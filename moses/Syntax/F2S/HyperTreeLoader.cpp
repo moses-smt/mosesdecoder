@@ -20,6 +20,7 @@
 #include "moses/ChartTranslationOptionList.h"
 #include "moses/FactorCollection.h"
 #include "moses/Syntax/RuleTableFF.h"
+#include "moses/parameters/AllOptions.h"
 #include "util/file_piece.hh"
 #include "util/string_piece.hh"
 #include "util/tokenize_piece.hh"
@@ -32,12 +33,14 @@
 
 namespace Moses
 {
+
 namespace Syntax
 {
 namespace F2S
 {
 
-bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
+bool HyperTreeLoader::Load(AllOptions const& opts,
+                           const std::vector<FactorType> &input,
                            const std::vector<FactorType> &output,
                            const std::string &inFile,
                            const RuleTableFF &ff,

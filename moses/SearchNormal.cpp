@@ -16,10 +16,9 @@ namespace Moses
  * /param transOptColl collection of translation options to be used for this sentence
  */
 SearchNormal::
-SearchNormal(Manager& manager, const InputType &source,
-             const TranslationOptionCollection &transOptColl)
-  : Search(manager, source)
-  , m_hypoStackColl(source.GetSize() + 1)
+SearchNormal(Manager& manager, const TranslationOptionCollection &transOptColl)
+  : Search(manager)
+  , m_hypoStackColl(manager.GetSource().GetSize() + 1)
   , m_transOptColl(transOptColl)
 {
   VERBOSE(1, "Translating: " << m_source << endl);

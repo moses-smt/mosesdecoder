@@ -32,10 +32,6 @@
 
 namespace MosesTraining
 {
-namespace Syntax
-{
-namespace GHKM
-{
 
 // The key of the map is the English index and the value is a set of the source ones
 typedef std::map <int, std::set<int> > HSentenceVertices;
@@ -49,6 +45,7 @@ public:
   enum REO_CLASS {REO_CLASS_LEFT, REO_CLASS_RIGHT, REO_CLASS_DLEFT, REO_CLASS_DRIGHT, REO_CLASS_UNKNOWN};
   enum REO_DIR {REO_DIR_L2R, REO_DIR_R2L, REO_DIR_BIDIR};
 
+  PhraseOrientation() {};
 
   PhraseOrientation(int sourceSize,
                     int targetSize,
@@ -58,6 +55,12 @@ public:
                     int targetSize,
                     const Moses::AlignmentInfo &alignTerm,
                     const Moses::AlignmentInfo &alignNonTerm);
+
+  PhraseOrientation(int sourceSize,
+                    int targetSize,
+                    const std::vector<std::vector<int> > &alignedToT,
+                    const std::vector<std::vector<int> > &alignedToS,
+                    const std::vector<int> &alignedCountS);
 
   REO_CLASS GetOrientationInfo(int startF, int endF, REO_DIR direction) const;
   REO_CLASS GetOrientationInfo(int startF, int startE, int endF, int endE, REO_DIR direction) const;
@@ -104,8 +107,8 @@ private:
     return first < second;
   };
 
-  const int m_countF;
-  const int m_countE;
+  int m_countF;
+  int m_countE;
 
   std::vector<std::vector<int> > m_alignedToT;
 
@@ -121,6 +124,4 @@ private:
   static std::vector<float> m_r2lOrientationPriorCounts;
 };
 
-}  // namespace GHKM
-}  // namespace Syntax
 }  // namespace MosesTraining

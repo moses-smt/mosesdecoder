@@ -125,8 +125,8 @@ int main(int argc, char const** argv)
     IFVERBOSE(1) {
       PrintUserTime("Created input-output object");
     }
-
-    boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper());
+    AllOptions::ptr opts(new AllOptions(*StaticData::Instance().options()));
+    boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper(*opts));
     if (ioWrapper == NULL) {
       cerr << "Error; Failed to create IO object" << endl;
       exit(1);

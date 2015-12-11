@@ -16,8 +16,9 @@ DeleteRules::DeleteRules(const std::string &line)
   ReadParameters();
 }
 
-void DeleteRules::Load()
+void DeleteRules::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   std::vector<FactorType> factorOrder;
   factorOrder.push_back(0); // unfactored for now
 

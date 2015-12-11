@@ -2,6 +2,7 @@
 
 namespace Moses
 {
+
 bool
 BookkeepingOptions::
 init(Parameter const& P)
@@ -15,4 +16,10 @@ init(Parameter const& P)
   }
   return true;
 }
+
+BookkeepingOptions::
+BookkeepingOptions()
+  : need_alignment_info(false)
+{ }
+
 }

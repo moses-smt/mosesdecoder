@@ -25,8 +25,9 @@ ProbingPT::~ProbingPT()
   delete m_engine;
 }
 
-void ProbingPT::Load()
+void ProbingPT::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   SetFeaturesToApply();
 
   m_engine = new QueryEngine(m_filePath.c_str());
@@ -76,7 +77,7 @@ void ProbingPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQue
     InputPath &inputPath = **iter;
     const Phrase &sourcePhrase = inputPath.GetPhrase();
 
-    if (sourcePhrase.GetSize() > StaticData::Instance().GetMaxPhraseLength()) {
+    if (sourcePhrase.GetSize() > StaticData::Instance().options()->search.max_phrase_length) {
       continue;
     }
 

@@ -15,7 +15,8 @@ namespace Moses
     std::string prefix;
     std::string suffix;
     
-    
+    bool word_deletion_enabled;
+    bool always_create_direct_transopt;
     OOVHandlingOptions();
 
     bool init(Parameter const& param);

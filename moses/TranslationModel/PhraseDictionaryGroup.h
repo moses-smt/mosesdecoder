@@ -63,7 +63,7 @@ class PhraseDictionaryGroup: public PhraseDictionary
 
 public:
   PhraseDictionaryGroup(const std::string& line);
-  void Load();
+  void Load(AllOptions::ptr const& opts);
   TargetPhraseCollection::shared_ptr
   CreateTargetPhraseCollection(const ttasksptr& ttask,
                                const Phrase& src) const;

@@ -38,9 +38,8 @@ MockHypothesisGuard
     m_uwp("UnknownWordPenalty"), m_dist("Distortion")
 {
   BOOST_CHECK_EQUAL(alignments.size(), targetSegments.size());
-  std::vector<Moses::FactorType> factors(1,0);
-  AllOptions const& opts = StaticData::Instance().options();
-  m_sentence.reset(new Sentence(0, sourceSentence, opts, &factors));
+  AllOptions::ptr opts(new AllOptions(*StaticData::Instance().options()));
+  m_sentence.reset(new Sentence(opts, 0, sourceSentence));
   m_ttask = TranslationTask::create(m_sentence);
   m_manager.reset(new Manager(m_ttask));
 
@@ -59,16 +58,14 @@ MockHypothesisGuard
   for (; ti != targetSegments.end() && ai != alignments.end(); ++ti,++ai) {
     Hypothesis* prevHypo = m_hypothesis;
     Range range(ai->first,ai->second);
-    const Bitmap &newBitmap = bitmaps.GetBitmap(prevHypo->GetWordsBitmap(),
-                              range);
-
+    const Bitmap &newBitmap = bitmaps.GetBitmap(prevHypo->GetWordsBitmap(), range);
     m_targetPhrases.push_back(TargetPhrase(NULL));
-    // m_targetPhrases.back().CreateFromString(Input, factors, *ti, "|", NULL);
+    vector<FactorType> const& factors = opts->output.factor_order;
     m_targetPhrases.back().CreateFromString(Input, factors, *ti, NULL);
     m_toptions.push_back(new TranslationOption
                          (range,m_targetPhrases.back()));
-    m_hypothesis = new Hypothesis(*prevHypo, *m_toptions.back(), newBitmap, m_manager->GetNextHypoId());
-
+    m_hypothesis = new Hypothesis(*prevHypo, *m_toptions.back(), newBitmap,
+                                  m_manager->GetNextHypoId());
   }
 
 

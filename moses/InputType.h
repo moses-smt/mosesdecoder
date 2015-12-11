@@ -45,6 +45,7 @@ class TranslationTask;
 class InputType
 {
 protected:
+  AllOptions::ptr m_options;
   long m_translationId; 	//< contiguous Id
   long m_documentId;
   long m_topicId;
@@ -67,10 +68,14 @@ public:
   size_t m_frontSpanCoveredLength;
   // how many words from the beginning are covered
 
-  InputType(long translationId = 0);
+  InputType(AllOptions::ptr const& opts, long translationId = 0);
   virtual ~InputType();
 
   virtual InputTypeEnum GetType() const = 0;
+
+  AllOptions::ptr const& options() const {
+    return m_options;
+  }
 
   long GetTranslationId() const {
     return m_translationId;
@@ -185,9 +190,10 @@ public:
 
   //! populate this InputType with data from in stream
   virtual int
-  Read(std::istream& in,
-       std::vector<FactorType> const& factorOrder,
-       AllOptions const& opts) =0;
+  Read(std::istream& in) = 0;
+  // ,
+  //    std::vector<FactorType> const& factorOrder,
+  //    AllOptions const& opts) =0;
 
   //! Output debugging info to stream out
   virtual void Print(std::ostream&) const =0;

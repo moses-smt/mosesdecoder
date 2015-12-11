@@ -34,7 +34,7 @@ class TargetBigramFeature : public StatefulFeatureFunction
 public:
   TargetBigramFeature(const std::string &line);
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   bool IsUseable(const FactorMask &mask) const;
 

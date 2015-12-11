@@ -34,8 +34,9 @@ RuleTableTrie::~RuleTableTrie()
 {
 }
 
-void RuleTableTrie::Load()
+void RuleTableTrie::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   SetFeaturesToApply();
 
   std::auto_ptr<Moses::RuleTableLoader> loader =
@@ -44,8 +45,7 @@ void RuleTableTrie::Load()
     throw runtime_error("Error: Loading " + m_filePath);
   }
 
-  bool ret = loader->Load(m_input, m_output, m_filePath, m_tableLimit,
-                          *this);
+  bool ret = loader->Load(*opts, m_input, m_output, m_filePath, m_tableLimit, *this);
   if (!ret) {
     throw runtime_error("Error: Loading " + m_filePath);
   }

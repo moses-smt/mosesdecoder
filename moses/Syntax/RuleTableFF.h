@@ -9,7 +9,7 @@ namespace Moses
 
 class ChartParser;
 class ChartCellCollectionBase;
-
+class AllOptions;
 namespace Syntax
 {
 
@@ -27,7 +27,7 @@ public:
   // FIXME Delete m_table?
   ~RuleTableFF() {}
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   const RuleTable *GetTable() const {
     return m_table;

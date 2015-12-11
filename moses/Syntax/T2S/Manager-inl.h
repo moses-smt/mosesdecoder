@@ -33,7 +33,7 @@ Manager<RuleMatcher>::Manager(ttasksptr const& ttask)
 {
   if (const TreeInput *p = dynamic_cast<const TreeInput*>(&m_source)) {
     // Construct the InputTree.
-    InputTreeBuilder builder;
+    InputTreeBuilder builder(options()->output.factor_order);
     builder.Build(*p, "Q", m_inputTree);
   } else {
     UTIL_THROW2("ERROR: T2S::Manager requires input to be a tree");
@@ -97,9 +97,9 @@ void Manager<RuleMatcher>::Decode()
   const StaticData &staticData = StaticData::Instance();
 
   // Get various pruning-related constants.
-  const std::size_t popLimit = this->options().cube.pop_limit;
+  const std::size_t popLimit = this->options()->cube.pop_limit;
   const std::size_t ruleLimit = staticData.GetRuleLimit();
-  const std::size_t stackLimit = this->options().search.stack_size;
+  const std::size_t stackLimit = this->options()->search.stack_size;
 
   // Initialize the stacks.
   InitializeStacks();
@@ -111,7 +111,8 @@ void Manager<RuleMatcher>::Decode()
   F2S::RuleMatcherCallback callback(m_stackMap, ruleLimit);
 
   // Create a glue rule synthesizer.
-  GlueRuleSynthesizer glueRuleSynthesizer(*m_glueRuleTrie);
+  Word dflt_nonterm = options()->syntax.output_default_non_terminal;
+  GlueRuleSynthesizer glueRuleSynthesizer(*m_glueRuleTrie, dflt_nonterm);
 
   // Visit each node of the input tree in post-order.
   for (std::vector<InputTree::Node>::const_iterator p =
@@ -215,7 +216,7 @@ void Manager<RuleMatcher>::ExtractKBest(
   // with 0 being 'unlimited.'  This actually sets a large-ish limit in case
   // too many translations are identical.
   const StaticData &staticData = StaticData::Instance();
-  const std::size_t nBestFactor = staticData.options().nbest.factor;
+  const std::size_t nBestFactor = staticData.options()->nbest.factor;
   std::size_t numDerivations = (nBestFactor == 0) ? k*1000 : k*nBestFactor;
 
   // Extract the derivations.

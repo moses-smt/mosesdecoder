@@ -44,7 +44,7 @@ class PhraseDictionaryFuzzyMatch : public PhraseDictionary
 public:
   PhraseDictionaryFuzzyMatch(const std::string &line);
   ~PhraseDictionaryFuzzyMatch();
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   const PhraseDictionaryNodeMemory &GetRootNode(long translationId) const;
 

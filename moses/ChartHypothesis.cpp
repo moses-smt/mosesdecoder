@@ -102,7 +102,7 @@ ChartHypothesis::~ChartHypothesis()
  */
 void ChartHypothesis::GetOutputPhrase(Phrase &outPhrase) const
 {
-  FactorType placeholderFactor = StaticData::Instance().options().input.placeholder_factor;
+  FactorType placeholderFactor = StaticData::Instance().options()->input.placeholder_factor;
 
   for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
     const Word &word = GetCurrTargetPhrase().GetWord(pos);
@@ -256,7 +256,7 @@ void ChartHypothesis::CleanupArcList()
    * However, may not be enough if only unique candidates are needed,
    * so we'll keep all of arc list if nedd distinct n-best list
    */
-  AllOptions const& opts = StaticData::Instance().options();
+  AllOptions const& opts = *StaticData::Instance().options();
   size_t nBestSize = opts.nbest.nbest_size;
   bool distinctNBest = (opts.nbest.only_distinct
                         || opts.mbr.enabled
@@ -336,7 +336,7 @@ std::ostream& operator<<(std::ostream& out, const ChartHypothesis& hypo)
     out << "->" << hypo.GetWinningHypothesis()->GetId();
   }
 
-  if (StaticData::Instance().GetIncludeLHSInSearchGraph()) {
+  if (hypo.GetManager().options()->output.include_lhs_in_search_graph) {
     out << " " << hypo.GetTargetLHS() << "=>";
   }
   out << " " << hypo.GetCurrTargetPhrase()

@@ -11,6 +11,7 @@
 #include "FF/InputFeature.h"
 #include "TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "util/exception.hh"
+#include "TranslationTask.h"
 
 using namespace std;
 
@@ -31,7 +32,7 @@ TranslationOptionCollectionLattice
   const InputFeature *inputFeature = InputFeature::InstancePtr();
   UTIL_THROW_IF2(inputFeature == NULL, "Input feature must be specified");
 
-  size_t maxPhraseLength = StaticData::Instance().GetMaxPhraseLength();
+  size_t maxPhraseLength = ttask->options()->search.max_phrase_length;  //StaticData::Instance().GetMaxPhraseLength();
   size_t size = input.GetSize();
 
   // 1-word phrases
@@ -68,13 +69,16 @@ TranslationOptionCollectionLattice
       m_inputPathQueue.push_back(path);
 
       // recursive
-      Extend(*path, input);
+      Extend(*path, input, ttask->options()->search.max_phrase_length);
 
     }
   }
 }
 
-void TranslationOptionCollectionLattice::Extend(const InputPath &prevPath, const WordLattice &input)
+void
+TranslationOptionCollectionLattice::
+Extend(const InputPath &prevPath, const WordLattice &input,
+       size_t const maxPhraseLength)
 {
   size_t nextPos = prevPath.GetWordsRange().GetEndPos() + 1;
   if (nextPos >= input.GetSize()) {
@@ -100,7 +104,7 @@ void TranslationOptionCollectionLattice::Extend(const InputPath &prevPath, const
 
     Range range(startPos, endPos);
 
-    size_t maxPhraseLength = StaticData::Instance().GetMaxPhraseLength();
+    // size_t maxPhraseLength = StaticData::Instance().GetMaxPhraseLength();
     if (range.GetNumWordsCovered() > maxPhraseLength) {
       continue;
     }
@@ -121,7 +125,7 @@ void TranslationOptionCollectionLattice::Extend(const InputPath &prevPath, const
     m_inputPathQueue.push_back(path);
 
     // recursive
-    Extend(*path, input);
+    Extend(*path, input, maxPhraseLength);
 
   }
 }

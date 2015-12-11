@@ -64,6 +64,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef HAVE_XMLRPC_C
 #include "moses/server/Server.h"
 #endif
+#include <signal.h>
 
 using namespace std;
 using namespace Moses;
@@ -102,7 +103,7 @@ SimpleTranslationInterface::~SimpleTranslationInterface()
 //the simplified version of string input/output translation
 string SimpleTranslationInterface::translate(const string &inputString)
 {
-  boost::shared_ptr<Moses::IOWrapper> ioWrapper(new IOWrapper);
+  boost::shared_ptr<Moses::IOWrapper> ioWrapper(new IOWrapper(*StaticData::Instance().options()));
   // main loop over set of input sentences
   size_t sentEnd = inputString.rfind('\n'); //find the last \n, the input stream has to be appended with \n to be translated
   const string &newString = sentEnd != string::npos ? inputString : inputString + '\n';
@@ -142,11 +143,25 @@ void SimpleTranslationInterface::DestroyFeatureFunctionStatic()
 
 Parameter params;
 
+void
+signal_handler(int signum)
+{
+  if (signum == SIGALRM) {
+    exit(0); // that's what we expected from the child process after forking
+  } else if (signum == SIGTERM || signum == SIGKILL) {
+    exit(0);
+  } else {
+    std::cerr << "Unexpected signal " << signum << std::endl;
+    exit(signum);
+  }
+}
+
 //! run moses in server mode
 int
 run_as_server()
 {
 #ifdef HAVE_XMLRPC_C
+  kill(getppid(),SIGALRM);
   MosesServer::Server server(params);
   return server.run(); // actually: don't return. see Server::run()
 #else
@@ -167,7 +182,7 @@ batch_run()
   IFVERBOSE(1) PrintUserTime("Created input-output object");
 
   // set up read/writing class:
-  boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper);
+  boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper(*staticData.options()));
   UTIL_THROW_IF2(ioWrapper == NULL, "Error; Failed to create IO object"
                  << " [" << HERE << "]");
 
@@ -326,17 +341,28 @@ int decoder_main(int argc, char const** argv)
     if (!StaticData::LoadDataStatic(&params, argv[0]))
       exit(1);
 
+    //
+#if 1
+    pid_t pid;
+    if (params.GetParam("daemon")) {
+      pid = fork();
+      if (pid) {
+        pause();  // parent process
+        exit(0);
+      }
+    }
+#endif
     // setting "-show-weights" -> just dump out weights and exit
     if (params.isParamSpecified("show-weights")) {
       ShowWeights();
       exit(0);
     }
 
-    if (params.GetParam("server"))
+    if (params.GetParam("server")) {
+      std::cerr << "RUN SERVER at pid " << pid << std::endl;
       return run_as_server();
-    else
+    } else
       return batch_run();
-
   }
 #ifdef NDEBUG
   catch (const std::exception &e) {

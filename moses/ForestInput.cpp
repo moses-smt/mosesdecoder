@@ -18,9 +18,7 @@ namespace Moses
 
 //! populate this InputType with data from in stream
 int ForestInput::
-Read(std::istream &in,
-     std::vector<FactorType> const& factorOrder,
-     AllOptions const& opts)
+Read(std::istream &in)
 {
   using Syntax::F2S::Forest;
 
@@ -48,7 +46,7 @@ Read(std::istream &in,
     std::getline(in, line);
   } else {
     do {
-      ParseHyperedgeLine(line, factorOrder);
+      ParseHyperedgeLine(line);
       std::getline(in, line);
     } while (line != "");
   }
@@ -58,7 +56,7 @@ Read(std::istream &in,
   // not sure ForestInput needs to.
   std::stringstream strme;
   strme << "<s> " << sentence << " </s>" << std::endl;
-  Sentence::Read(strme, factorOrder, opts);
+  Sentence::Read(strme);
 
   // Find the maximum end position of any vertex (0 if forest is empty).
   std::size_t maxEnd = FindMaxEnd(*m_forest);
@@ -69,6 +67,9 @@ Read(std::istream &in,
     FindTopVertices(*m_forest, topVertices);
     assert(topVertices.size() >= 1);
   }
+
+
+  const std::vector<FactorType>& factorOrder = m_options->input.factor_order;
 
   // Add <s> vertex.
   Forest::Vertex *startSymbol = NULL;
@@ -122,7 +123,9 @@ Read(std::istream &in,
   return 1;
 }
 
-Syntax::F2S::Forest::Vertex *ForestInput::AddOrDeleteVertex(Forest::Vertex *v)
+Syntax::F2S::Forest::Vertex*
+ForestInput::
+AddOrDeleteVertex(Forest::Vertex *v)
 {
   std::pair<VertexSet::iterator, bool> ret = m_vertexSet.insert(v);
   if (ret.second) {
@@ -172,14 +175,16 @@ void ForestInput::FindTopVertices(Forest &forest,
                       std::back_inserter(topVertices));
 }
 
-void ForestInput::ParseHyperedgeLine(
-  const std::string &line, const std::vector<FactorType>& factorOrder)
+void
+ForestInput::
+ParseHyperedgeLine(const std::string &line)
 {
+  const std::vector<FactorType>& factorOrder = m_options->input.factor_order;
   using Syntax::F2S::Forest;
 
   const util::AnyCharacter delimiter(" \t");
   util::TokenIter<util::AnyCharacter, true> p(line, delimiter);
-  Forest::Vertex *v = AddOrDeleteVertex(ParseVertex(*p, factorOrder));
+  Forest::Vertex *v = AddOrDeleteVertex(ParseVertex(*p));
   Forest::Hyperedge *e = new Forest::Hyperedge();
   e->head = v;
   ++p;
@@ -188,7 +193,7 @@ void ForestInput::ParseHyperedgeLine(
     //throw Exception("");
   }
   for (++p; *p != "|||"; ++p) {
-    v = ParseVertex(*p, factorOrder);
+    v = ParseVertex(*p);
     if (!v->pvertex.symbol.IsNonTerminal()) {
       // Egret does not give start/end for terminals.
       v->pvertex.span = Range(e->head->pvertex.span.GetStartPos(),
@@ -203,11 +208,11 @@ void ForestInput::ParseHyperedgeLine(
   e->head->incoming.push_back(e);
 }
 
-Syntax::F2S::Forest::Vertex *ForestInput::ParseVertex(
-  const StringPiece &s, const std::vector<FactorType>& factorOrder)
+Syntax::F2S::Forest::Vertex*
+ForestInput::ParseVertex(const StringPiece &s)
 {
   using Syntax::F2S::Forest;
-
+  const std::vector<FactorType>& factorOrder = m_options->input.factor_order;
   Word symbol;
   std::size_t pos = s.rfind('[');
   if (pos == std::string::npos) {

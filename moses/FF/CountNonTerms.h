@@ -41,6 +41,7 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
+  void Load(AllOptions::ptr const& opts);
 protected:
   bool m_all, m_sourceSyntax, m_targetSyntax;
 };

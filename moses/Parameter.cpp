@@ -218,6 +218,7 @@ Parameter::Parameter()
   // server options
   po::options_description server_opts("Moses Server Options");
   AddParam(server_opts,"server", "Run moses as a translation server.");
+  AddParam(server_opts,"daemon", "Run moses as a translation server in the background.");
   AddParam(server_opts,"server-port", "Port for moses server");
   AddParam(server_opts,"server-log", "Log destination for moses server");
   AddParam(server_opts,"serial", "Run server in serial mode, processing only one request at a time.");
@@ -232,7 +233,6 @@ Parameter::Parameter()
            "Max. number of seconds the server will keep a persistent connection alive.");
   AddParam(server_opts,"server-timeout",
            "Max. number of seconds the server will wait for a client to submit a request once a connection has been established.");
-
   // session timeout and session cache size are for moses translation session handling
   // they have nothing to do with the abyss server (but relate to the moses server)
   AddParam(server_opts,"session-timeout",

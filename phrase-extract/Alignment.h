@@ -25,10 +25,6 @@
 
 namespace MosesTraining
 {
-namespace Syntax
-{
-namespace GHKM
-{
 
 typedef std::vector<std::pair<int, int> > Alignment;
 
@@ -36,6 +32,4 @@ void ReadAlignment(const std::string &, Alignment &);
 
 void FlipAlignment(Alignment &);
 
-}  // namespace GHKM
-}  // namespace Syntax
 }  // namespace MosesTraining

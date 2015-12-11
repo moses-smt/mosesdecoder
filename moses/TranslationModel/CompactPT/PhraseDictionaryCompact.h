@@ -67,7 +67,7 @@ public:
 
   ~PhraseDictionaryCompact();
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   TargetPhraseCollection::shared_ptr  GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &source) const;
   TargetPhraseVectorPtr GetTargetPhraseCollectionRaw(const Phrase &source) const;

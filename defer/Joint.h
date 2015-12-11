@@ -58,7 +58,7 @@ public:
     delete m_lmImpl;
   }
 
-  bool Load(const std::string &filePath
+  bool Load(AllOptions const& opts, const std::string &filePath
             , const std::vector<FactorType> &factorTypes
             , size_t nGramOrder) {
     m_factorTypes				= FactorMask(factorTypes);
@@ -77,7 +77,7 @@ public:
       m_sentenceEndWord[factorType] 		= factorCollection.AddFactor(Output, factorType, EOS_);
     }
 
-    m_lmImpl->Load();
+    m_lmImpl->Load(AllOptions const& opts);
   }
 
   LMResult GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const {

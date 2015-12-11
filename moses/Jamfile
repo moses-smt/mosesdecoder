@@ -105,7 +105,7 @@ lib moses :
   TranslationModel/RuleTable/*.cpp
   TranslationModel/Scope3Parser/*.cpp
   TranslationModel/CYKPlusParser/*.cpp
-  ../phrase-extract/extract-ghkm/PhraseOrientation.cpp
+  ../phrase-extract/PhraseOrientation.cpp
   FF/*.cpp
   FF/bilingual-lm/*.cpp
   FF/OSM-Feature/*.cpp

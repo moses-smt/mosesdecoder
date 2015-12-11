@@ -43,7 +43,7 @@ public:
   }
   ~ExternalFeature();
 
-  void Load();
+  void Load(AllOptions const& opts);
 
   bool IsUseable(const FactorMask &mask) const {
     return true;

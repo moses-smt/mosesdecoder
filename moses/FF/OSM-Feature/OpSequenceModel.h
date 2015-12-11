@@ -25,7 +25,7 @@ public:
   ~OpSequenceModel();
 
   void readLanguageModel(const char *);
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,

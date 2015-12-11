@@ -52,7 +52,7 @@ TargetPhrase::TargetPhrase( std::string out_string, const PhraseDictionary *pt)
   //ACAT
   const StaticData &staticData = StaticData::Instance();
   // XXX should this really be InputFactorOrder???
-  CreateFromString(Output, staticData.GetInputFactorOrder(), out_string,
+  CreateFromString(Output, staticData.options()->input.factor_order, out_string,
                    // staticData.GetFactorDelimiter(), // eliminated [UG]
                    NULL);
 }
@@ -72,8 +72,7 @@ TargetPhrase::TargetPhrase(ttasksptr& ttask, std::string out_string, const Phras
   //ACAT
   const StaticData &staticData = StaticData::Instance();
   // XXX should this really be InputFactorOrder???
-  CreateFromString(Output, staticData.GetInputFactorOrder(), out_string,
-                   // staticData.GetFactorDelimiter(), // eliminated [UG]
+  CreateFromString(Output, ttask->options()->input.factor_order, out_string,
                    NULL);
 }
 

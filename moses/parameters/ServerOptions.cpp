@@ -35,6 +35,20 @@ parse_timespec(std::string const& spec)
 }
 
 ServerOptions::
+ServerOptions()
+  : is_serial(false)
+  , numThreads(15) // why 15?
+  , sessionTimeout(1800) // = 30 min
+  , sessionCacheSize(25)
+  , port(8080)
+  , maxConn(15)
+  , maxConnBacklog(15)
+  , keepaliveTimeout(15)
+  , keepaliveMaxConn(30)
+  , timeout(15)
+{ }
+
+ServerOptions::
 ServerOptions(Parameter const& P)
 { 
   init(P);

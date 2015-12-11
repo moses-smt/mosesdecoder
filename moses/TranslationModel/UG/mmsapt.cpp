@@ -417,9 +417,9 @@ namespace Moses
   
   void
   Mmsapt::
-  Load()
+  Load(AllOptions::ptr const& opts)
   {
-    Load(true);
+    Load(opts, true);
   }
 
   void
@@ -474,8 +474,9 @@ namespace Moses
 
   void
   Mmsapt::
-  Load(bool with_checks)
+  Load(AllOptions::ptr const& opts, bool with_checks)
   {
+    m_options = opts;
     boost::unique_lock<boost::shared_mutex> lock(m_lock);
     // load feature functions (i.e., load underlying data bases, if any)
     BOOST_FOREACH(SPTR<pscorer>& ff, m_active_ff_fix) ff->load();

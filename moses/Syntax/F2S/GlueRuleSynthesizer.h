@@ -9,6 +9,7 @@
 
 namespace Moses
 {
+class AllOptions;
 namespace Syntax
 {
 namespace F2S
@@ -16,8 +17,10 @@ namespace F2S
 
 class GlueRuleSynthesizer : public HyperTreeCreator
 {
+  Word m_input_default_nonterminal;
+  Word m_output_default_nonterminal;
 public:
-  GlueRuleSynthesizer(HyperTree &);
+  GlueRuleSynthesizer(Moses::AllOptions const& opts, HyperTree &);
 
   // Synthesize the minimal, monotone rule that can be applied to the given
   // hyperedge and add it to the rule trie.

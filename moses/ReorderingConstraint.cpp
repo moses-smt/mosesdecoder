@@ -187,7 +187,9 @@ bool ReorderingConstraint::Check( const Bitmap &bitmap, size_t startPos, size_t 
 
 
     // check, if we are setting us up for a dead end due to distortion limits
-    size_t distortionLimit = (size_t)StaticData::Instance().GetMaxDistortion();
+    
+    // size_t distortionLimit = (size_t)StaticData::Instance().GetMaxDistortion();
+    size_t distortionLimit = m_max_distortion;
     if (startPos != firstGapPos && endZone-firstGapPos >= distortionLimit) {
       VERBOSE(3," dead end due to distortion limit" << std::endl);
       return false;

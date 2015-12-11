@@ -14,11 +14,11 @@ RuleScope::RuleScope(const std::string &line)
 {
 }
 
-bool IsAmbiguous(const Word &word, bool sourceSyntax)
-{
-  const Word &inputDefaultNonTerminal = StaticData::Instance().GetInputDefaultNonTerminal();
-  return word.IsNonTerminal() && (!sourceSyntax || word == inputDefaultNonTerminal);
-}
+// bool IsAmbiguous(const Word &word, bool sourceSyntax)
+// {
+//   const Word &inputDefaultNonTerminal = StaticData::Instance().GetInputDefaultNonTerminal();
+//   return word.IsNonTerminal() && (!sourceSyntax || word == inputDefaultNonTerminal);
+// }
 
 void RuleScope::EvaluateInIsolation(const Phrase &source
                                     , const TargetPhrase &targetPhrase

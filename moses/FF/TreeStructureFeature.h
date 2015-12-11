@@ -74,7 +74,7 @@ public:
     int /* featureID - used to index the state in the previous hypotheses */,
     ScoreComponentCollection* accumulator) const;
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 };
 
 

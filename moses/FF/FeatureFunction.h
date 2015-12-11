@@ -7,12 +7,13 @@
 #include <string>
 #include "moses/FeatureVector.h"
 #include "moses/TypeDef.h"
-
+#include "moses/parameters/AllOptions.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Moses
 {
 
+class AllOptions;
 class Phrase;
 class TargetPhrase;
 class TranslationOptionList;
@@ -46,6 +47,7 @@ protected:
   size_t m_index; // index into vector covering ALL feature function values
   std::vector<bool> m_tuneableComponents;
   size_t m_numTuneableComponents;
+  AllOptions::ptr m_options;
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
 
@@ -69,7 +71,13 @@ public:
   virtual ~FeatureFunction();
 
   //! override to load model files
-  virtual void Load() {
+  virtual void Load(AllOptions::ptr const& opts) {
+    m_options = opts;
+  }
+
+  AllOptions::ptr const& 
+  options() const {
+    return m_options;
   }
 
   static void ResetDescriptionCounts() {

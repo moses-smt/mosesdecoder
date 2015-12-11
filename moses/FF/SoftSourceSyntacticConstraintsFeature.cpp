@@ -88,8 +88,9 @@ void SoftSourceSyntacticConstraintsFeature::SetParameter(const std::string& key,
   }
 }
 
-void SoftSourceSyntacticConstraintsFeature::Load()
+void SoftSourceSyntacticConstraintsFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   // don't change the loading order!
   LoadSourceLabelSet();
   if (!m_coreSourceLabelSetFile.empty()) {
@@ -311,8 +312,8 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
   std::vector<float> newScores(m_numScoreComponents,0);
 
   const TreeInput& treeInput = static_cast<const TreeInput&>(input);
-  const StaticData& staticData = StaticData::Instance();
-  const Word& outputDefaultNonTerminal = staticData.GetOutputDefaultNonTerminal();
+  // const StaticData& staticData = StaticData::Instance();
+  // const Word& outputDefaultNonTerminal = staticData.GetOutputDefaultNonTerminal();
 
   size_t nNTs = 1;
   bool treeInputMismatchLHSBinary = true;
@@ -365,7 +366,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
 
         for (NonTerminalSet::const_iterator treeInputLabelsIt = treeInputLabels.begin();
              treeInputLabelsIt != treeInputLabels.end(); ++treeInputLabelsIt) {
-          if (*treeInputLabelsIt != outputDefaultNonTerminal) {
+          if (*treeInputLabelsIt != m_options->syntax.output_default_non_terminal) {
             boost::unordered_map<const Factor*,size_t>::const_iterator foundTreeInputLabel
             = m_sourceLabelIndexesByFactor.find((*treeInputLabelsIt)[0]);
             if (foundTreeInputLabel != m_sourceLabelIndexesByFactor.end()) {
@@ -387,7 +388,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
 
     for (NonTerminalSet::const_iterator treeInputLabelsIt = treeInputLabels.begin();
          treeInputLabelsIt != treeInputLabels.end(); ++treeInputLabelsIt) {
-      if (*treeInputLabelsIt != outputDefaultNonTerminal) {
+      if (*treeInputLabelsIt != m_options->syntax.output_default_non_terminal) {
         boost::unordered_map<const Factor*,size_t>::const_iterator foundTreeInputLabel
         = m_sourceLabelIndexesByFactor.find((*treeInputLabelsIt)[0]);
         if (foundTreeInputLabel != m_sourceLabelIndexesByFactor.end()) {
@@ -568,7 +569,9 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
       }
       if ( treeInputLabelsLHS.size() == 0 ) {
         scoreBreakdown.PlusEquals(this,
-                                  "LHSPAIR_" + targetLHS->GetString().as_string() + "_" + outputDefaultNonTerminal[0]->GetString().as_string(),
+                                  "LHSPAIR_" + targetLHS->GetString().as_string() + "_" 
+				  + m_options->syntax.output_default_non_terminal[0]
+				  ->GetString().as_string(),
                                   1);
         if (!m_targetSourceLHSJointCountFile.empty()) {
           t2sLabelsScore = TransformScore(m_floor);

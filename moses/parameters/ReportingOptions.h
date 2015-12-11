@@ -10,13 +10,17 @@ namespace Moses
   struct 
   ReportingOptions : public OptionsBaseClass
   {
+    long start_translation_id;
+
     std::vector<FactorType> factor_order;
     
     bool ReportAllFactors; // m_reportAllFactors;
-
     int ReportSegmentation; // 0: no 1: m_reportSegmentation 2: ..._enriched 
 
     bool PrintAlignmentInfo; // m_PrintAlignmentInfo
+    bool PrintAllDerivations;
+    bool PrintTranslationOptions; 
+
     WordAlignmentSort WA_SortOrder; // 0: no, 1: target order
     std::string AlignmentOutputFile; 
     std::string FactorDelimiter;
@@ -36,13 +40,12 @@ namespace Moses
     bool PrintID;
     bool PrintPassThrough;
 
-    // print ..
-    bool aln_info;    // m_PrintAlignmentInfo;
-
     // transrep = translation reporting
     std::string detailed_transrep_filepath;
     std::string detailed_tree_transrep_filepath;
     std::string detailed_all_transrep_filepath;
+    bool include_lhs_in_search_graph;
+
     
     std::string lattice_sample_filepath; 
     size_t lattice_sample_size;
@@ -57,7 +60,10 @@ namespace Moses
 #ifdef HAVE_XMLRPC_C
     bool update(std::map<std::string, xmlrpc_c::value>const& param);
 #endif
-  };
 
+    
+    ReportingOptions();
+  };
+  
 }
 
