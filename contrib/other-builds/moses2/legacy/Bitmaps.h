@@ -19,14 +19,15 @@ class Bitmaps
 
   const Bitmap &GetNextBitmap(const Bitmap &bm, const Range &range);
 public:
-  Bitmaps(size_t inputSize, const std::vector<bool> &initSourceCompleted);
+  Bitmaps();
   virtual ~Bitmaps();
+  void Init(size_t inputSize, const std::vector<bool> &initSourceCompleted);
 
   const Bitmap &GetInitialBitmap() const {
     return *m_initBitmap;
   }
   const Bitmap &GetBitmap(const Bitmap &bm, const Range &range);
-
+  void Clear();
 };
 
 }

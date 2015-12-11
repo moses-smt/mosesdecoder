@@ -31,7 +31,8 @@ Manager::Manager(System &sys, const TranslationTask &task, const std::string &in
 {}
 
 Manager::~Manager() {
-	delete m_bitmaps;
+	m_bitmaps.Clear();
+
 	delete m_search;
 	delete m_estimatedScores;
 
@@ -64,7 +65,7 @@ void Manager::Init()
 
 	CalcFutureScore();
 
-	m_bitmaps = new Bitmaps(m_input->GetSize(), vector<bool>(0));
+	m_bitmaps.Init(m_input->GetSize(), vector<bool>(0));
 
 	switch (system.searchAlgorithm) {
 	case Normal:

@@ -43,7 +43,7 @@ public:
 	{ return *m_hypoRecycle; }
 
 	Bitmaps &GetBitmaps()
-	{ return *m_bitmaps; }
+	{ return m_bitmaps; }
 
 	const PhraseImpl &GetInput() const
 	{ return *m_input; }
@@ -71,7 +71,7 @@ protected:
     std::string m_inputStr;
 	PhraseImpl *m_input;
 	InputPaths m_inputPaths;
-	Bitmaps *m_bitmaps;
+	Bitmaps m_bitmaps;
 	SquareMatrix *m_estimatedScores;
 	Range m_initRange;
 	TargetPhrase *m_initPhrase;
