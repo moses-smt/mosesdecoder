@@ -101,9 +101,9 @@ public:
   std::vector<target_text> full_decode_line (unsigned char lines[], size_t linesCount, int num_scores);
 };
 
-std::string getTargetWordsFromIDs(const std::vector<unsigned int> &ids, std::map<unsigned int, std::string> * lookup_target_phrase);
+std::string getTargetWordsFromIDs(const std::vector<unsigned int> &ids, const std::map<unsigned int, std::string> &lookup_target_phrase);
 
-inline std::string getTargetWordFromID(unsigned int id, std::map<unsigned int, std::string> * lookup_target_phrase);
+inline const std::string &getTargetWordFromID(unsigned int id, const std::map<unsigned int, std::string> &lookup_target_phrase);
 
 inline unsigned int reinterpret_float(float * num);
 

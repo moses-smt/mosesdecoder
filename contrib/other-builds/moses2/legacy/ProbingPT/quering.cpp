@@ -160,7 +160,7 @@ void QueryEngine::printTargetInfo(const std::vector<target_text> &target_phrases
   for (int i = 0; i<entries; i++) {
     std::cout << "Entry " << i+1 << " of " << entries << ":" << std::endl;
     //Print text
-    std::cout << getTargetWordsFromIDs(target_phrases[i].target_phrase, &vocabids) << "\t";
+    std::cout << getTargetWordsFromIDs(target_phrases[i].target_phrase, vocabids) << "\t";
 
     //Print probabilities:
     for (int j = 0; j<target_phrases[i].prob.size(); j++) {

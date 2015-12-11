@@ -320,12 +320,12 @@ std::string HuffmanDecoder::getTargetWordsFromIDs(const std::vector<unsigned int
   return returnstring;
 }
 
-inline std::string getTargetWordFromID(unsigned int id, std::map<unsigned int, std::string> * lookup_target_phrase)
+inline const std::string &getTargetWordFromID(unsigned int id, const std::map<unsigned int, std::string> &lookup_target_phrase)
 {
-  return lookup_target_phrase->find(id)->second;
+  return lookup_target_phrase.find(id)->second;
 }
 
-std::string getTargetWordsFromIDs(const std::vector<unsigned int> &ids, std::map<unsigned int, std::string> * lookup_target_phrase)
+std::string getTargetWordsFromIDs(const std::vector<unsigned int> &ids, const std::map<unsigned int, std::string> &lookup_target_phrase)
 {
   std::string returnstring;
   for (std::vector<unsigned int>::const_iterator it = ids.begin(); it != ids.end(); it++) {
