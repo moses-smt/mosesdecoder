@@ -152,26 +152,27 @@ FactorCollection &System::GetVocab() const
 
 Recycler<Hypothesis*> &System::GetHypoRecycler() const
 {
-	Recycler<Hypothesis*> &ret = GetThreadSpecificObj(m_hypoRecycler);
-	return ret;
+	return GetThreadSpecificObj(m_hypoRecycler);
 }
 
 ObjectPoolContiguous<Hypothesis*> &System::GetBatchForEval() const
 {
-  ObjectPoolContiguous<Hypothesis*> &ret = GetThreadSpecificObj(m_batchForEval);
-  return ret;
+  return GetThreadSpecificObj(m_batchForEval);
 }
 
 NSCubePruning::CubeEdge::Queue &System::GetQueue() const
 {
-  NSCubePruning::CubeEdge::Queue &ret = GetThreadSpecificObj(m_queue);
-  return ret;
+  return GetThreadSpecificObj(m_queue);
 }
 
 NSCubePruning::CubeEdge::SeenPositions &System::GetSeenPositions() const
 {
-  NSCubePruning::CubeEdge::SeenPositions &ret = GetThreadSpecificObj(m_seenPositions);
-  return ret;
+  return GetThreadSpecificObj(m_seenPositions);
+}
+
+Bitmaps &System::GetBitmaps() const
+{
+  return GetThreadSpecificObj(m_bitmaps);
 }
 
 }

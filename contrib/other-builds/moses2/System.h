@@ -58,6 +58,7 @@ public:
 	ObjectPoolContiguous<Hypothesis*> &GetBatchForEval() const;
 	NSCubePruning::CubeEdge::Queue &GetQueue() const;
 	NSCubePruning::CubeEdge::SeenPositions &GetSeenPositions() const;
+	Bitmaps &GetBitmaps() const;
 
 protected:
   mutable FactorCollection m_vocab;
@@ -67,6 +68,8 @@ protected:
 
   mutable boost::thread_specific_ptr< NSCubePruning::CubeEdge::Queue> m_queue;
   mutable boost::thread_specific_ptr< NSCubePruning::CubeEdge::SeenPositions> m_seenPositions;
+
+  mutable boost::thread_specific_ptr<Bitmaps> m_bitmaps;
 
   void LoadWeights();
   void LoadMappings();
