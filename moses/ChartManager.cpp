@@ -87,7 +87,7 @@ void ChartManager::Decode()
       // create trans opt
       m_translationOptionList.Clear();
       m_parser.Create(range, m_translationOptionList);
-      m_translationOptionList.ApplyThreshold();
+      m_translationOptionList.ApplyThreshold(options()->search.trans_opt_threshold);
 
       const InputPath &inputPath = m_parser.GetInputPath(range);
       m_translationOptionList.EvaluateWithSourceContext(m_source, inputPath);
@@ -293,13 +293,14 @@ void
 ChartManager::
 OutputSearchGraphAsHypergraph(std::ostream& out) const
 {
-  ChartSearchGraphWriterHypergraph writer(&out);
+  ChartSearchGraphWriterHypergraph writer(options(), &out);
   WriteSearchGraph(writer);
 }
 
 void ChartManager::OutputSearchGraphMoses(std::ostream &outputSearchGraphStream) const
 {
-  ChartSearchGraphWriterMoses writer(&outputSearchGraphStream, m_source.GetTranslationId());
+  ChartSearchGraphWriterMoses writer(options(), &outputSearchGraphStream, 
+				     m_source.GetTranslationId());
   WriteSearchGraph(writer);
 }
 

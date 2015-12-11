@@ -64,7 +64,7 @@ public:
   float GetBestScore(const ChartCellLabel *chartCell) const;
 
   void Clear();
-  void ApplyThreshold();
+  void ApplyThreshold(float threshold);
   void EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath);
 
 private:

@@ -48,7 +48,8 @@ protected:
 public:
   void ProcessUnknownWord(size_t sourcePos);
 
-  TranslationOptionCollectionText(ttasksptr const& ttask, Sentence const& input, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
+  TranslationOptionCollectionText(ttasksptr const& ttask, Sentence const& input);
+  // , size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 
   bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;
   bool ViolatesXmlOptionsConstraint(size_t startPosition, size_t endPosition, TranslationOption *transOpt) const;

@@ -64,7 +64,7 @@ Run()
   
   Moses::StaticData const& SD = Moses::StaticData::Instance();
 
-  if (SD.IsSyntax())
+  if (is_syntax(m_options->search.algo))
     run_chart_decoder();
   else
     run_phrase_decoder();

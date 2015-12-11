@@ -132,8 +132,8 @@ StaticData
   m_parameter->SetParameter<string>(m_outputUnknownsFile,
                                     "output-unknowns", "");
 
-  m_parameter->SetParameter<long>(m_startTranslationId,
-                                  "start-translation-id", 0);
+  // m_parameter->SetParameter<long>(m_startTranslationId,
+  //                                 "start-translation-id", 0);
 
   return true;
 }
@@ -187,7 +187,7 @@ bool StaticData::LoadData(Parameter *parameter)
   if (is_syntax(m_options->search.algo))
     m_options->syntax.LoadNonTerminals(*parameter, FactorCollection::Instance());
 
-  if (IsSyntax())
+  if (is_syntax(m_options->search.algo))
     LoadChartDecodingParameters();
 
   // ORDER HERE MATTERS, SO DON'T CHANGE IT UNLESS YOU KNOW WHAT YOU ARE DOING!
@@ -427,7 +427,7 @@ LoadDecodeGraphsOld(const vector<string> &mappingVector,
     UTIL_THROW_IF2(decodeStep == NULL, "Null decode step");
     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
       DecodeGraph *decodeGraph;
-      if (IsSyntax()) {
+      if (is_syntax(m_options->search.algo)) { 
         size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
         VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
         decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
@@ -495,7 +495,7 @@ void StaticData::LoadDecodeGraphsNew(const std::vector<std::string> &mappingVect
     UTIL_THROW_IF2(decodeStep == NULL, "Null decode step");
     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
       DecodeGraph *decodeGraph;
-      if (IsSyntax()) {
+      if (is_syntax(m_options->search.algo)) { 
         size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
         VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
         decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);

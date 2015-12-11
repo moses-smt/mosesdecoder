@@ -127,7 +127,7 @@ protected:
   UnknownLHSList m_unknownLHS;
 
   int m_threadCount;
-  long m_startTranslationId;
+  // long m_startTranslationId;
 
   // alternate weight settings
   mutable std::string m_currentWeightSetting;
@@ -136,8 +136,8 @@ protected:
   std::map< std::string, std::set< size_t > > m_weightSettingIgnoreDP; // decoding path
 
   bool m_useLegacyPT;
-  bool m_defaultNonTermOnlyForEmptyRange;
-  S2TParsingAlgorithm m_s2tParsingAlgorithm;
+  // bool m_defaultNonTermOnlyForEmptyRange;
+  // S2TParsingAlgorithm m_s2tParsingAlgorithm;
 
   FeatureRegistry m_registry;
   PhrasePropertyFactory m_phrasePropertyFactory;
@@ -210,32 +210,6 @@ public:
     return m_options;
   }
 
-  // AllOptions&
-  // options() {
-  //   return m_options;
-  // }
-
-  // inline bool
-  // GetSourceStartPosMattersForRecombination() const {
-  //   return m_sourceStartPosMattersForRecombination;
-  // }
-
-  bool
-  UseEarlyDiscarding() const {
-    return m_options->search.early_discarding_threshold
-           != -std::numeric_limits<float>::infinity();
-  }
-
-  bool
-  UseEarlyDistortionCost() const {
-    return m_options->reordering.use_early_distortion_cost;
-  }
-
-  float
-  GetTranslationOptionThreshold() const {
-    return m_options->search.trans_opt_threshold;
-  }
-
   size_t
   GetVerboseLevel() const {
     return m_verboseLevel;
@@ -254,15 +228,6 @@ public:
   bool
   UseMinlexrInMemory() const {
     return m_minlexrMemory;
-  }
-
-  bool IsSyntax(SearchAlgorithm algo = DefaultSearchAlgorithm) const {
-    if (algo == DefaultSearchAlgorithm)
-      algo = m_options->search.algo;
-
-    return (algo == CYKPlus   || algo == ChartIncremental ||
-            algo == SyntaxS2T || algo == SyntaxT2S ||
-            algo == SyntaxF2S || algo == SyntaxT2S_SCFG);
   }
 
   const ScoreComponentCollection&
@@ -303,10 +268,6 @@ public:
     return m_outputUnknownsFile;
   }
 
-  // bool GetIncludeLHSInSearchGraph() const {
-  //   return m_includeLHSInSearchGraph;
-  // }
-
   const UnknownLHSList &GetUnknownLHS() const {
     return m_unknownLHS;
   }
@@ -332,9 +293,9 @@ public:
     return m_threadCount;
   }
 
-  long GetStartTranslationId() const {
-    return m_startTranslationId;
-  }
+  // long GetStartTranslationId() const {
+  //   return m_startTranslationId;
+  // }
 
   void SetExecPath(const std::string &path);
   const std::string &GetBinDirectory() const;
@@ -467,9 +428,9 @@ public:
     m_treeStructure = treeStructure;
   }
 
-  bool GetDefaultNonTermOnlyForEmptyRange() const {
-    return m_defaultNonTermOnlyForEmptyRange;
-  }
+  // bool GetDefaultNonTermOnlyForEmptyRange() const {
+  //   return m_defaultNonTermOnlyForEmptyRange;
+  // }
 
   bool RequireSortingAfterSourceContext() const {
     return m_requireSortingAfterSourceContext;
