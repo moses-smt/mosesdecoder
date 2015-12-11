@@ -146,6 +146,11 @@ if [ option.get "debug-build" : : "yes" ] {
    echo "Building with -Og to enable easier profiling and debugging. Only available on gcc 4.8+." ;
 }
 
+if [ option.get "with-profiler" : : "yes" ] {
+  external-lib profiler ;
+  requirements += <library>profiler ;
+}
+
 if [ option.get "with-address-sanitizer" : : "yes" ] {
   requirements += <cxxflags>-fsanitize=address ;
   requirements += <cxxflags>-fno-omit-frame-pointer ;
