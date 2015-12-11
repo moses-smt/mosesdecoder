@@ -34,6 +34,9 @@ public:
 	const std::vector<const StatefulFeatureFunction*> &GetStatefulFeatureFunctions() const
 	{ return m_statefulFeatureFunctions; }
 
+	const std::vector<const StatefulFeatureFunction*> &GetNonBatchedFeatureFunctions() const
+	{ return m_nonBatchedFeatureFunctions; }
+
 	const std::vector<const BatchedFeatureFunction*> &GetBatchedFeatureFunctions() const
 	{ return m_batchedFeatureFunctions; }
 
@@ -53,6 +56,7 @@ public:
 protected:
 	  std::vector<const FeatureFunction*> m_featureFunctions;
 	  std::vector<const StatefulFeatureFunction*> m_statefulFeatureFunctions;
+		std::vector<const StatefulFeatureFunction*> m_nonBatchedFeatureFunctions;
 		std::vector<const BatchedFeatureFunction*> m_batchedFeatureFunctions;
 	  std::vector<const PhraseTable*> m_phraseTables;
 

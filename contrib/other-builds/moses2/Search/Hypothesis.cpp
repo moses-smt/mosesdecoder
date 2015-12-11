@@ -165,7 +165,7 @@ void Hypothesis::EmptyHypothesisState(const PhraseImpl &input)
 
 void Hypothesis::EvaluateWhenApplied()
 {
-  const std::vector<const StatefulFeatureFunction*>  &sfffs = mgr.system.featureFunctions.GetStatefulFeatureFunctions();
+  const std::vector<const StatefulFeatureFunction*>  &sfffs = mgr.system.featureFunctions.GetNonBatchedFeatureFunctions();
   BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
 	  EvaluateWhenApplied(*sfff);
   }

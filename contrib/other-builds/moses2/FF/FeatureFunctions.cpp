@@ -54,9 +54,8 @@ void FeatureFunctions::Create()
 		BatchedFeatureFunction *bff = dynamic_cast<BatchedFeatureFunction*>(ff);
 		if (bff) {
 			m_batchedFeatureFunctions.push_back(bff);
-			// batched FFs are held exclusively here, are not present in the stateful list.
-			// (avoids them being evaluated twice)
-			continue;
+		} else {
+			m_nonBatchedFeatureFunctions.push_back(bff);
 		}
 
 	  StatefulFeatureFunction *sfff = dynamic_cast<StatefulFeatureFunction*>(ff);

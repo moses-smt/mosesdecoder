@@ -73,8 +73,11 @@ public:
 
   void EmptyHypothesisState(const PhraseImpl &input);
 
+  /** Only evaluates non-batched stateful FFs. */
   void EvaluateWhenApplied();
   void EvaluateWhenApplied(const StatefulFeatureFunction &sfff);
+
+  /** Hieu's old failed batching. Has nothing to do with BatchedFeatureFunction. */
   void EvaluateWhenAppliedNonBatch();
 
   const Hypothesis* GetPrevHypo() const
