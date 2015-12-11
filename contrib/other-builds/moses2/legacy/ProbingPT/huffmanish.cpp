@@ -270,9 +270,8 @@ target_text HuffmanDecoder::decode_line (const std::vector<unsigned int> &input,
 {
   //demo decoder
   target_text ret;
+  ret.prob.reserve(num_scores);
   //Split everything
-  std::vector<unsigned int> target_phrase;
-  std::vector<unsigned int> probs;
   unsigned int wAll;
 
   //Split the line into the proper arrays
@@ -283,11 +282,13 @@ target_text HuffmanDecoder::decode_line (const std::vector<unsigned int> &input,
     if (num == 0) {
       num_zeroes++;
     } else if (num_zeroes == 0) {
-      target_phrase.push_back(num);
+      ret.target_phrase.push_back(num);
     } else if (num_zeroes == 1) {
       //Push exactly num_scores scores
       for (int i = 0; i < num_scores; i++) {
-        probs.push_back(num);
+    	float prob = reinterpret_uint(&num);
+    	ret.prob.push_back(prob);
+
         counter++;
         num = input[counter];
       }
@@ -298,13 +299,7 @@ target_text HuffmanDecoder::decode_line (const std::vector<unsigned int> &input,
     counter++;
   }
 
-  ret.target_phrase = target_phrase;
   ret.word_all1 = lookup_word_all1.find(wAll)->second;
-
-  //Decode probabilities
-  for (std::vector<unsigned int>::iterator it = probs.begin(); it != probs.end(); it++) {
-    ret.prob.push_back(reinterpret_uint(&(*it)));
-  }
 
   return ret;
 
