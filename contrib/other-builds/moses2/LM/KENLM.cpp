@@ -266,11 +266,6 @@ void KENLM::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore,
 	  fullScore = TransformLMScore(fullScore);
 }
 
-lm::WordIndex KENLM::TranslateID(const Word &word) const {
-  std::size_t factor = word[m_factorType]->GetId();
-  return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
-}
-
 // Convert last words of hypothesis into vocab ids, returning an end pointer.
 lm::WordIndex *KENLM::LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const {
   lm::WordIndex *index = indices;

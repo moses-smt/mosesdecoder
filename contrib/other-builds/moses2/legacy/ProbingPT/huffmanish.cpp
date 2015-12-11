@@ -310,7 +310,7 @@ target_text HuffmanDecoder::decode_line (const std::vector<unsigned int> &input,
 
 }
 
-inline std::string HuffmanDecoder::getTargetWordFromID(unsigned int id)
+inline const std::string &HuffmanDecoder::getTargetWordFromID(unsigned int id)
 {
   return lookup_target_phrase.find(id)->second;
 }

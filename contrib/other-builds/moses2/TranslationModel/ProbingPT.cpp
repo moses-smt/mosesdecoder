@@ -70,15 +70,6 @@ void ProbingPT::Load(System &system)
   }
 }
 
-uint64_t ProbingPT::GetSourceProbingId(const Factor *factor) const
-{
-  size_t factorId = factor->GetId();
-  if (factorId >= m_sourceVocab.size()) {
-	  return m_unkId;
-  }
-  return m_sourceVocab[factorId];
-}
-
 void ProbingPT::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 {
   BOOST_FOREACH(InputPath &path, inputPaths) {

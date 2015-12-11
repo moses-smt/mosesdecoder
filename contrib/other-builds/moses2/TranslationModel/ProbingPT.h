@@ -51,7 +51,15 @@ protected:
 	  return m_targetVocab[probingId];
   }
 
-  uint64_t GetSourceProbingId(const Factor *factor) const;
+  inline uint64_t GetSourceProbingId(const Factor *factor) const
+  {
+	  size_t factorId = factor->GetId();
+	  if (factorId >= m_sourceVocab.size()) {
+		  return m_unkId;
+	  }
+	  return m_sourceVocab[factorId];
+
+  }
 
 };
 

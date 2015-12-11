@@ -13,6 +13,7 @@
 #include "lm/model.hh"
 #include "../legacy/Factor.h"
 #include "../legacy/Util2.h"
+#include "../Word.h"
 
 namespace Moses2
 {
@@ -72,8 +73,11 @@ protected:
 
   void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const;
 
-  lm::WordIndex TranslateID(const Word &word) const;
-
+  inline lm::WordIndex TranslateID(const Word &word) const
+  {
+	  std::size_t factor = word[m_factorType]->GetId();
+	  return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
+  }
   // Convert last words of hypothesis into vocab ids, returning an end pointer.
   lm::WordIndex *LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const;
 

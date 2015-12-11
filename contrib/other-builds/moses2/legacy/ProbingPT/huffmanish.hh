@@ -84,14 +84,14 @@ public:
   HuffmanDecoder (std::map<unsigned int, std::string> *, std::map<unsigned int, std::vector<unsigned char> > *);
 
   //Getters
-  const std::map<unsigned int, std::string> get_target_lookup_map() const {
+  const std::map<unsigned int, std::string> &get_target_lookup_map() const {
     return lookup_target_phrase;
   }
-  const std::map<unsigned int, std::vector<unsigned char> > get_word_all1_lookup_map() const {
+  const std::map<unsigned int, std::vector<unsigned char> > &get_word_all1_lookup_map() const {
     return lookup_word_all1;
   }
 
-  inline std::string getTargetWordFromID(unsigned int id);
+  inline const std::string &getTargetWordFromID(unsigned int id);
 
   std::string getTargetWordsFromIDs(const std::vector<unsigned int> &ids);
 
