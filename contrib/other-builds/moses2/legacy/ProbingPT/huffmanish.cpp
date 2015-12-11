@@ -409,9 +409,10 @@ std::vector<unsigned int> vbyte_decode_line(const std::vector<unsigned char> &li
   std::vector<unsigned int> huffman_line;
   std::vector<unsigned char> current_num;
 
-  for (std::vector<unsigned char>::const_iterator it = line.begin(); it != line.end(); it++) {
-    current_num.push_back(*it);
-    if ((*it >> 7) != 1) {
+  for (size_t i = 0; i < line.size(); ++i) {
+	unsigned char c = line[i];
+    current_num.push_back(c);
+    if ((c >> 7) != 1) {
       //We don't have continuation in the next bit
       huffman_line.push_back(bytes_to_int(current_num));
       current_num.clear();
