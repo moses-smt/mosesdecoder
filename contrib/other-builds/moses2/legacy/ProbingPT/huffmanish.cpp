@@ -222,10 +222,10 @@ HuffmanDecoder::HuffmanDecoder (std::map<unsigned int, std::string> * lookup_tar
   lookup_word_all1 = *lookup_word1;
 }
 
-std::vector<target_text> HuffmanDecoder::full_decode_line (const std::vector<unsigned char> &lines, int num_scores)
+std::vector<target_text> HuffmanDecoder::full_decode_line (unsigned char lines[], size_t linesCount, int num_scores)
 {
   std::vector<target_text> retvector; //All target phrases
-  std::vector<unsigned int> decoded_lines = vbyte_decode_line(lines); //All decoded lines
+  std::vector<unsigned int> decoded_lines = vbyte_decode_line(lines, linesCount); //All decoded lines
   std::vector<unsigned int>::iterator it = decoded_lines.begin(); //Iterator for them
   std::vector<unsigned int> current_target_phrase; //Current target phrase decoded
 
@@ -404,12 +404,12 @@ b1:
   return byte_vector;
 }
 
-std::vector<unsigned int> vbyte_decode_line(const std::vector<unsigned char> &line)
+std::vector<unsigned int> vbyte_decode_line(unsigned char line[], size_t linesSize)
 {
   std::vector<unsigned int> huffman_line;
   std::vector<unsigned char> current_num;
 
-  for (size_t i = 0; i < line.size(); ++i) {
+  for (size_t i = 0; i < linesSize; ++i) {
 	unsigned char c = line[i];
     current_num.push_back(c);
     if ((c >> 7) != 1) {

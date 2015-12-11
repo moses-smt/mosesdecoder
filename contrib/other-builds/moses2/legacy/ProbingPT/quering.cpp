@@ -112,14 +112,13 @@ std::pair<bool, std::vector<target_text> > QueryEngine::query(uint64_t source_ph
     unsigned int bytes_toread = entry -> bytes_toread;
 
     //ASK HIEU FOR MORE EFFICIENT WAY TO DO THIS!
-    std::vector<unsigned char> encoded_text; //Assign to the vector the relevant portion of the array.
-    encoded_text.reserve(bytes_toread);
+    unsigned char encoded_text[bytes_toread]; //Assign to the vector the relevant portion of the array.
     for (int i = 0; i < bytes_toread; i++) {
-      encoded_text.push_back(binary_mmaped[i+initial_index]);
+      encoded_text[i] = binary_mmaped[i+initial_index];
     }
 
     //Get only the translation entries necessary
-    translation_entries = decoder.full_decode_line(encoded_text, num_scores);
+    translation_entries = decoder.full_decode_line(encoded_text, bytes_toread, num_scores);
 
   }
 
@@ -156,14 +155,13 @@ std::pair<bool, std::vector<target_text> > QueryEngine::query(const StringPiece 
     std::cerr << "Entry size is bytes is: " << bytes_toread << std::endl;
 
     //ASK HIEU FOR MORE EFFICIENT WAY TO DO THIS!
-    std::vector<unsigned char> encoded_text; //Assign to the vector the relevant portion of the array.
-    encoded_text.reserve(bytes_toread);
+    unsigned char encoded_text[bytes_toread]; //Assign to the vector the relevant portion of the array.
     for (int i = 0; i < bytes_toread; i++) {
-      encoded_text.push_back(binary_mmaped[i+initial_index]);
+      encoded_text[i] = binary_mmaped[i+initial_index];
     }
 
     //Get only the translation entries necessary
-    translation_entries = decoder.full_decode_line(encoded_text, num_scores);
+    translation_entries = decoder.full_decode_line(encoded_text, bytes_toread, num_scores);
 
   }
 

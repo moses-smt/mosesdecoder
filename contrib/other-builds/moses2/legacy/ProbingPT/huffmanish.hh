@@ -98,7 +98,7 @@ public:
   target_text decode_line (const std::vector<unsigned int> &input, int num_scores);
 
   //Variable byte decodes a all target phrases contained here and then passes them to decode_line
-  std::vector<target_text> full_decode_line (const std::vector<unsigned char> &lines, int num_scores);
+  std::vector<target_text> full_decode_line (unsigned char lines[], size_t linesCount, int num_scores);
 };
 
 std::string getTargetWordsFromIDs(const std::vector<unsigned int> &ids, std::map<unsigned int, std::string> * lookup_target_phrase);
@@ -111,7 +111,7 @@ inline float reinterpret_uint(unsigned int * num);
 
 std::vector<unsigned char> vbyte_encode_line(const std::vector<unsigned int> &line);
 inline std::vector<unsigned char> vbyte_encode(unsigned int num);
-std::vector<unsigned int> vbyte_decode_line(const std::vector<unsigned char> &line);
+std::vector<unsigned int> vbyte_decode_line(unsigned char line[], size_t linesSize);
 inline unsigned int bytes_to_int(const std::vector<unsigned char> &number);
 
 }
