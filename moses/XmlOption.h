@@ -32,8 +32,8 @@ std::vector<std::string> TokenizeXml(const std::string& str, const std::string& 
 
 bool ProcessAndStripXMLTags(AllOptions const& opts,
                             std::string &line, std::vector<XmlOption const*> &res,
-                            ReorderingConstraint &reorderingConstraint, 
-			    std::vector< size_t > &walls,
+                            ReorderingConstraint &reorderingConstraint,
+                            std::vector< size_t > &walls,
                             std::vector< std::pair<size_t, std::string> > &placeholders);
 
 

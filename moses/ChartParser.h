@@ -57,7 +57,7 @@ public:
 private:
   std::vector<Phrase*> m_unksrcs;
   std::list<TargetPhraseCollection::shared_ptr> m_cacheTargetPhraseCollection;
-  AllOptions::ptr const& options() const; 
+  AllOptions::ptr const& options() const;
 };
 
 class ChartParser
@@ -79,7 +79,7 @@ public:
     return m_unknown.GetUnknownSources();
   }
 
-  AllOptions::ptr const& options() const; 
+  AllOptions::ptr const& options() const;
 
 private:
   ChartParserUnknown m_unknown;

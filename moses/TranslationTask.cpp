@@ -77,7 +77,7 @@ TranslationTask
                   boost::shared_ptr<IOWrapper> const& ioWrapper)
   : m_source(source) , m_ioWrapper(ioWrapper)
 {
-  m_options = source->options(); 
+  m_options = source->options();
 }
 
 TranslationTask::~TranslationTask()
@@ -104,7 +104,7 @@ TranslationTask
 
   else if (algo == SyntaxS2T) {
     // new-style string-to-tree decoding (ask Phil Williams)
-    S2TParsingAlgorithm algorithm = m_options->syntax.s2t_parsing_algo; 
+    S2TParsingAlgorithm algorithm = m_options->syntax.s2t_parsing_algo;
     if (algorithm == RecursiveCYKPlus) {
       typedef Syntax::S2T::EagerParserCallback Callback;
       typedef Syntax::S2T::RecursiveCYKPlusParser<Callback> Parser;

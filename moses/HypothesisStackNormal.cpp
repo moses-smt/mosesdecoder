@@ -74,13 +74,12 @@ pair<HypothesisStackNormal::iterator, bool> HypothesisStackNormal::Add(Hypothesi
     // prune only if stack is twice as big as needed (lazy pruning)
     size_t toleratedSize = 2*m_maxHypoStackSize-1;
     // add in room for stack diversity
-    if (m_minHypoStackDiversity)
-      {
-	// so what happens if maxdistortion is negative?
-	toleratedSize += m_minHypoStackDiversity 
-	  << m_manager.options()->reordering.max_distortion;
-      }
-    
+    if (m_minHypoStackDiversity) {
+      // so what happens if maxdistortion is negative?
+      toleratedSize += m_minHypoStackDiversity
+                       << m_manager.options()->reordering.max_distortion;
+    }
+
     if (m_hypos.size() > toleratedSize) {
       PruneToSize(m_maxHypoStackSize);
     } else {

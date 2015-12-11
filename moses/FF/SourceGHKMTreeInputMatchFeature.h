@@ -9,7 +9,6 @@ namespace Moses
 // assumes that source-side syntax labels are stored in the target non-terminal field of the rules
 class SourceGHKMTreeInputMatchFeature : public StatelessFeatureFunction
 {
-  // Word m_output_default_nonterminal;
 public:
   SourceGHKMTreeInputMatchFeature(const std::string &line);
 

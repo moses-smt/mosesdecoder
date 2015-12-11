@@ -245,7 +245,6 @@ Read(std::istream& in)
   string line;
   if (getline(in, line, '\n').eof())
     return 0;
-  
   m_labelledSpans.clear();
   ProcessAndStripXMLTags(*m_options, line, m_labelledSpans, m_xmlOptions);
 
@@ -265,7 +264,7 @@ Read(std::istream& in)
 
   // do source labels
   vector<XMLParseOutput>::const_iterator iterLabel;
-  for (iterLabel = m_labelledSpans.begin(); 
+  for (iterLabel = m_labelledSpans.begin();
        iterLabel != m_labelledSpans.end(); ++iterLabel) {
     const XMLParseOutput &labelItem = *iterLabel;
     const Range &range = labelItem.m_range;
@@ -279,7 +278,7 @@ Read(std::istream& in)
     for (size_t endPos = startPos; endPos < sourceSize; ++endPos) {
       NonTerminalSet &list = GetLabelSet(startPos, endPos);
       if (list.size() == 0 || ! only4empty ) {
-        AddChartLabel(startPos, endPos, m_options->syntax.input_default_non_terminal); 
+        AddChartLabel(startPos, endPos, m_options->syntax.input_default_non_terminal);
       }
     }
   }
@@ -300,7 +299,7 @@ TranslationOptionCollection* TreeInput::CreateTranslationOptionCollection() cons
   return NULL;
 }
 
-void 
+void
 TreeInput::
 AddChartLabel(size_t startPos, size_t endPos, const Word &label)
 {
@@ -324,14 +323,14 @@ AddChartLabel(size_t startPos, size_t endPos, const Word &label)
   }
 }
 
-void 
+void
 TreeInput::
 AddChartLabel(size_t startPos, size_t endPos, const string &label)
 {
   const std::vector<FactorType>& fOrder = m_options->input.factor_order;
   Word word(true);
-  const Factor *factor 
-    = FactorCollection::Instance().AddFactor(Input, fOrder[0], label, true); 
+  const Factor *factor
+  = FactorCollection::Instance().AddFactor(Input, fOrder[0], label, true);
   // TODO - no factors
   word.SetFactor(0, factor);
   AddChartLabel(startPos, endPos, word);

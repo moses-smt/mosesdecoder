@@ -46,6 +46,7 @@
 #include "XmlTree.h"
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
+#include "PhraseOrientation.h"
 
 using namespace std;
 using namespace MosesTraining;
@@ -62,6 +63,7 @@ private:
   Moses::OutputFileStream& m_extractFileInv;
   Moses::OutputFileStream& m_extractFileContext;
   Moses::OutputFileStream& m_extractFileContextInv;
+  PhraseOrientation m_phraseOrientation;
 
   vector< ExtractedRule > m_extractedRules;
 
@@ -109,6 +111,7 @@ public:
 void collectWordLabelCounts(SentenceAlignmentWithSyntax &sentence );
 void writeGlueGrammar(const string &, RuleExtractionOptions &options, set< string > &targetLabelCollection, map< string, int > &targetTopLabelCollection);
 void writeUnknownWordLabel(const string &);
+void writePhraseOrientationPriors(const string &);
 
 double getPcfgScore(const SyntaxNode &);
 
@@ -142,7 +145,8 @@ int main(int argc, char* argv[])
          << " | --UnpairedExtractFormat"
          << " | --ConditionOnTargetLHS ]"
          << " | --BoundaryRules[" << options.boundaryRules << "]"
-         << " | --FlexibilityScore\n";
+         << " | --FlexibilityScore"
+         << " | --PhraseOrientation\n";
 
     exit(1);
   }
@@ -267,6 +271,8 @@ int main(int argc, char* argv[])
       options.conditionOnTargetLhs = true;
     } else if (strcmp(argv[i],"--FlexibilityScore") == 0) {
       options.flexScoreFlag = true;
+    } else if (strcmp(argv[i],"--PhraseOrientation") == 0) {
+      options.phraseOrientation = true;
     } else if (strcmp(argv[i],"-threads") == 0 ||
                strcmp(argv[i],"--threads") == 0 ||
                strcmp(argv[i],"--Threads") == 0) {
@@ -377,6 +383,11 @@ int main(int argc, char* argv[])
 
   if (options.unknownWordLabelFlag)
     writeUnknownWordLabel(fileNameUnknownWordLabel);
+
+  if (options.phraseOrientation) {
+    std::string fileNamePhraseOrientationPriors = fileNameExtract + string(".phraseOrientationPriors");
+    writePhraseOrientationPriors(fileNamePhraseOrientationPriors);
+  }
 }
 
 void ExtractTask::Run()
@@ -391,6 +402,12 @@ void ExtractTask::extractRules()
 {
   int countT = m_sentence.target.size();
   int countS = m_sentence.source.size();
+
+  // initialize phrase orientation scoring object (for lexicalized reordering model)
+  if (m_options.phraseOrientation) {
+    m_sentence.invertAlignment(); // fill m_sentence.alignedToS
+    m_phraseOrientation = PhraseOrientation(countS, countT, m_sentence.alignedToT, m_sentence.alignedToS, m_sentence.alignedCountS);
+  }
 
   // phrase repository for creating hiero phrases
   RuleExist ruleExist(countT);
@@ -990,6 +1007,10 @@ void ExtractTask::addRule( int startT, int endT, int startS, int endS, int count
     }
   }
 
+  rule.alignment.erase(rule.alignment.size()-1);
+  if (!m_options.onlyDirectFlag)
+    rule.alignmentInv.erase(rule.alignmentInv.size()-1);
+
   // context (words to left and right)
   if (m_options.flexScoreFlag) {
     rule.sourceContextLeft = startS == 0 ? "<s>" : m_sentence.source[startS-1];
@@ -998,9 +1019,14 @@ void ExtractTask::addRule( int startT, int endT, int startS, int endS, int count
     rule.targetContextRight = endT+1 == m_sentence.target.size() ? "<s>" : m_sentence.target[endT+1];
   }
 
-  rule.alignment.erase(rule.alignment.size()-1);
-  if (!m_options.onlyDirectFlag)
-    rule.alignmentInv.erase(rule.alignmentInv.size()-1);
+  // phrase orientation (lexicalized reordering model)
+  if (m_options.phraseOrientation) {
+    rule.l2rOrientation = m_phraseOrientation.GetOrientationInfo(startS,endS,PhraseOrientation::REO_DIR_L2R);
+    rule.r2lOrientation = m_phraseOrientation.GetOrientationInfo(startS,endS,PhraseOrientation::REO_DIR_R2L);
+    // std::cerr << "span " << startS << " " << endS << std::endl;
+    // std::cerr << "phraseOrientationL2R " << m_phraseOrientation.GetOrientationInfo(startS,endS,PhraseOrientation::REO_DIR_L2R) << std::endl;
+    // std::cerr << "phraseOrientationR2L " << m_phraseOrientation.GetOrientationInfo(startS,endS,PhraseOrientation::REO_DIR_R2L) << std::endl;
+  }
 
   addRuleToCollection( rule );
 }
@@ -1070,6 +1096,15 @@ void ExtractTask::writeRulesToFile()
     if (m_options.pcfgScore) {
       out << " ||| " << rule->pcfgScore;
     }
+    if (m_options.phraseOrientation) {
+      out << " {{Orientation ";
+      m_phraseOrientation.WriteOrientation(out,rule->l2rOrientation);
+      out << " ";
+      m_phraseOrientation.WriteOrientation(out,rule->r2lOrientation);
+      m_phraseOrientation.IncrementPriorCount(PhraseOrientation::REO_DIR_L2R,rule->l2rOrientation,1);
+      m_phraseOrientation.IncrementPriorCount(PhraseOrientation::REO_DIR_R2L,rule->r2lOrientation,1);
+      out << "}}";
+    }
     out << "\n";
 
     if (!m_options.onlyDirectFlag) {
@@ -1119,10 +1154,14 @@ void writeGlueGrammar( const string & fileName, RuleExtractionOptions &options, 
 {
   ofstream grammarFile;
   grammarFile.open(fileName.c_str());
+  std::string glueRulesPhraseProperty = "";
+  if (options.phraseOrientation) {
+    glueRulesPhraseProperty.append(" ||| ||| {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}");
+  }
   if (!options.targetSyntax) {
-    grammarFile << "<s> [X] ||| <s> [S] ||| 1 ||| 0-0 ||| 0" << endl
-                << "[X][S] </s> [X] ||| [X][S] </s> [S] ||| 1 ||| 0-0 1-1 ||| 0" << endl
-                << "[X][S] [X][X] [X] ||| [X][S] [X][X] [S] ||| 2.718 ||| 0-0 1-1 ||| 0" << endl;
+    grammarFile << "<s> [X] ||| <s> [S] ||| 1 ||| 0-0 ||| 0" << glueRulesPhraseProperty << endl
+                << "[X][S] </s> [X] ||| [X][S] </s> [S] ||| 1 ||| 0-0 1-1 ||| 0" << glueRulesPhraseProperty << endl
+                << "[X][S] [X][X] [X] ||| [X][S] [X][X] [S] ||| 2.718 ||| 0-0 1-1 ||| 0" << glueRulesPhraseProperty << endl;
   } else {
     // chose a top label that is not already a label
     string topLabel = "QQQQQQ";
@@ -1193,6 +1232,14 @@ void writeUnknownWordLabel(const string & fileName)
       outFile << pos->first << " " << ratio << endl;
   }
 
+  outFile.close();
+}
+
+void writePhraseOrientationPriors(const string &fileName)
+{
+  ofstream outFile;
+  outFile.open(fileName.c_str());
+  PhraseOrientation::WritePriorCounts(outFile);
   outFile.close();
 }
 

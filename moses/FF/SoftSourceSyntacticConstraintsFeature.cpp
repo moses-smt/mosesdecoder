@@ -99,7 +99,6 @@ void SoftSourceSyntacticConstraintsFeature::Load(AllOptions::ptr const& opts)
   if (!m_targetSourceLHSJointCountFile.empty()) {
     LoadTargetSourceLeftHandSideJointCountFile();
   }
-  // m_output_default_nonterminal = opts->syntax.output_default_non_terminal;
 }
 
 void SoftSourceSyntacticConstraintsFeature::LoadSourceLabelSet()
