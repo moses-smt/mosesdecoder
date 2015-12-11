@@ -1210,7 +1210,8 @@ void collectWordLabelCounts( SentenceAlignmentWithSyntax &sentence )
   }
 }
 
-void writeUnknownWordLabel(const string & fileName) {
+void writeUnknownWordLabel(const string & fileName)
+{
   ofstream outFile;
   outFile.open(fileName.c_str());
   typedef map<string,int>::const_iterator I;
@@ -1234,7 +1235,7 @@ void writeUnknownWordLabel(const string & fileName) {
   outFile.close();
 }
 
-void writePhraseOrientationPriors(const string &fileName) 
+void writePhraseOrientationPriors(const string &fileName)
 {
   ofstream outFile;
   outFile.open(fileName.c_str());

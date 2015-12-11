@@ -151,11 +151,11 @@ aux_interpret_xml(std::string& line, std::vector<size_t> & xmlWalls,
   // parse XML markup in translation line
   using namespace std;
   if (m_options->input.xml_policy != XmlPassThrough) {
-    bool OK = ProcessAndStripXMLTags(*m_options, line, 
-				     m_xmlOptions,
+    bool OK = ProcessAndStripXMLTags(*m_options, line,
+                                     m_xmlOptions,
                                      m_reorderingConstraint,
                                      xmlWalls, placeholders);
-      UTIL_THROW_IF2(!OK, "Unable to parse XML in line: " << line);
+    UTIL_THROW_IF2(!OK, "Unable to parse XML in line: " << line);
   }
 }
 
@@ -170,7 +170,7 @@ init(string line)
 
   if (m_options->input.continue_partial_translation)
     aux_init_partial_translation(line);
-  
+
   line = Trim(line);
   aux_interpret_sgml_markup(line); // for "<seg id=..." markup
   aux_interpret_dlt(line); // some poorly documented cache-based stuff
@@ -365,7 +365,7 @@ CreateFromString(vector<FactorType> const& FOrder, string const& phraseString)
 }
 
 Sentence::
-Sentence(AllOptions::ptr const& opts, size_t const transId, string stext) 
+Sentence(AllOptions::ptr const& opts, size_t const transId, string stext)
   : InputType(opts, transId)
 {
   init(stext);

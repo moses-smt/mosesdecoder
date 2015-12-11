@@ -115,7 +115,7 @@ public:
   }
 
 
-  void init(std::string line);  
+  void init(std::string line);
 
   std::vector<std::map<std::string,std::string> > const&
   GetDltMeta() const {

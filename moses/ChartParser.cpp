@@ -47,21 +47,21 @@ ChartParserUnknown::~ChartParserUnknown()
   // RemoveAllInColl(m_cacheTargetPhraseCollection);
 }
 
-AllOptions::ptr const& 
+AllOptions::ptr const&
 ChartParserUnknown::
-options() const 
-{ 
-  return m_ttask.lock()->options(); 
-} 
+options() const
+{
+  return m_ttask.lock()->options();
+}
 
-void 
+void
 ChartParserUnknown::
 Process(const Word &sourceWord, const Range &range, ChartParserCallback &to)
 {
   // unknown word, add as trans opt
   const StaticData &staticData = StaticData::Instance();
-  const UnknownWordPenaltyProducer &unknownWordPenaltyProducer 
-    = UnknownWordPenaltyProducer::Instance();
+  const UnknownWordPenaltyProducer &unknownWordPenaltyProducer
+  = UnknownWordPenaltyProducer::Instance();
 
   size_t isDigit = 0;
   if (options()->unk.drop) {
@@ -101,8 +101,8 @@ Process(const Word &sourceWord, const Range &range, ChartParserCallback &to)
       //const Word &sourceLHS = staticData.GetInputDefaultNonTerminal();
       Word *targetLHS = new Word(true);
 
-      targetLHS->CreateFromString(Output, options()->output.factor_order, 
-				  targetLHSStr, true);
+      targetLHS->CreateFromString(Output, options()->output.factor_order,
+                                  targetLHSStr, true);
       UTIL_THROW_IF2(targetLHS->GetFactor(0) == NULL, "Null factor for target LHS");
 
       // add to dictionary
@@ -142,8 +142,8 @@ Process(const Word &sourceWord, const Range &range, ChartParserCallback &to)
       //float prob = iterLHS->second;
 
       Word *targetLHS = new Word(true);
-      targetLHS->CreateFromString(Output, staticData.options().output.factor_order, 
-				  targetLHSStr, true);
+      targetLHS->CreateFromString(Output, staticData.options().output.factor_order,
+                                  targetLHSStr, true);
       UTIL_THROW_IF2(targetLHS->GetFactor(0) == NULL, "Null factor for target LHS");
 
       targetPhrase->GetScoreBreakdown().Assign(&unknownWordPenaltyProducer, unknownScore);
@@ -300,12 +300,12 @@ long ChartParser::GetTranslationId() const
 }
 
 
-AllOptions::ptr const& 
+AllOptions::ptr const&
 ChartParser::
-options() const 
-{ 
-  return m_ttask.lock()->options(); 
-} 
+options() const
+{
+  return m_ttask.lock()->options();
+}
 
 
 } // namespace Moses

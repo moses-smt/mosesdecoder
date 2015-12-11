@@ -70,7 +70,7 @@ public:
     , startS(sS)
     , endS(eS)
     , count(0)
-    , pcfgScore(0.0) 
+    , pcfgScore(0.0)
     , l2rOrientation(PhraseOrientation::REO_CLASS_UNKNOWN)
     , r2lOrientation(PhraseOrientation::REO_CLASS_UNKNOWN)
   { }

@@ -569,8 +569,8 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
       }
       if ( treeInputLabelsLHS.size() == 0 ) {
         scoreBreakdown.PlusEquals(this,
-                                  "LHSPAIR_" + targetLHS->GetString().as_string() + "_" 
-				  + m_output_default_nonterminal[0]->GetString().as_string(),
+                                  "LHSPAIR_" + targetLHS->GetString().as_string() + "_"
+                                  + m_output_default_nonterminal[0]->GetString().as_string(),
                                   1);
         if (!m_targetSourceLHSJointCountFile.empty()) {
           t2sLabelsScore = TransformScore(m_floor);

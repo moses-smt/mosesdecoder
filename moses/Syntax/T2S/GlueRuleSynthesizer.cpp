@@ -12,7 +12,7 @@ namespace Syntax
 namespace T2S
 {
 
-void 
+void
 GlueRuleSynthesizer::
 SynthesizeRule(const InputTree::Node &node)
 {

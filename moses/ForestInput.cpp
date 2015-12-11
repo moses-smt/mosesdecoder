@@ -68,7 +68,7 @@ Read(std::istream &in)
     assert(topVertices.size() >= 1);
   }
 
-  
+
   const std::vector<FactorType>& factorOrder = m_options->input.factor_order;
 
   // Add <s> vertex.
@@ -175,7 +175,7 @@ void ForestInput::FindTopVertices(Forest &forest,
                       std::back_inserter(topVertices));
 }
 
-void 
+void
 ForestInput::
 ParseHyperedgeLine(const std::string &line)
 {
