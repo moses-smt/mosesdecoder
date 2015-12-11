@@ -42,11 +42,11 @@ const Bitmap &Bitmaps::GetBitmap(const Bitmap &bm, const Range &range)
 
   const Bitmap *newBM;
   NextBitmaps &next = iter->second;
-  NextBitmaps::const_iterator iterNext = next.find(range);
+  NextBitmaps::const_iterator iterNext = next.find(&range);
   if (iterNext == next.end()) {
     // not seen the link yet.
     newBM = &GetNextBitmap(bm, range);
-    next[range] = newBM;
+    next[&range] = newBM;
   } else {
     // link exist
     //std::cerr << "link exists" << endl;

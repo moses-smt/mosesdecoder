@@ -11,7 +11,7 @@ namespace Moses2
 
 class Bitmaps
 {
-  typedef boost::unordered_map<Range, const Bitmap*> NextBitmaps;
+  typedef boost::unordered_map<const Range*, const Bitmap*> NextBitmaps;
   typedef boost::unordered_map<const Bitmap*, NextBitmaps, UnorderedComparer<Bitmap>, UnorderedComparer<Bitmap> > Coll;
   //typedef std::set<const Bitmap*, OrderedComparer<Bitmap> > Coll;
   Coll m_coll;
