@@ -15,6 +15,7 @@
 class System;
 class FeatureFunction;
 class StatefulFeatureFunction;
+class BatchedFeatureFunction;
 class PhraseTable;
 class Manager;
 class MemPool;
@@ -33,6 +34,9 @@ public:
 	const std::vector<const StatefulFeatureFunction*> &GetStatefulFeatureFunctions() const
 	{ return m_statefulFeatureFunctions; }
 
+	const std::vector<const BatchedFeatureFunction*> &GetBatchedFeatureFunctions() const
+	{ return m_batchedFeatureFunctions; }
+
 	size_t GetNumScores() const
 	{ return m_ffStartInd; }
 
@@ -49,6 +53,7 @@ public:
 protected:
 	  std::vector<const FeatureFunction*> m_featureFunctions;
 	  std::vector<const StatefulFeatureFunction*> m_statefulFeatureFunctions;
+		std::vector<const BatchedFeatureFunction*> m_batchedFeatureFunctions;
 	  std::vector<const PhraseTable*> m_phraseTables;
 
 	  System &m_system;

@@ -14,6 +14,7 @@
 #include "../TargetPhrases.h"
 #include "../TargetPhrase.h"
 #include "../System.h"
+#include "../FF/BatchedFeatureFunction.h"
 
 using namespace std;
 
@@ -156,6 +157,7 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 		SCORE estimatedScore)
 {
   Hypothesis *arr[20];
+  assert(tps.GetSize() <= 20);
 
   size_t numHypos = 0;
   BOOST_FOREACH(const TargetPhrase *tp, tps) {
@@ -165,6 +167,13 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 		++numHypos;
   }
 
+  // evaluate batched (stateful) feature functions
+  const std::vector<const BatchedFeatureFunction*>  &bffs = m_mgr.system.featureFunctions.GetBatchedFeatureFunctions();
+  BOOST_FOREACH(const BatchedFeatureFunction *bff, bffs) {
+    bff->EvaluateWhenAppliedBatched(arr, arr + numHypos);
+  }
+
+  // evaluate stateful feature functions
   for (size_t i = 0; i < numHypos; ++i) {
 	  	Hypothesis *newHypo = arr[i];
 		newHypo->EvaluateWhenApplied();

@@ -8,6 +8,7 @@
 #include <boost/foreach.hpp>
 #include "FeatureFunctions.h"
 #include "StatefulFeatureFunction.h"
+#include "BatchedFeatureFunction.h"
 #include "../System.h"
 #include "../Scores.h"
 #include "../MemPool.h"
@@ -49,6 +50,14 @@ void FeatureFunctions::Create()
 	  FeatureFunction *ff = Create(line);
 
 	  m_featureFunctions.push_back(ff);
+
+		BatchedFeatureFunction *bff = dynamic_cast<BatchedFeatureFunction*>(ff);
+		if (bff) {
+			m_batchedFeatureFunctions.push_back(bff);
+			// batched FFs are held exclusively here, are not present in the stateful list.
+			// (avoids them being evaluated twice)
+			continue;
+		}
 
 	  StatefulFeatureFunction *sfff = dynamic_cast<StatefulFeatureFunction*>(ff);
 	  if (sfff) {
