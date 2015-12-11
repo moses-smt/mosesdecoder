@@ -106,24 +106,29 @@ TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system
     return tpSharedPtr;
   }
 
-  std::pair<bool, std::vector<target_text> > query_result;
+  std::pair<bool, std::vector<target_text*> > query_result;
 
   //Actual lookup
   query_result = m_engine->query(probingSource, sourceSize);
 
   if (query_result.first) {
     //m_engine->printTargetInfo(query_result.second);
-	const std::vector<target_text> &probingTargetPhrases = query_result.second;
+	const std::vector<target_text*> &probingTargetPhrases = query_result.second;
     tpSharedPtr = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, probingTargetPhrases.size());
 
     for (size_t i = 0; i < probingTargetPhrases.size(); ++i) {
-      const target_text &probingTargetPhrase = probingTargetPhrases[i];
-      TargetPhrase *tp = CreateTargetPhrase(pool, system, sourcePhrase, probingTargetPhrase);
+      const target_text *probingTargetPhrase = probingTargetPhrases[i];
+      TargetPhrase *tp = CreateTargetPhrase(pool, system, sourcePhrase, *probingTargetPhrase);
 
       tpSharedPtr->AddTargetPhrase(*tp);
+
+      delete probingTargetPhrase;
     }
 
     tpSharedPtr->SortAndPrune(m_tableLimit);
+  }
+  else {
+	  assert(query_result.second.size() == 0);
   }
 
   return tpSharedPtr;

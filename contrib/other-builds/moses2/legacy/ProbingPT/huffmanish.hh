@@ -95,10 +95,10 @@ public:
 
   std::string getTargetWordsFromIDs(const std::vector<unsigned int> &ids);
 
-  target_text decode_line (const std::vector<unsigned int> &input, int num_scores);
+  target_text *decode_line (const std::vector<unsigned int> &input, int num_scores);
 
   //Variable byte decodes a all target phrases contained here and then passes them to decode_line
-  std::vector<target_text> full_decode_line (unsigned char lines[], size_t linesCount, int num_scores);
+  std::vector<target_text*> full_decode_line (unsigned char lines[], size_t linesCount, int num_scores);
 };
 
 std::string getTargetWordsFromIDs(const std::vector<unsigned int> &ids, const std::map<unsigned int, std::string> &lookup_target_phrase);

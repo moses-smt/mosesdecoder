@@ -222,9 +222,9 @@ HuffmanDecoder::HuffmanDecoder (const std::map<unsigned int, std::string> &looku
   lookup_word_all1 = lookup_word1;
 }
 
-std::vector<target_text> HuffmanDecoder::full_decode_line (unsigned char lines[], size_t linesCount, int num_scores)
+std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[], size_t linesCount, int num_scores)
 {
-  std::vector<target_text> retvector; //All target phrases
+  std::vector<target_text*> retvector; //All target phrases
   std::vector<unsigned int> decoded_lines = vbyte_decode_line(lines, linesCount); //All decoded lines
   std::vector<unsigned int>::iterator it = decoded_lines.begin(); //Iterator for them
   std::vector<unsigned int> current_target_phrase; //Current target phrase decoded
@@ -266,11 +266,11 @@ std::vector<target_text> HuffmanDecoder::full_decode_line (unsigned char lines[]
 
 }
 
-target_text HuffmanDecoder::decode_line (const std::vector<unsigned int> &input, int num_scores)
+target_text *HuffmanDecoder::decode_line (const std::vector<unsigned int> &input, int num_scores)
 {
   //demo decoder
-  target_text ret;
-  ret.prob.reserve(num_scores);
+  target_text *ret = new target_text;
+  ret->prob.reserve(num_scores);
   //Split everything
   unsigned int wAll;
 
@@ -282,12 +282,12 @@ target_text HuffmanDecoder::decode_line (const std::vector<unsigned int> &input,
     if (num == 0) {
       num_zeroes++;
     } else if (num_zeroes == 0) {
-      ret.target_phrase.push_back(num);
+      ret->target_phrase.push_back(num);
     } else if (num_zeroes == 1) {
       //Push exactly num_scores scores
       for (int i = 0; i < num_scores; i++) {
     	float prob = reinterpret_uint(&num);
-    	ret.prob.push_back(prob);
+    	ret->prob.push_back(prob);
 
         counter++;
         num = input[counter];
@@ -299,7 +299,7 @@ target_text HuffmanDecoder::decode_line (const std::vector<unsigned int> &input,
     counter++;
   }
 
-  ret.word_all1 = &lookup_word_all1.find(wAll)->second;
+  ret->word_all1 = &lookup_word_all1.find(wAll)->second;
 
   return ret;
 
