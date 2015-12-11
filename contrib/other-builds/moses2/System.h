@@ -16,6 +16,7 @@
 #include "legacy/Parameter.h"
 #include "TypeDef.h"
 #include "Search/CubePruning/Misc.h"
+#include "legacy/Bitmaps.h"
 
 namespace Moses2
 {

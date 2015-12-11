@@ -31,7 +31,7 @@ Manager::Manager(System &sys, const TranslationTask &task, const std::string &in
 {}
 
 Manager::~Manager() {
-	m_bitmaps.Clear();
+	m_bitmaps->Clear();
 
 	delete m_search;
 	delete m_estimatedScores;
@@ -45,6 +45,7 @@ void Manager::Init()
 	// init pools etc
 	m_pool = &system.GetManagerPool();
 	m_hypoRecycle = &system.GetHypoRecycler();
+	m_bitmaps = &system.GetBitmaps();
 
 	m_initPhrase = new (GetPool().Allocate<TargetPhrase>()) TargetPhrase(GetPool(), system, 0);
 
@@ -65,7 +66,7 @@ void Manager::Init()
 
 	CalcFutureScore();
 
-	m_bitmaps.Init(m_input->GetSize(), vector<bool>(0));
+	m_bitmaps->Init(m_input->GetSize(), vector<bool>(0));
 
 	switch (system.searchAlgorithm) {
 	case Normal:
