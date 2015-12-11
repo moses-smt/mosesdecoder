@@ -711,6 +711,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Phrase.h</locationURI>
 		</link>
 		<link>
+			<name>PhraseOrientation.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/PhraseOrientation.cpp</locationURI>
+		</link>
+		<link>
+			<name>PhraseOrientation.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/PhraseOrientation.h</locationURI>
+		</link>
+		<link>
 			<name>PrefixTree.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PrefixTree.h</locationURI>
@@ -2464,6 +2474,16 @@
 			<name>parameters/ServerOptions.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ServerOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/SyntaxOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/SyntaxOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/SyntaxOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/SyntaxOptions.h</locationURI>
 		</link>
 		<link>
 			<name>FF/LexicalReordering/LexicalReordering.cpp</name>
