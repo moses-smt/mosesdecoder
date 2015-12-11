@@ -10,7 +10,7 @@ uint64_t getHash(StringPiece text)
   return key;
 }
 
-std::vector<uint64_t> getVocabIDs(StringPiece textin)
+std::vector<uint64_t> getVocabIDs(const StringPiece &textin)
 {
   //Tokenize
   std::vector<uint64_t> output;
@@ -25,7 +25,7 @@ std::vector<uint64_t> getVocabIDs(StringPiece textin)
   return output;
 }
 
-uint64_t getVocabID(std::string candidate)
+uint64_t getVocabID(const std::string &candidate)
 {
   std::size_t len = candidate.length();
   uint64_t key = util::MurmurHashNative(candidate.c_str(), len);

@@ -3,7 +3,7 @@
 namespace Moses2
 {
 
-line_text splitLine(StringPiece textin)
+line_text splitLine(const StringPiece &textin)
 {
   const char delim[] = " ||| ";
   line_text output;
@@ -28,7 +28,7 @@ line_text splitLine(StringPiece textin)
   return output;
 }
 
-std::vector<unsigned char> splitWordAll1(StringPiece textin)
+std::vector<unsigned char> splitWordAll1(const StringPiece &textin)
 {
   const char delim[] = " ";
   const char delim2[] = "-";

@@ -51,15 +51,15 @@ class Huffman
 
 public:
   Huffman (const char *);
-  void count_elements (line_text line);
+  void count_elements (const line_text &line);
   void assign_values();
   void serialize_maps(const char * dirname);
   void produce_lookups();
 
-  std::vector<unsigned int> encode_line(line_text line);
+  std::vector<unsigned int> encode_line(const line_text &line);
 
   //encode line + variable byte ontop
-  std::vector<unsigned char> full_encode_line(line_text line);
+  std::vector<unsigned char> full_encode_line(const line_text &line);
 
   //Getters
   const std::map<unsigned int, std::string> get_target_lookup_map() const {

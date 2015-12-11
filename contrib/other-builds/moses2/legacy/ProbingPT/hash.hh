@@ -12,8 +12,8 @@ namespace Moses2
 //Gets the MurmurmurHash for give string
 uint64_t getHash(StringPiece text);
 
-std::vector<uint64_t> getVocabIDs(StringPiece textin);
+std::vector<uint64_t> getVocabIDs(const StringPiece &textin);
 
-uint64_t getVocabID(std::string candidate);
+uint64_t getVocabID(const std::string &candidate);
 
 }

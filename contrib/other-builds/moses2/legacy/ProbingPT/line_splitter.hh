@@ -29,9 +29,9 @@ struct target_text {
 };
 
 //Ask if it's better to have it receive a pointer to a line_text struct
-line_text splitLine(StringPiece textin);
+line_text splitLine(const StringPiece &textin);
 
-std::vector<unsigned char> splitWordAll1(StringPiece textin);
+std::vector<unsigned char> splitWordAll1(const StringPiece &textin);
 
 }
 

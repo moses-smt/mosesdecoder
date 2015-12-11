@@ -40,7 +40,7 @@ Huffman::Huffman (const char * filepath)
   std::cerr << uniq_lines << std::endl;
 }
 
-void Huffman::count_elements(line_text linein)
+void Huffman::count_elements(const line_text &linein)
 {
   //For target phrase:
   util::TokenIter<util::SingleCharacter> it(linein.target_phrase, util::SingleCharacter(' '));
@@ -141,12 +141,12 @@ void Huffman::serialize_maps(const char * dirname)
   os2.close();
 }
 
-std::vector<unsigned char> Huffman::full_encode_line(line_text line)
+std::vector<unsigned char> Huffman::full_encode_line(const line_text &line)
 {
   return vbyte_encode_line((encode_line(line)));
 }
 
-std::vector<unsigned int> Huffman::encode_line(line_text line)
+std::vector<unsigned int> Huffman::encode_line(const line_text &line)
 {
   std::vector<unsigned int> retvector;
 

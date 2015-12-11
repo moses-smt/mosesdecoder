@@ -3,7 +3,7 @@
 namespace Moses2
 {
 
-void add_to_map(std::map<uint64_t, std::string> *karta, StringPiece textin)
+void add_to_map(std::map<uint64_t, std::string> *karta, const StringPiece &textin)
 {
   //Tokenize
   util::TokenIter<util::SingleCharacter> it(textin, util::SingleCharacter(' '));
