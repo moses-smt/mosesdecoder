@@ -91,8 +91,7 @@ QueryEngine::~QueryEngine()
 
 std::pair<bool, std::vector<target_text> > QueryEngine::query(uint64_t source_phrase[], size_t size)
 {
-  bool found;
-  std::vector<target_text> translation_entries;
+  std::pair<bool, std::vector<target_text> > output;
   const Entry * entry;
   //TOO SLOW
   //uint64_t key = util::MurmurHashNative(&source_phrase[0], source_phrase.size());
@@ -102,9 +101,9 @@ std::pair<bool, std::vector<target_text> > QueryEngine::query(uint64_t source_ph
   }
 
 
-  found = table.Find(key, entry);
+  output.first = table.Find(key, entry);
 
-  if (found) {
+  if (output.first) {
     //The phrase that was searched for was found! We need to get the translation entries.
     //We will read the largest entry in bytes and then filter the unnecesarry with functions
     //from line_splitter
@@ -118,11 +117,9 @@ std::pair<bool, std::vector<target_text> > QueryEngine::query(uint64_t source_ph
     }
 
     //Get only the translation entries necessary
-    translation_entries = decoder.full_decode_line(encoded_text, bytes_toread, num_scores);
+    output.second = decoder.full_decode_line(encoded_text, bytes_toread, num_scores);
 
   }
-
-  std::pair<bool, std::vector<target_text> > output (found, translation_entries);
 
   return output;
 
@@ -130,8 +127,7 @@ std::pair<bool, std::vector<target_text> > QueryEngine::query(uint64_t source_ph
 
 std::pair<bool, std::vector<target_text> > QueryEngine::query(const StringPiece &source_phrase)
 {
-  bool found;
-  std::vector<target_text> translation_entries;
+  std::pair<bool, std::vector<target_text> > output;
   const Entry * entry;
   //Convert source frase to VID
   std::vector<uint64_t> source_phrase_vid = getVocabIDs(source_phrase);
@@ -142,10 +138,10 @@ std::pair<bool, std::vector<target_text> > QueryEngine::query(const StringPiece 
     key += (source_phrase_vid[i] << i);
   }
 
-  found = table.Find(key, entry);
+  output.first = table.Find(key, entry);
 
 
-  if (found) {
+  if (output.first) {
     //The phrase that was searched for was found! We need to get the translation entries.
     //We will read the largest entry in bytes and then filter the unnecesarry with functions
     //from line_splitter
@@ -161,11 +157,9 @@ std::pair<bool, std::vector<target_text> > QueryEngine::query(const StringPiece 
     }
 
     //Get only the translation entries necessary
-    translation_entries = decoder.full_decode_line(encoded_text, bytes_toread, num_scores);
+    output.second = decoder.full_decode_line(encoded_text, bytes_toread, num_scores);
 
   }
-
-  std::pair<bool, std::vector<target_text> > output (found, translation_entries);
 
   return output;
 
