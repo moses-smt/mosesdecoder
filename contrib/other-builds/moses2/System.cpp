@@ -160,6 +160,11 @@ ObjectPoolContiguous<Hypothesis*> &System::GetBatchForEval() const
   return GetThreadSpecificObj(m_batchForEval);
 }
 
+Bitmaps &System::GetBitmaps() const
+{
+  return GetThreadSpecificObj(m_bitmaps);
+}
+
 NSCubePruning::CubeEdge::Queue &System::GetQueue() const
 {
   return GetThreadSpecificObj(m_queue);
@@ -170,10 +175,12 @@ NSCubePruning::CubeEdge::SeenPositions &System::GetSeenPositions() const
   return GetThreadSpecificObj(m_seenPositions);
 }
 
-Bitmaps &System::GetBitmaps() const
+Recycler<NSCubePruning::Stack*> &System::GetStackRecycler() const
 {
-  return GetThreadSpecificObj(m_bitmaps);
+  return GetThreadSpecificObj(m_stack);
 }
+
+
 
 }
 

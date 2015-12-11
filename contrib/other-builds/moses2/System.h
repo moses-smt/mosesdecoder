@@ -8,6 +8,7 @@
 #pragma once
 #include <vector>
 #include <boost/thread/tss.hpp>
+#include <boost/pool/object_pool.hpp>
 #include "FF/FeatureFunctions.h"
 #include "Weights.h"
 #include "MemPool.h"
@@ -20,6 +21,10 @@
 
 namespace Moses2
 {
+	namespace NSCubePruning
+	{
+		class Stack;
+	}
 
 class FeatureFunction;
 class StatefulFeatureFunction;
@@ -57,9 +62,11 @@ public:
 
 	Recycler<Hypothesis*> &GetHypoRecycler() const;
 	ObjectPoolContiguous<Hypothesis*> &GetBatchForEval() const;
+	Bitmaps &GetBitmaps() const;
 	NSCubePruning::CubeEdge::Queue &GetQueue() const;
 	NSCubePruning::CubeEdge::SeenPositions &GetSeenPositions() const;
-	Bitmaps &GetBitmaps() const;
+
+    Recycler<NSCubePruning::Stack*> &GetStackRecycler() const;
 
 protected:
   mutable FactorCollection m_vocab;
@@ -71,6 +78,8 @@ protected:
   mutable boost::thread_specific_ptr< NSCubePruning::CubeEdge::SeenPositions> m_seenPositions;
 
   mutable boost::thread_specific_ptr<Bitmaps> m_bitmaps;
+
+  mutable boost::thread_specific_ptr< Recycler<NSCubePruning::Stack*> > m_stack;
 
   void LoadWeights();
   void LoadMappings();

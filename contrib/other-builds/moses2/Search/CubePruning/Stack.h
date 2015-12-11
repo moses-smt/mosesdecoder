@@ -71,6 +71,11 @@ public:
 	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
 
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
+	void Clear()
+	{
+		m_coll.clear();
+	}
+
 protected:
 	Coll m_coll;
 
