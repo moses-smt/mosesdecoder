@@ -206,7 +206,7 @@ public:
   }
 
   AllOptions::ptr const
-  options() const {
+    options() const {
     return m_options;
   }
 

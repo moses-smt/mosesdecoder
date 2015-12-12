@@ -57,11 +57,11 @@ protected:
 public:
 
   //! create ReorderingConstraint of length size and initialise to zero
-  ReorderingConstraint(int max_distortion) 
-  : m_wall(NULL)
-  , m_localWall(NULL)
-  , m_active(false) 
-  , m_max_distortion(max_distortion)
+  ReorderingConstraint(int max_distortion)
+    : m_wall(NULL)
+    , m_localWall(NULL)
+    , m_active(false)
+    , m_max_distortion(max_distortion)
   {}
 
   //! destructer
