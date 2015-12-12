@@ -256,14 +256,8 @@ TranslationOptionCollection*
 Sentence::
 CreateTranslationOptionCollection(ttasksptr const& ttask) const
 {
-  size_t maxNoTransOptPerCoverage = ttask->options()->search.max_trans_opt_per_cov;
-  // StaticData::Instance().GetMaxNoTransOptPerCoverage();
-  float transOptThreshold = ttask->options()->search.trans_opt_threshold;
-  // StaticData::Instance().GetTranslationOptionThreshold();
   TranslationOptionCollection *rv
-  = new TranslationOptionCollectionText(ttask, *this,
-                                        maxNoTransOptPerCoverage,
-                                        transOptThreshold);
+    = new TranslationOptionCollectionText(ttask, *this);
   assert(rv);
   return rv;
 }

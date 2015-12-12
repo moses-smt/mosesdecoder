@@ -52,14 +52,12 @@ namespace Moses
  * called by inherited classe */
 TranslationOptionCollection::
 TranslationOptionCollection(ttasksptr const& ttask,
-                            InputType const& src,
-                            size_t maxNoTransOptPerCoverage,
-                            float translationOptionThreshold)
+                            InputType const& src)
   : m_ttask(ttask)
   , m_source(src)
   , m_estimatedScores(src.GetSize())
-  , m_maxNoTransOptPerCoverage(maxNoTransOptPerCoverage)
-  , m_translationOptionThreshold(translationOptionThreshold)
+  , m_maxNoTransOptPerCoverage(ttask->options()->search.max_trans_opt_per_cov)
+  , m_translationOptionThreshold(ttask->options()->search.trans_opt_threshold)
   , m_max_phrase_length(ttask->options()->search.max_phrase_length)
 {
   // create 2-d vector

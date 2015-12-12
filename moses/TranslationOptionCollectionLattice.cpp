@@ -21,14 +21,16 @@ namespace Moses
 /** constructor; just initialize the base class */
 TranslationOptionCollectionLattice
 ::TranslationOptionCollectionLattice
-( ttasksptr const& ttask,   const WordLattice &input,
-  size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
-  : TranslationOptionCollection(ttask, input, maxNoTransOptPerCoverage,
-                                translationOptionThreshold)
+( ttasksptr const& ttask,   const WordLattice &input)
+  // , size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
+  : TranslationOptionCollection(ttask, input)//
+    // , maxNoTransOptPerCoverage, translationOptionThreshold)
 {
   UTIL_THROW_IF2(StaticData::Instance().GetUseLegacyPT(),
                  "Not for models using the legqacy binary phrase table");
 
+  size_t maxNoTransOptPerCoverage = ttask->options()->search.max_trans_opt_per_cov;
+  float translationOptionThreshold = ttask->options()->search.trans_opt_threshold;
   const InputFeature *inputFeature = InputFeature::InstancePtr();
   UTIL_THROW_IF2(inputFeature == NULL, "Input feature must be specified");
 

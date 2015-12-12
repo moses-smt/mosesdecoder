@@ -20,13 +20,14 @@ namespace Moses
 
 /** constructor; just initialize the base class */
 TranslationOptionCollectionConfusionNet::
-TranslationOptionCollectionConfusionNet(ttasksptr const& ttask,
-                                        const ConfusionNet &input,
-                                        size_t maxNoTransOptPerCoverage,
-                                        float translationOptionThreshold)
-  : TranslationOptionCollection(ttask,input, maxNoTransOptPerCoverage,
-                                translationOptionThreshold)
+TranslationOptionCollectionConfusionNet(ttasksptr const& ttask, 
+                                        const ConfusionNet &input)
+  // , size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
+  : TranslationOptionCollection(ttask,input)//
+    // , maxNoTransOptPerCoverage, translationOptionThreshold)
 {
+  size_t maxNoTransOptPerCoverage = ttask->options()->search.max_trans_opt_per_cov;
+  float translationOptionThreshold = ttask->options()->search.trans_opt_threshold;
   // Prefix checkers are phrase dictionaries that provide a prefix check
   // to indicate that a phrase table entry with a given prefix exists.
   // If no entry with the given prefix exists, there is no point in

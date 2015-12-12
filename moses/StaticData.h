@@ -92,26 +92,16 @@ protected:
   bool m_reorderingConstraint; //! use additional reordering constraints
   BookkeepingOptions m_bookkeeping_options;
 
-  size_t m_latticeSamplesSize;
 
-  std::string  m_latticeSamplesFilePath;
-  // bool m_wordDeletionEnabled;
-
-  bool m_printAllDerivations;
-  bool m_printTranslationOptions;
-
-  // bool m_sourceStartPosMattersForRecombination;
   bool m_requireSortingAfterSourceContext;
 
   mutable size_t m_verboseLevel;
 
   std::string m_factorDelimiter; //! by default, |, but it can be changed
 
-  std::pair<std::string,std::string> m_xmlBrackets; //! strings to use as XML tags' opening and closing brackets. Default are "<" and ">"
 
   size_t m_lmcache_cleanup_threshold; //! number of translations after which LM claenup is performed (0=never, N=after N translations; default is 1)
 
-  bool m_includeLHSInSearchGraph; //! include LHS of rules in search graph
   std::string m_outputUnknownsFile; //! output unknowns in this file
 
   size_t m_ruleLimit;
@@ -127,7 +117,7 @@ protected:
   UnknownLHSList m_unknownLHS;
 
   int m_threadCount;
-  long m_startTranslationId;
+  // long m_startTranslationId;
 
   // alternate weight settings
   mutable std::string m_currentWeightSetting;
@@ -136,8 +126,8 @@ protected:
   std::map< std::string, std::set< size_t > > m_weightSettingIgnoreDP; // decoding path
 
   bool m_useLegacyPT;
-  bool m_defaultNonTermOnlyForEmptyRange;
-  S2TParsingAlgorithm m_s2tParsingAlgorithm;
+  // bool m_defaultNonTermOnlyForEmptyRange;
+  // S2TParsingAlgorithm m_s2tParsingAlgorithm;
 
   FeatureRegistry m_registry;
   PhrasePropertyFactory m_phrasePropertyFactory;
@@ -206,34 +196,8 @@ public:
   }
 
   AllOptions::ptr const
-  options() const {
+    options() const {
     return m_options;
-  }
-
-  // AllOptions&
-  // options() {
-  //   return m_options;
-  // }
-
-  // inline bool
-  // GetSourceStartPosMattersForRecombination() const {
-  //   return m_sourceStartPosMattersForRecombination;
-  // }
-
-  bool
-  UseEarlyDiscarding() const {
-    return m_options->search.early_discarding_threshold
-           != -std::numeric_limits<float>::infinity();
-  }
-
-  bool
-  UseEarlyDistortionCost() const {
-    return m_options->reordering.use_early_distortion_cost;
-  }
-
-  float
-  GetTranslationOptionThreshold() const {
-    return m_options->search.trans_opt_threshold;
   }
 
   size_t
@@ -244,25 +208,6 @@ public:
   void
   SetVerboseLevel(int x) const {
     m_verboseLevel = x;
-  }
-
-  bool
-  UseMinphrInMemory() const {
-    return m_minphrMemory;
-  }
-
-  bool
-  UseMinlexrInMemory() const {
-    return m_minlexrMemory;
-  }
-
-  bool IsSyntax(SearchAlgorithm algo = DefaultSearchAlgorithm) const {
-    if (algo == DefaultSearchAlgorithm)
-      algo = m_options->search.algo;
-
-    return (algo == CYKPlus   || algo == ChartIncremental ||
-            algo == SyntaxS2T || algo == SyntaxT2S ||
-            algo == SyntaxF2S || algo == SyntaxT2S_SCFG);
   }
 
   const ScoreComponentCollection&
@@ -303,10 +248,6 @@ public:
     return m_outputUnknownsFile;
   }
 
-  // bool GetIncludeLHSInSearchGraph() const {
-  //   return m_includeLHSInSearchGraph;
-  // }
-
   const UnknownLHSList &GetUnknownLHS() const {
     return m_unknownLHS;
   }
@@ -332,9 +273,9 @@ public:
     return m_threadCount;
   }
 
-  long GetStartTranslationId() const {
-    return m_startTranslationId;
-  }
+  // long GetStartTranslationId() const {
+  //   return m_startTranslationId;
+  // }
 
   void SetExecPath(const std::string &path);
   const std::string &GetBinDirectory() const;
@@ -465,10 +406,6 @@ public:
 
   void SetTreeStructure(const StatefulFeatureFunction* treeStructure) {
     m_treeStructure = treeStructure;
-  }
-
-  bool GetDefaultNonTermOnlyForEmptyRange() const {
-    return m_defaultNonTermOnlyForEmptyRange;
   }
 
   bool RequireSortingAfterSourceContext() const {

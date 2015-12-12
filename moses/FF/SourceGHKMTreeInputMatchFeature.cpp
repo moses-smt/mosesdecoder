@@ -48,10 +48,10 @@ void SourceGHKMTreeInputMatchFeature::EvaluateWithSourceContext(const InputType 
 
   const StaticData& staticData = StaticData::Instance();
 
-  std::vector<float> newScores(m_numScoreComponents,0.0); 
+  std::vector<float> newScores(m_numScoreComponents,0.0);
   // m_numScoreComponents == 2 // first fires for matches, second for mismatches
 
-  if ( (treeInputLabels.find(lhsLabel) != treeInputLabels.end()) 
+  if ( (treeInputLabels.find(lhsLabel) != treeInputLabels.end())
        && (lhsLabel != m_options->syntax.output_default_non_terminal) ) {
     // match
     newScores[0] = 1.0;

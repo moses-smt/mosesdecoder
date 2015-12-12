@@ -278,15 +278,13 @@ TranslationOptionCollection*
 ConfusionNet::
 CreateTranslationOptionCollection(ttasksptr const& ttask) const
 {
-  size_t maxNoTransOptPerCoverage
-  = ttask->options()->search.max_trans_opt_per_cov;
-  // StaticData::Instance().GetMaxNoTransOptPerCoverage();
-  float translationOptionThreshold
-  = ttask->options()->search.trans_opt_threshold;
-  // StaticData::Instance().GetTranslationOptionThreshold();
+  // size_t maxNoTransOptPerCoverage
+  //   = ttask->options()->search.max_trans_opt_per_cov;
+  // float translationOptionThreshold
+  //   = ttask->options()->search.trans_opt_threshold;
   TranslationOptionCollection *rv
-  = new TranslationOptionCollectionConfusionNet
-  (ttask, *this, maxNoTransOptPerCoverage, translationOptionThreshold);
+    = new TranslationOptionCollectionConfusionNet(ttask, *this);
+  //, maxNoTransOptPerCoverage, translationOptionThreshold);
   assert(rv);
   return rv;
 }

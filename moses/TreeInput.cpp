@@ -252,7 +252,7 @@ Read(std::istream& in)
   stringstream strme;
   strme << line << endl;
 
-  Sentence::Read(strme); 
+  Sentence::Read(strme);
 
   // size input chart
   size_t sourceSize = GetSize();
