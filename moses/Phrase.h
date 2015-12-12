@@ -55,18 +55,6 @@ protected:
 
 public:
 
-  // /// return shared pointer to ttask
-  // //  only TargetPhrases have non-NULL ttaskptrs!
-  // virtual ttasksptr GetTtask() const {
-  //   return ttasksptr();
-  // }
-
-  // /// check if this phrase belongs to a valid ttask
-  // //  only TargetPhrases have non-NULL ttaskptrs!
-  // virtual bool HasTtaskSPtr() const {
-  //   return false;
-  // }
-
   virtual bool HasScope() const {
     return false;
   }

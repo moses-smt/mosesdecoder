@@ -35,16 +35,6 @@ namespace Moses
 {
 std::vector<PhraseDictionary*> PhraseDictionary::s_staticColl;
 
-// CacheColl::~CacheColl()
-// {
-//   // not needed any more since the switch to shared pointers
-//   // for (iterator iter = begin(); iter != end(); ++iter) {
-//   //   std::pair<TargetPhraseCollection::shared_ptr , clock_t> &key = iter->second;
-//   //   TargetPhraseCollection::shared_ptr tps = key.first;
-//   //   delete tps;
-//   // }
-// }
-
 PhraseDictionary::PhraseDictionary(const std::string &line, bool registerNow)
   : DecodeFeature(line, registerNow)
   , m_tableLimit(20) // default
@@ -82,8 +72,7 @@ GetTargetPhraseCollectionLEGACY(const Phrase& src) const
         ret.reset(new TargetPhraseCollection(*ret));
       }
       cache[hash] = entry(ret, clock());
-    } else {
-      // in cache. just use it
+    } else { // in cache. just use it
       iter->second.second = clock();
       ret = iter->second.first;
     }
@@ -175,31 +164,6 @@ GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
   }
 }
 
-// persistent cache handling
-// saving presistent cache to disk
-//void PhraseDictionary::SaveCache() const
-//{
-//  CacheColl &cache = GetCache();
-//  for( std::map<size_t, std::pair<TargetPhraseCollection::shared_ptr ,clock_t> >::iterator iter,
-//       iter != cache.end(),
-//       iter++ ) {
-//
-//  }
-//}
-
-// loading persistent cache from disk
-//void PhraseDictionary::LoadCache() const
-//{
-//  CacheColl &cache = GetCache();
-//  std::map<size_t, std::pair<TargetPhraseCollection::shared_ptr ,clock_t> >::iterator iter;
-//  iter = cache.begin();
-//  while( iter != cache.end() ) {
-//    std::map<size_t, std::pair<TargetPhraseCollection::shared_ptr ,clock_t> >::iterator iterRemove = iter++;
-//    delete iterRemove->second.first;
-//    cache.erase(iterRemove);
-//  }
-//}
-
 // reduce presistent cache by half of maximum size
 void PhraseDictionary::ReduceCache() const
 {
@@ -233,7 +197,9 @@ void PhraseDictionary::ReduceCache() const
           << reduceCacheTime << " seconds." << std::endl);
 }
 
-CacheColl &PhraseDictionary::GetCache() const
+CacheColl &
+PhraseDictionary::
+GetCache() const
 {
   CacheColl *cache;
   cache = m_cache.get();

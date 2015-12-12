@@ -13,6 +13,7 @@ namespace Moses
     long start_translation_id;
 
     std::vector<FactorType> factor_order;
+    std::string factor_delimiter;
     
     bool ReportAllFactors; // m_reportAllFactors;
     int ReportSegmentation; // 0: no 1: m_reportSegmentation 2: ..._enriched 
@@ -23,7 +24,6 @@ namespace Moses
 
     WordAlignmentSort WA_SortOrder; // 0: no, 1: target order
     std::string AlignmentOutputFile; 
-    std::string FactorDelimiter;
     
     bool WordGraph;
 

@@ -94,11 +94,11 @@ void Manager<RuleMatcher>::InitializeStacks()
 template<typename RuleMatcher>
 void Manager<RuleMatcher>::Decode()
 {
-  const StaticData &staticData = StaticData::Instance();
+  // const StaticData &staticData = StaticData::Instance();
 
   // Get various pruning-related constants.
   const std::size_t popLimit = this->options()->cube.pop_limit;
-  const std::size_t ruleLimit = staticData.GetRuleLimit();
+  const std::size_t ruleLimit = this->options()->syntax.rule_limit;
   const std::size_t stackLimit = this->options()->search.stack_size;
 
   // Initialize the stacks.
@@ -215,8 +215,8 @@ void Manager<RuleMatcher>::ExtractKBest(
   // than k.  The k-best factor determines how much bigger the limit should be,
   // with 0 being 'unlimited.'  This actually sets a large-ish limit in case
   // too many translations are identical.
-  const StaticData &staticData = StaticData::Instance();
-  const std::size_t nBestFactor = staticData.options()->nbest.factor;
+  // const StaticData &staticData = StaticData::Instance();
+  const std::size_t nBestFactor = this->options()->nbest.factor;
   std::size_t numDerivations = (nBestFactor == 0) ? k*1000 : k*nBestFactor;
 
   // Extract the derivations.

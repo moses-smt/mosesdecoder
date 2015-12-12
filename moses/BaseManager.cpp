@@ -101,7 +101,7 @@ OutputSurface(std::ostream &out, Phrase const& phrase) const
   std::vector<FactorType> const& factor_order = options()->output.factor_order;
 
   bool markUnknown = options()->unk.mark;
-  std::string const& fd = options()->output.FactorDelimiter;
+  std::string const& fd = options()->output.factor_delimiter;
 
   size_t size = phrase.GetSize();
   for (size_t pos = 0 ; pos < size ; pos++) {

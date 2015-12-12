@@ -74,7 +74,7 @@ public:
 struct CompletedRuleCollection {
 public:
 
-  CompletedRuleCollection();
+  CompletedRuleCollection(size_t rule_limit);
   ~CompletedRuleCollection();
 
   CompletedRuleCollection(const CompletedRuleCollection &old)

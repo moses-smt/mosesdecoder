@@ -17,6 +17,7 @@ namespace Moses {
     xml_brackets.first  = "<";
     xml_brackets.second = ">";
     factor_order.assign(1,0);
+    factor_delimiter = "|";
   }
 
   bool
@@ -76,6 +77,7 @@ namespace Moses {
     if (factor_order.empty()) factor_order.assign(1,0);
     param.SetParameter(placeholder_factor, "placeholder-factor", NOT_FOUND);
 
+    param.SetParameter<std::string>(factor_delimiter, "factor-delimiter", "|");
     param.SetParameter<std::string>(input_file_path,"input-file","");
 
     return true;

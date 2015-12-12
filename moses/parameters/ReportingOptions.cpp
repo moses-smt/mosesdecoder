@@ -24,6 +24,7 @@ namespace Moses {
     , lattice_sample_size(0)
   {
     factor_order.assign(1,0);
+    factor_delimiter = "|";
   }
   
   bool
@@ -94,14 +95,14 @@ namespace Moses {
     params= param.GetParam("output-factors");
     if (params) factor_order = Scan<FactorType>(*params);
     if (factor_order.empty()) factor_order.assign(1,0);
-
+    
     if (ReportAllFactors) {
       for (size_t i = 1; i < MAX_NUM_FACTORS; ++i)
         factor_order.push_back(i);
     }
 
-    param.SetParameter(FactorDelimiter, "factor-delimiter", std::string("|"));
-    param.SetParameter(FactorDelimiter, "output-factor-delimiter", FactorDelimiter);
+    param.SetParameter(factor_delimiter, "factor-delimiter", std::string("|"));
+    param.SetParameter(factor_delimiter, "output-factor-delimiter", factor_delimiter);
     
     return true;
   }
@@ -134,12 +135,12 @@ namespace Moses {
 
     m = param.find("factor-delimiter");
     if (m != param.end()) { 
-      FactorDelimiter = Trim(xmlrpc_c::value_string(m->second));
+      factor_delimiter = Trim(xmlrpc_c::value_string(m->second));
     }
 
     m = param.find("output-factor-delimiter");
     if (m != param.end()) { 
-      FactorDelimiter = Trim(xmlrpc_c::value_string(m->second));
+      factor_delimiter = Trim(xmlrpc_c::value_string(m->second));
     }
     
     return true;
