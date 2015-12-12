@@ -61,7 +61,7 @@ public:
     , m_transOptRange(transOptRange) {
     m_totalWeightDistortion = 0;
     const StaticData &staticData = StaticData::Instance();
-    
+
     const std::vector<const DistortionScoreProducer*> &ffs = DistortionScoreProducer::GetDistortionFeatureFunctions();
     std::vector<const DistortionScoreProducer*>::const_iterator iter;
     for (iter = ffs.begin(); iter != ffs.end(); ++iter) {

@@ -96,7 +96,7 @@ bool LanguageModelIRST::IsUseable(const FactorMask &mask) const
   return ret;
 }
 
-  void LanguageModelIRST::Load(AllOptions::ptr const& opts)
+void LanguageModelIRST::Load(AllOptions::ptr const& opts)
 {
   FactorCollection &factorCollection = FactorCollection::Instance();
 

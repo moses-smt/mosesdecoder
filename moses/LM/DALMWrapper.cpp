@@ -204,7 +204,7 @@ LanguageModelDALM::~LanguageModelDALM()
   delete m_lm;
 }
 
-void LanguageModelDALM::Load(AllOptions const& opts)
+void LanguageModelDALM::Load(AllOptions::ptr const& opts)
 {
   /////////////////////
   // READING INIFILE //

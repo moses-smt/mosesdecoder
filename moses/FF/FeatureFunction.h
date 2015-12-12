@@ -75,7 +75,7 @@ public:
     m_options = opts;
   }
 
-  AllOptions::ptr const& 
+  AllOptions::ptr const&
   options() const {
     return m_options;
   }
