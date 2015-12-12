@@ -32,7 +32,7 @@ public:
       return NULL;
     }
 
-  bool FindHeadRecursively(TreePointer tree, const std::vector<TreePointer> &previous_trees, const std::vector<HeadsPointer> &previous_heads, std::unordered_map<InternalTree*, const Word*> &childrenHeadWords, size_t &childId) const;
+  bool FindHeadRecursively(TreePointer tree, const std::vector<TreePointer> &previous_trees, size_t &childId) const;
   std::vector<std::string> ProcessChild(TreePointer child, size_t childId, TreePointer currentNode, const std::vector<TreePointer> &previous_trees) const;
   void MakeTuples(TreePointer tree, const std::vector<TreePointer> &previous_trees, std::vector<std::vector<std::string>> &depRelTuples) const;
 
@@ -93,17 +93,22 @@ protected:
 
 class SelPrefState : public TreeState{
 public:
-	SelPrefState(TreePointer tree, HeadsPointer heads)
+	SelPrefState(TreePointer tree, size_t hash)
 		: TreeState(tree)
-		, m_heads(heads)
+		, m_depRelHash(hash)
 	{}
-	HeadsPointer GetHeads() const{
-		return m_heads;
+	size_t GetHash() const{
+		return m_depRelHash;
 	}
+	int Compare(const FFState& other) const {
+	    if (m_depRelHash == static_cast<const SelPrefState*>(&other)->GetHash()) return 0;
+	    else if (m_depRelHash > static_cast<const SelPrefState*>(&other)->GetHash()) return 1;
+	    else return -1;
+	  }
 protected:
 	// head words of non-terminal in pre-order traversal of non-terminals
 	// maybe I should map to the TreePointer correspondong to the terminal node so not to save another Word
-	HeadsPointer m_heads;
+	size_t m_depRelHash;
 
 };
 

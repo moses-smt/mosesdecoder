@@ -12,6 +12,7 @@
 #include <string>
 #include <unordered_map>
 #include <queue>
+#include <stack>
 #include <boost/algorithm/string.hpp>
 #include <fstream>
 
@@ -27,7 +28,7 @@ namespace Moses
 float SelPrefFeature::score = 0.0;
 
 SelPrefFeature::SelPrefFeature(const std::string &line)
-  : StatefulFeatureFunction(0, line)
+  : StatefulFeatureFunction(1, line)
 	, m_modelFileARPA("")
 	, m_lemmaFile("")
 	, m_WBmodel(nullptr)
@@ -193,6 +194,25 @@ inline string ToString(const Word *word){
 }
 
 
+void PrintHeadWords(TreePointer tree){
+	stack< TreePointer> DFSStack;
+	DFSStack.push(tree);
+	cout << "Heads: ";
+	while(!DFSStack.empty()){
+		auto currentNode = DFSStack.top();
+		DFSStack.pop();
+		if(currentNode->GetHead().get() != nullptr)
+			cout << currentNode->GetLabel().ToString() << " " << currentNode->GetHead()->ToString() << " ";
+		if(currentNode->IsLeafNT())
+			continue;
+		for (auto child : currentNode->GetChildren()){
+			DFSStack.push(child);
+		}
+	}
+	cout << endl;
+
+}
+
 /*
 * Recursively find head words for nodes in the internal tree
 *  arg1: TreePointer tree -> current node
@@ -212,8 +232,7 @@ inline string ToString(const Word *word){
 // todo: !!! solve recursion in previous trees for fininding heads via ^leafNT -> check Rico's emnlp2014 paper
 bool SelPrefFeature::FindHeadRecursively(
 		TreePointer tree, const std::vector<TreePointer> &previous_trees,
-		const std::vector<HeadsPointer> &previous_heads,
-		std::unordered_map<InternalTree*, const Word*> &childrenHeadWords, size_t &childId) const{
+		size_t &childId) const{
 	TreePointer headTree = nullptr;
 	bool found = false;
 	for (auto child : tree->GetChildren()){
@@ -229,7 +248,6 @@ bool SelPrefFeature::FindHeadRecursively(
 			// [^root [VBN gathered] [dep [IN in] [prep [IN of] [pobj [NNP Tokyo]]]] [punct [. .]]]
 			if(headTree->GetLength() == 1 && headTree->GetChildren()[0]->IsTerminal()){
 				if(!found){
-					childrenHeadWords[tree.get()] = &headTree->GetChildren()[0]->GetLabel();
 					tree->SetHead(make_shared<Word> (headTree->GetChildren()[0]->GetLabel()));
 					found = true;
 				}
@@ -244,7 +262,6 @@ bool SelPrefFeature::FindHeadRecursively(
 					for (auto grandchild :  headTree->GetChildren()) {
 						if(grandchild->GetLength() == 1 && grandchild->GetChildren()[0]->IsTerminal()){
 							if(!found){
-								childrenHeadWords[tree.get()] = &grandchild->GetChildren()[0]->GetLabel();
 								tree->SetHead(make_shared<Word> (grandchild->GetChildren()[0]->GetLabel()));
 								found = true;
 							}
@@ -255,7 +272,6 @@ bool SelPrefFeature::FindHeadRecursively(
 
 				if (headTree->GetHead().get() != nullptr){
 					child->SetHead(headTree->GetHead());
-					childrenHeadWords[child.get()] = headTree->GetHead().get();
 				/*
 				 * nsubj doesn't have a head because there is no pre-terminal head -> get it from [^nsubj] (last leafNT)
 				 * this should be solved with recursing to previous hypothesis !! todo !!
@@ -275,7 +291,6 @@ bool SelPrefFeature::FindHeadRecursively(
 		if(headTree->GetLength() == 1 && headTree->GetChildren()[0]->IsTerminal()){
 			// the head of the subtree is the terminal corresponding to the first pre-terminal child
 			if(!found){
-				childrenHeadWords[tree.get()] = &headTree->GetChildren()[0]->GetLabel();
 				tree->SetHead(make_shared<Word> (headTree->GetChildren()[0]->GetLabel()));
 				found = true;
 			}
@@ -284,7 +299,7 @@ bool SelPrefFeature::FindHeadRecursively(
 			// recursively find heads for internal tree (for non-terminal children of the current node that are not pre-terminals)
 			// Example: [prep [IN of] [pobj [det [DT the]] [NN session]]] -> head of pobj
 			if (!headTree->IsTerminal()) // should never be the case we recursively reached a terminal
-				FindHeadRecursively(headTree, previous_trees, previous_heads, childrenHeadWords, childId);
+				FindHeadRecursively(headTree, previous_trees, childId);
 		}
 
 	}
@@ -314,7 +329,7 @@ vector<string> SelPrefFeature::ProcessChild(
 		// -> should be solved by unbinarizing the ^leafNT recursively
 		if (rel == "prep"){
 			if (child->GetHead().get() == nullptr){
-				cout << "No prep head!" << endl;
+				//cout << "No prep head!" << endl;
 				return depTuple;
 			}
 			rel = rel + "_" + ToString(child->GetHead().get());
@@ -332,19 +347,19 @@ vector<string> SelPrefFeature::ProcessChild(
 			// [^root [VBN] [prep [IN] [dep]] [punct [. .]]]
 			// [^root [VBN gathered] [prep [IN in] [dep [NNP Tokyo]]] [punct [. .]]]
 			if(!child){
-				cout << "NO pobj child" << endl;
+				//cout << "NO pobj child" << endl;
 				return depTuple;
 			}
 		}
 		if (child->GetHead().get() == nullptr){
-			cout << "No head in children!" << endl;
+			//cout << "No head in children!" << endl;
 			return depTuple;
 		}
 		string dep;
 		dep = FilterArg(ToString(child->GetHead().get()), m_lemmaMap);
 
 		if (currentNode->GetHead().get() == nullptr){
-			cout << "No parent head!" << endl;
+			//cout << "No parent head!" << endl;
 			return depTuple;
 		}
 		string head = FilterArg(ToString(currentNode->GetHead().get()), m_lemmaMap);
@@ -453,7 +468,6 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 		TreePointer mytree (boost::make_shared<InternalTree>(*tree));
 		// get pointers to the root of previous hypothesis, in target order of the leaf NTs in the current hypothesis
 		std::vector<TreePointer> previous_trees;
-		std::vector<HeadsPointer> previous_heads;
 		for (size_t pos = 0; pos < cur_hypo.GetCurrTargetPhrase().GetSize(); ++pos) {
 		  const Word &word = cur_hypo.GetCurrTargetPhrase().GetWord(pos);
 		  if (word.IsNonTerminal()) {
@@ -462,8 +476,6 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 			const SelPrefState* prev = static_cast<const SelPrefState*>(prevHypo->GetFFState(featureID));
 			const TreePointer prev_tree = prev->GetTree();
 			previous_trees.push_back(prev_tree);
-			const HeadsPointer prev_head = prev->GetHeads();
-			previous_heads.push_back(prev_head);
 
 		  }
 		}
@@ -472,57 +484,57 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 		UnbinarizeTree(mytree);
 
 		// find head word for the root of the current hypothesis and the head words for the internal non-terminals
-		std::unordered_map<InternalTree*, const Word*> childrenHeadWords;
 		size_t childId = 0;
-		FindHeadRecursively(mytree, previous_trees, previous_heads, childrenHeadWords, childId);
+		FindHeadRecursively(mytree, previous_trees, childId);
 
-		if(childrenHeadWords.size() > 0){
-			if(childrenHeadWords.find(mytree.get())!= childrenHeadWords.end())
-				cout << "Head: "<< mytree->GetLabel().ToString() << " "<< childrenHeadWords[mytree.get()]->ToString();
-			cout << " Children heads: ";
-			for (auto const&elem : childrenHeadWords){
-				cout << elem.first->GetLabel().ToString() << " " << elem.second->ToString() << " ";
-			}
-			cout << endl;
-		}
+		//PrintHeadWords(mytree);
 
-
+		// Extract dep rel tuples for the current syntax tree
 		vector<vector<string>> depRelTuples;
 		MakeTuples(mytree, previous_trees, depRelTuples);
+
+		// Compute hash for current hypothesis
+		//std::hash<vector<vector<string>>> hash_fn;
+		size_t depRelHash = 0;
+		boost::hash_combine(depRelHash, depRelTuples);
+		//cout << "Hash value: " << depRelHash << endl;
+
+		// Compute feature function scores
+		float score =0.0;
 		for (auto &tuple: depRelTuples){
-			for (auto &elem: tuple)
+			score += GetWBScore(tuple);
+	/*		for (auto &elem: tuple)
 				cout << elem << " ";
 			cout <<endl;
-			float score =0.0;
-			score = GetWBScore(tuple);
 			SelPrefFeature::score += score;
 			cout << "SCORE: " << score << " "<< SelPrefFeature::score << endl;
-
+	*/
 			}
-
-		// combine with previous hypothesis -> extend leafNTs to point to TreePointers of prevHyp
-		// Why do I need this?
-
-/*		if(depRelTuples.size() !=0){
+/*
+		if(depRelTuples.size() !=0){
 			std::cout << *tree << endl;
 			std::cout <<  mytree->GetString() << endl;
 		}
 */
-		std::cout << *tree << endl;
-		std::cout <<  mytree->GetString() << endl;
+		//std::cout << *tree << endl;
+		//std::cout <<  mytree->GetString() << endl;
+
 
 		mytree->Combine(previous_trees);
-	//	if(depRelTuples.size() !=0)
-			std::cout << mytree->GetString() <<endl;
+
+		//if(depRelTuples.size() !=0)
+		//	std::cout << mytree->GetString() <<endl;
 		//if(*tree == "[^root [nsubj [det [DT the]] [^nsubj]] [^root [VBZ has] [^root [dobj] [^root]]]]")
 		//	exit(0);
 
-		if(*tree == "[sent [root [VB] [^root [dobj] [^root [prep [IN in]] [^root [prep] [punct [. .]]]]]]]")
-			exit(0);
+		//if(*tree == "[sent [root [VB] [^root [dobj] [^root [prep [IN in]] [^root [prep] [punct [. .]]]]]]]")
+		//	exit(0);
 
 
+		accumulator->PlusEquals(this,score);
 
-		return new SelPrefState(mytree,make_shared<std::unordered_map<InternalTree*,const Word*>> (childrenHeadWords));
+
+		return new SelPrefState(mytree, depRelHash);
 	}
 	else {
 	    UTIL_THROW2("Error: TreeStructureFeature active, but no internal tree structure found");
