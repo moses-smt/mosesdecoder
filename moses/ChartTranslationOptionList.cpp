@@ -158,8 +158,8 @@ void ChartTranslationOptionList::ApplyThreshold(float const threshold)
   scoreThreshold += threshold; // StaticData::Instance().GetTranslationOptionThreshold();
 
   CollType::iterator bound = std::partition(m_collection.begin(),
-					    m_collection.begin()+m_size,
-					    ScoreThresholdPred(scoreThreshold));
+                             m_collection.begin()+m_size,
+                             ScoreThresholdPred(scoreThreshold));
 
   m_size = std::distance(m_collection.begin(), bound);
 }
