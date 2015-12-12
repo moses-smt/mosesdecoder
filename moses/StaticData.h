@@ -92,26 +92,16 @@ protected:
   bool m_reorderingConstraint; //! use additional reordering constraints
   BookkeepingOptions m_bookkeeping_options;
 
-  size_t m_latticeSamplesSize;
 
-  std::string  m_latticeSamplesFilePath;
-  // bool m_wordDeletionEnabled;
-
-  bool m_printAllDerivations;
-  bool m_printTranslationOptions;
-
-  // bool m_sourceStartPosMattersForRecombination;
   bool m_requireSortingAfterSourceContext;
 
   mutable size_t m_verboseLevel;
 
   std::string m_factorDelimiter; //! by default, |, but it can be changed
 
-  std::pair<std::string,std::string> m_xmlBrackets; //! strings to use as XML tags' opening and closing brackets. Default are "<" and ">"
 
   size_t m_lmcache_cleanup_threshold; //! number of translations after which LM claenup is performed (0=never, N=after N translations; default is 1)
 
-  bool m_includeLHSInSearchGraph; //! include LHS of rules in search graph
   std::string m_outputUnknownsFile; //! output unknowns in this file
 
   size_t m_ruleLimit;
@@ -218,16 +208,6 @@ public:
   void
   SetVerboseLevel(int x) const {
     m_verboseLevel = x;
-  }
-
-  bool
-  UseMinphrInMemory() const {
-    return m_minphrMemory;
-  }
-
-  bool
-  UseMinlexrInMemory() const {
-    return m_minlexrMemory;
   }
 
   const ScoreComponentCollection&
@@ -427,10 +407,6 @@ public:
   void SetTreeStructure(const StatefulFeatureFunction* treeStructure) {
     m_treeStructure = treeStructure;
   }
-
-  // bool GetDefaultNonTermOnlyForEmptyRange() const {
-  //   return m_defaultNonTermOnlyForEmptyRange;
-  // }
 
   bool RequireSortingAfterSourceContext() const {
     return m_requireSortingAfterSourceContext;

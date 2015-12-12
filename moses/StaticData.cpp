@@ -50,6 +50,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
 #endif
+#ifdef HAVE_CMPH
+#include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
+#endif
+#if !defined WIN32 || defined __MINGW32__ || defined HAVE_CMPH
+#include "moses/TranslationModel/CompactPT/LexicalReorderingTableCompact.h"
+#endif
 
 using namespace std;
 using namespace boost::algorithm;
@@ -203,12 +209,19 @@ bool StaticData::LoadData(Parameter *parameter)
   if (!ini_performance_options()) return false;
 
   // Compact phrase table and reordering model
-  m_parameter->SetParameter(m_minphrMemory, "minphr-memory", false );
-  m_parameter->SetParameter(m_minlexrMemory, "minlexr-memory", false );
+  // m_parameter->SetParameter(m_minphrMemory, "minphr-memory", false );
+  // m_parameter->SetParameter(m_minlexrMemory, "minlexr-memory", false );
 
   // S2T decoder
 
   // FEATURE FUNCTION INITIALIZATION HAPPENS HERE ===============================
+
+  // set class-specific default parameters
+#if !defined WIN32 || defined __MINGW32__ || defined HAVE_CMPH
+  LexicalReorderingTableCompact::SetStaticDefaultParameters(*parameter);
+  PhraseDictionaryCompact::SetStaticDefaultParameters(*parameter);
+#endif
+
   initialize_features();
 
   if (m_parameter->GetParam("show-weights") == NULL)

@@ -48,11 +48,10 @@ PhraseDictionaryCompact::SentenceCache PhraseDictionaryCompact::m_sentenceCache;
 
 PhraseDictionaryCompact::PhraseDictionaryCompact(const std::string &line)
   :PhraseDictionary(line, true)
-  ,m_inMemory(true)
+  ,m_inMemory(true)//(s_inMemoryByDefault)
   ,m_useAlignmentInfo(true)
   ,m_hash(10, 16)
   ,m_phraseDecoder(0)
-  ,m_weight(0)
 {
   ReadParameters();
 }
@@ -64,8 +63,6 @@ void PhraseDictionaryCompact::Load(AllOptions::ptr const& opts)
 
   SetFeaturesToApply();
 
-  m_weight = staticData.GetWeights(this);
-
   std::string tFilePath = m_filePath;
 
   std::string suffix = ".minphr";
@@ -73,8 +70,8 @@ void PhraseDictionaryCompact::Load(AllOptions::ptr const& opts)
   if (!FileExists(tFilePath))
     throw runtime_error("Error: File " + tFilePath + " does not exist.");
 
-  m_phraseDecoder = new PhraseDecoder(*this, &m_input, &m_output,
-                                      m_numScoreComponents, &m_weight);
+  m_phraseDecoder 
+    = new PhraseDecoder(*this, &m_input, &m_output, m_numScoreComponents);
 
   std::FILE* pFile = std::fopen(tFilePath.c_str() , "r");
 
@@ -82,7 +79,7 @@ void PhraseDictionaryCompact::Load(AllOptions::ptr const& opts)
   //if(m_inMemory)
   // Load source phrase index into memory
   indexSize = m_hash.Load(pFile);
-// else
+  // else
   // Keep source phrase index on disk
   //indexSize = m_hash.LoadIndex(pFile);
 
@@ -100,16 +97,9 @@ void PhraseDictionaryCompact::Load(AllOptions::ptr const& opts)
                  "Not successfully loaded");
 }
 
-// now properly declared in TargetPhraseCollection.h
-// and defined in TargetPhraseCollection.cpp
-// struct CompareTargetPhrase {
-//   bool operator() (const TargetPhrase &a, const TargetPhrase &b) {
-//     return a.GetFutureScore() > b.GetFutureScore();
-//   }
-// };
-
 TargetPhraseCollection::shared_ptr
-PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &sourcePhrase) const
+PhraseDictionaryCompact::
+GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &sourcePhrase) const
 {
 
   TargetPhraseCollection::shared_ptr ret;
@@ -145,7 +135,8 @@ PhraseDictionaryCompact::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &s
 }
 
 TargetPhraseVectorPtr
-PhraseDictionaryCompact::GetTargetPhraseCollectionRaw(const Phrase &sourcePhrase) const
+PhraseDictionaryCompact::
+GetTargetPhraseCollectionRaw(const Phrase &sourcePhrase) const
 {
 
   // There is no such source phrase if source phrase is longer than longest
@@ -157,40 +148,46 @@ PhraseDictionaryCompact::GetTargetPhraseCollectionRaw(const Phrase &sourcePhrase
   return m_phraseDecoder->CreateTargetPhraseCollection(sourcePhrase, true, false);
 }
 
-PhraseDictionaryCompact::~PhraseDictionaryCompact()
+PhraseDictionaryCompact::
+~PhraseDictionaryCompact()
 {
   if(m_phraseDecoder)
     delete m_phraseDecoder;
 }
 
-//TO_STRING_BODY(PhraseDictionaryCompact)
-
-void PhraseDictionaryCompact::CacheForCleanup(TargetPhraseCollection::shared_ptr  tpc)
+void 
+PhraseDictionaryCompact::
+CacheForCleanup(TargetPhraseCollection::shared_ptr  tpc)
 {
   if(!m_sentenceCache.get())
     m_sentenceCache.reset(new PhraseCache());
   m_sentenceCache->push_back(tpc);
 }
 
-void PhraseDictionaryCompact::AddEquivPhrase(const Phrase &source,
-    const TargetPhrase &targetPhrase) { }
+void 
+PhraseDictionaryCompact::
+AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase) 
+{ }
 
-void PhraseDictionaryCompact::CleanUpAfterSentenceProcessing(const InputType &source)
+void 
+PhraseDictionaryCompact::
+CleanUpAfterSentenceProcessing(const InputType &source)
 {
   if(!m_sentenceCache.get())
     m_sentenceCache.reset(new PhraseCache());
 
   m_phraseDecoder->PruneCache();
-  // for(PhraseCache::iterator it = m_sentenceCache->begin();
-  //     it != m_sentenceCache->end(); it++)
-  //   it->reset();
-
-  // PhraseCache temp;
-  // temp.swap(*m_sentenceCache);
   m_sentenceCache->clear();
 
   ReduceCache();
 }
 
+bool PhraseDictionaryCompact::s_inMemoryByDefault = false;
+void
+PhraseDictionaryCompact::
+SetStaticDefaultParameters(Parameter const& param)
+{
+  param.SetParameter(s_inMemoryByDefault, "minphr-memory", true);
+}
 }
 
