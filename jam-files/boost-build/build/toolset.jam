@@ -15,6 +15,7 @@ import property ;
 import regex ;
 import sequence ;
 import set ;
+import property-set ;
 
 
 .flag-no = 1 ;
@@ -320,10 +321,82 @@ rule set-target-variables-aux ( rule-or-module : property-set )
     return $(result) ;
 }
 
+rule relevant-features ( rule-or-module )
+{
+    local result ;
+    if ! $(.relevant-features.$(rule-or-module))
+    {
+        for local f in $(.$(rule-or-module).flags)
+        {
+            local condition = $(.$(rule-or-module).condition.$(f)) ;
+            local values = $(.$(rule-or-module).values.$(f)) ;
+
+            for local c in $(condition)
+            {
+                for local p in [ feature.split $(c) ]
+                {
+                    if $(p:G)
+                    {
+                        result += $(p:G) ;
+                    }
+                    else
+                    {
+                        local temp = [ feature.expand-subfeatures $(p) ] ;
+                        result += $(temp:G) ;
+                    }
+                }
+            }
+
+            for local v in $(values)
+            {
+                if $(v:G)
+                {
+                    result += $(v:G) ;
+                }
+            }
+        }
+
+        # Strip away last dot separated part and recurse.
+        local next = [ MATCH ^(.+)\\.([^\\.])* : $(rule-or-module) ] ;
+        if $(next)
+        {
+            result += [ relevant-features $(next[1]) ] ;
+        }
+        result = [ sequence.unique $(result) ] ;
+        if $(result[1]) = ""
+        {
+            result = $(result) ;
+        }
+        .relevant-features.$(rule-or-module) = $(result) ;
+        return $(result) ;
+    }
+    else
+    {
+        return $(.relevant-features.$(rule-or-module)) ;
+    }
+}
+
+rule filter-property-set ( rule-or-module : property-set )
+{
+    if ! $(.filtered.property-set.$(rule-or-module).$(property-set))
+    {
+        local relevant = [ relevant-features $(rule-or-module) ] ;
+        local result ;
+        for local p in [ $(property-set).raw ]
+        {
+            if $(p:G) in $(relevant)
+            {
+                result += $(p) ;
+            }
+        }
+        .filtered.property-set.$(rule-or-module).$(property-set) = [ property-set.create $(result) ] ;
+    }
+    return $(.filtered.property-set.$(rule-or-module).$(property-set)) ;
+}
 
 rule set-target-variables ( rule-or-module targets + : property-set )
 {
-    properties = [ $(property-set).raw ] ;
+    property-set = [ filter-property-set $(rule-or-module) : $(property-set) ] ;
     local key = $(rule-or-module).$(property-set) ;
     local settings = $(.stv.$(key)) ;
     if ! $(settings)

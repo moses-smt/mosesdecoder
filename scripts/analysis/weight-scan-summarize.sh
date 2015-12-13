@@ -1,4 +1,8 @@
 #!/bin/bash
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
+
 # Hackish summarization of weight-scan.pl results, heavily relies on tools by
 # Ondrej Bojar (bojar@ufal.mff.cuni.cz), some of which need Mercury; beware.
 

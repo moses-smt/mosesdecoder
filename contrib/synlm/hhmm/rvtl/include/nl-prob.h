@@ -43,7 +43,7 @@ class Prob {
       Prob ( )              { gVal = 0.0; }
       Prob (double d)       { gVal = d;   }
       Prob (const char* ps) { gVal = atof(ps); }
-      
+
       operator double() const { return gVal; }
       double toDouble() const { return gVal; }
       Prob& operator+= ( const Prob p ) { gVal += p.gVal; return *this; }
@@ -54,7 +54,7 @@ class Prob {
       friend ostream& operator<< ( ostream& os, const Prob& pr ) { return os<<pr.toDouble(); }
       friend String&  operator<< ( String& str, const Prob& pr ) { return str<<pr.toDouble(); }
       friend pair<StringInput,Prob*> operator>> ( StringInput si, Prob& n ) { return pair<StringInput,Prob*>(si,&n); }
-      friend StringInput             operator>> ( pair<StringInput,Prob*> si_n, const char* psDlm ) { 
+      friend StringInput             operator>> ( pair<StringInput,Prob*> si_n, const char* psDlm ) {
         double d=0.0; StringInput si=si_n.first>>d>>psDlm; *si_n.second=Prob(d); return si; }
 };
 
@@ -129,7 +129,7 @@ class LogProb : public Id<int> {
   friend ostream& operator<< ( ostream& os, const LogProb& lp ) { return os<<lp.toInt(); }
   friend String&  operator<< ( String& str, const LogProb& lp ) { return str<<lp.toInt(); }
   friend pair<StringInput,LogProb*> operator>> ( StringInput si, LogProb& n ) { return pair<StringInput,LogProb*>(si,&n); }
-  friend StringInput                operator>> ( pair<StringInput,LogProb*> si_n, const char* psDlm ) { 
+  friend StringInput                operator>> ( pair<StringInput,LogProb*> si_n, const char* psDlm ) {
     double d=0.0; StringInput si=si_n.first>>d>>psDlm; *si_n.second=LogProb(d); return si; }
 };
 

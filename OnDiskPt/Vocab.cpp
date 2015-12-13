@@ -21,6 +21,7 @@
 #include <fstream>
 #include "OnDiskWrapper.h"
 #include "Vocab.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -35,19 +36,19 @@ bool Vocab::Load(OnDiskWrapper &onDiskWrapper)
   while(getline(file, line)) {
     vector<string> tokens;
     Moses::Tokenize(tokens, line);
-    CHECK(tokens.size() == 2);
+    UTIL_THROW_IF2(tokens.size() != 2, "Vocab file corrupted");
     const string &key = tokens[0];
-    m_vocabColl[key] =  Moses::Scan<UINT64>(tokens[1]);
+    m_vocabColl[key] =  Moses::Scan<uint64_t>(tokens[1]);
   }
 
   // create lookup
   // assume contiguous vocab id
   m_lookup.resize(m_vocabColl.size() + 1);
   m_nextId = m_lookup.size();
-  
+
   CollType::const_iterator iter;
   for (iter = m_vocabColl.begin(); iter != m_vocabColl.end(); ++iter) {
-    UINT32 vocabId = iter->second;
+    uint32_t vocabId = iter->second;
     const std::string &word = iter->first;
 
     m_lookup[vocabId] = word;
@@ -62,13 +63,13 @@ void Vocab::Save(OnDiskWrapper &onDiskWrapper)
   CollType::const_iterator iterVocab;
   for (iterVocab = m_vocabColl.begin(); iterVocab != m_vocabColl.end(); ++iterVocab) {
     const string &word = iterVocab->first;
-    UINT32 vocabId = iterVocab->second;
+    uint32_t vocabId = iterVocab->second;
 
     file << word << " " << vocabId << endl;
   }
 }
 
-UINT64 Vocab::AddVocabId(const std::string &str)
+uint64_t Vocab::AddVocabId(const std::string &str)
 {
   // find string id
   CollType::const_iterator iter = m_vocabColl.find(str);
@@ -82,7 +83,7 @@ UINT64 Vocab::AddVocabId(const std::string &str)
   }
 }
 
-UINT64 Vocab::GetVocabId(const std::string &str, bool &found) const
+uint64_t Vocab::GetVocabId(const std::string &str, bool &found) const
 {
   // find string id
   CollType::const_iterator iter = m_vocabColl.find(str);

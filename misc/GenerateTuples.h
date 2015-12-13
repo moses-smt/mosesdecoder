@@ -1,7 +1,7 @@
 // $Id$
 #ifndef GENERATETUPLES_H_
 #define GENERATETUPLES_H_
-#include "PhraseDictionaryTree.h"
+#include "moses/PhraseDictionaryTree.h"
 
 class ConfusionNet;
 

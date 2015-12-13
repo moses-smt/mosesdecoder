@@ -6,14 +6,21 @@
 #include <sys/time.h>
 #endif
 
-namespace {
+#if defined __MINGW32__
+#include <sys/time.h>
+#endif // defined
 
-#if !defined(_WIN32) && !defined(_WIN64)
-uint64_t GetMicroSeconds(const struct timeval& tv) {
+namespace
+{
+
+#if (!defined(_WIN32) && !defined(_WIN64)) || defined __MINGW32__
+uint64_t GetMicroSeconds(const struct timeval& tv)
+{
   return static_cast<uint64_t>(tv.tv_sec) * 1000000 + tv.tv_usec;
 }
 
-uint64_t GetTimeOfDayMicroSeconds() {
+uint64_t GetTimeOfDayMicroSeconds()
+{
   struct timeval tv;
   gettimeofday(&tv, NULL);
   return static_cast<uint64_t>(tv.tv_sec) * 1000000 + tv.tv_usec;
@@ -24,9 +31,10 @@ uint64_t GetTimeOfDayMicroSeconds() {
 
 namespace MosesTuning
 {
-  
 
-void Timer::GetCPUTimeMicroSeconds(Timer::CPUTime* cpu_time) const {
+
+void Timer::GetCPUTimeMicroSeconds(Timer::CPUTime* cpu_time) const
+{
 #if !defined(_WIN32) && !defined(_WIN64)
   struct rusage usage;
   if (getrusage(RUSAGE_SELF, &usage)) {
@@ -41,22 +49,26 @@ void Timer::GetCPUTimeMicroSeconds(Timer::CPUTime* cpu_time) const {
 #endif
 }
 
-double Timer::get_elapsed_cpu_time() const {
+double Timer::get_elapsed_cpu_time() const
+{
   return static_cast<double>(get_elapsed_cpu_time_microseconds()) * 1e-6;
 }
 
-uint64_t Timer::get_elapsed_cpu_time_microseconds() const {
+uint64_t Timer::get_elapsed_cpu_time_microseconds() const
+{
   CPUTime e;
   GetCPUTimeMicroSeconds(&e);
   return (e.user_time - m_start_time.user_time) +
-      (e.sys_time - m_start_time.sys_time);
+         (e.sys_time - m_start_time.sys_time);
 }
 
-double Timer::get_elapsed_wall_time() const {
+double Timer::get_elapsed_wall_time() const
+{
   return static_cast<double>(get_elapsed_wall_time_microseconds()) * 1e-6;
 }
 
-uint64_t Timer::get_elapsed_wall_time_microseconds() const {
+uint64_t Timer::get_elapsed_wall_time_microseconds() const
+{
   return GetTimeOfDayMicroSeconds() - m_wall;
 }
 
@@ -92,7 +104,8 @@ void Timer::check(const char* msg)
   }
 }
 
-std::string Timer::ToString() const {
+std::string Timer::ToString() const
+{
   std::string res;
   const double wall = get_elapsed_wall_time();
   CPUTime e;

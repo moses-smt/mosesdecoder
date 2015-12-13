@@ -1,12 +1,13 @@
 #include "lm/model.hh"
 
-#include <stdlib.h>
+#include <cstdlib>
+#include <cstring>
 
 #define BOOST_TEST_MODULE ModelTest
 #include <boost/test/unit_test.hpp>
 #include <boost/test/floating_point_comparison.hpp>
 
-// Apparently some Boost versions use templates and are pretty strict about types matching.  
+// Apparently some Boost versions use templates and are pretty strict about types matching.
 #define SLOPPY_CHECK_CLOSE(ref, value, tol) BOOST_CHECK_CLOSE(static_cast<double>(ref), static_cast<double>(value), static_cast<double>(tol));
 
 namespace lm {
@@ -22,17 +23,20 @@ std::ostream &operator<<(std::ostream &o, const State &state) {
 
 namespace {
 
+// Stupid bjam reverses the command line arguments randomly.
 const char *TestLocation() {
-  if (boost::unit_test::framework::master_test_suite().argc < 2) {
+  if (boost::unit_test::framework::master_test_suite().argc < 3) {
     return "test.arpa";
   }
-  return boost::unit_test::framework::master_test_suite().argv[1];
+  char **argv = boost::unit_test::framework::master_test_suite().argv;
+  return argv[strstr(argv[1], "nounk") ? 2 : 1];
 }
 const char *TestNoUnkLocation() {
   if (boost::unit_test::framework::master_test_suite().argc < 3) {
     return "test_nounk.arpa";
   }
-  return boost::unit_test::framework::master_test_suite().argv[2];
+  char **argv = boost::unit_test::framework::master_test_suite().argv;
+  return argv[strstr(argv[1], "nounk") ? 1 : 2];
 }
 
 template <class Model> State GetState(const Model &model, const char *word, const State &in) {
@@ -114,7 +118,7 @@ template <class M> void Blanks(const M &model) {
   AppendTest("not_found", 1, -1.995635 - 7.0 - 0.30103, true);
 
   state = model.NullContextState();
-  // higher looking is a blank.  
+  // higher looking is a blank.
   AppendTest("higher", 1, -1.509559, false);
   AppendTest("looking", 2, -1.285941 - 0.30103, false);
 
@@ -146,7 +150,7 @@ template <class M> void Unknowns(const M &model) {
   State preserve = state;
   AppendTest("not_found2", 2, -15.0, true);
   AppendTest("not_found3", 2, -15.0 - 2.0, true);
-  
+
   state = preserve;
   AppendTest("however", 2, -4, true);
   AppendTest("not_found3", 3, -6, true);
@@ -163,7 +167,7 @@ template <class M> void MinimalState(const M &model) {
   AppendTest("foo", 1, -3.141592, true);
   BOOST_CHECK_EQUAL(1, state.length);
   AppendTest("bar", 2, -6.0, true);
-  // Has to include the backoff weight.  
+  // Has to include the backoff weight.
   BOOST_CHECK_EQUAL(1, state.length);
   AppendTest("bar", 1, -2.718281 + 3.0, true);
   BOOST_CHECK_EQUAL(1, state.length);
@@ -172,7 +176,7 @@ template <class M> void MinimalState(const M &model) {
   AppendTest("to", 1, -1.687872, false);
   AppendTest("look", 2, -0.2922095, true);
   BOOST_CHECK_EQUAL(2, state.length);
-  AppendTest("good", 3, -7, true);
+  AppendTest("a", 3, -7, true);
 }
 
 template <class M> void ExtendLeftTest(const M &model) {
@@ -259,7 +263,7 @@ template <class M> void Stateless(const M &model) {
   // the
   AppendTest("the", 1, -4.04005, true);
   StatelessTest(5, 5, 1, -4.04005);
-  // No context of the.  
+  // No context of the.
   StatelessTest(5, 0, 1, -1.687872);
   // biarritz
   StatelessTest(6, 1, 1, -1.9889);
@@ -356,10 +360,11 @@ BOOST_AUTO_TEST_CASE(quant_bhiksha_trie) {
   LoadingTest<QuantArrayTrieModel>();
 }
 
-template <class ModelT> void BinaryTest() {
+template <class ModelT> void BinaryTest(Config::WriteMethod write_method) {
   Config config;
   config.write_mmap = "test.binary";
   config.messages = NULL;
+  config.write_method = write_method;
   ExpectEnumerateVocab enumerate;
   config.enumerate_vocab = &enumerate;
 
@@ -400,6 +405,11 @@ template <class ModelT> void BinaryTest() {
     NoUnkCheck(binary);
   }
   unlink("test_nounk.binary");
+}
+
+template <class ModelT> void BinaryTest() {
+  BinaryTest<ModelT>(Config::WRITE_MMAP);
+  BinaryTest<ModelT>(Config::WRITE_AFTER);
 }
 
 BOOST_AUTO_TEST_CASE(write_and_read_probing) {

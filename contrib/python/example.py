@@ -1,31 +1,32 @@
-import binpt
-#from binpt import QueryResult
+from moses.dictree import load
 import sys
 
-
-if len(sys.argv) < 3:
-    print "Usage: %s phrase-table nscores [wa] < query > result" % (sys.argv[0])
+if len(sys.argv) != 4:
+    print "Usage: %s table nscores tlimit < query > result" % (sys.argv[0])
     sys.exit(0)
 
-pt_file = sys.argv[1]
+path = sys.argv[1]
 nscores = int(sys.argv[2])
-wa = len(sys.argv) == 4
+tlimit = int(sys.argv[3])
 
-pt = binpt.BinaryPhraseTable(pt_file, nscores, wa)
-print >> sys.stderr, "-ttable %s -nscores %d -alignment-info %s -delimiter '%s'\n" %(pt.path, pt.nscores, str(pt.wa), pt.delimiters)
+table = load(path, nscores, tlimit)
 
 for line in sys.stdin:
     f = line.strip()
-    matches = pt.query(f, cmp = binpt.QueryResult.desc, top = 20)
-    print '\n'.join([' ||| '.join((f, str(e))) for e in matches])
-    '''
-    # This is how one would use the QueryResult object
-    for e in matches:
-        print ' '.join(e.words) # tuple of strings
-        print e.scores # tuple of floats
-        if e.wa:
-            print e.wa # string
-    '''
-            
+    result = table.query(f)
+    # you could simply print the matches
+    # print '\n'.join([' ||| '.join((f, str(e))) for e in matches])
+    # or you can use its attributes
+    print result.source
+    for e in result:
+        if e.lhs:
+            print '\t%s -> %s ||| %s ||| %s' % (e.lhs, 
+                    ' '.join(e.rhs), 
+                    e.scores, 
+                    e.alignment)
+        else:
+            print '\t%s ||| %s ||| %s' % (' '.join(e.rhs), 
+                    e.scores, 
+                    e.alignment)
      
 

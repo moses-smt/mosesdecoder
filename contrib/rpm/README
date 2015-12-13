@@ -1,0 +1,43 @@
+Building Moses RPM
+==================
+
+*** WARNING ***
+Before completing *any* of the tasks outlined in this README, please commit and push any changes you wish to be included in your installer.
+*** WARNING ***
+
+
+Building the RPM SPEC file
+--------------------------
+
+The first phase is to construct the RPM SPEC file in $HOME/rpmbuild. The build_source.sh script builds all the artefacts needed to build. This script needs the following information:
+
+ - The Git repository from which an installer will be built,
+ - The branch in the Git repository to build,
+ - The location of Boost on the build machine, and
+ - The version of the installed Moses distribution.
+
+For example, to build the RELEASE-1.0 branch in the mosesdecoder repository (git://github.com/moses-smt/mosesdecoder.git):
+
+$ build_source.sh -r git://github.com/moses-smt/mosesdecoder.git -b RELASE-1.0 -v 1.0 -t /usr
+
+This builds the source tarballs in the $HOME/rpmbuild/SOURCES directory and the moses.spec file in $HOME/rpmbuild/SPECS.
+
+
+Building the RPM
+----------------
+
+Change directory to $HOME/rpmbuild, and build the binary RPM with:
+
+$ rpmbuild -bb SPECS/moses.spec
+
+This will download IRSTLM v5.70.04 and GIZA++ v2, then build them along with Moses and make the RPM in the directory $HOME/rpmbuild/RPMS/<architecture>/moses-<version>-1.<architecture>.rpm.
+
+For example building on a 64 bit Intel architecture, and building v1.0 the RPM would be called moses-1.0-1.x86_64.rpm.
+
+
+Building a Debian package
+-------------------------
+
+The Alien tool converts RPM packages to Debian packages. If a Debian package is required then follow the instructions on the following web-page:
+
+https://help.ubuntu.com/community/RPM/AlienHowto

@@ -5,13 +5,14 @@
 
 namespace MosesTuning
 {
-  
+
 
 // thread *un*safe singleton.
 // TODO: replace this with thread-safe singleton.
 template <typename T>
-class Singleton {
- public:
+class Singleton
+{
+public:
   static T* GetInstance() {
     if (m_instance == NULL) {
       m_instance = new T;
@@ -20,13 +21,11 @@ class Singleton {
   }
 
   static void Delete() {
-    if (m_instance) {
-      delete m_instance;
-      m_instance = NULL;
-    }
+    delete m_instance;
+    m_instance = NULL;
   }
 
- private:
+private:
   Singleton();
   static T* m_instance;
 };

@@ -1,8 +1,12 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 
-die("ERROR syntax: reference-from-sgm.perl ref src out") 
+die("ERROR syntax: reference-from-sgm.perl ref src out")
     unless scalar @ARGV == 3;
 my ($ref,$src,$txt) = @ARGV;
 
@@ -20,18 +24,24 @@ my %DOC;
 my $system_from_refset = 0;
 my ($doc,$system);
 open(REF,$ref) or die "Cannot open: $!";
-while(<REF>) {
-    if (/<refset/ && /refid="([^\"]+)"/i) {
+while(my $line = <REF>) {
+    if ($line =~ /<refset/ && $line =~ /refid="([^\"]+)"/i) {
       $system = $1;
       $system_from_refset = 1;
     }
-    if (/<doc/i) {
-        die unless /sysid="([^\"]+)"/i || $system_from_refset;
+    if ($line =~ /<doc/i) {
+        die unless $line =~ /sysid="([^\"]+)"/i || $system_from_refset;
         $system = $1 unless $system_from_refset;
-        die unless /docid="([^\"]+)"/i;
+        die unless $line =~ /docid="([^\"]+)"/i;
         $doc = $1;
     }
-    elsif (/<seg[^>]+>\s*(.+)\s*<\/seg>/i) {
+    while ($line =~ /<seg[^>]+>\s*(.*)\s*$/i &&
+	   $line !~ /<seg[^>]+>\s*(.*)\s*<\/seg>/i) {
+	my $next_line = <REF>;
+	$line .= $next_line;
+	chop($line);
+    }
+    if ($line =~ /<seg[^>]+>\s*(.+)\s*<\/seg>/i) {
    	push @{$DOC{$system}{$doc}},$1;
     }
 }
@@ -50,7 +60,7 @@ foreach my $system (keys %DOC) {
     }
     open(TXT,">$outfile") || die($outfile);
     foreach my $doc (@ORDER) {
-	die($doc) unless defined @{$DOC{$system}{$doc}};
+	die("can't find '$doc' for ref '$system'") unless defined @{$DOC{$system}{$doc}};
 	foreach my $line (@{$DOC{$system}{$doc}}) {
 	    print TXT $line."\n";
 	}

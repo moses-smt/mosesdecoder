@@ -336,6 +336,9 @@ rule find-tools ( docbook-xsl-dir ? : docbook-dtd-dir ? : boostbook-dir ? )
     # Ubuntu Linux
     docbook-xsl-dir ?= [ path.glob /usr/share/xml/docbook/stylesheet : nwalsh ] ;
     docbook-dtd-dir ?= [ path.glob /usr/share/xml/docbook/schema/dtd : $(dtd-versions) ] ;
+
+    # SUSE
+    docbook-xsl-dir ?= [ path.glob /usr/share/xml/docbook/stylesheet/nwalsh : current ] ;
   }
 
   if $(docbook-xsl-dir) 

@@ -17,7 +17,7 @@
 
 namespace MosesTuning
 {
-  
+
 const char SCORES_TXT_BEGIN[] = "SCORES_TXT_BEGIN_0";
 const char SCORES_TXT_END[] = "SCORES_TXT_END_0";
 const char SCORES_BIN_BEGIN[] = "SCORES_BIN_BEGIN_0";
@@ -25,30 +25,42 @@ const char SCORES_BIN_END[] = "SCORES_BIN_END_0";
 
 class ScoreArray
 {
- private:
+private:
   scorearray_t m_array;
   std::string m_score_type;
   std::size_t m_num_scores;
 
   // indexx to identify the utterance.
   // It can differ from the index inside the vector.
-  std::string  m_index;
+  int m_index;
 
 public:
   ScoreArray();
   ~ScoreArray() {}
 
-  void clear() { m_array.clear(); }
+  void clear() {
+    m_array.clear();
+  }
 
-  std::string getIndex() const { return m_index; }
+  int getIndex() const {
+    return m_index;
+  }
 
-  void setIndex(const std::string& value) { m_index = value; }
+  void setIndex(int value) {
+    m_index = value;
+  }
 
-  ScoreStats& get(std::size_t i) { return m_array.at(i); }
+  ScoreStats& get(std::size_t i) {
+    return m_array.at(i);
+  }
 
-  const ScoreStats& get(std::size_t i) const { return m_array.at(i); }
+  const ScoreStats& get(std::size_t i) const {
+    return m_array.at(i);
+  }
 
-  void add(const ScoreStats& e) { m_array.push_back(e); }
+  void add(const ScoreStats& e) {
+    m_array.push_back(e);
+  }
 
   //ADDED BY TS
   void swap(std::size_t i, std::size_t j) {
@@ -62,15 +74,25 @@ public:
 
   void merge(ScoreArray& e);
 
-  std::string name() const { return m_score_type; }
+  std::string name() const {
+    return m_score_type;
+  }
 
-  void name(std::string &score_type) { m_score_type = score_type; }
+  void name(std::string &score_type) {
+    m_score_type = score_type;
+  }
 
-  std::size_t size() const { return m_array.size(); }
+  std::size_t size() const {
+    return m_array.size();
+  }
 
-  std::size_t NumberOfScores() const { return m_num_scores; }
+  std::size_t NumberOfScores() const {
+    return m_num_scores;
+  }
 
-  void NumberOfScores(std::size_t v) { m_num_scores = v; }
+  void NumberOfScores(std::size_t v) {
+    m_num_scores = v;
+  }
 
   void savetxt(std::ostream* os, const std::string& score_type);
   void savebin(std::ostream* os, const std::string& score_type);

@@ -42,23 +42,33 @@ void HoleCollection::SortSourceHoles()
 void HoleCollection::Add(int startT, int endT, int startS, int endS)
 {
   Hole hole(startS, endS, startT, endT);
-  m_scope = Scope(hole);
-  m_sourceHoleStartPoints.insert(startS);
-  m_sourceHoleEndPoints.insert(endS);
+  m_scope.push_back(Scope(hole));
+  m_sourceHoleStartPoints.push_back(startS);
+  m_sourceHoleEndPoints.push_back(endS);
   m_holes.push_back(hole);
+  m_sortedSourceHoles.clear();
+}
+
+void HoleCollection::RemoveLast()
+{
+  m_scope.pop_back();
+  m_sourceHoleStartPoints.pop_back();
+  m_sourceHoleEndPoints.pop_back();
+  m_holes.pop_back();
+  m_sortedSourceHoles.clear();
 }
 
 int HoleCollection::Scope(const Hole &proposedHole) const
 {
   const int holeStart = proposedHole.GetStart(0);
   const int holeEnd = proposedHole.GetEnd(0);
-  int scope = m_scope;
-  if (holeStart == m_sourcePhraseStart ||
-      m_sourceHoleEndPoints.find(holeStart-1) != m_sourceHoleEndPoints.end()) {
+  int scope = m_scope.back();
+  if (holeStart == m_sourcePhraseStart.back() ||
+      find(m_sourceHoleEndPoints.begin(), m_sourceHoleEndPoints.end(), holeStart-1) != m_sourceHoleEndPoints.end()) {
     ++scope; // Adding hole would introduce choice point at start of hole.
   }
-  if (holeEnd == m_sourcePhraseEnd ||
-      m_sourceHoleStartPoints.find(holeEnd+1) != m_sourceHoleStartPoints.end()) {
+  if (holeEnd == m_sourcePhraseEnd.back() ||
+      find(m_sourceHoleStartPoints.begin(), m_sourceHoleStartPoints.end(), holeEnd-1) != m_sourceHoleStartPoints.end()) {
     ++scope; // Adding hole would introduce choice point at end of hole.
   }
   return scope;

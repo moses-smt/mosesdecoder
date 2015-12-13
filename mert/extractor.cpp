@@ -20,7 +20,8 @@
 using namespace std;
 using namespace MosesTuning;
 
-namespace {
+namespace
+{
 
 void usage()
 {
@@ -78,68 +79,69 @@ struct ProgramOption {
   int verbosity;
 
   ProgramOption()
-      : scorerType("BLEU"),
-        scorerConfig(""),
-        scorerFactors(""),
-        scorerFilter(""),
-        referenceFile(""),
-        nbestFile(""),
-        scoreDataFile("statscore.data"),
-        featureDataFile("features.data"),
-        prevScoreDataFile(""),
-        prevFeatureDataFile(""),
-        binmode(false),
-        allowDuplicates(false),
-        verbosity(0) { }
+    : scorerType("BLEU"),
+      scorerConfig(""),
+      scorerFactors(""),
+      scorerFilter(""),
+      referenceFile(""),
+      nbestFile(""),
+      scoreDataFile("statscore.data"),
+      featureDataFile("features.data"),
+      prevScoreDataFile(""),
+      prevFeatureDataFile(""),
+      binmode(false),
+      allowDuplicates(false),
+      verbosity(0) { }
 };
 
-void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
+void ParseCommandOptions(int argc, char** argv, ProgramOption* opt)
+{
   int c;
   int option_index;
 
   while ((c = getopt_long(argc, argv, "s:r:f:l:n:S:F:R:E:v:hbd", long_options, &option_index)) != -1) {
     switch (c) {
-      case 's':
-        opt->scorerType = string(optarg);
-        break;
-      case 'c':
-        opt->scorerConfig = string(optarg);
-        break;
-      case 'f':
-        opt->scorerFactors = string(optarg);
-        break;
-      case 'l':
-        opt->scorerFilter = string(optarg);
-        break;
-      case 'r':
-        opt->referenceFile = string(optarg);
-        break;
-      case 'b':
-        opt->binmode = true;
-        break;
-      case 'n':
-        opt->nbestFile = string(optarg);
-        break;
-      case 'S':
-        opt->scoreDataFile = string(optarg);
-        break;
-      case 'F':
-        opt->featureDataFile = string(optarg);
-        break;
-      case 'E':
-        opt->prevFeatureDataFile = string(optarg);
-        break;
-      case 'R':
-        opt->prevScoreDataFile = string(optarg);
-        break;
-      case 'v':
-        opt->verbosity = atoi(optarg);
-        break;
-      case 'd':
-        opt->allowDuplicates = true;
-        break;
-      default:
-        usage();
+    case 's':
+      opt->scorerType = string(optarg);
+      break;
+    case 'c':
+      opt->scorerConfig = string(optarg);
+      break;
+    case 'f':
+      opt->scorerFactors = string(optarg);
+      break;
+    case 'l':
+      opt->scorerFilter = string(optarg);
+      break;
+    case 'r':
+      opt->referenceFile = string(optarg);
+      break;
+    case 'b':
+      opt->binmode = true;
+      break;
+    case 'n':
+      opt->nbestFile = string(optarg);
+      break;
+    case 'S':
+      opt->scoreDataFile = string(optarg);
+      break;
+    case 'F':
+      opt->featureDataFile = string(optarg);
+      break;
+    case 'E':
+      opt->prevFeatureDataFile = string(optarg);
+      break;
+    case 'R':
+      opt->prevScoreDataFile = string(optarg);
+      break;
+    case 'v':
+      opt->verbosity = atoi(optarg);
+      break;
+    case 'd':
+      opt->allowDuplicates = true;
+      break;
+    default:
+      usage();
     }
   }
 }
@@ -202,7 +204,7 @@ int main(int argc, char** argv)
     TRACE_ERR("Scorer type: " << option.scorerType << endl);
 
     boost::scoped_ptr<Scorer> scorer(
-        ScorerFactory::getScorer(option.scorerType, option.scorerConfig));
+      ScorerFactory::getScorer(option.scorerType, option.scorerConfig));
 
     // set Factors and Filter used to preprocess the sentences
     scorer->setFactors(option.scorerFactors);

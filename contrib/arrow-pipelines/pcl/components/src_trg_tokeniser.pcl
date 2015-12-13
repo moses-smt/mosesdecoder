@@ -1,0 +1,40 @@
+#
+# Import all of the components to be composed
+#
+import wrappers.tokenizer.tokenizer as tokeniser
+
+#
+# Component definition
+#
+#                 +---------+                +---------+                          +---------+                          +---------+
+# src_filename -->+         +--> filename -->+-- src --+--> tokenised_filename -->+---------+--> tokenised_filename -->+         +--> tokenised_src_filename
+#                 |         |                |         |                          |         |                          |         |
+# trg_filename -->+         +--> filename -->+---------+-------> filename ------->+-- trg --+--> tokenised_filename -->+         +--> tokenised_trg_filename
+#                 +---------+                +---------+                          +---------+                          +---------+
+#                                  Config: {language::String,              Config: {language::String,
+#                                           tokenisation_dir::String,               tokenisation_dir::String,
+#                                           moses_installation_dir::String}         moses_installation_dir::String}
+#
+component src_trg_tokeniser
+  inputs (src_filename), (trg_filename)
+  outputs (tokenised_src_filename), (tokenised_trg_filename)
+  configuration tokeniser.src.language,
+                tokeniser.src.tokenisation_dir,
+                tokeniser.trg.language,
+                tokeniser.trg.tokenisation_dir,
+                tokeniser.moses.installation
+  declare
+    src_tokeniser := new tokeniser with
+      tokeniser.src.language -> corpus.language,
+      tokeniser.src.tokenisation_dir -> working.directory.root,
+      tokeniser.moses.installation -> moses.installation
+    trg_tokeniser := new tokeniser with
+      tokeniser.trg.language -> corpus.language,
+      tokeniser.trg.tokenisation_dir -> working.directory.root,
+      tokeniser.moses.installation -> moses.installation
+  as
+    wire (src_filename -> corpus.filename),
+         (trg_filename -> corpus.filename) >>>
+    (src_tokeniser *** trg_tokeniser) >>>
+    wire (corpus.tokenised.filename -> tokenised_src_filename),
+         (corpus.tokenised.filename -> tokenised_trg_filename)

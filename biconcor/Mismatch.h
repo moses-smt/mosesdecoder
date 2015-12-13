@@ -34,7 +34,9 @@ public:
   Mismatch( SuffixArray *sa, TargetCorpus *tc, Alignment *a, INDEX sentence_id, INDEX position, int source_length, int target_length, int source_start, int source_end );
   ~Mismatch();
 
-  bool Unaligned() const { return m_unaligned; }
+  bool Unaligned() const {
+    return m_unaligned;
+  }
   void PrintClippedHTML(std::ostream* out, int width );
   void LabelSourceMatches(int *source_annotation, int *target_annotation, int source_id, int label );
 };

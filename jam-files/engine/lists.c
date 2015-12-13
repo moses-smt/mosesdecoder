@@ -4,28 +4,54 @@
  * This file is part of Jam - see jam.c for Copyright information.
  */
 
-# include "jam.h"
-# include "newstr.h"
-# include "lists.h"
-
 /*
- * lists.c - maintain lists of strings
- *
- * This implementation essentially uses a singly linked list, but
- * guarantees that the head element of every list has a valid pointer
- * to the tail of the list, so the new elements can efficiently and
- * properly be appended to the end of a list.
- *
- * To avoid massive allocation, list_free() just tacks the whole freed
- * chain onto freelist and list_new() looks on freelist first for an
- * available list struct.  list_free() does not free the strings in the
- * chain: it lazily lets list_new() do so.
- *
- * 08/23/94 (seiwald) - new list_append()
- * 09/07/00 (seiwald) - documented lol_*() functions
+ * lists.c - maintain lists of objects
  */
 
-static LIST *freelist = 0;  /* junkpile for list_free() */
+#include "jam.h"
+#include "lists.h"
+
+#include <assert.h>
+
+static LIST * freelist[ 32 ];  /* junkpile for list_dealloc() */
+
+static unsigned get_bucket( unsigned size )
+{
+    unsigned bucket = 0;
+    while ( size > ( 1u << bucket ) ) ++bucket;
+    return bucket;
+}
+
+static LIST * list_alloc( unsigned const size )
+{
+    unsigned const bucket = get_bucket( size );
+    if ( freelist[ bucket ] )
+    {
+        LIST * result = freelist[ bucket ];
+        freelist[ bucket ] = result->impl.next;
+        return result;
+    }
+    return (LIST *)BJAM_MALLOC( sizeof( LIST ) + ( 1u << bucket ) *
+        sizeof( OBJECT * ) );
+}
+
+static void list_dealloc( LIST * l )
+{
+    unsigned size = list_length( l );
+    unsigned bucket;
+    LIST * node = l;
+
+    if ( size == 0 ) return;
+
+    bucket = get_bucket( size );;
+
+#ifdef BJAM_NO_MEM_CACHE
+    BJAM_FREE( node );
+#else
+    node->impl.next = freelist[ bucket ];
+    freelist[ bucket ] = node;
+#endif
+}
 
 /*
  * list_append() - append a list onto another one, returning total
@@ -33,60 +59,78 @@ static LIST *freelist = 0;  /* junkpile for list_free() */
 
 LIST * list_append( LIST * l, LIST * nl )
 {
-    if ( !nl )
+    if ( list_empty( l ) )
+        return nl;
+    if ( !list_empty( nl ) )
     {
-        /* Just return l */
-    }
-    else if ( !l )
-    {
-        l = nl;
-    }
-    else
-    {
-        /* Graft two non-empty lists. */
-        l->tail->next = nl;
-        l->tail = nl->tail;
-    }
+        int const l_size = list_length( l );
+        int const nl_size = list_length( nl );
+        int const size = l_size + nl_size;
+        unsigned const bucket = get_bucket( size );
 
+        /* Do we need to reallocate? */
+        if ( l_size <= ( 1u << ( bucket - 1 ) ) )
+        {
+            LIST * result = list_alloc( size );
+            memcpy( list_begin( result ), list_begin( l ), l_size * sizeof(
+                OBJECT * ) );
+            list_dealloc( l );
+            l = result;
+        }
+
+        l->impl.size = size;
+        memcpy( list_begin( l ) + l_size, list_begin( nl ), nl_size * sizeof(
+            OBJECT * ) );
+        list_dealloc( nl );
+    }
     return l;
 }
 
+LISTITER list_begin( LIST * l )
+{
+    return l ? (LISTITER)( (char *)l + sizeof( LIST ) ) : 0;
+}
+
+LISTITER list_end( LIST * l )
+{
+    return l ? list_begin( l ) + l->impl.size : 0;
+}
+
+LIST * list_new( OBJECT * value )
+{
+    LIST * const head = list_alloc( 1 ) ;
+    head->impl.size = 1;
+    list_begin( head )[ 0 ] = value;
+    return head;
+}
+
 /*
- * list_new() - tack a string onto the end of a list of strings
+ * list_push_back() - tack a string onto the end of a list of strings
  */
 
-LIST * list_new( LIST * head, char * string )
+LIST * list_push_back( LIST * head, OBJECT * value )
 {
-    LIST * l;
+    unsigned int size = list_length( head );
+    unsigned int i;
 
     if ( DEBUG_LISTS )
-        printf( "list > %s <\n", string );
+        printf( "list > %s <\n", object_str( value ) );
 
-    /* Get list struct from freelist, if one available.  */
-    /* Otherwise allocate. */
-    /* If from freelist, must free string first */
-
-    if ( freelist )
+    /* If the size is a power of 2, reallocate. */
+    if ( size == 0 )
     {
-        l = freelist;
-        freestr( l->string );
-        freelist = freelist->next;
+        head = list_alloc( 1 );
     }
-    else
+    else if ( ( ( size - 1 ) & size ) == 0 )
     {
-        l = (LIST *)BJAM_MALLOC( sizeof( LIST ) );
+        LIST * l = list_alloc( size + 1 );
+        memcpy( l, head, sizeof( LIST ) + size * sizeof( OBJECT * ) );
+        list_dealloc( head );
+        head = l;
     }
 
-    /* If first on chain, head points here. */
-    /* If adding to chain, tack us on. */
-    /* Tail must point to this new, last element. */
-
-    if ( !head ) head = l;
-    else head->tail->next = l;
-    head->tail = l;
-    l->next = 0;
-
-    l->string = string;
+    list_begin( head )[ size ] = value;
+    head->impl.size = size + 1;
 
     return head;
 }
@@ -96,11 +140,36 @@ LIST * list_new( LIST * head, char * string )
  * list_copy() - copy a whole list of strings (nl) onto end of another (l).
  */
 
-LIST * list_copy( LIST * l, LIST * nl )
+LIST * list_copy( LIST * l )
 {
-    for ( ; nl; nl = list_next( nl ) )
-        l = list_new( l, copystr( nl->string ) );
-    return l;
+    int size = list_length( l );
+    int i;
+    LIST * result;
+
+    if ( size == 0 ) return L0;
+
+    result = list_alloc( size );
+    result->impl.size = size;
+    for ( i = 0; i < size; ++i )
+        list_begin( result )[ i ] = object_copy( list_begin( l )[ i ] );
+    return result;
+}
+
+
+LIST * list_copy_range( LIST * l, LISTITER first, LISTITER last )
+{
+    if ( first == last )
+        return L0;
+    else
+    {
+        int size = last - first;
+        LIST * result = list_alloc( size );
+        LISTITER dest = list_begin( result );
+        result->impl.size = size;
+        for ( ; first != last; ++first, ++dest )
+            *dest = object_copy( *first );
+        return result;
+    }
 }
 
 
@@ -110,19 +179,19 @@ LIST * list_copy( LIST * l, LIST * nl )
 
 LIST * list_sublist( LIST * l, int start, int count )
 {
-    LIST * nl = 0;
-    for ( ; l && start--; l = list_next( l ) );
-    for ( ; l && count--; l = list_next( l ) )
-        nl = list_new( nl, copystr( l->string ) );
-    return nl;
+    int end = start + count;
+    int size = list_length( l );
+    if ( start >= size ) return L0;
+    if ( end > size ) end = size;
+    return list_copy_range( l, list_begin( l ) + start, list_begin( l ) + end );
 }
 
 
 static int str_ptr_compare( void const * va, void const * vb )
 {
-    char * a = *( (char * *)va );
-    char * b = *( (char * *)vb );
-    return strcmp(a, b);
+    OBJECT * a = *( (OBJECT * *)va );
+    OBJECT * b = *( (OBJECT * *)vb );
+    return strcmp( object_str( a ), object_str( b ) );
 }
 
 
@@ -130,29 +199,15 @@ LIST * list_sort( LIST * l )
 {
     int len;
     int ii;
-    char * * strings;
-    LIST * listp;
-    LIST * result = 0;
+    LIST * result;
 
     if ( !l )
         return L0;
 
     len = list_length( l );
-    strings = (char * *)BJAM_MALLOC( len * sizeof(char*) );
+    result = list_copy( l );
 
-    listp = l;
-    for ( ii = 0; ii < len; ++ii )
-    {
-        strings[ ii ] = listp->string;
-        listp = listp->next;
-    }
-
-    qsort( strings, len, sizeof( char * ), str_ptr_compare );
-
-    for ( ii = 0; ii < len; ++ii )
-        result = list_append( result, list_new( 0, strings[ ii ] ) );
-
-    BJAM_FREE( strings );
+    qsort( list_begin( result ), len, sizeof( OBJECT * ), str_ptr_compare );
 
     return result;
 }
@@ -164,11 +219,13 @@ LIST * list_sort( LIST * l )
 
 void list_free( LIST * head )
 {
-    /* Just tack onto freelist. */
-    if ( head )
+    if ( !list_empty( head ) )
     {
-        head->tail->next = freelist;
-        freelist = head;
+        LISTITER iter = list_begin( head );
+        LISTITER const end = list_end( head );
+        for ( ; iter != end; iter = list_next( iter ) )
+            object_free( list_item( iter ) );
+        list_dealloc( head );
     }
 }
 
@@ -179,17 +236,78 @@ void list_free( LIST * head )
 
 LIST * list_pop_front( LIST * l )
 {
-    LIST * result = l->next;
-    if ( result )
+    unsigned size = list_length( l );
+    assert( size );
+    --size;
+    object_free( list_front( l ) );
+
+    if ( size == 0 )
     {
-        result->tail = l->tail;
-        l->next = L0;
-        l->tail = l;
+        list_dealloc( l );
+        return L0;
     }
-    list_free( l );
-    return result;
+
+    if ( ( ( size - 1 ) & size ) == 0 )
+    {
+        LIST * const nl = list_alloc( size );
+        nl->impl.size = size;
+        memcpy( list_begin( nl ), list_begin( l ) + 1, size * sizeof( OBJECT * )
+            );
+        list_dealloc( l );
+        return nl;
+    }
+
+    l->impl.size = size;
+    memmove( list_begin( l ), list_begin( l ) + 1, size * sizeof( OBJECT * ) );
+    return l;
 }
 
+LIST * list_reverse( LIST * l )
+{
+    int size = list_length( l );
+    if ( size == 0 ) return L0;
+    {
+        LIST * const result = list_alloc( size );
+        int i;
+        result->impl.size = size;
+        for ( i = 0; i < size; ++i )
+            list_begin( result )[ i ] = object_copy( list_begin( l )[ size - i -
+                1 ] );
+        return result;
+    }
+}
+
+int list_cmp( LIST * t, LIST * s )
+{
+    int status = 0;
+    LISTITER t_it = list_begin( t );
+    LISTITER const t_end = list_end( t );
+    LISTITER s_it = list_begin( s );
+    LISTITER const s_end = list_end( s );
+
+    while ( !status && ( t_it != t_end || s_it != s_end ) )
+    {
+        char const * st = t_it != t_end ? object_str( list_item( t_it ) ) : "";
+        char const * ss = s_it != s_end ? object_str( list_item( s_it ) ) : "";
+
+        status = strcmp( st, ss );
+
+        t_it = t_it != t_end ? list_next( t_it ) : t_it;
+        s_it = s_it != s_end ? list_next( s_it ) : s_it;
+    }
+
+    return status;
+}
+
+int list_is_sublist( LIST * sub, LIST * l )
+{
+    LISTITER iter = list_begin( sub );
+    LISTITER const end = list_end( sub );
+    for ( ; iter != end; iter = list_next( iter ) )
+        if ( !list_in( l, list_item( iter ) ) )
+            return 0;
+    return 1;
+}
 
 /*
  * list_print() - print a list of strings to stdout
@@ -197,12 +315,14 @@ LIST * list_pop_front( LIST * l )
 
 void list_print( LIST * l )
 {
-    LIST * p = 0;
-    for ( ; l; p = l, l = list_next( l ) )
-        if ( p )
-            printf( "%s ", p->string );
-    if ( p )
-        printf( "%s", p->string );
+    LISTITER iter = list_begin( l ), end = list_end( l );
+    if ( iter != end )
+    {
+        printf( "%s", object_str( list_item( iter ) ) );
+        iter = list_next( iter );
+        for ( ; iter != end; iter = list_next( iter ) )
+            printf( " %s", object_str( list_item( iter ) ) );
+    }
 }
 
 
@@ -212,16 +332,16 @@ void list_print( LIST * l )
 
 int list_length( LIST * l )
 {
-    int n = 0;
-    for ( ; l; l = list_next( l ), ++n );
-    return n;
+    return l ? l->impl.size : 0;
 }
 
 
-int list_in( LIST * l, char * value )
+int list_in( LIST * l, OBJECT * value )
 {
-    for ( ; l; l = l->next )
-        if ( strcmp( l->string, value ) == 0 )
+    LISTITER iter = list_begin( l );
+    LISTITER end = list_end( l );
+    for ( ; iter != end; iter = list_next( iter ) )
+        if ( object_equal( list_item( iter ), value ) )
             return 1;
     return 0;
 }
@@ -229,18 +349,34 @@ int list_in( LIST * l, char * value )
 
 LIST * list_unique( LIST * sorted_list )
 {
-    LIST * result = 0;
-    LIST * last_added = 0;
+    LIST * result = L0;
+    OBJECT * last_added = 0;
 
-    for ( ; sorted_list; sorted_list = sorted_list->next )
+    LISTITER iter = list_begin( sorted_list ), end = list_end( sorted_list );
+    for ( ; iter != end; iter = list_next( iter ) )
     {
-        if ( !last_added || strcmp( sorted_list->string, last_added->string ) != 0 )
+        if ( !last_added || !object_equal( list_item( iter ), last_added ) )
         {
-            result = list_new( result, sorted_list->string );
-            last_added = sorted_list;
+            result = list_push_back( result, object_copy( list_item( iter ) ) );
+            last_added = list_item( iter );
         }
     }
     return result;
+}
+
+void list_done()
+{
+    int i;
+    for ( i = 0; i < sizeof( freelist ) / sizeof( freelist[ 0 ] ); ++i )
+    {
+        LIST * l = freelist[ i ];
+        while ( l )
+        {
+            LIST * const tmp = l;
+            l = l->impl.next;
+            BJAM_FREE( tmp );
+        }
+    }
 }
 
 
@@ -284,7 +420,7 @@ void lol_free( LOL * lol )
 
 LIST * lol_get( LOL * lol, int i )
 {
-    return i < lol->count ? lol->list[ i ] : 0;
+    return i < lol->count ? lol->list[ i ] : L0;
 }
 
 
@@ -295,7 +431,6 @@ LIST * lol_get( LOL * lol, int i )
 void lol_print( LOL * lol )
 {
     int i;
-
     for ( i = 0; i < lol->count; ++i )
     {
         if ( i )
@@ -306,31 +441,32 @@ void lol_print( LOL * lol )
 
 #ifdef HAVE_PYTHON
 
-PyObject *list_to_python(LIST *l)
+PyObject * list_to_python( LIST * l )
 {
-    PyObject *result = PyList_New(0);
-
-    for (; l; l = l->next)
+    PyObject * result = PyList_New( 0 );
+    LISTITER iter = list_begin( l );
+    LISTITER const end = list_end( l );
+    for ( ; iter != end; iter = list_next( iter ) )
     {
-        PyObject* s = PyString_FromString(l->string);
-        PyList_Append(result, s);
-        Py_DECREF(s);
+        PyObject * s = PyString_FromString( object_str( list_item( iter ) ) );
+        PyList_Append( result, s );
+        Py_DECREF( s );
     }
 
     return result;
 }
 
-LIST *list_from_python(PyObject *l)
+LIST * list_from_python( PyObject * l )
 {
-    LIST * result = 0;
+    LIST * result = L0;
 
-    Py_ssize_t i, n;
-    n = PySequence_Size(l);
-    for (i = 0; i < n; ++i)
+    Py_ssize_t n = PySequence_Size( l );
+    Py_ssize_t i;
+    for ( i = 0; i < n; ++i )
     {
-        PyObject *v = PySequence_GetItem(l, i);        
-        result = list_new (result, newstr (PyString_AsString(v)));
-        Py_DECREF(v);
+        PyObject * v = PySequence_GetItem( l, i );
+        result = list_push_back( result, object_new( PyString_AsString( v ) ) );
+        Py_DECREF( v );
     }
 
     return result;

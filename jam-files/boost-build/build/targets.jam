@@ -936,7 +936,7 @@ rule common-properties ( build-request requirements )
     {
         $(key) = [ common-properties2 $(build-request) $(non-free) ] ;
     }
-    result = [ $($(key)).add-raw $(free) ] ;
+    return [ $($(key)).add-raw $(free) ] ;
 }
 
 

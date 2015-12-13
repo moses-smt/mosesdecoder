@@ -5,19 +5,24 @@
 
 using namespace MosesTuning;
 
-namespace {
+namespace
+{
 
 static int g_count = 0;
 
-class Instance {
- public:
-  Instance() { ++g_count; }
+class Instance
+{
+public:
+  Instance() {
+    ++g_count;
+  }
   ~Instance() {}
 };
 
 } // namespace
 
-BOOST_AUTO_TEST_CASE(singleton_basic) {
+BOOST_AUTO_TEST_CASE(singleton_basic)
+{
   Instance* instance1 = Singleton<Instance>::GetInstance();
   Instance* instance2 = Singleton<Instance>::GetInstance();
   Instance* instance3 = Singleton<Instance>::GetInstance();

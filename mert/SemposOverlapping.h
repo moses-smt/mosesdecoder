@@ -7,9 +7,11 @@
 #include <utility>
 #include <vector>
 
+#include "Types.h"
+
 namespace MosesTuning
 {
-  
+
 
 class SemposScorer;
 
@@ -31,19 +33,20 @@ class SemposOverlapping
 {
 public:
   virtual ~SemposOverlapping() {}
-  virtual std::vector<int> prepareStats(const sentence_t& cand, const sentence_t& ref) = 0;
-  virtual float calculateScore(const std::vector<int>& stats) const = 0;
+  virtual std::vector<ScoreStatsType> prepareStats(const sentence_t& cand, const sentence_t& ref) = 0;
+  virtual float calculateScore(const std::vector<ScoreStatsType>& stats) const = 0;
   virtual std::size_t NumberOfScores() const = 0;
 };
 
-class SemposOverlappingFactory {
- public:
+class SemposOverlappingFactory
+{
+public:
   static SemposOverlapping* GetOverlapping(const std::string& str, const SemposScorer* sempos);
 
   // dependency injection for unit testing.
   static void SetOverlapping(SemposOverlapping* ovr);
 
- private:
+private:
   SemposOverlappingFactory() {}
   ~SemposOverlappingFactory() {}
 };
@@ -60,11 +63,13 @@ public:
   CapMicroOverlapping(const SemposScorer* sempos) : semposScorer(sempos) {}
   ~CapMicroOverlapping() {}
 
-  virtual std::vector<int> prepareStats(const sentence_t& cand, const sentence_t& ref);
-  virtual float calculateScore(const std::vector<int>& stats) const;
-  virtual std::size_t NumberOfScores() const { return 2; }
+  virtual std::vector<ScoreStatsType> prepareStats(const sentence_t& cand, const sentence_t& ref);
+  virtual float calculateScore(const std::vector<ScoreStatsType>& stats) const;
+  virtual std::size_t NumberOfScores() const {
+    return 2;
+  }
 
- private:
+private:
   // no copying allowed.
   CapMicroOverlapping(const CapMicroOverlapping&);
   CapMicroOverlapping& operator=(const CapMicroOverlapping&);
@@ -80,11 +85,13 @@ public:
   CapMacroOverlapping(const SemposScorer* sempos) : semposScorer(sempos) {}
   ~CapMacroOverlapping() {}
 
-  virtual std::vector<int> prepareStats(const sentence_t& cand, const sentence_t& ref);
-  virtual float calculateScore(const std::vector<int>& stats) const;
-  virtual std::size_t NumberOfScores() const { return kMaxNOC * 2; }
+  virtual std::vector<ScoreStatsType> prepareStats(const sentence_t& cand, const sentence_t& ref);
+  virtual float calculateScore(const std::vector<ScoreStatsType>& stats) const;
+  virtual std::size_t NumberOfScores() const {
+    return kMaxNOC * 2;
+  }
 
- private:
+private:
   // no copying allowed.
   CapMacroOverlapping(const CapMacroOverlapping&);
   CapMacroOverlapping& operator=(const CapMacroOverlapping&);

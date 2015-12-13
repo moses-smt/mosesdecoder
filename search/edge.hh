@@ -2,6 +2,7 @@
 #define SEARCH_EDGE__
 
 #include "lm/state.hh"
+#include "search/header.hh"
 #include "search/types.hh"
 #include "search/vertex.hh"
 #include "util/pool.hh"
@@ -13,76 +14,39 @@
 namespace search {
 
 // Copyable, but the copy will be shallow.
-class PartialEdge {
+class PartialEdge : public Header {
   public:
-    // Allow default construction for STL.  
-    PartialEdge() : base_(NULL) {}
-    bool Valid() const { return base_; }
+    // Allow default construction for STL.
+    PartialEdge() {}
 
-    Score GetScore() const {
-      return *reinterpret_cast<const float*>(base_);
-    }
-    void SetScore(Score to) {
-      *reinterpret_cast<float*>(base_) = to;
-    }
-    bool operator<(const PartialEdge &other) const {
-      return GetScore() < other.GetScore();
-    }
+    PartialEdge(util::Pool &pool, Arity arity)
+      : Header(pool.Allocate(Size(arity, arity + 1)), arity) {}
 
-    Arity GetArity() const {
-      return *reinterpret_cast<const Arity*>(base_ + sizeof(Score));
-    }
-
-    Note GetNote() const {
-      return *reinterpret_cast<const Note*>(base_ + sizeof(Score) + sizeof(Arity));
-    }
-    void SetNote(Note to) {
-      *reinterpret_cast<Note*>(base_ + sizeof(Score) + sizeof(Arity)) = to;
-    }
+    PartialEdge(util::Pool &pool, Arity arity, Arity chart_states)
+      : Header(pool.Allocate(Size(arity, chart_states)), arity) {}
 
     // Non-terminals
     const PartialVertex *NT() const {
-      return reinterpret_cast<const PartialVertex*>(base_ + kHeaderSize);
+      return reinterpret_cast<const PartialVertex*>(After());
     }
     PartialVertex *NT() {
-      return reinterpret_cast<PartialVertex*>(base_ + kHeaderSize);
+      return reinterpret_cast<PartialVertex*>(After());
     }
 
     const lm::ngram::ChartState &CompletedState() const {
       return *Between();
     }
     const lm::ngram::ChartState *Between() const {
-      return reinterpret_cast<const lm::ngram::ChartState*>(base_ + kHeaderSize + GetArity() * sizeof(PartialVertex));
+      return reinterpret_cast<const lm::ngram::ChartState*>(After() + GetArity() * sizeof(PartialVertex));
     }
     lm::ngram::ChartState *Between() {
-      return reinterpret_cast<lm::ngram::ChartState*>(base_ + kHeaderSize + GetArity() * sizeof(PartialVertex));
+      return reinterpret_cast<lm::ngram::ChartState*>(After() + GetArity() * sizeof(PartialVertex));
     }
 
   private:
-    static const std::size_t kHeaderSize = sizeof(Score) + sizeof(Arity) + sizeof(Note);
-
-    friend class PartialEdgePool;
-    PartialEdge(void *base, Arity arity) : base_(static_cast<uint8_t*>(base)) {
-      *reinterpret_cast<Arity*>(base_ + sizeof(Score)) = arity;
+    static std::size_t Size(Arity arity, Arity chart_states) {
+      return kHeaderSize + arity * sizeof(PartialVertex) + chart_states * sizeof(lm::ngram::ChartState);
     }
-
-    uint8_t *base_;
-};
-
-class PartialEdgePool {
-  public:
-    PartialEdge Allocate(Arity arity, Arity chart_states) {
-      return PartialEdge(
-          pool_.Allocate(PartialEdge::kHeaderSize + arity * sizeof(PartialVertex) + chart_states * sizeof(lm::ngram::ChartState)),
-          arity);
-    }
-
-    PartialEdge Allocate(Arity arity) {
-      return Allocate(arity, arity + 1);
-    }
-
-  private:
-    util::Pool pool_;
 };
 
 

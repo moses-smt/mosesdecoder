@@ -11,81 +11,75 @@
 /*
  * PATHNAME - a name of a file, broken into <grist>dir/base/suffix(member)
  *
- * <grist> is salt to distinguish between targets that otherwise would
- * have the same name:  it never appears in the bound name of a target.
- * (member) is an archive member name: the syntax is arbitrary, but must
- * agree in path_parse(), path_build() and the Jambase.
+ * <grist> - salt to distinguish between targets that would otherwise have the
+ * same name - it never appears in the bound name of a target.
  *
- * On VMS, we keep track of whether the original path was a directory
- * (without a file), so that $(VAR:D) can climb to the parent.
+ * (member) - archive member name: the syntax is arbitrary, but must agree in
+ * path_parse(), path_build() and the Jambase.
  */
 
 #ifndef PATHSYS_VP_20020211_H
-# define PATHSYS_VP_20020211_H
+#define PATHSYS_VP_20020211_H
 
+#include "object.h"
 #include "strings.h"
 
-typedef struct _pathname PATHNAME;
-typedef struct _pathpart PATHPART;
 
-struct _pathpart
+typedef struct _pathpart
 {
-    char * ptr;
-    int    len;
-};
+    char const * ptr;
+    int len;
+} PATHPART;
 
-struct _pathname
+typedef struct _pathname
 {
-    PATHPART    part[6];
-#ifdef OS_VMS
-    int     parent;
-#endif
+    PATHPART part[ 6 ];
 
-#define f_grist    part[0]
-#define f_root     part[1]
-#define f_dir      part[2]
-#define f_base     part[3]
-#define f_suffix   part[4]
-#define f_member   part[5]
-};
+#define f_grist   part[ 0 ]
+#define f_root    part[ 1 ]
+#define f_dir     part[ 2 ]
+#define f_base    part[ 3 ]
+#define f_suffix  part[ 4 ]
+#define f_member  part[ 5 ]
+} PATHNAME;
 
-void path_build( PATHNAME * f, string * file, int binding );
-void path_build1( PATHNAME * f, string * file );
 
-void path_parse( char * file, PATHNAME * f );
-void path_parent( PATHNAME * f );
+void path_build( PATHNAME *, string * file );
+void path_parse( char const * file, PATHNAME * );
+void path_parent( PATHNAME * );
 
-#ifdef NT
+/* Given a path, returns an object containing an equivalent path in canonical
+ * format that can be used as a unique key for that path. Equivalent paths such
+ * as a/b, A\B, and a\B on NT all yield the same key.
+ */
+OBJECT * path_as_key( OBJECT * path );
 
-/** Returns newstr-allocated string with long equivivalent of 'short_name'.
-    If none exists -- i.e. 'short_path' is already long path, it's returned
-    unaltered. */
-char * short_path_to_long_path( char * short_path );
+/* Called as an optimization when we know we have a path that is already in its
+ * canonical/long/key form. Avoids the need for some subsequent path_as_key()
+ * call to do a potentially expensive path conversion requiring access to the
+ * actual underlying file system.
+ */
+void path_register_key( OBJECT * canonic_path );
 
-#endif
+/* Returns a static pointer to the system dependent path to the temporary
+ * directory. NOTE: Does *not* include a trailing path separator.
+ */
+string const * path_tmpdir( void );
 
-#ifdef USE_PATHUNIX
-/** Returns a static pointer to the system dependent path to the temporary
-    directory. NOTE: *without* a trailing path separator.
-*/
-const char * path_tmpdir( void );
+/* Returns a new temporary name. */
+OBJECT * path_tmpnam( void );
 
-/** Returns a new temporary name.
-*/
-const char * path_tmpnam( void );
+/* Returns a new temporary path. */
+OBJECT * path_tmpfile( void );
 
-/** Returns a new temporary path.
-*/
-const char * path_tmpfile( void );
-#endif
+/* Give the first argument to 'main', return a full path to our executable.
+ * Returns null in the unlikely case it cannot be determined. Caller is
+ * responsible for freeing the string.
+ *
+ * Implemented in jam.c
+ */
+char * executable_path( char const * argv0 );
 
-/** Give the first argument to 'main', return a full path to
-    our executable.  Returns null in the unlikely case it
-    cannot be determined. Caller is responsible for freeing
-    the string.
-
-    Implemented in jam.c
-*/
-char * executable_path (char *argv0);
+void path_done( void );
 
 #endif

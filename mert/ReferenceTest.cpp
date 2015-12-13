@@ -5,12 +5,14 @@
 
 using namespace MosesTuning;
 
-BOOST_AUTO_TEST_CASE(refernece_count) {
+BOOST_AUTO_TEST_CASE(refernece_count)
+{
   Reference ref;
   BOOST_CHECK(ref.get_counts() != NULL);
 }
 
-BOOST_AUTO_TEST_CASE(refernece_length_iterator) {
+BOOST_AUTO_TEST_CASE(refernece_length_iterator)
+{
   Reference ref;
   ref.push_back(4);
   ref.push_back(2);
@@ -24,7 +26,8 @@ BOOST_AUTO_TEST_CASE(refernece_length_iterator) {
   BOOST_CHECK(it == ref.end());
 }
 
-BOOST_AUTO_TEST_CASE(refernece_length_average) {
+BOOST_AUTO_TEST_CASE(refernece_length_average)
+{
   {
     Reference ref;
     ref.push_back(4);
@@ -49,7 +52,8 @@ BOOST_AUTO_TEST_CASE(refernece_length_average) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(refernece_length_closest) {
+BOOST_AUTO_TEST_CASE(refernece_length_closest)
+{
   {
     Reference ref;
     ref.push_back(4);
@@ -92,7 +96,8 @@ BOOST_AUTO_TEST_CASE(refernece_length_closest) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(refernece_length_shortest) {
+BOOST_AUTO_TEST_CASE(refernece_length_shortest)
+{
   {
     Reference ref;
     ref.push_back(4);

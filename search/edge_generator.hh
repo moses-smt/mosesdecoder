@@ -2,14 +2,13 @@
 #define SEARCH_EDGE_GENERATOR__
 
 #include "search/edge.hh"
-#include "search/note.hh"
 #include "search/types.hh"
 
 #include <queue>
 
 namespace lm {
 namespace ngram {
-class ChartState;
+struct ChartState;
 } // namespace ngram
 } // namespace lm
 
@@ -22,7 +21,7 @@ class EdgeGenerator {
     EdgeGenerator() {}
 
     PartialEdge AllocateEdge(Arity arity) {
-      return partial_edge_pool_.Allocate(arity);
+      return PartialEdge(partial_edge_pool_, arity);
     }
 
     void AddEdge(PartialEdge edge) {
@@ -47,7 +46,7 @@ class EdgeGenerator {
     }
 
   private:
-    PartialEdgePool partial_edge_pool_;
+    util::Pool partial_edge_pool_;
 
     typedef std::priority_queue<PartialEdge> Generate;
     Generate generate_;

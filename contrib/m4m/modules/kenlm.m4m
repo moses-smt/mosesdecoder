@@ -1,0 +1,36 @@
+# -*- Makefile -*-
+
+# default parameters
+
+kenlm.order  ?= 5
+kenlm.memory ?= 10%
+kenlm.type   ?= probing
+kenlm.lazy   ?= 1 
+kenlm.factor ?= 0
+
+%.kenlm:
+	$(lock)
+	zcat -f $| | ${kenlm.build} -o ${kenlm.order} -S${kenlm.memory} \
+	| ${kenlm.binarize} ${kenlm.type} /dev/stdin $@_
+	mv $@_ $@
+	$(unlock)
+
+
+# $1: name of LM file
+# $2: order of model
+# $3: factors
+# $4: lazy loading?
+define add_kenlm
+
+ffname := LM$(words ${LMODEL_ENTRIES})
+MY_ENTRY := KENLM
+MY_ENTRY += name=$$(ffname)
+MY_ENTRY += order=$2 
+MY_ENTRY += factor=$3
+MY_ENTRY += num-features=1
+MY_ENTRY += lazyken=0
+MY_ENTRY += path=$(abspath $1)
+LMODEL_ENTRIES += $$(subst $$(space),;,$${MY_ENTRY})
+LMODELS  += $(abspath $1)
+
+endef

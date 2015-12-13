@@ -1,9 +1,13 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 
 my $jobs = 20;
-my ($infile,$outfile,$cmd,$tmpdir);
+my ($infile,$outfile,$cmd,$tmpdir,$qflags);
 
 use Getopt::Long qw(:config pass_through no_ignore_case);
 GetOptions('jobs=i' => \$jobs,
@@ -11,7 +15,7 @@ GetOptions('jobs=i' => \$jobs,
 	   'in=s' => \$infile,
 	   'out=s' => \$outfile,
 	   'cmd=s' => \$cmd,
-       'queue-flags=s' => \$qflags,
+	   'queue-flags=s' => \$qflags,
 	   ) or exit(1);
 
 die("ERROR: specify infile with -in") unless $infile;
@@ -24,7 +28,7 @@ $qflags = "" unless $qflags;
 
 # create split input files
 my $sentenceN = `cat $infile | wc -l`;
-my $splitN = int(($sentenceN+$jobs-0.5) / $jobs); 
+my $splitN = int(($sentenceN+$jobs-0.5) / $jobs);
 `split -a 2 -l $splitN $infile $tmpdir/in-$$-`;
 
 # find out the names of the jobs
@@ -55,7 +59,7 @@ foreach my $job (@JOB){
 
 # get qsub ID
 my @QSUB_ID;
-foreach my $job (@JOB){    
+foreach my $job (@JOB){
     `cat $tmpdir/job-$$-$job.log` =~ /Your job (\d+) /
 	or die "ERROR: Can't read log of job $tmpdir/job-$$-$job.log";
     push @QSUB_ID,$1;

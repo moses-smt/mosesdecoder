@@ -26,6 +26,7 @@
 #include "tables-core.h"
 #include "XmlException.h"
 #include "XmlTree.h"
+#include "util/tokenize.hh"
 
 using namespace std;
 
@@ -42,13 +43,14 @@ bool SentenceAlignmentWithSyntax::processTargetSentence(const char * targetStrin
   try {
     ProcessAndStripXMLTags(targetStringCPP, targetTree,
                            m_targetLabelCollection,
-                           m_targetTopLabelCollection);
+                           m_targetTopLabelCollection,
+                           false);
   } catch (const XmlException & e) {
     std::cerr << "WARNING: failed to process target sentence at line "
               << sentenceID << ": " << e.getMsg() << std::endl;
     return false;
   }
-  target = tokenize(targetStringCPP.c_str());
+  target = util::tokenize(targetStringCPP);
   return true;
 }
 
@@ -62,17 +64,15 @@ bool SentenceAlignmentWithSyntax::processSourceSentence(const char * sourceStrin
   try {
     ProcessAndStripXMLTags(sourceStringCPP, sourceTree,
                            m_sourceLabelCollection ,
-                           m_sourceTopLabelCollection);
+                           m_sourceTopLabelCollection,
+                           false);
   } catch (const XmlException & e) {
     std::cerr << "WARNING: failed to process source sentence at line "
               << sentenceID << ": " << e.getMsg() << std::endl;
     return false;
   }
-  source = tokenize(sourceStringCPP.c_str());
+  source = util::tokenize(sourceStringCPP);
   return true;
 }
 
 } // namespace
-
-
-

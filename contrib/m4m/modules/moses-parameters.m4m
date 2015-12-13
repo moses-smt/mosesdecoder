@@ -1,0 +1,57 @@
+# -*- makefile -*-
+casing1 ?= truecase
+casing2 ?= truecase
+word-alignment ?= fast
+moses.threads = $(shell parallel --number-of-cores)
+
+# numerical constants for moses
+moses.inputtype.plaintext = 0
+
+PHRASE_TABLES     = $(ptable)
+LANGUAGE_MODELS   = $(lmodel)
+DISTORTION_MODELS = $(lexdm)
+
+# defaults
+ptable      = model/tm/bin/${L1}-${L2}
+lmodel      = model/lm/${L2}/kenlm
+lexdm_specs = wbe-mslr-bidirectional-fe-allff
+lexdm       = model/dm/bin/${L1}-${L2}/${dflt_lexdmodel_specs}
+
+ptable.max-phrase-length ?= 7
+ptable.smoothing         ?= --GoodTuring
+ptable.source-factors    ?= 0
+ptable.target-factors    ?= 0
+ptable.num-features      ?= 5
+ptable.implemetation     ?= 1
+# reminder: implementation types:
+#  0 - text
+#  1 - binary via processPhraseTable
+# 14 - based on dynamic suffix arrays
+
+# if you don't provide the phrase table, you must 
+# specify the components of the word-aligned corpus
+# as target-specific variable assignments
+model/tm/bin/${L1}-${L2}: ptable.L1_text = ${
+model/tm/bin/${L1}-${L2}: ptable.smoothing = --GoodTuring
+
+# source corpus and parameters here:
+
+
+# reordering model
+dmodel.type         = wbe
+dmodel.orientation  = mslr
+dmodel.direction    = bidirectional
+dmodel.language     = fe
+dmodel.collapsing   = allff
+dmodel.smooth       = 0.5
+dmodel.num-feats    = 9
+dmodel.description  = $(addprefix ${dmodel.type}-${dmodel.orientation}-,\
+			${dmodel.direction}-${dmodel.language}-${dmodel.collapsing})
+distortion-limit    = 6
+
+# DEFAULT TUNING PARAMETERS
+FACTORSEP ?= \n
+mert.nbest          = 100
+mert.extra-flags   ?=
+mert.extra-flags   += --no-filter-phrase-table
+mert.decoder-flags  = -threads ${moses.threads} -fd '${FACTORSEP}'

@@ -6,7 +6,7 @@
 
 namespace MosesTuning
 {
-  
+
 
 class Scorer;
 

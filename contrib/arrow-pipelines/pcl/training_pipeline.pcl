@@ -1,0 +1,117 @@
+#
+# Import all of the components to be composed
+#
+import components.src_trg_tokeniser as tokeniser
+import components.translation_model_training as model_training
+import components.wrappers.irstlm_build.irstlm_build as lang_model
+import components.wrappers.mert.mert as mert
+
+#
+# Component definition
+#
+#                                                        Config: {model_training.max_segment_length,
+#                                                                 model_training.corpus.[development_size|evaluation_size],
+#                                                                 model_training.[src|trg].language,
+#                                                                 model_training.method.[alignment|reordering],  {moses_ini_filename,
+#                                                                 model_training.giza.installation,               evaluation_data_filename}
+# {src_filename,    {tokenised_src_filename,                      model_training.translation_model.dir}           |
+#  trg_filename}     tokenised_trg_filename}             +-----------------------------------------+   +-------+  |          {moses_ini_filename}
+#  |  +-------+    +-------+    +-------+ |  +-------+   | tokenised_src_filename -> src_filename, |   | Model |  V    +-------+               |
+#  V  |       +--->+ Src/  +--->+       | V  |       +-->+ tokenised_trg_filename -> trg_filename  +-->+ Train +------>+       |      +------+ V
+# --->+ Split |    | Trg   |    | Merge +--->+ Split |   +-----------------------------------------+   +-------+       | Merge +----->+ MERT +--->
+#     |       +--->+ Token +--->+       |    |       +--\  +------------------------------------------+   +--------+   |       |  ^   +------+
+#     +-------+    +-------+    +-------+    +-------+  \->+ tokenised_trg_filename -> input_filename +-->+ IRSTLM +-->+       |  |
+# Config: {tokeniser.[src|trg].language,                   +------------------------------------------+   +--------+ ^ +-------+  |
+#          tokeniser.[src|trg].tokeniser_dir                             Config: {irstlm_installation_dir::String,   |            |
+#          tokeniser.moses.installation}                                          irstlm_smoothing_method::String,   |            |
+#                                                                                 language_model_directory}          |            |
+#                                                                                                                    |            |
+#                                                           {lm_filename, compiled_lm_filename, add_start_end_filename}           |
+#                                                                                                                                 |
+#                                                            {moses_ini_file, evaluation_data_filename, trg_language_model_filename,
+#                                                             trg_language_model_order, trg_language_model_type}
+#
+component training_pipeline
+  inputs src_filename, trg_filename
+  output moses_ini_filename
+  configuration source_language,
+                target_language,
+                max_segment_length,
+                corpus_development_size,
+                corpus_evaluation_size,
+                alignment_method,
+                reordering_method,
+                smoothing_method,
+                tokenisation_directory,
+                translation_model_directory,
+                language_model_directory,
+                mert_directory,
+                mert_max_no_iterations,
+                moses_installation_directory,
+                giza_installation_directory,
+                irstlm_installation_directory
+  declare
+    tokeniser := new tokeniser with
+      source_language -> tokeniser.src.language,
+      target_language -> tokeniser.trg.language,
+      tokenisation_directory -> tokeniser.src.tokenisation_dir,
+      tokenisation_directory -> tokeniser.trg.tokenisation_dir,
+      moses_installation_directory -> tokeniser.moses.installation
+    model_training := new model_training with
+      max_segment_length -> model_training.max_segment_length,
+      corpus_development_size -> model_training.corpus.development_size,
+      corpus_evaluation_size -> model_training.corpus.evaluation_size,
+      translation_model_directory -> model_training.translation_model.dir,
+      alignment_method -> model_training.method.alignment,
+      reordering_method -> model_training.method.reordering,
+      source_language -> model_training.src.language,
+      moses_installation_directory -> model_training.moses.installation,
+      giza_installation_directory -> model_training.giza.installation,
+      target_language -> model_training.trg.language
+    irstlm := new lang_model with
+      irstlm_installation_directory -> irstlm_installation_dir,
+      smoothing_method -> irstlm_smoothing_method,
+      language_model_directory -> language_model_directory
+    mert := new mert with
+      source_language -> source_language,
+      target_language -> target_language,
+      moses_installation_directory -> moses_installation_dir,
+      mert_directory -> mert_working_directory,
+      mert_max_no_iterations -> mert_max_no_iterations
+  as
+    # Split and transform the input to the tokeniser component
+    #  Inputs: src_filename, trg_filename
+    # Outputs: (tokenised_src_filename), (tokenised_trg_filename)
+    (wire src_filename -> src_filename,
+          trg_filename -> _ &&&
+     wire trg_filename -> trg_filename,
+          src_filename -> _) >>>
+    tokeniser >>>
+
+    # Merge output from tokeniser
+    #  Inputs: (tokenised_src_filename), (tokenised_trg_filename)
+    # Outputs: tokenised_src_filename, tokenised_trg_filename
+    merge top[tokenised_src_filename] -> tokenised_src_filename,
+          bottom[tokenised_trg_filename] -> tokenised_trg_filename >>>
+
+    # Train the translation table and target language model
+    #  Inputs: tokenised_src_filename, tokenised_trg_filename
+    # Outputs: (moses_ini_filename), ('add_start_end_filename', 'lm_filename', 'compiled_lm_filename')
+    ((wire tokenised_src_filename -> src_filename,
+           tokenised_trg_filename -> trg_filename >>> model_training) &&&
+     (wire tokenised_trg_filename -> input_filename,
+           tokenised_src_filename -> _ >>> irstlm)) >>>
+
+    # Merge the output from the TT and LM training component
+    #  Inputs: (moses_ini_filename, evaluation_data_filename),
+    #          (compiled_lm_filename, add_start_end_filename, lm_filename)
+    # Outputs: moses_ini_filename, evaluation_data_filename, evaluation_data_filename,
+    #          trg_language_model_filename, trg_language_model_order, trg_language_model_type
+    merge top[moses_ini_filename] -> moses_ini_filename,
+          top[evaluation_data_filename] -> evaluation_data_filename,
+          bottom[compiled_lm_filename] -> trg_language_model_filename,
+          bottom[add_start_end_filename] -> _,
+          bottom[lm_filename] -> _,
+          3 -> trg_language_model_order,
+          9 -> trg_language_model_type >>>
+    mert

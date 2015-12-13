@@ -1,0 +1,7 @@
+# -*- Makefile -*-
+
+# STANDARD LOCATIONS
+basedir   ?= $(CURDIR)
+tune.dir  ?= ${basedir}/tune
+eval.dir  ?= ${basedir}/eval
+input.dir ?= ${basedir}/input

@@ -21,13 +21,13 @@
 
 #include "TargetPhrase.h"
 #include "Vocab.h"
+#include "moses/TargetPhraseCollection.h"
+#include <boost/shared_ptr.hpp>
 
 namespace Moses
 {
 class TargetPhraseCollection;
 class PhraseDictionary;
-class LMList;
-class WordPenaltyProducer;
 }
 
 namespace OnDiskPt
@@ -48,10 +48,13 @@ class TargetPhraseCollection
 protected:
   typedef std::vector<TargetPhrase*> CollType;
   CollType m_coll;
-  UINT64 m_filePos;
+  uint64_t m_filePos;
   std::string m_debugStr;
 
 public:
+  typedef boost::shared_ptr<TargetPhraseCollection const> shared_const_ptr;
+  typedef boost::shared_ptr<TargetPhraseCollection> shared_ptr;
+
   static size_t s_sortScoreInd;
 
   TargetPhraseCollection();
@@ -66,20 +69,18 @@ public:
   size_t GetSize() const {
     return m_coll.size();
   }
-  
-  const TargetPhrase &GetTargetPhrase(size_t ind) const;
-  
-  UINT64 GetFilePos() const;
 
-  Moses::TargetPhraseCollection *ConvertToMoses(const std::vector<Moses::FactorType> &inputFactors
+  const TargetPhrase &GetTargetPhrase(size_t ind) const;
+
+  uint64_t GetFilePos() const;
+
+  Moses::TargetPhraseCollection::shared_ptr ConvertToMoses(const std::vector<Moses::FactorType> &inputFactors
       , const std::vector<Moses::FactorType> &outputFactors
       , const Moses::PhraseDictionary &phraseDict
       , const std::vector<float> &weightT
-      , const Moses::WordPenaltyProducer* wpProducer
-      , const Moses::LMList &lmList
-      , const std::string &filePath
-      , Vocab &vocab) const;
-  void ReadFromFile(size_t tableLimit, UINT64 filePos, OnDiskWrapper &onDiskWrapper);
+      , Vocab &vocab
+      , bool isSyntax) const;
+  void ReadFromFile(size_t tableLimit, uint64_t filePos, OnDiskWrapper &onDiskWrapper);
 
   const std::string GetDebugStr() const;
   void SetDebugStr(const std::string &str);

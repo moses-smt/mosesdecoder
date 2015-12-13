@@ -42,11 +42,11 @@ typedef HidVarCPT2DModel<P,C,LogProb> PgivCModel;
 class WModel {
  private:
   TrainableDTree2DModel<P,W,LogProb> modPgivWdt;
-  
+
   RandAccCPT2DModel<P,W,LogProb> modPgivWs;
   RandAccCPT1DModel<P,LogProb> modP;
   RandAccCPT1DModel<W,LogProb> modW;
-  
+
  public:
   //LogProb getProb ( const W& w, const HidVarCPT1DModel<P,LogProb>::IterVal& p ) const {
   LogProb getProb ( const W& w, const P::ArrayIterator<LogProb>& p ) const {
@@ -93,8 +93,8 @@ class OModel {
   };
 
   typedef DistribModeledWgivC RandVarType;
-  
-  
+
+
 
   void calcProb ( OModel::RandVarType& o, const W& w ) const {
     o.clear();
@@ -106,7 +106,7 @@ class OModel {
       for (LogProb pr=modPgivC.setIterProb(p,c,aCtr); pr!=LogProb(); pr = modPgivC.setIterProb(p,c,aCtr=0) ){
         o.setProb(c) += modPgivC.getProb(p,c).toProb() * modWgivP.getProb(w,p).toProb();
       }
-     
+
     }
   }
 
@@ -134,7 +134,7 @@ class XModel {
   RandAccCPT2DModel<P,W,Prob>     modPgivW;
   RandAccCPT1DModel<P,Prob>       modP;
   RandAccCPT1DModel<W,Prob>       modW;
-  
+
  public:
 
   typedef X RandVarType;

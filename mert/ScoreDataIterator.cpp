@@ -18,6 +18,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 #include <iostream>
 
+#include "util/file_piece.hh"
 #include "util/tokenize_piece.hh"
 
 #include "ScoreArray.h"
@@ -28,23 +29,28 @@ using namespace util;
 
 namespace MosesTuning
 {
-  
+
 
 ScoreDataIterator::ScoreDataIterator() {}
 
-ScoreDataIterator::ScoreDataIterator(const string& filename) {
+ScoreDataIterator::ScoreDataIterator(const string& filename)
+{
   m_in.reset(new FilePiece(filename.c_str()));
   readNext();
 }
 
-void ScoreDataIterator::readNext() {
+ScoreDataIterator::~ScoreDataIterator() {}
+
+void ScoreDataIterator::readNext()
+{
   m_next.clear();
   try {
     StringPiece marker = m_in->ReadDelimited();
     if (marker != StringPiece(SCORES_TXT_BEGIN)) {
       throw FileFormatException(m_in->FileName(), marker.as_string());
     }
-    size_t sentenceId = m_in->ReadULong();
+    // size_t sentenceId =
+    m_in->ReadULong();
     size_t count = m_in->ReadULong();
     size_t length = m_in->ReadULong();
     m_in->ReadLine(); //ignore rest of line
@@ -68,12 +74,14 @@ void ScoreDataIterator::readNext() {
   }
 }
 
-void ScoreDataIterator::increment() {
+void ScoreDataIterator::increment()
+{
   readNext();
 }
 
 
-bool ScoreDataIterator::equal(const ScoreDataIterator& rhs) const {
+bool ScoreDataIterator::equal(const ScoreDataIterator& rhs) const
+{
   if (!m_in && !rhs.m_in) {
     return true;
   } else if (!m_in) {
@@ -81,13 +89,14 @@ bool ScoreDataIterator::equal(const ScoreDataIterator& rhs) const {
   } else if (!rhs.m_in) {
     return false;
   } else {
-    return m_in->FileName() == rhs.m_in->FileName() && 
-      m_in->Offset() == rhs.m_in->Offset();
+    return m_in->FileName() == rhs.m_in->FileName() &&
+           m_in->Offset() == rhs.m_in->Offset();
   }
 }
 
 
-const vector<ScoreDataItem>& ScoreDataIterator::dereference() const {
+const vector<ScoreDataItem>& ScoreDataIterator::dereference() const
+{
   return m_next;
 }
 

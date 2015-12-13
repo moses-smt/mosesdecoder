@@ -6,12 +6,12 @@ using namespace std;
 
 namespace MosesTuning
 {
-  
+
 
 // TODO: This is too long. Consider creating a function for
 // initialization such as Init().
 InterpolatedScorer::InterpolatedScorer(const string& name, const string& config)
-    : Scorer(name,config)
+  : Scorer(name,config)
 {
   // name would be: HAMMING,BLEU or similar
   string scorers = name;
@@ -66,7 +66,8 @@ InterpolatedScorer::InterpolatedScorer(const string& name, const string& config)
   cerr <<endl;
 }
 
-bool InterpolatedScorer::useAlignment() const {
+bool InterpolatedScorer::useAlignment() const
+{
   //cout << "InterpolatedScorer::useAlignment" << endl;
   for (vector<Scorer*>::const_iterator itsc =  m_scorers.begin(); itsc < m_scorers.end(); itsc++) {
     if ((*itsc)->useAlignment()) {
@@ -88,10 +89,6 @@ void InterpolatedScorer::setScoreData(ScoreData* data)
     for (size_t i = 0; i < data->size(); i++) {
       ScoreArray scoreArray = data->get(i);
       ScoreArray newScoreArray;
-      std::string istr;
-      std::stringstream out;
-      out << i;
-      istr = out.str();
       size_t numNBest = scoreArray.size();
       //cout << " Datasize " << data->size() <<  " NumNBest " << numNBest << endl ;
       for (size_t j = 0; j < numNBest ; j++) {
@@ -105,7 +102,7 @@ void InterpolatedScorer::setScoreData(ScoreData* data)
         //cout << " last " << last << " NumScores " << numScoresScorer << "newScorestats " << newScoreStats << endl;
         newScoreArray.add(newScoreStats);
       }
-      newScoreArray.setIndex(istr);
+      newScoreArray.setIndex(i);
       newData->add(newScoreArray);
     }
     //newData->dump();
@@ -156,6 +153,41 @@ void InterpolatedScorer::score(const candidates_t& candidates, const diffs_t& di
 
 }
 
+/** Interpolated scorer gets a vector of sufficient statistics, calls all scorers with corresponding statistics,
+    and combines them with weights **/
+float InterpolatedScorer::calculateScore(const std::vector<ScoreStatsType>& totals) const
+{
+  size_t scorerNum = 0;
+  size_t last = 0;
+  float score = 0;
+  for (ScopedVector<Scorer>::const_iterator itsc = m_scorers.begin();
+       itsc != m_scorers.end(); ++itsc) {
+    int numScoresScorer = (*itsc)->NumberOfScores();
+    std::vector<ScoreStatsType> totals_scorer(totals.begin()+last, totals.begin()+last+numScoresScorer);
+    score += (*itsc)->calculateScore(totals_scorer) * m_scorer_weights[scorerNum];
+    last += numScoresScorer;
+    scorerNum++;
+  }
+  return score;
+}
+
+
+float InterpolatedScorer::getReferenceLength(const std::vector<ScoreStatsType>& totals) const
+{
+  size_t scorerNum = 0;
+  size_t last = 0;
+  float refLen = 0;
+  for (ScopedVector<Scorer>::const_iterator itsc = m_scorers.begin();
+       itsc != m_scorers.end(); ++itsc) {
+    int numScoresScorer = (*itsc)->NumberOfScores();
+    std::vector<ScoreStatsType> totals_scorer(totals.begin()+last, totals.begin()+last+numScoresScorer);
+    refLen += (*itsc)->getReferenceLength(totals_scorer) * m_scorer_weights[scorerNum];
+    last += numScoresScorer;
+    scorerNum++;
+  }
+  return refLen;
+}
+
 void InterpolatedScorer::setReferenceFiles(const vector<string>& referenceFiles)
 {
   for (ScopedVector<Scorer>::iterator itsc = m_scorers.begin();
@@ -168,7 +200,7 @@ void InterpolatedScorer::prepareStats(size_t sid, const string& text, ScoreStats
 {
   stringstream buff;
   string align = text;
-  string sentence = "";
+  string sentence = text;
   size_t alignmentData = text.find("|||");
   //Get sentence and alignment parts
   if(alignmentData != string::npos) {
@@ -180,8 +212,7 @@ void InterpolatedScorer::prepareStats(size_t sid, const string& text, ScoreStats
     ScoreStats tempEntry;
     if ((*itsc)->useAlignment()) {
       (*itsc)->prepareStats(sid, text, tempEntry);
-    }
-    else {
+    } else {
       (*itsc)->prepareStats(sid, sentence, tempEntry);
     }
     if (i > 0) buff <<  " ";
@@ -210,18 +241,17 @@ void InterpolatedScorer::setFactors(const string& factors)
 
 void InterpolatedScorer::setFilter(const string& filterCommand)
 {
-    if (filterCommand.empty()) return;
+  if (filterCommand.empty()) return;
 
-    vector<string> csplit;
-    split(filterCommand, ',', csplit);
+  vector<string> csplit;
+  split(filterCommand, ',', csplit);
 
-    if (csplit.size() != m_scorers.size())
-      throw runtime_error("Number of command specifications does not equal number of interpolated scorers.");
+  if (csplit.size() != m_scorers.size())
+    throw runtime_error("Number of command specifications does not equal number of interpolated scorers.");
 
-    for (size_t i = 0; i < m_scorers.size(); ++i) {
-      m_scorers[i]->setFilter(csplit[i]);
-    }
+  for (size_t i = 0; i < m_scorers.size(); ++i) {
+    m_scorers[i]->setFilter(csplit[i]);
+  }
 }
 
 }
-

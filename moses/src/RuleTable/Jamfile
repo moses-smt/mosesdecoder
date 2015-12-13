@@ -1,1 +1,0 @@
-lib RuleTable : [ glob *.cpp ] ..//moses_internal ..//Scope3Parser ..//CYKPlusParser ..//fuzzy-match ;

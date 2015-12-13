@@ -10,7 +10,7 @@
 
 namespace MosesTuning
 {
-  
+
 
 class ScoreStats;
 
@@ -31,7 +31,7 @@ public:
     return kLENGTH + 1;
   }
 
-  virtual float calculateScore(const std::vector<int>& comps) const;
+  virtual float calculateScore(const std::vector<ScoreStatsType>& comps) const;
 
 private:
   const int kLENGTH;

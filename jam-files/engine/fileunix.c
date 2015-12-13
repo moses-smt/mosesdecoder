@@ -11,491 +11,170 @@
  *  (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  */
 
-# include "jam.h"
-# include "filesys.h"
-# include "strings.h"
-# include "pathsys.h"
-# include "newstr.h"
-# include <stdio.h>
-# include <sys/stat.h>
-
-#if defined(sun) || defined(__sun) || defined(linux)
-# include <unistd.h> /* needed for read and close prototype */
-#endif
-
-# ifdef USE_FILEUNIX
-
-#if defined(sun) || defined(__sun)
-# include <unistd.h> /* needed for read and close prototype */
-#endif
-
-# if defined( OS_SEQUENT ) || \
-     defined( OS_DGUX ) || \
-     defined( OS_SCO ) || \
-     defined( OS_ISC )
-# define PORTAR 1
-# endif
-
-# ifdef __EMX__
-# include <sys/types.h>
-# include <sys/stat.h>
-# endif
-
-# if defined( OS_RHAPSODY ) || \
-     defined( OS_MACOSX ) || \
-     defined( OS_NEXT )
-/* need unistd for rhapsody's proper lseek */
-# include <sys/dir.h>
-# include <unistd.h>
-# define STRUCT_DIRENT struct direct
-# else
-# include <dirent.h>
-# define STRUCT_DIRENT struct dirent
-# endif
-
-# ifdef OS_COHERENT
-# include <arcoff.h>
-# define HAVE_AR
-# endif
-
-# if defined( OS_MVS ) || \
-         defined( OS_INTERIX )
-
-#define ARMAG   "!<arch>\n"
-#define SARMAG  8
-#define ARFMAG  "`\n"
-
-struct ar_hdr       /* archive file member header - printable ascii */
-{
-    char    ar_name[16];    /* file member name - `/' terminated */
-    char    ar_date[12];    /* file member date - decimal */
-    char    ar_uid[6];  /* file member user id - decimal */
-    char    ar_gid[6];  /* file member group id - decimal */
-    char    ar_mode[8]; /* file member mode - octal */
-    char    ar_size[10];    /* file member size - decimal */
-    char    ar_fmag[2]; /* ARFMAG - string to end header */
-};
-
-# define HAVE_AR
-# endif
-
-# if defined( OS_QNX ) || \
-     defined( OS_BEOS ) || \
-     defined( OS_MPEIX )
-# define NO_AR
-# define HAVE_AR
-# endif
-
-# ifndef HAVE_AR
-
-# ifdef OS_AIX
-/* Define those for AIX to get the definitions for both the small and the
- * big variant of the archive file format. */
-#    define __AR_SMALL__
-#    define __AR_BIG__
-# endif
-
-# include <ar.h>
-# endif
-
 /*
  * fileunix.c - manipulate file names and scan directories on UNIX/AmigaOS
  *
  * External routines:
+ *  file_mkdir()                    - create a directory
+ *  file_supported_fmt_resolution() - file modification timestamp resolution
  *
- *  file_dirscan() - scan a directory for files
- *  file_time() - get timestamp of file, if not done by file_dirscan()
- *  file_archscan() - scan an archive for files
- *
- * File_dirscan() and file_archscan() call back a caller provided function
- * for each file found.  A flag to this callback function lets file_dirscan()
- * and file_archscan() indicate that a timestamp is being provided with the
- * file.   If file_dirscan() or file_archscan() do not provide the file's
- * timestamp, interested parties may later call file_time().
- *
- * 04/08/94 (seiwald) - Coherent/386 support added.
- * 12/19/94 (mikem) - solaris string table insanity support
- * 02/14/95 (seiwald) - parse and build /xxx properly
- * 05/03/96 (seiwald) - split into pathunix.c
- * 11/21/96 (peterk) - BEOS does not have Unix-style archives
+ * External routines called only via routines in filesys.c:
+ *  file_collect_dir_content_() - collects directory content information
+ *  file_dirscan_()             - OS specific file_dirscan() implementation
+ *  file_query_()               - query information about a path from the OS
  */
 
+#include "jam.h"
+#ifdef USE_FILEUNIX
+#include "filesys.h"
+
+#include "object.h"
+#include "pathsys.h"
+#include "strings.h"
+
+#include <assert.h>
+#include <stdio.h>
+#include <sys/stat.h>  /* needed for mkdir() */
+
+#if defined( sun ) || defined( __sun ) || defined( linux )
+# include <unistd.h>  /* needed for read and close prototype */
+#endif
+
+#if defined( OS_SEQUENT ) || \
+    defined( OS_DGUX ) || \
+    defined( OS_SCO ) || \
+    defined( OS_ISC )
+# define PORTAR 1
+#endif
+
+#if defined( OS_RHAPSODY ) || defined( OS_MACOSX ) || defined( OS_NEXT )
+# include <sys/dir.h>
+# include <unistd.h>  /* need unistd for rhapsody's proper lseek */
+# define STRUCT_DIRENT struct direct
+#else
+# include <dirent.h>
+# define STRUCT_DIRENT struct dirent
+#endif
 
 /*
- * file_dirscan() - scan a directory for files.
+ * file_collect_dir_content_() - collects directory content information
  */
 
-void file_dirscan( char * dir, scanback func, void * closure )
+int file_collect_dir_content_( file_info_t * const d )
 {
-    PROFILE_ENTER( FILE_DIRSCAN );
+    LIST * files = L0;
+    PATHNAME f;
+    DIR * dd;
+    STRUCT_DIRENT * dirent;
+    string path[ 1 ];
+    char const * dirstr;
 
-    file_info_t * d = 0;
+    assert( d );
+    assert( d->is_dir );
+    assert( list_empty( d->files ) );
 
-    d = file_query( dir );
+    dirstr = object_str( d->name );
 
-    if ( !d || !d->is_dir )
+    memset( (char *)&f, '\0', sizeof( f ) );
+    f.f_dir.ptr = dirstr;
+    f.f_dir.len = strlen( dirstr );
+
+    if ( !*dirstr ) dirstr = ".";
+
+    if ( !( dd = opendir( dirstr ) ) )
+        return -1;
+
+    string_new( path );
+    while ( ( dirent = readdir( dd ) ) )
     {
-        PROFILE_EXIT( FILE_DIRSCAN );
-        return;
+        OBJECT * name;
+        f.f_base.ptr = dirent->d_name
+        #ifdef old_sinix
+            - 2  /* Broken structure definition on sinix. */
+        #endif
+            ;
+        f.f_base.len = strlen( f.f_base.ptr );
+
+        string_truncate( path, 0 );
+        path_build( &f, path );
+        name = object_new( path->value );
+        /* Immediately stat the file to preserve invariants. */
+        if ( file_query( name ) )
+            files = list_push_back( files, name );
+        else
+            object_free( name );
     }
+    string_free( path );
 
-    if ( ! d->files )
-    {
-        LIST* files = L0;
-        PATHNAME f;
-        DIR *dd;
-        STRUCT_DIRENT *dirent;
-        string filename[1];
+    closedir( dd );
 
-        /* First enter directory itself */
-
-        memset( (char *)&f, '\0', sizeof( f ) );
-
-        f.f_dir.ptr = dir;
-        f.f_dir.len = strlen(dir);
-
-        dir = *dir ? dir : ".";
-
-        /* Now enter contents of directory. */
-
-        if ( !( dd = opendir( dir ) ) )
-        {
-            PROFILE_EXIT( FILE_DIRSCAN );
-            return;
-        }
-
-        if ( DEBUG_BINDSCAN )
-            printf( "scan directory %s\n", dir );
-
-        string_new( filename );
-        while ( ( dirent = readdir( dd ) ) )
-        {
-            # ifdef old_sinix
-            /* Broken structure definition on sinix. */
-            f.f_base.ptr = dirent->d_name - 2;
-            # else
-            f.f_base.ptr = dirent->d_name;
-            # endif
-            f.f_base.len = strlen( f.f_base.ptr );
-
-            string_truncate( filename, 0 );
-            path_build( &f, filename, 0 );
-
-            files = list_new( files, newstr(filename->value) );
-            file_query( filename->value );
-        }
-        string_free( filename );
-
-        closedir( dd );
-
-        d->files = files;
-    }
-
-    /* Special case / : enter it */
-    {
-        unsigned long len = strlen(d->name);
-        if ( ( len == 1 ) && ( d->name[0] == '/' ) )
-            (*func)( closure, d->name, 1 /* stat()'ed */, d->time );
-    }
-
-    /* Now enter contents of directory */
-    if ( d->files )
-    {
-        LIST * files = d->files;
-        while ( files )
-        {
-            file_info_t * ff = file_info( files->string );
-            (*func)( closure, ff->name, 1 /* stat()'ed */, ff->time );
-            files = list_next( files );
-        }
-    }
-
-    PROFILE_EXIT( FILE_DIRSCAN );
-}
-
-
-file_info_t * file_query( char * filename )
-{
-    file_info_t * ff = file_info( filename );
-    if ( ! ff->time )
-    {
-        struct stat statbuf;
-
-        if ( stat( *filename ? filename : ".", &statbuf ) < 0 )
-            return 0;
-
-        ff->is_file = statbuf.st_mode & S_IFREG ? 1 : 0;
-        ff->is_dir = statbuf.st_mode & S_IFDIR ? 1 : 0;
-        ff->size = statbuf.st_size;
-        ff->time = statbuf.st_mtime ? statbuf.st_mtime : 1;
-    }
-    return ff;
-}
-
-/*
- * file_time() - get timestamp of file, if not done by file_dirscan()
- */
-
-int
-file_time(
-    char    *filename,
-    time_t  *time )
-{
-    file_info_t * ff = file_query( filename );
-    if ( !ff ) return -1;
-    *time = ff->time;
+    d->files = files;
     return 0;
 }
 
-int file_is_file(char* filename)
-{
-    file_info_t * ff = file_query( filename );
-    if ( !ff ) return -1;
-    return ff->is_file;
-}
-
-int file_mkdir(char* pathname)
-{
-    return mkdir(pathname, 0766);
-}
 
 /*
- * file_archscan() - scan an archive for files
+ * file_dirscan_() - OS specific file_dirscan() implementation
  */
 
-# ifndef AIAMAG /* God-fearing UNIX */
-
-# define SARFMAG 2
-# define SARHDR sizeof( struct ar_hdr )
-
-void
-file_archscan(
-    char *archive,
-    scanback func,
-    void *closure )
+void file_dirscan_( file_info_t * const d, scanback func, void * closure )
 {
-# ifndef NO_AR
-    struct ar_hdr ar_hdr;
-    char buf[ MAXJPATH ];
-    long offset;
-    char    *string_table = 0;
-    int fd;
+    assert( d );
+    assert( d->is_dir );
 
-    if ( ( fd = open( archive, O_RDONLY, 0 ) ) < 0 )
-        return;
+    /* Special case / : enter it */
+    if ( !strcmp( object_str( d->name ), "/" ) )
+        (*func)( closure, d->name, 1 /* stat()'ed */, &d->time );
+}
 
-    if ( read( fd, buf, SARMAG ) != SARMAG ||
-        strncmp( ARMAG, buf, SARMAG ) )
-    {
-        close( fd );
-        return;
-    }
 
-    offset = SARMAG;
+/*
+ * file_mkdir() - create a directory
+ */
 
-    if ( DEBUG_BINDSCAN )
-        printf( "scan archive %s\n", archive );
-
-    while ( ( read( fd, &ar_hdr, SARHDR ) == SARHDR )
-           && !( memcmp( ar_hdr.ar_fmag, ARFMAG, SARFMAG )
-#ifdef ARFZMAG
-              /* OSF also has a compressed format */
-              && memcmp( ar_hdr.ar_fmag, ARFZMAG, SARFMAG )
+int file_mkdir( char const * const path )
+{
+#if defined(__MINGW32__)
+    /* MinGW's mkdir() takes only one argument: the path. */
+    mkdir(path);
+#else
+    /* Explicit cast to remove const modifiers and avoid related compiler
+     * warnings displayed when using the intel compiler.
+     */
+    return mkdir( (char *)path, 0777 );
 #endif
-          ) )
-    {
-        char   lar_name_[257];
-        char * lar_name = lar_name_ + 1;
-        long   lar_date;
-        long   lar_size;
-        long   lar_offset;
-        char * c;
-        char * src;
-        char * dest;
-
-        strncpy( lar_name, ar_hdr.ar_name, sizeof(ar_hdr.ar_name) );
-
-        sscanf( ar_hdr.ar_date, "%ld", &lar_date );
-        sscanf( ar_hdr.ar_size, "%ld", &lar_size );
-
-        if (ar_hdr.ar_name[0] == '/')
-        {
-        if (ar_hdr.ar_name[1] == '/')
-        {
-            /* this is the "string table" entry of the symbol table,
-            ** which holds strings of filenames that are longer than
-            ** 15 characters (ie. don't fit into a ar_name
-            */
-
-            string_table = (char *)BJAM_MALLOC_ATOMIC(lar_size);
-            lseek(fd, offset + SARHDR, 0);
-            if (read(fd, string_table, lar_size) != lar_size)
-            printf("error reading string table\n");
-        }
-        else if (string_table && ar_hdr.ar_name[1] != ' ')
-        {
-            /* Long filenames are recognized by "/nnnn" where nnnn is
-            ** the offset of the string in the string table represented
-            ** in ASCII decimals.
-            */
-            dest = lar_name;
-            lar_offset = atoi(lar_name + 1);
-            src = &string_table[lar_offset];
-            while (*src != '/')
-            *dest++ = *src++;
-            *dest = '/';
-        }
-        }
-
-        c = lar_name - 1;
-        while ( ( *++c != ' ' ) && ( *c != '/' ) ) ;
-        *c = '\0';
-
-        if ( DEBUG_BINDSCAN )
-        printf( "archive name %s found\n", lar_name );
-
-        sprintf( buf, "%s(%s)", archive, lar_name );
-
-        (*func)( closure, buf, 1 /* time valid */, (time_t)lar_date );
-
-        offset += SARHDR + ( ( lar_size + 1 ) & ~1 );
-        lseek( fd, offset, 0 );
-    }
-
-    if (string_table)
-        BJAM_FREE(string_table);
-
-    close( fd );
-
-# endif /* NO_AR */
-
 }
 
-# else /* AIAMAG - RS6000 AIX */
 
-static void file_archscan_small(
-    int fd, char const *archive, scanback func, void *closure)
+/*
+ * file_query_() - query information about a path from the OS
+ */
+
+void file_query_( file_info_t * const info )
 {
-    struct fl_hdr fl_hdr;
-
-    struct {
-        struct ar_hdr hdr;
-        char pad[ 256 ];
-    } ar_hdr ;
-
-    char buf[ MAXJPATH ];
-    long offset;
-
-    if ( read( fd, (char *)&fl_hdr, FL_HSZ ) != FL_HSZ)
-        return;
-
-    sscanf( fl_hdr.fl_fstmoff, "%ld", &offset );
-
-    if ( DEBUG_BINDSCAN )
-        printf( "scan archive %s\n", archive );
-
-    while ( ( offset > 0 )
-           && ( lseek( fd, offset, 0 ) >= 0 )
-           && ( read( fd, &ar_hdr, sizeof( ar_hdr ) ) >= sizeof( ar_hdr.hdr ) ) )
-    {
-        long lar_date;
-        int  lar_namlen;
-
-        sscanf( ar_hdr.hdr.ar_namlen, "%d" , &lar_namlen );
-        sscanf( ar_hdr.hdr.ar_date  , "%ld", &lar_date   );
-        sscanf( ar_hdr.hdr.ar_nxtmem, "%ld", &offset     );
-
-        if ( !lar_namlen )
-            continue;
-
-        ar_hdr.hdr._ar_name.ar_name[ lar_namlen ] = '\0';
-
-        sprintf( buf, "%s(%s)", archive, ar_hdr.hdr._ar_name.ar_name );
-
-        (*func)( closure, buf, 1 /* time valid */, (time_t)lar_date );
-    }
+    file_query_posix_( info );
 }
 
-/* Check for OS version which supports the big variant. */
-#ifdef AR_HSZ_BIG
 
-static void file_archscan_big(
-    int fd, char const *archive, scanback func, void *closure)
+/*
+ * file_supported_fmt_resolution() - file modification timestamp resolution
+ *
+ * Returns the minimum file modification timestamp resolution supported by this
+ * Boost Jam implementation. File modification timestamp changes of less than
+ * the returned value might not be recognized.
+ *
+ * Does not take into consideration any OS or file system related restrictions.
+ *
+ * Return value 0 indicates that any value supported by the OS is also supported
+ * here.
+ */
+
+void file_supported_fmt_resolution( timestamp * const t )
 {
-    struct fl_hdr_big fl_hdr;
-
-    struct {
-        struct ar_hdr_big hdr;
-        char pad[ 256 ];
-    } ar_hdr ;
-
-    char buf[ MAXJPATH ];
-    long long offset;
-
-    if ( read( fd, (char *)&fl_hdr, FL_HSZ_BIG) != FL_HSZ_BIG)
-        return;
-
-    sscanf( fl_hdr.fl_fstmoff, "%lld", &offset );
-
-    if ( DEBUG_BINDSCAN )
-        printf( "scan archive %s\n", archive );
-
-    while ( ( offset > 0 )
-           && ( lseek( fd, offset, 0 ) >= 0 )
-           && ( read( fd, &ar_hdr, sizeof( ar_hdr ) ) >= sizeof( ar_hdr.hdr ) ) )
-    {
-        long lar_date;
-        int  lar_namlen;
-
-        sscanf( ar_hdr.hdr.ar_namlen, "%d"  , &lar_namlen );
-        sscanf( ar_hdr.hdr.ar_date  , "%ld" , &lar_date   );
-        sscanf( ar_hdr.hdr.ar_nxtmem, "%lld", &offset     );
-
-        if ( !lar_namlen )
-            continue;
-
-        ar_hdr.hdr._ar_name.ar_name[ lar_namlen ] = '\0';
-
-        sprintf( buf, "%s(%s)", archive, ar_hdr.hdr._ar_name.ar_name );
-
-        (*func)( closure, buf, 1 /* time valid */, (time_t)lar_date );
-    }
-
+    /* The current implementation does not support file modification timestamp
+     * resolution of less than one second.
+     */
+    timestamp_init( t, 1, 0 );
 }
 
-#endif /* AR_HSZ_BIG */
-
-void file_archscan(char *archive, scanback func, void *closure)
-{
-    int fd;
-    char fl_magic[SAIAMAG];
-
-    if (( fd = open(archive, O_RDONLY, 0)) < 0)
-        return;
-
-    if (read( fd, fl_magic, SAIAMAG) != SAIAMAG
-       || lseek(fd, 0, SEEK_SET) == -1)
-    {
-        close(fd);
-        return;
-    }
-
-    if (strncmp(AIAMAG, fl_magic, SAIAMAG) == 0)
-    {
-        /* read small variant */
-        file_archscan_small(fd, archive, func, closure);
-    }
-#ifdef AR_HSZ_BIG
-    else if (strncmp(AIAMAGBIG, fl_magic, SAIAMAG) == 0)
-    {
-        /* read big variant */
-        file_archscan_big(fd, archive, func, closure);
-    }
-#endif
-
-    close( fd );
-}
-
-# endif /* AIAMAG - RS6000 AIX */
-
-# endif /* USE_FILEUNIX */
+#endif  /* USE_FILEUNIX */

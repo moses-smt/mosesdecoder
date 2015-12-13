@@ -8,9 +8,18 @@
  * headers.h - handle #includes in source files
  */
 
-void headers( TARGET *t );
+#ifndef HEADERS_SW20111118_H
+#define HEADERS_SW20111118_H
+
+#include "object.h"
+#include "rules.h"
+#include "regexp.h"
+
+void headers( TARGET * t );
 
 #ifdef OPT_HEADER_CACHE_EXT
 struct regexp;
-LIST *headers1( LIST *l, char *file, int rec, struct regexp *re[] );
+LIST * headers1( LIST *l, OBJECT * file, int rec, struct regexp *re[] );
+#endif
+
 #endif

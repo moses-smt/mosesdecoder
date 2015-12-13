@@ -18,7 +18,7 @@ using namespace std;
 
 namespace MosesTuning
 {
-  
+
 
 ScoreData::ScoreData(Scorer* scorer) :
   m_scorer(scorer)
@@ -50,7 +50,8 @@ void ScoreData::save(const string &file, bool bin)
   ofs.close();
 }
 
-void ScoreData::save(bool bin) {
+void ScoreData::save(bool bin)
+{
   save(&cout, bin);
 }
 
@@ -95,7 +96,7 @@ void ScoreData::add(ScoreArray& e)
   }
 }
 
-void ScoreData::add(const ScoreStats& e, const string& sent_idx)
+void ScoreData::add(const ScoreStats& e, int sent_idx)
 {
   if (exists(sent_idx)) { // array at position e.getIndex() already exists
     // Enlarge array at position e.getIndex()
@@ -139,4 +140,3 @@ void ScoreData::setIndex()
 }
 
 }
-

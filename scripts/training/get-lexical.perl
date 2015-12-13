@@ -1,5 +1,6 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
+use warnings;
 use strict;
 use FindBin qw($RealBin);
 BEGIN { require "$RealBin/LexicalTranslationModel.pm"; "LexicalTranslationModel"->import; }
@@ -11,7 +12,7 @@ if (scalar(@ARGV) < 4) {
 } else {
 
     my ($SOURCE,$TARGET,$ALIGNMENT,$OUT) = @ARGV;
-    
+
     &get_lexical($SOURCE,$TARGET,$ALIGNMENT,$OUT,0);
 
 }

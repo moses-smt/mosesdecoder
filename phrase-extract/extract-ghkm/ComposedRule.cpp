@@ -1,17 +1,17 @@
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2011 University of Edinburgh
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -19,22 +19,26 @@
 
 #include "ComposedRule.h"
 
-#include "Node.h"
-#include "Options.h"
-#include "Subgraph.h"
-
 #include <set>
 #include <vector>
 #include <queue>
 
-namespace Moses {
-namespace GHKM {
+#include "Node.h"
+#include "Options.h"
+#include "Subgraph.h"
+
+namespace MosesTraining
+{
+namespace Syntax
+{
+namespace GHKM
+{
 
 ComposedRule::ComposedRule(const Subgraph &baseRule)
-    : m_baseRule(baseRule)
-    , m_depth(baseRule.GetDepth())
-    , m_size(baseRule.GetSize())
-    , m_nodeCount(baseRule.GetNodeCount())
+  : m_baseRule(baseRule)
+  , m_depth(baseRule.GetDepth())
+  , m_size(baseRule.GetSize())
+  , m_nodeCount(baseRule.GetNodeCount())
 {
   const std::set<const Node *> &leaves = baseRule.GetLeaves();
   for (std::set<const Node *>::const_iterator p = leaves.begin();
@@ -47,12 +51,12 @@ ComposedRule::ComposedRule(const Subgraph &baseRule)
 
 ComposedRule::ComposedRule(const ComposedRule &other, const Subgraph &rule,
                            int depth)
-    : m_baseRule(other.m_baseRule)
-    , m_attachedRules(other.m_attachedRules)
-    , m_openAttachmentPoints(other.m_openAttachmentPoints)
-    , m_depth(depth)
-    , m_size(other.m_size+rule.GetSize())
-    , m_nodeCount(other.m_nodeCount+rule.GetNodeCount()-1)
+  : m_baseRule(other.m_baseRule)
+  , m_attachedRules(other.m_attachedRules)
+  , m_openAttachmentPoints(other.m_openAttachmentPoints)
+  , m_depth(depth)
+  , m_size(other.m_size+rule.GetSize())
+  , m_nodeCount(other.m_nodeCount+rule.GetNodeCount()-1)
 {
   m_attachedRules.push_back(&rule);
   m_openAttachmentPoints.pop();
@@ -71,7 +75,7 @@ void ComposedRule::CloseAttachmentPoint()
 }
 
 ComposedRule *ComposedRule::AttemptComposition(const Subgraph &rule,
-                                               const Options &options) const
+    const Options &options) const
 {
   // The smallest possible rule fragment should be rooted at a tree node.
   // Note that this differs from the original GHKM definition.
@@ -126,4 +130,5 @@ Subgraph ComposedRule::CreateSubgraph()
 }
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

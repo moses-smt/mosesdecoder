@@ -1,5 +1,9 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 use Getopt::Long;
 
@@ -28,11 +32,11 @@ if (@excludedLines > 0)
 while(<STDIN>)
 {
     my $line = $_;
-		    
+
     if ($nextLineExcl == $lineNum)
     {
     	$exclInd++;
-    	if ($exclInd < @excludedLines) 
+    	if ($exclInd < @excludedLines)
     	{
 	    	$nextLineExcl = $excludedLines[$exclInd];
 	    }
@@ -42,7 +46,7 @@ while(<STDIN>)
     	print $line;
 	$linesOut++;
     }
-  
+
     $lineNum++;
 }
 #close(STDIN);

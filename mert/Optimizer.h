@@ -12,7 +12,7 @@ static const float kMaxFloat = std::numeric_limits<float>::max();
 
 namespace MosesTuning
 {
-  
+
 
 class Point;
 
@@ -31,8 +31,12 @@ protected:
 public:
   Optimizer(unsigned Pd, const std::vector<unsigned>& i2O, const std::vector<bool>& positive, const std::vector<parameter_t>& start, unsigned int nrandom);
 
-  void SetScorer(Scorer *scorer) { m_scorer = scorer; }
-  void SetFeatureData(FeatureDataHandle feature_data) { m_feature_data = feature_data; }
+  void SetScorer(Scorer *scorer) {
+    m_scorer = scorer;
+  }
+  void SetFeatureData(FeatureDataHandle feature_data) {
+    m_feature_data = feature_data;
+  }
   virtual ~Optimizer();
 
   unsigned size() const {
@@ -97,7 +101,7 @@ private:
 public:
   RandomDirectionOptimizer(unsigned dim, const std::vector<unsigned>& i2O, const std::vector<bool>& positive,
                            const std::vector<parameter_t>& start, unsigned int nrandom)
-      : Optimizer(dim, i2O, positive, start, nrandom), kEPS(0.0001f) {}
+    : Optimizer(dim, i2O, positive, start, nrandom), kEPS(0.0001f) {}
   virtual statscore_t TrueRun(Point&) const;
 };
 
@@ -109,7 +113,7 @@ class RandomOptimizer : public Optimizer
 public:
   RandomOptimizer(unsigned dim, const std::vector<unsigned>& i2O, const std::vector<bool>& positive,
                   const std::vector<parameter_t>& start, unsigned int nrandom)
-      : Optimizer(dim, i2O, positive, start, nrandom) {}
+    : Optimizer(dim, i2O, positive, start, nrandom) {}
   virtual statscore_t TrueRun(Point&) const;
 };
 

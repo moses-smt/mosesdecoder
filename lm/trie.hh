@@ -1,5 +1,5 @@
-#ifndef LM_TRIE__
-#define LM_TRIE__
+#ifndef LM_TRIE_H
+#define LM_TRIE_H
 
 #include "lm/weights.hh"
 #include "lm/word_index.hh"
@@ -18,7 +18,7 @@ struct NodeRange {
   uint64_t begin, end;
 };
 
-// TODO: if the number of unigrams is a concern, also bit pack these records.  
+// TODO: if the number of unigrams is a concern, also bit pack these records.
 struct UnigramValue {
   ProbBackoff weights;
   uint64_t next;
@@ -44,25 +44,23 @@ class UnigramPointer {
 class Unigram {
   public:
     Unigram() {}
-    
+
     void Init(void *start) {
       unigram_ = static_cast<UnigramValue*>(start);
     }
-    
+
     static uint64_t Size(uint64_t count) {
-      // +1 in case unknown doesn't appear.  +1 for the final next.  
+      // +1 in case unknown doesn't appear.  +1 for the final next.
       return (count + 2) * sizeof(UnigramValue);
     }
-    
+
     const ProbBackoff &Lookup(WordIndex index) const { return unigram_[index].weights; }
-    
+
     ProbBackoff &Unknown() { return unigram_[0].weights; }
 
     UnigramValue *Raw() {
       return unigram_;
     }
-    
-    void LoadedBinary() {}
 
     UnigramPointer Find(WordIndex word, NodeRange &next) const {
       UnigramValue *val = unigram_ + word;
@@ -73,7 +71,7 @@ class Unigram {
 
   private:
     UnigramValue *unigram_;
-};  
+};
 
 class BitPacked {
   public:
@@ -101,14 +99,12 @@ template <class Bhiksha> class BitPackedMiddle : public BitPacked {
   public:
     static uint64_t Size(uint8_t quant_bits, uint64_t entries, uint64_t max_vocab, uint64_t max_next, const Config &config);
 
-    // next_source need not be initialized.  
+    // next_source need not be initialized.
     BitPackedMiddle(void *base, uint8_t quant_bits, uint64_t entries, uint64_t max_vocab, uint64_t max_next, const BitPacked &next_source, const Config &config);
 
     util::BitAddress Insert(WordIndex word);
 
     void FinishedLoading(uint64_t next_end, const Config &config);
-
-    void LoadedBinary() { bhiksha_.LoadedBinary(); }
 
     util::BitAddress Find(WordIndex word, NodeRange &range, uint64_t &pointer) const;
 
@@ -138,18 +134,13 @@ class BitPackedLongest : public BitPacked {
       BaseInit(base, max_vocab, quant_bits);
     }
 
-    void LoadedBinary() {}
-
     util::BitAddress Insert(WordIndex word);
 
     util::BitAddress Find(WordIndex word, const NodeRange &node) const;
-
-  private:
-    uint8_t quant_bits_;
 };
 
 } // namespace trie
 } // namespace ngram
 } // namespace lm
 
-#endif // LM_TRIE__
+#endif // LM_TRIE_H

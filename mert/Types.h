@@ -33,14 +33,14 @@ typedef FeatureStatsType* featstats_t;
 typedef std::vector<FeatureStats> featarray_t;
 typedef std::vector<FeatureArray> featdata_t;
 
-typedef int ScoreStatsType;
+typedef float ScoreStatsType;
 typedef ScoreStatsType* scorestats_t;
 //typedef std::vector<ScoreStatsType> scorestats_t;
 typedef std::vector<ScoreStats> scorearray_t;
 typedef std::vector<ScoreArray> scoredata_t;
 
-typedef std::map<std::size_t, std::string> idx2name;
-typedef std::map<std::string, std::size_t> name2idx;
+typedef std::map<std::size_t, int> idx2name;
+typedef std::map<int, std::size_t> name2idx;
 
 typedef enum { HAMMING_DISTANCE=0, KENDALL_DISTANCE } distanceMetric_t;
 typedef enum { REFERENCE_CHOICE_AVERAGE=0, REFERENCE_CHOICE_CLOSEST } distanceMetricReferenceChoice_t;

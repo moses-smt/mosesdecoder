@@ -16,11 +16,11 @@ using namespace std;
 
 namespace MosesTuning
 {
-  
+
 
 
 FeatureData::FeatureData()
-    : m_num_features(0) {}
+  : m_num_features(0) {}
 
 void FeatureData::save(ostream* os, bool bin)
 {
@@ -38,7 +38,8 @@ void FeatureData::save(const string &file, bool bin)
   ofs.close();
 }
 
-void FeatureData::save(bool bin) {
+void FeatureData::save(bool bin)
+{
   save(&cout, bin);
 }
 
@@ -90,7 +91,7 @@ void FeatureData::add(FeatureArray& e)
   }
 }
 
-void FeatureData::add(FeatureStats& e, const string& sent_idx)
+void FeatureData::add(FeatureStats& e, int sent_idx)
 {
   if (exists(sent_idx)) { // array at position e.getIndex() already exists
     //enlarge array at position e.getIndex()
@@ -145,7 +146,8 @@ void FeatureData::setFeatureMap(const string& feat)
   }
 }
 
-string FeatureData::ToString() const {
+string FeatureData::ToString() const
+{
   string res;
 
   {
@@ -168,4 +170,3 @@ string FeatureData::ToString() const {
 }
 
 }
-

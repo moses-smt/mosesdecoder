@@ -1,11 +1,12 @@
-#ifndef MERT_PREPROCESSFILTER_H_
-#define MERT_PREPROCESSFILTER_H_
+#pragma once
 
 #include <string>
 
+#if defined(__GLIBCXX__) || defined(__GLIBCPP__)
+
 namespace MosesTuning
 {
-  
+
 
 class ofdstream;
 class ifdstream;
@@ -22,10 +23,10 @@ public:
   ~PreProcessFilter();
 
 private:
-    ofdstream* m_toFilter;
-    ifdstream* m_fromFilter;
+  ofdstream* m_toFilter;
+  ifdstream* m_fromFilter;
 };
 
 }
 
-#endif  // MERT_PREPROCESSFILTER_H_
+#endif

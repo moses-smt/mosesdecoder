@@ -161,8 +161,8 @@ rule init ( version ? :     # the compiler version
 
     if ! $(compatibility)
     {
-        # If there's no backend version, assume 7.1.
-        compatibility = vc7.1 ;
+        # If there's no backend version, assume 10.
+        compatibility = vc10 ;
     }
 
     local extract-version = [ MATCH ^vc(.*) : $(compatibility) ] ;

@@ -6,7 +6,7 @@ using namespace std;
 
 namespace MosesTuning
 {
-  
+
 
 /**
  * Constructor, initializes to the zero vector
@@ -36,9 +36,10 @@ MiraWeightVector::MiraWeightVector(const vector<ValType>& init)
  * \param fv  Feature vector to be added to the weights
  * \param tau FV will be scaled by this value before update
  */
-void MiraWeightVector::update(const MiraFeatureVector& fv, float tau) {
+void MiraWeightVector::update(const MiraFeatureVector& fv, float tau)
+{
   m_numUpdates++;
-  for(size_t i=0;i<fv.size();i++) {
+  for(size_t i=0; i<fv.size(); i++) {
     update(fv.feat(i), fv.val(i)*tau);
   }
 }
@@ -46,7 +47,8 @@ void MiraWeightVector::update(const MiraFeatureVector& fv, float tau) {
 /**
  * Perform an empty update (affects averaging)
  */
-void MiraWeightVector::tick() {
+void MiraWeightVector::tick()
+{
   m_numUpdates++;
 }
 
@@ -54,7 +56,8 @@ void MiraWeightVector::tick() {
  * Score a feature vector according to the model
  * \param fv Feature vector to be scored
  */
-ValType MiraWeightVector::score(const MiraFeatureVector& fv) const {
+ValType MiraWeightVector::score(const MiraFeatureVector& fv) const
+{
   ValType toRet = 0.0;
   for(size_t i=0; i<fv.size(); i++) {
     toRet += weight(fv.feat(i)) * fv.val(i);
@@ -65,7 +68,8 @@ ValType MiraWeightVector::score(const MiraFeatureVector& fv) const {
 /**
  * Return an averaged view of this weight vector
  */
-AvgWeightVector MiraWeightVector::avg() {
+AvgWeightVector MiraWeightVector::avg()
+{
   this->fixTotals();
   return AvgWeightVector(*this);
 }
@@ -73,7 +77,8 @@ AvgWeightVector MiraWeightVector::avg() {
 /**
  * Updates a weight and lazily updates its total
  */
-void MiraWeightVector::update(size_t index, ValType delta) {
+void MiraWeightVector::update(size_t index, ValType delta)
+{
 
   // Handle previously unseen weights
   while(index>=m_weights.size()) {
@@ -88,28 +93,45 @@ void MiraWeightVector::update(size_t index, ValType delta) {
   m_lastUpdated[index] = m_numUpdates;
 }
 
+void MiraWeightVector::ToSparse(SparseVector* sparse, size_t denseSize) const
+{
+  for (size_t i = 0; i < m_weights.size(); ++i) {
+    if(abs(m_weights[i])>1e-8) {
+      if (i < denseSize) {
+        sparse->set(i,m_weights[i]);
+      } else {
+        //The ids in MiraFeatureVector/MiraWeightVector for sparse features
+        //need to be translated when converting back to SparseVector.
+        sparse->set(i-denseSize, m_weights[i]);
+      }
+    }
+  }
+}
+
 /**
  * Make sure everyone's total is up-to-date
  */
-void MiraWeightVector::fixTotals() {
+void MiraWeightVector::fixTotals()
+{
   for(size_t i=0; i<m_weights.size(); i++) update(i,0);
 }
 
 /**
  * Helper to handle out of range weights
  */
-ValType MiraWeightVector::weight(size_t index) const {
+ValType MiraWeightVector::weight(size_t index) const
+{
   if(index < m_weights.size()) {
     return m_weights[index];
-  }
-  else {
+  } else {
     return 0;
   }
 }
 
-ValType MiraWeightVector::sqrNorm() const {
+ValType MiraWeightVector::sqrNorm() const
+{
   ValType toRet = 0;
-  for(size_t i=0;i<m_weights.size();i++) {
+  for(size_t i=0; i<m_weights.size(); i++) {
     toRet += weight(i) * weight(i);
   }
   return toRet;
@@ -119,12 +141,12 @@ AvgWeightVector::AvgWeightVector(const MiraWeightVector& wv)
   :m_wv(wv)
 {}
 
-ostream& operator<<(ostream& o, const MiraWeightVector& e) 
+ostream& operator<<(ostream& o, const MiraWeightVector& e)
 {
-  for(size_t i=0;i<e.m_weights.size();i++) {
+  for(size_t i=0; i<e.m_weights.size(); i++) {
     if(abs(e.m_weights[i])>1e-8) {
       if(i>0) o << " ";
-      cerr << i << ":" << e.m_weights[i];
+      o << i << ":" << e.m_weights[i];
     }
   }
   return o;
@@ -136,14 +158,14 @@ ValType AvgWeightVector::weight(size_t index) const
   else {
     if(index < m_wv.m_totals.size()) {
       return m_wv.m_totals[index] / m_wv.m_numUpdates;
-    }
-    else {
+    } else {
       return 0;
     }
   }
 }
 
-ValType AvgWeightVector::score(const MiraFeatureVector& fv) const {
+ValType AvgWeightVector::score(const MiraFeatureVector& fv) const
+{
   ValType toRet = 0.0;
   for(size_t i=0; i<fv.size(); i++) {
     toRet += weight(fv.feat(i)) * fv.val(i);
@@ -151,8 +173,25 @@ ValType AvgWeightVector::score(const MiraFeatureVector& fv) const {
   return toRet;
 }
 
-size_t AvgWeightVector::size() const {
+size_t AvgWeightVector::size() const
+{
   return m_wv.m_weights.size();
+}
+
+void AvgWeightVector::ToSparse(SparseVector* sparse, size_t denseSize) const
+{
+  for (size_t i = 0; i < size(); ++i) {
+    ValType w = weight(i);
+    if(abs(w)>1e-8) {
+      if (i < denseSize) {
+        sparse->set(i,w);
+      } else {
+        //The ids in MiraFeatureVector/MiraWeightVector for sparse features
+        //need to be translated when converting back to SparseVector.
+        sparse->set(i-denseSize, w);
+      }
+    }
+  }
 }
 
 // --Emacs trickery--

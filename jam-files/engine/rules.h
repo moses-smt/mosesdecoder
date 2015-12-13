@@ -10,20 +10,11 @@
  *  (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
  */
 
-#ifndef RULES_DWA_20011020_H
-#define RULES_DWA_20011020_H
-
-#include "modules.h"
-#include "jam.h"
-#include "parse.h"
-
-
 /*
  * rules.h -  targets, rules, and related information
  *
- * This file describes the structures holding the targets, rules, and
- * related information accumulated by interpreting the statements
- * of the jam files.
+ * This file describes the structures holding the targets, rules, and related
+ * information accumulated by interpreting the statements of the jam files.
  *
  * The following are defined:
  *
@@ -33,15 +24,15 @@
  *  SETTINGS - variables to set when executing a TARGET's ACTIONS.
  *  TARGETS - a chain of TARGETs.
  *  TARGET - an entity (e.g. a file) that can be built.
- *
- * 04/11/94 (seiwald) - Combined deps & headers into deps[2] in TARGET.
- * 04/12/94 (seiwald) - actionlist() now just appends a single action.
- * 06/01/94 (seiwald) - new 'actions existing' does existing sources
- * 12/20/94 (seiwald) - NOTIME renamed NOTFILE.
- * 01/19/95 (seiwald) - split DONTKNOW into CANTFIND/CANTMAKE.
- * 02/02/95 (seiwald) - new LEAVES modifier on targets.
- * 02/14/95 (seiwald) - new NOUPDATE modifier on targets.
  */
+
+#ifndef RULES_DWA_20011020_H
+#define RULES_DWA_20011020_H
+
+#include "function.h"
+#include "modules.h"
+#include "timestamp.h"
+
 
 typedef struct _rule RULE;
 typedef struct _target TARGET;
@@ -52,20 +43,13 @@ typedef struct _settings SETTINGS ;
 
 /* RULE - a generic jam rule, the product of RULE and ACTIONS. */
 
-/* A rule's argument list. */
-struct argument_list
-{
-    int reference_count;
-    LOL data[1];
-};
-
 /* Build actions corresponding to a rule. */
 struct rule_actions
 {
-    int    reference_count;
-    char * command;          /* command string from ACTIONS */
-    LIST * bindlist;
-    int    flags;            /* modifiers on ACTIONS */
+    int        reference_count;
+    FUNCTION * command;          /* command string from ACTIONS */
+    LIST     * bindlist;
+    int        flags;            /* modifiers on ACTIONS */
 
 #define RULE_NEWSRCS   0x01  /* $(>) is updated sources only */
 #define RULE_TOGETHER  0x02  /* combine actions on single target */
@@ -80,19 +64,14 @@ typedef struct argument_list argument_list;
 
 struct _rule
 {
-    char          * name;
-    PARSE         * procedure;  /* parse tree from RULE */
-    argument_list * arguments;  /* argument checking info, or NULL for unchecked
-                                 */
+    OBJECT        * name;
+    FUNCTION      * procedure;
     rule_actions  * actions;    /* build actions, or NULL for no actions */
     module_t      * module;     /* module in which this rule is executed */
     int             exported;   /* nonzero if this rule is supposed to appear in
                                  * the global module and be automatically
                                  * imported into other modules
                                  */
-#ifdef HAVE_PYTHON
-    PyObject * python_function;
-#endif
 };
 
 /* ACTIONS - a chain of ACTIONs. */
@@ -110,16 +89,19 @@ struct _action
     TARGETS * targets;
     TARGETS * sources;        /* aka $(>) */
     char      running;        /* has been started */
+#define A_INIT           0
+#define A_RUNNING_NOEXEC 1
+#define A_RUNNING        2
     char      status;         /* see TARGET status */
+    int       refs;
 };
 
 /* SETTINGS - variables to set when executing a TARGET's ACTIONS. */
 struct _settings
 {
     SETTINGS * next;
-    char     * symbol;        /* symbol name for var_set() */
+    OBJECT   * symbol;        /* symbol name for var_set() */
     LIST     * value;         /* symbol value for var_set() */
-    int multiple;
 };
 
 /* TARGETS - a chain of TARGETs. */
@@ -133,8 +115,8 @@ struct _targets
 /* TARGET - an entity (e.g. a file) that can be built. */
 struct _target
 {
-    char     * name;
-    char     * boundname;             /* if search() relocates target */
+    OBJECT   * name;
+    OBJECT   * boundname;             /* if search() relocates target */
     ACTIONS  * actions;               /* rules to execute, if any */
     SETTINGS * settings;              /* variables to define */
 
@@ -155,19 +137,18 @@ struct _target
 
 /* This flag was added to support a new built-in rule named "FAIL_EXPECTED" used
  * to indicate that the result of running a given action should be inverted,
- * i.e. ok <=> fail. This is useful for launching certain test runs from a
- * Jamfile.
+ * i.e. ok <=> fail. Useful for launching certain test runs from a Jamfile.
  */
 #define T_FLAG_FAIL_EXPECTED  0x0100  /* FAIL_EXPECTED applied */
 
 #define T_FLAG_INTERNAL       0x0200  /* internal INCLUDES node */
 
-/* Indicates that the target must be a file. This prevents matching non-files,
- * like directories, when a target is searched.
+/* Indicates that the target must be a file. Prevents matching non-files, like
+ * directories, when a target is searched.
  */
 #define T_FLAG_ISFILE         0x0400
 
-#define T_FLAG_PRECIOUS       0x0800 
+#define T_FLAG_PRECIOUS       0x0800
 
     char       binding;               /* how target relates to a real file or
                                        * folder
@@ -187,8 +168,8 @@ struct _target
     TARGET   * original_target;       /* original_target->includes = this */
     char       rescanned;
 
-    time_t     time;                  /* update time */
-    time_t     leaf;                  /* update time of leaf sources */
+    timestamp  time;                  /* update time */
+    timestamp  leaf;                  /* update time of leaf sources */
 
     char       fate;                  /* make0()'s diagnosis */
 
@@ -197,13 +178,13 @@ struct _target
 
 #define T_FATE_STABLE         2       /* target did not need updating */
 #define T_FATE_NEWER          3       /* target newer than parent */
-                                  
+
 #define T_FATE_SPOIL          4       /* >= SPOIL rebuilds parents */
 #define T_FATE_ISTMP          4       /* unneeded temp target oddly present */
 
 #define T_FATE_BUILD          5       /* >= BUILD rebuilds target */
 #define T_FATE_TOUCHED        5       /* manually touched with -t */
-#define T_FATE_REBUILD        6       
+#define T_FATE_REBUILD        6
 #define T_FATE_MISSING        7       /* is missing, needs updating */
 #define T_FATE_NEEDTMP        8       /* missing temp that must be rebuild */
 #define T_FATE_OUTDATED       9       /* is out of date, needs updating */
@@ -220,6 +201,7 @@ struct _target
 #define T_MAKE_ACTIVE         2       /* make1(target) in make1b() */
 #define T_MAKE_RUNNING        3       /* make1(target) running commands */
 #define T_MAKE_DONE           4       /* make1(target) done */
+#define T_MAKE_NOEXEC_DONE    5       /* make1(target) done with -n in effect */
 
 #ifdef OPT_SEMAPHORE
     #define T_MAKE_SEMAPHORE  5       /* Special target type for semaphores */
@@ -233,46 +215,54 @@ struct _target
 
     int        asynccnt;              /* child deps outstanding */
     TARGETS  * parents;               /* used by make1() for completion */
+    TARGET   * scc_root;              /* used by make to resolve cyclic includes
+                                       */
+    TARGET   * rescanning;            /* used by make0 to mark visited targets
+                                       * when rescanning
+                                       */
+    int        depth;                 /* The depth of the target in the make0
+                                       * stack.
+                                       */
     char     * cmds;                  /* type-punned command list */
 
-    char     * failed;
+    char const * failed;
 };
 
 
 /* Action related functions. */
+void       action_free  ( ACTION * );
 ACTIONS  * actionlist   ( ACTIONS *, ACTION * );
 void       freeactions  ( ACTIONS * );
-SETTINGS * addsettings  ( SETTINGS *, int flag, char * symbol, LIST * value );
-void       pushsettings ( SETTINGS * );
-void       popsettings  ( SETTINGS * );
+SETTINGS * addsettings  ( SETTINGS *, int flag, OBJECT * symbol, LIST * value );
+void       pushsettings ( module_t *, SETTINGS * );
+void       popsettings  ( module_t *, SETTINGS * );
 SETTINGS * copysettings ( SETTINGS * );
 void       freesettings ( SETTINGS * );
 void       actions_refer( rule_actions * );
 void       actions_free ( rule_actions * );
 
-/* Argument list related functions. */
-void            args_free ( argument_list * );
-argument_list * args_new  ();
-void            args_refer( argument_list * );
-
 /* Rule related functions. */
-RULE * bindrule        ( char * rulename, module_t * );
-RULE * import_rule     ( RULE * source, module_t *, char * name );
-RULE * new_rule_body   ( module_t *, char * rulename, argument_list *, PARSE * procedure, int exprt );
-RULE * new_rule_actions( module_t *, char * rulename, char * command, LIST * bindlist, int flags );
+RULE * bindrule        ( OBJECT * rulename, module_t * );
+RULE * import_rule     ( RULE * source, module_t *, OBJECT * name );
+void   rule_localize   ( RULE * rule, module_t * module );
+RULE * new_rule_body   ( module_t *, OBJECT * rulename, FUNCTION * func, int exprt );
+RULE * new_rule_actions( module_t *, OBJECT * rulename, FUNCTION * command, LIST * bindlist, int flags );
 void   rule_free       ( RULE * );
 
 /* Target related functions. */
 void      bind_explicitly_located_targets();
-TARGET  * bindtarget                     ( char const * target_name );
-TARGET  * copytarget                     ( TARGET const * t );
+TARGET  * bindtarget                     ( OBJECT * const );
 void      freetargets                    ( TARGETS * );
-TARGET  * search_for_target              ( char * name, LIST * search_path );
-TARGETS * targetchain                    ( TARGETS * chain, TARGETS * );
-TARGETS * targetentry                    ( TARGETS * chain, TARGET * );
-void      target_include                 ( TARGET * including, TARGET * included );
-TARGETS * targetlist                     ( TARGETS * chain, LIST * target_names );
-void      touch_target                   ( char * t );
+TARGETS * targetchain                    ( TARGETS *, TARGETS * );
+TARGETS * targetentry                    ( TARGETS *, TARGET * );
+void      target_include                 ( TARGET * const including,
+                                           TARGET * const included );
+void      target_include_many            ( TARGET * const including,
+                                           LIST * const included_names );
+TARGETS * targetlist                     ( TARGETS *, LIST * target_names );
+void      touch_target                   ( OBJECT * const );
+void      clear_includes                 ( TARGET * );
+TARGET  * target_scc                     ( TARGET * );
 
 /* Final module cleanup. */
 void rules_done();

@@ -1,6 +1,11 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
+use FindBin qw($RealBin);
 
 use Getopt::Long "GetOptions";
 my ($IN,$OUT,$MXPOST);
@@ -14,13 +19,13 @@ if (!&GetOptions('mxpost=s' => \$MXPOST) ||
 
 my $pipeline = "perl -ne 'chop; tr/\\x20-\\x7f/\?/c; print \$_.\"\\n\";' | tee debug | ";
 $pipeline .= "$MXPOST/mxpost $MXPOST/tagger.project |";
-open(TAGGER,"cat $IN | $pipeline");
-open(OUT,">$OUT");
+open(TAGGER,"$RealBin/../../tokenizer/deescape-special-chars.perl < $IN | $pipeline");
+open(OUT,"| $RealBin/../../tokenizer/escape-special-chars.perl > $OUT");
 while(<TAGGER>) {
     foreach my $word_pos (split) {
 	$word_pos =~ s/\/([^\/]+)$/_$1/;
 	$word_pos = "//_:" if $word_pos eq "//";
-	print STDERR "faulty POS tag: $word_pos\n" 
+	print STDERR "faulty POS tag: $word_pos\n"
 	    unless $word_pos =~ /^.+_([^_]+)$/;
 	print OUT "$1 ";
     }

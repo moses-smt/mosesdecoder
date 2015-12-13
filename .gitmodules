@@ -1,0 +1,9 @@
+[submodule "contrib/arrow-pipelines/python/pcl"]
+	path = contrib/arrow-pipelines/python/pcl
+	url = https://github.com/ianj-als/pcl.git
+[submodule "contrib/omtc/omtc"]
+	path = contrib/omtc/omtc
+	url = https://github.com/ianj-als/omtc.git
+[submodule "regtest"]
+	path = regtest
+	url = https://github.com/moses-smt/moses-regression-tests

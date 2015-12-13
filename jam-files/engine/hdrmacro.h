@@ -9,6 +9,13 @@
  *              #define MACRO  "filename" definitions
  */
 
-void   macro_headers( TARGET *t );
+#ifndef HDRMACRO_SW20111118_H
+#define HDRMACRO_SW20111118_H
 
-char*  macro_header_get( const char*  macro_name );
+#include "object.h"
+#include "rules.h"
+
+void macro_headers( TARGET * );
+OBJECT * macro_header_get( OBJECT * macro_name );
+
+#endif

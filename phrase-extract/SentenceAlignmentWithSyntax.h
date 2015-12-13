@@ -28,7 +28,7 @@
 
 #include "RuleExtractionOptions.h"
 #include "SentenceAlignment.h"
-#include "SyntaxTree.h"
+#include "SyntaxNodeCollection.h"
 
 namespace MosesTraining
 {
@@ -36,8 +36,8 @@ namespace MosesTraining
 class SentenceAlignmentWithSyntax : public SentenceAlignment
 {
 public:
-  SyntaxTree targetTree;
-  SyntaxTree sourceTree;
+  SyntaxNodeCollection targetTree;
+  SyntaxNodeCollection sourceTree;
   std::set<std::string> & m_targetLabelCollection;
   std::set<std::string> & m_sourceLabelCollection;
   std::map<std::string, int> & m_targetTopLabelCollection;
@@ -53,8 +53,8 @@ public:
     , m_sourceLabelCollection(srcLabelColl)
     , m_targetTopLabelCollection(tgtTopLabelColl)
     , m_sourceTopLabelCollection(srcTopLabelColl)
-    , m_options(options)
-  {}
+    , m_options(options) {
+  }
 
   virtual ~SentenceAlignmentWithSyntax() {}
 

@@ -17,8 +17,8 @@ protected:
   virtual int_type underflow();
 
   virtual std::streampos seekpos(
-      std::streampos sp,
-      std::ios_base::openmode which = std::ios_base::in | std::ios_base::out);
+    std::streampos sp,
+    std::ios_base::openmode which = std::ios_base::in | std::ios_base::out);
 
   virtual std::streamsize xsgetn(char* s, std::streamsize num);
 

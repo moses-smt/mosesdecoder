@@ -30,15 +30,13 @@ namespace Moses
 {
 class PhraseDictionary;
 class TargetPhrase;
-class LMList;
 class Phrase;
-class WordPenaltyProducer;
 }
 
 namespace OnDiskPt
 {
 
-typedef std::pair<UINT64, UINT64>  AlignPair;
+typedef std::pair<uint64_t, uint64_t>  AlignPair;
 typedef std::vector<AlignPair> AlignType;
 
 class Vocab;
@@ -51,29 +49,37 @@ class TargetPhrase: public Phrase
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
 protected:
   AlignType m_align;
-  PhrasePtr m_sourcePhrase; 
+  PhrasePtr m_sourcePhrase;
+  std::string m_sparseFeatures, m_property;
 
-  std::vector<float>	m_scores;
-  UINT64 m_filePos;
+  std::vector<float> m_scores;
+  uint64_t m_filePos;
 
   size_t WriteAlignToMemory(char *mem) const;
   size_t WriteScoresToMemory(char *mem) const;
+  size_t WriteStringToMemory(char *mem, const std::string &str) const;
 
-  UINT64 ReadAlignFromFile(std::fstream &fileTPColl);
-  UINT64 ReadScoresFromFile(std::fstream &fileTPColl);
+  uint64_t ReadAlignFromFile(std::fstream &fileTPColl);
+  uint64_t ReadScoresFromFile(std::fstream &fileTPColl);
+  uint64_t ReadStringFromFile(std::fstream &fileTPColl, std::string &outStr);
 
 public:
+  TargetPhrase() {
+  }
   TargetPhrase(size_t numScores);
-  TargetPhrase(const 	TargetPhrase &copy);
+  TargetPhrase(const TargetPhrase &copy);
   virtual ~TargetPhrase();
 
   void SetSourcePhrase(PhrasePtr p) {
     m_sourcePhrase = p;
   }
   const PhrasePtr GetSourcePhrase() const {
-	  return m_sourcePhrase;
+    return m_sourcePhrase;
   }
-  
+  const std::vector<float> &GetScores() const {
+    return m_scores;
+  }
+
   void SetLHS(WordPtr lhs);
 
   void Create1AlignFromString(const std::string &align1Str);
@@ -89,7 +95,7 @@ public:
   char *WriteOtherInfoToMemory(OnDiskWrapper &onDiskWrapper, size_t &memUsed) const;
   void Save(OnDiskWrapper &onDiskWrapper);
 
-  UINT64 GetFilePos() const {
+  uint64_t GetFilePos() const {
     return m_filePos;
   }
   float GetScore(size_t ind) const {
@@ -101,13 +107,19 @@ public:
                                       , const Vocab &vocab
                                       , const Moses::PhraseDictionary &phraseDict
                                       , const std::vector<float> &weightT
-                                      , const Moses::WordPenaltyProducer* wpProducer
-                                      , const Moses::LMList &lmList) const;
-  UINT64 ReadOtherInfoFromFile(UINT64 filePos, std::fstream &fileTPColl);
-  UINT64 ReadFromFile(std::fstream &fileTP);
+                                      , bool isSyntax) const;
+  uint64_t ReadOtherInfoFromFile(uint64_t filePos, std::fstream &fileTPColl);
+  uint64_t ReadFromFile(std::fstream &fileTP);
 
-	virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
+  virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
 
+  void SetProperty(const std::string &value) {
+    m_property = value;
+  }
+
+  void SetSparseFeatures(const std::string &value) {
+    m_sparseFeatures = value;
+  }
 };
 
 }

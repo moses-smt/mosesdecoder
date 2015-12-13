@@ -49,8 +49,10 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "IOWrapper.h"
 #include "LatticeMBR.h"
 #include "Manager.h"
+#include "Timer.h"
 #include "StaticData.h"
 
+#include "util/exception.hh"
 
 using namespace std;
 using namespace Moses;
@@ -68,7 +70,7 @@ public:
   /** Add a parameter with key, command line argument, and default value */
   void addParam(gridkey key, const string& arg, float defaultValue) {
     m_args[arg] = key;
-    CHECK(m_grid.find(key) == m_grid.end());
+    UTIL_THROW_IF2(m_grid.find(key) != m_grid.end(), "Duplicate parameter " << arg);
     m_grid[key].push_back(defaultValue);
   }
 
@@ -151,6 +153,7 @@ int main(int argc, char* argv[])
     params->Explain();
     exit(1);
   }
+  ResetUserTime();
   if (!StaticData::LoadDataStatic(params, argv[0])) {
     exit(1);
   }

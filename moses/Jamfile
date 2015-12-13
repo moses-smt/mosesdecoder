@@ -1,0 +1,142 @@
+# -*- jam -*-
+max-factors = [ option.get "max-factors" : 4 : 4 ] ;
+path-constant FACTOR-LOG : bin/factor.log ;
+update-if-changed $(FACTOR-LOG) $(max-factors) ;
+max-factors = <define>MAX_NUM_FACTORS=$(max-factors) <dependency>$(FACTOR-LOG) ;
+
+with-dlib = [ option.get "with-dlib" ] ;
+if $(with-dlib) {
+  dlib = <define>WITH_DLIB <include>$(with-dlib) ;
+} else {
+  dlib = ;
+}
+
+with-oxlm = [ option.get "with-oxlm" ] ; 
+if $(with-oxlm) {
+  oxlm = <cxxflags>-std=c++0x <define>LM_OXLM <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
+} else {
+  oxlm = ;
+}
+
+local classifier = ;
+if [ option.get "with-vw" ] {
+  classifier += ..//vw//classifier ;
+}
+
+alias headers : ../util//kenutil $(classifier) : : : $(max-factors) $(dlib) $(oxlm) ; 
+alias ThreadPool : ThreadPool.cpp ;
+alias Util : Util.cpp Timer.cpp ;
+
+if [ option.get "with-synlm" : no : yes ] = yes
+{
+  lib m ;
+  obj SyntacticLanguageModel.o : SyntacticLanguageModel.cpp headers : <include>$(TOP)/synlm/hhmm/rvtl/include <include>$(TOP)/synlm/hhmm/wsjparse/include ;
+  alias synlm : SyntacticLanguageModel.o m : : : <define>HAVE_SYNLM ;
+} else {
+  alias synlm ;
+}
+
+#This is a kludge to force rebuilding if different --with options are passed. 
+#Could have used features like <srilm>on but getting these to apply only to
+#linking was ugly and it still didn't trigger an install (since the install
+#path doesn't encode features).  It stores a file lm.log with the previous
+#options and forces a rebuild if the current options differ.  
+local current = ;
+for local i in srilm irstlm randlm {
+  local optval = [ option.get "with-$(i)" ] ;
+  if $(optval) {
+    current += "--with-$(i)=$(optval)" ;
+  }
+}
+current = $(current:J=" ") ;
+current ?= "" ;
+path-constant LM-LOG : bin/lm.log ;
+update-if-changed $(LM-LOG) $(current) ;
+
+obj FF_Factory.o : FF/Factory.cpp LM//macros headers ../lm//kenlm mmlib : <dependency>$(LM-LOG) ;
+
+# check if we have xmlrpc-c's abyss server available
+# if yes, include server capabilities in the moses executable
+# include $(TOP)/jam-files/server.jam ;
+
+if [ xmlrpc ] 
+{
+  echo "BUILDING MOSES SERVER!" ;
+  alias mserver : [ glob server/*.cpp ] ;
+}
+else 
+{
+  echo "NOT BUILDING MOSES SERVER!" ;
+  alias mserver ;
+}
+
+if [ option.get "with-mm" : no : yes ] = yes
+{
+  alias mmlib : 
+  $(TOP)/moses/TranslationModel/UG//mmsapt
+  $(TOP)/moses/TranslationModel/UG/generic//generic
+  $(TOP)/moses/TranslationModel/UG/mm//mm
+  ;
+} else {
+  alias mmlib ;
+}
+
+local with-vw = [ option.get "with-vw" ] ;
+if $(with-vw) {
+  alias vwfiles : [ glob FF/VW/*.cpp ] ;
+} else {
+  alias vwfiles ;
+}
+
+lib moses :
+[ glob 
+  *.cpp
+  parameters/*.cpp
+  Syntax/*.cpp
+  Syntax/F2S/*.cpp
+  Syntax/S2T/*.cpp
+  Syntax/S2T/Parsers/*.cpp
+  Syntax/S2T/Parsers/RecursiveCYKPlusParser/*.cpp
+  Syntax/S2T/Parsers/Scope3Parser/*.cpp
+  Syntax/T2S/*.cpp
+  TranslationModel/*.cpp
+  TranslationModel/fuzzy-match/*.cpp
+  TranslationModel/DynSAInclude/*.cpp
+  TranslationModel/RuleTable/*.cpp
+  TranslationModel/Scope3Parser/*.cpp
+  TranslationModel/CYKPlusParser/*.cpp
+  ../phrase-extract/PhraseOrientation.cpp
+  FF/*.cpp
+  FF/bilingual-lm/*.cpp
+  FF/OSM-Feature/*.cpp
+  FF/LexicalReordering/*.cpp
+  PP/*.cpp
+: #exceptions
+  ThreadPool.cpp
+  SyntacticLanguageModel.cpp
+  *Test.cpp Mock*.cpp FF/*Test.cpp
+  FF/Factory.cpp
+] 
+vwfiles synlm mmlib mserver headers 
+FF_Factory.o 
+LM//LM 
+TranslationModel/CompactPT//CompactPT 
+TranslationModel/ProbingPT//ProbingPT 
+ThreadPool
+..//search 
+../util/double-conversion//double-conversion 
+..//z 
+../OnDiskPt//OnDiskPt 
+$(TOP)//boost_filesystem 
+$(TOP)//boost_iostreams 
+:
+<threading>single:<source>../util//rt
+;
+
+
+alias headers-to-install : [ glob-tree *.h ] ;
+
+import testing ;
+
+unit-test moses_test : [ glob *Test.cpp Mock*.cpp FF/*Test.cpp ] ..//boost_filesystem moses headers ..//z ../OnDiskPt//OnDiskPt ..//boost_unit_test_framework ;
+

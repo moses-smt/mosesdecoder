@@ -31,6 +31,15 @@ namespace MosesTuning
 #define TRACE_ERR(str) { }
 #endif
 
+#if __GNUC__ == 4 && __GNUC_MINOR__ == 8 && (__GNUC_PATCHLEVEL__ == 1 || __GNUC_PATCHLEVEL__ == 2)
+// gcc nth_element() bug
+#define NTH_ELEMENT3(begin, middle, end) std::sort(begin, end)
+#define NTH_ELEMENT4(begin, middle, end, orderer) std::sort(begin, end, orderer)
+#else
+#define NTH_ELEMENT3(begin, middle, end) std::nth_element(begin, middle, end)
+#define NTH_ELEMENT4(begin, middle, end, orderer) std::nth_element(begin, middle, end, orderer)
+#endif
+
 const char kDefaultDelimiterSymbol[] = " ";
 
 int verboselevel();
@@ -40,7 +49,8 @@ int setverboselevel(int v);
 const float kEPS = 0.0001f;
 
 template <typename T>
-bool IsAlmostEqual(T expected, T actual, float round=kEPS) {
+bool IsAlmostEqual(T expected, T actual, float round=kEPS)
+{
   if (std::abs(expected - actual) < round) {
     return true;
   } else {
@@ -86,7 +96,8 @@ inline T Scan(const std::string &input)
  * Returns true iff "str" ends with "suffix".
  * e.g., Given str = "abc:" and suffix = ":", this function returns true.
  */
-inline bool EndsWith(const std::string& str, const char* suffix) {
+inline bool EndsWith(const std::string& str, const char* suffix)
+{
   return str.find_last_of(suffix) == str.size() - 1;
 }
 

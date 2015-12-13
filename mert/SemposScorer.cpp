@@ -12,7 +12,7 @@ using namespace std;
 
 namespace MosesTuning
 {
-  
+
 
 SemposScorer::SemposScorer(const string& config)
   : StatisticsBasedScorer("SEMPOS", config),
@@ -25,8 +25,7 @@ SemposScorer::SemposScorer(const string& config)
   m_semposMap.clear();
 
   string weightsfile = getConfig("weightsfile", "");
-  if (weightsfile != "")
-  {
+  if (weightsfile != "") {
     loadWeights(weightsfile);
   }
 }
@@ -144,42 +143,35 @@ int SemposScorer::encodeSempos(const string& sempos)
 
 float SemposScorer::weight(int item) const
 {
-    std::map<int,float>::const_iterator it = weightsMap.find(item);
-    if (it == weightsMap.end())
-    {
-        return 1.0f;
-    }
-    else
-    {
-        return it->second;
-    }
+  std::map<int,float>::const_iterator it = weightsMap.find(item);
+  if (it == weightsMap.end()) {
+    return 1.0f;
+  } else {
+    return it->second;
+  }
 }
 
 void SemposScorer::loadWeights(const string& weightsfile)
 {
-    string line;
-    ifstream myfile;
-    myfile.open(weightsfile.c_str(), ifstream::in);
-    if (myfile.is_open())
-    {
-        while ( myfile.good() )
-        {
-            getline (myfile,line);
-            vector<string> fields;
-            if (line == "") continue;
-            split(line, '\t', fields);
-            if (fields.size() != 2) throw std::runtime_error("Bad format of a row in weights file.");
-            int encoded = encodeString(fields[0]);
-            float weight = atof(fields[1].c_str());
-            weightsMap[encoded] = weight;
-        }
-        myfile.close();
+  string line;
+  ifstream myfile;
+  myfile.open(weightsfile.c_str(), ifstream::in);
+  if (myfile.is_open()) {
+    while ( myfile.good() ) {
+      getline (myfile,line);
+      vector<string> fields;
+      if (line == "") continue;
+      split(line, '\t', fields);
+      if (fields.size() != 2) throw std::runtime_error("Bad format of a row in weights file.");
+      int encoded = encodeString(fields[0]);
+      float weight = atof(fields[1].c_str());
+      weightsMap[encoded] = weight;
     }
-    else
-    {
-        cerr << "Unable to open file "<< weightsfile << endl;
-        exit(1);
-    }
+    myfile.close();
+  } else {
+    cerr << "Unable to open file "<< weightsfile << endl;
+    exit(1);
+  }
 
 }
 

@@ -1,4 +1,6 @@
 #include "lm/bhiksha.hh"
+
+#include "lm/binary_format.hh"
 #include "lm/config.hh"
 #include "util/file.hh"
 #include "util/exception.hh"
@@ -9,17 +11,17 @@ namespace lm {
 namespace ngram {
 namespace trie {
 
-DontBhiksha::DontBhiksha(const void * /*base*/, uint64_t /*max_offset*/, uint64_t max_next, const Config &/*config*/) : 
+DontBhiksha::DontBhiksha(const void * /*base*/, uint64_t /*max_offset*/, uint64_t max_next, const Config &/*config*/) :
   next_(util::BitsMask::ByMax(max_next)) {}
 
 const uint8_t kArrayBhikshaVersion = 0;
 
-// TODO: put this in binary file header instead when I change the binary file format again.  
-void ArrayBhiksha::UpdateConfigFromBinary(int fd, Config &config) {
-  uint8_t version;
-  uint8_t configured_bits;
-  util::ReadOrThrow(fd, &version, 1);
-  util::ReadOrThrow(fd, &configured_bits, 1);
+// TODO: put this in binary file header instead when I change the binary file format again.
+void ArrayBhiksha::UpdateConfigFromBinary(const BinaryFormat &file, uint64_t offset, Config &config) {
+  uint8_t buffer[2];
+  file.ReadForConfig(buffer, 2, offset);
+  uint8_t version = buffer[0];
+  uint8_t configured_bits = buffer[1];
   if (version != kArrayBhikshaVersion) UTIL_THROW(FormatLoadException, "This file has sorted array compression version " << (unsigned) version << " but the code expects version " << (unsigned)kArrayBhikshaVersion);
   config.pointer_bhiksha_bits = configured_bits;
 }
@@ -31,7 +33,7 @@ uint8_t ChopBits(uint64_t max_offset, uint64_t max_next, const Config &config) {
   uint8_t required = util::RequiredBits(max_next);
   uint8_t best_chop = 0;
   int64_t lowest_change = std::numeric_limits<int64_t>::max();
-  // There are probably faster ways but I don't care because this is only done once per order at construction time.  
+  // There are probably faster ways but I don't care because this is only done once per order at construction time.
   for (uint8_t chop = 0; chop <= std::min(required, config.pointer_bhiksha_bits); ++chop) {
     int64_t change = (max_next >> (required - chop)) * 64 /* table cost in bits */
       - max_offset * static_cast<int64_t>(chop); /* savings in bits*/
@@ -85,9 +87,6 @@ void ArrayBhiksha::FinishedLoading(const Config &config) {
   uint8_t *head_write = reinterpret_cast<uint8_t*>(original_base_);
   *(head_write++) = kArrayBhikshaVersion;
   *(head_write++) = config.pointer_bhiksha_bits;
-}
-
-void ArrayBhiksha::LoadedBinary() {
 }
 
 } // namespace trie

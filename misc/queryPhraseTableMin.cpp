@@ -6,8 +6,10 @@
 #include <string>
 #include <vector>
 
-#include "CompactPT/PhraseDictionaryCompact.h"
-#include "Util.h"
+#include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
+#include "moses/Util.h"
+#include "moses/Phrase.h"
+#include "moses/parameters/AllOptions.h"
 
 void usage();
 
@@ -17,7 +19,7 @@ using namespace Moses;
 
 int main(int argc, char **argv)
 {
-  int nscores = 5;
+  int nscores = 4;
   std::string ttable = "";
   bool useAlignments = false;
   bool reportCounts = false;
@@ -35,8 +37,7 @@ int main(int argc, char **argv)
       useAlignments = true;
     } else if (!strcmp(argv[i], "-c")) {
       reportCounts = true;
-    }
-    else
+    } else
       usage();
   }
 
@@ -46,32 +47,22 @@ int main(int argc, char **argv)
   std::vector<FactorType> input(1, 0);
   std::vector<FactorType> output(1, 0);
   std::vector<float> weight(nscores, 0);
-  
-  LMList lmList;
-  
-  Parameter *parameter = new Parameter();
-  const_cast<std::vector<std::string>&>(parameter->GetParam("factor-delimiter")).resize(1, "||dummy_string||");
-  const_cast<std::vector<std::string>&>(parameter->GetParam("input-factors")).resize(1, "0");
-  const_cast<std::vector<std::string>&>(parameter->GetParam("verbose")).resize(1, "0");
-  const_cast<std::vector<std::string>&>(parameter->GetParam("weight-w")).resize(1, "0");
-  const_cast<std::vector<std::string>&>(parameter->GetParam("weight-d")).resize(1, "0");
-  
-  const_cast<StaticData&>(StaticData::Instance()).LoadData(parameter);
 
-  
-  PhraseDictionaryFeature pdf(Compact, nscores, nscores, input, output, ttable, weight, 0, "", "");
-  PhraseDictionaryCompact pdc(nscores, Compact, &pdf, false, useAlignments);
-  bool ret = pdc.Load(input, output, ttable, weight, 0, lmList, 0);                                                                           
-  assert(ret);
-  
+  std::stringstream ss;
+  ss << nscores;
+  PhraseDictionaryCompact pdc("PhraseDictionaryCompact input-factor=0 output-factor=0 num-features=" + ss.str() + " path=" + ttable);
+  AllOptions::ptr opts(new AllOptions);
+  pdc.Load(opts);
+
   std::string line;
   while(getline(std::cin, line)) {
-    Phrase sourcePhrase(0);
-    sourcePhrase.CreateFromString(input, line, "||dummy_string||");
-    
+    Phrase sourcePhrase;
+    // sourcePhrase.CreateFromString(Input, input, line, "||dummy_string||", NULL);
+    sourcePhrase.CreateFromString(Input, input, line, NULL);
+
     TargetPhraseVectorPtr decodedPhraseColl
-      = pdc.GetTargetPhraseCollectionRaw(sourcePhrase);
-    
+    = pdc.GetTargetPhraseCollectionRaw(sourcePhrase);
+
     if(decodedPhraseColl != NULL) {
       if(reportCounts)
         std::cout << sourcePhrase << decodedPhraseColl->size() << std::endl;
@@ -80,19 +71,18 @@ int main(int argc, char **argv)
           TargetPhrase &tp = *it;
           std::cout << sourcePhrase << "||| ";
           std::cout << static_cast<const Phrase&>(tp) << "|||";
-          
+
           if(useAlignments)
-            std::cout << " " << tp.GetAlignmentInfo() << "|||"; 
-          
-          size_t offset = tp.GetScoreBreakdown().size() - nscores;
-          for(size_t i = offset; i < tp.GetScoreBreakdown().size(); i++)
-            std::cout << " " << exp(tp.GetScoreBreakdown()[i]);
+            std::cout << " " << tp.GetAlignTerm() << "|||";
+
+          std::vector<float> scores = tp.GetScoreBreakdown().GetScoresForProducer(&pdc);
+          for(size_t i = 0; i < scores.size(); i++)
+            std::cout << " " << exp(scores[i]);
           std::cout << std::endl;
         }
-    }
-    else if(reportCounts)
+    } else if(reportCounts)
       std::cout << sourcePhrase << 0 << std::endl;
-    
+
     std::cout.flush();
   }
 }

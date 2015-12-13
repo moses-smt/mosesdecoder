@@ -5,7 +5,7 @@ using namespace std;
 
 namespace MosesTuning
 {
-  
+
 
 vector<string> OptimizerFactory::m_type_names;
 
@@ -38,11 +38,11 @@ OptimizerFactory::OptimizerType OptimizerFactory::GetOptimizerType(const string&
 }
 
 Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim,
-                                            const vector<unsigned>& i2o,
-                                            const std::vector<bool>& positive,
-                                            const vector<parameter_t>& start,
-                                            const string& type,
-                                            unsigned int nrandom)
+    const vector<unsigned>& i2o,
+    const std::vector<bool>& positive,
+    const vector<parameter_t>& start,
+    const string& type,
+    unsigned int nrandom)
 {
   OptimizerType opt_type = GetOptimizerType(type);
   if (opt_type == NOPTIMIZER) {
@@ -55,18 +55,18 @@ Optimizer* OptimizerFactory::BuildOptimizer(unsigned dim,
   }
 
   switch (opt_type) {
-    case POWELL:
-      return new SimpleOptimizer(dim, i2o, positive, start, nrandom);
-      break;
-    case RANDOM_DIRECTION:
-      return new RandomDirectionOptimizer(dim, i2o, positive, start, nrandom);
-      break;
-    case RANDOM:
-      return new RandomOptimizer(dim, i2o, positive, start, nrandom);
-      break;
-    default:
-      cerr << "Error: unknown optimizer" << type << endl;
-      return NULL;
+  case POWELL:
+    return new SimpleOptimizer(dim, i2o, positive, start, nrandom);
+    break;
+  case RANDOM_DIRECTION:
+    return new RandomDirectionOptimizer(dim, i2o, positive, start, nrandom);
+    break;
+  case RANDOM:
+    return new RandomOptimizer(dim, i2o, positive, start, nrandom);
+    break;
+  default:
+    cerr << "Error: unknown optimizer" << type << endl;
+    return NULL;
   }
 }
 

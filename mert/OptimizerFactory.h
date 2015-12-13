@@ -6,13 +6,13 @@
 
 namespace MosesTuning
 {
-  
+
 
 class Optimizer;
 
 class OptimizerFactory
 {
- public:
+public:
   // NOTE: Add new optimizer here BEFORE NOPTIMZER
   enum OptimizerType {
     POWELL = 0,
@@ -36,7 +36,7 @@ class OptimizerFactory
                                    const std::string& type,
                                    unsigned int nrandom);
 
- private:
+private:
   OptimizerFactory() {}
   ~OptimizerFactory() {}
 

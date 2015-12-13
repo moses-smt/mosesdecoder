@@ -10,7 +10,7 @@
 #include <stdexcept>
 #include <string>
 #include <vector>
-#include <limits.h>
+#include <climits>
 #include "Types.h"
 #include "ScoreData.h"
 #include "Scorer.h"
@@ -19,7 +19,7 @@
 
 namespace MosesTuning
 {
-  
+
 /**
   * Permutation
  **/
@@ -49,7 +49,7 @@ public:
 
 
 protected:
-  statscore_t calculateScore(const std::vector<int>& scores) const;
+  statscore_t calculateScore(const std::vector<ScoreStatsType>& scores) const;
   PermutationScorer(const PermutationScorer&);
   ~PermutationScorer() {};
   PermutationScorer& operator=(const PermutationScorer&);

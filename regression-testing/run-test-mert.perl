@@ -1,5 +1,6 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
 
+use warnings;
 use strict;
 my $script_dir; BEGIN { use Cwd qw/ abs_path /; use File::Basename; $script_dir = dirname(abs_path($0)); push @INC, $script_dir; }
 #use MertRegressionTesting;
@@ -92,7 +93,11 @@ exit 0;
 sub exec_test {
   my ($test_dir,$results) = @_;
   my $start_time = time;
-  my ($o, $ec, $sig) = run_command("sh $test_dir/command $bin_dir $test_dir 1> $results/run.stdout 2> $results/run.stderr");
+  my $cmd = "sh $test_dir/command $bin_dir $test_dir 1> $results/run.stdout 2> $results/run.stderr";
+  open CMD, ">$results/cmd_line";
+  print CMD "$cmd";
+  close CMD;
+  my ($o, $ec, $sig) = run_command($cmd);
   my $elapsed = 0;
   $elapsed = time - $start_time;
   return ($o, $elapsed, $ec, $sig);

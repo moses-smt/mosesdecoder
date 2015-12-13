@@ -43,7 +43,7 @@ static const PDFVal VARIANCE_THRESHOLD = 0.01; //0.0001; //0
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class Y> 
+template <class Y>
 class DiagGauss1DModel : public Generic1DModel<Y,PDFVal> {
  private:
   // Member variables...
@@ -53,7 +53,7 @@ class DiagGauss1DModel : public Generic1DModel<Y,PDFVal> {
   SimpleHash<Id<int>,PDFVal> aMeans;
   SimpleHash<Id<int>,PDFVal> aVariances;
   PDFVal                     prInvRootNormVariances;
-  PDFVal                     prProduct;         
+  PDFVal                     prProduct;
   SimpleHash<Id<int>,PDFVal> algprNegHalfInvVariances;
  public:
   // Constructor / destructor methods...
@@ -78,7 +78,7 @@ class DiagGauss1DModel : public Generic1DModel<Y,PDFVal> {
 };
 
 ////////////////////////////////////////
-template <class Y> 
+template <class Y>
 inline void DiagGauss1DModel<Y>::precomputeVarianceTerms ( ) {
   // Inverse square root of norm of variances...
   setInvRootNormVar() = 1.0;
@@ -92,7 +92,7 @@ inline void DiagGauss1DModel<Y>::precomputeVarianceTerms ( ) {
 }
 
 ////////////////////////////////////////
-template <class Y> 
+template <class Y>
 inline PDFVal DiagGauss1DModel<Y>::getProb ( const Y& y ) const {
 //  fprintf(stderr,"--------------------\n");
 //  y.write(stderr);
@@ -109,7 +109,7 @@ inline PDFVal DiagGauss1DModel<Y>::getProb ( const Y& y ) const {
 }
 
 ////////////////////////////////////////
-template <class Y> 
+template <class Y>
 bool DiagGauss1DModel<Y>::readFields ( char* as[], int numFields ) {
   if ( 0==strcmp(as[1],"m") && numFields>2 ) {
     char* psT;
@@ -126,12 +126,12 @@ bool DiagGauss1DModel<Y>::readFields ( char* as[], int numFields ) {
 }
 
 ////////////////////////////////////////
-template <class Y> 
+template <class Y>
 void DiagGauss1DModel<Y>::writeFields ( FILE* pf, const string& sPref ) const {
   fprintf(pf,"%s m = ",sPref.c_str());
   for(int i=0; i<getNumFeats(); i++) fprintf(pf,"%s%f",(0==i)?"":"_",getMean(i));
   fprintf ( pf, "\n" ) ;
-  
+
   fprintf(pf,"%s v = ",sPref.c_str());
   for(int i=0; i<getNumFeats(); i++) fprintf(pf,"%s%f",(0==i)?"":"_",getVariance(i));
   fprintf ( pf, "\n" ) ;
@@ -141,7 +141,7 @@ void DiagGauss1DModel<Y>::writeFields ( FILE* pf, const string& sPref ) const {
 ////////////////////////////////////////////////////////////////////////////////
 
 /*
-template <class Y,class X> 
+template <class Y,class X>
 class DiagGauss2DModel : public Generic2DModel<Y,X,PDFVal> {
  private:
   // Member variables...
@@ -177,7 +177,7 @@ class DiagGauss2DModel : public Generic2DModel<Y,X,PDFVal> {
 
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class Y,class X1,class X2> 
+template <class Y,class X1,class X2>
 class DiagGauss3DModel : public Generic3DModel<Y,X1,X2,PDFVal> {
  private:
   // Member variables...
@@ -220,7 +220,7 @@ class DiagGauss3DModel : public Generic3DModel<Y,X1,X2,PDFVal> {
 //
 ////////////////////////////////////////////////////////////////////////////////
 
-template <class Y> 
+template <class Y>
 class TrainableDiagGauss1DModel : public DiagGauss1DModel<Y> {
  public:
   TrainableDiagGauss1DModel ( )                 : DiagGauss1DModel<Y>() { }

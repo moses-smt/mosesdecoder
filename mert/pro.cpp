@@ -42,6 +42,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FeatureDataIterator.h"
 #include "ScoreDataIterator.h"
 #include "BleuScorer.h"
+#include "Util.h"
+#include "util/random.hh"
 
 using namespace std;
 using namespace MosesTuning;
@@ -51,7 +53,8 @@ namespace po = boost::program_options;
 namespace MosesTuning
 {
 
-class SampledPair {
+class SampledPair
+{
 private:
   pair<size_t,size_t> m_translation1;
   pair<size_t,size_t> m_translation2;
@@ -70,12 +73,19 @@ public:
     }
   }
 
-  float getDiff() const { return m_score_diff; }
-  const pair<size_t,size_t>& getTranslation1() const { return m_translation1; }
-  const pair<size_t,size_t>& getTranslation2() const { return m_translation2; }
+  float getDiff() const {
+    return m_score_diff;
+  }
+  const pair<size_t,size_t>& getTranslation1() const {
+    return m_translation1;
+  }
+  const pair<size_t,size_t>& getTranslation2() const {
+    return m_translation2;
+  }
 };
 
-static void outputSample(ostream& out, const FeatureDataItem& f1, const FeatureDataItem& f2) {
+static void outputSample(ostream& out, const FeatureDataItem& f1, const FeatureDataItem& f2)
+{
   // difference in score in regular features
   for(unsigned int j=0; j<f1.dense.size(); j++)
     if (abs(f1.dense[j]-f2.dense[j]) > 0.00001)
@@ -105,15 +115,18 @@ int main(int argc, char** argv)
   const unsigned int n_candidates = 5000; // Gamma, in Hopkins & May
   const unsigned int n_samples = 50; // Xi, in Hopkins & May
   const float min_diff = 0.05;
+  bool smoothBP = false;
+  const float bleuSmoothing = 1.0f;
 
   po::options_description desc("Allowed options");
   desc.add_options()
-      ("help,h", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
-      ("scfile,S", po::value<vector<string> >(&scoreFiles), "Scorer data files")
-      ("ffile,F", po::value<vector<string> > (&featureFiles), "Feature data files")
-      ("random-seed,r", po::value<int>(&seed), "Seed for random number generation")
-      ("output-file,o", po::value<string>(&outputFile), "Output file")
-      ;
+  ("help,h", po::value(&help)->zero_tokens()->default_value(false), "Print this help message and exit")
+  ("scfile,S", po::value<vector<string> >(&scoreFiles), "Scorer data files")
+  ("ffile,F", po::value<vector<string> > (&featureFiles), "Feature data files")
+  ("random-seed,r", po::value<int>(&seed), "Seed for random number generation")
+  ("output-file,o", po::value<string>(&outputFile), "Output file")
+  ("smooth-brevity-penalty,b", po::value(&smoothBP)->zero_tokens()->default_value(false), "Smooth the brevity penalty, as in Nakov et al. (Coling 2012)")
+  ;
 
   po::options_description cmdline_options;
   cmdline_options.add(desc);
@@ -122,17 +135,17 @@ int main(int argc, char** argv)
             options(cmdline_options).run(), vm);
   po::notify(vm);
   if (help) {
-      cout << "Usage: " + string(argv[0]) +  " [options]" << endl;
-      cout << desc << endl;
-      exit(0);
+    cout << "Usage: " + string(argv[0]) +  " [options]" << endl;
+    cout << desc << endl;
+    exit(0);
   }
 
   if (vm.count("random-seed")) {
     cerr << "Initialising random seed to " << seed << endl;
-    srand(seed);
+    util::rand_init(seed);
   } else {
     cerr << "Initialising random seed from system clock" << endl;
-    srand(time(NULL));
+    util::rand_init();
   }
 
   if (scoreFiles.size() == 0 || featureFiles.size() == 0) {
@@ -142,7 +155,7 @@ int main(int argc, char** argv)
 
   if (featureFiles.size() != scoreFiles.size()) {
     cerr << "Error: Number of feature files (" << featureFiles.size() <<
-      ") does not match number of score files (" << scoreFiles.size() << ")" << endl;
+         ") does not match number of score files (" << scoreFiles.size() << ")" << endl;
     exit(1);
   }
 
@@ -199,13 +212,13 @@ int main(int argc, char** argv)
     vector<float> scores;
     size_t n_translations = hypotheses.size();
     for(size_t  i=0; i<n_candidates; i++) {
-      size_t rand1 = rand() % n_translations;
+      size_t rand1 = util::rand_excl(n_translations);
       pair<size_t,size_t> translation1 = hypotheses[rand1];
-      float bleu1 = sentenceLevelBleuPlusOne(scoreDataIters[translation1.first]->operator[](translation1.second));
+      float bleu1 = smoothedSentenceBleu(scoreDataIters[translation1.first]->operator[](translation1.second), bleuSmoothing, smoothBP);
 
-      size_t rand2 = rand() % n_translations;
+      size_t rand2 = util::rand_excl(n_translations);
       pair<size_t,size_t> translation2 = hypotheses[rand2];
-      float bleu2 = sentenceLevelBleuPlusOne(scoreDataIters[translation2.first]->operator[](translation2.second));
+      float bleu2 = smoothedSentenceBleu(scoreDataIters[translation2.first]->operator[](translation2.second), bleuSmoothing, smoothBP);
 
       /*
       cerr << "t(" << translation1.first << "," << translation1.second << ") = " << bleu1 <<
@@ -221,7 +234,7 @@ int main(int argc, char** argv)
 
     float sample_threshold = -1.0;
     if (samples.size() > n_samples) {
-      nth_element(scores.begin(), scores.begin() + (n_samples-1), scores.end());
+      NTH_ELEMENT3(scores.begin(), scores.begin() + (n_samples-1), scores.end());
       sample_threshold = 0.99999-scores[n_samples-1];
     }
 
@@ -235,11 +248,11 @@ int main(int argc, char** argv)
       size_t hypo_id2 = samples[i].getTranslation2().second;
       *out << "1";
       outputSample(*out, featureDataIters[file_id1]->operator[](hypo_id1),
-                        featureDataIters[file_id2]->operator[](hypo_id2));
+                   featureDataIters[file_id2]->operator[](hypo_id2));
       *out << endl;
       *out << "0";
       outputSample(*out, featureDataIters[file_id2]->operator[](hypo_id2),
-                        featureDataIters[file_id1]->operator[](hypo_id1));
+                   featureDataIters[file_id1]->operator[](hypo_id1));
       *out << endl;
     }
     //advance all iterators

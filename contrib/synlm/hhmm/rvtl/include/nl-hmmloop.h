@@ -348,7 +348,7 @@ const TrellNode<S,B>& HMMLoop<MY,MX,S,B>::update ( const typename MX::RandVarTyp
     //modX.getProb(o,modY.setTrellDat(ashpiQueue.getTop().first,ashpiQueue.getTop().second));
     if ( ashpiQueue.getSize() > 0 ) {
       S s ( ashpiQueue.getTop().second );
-      ////S s; modY.setTrellDat(s,ashpiQueue.getTop().second); 
+      ////S s; modY.setTrellDat(s,ashpiQueue.getTop().second);
       bFull |= btn.tryAdd ( s, IB(ashpiQueue.getTop().first,B(ashpiQueue.getTop().second)), ashpiQueue.getTop().third );
       ////cerr<<ashpiQueue.getSize()<<" queue elems A "<<ashpiQueue.getTop()<<"\n";
       ////cerr<<"/-----A-----\\\n"<<ashpiQueue<<"\\-----A-----/\n";

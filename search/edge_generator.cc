@@ -1,6 +1,7 @@
 #include "search/edge_generator.hh"
 
 #include "lm/left.hh"
+#include "lm/model.hh"
 #include "lm/partial.hh"
 #include "search/context.hh"
 #include "search/vertex.hh"
@@ -33,12 +34,12 @@ template <class Model> void FastScore(const Context<Model> &context, Arity victi
       adjustment += lm::ngram::Subsume(context.LanguageModel(), before->left, before->right, after->left, after->right, update_reveal.left.length);
     }
     before->right = after->right;
-    // Shift the others shifted one down, covering after.  
+    // Shift the others shifted one down, covering after.
     for (lm::ngram::ChartState *cover = after; cover < between + incomplete; ++cover) {
       *cover = *(cover + 1);
     }
   }
-  update.SetScore(update.GetScore() + adjustment * context.GetWeights().LM());
+  update.SetScore(update.GetScore() + adjustment * context.LMWeight());
 }
 
 } // namespace
@@ -53,20 +54,20 @@ template <class Model> PartialEdge EdgeGenerator::Pop(Context<Model> &context) {
   Arity victim = 0;
   Arity victim_completed;
   Arity incomplete;
-  // Select victim or return if complete.   
+  unsigned char lowest_niceness = 255;
+  // Select victim or return if complete.
   {
     Arity completed = 0;
-    unsigned char lowest_length = 255;
     for (Arity i = 0; i != arity; ++i) {
       if (top_nt[i].Complete()) {
         ++completed;
-      } else if (top_nt[i].Length() < lowest_length) {
-        lowest_length = top_nt[i].Length();
+      } else if (top_nt[i].Niceness() < lowest_niceness) {
+        lowest_niceness = top_nt[i].Niceness();
         victim = i;
         victim_completed = completed;
       }
     }
-    if (lowest_length == 255) {
+    if (lowest_niceness == 255) {
       return top;
     }
     incomplete = arity - completed;
@@ -75,10 +76,11 @@ template <class Model> PartialEdge EdgeGenerator::Pop(Context<Model> &context) {
   PartialVertex old_value(top_nt[victim]);
   PartialVertex alternate_changed;
   if (top_nt[victim].Split(alternate_changed)) {
-    PartialEdge alternate = partial_edge_pool_.Allocate(arity, incomplete + 1);
+    PartialEdge alternate(partial_edge_pool_, arity, incomplete + 1);
     alternate.SetScore(top.GetScore() + alternate_changed.Bound() - old_value.Bound());
 
     alternate.SetNote(top.GetNote());
+    alternate.SetRange(top.GetRange());
 
     PartialVertex *alternate_nt = alternate.NT();
     for (Arity i = 0; i < victim; ++i) alternate_nt[i] = top_nt[i];
@@ -87,16 +89,20 @@ template <class Model> PartialEdge EdgeGenerator::Pop(Context<Model> &context) {
 
     memcpy(alternate.Between(), top.Between(), sizeof(lm::ngram::ChartState) * (incomplete + 1));
 
-    // TODO: dedupe?  
+    // TODO: dedupe?
     generate_.push(alternate);
   }
 
+#ifndef NDEBUG
+  Score before = top.GetScore();
+#endif
   // top is now the continuation.
   FastScore(context, victim, victim - victim_completed, incomplete, old_value, top);
-  // TODO: dedupe?  
+  // TODO: dedupe?
   generate_.push(top);
+  assert(lowest_niceness != 254 || top.GetScore() == before);
 
-  // Invalid indicates no new hypothesis generated.  
+  // Invalid indicates no new hypothesis generated.
   return PartialEdge();
 }
 

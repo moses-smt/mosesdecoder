@@ -41,18 +41,18 @@ class Word
 {
   friend std::ostream& operator<<(std::ostream&, const Word&);
 
-protected:
+private:
   bool m_isNonTerminal;
-  UINT64 m_vocabId;
+  uint64_t m_vocabId;
 
 public:
-  explicit Word()
-  {}
+  explicit Word() {
+  }
 
   explicit Word(bool isNonTerminal)
-  :m_isNonTerminal(isNonTerminal)
-  ,m_vocabId(0)
-  {}
+    :m_isNonTerminal(isNonTerminal)
+    ,m_vocabId(0) {
+  }
 
   Word(const Word &copy);
   ~Word();
@@ -67,7 +67,7 @@ public:
   size_t ReadFromMemory(const char *mem);
   size_t ReadFromFile(std::fstream &file);
 
-  void SetVocabId(UINT32 vocabId) {
+  void SetVocabId(uint32_t vocabId) {
     m_vocabId = vocabId;
   }
 
@@ -76,7 +76,10 @@ public:
     const Vocab &vocab,
     Moses::Word &overwrite) const;
 
-	virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
+  void DebugPrint(std::ostream &out, const Vocab &vocab) const;
+  inline const std::string &GetString(const Vocab &vocab) const {
+    return vocab.GetString(m_vocabId);
+  }
 
   int Compare(const Word &compare) const;
   bool operator<(const Word &compare) const;

@@ -5,14 +5,12 @@
 
 #include <iostream>
 #include <fstream>
-#include <assert.h>
-#include <stdlib.h>
+#include <cassert>
+#include <cstdlib>
 #include <string>
 #include <queue>
 #include <map>
 #include <cmath>
-
-extern std::vector<std::string> tokenize( const char*);
 
 namespace MosesTraining
 {
@@ -27,7 +25,7 @@ public:
   std::vector< WORD > vocab;
   WORD_ID storeIfNew( const WORD& );
   WORD_ID getWordID( const WORD& );
-  inline WORD &getWord( WORD_ID id ) {
+  inline WORD &getWord( const WORD_ID id ) {
     return vocab[ id ];
   }
 };

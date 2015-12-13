@@ -1,5 +1,5 @@
-#ifndef LM_SEARCH_HASHED__
-#define LM_SEARCH_HASHED__
+#ifndef LM_SEARCH_HASHED_H
+#define LM_SEARCH_HASHED_H
 
 #include "lm/model_type.hh"
 #include "lm/config.hh"
@@ -18,7 +18,7 @@ namespace util { class FilePiece; }
 
 namespace lm {
 namespace ngram {
-struct Backing;
+class BinaryFormat;
 class ProbingVocabulary;
 namespace detail {
 
@@ -71,8 +71,8 @@ template <class Value> class HashedSearch {
     static const bool kDifferentRest = Value::kDifferentRest;
     static const unsigned int kVersion = 0;
 
-    // TODO: move probing_multiplier here with next binary file format update.  
-    static void UpdateConfigFromBinary(int, const std::vector<uint64_t> &, Config &) {}
+    // TODO: move probing_multiplier here with next binary file format update.
+    static void UpdateConfigFromBinary(const BinaryFormat &, const std::vector<uint64_t> &, uint64_t, Config &) {}
 
     static uint64_t Size(const std::vector<uint64_t> &counts, const Config &config) {
       uint64_t ret = Unigram::Size(counts[0]);
@@ -84,9 +84,7 @@ template <class Value> class HashedSearch {
 
     uint8_t *SetupMemory(uint8_t *start, const std::vector<uint64_t> &counts, const Config &config);
 
-    void InitializeFromARPA(const char *file, util::FilePiece &f, const std::vector<uint64_t> &counts, const Config &config, ProbingVocabulary &vocab, Backing &backing);
-
-    void LoadedBinary();
+    void InitializeFromARPA(const char *file, util::FilePiece &f, const std::vector<uint64_t> &counts, const Config &config, ProbingVocabulary &vocab, BinaryFormat &backing);
 
     unsigned char Order() const {
       return middle_.size() + 2;
@@ -102,14 +100,9 @@ template <class Value> class HashedSearch {
       return ret;
     }
 
-#pragma GCC diagnostic ignored "-Wuninitialized"
     MiddlePointer Unpack(uint64_t extend_pointer, unsigned char extend_length, Node &node) const {
       node = extend_pointer;
-      typename Middle::ConstIterator found;
-      bool got = middle_[extend_length - 2].Find(extend_pointer, found);
-      assert(got);
-      (void)got;
-      return MiddlePointer(found->value);
+      return MiddlePointer(middle_[extend_length - 2].MustFind(extend_pointer)->value);
     }
 
     MiddlePointer LookupMiddle(unsigned char order_minus_2, WordIndex word, Node &node, bool &independent_left, uint64_t &extend_pointer) const {
@@ -126,14 +119,14 @@ template <class Value> class HashedSearch {
     }
 
     LongestPointer LookupLongest(WordIndex word, const Node &node) const {
-      // Sign bit is always on because longest n-grams do not extend left.  
+      // Sign bit is always on because longest n-grams do not extend left.
       typename Longest::ConstIterator found;
       if (!longest_.Find(CombineWordHash(node, word), found)) return LongestPointer();
       return LongestPointer(found->value.prob);
     }
 
-    // Generate a node without necessarily checking that it actually exists.  
-    // Optionally return false if it's know to not exist.  
+    // Generate a node without necessarily checking that it actually exists.
+    // Optionally return false if it's know to not exist.
     bool FastMakeNode(const WordIndex *begin, const WordIndex *end, Node &node) const {
       assert(begin != end);
       node = static_cast<Node>(*begin);
@@ -144,16 +137,16 @@ template <class Value> class HashedSearch {
     }
 
   private:
-    // Interpret config's rest cost build policy and pass the right template argument to ApplyBuild.  
+    // Interpret config's rest cost build policy and pass the right template argument to ApplyBuild.
     void DispatchBuild(util::FilePiece &f, const std::vector<uint64_t> &counts, const Config &config, const ProbingVocabulary &vocab, PositiveProbWarn &warn);
 
-    template <class Build> void ApplyBuild(util::FilePiece &f, const std::vector<uint64_t> &counts, const Config &config, const ProbingVocabulary &vocab, PositiveProbWarn &warn, const Build &build);
+    template <class Build> void ApplyBuild(util::FilePiece &f, const std::vector<uint64_t> &counts, const ProbingVocabulary &vocab, PositiveProbWarn &warn, const Build &build);
 
     class Unigram {
       public:
         Unigram() {}
 
-        Unigram(void *start, uint64_t count, std::size_t /*allocated*/) : 
+        Unigram(void *start, uint64_t count) :
           unigram_(static_cast<typename Value::Weights*>(start))
 #ifdef DEBUG
          ,  count_(count)
@@ -172,8 +165,6 @@ template <class Value> class HashedSearch {
         }
 
         typename Value::Weights &Unknown() { return unigram_[0]; }
-
-        void LoadedBinary() {}
 
         // For building.
         typename Value::Weights *Raw() { return unigram_; }
@@ -198,4 +189,4 @@ template <class Value> class HashedSearch {
 } // namespace ngram
 } // namespace lm
 
-#endif // LM_SEARCH_HASHED__
+#endif // LM_SEARCH_HASHED_H

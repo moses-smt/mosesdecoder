@@ -3,23 +3,28 @@
 #include <stdexcept>
 #include "Scorer.h"
 #include "BleuScorer.h"
+#include "BleuDocScorer.h"
 #include "PerScorer.h"
 #include "TerScorer.h"
 #include "CderScorer.h"
-#include "MergeScorer.h"
 #include "InterpolatedScorer.h"
 #include "SemposScorer.h"
 #include "PermutationScorer.h"
+#include "MeteorScorer.h"
+#include "HwcmScorer.h"
+#include "Reference.h"
 
 using namespace std;
 
 namespace MosesTuning
 {
-  
 
-vector<string> ScorerFactory::getTypes() {
+
+vector<string> ScorerFactory::getTypes()
+{
   vector<string> types;
   types.push_back(string("BLEU"));
+  types.push_back(string("BLEUDOC"));
   types.push_back(string("PER"));
   types.push_back(string("TER"));
   types.push_back(string("CDER"));
@@ -27,12 +32,17 @@ vector<string> ScorerFactory::getTypes() {
   types.push_back(string("MERGE"));
   types.push_back(string("SEMPOS"));
   types.push_back(string("LRSCORE"));
+  types.push_back(string("METEOR"));
+  types.push_back(string("HWCM"));
   return types;
 }
 
-Scorer* ScorerFactory::getScorer(const string& type, const string& config) {
+Scorer* ScorerFactory::getScorer(const string& type, const string& config)
+{
   if (type == "BLEU") {
     return new BleuScorer(config);
+  } else if (type == "BLEUDOC") {
+    return new BleuDocScorer(config);
   } else if (type == "PER") {
     return new PerScorer(config);
   } else if (type == "TER") {
@@ -44,15 +54,16 @@ Scorer* ScorerFactory::getScorer(const string& type, const string& config) {
     return new CderScorer(config, false);
   } else if (type == "SEMPOS") {
     return new SemposScorer(config);
-  } else if (type == "MERGE") {
-    return new MergeScorer(config);
   } else if ((type == "HAMMING") || (type == "KENDALL")) {
     return (PermutationScorer*) new PermutationScorer(type, config);
+  } else if (type == "METEOR") {
+    return new MeteorScorer(config);
+  } else if (type == "HWCM") {
+    return new HwcmScorer(config);
   } else {
     if (type.find(',') != string::npos) {
       return new InterpolatedScorer(type, config);
-    }
-    else {
+    } else {
       throw runtime_error("Unknown scorer type: " + type);
     }
   }

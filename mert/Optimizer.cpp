@@ -1,7 +1,7 @@
 #include "Optimizer.h"
 
 #include <cmath>
-#include "util/check.hh"
+#include "util/exception.hh"
 #include <vector>
 #include <limits>
 #include <map>
@@ -17,7 +17,8 @@ using namespace std;
 static const float MIN_FLOAT = -1.0 * numeric_limits<float>::max();
 static const float MAX_FLOAT = numeric_limits<float>::max();
 
-namespace {
+namespace
+{
 
 /**
  * Compute the intersection of 2 lines.
@@ -35,7 +36,7 @@ inline float intersect(float m1, float b1, float m2, float b2)
 
 namespace MosesTuning
 {
-  
+
 
 Optimizer::Optimizer(unsigned Pd, const vector<unsigned>& i2O, const vector<bool>& pos, const vector<parameter_t>& start, unsigned int nrandom)
   : m_scorer(NULL), m_feature_data(), m_num_random_directions(nrandom), m_positive(pos)
@@ -43,7 +44,7 @@ Optimizer::Optimizer(unsigned Pd, const vector<unsigned>& i2O, const vector<bool
   // Warning: the init vector is a full set of parameters, of dimension m_pdim!
   Point::m_pdim = Pd;
 
-  CHECK(start.size() == Pd);
+  UTIL_THROW_IF(start.size() != Pd, util::Exception, "Error");
   Point::m_dim = i2O.size();
   Point::m_opt_indices = i2O;
   if (Point::m_pdim > Point::m_dim) {
@@ -83,7 +84,7 @@ map<float,diff_t >::iterator AddThreshold(map<float,diff_t >& thresholdmap, floa
   } else {
     // normal case
     pair<map<float,diff_t>::iterator, bool> ins = thresholdmap.insert(threshold(newt, diff_t(1, newdiff)));
-    CHECK(ins.second);                // we really inserted something
+    UTIL_THROW_IF(!ins.second, util::Exception, "Error");                // we really inserted something
     it = ins.first;
   }
   return it;
@@ -167,7 +168,8 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
         // The rightmost bestindex is the one with the highest slope.
 
         // They should be equal but there might be.
-        CHECK(abs(leftmost->first-gradient.rbegin()->first) < 0.0001);
+        UTIL_THROW_IF(abs(leftmost->first-gradient.rbegin()->first) >= 0.0001,
+                      util::Exception, "Error");
         // A small difference due to rounding error
         break;
       }
@@ -188,7 +190,9 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
         map<float,diff_t>::iterator tit = thresholdmap.find(leftmostx);
         if (tit == previnserted) {
           // The threshold is the same as before can happen if 2 candidates are the same for example.
-          CHECK(previnserted->second.back().first == newd.first);
+          UTIL_THROW_IF(previnserted->second.back().first != newd.first,
+                        util::Exception,
+                        "Error");
           previnserted->second.back()=newd; // just replace the 1 best for sentence S
           // previnsert doesn't change
         } else {
@@ -198,18 +202,22 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
             thresholdmap.erase(previnserted); // erase old previnsert
             previnserted = thresholdmap.find(leftmostx); // point previnsert to the new threshold
             previnserted->second.back()=newd; // We update the diff for sentence S
-          // Threshold already exists but is not the previous one.
+            // Threshold already exists but is not the previous one.
           } else {
             // We append the diffs in previnsert to tit before destroying previnsert.
             tit->second.insert(tit->second.end(),previnserted->second.begin(),previnserted->second.end());
-            CHECK(tit->second.back().first == newd.first);
+            UTIL_THROW_IF(tit->second.back().first != newd.first,
+                          util::Exception,
+                          "Error");
             tit->second.back()=newd;    // change diff for sentence S
             thresholdmap.erase(previnserted); // erase old previnsert
             previnserted = tit;  // point previnsert to the new threshold
           }
         }
 
-        CHECK(previnserted != thresholdmap.end());
+        UTIL_THROW_IF(previnserted == thresholdmap.end(),
+                      util::Exception,
+                      "Error");
       } else { //normal insertion process
         previnserted = AddThreshold(thresholdmap, leftmostx, newd);
       }
@@ -245,7 +253,9 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
   float bestx = MIN_FLOAT;
 
   // We skipped the first el of thresholdlist but GetIncStatScore return 1 more for first1best.
-  CHECK(scores.size() == thresholdmap.size());
+  UTIL_THROW_IF(scores.size() != thresholdmap.size(),
+                util::Exception,
+                "Error");
   for (unsigned int sc = 0; sc != scores.size(); sc++) {
     //cerr << "x=" << thrit->first << " => " << scores[sc] << endl;
 
@@ -311,7 +321,7 @@ statscore_t Optimizer::LineOptimize(const Point& origin, const Point& direction,
 
 void Optimizer::Get1bests(const Point& P, vector<unsigned>& bests) const
 {
-  CHECK(m_feature_data);
+  UTIL_THROW_IF(m_feature_data == NULL, util::Exception, "Error");
   bests.clear();
   bests.resize(size());
 
@@ -364,7 +374,7 @@ statscore_t Optimizer::Run(Point& P) const
 
 vector<statscore_t> Optimizer::GetIncStatScore(const vector<unsigned>& thefirst, const vector<vector <pair<unsigned,unsigned> > >& thediffs) const
 {
-  CHECK(m_scorer);
+  UTIL_THROW_IF(m_scorer == NULL, util::Exception, "Error");
 
   vector<statscore_t> theres;
 
@@ -405,8 +415,7 @@ statscore_t SimpleOptimizer::TrueRun(Point& P) const
         for (unsigned int i = 0; i < Point::getdim(); i++)
           direction[i]=0.0;
         direction[d]=1.0;
-      }
-      else { // random direction update
+      } else { // random direction update
         direction.Randomize();
       }
       statscore_t curscore = LineOptimize(P, direction, linebest);//find the minimum on the line
@@ -443,8 +452,7 @@ statscore_t RandomDirectionOptimizer::TrueRun(Point& P) const
   // do specified number of random direction optimizations
   unsigned int nrun = 0;
   unsigned int nrun_no_change = 0;
-  for (; nrun_no_change < m_num_random_directions; nrun++, nrun_no_change++)
-  {
+  for (; nrun_no_change < m_num_random_directions; nrun++, nrun_no_change++) {
     // choose a random direction in which to optimize
     Point direction;
     direction.Randomize();

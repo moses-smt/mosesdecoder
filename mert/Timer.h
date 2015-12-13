@@ -7,11 +7,11 @@
 
 namespace MosesTuning
 {
-  
+
 
 class Timer
 {
- private:
+private:
   // Time values are stored in microseconds.
   struct CPUTime {
     uint64_t user_time;                 // user CPU time
@@ -30,15 +30,15 @@ class Timer
   Timer(const Timer&);
   void operator=(const Timer&);
 
- public:
+public:
   /**
    * 'm_is_running' is initially false. A timer needs to be explicitly started
    * using 'start'.
    */
   Timer()
-      : m_is_running(false),
-        m_wall(0),
-        m_start_time() {}
+    : m_is_running(false),
+      m_wall(0),
+      m_start_time() {}
 
   ~Timer() {}
 
@@ -61,7 +61,9 @@ class Timer
 
   /**
    */
-  bool is_running() const { return m_is_running; }
+  bool is_running() const {
+    return m_is_running;
+  }
 
   /**
    * Return the total time in seconds that the timer has been in the
@@ -97,7 +99,8 @@ class Timer
  * for an ostream 'os' and a timer 't'.  For example, "cout << t" will
  * print out the total amount of time 't' has been "running".
  */
-inline std::ostream& operator<<(std::ostream& os, const Timer& t) {
+inline std::ostream& operator<<(std::ostream& os, const Timer& t)
+{
   if (t.is_running()) {
     os << t.ToString();
   } else {

@@ -1,21 +1,23 @@
-#ifndef UTIL_ERSATZ_PROGRESS__
-#define UTIL_ERSATZ_PROGRESS__
+#ifndef UTIL_ERSATZ_PROGRESS_H
+#define UTIL_ERSATZ_PROGRESS_H
 
 #include <iostream>
 #include <string>
-
-#include <inttypes.h>
+#include <stdint.h>
 
 // Ersatz version of boost::progress so core language model doesn't depend on
-// boost.  Also adds option to print nothing.  
+// boost.  Also adds option to print nothing.
 
 namespace util {
+
+extern const char kProgressBanner[];
+
 class ErsatzProgress {
   public:
-    // No output.  
+    // No output.
     ErsatzProgress();
 
-    // Null means no output.  The null value is useful for passing along the ostream pointer from another caller.   
+    // Null means no output.  The null value is useful for passing along the ostream pointer from another caller.
     explicit ErsatzProgress(uint64_t complete, std::ostream *to = &std::cerr, const std::string &message = "");
 
     ~ErsatzProgress();
@@ -32,7 +34,6 @@ class ErsatzProgress {
 
     void Set(uint64_t to) {
       if ((current_ = to) >= next_) Milestone();
-      Milestone();
     }
 
     void Finished() {
@@ -53,4 +54,4 @@ class ErsatzProgress {
 
 } // namespace util
 
-#endif // UTIL_ERSATZ_PROGRESS__
+#endif // UTIL_ERSATZ_PROGRESS_H

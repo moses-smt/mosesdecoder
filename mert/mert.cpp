@@ -24,13 +24,15 @@
 #include "Types.h"
 #include "Timer.h"
 #include "Util.h"
+#include "util/random.hh"
 
-#include "../moses/src/ThreadPool.h"
+#include "moses/ThreadPool.h"
 
 using namespace std;
 using namespace MosesTuning;
 
-namespace {
+namespace
+{
 
 const char kDefaultOptimizer[] = "powell";
 const char kDefaultScorer[] = "BLEU";
@@ -46,10 +48,11 @@ const char kOutputFile[] = "weights.txt";
 /**
  * Runs an optimisation, or a random restart.
  */
-class OptimizationTask : public Moses::Task {
- public:
+class OptimizationTask : public Moses::Task
+{
+public:
   OptimizationTask(Optimizer* optimizer, const Point& point)
-      : m_optimizer(optimizer), m_point(point) {}
+    : m_optimizer(optimizer), m_point(point) {}
 
   ~OptimizationTask() {}
 
@@ -76,7 +79,7 @@ class OptimizationTask : public Moses::Task {
     return m_point;
   }
 
- private:
+private:
   // Do not allow the user to instanciate without arguments.
   OptimizationTask() {}
 
@@ -85,7 +88,8 @@ class OptimizationTask : public Moses::Task {
   statscore_t m_score;
 };
 
-bool WriteFinalWeights(const char* filename, const Point& point) {
+bool WriteFinalWeights(const char* filename, const Point& point)
+{
   ofstream ofs(filename);
   if (!ofs) {
     cerr << "Cannot open " << filename << endl;
@@ -165,91 +169,92 @@ struct ProgramOption {
   size_t shard_count;
 
   ProgramOption()
-      : to_optimize_str(""),
-        pdim(-1),
-        ntry(1),
-        nrandom(0),
-        seed(0),
-        has_seed(false),
-        optimize_type(kDefaultOptimizer),
-        scorer_type(kDefaultScorer),
-        scorer_config(""),
-        scorer_file(kDefaultScorerFile),
-        feature_file(kDefaultFeatureFile),
-        init_file(kDefaultInitFile),
-        positive_string(kDefaultPositiveString),
-        sparse_weights_file(kDefaultSparseWeightsFile),
-        num_threads(1),
-        shard_size(0),
-        shard_count(0) { }
+    : to_optimize_str(""),
+      pdim(-1),
+      ntry(1),
+      nrandom(0),
+      seed(0),
+      has_seed(false),
+      optimize_type(kDefaultOptimizer),
+      scorer_type(kDefaultScorer),
+      scorer_config(""),
+      scorer_file(kDefaultScorerFile),
+      feature_file(kDefaultFeatureFile),
+      init_file(kDefaultInitFile),
+      positive_string(kDefaultPositiveString),
+      sparse_weights_file(kDefaultSparseWeightsFile),
+      num_threads(1),
+      shard_size(0),
+      shard_count(0) { }
 };
 
-void ParseCommandOptions(int argc, char** argv, ProgramOption* opt) {
+void ParseCommandOptions(int argc, char** argv, ProgramOption* opt)
+{
   int c;
   int option_index;
 
   while ((c = getopt_long(argc, argv, "o:r:d:n:m:t:s:S:F:v:p:P:", long_options, &option_index)) != -1) {
     switch (c) {
-      case 'o':
-        opt->to_optimize_str = string(optarg);
-        break;
-      case 'd':
-        opt->pdim = strtol(optarg, NULL, 10);
-        break;
-      case 'n':
-        opt->ntry = strtol(optarg, NULL, 10);
-        break;
-      case 'm':
-        opt->nrandom = strtol(optarg, NULL, 10);
-        break;
-      case 'r':
-        opt->seed = strtol(optarg, NULL, 10);
-        opt->has_seed = true;
-        break;
-      case 't':
-        opt->optimize_type = string(optarg);
-        break;
-      case's':
-        opt->scorer_type = string(optarg);
-        break;
-      case 'c':
-        opt->scorer_config = string(optarg);
-        break;
-      case 'S':
-        opt->scorer_file = string(optarg);
-        break;
-      case 'F':
-        opt->feature_file = string(optarg);
-        break;
-      case 'i':
-        opt->init_file = string(optarg);
-        break;
-      case 'p':
-        opt->sparse_weights_file=string(optarg);
-        break;
-      case 'v':
-        setverboselevel(strtol(optarg, NULL, 10));
-        break;
+    case 'o':
+      opt->to_optimize_str = string(optarg);
+      break;
+    case 'd':
+      opt->pdim = strtol(optarg, NULL, 10);
+      break;
+    case 'n':
+      opt->ntry = strtol(optarg, NULL, 10);
+      break;
+    case 'm':
+      opt->nrandom = strtol(optarg, NULL, 10);
+      break;
+    case 'r':
+      opt->seed = strtol(optarg, NULL, 10);
+      opt->has_seed = true;
+      break;
+    case 't':
+      opt->optimize_type = string(optarg);
+      break;
+    case's':
+      opt->scorer_type = string(optarg);
+      break;
+    case 'c':
+      opt->scorer_config = string(optarg);
+      break;
+    case 'S':
+      opt->scorer_file = string(optarg);
+      break;
+    case 'F':
+      opt->feature_file = string(optarg);
+      break;
+    case 'i':
+      opt->init_file = string(optarg);
+      break;
+    case 'p':
+      opt->sparse_weights_file=string(optarg);
+      break;
+    case 'v':
+      setverboselevel(strtol(optarg, NULL, 10));
+      break;
 #ifdef WITH_THREADS
-      case 'T':
-        opt->num_threads = strtol(optarg, NULL, 10);
-        if (opt->num_threads < 1) opt->num_threads = 1;
-        break;
+    case 'T':
+      opt->num_threads = strtol(optarg, NULL, 10);
+      if (opt->num_threads < 1) opt->num_threads = 1;
+      break;
 #endif
-      case 'a':
-        opt->shard_count = strtof(optarg, NULL);
-        break;
-      case 'b':
-        opt->shard_size = strtof(optarg, NULL);
-        break;
-      case 'h':
-        usage(0);
-        break;
-      case 'P':
-        opt->positive_string = string(optarg);
-        break;
-      default:
-        usage(1);
+    case 'a':
+      opt->shard_count = strtof(optarg, NULL);
+      break;
+    case 'b':
+      opt->shard_size = strtof(optarg, NULL);
+      break;
+    case 'h':
+      usage(0);
+      break;
+    case 'P':
+      opt->positive_string = string(optarg);
+      break;
+    default:
+      usage(1);
     }
   }
 }
@@ -285,10 +290,10 @@ int main(int argc, char **argv)
 
   if (option.has_seed) {
     cerr << "Seeding random numbers with " << option.seed << endl;
-    srandom(option.seed);
+    util::rand_init(option.seed);
   } else {
     cerr << "Seeding random numbers with system clock " << endl;
-    srandom(time(NULL));
+    util::rand_init();
   }
 
   if (option.sparse_weights_file.size()) ++option.pdim;
@@ -353,7 +358,7 @@ int main(int argc, char **argv)
 
   // it make sense to know what parameter set were used to generate the nbest
   boost::scoped_ptr<Scorer> scorer(
-      ScorerFactory::getScorer(option.scorer_type, option.scorer_config));
+    ScorerFactory::getScorer(option.scorer_type, option.scorer_config));
 
   //load data
   Data data(scorer.get(), option.sparse_weights_file);
@@ -447,7 +452,7 @@ int main(int argc, char **argv)
     startingPoints.back().Randomize();
   }
 
-  vector<vector<OptimizationTask*> > allTasks(1);
+  vector<vector<boost::shared_ptr<OptimizationTask> > > allTasks(1);
 
   //optional sharding
   vector<Data> shards;
@@ -462,13 +467,14 @@ int main(int argc, char **argv)
     if (option.shard_count)
       data_ref = shards[i]; //use the sharded data if it exists
 
-    vector<OptimizationTask*>& tasks = allTasks[i];
+    vector<boost::shared_ptr<OptimizationTask> >& tasks = allTasks[i];
     Optimizer *optimizer = OptimizerFactory::BuildOptimizer(option.pdim, to_optimize, positive, start_list[0], option.optimize_type, option.nrandom);
     optimizer->SetScorer(data_ref.getScorer());
     optimizer->SetFeatureData(data_ref.getFeatureData());
     // A task for each start point
     for (size_t j = 0; j < startingPoints.size(); ++j) {
-      OptimizationTask* task = new OptimizationTask(optimizer, startingPoints[j]);
+      boost::shared_ptr<OptimizationTask>
+      task(new OptimizationTask(optimizer, startingPoints[j]));
       tasks.push_back(task);
 #ifdef WITH_THREADS
       pool.Submit(task);
@@ -534,9 +540,6 @@ int main(int argc, char **argv)
 
   for (size_t i = 0; i < allTasks.size(); ++i) {
     allTasks[i][0]->resetOptimizer();
-    for (size_t j = 0; j < allTasks[i].size(); ++j) {
-      delete allTasks[i][j];
-    }
   }
 
   PrintUserTime("Stopping...");

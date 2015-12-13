@@ -1,4 +1,38 @@
-TBD: Russian uppercase alphabet [А-Я]
+# added Cyrillic uppercase letters [А-Я]
+# removed 000D carriage return (this is not removed by chomp in tokenizer.perl, and prevents recognition of the prefixes)
+# edited by Kate Young (nspaceanalysis@earthlink.net) 21 May 2013
+А
+Б
+В
+Г
+Д
+Е
+Ж
+З
+И
+Й
+К
+Л
+М
+Н
+О
+П
+Р
+С
+Т
+У
+Ф
+Х
+Ц
+Ч
+Ш
+Щ
+Ъ
+Ы
+Ь
+Э
+Ю
+Я
 A
 B
 C

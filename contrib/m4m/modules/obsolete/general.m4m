@@ -1,0 +1,8 @@
+# -*- Makefile -*-
+
+%.gz: | %
+      $(lock)
+      gzip $* -o $@_
+      mv $@_ $@
+      $(unlock)
+

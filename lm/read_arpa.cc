@@ -1,6 +1,7 @@
 #include "lm/read_arpa.hh"
 
 #include "lm/blank.hh"
+#include "util/file.hh"
 
 #include <cmath>
 #include <cstdlib>
@@ -8,8 +9,8 @@
 #include <sstream>
 #include <vector>
 
-#include <ctype.h>
-#include <string.h>
+#include <cctype>
+#include <cstring>
 #include <stdint.h>
 
 #ifdef WIN32
@@ -18,7 +19,7 @@
 
 namespace lm {
 
-// 1 for '\t', '\n', and ' '.  This is stricter than isspace.  
+// 1 for '\t', '\n', and ' '.  This is stricter than isspace.
 const bool kARPASpaces[256] = {0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 
 namespace {
@@ -45,13 +46,19 @@ uint64_t ReadCount(const std::string &from) {
 
 void ReadARPACounts(util::FilePiece &in, std::vector<uint64_t> &number) {
   number.clear();
-  StringPiece line;
-  while (IsEntirelyWhiteSpace(line = in.ReadLine())) {}
+  StringPiece line = in.ReadLine();
+  // In general, ARPA files can have arbitrary text before "\data\"
+  // But in KenLM, we require such lines to start with "#", so that
+  // we can do stricter error checking
+  while (IsEntirelyWhiteSpace(line) || starts_with(line, "#")) {
+    line = in.ReadLine();
+  }
+
   if (line != "\\data\\") {
     if ((line.size() >= 2) && (line.data()[0] == 0x1f) && (static_cast<unsigned char>(line.data()[1]) == 0x8b)) {
       UTIL_THROW(FormatLoadException, "Looks like a gzip file.  If this is an ARPA file, pipe " << in.FileName() << " through zcat.  If this already in binary format, you need to decompress it because mmap doesn't work on top of gzip.");
     }
-    if (static_cast<size_t>(line.size()) >= strlen(kBinaryMagic) && StringPiece(line.data(), strlen(kBinaryMagic)) == kBinaryMagic) 
+    if (static_cast<size_t>(line.size()) >= strlen(kBinaryMagic) && StringPiece(line.data(), strlen(kBinaryMagic)) == kBinaryMagic)
       UTIL_THROW(FormatLoadException, "This looks like a binary file but got sent to the ARPA parser.  Did you compress the binary file or pass a binary file where only ARPA files are accepted?");
     UTIL_THROW_IF(line.size() >= 4 && StringPiece(line.data(), 4) == "blmt", FormatLoadException, "This looks like an IRSTLM binary file.  Did you forget to pass --text yes to compile-lm?");
     UTIL_THROW_IF(line == "iARPA", FormatLoadException, "This looks like an IRSTLM iARPA file.  You need an ARPA file.  Run\n  compile-lm --text yes " << in.FileName() << " " << in.FileName() << ".arpa\nfirst.");
@@ -59,7 +66,7 @@ void ReadARPACounts(util::FilePiece &in, std::vector<uint64_t> &number) {
   }
   while (!IsEntirelyWhiteSpace(line = in.ReadLine())) {
     if (line.size() < 6 || strncmp(line.data(), "ngram ", 6)) UTIL_THROW(FormatLoadException, "count line \"" << line << "\"doesn't begin with \"ngram \"");
-    // So strtol doesn't go off the end of line.  
+    // So strtol doesn't go off the end of line.
     std::string remaining(line.data() + 6, line.size() - 6);
     char *end_ptr;
     unsigned int length = std::strtol(remaining.c_str(), &end_ptr, 10);
@@ -95,8 +102,8 @@ void ReadBackoff(util::FilePiece &in, Prob &/*weights*/) {
 }
 
 void ReadBackoff(util::FilePiece &in, float &backoff) {
-  // Always make zero negative.  
-  // Negative zero means that no (n+1)-gram has this n-gram as context.  
+  // Always make zero negative.
+  // Negative zero means that no (n+1)-gram has this n-gram as context.
   // Therefore the hypothesis state can be shorter.  Of course, many n-grams
   // are context for (n+1)-grams.  An algorithm in the data structure will go
   // back and set the backoff to positive zero in these cases.
@@ -105,7 +112,7 @@ void ReadBackoff(util::FilePiece &in, float &backoff) {
       backoff = in.ReadFloat();
       if (backoff == ngram::kExtensionBackoff) backoff = ngram::kNoExtensionBackoff;
       {
-#ifdef WIN32
+#if defined(WIN32) && !defined(__MINGW32__)
 		int float_class = _fpclass(backoff);
         UTIL_THROW_IF(float_class == _FPCLASS_SNAN || float_class == _FPCLASS_QNAN || float_class == _FPCLASS_NINF || float_class == _FPCLASS_PINF, FormatLoadException, "Bad backoff " << backoff);
 #else
@@ -143,7 +150,7 @@ void PositiveProbWarn::Warn(float prob) {
     case THROW_UP:
       UTIL_THROW(FormatLoadException, "Positive log probability " << prob << " in the model.  This is a bug in IRSTLM; you can set config.positive_log_probability = SILENT or pass -i to build_binary to substitute 0.0 for the log probability.  Error");
     case COMPLAIN:
-      std::cerr << "There's a positive log probability " << prob << " in the APRA file, probably because of a bug in IRSTLM.  This and subsequent entires will be mapepd to 0 log probability." << std::endl;
+      std::cerr << "There's a positive log probability " << prob << " in the APRA file, probably because of a bug in IRSTLM.  This and subsequent entires will be mapped to 0 log probability." << std::endl;
       action_ = SILENT;
       break;
     case SILENT:

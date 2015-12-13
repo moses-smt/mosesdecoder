@@ -1,6 +1,10 @@
 #include "util/pool.hh"
 
-#include <stdlib.h>
+#include "util/scoped.hh"
+
+#include <cstdlib>
+
+#include <algorithm>
 
 namespace util {
 
@@ -24,8 +28,7 @@ void Pool::FreeAll() {
 
 void *Pool::More(std::size_t size) {
   std::size_t amount = std::max(static_cast<size_t>(32) << free_list_.size(), size);
-  uint8_t *ret = static_cast<uint8_t*>(malloc(amount));
-  if (!ret) throw std::bad_alloc();
+  uint8_t *ret = static_cast<uint8_t*>(MallocOrThrow(amount));
   free_list_.push_back(ret);
   current_ = ret + size;
   current_end_ = ret + amount;

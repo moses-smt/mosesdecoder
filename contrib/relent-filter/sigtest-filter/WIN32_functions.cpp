@@ -31,14 +31,14 @@
 ///////////////////////////////////////////////////////////////////////////////
 // if you are not using precompiled headers then include these lines:
 //#include <windows.h>
-//#include <stdio.h>
+//#include <cstdio>
 //#include <tchar.h>
 ///////////////////////////////////////////////////////////////////////////////
 
 
-#include <stdio.h>
-#include <string.h>
-#include <math.h>
+#include <cstdio>
+#include <cstring>
+#include <cmath>
 #include "WIN32_functions.h"
 
 

@@ -28,7 +28,7 @@ ECHO ### You can specify the toolset as the argument, i.e.:
 ECHO ###     .\build.bat msvc
 ECHO ###
 ECHO ### Toolsets supported by this script are: borland, como, gcc, gcc-nocygwin,
-ECHO ###     intel-win32, metrowerks, mingw, msvc, vc7, vc8, vc9, vc10
+ECHO ###     intel-win32, metrowerks, mingw, msvc, vc7, vc8, vc9, vc10, vc11
 ECHO ###
 call :Set_Error
 endlocal
@@ -100,6 +100,16 @@ call :Clear_Error
 call :Test_Empty %ProgramFiles%
 if not errorlevel 1 set ProgramFiles=C:\Program Files
 
+call :Clear_Error
+if NOT "_%VS110COMNTOOLS%_" == "__" (
+    set "BOOST_JAM_TOOLSET=vc11"
+    set "BOOST_JAM_TOOLSET_ROOT=%VS110COMNTOOLS%..\..\VC\"
+    goto :eof)
+call :Clear_Error
+if EXIST "%ProgramFiles%\Microsoft Visual Studio 11.0\VC\VCVARSALL.BAT" (
+    set "BOOST_JAM_TOOLSET=vc11"
+    set "BOOST_JAM_TOOLSET_ROOT=%ProgramFiles%\Microsoft Visual Studio 11.0\VC\"
+    goto :eof)
 call :Clear_Error
 if NOT "_%VS100COMNTOOLS%_" == "__" (
     set "BOOST_JAM_TOOLSET=vc10"
@@ -371,6 +381,21 @@ set "BOOST_JAM_OPT_MKJAMBASE=/Febootstrap\mkjambase0"
 set "BOOST_JAM_OPT_YYACC=/Febootstrap\yyacc0"
 set "_known_=1"
 :Skip_VC10
+if NOT "_%BOOST_JAM_TOOLSET%_" == "_vc11_" goto Skip_VC11
+if NOT "_%VS110COMNTOOLS%_" == "__" (
+    set "BOOST_JAM_TOOLSET_ROOT=%VS110COMNTOOLS%..\..\VC\"
+    )
+if "_%VCINSTALLDIR%_" == "__" call :Call_If_Exists "%BOOST_JAM_TOOLSET_ROOT%VCVARSALL.BAT" %BOOST_JAM_ARGS%
+if NOT "_%BOOST_JAM_TOOLSET_ROOT%_" == "__" (
+    if "_%VCINSTALLDIR%_" == "__" (
+        set "PATH=%BOOST_JAM_TOOLSET_ROOT%bin;%PATH%"
+        ) )
+set "BOOST_JAM_CC=cl /nologo /RTC1 /Zi /MTd /Fobootstrap/ /Fdbootstrap/ -DNT -DYYDEBUG -wd4996 kernel32.lib advapi32.lib user32.lib"
+set "BOOST_JAM_OPT_JAM=/Febootstrap\jam0"
+set "BOOST_JAM_OPT_MKJAMBASE=/Febootstrap\mkjambase0"
+set "BOOST_JAM_OPT_YYACC=/Febootstrap\yyacc0"
+set "_known_=1"
+:Skip_VC11
 if NOT "_%BOOST_JAM_TOOLSET%_" == "_borland_" goto Skip_BORLAND
 if "_%BOOST_JAM_TOOLSET_ROOT%_" == "__" (
     call :Test_Path bcc32.exe )
@@ -438,13 +463,18 @@ echo ###
 set YYACC_SOURCES=yyacc.c
 set MKJAMBASE_SOURCES=mkjambase.c
 set BJAM_SOURCES=
-set BJAM_SOURCES=%BJAM_SOURCES% command.c compile.c debug.c execnt.c expand.c filent.c glob.c hash.c
-set BJAM_SOURCES=%BJAM_SOURCES% hdrmacro.c headers.c jam.c jambase.c jamgram.c lists.c make.c make1.c
-set BJAM_SOURCES=%BJAM_SOURCES% newstr.c option.c output.c parse.c pathunix.c regexp.c
-set BJAM_SOURCES=%BJAM_SOURCES% rules.c scan.c search.c subst.c timestamp.c variable.c modules.c
-set BJAM_SOURCES=%BJAM_SOURCES% strings.c filesys.c builtins.c md5.c pwd.c class.c w32_getreg.c native.c
-set BJAM_SOURCES=%BJAM_SOURCES% modules/set.c modules/path.c modules/regex.c
-set BJAM_SOURCES=%BJAM_SOURCES% modules/property-set.c modules/sequence.c modules/order.c
+set BJAM_SOURCES=%BJAM_SOURCES% command.c compile.c constants.c debug.c
+set BJAM_SOURCES=%BJAM_SOURCES% execcmd.c execnt.c filent.c frames.c function.c
+set BJAM_SOURCES=%BJAM_SOURCES% glob.c hash.c hdrmacro.c headers.c jam.c
+set BJAM_SOURCES=%BJAM_SOURCES% jambase.c jamgram.c lists.c make.c make1.c
+set BJAM_SOURCES=%BJAM_SOURCES% object.c option.c output.c parse.c pathnt.c
+set BJAM_SOURCES=%BJAM_SOURCES% pathsys.c regexp.c rules.c scan.c search.c
+set BJAM_SOURCES=%BJAM_SOURCES% subst.c timestamp.c variable.c modules.c
+set BJAM_SOURCES=%BJAM_SOURCES% strings.c filesys.c builtins.c md5.c class.c
+set BJAM_SOURCES=%BJAM_SOURCES% cwd.c w32_getreg.c native.c modules/set.c
+set BJAM_SOURCES=%BJAM_SOURCES% modules/path.c modules/regex.c
+set BJAM_SOURCES=%BJAM_SOURCES% modules/property-set.c modules/sequence.c
+set BJAM_SOURCES=%BJAM_SOURCES% modules/order.c
 
 set BJAM_UPDATE=
 :Check_Update
@@ -457,10 +487,13 @@ set test=###%test%###
 set test=%test:"###=%
 set test=%test:###"=%
 set test=%test:###=%
-if "%test%" == "--update" set BJAM_UPDATE=update
+if "%test%" == "--update" goto Found_Update
 endlocal
 shift
 if not "_%BJAM_UPDATE%_" == "_update_" goto Check_Update
+:Found_Update
+endlocal
+set BJAM_UPDATE=update
 :Check_Update_End
 if "_%BJAM_UPDATE%_" == "_update_" (
     if not exist ".\bootstrap\jam0.exe" (
@@ -506,9 +539,6 @@ rename y.tab.h jamgram.h
 %BOOST_JAM_CC% %BOOST_JAM_OPT_JAM% %BJAM_SOURCES%
 :Skip_Bootstrap
 @if not exist ".\bootstrap\jam0.exe" goto Skip_Jam
-@if "_%BJAM_UPDATE%_" == "_update_" goto Skip_Clean
-.\bootstrap\jam0 -f build.jam --toolset=%BOOST_JAM_TOOLSET% "--toolset-root=%BOOST_JAM_TOOLSET_ROOT% " clean
-:Skip_Clean
 @set args=%*
 @echo OFF
 :Set_Args
@@ -526,6 +556,9 @@ set args=%args:~1%
 goto Set_Args
 :Set_Args_End
 @echo ON
+@if "_%BJAM_UPDATE%_" == "_update_" goto Skip_Clean
+.\bootstrap\jam0 -f build.jam --toolset=%BOOST_JAM_TOOLSET% "--toolset-root=%BOOST_JAM_TOOLSET_ROOT% " %args% clean
+:Skip_Clean
 .\bootstrap\jam0 -f build.jam --toolset=%BOOST_JAM_TOOLSET% "--toolset-root=%BOOST_JAM_TOOLSET_ROOT% " %args%
 :Skip_Jam
 

@@ -1,13 +1,22 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id: train-recaser.perl 1326 2007-03-26 05:44:27Z bojar $
 
 #
 # Options:
 #
-# --possiblyUseFirstToken : boolean option; the default behaviour (when this option is not provided) is that the first token of a sentence is ignored, on the basis that the first word of a sentence is always capitalized; if this option is provided then: a) if a sentence-initial token is *not* capitalized, then it is counted, and b) if a capitalized sentence-initial token is the only token of the segment, then it is counted, but with only 10% of the weight of a normal token.
-#
+# --possiblyUseFirstToken : boolean option; the default behaviour (when this
+# option is not provided) is that the first token of a sentence is ignored, on
+# the basis that the first word of a sentence is always capitalized; if this
+# option is provided then: a) if a sentence-initial token is *not* capitalized,
+# then it is counted, and b) if a capitalized sentence-initial token is the
+# only token of the segment, then it is counted, but with only 10% of the
+# weight of a normal token.
 
+use warnings;
 use strict;
 use Getopt::Long "GetOptions";
 
@@ -20,18 +29,18 @@ die("train-truecaser.perl --model truecaser --corpus cased [--possiblyUseFirstTo
     && defined($CORPUS) && defined($MODEL);
 my %CASING;
 my %SENTENCE_END = ("."=>1,":"=>1,"?"=>1,"!"=>1);
-my %DELAYED_SENTENCE_START = ("("=>1,"["=>1,"\""=>1,"'"=>1);
+my %DELAYED_SENTENCE_START = ("("=>1,"["=>1,"\""=>1,"'"=>1,"&apos;"=>1,"&quot;"=>1,"&#91;"=>1,"&#93;"=>1);
 open(CORPUS,$CORPUS) || die("ERROR: could not open '$CORPUS'");
 binmode(CORPUS, ":utf8");
 while(<CORPUS>) {
   chop;
-  my @WORD = split;
+  my ($WORD,$MARKUP) = split_xml($_);
   my $start = 0;
-  while($start<=$#WORD && defined($DELAYED_SENTENCE_START{$WORD[$start]})) { $start++; }
+  while($start<=$#$WORD && defined($DELAYED_SENTENCE_START{$$WORD[$start]})) { $start++; }
   my $firstWordOfSentence = 1;
-  for(my $i=$start;$i<=$#WORD;$i++) {
-    my $currentWord = $WORD[$i];
-    if (! $firstWordOfSentence && defined($SENTENCE_END{$WORD[$i-1]})) {
+  for(my $i=$start;$i<=$#$WORD;$i++) {
+    my $currentWord = $$WORD[$i];
+    if (! $firstWordOfSentence && defined($SENTENCE_END{$$WORD[$i-1]})) {
       $firstWordOfSentence = 1;
     }
 
@@ -44,7 +53,7 @@ while(<CORPUS>) {
       if (lc($firstChar) eq $firstChar) {
         # if the first character is not upper case, count the token as full evidence (because if it's not capitalized, then there's no reason to be wary that the given casing is only due to being sentence-initial)
 	$currentWordWeight = 1;
-      } elsif (scalar(@WORD) == 1) {
+      } elsif (scalar(@$WORD) == 1) {
 	# if the first character is upper case, but the current token is the only token of the segment, then count the token as partial evidence (because the segment is presumably not a sentence and the token is therefore not the first word of a sentence and is possibly in its natural case)
 	$currentWordWeight = 0.1;
       }
@@ -77,3 +86,36 @@ foreach my $type (keys %CASING) {
   print MODEL "\n";
 }
 close(MODEL);
+
+
+# store away xml markup
+sub split_xml {
+  my ($line) = @_;
+  my (@WORD,@MARKUP);
+  my $i = 0;
+  $MARKUP[0] = "";
+  while($line =~ /\S/) {
+    # XML tag
+    if ($line =~ /^\s*(<\S[^>]*>)(.*)$/) {
+      $MARKUP[$i] .= $1." ";
+      $line = $2;
+    }
+    # non-XML text
+    elsif ($line =~ /^\s*([^\s<>]+)(.*)$/) {
+      $WORD[$i++] = $1;
+      $MARKUP[$i] = "";
+      $line = $2;
+    }
+    # '<' or '>' occurs in word, but it's not an XML tag
+    elsif ($line =~ /^\s*(\S+)(.*)$/) {
+      $WORD[$i++] = $1;
+      $MARKUP[$i] = "";
+      $line = $2;
+      }
+    else {
+      die("ERROR: huh? $line\n");
+    }
+  }
+  chop($MARKUP[$#MARKUP]);
+  return (\@WORD,\@MARKUP);
+}

@@ -1,12 +1,15 @@
-#ifndef UTIL_EXCEPTION__
-#define UTIL_EXCEPTION__
+#ifndef UTIL_EXCEPTION_H
+#define UTIL_EXCEPTION_H
+
+#include "util/string_stream.hh"
 
 #include <exception>
 #include <limits>
-#include <sstream>
 #include <string>
+#include <stdint.h>
 
-#include <inttypes.h>
+// TODO(hieu) delete this
+#include <sstream>
 
 namespace util {
 
@@ -17,13 +20,9 @@ class Exception : public std::exception {
     Exception() throw();
     virtual ~Exception() throw();
 
-    Exception(const Exception &from);
-    Exception &operator=(const Exception &from);
+    const char *what() const throw() { return what_.c_str(); }
 
-    // Not threadsafe, but probably doesn't matter.  FWIW, Boost's exception guidance implies that what() isn't threadsafe.  
-    const char *what() const throw();
-
-    // For use by the UTIL_THROW macros.  
+    // For use by the UTIL_THROW macros.
     void SetLocation(
         const char *file,
         unsigned int line,
@@ -34,21 +33,25 @@ class Exception : public std::exception {
   private:
     template <class Except, class Data> friend typename Except::template ExceptionTag<Except&>::Identity operator<<(Except &e, const Data &data);
 
-    // This helps restrict operator<< defined below.  
+    // This helps restrict operator<< defined below.
     template <class T> struct ExceptionTag {
       typedef T Identity;
     };
 
-    std::stringstream stream_;
-    mutable std::string text_;
+    std::string what_;
 };
 
-/* This implements the normal operator<< for Exception and all its children. 
- * SNIFAE means it only applies to Exception.  Think of this as an ersatz
- * boost::enable_if.  
+/* This implements the normal operator<< for Exception and all its children.
+ * SFINAE means it only applies to Exception.  Think of this as an ersatz
+ * boost::enable_if.
  */
 template <class Except, class Data> typename Except::template ExceptionTag<Except&>::Identity operator<<(Except &e, const Data &data) {
-  e.stream_ << data;
+  // TODO(hieu): change this to
+  // StringStream(e.what_) << data;
+
+  std::stringstream moses_hack;
+  moses_hack << data;
+  e.what_ += moses_hack.str();
   return e;
 }
 
@@ -62,40 +65,55 @@ template <class Except, class Data> typename Except::template ExceptionTag<Excep
 #endif
 #endif
 
-#define UTIL_SET_LOCATION(UTIL_e, child, condition) do { \
-  (UTIL_e).SetLocation(__FILE__, __LINE__, UTIL_FUNC_NAME, (child), (condition)); \
-} while (0)
-
 /* Create an instance of Exception, add the message Modify, and throw it.
  * Modify is appended to the what() message and can contain << for ostream
- * operations.  
+ * operations.
  *
  * do .. while kludge to swallow trailing ; character
- * http://gcc.gnu.org/onlinedocs/cpp/Swallowing-the-Semicolon.html .  
+ * http://gcc.gnu.org/onlinedocs/cpp/Swallowing-the-Semicolon.html .
+ * Arg can be a constructor argument to the exception.
  */
-#define UTIL_THROW(Exception, Modify) do { \
-  Exception UTIL_e; \
-  UTIL_SET_LOCATION(UTIL_e, #Exception, NULL); \
+#define UTIL_THROW_BACKEND(Condition, Exception, Arg, Modify) do { \
+  Exception UTIL_e Arg; \
+  UTIL_e.SetLocation(__FILE__, __LINE__, UTIL_FUNC_NAME, #Exception, Condition); \
   UTIL_e << Modify; \
   throw UTIL_e; \
 } while (0)
 
-#define UTIL_THROW_VAR(Var, Modify) do { \
-  Exception &UTIL_e = (Var); \
-  UTIL_SET_LOCATION(UTIL_e, NULL, NULL); \
-  UTIL_e << Modify; \
-  throw UTIL_e; \
-} while (0)
+#define UTIL_THROW_ARG(Exception, Arg, Modify) \
+  UTIL_THROW_BACKEND(NULL, Exception, Arg, Modify)
 
-#define UTIL_THROW_IF(Condition, Exception, Modify) do { \
-  if (Condition) { \
-    Exception UTIL_e; \
-    UTIL_SET_LOCATION(UTIL_e, #Exception, #Condition); \
-    UTIL_e << Modify; \
-    throw UTIL_e; \
+#define UTIL_THROW(Exception, Modify) \
+  UTIL_THROW_BACKEND(NULL, Exception, , Modify);
+
+#define UTIL_THROW2(Modify) \
+  UTIL_THROW_BACKEND(NULL, util::Exception, , Modify);
+
+#if __GNUC__ >= 3
+#define UTIL_UNLIKELY(x) __builtin_expect (!!(x), 0)
+#else
+#define UTIL_UNLIKELY(x) (x)
+#endif
+
+#if __GNUC__ >= 3
+#define UTIL_LIKELY(x) __builtin_expect (!!(x), 1)
+#else
+#define UTIL_LIKELY(x) (x)
+#endif
+
+#define UTIL_THROW_IF_ARG(Condition, Exception, Arg, Modify) do { \
+  if (UTIL_UNLIKELY(Condition)) { \
+    UTIL_THROW_BACKEND(#Condition, Exception, Arg, Modify); \
   } \
 } while (0)
 
+#define UTIL_THROW_IF(Condition, Exception, Modify) \
+  UTIL_THROW_IF_ARG(Condition, Exception, , Modify)
+
+#define UTIL_THROW_IF2(Condition, Modify) \
+  UTIL_THROW_IF_ARG(Condition, util::Exception, , Modify)
+
+// Exception that records errno and adds it to the message.
 class ErrnoException : public Exception {
   public:
     ErrnoException() throw();
@@ -108,12 +126,14 @@ class ErrnoException : public Exception {
     int errno_;
 };
 
-class EndOfFileException : public Exception {
+// file wasn't there, or couldn't be open for some reason
+class FileOpenException : public Exception {
   public:
-    EndOfFileException() throw();
-    ~EndOfFileException() throw();
+	FileOpenException() throw() {}
+    ~FileOpenException() throw() {}
 };
 
+// Utilities for overflow checking.
 class OverflowException : public Exception {
   public:
     OverflowException() throw();
@@ -133,6 +153,15 @@ inline std::size_t CheckOverflow(uint64_t value) {
   return CheckOverflowInternal<sizeof(std::size_t)>(value);
 }
 
+#if defined(_WIN32) || defined(_WIN64)
+/* Thrown for Windows specific operations. */
+class WindowsException : public Exception {
+  public:
+    WindowsException() throw();
+    ~WindowsException() throw();
+};
+#endif
+
 } // namespace util
 
-#endif // UTIL_EXCEPTION__
+#endif // UTIL_EXCEPTION_H

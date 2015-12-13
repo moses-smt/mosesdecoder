@@ -20,9 +20,9 @@
 
 #include <algorithm>
 #include <iostream>
-#include "../moses/src/Util.h"
-#include "../moses/src/TargetPhraseCollection.h"
-#include "../moses/src/PhraseDictionary.h"
+#include "moses/Util.h"
+#include "moses/TargetPhraseCollection.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 #include "TargetPhraseCollection.h"
 #include "Vocab.h"
 #include "OnDiskWrapper.h"
@@ -58,7 +58,7 @@ void TargetPhraseCollection::Sort(size_t tableLimit)
 {
   std::sort(m_coll.begin(), m_coll.end(), TargetPhraseOrderByScore());
 
-  if (m_coll.size() > tableLimit) {
+  if (tableLimit && m_coll.size() > tableLimit) {
     CollType::iterator iter;
     for (iter = m_coll.begin() + tableLimit ; iter != m_coll.end(); ++iter) {
       delete *iter;
@@ -71,18 +71,18 @@ void TargetPhraseCollection::Save(OnDiskWrapper &onDiskWrapper)
 {
   std::fstream &file = onDiskWrapper.GetFileTargetColl();
 
-  size_t memUsed = sizeof(UINT64);
+  size_t memUsed = sizeof(uint64_t);
   char *mem = (char*) malloc(memUsed);
 
   // size of coll
-  UINT64 numPhrases = GetSize();
-  ((UINT64*)mem)[0] = numPhrases;
+  uint64_t numPhrases = GetSize();
+  ((uint64_t*)mem)[0] = numPhrases;
 
   // MAIN LOOP
   CollType::iterator iter;
   for (iter = m_coll.begin(); iter != m_coll.end(); ++iter) {
     // save phrase
-	TargetPhrase &targetPhrase = **iter;
+    TargetPhrase &targetPhrase = **iter;
     targetPhrase.Save(onDiskWrapper);
 
     // save coll
@@ -98,41 +98,38 @@ void TargetPhraseCollection::Save(OnDiskWrapper &onDiskWrapper)
   }
 
   // total number of bytes
-  //((UINT64*)mem)[0] = (UINT64) memUsed;
+  //((uint64_t*)mem)[0] = (uint64_t) memUsed;
 
-  UINT64 startPos = file.tellp();
+  uint64_t startPos = file.tellp();
   file.seekp(0, ios::end);
   file.write((char*) mem, memUsed);
 
   free(mem);
 
-  UINT64 endPos = file.tellp();
-  CHECK(startPos + memUsed == endPos);
-
+#ifndef NDEBUG
+  uint64_t endPos = file.tellp();
+  assert(startPos + memUsed == endPos);
+#endif
   m_filePos = startPos;
 
 }
 
-Moses::TargetPhraseCollection *TargetPhraseCollection::ConvertToMoses(const std::vector<Moses::FactorType> &inputFactors
+Moses::TargetPhraseCollection::shared_ptr TargetPhraseCollection::ConvertToMoses(const std::vector<Moses::FactorType> &inputFactors
     , const std::vector<Moses::FactorType> &outputFactors
     , const Moses::PhraseDictionary &phraseDict
     , const std::vector<float> &weightT
-    , const Moses::WordPenaltyProducer* wpProducer
-    , const Moses::LMList &lmList
-    , const std::string & /* filePath */
-    , Vocab &vocab) const
+    , Vocab &vocab
+    , bool isSyntax) const
 {
-  Moses::TargetPhraseCollection *ret = new Moses::TargetPhraseCollection();
+  Moses::TargetPhraseCollection::shared_ptr ret;
+  ret.reset(new Moses::TargetPhraseCollection);
 
   CollType::const_iterator iter;
   for (iter = m_coll.begin(); iter != m_coll.end(); ++iter) {
     const TargetPhrase &tp = **iter;
-    Moses::TargetPhrase *mosesPhrase = tp.ConvertToMoses(inputFactors, outputFactors
-                                       , vocab
-                                       , phraseDict
-                                       , weightT
-                                       , wpProducer
-                                       , lmList);
+    Moses::TargetPhrase *mosesPhrase
+    = tp.ConvertToMoses(inputFactors, outputFactors, vocab,
+                        phraseDict, weightT, isSyntax);
 
     /*
     // debugging output
@@ -150,29 +147,31 @@ Moses::TargetPhraseCollection *TargetPhraseCollection::ConvertToMoses(const std:
 
 }
 
-void TargetPhraseCollection::ReadFromFile(size_t tableLimit, UINT64 filePos, OnDiskWrapper &onDiskWrapper)
+void TargetPhraseCollection::ReadFromFile(size_t tableLimit, uint64_t filePos, OnDiskWrapper &onDiskWrapper)
 {
   fstream &fileTPColl = onDiskWrapper.GetFileTargetColl();
   fstream &fileTP = onDiskWrapper.GetFileTargetInd();
-    
+
   size_t numScores = onDiskWrapper.GetNumScores();
-    
 
-  UINT64 numPhrases;
 
-  UINT64 currFilePos = filePos;
+  uint64_t numPhrases;
+
+  uint64_t currFilePos = filePos;
   fileTPColl.seekg(filePos);
-  fileTPColl.read((char*) &numPhrases, sizeof(UINT64));
+  fileTPColl.read((char*) &numPhrases, sizeof(uint64_t));
 
   // table limit
-  numPhrases = std::min(numPhrases, (UINT64) tableLimit);
+  if (tableLimit) {
+    numPhrases = std::min(numPhrases, (uint64_t) tableLimit);
+  }
 
-  currFilePos += sizeof(UINT64);
- 
+  currFilePos += sizeof(uint64_t);
+
   for (size_t ind = 0; ind < numPhrases; ++ind) {
-    TargetPhrase *tp = new TargetPhrase(numScores);    
+    TargetPhrase *tp = new TargetPhrase(numScores);
 
-    UINT64 sizeOtherInfo = tp->ReadOtherInfoFromFile(currFilePos, fileTPColl);
+    uint64_t sizeOtherInfo = tp->ReadOtherInfoFromFile(currFilePos, fileTPColl);
     tp->ReadFromFile(fileTP);
 
     currFilePos += sizeOtherInfo;
@@ -181,7 +180,7 @@ void TargetPhraseCollection::ReadFromFile(size_t tableLimit, UINT64 filePos, OnD
   }
 }
 
-UINT64 TargetPhraseCollection::GetFilePos() const
+uint64_t TargetPhraseCollection::GetFilePos() const
 {
   return m_filePos;
 }
@@ -201,7 +200,7 @@ const TargetPhrase &TargetPhraseCollection::GetTargetPhrase(size_t ind) const
   assert(ind < GetSize());
   return *m_coll[ind];
 }
-  
+
 }
 
 

@@ -35,7 +35,10 @@ ModelScore* ModelScore::createModelScore(const string& modeltype)
   } else if (modeltype.compare("leftright") == 0) {
     return new ModelScoreLR();
   } else {
-    cerr << "Illegal model type given for lexical reordering model scoring: " << modeltype << ". The allowed types are: mslr, msd, monotonicity, leftright" << endl;
+    cerr << "Illegal model type given for lexical reordering model scoring: "
+         << modeltype
+         << ". The allowed types are: mslr, msd, monotonicity, leftright"
+         << endl;
     exit(1);
   }
 }
@@ -56,12 +59,13 @@ void ModelScore::reset_f()
   }
 }
 
-void ModelScore::add_example(const string& previous, string& next)
+void ModelScore::add_example
+(const StringPiece& previous, const StringPiece& next, float weight)
 {
-  count_fe_prev[getType(previous)]++;
-  count_f_prev[getType(previous)]++;
-  count_fe_next[getType(next)]++;
-  count_f_next[getType(next)]++;
+  count_fe_prev[getType(previous)]+=weight;
+  count_f_prev[getType(previous)]+=weight;
+  count_fe_next[getType(next)]+=weight;
+  count_f_next[getType(next)]+=weight;
 }
 
 const vector<double>& ModelScore::get_scores_fe_prev() const
@@ -85,7 +89,7 @@ const vector<double>& ModelScore::get_scores_f_next() const
 }
 
 
-ORIENTATION ModelScore::getType(const string& s)
+ORIENTATION ModelScore::getType(const StringPiece& s)
 {
   if (s.compare("mono") == 0) {
     return MONO;
@@ -106,7 +110,7 @@ ORIENTATION ModelScore::getType(const string& s)
 }
 
 
-ORIENTATION ModelScoreMSLR::getType(const string& s)
+ORIENTATION ModelScoreMSLR::getType(const StringPiece& s)
 {
   if (s.compare("mono") == 0) {
     return MONO;
@@ -126,7 +130,7 @@ ORIENTATION ModelScoreMSLR::getType(const string& s)
 }
 
 
-ORIENTATION ModelScoreLR::getType(const string& s)
+ORIENTATION ModelScoreLR::getType(const StringPiece& s)
 {
   if (s.compare("mono") == 0 || s.compare("dright") == 0) {
     return DRIGHT;
@@ -142,7 +146,7 @@ ORIENTATION ModelScoreLR::getType(const string& s)
 }
 
 
-ORIENTATION ModelScoreMSD::getType(const string& s)
+ORIENTATION ModelScoreMSD::getType(const StringPiece& s)
 {
   if (s.compare("mono") == 0) {
     return MONO;
@@ -161,7 +165,7 @@ ORIENTATION ModelScoreMSD::getType(const string& s)
   }
 }
 
-ORIENTATION ModelScoreMonotonicity::getType(const string& s)
+ORIENTATION ModelScoreMonotonicity::getType(const StringPiece& s)
 {
   if (s.compare("mono") == 0) {
     return MONO;
@@ -273,7 +277,7 @@ void Model::score_fe(const string& f, const string& e)
 {
   if (!fe)    //Make sure we do not do anything if it is not a fe model
     return;
-  fprintf(file,"%s ||| %s ||| ",f.c_str(),e.c_str());
+  outputFile << f << " ||| " << e << " |||";
   //condition on the previous phrase
   if (previous) {
     vector<double> scores;
@@ -284,9 +288,8 @@ void Model::score_fe(const string& f, const string& e)
       sum += scores[i];
     }
     for(size_t i=0; i<scores.size(); ++i) {
-      fprintf(file,"%f ",scores[i]/sum);
+      outputFile << " " << (scores[i]/sum);
     }
-    //fprintf(file, "||| ");
   }
   //condition on the next phrase
   if (next) {
@@ -298,17 +301,17 @@ void Model::score_fe(const string& f, const string& e)
       sum += scores[i];
     }
     for(size_t i=0; i<scores.size(); ++i) {
-      fprintf(file, "%f ", scores[i]/sum);
+      outputFile << " " << (scores[i]/sum);
     }
   }
-  fprintf(file,"\n");
+  outputFile << endl;
 }
 
 void Model::score_f(const string& f)
 {
   if (fe)      //Make sure we do not do anything if it is not a f model
     return;
-  fprintf(file, "%s ||| ", f.c_str());
+  cout << f << " |||";
   //condition on the previous phrase
   if (previous) {
     vector<double> scores;
@@ -319,9 +322,8 @@ void Model::score_f(const string& f)
       sum += scores[i];
     }
     for(size_t i=0; i<scores.size(); ++i) {
-      fprintf(file, "%f ", scores[i]/sum);
+      outputFile << " " << (scores[i]/sum);
     }
-    //fprintf(file, "||| ");
   }
   //condition on the next phrase
   if (next) {
@@ -333,22 +335,16 @@ void Model::score_f(const string& f)
       sum += scores[i];
     }
     for(size_t i=0; i<scores.size(); ++i) {
-      fprintf(file, "%f ", scores[i]/sum);
+      outputFile << " " << (scores[i]/sum);
     }
   }
-  fprintf(file, "\n");
+  outputFile << endl;
 }
 
 Model::Model(ModelScore* ms, Scorer* sc, const string& dir, const string& lang, const string& fn)
   : modelscore(ms), scorer(sc), filename(fn)
 {
-
-  file = fopen(filename.c_str(),"w");
-  if (!file) {
-    cerr << "Could not open the model output file: " << filename << endl;
-    exit(1);
-  }
-
+  outputFile.Open( (filename+".gz").c_str() );
   fe = false;
   if (lang.compare("fe") == 0) {
     fe = true;
@@ -369,26 +365,9 @@ Model::Model(ModelScore* ms, Scorer* sc, const string& dir, const string& lang, 
 
 Model::~Model()
 {
-  fclose(file);
+  outputFile.Close();
   delete modelscore;
   delete scorer;
-}
-
-void Model::zipFile()
-{
-  fclose(file);
-  file = fopen(filename.c_str(), "rb");
-  gzFile gzfile = gzopen((filename+".gz").c_str(),"wb");
-  char inbuffer[128];
-  int num_read;
-  while ((num_read = fread(inbuffer, 1, sizeof(inbuffer), file)) > 0) {
-    gzwrite(gzfile, inbuffer, num_read);
-  }
-  fclose(file);
-  gzclose(gzfile);
-
-  //Remove the unzipped file
-  remove(filename.c_str());
 }
 
 void Model::split_config(const string& config, string& dir, string& lang, string& orient)

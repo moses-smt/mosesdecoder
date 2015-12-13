@@ -1,17 +1,17 @@
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2011 University of Edinburgh
- 
+
  This library is free software; you can redistribute it and/or
  modify it under the terms of the GNU Lesser General Public
  License as published by the Free Software Foundation; either
  version 2.1 of the License, or (at your option) any later version.
- 
+
  This library is distributed in the hope that it will be useful,
  but WITHOUT ANY WARRANTY; without even the implied warranty of
  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
  Lesser General Public License for more details.
- 
+
  You should have received a copy of the GNU Lesser General Public
  License along with this library; if not, write to the Free Software
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
@@ -19,21 +19,27 @@
 
 #include "AlignmentGraph.h"
 
-#include "ComposedRule.h"
-#include "Node.h"
-#include "Options.h"
-#include "ParseTree.h"
-#include "Subgraph.h"
-
 #include <algorithm>
 #include <cassert>
+#include <cstdlib>
 #include <memory>
 #include <stack>
 
-namespace Moses {
-namespace GHKM {
+#include "SyntaxTree.h"
 
-AlignmentGraph::AlignmentGraph(const ParseTree *t,
+#include "ComposedRule.h"
+#include "Node.h"
+#include "Options.h"
+#include "Subgraph.h"
+
+namespace MosesTraining
+{
+namespace Syntax
+{
+namespace GHKM
+{
+
+AlignmentGraph::AlignmentGraph(const SyntaxTree *t,
                                const std::vector<std::string> &s,
                                const Alignment &a)
 {
@@ -84,8 +90,8 @@ AlignmentGraph::~AlignmentGraph()
 }
 
 Subgraph AlignmentGraph::ComputeMinimalFrontierGraphFragment(
-    Node *root,
-    const std::set<Node *> &frontierSet)
+  Node *root,
+  const std::set<Node *> &frontierSet)
 {
   std::stack<Node *> expandableNodes;
   std::set<const Node *> expandedNodes;
@@ -206,20 +212,26 @@ void AlignmentGraph::ExtractComposedRules(Node *node, const Options &options)
   }
 }
 
-Node *AlignmentGraph::CopyParseTree(const ParseTree *root)
+Node *AlignmentGraph::CopyParseTree(const SyntaxTree *root)
 {
   NodeType nodeType = (root->IsLeaf()) ? TARGET : TREE;
 
-  std::auto_ptr<Node> n(new Node(root->GetLabel(), nodeType));
+  std::auto_ptr<Node> n(new Node(root->value().label, nodeType));
 
   if (nodeType == TREE) {
-    n->SetPcfgScore(root->GetPcfgScore());
+    float score = 0.0f;
+    SyntaxNode::AttributeMap::const_iterator p =
+      root->value().attributes.find("pcfg");
+    if (p != root->value().attributes.end()) {
+      score = std::atof(p->second.c_str());
+    }
+    n->SetPcfgScore(score);
   }
 
-  const std::vector<ParseTree *> &children = root->GetChildren();
+  const std::vector<SyntaxTree *> &children = root->children();
   std::vector<Node *> childNodes;
   childNodes.reserve(children.size());
-  for (std::vector<ParseTree *>::const_iterator p(children.begin());
+  for (std::vector<SyntaxTree *>::const_iterator p(children.begin());
        p != children.end(); ++p) {
     Node *child = CopyParseTree(*p);
     child->AddParent(n.get());
@@ -232,41 +244,60 @@ Node *AlignmentGraph::CopyParseTree(const ParseTree *root)
   return p;
 }
 
-// Finds the set of frontier nodes.  The definition of a frontier node differs
-// from Galley et al's (2004) in the following ways:
-//
-// 1. A node with an empty span is not a frontier node (this excludes
-//    unaligned target subtrees).
-// 2. Target word nodes are not frontier nodes.
-// 3. Source word nodes are not frontier nodes.
-// 4. Unless the --AllowUnary option is used, a node is not a frontier node if
-//    it has the same span as its parent.
+// Recursively constructs the set of frontier nodes for the tree (or subtree)
+// rooted at the given node.
 void AlignmentGraph::ComputeFrontierSet(Node *root,
                                         const Options &options,
                                         std::set<Node *> &frontierSet) const
 {
-  // Don't include word nodes or unaligned target subtrees.
+  // Non-tree nodes and unaligned target subtrees are not frontier nodes (and
+  // nor are their descendants).  See the comment for the function
+  // AlignmentGraph::IsFrontierNode().
   if (root->GetType() != TREE || root->GetSpan().empty()) {
     return;
   }
 
-  if (!SpansIntersect(root->GetComplementSpan(), Closure(root->GetSpan()))) {
-    // Unless unary rules are explicitly allowed, we use Chung et al's (2011)
-    // modified defintion of a frontier node to eliminate the production of
-    // non-lexical unary rules.
-    assert(root->GetParents().size() <= 1);
-    if (options.allowUnary
-        || root->GetParents().empty()
-        || root->GetParents()[0]->GetSpan() != root->GetSpan()) {
-      frontierSet.insert(root);
-    }
+  if (IsFrontierNode(*root, options)) {
+    frontierSet.insert(root);
   }
 
+  // Recursively check descendants.
   const std::vector<Node *> &children = root->GetChildren();
   for (std::vector<Node *>::const_iterator p(children.begin());
        p != children.end(); ++p) {
     ComputeFrontierSet(*p, options, frontierSet);
   }
+}
+
+// Determines whether the given node is a frontier node or not. The definition
+// of a frontier node differs from Galley et al's (2004) in the following ways:
+//
+// 1. A node with an empty span is not a frontier node (this is to exclude
+//    unaligned target subtrees).
+// 2. Target word nodes are not frontier nodes.
+// 3. Source word nodes are not frontier nodes.
+// 4. Unless the --AllowUnary option is used, a node is not a frontier node if
+//    it has the same span as its parent.
+bool AlignmentGraph::IsFrontierNode(const Node &n, const Options &options) const
+{
+  // Don't include word nodes or unaligned target subtrees.
+  if (n.GetType() != TREE || n.GetSpan().empty()) {
+    return false;
+  }
+  // This is the original GHKM definition of a frontier node.
+  if (SpansIntersect(n.GetComplementSpan(), Closure(n.GetSpan()))) {
+    return false;
+  }
+  // Unless unary rules are explicitly allowed, we use Chung et al's (2011)
+  // modified defintion of a frontier node to eliminate the production of
+  // non-lexical unary rules.
+  assert(n.GetParents().size() <= 1);
+  if (!options.allowUnary &&
+      !n.GetParents().empty() &&
+      n.GetParents()[0]->GetSpan() == n.GetSpan()) {
+    return false;
+  }
+  return true;
 }
 
 void AlignmentGraph::CalcComplementSpans(Node *root)
@@ -302,7 +333,7 @@ void AlignmentGraph::CalcComplementSpans(Node *root)
 }
 
 void AlignmentGraph::GetTargetTreeLeaves(Node *root,
-                                         std::vector<Node *> &leaves)
+    std::vector<Node *> &leaves)
 {
   if (root->IsSink()) {
     leaves.push_back(root);
@@ -383,4 +414,5 @@ Node *AlignmentGraph::DetermineAttachmentPoint(int index)
 }
 
 }  // namespace GHKM
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining

@@ -34,10 +34,49 @@ template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT
   if (static_cast<std::size_t>(start - static_cast<uint8_t*>(base)) != goal_size) UTIL_THROW(FormatLoadException, "The data structures took " << (start - static_cast<uint8_t*>(base)) << " but Size says they should take " << goal_size);
 }
 
-template <class Search, class VocabularyT> GenericModel<Search, VocabularyT>::GenericModel(const char *file, const Config &config) {
-  LoadLM(file, config, *this);
+namespace {
+void ComplainAboutARPA(const Config &config, ModelType model_type) {
+  if (config.write_mmap || !config.messages) return;
+  if (config.arpa_complain == Config::ALL) {
+    *config.messages << "Loading the LM will be faster if you build a binary file." << std::endl;
+  } else if (config.arpa_complain == Config::EXPENSIVE &&
+             (model_type == TRIE || model_type == QUANT_TRIE || model_type == ARRAY_TRIE || model_type == QUANT_ARRAY_TRIE)) {
+    *config.messages << "Building " << kModelNames[model_type] << " from ARPA is expensive.  Save time by building a binary format." << std::endl;
+  }
+}
 
-  // g++ prints warnings unless these are fully initialized.  
+void CheckCounts(const std::vector<uint64_t> &counts) {
+  UTIL_THROW_IF(counts.size() > KENLM_MAX_ORDER, FormatLoadException, "This model has order " << counts.size() << " but KenLM was compiled to support up to " << KENLM_MAX_ORDER << ".  " << KENLM_ORDER_MESSAGE);
+  if (sizeof(uint64_t) > sizeof(std::size_t)) {
+    for (std::vector<uint64_t>::const_iterator i = counts.begin(); i != counts.end(); ++i) {
+      UTIL_THROW_IF(*i > static_cast<uint64_t>(std::numeric_limits<size_t>::max()), util::OverflowException, "This model has " << *i << " " << (i - counts.begin() + 1) << "-grams which is too many for 32-bit machines.");
+    }
+  }
+}
+
+} // namespace
+
+template <class Search, class VocabularyT> GenericModel<Search, VocabularyT>::GenericModel(const char *file, const Config &init_config) : backing_(init_config) {
+  util::scoped_fd fd(util::OpenReadOrThrow(file));
+  if (IsBinaryFormat(fd.get())) {
+    Parameters parameters;
+    int fd_shallow = fd.release();
+    backing_.InitializeBinary(fd_shallow, kModelType, kVersion, parameters);
+    CheckCounts(parameters.counts);
+
+    Config new_config(init_config);
+    new_config.probing_multiplier = parameters.fixed.probing_multiplier;
+    Search::UpdateConfigFromBinary(backing_, parameters.counts, VocabularyT::Size(parameters.counts[0], new_config), new_config);
+    UTIL_THROW_IF(new_config.enumerate_vocab && !parameters.fixed.has_vocabulary, FormatLoadException, "The decoder requested all the vocabulary strings, but this binary file does not have them.  You may need to rebuild the binary file with an updated version of build_binary.");
+
+    SetupMemory(backing_.LoadBinary(Size(parameters.counts, new_config)), parameters.counts, new_config);
+    vocab_.LoadedBinary(parameters.fixed.has_vocabulary, fd_shallow, new_config.enumerate_vocab, backing_.VocabStringReadingOffset());
+  } else {
+    ComplainAboutARPA(init_config, kModelType);
+    InitializeFromARPA(fd.release(), file, init_config);
+  }
+
+  // g++ prints warnings unless these are fully initialized.
   State begin_sentence = State();
   begin_sentence.length = 1;
   begin_sentence.words[0] = vocab_.BeginSentence();
@@ -50,27 +89,9 @@ template <class Search, class VocabularyT> GenericModel<Search, VocabularyT>::Ge
   P::Init(begin_sentence, null_context, vocab_, search_.Order());
 }
 
-namespace {
-void CheckCounts(const std::vector<uint64_t> &counts) {
-  UTIL_THROW_IF(counts.size() > KENLM_MAX_ORDER, FormatLoadException, "This model has order " << counts.size() << " but KenLM was compiled to support up to " << KENLM_MAX_ORDER << ".  " << KENLM_ORDER_MESSAGE);
-  if (sizeof(uint64_t) > sizeof(std::size_t)) {
-    for (std::vector<uint64_t>::const_iterator i = counts.begin(); i != counts.end(); ++i) {
-      UTIL_THROW_IF(*i > static_cast<uint64_t>(std::numeric_limits<size_t>::max()), util::OverflowException, "This model has " << *i << " " << (i - counts.begin() + 1) << "-grams which is too many for 32-bit machines.");
-    }
-  }
-}
-} // namespace
-
-template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT>::InitializeFromBinary(void *start, const Parameters &params, const Config &config, int fd) {
-  CheckCounts(params.counts);
-  SetupMemory(start, params.counts, config);
-  vocab_.LoadedBinary(params.fixed.has_vocabulary, fd, config.enumerate_vocab);
-  search_.LoadedBinary();
-}
-
-template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT>::InitializeFromARPA(const char *file, const Config &config) {
-  // Backing file is the ARPA.  Steal it so we can make the backing file the mmap output if any.  
-  util::FilePiece f(backing_.file.release(), file, config.messages);
+template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT>::InitializeFromARPA(int fd, const char *file, const Config &config) {
+  // Backing file is the ARPA.
+  util::FilePiece f(fd, file, config.ProgressMessages());
   try {
     std::vector<uint64_t> counts;
     // File counts do not include pruned trigrams that extend to quadgrams etc.   These will be fixed by search_.
@@ -80,14 +101,18 @@ template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT
     if (config.probing_multiplier <= 1.0) UTIL_THROW(ConfigException, "probing multiplier must be > 1.0");
 
     std::size_t vocab_size = util::CheckOverflow(VocabularyT::Size(counts[0], config));
-    // Setup the binary file for writing the vocab lookup table.  The search_ is responsible for growing the binary file to its needs.  
-    vocab_.SetupMemory(SetupJustVocab(config, counts.size(), vocab_size, backing_), vocab_size, counts[0], config);
+    // Setup the binary file for writing the vocab lookup table.  The search_ is responsible for growing the binary file to its needs.
+    vocab_.SetupMemory(backing_.SetupJustVocab(vocab_size, counts.size()), vocab_size, counts[0], config);
 
-    if (config.write_mmap) {
+    if (config.write_mmap && config.include_vocab) {
       WriteWordsWrapper wrap(config.enumerate_vocab);
       vocab_.ConfigureEnumerate(&wrap, counts[0]);
       search_.InitializeFromARPA(file, f, counts, config, vocab_, backing_);
-      wrap.Write(backing_.file.get());
+      void *vocab_rebase, *search_rebase;
+      backing_.WriteVocabWords(wrap.Buffer(), vocab_rebase, search_rebase);
+      // Due to writing at the end of file, mmap may have relocated data.  So remap.
+      vocab_.Relocate(vocab_rebase);
+      search_.SetupMemory(reinterpret_cast<uint8_t*>(search_rebase), counts, config);
     } else {
       vocab_.ConfigureEnumerate(config.enumerate_vocab, counts[0]);
       search_.InitializeFromARPA(file, f, counts, config, vocab_, backing_);
@@ -95,20 +120,15 @@ template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT
 
     if (!vocab_.SawUnk()) {
       assert(config.unknown_missing != THROW_UP);
-      // Default probabilities for unknown.  
+      // Default probabilities for unknown.
       search_.UnknownUnigram().backoff = 0.0;
       search_.UnknownUnigram().prob = config.unknown_missing_logprob;
     }
-    FinishFile(config, kModelType, kVersion, counts, vocab_.UnkCountChangePadding(), backing_);
+    backing_.FinishFile(config, kModelType, kVersion, counts);
   } catch (util::Exception &e) {
     e << " Byte: " << f.Offset();
     throw;
   }
-}
-
-template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT>::UpdateConfigFromBinary(int fd, const std::vector<uint64_t> &counts, Config &config) {
-  util::AdvanceOrThrow(fd, VocabularyT::Size(counts[0], config));
-  Search::UpdateConfigFromBinary(fd, counts, config);
 }
 
 template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, VocabularyT>::FullScore(const State &in_state, const WordIndex new_word, State &out_state) const {
@@ -147,7 +167,7 @@ template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, 
 }
 
 template <class Search, class VocabularyT> void GenericModel<Search, VocabularyT>::GetState(const WordIndex *context_rbegin, const WordIndex *context_rend, State &out_state) const {
-  // Generate a state from context.  
+  // Generate a state from context.
   context_rend = std::min(context_rend, context_rbegin + P::Order() - 1);
   if (context_rend == context_rbegin) {
     out_state.length = 0;
@@ -191,7 +211,7 @@ template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, 
     ret.rest = ptr.Rest();
     ret.prob = ptr.Prob();
     ret.extend_left = extend_pointer;
-    // If this function is called, then it does depend on left words.   
+    // If this function is called, then it does depend on left words.
     ret.independent_left = false;
   }
   float subtract_me = ret.rest;
@@ -199,7 +219,7 @@ template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, 
   next_use = extend_length;
   ResumeScore(add_rbegin, add_rend, extend_length - 1, node, backoff_out, next_use, ret);
   next_use -= extend_length;
-  // Charge backoffs.  
+  // Charge backoffs.
   for (const float *b = backoff_in + ret.ngram_length - extend_length; b < backoff_in + (add_rend - add_rbegin); ++b) ret.prob += *b;
   ret.prob -= subtract_me;
   ret.rest -= subtract_me;
@@ -209,7 +229,7 @@ template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, 
 namespace {
 // Do a paraonoid copy of history, assuming new_word has already been copied
 // (hence the -1).  out_state.length could be zero so I avoided using
-// std::copy.   
+// std::copy.
 void CopyRemainingHistory(const WordIndex *from, State &out_state) {
   WordIndex *out = out_state.words + 1;
   const WordIndex *in_end = from + static_cast<ptrdiff_t>(out_state.length) - 1;
@@ -217,18 +237,19 @@ void CopyRemainingHistory(const WordIndex *from, State &out_state) {
 }
 } // namespace
 
-/* Ugly optimized function.  Produce a score excluding backoff.  
- * The search goes in increasing order of ngram length.  
+/* Ugly optimized function.  Produce a score excluding backoff.
+ * The search goes in increasing order of ngram length.
  * Context goes backward, so context_begin is the word immediately preceeding
- * new_word.  
+ * new_word.
  */
 template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, VocabularyT>::ScoreExceptBackoff(
     const WordIndex *const context_rbegin,
     const WordIndex *const context_rend,
     const WordIndex new_word,
     State &out_state) const {
+  assert(new_word < vocab_.Bound());
   FullScoreReturn ret;
-  // ret.ngram_length contains the last known non-blank ngram length.  
+  // ret.ngram_length contains the last known non-blank ngram length.
   ret.ngram_length = 1;
 
   typename Search::Node node;
@@ -237,9 +258,9 @@ template <class Search, class VocabularyT> FullScoreReturn GenericModel<Search, 
   ret.prob = uni.Prob();
   ret.rest = uni.Rest();
 
-  // This is the length of the context that should be used for continuation to the right.  
+  // This is the length of the context that should be used for continuation to the right.
   out_state.length = HasExtension(out_state.backoff[0]) ? 1 : 0;
-  // We'll write the word anyway since it will probably be used and does no harm being there.  
+  // We'll write the word anyway since it will probably be used and does no harm being there.
   out_state.words[0] = new_word;
   if (context_rbegin == context_rend) return ret;
 
@@ -303,5 +324,26 @@ template class GenericModel<trie::TrieSearch<SeparatelyQuantize, trie::DontBhiks
 template class GenericModel<trie::TrieSearch<SeparatelyQuantize, trie::ArrayBhiksha>, SortedVocabulary>;
 
 } // namespace detail
+
+base::Model *LoadVirtual(const char *file_name, const Config &config, ModelType model_type) {
+  RecognizeBinary(file_name, model_type);
+  switch (model_type) {
+    case PROBING:
+      return new ProbingModel(file_name, config);
+    case REST_PROBING:
+      return new RestProbingModel(file_name, config);
+    case TRIE:
+      return new TrieModel(file_name, config);
+    case QUANT_TRIE:
+      return new QuantTrieModel(file_name, config);
+    case ARRAY_TRIE:
+      return new ArrayTrieModel(file_name, config);
+    case QUANT_ARRAY_TRIE:
+      return new QuantArrayTrieModel(file_name, config);
+    default:
+      UTIL_THROW(FormatLoadException, "Confused by model type " << model_type);
+  }
+}
+
 } // namespace ngram
 } // namespace lm

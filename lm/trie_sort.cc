@@ -16,6 +16,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <deque>
+#include <iterator>
 #include <limits>
 #include <vector>
 
@@ -26,7 +27,7 @@ namespace {
 
 typedef util::SizedIterator NGramIter;
 
-// Proxy for an entry except there is some extra cruft between the entries.  This is used to sort (n-1)-grams using the same memory as the sorted n-grams.  
+// Proxy for an entry except there is some extra cruft between the entries.  This is used to sort (n-1)-grams using the same memory as the sorted n-grams.
 class PartialViewProxy {
   public:
     PartialViewProxy() : attention_size_(0), inner_() {}
@@ -50,6 +51,10 @@ class PartialViewProxy {
     const void *Data() const { return inner_.Data(); }
     void *Data() { return inner_.Data(); }
 
+    friend void swap(PartialViewProxy first, PartialViewProxy second) {
+      std::swap_ranges(reinterpret_cast<char*>(first.Data()), reinterpret_cast<char*>(first.Data()) + first.attention_size_, reinterpret_cast<char*>(second.Data()));
+    }
+
   private:
     friend class util::ProxyIterator<PartialViewProxy>;
 
@@ -59,21 +64,21 @@ class PartialViewProxy {
 
     typedef util::SizedInnerIterator InnerIterator;
     InnerIterator &Inner() { return inner_; }
-    const InnerIterator &Inner() const { return inner_; } 
+    const InnerIterator &Inner() const { return inner_; }
     InnerIterator inner_;
 };
 
 typedef util::ProxyIterator<PartialViewProxy> PartialIter;
 
-FILE *DiskFlush(const void *mem_begin, const void *mem_end, const util::TempMaker &maker) {
-  util::scoped_fd file(maker.Make());
+FILE *DiskFlush(const void *mem_begin, const void *mem_end, const std::string &temp_prefix) {
+  util::scoped_fd file(util::MakeTemp(temp_prefix));
   util::WriteOrThrow(file.get(), mem_begin, (uint8_t*)mem_end - (uint8_t*)mem_begin);
   return util::FDOpenOrThrow(file);
 }
 
-FILE *WriteContextFile(uint8_t *begin, uint8_t *end, const util::TempMaker &maker, std::size_t entry_size, unsigned char order) {
+FILE *WriteContextFile(uint8_t *begin, uint8_t *end, const std::string &temp_prefix, std::size_t entry_size, unsigned char order) {
   const size_t context_size = sizeof(WordIndex) * (order - 1);
-  // Sort just the contexts using the same memory.  
+  // Sort just the contexts using the same memory.
   PartialIter context_begin(PartialViewProxy(begin + sizeof(WordIndex), entry_size, context_size));
   PartialIter context_end(PartialViewProxy(end + sizeof(WordIndex), entry_size, context_size));
 
@@ -84,9 +89,9 @@ FILE *WriteContextFile(uint8_t *begin, uint8_t *end, const util::TempMaker &make
 #endif
     (context_begin, context_end, util::SizedCompare<EntryCompare, PartialViewProxy>(EntryCompare(order - 1)));
 
-  util::scoped_FILE out(maker.MakeFile());
+  util::scoped_FILE out(util::FMakeTemp(temp_prefix));
 
-  // Write out to file and uniqueify at the same time.  Could have used unique_copy if there was an appropriate OutputIterator.  
+  // Write out to file and uniqueify at the same time.  Could have used unique_copy if there was an appropriate OutputIterator.
   if (context_begin == context_end) return out.release();
   PartialIter i(context_begin);
   util::WriteOrThrow(out.get(), i->Data(), context_size);
@@ -102,24 +107,30 @@ FILE *WriteContextFile(uint8_t *begin, uint8_t *end, const util::TempMaker &make
 }
 
 struct ThrowCombine {
-  void operator()(std::size_t /*entry_size*/, const void * /*first*/, const void * /*second*/, FILE * /*out*/) const {
-    UTIL_THROW(FormatLoadException, "Duplicate n-gram detected.");
+  void operator()(std::size_t entry_size, unsigned char order, const void *first, const void *second, FILE * /*out*/) const {
+    const WordIndex *base = reinterpret_cast<const WordIndex*>(first);
+    FormatLoadException e;
+    e << "Duplicate n-gram detected with vocab ids";
+    for (const WordIndex *i = base; i != base + order; ++i) {
+      e << ' ' << *i;
+    }
+    throw e;
   }
 };
 
-// Useful for context files that just contain records with no value.  
+// Useful for context files that just contain records with no value.
 struct FirstCombine {
-  void operator()(std::size_t entry_size, const void *first, const void * /*second*/, FILE *out) const {
+  void operator()(std::size_t entry_size, unsigned char /*order*/, const void *first, const void * /*second*/, FILE *out) const {
     util::WriteOrThrow(out, first, entry_size);
   }
 };
 
-template <class Combine> FILE *MergeSortedFiles(FILE *first_file, FILE *second_file, const util::TempMaker &maker, std::size_t weights_size, unsigned char order, const Combine &combine) {
+template <class Combine> FILE *MergeSortedFiles(FILE *first_file, FILE *second_file, const std::string &temp_prefix, std::size_t weights_size, unsigned char order, const Combine &combine) {
   std::size_t entry_size = sizeof(WordIndex) * order + weights_size;
   RecordReader first, second;
   first.Init(first_file, entry_size);
   second.Init(second_file, entry_size);
-  util::scoped_FILE out_file(maker.MakeFile());
+  util::scoped_FILE out_file(util::FMakeTemp(temp_prefix));
   EntryCompare less(order);
   while (first && second) {
     if (less(first.Data(), second.Data())) {
@@ -129,7 +140,7 @@ template <class Combine> FILE *MergeSortedFiles(FILE *first_file, FILE *second_f
       util::WriteOrThrow(out_file.get(), second.Data(), entry_size);
       ++second;
     } else {
-      combine(entry_size, first.Data(), second.Data(), out_file.get());
+      combine(entry_size, order, first.Data(), second.Data(), out_file.get());
       ++first; ++second;
     }
   }
@@ -161,7 +172,7 @@ void RecordReader::Overwrite(const void *start, std::size_t amount) {
   util::WriteOrThrow(file_, start, amount);
   long forward = entry_size_ - internal - amount;
 #if !defined(_WIN32) && !defined(_WIN64)
-  if (forward) 
+  if (forward)
 #endif
     UTIL_THROW_IF(fseek(file_, forward, SEEK_CUR), util::ErrnoException, "Couldn't seek forwards past revision");
 }
@@ -177,11 +188,10 @@ void RecordReader::Rewind() {
 }
 
 SortedFiles::SortedFiles(const Config &config, util::FilePiece &f, std::vector<uint64_t> &counts, size_t buffer, const std::string &file_prefix, SortedVocabulary &vocab) {
-  util::TempMaker maker(file_prefix);
   PositiveProbWarn warn(config.positive_log_probability);
-  unigram_.reset(maker.Make());
+  unigram_.reset(util::MakeTemp(file_prefix));
   {
-    // In case <unk> appears.  
+    // In case <unk> appears.
     size_t size_out = (counts[0] + 1) * sizeof(ProbBackoff);
     util::scoped_mmap unigram_mmap(util::MapZeroedWrite(unigram_.get(), size_out), size_out);
     Read1Grams(f, counts[0], vocab, reinterpret_cast<ProbBackoff*>(unigram_mmap.get()), warn);
@@ -189,7 +199,7 @@ SortedFiles::SortedFiles(const Config &config, util::FilePiece &f, std::vector<u
     if (!vocab.SawUnk()) ++counts[0];
   }
 
-  // Only use as much buffer as we need.  
+  // Only use as much buffer as we need.
   size_t buffer_use = 0;
   for (unsigned int order = 2; order < counts.size(); ++order) {
     buffer_use = std::max<size_t>(buffer_use, static_cast<size_t>((sizeof(WordIndex) * order + 2 * sizeof(float)) * counts[order - 1]));
@@ -202,7 +212,7 @@ SortedFiles::SortedFiles(const Config &config, util::FilePiece &f, std::vector<u
   if (!mem.get()) UTIL_THROW(util::ErrnoException, "malloc failed for sort buffer size " << buffer);
 
   for (unsigned char order = 2; order <= counts.size(); ++order) {
-    ConvertToSorted(f, vocab, counts, maker, order, warn, mem.get(), buffer);
+    ConvertToSorted(f, vocab, counts, file_prefix, order, warn, mem.get(), buffer);
   }
   ReadEnd(f);
 }
@@ -227,10 +237,10 @@ class Closer {
 };
 } // namespace
 
-void SortedFiles::ConvertToSorted(util::FilePiece &f, const SortedVocabulary &vocab, const std::vector<uint64_t> &counts, const util::TempMaker &maker, unsigned char order, PositiveProbWarn &warn, void *mem, std::size_t mem_size) {
+void SortedFiles::ConvertToSorted(util::FilePiece &f, const SortedVocabulary &vocab, const std::vector<uint64_t> &counts, const std::string &file_prefix, unsigned char order, PositiveProbWarn &warn, void *mem, std::size_t mem_size) {
   ReadNGramHeader(f, order);
   const size_t count = counts[order - 1];
-  // Size of weights.  Does it include backoff?  
+  // Size of weights.  Does it include backoff?
   const size_t words_size = sizeof(WordIndex) * order;
   const size_t weights_size = sizeof(float) + ((order == counts.size()) ? 0 : sizeof(float));
   const size_t entry_size = words_size + weights_size;
@@ -245,35 +255,37 @@ void SortedFiles::ConvertToSorted(util::FilePiece &f, const SortedVocabulary &vo
     uint8_t *out_end = out + std::min(count - done, batch_size) * entry_size;
     if (order == counts.size()) {
       for (; out != out_end; out += entry_size) {
-        ReadNGram(f, order, vocab, reinterpret_cast<WordIndex*>(out), *reinterpret_cast<Prob*>(out + words_size), warn);
+        std::reverse_iterator<WordIndex*> it(reinterpret_cast<WordIndex*>(out) + order);
+        ReadNGram(f, order, vocab, it, *reinterpret_cast<Prob*>(out + words_size), warn);
       }
     } else {
       for (; out != out_end; out += entry_size) {
-        ReadNGram(f, order, vocab, reinterpret_cast<WordIndex*>(out), *reinterpret_cast<ProbBackoff*>(out + words_size), warn);
+        std::reverse_iterator<WordIndex*> it(reinterpret_cast<WordIndex*>(out) + order);
+        ReadNGram(f, order, vocab, it, *reinterpret_cast<ProbBackoff*>(out + words_size), warn);
       }
     }
-    // Sort full records by full n-gram.  
+    // Sort full records by full n-gram.
     util::SizedProxy proxy_begin(begin, entry_size), proxy_end(out_end, entry_size);
-    // parallel_sort uses too much RAM.  TODO: figure out why windows sort doesn't like my proxies.  
+    // parallel_sort uses too much RAM.  TODO: figure out why windows sort doesn't like my proxies.
 #if defined(_WIN32) || defined(_WIN64)
     std::stable_sort
 #else
     std::sort
 #endif
         (NGramIter(proxy_begin), NGramIter(proxy_end), util::SizedCompare<EntryCompare>(EntryCompare(order)));
-    files.push_back(DiskFlush(begin, out_end, maker));
-    contexts.push_back(WriteContextFile(begin, out_end, maker, entry_size, order));
+    files.push_back(DiskFlush(begin, out_end, file_prefix));
+    contexts.push_back(WriteContextFile(begin, out_end, file_prefix, entry_size, order));
 
     done += (out_end - begin) / entry_size;
   }
 
-  // All individual files created.  Merge them.  
+  // All individual files created.  Merge them.
 
   while (files.size() > 1) {
-    files.push_back(MergeSortedFiles(files[0], files[1], maker, weights_size, order, ThrowCombine()));
+    files.push_back(MergeSortedFiles(files[0], files[1], file_prefix, weights_size, order, ThrowCombine()));
     files_closer.PopFront();
     files_closer.PopFront();
-    contexts.push_back(MergeSortedFiles(contexts[0], contexts[1], maker, 0, order - 1, FirstCombine()));
+    contexts.push_back(MergeSortedFiles(contexts[0], contexts[1], file_prefix, 0, order - 1, FirstCombine()));
     contexts_closer.PopFront();
     contexts_closer.PopFront();
   }

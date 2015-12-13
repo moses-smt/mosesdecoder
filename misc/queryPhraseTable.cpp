@@ -6,8 +6,8 @@
 #include <string>
 #include <vector>
 
-#include "PhraseDictionaryTree.h"
-#include "Util.h"
+#include "moses/TranslationModel/PhraseDictionaryTree.h"
+#include "moses/Util.h"
 
 void usage();
 
@@ -17,7 +17,7 @@ int main(int argc, char **argv)
 {
   int nscores = 5;
   std::string ttable = "";
-  bool useAlignments = false;
+  bool needAlignments = false;
   bool reportCounts = false;
 
   for(int i = 1; i < argc; i++) {
@@ -30,19 +30,18 @@ int main(int argc, char **argv)
         usage();
       ttable = argv[++i];
     } else if(!strcmp(argv[i], "-a")) {
-      useAlignments = true;
+      needAlignments = true;
     } else if (!strcmp(argv[i], "-c")) {
       reportCounts = true;
-    }
-    else
+    } else
       usage();
   }
 
   if(ttable == "")
     usage();
 
-  Moses::PhraseDictionaryTree ptree(nscores);
-  ptree.UseWordAlignment(useAlignments);
+  Moses::PhraseDictionaryTree ptree;
+  ptree.NeedAlignmentInfo(needAlignments);
   ptree.Read(ttable);
 
   std::string line;
@@ -53,7 +52,7 @@ int main(int argc, char **argv)
     std::vector<Moses::StringTgtCand> tgtcands;
     std::vector<std::string> wordAlignment;
 
-    if(useAlignments)
+    if(needAlignments)
       ptree.GetTargetCandidates(srcphrase, tgtcands, wordAlignment);
     else
       ptree.GetTargetCandidates(srcphrase, tgtcands);
@@ -67,7 +66,7 @@ int main(int argc, char **argv)
           std::cout << ' ' << *tgtcands[i].tokens[j];
         std::cout << " |||";
 
-        if(useAlignments) {
+        if(needAlignments) {
           std::cout << " " << wordAlignment[i] << " |||";
         }
 

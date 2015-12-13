@@ -34,27 +34,18 @@ class HoleCollection
 protected:
   HoleList m_holes;
   std::vector<Hole*> m_sortedSourceHoles;
-  std::set<int> m_sourceHoleStartPoints;
-  std::set<int> m_sourceHoleEndPoints;
-  int m_scope;
-  int m_sourcePhraseStart;
-  int m_sourcePhraseEnd;
+  std::vector<int> m_sourceHoleStartPoints;
+  std::vector<int> m_sourceHoleEndPoints;
+  std::vector<int> m_scope;
+  std::vector<int> m_sourcePhraseStart;
+  std::vector<int> m_sourcePhraseEnd;
 
 public:
   HoleCollection(int sourcePhraseStart, int sourcePhraseEnd)
-    : m_scope(0)
-    , m_sourcePhraseStart(sourcePhraseStart)
-    , m_sourcePhraseEnd(sourcePhraseEnd)
-  {}
-
-  HoleCollection(const HoleCollection &copy)
-    : m_holes(copy.m_holes)
-    , m_sourceHoleStartPoints(copy.m_sourceHoleStartPoints)
-    , m_sourceHoleEndPoints(copy.m_sourceHoleEndPoints)
-    , m_scope(copy.m_scope)
-    , m_sourcePhraseStart(copy.m_sourcePhraseStart)
-    , m_sourcePhraseEnd(copy.m_sourcePhraseEnd)
-  {} // don't copy sorted target holes. messes up sorting fn
+    : m_scope(1, 0)
+    , m_sourcePhraseStart(1, sourcePhraseStart)
+    , m_sourcePhraseEnd(1, sourcePhraseEnd) {
+  }
 
   const HoleList &GetHoles() const {
     return m_holes;
@@ -69,6 +60,8 @@ public:
   }
 
   void Add(int startT, int endT, int startS, int endS);
+
+  void RemoveLast();
 
   bool OverlapSource(const Hole &sourceHole) const {
     HoleList::const_iterator iter;

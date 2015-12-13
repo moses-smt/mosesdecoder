@@ -38,12 +38,13 @@ public:
     ,m_start_null(start_null)
     ,m_end_null(end_null)
     ,m_pre_null(pre_null)
-    ,m_post_null(post_null)
-  {}
+    ,m_post_null(post_null) {
+  }
   ~PhrasePair () {}
 
   void PrintTarget( std::ostream* out ) const;
-  void Print( std::ostream* out, int width ) const;
+  void Print( std::ostream* out ) const;
+  void PrintPretty( std::ostream* out, int width ) const;
   void PrintHTML( std::ostream* out ) const;
   void PrintClippedHTML( std::ostream* out, int width ) const;
 };

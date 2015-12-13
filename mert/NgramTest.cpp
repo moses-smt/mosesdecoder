@@ -5,7 +5,8 @@
 
 using namespace MosesTuning;
 
-BOOST_AUTO_TEST_CASE(ngram_basic) {
+BOOST_AUTO_TEST_CASE(ngram_basic)
+{
   NgramCounts counts;
   NgramCounts::Key key;
   key.push_back(1);
@@ -25,7 +26,8 @@ BOOST_AUTO_TEST_CASE(ngram_basic) {
   BOOST_CHECK_EQUAL(it->second, 1);
 }
 
-BOOST_AUTO_TEST_CASE(ngram_Add) {
+BOOST_AUTO_TEST_CASE(ngram_Add)
+{
   NgramCounts counts;
   NgramCounts::Key key;
   key.push_back(1);
@@ -49,7 +51,8 @@ BOOST_AUTO_TEST_CASE(ngram_Add) {
   BOOST_CHECK_EQUAL(counts[key3], counts.get_default_count());
 }
 
-BOOST_AUTO_TEST_CASE(ngram_lookup) {
+BOOST_AUTO_TEST_CASE(ngram_lookup)
+{
   NgramCounts counts;
   NgramCounts::Key key;
   key.push_back(1);

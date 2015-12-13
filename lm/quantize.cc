@@ -38,24 +38,24 @@ const char kSeparatelyQuantizeVersion = 2;
 
 } // namespace
 
-void SeparatelyQuantize::UpdateConfigFromBinary(int fd, const std::vector<uint64_t> &/*counts*/, Config &config) {
-  char version;
-  util::ReadOrThrow(fd, &version, 1);
-  util::ReadOrThrow(fd, &config.prob_bits, 1);
-  util::ReadOrThrow(fd, &config.backoff_bits, 1);
+void SeparatelyQuantize::UpdateConfigFromBinary(const BinaryFormat &file, uint64_t offset, Config &config) {
+  unsigned char buffer[3];
+  file.ReadForConfig(buffer, 3, offset);
+  char version = buffer[0];
+  config.prob_bits = buffer[1];
+  config.backoff_bits = buffer[2];
   if (version != kSeparatelyQuantizeVersion) UTIL_THROW(FormatLoadException, "This file has quantization version " << (unsigned)version << " but the code expects version " << (unsigned)kSeparatelyQuantizeVersion);
-  util::AdvanceOrThrow(fd, -3);
 }
 
 void SeparatelyQuantize::SetupMemory(void *base, unsigned char order, const Config &config) {
   prob_bits_ = config.prob_bits;
   backoff_bits_ = config.backoff_bits;
-  // We need the reserved values.  
+  // We need the reserved values.
   if (config.prob_bits == 0) UTIL_THROW(ConfigException, "You can't quantize probability to zero");
   if (config.backoff_bits == 0) UTIL_THROW(ConfigException, "You can't quantize backoff to zero");
   if (config.prob_bits > 25) UTIL_THROW(ConfigException, "For efficiency reasons, quantizing probability supports at most 25 bits.  Currently you have requested " << static_cast<unsigned>(config.prob_bits) << " bits.");
   if (config.backoff_bits > 25) UTIL_THROW(ConfigException, "For efficiency reasons, quantizing backoff supports at most 25 bits.  Currently you have requested " << static_cast<unsigned>(config.backoff_bits) << " bits.");
-  // Reserve 8 byte header for bit counts.  
+  // Reserve 8 byte header for bit counts.
   actual_base_ = static_cast<uint8_t*>(base);
   float *start = reinterpret_cast<float*>(actual_base_ + 8);
   for (unsigned char i = 0; i < order - 2; ++i) {

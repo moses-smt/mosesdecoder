@@ -22,13 +22,13 @@
 #include <fstream>
 #include "Vocab.h"
 #include "PhraseNode.h"
-#include "../moses/src/Word.h"
+#include "moses/Word.h"
 
 namespace OnDiskPt
 {
 const float DEFAULT_COUNT = 66666;
 
-/** Global class with misc information need to create and use the on-disk rule table. 
+/** Global class with misc information need to create and use the on-disk rule table.
  * 1 object of this class should be instantiated per rule table.
  * Currently only hierarchical/syntax models use this, but can & should be used with pb models too
  */
@@ -43,7 +43,7 @@ protected:
   size_t m_defaultNodeSize;
   PhraseNode *m_rootSourceNode;
 
-  std::map<std::string, UINT64> m_miscInfo;
+  std::map<std::string, uint64_t> m_miscInfo;
 
   void SaveMisc();
   bool OpenForLoad(const std::string &filePath);
@@ -55,13 +55,16 @@ public:
   OnDiskWrapper();
   ~OnDiskWrapper();
 
-  bool BeginLoad(const std::string &filePath);
+  void BeginLoad(const std::string &filePath);
 
-  bool BeginSave(const std::string &filePath
+  void BeginSave(const std::string &filePath
                  , int numSourceFactors, int	numTargetFactors, int numScores);
   void EndSave();
 
   Vocab &GetVocab() {
+    return m_vocab;
+  }
+  const Vocab &GetVocab() const {
     return m_vocab;
   }
 
@@ -95,12 +98,16 @@ public:
     return 1;
   }
 
-  PhraseNode &GetRootSourceNode();
+  PhraseNode &GetRootSourceNode() {
+    return *m_rootSourceNode;
+  }
+  const PhraseNode &GetRootSourceNode() const {
+    return *m_rootSourceNode;
+  }
 
-  UINT64 GetMisc(const std::string &key) const;
+  uint64_t GetMisc(const std::string &key) const;
 
-  Word *ConvertFromMoses(Moses::FactorDirection direction
-                         , const std::vector<Moses::FactorType> &factorsVec
+  Word *ConvertFromMoses(const std::vector<Moses::FactorType> &factorsVec
                          , const Moses::Word &origWord) const;
 
 };

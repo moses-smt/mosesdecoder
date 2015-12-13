@@ -1,4 +1,7 @@
 #!/bin/bash
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # execute: ~/workspace/bin/moses-smt/scripts/training/wrappers/adam-suffix-array/suffix-array-extract.sh $SA_EXEC_DIR $MODEL_DIR $INPUT_FILE $OUTPUT_DIR
 
@@ -12,14 +15,14 @@ SA_EXEC_DIR=$1
 MODEL_DIR=$2
 INPUT_FILE=$3
 OUTPUT_DIR=$4
+JOBS=$5
 
 mkdir $OUTPUT_DIR
 
 pushd .
 cd $OUTPUT_DIR
 
-cat $INPUT_FILE | $SA_EXEC_DIR/escape-testset.pl | $SA_EXEC_DIR/extractor.py -c  $MODEL_DIR/extract.ini
-gzip $OUTPUT_DIR/grammar.out.*
+cat $INPUT_FILE | python $SA_EXEC_DIR/cdec/sa/extract.py -c $MODEL_DIR/extract.ini -g $OUTPUT_DIR -j $JOBS -z > $OUTPUT_DIR/input.sgm
 
 popd
 

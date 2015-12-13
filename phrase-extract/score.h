@@ -1,66 +1,29 @@
+/***********************************************************************
+  Moses - factored phrase-based language decoder
+  Copyright (C) 2009 University of Edinburgh
+
+  This library is free software; you can redistribute it and/or
+  modify it under the terms of the GNU Lesser General Public
+  License as published by the Free Software Foundation; either
+  version 2.1 of the License, or (at your option) any later version.
+
+  This library is distributed in the hope that it will be useful,
+  but WITHOUT ANY WARRANTY; without even the implied warranty of
+  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+  Lesser General Public License for more details.
+
+  You should have received a copy of the GNU Lesser General Public
+  License along with this library; if not, write to the Free Software
+  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ ***********************************************************************/
+
 #pragma once
-/*
- *  score.h
- *  extract
- *
- *  Created by Hieu Hoang on 28/07/2010.
- *  Copyright 2010 __MyCompanyName__. All rights reserved.
- *
- */
+
 #include <string>
-#include <vector>
+#include <map>
 
 namespace MosesTraining
 {
-
-class PhraseAlignment;
-
-typedef std::vector<PhraseAlignment*>          PhraseAlignmentCollection;
-//typedef std::vector<PhraseAlignmentCollection> PhrasePairGroup;
-
-class PhraseAlignmentCollectionOrderer
-{
-public:
-	bool operator()(const PhraseAlignmentCollection &collA, const PhraseAlignmentCollection &collB) const
-	{
-    assert(collA.size() > 0);
-    assert(collB.size() > 0);
-
-    const PhraseAlignment &objA = *collA[0];
-    const PhraseAlignment &objB = *collB[0];
-    bool ret = objA < objB;
-
-    return ret;
-	}
-};
-
-
-//typedef std::set<PhraseAlignmentCollection, PhraseAlignmentCollectionOrderer> PhrasePairGroup;
-
-class PhrasePairGroup
-{
-private:
-  typedef std::set<PhraseAlignmentCollection, PhraseAlignmentCollectionOrderer> Coll;
-  Coll m_coll;
-
-
-public:
-  typedef Coll::iterator iterator;
-  typedef Coll::const_iterator const_iterator;
-  typedef std::vector<const PhraseAlignmentCollection *> SortedColl;
-
-  std::pair<Coll::iterator,bool> insert ( const PhraseAlignmentCollection& obj );
-
-  const SortedColl &GetSortedColl() const
-  { return m_sortedColl; }
-  size_t GetSize() const
-  { return m_coll.size(); }
-
-private:
-  SortedColl m_sortedColl;
-
-};
-
 class LexicalTable
 {
 public:
@@ -81,6 +44,6 @@ inline bool isNonTerminal( const std::string &word )
   return (word.length()>=3 && word[0] == '[' && word[word.length()-1] == ']');
 }
 
-  
+
 }
 

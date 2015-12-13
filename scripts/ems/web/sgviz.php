@@ -1,9 +1,15 @@
 <?php
+
+/*
+This file is part of moses.  Its use is licensed under the GNU Lesser General
+Public License version 2.1 or, at your option, any later version.
+*/
+
 function sgviz($sentence) {
   global $setup,$dir,$id,$set;
 ?><html><head><title>Search Graph Visualization, Sentence <?php $sentence ?></title>
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-<script language="javascript" src="/javascripts/prototype.js"></script></head>
+<script language="javascript" src="javascripts/prototype.js"></script></head>
 <body><svg id="sg" height="500" width="900" xmlns="http://www.w3.org/2000/svg"><g id="chart"></g></svg>
 <script>
 var sg = document.getElementById("sg");
@@ -39,7 +45,7 @@ new Ajax.Request('?analysis=sgviz_data'
     method: "post"
   });
 </script></body></html>
-<?php 
+<?php
 // read graph
 //$file = get_current_analysis_filename("basic","search-graph")."/graph.$sentence";
 //$handle = fopen($file,"r");
@@ -55,7 +61,7 @@ function sgviz_data($sentence) {
   $file = get_current_analysis_filename("basic","search-graph")."/graph.$sentence";
 
   $handle = fopen($file,"r");
-  while (($line = fgets($handle)) !== false) { 
+  while (($line = fgets($handle)) !== false) {
     $e = explode("\t",addslashes(chop($line)));
     $edge[$e[0]] = array($e[1],$e[2],$e[3],$e[4],$e[5],$e[6],$e[7],$e[8],$e[9],$e[10]);
   }

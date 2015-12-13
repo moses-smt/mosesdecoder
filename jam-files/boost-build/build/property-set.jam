@@ -48,49 +48,6 @@ class property-set
             {
                 errors.error "Invalid property: '$(p)'" ;
             }
-
-            local att = [ feature.attributes $(p:G) ] ;
-            # A feature can be both incidental and free, in which case we add it
-            # to incidental.
-            if incidental in $(att)
-            {
-                self.incidental += $(p) ;
-            }
-            else if free in $(att)
-            {
-                self.free += $(p) ;
-            }
-            else
-            {
-                self.base += $(p) ;
-            }
-
-            if dependency in $(att)
-            {
-                self.dependency += $(p) ;
-            }
-            else
-            {
-                self.non-dependency += $(p) ;
-            }
-
-            if [ MATCH (:) : $(p:G=) ]
-            {
-                self.conditional += $(p) ;
-            }
-            else
-            {
-                self.non-conditional += $(p) ;
-            }
-
-            if propagated in $(att)
-            {
-                self.propagated += $(p) ;
-            }
-            if link-incompatible in $(att)
-            {
-                self.link-incompatible += $(p) ;
-            }
         }
     }
 
@@ -110,6 +67,10 @@ class property-set
     #
     rule base ( )
     {
+        if ! $(self.base-initialized)
+        {
+            init-base ;
+        }
         return $(self.base) ;
     }
 
@@ -117,6 +78,10 @@ class property-set
     #
     rule free ( )
     {
+        if ! $(self.base-initialized)
+        {
+            init-base ;
+        }
         return $(self.free) ;
     }
 
@@ -124,21 +89,37 @@ class property-set
     #
     rule dependency ( )
     {
+        if ! $(self.dependency-initialized)
+        {
+            init-dependency ;
+        }
         return $(self.dependency) ;
     }
 
     rule non-dependency ( )
     {
+        if ! $(self.dependency-initialized)
+        {
+            init-dependency ;
+        }
         return $(self.non-dependency) ;
     }
 
     rule conditional ( )
     {
+        if ! $(self.conditional-initialized)
+        {
+            init-conditional ;
+        }
         return $(self.conditional) ;
     }
 
     rule non-conditional ( )
     {
+        if ! $(self.conditional-initialized)
+        {
+            init-conditional ;
+        }
         return $(self.non-conditional) ;
     }
 
@@ -146,6 +127,10 @@ class property-set
     #
     rule incidental ( )
     {
+        if ! $(self.base-initialized)
+        {
+            init-base ;
+        }
         return $(self.incidental) ;
     }
 
@@ -200,28 +185,17 @@ class property-set
     {
         if ! $(self.propagated-ps)
         {
-            self.propagated-ps = [ property-set.create $(self.propagated) ] ;
+            local result ;
+            for local p in $(self.raw)
+            {
+                if propagated in [ feature.attributes $(p:G) ]
+                {
+                    result += $(p) ;
+                }
+            }
+            self.propagated-ps = [ property-set.create $(result) ] ;
         }
         return $(self.propagated-ps) ;
-    }
-
-    rule link-incompatible ( )
-    {
-        if ! $(self.link-incompatible-ps)
-        {
-            self.link-incompatible-ps =
-              [ property-set.create $(self.link-incompatible) ] ;
-        }
-        return $(self.link-incompatible-ps) ;
-    }
-
-    rule run-actions ( )
-    {
-        if ! $(self.run)
-        {
-            self.run = [ property-set.create [ feature.run-actions $(self.raw) ] ] ;
-        }
-        return $(self.run) ;
     }
 
     rule add-defaults ( )
@@ -238,7 +212,7 @@ class property-set
     {
         if ! $(self.as-path)
         {
-            self.as-path = [ property.as-path $(self.base) ] ;
+            self.as-path = [ property.as-path [ base ] ] ;
         }
         return $(self.as-path) ;
     }
@@ -303,31 +277,6 @@ class property-set
         return [ add [ property-set.create $(properties) ] ] ;
     }
 
-    rule link-incompatible-with ( ps )
-    {
-        if ! $(.li.$(ps))
-        {
-            local li1 = [ $(__name__).link-incompatible ] ;
-            local li2 = [ $(ps).link-incompatible ] ;
-            if [ set.equal $(li1) : $(li2) ]
-            {
-                .li.$(ps) = false ;
-            }
-            else
-            {
-                .li.$(ps) = true ;
-            }
-        }
-        if $(.li.$(ps)) = true
-        {
-            return true ;
-        }
-        else
-        {
-            return ;
-        }
-    }
-
     # Returns all values of 'feature'.
     #
     rule get ( feature )
@@ -344,6 +293,65 @@ class property-set
             }
         }
         return $($(feature)) ;
+    }
+    
+    # private
+
+    rule init-base ( )
+    {
+        for local p in $(self.raw)
+        {
+            local att = [ feature.attributes $(p:G) ] ;
+            # A feature can be both incidental and free, in which case we add it
+            # to incidental.
+            if incidental in $(att)
+            {
+                self.incidental += $(p) ;
+            }
+            else if free in $(att)
+            {
+                self.free += $(p) ;
+            }
+            else
+            {
+                self.base += $(p) ;
+            }
+        }
+        self.base-initialized = true ;
+    }
+
+    rule init-dependency ( )
+    {
+        for local p in $(self.raw)
+        {
+            local att = [ feature.attributes $(p:G) ] ;
+
+            if dependency in $(att)
+            {
+                self.dependency += $(p) ;
+            }
+            else
+            {
+                self.non-dependency += $(p) ;
+            }
+        }
+        self.dependency-initialized = true ;
+    }
+
+    rule init-conditional ( )
+    {
+        for local p in $(self.raw)
+        {
+            if [ MATCH (:) : $(p:G=) ]
+            {
+                self.conditional += $(p) ;
+            }
+            else
+            {
+                self.non-conditional += $(p) ;
+            }
+        }
+        self.conditional-initialized = true ;
     }
 }
 

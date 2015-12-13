@@ -1,0 +1,120 @@
+# This module handles the use (or non-use) of the externall
+# xmlrpc-c library (including the abyss server) that is needed for 
+# moses server functionality
+
+if [ option.get "no-xmlrpc-c" : : "yes" ]
+{
+  rule xmlrpc ( what ? ) { } # never return anything
+}
+else
+{
+  local xmlrpc = [ option.get "with-xmlrpc-c" ] ; 
+  if ! $(xmlrpc) # check for environment variable
+  {
+    local where = [ os.environ "XMLRPC_C_ROOT" ] ;
+    if $(where) 
+    { 
+      option.set "with-xmlrpc-c" : $(where) ; 
+      local msg = "setting --with-xmlrpc-c=$(where) via environment " ;
+      echo "$(msg) variable XMLRPC_C_ROOT" ;
+    }
+    xmlrpc = [ option.get "with-xmlrpc-c" ] ; 
+  }
+  local config ; 
+  if ! $(xmlrpc) { config = "xmlrpc-c-config" ; }
+  else { config = "$(xmlrpc)/bin/xmlrpc-c-config" ; }
+
+  # check if xmlrpc-config can be executed
+  xmlrpc-check = [ _shell "$(config) --features 2>/dev/null" : exit-status ] ; 
+
+  if $(xmlrpc-check[2]) = 0 # yes it can
+  { 
+    # is the abyss server is available ?
+    if [ MATCH "(abyss-server)" : $(xmlrpc-check[1]) ] 
+    {
+      # Yes, abyss server is available. Is it the right xmlrpc-c version ?
+      # Note: Version 1.25.29 does not work. 
+      xmlrpc-check = [ _shell "$(config) --version 2>/dev/null" : exit-status ] ; 
+      xmlrpc-c-version = $(xmlrpc-check[1]) ; 
+      if [ MATCH "(1.25.29)" : $(xmlrpc-c-version) ] 
+      {
+        echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+	echo "XMLRPC-C: Moses is not compatible with xmlrpc-c version $(xmlrpc-c-version). " ; 
+	echo "XMLRPC-C: Use another one or compile without server functionality (--no-xmlrpc-c)." ; 
+	echo "XMLRPC-C: Build aborted." ; 
+	exit : 1 ;
+      }
+    }
+    else 
+    {
+      echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+      echo "XMLRPC-C: Found xmlrpc-c but it does not provide the abyss server." ;
+      echo "XMLRPC-C: Use another xmlrpc-c installation that provides one " ; 
+      echo "XMLRPC-C: or compile without server functionality (--no-xmlrpc-c)." ; 
+      exit : 1 ;
+    }
+    local prefix  = [ shell_or_die "$(config) --prefix" ] ;
+    local version = [ shell_or_die "$(config) --version" ] ;
+    
+    # Check the version is recent enough:
+    # If anyone knows a better way to do this, go ahead and fix this.
+    minversion = 1.32.0 ;
+    local cmd = "perl -e '@a = split(/\\./,@ARGV[0]); @b = split(/\\./,$ARGV[1]); ++$i while $i < $#a && $a[$i] == $b[$i]; die if $a[$i] < $b[$i];'" ;
+    local check = [ SHELL "$(cmd) $(version) $(minversion) 2>/dev/null" : exit-status ] ;
+    if $(check[2]) = 0 
+    {
+       echo "XMLRPC-C: USING VERSION $(version) FROM $(prefix)" ;
+    } 
+    else 
+    {
+      echo "\nCOMPILATION FAILED! YOUR VERSION OF THE XMLRPC-C LIBRARY IS TOO OLD.\n" ;
+      echo "Moses server functionality requires XMLRPC-C version $(minversion) or newer." ;
+      echo "The version provided in $(prefix) is $(version). " ;
+      echo "Install a suitable version if necessary and provide its location with\n " ;
+      echo "   --with-xmlrpc-c=/path/to/correct/version\n" ; 
+      echo "You can also use --no-xmlrpc-c to compile without the xmlrpc-c library, " ; 
+      echo "in which case Moses will work in batch mode, but can't be run as a server. " ; 
+      exit : 1 ;
+    }
+
+    # now add stuff to the requirements
+    local xmlrpc-cxxflags = [ shell_or_die "$(config) c++2 abyss-server --cflags" ] ;
+    requirements += <define>HAVE_XMLRPC_C ;
+    requirements += <cxxflags>$(xmlrpc-cxxflags) ;
+    
+    local libs = [ shell_or_die "$(config) c++2 abyss-server --libs" ] ;
+    for local i in [ SPLIT_BY_CHARACTERS $(libs) : " " ] 
+    { 
+      local libname = [ MATCH "-l(xmlrpc.*)" : $(i) ] ; 
+      if $(libname) 
+      {   
+	external-lib $(libname) : $(prefix)/lib ;
+	#      : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
+	requirements += <library>$(libname) ;
+      }
+      local pathname = [ MATCH "-L(.*)" : $(i) ] ; 
+      if $(pathname)
+      {
+	requirements += <library-path>$(pathname) ; 
+      }
+    }
+  
+    rule xmlrpc { return yes ; }
+  }
+  else if [ option.get "with-xmlrpc-c" ] 
+  {
+    echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+    echo "XMLRPC-C: Could not find $(config). " ;
+    echo "Build aborted. " ; 
+    echo "Use --no-xmlrpc-c to compile moses without server functionality. " ; 
+    exit : 1 ;
+  }
+  else
+  {
+    rule xmlrpc ( what ? ) { } # never return anything
+  }
+  
+}
+
+
+

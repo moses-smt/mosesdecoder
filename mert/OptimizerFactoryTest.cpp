@@ -7,21 +7,24 @@
 
 using namespace MosesTuning;
 
-namespace {
+namespace
+{
 
 inline bool CheckBuildOptimizer(unsigned dim,
                                 const std::vector<unsigned>& to_optimize,
                                 const std::vector<bool>& positive,
                                 const std::vector<parameter_t>& start,
                                 const std::string& type,
-                                unsigned int num_random) {
+                                unsigned int num_random)
+{
   boost::scoped_ptr<Optimizer> optimizer(OptimizerFactory::BuildOptimizer(dim, to_optimize, positive, start, type, num_random));
   return optimizer.get() != NULL;
 }
 
 } // namespace
 
-BOOST_AUTO_TEST_CASE(optimizer_type) {
+BOOST_AUTO_TEST_CASE(optimizer_type)
+{
   BOOST_CHECK_EQUAL(OptimizerFactory::GetOptimizerType("powell"),
                     OptimizerFactory::POWELL);
   BOOST_CHECK_EQUAL(OptimizerFactory::GetOptimizerType("random"),
@@ -30,7 +33,8 @@ BOOST_AUTO_TEST_CASE(optimizer_type) {
                     OptimizerFactory::RANDOM_DIRECTION);
 }
 
-BOOST_AUTO_TEST_CASE(optimizer_build) {
+BOOST_AUTO_TEST_CASE(optimizer_build)
+{
   const unsigned dim = 3;
   std::vector<unsigned> to_optimize;
   to_optimize.push_back(1);

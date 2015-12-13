@@ -24,6 +24,7 @@
 #include <string>
 
 #include "tables-core.h"
+#include "util/tokenize.hh"
 
 using namespace std;
 
@@ -40,7 +41,7 @@ void addBoundaryWords(vector<string> &phrase)
 
 bool SentenceAlignment::processTargetSentence(const char * targetString, int, bool boundaryRules)
 {
-  target = tokenize(targetString);
+  target = util::tokenize(targetString);
   if (boundaryRules)
     addBoundaryWords(target);
   return true;
@@ -48,16 +49,21 @@ bool SentenceAlignment::processTargetSentence(const char * targetString, int, bo
 
 bool SentenceAlignment::processSourceSentence(const char * sourceString, int, bool boundaryRules)
 {
-  source = tokenize(sourceString);
+  source = util::tokenize(sourceString);
   if (boundaryRules)
     addBoundaryWords(source);
   return true;
 }
 
-bool SentenceAlignment::create( char targetString[], char sourceString[], char alignmentString[], int sentenceID, bool boundaryRules)
+bool SentenceAlignment::create(const char targetString[],
+                               const char sourceString[],
+                               const char alignmentString[],
+                               const char weightString[],
+                               int sentenceID, bool boundaryRules)
 {
   using namespace std;
   this->sentenceID = sentenceID;
+  this->weightString = std::string(weightString);
 
   // process sentence strings and store in target and source members.
   if (!processTargetSentence(targetString, sentenceID, boundaryRules)) {
@@ -84,7 +90,7 @@ bool SentenceAlignment::create( char targetString[], char sourceString[], char a
   }
 
   // reading in alignments
-  vector<string> alignmentSequence = tokenize( alignmentString );
+  vector<string> alignmentSequence = util::tokenize( alignmentString );
   for(size_t i=0; i<alignmentSequence.size(); i++) {
     int s,t;
     // cout << "scaning " << alignmentSequence[i].c_str() << endl;
@@ -93,12 +99,12 @@ bool SentenceAlignment::create( char targetString[], char sourceString[], char a
       cerr << "T: " << targetString << endl << "S: " << sourceString << endl;
       return false;
     }
-    
+
     if (boundaryRules) {
       ++s;
       ++t;
     }
-    
+
     // cout << "alignmentSequence[i] " << alignmentSequence[i] << " is " << s << ", " << t << endl;
     if ((size_t)t >= target.size() || (size_t)s >= source.size()) {
       cerr << "WARNING: sentence " << sentenceID << " has alignment point (" << s << ", " << t << ") out of bounds (" << source.size() << ", " << target.size() << ")\n";
@@ -108,17 +114,30 @@ bool SentenceAlignment::create( char targetString[], char sourceString[], char a
     alignedToT[t].push_back( s );
     alignedCountS[s]++;
   }
-  
+
   if (boundaryRules) {
     alignedToT[0].push_back(0);
     alignedCountS[0]++;
-    
+
     alignedToT.back().push_back(alignedCountS.size() - 1);
     alignedCountS.back()++;
-    
+
   }
-  
+
   return true;
+}
+
+void SentenceAlignment::invertAlignment()
+{
+  alignedToS.resize(source.size());
+  for (size_t targetPos = 0; targetPos < alignedToT.size(); ++targetPos) {
+    const std::vector<int> &vec = alignedToT[targetPos];
+    for (size_t i = 0; i < vec.size(); ++i) {
+      int sourcePos = vec[i];
+      alignedToS[sourcePos].push_back(targetPos);
+    }
+
+  }
 }
 
 }

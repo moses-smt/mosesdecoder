@@ -1,11 +1,16 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id$
 #show-phrases-used: display all source and target phrases for each sentence in a corpus, and give average phrase length used
 #usage: show-phrases-used DECODER_OUTFILE > output.html
 #  where DECODER_OUTFILE is the output of moses with the -T (show alignments) option
 
+use warnings;
 use strict;
+
 BEGIN
 {
     my $wd= `pawd 2>/dev/null`;
@@ -190,13 +195,13 @@ for(my $i = 0; $i < scalar(@{$sentenceData[0]}); $i++)
 	{
 		my $k = $srcPhraseIndices[$j];
 		my $srcBottomY = $srcY + ($font->height + $phraseEdgeVSpace) * $srcNumFactors; #bottom of color
-		$img->filledRectangle($srcStartX[$k], $srcY - $phraseEdgeVSpace, $srcStartX[$k] + $font->width * $sentenceData[0]->[$i]->[$k]->{'srcNumChars'} + 2 * $phraseEdgeHSpace, 
+		$img->filledRectangle($srcStartX[$k], $srcY - $phraseEdgeVSpace, $srcStartX[$k] + $font->width * $sentenceData[0]->[$i]->[$k]->{'srcNumChars'} + 2 * $phraseEdgeHSpace,
 									$srcBottomY, $bgCols[$srcBGCols[$k]]);
 		if(length $sentenceData[0]->[$i]->[$k]->{'tgtText'} > 0) #non-empty target phrase
 		{
 			$img->filledRectangle($tgtStartX[$j], $tgtY - $phraseEdgeVSpace, $tgtStartX[$j] + $font->width * $sentenceData[0]->[$i]->[$k]->{'tgtNumChars'} + 2 * $phraseEdgeHSpace,
 										$tgtY + ($font->height + $phraseEdgeVSpace) * $tgtNumFactors, $bgCols[$srcBGCols[$k]]);
-			my ($srcMidX, $tgtMidX) = ($srcStartX[$k] + $font->width * $sentenceData[0]->[$i]->[$k]->{'srcNumChars'} / 2 + $phraseEdgeHSpace, 
+			my ($srcMidX, $tgtMidX) = ($srcStartX[$k] + $font->width * $sentenceData[0]->[$i]->[$k]->{'srcNumChars'} / 2 + $phraseEdgeHSpace,
 												$tgtStartX[$j] + $font->width * $sentenceData[0]->[$i]->[$k]->{'tgtNumChars'} / 2 + $phraseEdgeHSpace);
 			$img->line($srcMidX, $srcBottomY, $tgtMidX, $tgtY, $bgCols[$srcBGCols[$k]]);
 			writeFactoredStringGD($img, $srcStartX[$k] + $phraseEdgeHSpace, \@srcFactorYs, $sentenceData[0]->[$i]->[$k]->{'srcText'}, $font, $black);
