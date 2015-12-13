@@ -73,8 +73,8 @@ public:
 class ChartSearchGraphWriterMoses : public virtual ChartSearchGraphWriter
 {
 public:
-  ChartSearchGraphWriterMoses(AllOptions::ptr const& opts, 
-			      std::ostream* out, size_t lineNumber) 
+  ChartSearchGraphWriterMoses(AllOptions::ptr const& opts,
+                              std::ostream* out, size_t lineNumber)
     : ChartSearchGraphWriter(opts), m_out(out), m_lineNumber(lineNumber) {}
   virtual void WriteHeader(size_t, size_t) const {
     /* do nothing */
@@ -91,7 +91,7 @@ private:
 class ChartSearchGraphWriterHypergraph : public virtual ChartSearchGraphWriter
 {
 public:
-  ChartSearchGraphWriterHypergraph(AllOptions::ptr const& opts, std::ostream* out) 
+  ChartSearchGraphWriterHypergraph(AllOptions::ptr const& opts, std::ostream* out)
     : ChartSearchGraphWriter(opts), m_out(out), m_nodeId(0) { }
   virtual void WriteHeader(size_t winners, size_t losers) const;
   virtual void WriteHypos(const ChartHypothesisCollection& hypos,
