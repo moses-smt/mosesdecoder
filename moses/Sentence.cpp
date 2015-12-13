@@ -257,7 +257,7 @@ Sentence::
 CreateTranslationOptionCollection(ttasksptr const& ttask) const
 {
   TranslationOptionCollection *rv
-    = new TranslationOptionCollectionText(ttask, *this);
+  = new TranslationOptionCollectionText(ttask, *this);
   assert(rv);
   return rv;
 }

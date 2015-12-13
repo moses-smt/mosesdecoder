@@ -49,16 +49,16 @@ const FFState* DistortionScoreProducer::EmptyHypothesisState(const InputType &in
            NOT_FOUND);
 }
 
-float 
+float
 DistortionScoreProducer::
 CalculateDistortionScore(const Hypothesis& hypo,
-			 const Range &prev, const Range &curr, const int FirstGap)
+                         const Range &prev, const Range &curr, const int FirstGap)
 {
   // if(!StaticData::Instance().UseEarlyDistortionCost()) {
   if(!hypo.GetManager().options()->reordering.use_early_distortion_cost) {
     return - (float) hypo.GetInput().ComputeDistortionDistance(prev, curr);
   } // else {
-  
+
   /* Pay distortion score as soon as possible, from Moore and Quirk MT Summit 2007
      Definitions:
      S   : current source range

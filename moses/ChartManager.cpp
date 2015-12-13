@@ -300,8 +300,8 @@ OutputSearchGraphAsHypergraph(std::ostream& out) const
 
 void ChartManager::OutputSearchGraphMoses(std::ostream &outputSearchGraphStream) const
 {
-  ChartSearchGraphWriterMoses writer(options(), &outputSearchGraphStream, 
-				     m_source.GetTranslationId());
+  ChartSearchGraphWriterMoses writer(options(), &outputSearchGraphStream,
+                                     m_source.GetTranslationId());
   WriteSearchGraph(writer);
 }
 

@@ -35,14 +35,14 @@ namespace Moses
 /** constructor; just initialize the base class */
 TranslationOptionCollectionText::
 TranslationOptionCollectionText(ttasksptr const& ttask, Sentence const &input)
-  //, size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
+//, size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
   : TranslationOptionCollection(ttask,input)
-    // , maxNoTransOptPerCoverage, translationOptionThreshold)
+  // , maxNoTransOptPerCoverage, translationOptionThreshold)
 {
   size_t maxNoTransOptPerCoverage
-    = ttask->options()->search.max_trans_opt_per_cov;
+  = ttask->options()->search.max_trans_opt_per_cov;
   float translationOptionThreshold
-    = ttask->options()->search.trans_opt_threshold;
+  = ttask->options()->search.trans_opt_threshold;
   size_t size = input.GetSize();
   m_inputPathMatrix.resize(size);
   for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {

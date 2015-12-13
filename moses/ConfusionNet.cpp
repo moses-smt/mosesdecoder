@@ -283,7 +283,7 @@ CreateTranslationOptionCollection(ttasksptr const& ttask) const
   // float translationOptionThreshold
   //   = ttask->options()->search.trans_opt_threshold;
   TranslationOptionCollection *rv
-    = new TranslationOptionCollectionConfusionNet(ttask, *this);
+  = new TranslationOptionCollectionConfusionNet(ttask, *this);
   //, maxNoTransOptPerCoverage, translationOptionThreshold);
   assert(rv);
   return rv;

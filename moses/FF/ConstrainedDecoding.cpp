@@ -56,7 +56,7 @@ void ConstrainedDecoding::Load(AllOptions::ptr const& opts)
   for(size_t i = 0; i < m_paths.size(); ++i) {
     InputFileStream constraintFile(m_paths[i]);
     std::string line;
-    long sentenceID = opts->output.start_translation_id - 1 ; 
+    long sentenceID = opts->output.start_translation_id - 1 ;
     while (getline(constraintFile, line)) {
       vector<string> vecStr = Tokenize(line, "\t");
 

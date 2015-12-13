@@ -36,7 +36,7 @@ protected:
 
 public:
   TranslationOptionCollectionConfusionNet
-    (ttasksptr const& ttask, const ConfusionNet &source);
+  (ttasksptr const& ttask, const ConfusionNet &source);
   // , size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 
   void ProcessUnknownWord(size_t sourcePos);
