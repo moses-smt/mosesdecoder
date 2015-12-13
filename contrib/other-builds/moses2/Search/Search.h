@@ -5,10 +5,10 @@
  *      Author: hieu
  */
 
-#ifndef SEARCH_SEARCH_H_
-#define SEARCH_SEARCH_H_
+#pragma once
 
 #include <stddef.h>
+#include "../legacy/Util2.h"
 
 namespace Moses2
 {
@@ -32,11 +32,20 @@ protected:
 	//ArcLists m_arcLists;
 
 	bool CanExtend(const Bitmap &hypoBitmap, size_t hypoRangeEndPos, const Range &pathRange);
-	int ComputeDistortionDistance(size_t prevEndPos, size_t currStartPos) const;
+
+	inline int ComputeDistortionDistance(size_t prevEndPos, size_t currStartPos) const
+	{
+	  int dist = 0;
+	  if (prevEndPos == NOT_FOUND) {
+	    dist = currStartPos;
+	  } else {
+	    dist = (int)prevEndPos - (int)currStartPos + 1 ;
+	  }
+	  return abs(dist);
+	}
 
 };
 
 }
 
 
-#endif /* SEARCH_SEARCH_H_ */

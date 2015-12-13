@@ -25,17 +25,6 @@ Search::~Search() {
 	// TODO Auto-generated destructor stub
 }
 
-int Search::ComputeDistortionDistance(size_t prevEndPos, size_t currStartPos) const
-{
-  int dist = 0;
-  if (prevEndPos == NOT_FOUND) {
-    dist = currStartPos;
-  } else {
-    dist = (int)prevEndPos - (int)currStartPos + 1 ;
-  }
-  return abs(dist);
-}
-
 bool Search::CanExtend(const Bitmap &hypoBitmap, size_t hypoRangeEndPos, const Range &pathRange)
 {
     const size_t hypoFirstGapPos = hypoBitmap.GetFirstGapPos();
