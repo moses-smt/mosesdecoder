@@ -144,10 +144,10 @@ TargetPhraseCollection::shared_ptr PhraseDictionaryMultiModelCounts::GetTargetPh
 }
 
 
-void 
+void
 PhraseDictionaryMultiModelCounts::
-CollectSufficientStats(const Phrase& src, vector<float> &fs, 
-		       map<string,multiModelCountsStats*>* allStats) const
+CollectSufficientStats(const Phrase& src, vector<float> &fs,
+                       map<string,multiModelCountsStats*>* allStats) const
 //fill fs and allStats with statistics from models
 {
   for(size_t i = 0; i < m_numModels; ++i) {

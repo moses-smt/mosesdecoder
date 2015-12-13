@@ -116,6 +116,13 @@ function run_single_test () {
   #regtest_dir=$PWD/$(basename $regtest_file .tgz)
   cd ..
 
+  # test build with different configurations
+  echo "## test build with different configurations" >> $longlog
+  for configArgs in "${ALTERNATIVE_CONFIGURE_ARGS[@]}"
+  do
+    ./bjam clean $configArgs >> $longlog 2>&1 || warn "bjam clean failed, suspicious"
+  done
+
   echo "## ./bjam clean" >> $longlog
   ./bjam clean $MCC_CONFIGURE_ARGS --with-regtest=$regtest_dir >> $longlog 2>&1 || warn "bjam clean failed, suspicious"
 
@@ -169,7 +176,7 @@ function run_single_test () {
   echo "## Status: $status" >> $longlog
 
   nicedate=$(date +"%Y%m%d-%H%M%S")
-  echo "$commit	$status	$configname	$ccversion	$nicedate" \
+  echo "$commit$status$configname$ccversion$nicedate" \
     >> "$LOGDIR/brief.log"
 
   if [ -z "$err" ]; then
