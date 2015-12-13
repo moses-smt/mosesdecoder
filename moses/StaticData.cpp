@@ -53,7 +53,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef HAVE_CMPH
 #include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
 #endif
-#if !defined WIN32 || defined __MINGW32__ || defined HAVE_CMPH
+#if defined HAVE_CMPH
 #include "moses/TranslationModel/CompactPT/LexicalReorderingTableCompact.h"
 #endif
 
@@ -217,7 +217,7 @@ bool StaticData::LoadData(Parameter *parameter)
   // FEATURE FUNCTION INITIALIZATION HAPPENS HERE ===============================
 
   // set class-specific default parameters
-#if !defined WIN32 || defined __MINGW32__ || defined HAVE_CMPH
+#if defined HAVE_CMPH
   LexicalReorderingTableCompact::SetStaticDefaultParameters(*parameter);
   PhraseDictionaryCompact::SetStaticDefaultParameters(*parameter);
 #endif
