@@ -237,8 +237,8 @@ void ChartParser::CreateInputPaths(const InputType &input)
   m_inputPathMatrix.resize(size);
 
   UTIL_THROW_IF2(input.GetType() != SentenceInput && input.GetType() != TreeInputType,
-                 "Input must be a sentence or a tree, " << 
-		 "not lattice or confusion networks");
+                 "Input must be a sentence or a tree, " <<
+                 "not lattice or confusion networks");
 
   TranslationTask const* ttask = m_ttask.lock().get();
   for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {

@@ -213,8 +213,8 @@ TO_STRING_BODY(Word);
 ostream& operator<<(ostream& out, const Word& word)
 {
   util::StringStream strme;
-  const std::string& factorDelimiter 
-    = StaticData::Instance().options()->output.factor_delimiter;
+  const std::string& factorDelimiter
+  = StaticData::Instance().options()->output.factor_delimiter;
   bool firstPass = true;
   unsigned int stop = max_fax();
   for (unsigned int currFactor = 0 ; currFactor < stop; currFactor++) {
