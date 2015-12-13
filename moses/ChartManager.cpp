@@ -34,6 +34,7 @@
 #include "moses/OutputCollector.h"
 #include "moses/ChartKBestExtractor.h"
 #include "moses/HypergraphOutput.h"
+#include "moses/TranslationTask.h"
 
 using namespace std;
 
@@ -52,7 +53,7 @@ ChartManager::ChartManager(ttasksptr const& ttask)
   , m_start(clock())
   , m_hypothesisId(0)
   , m_parser(ttask, m_hypoStackColl)
-  , m_translationOptionList(StaticData::Instance().GetRuleLimit(), m_source)
+  , m_translationOptionList(ttask->options()->syntax.rule_limit, m_source)
 { }
 
 ChartManager::~ChartManager()

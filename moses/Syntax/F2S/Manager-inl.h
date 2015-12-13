@@ -60,9 +60,9 @@ void Manager<RuleMatcher>::Decode()
   const StaticData &staticData = StaticData::Instance();
 
   // Get various pruning-related constants.
-  const std::size_t popLimit = staticData.options()->cube.pop_limit;
-  const std::size_t ruleLimit = staticData.GetRuleLimit();
-  const std::size_t stackLimit = staticData.options()->search.stack_size;
+  const std::size_t popLimit = options()->cube.pop_limit;
+  const std::size_t ruleLimit = options()->syntax.rule_limit;
+  const std::size_t stackLimit = options()->search.stack_size;
 
   // Initialize the stacks.
   InitializeStacks();

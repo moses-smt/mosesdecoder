@@ -104,12 +104,6 @@ protected:
 
   std::string m_outputUnknownsFile; //! output unknowns in this file
 
-  size_t m_ruleLimit;
-
-  // Whether to load compact phrase table and reordering table into memory
-  bool m_minphrMemory;
-  bool m_minlexrMemory;
-
   // Initial = 0 = can be used when creating poss trans
   // Other = 1 = used to calculate LM score once all steps have been processed
   Word m_inputDefaultNonTerminal, m_outputDefaultNonTerminal;
@@ -146,7 +140,6 @@ protected:
 
   void NoCache();
 
-  bool m_continuePartialTranslation;
   std::string m_binPath;
 
   // soft NT lookup for chart models
@@ -252,15 +245,8 @@ public:
     return m_unknownLHS;
   }
 
-  size_t GetRuleLimit() const {
-    return m_ruleLimit;
-  }
   float GetRuleCountThreshold() const {
     return 999999; /* TODO wtf! */
-  }
-
-  bool ContinuePartialTranslation() const {
-    return m_continuePartialTranslation;
   }
 
   void ReLoadBleuScoreFeatureParameter(float weight);
@@ -272,10 +258,6 @@ public:
   int ThreadCount() const {
     return m_threadCount;
   }
-
-  // long GetStartTranslationId() const {
-  //   return m_startTranslationId;
-  // }
 
   void SetExecPath(const std::string &path);
   const std::string &GetBinDirectory() const;

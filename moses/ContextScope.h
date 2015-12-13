@@ -36,7 +36,7 @@ protected:
 #endif
   SPTR<std::map<std::string,float> const> m_context_weights;
 public:
-
+  typedef boost::shared_ptr<ContextScope> ptr;
   template<typename T>
   boost::shared_ptr<void> const&
   set(void const* const key, boost::shared_ptr<T> const& val) {

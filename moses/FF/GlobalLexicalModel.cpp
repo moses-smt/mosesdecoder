@@ -55,7 +55,9 @@ void GlobalLexicalModel::Load(AllOptions::ptr const& opts)
 {
   m_options = opts;
   FactorCollection &factorCollection = FactorCollection::Instance();
-  const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
+  const std::string& oFactorDelimiter = opts->output.factor_delimiter; 
+  const std::string& iFactorDelimiter = opts->input.factor_delimiter; 
+
 
   VERBOSE(2, "Loading global lexical model from file " << m_filePath << endl);
 
@@ -76,21 +78,23 @@ void GlobalLexicalModel::Load(AllOptions::ptr const& opts)
 
     // create the output word
     Word *outWord = new Word();
-    vector<string> factorString = Tokenize( token[0], factorDelimiter );
+    vector<string> factorString = Tokenize( token[0], oFactorDelimiter );
     for (size_t i=0 ; i < m_outputFactorsVec.size() ; i++) {
       const FactorDirection& direction = Output;
       const FactorType& factorType = m_outputFactorsVec[i];
-      const Factor* factor = factorCollection.AddFactor( direction, factorType, factorString[i] );
+      const Factor* factor 
+	= factorCollection.AddFactor( direction, factorType, factorString[i] );
       outWord->SetFactor( factorType, factor );
     }
 
     // create the input word
     Word *inWord = new Word();
-    factorString = Tokenize( token[1], factorDelimiter );
+    factorString = Tokenize( token[1], iFactorDelimiter );
     for (size_t i=0 ; i < m_inputFactorsVec.size() ; i++) {
       const FactorDirection& direction = Input;
       const FactorType& factorType = m_inputFactorsVec[i];
-      const Factor* factor = factorCollection.AddFactor( direction, factorType, factorString[i] );
+      const Factor* factor 
+	= factorCollection.AddFactor( direction, factorType, factorString[i] );
       inWord->SetFactor( factorType, factor );
     }
 

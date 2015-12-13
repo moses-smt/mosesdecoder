@@ -129,18 +129,10 @@ StaticData
 ::ini_output_options()
 {
   const PARAM_VEC *params;
-
   // verbose level
   m_parameter->SetParameter(m_verboseLevel, "verbose", (size_t) 1);
-
-
-
   m_parameter->SetParameter<string>(m_outputUnknownsFile,
                                     "output-unknowns", "");
-
-  // m_parameter->SetParameter<long>(m_startTranslationId,
-  //                                 "start-translation-id", 0);
-
   return true;
 }
 
@@ -207,12 +199,6 @@ bool StaticData::LoadData(Parameter *parameter)
 
   // threading etc.
   if (!ini_performance_options()) return false;
-
-  // Compact phrase table and reordering model
-  // m_parameter->SetParameter(m_minphrMemory, "minphr-memory", false );
-  // m_parameter->SetParameter(m_minlexrMemory, "minlexr-memory", false );
-
-  // S2T decoder
 
   // FEATURE FUNCTION INITIALIZATION HAPPENS HERE ===============================
 
@@ -324,8 +310,6 @@ void StaticData::LoadChartDecodingParameters()
   // source label overlap
   m_parameter->SetParameter(m_sourceLabelOverlap, "source-label-overlap",
                             SourceLabelOverlapAdd);
-  m_parameter->SetParameter(m_ruleLimit, "rule-limit",
-                            DEFAULT_MAX_TRANS_OPT_SIZE);
 
 }
 
@@ -621,7 +605,6 @@ void StaticData::LoadFeatureFunctions()
       m_requireSortingAfterSourceContext = true;
     }
 
-    // if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
     if (dynamic_cast<PhraseDictionary*>(ff)) {
       doLoad = false;
     }
