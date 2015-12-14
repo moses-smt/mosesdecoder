@@ -6,6 +6,7 @@
  */
 #include <boost/foreach.hpp>
 #include <vector>
+#include <sstream>
 #include "Manager.h"
 #include "SearchNormal.h"
 #include "SearchNormalBatch.h"
@@ -89,6 +90,7 @@ void Manager::Decode()
 {
 	Init();
 	m_search->Decode();
+	OutputBest();
 }
 
 void Manager::CalcFutureScore()
@@ -147,8 +149,9 @@ void Manager::CalcFutureScore()
 	  //cerr << *m_estimatedScores << endl;
 }
 
-void Manager::OutputBest(std::ostream &out) const
+void Manager::OutputBest() const
 {
+	stringstream out;
     const Hypothesis *bestHypo = m_search->GetBestHypothesis();
 	if (bestHypo) {
 		if (system.outputHypoScore) {
@@ -161,7 +164,8 @@ void Manager::OutputBest(std::ostream &out) const
 	else {
 		cerr << "NO TRANSLATION";
 	}
-	out << endl;
+
+	system.bestCollector.Write(m_input->GetTranslationId(), out.str());
 	cerr << endl;
 
 

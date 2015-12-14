@@ -18,6 +18,7 @@
 #include "TypeDef.h"
 #include "Search/CubePruning/Misc.h"
 #include "legacy/Bitmaps.h"
+#include "legacy/OutputCollector.h"
 
 namespace Moses2
 {
@@ -38,6 +39,7 @@ public:
     Weights weights;
     std::vector<const PhraseTable*> mappings;
     mutable MemPool systemPool;
+    mutable OutputCollector bestCollector;
 
     // moses.ini params
     size_t stackSize;

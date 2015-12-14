@@ -20,7 +20,6 @@ TranslationTask::~TranslationTask()
 void TranslationTask::Run()
 {
 	m_mgr->Decode();
-	m_mgr->OutputBest(cout);
 }
 
 }

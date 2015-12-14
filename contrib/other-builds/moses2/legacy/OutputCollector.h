@@ -31,7 +31,6 @@
 #include <map>
 #include <ostream>
 #include <string>
-#include "Util.h"
 #include "util/exception.hh"
 
 namespace Moses2

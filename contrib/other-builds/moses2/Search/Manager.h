@@ -27,6 +27,7 @@ class SearchNormal;
 class Search;
 class Hypothesis;
 class Sentence;
+class OutputCollector;
 
 class Manager {
 public:
@@ -63,7 +64,7 @@ public:
 
 	void Decode();
 
-    void OutputBest(std::ostream &out) const;
+    void OutputBest() const;
 
 protected:
 	mutable MemPool *m_pool;
