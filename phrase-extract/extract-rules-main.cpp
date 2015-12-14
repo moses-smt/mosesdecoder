@@ -767,6 +767,15 @@ void ExtractTask::saveHieroPhrase( int startT, int endT, int startS, int endS
     }
   }
 
+  // phrase orientation (lexicalized reordering model)
+  if (m_options.phraseOrientation) {
+    rule.l2rOrientation = m_phraseOrientation.GetOrientationInfo(startS,endS,PhraseOrientation::REO_DIR_L2R);
+    rule.r2lOrientation = m_phraseOrientation.GetOrientationInfo(startS,endS,PhraseOrientation::REO_DIR_R2L);
+    // std::cerr << "span " << startS << " " << endS << std::endl;
+    // std::cerr << "phraseOrientationL2R " << m_phraseOrientation.GetOrientationInfo(startS,endS,PhraseOrientation::REO_DIR_L2R) << std::endl;
+    // std::cerr << "phraseOrientationR2L " << m_phraseOrientation.GetOrientationInfo(startS,endS,PhraseOrientation::REO_DIR_R2L) << std::endl;
+  }
+
   addRuleToCollection( rule );
 }
 
