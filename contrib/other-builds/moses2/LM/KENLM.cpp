@@ -208,6 +208,9 @@ private:
 
 void KENLM::EvaluateWhenAppliedBatched(Hypothesis **begin, Hypothesis **end, const Manager &mgr) const
 {
+#if 0
+  // prefetching
+
   Hypothesis **i;
 
   // construct if necessary
@@ -220,6 +223,12 @@ void KENLM::EvaluateWhenAppliedBatched(Hypothesis **begin, Hypothesis **end, con
   }
   // finish work
   m_prefetchQueue->Drain(mgr);
+#else
+  // no prefetching
+  Hypothesis **i;
+  for(i = begin; i != end; ++i)
+    (*i)->EvaluateWhenApplied(*this);
+#endif
 }
 
 
