@@ -52,6 +52,7 @@ int main(int argc, char** argv)
 
 		pool.Submit(task);
 		//task->Run();
+		++translationId;
 	}
 
 	pool.Stop(true);
