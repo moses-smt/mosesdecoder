@@ -64,10 +64,20 @@ Run()
   // settings within the session scope
   param_t::const_iterator si = params.find("context-weights");
   if (si != params.end()){
-    std::string _cw = xmlrpc_c::value_string(si->second);
-    XVERBOSE(1,"context_weights:|" << _cw << "|" << endl);
+    xmlrpc_c::value parValue = si->second;
+    typedef std::map<std::string,xmlrpc_c::value> tmap;
+    tmap const tmp = static_cast<tmap>(xmlrpc_c::value_struct(parValue));
+    typedef std::map<std::string,float> weightmap_t;
+    weightmap_t* _cwm = new weightmap_t;
+    XVERBOSE(1," reading context-weight map" << endl);
+    for(tmap::const_iterator m = tmp.begin(); m != tmp.end(); ++m) {
+      std::string _key = m->first;
+      double _val = (double) xmlrpc_c::value_double(m->second);
+      XVERBOSE(1,"  |" << _key << "| = " << _val << endl);
+      (*_cwm)[_key] = _val;
+    }
     XVERBOSE(1,"before calling SetContextWeights" << endl);
-    m_scope->SetContextWeights(_cw);
+    m_scope->SetContextWeights(*_cwm);
     XVERBOSE(1,"after calling SetContextWeights" << endl);
   }
 
