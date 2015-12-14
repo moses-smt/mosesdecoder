@@ -30,6 +30,7 @@ Manager::Manager(System &sys, const TranslationTask &task, const std::string &in
 ,task(task)
 ,m_inputStr(inputStr)
 ,m_initRange(NOT_FOUND, NOT_FOUND)
+,m_translationId(translationId)
 {}
 
 Manager::~Manager() {
