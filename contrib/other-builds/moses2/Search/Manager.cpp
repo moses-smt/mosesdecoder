@@ -165,6 +165,7 @@ void Manager::OutputBest() const
 	else {
 		cerr << "NO TRANSLATION";
 	}
+	out << "\n";
 
 	system.bestCollector.Write(m_input->GetTranslationId(), out.str());
 	cerr << endl;
