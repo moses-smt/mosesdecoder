@@ -32,15 +32,28 @@ void CopyRemainingHistory(const WordIndex *from, State &out_state);
 template <class Search, class VocabularyT>
 class PrefetchLookup {
 public:
-  PrefetchLookup(const VocabularyT &vocab, const Search &search, unsigned char order): vocab_(vocab), search_(search), order_(order) {
+  // dummy, do not use if you can help it.
+  PrefetchLookup(): vocab_(NULL), search_(NULL), order_(0) { }
+
+  PrefetchLookup(const VocabularyT *vocab, const Search *search, unsigned char order): vocab_(vocab), search_(search), order_(order) {
     in_state.length = 0;
   }
 
   /**
+   * Single-time call constructor replacement.
+   */
+  void Construct(const VocabularyT *vocab, const Search *search, unsigned char order) {
+    vocab_ = vocab;
+    search_ = search;
+    order_ = order;
+  }
+
+  /**
    * Prepare for the PrefetchLookup of a single n-gram continuing in_state with new_word.
+   * in_state may be our previous out_state, since it is copied.
    */
   void Init(const State& in_state, const WordIndex new_word) {
-    this->in_state = in_state;
+    this->in_state = in_state; // copy
     Init(this->in_state.words, this->in_state.words + this->in_state.length, new_word);
   }
 
@@ -54,11 +67,11 @@ public:
     this->context_rend = context_rend;
     this->node = typename Search::Node();
 
-    assert(new_word < vocab_.Bound());
+    assert(new_word < vocab_->Bound());
     // ret.ngram_length contains the last known non-blank ngram length.
     ret.ngram_length = 1;
 
-    typename Search::UnigramPointer uni(search_.LookupUnigram(new_word, node, ret.independent_left, ret.extend_left));
+    typename Search::UnigramPointer uni(search_->LookupUnigram(new_word, node, ret.independent_left, ret.extend_left));
     out_state.backoff[0] = uni.Backoff();
     ret.prob = uni.Prob();
     ret.rest = uni.Rest();
@@ -76,12 +89,12 @@ public:
       return;
 
     // prefetch
-    it = search_.MiddleAdvance(order_minus_2, *hist_iter, node);
+    it = search_->MiddleAdvance(order_minus_2, *hist_iter, node);
     __builtin_prefetch(it, 0, 0);
 
     if(Order() == 2) {
       // in this case, instead of address calculation in RunState()
-      itl = search_.LongestAdvance(*hist_iter, node);
+      itl = search_->LongestAdvance(*hist_iter, node);
       __builtin_prefetch(itl, 0, 0);
     }
   }
@@ -95,7 +108,7 @@ public:
       return Final();
     }
 
-    typename Search::MiddlePointer pointer(search_.LookupMiddleFromIterator(order_minus_2, node, ret.independent_left, ret.extend_left, it));
+    typename Search::MiddlePointer pointer(search_->LookupMiddleFromIterator(order_minus_2, node, ret.independent_left, ret.extend_left, it));
     if (!pointer.Found()) return Final();
     *backoff_out = pointer.Backoff();
     ret.prob = pointer.Prob();
@@ -110,10 +123,10 @@ public:
     // prefetch
     if (hist_iter != context_rend) {
       if (order_minus_2 != Order() - 2) {
-        it = search_.MiddleAdvance(order_minus_2, *hist_iter, node);
+        it = search_->MiddleAdvance(order_minus_2, *hist_iter, node);
         __builtin_prefetch(it, 0, 0);
       } else {
-        itl = search_.LongestAdvance(*hist_iter, node);
+        itl = search_->LongestAdvance(*hist_iter, node);
         __builtin_prefetch(itl, 0, 0);
       }
     }
@@ -137,12 +150,12 @@ public:
     return ret_full;
   }
 
-private:
   unsigned char Order() { return order_; }
 
+private:
   void Longest() {
     ret.independent_left = true;
-    typename Search::LongestPointer longest(search_.LookupLongestFromIterator(node, itl));
+    typename Search::LongestPointer longest(search_->LookupLongestFromIterator(node, itl));
     if (longest.Found()) {
       ret.prob = longest.Prob();
       ret.rest = ret.prob;
@@ -153,6 +166,7 @@ private:
 
   bool Final() {
     CopyRemainingHistory(context_rbegin, out_state);
+    in_state.length = 0;
     return false;
   }
 
@@ -171,8 +185,8 @@ private:
   State out_state;
 
   // from GenericModel
-  const VocabularyT &vocab_;
-  const Search &search_;
+  const VocabularyT *vocab_;
+  const Search *search_;
   unsigned char order_;
 };
 
