@@ -120,8 +120,8 @@ function run_single_test () {
   echo "## test build with different configurations" >> $longlog
   for configArgs in "${ALTERNATIVE_CONFIGURE_ARGS[@]}"
   do
-   echo "building with args: $configArgs"
-   ./bjam clean $configArgs &>> $longlog
+   echo "building with args: $configArgs" >> $longlog
+   ./bjam clean $configArgs >> $longlog
   done
 
   echo "## ./bjam clean" >> $longlog
