@@ -84,6 +84,9 @@ protected:
   // Dependency relations that are considered by this feature
   std::set<std::string> m_allowedLabels;
 
+  // If the rule table is binarized then unbinarize each hypothesis before extracting the head words
+  bool m_unbinarize;
+
   // todo: initalize
   std::shared_ptr<std::unordered_map<std::string, std::string>> m_lemmaMap;
 

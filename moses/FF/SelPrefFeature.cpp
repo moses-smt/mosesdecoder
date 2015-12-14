@@ -45,6 +45,7 @@ SCORE: -5.016 -19304.324
 [^root [dep [VBD met] [nsubj [NNP Tokyo] [^nsubj [NN sich] [prep [IN into] [pobj [det [DT the]]...
 	 */
 	, m_allowedLabels{"nsubj","nsbujpass", "dobj", "iobj", "prep"}//,"^nsubj","^nsbujpass", "^dobj", "^iobj", "^prep"}
+	, m_unbinarize(false)
 	, m_lemmaMap(nullptr)
    {
 
@@ -54,10 +55,11 @@ SCORE: -5.016 -19304.324
 void SelPrefFeature::SetParameter(const std::string& key, const std::string& value){
 	if(key=="modelFileARPA"){
 		m_modelFileARPA = value;
-	}
-
-	if(key == "lemmaFile"){
+	} else if(key == "lemmaFile"){
 		m_lemmaFile = value;
+	} else if (key == "unbinarize"){
+		if (value == "true")
+			m_unbinarize = true;
 	}
 
 /*	else{
@@ -480,8 +482,8 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 		  }
 		}
 
-
-		UnbinarizeTree(mytree);
+		if(m_unbinarize)
+			UnbinarizeTree(mytree);
 
 		// find head word for the root of the current hypothesis and the head words for the internal non-terminals
 		size_t childId = 0;
