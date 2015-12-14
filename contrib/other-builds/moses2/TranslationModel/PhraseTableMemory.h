@@ -13,6 +13,10 @@
 class PhraseTableMemory : public PhraseTable
 {
 //////////////////////////////////////
+
+  /**
+   * Implements a linked list of source words in a hash table.
+   */
 	class Node
 	{
 	public:

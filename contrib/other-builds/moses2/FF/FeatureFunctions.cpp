@@ -52,13 +52,14 @@ void FeatureFunctions::Create()
 	  m_featureFunctions.push_back(ff);
 
 		BatchedFeatureFunction *bff = dynamic_cast<BatchedFeatureFunction*>(ff);
+		StatefulFeatureFunction *sfff = dynamic_cast<StatefulFeatureFunction*>(ff);
 		if (bff) {
 			m_batchedFeatureFunctions.push_back(bff);
-		} else {
-			m_nonBatchedFeatureFunctions.push_back(bff);
+		} else if(sfff) {
+			m_nonBatchedFeatureFunctions.push_back(sfff);
 		}
 
-	  StatefulFeatureFunction *sfff = dynamic_cast<StatefulFeatureFunction*>(ff);
+		// batched is stateful as well
 	  if (sfff) {
 		  sfff->SetStatefulInd(m_statefulFeatureFunctions.size());
 		  m_statefulFeatureFunctions.push_back(sfff);

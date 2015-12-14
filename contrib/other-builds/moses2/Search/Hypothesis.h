@@ -60,6 +60,9 @@ public:
   const Scores &GetScores() const
   { return *m_scores; }
 
+  Scores &GetScores()
+  { return *m_scores; }
+
   SCORE GetFutureScore() const
   { return GetScores().GetTotalScore() + m_estimatedScore; }
 
@@ -68,6 +71,14 @@ public:
 
   const FFState *GetState(size_t ind) const
   { return m_ffStates[ind]; }
+
+  FFState *GetState(size_t ind)
+  { return m_ffStates[ind]; }
+
+  /*
+  void SetState(size_t ind, FFState *state)
+  { m_ffStates[ind] = state; }
+   */
 
   void OutputToStream(std::ostream &out) const;
 
@@ -82,6 +93,10 @@ public:
 
   const Hypothesis* GetPrevHypo() const
   { return m_prevHypo; }
+
+  // TODO ugly
+  Hypothesis* GetPrevHypo()
+  { return const_cast<Hypothesis*>(m_prevHypo); }
 
   /** curr - pos is relative from CURRENT hypothesis's starting index
    * (ie, start of sentence would be some negative number, which is

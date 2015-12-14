@@ -170,7 +170,7 @@ void SearchNormal::Extend(const Hypothesis &hypo,
   // evaluate batched (stateful) feature functions
   const std::vector<const BatchedFeatureFunction*>  &bffs = m_mgr.system.featureFunctions.GetBatchedFeatureFunctions();
   BOOST_FOREACH(const BatchedFeatureFunction *bff, bffs) {
-    bff->EvaluateWhenAppliedBatched(arr, arr + numHypos);
+    bff->EvaluateWhenAppliedBatched(arr, arr + numHypos, m_mgr);
   }
 
   // evaluate stateful feature functions

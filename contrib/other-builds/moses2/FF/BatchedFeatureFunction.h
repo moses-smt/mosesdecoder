@@ -20,7 +20,7 @@ public:
   /**
    * Evaluate a batch of Hypotheses in one go.
    */
-  virtual void EvaluateWhenAppliedBatched(Hypothesis **begin, Hypothesis **end) const = 0;
+  virtual void EvaluateWhenAppliedBatched(Hypothesis **begin, Hypothesis **end, const Manager &mgr) const = 0;
 
   virtual ~BatchedFeatureFunction() {}
 };
