@@ -121,7 +121,7 @@ function run_single_test () {
   for configArgs in "${ALTERNATIVE_CONFIGURE_ARGS[@]}"
   do
    echo "building with args: $configArgs" >> $longlog
-   ./bjam clean -a $configArgs >> $longlog
+   ./bjam clean -a $configArgs >> $longlog 2>&1 || warn "bjam clean failed, suspicious"
   done
 
   echo "## ./bjam clean" >> $longlog
