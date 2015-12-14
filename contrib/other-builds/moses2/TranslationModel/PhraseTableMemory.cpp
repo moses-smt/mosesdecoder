@@ -105,7 +105,7 @@ void PhraseTableMemory::Load(System &system)
 	string line;
 	while (getline(strme, line)) {
 		if (++lineNum % 100000) {
-			cerr << lineNum << " ";
+			//cerr << lineNum << " ";
 		}
 		toks.clear();
 		TokenizeMultiCharSeparator(toks, line, "|||");
