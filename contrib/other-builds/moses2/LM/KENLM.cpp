@@ -98,7 +98,8 @@ struct PrefetchQueueEntry {
     // prepare lookup of first word
     position = begin;
     finished = false;
-    lookup.Init(in_state, m_kenlm->TranslateID(hypo->GetWord(position++)));
+    score = 0.0;
+    lookup.Init(in_state, m_kenlm->TranslateID(hypo->GetWord(position)));
   }
 
   bool Finished() {
@@ -117,7 +118,7 @@ struct PrefetchQueueEntry {
     // have result of lookup for word
     score += lookup.FullScore().prob;
 
-    if(position == adjust_end) {
+    if(++position == adjust_end) {
       // not the nicest way of setting state...
       static_cast<KenLMState *>(hypo->GetState(m_statefulInd))->state = lookup.GetOutState();
       // set score, and potentially state as well.
@@ -127,7 +128,7 @@ struct PrefetchQueueEntry {
     }
 
     // init for next word
-    lookup.Init(lookup.GetOutState(), m_kenlm->TranslateID(hypo->GetWord(position++)));
+    lookup.Init(lookup.GetOutState(), m_kenlm->TranslateID(hypo->GetWord(position)));
     return true;
   }
 };
@@ -138,13 +139,21 @@ struct PrefetchQueueEntry {
 template<unsigned PrefetchSize>
 class PrefetchQueue {
 public:
-  PrefetchQueue(lm::ngram::ProbingModel &model, const KENLM &kenlm): m_cur(0), m_model(model) {
-    // I avoid constructor and operator= here since this is going to happen very often.
+  PrefetchQueue(lm::ngram::ProbingModel &model, const KENLM &kenlm): m_cur(0), m_model(model), m_kenlm(kenlm), m_constructed(false) {
+  }
+
+  void Construct() {
+    if(m_constructed)
+      return;
+
+    // has to be later than constructor, to have the proper kenlm m_statefulInd
     for(PrefetchQueueEntry *i = m_entries; i != m_entries + PrefetchSize; i++)
-      i->Construct(model, kenlm);
+      i->Construct(m_model, m_kenlm);
+    m_constructed = true;
   }
 
   void Add(Hypothesis *hypo) {
+    assert(m_constructed);
     // can only add entries when there is space
     assert(Cur().Finished());
 
@@ -154,6 +163,8 @@ public:
 
   /** Keep calling this until it returns false, then you can add another entry. */
   bool RunState(const Manager &mgr) {
+    assert(m_constructed);
+
     // empty slot?
     if(Cur().Finished())
       return false;
@@ -167,11 +178,13 @@ public:
 
   /** Finish processing. */
   void Drain(const Manager &mgr) {
+    assert(m_constructed);
+
     bool anyBusy = true;
     while(anyBusy) {
       anyBusy = false;
       for(PrefetchQueueEntry *i = m_entries; i != m_entries + PrefetchSize; i++)
-        anyBusy = anyBusy || i->RunState(mgr);
+        anyBusy = i->RunState(mgr) || anyBusy; // note: order matters here, to do round-robin properly
     }
   }
 
@@ -188,12 +201,18 @@ private:
   PrefetchQueueEntry m_entries[PrefetchSize];
   std::size_t m_cur;
 
-  const lm::ngram::ProbingModel &m_model;
+  lm::ngram::ProbingModel &m_model;
+  const KENLM &m_kenlm;
+  bool m_constructed;
 };
 
 void KENLM::EvaluateWhenAppliedBatched(Hypothesis **begin, Hypothesis **end, const Manager &mgr) const
 {
   Hypothesis **i;
+
+  // construct if necessary
+  m_prefetchQueue->Construct();
+
   for(i = begin; i != end; ++i) {
     // work queue to make space
     while(m_prefetchQueue->RunState(mgr));
