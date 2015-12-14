@@ -84,9 +84,9 @@ public:
   void
   Load(std::string filePath);
 
-  static void 
+  static void
   SetStaticDefaultParameters(Parameter const& param);
-  
+
 };
 
 }

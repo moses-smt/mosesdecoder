@@ -237,7 +237,10 @@ void ChartParser::CreateInputPaths(const InputType &input)
   m_inputPathMatrix.resize(size);
 
   UTIL_THROW_IF2(input.GetType() != SentenceInput && input.GetType() != TreeInputType,
-                 "Input must be a sentence or a tree, not lattice or confusion networks");
+                 "Input must be a sentence or a tree, " <<
+                 "not lattice or confusion networks");
+
+  TranslationTask const* ttask = m_ttask.lock().get();
   for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
     for (size_t startPos = 0; startPos < size - phaseSize + 1; ++startPos) {
       size_t endPos = startPos + phaseSize -1;
@@ -249,11 +252,11 @@ void ChartParser::CreateInputPaths(const InputType &input)
 
       InputPath *node;
       if (range.GetNumWordsCovered() == 1) {
-        node = new InputPath(m_ttask, subphrase, labels, range, NULL, NULL);
+        node = new InputPath(ttask, subphrase, labels, range, NULL, NULL);
         vec.push_back(node);
       } else {
         const InputPath &prevNode = GetInputPath(startPos, endPos - 1);
-        node = new InputPath(m_ttask, subphrase, labels, range, &prevNode, NULL);
+        node = new InputPath(ttask, subphrase, labels, range, &prevNode, NULL);
         vec.push_back(node);
       }
 

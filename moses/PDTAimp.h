@@ -116,6 +116,7 @@ public:
 
   void CreateTargetPhrase(TargetPhrase& targetPhrase,
                           StringTgtCand::Tokens const& factorStrings,
+                          std::string const& factorDelimiter,
                           Scores const& transVector,
                           Scores const& inputVector,
                           const std::string *alignmentString,

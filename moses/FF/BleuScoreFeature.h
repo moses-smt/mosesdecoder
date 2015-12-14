@@ -144,7 +144,7 @@ public:
     return m_avg_input_length;
   }
 
-  void Load(AllOptions::ptr const& opts); 
+  void Load(AllOptions::ptr const& opts);
 
 private:
   static std::vector<BleuScoreFeature*> s_staticColl;

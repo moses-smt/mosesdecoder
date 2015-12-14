@@ -53,7 +53,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef HAVE_CMPH
 #include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
 #endif
-#if !defined WIN32 || defined __MINGW32__ || defined HAVE_CMPH
+#if defined HAVE_CMPH
 #include "moses/TranslationModel/CompactPT/LexicalReorderingTableCompact.h"
 #endif
 
@@ -127,18 +127,10 @@ StaticData
 ::ini_output_options()
 {
   const PARAM_VEC *params;
-
   // verbose level
   m_parameter->SetParameter(m_verboseLevel, "verbose", (size_t) 1);
-
-
-
   m_parameter->SetParameter<string>(m_outputUnknownsFile,
                                     "output-unknowns", "");
-
-  // m_parameter->SetParameter<long>(m_startTranslationId,
-  //                                 "start-translation-id", 0);
-
   return true;
 }
 
@@ -206,16 +198,10 @@ bool StaticData::LoadData(Parameter *parameter)
   // threading etc.
   if (!ini_performance_options()) return false;
 
-  // Compact phrase table and reordering model
-  // m_parameter->SetParameter(m_minphrMemory, "minphr-memory", false );
-  // m_parameter->SetParameter(m_minlexrMemory, "minlexr-memory", false );
-
-  // S2T decoder
-
   // FEATURE FUNCTION INITIALIZATION HAPPENS HERE ===============================
 
   // set class-specific default parameters
-#if !defined WIN32 || defined __MINGW32__ || defined HAVE_CMPH
+#if defined HAVE_CMPH
   LexicalReorderingTableCompact::SetStaticDefaultParameters(*parameter);
   PhraseDictionaryCompact::SetStaticDefaultParameters(*parameter);
 #endif
@@ -322,8 +308,6 @@ void StaticData::LoadChartDecodingParameters()
   // source label overlap
   m_parameter->SetParameter(m_sourceLabelOverlap, "source-label-overlap",
                             SourceLabelOverlapAdd);
-  m_parameter->SetParameter(m_ruleLimit, "rule-limit",
-                            DEFAULT_MAX_TRANS_OPT_SIZE);
 
 }
 
@@ -438,7 +422,7 @@ LoadDecodeGraphsOld(const vector<string> &mappingVector,
     UTIL_THROW_IF2(decodeStep == NULL, "Null decode step");
     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
       DecodeGraph *decodeGraph;
-      if (is_syntax(m_options->search.algo)) { 
+      if (is_syntax(m_options->search.algo)) {
         size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
         VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
         decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
@@ -506,7 +490,7 @@ void StaticData::LoadDecodeGraphsNew(const std::vector<std::string> &mappingVect
     UTIL_THROW_IF2(decodeStep == NULL, "Null decode step");
     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
       DecodeGraph *decodeGraph;
-      if (is_syntax(m_options->search.algo)) { 
+      if (is_syntax(m_options->search.algo)) {
         size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
         VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
         decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
@@ -619,7 +603,6 @@ void StaticData::LoadFeatureFunctions()
       m_requireSortingAfterSourceContext = true;
     }
 
-    // if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
     if (dynamic_cast<PhraseDictionary*>(ff)) {
       doLoad = false;
     }

@@ -35,14 +35,14 @@ namespace Moses
 /** constructor; just initialize the base class */
 TranslationOptionCollectionText::
 TranslationOptionCollectionText(ttasksptr const& ttask, Sentence const &input)
-  //, size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
+//, size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
   : TranslationOptionCollection(ttask,input)
-    // , maxNoTransOptPerCoverage, translationOptionThreshold)
+  // , maxNoTransOptPerCoverage, translationOptionThreshold)
 {
   size_t maxNoTransOptPerCoverage
-    = ttask->options()->search.max_trans_opt_per_cov;
+  = ttask->options()->search.max_trans_opt_per_cov;
   float translationOptionThreshold
-    = ttask->options()->search.trans_opt_threshold;
+  = ttask->options()->search.trans_opt_threshold;
   size_t size = input.GetSize();
   m_inputPathMatrix.resize(size);
   for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
@@ -56,11 +56,11 @@ TranslationOptionCollectionText(ttasksptr const& ttask, Sentence const &input)
 
       InputPath *path;
       if (range.GetNumWordsCovered() == 1) {
-        path = new InputPath(ttask, subphrase, labels, range, NULL, NULL);
+        path = new InputPath(ttask.get(), subphrase, labels, range, NULL, NULL);
         vec.push_back(path);
       } else {
         const InputPath &prevPath = GetInputPath(startPos, endPos - 1);
-        path = new InputPath(ttask, subphrase, labels, range, &prevPath, NULL);
+        path = new InputPath(ttask.get(), subphrase, labels, range, &prevPath, NULL);
         vec.push_back(path);
       }
 

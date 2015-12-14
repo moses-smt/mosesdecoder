@@ -77,7 +77,7 @@ void ProbingPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQue
     InputPath &inputPath = **iter;
     const Phrase &sourcePhrase = inputPath.GetPhrase();
 
-    if (sourcePhrase.GetSize() > StaticData::Instance().options()->search.max_phrase_length) {
+    if (sourcePhrase.GetSize() > m_options->search.max_phrase_length) {
       continue;
     }
 

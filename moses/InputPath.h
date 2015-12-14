@@ -40,7 +40,8 @@ public:
   TargetPhrases;
 
 public:
-  ttaskwptr const ttask;
+  // ttaskwptr const ttask;
+  TranslationTask const* ttask;
 protected:
   const InputPath *m_prevPath;
   Phrase m_phrase;
@@ -65,7 +66,7 @@ public:
     , m_nextNode(NOT_FOUND) {
   }
 
-  InputPath(ttaskwptr const ttask,
+  InputPath(TranslationTask const* ttask, // ttaskwptr const ttask,
             Phrase const& phrase,
             NonTerminalSet const& sourceNonTerms,
             Range const& range,

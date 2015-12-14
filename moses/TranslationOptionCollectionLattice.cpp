@@ -22,9 +22,9 @@ namespace Moses
 TranslationOptionCollectionLattice
 ::TranslationOptionCollectionLattice
 ( ttasksptr const& ttask,   const WordLattice &input)
-  // , size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
+// , size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
   : TranslationOptionCollection(ttask, input)//
-    // , maxNoTransOptPerCoverage, translationOptionThreshold)
+  // , maxNoTransOptPerCoverage, translationOptionThreshold)
 {
   UTIL_THROW_IF2(StaticData::Instance().GetUseLegacyPT(),
                  "Not for models using the legqacy binary phrase table");
@@ -65,7 +65,7 @@ TranslationOptionCollectionLattice
       ScorePair *inputScore = new ScorePair(scores);
 
       InputPath *path
-      = new InputPath(ttask, subphrase, labels, range, NULL, inputScore);
+      = new InputPath(ttask.get(), subphrase, labels, range, NULL, inputScore);
 
       path->SetNextNode(nextNode);
       m_inputPathQueue.push_back(path);

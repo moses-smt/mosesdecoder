@@ -70,8 +70,8 @@ void PhraseDictionaryCompact::Load(AllOptions::ptr const& opts)
   if (!FileExists(tFilePath))
     throw runtime_error("Error: File " + tFilePath + " does not exist.");
 
-  m_phraseDecoder 
-    = new PhraseDecoder(*this, &m_input, &m_output, m_numScoreComponents);
+  m_phraseDecoder
+  = new PhraseDecoder(*this, &m_input, &m_output, m_numScoreComponents);
 
   std::FILE* pFile = std::fopen(tFilePath.c_str() , "r");
 
@@ -155,7 +155,7 @@ PhraseDictionaryCompact::
     delete m_phraseDecoder;
 }
 
-void 
+void
 PhraseDictionaryCompact::
 CacheForCleanup(TargetPhraseCollection::shared_ptr  tpc)
 {
@@ -164,12 +164,12 @@ CacheForCleanup(TargetPhraseCollection::shared_ptr  tpc)
   m_sentenceCache->push_back(tpc);
 }
 
-void 
+void
 PhraseDictionaryCompact::
-AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase) 
+AddEquivPhrase(const Phrase &source, const TargetPhrase &targetPhrase)
 { }
 
-void 
+void
 PhraseDictionaryCompact::
 CleanUpAfterSentenceProcessing(const InputType &source)
 {

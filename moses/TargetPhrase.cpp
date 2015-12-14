@@ -53,7 +53,6 @@ TargetPhrase::TargetPhrase( std::string out_string, const PhraseDictionary *pt)
   const StaticData &staticData = StaticData::Instance();
   // XXX should this really be InputFactorOrder???
   CreateFromString(Output, staticData.options()->input.factor_order, out_string,
-                   // staticData.GetFactorDelimiter(), // eliminated [UG]
                    NULL);
 }
 

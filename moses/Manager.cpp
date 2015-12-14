@@ -1699,7 +1699,7 @@ OutputSurface(std::ostream &out, Hypothesis const& edge, bool const recursive) c
   }
 
   bool markUnknown = options()->unk.mark;
-  std::string const& fd = options()->output.FactorDelimiter;
+  std::string const& fd = options()->output.factor_delimiter;
 
   TargetPhrase const& phrase = edge.GetCurrTargetPhrase();
   size_t size = phrase.GetSize();
