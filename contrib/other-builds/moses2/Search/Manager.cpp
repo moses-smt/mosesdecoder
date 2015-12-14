@@ -17,7 +17,6 @@
 #include "../InputPath.h"
 #include "../TranslationModel/PhraseTable.h"
 #include "../legacy/Range.h"
-#include "../legacy/Timer.h"
 
 using namespace std;
 
@@ -90,9 +89,6 @@ void Manager::Decode()
 {
 	Init();
 
-	Moses2::Timer timer;
-	timer.start();
-
 	const Bitmap &initBitmap = m_bitmaps->GetInitialBitmap();
 	Hypothesis *initHypo = Hypothesis::Create(*this);
 	initHypo->Init(*m_initPhrase, m_initRange, initBitmap);
@@ -104,9 +100,6 @@ void Manager::Decode()
 	for (size_t i = 0; i < m_stacks.GetSize() - 1; ++i) {
 		m_search->Decode(i);
 	}
-
-	timer.stop();
-	std::cerr << "decoding_time " << timer.get_elapsed_time() << std::endl;
 }
 
 void Manager::CalcFutureScore()
