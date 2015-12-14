@@ -212,7 +212,6 @@ phrase-extract//extract-mixed-syntax
 biconcor 
 mira//mira 
 contrib/server//mosesserver 
-contrib/bleu-champ//programs 
 contrib/word2vec//word2vec 
 mm
 ;
