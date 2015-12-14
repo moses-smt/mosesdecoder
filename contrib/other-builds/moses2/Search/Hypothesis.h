@@ -23,6 +23,7 @@ class PhraseImpl;
 class TargetPhrase;
 class Scores;
 class StatefulFeatureFunction;
+class InputType;
 
 class Hypothesis {
 	  friend std::ostream& operator<<(std::ostream &, const Hypothesis &);
@@ -74,7 +75,7 @@ public:
 
   void OutputToStream(std::ostream &out) const;
 
-  void EmptyHypothesisState(const PhraseImpl &input);
+  void EmptyHypothesisState(const InputType &input);
 
   void EvaluateWhenApplied();
   void EvaluateWhenApplied(const StatefulFeatureFunction &sfff);

@@ -12,7 +12,7 @@ class TranslationTask : public Task
 {
 public:
 
-	TranslationTask(System &system, const std::string &line);
+	TranslationTask(System &system, const std::string &line, long translationId);
 	virtual ~TranslationTask();
 	virtual void Run();
 

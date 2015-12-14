@@ -62,13 +62,13 @@ Distortion::~Distortion() {
 	// TODO Auto-generated destructor stub
 }
 
-FFState* Distortion::BlankState(const Manager &mgr, const PhraseImpl &input) const
+FFState* Distortion::BlankState(const Manager &mgr, const InputType &input) const
 {
   MemPool &pool = mgr.GetPool();
   return new (pool.Allocate<DistortionState_traditional>()) DistortionState_traditional();
 }
 
-void Distortion::EmptyHypothesisState(FFState &state, const Manager &mgr, const PhraseImpl &input) const
+void Distortion::EmptyHypothesisState(FFState &state, const Manager &mgr, const InputType &input) const
 {
     DistortionState_traditional &stateCast = static_cast<DistortionState_traditional&>(state);
 

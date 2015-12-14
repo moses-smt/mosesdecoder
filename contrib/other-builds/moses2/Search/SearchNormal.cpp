@@ -14,6 +14,7 @@
 #include "../TargetPhrases.h"
 #include "../TargetPhrase.h"
 #include "../System.h"
+#include "../Sentence.h"
 
 using namespace std;
 

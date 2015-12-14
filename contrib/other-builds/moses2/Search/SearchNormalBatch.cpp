@@ -15,6 +15,7 @@
 #include "../TargetPhrases.h"
 #include "../TargetPhrase.h"
 #include "../System.h"
+#include "../Sentence.h"
 #include "../FF/StatefulFeatureFunction.h"
 
 using namespace std;
@@ -36,6 +37,7 @@ SearchNormalBatch::~SearchNormalBatch() {
 
 void SearchNormalBatch::Decode()
 {
+
 	// init stacks
 	m_stacks.Init(m_mgr.GetInput().GetSize() + 1);
 

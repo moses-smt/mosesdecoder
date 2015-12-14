@@ -11,6 +11,7 @@
 #include "../../InputPaths.h"
 #include "../../InputPath.h"
 #include "../../System.h"
+#include "../../Sentence.h"
 #include "../../TranslationTask.h"
 #include "../../legacy/Util2.h"
 

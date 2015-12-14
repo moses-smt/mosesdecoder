@@ -126,13 +126,13 @@ void LanguageModel::SetParameter(const std::string& key, const std::string& valu
   }
 }
 
-FFState* LanguageModel::BlankState(const Manager &mgr, const PhraseImpl &input) const
+FFState* LanguageModel::BlankState(const Manager &mgr, const InputType &input) const
 {
 	MemPool &pool = mgr.GetPool();
 	return new (pool.Allocate<LMState>()) LMState();
 }
 
-void LanguageModel::EmptyHypothesisState(FFState &state, const Manager &mgr, const PhraseImpl &input) const
+void LanguageModel::EmptyHypothesisState(FFState &state, const Manager &mgr, const InputType &input) const
 {
 	LMState &stateCast = static_cast<LMState&>(state);
 

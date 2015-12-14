@@ -119,7 +119,7 @@ void KENLM::SetParameter(const std::string& key, const std::string& value)
   }
 }
 
-FFState* KENLM::BlankState(const Manager &mgr, const PhraseImpl &input) const
+FFState* KENLM::BlankState(const Manager &mgr, const InputType &input) const
 {
   MemPool &pool = mgr.GetPool();
   KenLMState *ret = new (pool.Allocate<KenLMState>()) KenLMState();
@@ -127,7 +127,7 @@ FFState* KENLM::BlankState(const Manager &mgr, const PhraseImpl &input) const
 }
 
 //! return the state associated with the empty hypothesis for a given sentence
-void KENLM::EmptyHypothesisState(FFState &state, const Manager &mgr, const PhraseImpl &input) const
+void KENLM::EmptyHypothesisState(FFState &state, const Manager &mgr, const InputType &input) const
 {
   KenLMState &stateCast = static_cast<KenLMState&>(state);
   stateCast.state = m_ngram->BeginSentenceState();

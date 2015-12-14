@@ -14,9 +14,11 @@ external-lib boost_serialization ;
  exe moses2 :
  	 InputPath.cpp 
  	 InputPaths.cpp
+   InputType.cpp
  	 Main.cpp 
  	 MemPool.cpp
    Phrase.cpp 
+   Sentence.cpp
    Scores.cpp 
  	 System.cpp 
    TargetPhrase.cpp 

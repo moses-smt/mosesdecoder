@@ -19,8 +19,8 @@ public:
 	SkeletonStatefulFF(size_t startInd, const std::string &line);
 	virtual ~SkeletonStatefulFF();
 
-  virtual FFState* BlankState(const Manager &mgr, const PhraseImpl &input) const;
-  virtual void EmptyHypothesisState(FFState &state, const Manager &mgr, const PhraseImpl &input) const;
+  virtual FFState* BlankState(const Manager &mgr, const InputType &input) const;
+  virtual void EmptyHypothesisState(FFState &state, const Manager &mgr, const InputType &input) const;
 
   virtual void
   EvaluateInIsolation(const System &system,

@@ -201,13 +201,13 @@ void LanguageModelDALM::SetParameter(const std::string& key, const std::string& 
   m_ContextSize = m_nGramOrder-1;
 }
 
-FFState* LanguageModelDALM::BlankState(const Manager &mgr, const PhraseImpl &input) const
+FFState* LanguageModelDALM::BlankState(const Manager &mgr, const InputType &input) const
 {
 	DALMState *state = new DALMState();
 	return state;
 }
 
-void LanguageModelDALM::EmptyHypothesisState(FFState &state, const Manager &mgr, const PhraseImpl &input) const
+void LanguageModelDALM::EmptyHypothesisState(FFState &state, const Manager &mgr, const InputType &input) const
 {
   DALMState &dalmState = static_cast<DALMState&>(state);
   m_lm->init_state(dalmState.get_state());

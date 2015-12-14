@@ -26,13 +26,14 @@ class PhraseImpl;
 class SearchNormal;
 class Search;
 class Hypothesis;
+class Sentence;
 
 class Manager {
 public:
 	const System &system;
 	const TranslationTask &task;
 
-	Manager(System &sys, const TranslationTask &task, const std::string &inputStr);
+	Manager(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId);
 
 	virtual ~Manager();
 
@@ -45,7 +46,7 @@ public:
 	Bitmaps &GetBitmaps()
 	{ return *m_bitmaps; }
 
-	const PhraseImpl &GetInput() const
+	const Sentence &GetInput() const
 	{ return *m_input; }
 
 	const SquareMatrix &GetEstimatedScores() const
@@ -69,7 +70,8 @@ protected:
 	mutable Recycler<Hypothesis*> *m_hypoRecycle;
 
     std::string m_inputStr;
-	PhraseImpl *m_input;
+    long m_translationId;
+	Sentence *m_input;
 	InputPaths m_inputPaths;
 	Bitmaps *m_bitmaps;
 	SquareMatrix *m_estimatedScores;

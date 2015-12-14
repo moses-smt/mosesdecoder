@@ -7,9 +7,9 @@ using namespace std;
 namespace Moses2
 {
 
-TranslationTask::TranslationTask(System &system, const std::string &line)
+TranslationTask::TranslationTask(System &system, const std::string &line, long translationId)
 {
-	m_mgr = new Manager(system, *this, line);
+	m_mgr = new Manager(system, *this, line, translationId);
 }
 
 TranslationTask::~TranslationTask()

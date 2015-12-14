@@ -11,6 +11,7 @@
 #include "Manager.h"
 #include "../System.h"
 #include "../Scores.h"
+#include "../Sentence.h"
 #include "../Recycler.h"
 #include "../FF/StatefulFeatureFunction.h"
 
@@ -184,7 +185,7 @@ std::ostream& operator<<(std::ostream &out, const Hypothesis &obj)
 	return out;
 }
 
-void Hypothesis::EmptyHypothesisState(const PhraseImpl &input)
+void Hypothesis::EmptyHypothesisState(const InputType &input)
 {
 	const std::vector<const StatefulFeatureFunction*>  &sfffs = mgr.system.featureFunctions.GetStatefulFeatureFunctions();
 	  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {

@@ -17,6 +17,7 @@ namespace Moses2
 {
 
 class Hypothesis;
+class InputType;
 
 class StatefulFeatureFunction : public FeatureFunction
 {
@@ -30,10 +31,10 @@ public:
 	{ return m_statefulInd; }
 
 	  //! return uninitialise state
-	  virtual FFState* BlankState(const Manager &mgr, const PhraseImpl &input) const = 0;
+	  virtual FFState* BlankState(const Manager &mgr, const InputType &input) const = 0;
 
 	  //! return the state associated with the empty hypothesis for a given sentence
-	  virtual void EmptyHypothesisState(FFState &state, const Manager &mgr, const PhraseImpl &input) const = 0;
+	  virtual void EmptyHypothesisState(FFState &state, const Manager &mgr, const InputType &input) const = 0;
 
 	  virtual void EvaluateWhenApplied(const ObjectPoolContiguous<Hypothesis*> &hypos) const;
 

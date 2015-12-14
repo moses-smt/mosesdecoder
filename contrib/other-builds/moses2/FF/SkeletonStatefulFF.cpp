@@ -52,13 +52,13 @@ SkeletonStatefulFF::~SkeletonStatefulFF() {
 	// TODO Auto-generated destructor stub
 }
 
-FFState* SkeletonStatefulFF::BlankState(const Manager &mgr, const PhraseImpl &input) const
+FFState* SkeletonStatefulFF::BlankState(const Manager &mgr, const InputType &input) const
 {
 	MemPool &pool = mgr.GetPool();
     return new (pool.Allocate<SkeletonState>()) SkeletonState();
 }
 
-void SkeletonStatefulFF::EmptyHypothesisState(FFState &state, const Manager &mgr, const PhraseImpl &input) const
+void SkeletonStatefulFF::EmptyHypothesisState(FFState &state, const Manager &mgr, const InputType &input) const
 {
 	SkeletonState &stateCast = static_cast<SkeletonState&>(state);
 	stateCast.targetLen = 0;

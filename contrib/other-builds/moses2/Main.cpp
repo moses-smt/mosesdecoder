@@ -45,9 +45,10 @@ int main(int argc, char** argv)
 
 	Moses2::ThreadPool pool(system.numThreads);
 
+	long translationId = 0;
 	string line;
 	while (getline(inStream, line)) {
-	    boost::shared_ptr<Moses2::TranslationTask> task(new Moses2::TranslationTask(system, line));
+	    boost::shared_ptr<Moses2::TranslationTask> task(new Moses2::TranslationTask(system, line, translationId));
 
 		pool.Submit(task);
 		//task->Run();

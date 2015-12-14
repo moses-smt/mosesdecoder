@@ -15,6 +15,7 @@
 #include "../TargetPhrase.h"
 #include "../InputPaths.h"
 #include "../InputPath.h"
+#include "../Sentence.h"
 #include "../TranslationModel/PhraseTable.h"
 #include "../legacy/Range.h"
 
@@ -23,7 +24,7 @@ using namespace std;
 namespace Moses2
 {
 
-Manager::Manager(System &sys, const TranslationTask &task, const std::string &inputStr)
+Manager::Manager(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId)
 :system(sys)
 ,task(task)
 ,m_inputStr(inputStr)
@@ -53,7 +54,7 @@ void Manager::Init()
 	// create input phrase obj
 	FactorCollection &vocab = system.GetVocab();
 
-	m_input = PhraseImpl::CreateFromString(GetPool(), vocab, system, m_inputStr);
+	m_input = Sentence::CreateFromString(GetPool(), vocab, system, m_inputStr, m_translationId);
 	m_inputPaths.Init(*m_input, system);
 
 	const std::vector<const PhraseTable*> &pts = system.mappings;
