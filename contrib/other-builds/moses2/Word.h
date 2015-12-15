@@ -34,6 +34,11 @@ public:
 	return cmp == 0;
   }
 
+  bool operator!=(const Word &compare) const
+  {
+	return !( (*this) == compare );
+  }
+
   bool operator<(const Word &compare) const;
 
   const Factor* operator[](size_t ind) const {

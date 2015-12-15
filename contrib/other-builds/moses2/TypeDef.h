@@ -7,12 +7,17 @@
 #pragma once
 
 #include <cstddef>
+#include <vector>
 
 namespace Moses2
 {
 
 class Hypothesis;
 
+#define NOT_FOUND 			std::numeric_limits<size_t>::max()
+const size_t DEFAULT_MAX_PHRASE_LENGTH = 20;
+const size_t DEFAULT_MAX_HYPOSTACK_SIZE = 200;
+const size_t DEFAULT_CUBE_PRUNING_POP_LIMIT = 1000;
 const size_t DEFAULT_MAX_TRANS_OPT_CACHE_SIZE = 10000;
 
 #ifndef BOS_
@@ -22,7 +27,9 @@ const size_t DEFAULT_MAX_TRANS_OPT_CACHE_SIZE = 10000;
 #define EOS_ "</s>" //End of sentence symbol
 #endif
 
+typedef size_t FactorType;
 typedef float SCORE;
+typedef std::vector<FactorType> FactorList;
 
 // Note: StaticData uses SearchAlgorithm to determine whether the translation
 // model is phrase-based or syntax-based.  If you add a syntax-based search

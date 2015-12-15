@@ -29,6 +29,23 @@ size_t Phrase::hash() const
   return seed;
 }
 
+bool Phrase::operator==(const Phrase &compare) const
+{
+  if (GetSize() != compare.GetSize()) {
+	  return false;
+  }
+
+  for (size_t i = 0; i < GetSize(); ++i) {
+	  const Word &word = (*this)[i];
+	  const Word &otherWord = compare[i];
+	  if (word != otherWord) {
+		  return false;
+	  }
+  }
+
+  return true;
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 PhraseImpl *PhraseImpl::CreateFromString(MemPool &pool, FactorCollection &vocab, const System &system, const std::string &str)
 {

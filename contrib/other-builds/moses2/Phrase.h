@@ -25,7 +25,13 @@ class Phrase
 public:
   virtual const Word& operator[](size_t pos) const = 0;
   virtual size_t GetSize() const = 0;
-  size_t hash() const;
+  virtual size_t hash() const;
+  virtual bool operator==(const Phrase &compare) const;
+  virtual bool operator!=(const Phrase &compare) const
+  {
+		return !( (*this) == compare );
+  }
+
 };
 
 class PhraseImpl : public Phrase

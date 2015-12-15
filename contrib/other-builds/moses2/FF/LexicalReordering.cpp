@@ -6,7 +6,11 @@
  */
 
 #include "LexicalReordering.h"
+#include "../System.h"
 #include "../Search/Manager.h"
+#include "../legacy/InputFileStream.h"
+
+using namespace std;
 
 namespace Moses2 {
 
@@ -48,7 +52,19 @@ LexicalReordering::~LexicalReordering()
 
 void LexicalReordering::Load(System &system)
 {
+  InputFileStream file(m_path);
+  string line;
 
+  while(getline(file, line)) {
+	std::vector<std::string> toks = TokenizeMultiCharSeparator(line, "|||");
+	assert(toks.size() == 3);
+	PhraseImpl *source = PhraseImpl::CreateFromString(system.systemPool, system.GetVocab(), system, toks[0]);
+	PhraseImpl *target = PhraseImpl::CreateFromString(system.systemPool, system.GetVocab(), system, toks[1]);
+	std::vector<SCORE> scores = Tokenize<SCORE>(toks[2]);
+
+	Key key(source, target);
+	m_coll[key] = scores;
+  }
 }
 
 void LexicalReordering::SetParameter(const std::string& key, const std::string& value)
