@@ -17,6 +17,7 @@
 #include "WordPenalty.h"
 #include "PhrasePenalty.h"
 #include "Distortion.h"
+#include "LexicalReordering.h"
 #include "../TranslationModel/PhraseTableMemory.h"
 #include "../TranslationModel/ProbingPT.h"
 #include "../TranslationModel/UnknownWordPenalty.h"
@@ -126,7 +127,9 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 	}
 	else if (toks[0] == "PhrasePenalty") {
 		ret = new PhrasePenalty(m_ffStartInd, line);
-		//ret = new KENLMBatch(m_ffStartInd, line);
+	}
+	else if (toks[0] == "LexicalReordering") {
+		ret = new LexicalReordering(m_ffStartInd, line);
 	}
 	else {
 		//ret = new SkeletonStatefulFF(m_ffStartInd, line);

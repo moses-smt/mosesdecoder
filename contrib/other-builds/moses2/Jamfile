@@ -30,6 +30,7 @@ external-lib boost_serialization ;
 		FF/Distortion.cpp
    	FF/FeatureFunction.cpp 
    	FF/FeatureFunctions.cpp 
+    FF/LexicalReordering.cpp
     FF/PhrasePenalty.cpp
     FF/SkeletonStatefulFF.cpp
     FF/SkeletonStatelessFF.cpp
