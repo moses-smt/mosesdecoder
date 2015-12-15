@@ -115,7 +115,7 @@ void PhraseTableMemory::Load(System &system)
 	InputFileStream strme(m_path);
 	string line;
 	while (getline(strme, line)) {
-		if (++lineNum % 100000) {
+		if (++lineNum % 1000000 == 0) {
 			cerr << lineNum << " ";
 		}
 		toks.clear();

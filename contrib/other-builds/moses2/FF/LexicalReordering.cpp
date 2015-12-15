@@ -54,8 +54,13 @@ void LexicalReordering::Load(System &system)
 {
   InputFileStream file(m_path);
   string line;
+  size_t lineNum = 0;
 
   while(getline(file, line)) {
+	if (++lineNum % 1000000 == 0) {
+		cerr << lineNum << " ";
+	}
+
 	std::vector<std::string> toks = TokenizeMultiCharSeparator(line, "|||");
 	assert(toks.size() == 3);
 	PhraseImpl *source = PhraseImpl::CreateFromString(system.systemPool, system.GetVocab(), system, toks[0]);
