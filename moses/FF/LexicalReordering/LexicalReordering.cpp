@@ -107,11 +107,9 @@ EvaluateWhenApplied(const Hypothesis& hypo,
                     ScoreComponentCollection* out) const
 {
   VERBOSE(3,"LexicalReordering::Evaluate(const Hypothesis& hypo,...) START" << std::endl);
-  Scores score(GetNumScoreComponents(), 0);
   const LRState *prev = static_cast<const LRState *>(prev_state);
   LRState *next_state = prev->Expand(hypo.GetTranslationOption(), hypo.GetInput(), out);
 
-  out->PlusEquals(this, score);
   VERBOSE(3,"LexicalReordering::Evaluate(const Hypothesis& hypo,...) END" << std::endl);
 
   return next_state;
