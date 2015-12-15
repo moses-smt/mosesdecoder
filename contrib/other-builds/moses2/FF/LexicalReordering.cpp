@@ -72,6 +72,16 @@ void LexicalReordering::SetParameter(const std::string& key, const std::string& 
   if (key == "path") {
 	  m_path = value;
   }
+  else if (key == "type") {
+
+  }
+  else if (key == "input-factor") {
+
+  }
+  else if (key == "output-factor") {
+
+  }
+
   else {
 	  StatefulFeatureFunction::SetParameter(key, value);
   }
