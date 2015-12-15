@@ -127,7 +127,10 @@ FFState* KENLM::BlankState(const Manager &mgr, const InputType &input) const
 }
 
 //! return the state associated with the empty hypothesis for a given sentence
-void KENLM::EmptyHypothesisState(FFState &state, const Manager &mgr, const InputType &input) const
+void KENLM::EmptyHypothesisState(FFState &state,
+		const Manager &mgr,
+		const InputType &input,
+		const Hypothesis &hypo) const
 {
   KenLMState &stateCast = static_cast<KenLMState&>(state);
   stateCast.state = m_ngram->BeginSentenceState();

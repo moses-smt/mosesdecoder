@@ -31,7 +31,10 @@ public:
   virtual FFState* BlankState(const Manager &mgr, const InputType &input) const;
 
   //! return the state associated with the empty hypothesis for a given sentence
-  virtual void EmptyHypothesisState(FFState &state, const Manager &mgr, const InputType &input) const;
+  virtual void EmptyHypothesisState(FFState &state,
+		  const Manager &mgr,
+		  const InputType &input,
+		  const Hypothesis &hypo) const;
 
   //virtual void EvaluateWhenApplied(const Recycler<Hypothesis*> &hypos) const
   //{}

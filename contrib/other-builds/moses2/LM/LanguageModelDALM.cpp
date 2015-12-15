@@ -207,7 +207,10 @@ FFState* LanguageModelDALM::BlankState(const Manager &mgr, const InputType &inpu
 	return state;
 }
 
-void LanguageModelDALM::EmptyHypothesisState(FFState &state, const Manager &mgr, const InputType &input) const
+void LanguageModelDALM::EmptyHypothesisState(FFState &state,
+		const Manager &mgr,
+		const InputType &input,
+		const Hypothesis &hypo) const
 {
   DALMState &dalmState = static_cast<DALMState&>(state);
   m_lm->init_state(dalmState.get_state());

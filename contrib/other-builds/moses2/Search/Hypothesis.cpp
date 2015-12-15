@@ -191,7 +191,7 @@ void Hypothesis::EmptyHypothesisState(const InputType &input)
 	  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
 		  size_t statefulInd = sfff->GetStatefulInd();
 		  FFState *state = m_ffStates[statefulInd];
-		  sfff->EmptyHypothesisState(*state, mgr, input);
+		  sfff->EmptyHypothesisState(*state, mgr, input, *this);
 	  }
 }
 

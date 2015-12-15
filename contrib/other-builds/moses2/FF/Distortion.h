@@ -22,7 +22,10 @@ public:
 	virtual ~Distortion();
 
   virtual FFState* BlankState(const Manager &mgr, const InputType &input) const;
-  virtual void EmptyHypothesisState(FFState &state, const Manager &mgr, const InputType &input) const;
+  virtual void EmptyHypothesisState(FFState &state,
+		  const Manager &mgr,
+		  const InputType &input,
+		  const Hypothesis &hypo) const;
 
   virtual void
   EvaluateInIsolation(const System &system,

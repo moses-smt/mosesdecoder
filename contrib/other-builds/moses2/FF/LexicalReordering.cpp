@@ -16,6 +16,8 @@ namespace Moses2 {
 
 struct LexicalReorderingState : public FFState
 {
+  const Range *range;
+
   LexicalReorderingState()
   {
 	  // uninitialised
@@ -23,10 +25,11 @@ struct LexicalReorderingState : public FFState
 
 
   size_t hash() const {
-    return 0;
+    return (size_t) range;
   }
   virtual bool operator==(const FFState& other) const {
-	  return true;
+	  const LexicalReorderingState &stateCast = static_cast<const LexicalReorderingState&>(other);
+	  return range == stateCast.range;
   }
 
   virtual std::string ToString() const
@@ -98,9 +101,13 @@ FFState* LexicalReordering::BlankState(const Manager &mgr, const InputType &inpu
   return new (pool.Allocate<LexicalReorderingState>()) LexicalReorderingState();
 }
 
-void LexicalReordering::EmptyHypothesisState(FFState &state, const Manager &mgr, const InputType &input) const
+void LexicalReordering::EmptyHypothesisState(FFState &state,
+		const Manager &mgr,
+		const InputType &input,
+		const Hypothesis &hypo) const
 {
-
+	LexicalReorderingState &stateCast = static_cast<LexicalReorderingState&>(state);
+	stateCast.range = &hypo.GetRange();
 }
 
 void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
@@ -112,5 +119,17 @@ void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
 
 }
 
+const LexicalReordering::Values *LexicalReordering::GetValues(const Phrase &source, const Phrase &target) const
+{
+	LexicalReordering::Key key(&source, &target);
+	LexicalReordering::Coll::const_iterator iter;
+	iter = m_coll.find(key);
+	if (iter == m_coll.end()) {
+		return NULL;
+	}
+	else {
+		return &iter->second;
+	}
+}
 
 } /* namespace Moses2 */

@@ -58,7 +58,10 @@ FFState* SkeletonStatefulFF::BlankState(const Manager &mgr, const InputType &inp
     return new (pool.Allocate<SkeletonState>()) SkeletonState();
 }
 
-void SkeletonStatefulFF::EmptyHypothesisState(FFState &state, const Manager &mgr, const InputType &input) const
+void SkeletonStatefulFF::EmptyHypothesisState(FFState &state,
+		const Manager &mgr,
+		const InputType &input,
+		const Hypothesis &hypo) const
 {
 	SkeletonState &stateCast = static_cast<SkeletonState&>(state);
 	stateCast.targetLen = 0;

@@ -68,7 +68,10 @@ FFState* Distortion::BlankState(const Manager &mgr, const InputType &input) cons
   return new (pool.Allocate<DistortionState_traditional>()) DistortionState_traditional();
 }
 
-void Distortion::EmptyHypothesisState(FFState &state, const Manager &mgr, const InputType &input) const
+void Distortion::EmptyHypothesisState(FFState &state,
+		const Manager &mgr,
+		const InputType &input,
+		const Hypothesis &hypo) const
 {
     DistortionState_traditional &stateCast = static_cast<DistortionState_traditional&>(state);
 

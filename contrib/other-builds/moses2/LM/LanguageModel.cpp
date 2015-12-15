@@ -132,7 +132,10 @@ FFState* LanguageModel::BlankState(const Manager &mgr, const InputType &input) c
 	return new (pool.Allocate<LMState>()) LMState();
 }
 
-void LanguageModel::EmptyHypothesisState(FFState &state, const Manager &mgr, const InputType &input) const
+void LanguageModel::EmptyHypothesisState(FFState &state,
+		const Manager &mgr,
+		const InputType &input,
+		const Hypothesis &hypo) const
 {
 	LMState &stateCast = static_cast<LMState&>(state);
 

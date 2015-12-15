@@ -25,7 +25,10 @@ public:
   virtual void SetParameter(const std::string& key, const std::string& value);
 
   virtual FFState* BlankState(const Manager &mgr, const InputType &input) const;
-  virtual void EmptyHypothesisState(FFState &state, const Manager &mgr, const InputType &input) const;
+  virtual void EmptyHypothesisState(FFState &state,
+		  const Manager &mgr,
+		  const InputType &input,
+		  const Hypothesis &hypo) const;
 
   virtual void
   EvaluateInIsolation(const System &system,
@@ -48,7 +51,7 @@ protected:
   FactorList m_FactorsC;
 
 
-  typedef std::pair<PhraseImpl*, PhraseImpl*> Key;
+  typedef std::pair<const Phrase*, const Phrase*> Key;
   typedef std::vector<SCORE> Values;
 
   struct KeyComparer
@@ -74,6 +77,7 @@ protected:
   typedef boost::unordered_map<Key, Values, KeyComparer, KeyComparer> Coll;
   Coll m_coll;
 
+  const Values *GetValues(const Phrase &source, const Phrase &target) const;
 };
 
 } /* namespace Moses2 */
