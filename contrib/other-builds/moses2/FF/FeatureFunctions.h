@@ -32,6 +32,9 @@ public:
     FeatureFunctions(System &system);
 	virtual ~FeatureFunctions();
 
+	const std::vector<const FeatureFunction*> &GetFeatureFunctions() const
+	{ return m_featureFunctions; }
+
 	const std::vector<const StatefulFeatureFunction*> &GetStatefulFeatureFunctions() const
 	{ return m_statefulFeatureFunctions; }
 
