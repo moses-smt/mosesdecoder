@@ -22,14 +22,14 @@ class Manager;
 namespace NSCubePruning
 {
 
-class HypothesisSet
+class MiniStack
 {
 public:
 	typedef boost::unordered_set<const Hypothesis*,
 			  UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>
 			   > _HCType;
 
-	HypothesisSet()
+	MiniStack()
 	{}
 
 	_HCType &GetColl()
@@ -38,7 +38,7 @@ public:
 	const _HCType &GetColl() const
 	{ return m_coll; }
 
-	CubeEdge::Hypotheses &GetSortedHypos(const Manager &mgr) const;
+	CubeEdge::Hypotheses &GetSortedAndPruneHypos(const Manager &mgr) const;
 
 protected:
 	_HCType m_coll;
@@ -57,7 +57,7 @@ public:
   typedef std::pair<const Bitmap*, size_t> HypoCoverage;
 		  // bitmap and current endPos of hypos
 
-  typedef boost::unordered_map<HypoCoverage, HypothesisSet> Coll;
+  typedef boost::unordered_map<HypoCoverage, MiniStack> Coll;
 
 
 	Stack();
@@ -81,7 +81,7 @@ protected:
 
 	StackAdd Add(const Hypothesis *hypo);
 
-	HypothesisSet &GetHypothesisSet(const HypoCoverage &key);
+	MiniStack &GetMiniStack(const HypoCoverage &key);
 
 };
 

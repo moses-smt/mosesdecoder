@@ -19,7 +19,7 @@ namespace Moses2
 
 namespace NSCubePruning
 {
-CubeEdge::Hypotheses &HypothesisSet::GetSortedHypos(const Manager &mgr) const
+CubeEdge::Hypotheses &MiniStack::GetSortedAndPruneHypos(const Manager &mgr) const
 {
   if (m_sortedHypos == NULL) {
     // create sortedHypos first
@@ -38,7 +38,7 @@ CubeEdge::Hypotheses &HypothesisSet::GetSortedHypos(const Manager &mgr) const
   return *m_sortedHypos;
 }
 
-void HypothesisSet::SortAndPruneHypos(const Manager &mgr) const
+void MiniStack::SortAndPruneHypos(const Manager &mgr) const
 {
   size_t stackSize = mgr.system.stackSize;
   Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycle();
@@ -102,8 +102,8 @@ void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 StackAdd Stack::Add(const Hypothesis *hypo)
 {
   HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
-  HypothesisSet::_HCType &innerColl = GetHypothesisSet(key).GetColl();
-  std::pair<HypothesisSet::_HCType::iterator, bool> addRet = innerColl.insert(hypo);
+  MiniStack::_HCType &innerColl = GetMiniStack(key).GetColl();
+  std::pair<MiniStack::_HCType::iterator, bool> addRet = innerColl.insert(hypo);
 
   // CHECK RECOMBINATION
   if (addRet.second) {
@@ -117,7 +117,7 @@ StackAdd Stack::Add(const Hypothesis *hypo)
 		  innerColl.erase(addRet.first);
 
 		  // re-add. It better go in
-		  std::pair<HypothesisSet::_HCType::iterator, bool> addRet = innerColl.insert(hypo);
+		  std::pair<MiniStack::_HCType::iterator, bool> addRet = innerColl.insert(hypo);
 		  assert(addRet.second);
 
 		  return StackAdd(true, const_cast<Hypothesis*>(hypoExisting));
@@ -137,7 +137,7 @@ std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
 {
   std::vector<const Hypothesis*> ret;
   BOOST_FOREACH(const Coll::value_type &val, m_coll) {
-		const HypothesisSet::_HCType &hypos = val.second.GetColl();
+		const MiniStack::_HCType &hypos = val.second.GetColl();
 		ret.insert(ret.end(), hypos.begin(), hypos.end());
   }
 
@@ -156,13 +156,13 @@ size_t Stack::GetHypoSize() const
 {
 	size_t ret = 0;
 	BOOST_FOREACH(const Coll::value_type &val, m_coll) {
-		const HypothesisSet::_HCType &hypos = val.second.GetColl();
+		const MiniStack::_HCType &hypos = val.second.GetColl();
 		ret += hypos.size();
 	}
 	return ret;
 }
 
-HypothesisSet &Stack::GetHypothesisSet(const HypoCoverage &key)
+MiniStack &Stack::GetMiniStack(const HypoCoverage &key)
 {
 	/*
 	_HCType *ret;
