@@ -101,7 +101,7 @@ void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 
 StackAdd Stack::Add(const Hypothesis *hypo)
 {
-  HypoCoverage key(&hypo->GetBitmap(), hypo->GetRange().GetEndPos());
+  HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
   HypothesisSet::_HCType &innerColl = GetHypothesisSet(key).GetColl();
   std::pair<HypothesisSet::_HCType::iterator, bool> addRet = innerColl.insert(hypo);
 

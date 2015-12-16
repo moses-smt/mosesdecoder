@@ -43,7 +43,7 @@ void SearchNormalBatch::Decode()
 
 	const Bitmap &initBitmap = m_mgr.GetBitmaps().GetInitialBitmap();
 	Hypothesis *initHypo = Hypothesis::Create(m_mgr);
-	initHypo->Init(m_mgr.GetInitPhrase(), m_mgr.GetInitRange(), initBitmap);
+	initHypo->Init(m_mgr.GetInputPaths().GetBlank(), m_mgr.GetInitPhrase(), initBitmap);
 	initHypo->EmptyHypothesisState(m_mgr.GetInput());
 
 	m_stacks.Add(initHypo, m_mgr.GetHypoRecycle());
@@ -110,7 +110,7 @@ void SearchNormalBatch::Extend(const Hypothesis &hypo)
 void SearchNormalBatch::Extend(const Hypothesis &hypo, const InputPath &path)
 {
 	const Bitmap &hypoBitmap = hypo.GetBitmap();
-	const Range &hypoRange = hypo.GetRange();
+	const Range &hypoRange = hypo.GetInputPath().range;
 	const Range &pathRange = path.range;
 
 	if (!CanExtend(hypoBitmap, hypoRange.GetEndPos(), pathRange)) {
@@ -128,30 +128,30 @@ void SearchNormalBatch::Extend(const Hypothesis &hypo, const InputPath &path)
 	for (size_t i = 0; i < tpsAllPt.size(); ++i) {
 		const TargetPhrases *tps = tpsAllPt[i];
 		if (tps) {
-			Extend(hypo, *tps, pathRange, newBitmap, estimatedScore);
+			Extend(hypo, *tps, path, newBitmap, estimatedScore);
 		}
 	}
 }
 
 void SearchNormalBatch::Extend(const Hypothesis &hypo,
 		const TargetPhrases &tps,
-		const Range &pathRange,
+		const InputPath &path,
 		const Bitmap &newBitmap,
 		SCORE estimatedScore)
 {
   BOOST_FOREACH(const TargetPhrase *tp, tps) {
-	  Extend(hypo, *tp, pathRange, newBitmap, estimatedScore);
+	  Extend(hypo, *tp, path, newBitmap, estimatedScore);
   }
 }
 
 void SearchNormalBatch::Extend(const Hypothesis &hypo,
 		const TargetPhrase &tp,
-		const Range &pathRange,
+		const InputPath &path,
 		const Bitmap &newBitmap,
 		SCORE estimatedScore)
 {
 	Hypothesis *newHypo = Hypothesis::Create(m_mgr);
-	newHypo->Init(hypo, tp, pathRange, newBitmap, estimatedScore);
+	newHypo->Init(hypo, path, tp, newBitmap, estimatedScore);
 	newHypo->EvaluateWhenAppliedNonBatch();
 
 

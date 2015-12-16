@@ -45,8 +45,12 @@ public:
 
   void DeleteUnusedPaths();
 
+  const InputPath &GetBlank() const
+  { return *m_blank; }
+
 protected:
 	Coll m_inputPaths;
+	InputPath *m_blank;
 };
 
 }

@@ -109,14 +109,14 @@ void Distortion::EvaluateWhenApplied(const Manager &mgr,
     const DistortionState_traditional &prev = static_cast<const DistortionState_traditional&>(prevState);
 	SCORE distortionScore = CalculateDistortionScore(
             prev.range,
-            hypo.GetRange(),
+            hypo.GetInputPath().range,
             prev.first_gap);
 	//cerr << "distortionScore=" << distortionScore << endl;
 
 	scores.PlusEquals(mgr.system, *this, distortionScore);
 
     DistortionState_traditional &stateCast = static_cast<DistortionState_traditional&>(state);
-    stateCast.Set(hypo.GetRange(), hypo.GetBitmap().GetFirstGapPos());
+    stateCast.Set(hypo.GetInputPath().range, hypo.GetBitmap().GetFirstGapPos());
 }
 
 SCORE Distortion::CalculateDistortionScore(const Range &prev, const Range &curr, const int FirstGap) const

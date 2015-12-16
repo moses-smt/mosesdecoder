@@ -107,7 +107,7 @@ void LexicalReordering::EmptyHypothesisState(FFState &state,
 		const Hypothesis &hypo) const
 {
 	LexicalReorderingState &stateCast = static_cast<LexicalReorderingState&>(state);
-	stateCast.range = &hypo.GetRange();
+	stateCast.range = &hypo.GetInputPath().range;
 }
 
 void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,

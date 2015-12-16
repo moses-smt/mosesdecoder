@@ -9,6 +9,7 @@
 #include <stdlib.h>
 #include "Hypothesis.h"
 #include "Manager.h"
+#include "../InputPath.h"
 #include "../System.h"
 #include "../Scores.h"
 #include "../Sentence.h"
@@ -78,13 +79,11 @@ Hypothesis::~Hypothesis() {
 	// TODO Auto-generated destructor stub
 }
 
-void Hypothesis::Init(const TargetPhrase &tp,
-		const Range &range,
-		const Bitmap &bitmap)
+void Hypothesis::Init(const InputPath &path, const TargetPhrase &tp, const Bitmap &bitmap)
 {
 	m_targetPhrase = &tp;
 	m_sourceCompleted = &bitmap;
-	m_range = &range;
+	m_path = &path;
 	m_prevHypo = NULL;
 	m_currTargetWordsRange = Range(NOT_FOUND, NOT_FOUND);
 	m_estimatedScore = 0;
@@ -94,14 +93,14 @@ void Hypothesis::Init(const TargetPhrase &tp,
 }
 
 void Hypothesis::Init(const Hypothesis &prevHypo,
+		const InputPath &path,
 		const TargetPhrase &tp,
-		const Range &pathRange,
 		const Bitmap &bitmap,
 		SCORE estimatedScore)
 {
 	m_targetPhrase = &tp;
 	m_sourceCompleted = &bitmap;
-	m_range = &pathRange;
+	m_path = &path;
 	m_prevHypo = &prevHypo;
 	m_currTargetWordsRange = Range(prevHypo.m_currTargetWordsRange.GetEndPos() + 1,
 	                         prevHypo.m_currTargetWordsRange.GetEndPos()
@@ -167,7 +166,7 @@ void Hypothesis::OutputToStream(std::ostream &out) const
 std::ostream& operator<<(std::ostream &out, const Hypothesis &obj)
 {
 	// coverage
-	out << obj.GetBitmap() << " " << obj.GetRange() << " ";
+	out << obj.GetBitmap() << " " << obj.GetInputPath().range << " ";
 
 	// states
 	const std::vector<const StatefulFeatureFunction*> &sfffs = obj.mgr.system.featureFunctions.GetStatefulFeatureFunctions();

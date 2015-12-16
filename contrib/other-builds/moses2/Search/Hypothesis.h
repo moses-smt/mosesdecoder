@@ -13,6 +13,7 @@
 #include "../Scores.h"
 #include "../Phrase.h"
 #include "../TargetPhrase.h"
+#include "../InputPath.h"
 #include "../legacy/Range.h"
 
 namespace Moses2
@@ -24,6 +25,7 @@ class TargetPhrase;
 class Scores;
 class StatefulFeatureFunction;
 class InputType;
+class InputPath;
 
 class Hypothesis {
 	  friend std::ostream& operator<<(std::ostream &, const Hypothesis &);
@@ -38,13 +40,11 @@ public:
   virtual ~Hypothesis();
 
   // initial, empty hypo
-  void Init(const TargetPhrase &tp,
-  		const Range &range,
-  		const Bitmap &bitmap);
+  void Init(const InputPath &path, const TargetPhrase &tp, const Bitmap &bitmap);
 
   void Init(const Hypothesis &prevHypo,
+  	    const InputPath &path,
   		const TargetPhrase &tp,
-  		const Range &pathRange,
   		const Bitmap &bitmap,
 		SCORE estimatedScore);
 
@@ -54,8 +54,8 @@ public:
   inline const Bitmap &GetBitmap() const
   { return *m_sourceCompleted; }
 
-  inline const Range &GetRange() const
-  { return *m_range; }
+  inline const InputPath &GetInputPath() const
+  { return *m_path; }
 
   inline const Range &GetCurrTargetWordsRange() const {
     return m_currTargetWordsRange;
@@ -98,7 +98,7 @@ public:
 protected:
   const TargetPhrase *m_targetPhrase;
   const Bitmap *m_sourceCompleted;
-  const Range *m_range;
+  const InputPath *m_path;
   const Hypothesis *m_prevHypo;
 
   FFState **m_ffStates;

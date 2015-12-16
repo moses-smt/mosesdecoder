@@ -16,7 +16,7 @@ namespace Moses2
 {
 
 InputPaths::~InputPaths() {
-	// TODO Auto-generated destructor stub
+	delete m_blank;
 }
 
 void InputPaths::Init(const PhraseImpl &input, const System &system)
@@ -25,6 +25,12 @@ void InputPaths::Init(const PhraseImpl &input, const System &system)
   size_t size = input.GetSize();
   size_t maxLength = min(size, system.maxPhraseLength);
 
+  // create blank path for initial hypo
+  Range range(NOT_FOUND, NOT_FOUND);
+  SubPhrase subPhrase = input.GetSubPhrase(NOT_FOUND, NOT_FOUND);
+  m_blank = new InputPath(subPhrase, range, numPt, NULL);
+
+  // create normal paths of subphrases through the sentence
   for (size_t startPos = 0; startPos < size; ++startPos) {
 	const InputPath *prefixPath = NULL;
 

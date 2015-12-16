@@ -45,12 +45,12 @@ protected:
 	void Extend(const Hypothesis &hypo, const InputPath &path);
 	void Extend(const Hypothesis &hypo,
 			const TargetPhrases &tps,
-			const Range &pathRange,
+			const InputPath &path,
 			const Bitmap &newBitmap,
 			SCORE estimatedScore);
 	void Extend(const Hypothesis &hypo,
 			const TargetPhrase &tp,
-			const Range &pathRange,
+			const InputPath &path,
 			const Bitmap &newBitmap,
 			SCORE estimatedScore);
 

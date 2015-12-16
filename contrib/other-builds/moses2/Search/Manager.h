@@ -59,9 +59,6 @@ public:
 	const TargetPhrase &GetInitPhrase() const
 	{ return *m_initPhrase; }
 
-	const Range &GetInitRange() const
-	{ return m_initRange; }
-
 	void Decode();
 
     void OutputBest() const;
@@ -76,7 +73,6 @@ protected:
 	InputPaths m_inputPaths;
 	Bitmaps *m_bitmaps;
 	SquareMatrix *m_estimatedScores;
-	Range m_initRange;
 	TargetPhrase *m_initPhrase;
 
 	Search *m_search;
