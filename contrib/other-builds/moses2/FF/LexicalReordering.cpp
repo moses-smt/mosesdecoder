@@ -116,13 +116,36 @@ void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
   Scores &scores,
   FFState &state) const
 {
-	//const Phrase &source = hypo.ge
+  const Phrase &source = hypo.GetInputPath().subPhrase;
+  const Phrase &target = hypo.GetTargetPhrase();
+
+  const LexicalReordering::Values *values = GetValues(source, target);
+
+  if (values) {
+	  size_t orientation;
+
+	  const Range &currRange = hypo.GetInputPath().range;
+
+	  const Hypothesis *prevHypo = hypo.GetPrevHypo();
+	  if (prevHypo) {
+		  const Range &prevRange = prevHypo->GetInputPath().range;
+		  orientation = GetOrientation(prevRange, currRange);
+	  }
+	  else {
+		  orientation = GetOrientation(currRange);
+	  }
+
+	  vector<SCORE> scoreVec(6, 0);
+	  scoreVec[orientation] = (*values)[orientation];
+	  scoreVec[2 + orientation] = (*values)[2 + orientation];
+	  scores.PlusEquals(mgr.system, *this, scoreVec);
+  }
 }
 
 const LexicalReordering::Values *LexicalReordering::GetValues(const Phrase &source, const Phrase &target) const
 {
-	LexicalReordering::Key key(&source, &target);
-	LexicalReordering::Coll::const_iterator iter;
+	Key key(&source, &target);
+	Coll::const_iterator iter;
 	iter = m_coll.find(key);
 	if (iter == m_coll.end()) {
 		return NULL;
