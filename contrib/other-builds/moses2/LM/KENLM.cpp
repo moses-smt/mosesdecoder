@@ -208,7 +208,7 @@ private:
 
 void KENLM::EvaluateWhenAppliedBatched(Hypothesis **begin, Hypothesis **end, const Manager &mgr) const
 {
-#if 0
+#if 1
   // prefetching
 
   Hypothesis **i;
