@@ -69,6 +69,7 @@ void LexicalReordering::Load(System &system)
 	PhraseImpl *source = PhraseImpl::CreateFromString(system.systemPool, system.GetVocab(), system, toks[0]);
 	PhraseImpl *target = PhraseImpl::CreateFromString(system.systemPool, system.GetVocab(), system, toks[1]);
 	std::vector<SCORE> scores = Tokenize<SCORE>(toks[2]);
+    std::transform(scores.begin(), scores.end(), scores.begin(), TransformScore);
 
 	Key key(source, target);
 	m_coll[key] = scores;
@@ -123,21 +124,25 @@ void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
 
   if (values) {
 	  size_t orientation;
+	  vector<SCORE> scoreVec(6, 0);
 
 	  const Range &currRange = hypo.GetInputPath().range;
 
 	  const Hypothesis *prevHypo = hypo.GetPrevHypo();
-	  if (prevHypo) {
+	  assert(prevHypo);
+	  const Range &prevRange = prevHypo->GetInputPath().range;
+
+	  if (prevRange.GetStartPos() != NOT_FOUND) {
 		  const Range &prevRange = prevHypo->GetInputPath().range;
 		  orientation = GetOrientation(prevRange, currRange);
+		  scoreVec[orientation] = (*values)[orientation];
+		  scoreVec[2 + orientation] = (*values)[2 + orientation];
 	  }
 	  else {
 		  orientation = GetOrientation(currRange);
+		  scoreVec[orientation] = (*values)[orientation];
 	  }
 
-	  vector<SCORE> scoreVec(6, 0);
-	  scoreVec[orientation] = (*values)[orientation];
-	  scoreVec[2 + orientation] = (*values)[2 + orientation];
 	  scores.PlusEquals(mgr.system, *this, scoreVec);
   }
 }

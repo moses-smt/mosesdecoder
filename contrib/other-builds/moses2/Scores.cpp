@@ -209,21 +209,15 @@ void Scores::CreateFromString(const std::string &str,
 
 void Scores::Debug(std::ostream &out, const FeatureFunctions &ffs) const
 {
-	out << m_total << " = ";
 	if (m_scores) {
 	  BOOST_FOREACH(const FeatureFunction *ff, ffs.GetFeatureFunctions()) {
 		  out << ff->GetName() << ":";
 		  for (size_t i = ff->GetStartInd(); i < (ff->GetStartInd() + ff->GetNumScores()); ++i) {
 			out << m_scores[i] << " ";
 		  }
-
 	  }
-
-		size_t numScores = ffs.GetNumScores();
-		for (size_t i = 0; i < numScores; ++i) {
-			out << m_scores[i] << " ";
-		}
 	}
+	out << "= " << m_total;
 }
 
 std::ostream& operator<<(std::ostream &out, const Scores &obj)
