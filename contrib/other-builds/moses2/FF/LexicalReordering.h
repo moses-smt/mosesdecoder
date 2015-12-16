@@ -11,6 +11,7 @@
 #include "StatefulFeatureFunction.h"
 #include "../TypeDef.h"
 #include "../Phrase.h"
+#include "../legacy/Range.h"
 
 namespace Moses2 {
 
@@ -78,6 +79,10 @@ protected:
   Coll m_coll;
 
   const Values *GetValues(const Phrase &source, const Phrase &target) const;
+
+  size_t  GetOrientation(Range const& cur) const;
+  size_t  GetOrientation(Range const& prev, Range const& cur) const;
+
 };
 
 } /* namespace Moses2 */

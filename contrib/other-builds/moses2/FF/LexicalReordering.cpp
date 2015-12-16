@@ -114,9 +114,9 @@ void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
   const Hypothesis &hypo,
   const FFState &prevState,
   Scores &scores,
-	FFState &state) const
+  FFState &state) const
 {
-
+	//const Phrase &source = hypo.ge
 }
 
 const LexicalReordering::Values *LexicalReordering::GetValues(const Phrase &source, const Phrase &target) const
@@ -130,6 +130,27 @@ const LexicalReordering::Values *LexicalReordering::GetValues(const Phrase &sour
 	else {
 		return &iter->second;
 	}
+}
+
+size_t LexicalReordering::GetOrientation(Range const& cur) const
+{
+  return (cur.GetStartPos() == 0) ? 0 : 1;
+}
+
+size_t LexicalReordering::GetOrientation(Range const& prev, Range const& cur) const
+{
+  if (cur.GetStartPos() == prev.GetEndPos() + 1) {
+	  // monotone
+	  return 0;
+  }
+  else if (prev.GetStartPos() ==  cur.GetEndPos() + 1) {
+	  // swap
+	  return 1;
+  }
+  else {
+	  // discontinuous
+	  return 2;
+  }
 }
 
 } /* namespace Moses2 */
