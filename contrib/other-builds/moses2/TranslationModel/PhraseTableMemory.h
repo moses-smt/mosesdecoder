@@ -22,14 +22,14 @@ class PhraseTableMemory : public PhraseTable
 		Node();
 		~Node();
 		void AddRule(PhraseImpl &source, TargetPhrase *target);
-		TargetPhrases::shared_const_ptr Find(const Phrase &source, size_t pos = 0) const;
+		TargetPhrases *Find(const Phrase &source, size_t pos = 0) const;
 
 		void SortAndPrune(size_t tableLimit, MemPool &pool);
 
 	protected:
 		typedef boost::unordered_map<Word, Node, UnorderedComparer<Word>, UnorderedComparer<Word> > Children;
 		Children m_children;
-		TargetPhrases::shared_ptr m_targetPhrases;
+		TargetPhrases *m_targetPhrases;
 		std::vector<TargetPhrase*> *m_unsortedTPS;
 
 		Node &AddRule(PhraseImpl &source, TargetPhrase *target, size_t pos);
@@ -41,7 +41,7 @@ public:
 	virtual ~PhraseTableMemory();
 
 	virtual void Load(System &system);
-	virtual TargetPhrases::shared_const_ptr Lookup(const Manager &mgr, InputPath &inputPath) const;
+	virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const;
 
 protected:
 	Node m_root;

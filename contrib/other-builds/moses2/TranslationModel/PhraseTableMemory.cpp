@@ -22,6 +22,7 @@ namespace Moses2
 
 PhraseTableMemory::Node::Node()
 :m_unsortedTPS(NULL)
+,m_targetPhrases(NULL)
 {}
 
 PhraseTableMemory::Node::~Node()
@@ -50,7 +51,7 @@ PhraseTableMemory::Node &PhraseTableMemory::Node::AddRule(PhraseImpl &source, Ta
 	}
 }
 
-TargetPhrases::shared_const_ptr PhraseTableMemory::Node::Find(const Phrase &source, size_t pos) const
+TargetPhrases *PhraseTableMemory::Node::Find(const Phrase &source, size_t pos) const
 {
 	assert(source.GetSize());
 	if (pos == source.GetSize()) {
@@ -61,7 +62,7 @@ TargetPhrases::shared_const_ptr PhraseTableMemory::Node::Find(const Phrase &sour
 		//cerr << "word=" << word << endl;
 		Children::const_iterator iter = m_children.find(word);
 		if (iter == m_children.end()) {
-			return TargetPhrases::shared_const_ptr();
+			return NULL;
 		}
 		else {
 			const Node &child = iter->second;
@@ -79,16 +80,15 @@ void PhraseTableMemory::Node::SortAndPrune(size_t tableLimit, MemPool &pool)
 
   // prune target phrases in this node
   if (m_unsortedTPS) {
-	  TargetPhrases *tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, m_unsortedTPS->size());
+	  m_targetPhrases = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, m_unsortedTPS->size());
 
 	  for (size_t i = 0; i < m_unsortedTPS->size(); ++i) {
 		  TargetPhrase *tp = (*m_unsortedTPS)[i];
-		  tps->AddTargetPhrase(*tp);
+		  m_targetPhrases->AddTargetPhrase(*tp);
 	  }
 
-	  tps->SortAndPrune(tableLimit);
+	  m_targetPhrases->SortAndPrune(tableLimit);
 
-	  m_targetPhrases.reset(tps);
 	  delete m_unsortedTPS;
   }
 }
@@ -138,10 +138,10 @@ void PhraseTableMemory::Load(System &system)
 	m_root.SortAndPrune(m_tableLimit, system.systemPool);
 }
 
-TargetPhrases::shared_const_ptr PhraseTableMemory::Lookup(const Manager &mgr, InputPath &inputPath) const
+TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const
 {
 	const SubPhrase &phrase = inputPath.subPhrase;
-	TargetPhrases::shared_const_ptr tps = m_root.Find(phrase);
+	TargetPhrases *tps = m_root.Find(phrase);
 	return tps;
 }
 
