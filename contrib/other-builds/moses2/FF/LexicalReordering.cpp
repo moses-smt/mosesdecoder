@@ -49,6 +49,7 @@ LexicalReordering::LexicalReordering(size_t startInd, const std::string &line)
 :StatefulFeatureFunction(startInd, line)
 {
 	ReadParameters();
+	assert(m_numScores == 6);
 }
 
 LexicalReordering::~LexicalReordering()
@@ -115,6 +116,20 @@ void LexicalReordering::EmptyHypothesisState(FFState &state,
 	stateCast.targetPhrase = &hypo.GetTargetPhrase();
 }
 
+void LexicalReordering::EvaluateInIsolation(const System &system,
+		  const Phrase &source,
+		  const TargetPhrase &targetPhrase,
+		  Scores &scores,
+		  Scores *estimatedScores) const
+{
+  // cache data in target phrase
+  const LexicalReordering::Values *values = GetValues(source, targetPhrase);
+  if (values) {
+    //scoreVec[orientation] = (*values)[orientation];
+  }
+
+}
+
 void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
   const Hypothesis &hypo,
   const FFState &prevState,
@@ -128,7 +143,7 @@ void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
   stateCast.path = &hypo.GetInputPath();
   stateCast.targetPhrase = &hypo.GetTargetPhrase();
 
-  vector<SCORE> scoreVec(6, 0);
+  vector<SCORE> scoreVec(m_numScores, 0);
 
   // calc orientation
   size_t orientation;
