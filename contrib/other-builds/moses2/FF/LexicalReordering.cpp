@@ -25,11 +25,13 @@ struct LexicalReorderingState : public FFState
 
 
   size_t hash() const {
+	// compare range address. All ranges are created in InputPath
     return (size_t) range;
   }
   virtual bool operator==(const FFState& other) const {
-	  const LexicalReorderingState &stateCast = static_cast<const LexicalReorderingState&>(other);
-	  return range == stateCast.range;
+	// compare range address. All ranges are created in InputPath
+    const LexicalReorderingState &stateCast = static_cast<const LexicalReorderingState&>(other);
+    return range == stateCast.range;
   }
 
   virtual std::string ToString() const
