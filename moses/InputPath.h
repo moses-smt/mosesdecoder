@@ -41,7 +41,7 @@ public:
 
 public:
   // ttaskwptr const ttask;
-  TranslationTask const* ttask; 
+  TranslationTask const* ttask;
 protected:
   const InputPath *m_prevPath;
   Phrase m_phrase;

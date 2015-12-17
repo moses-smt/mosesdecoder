@@ -27,7 +27,7 @@ using namespace std;
 namespace Moses
 {
 
-CompletedRuleCollection::CompletedRuleCollection(size_t rule_limit) 
+CompletedRuleCollection::CompletedRuleCollection(size_t rule_limit)
   : m_ruleLimit(rule_limit)
 {
   m_scoreThreshold = numeric_limits<float>::infinity();

@@ -135,8 +135,8 @@ PDTAimp::GetTargetPhraseCollection(Phrase const &src) const
       targetPhrase.GetScoreBreakdown().Assign(m_obj, *cands[i].fnames[j], cands[i].fvalues[j]);
     }
 
-    CreateTargetPhrase(targetPhrase,factorStrings, fd, scoreVector, Scores(0), 
-		       &wacands[i], &src);
+    CreateTargetPhrase(targetPhrase,factorStrings, fd, scoreVector, Scores(0),
+                       &wacands[i], &src);
 
     costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
     tCands.push_back(targetPhrase);
@@ -377,7 +377,7 @@ void PDTAimp::CacheSource(ConfusionNet const& src)
       TargetPhrase targetPhrase(m_obj);
       CreateTargetPhrase(targetPhrase
                          , j ->first
-			 , m_obj->options()->output.factor_delimiter
+                         , m_obj->options()->output.factor_delimiter
                          , scores.transScore
                          , scores.inputScores
                          , NULL
@@ -406,7 +406,7 @@ void PDTAimp::CacheSource(ConfusionNet const& src)
 
 void PDTAimp::CreateTargetPhrase(TargetPhrase& targetPhrase,
                                  StringTgtCand::Tokens const& factorStrings,
-				 std::string const& factorDelimiter,
+                                 std::string const& factorDelimiter,
                                  Scores const& transVector,
                                  Scores const& inputVector,
                                  const std::string *alignmentString,
@@ -415,8 +415,8 @@ void PDTAimp::CreateTargetPhrase(TargetPhrase& targetPhrase,
   FactorCollection &factorCollection = FactorCollection::Instance();
 
   for(size_t k=0; k<factorStrings.size(); ++k) {
-    util::TokenIter<util::MultiCharacter, false> 
-      word(*factorStrings[k], factorDelimiter);
+    util::TokenIter<util::MultiCharacter, false>
+    word(*factorStrings[k], factorDelimiter);
     Word& w=targetPhrase.AddWord();
     for(size_t l=0; l<m_output.size(); ++l, ++word) {
       w[m_output[l]]= factorCollection.AddFactor(*word);

@@ -65,7 +65,7 @@ TranslationOptionCollectionLattice
       ScorePair *inputScore = new ScorePair(scores);
 
       InputPath *path
-	= new InputPath(ttask.get(), subphrase, labels, range, NULL, inputScore);
+      = new InputPath(ttask.get(), subphrase, labels, range, NULL, inputScore);
 
       path->SetNextNode(nextNode);
       m_inputPathQueue.push_back(path);
