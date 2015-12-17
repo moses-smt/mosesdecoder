@@ -67,7 +67,7 @@ void Manager::Init()
 		m_search = new SearchNormal(*this);
 		break;
 	case NormalBatch:
-		m_search = new SearchNormalBatch(*this);
+      m_search = NULL; //new SearchNormalBatch(*this);
 		break;
 	case CubePruning:
 		m_search = new NSCubePruning::Search(*this);

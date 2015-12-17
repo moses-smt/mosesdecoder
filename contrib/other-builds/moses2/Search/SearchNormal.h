@@ -33,7 +33,7 @@ public:
 protected:
     Stacks m_stacks;
 
-	void Decode(size_t stackInd);
+	void Decode(Stack* stack);
 	void Extend(const Hypothesis &hypo, const InputPath &path);
 	void Extend(const Hypothesis &hypo,
 			const TargetPhrases &tps,

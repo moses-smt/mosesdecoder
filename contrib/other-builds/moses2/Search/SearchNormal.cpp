@@ -31,7 +31,7 @@ SearchNormal::~SearchNormal() {
 void SearchNormal::Decode()
 {
 	// init stacks
-	m_stacks.Init(m_mgr.GetInput().GetSize() + 1);
+//	m_stacks.Init(m_mgr.GetInput().GetSize() + 1);
 
 	const Bitmap &initBitmap = m_mgr.GetBitmaps().GetInitialBitmap();
 	Hypothesis *initHypo = Hypothesis::Create(m_mgr);
@@ -40,27 +40,31 @@ void SearchNormal::Decode()
 
 	m_stacks.Add(initHypo, m_mgr.GetHypoRecycle());
 
-	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
-		Decode(stackInd);
-		//cerr << m_stacks << endl;
-
-		// delete stack to save mem
-		if (stackInd < m_stacks.GetSize() - 1) {
-			m_stacks.Delete(stackInd);
-		}
-		//cerr << m_stacks << endl;
-	}
+  while (! m_stacks.empty() ) {
+    Decode(m_stacks.getNextStack());
+  }
+  
+//	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
+//		Decode(stackInd);
+//		//cerr << m_stacks << endl;
+//
+//		// delete stack to save mem
+//		if (stackInd < m_stacks.GetSize() - 1) {
+//			m_stacks.Delete(stackInd);
+//		}
+//		//cerr << m_stacks << endl;
+//	}
 }
 
-void SearchNormal::Decode(size_t stackInd)
+void SearchNormal::Decode(Stack* stack)
 {
-  Stack &stack = m_stacks[stackInd];
-  if (&stack == &m_stacks.Back()) {
-	  // last stack. don't do anythin
-	  return;
-  }
+//  Stack &stack = m_stacks[stackInd];
+//  if (&stack == &m_stacks.Back()) {
+//	  // last stack. don't do anythin
+//	  return;
+//  }
 
-  std::vector<const Hypothesis*> hypos = stack.GetBestHyposAndPrune(m_mgr.system.stackSize, m_mgr.GetHypoRecycle());
+  std::vector<const Hypothesis*> hypos = stack->GetBestHyposAndPrune(m_mgr.system.stackSize, m_mgr.GetHypoRecycle());
 
 	const InputPaths &paths = m_mgr.GetInputPaths();
 

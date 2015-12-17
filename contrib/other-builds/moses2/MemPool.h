@@ -77,7 +77,9 @@ class MemPool {
 ////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename T>
 class ObjectPoolContiguous {
-  friend std::ostream& operator<<(std::ostream &, const ObjectPoolContiguous &);
+  
+  template <typename FriendT>
+  friend std::ostream& operator<<(std::ostream &, const ObjectPoolContiguous<FriendT> &);
 
   public:
 	ObjectPoolContiguous(std::size_t initSize = 100000)
