@@ -123,7 +123,7 @@ void LexicalReordering::EvaluateInIsolation(const System &system,
 		  Scores *estimatedScores) const
 {
   // cache data in target phrase
-  const LexicalReordering::Values *values = GetValues(source, targetPhrase);
+  const Values *values = GetValues(source, targetPhrase);
   if (values) {
     //scoreVec[orientation] = (*values)[orientation];
   }
@@ -160,7 +160,7 @@ void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
   const Phrase &source = hypo.GetInputPath().subPhrase;
   const Phrase &target = hypo.GetTargetPhrase();
 
-  const LexicalReordering::Values *values = GetValues(source, target);
+  const Values *values = GetValues(source, target);
   if (values) {
 	  scoreVec[orientation] = (*values)[orientation];
   }
@@ -170,7 +170,7 @@ void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
 	  const Phrase &source = prevStateCast.path->subPhrase;
 	  const Phrase &target = *prevStateCast.targetPhrase;
 
-	  const LexicalReordering::Values *values = GetValues(source, target);
+	  const Values *values = GetValues(source, target);
 	  if (values) {
 		  scoreVec[orientation + 3] = (*values)[orientation + 3];
 	  }
