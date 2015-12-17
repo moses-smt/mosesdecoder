@@ -119,7 +119,7 @@ void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
 {
   const LexicalReorderingState &prevStateCast = static_cast<const LexicalReorderingState&>(prevState);
   LexicalReorderingState &stateCast = static_cast<LexicalReorderingState&>(state);
-cerr << "hypo=" << hypo << endl;
+
   const Range &currRange = hypo.GetInputPath().range;
   stateCast.range = &currRange;
 
@@ -143,7 +143,7 @@ cerr << "hypo=" << hypo << endl;
 	  else {
 		  orientation = GetOrientation(*prevRange, currRange);
 		  scoreVec[orientation] = (*values)[orientation];
-		  scoreVec[2 + orientation] = (*values)[2 + orientation];
+		  scoreVec[3 + orientation] = (*values)[3 + orientation];
 	  }
 
 	  scores.PlusEquals(mgr.system, *this, scoreVec);
