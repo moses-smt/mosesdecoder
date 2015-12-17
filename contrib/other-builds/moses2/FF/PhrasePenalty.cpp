@@ -22,7 +22,8 @@ PhrasePenalty::~PhrasePenalty() {
 }
 
 void
-PhrasePenalty::EvaluateInIsolation(const System &system,
+PhrasePenalty::EvaluateInIsolation(MemPool &pool,
+		const System &system,
 		const Phrase &source, const TargetPhrase &targetPhrase,
 		Scores &scores,
 		Scores *estimatedScores) const

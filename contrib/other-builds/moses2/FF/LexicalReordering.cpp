@@ -116,11 +116,12 @@ void LexicalReordering::EmptyHypothesisState(FFState &state,
 	stateCast.targetPhrase = &hypo.GetTargetPhrase();
 }
 
-void LexicalReordering::EvaluateInIsolation(const System &system,
-		  const Phrase &source,
-		  const TargetPhrase &targetPhrase,
-		  Scores &scores,
-		  Scores *estimatedScores) const
+void LexicalReordering::EvaluateInIsolation(MemPool &pool,
+		const System &system,
+		const Phrase &source,
+		const TargetPhrase &targetPhrase,
+		Scores &scores,
+		Scores *estimatedScores) const
 {
   // cache data in target phrase
   const Values *values = GetValues(source, targetPhrase);

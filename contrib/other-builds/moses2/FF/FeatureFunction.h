@@ -5,8 +5,7 @@
  *      Author: hieu
  */
 
-#ifndef FEATUREFUNCTION_H_
-#define FEATUREFUNCTION_H_
+#pragma once
 
 #include <cstddef>
 #include <string>
@@ -21,6 +20,7 @@ class PhraseImpl;
 class TargetPhrase;
 class Scores;
 class Manager;
+class MemPool;
 
 class FeatureFunction {
 public:
@@ -46,7 +46,7 @@ public:
 	  // For SCFG decoding, the source contains non-terminals, NOT the raw
 	  // source from the input sentence
 	  virtual void
-	  EvaluateInIsolation(const System &system,
+	  EvaluateInIsolation(MemPool &pool, const System &system,
 			  const Phrase &source, const TargetPhrase &targetPhrase,
 	          Scores &scores,
 	          Scores *estimatedScores) const = 0;
@@ -69,5 +69,3 @@ protected:
 
 }
 
-
-#endif /* FEATUREFUNCTION_H_ */

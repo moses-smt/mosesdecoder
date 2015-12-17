@@ -144,8 +144,10 @@ void LanguageModel::EmptyHypothesisState(FFState &state,
 }
 
 void
-LanguageModel::EvaluateInIsolation(const System &system,
-		  const Phrase &source, const TargetPhrase &targetPhrase,
+LanguageModel::EvaluateInIsolation(MemPool &pool,
+		const System &system,
+		const Phrase &source,
+		const TargetPhrase &targetPhrase,
         Scores &scores,
         Scores *estimatedScores) const
 {

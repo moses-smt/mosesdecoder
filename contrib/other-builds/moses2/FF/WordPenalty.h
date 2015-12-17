@@ -20,7 +20,8 @@ public:
 	virtual ~WordPenalty();
 
 	  virtual void
-	  EvaluateInIsolation(const System &system,
+	  EvaluateInIsolation(MemPool &pool,
+			  const System &system,
 			  const Phrase &source,
 			  const TargetPhrase &targetPhrase,
 			  Scores &scores,

@@ -24,7 +24,8 @@ WordPenalty::~WordPenalty() {
 }
 
 void
-WordPenalty::EvaluateInIsolation(const System &system,
+WordPenalty::EvaluateInIsolation(MemPool &pool,
+		const System &system,
 		const Phrase &source,
 		const TargetPhrase &targetPhrase,
 		Scores &scores,

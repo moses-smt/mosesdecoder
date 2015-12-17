@@ -175,7 +175,7 @@ void LanguageModelDALM::CreateVocabMapping(const std::string &wordstxt, const Sy
 
   for(std::size_t i = 0; i < m_vocabMap.size(); i++) {
 	m_vocabMap[i] = m_vocab->unk();
-  }
+  }MemPool &pool,
 
   m_vocabMap.resize(max_fid+1, m_vocab->unk());
   std::vector< std::pair<std::size_t, DALM::VocabId> >::iterator it = vlist.begin();
@@ -216,10 +216,12 @@ void LanguageModelDALM::EmptyHypothesisState(FFState &state,
   m_lm->init_state(dalmState.get_state());
 }
 
- void LanguageModelDALM::EvaluateInIsolation(const System &system,
-		  const Phrase &source, const TargetPhrase &targetPhrase,
-          Scores &scores,
-          Scores *estimatedScores) const
+ void LanguageModelDALM::EvaluateInIsolation(MemPool &pool,
+		 const System &system,
+		 const Phrase &source,
+		 const TargetPhrase &targetPhrase,
+         Scores &scores,
+         Scores *estimatedScores) const
  {
 
  }

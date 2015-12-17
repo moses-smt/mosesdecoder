@@ -137,8 +137,10 @@ void KENLM::EmptyHypothesisState(FFState &state,
 }
 
 void
-KENLM::EvaluateInIsolation(const System &system,
-		  const Phrase &source, const TargetPhrase &targetPhrase,
+KENLM::EvaluateInIsolation(MemPool &pool,
+		const System &system,
+		const Phrase &source,
+		const TargetPhrase &targetPhrase,
         Scores &scores,
         Scores *estimatedScores) const
 {

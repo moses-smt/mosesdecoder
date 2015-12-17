@@ -68,8 +68,10 @@ void SkeletonStatefulFF::EmptyHypothesisState(FFState &state,
 }
 
 void
-SkeletonStatefulFF::EvaluateInIsolation(const System &system,
-		const Phrase &source, const TargetPhrase &targetPhrase,
+SkeletonStatefulFF::EvaluateInIsolation(MemPool &pool,
+		const System &system,
+		const Phrase &source,
+		const TargetPhrase &targetPhrase,
 		Scores &scores,
 		Scores *estimatedScores) const
 {

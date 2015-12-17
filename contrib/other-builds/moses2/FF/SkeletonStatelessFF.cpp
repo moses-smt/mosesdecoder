@@ -22,8 +22,10 @@ SkeletonStatelessFF::~SkeletonStatelessFF() {
 }
 
 void
-SkeletonStatelessFF::EvaluateInIsolation(const System &system,
-		const Phrase &source, const TargetPhrase &targetPhrase,
+SkeletonStatelessFF::EvaluateInIsolation(MemPool &pool,
+		const System &system,
+		const Phrase &source,
+		const TargetPhrase &targetPhrase,
 		Scores &scores,
 		Scores *estimatedScores) const
 {
