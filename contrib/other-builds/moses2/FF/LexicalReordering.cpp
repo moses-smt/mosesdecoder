@@ -126,7 +126,14 @@ void LexicalReordering::EvaluateInIsolation(MemPool &pool,
   // cache data in target phrase
   const Values *values = GetValues(source, targetPhrase);
   if (values) {
-    //scoreVec[orientation] = (*values)[orientation];
+    SCORE *scoreArr = pool.Allocate<SCORE>(6);
+    for (size_t i = 0; i < 6; ++i) {
+    	scoreArr[i] = (*values)[i];
+    }
+    targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
+  }
+  else {
+	  targetPhrase.ffData[m_PhraseTableInd] = NULL;
   }
 
 }
@@ -158,22 +165,20 @@ void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
   }
 
   // backwards
-  const Phrase &source = hypo.GetInputPath().subPhrase;
-  const Phrase &target = hypo.GetTargetPhrase();
+  const TargetPhrase &target = hypo.GetTargetPhrase();
 
-  const Values *values = GetValues(source, target);
+  const SCORE *values = (const SCORE *) target.ffData[m_PhraseTableInd];
   if (values) {
-	  scoreVec[orientation] = (*values)[orientation];
+	  scoreVec[orientation] = values[orientation];
   }
 
   // forwards
   if (prevRange->GetStartPos() != NOT_FOUND) {
-	  const Phrase &source = prevStateCast.path->subPhrase;
-	  const Phrase &target = *prevStateCast.targetPhrase;
+	  const TargetPhrase &prevTarget = *prevStateCast.targetPhrase;
+	  const SCORE *prevValues = (const SCORE *) prevTarget.ffData[m_PhraseTableInd];
 
-	  const Values *values = GetValues(source, target);
-	  if (values) {
-		  scoreVec[orientation + 3] = (*values)[orientation + 3];
+	  if (prevValues) {
+		  scoreVec[orientation + 3] = prevValues[orientation + 3];
 	  }
   }
 
