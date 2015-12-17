@@ -47,6 +47,13 @@ Scores::Scores(MemPool &pool,
 	}
 }
 
+Scores::Scores(const System &system, size_t numScores)
+:m_total(0)
+,m_scores(NULL)
+{
+}
+
+
 Scores::~Scores() {
 
 }

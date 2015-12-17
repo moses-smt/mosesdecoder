@@ -50,8 +50,8 @@ public:
     const FeatureFunction *FindFeatureFunction(const std::string &name) const;
     const PhraseTable *GetPhraseTablesExcludeUnknownWordPenalty(size_t ptInd);
 
-	  virtual void
-	  EvaluateInIsolation(MemPool &pool, const System &system,
+    // the pool here must be the system pool if the rule was loaded during load, or the mgr if it was loaded on demand
+    virtual void EvaluateInIsolation(MemPool &pool, const System &system,
 			  const Phrase &source, TargetPhrase &targetPhrase) const;
 
 protected:

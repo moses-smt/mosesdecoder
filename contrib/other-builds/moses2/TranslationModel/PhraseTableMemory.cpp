@@ -109,7 +109,7 @@ void PhraseTableMemory::Load(System &system)
 {
 	FactorCollection &vocab = system.GetVocab();
 
-	MemPool tmpPool;
+	MemPool tmpSourcePool;
 	vector<string> toks;
 	size_t lineNum = 0;
 	InputFileStream strme(m_path);
@@ -123,15 +123,14 @@ void PhraseTableMemory::Load(System &system)
 		assert(toks.size() >= 3);
 		//cerr << "line=" << line << endl;
 
-		PhraseImpl *source = PhraseImpl::CreateFromString(tmpPool, vocab, system, toks[0]);
+		PhraseImpl *source = PhraseImpl::CreateFromString(tmpSourcePool, vocab, system, toks[0]);
 		//cerr << "created soure" << endl;
 		TargetPhrase *target = TargetPhrase::CreateFromString(system.systemPool, system, toks[1]);
 		//cerr << "created target" << endl;
 		target->GetScores().CreateFromString(toks[2], *this, system, true);
 		//cerr << "created scores" << endl;
 
-		MemPool tmpPool;
-		system.featureFunctions.EvaluateInIsolation(tmpPool, system, *source, *target);
+		system.featureFunctions.EvaluateInIsolation(system.systemPool, system, *source, *target);
 		m_root.AddRule(*source, target);
 	}
 

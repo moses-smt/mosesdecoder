@@ -24,6 +24,10 @@ class Scores {
 public:
   Scores(const System &system, MemPool &pool, size_t numScores);
   Scores(MemPool &pool, size_t numScores, const Scores &origScores);
+
+  // Use with care. Doesn't use mempool. Currently only used in method to hold estimated score
+  Scores(const System &system, size_t numScores);
+
   virtual ~Scores();
 
   SCORE GetTotalScore() const
