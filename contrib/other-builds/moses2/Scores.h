@@ -46,6 +46,11 @@ public:
 
   void PlusEquals(const System &system,
 		  const FeatureFunction &featureFunction,
+		  const SCORE &score,
+		  size_t offset);
+
+  void PlusEquals(const System &system,
+		  const FeatureFunction &featureFunction,
 		  const std::vector<SCORE> &scores);
 
   void PlusEquals(const System &system,

@@ -80,7 +80,23 @@ void Scores::PlusEquals(const System &system,
 	}
 	SCORE weight = weights[ffStartInd];
 	m_total += score * weight;
+}
 
+void Scores::PlusEquals(const System &system,
+		  const FeatureFunction &featureFunction,
+		  const SCORE &score,
+		  size_t offset)
+{
+	assert(offset < featureFunction.GetNumScores());
+
+	const Weights &weights = system.weights;
+
+	size_t ffStartInd = featureFunction.GetStartInd();
+	if (m_scores) {
+		m_scores[ffStartInd + offset] += score;
+	}
+	SCORE weight = weights[ffStartInd + offset];
+	m_total += score * weight;
 }
 
 void Scores::PlusEquals(const System &system,

@@ -151,8 +151,6 @@ void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
   stateCast.path = &hypo.GetInputPath();
   stateCast.targetPhrase = &hypo.GetTargetPhrase();
 
-  vector<SCORE> scoreVec(m_numScores, 0);
-
   // calc orientation
   size_t orientation;
   const Range *prevRange = &prevStateCast.path->range;
@@ -169,7 +167,7 @@ void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
 
   const SCORE *values = (const SCORE *) target.ffData[m_PhraseTableInd];
   if (values) {
-	  scoreVec[orientation] = values[orientation];
+	  scores.PlusEquals(mgr.system, *this, values[orientation], orientation);
   }
 
   // forwards
@@ -178,11 +176,9 @@ void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
 	  const SCORE *prevValues = (const SCORE *) prevTarget.ffData[m_PhraseTableInd];
 
 	  if (prevValues) {
-		  scoreVec[orientation + 3] = prevValues[orientation + 3];
+		  scores.PlusEquals(mgr.system, *this, prevValues[orientation + 3], orientation + 3);
 	  }
   }
-
-  scores.PlusEquals(mgr.system, *this, scoreVec);
 
 }
 
