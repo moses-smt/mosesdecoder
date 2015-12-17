@@ -133,7 +133,7 @@ void LexicalReordering::EvaluateInIsolation(MemPool &pool,
     targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
   }
   else {
-	  targetPhrase.ffData[m_PhraseTableInd] = NULL;
+	targetPhrase.ffData[m_PhraseTableInd] = NULL;
   }
 
 }
