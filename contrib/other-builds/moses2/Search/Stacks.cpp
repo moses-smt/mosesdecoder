@@ -45,10 +45,19 @@ std::ostream& operator<<(std::ostream &out, const Stacks &obj)
 
 void Stacks::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 {
-	size_t numWordsCovered = hypo->GetBitmap().GetNumWordsCovered();
+  const Bitmap &bitmap = hypo->GetBitmap();
+	size_t numWordsCovered = bitmap.GetNumWordsCovered();
 	//cerr << "numWordsCovered=" << numWordsCovered << endl;
 	Stack &stack = *m_stacks[numWordsCovered];
 	stack.Add(hypo, hypoRecycle);
 
+  auto search = m_stacksMap.find(&bitmap);
+  if (search == m_stacksMap.end()) {
+    cerr << "Creating new stack for coverage " << bitmap.GetNumWordsCovered() << endl;
+    m_stacksMap.insert({&bitmap, new Stack()});
+  } else {
+//    cerr << "bar" << endl;
+  }
+  
 }
 

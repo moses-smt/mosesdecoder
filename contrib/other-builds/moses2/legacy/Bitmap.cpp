@@ -77,6 +77,31 @@ bool Bitmap::operator==(const Bitmap& other) const
   return m_bitmap == other.m_bitmap;
 }
 
+bool Bitmap::operator<(const Bitmap& other) const
+{
+  if (m_numWordsCovered < other.m_numWordsCovered) {
+    return true;
+  } else {
+    auto my_size = m_bitmap.size();
+    auto other_size = other.m_bitmap.size();
+    
+    if (my_size==other_size) {
+      for (auto i = 0U; i < my_size; i+=1) {
+        if (m_bitmap[i] < other.m_bitmap[i]) {
+          return true;
+        }
+      }
+      return false;
+    } else if (my_size < other_size) {
+      return true;
+    } else {
+      return false;
+    }
+    
+  }
+
+}
+
 // friend
 std::ostream& operator<<(std::ostream& out, const Bitmap& bitmap)
 {

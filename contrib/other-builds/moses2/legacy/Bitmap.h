@@ -238,5 +238,7 @@ public:
     return !(*this == other);
   }
 
+  bool operator<(const Bitmap& other) const;
+
 };
 
