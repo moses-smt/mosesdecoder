@@ -37,18 +37,7 @@ void InputPath::AddTargetPhrases(const PhraseTable &pt, const TargetPhrases *tps
 		m_isUsed = true;
 	}
 }
-/*
-bool InputPath::IsUsed() const
-{
-  BOOST_FOREACH(const TargetPhrases::shared_const_ptr &sharedPtr, targetPhrases) {
-	  const TargetPhrases *tps = sharedPtr.get();
-	  if (tps && tps->GetSize()) {
-		  return true;
-	  }
-  }
-  return false;
-}
-*/
+
 std::ostream& operator<<(std::ostream &out, const InputPath &obj)
 {
 	out << obj.range << " " << obj.subPhrase;
