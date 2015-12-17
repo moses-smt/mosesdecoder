@@ -38,6 +38,9 @@ public:
 	const std::vector<const StatefulFeatureFunction*> &GetStatefulFeatureFunctions() const
 	{ return m_statefulFeatureFunctions; }
 
+	const std::vector<const FeatureFunction*> &GetWithPhraseTableInd() const
+	{ return m_withPhraseTableInd; }
+
 	size_t GetNumScores() const
 	{ return m_ffStartInd; }
 
@@ -55,6 +58,7 @@ protected:
 	  std::vector<const FeatureFunction*> m_featureFunctions;
 	  std::vector<const StatefulFeatureFunction*> m_statefulFeatureFunctions;
 	  std::vector<const PhraseTable*> m_phraseTables;
+	  std::vector<const FeatureFunction*> m_withPhraseTableInd;
 
 	  System &m_system;
 	  size_t m_ffStartInd;

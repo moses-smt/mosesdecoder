@@ -37,10 +37,10 @@ public:
 	const std::string &GetName() const
 	{ return m_name; }
 
-	virtual size_t HasVocabInd() const
+	virtual size_t HasPhraseTableInd() const
 	{ return false; }
-	void SetVocabInd(size_t vocabInd)
-	{ m_vocabInd = vocabInd; }
+	void SetPhraseTableInd(size_t ind)
+	{ m_PhraseTableInd = ind; }
 
 	  // may have more factors than actually need, but not guaranteed.
 	  // For SCFG decoding, the source contains non-terminals, NOT the raw
@@ -57,7 +57,7 @@ public:
 protected:
 	size_t m_startInd;
 	size_t m_numScores;
-	size_t m_vocabInd;
+	size_t m_PhraseTableInd;
 	std::string m_name;
 	std::vector<std::vector<std::string> > m_args;
 	bool m_tuneable;

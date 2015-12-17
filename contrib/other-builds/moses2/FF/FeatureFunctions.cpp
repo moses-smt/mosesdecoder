@@ -62,6 +62,11 @@ void FeatureFunctions::Create()
 		  m_statefulFeatureFunctions.push_back(sfff);
 	  }
 
+	  if (ff->HasPhraseTableInd()) {
+		  ff->SetPhraseTableInd(m_withPhraseTableInd.size());
+		  m_withPhraseTableInd.push_back(ff);
+	  }
+
 	  PhraseTable *pt = dynamic_cast<PhraseTable*>(ff);
 	  if (pt) {
 		  pt->SetPtInd(m_phraseTables.size());
