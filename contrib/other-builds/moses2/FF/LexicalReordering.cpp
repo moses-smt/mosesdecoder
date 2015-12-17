@@ -16,7 +16,8 @@ namespace Moses2 {
 
 struct LexicalReorderingState : public FFState
 {
-  const Range *range;
+  const InputPath *path;
+  const TargetPhrase *targetPhrase;
 
   LexicalReorderingState()
   {
@@ -26,12 +27,12 @@ struct LexicalReorderingState : public FFState
 
   size_t hash() const {
 	// compare range address. All ranges are created in InputPath
-    return (size_t) range;
+    return (size_t) &path->range;
   }
   virtual bool operator==(const FFState& other) const {
 	// compare range address. All ranges are created in InputPath
     const LexicalReorderingState &stateCast = static_cast<const LexicalReorderingState&>(other);
-    return range == stateCast.range;
+    return &path->range == &stateCast.path->range;
   }
 
   virtual std::string ToString() const
@@ -110,7 +111,8 @@ void LexicalReordering::EmptyHypothesisState(FFState &state,
 		const Hypothesis &hypo) const
 {
 	LexicalReorderingState &stateCast = static_cast<LexicalReorderingState&>(state);
-	stateCast.range = &hypo.GetInputPath().range;
+	stateCast.path = &hypo.GetInputPath();
+	stateCast.targetPhrase = &hypo.GetTargetPhrase();
 }
 
 void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
@@ -123,33 +125,44 @@ void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
   LexicalReorderingState &stateCast = static_cast<LexicalReorderingState&>(state);
 
   const Range &currRange = hypo.GetInputPath().range;
-  stateCast.range = &currRange;
+  stateCast.path = &hypo.GetInputPath();
+  stateCast.targetPhrase = &hypo.GetTargetPhrase();
 
+  vector<SCORE> scoreVec(6, 0);
+
+  // calc orientation
+  size_t orientation;
+  const Range *prevRange = &prevStateCast.path->range;
+  assert(prevRange);
+  if (prevRange->GetStartPos() == NOT_FOUND) {
+	  orientation = GetOrientation(currRange);
+  }
+  else {
+	  orientation = GetOrientation(*prevRange, currRange);
+  }
+
+  // backwards
   const Phrase &source = hypo.GetInputPath().subPhrase;
   const Phrase &target = hypo.GetTargetPhrase();
 
   const LexicalReordering::Values *values = GetValues(source, target);
-
   if (values) {
-	  size_t orientation;
-	  vector<SCORE> scoreVec(6, 0);
-
-
-	  const Range *prevRange = prevStateCast.range;
-	  assert(prevRange);
-
-	  if (prevRange->GetStartPos() == NOT_FOUND) {
-		  orientation = GetOrientation(currRange);
-		  scoreVec[orientation] = (*values)[orientation];
-	  }
-	  else {
-		  orientation = GetOrientation(*prevRange, currRange);
-		  scoreVec[orientation] = (*values)[orientation];
-		  scoreVec[3 + orientation] = (*values)[3 + orientation];
-	  }
-
-	  scores.PlusEquals(mgr.system, *this, scoreVec);
+	  scoreVec[orientation] = (*values)[orientation];
   }
+
+  // forwards
+  if (prevRange->GetStartPos() != NOT_FOUND) {
+	  const Phrase &source = prevStateCast.path->subPhrase;
+	  const Phrase &target = *prevStateCast.targetPhrase;
+
+	  const LexicalReordering::Values *values = GetValues(source, target);
+	  if (values) {
+		  scoreVec[orientation + 3] = (*values)[orientation + 3];
+	  }
+  }
+
+  scores.PlusEquals(mgr.system, *this, scoreVec);
+
 }
 
 const LexicalReordering::Values *LexicalReordering::GetValues(const Phrase &source, const Phrase &target) const
