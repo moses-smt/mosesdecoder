@@ -220,6 +220,7 @@ void Scores::CreateFromString(const std::string &str,
 	vector<SCORE> scores = Tokenize<SCORE>(str);
 	if (transformScores) {
 	    std::transform(scores.begin(), scores.end(), scores.begin(), TransformScore);
+	    std::transform(scores.begin(), scores.end(), scores.begin(), FloorScore);
 	}
 
 	/*

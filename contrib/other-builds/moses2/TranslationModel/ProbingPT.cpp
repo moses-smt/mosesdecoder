@@ -157,6 +157,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system,
   SCORE scores[probingTargetPhrase.prob.size()];
   std::copy(probingTargetPhrase.prob.begin(), probingTargetPhrase.prob.end(), scores);
   std::transform(scores, scores + probingTargetPhrase.prob.size(), scores, TransformScore);
+  std::transform(scores, scores + probingTargetPhrase.prob.size(), scores, FloorScore);
   tp->GetScores().PlusEquals(system, *this, scores);
 
 //  // alignment

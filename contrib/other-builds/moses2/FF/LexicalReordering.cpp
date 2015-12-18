@@ -74,6 +74,7 @@ void LexicalReordering::Load(System &system)
 	PhraseImpl *target = PhraseImpl::CreateFromString(system.systemPool, system.GetVocab(), system, toks[1]);
 	std::vector<SCORE> scores = Tokenize<SCORE>(toks[2]);
     std::transform(scores.begin(), scores.end(), scores.begin(), TransformScore);
+    std::transform(scores.begin(), scores.end(), scores.begin(), FloorScore);
 
 	Key key(source, target);
 	m_coll[key] = scores;

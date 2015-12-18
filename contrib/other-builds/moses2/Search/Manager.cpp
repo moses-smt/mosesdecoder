@@ -162,6 +162,9 @@ void Manager::OutputBest() const
 		cerr << "BEST TRANSLATION: " << *bestHypo;
 	}
 	else {
+		if (system.outputHypoScore) {
+			out << "0 ";
+		}
 		cerr << "NO TRANSLATION";
 	}
 	out << "\n";

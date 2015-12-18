@@ -240,6 +240,12 @@ inline float TransformScore(float prob)
   return log(prob);
 }
 
+//! make sure score doesn't fall below LOWEST_SCORE
+inline float FloorScore(float logScore)
+{
+  return (std::max)(logScore , LOWEST_SCORE);
+}
+
 template<typename T>
 void Swap(T &a, T &b) {
   T &c = a;
