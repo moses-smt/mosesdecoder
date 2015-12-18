@@ -29,16 +29,10 @@ else {
     alias programsMin ;
 }
 
-if [ option.get "with-probing-pt" : : "yes" ]
-{
-    exe CreateProbingPT : CreateProbingPT.cpp ..//boost_filesystem ../moses//moses ;
-    exe QueryProbingPT : QueryProbingPT.cpp ..//boost_filesystem ../moses//moses ;
+exe CreateProbingPT : CreateProbingPT.cpp ..//boost_filesystem ../moses//moses ;
+exe QueryProbingPT : QueryProbingPT.cpp ..//boost_filesystem ../moses//moses ;
 
-    alias programsProbing : CreateProbingPT QueryProbingPT ;
-}
-else {
-    alias programsProbing ;
-}
+alias programsProbing : CreateProbingPT QueryProbingPT ;
 
 exe merge-sorted : 
 merge-sorted.cc 

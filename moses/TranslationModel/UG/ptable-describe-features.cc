@@ -7,6 +7,7 @@
 #include <boost/shared_ptr.hpp>
 #include <algorithm>
 #include <iostream>
+#include "moses/parameters/AllOptions.h"
 
 using namespace Moses;
 using namespace sapt;
@@ -20,15 +21,16 @@ int main()
     {
       if (line.empty()) continue;
       size_t k = line.find_first_not_of(" ");
-      if (line.find("Mmsapt") != k &&
-	  line.find("PhraseDictionaryBitextSampling") != k)
-	continue;
+      if (line.find("Mmsapt") != k && 
+          line.find("PhraseDictionaryBitextSampling") != k)
+        continue;
+      AllOptions::ptr opts(new AllOptions);
       Mmsapt PT(line);
-      PT.Load(false);
+      PT.Load(opts, false);
       cout << PT.GetName() << ":" << endl;
       vector<string> const& fnames = PT.GetFeatureNames();
       BOOST_FOREACH(string const& s, fnames)
-	cout << s << endl;
+        cout << s << endl;
       cout << endl;
     }
   exit(0);
