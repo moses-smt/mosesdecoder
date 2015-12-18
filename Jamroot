@@ -206,12 +206,9 @@ if [ option.get "with-icu" : : "yes" ]
 #  requirements += <runtime-link>shared ;
 }
 
-if [ option.get "with-probing-pt" : : "yes" ]
-{
-  external-lib boost_serialization ;
-  requirements += <define>HAVE_PROBINGPT ;
-  requirements += <library>boost_serialization ;
-}
+# for probing pt
+external-lib boost_serialization ;
+requirements += <library>boost_serialization ;
 
 if [ option.get "with-vw" ] {
   requirements += <define>HAVE_VW ;
