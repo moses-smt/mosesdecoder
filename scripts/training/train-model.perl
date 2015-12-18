@@ -2367,7 +2367,14 @@ sub create_ini {
   print INI "PhrasePenalty\n";
   print INI "SoftMatchingFeature name=SM0 path=$_UNKNOWN_WORD_SOFT_MATCHES_FILE\n" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_SOFT_MATCHES_FILE);
   print INI "SoftSourceSyntacticConstraintsFeature sourceLabelSetFile=$_GHKM_SOURCE_LABELS_FILE\n" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
-  print INI "PhraseOrientationFeature\n" if $_PHRASE_ORIENTATION;
+  if ($_PHRASE_ORIENTATION) {
+    print INI "PhraseOrientationFeature";
+    # find the label of the left-hand side non-terminal in glue rules (target non-terminal set)
+    my $TOPLABEL = `head -n 1 $___GLUE_GRAMMAR_FILE`;
+    $TOPLABEL =~ s/.* \|\|\| .* \[(.*)\] \|\|\| .*/\1/;
+    chomp($TOPLABEL);
+    print INI " glue-label=$TOPLABEL\n";
+  }
   print INI $feature_spec;
 
   print INI "\n# dense weights for feature functions\n";

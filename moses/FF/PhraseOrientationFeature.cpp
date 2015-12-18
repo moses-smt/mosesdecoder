@@ -82,8 +82,8 @@ const std::string PhraseOrientationFeature::DORIENT("D");
 
 PhraseOrientationFeature::PhraseOrientationFeature(const std::string &line)
   : StatefulFeatureFunction(6, line)
-  , m_glueTargetLHSStr("Q")
-  , m_distinguishStates(true)
+  , m_glueLabelStr("Q")
+  , m_distinguishStates(false)
   , m_useSparseWord(false)
   , m_useSparseNT(false)
   , m_offsetR2LScores(m_numScoreComponents/2)
@@ -93,24 +93,24 @@ PhraseOrientationFeature::PhraseOrientationFeature(const std::string &line)
   VERBOSE(1, "Initializing feature " << GetScoreProducerDescription() << " ...");
   ReadParameters();
   FactorCollection &factorCollection = FactorCollection::Instance();
-  m_glueTargetLHS = factorCollection.AddFactor(m_glueTargetLHSStr, true);
+  m_glueLabel = factorCollection.AddFactor(m_glueLabelStr, true);
   VERBOSE(1, " Done." << std::endl);
 }
 
 
 void PhraseOrientationFeature::SetParameter(const std::string& key, const std::string& value)
 {
-  if (key == "glueTargetLHS") {
-    m_glueTargetLHSStr = value;
-  } else if (key == "distinguishStates") {
+  if (key == "glue-label") {
+    m_glueLabelStr = value;
+  } else if (key == "distinguish-states") {
     m_distinguishStates = Scan<bool>(value);
-  } else if (key == "sparseWord") {
+  } else if (key == "sparse-word") {
     m_useSparseWord = Scan<bool>(value);
-  } else if (key == "sparseNT") {
+  } else if (key == "sparse-nt") {
     m_useSparseNT = Scan<bool>(value);
-  } else if (key == "targetWordList") {
+  } else if (key == "target-word-list") {
     m_filenameTargetWordList = value;
-  } else if (key == "sourceWordList") {
+  } else if (key == "source-word-list") {
     m_filenameSourceWordList = value;
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
@@ -206,7 +206,7 @@ void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source,
       MosesTraining::PhraseOrientation::REO_CLASS l2rOrientation = phraseOrientation.GetOrientationInfo(sourceIndex,sourceIndex,MosesTraining::PhraseOrientation::REO_DIR_L2R);
 
       if ( ((targetIndex == 0) || !phraseOrientation.TargetSpanIsAligned(0,targetIndex)) // boundary non-terminal in rule-initial position (left boundary)
-           && (targetPhraseLHS != m_glueTargetLHS) ) { // and not glue rule
+           && (targetPhraseLHS != m_glueLabel) ) { // and not glue rule
 
         FEATUREVERBOSE(3, "Left boundary: targetIndex== " << targetIndex);
         if (targetIndex != 0) {
@@ -236,7 +236,7 @@ void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source,
       MosesTraining::PhraseOrientation::REO_CLASS r2lOrientation = phraseOrientation.GetOrientationInfo(sourceIndex,sourceIndex,MosesTraining::PhraseOrientation::REO_DIR_R2L);
 
       if ( ((targetIndex == targetPhrase.GetSize()-1) || !phraseOrientation.TargetSpanIsAligned(targetIndex,targetPhrase.GetSize()-1)) // boundary non-terminal in rule-final position (right boundary)
-           && (targetPhraseLHS != m_glueTargetLHS) ) { // and not glue rule
+           && (targetPhraseLHS != m_glueLabel) ) { // and not glue rule
 
         FEATUREVERBOSE(3, "Right boundary: targetIndex== " << targetIndex);
         if (targetIndex != targetPhrase.GetSize()-1) {
@@ -891,7 +891,7 @@ void PhraseOrientationFeature::SparseNonTerminalL2RScore(const Factor* nonTermin
     ScoreComponentCollection* scoreBreakdown,
     const std::string* o) const
 {
-  if ( nonTerminalSymbol != m_glueTargetLHS ) {
+  if ( nonTerminalSymbol != m_glueLabel ) {
     const std::string& nonTerminalString = nonTerminalSymbol->GetString().as_string();
     scoreBreakdown->PlusEquals(this,
                                "L2R"+*o+"_n_"+nonTerminalString,
@@ -905,7 +905,7 @@ void PhraseOrientationFeature::SparseNonTerminalR2LScore(const Factor* nonTermin
     ScoreComponentCollection* scoreBreakdown,
     const std::string* o) const
 {
-  if ( nonTerminalSymbol != m_glueTargetLHS ) {
+  if ( nonTerminalSymbol != m_glueLabel ) {
     const std::string& nonTerminalString = nonTerminalSymbol->GetString().as_string();
     scoreBreakdown->PlusEquals(this,
                                "R2L"+*o+"_n_"+nonTerminalString,
