@@ -31,6 +31,7 @@ public:
   {
 		return !( (*this) == compare );
   }
+  virtual std::string GetString(const FactorList &factorTypes) const;
 
 };
 

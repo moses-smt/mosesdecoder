@@ -46,6 +46,24 @@ bool Phrase::operator==(const Phrase &compare) const
   return true;
 }
 
+std::string Phrase::GetString(const FactorList &factorTypes) const
+{
+	if (GetSize() == 0) {
+		return "";
+	}
+
+	std::stringstream ret;
+
+	const Word &word = (*this)[0];
+	ret << word.GetString(factorTypes);
+	for (size_t i = 1; i < factorTypes.size(); ++i) {
+		const Word &word = (*this)[0];
+		ret << " " << word.GetString(factorTypes);
+	}
+	return ret.str();
+
+}
+
 ////////////////////////////////////////////////////////////////////////////////////////
 PhraseImpl *PhraseImpl::CreateFromString(MemPool &pool, FactorCollection &vocab, const System &system, const std::string &str)
 {

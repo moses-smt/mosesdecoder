@@ -49,6 +49,7 @@ public:
 	return m_factors[ind];
   }
 
+  std::string GetString(const FactorList &factorTypes) const;
 protected:
   const Factor *m_factors[MAX_NUM_FACTORS];
 

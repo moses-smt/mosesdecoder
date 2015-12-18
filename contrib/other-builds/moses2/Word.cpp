@@ -5,6 +5,7 @@
  *      Author: hieu
  */
 
+#include <sstream>
 #include <vector>
 #include "Word.h"
 #include "System.h"
@@ -79,6 +80,19 @@ std::ostream& operator<<(std::ostream &out, const Word &obj)
 		}
 	}
 	return out;
+}
+
+std::string Word::GetString(const FactorList &factorTypes) const
+{
+	assert(factorTypes.size());
+	std::stringstream ret;
+
+	ret << m_factors[ factorTypes[0] ]->GetString();
+	for (size_t i = 1; i < factorTypes.size(); ++i) {
+		FactorType factorType = factorTypes[i];
+		ret << "|" << m_factors[factorType];
+	}
+	return ret.str();
 }
 
 }
