@@ -9,6 +9,7 @@
 #include "../System.h"
 #include "../Search/Manager.h"
 #include "../legacy/InputFileStream.h"
+#include "../legacy/Util2.h"
 
 using namespace std;
 
@@ -59,6 +60,11 @@ LexicalReordering::~LexicalReordering()
 
 void LexicalReordering::Load(System &system)
 {
+  if (FileExists(m_path + ".binlexr.idx") ) {
+	//ret = new LexicalReorderingTableTree(filePath, f_factors,
+	//									 e_factors, c_factors);
+  }
+
   InputFileStream file(m_path);
   string line;
   size_t lineNum = 0;
