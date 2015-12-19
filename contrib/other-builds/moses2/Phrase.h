@@ -32,6 +32,7 @@ public:
 		return !( (*this) == compare );
   }
   virtual std::string GetString(const FactorList &factorTypes) const;
+  virtual SubPhrase GetSubPhrase(size_t start, size_t end) const = 0;
 
 };
 
@@ -76,6 +77,8 @@ public:
 
   virtual size_t GetSize() const
   { return m_end - m_start + 1; }
+
+  SubPhrase GetSubPhrase(size_t start, size_t end) const;
 
 protected:
   const PhraseImpl *m_origPhrase;

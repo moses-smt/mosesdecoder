@@ -142,7 +142,6 @@ SubPhrase::SubPhrase(const PhraseImpl &origPhrase, size_t start, size_t end)
 
 }
 
-
 std::ostream& operator<<(std::ostream &out, const SubPhrase &obj)
 {
 	if (obj.GetSize()) {
@@ -153,6 +152,12 @@ std::ostream& operator<<(std::ostream &out, const SubPhrase &obj)
 		}
 	}
 	return out;
+}
+
+SubPhrase SubPhrase::GetSubPhrase(size_t start, size_t end) const
+{
+	SubPhrase ret(*m_origPhrase, m_start + start, m_start + end);
+	return ret;
 }
 
 }
