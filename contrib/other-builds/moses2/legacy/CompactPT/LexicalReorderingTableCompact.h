@@ -32,8 +32,6 @@ namespace Moses2
 {
 class Phrase;
 
-typedef std::vector<float> Scores;
-
 //! additional types
 class LexicalReorderingTable
 {
@@ -51,7 +49,7 @@ public:
 public:
 
   virtual
-  Scores
+  std::vector<float>
   GetScore(const Phrase& f, const Phrase& e, const Phrase& c) = 0;
 
   virtual

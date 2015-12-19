@@ -15,6 +15,8 @@
 
 namespace Moses2 {
 
+class LexicalReorderingTableCompact;
+
 class LexicalReordering : public StatefulFeatureFunction
 {
 public:
@@ -54,7 +56,10 @@ protected:
   FactorList m_FactorsE;
   FactorList m_FactorsC;
 
+  // COMPACT MODEL
+  LexicalReorderingTableCompact *m_compactModel;
 
+  // MEMORY MODEL
   typedef std::pair<const Phrase*, const Phrase*> Key;
   typedef std::vector<SCORE> Values;
 
@@ -79,7 +84,7 @@ protected:
   };
 
   typedef boost::unordered_map<Key, Values, KeyComparer, KeyComparer> Coll;
-  Coll m_coll;
+  Coll *m_coll;
 
   const Values *GetValues(const Phrase &source, const Phrase &target) const;
 

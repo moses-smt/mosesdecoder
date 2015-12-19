@@ -10,6 +10,7 @@
 #include "../Search/Manager.h"
 #include "../legacy/InputFileStream.h"
 #include "../legacy/Util2.h"
+#include "../legacy/CompactPT/LexicalReorderingTableCompact.h"
 
 using namespace std;
 
@@ -48,6 +49,8 @@ struct LexicalReorderingState : public FFState
 
 LexicalReordering::LexicalReordering(size_t startInd, const std::string &line)
 :StatefulFeatureFunction(startInd, line)
+,m_compactModel(NULL)
+,m_coll(NULL)
 {
 	ReadParameters();
 	assert(m_numScores == 6);
@@ -55,35 +58,38 @@ LexicalReordering::LexicalReordering(size_t startInd, const std::string &line)
 
 LexicalReordering::~LexicalReordering()
 {
-	// TODO Auto-generated destructor stub
+	delete m_compactModel;
+	delete m_coll;
 }
 
 void LexicalReordering::Load(System &system)
 {
-  if (FileExists(m_path + ".binlexr.idx") ) {
-	//ret = new LexicalReorderingTableTree(filePath, f_factors,
-	//									 e_factors, c_factors);
+  if (FileExists(m_path + ".minlexr") ) {
+	  m_compactModel = new LexicalReorderingTableCompact(m_path + ".minlexr", m_FactorsF,
+			  m_FactorsE, m_FactorsC);
   }
+  else {
+	  m_coll = new Coll();
+	  InputFileStream file(m_path);
+	  string line;
+	  size_t lineNum = 0;
 
-  InputFileStream file(m_path);
-  string line;
-  size_t lineNum = 0;
+	  while(getline(file, line)) {
+		if (++lineNum % 1000000 == 0) {
+			cerr << lineNum << " ";
+		}
 
-  while(getline(file, line)) {
-	if (++lineNum % 1000000 == 0) {
-		cerr << lineNum << " ";
-	}
+		std::vector<std::string> toks = TokenizeMultiCharSeparator(line, "|||");
+		assert(toks.size() == 3);
+		PhraseImpl *source = PhraseImpl::CreateFromString(system.systemPool, system.GetVocab(), system, toks[0]);
+		PhraseImpl *target = PhraseImpl::CreateFromString(system.systemPool, system.GetVocab(), system, toks[1]);
+		std::vector<SCORE> scores = Tokenize<SCORE>(toks[2]);
+		std::transform(scores.begin(), scores.end(), scores.begin(), TransformScore);
+		std::transform(scores.begin(), scores.end(), scores.begin(), FloorScore);
 
-	std::vector<std::string> toks = TokenizeMultiCharSeparator(line, "|||");
-	assert(toks.size() == 3);
-	PhraseImpl *source = PhraseImpl::CreateFromString(system.systemPool, system.GetVocab(), system, toks[0]);
-	PhraseImpl *target = PhraseImpl::CreateFromString(system.systemPool, system.GetVocab(), system, toks[1]);
-	std::vector<SCORE> scores = Tokenize<SCORE>(toks[2]);
-    std::transform(scores.begin(), scores.end(), scores.begin(), TransformScore);
-    std::transform(scores.begin(), scores.end(), scores.begin(), FloorScore);
-
-	Key key(source, target);
-	m_coll[key] = scores;
+		Key key(source, target);
+		(*m_coll)[key] = scores;
+	  }
   }
 }
 
@@ -96,10 +102,11 @@ void LexicalReordering::SetParameter(const std::string& key, const std::string& 
 
   }
   else if (key == "input-factor") {
-
+	  m_FactorsF = Tokenize<FactorType>(value);
   }
   else if (key == "output-factor") {
-
+	  m_FactorsE = Tokenize<FactorType>(value);
+	  m_FactorsC = m_FactorsE;
   }
 
   else {
@@ -130,19 +137,36 @@ void LexicalReordering::EvaluateInIsolation(MemPool &pool,
 		Scores &scores,
 		Scores *estimatedScores) const
 {
-  // cache data in target phrase
-  const Values *values = GetValues(source, targetPhrase);
-  if (values) {
-    SCORE *scoreArr = pool.Allocate<SCORE>(6);
-    for (size_t i = 0; i < 6; ++i) {
-    	scoreArr[i] = (*values)[i];
-    }
-    targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
+  if (m_compactModel) {
+	  const Values values = m_compactModel->GetScore(source, targetPhrase, targetPhrase);
+	  if (values.size()) {
+	    assert(values.size() == 6);
+		SCORE *scoreArr = pool.Allocate<SCORE>(6);
+		for (size_t i = 0; i < 6; ++i) {
+			scoreArr[i] = values[i];
+		}
+		targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
+	  }
+	  else {
+		targetPhrase.ffData[m_PhraseTableInd] = NULL;
+	  }
   }
   else {
-	targetPhrase.ffData[m_PhraseTableInd] = NULL;
-  }
+	  assert(m_coll);
 
+	  // cache data in target phrase
+	  const Values *values = GetValues(source, targetPhrase);
+	  if (values) {
+		SCORE *scoreArr = pool.Allocate<SCORE>(6);
+		for (size_t i = 0; i < 6; ++i) {
+			scoreArr[i] = (*values)[i];
+		}
+		targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
+	  }
+	  else {
+		targetPhrase.ffData[m_PhraseTableInd] = NULL;
+	  }
+  }
 }
 
 void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
@@ -193,8 +217,8 @@ const LexicalReordering::Values *LexicalReordering::GetValues(const Phrase &sour
 {
 	Key key(&source, &target);
 	Coll::const_iterator iter;
-	iter = m_coll.find(key);
-	if (iter == m_coll.end()) {
+	iter = m_coll->find(key);
+	if (iter == m_coll->end()) {
 		return NULL;
 	}
 	else {

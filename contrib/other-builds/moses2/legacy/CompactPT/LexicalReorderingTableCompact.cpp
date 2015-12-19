@@ -72,7 +72,7 @@ LexicalReorderingTableCompact::
 GetScore(const Phrase& f, const Phrase& e, const Phrase& c)
 {
   std::string key;
-  Scores scores;
+  std::vector<float> scores;
 
   if(0 == c.GetSize())
     key = MakeKey(f, e, c);
@@ -97,7 +97,7 @@ GetScore(const Phrase& f, const Phrase& e, const Phrase& c)
     return scores;
   }
 
-  return Scores();
+  return std::vector<float>();
 }
 
 std::string
