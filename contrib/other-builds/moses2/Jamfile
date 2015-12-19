@@ -74,7 +74,12 @@ external-lib boost_serialization ;
     legacy/ProbingPT/probing_hash_utils.cpp
     legacy/ProbingPT/quering.cpp
     legacy/ProbingPT/vocabid.cpp
-    
+    legacy/CompactPT/BlockHashIndex.cpp
+    legacy/CompactPT/CmphStringVectorAdapter.cpp
+    legacy/CompactPT/LexicalReorderingTableCompact.cpp
+    legacy/CompactPT/MurmurHash3.cpp
+    legacy/CompactPT/ThrowingFwrite.cpp
+
  ../../../moses//moses 
  ../../../OnDiskPt//OnDiskPt 
  ../../..//boost_filesystem  
