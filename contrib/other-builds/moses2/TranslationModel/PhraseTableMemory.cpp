@@ -71,11 +71,11 @@ TargetPhrases *PhraseTableMemory::Node::Find(const Phrase &source, size_t pos) c
 	}
 }
 
-void PhraseTableMemory::Node::SortAndPrune(size_t tableLimit, MemPool &pool)
+void PhraseTableMemory::Node::SortAndPrune(size_t tableLimit, MemPool &pool, System &system)
 {
   BOOST_FOREACH(Children::value_type &val, m_children) {
 	  Node &child = val.second;
-	  child.SortAndPrune(tableLimit, pool);
+	  child.SortAndPrune(tableLimit, pool, system);
   }
 
   // prune target phrases in this node
@@ -88,6 +88,7 @@ void PhraseTableMemory::Node::SortAndPrune(size_t tableLimit, MemPool &pool)
 	  }
 
 	  m_targetPhrases->SortAndPrune(tableLimit);
+	  system.featureFunctions.EvaluateAfterTablePruning(*m_targetPhrases);
 
 	  delete m_unsortedTPS;
   }
@@ -134,7 +135,7 @@ void PhraseTableMemory::Load(System &system)
 		m_root.AddRule(*source, target);
 	}
 
-	m_root.SortAndPrune(m_tableLimit, system.systemPool);
+	m_root.SortAndPrune(m_tableLimit, system.systemPool, system);
 }
 
 TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const

@@ -44,6 +44,9 @@ public:
 		  Scores &scores,
 		  Scores *estimatedScores) const;
 
+  virtual void
+  EvaluateAfterTablePruning(const TargetPhrases &tps) const;
+
   virtual void EvaluateWhenApplied(const Manager &mgr,
 	const Hypothesis &hypo,
 	const FFState &prevState,
@@ -55,6 +58,9 @@ protected:
   FactorList m_FactorsF;
   FactorList m_FactorsE;
   FactorList m_FactorsC;
+
+  virtual void
+  EvaluateAfterTablePruning(const TargetPhrase &targetPhrase) const;
 
   // COMPACT MODEL
   LexicalReorderingTableCompact *m_compactModel;

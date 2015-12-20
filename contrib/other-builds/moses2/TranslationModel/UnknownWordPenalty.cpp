@@ -78,6 +78,7 @@ TargetPhrases *UnknownWordPenalty::Lookup(const Manager &mgr, MemPool &pool, Inp
 	system.featureFunctions.EvaluateInIsolation(memPool, system, source, *target);
 
 	tps->AddTargetPhrase(*target);
+    system.featureFunctions.EvaluateAfterTablePruning(*tps);
 
 	return tps;
 }

@@ -24,7 +24,7 @@ class PhraseTableMemory : public PhraseTable
 		void AddRule(PhraseImpl &source, TargetPhrase *target);
 		TargetPhrases *Find(const Phrase &source, size_t pos = 0) const;
 
-		void SortAndPrune(size_t tableLimit, MemPool &pool);
+		void SortAndPrune(size_t tableLimit, MemPool &pool, System &system);
 
 	protected:
 		typedef boost::unordered_map<Word, Node, UnorderedComparer<Word>, UnorderedComparer<Word> > Children;

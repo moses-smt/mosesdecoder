@@ -5,6 +5,7 @@
  *      Author: hieu
  */
 
+#include <boost/foreach.hpp>
 #include "LexicalReordering.h"
 #include "../System.h"
 #include "../Search/Manager.h"
@@ -137,10 +138,22 @@ void LexicalReordering::EvaluateInIsolation(MemPool &pool,
 		Scores &scores,
 		Scores *estimatedScores) const
 {
+}
+
+void LexicalReordering::EvaluateAfterTablePruning(const TargetPhrases &tps) const
+{
+  BOOST_FOREACH(const TargetPhrase *tp, tps) {
+	  EvaluateAfterTablePruning(*tp);
+  }
+}
+
+void LexicalReordering::EvaluateAfterTablePruning(const TargetPhrase &targetPhrase) const
+{
+	/*
   if (m_compactModel) {
 	  const Values values = m_compactModel->GetScore(source, targetPhrase, *m_blank);
 	  if (values.size()) {
-	    assert(values.size() == 6);
+		assert(values.size() == 6);
 		SCORE *scoreArr = pool.Allocate<SCORE>(6);
 		for (size_t i = 0; i < 6; ++i) {
 			scoreArr[i] = values[i];
@@ -167,7 +180,9 @@ void LexicalReordering::EvaluateInIsolation(MemPool &pool,
 		targetPhrase.ffData[m_PhraseTableInd] = NULL;
 	  }
   }
+	*/
 }
+
 
 void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
   const Hypothesis &hypo,

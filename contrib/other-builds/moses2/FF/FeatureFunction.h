@@ -18,6 +18,7 @@ class System;
 class Phrase;
 class PhraseImpl;
 class TargetPhrase;
+class TargetPhrases;
 class Scores;
 class Manager;
 class MemPool;
@@ -50,6 +51,10 @@ public:
 			  const Phrase &source, const TargetPhrase &targetPhrase,
 	          Scores &scores,
 	          Scores *estimatedScores) const = 0;
+
+	  virtual void
+	  EvaluateAfterTablePruning(const TargetPhrases &tps) const
+	  {}
 
 	  // clean up temporary memory, called after processing each sentence
 	  virtual void CleanUpAfterSentenceProcessing() {}

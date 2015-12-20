@@ -24,6 +24,7 @@ class MemPool;
 class Phrase;
 class PhraseImpl;
 class TargetPhrase;
+class TargetPhrases;
 class Scores;
 
 class FeatureFunctions {
@@ -51,8 +52,9 @@ public:
     const PhraseTable *GetPhraseTablesExcludeUnknownWordPenalty(size_t ptInd);
 
     // the pool here must be the system pool if the rule was loaded during load, or the mgr if it was loaded on demand
-    virtual void EvaluateInIsolation(MemPool &pool, const System &system,
+    void EvaluateInIsolation(MemPool &pool, const System &system,
 			  const Phrase &source, TargetPhrase &targetPhrase) const;
+    void EvaluateAfterTablePruning(const TargetPhrases &tps) const;
 
 protected:
 	  std::vector<const FeatureFunction*> m_featureFunctions;
