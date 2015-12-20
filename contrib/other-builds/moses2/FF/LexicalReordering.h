@@ -28,7 +28,7 @@ public:
   virtual void SetParameter(const std::string& key, const std::string& value);
 
   virtual size_t HasPhraseTableInd() const
-  { return false; }
+  { return true; }
 
   virtual FFState* BlankState(const Manager &mgr, const InputType &input) const;
   virtual void EmptyHypothesisState(FFState &state,
