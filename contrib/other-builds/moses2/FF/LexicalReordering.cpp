@@ -153,7 +153,6 @@ void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
 		const TargetPhrase &targetPhrase,
 		const Phrase &sourcePhrase) const
 {
-	/*
   if (m_compactModel) {
 	  const Values values = m_compactModel->GetScore(sourcePhrase, targetPhrase, *m_blank);
 	  if (values.size()) {
@@ -184,7 +183,6 @@ void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
 		targetPhrase.ffData[m_PhraseTableInd] = NULL;
 	  }
   }
-	*/
 }
 
 
