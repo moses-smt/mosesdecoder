@@ -53,7 +53,7 @@ public:
 	          Scores *estimatedScores) const = 0;
 
 	  virtual void
-	  EvaluateAfterTablePruning(const TargetPhrases &tps) const
+	  EvaluateAfterTablePruning(MemPool &pool, const TargetPhrases &tps, const Phrase &sourcePhrase) const
 	  {}
 
 	  // clean up temporary memory, called after processing each sentence

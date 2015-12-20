@@ -189,10 +189,11 @@ FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
   targetPhrase.SetEstimatedScore(estimatedScores.GetTotalScore());
 }
 
-void FeatureFunctions::EvaluateAfterTablePruning(const TargetPhrases &tps) const
+void FeatureFunctions::EvaluateAfterTablePruning(MemPool &pool, const TargetPhrases &tps, const Phrase &sourcePhrase) const
 {
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
-	  ff->EvaluateAfterTablePruning(tps);  }
+	  ff->EvaluateAfterTablePruning(pool, tps, sourcePhrase);
+  }
 
 }
 

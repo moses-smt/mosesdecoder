@@ -126,7 +126,7 @@ TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system
     }
 
     tps->SortAndPrune(m_tableLimit);
-    system.featureFunctions.EvaluateAfterTablePruning(*tps);
+    system.featureFunctions.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
   }
   else {
 	  assert(query_result.second.size() == 0);

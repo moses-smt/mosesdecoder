@@ -140,18 +140,22 @@ void LexicalReordering::EvaluateInIsolation(MemPool &pool,
 {
 }
 
-void LexicalReordering::EvaluateAfterTablePruning(const TargetPhrases &tps) const
+void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
+		const TargetPhrases &tps,
+		const Phrase &sourcePhrase) const
 {
   BOOST_FOREACH(const TargetPhrase *tp, tps) {
-	  EvaluateAfterTablePruning(*tp);
+	  EvaluateAfterTablePruning(pool, *tp, sourcePhrase);
   }
 }
 
-void LexicalReordering::EvaluateAfterTablePruning(const TargetPhrase &targetPhrase) const
+void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
+		const TargetPhrase &targetPhrase,
+		const Phrase &sourcePhrase) const
 {
 	/*
   if (m_compactModel) {
-	  const Values values = m_compactModel->GetScore(source, targetPhrase, *m_blank);
+	  const Values values = m_compactModel->GetScore(sourcePhrase, targetPhrase, *m_blank);
 	  if (values.size()) {
 		assert(values.size() == 6);
 		SCORE *scoreArr = pool.Allocate<SCORE>(6);
@@ -168,7 +172,7 @@ void LexicalReordering::EvaluateAfterTablePruning(const TargetPhrase &targetPhra
 	  assert(m_coll);
 
 	  // cache data in target phrase
-	  const Values *values = GetValues(source, targetPhrase);
+	  const Values *values = GetValues(sourcePhrase, targetPhrase);
 	  if (values) {
 		SCORE *scoreArr = pool.Allocate<SCORE>(6);
 		for (size_t i = 0; i < 6; ++i) {

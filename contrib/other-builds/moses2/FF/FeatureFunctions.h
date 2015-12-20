@@ -54,7 +54,7 @@ public:
     // the pool here must be the system pool if the rule was loaded during load, or the mgr if it was loaded on demand
     void EvaluateInIsolation(MemPool &pool, const System &system,
 			  const Phrase &source, TargetPhrase &targetPhrase) const;
-    void EvaluateAfterTablePruning(const TargetPhrases &tps) const;
+    void EvaluateAfterTablePruning(MemPool &pool, const TargetPhrases &tps, const Phrase &sourcePhrase) const;
 
 protected:
 	  std::vector<const FeatureFunction*> m_featureFunctions;

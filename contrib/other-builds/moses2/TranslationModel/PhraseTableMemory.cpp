@@ -39,6 +39,7 @@ PhraseTableMemory::Node &PhraseTableMemory::Node::AddRule(PhraseImpl &source, Ta
 	if (pos == source.GetSize()) {
 		if (m_unsortedTPS == NULL) {
 			m_unsortedTPS = new std::vector<TargetPhrase*>();
+			m_source = &source;
 		}
 
 		m_unsortedTPS->push_back(target);
@@ -88,7 +89,7 @@ void PhraseTableMemory::Node::SortAndPrune(size_t tableLimit, MemPool &pool, Sys
 	  }
 
 	  m_targetPhrases->SortAndPrune(tableLimit);
-	  system.featureFunctions.EvaluateAfterTablePruning(*m_targetPhrases);
+	  system.featureFunctions.EvaluateAfterTablePruning(system.systemPool, *m_targetPhrases, *m_source);
 
 	  delete m_unsortedTPS;
   }
