@@ -67,6 +67,7 @@ void LexicalReordering::Load(System &system)
   if (FileExists(m_path + ".minlexr") ) {
 	  m_compactModel = new LexicalReorderingTableCompact(m_path + ".minlexr", m_FactorsF,
 			  m_FactorsE, m_FactorsC);
+	  m_blank = new (system.systemPool.Allocate<PhraseImpl>()) PhraseImpl(system.systemPool, 0);
   }
   else {
 	  m_coll = new Coll();
@@ -106,7 +107,6 @@ void LexicalReordering::SetParameter(const std::string& key, const std::string& 
   }
   else if (key == "output-factor") {
 	  m_FactorsE = Tokenize<FactorType>(value);
-	  m_FactorsC = m_FactorsE;
   }
 
   else {
@@ -138,7 +138,7 @@ void LexicalReordering::EvaluateInIsolation(MemPool &pool,
 		Scores *estimatedScores) const
 {
   if (m_compactModel) {
-	  const Values values = m_compactModel->GetScore(source, targetPhrase, targetPhrase);
+	  const Values values = m_compactModel->GetScore(source, targetPhrase, *m_blank);
 	  if (values.size()) {
 	    assert(values.size() == 6);
 		SCORE *scoreArr = pool.Allocate<SCORE>(6);

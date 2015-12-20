@@ -56,8 +56,8 @@ std::string Phrase::GetString(const FactorList &factorTypes) const
 
 	const Word &word = (*this)[0];
 	ret << word.GetString(factorTypes);
-	for (size_t i = 1; i < factorTypes.size(); ++i) {
-		const Word &word = (*this)[0];
+	for (size_t i = 1; i < GetSize(); ++i) {
+		const Word &word = (*this)[i];
 		ret << " " << word.GetString(factorTypes);
 	}
 	return ret.str();

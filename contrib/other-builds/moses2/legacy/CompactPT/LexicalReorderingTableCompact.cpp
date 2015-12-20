@@ -76,11 +76,12 @@ GetScore(const Phrase& f, const Phrase& e, const Phrase& c)
 
   if(0 == c.GetSize())
     key = MakeKey(f, e, c);
-  else
+  else {
     for(size_t i = 0; i <= c.GetSize(); ++i) {
       SubPhrase sub_c = c.GetSubPhrase(i, c.GetSize()-1);
       key = MakeKey(f,e,sub_c);
     }
+  }
 
   size_t index = m_hash[key];
   if(m_hash.GetSize() != index) {

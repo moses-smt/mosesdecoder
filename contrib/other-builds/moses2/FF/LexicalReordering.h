@@ -58,6 +58,7 @@ protected:
 
   // COMPACT MODEL
   LexicalReorderingTableCompact *m_compactModel;
+  Phrase *m_blank;
 
   // MEMORY MODEL
   typedef std::pair<const Phrase*, const Phrase*> Key;
