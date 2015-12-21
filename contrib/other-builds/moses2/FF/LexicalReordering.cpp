@@ -65,7 +65,10 @@ LexicalReordering::~LexicalReordering()
 
 void LexicalReordering::Load(System &system)
 {
-  if (FileExists(m_path + ".minlexr") ) {
+  if (!m_ptProperty.empty()) {
+	  // do nothing
+  }
+  else if (FileExists(m_path + ".minlexr") ) {
 	  m_compactModel = new LexicalReorderingTableCompact(m_path + ".minlexr", m_FactorsF,
 			  m_FactorsE, m_FactorsC);
 	  m_blank = new (system.systemPool.Allocate<PhraseImpl>()) PhraseImpl(system.systemPool, 0);
@@ -101,7 +104,7 @@ void LexicalReordering::SetParameter(const std::string& key, const std::string& 
 	  m_path = value;
   }
   else if (key == "type") {
-
+	  // ignore. only do 1 type
   }
   else if (key == "input-factor") {
 	  m_FactorsF = Tokenize<FactorType>(value);
@@ -109,7 +112,9 @@ void LexicalReordering::SetParameter(const std::string& key, const std::string& 
   else if (key == "output-factor") {
 	  m_FactorsE = Tokenize<FactorType>(value);
   }
-
+  else if (key == "pt-property") {
+	  m_ptProperty = value;
+  }
   else {
 	  StatefulFeatureFunction::SetParameter(key, value);
   }
@@ -153,7 +158,26 @@ void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
 		const TargetPhrase &targetPhrase,
 		const Phrase &sourcePhrase) const
 {
-  if (m_compactModel) {
+  if (!m_ptProperty.empty()) {
+	  string propStr = GetProperty(targetPhrase.properties, m_ptProperty);
+	  //cerr << "propStr=" << propStr << endl;
+	  if (!propStr.empty()) {
+		  vector<SCORE> values = Tokenize<SCORE>(propStr, " ");
+		  assert(values.size() == 6);
+
+		  SCORE *scoreArr = pool.Allocate<SCORE>(6);
+		  for (size_t i = 0; i < 6; ++i) {
+			scoreArr[i] = values[i];
+		  }
+
+		  targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
+	  }
+	  else {
+		  targetPhrase.ffData[m_PhraseTableInd] = NULL;
+	  }
+  }
+  else if (m_compactModel) {
+	  // using external compact binary model
 	  const Values values = m_compactModel->GetScore(sourcePhrase, targetPhrase, *m_blank);
 	  if (values.size()) {
 		assert(values.size() == 6);
@@ -168,6 +192,7 @@ void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
 	  }
   }
   else {
+	  // using external memory model
 	  assert(m_coll);
 
 	  // cache data in target phrase
@@ -184,7 +209,6 @@ void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
 	  }
   }
 }
-
 
 void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
   const Hypothesis &hypo,
@@ -241,6 +265,29 @@ const LexicalReordering::Values *LexicalReordering::GetValues(const Phrase &sour
 	else {
 		return &iter->second;
 	}
+}
+
+std::string LexicalReordering::GetProperty(const char *properties, const std::string &key) const
+{
+	string ret;
+	if (properties == NULL) {
+		return ret;
+	}
+
+	string propStr(properties);
+
+	size_t start = propStr.find("{{" + key + " ");
+	if (start == propStr.npos) {
+		// do nothing
+	}
+	else {
+		size_t keySize = key.size();
+		size_t end = propStr.find("}}", start);
+		assert(end != propStr.npos);
+		ret = propStr.substr(start + keySize + 3, end - start - keySize - 3);
+	}
+
+	return ret;
 }
 
 size_t LexicalReordering::GetOrientation(Range const& cur) const

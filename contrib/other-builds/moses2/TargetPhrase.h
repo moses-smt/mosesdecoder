@@ -23,6 +23,7 @@ class TargetPhrase : public PhraseImpl
 	  friend std::ostream& operator<<(std::ostream &, const TargetPhrase &);
 public:
   mutable void **ffData;
+  char *properties;
 
   static TargetPhrase *CreateFromString(MemPool &pool, const System &system, const std::string &str);
   TargetPhrase(MemPool &pool, const System &system, size_t size);

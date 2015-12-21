@@ -132,6 +132,12 @@ void PhraseTableMemory::Load(System &system)
 		target->GetScores().CreateFromString(toks[2], *this, system, true);
 		//cerr << "created scores" << endl;
 
+		// properties
+		if (toks.size() == 7) {
+			target->properties = (char*) system.systemPool.Allocate(toks[6].size() + 1);
+			strcpy(target->properties, toks[6].c_str());
+		}
+
 		system.featureFunctions.EvaluateInIsolation(system.systemPool, system, *source, *target);
 		m_root.AddRule(*source, target);
 	}

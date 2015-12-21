@@ -131,18 +131,32 @@ int main(int argc, char** argv)
 		//cerr << line << endl;
 		std::vector<std::string> toks = TokenizeMultiCharSeparator(line, "|||");
 		assert(toks.size() >= 2);
-		toks[0] = Trim(toks[0]);
-		toks[1] = Trim(toks[1]);
 
-		cerr << toks[0] << endl
-         << toks[1] << endl;
+		for (size_t i = 0; i < toks.size(); ++i) {
+			toks[i] = Trim(toks[i]);
+    }
 
 		std::vector<float> scores = GetScore(toks[0], toks[1], "");
 
-		for (size_t i = 0; i < scores.size(); ++i) {
-			cerr << scores[i] << " ";
+		// output
+		for (size_t i = 0; i < toks.size(); ++i) {
+			cout << toks[i] << " ||| ";
     }
-    cerr << endl << endl;
+
+		// blank columns
+		for (size_t i = toks.size(); i < 6; ++i) {
+			cout << "||| ";
+    }
+	
+    // key-value pairs
+		cout << "{{LexRO ";
+		for (size_t i = 0; i < scores.size(); ++i) {
+			cout << scores[i] << " ";
+    }
+    cout << "}}";
+
+		cout << endl;
+
   }
 
 }
