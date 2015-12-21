@@ -57,7 +57,6 @@ public:
 
 protected:
   std::string m_path;
-  std::string m_ptProperty;
   FactorList m_FactorsF;
   FactorList m_FactorsE;
   FactorList m_FactorsC;
@@ -68,6 +67,9 @@ protected:
   EvaluateAfterTablePruning(MemPool &pool,
 		  const TargetPhrase &targetPhrase,
 		  const Phrase &sourcePhrase) const;
+
+  // PROPERTY IN PT
+  std::string m_ptProperty;
 
   // COMPACT MODEL
   LexicalReorderingTableCompact *m_compactModel;
