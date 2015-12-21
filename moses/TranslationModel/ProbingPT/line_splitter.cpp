@@ -9,18 +9,34 @@ line_text splitLine(StringPiece textin)
   util::TokenIter<util::MultiCharacter> it(textin, util::MultiCharacter(delim));
   //Get source phrase
   output.source_phrase = *it;
-  it++;
+
   //Get target_phrase
+  it++;
   output.target_phrase = *it;
-  it++;
+
   //Get probabilities
+  it++;
   output.prob = *it;
-  it++;
+
   //Get WordAllignment
-  output.word_all1 = *it;
   it++;
+  if (it == util::TokenIter<util::MultiCharacter>::end()) return output;
+  output.word_align = *it;
+
   //Get count
-  output.word_all2 = *it;
+  it++;
+  if (it == util::TokenIter<util::MultiCharacter>::end()) return output;
+  output.counts = *it;
+
+  //Get sparse_score
+  it++;
+  if (it == util::TokenIter<util::MultiCharacter>::end()) return output;
+  output.sparse_score = *it;
+
+  //Get property
+  it++;
+  if (it == util::TokenIter<util::MultiCharacter>::end()) return output;
+  output.property = *it;
 
   return output;
 }

@@ -58,7 +58,7 @@ void Huffman::count_elements(line_text linein)
 
   //For word allignment 1
   std::map<std::vector<unsigned char>, unsigned int>::iterator mapiter3;
-  std::vector<unsigned char> numbers = splitWordAll1(linein.word_all1);
+  std::vector<unsigned char> numbers = splitWordAll1(linein.word_align);
   mapiter3 = word_all1.find(numbers);
 
   if (mapiter3 != word_all1.end()) {
@@ -170,7 +170,7 @@ std::vector<unsigned int> Huffman::encode_line(line_text line)
 
 
   //Get Word allignments
-  retvector.push_back(word_all1_huffman.find(splitWordAll1(line.word_all1))->second);
+  retvector.push_back(word_all1_huffman.find(splitWordAll1(line.word_align))->second);
   retvector.push_back(0);
 
   return retvector;
