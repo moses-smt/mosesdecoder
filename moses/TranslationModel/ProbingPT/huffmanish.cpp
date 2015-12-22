@@ -173,6 +173,33 @@ std::vector<unsigned int> Huffman::encode_line(line_text line)
   retvector.push_back(word_all1_huffman.find(splitWordAll1(line.word_align))->second);
   retvector.push_back(0);
 
+  //The rest of the components might not be there, but add them (as reinterpretation to byte arr)
+  //In the future we should really make those optional to save space
+
+  //Counts
+  const char* counts = line.counts.data();
+  size_t counts_size = line.counts.size();
+  for (size_t i = 0; i < counts_size; i++) {
+    retvector.push_back(counts[i]);
+  }
+  retvector.push_back(0);
+
+  //Sparse score
+  const char* sparse_score = line.sparse_score.data();
+  size_t sparse_score_size = line.sparse_score.size();
+  for (size_t i = 0; i < sparse_score_size; i++) {
+    retvector.push_back(sparse_score[i]);
+  }
+  retvector.push_back(0);
+
+  //Property
+  const char* property = line.property.data();
+  size_t property_size = line.property.size();
+  for (size_t i = 0; i < property_size; i++) {
+    retvector.push_back(property[i]);
+  }
+  retvector.push_back(0);
+
   return retvector;
 }
 
@@ -226,7 +253,7 @@ std::vector<target_text> HuffmanDecoder::full_decode_line (std::vector<unsigned 
   std::vector<unsigned int>::iterator it = decoded_lines.begin(); //Iterator for them
   std::vector<unsigned int> current_target_phrase; //Current target phrase decoded
 
-  short zero_count = 0; //Count home many zeroes we have met. so far. Every 3 zeroes mean a new target phrase.
+  short zero_count = 0; //Count how many zeroes we have met. so far. Every 6 zeroes mean a new target phrase.
   while(it != decoded_lines.end()) {
     if (zero_count == 1) {
       //We are extracting scores. we know how many scores there are so we can push them
@@ -238,7 +265,7 @@ std::vector<target_text> HuffmanDecoder::full_decode_line (std::vector<unsigned 
       }
     }
 
-    if (zero_count == 3) {
+    if (zero_count == 6) {
       //We have finished with this entry, decode it, and add it to the retvector.
       retvector.push_back(decode_line(current_target_phrase, num_scores));
       current_target_phrase.clear(); //Clear the current target phrase and the zero_count
@@ -252,7 +279,7 @@ std::vector<target_text> HuffmanDecoder::full_decode_line (std::vector<unsigned 
     it++; //Go to the next word/symbol
   }
   //Don't forget the last remaining line!
-  if (zero_count == 3) {
+  if (zero_count == 6) {
     //We have finished with this entry, decode it, and add it to the retvector.
     retvector.push_back(decode_line(current_target_phrase, num_scores));
     current_target_phrase.clear(); //Clear the current target phrase and the zero_count
@@ -275,7 +302,7 @@ target_text HuffmanDecoder::decode_line (std::vector<unsigned int> input, int nu
   //Split the line into the proper arrays
   short num_zeroes = 0;
   int counter = 0;
-  while (num_zeroes < 3) {
+  while (num_zeroes < 6) {
     unsigned int num = input[counter];
     if (num == 0) {
       num_zeroes++;
@@ -291,6 +318,12 @@ target_text HuffmanDecoder::decode_line (std::vector<unsigned int> input, int nu
       continue;
     } else if (num_zeroes == 2) {
       wAll = num;
+    } else if (num_zeroes == 3) {
+      ret.counts.push_back(static_cast<char>(input[counter]));
+    } else if (num_zeroes == 4) {
+      ret.sparse_score.push_back(static_cast<char>(input[counter]));
+    } else if (num_zeroes == 5) {
+      ret.property.push_back(static_cast<char>(input[counter]));
     }
     counter++;
   }
