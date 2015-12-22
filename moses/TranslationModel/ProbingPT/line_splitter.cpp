@@ -2,41 +2,48 @@
 
 line_text splitLine(StringPiece textin)
 {
-  const char delim[] = " ||| ";
+  const char delim[] = "|||";
   line_text output;
 
   //Tokenize
   util::TokenIter<util::MultiCharacter> it(textin, util::MultiCharacter(delim));
   //Get source phrase
-  output.source_phrase = *it;
+  output.source_phrase = Trim(*it);
+  //std::cerr << "output.source_phrase=" << output.source_phrase << "AAAA" << std::endl;
 
   //Get target_phrase
   it++;
-  output.target_phrase = *it;
+  output.target_phrase = Trim(*it);
+  //std::cerr << "output.target_phrase=" << output.target_phrase << "AAAA" << std::endl;
 
   //Get probabilities
   it++;
-  output.prob = *it;
+  output.prob = Trim(*it);
+  //std::cerr << "output.prob=" << output.prob << "AAAA" << std::endl;
 
   //Get WordAllignment
   it++;
   if (it == util::TokenIter<util::MultiCharacter>::end()) return output;
-  output.word_align = *it;
+  output.word_align = Trim(*it);
+  //std::cerr << "output.word_align=" << output.word_align << "AAAA" << std::endl;
 
   //Get count
   it++;
   if (it == util::TokenIter<util::MultiCharacter>::end()) return output;
-  output.counts = *it;
+  output.counts = Trim(*it);
+  //std::cerr << "output.counts=" << output.counts << "AAAA" << std::endl;
 
   //Get sparse_score
   it++;
   if (it == util::TokenIter<util::MultiCharacter>::end()) return output;
-  output.sparse_score = *it;
+  output.sparse_score = Trim(*it);
+  //std::cerr << "output.sparse_score=" << output.sparse_score << "AAAA" << std::endl;
 
   //Get property
   it++;
   if (it == util::TokenIter<util::MultiCharacter>::end()) return output;
-  output.property = *it;
+  output.property = Trim(*it);
+  //std::cerr << "output.property=" << output.property << "AAAA" << std::endl;
 
   return output;
 }
