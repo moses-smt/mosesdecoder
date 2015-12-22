@@ -193,6 +193,25 @@ void QueryEngine::printTargetInfo(std::vector<target_text> target_phrases)
         std::cout << (short)target_phrases[i].word_all1[j] << " ";
       }
     }
+
+    //Print counts
+    for (size_t j = 0; j < target_phrases[i].counts.size(); j++) {
+      std::cout << target_phrases[i].counts[j];
+    }
+    std::cout << "\t";
+
+    //Print sparse_score
+    for (size_t j = 0; j < target_phrases[i].sparse_score.size(); j++) {
+      std::cout << target_phrases[i].sparse_score[j];
+    }
+    std::cout << "\t";
+
+    //Print properties
+    for (size_t j = 0; j < target_phrases[i].property.size(); j++) {
+      std::cout << target_phrases[i].property[j];
+    }
+    std::cout << "\t";
+
     std::cout << std::endl;
   }
 }

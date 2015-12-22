@@ -54,6 +54,11 @@ std::vector<unsigned char> splitWordAll1(StringPiece textin)
   const char delim2[] = "-";
   std::vector<unsigned char> output;
 
+  //Case with no word alignments.
+  if (textin.size() == 0) {
+  	return output;
+  }
+
   //Split on space
   util::TokenIter<util::MultiCharacter> it(textin, util::MultiCharacter(delim));
 
