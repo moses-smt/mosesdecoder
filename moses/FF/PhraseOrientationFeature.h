@@ -405,8 +405,8 @@ protected:
   static const std::string SORIENT;
   static const std::string DORIENT;
 
-  std::string m_glueTargetLHSStr;
-  const Factor* m_glueTargetLHS;
+  std::string m_glueLabelStr;
+  const Factor* m_glueLabel;
   bool m_distinguishStates;
   bool m_useSparseWord;
   bool m_useSparseNT;

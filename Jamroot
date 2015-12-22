@@ -248,6 +248,7 @@ if [ option.get "with-mm-extras" : : "yes" ]
   moses/TranslationModel/UG//ptable-describe-features 
   moses/TranslationModel/UG//count-ptable-features 
   moses/TranslationModel/UG//ptable-lookup 
+  moses/TranslationModel/UG//ptable-lookup-corpus 
   moses/TranslationModel/UG//check-coverage 
   moses/TranslationModel/UG/mm//mtt-demo1 
   moses/TranslationModel/UG/mm//mtt-dump 
