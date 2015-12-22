@@ -14,8 +14,10 @@ struct line_text {
   StringPiece source_phrase;
   StringPiece target_phrase;
   StringPiece prob;
-  StringPiece word_all1;
-  StringPiece word_all2;
+  StringPiece word_align;
+  StringPiece counts;
+  StringPiece sparse_score;
+  StringPiece property;
 };
 
 //Struct for holding processed line
