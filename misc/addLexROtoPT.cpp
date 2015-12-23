@@ -114,8 +114,8 @@ GetScore(const std::string& f, const std::string& e, const std::string& c)
 
 int main(int argc, char** argv)
 {
-  string roPath(argv[1]);
-  string ptPath(argv[2]);
+  string ptPath(argv[1]);
+  string roPath(argv[2]);
 
 	// lex reordering model
 	m_factorsF.push_back(0);
