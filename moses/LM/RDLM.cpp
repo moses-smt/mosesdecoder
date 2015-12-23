@@ -39,7 +39,7 @@ RDLM::~RDLM()
   delete lm_label_base_instance_;
 }
 
-void RDLM::Load(AllOptions const& opts)
+void RDLM::Load(AllOptions::ptr const& opts)
 {
 
   lm_head_base_instance_ = new nplm::neuralTM();

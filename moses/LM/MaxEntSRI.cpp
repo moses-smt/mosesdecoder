@@ -66,7 +66,7 @@ LanguageModelMaxEntSRI::~LanguageModelMaxEntSRI()
   delete m_srilmVocab;
 }
 
-void LanguageModelMaxEntSRI::Load(AllOptions const& opts)
+void LanguageModelMaxEntSRI::Load(AllOptions::ptr const& opts)
 {
   m_srilmVocab  = new ::Vocab();
   m_srilmModel	= new MEModel(*m_srilmVocab, m_nGramOrder);

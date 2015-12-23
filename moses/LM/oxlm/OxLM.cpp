@@ -70,7 +70,7 @@ void OxLM<Model>::SetParameter(const string& key, const string& value)
 }
 
 template<class Model>
-void OxLM<Model>::Load(AllOptions const& opts)
+void OxLM<Model>::Load(AllOptions::ptr const& opts)
 {
   model.load(m_filePath);
 
