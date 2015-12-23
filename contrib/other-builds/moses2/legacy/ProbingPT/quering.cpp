@@ -169,11 +169,11 @@ void QueryEngine::printTargetInfo(const std::vector<target_text> &target_phrases
     std::cout << "\t";
 
     //Print word_all1
-    for (int j = 0; j<target_phrases[i].word_all1->size(); j++) {
+    for (int j = 0; j<target_phrases[i].word_all1.size(); j++) {
       if (j%2 == 0) {
-        std::cout << (short)(*target_phrases[i].word_all1)[j] << "-";
+        std::cout << (short)(target_phrases[i].word_all1)[j] << "-";
       } else {
-        std::cout << (short)(*target_phrases[i].word_all1)[j] << " ";
+        std::cout << (short)(target_phrases[i].word_all1)[j] << " ";
       }
     }
     std::cout << std::endl;

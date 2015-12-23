@@ -76,8 +76,6 @@ GetScore(const Phrase& f, const Phrase& e, const Phrase& c)
       key = MakeKey(f,e,sub_c);
     }
 
-  std::cerr << "key=" << key << std::endl;
-
   size_t index = m_hash[key];
   if(m_hash.GetSize() != index) {
     std::string scoresString;

@@ -171,6 +171,15 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system,
 //  }
 //  */
 
+  // properties
+  if (probingTargetPhrase.property.size()) {
+	  //cerr << "probingTargetPhrase.property.size()=" << probingTargetPhrase.property.size() << endl;
+	  size_t size = probingTargetPhrase.property.size();
+	  tp->properties = (char*) system.systemPool.Allocate(size + 1);
+	  memcpy(tp->properties, probingTargetPhrase.property.data(), size);
+	  tp->properties[size] = '0x0';
+  }
+
   // score of all other ff when this rule is being loaded
   const FeatureFunctions &ffs = system.featureFunctions;
   ffs.EvaluateInIsolation(pool, system, sourcePhrase, *tp);

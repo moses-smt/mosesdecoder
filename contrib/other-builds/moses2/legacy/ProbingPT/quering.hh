@@ -8,7 +8,7 @@
 #include "hash.hh" //Includes line splitter
 #include "../../Vector.h"
 
-#define API_VERSION 3
+#define API_VERSION 4
 
 namespace Moses2
 {
