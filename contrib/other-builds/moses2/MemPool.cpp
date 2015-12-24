@@ -45,7 +45,7 @@ MemPool::~MemPool()
 }
 
 
-void *MemPool::More(std::size_t size)
+uint8_t *MemPool::More(std::size_t size)
 {
 	++m_currPage;
 	if (m_currPage >= m_pages.size()) {

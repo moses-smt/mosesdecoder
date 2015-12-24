@@ -35,12 +35,12 @@ class MemPool {
 
     ~MemPool();
 
-    void *Allocate(std::size_t size) {
-      void *ret = current_;
+    uint8_t *Allocate(std::size_t size) {
+      uint8_t *ret = current_;
       current_ += size;
 
       Page &page = *m_pages[m_currPage];
-      if (current_ < page.end) {
+      if (current_ <= page.end) {
     	  // return what we got
       } else {
         ret = More(size);
@@ -51,20 +51,20 @@ class MemPool {
 
     template<typename T>
     T *Allocate() {
-    	void *ret = Allocate(sizeof(T));
+    	uint8_t *ret = Allocate(sizeof(T));
     	return (T*) ret;
     }
 
     template<typename T>
     T *Allocate(size_t num) {
-    	void *ret = Allocate(sizeof(T) * num);
+    	uint8_t *ret = Allocate(sizeof(T) * num);
     	return (T*) ret;
     }
 
     void Reset();
 
   private:
-    void *More(std::size_t size);
+    uint8_t *More(std::size_t size);
 
     std::vector<Page*> m_pages;
 
