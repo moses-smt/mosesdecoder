@@ -145,10 +145,10 @@ int main(int argc, char** argv)
 		  }
 			columns[6] += "{{LexRO ";
 			for (size_t i = 0; i < scores.size() - 1; ++i) {
-				columns[6] += scores[i];
+				columns[6] += Moses::SPrint(scores[i]);
 				columns[6] += " ";
 		  }
-			columns[6] += scores[scores.size() - 1];
+			columns[6] += Moses::SPrint(scores[scores.size() - 1]);
 		  columns[6] += "}}";
 		}
 
