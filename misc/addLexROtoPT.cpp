@@ -129,34 +129,34 @@ int main(int argc, char** argv)
 	string line;
 	while (getline(ptStrm, line)) {
 		//cerr << line << endl;
+    std::vector<std::string> columns(7);
 		std::vector<std::string> toks = TokenizeMultiCharSeparator(line, "|||");
 		assert(toks.size() >= 2);
 
 		for (size_t i = 0; i < toks.size(); ++i) {
-			toks[i] = Trim(toks[i]);
+			columns[i] = Trim(toks[i]);
     }
 
-		std::vector<float> scores = GetScore(toks[0], toks[1], "");
+		std::vector<float> scores = GetScore(columns[0], columns[1], "");
+    // key-value pairs
+    if (scores.size()) {
+		  if (!columns[6].empty()) {
+				columns[6] += " ";
+		  }
+			columns[6] += "{{LexRO ";
+			for (size_t i = 0; i < scores.size() - 1; ++i) {
+				columns[6] += scores[i];
+				columns[6] += " ";
+		  }
+			columns[6] += scores[scores.size() - 1];
+		  columns[6] += "}}";
+		}
 
 		// output
-		for (size_t i = 0; i < toks.size(); ++i) {
-			cout << toks[i] << " ||| ";
+		for (size_t i = 0; i < toks.size() - 1; ++i) {
+			cout << columns[i] << " ||| ";
     }
-
-		// blank columns
-		for (size_t i = toks.size(); i < 6; ++i) {
-			cout << "||| ";
-    }
-	
-    // key-value pairs
-		cout << "{{LexRO ";
-		for (size_t i = 0; i < scores.size(); ++i) {
-			cout << scores[i] << " ";
-    }
-    cout << "}}";
-
-		cout << endl;
-
+		cout << columns[columns.size() - 1] << endl;
   }
 
 }
