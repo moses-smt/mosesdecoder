@@ -61,7 +61,7 @@ void Huffman::count_elements(const line_text &linein)
 
   //For word allignment 1
   std::map<std::vector<unsigned char>, unsigned int>::iterator mapiter3;
-  std::vector<unsigned char> numbers = splitWordAll1(linein.word_all1);
+  std::vector<unsigned char> numbers = splitWordAll1(linein.word_align);
   mapiter3 = word_all1.find(numbers);
 
   if (mapiter3 != word_all1.end()) {
@@ -173,7 +173,34 @@ std::vector<unsigned int> Huffman::encode_line(const line_text &line)
 
 
   //Get Word allignments
-  retvector.push_back(word_all1_huffman.find(splitWordAll1(line.word_all1))->second);
+  retvector.push_back(word_all1_huffman.find(splitWordAll1(line.word_align))->second);
+  retvector.push_back(0);
+
+  //The rest of the components might not be there, but add them (as reinterpretation to byte arr)
+  //In the future we should really make those optional to save space
+
+  //Counts
+  const char* counts = line.counts.data();
+  size_t counts_size = line.counts.size();
+  for (size_t i = 0; i < counts_size; i++) {
+    retvector.push_back(counts[i]);
+  }
+  retvector.push_back(0);
+
+  //Sparse score
+  const char* sparse_score = line.sparse_score.data();
+  size_t sparse_score_size = line.sparse_score.size();
+  for (size_t i = 0; i < sparse_score_size; i++) {
+    retvector.push_back(sparse_score[i]);
+  }
+  retvector.push_back(0);
+
+  //Property
+  const char* property = line.property.data();
+  size_t property_size = line.property.size();
+  for (size_t i = 0; i < property_size; i++) {
+    retvector.push_back(property[i]);
+  }
   retvector.push_back(0);
 
   return retvector;
