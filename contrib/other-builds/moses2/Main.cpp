@@ -3,6 +3,7 @@
 #include "System.h"
 #include "Phrase.h"
 #include "TranslationTask.h"
+#include "MemPool.h"
 #include "Search/Manager.h"
 #include "legacy/InputFileStream.h"
 #include "legacy/Parameter.h"
@@ -69,10 +70,14 @@ int main(int argc, char** argv)
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
 
-
 void Temp()
 {
-	vector<int> v;
-	v.push_back(33);
+	Moses2::MemPool pool;
+	Moses2::MemPoolAllocator<int> a(pool);
 
+	boost::unordered_set<int, boost::hash<int>, std::equal_to<int>, Moses2::MemPoolAllocator<int> > s(a);
+	s.insert(3);
+	s.insert(4);
+	s.insert(3);
+	s.erase(3);
 }
