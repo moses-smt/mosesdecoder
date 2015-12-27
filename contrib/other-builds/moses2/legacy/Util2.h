@@ -9,6 +9,7 @@
 #include <sstream>
 #include <vector>
 #include <cmath>
+#include <stdlib.h>
 #include "../TypeDef.h"
 
 namespace Moses2
@@ -66,6 +67,13 @@ template<>
 inline std::string Scan<std::string>(const std::string &input)
 {
   return input;
+}
+
+template<>
+inline SCORE Scan<SCORE>(const std::string &input)
+{
+  SCORE ret = atof(input.c_str());
+  return ret;
 }
 
 //! Specialisation to understand yes/no y/n true/false 0/1
