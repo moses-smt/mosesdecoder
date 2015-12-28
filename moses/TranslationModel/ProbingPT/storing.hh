@@ -12,7 +12,7 @@
 #include "util/file_piece.hh"
 #include "util/file.hh"
 #include "vocabid.hh"
-#define API_VERSION 4
+#define API_VERSION 5
 
 void createProbingPT(const char * phrasetable_path, const char * target_path,
                      const char * num_scores, int num_lex_scores);
