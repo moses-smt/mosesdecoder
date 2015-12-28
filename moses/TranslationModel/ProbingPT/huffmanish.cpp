@@ -220,6 +220,7 @@ void Huffman::AppendLexRO(line_text &line, std::vector<unsigned int> &retvector)
 	  StringPiece lexProb = origProperty.substr(startPos + 8, endPos - startPos - 8);
 	  cerr << "lexProb=" << lexProb << endl;
 
+	  // append lex probs to pt probs
 	  util::TokenIter<util::SingleCharacter> it(lexProb, util::SingleCharacter(' '));
 	  while (it) {
   	    StringPiece probStr = *it;
@@ -228,6 +229,9 @@ void Huffman::AppendLexRO(line_text &line, std::vector<unsigned int> &retvector)
 		double tempnum = atof(probStr.data());
 		float num = (float)tempnum;
 		retvector.push_back(reinterpret_float(&num));
+
+		// exclude LexRO property from property column
+  	    const StringPiece &newProperty = line.property;
 
 	    it++;
 	  }

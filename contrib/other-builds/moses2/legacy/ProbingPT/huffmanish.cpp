@@ -262,7 +262,7 @@ std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[
       //We are extracting scores. we know how many scores there are so we can push them
       //to the vector. This is done in case any of the scores is 0, because it would mess
       //up the state machine.
-      for (int i = 0; i < num_scores; i++) {
+      for (int i = 0; i < num_scores + num_lex_scores; i++) {
         current_target_phrase.push_back(*it);
         it++;
       }
@@ -270,7 +270,7 @@ std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[
 
     if (zero_count == 6) {
       //We have finished with this entry, decode it, and add it to the retvector.
-      retvector.push_back(decode_line(current_target_phrase, num_scores));
+      retvector.push_back(decode_line(current_target_phrase, num_scores, num_lex_scores));
       current_target_phrase.clear(); //Clear the current target phrase and the zero_count
       zero_count = 0; //So that we can reuse them for the next target phrase
     }
@@ -284,7 +284,7 @@ std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[
   //Don't forget the last remaining line!
   if (zero_count == 6) {
     //We have finished with this entry, decode it, and add it to the retvector.
-    retvector.push_back(decode_line(current_target_phrase, num_scores));
+    retvector.push_back(decode_line(current_target_phrase, num_scores, num_lex_scores));
     current_target_phrase.clear(); //Clear the current target phrase and the zero_count
     zero_count = 0; //So that we can reuse them for the next target phrase
   }
@@ -293,7 +293,7 @@ std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[
 
 }
 
-target_text *HuffmanDecoder::decode_line (const std::vector<unsigned int> &input, int num_scores)
+target_text *HuffmanDecoder::decode_line (const std::vector<unsigned int> &input, int num_scores, int num_lex_scores)
 {
   //demo decoder
   target_text *ret = new target_text;
@@ -312,7 +312,7 @@ target_text *HuffmanDecoder::decode_line (const std::vector<unsigned int> &input
       ret->target_phrase.push_back(num);
     } else if (num_zeroes == 1) {
       //Push exactly num_scores scores
-      for (int i = 0; i < num_scores + 6; i++) {
+      for (int i = 0; i < num_scores + num_lex_scores; i++) {
     	float prob = reinterpret_uint(&num);
     	ret->prob.push_back(prob);
 
