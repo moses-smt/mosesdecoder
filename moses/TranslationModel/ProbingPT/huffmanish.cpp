@@ -1,4 +1,7 @@
 #include "huffmanish.hh"
+#include "util/string_piece.hh"
+
+using namespace std;
 
 Huffman::Huffman (const char * filepath)
 {
@@ -138,12 +141,12 @@ void Huffman::serialize_maps(const char * dirname)
   os2.close();
 }
 
-std::vector<unsigned char> Huffman::full_encode_line(line_text line)
+std::vector<unsigned char> Huffman::full_encode_line(line_text &line)
 {
   return vbyte_encode_line((encode_line(line)));
 }
 
-std::vector<unsigned int> Huffman::encode_line(line_text line)
+std::vector<unsigned int> Huffman::encode_line(line_text &line)
 {
   std::vector<unsigned int> retvector;
 
@@ -165,6 +168,10 @@ std::vector<unsigned int> Huffman::encode_line(line_text line)
     retvector.push_back(reinterpret_float(&num));
     probit++;
   }
+
+  // append LexRO prob to pt scores
+  AppendLexRO(line, retvector);
+
   //Add a zero;
   retvector.push_back(0);
 
@@ -202,6 +209,32 @@ std::vector<unsigned int> Huffman::encode_line(line_text line)
 
   return retvector;
 }
+
+void Huffman::AppendLexRO(line_text &line, std::vector<unsigned int> &retvector)
+{
+  const StringPiece &origProperty = line.property;
+  StringPiece::size_type startPos = origProperty.find("{{LexRO ");
+
+  if (startPos != StringPiece::npos) {
+	  StringPiece::size_type endPos = origProperty.find("}}", startPos + 8);
+	  StringPiece lexProb = origProperty.substr(startPos + 8, endPos - startPos - 8);
+	  cerr << "lexProb=" << lexProb << endl;
+
+	  util::TokenIter<util::SingleCharacter> it(lexProb, util::SingleCharacter(' '));
+	  while (it) {
+  	    StringPiece probStr = *it;
+		cerr << "\t" << probStr << endl;
+
+		double tempnum = atof(probStr.data());
+		float num = (float)tempnum;
+		retvector.push_back(reinterpret_float(&num));
+
+	    it++;
+	  }
+
+  }
+}
+
 
 void Huffman::produce_lookups()
 {

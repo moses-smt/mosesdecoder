@@ -249,7 +249,7 @@ HuffmanDecoder::HuffmanDecoder (const std::map<unsigned int, std::string> &looku
   lookup_word_all1 = lookup_word1;
 }
 
-std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[], size_t linesCount, int num_scores)
+std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[], size_t linesCount, int num_scores, int num_lex_scores)
 {
   std::vector<target_text*> retvector; //All target phrases
   std::vector<unsigned int> decoded_lines = vbyte_decode_line(lines, linesCount); //All decoded lines
@@ -312,7 +312,7 @@ target_text *HuffmanDecoder::decode_line (const std::vector<unsigned int> &input
       ret->target_phrase.push_back(num);
     } else if (num_zeroes == 1) {
       //Push exactly num_scores scores
-      for (int i = 0; i < num_scores; i++) {
+      for (int i = 0; i < num_scores + 6; i++) {
     	float prob = reinterpret_uint(&num);
     	ret->prob.push_back(prob);
 

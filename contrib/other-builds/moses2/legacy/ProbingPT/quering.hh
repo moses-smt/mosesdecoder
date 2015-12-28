@@ -29,6 +29,7 @@ class QueryEngine
   size_t binary_filesize;
   size_t table_filesize;
   int num_scores;
+  int num_lex_scores;
   bool is_reordering;
 public:
   QueryEngine (const char *);

@@ -58,12 +58,8 @@ QueryEngine::QueryEngine(const char * filepath) : decoder(filepath)
   num_scores = atoi(line.c_str());
   //do we have a reordering table
   getline(config, line);
-  std::transform(line.begin(), line.end(), line.begin(), ::tolower); //Get the boolean in lowercase
-  is_reordering = false;
-  if (line == "true") {
-    is_reordering = true;
-    std::cerr << "WARNING. REORDERING TABLES NOT SUPPORTED YET." << std::endl;
-  }
+  num_lex_scores = atoi(line.c_str());
+
   config.close();
 
   //Mmap binary table
@@ -111,7 +107,7 @@ std::pair<bool, std::vector<target_text*> > QueryEngine::query(uint64_t source_p
     unsigned int bytes_toread = entry -> bytes_toread;
 
     //Get only the translation entries necessary
-    output.second = decoder.full_decode_line(binary_mmaped + initial_index, bytes_toread, num_scores);
+    output.second = decoder.full_decode_line(binary_mmaped + initial_index, bytes_toread, num_scores, num_lex_scores);
 
   }
 
@@ -145,7 +141,7 @@ std::pair<bool, std::vector<target_text*> > QueryEngine::query(const StringPiece
     std::cerr << "Entry size is bytes is: " << bytes_toread << std::endl;
 
     //Get only the translation entries necessary
-    output.second = decoder.full_decode_line(binary_mmaped + initial_index, bytes_toread, num_scores);
+    output.second = decoder.full_decode_line(binary_mmaped + initial_index, bytes_toread, num_scores, num_lex_scores);
 
   }
 
