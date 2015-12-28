@@ -42,7 +42,7 @@ line_text splitLine(StringPiece textin)
   //Get property
   it++;
   if (it == util::TokenIter<util::MultiCharacter>::end()) return output;
-  output.property = Trim(*it);
+  output.property_orig = Trim(*it);
   //std::cerr << "output.property=" << output.property << "AAAA" << std::endl;
 
   return output;

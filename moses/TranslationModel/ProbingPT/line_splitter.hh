@@ -17,7 +17,8 @@ struct line_text {
   StringPiece word_align;
   StringPiece counts;
   StringPiece sparse_score;
-  StringPiece property;
+  StringPiece property_orig;
+  std::string property_to_be_binarized;
 };
 
 //Struct for holding processed line

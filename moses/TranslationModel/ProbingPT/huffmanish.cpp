@@ -200,8 +200,8 @@ std::vector<unsigned int> Huffman::encode_line(line_text &line)
   retvector.push_back(0);
 
   //Property
-  const char* property = line.property.data();
-  size_t property_size = line.property.size();
+  const char* property = line.property_to_be_binarized.data();
+  size_t property_size = line.property_to_be_binarized.size();
   for (size_t i = 0; i < property_size; i++) {
     retvector.push_back(property[i]);
   }
@@ -212,27 +212,28 @@ std::vector<unsigned int> Huffman::encode_line(line_text &line)
 
 void Huffman::AppendLexRO(line_text &line, std::vector<unsigned int> &retvector)
 {
-  const StringPiece &origProperty = line.property;
+  const StringPiece &origProperty = line.property_orig;
   StringPiece::size_type startPos = origProperty.find("{{LexRO ");
 
   if (startPos != StringPiece::npos) {
 	  StringPiece::size_type endPos = origProperty.find("}}", startPos + 8);
 	  StringPiece lexProb = origProperty.substr(startPos + 8, endPos - startPos - 8);
-	  cerr << "lexProb=" << lexProb << endl;
+	  //cerr << "lexProb=" << lexProb << endl;
 
 	  // append lex probs to pt probs
 	  util::TokenIter<util::SingleCharacter> it(lexProb, util::SingleCharacter(' '));
 	  while (it) {
   	    StringPiece probStr = *it;
-		cerr << "\t" << probStr << endl;
+		//cerr << "\t" << probStr << endl;
 
 		double tempnum = atof(probStr.data());
 		float num = (float)tempnum;
 		retvector.push_back(reinterpret_float(&num));
 
 		// exclude LexRO property from property column
-  	    const StringPiece &newProperty = line.property;
-
+		line.property_to_be_binarized = origProperty.substr(0, startPos).as_string()
+				+ origProperty.substr(endPos + 2, origProperty.size() - endPos - 2).as_string();
+		//cerr << "line.property_to_be_binarized=" << line.property_to_be_binarized << "AAAA" << endl;
 	    it++;
 	  }
 
