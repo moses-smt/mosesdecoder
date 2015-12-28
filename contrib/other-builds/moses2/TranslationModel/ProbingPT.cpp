@@ -161,6 +161,31 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system,
   std::transform(scores, scores + probingTargetPhrase.prob.size(), scores, FloorScore);
   tp->GetScores().PlusEquals(system, *this, scores);
 
+  // extra scores
+  cerr << "probingTargetPhrase.prob.size()=" << probingTargetPhrase.prob.size() << endl;
+  if (probingTargetPhrase.prob.size() > m_numScores) {
+	  // we have extra scores, possibly for lex ro. Keep them in the target phrase.
+	  size_t numExtraScores = probingTargetPhrase.prob.size() - m_numScores;
+	  tp->scoreProperties = pool.Allocate<SCORE>(numExtraScores);
+	  memcpy(tp->scoreProperties, scores + m_numScores, sizeof(SCORE) * numExtraScores);
+
+
+	  for (size_t i = 0; i < probingTargetPhrase.prob.size(); ++i) {
+		  cerr << probingTargetPhrase.prob[i] << " ";
+	  }
+	  cerr << endl;
+
+	  for (size_t i = 0; i < probingTargetPhrase.prob.size(); ++i) {
+		  cerr << scores[i] << " ";
+	  }
+	  cerr << endl;
+
+	  for (size_t i = 0; i < numExtraScores; ++i) {
+		  cerr << tp->scoreProperties[i] << " ";
+	  }
+	  cerr << endl;
+  }
+
 //  // alignment
 //  /*
 //  const std::vector<unsigned char> &alignments = probingTargetPhrase.word_all1;
@@ -170,18 +195,6 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system,
 //    aligns.Add((size_t) alignments[i], (size_t) alignments[i+1]);
 //  }
 //  */
-
-  // properties
-  if (probingTargetPhrase.property.size()) {
-	  size_t size = probingTargetPhrase.property.size();
-	  //cerr << "probingTargetPhrase.property.size()=" << size << endl;
-
-	  size_t remainder = size % 4;
-	  size_t allocSize = size + (4 - remainder);
-	  tp->properties = (char*) pool.Allocate(allocSize);
-	  memcpy(tp->properties, probingTargetPhrase.property.data(), size);
-	  tp->properties[size] = 0x0;
-  }
 
   // score of all other ff when this rule is being loaded
   const FeatureFunctions &ffs = system.featureFunctions;
@@ -207,6 +220,11 @@ void ProbingPT::ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &o
 
   ok = true;
 }
+
+void ProbingPT::GetScoresProperty(const std::string &key, size_t ind, SCORE *scoreArr)
+		{
+
+		}
 
 }
 

@@ -23,7 +23,7 @@ class TargetPhrase : public PhraseImpl
 	  friend std::ostream& operator<<(std::ostream &, const TargetPhrase &);
 public:
   mutable void **ffData;
-  char *properties;
+  SCORE *scoreProperties;
 
   static TargetPhrase *CreateFromString(MemPool &pool, const System &system, const std::string &str);
   TargetPhrase(MemPool &pool, const System &system, size_t size);
@@ -42,6 +42,7 @@ public:
   void SetEstimatedScore(const SCORE &value)
   { m_estimatedScore = value; }
 
+  SCORE *GetScoresProperty(int propertyInd) const;
 protected:
 	Scores *m_scores;
 	SCORE m_estimatedScore;

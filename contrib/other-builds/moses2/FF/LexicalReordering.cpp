@@ -52,6 +52,7 @@ LexicalReordering::LexicalReordering(size_t startInd, const std::string &line)
 :StatefulFeatureFunction(startInd, line)
 ,m_compactModel(NULL)
 ,m_coll(NULL)
+,m_propertyInd(-1)
 {
 	ReadParameters();
 	assert(m_numScores == 6);
@@ -65,8 +66,8 @@ LexicalReordering::~LexicalReordering()
 
 void LexicalReordering::Load(System &system)
 {
-  if (!m_ptProperty.empty()) {
-	  // do nothing
+  if (m_propertyInd >= 0) {
+	  // Using integrate Lex RO. No loading needed
   }
   else if (FileExists(m_path + ".minlexr") ) {
 	  m_compactModel = new LexicalReorderingTableCompact(m_path + ".minlexr", m_FactorsF,
@@ -112,8 +113,8 @@ void LexicalReordering::SetParameter(const std::string& key, const std::string& 
   else if (key == "output-factor") {
 	  m_FactorsE = Tokenize<FactorType>(value);
   }
-  else if (key == "pt-property") {
-	  m_ptProperty = value;
+  else if (key == "property-index") {
+	  m_propertyInd = Scan<int>(value);
   }
   else {
 	  StatefulFeatureFunction::SetParameter(key, value);
@@ -158,23 +159,10 @@ void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
 		const TargetPhrase &targetPhrase,
 		const Phrase &sourcePhrase) const
 {
-  if (!m_ptProperty.empty()) {
-	  string propStr = GetProperty(targetPhrase.properties, m_ptProperty);
-	  //cerr << "propStr=" << propStr << endl;
-	  if (!propStr.empty()) {
-		  vector<SCORE> values = Tokenize<SCORE>(propStr, " ");
-		  assert(values.size() == 6);
-
-		  SCORE *scoreArr = pool.Allocate<SCORE>(6);
-		  for (size_t i = 0; i < 6; ++i) {
-			scoreArr[i] = values[i];
-		  }
-
-		  targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
-	  }
-	  else {
-		  targetPhrase.ffData[m_PhraseTableInd] = NULL;
-	  }
+  if (m_propertyInd >= 0) {
+	  SCORE *scoreArr = NULL;
+	  scoreArr = targetPhrase.GetScoresProperty(m_propertyInd);
+	  targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
   }
   else if (m_compactModel) {
 	  // using external compact binary model
@@ -191,9 +179,8 @@ void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
 		targetPhrase.ffData[m_PhraseTableInd] = NULL;
 	  }
   }
-  else {
+  else if (m_coll) {
 	  // using external memory model
-	  assert(m_coll);
 
 	  // cache data in target phrase
 	  const Values *values = GetValues(sourcePhrase, targetPhrase);

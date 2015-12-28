@@ -134,8 +134,8 @@ void PhraseTableMemory::Load(System &system)
 
 		// properties
 		if (toks.size() == 7) {
-			target->properties = (char*) system.systemPool.Allocate(toks[6].size() + 1);
-			strcpy(target->properties, toks[6].c_str());
+			//target->properties = (char*) system.systemPool.Allocate(toks[6].size() + 1);
+			//strcpy(target->properties, toks[6].c_str());
 		}
 
 		system.featureFunctions.EvaluateInIsolation(system.systemPool, system, *source, *target);

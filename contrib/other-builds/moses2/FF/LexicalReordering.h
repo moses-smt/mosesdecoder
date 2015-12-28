@@ -69,7 +69,7 @@ protected:
 		  const Phrase &sourcePhrase) const;
 
   // PROPERTY IN PT
-  std::string m_ptProperty;
+  int m_propertyInd;
 
   // COMPACT MODEL
   LexicalReorderingTableCompact *m_compactModel;

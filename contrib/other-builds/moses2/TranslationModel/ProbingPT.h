@@ -31,6 +31,8 @@ public:
   void Lookup(const Manager &mgr, InputPaths &inputPaths) const;
   TargetPhrases *Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const;
 
+  virtual void GetScoresProperty(const std::string &key, size_t ind, SCORE *scoreArr);
+
 protected:
   std::vector<uint64_t> m_sourceVocab; // factor id -> pt id
   std::vector<const Factor*> m_targetVocab; // pt id -> factor*

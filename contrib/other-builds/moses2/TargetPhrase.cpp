@@ -31,7 +31,7 @@ TargetPhrase *TargetPhrase::CreateFromString(MemPool &pool, const System &system
 
 TargetPhrase::TargetPhrase(MemPool &pool, const System &system, size_t size)
 :PhraseImpl(pool, size)
-,properties(NULL)
+,scoreProperties(NULL)
 {
 	m_scores = new (pool.Allocate<Scores>()) Scores(system, pool, system.featureFunctions.GetNumScores());
 
@@ -41,7 +41,7 @@ TargetPhrase::TargetPhrase(MemPool &pool, const System &system, size_t size)
 
 TargetPhrase::TargetPhrase(MemPool &pool, const System &system, const TargetPhrase &copy)
 :PhraseImpl(pool, copy)
-,properties(NULL)
+,scoreProperties(NULL)
 {
 	// scores
 	m_estimatedScore = copy.m_estimatedScore;
@@ -62,6 +62,11 @@ std::ostream& operator<<(std::ostream &out, const TargetPhrase &obj)
 {
 	out << (const PhraseImpl&) obj << " SCORES:" << obj.GetScores();
 	return out;
+}
+
+SCORE *TargetPhrase::GetScoresProperty(int propertyInd) const
+{
+
 }
 
 }
