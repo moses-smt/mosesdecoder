@@ -212,6 +212,24 @@ inline std::string SPrint(const T &input)
   return stream.str();
 }
 
+//! irst number are in log 10, transform to natural log
+inline float TransformLMScore(float irstScore)
+{
+  return irstScore * 2.30258509299405f;
+}
+
+//! transform prob to natural log score
+inline float TransformScore(float prob)
+{
+  return log(prob);
+}
+
+//! make sure score doesn't fall below LOWEST_SCORE
+inline float FloorScore(float logScore)
+{
+  return (std::max)(logScore , LOWEST_SCORE);
+}
+
 inline float UntransformLMScore(float logNScore)
 {
   // opposite of above
@@ -234,24 +252,6 @@ void RemoveAllInColl(COLL &coll)
     delete (*iter);
   }
   coll.clear();
-}
-
-//! irst number are in log 10, transform to natural log
-inline float TransformLMScore(float irstScore)
-{
-  return irstScore * 2.30258509299405f;
-}
-
-//! transform prob to natural log score
-inline float TransformScore(float prob)
-{
-  return log(prob);
-}
-
-//! make sure score doesn't fall below LOWEST_SCORE
-inline float FloorScore(float logScore)
-{
-  return (std::max)(logScore , LOWEST_SCORE);
 }
 
 template<typename T>

@@ -86,7 +86,7 @@ std::vector<float>
 GetScore(const std::string& f, const std::string& e, const std::string& c)
 {
   std::string key;
-  std::vector<float> scores;
+  std::vector<float> probs;
 
   key = MakeKey(f, e, c);
 
@@ -100,14 +100,19 @@ GetScore(const std::string& f, const std::string& e, const std::string& c)
 
 
     BitWrapper<> bitStream(scoresString);
-    for(size_t i = 0; i < m_numScoreComponent; i++)
-      scores.push_back(m_scoreTrees[m_multipleScoreTrees ? i : 0]->Read(bitStream));
+    for(size_t i = 0; i < m_numScoreComponent; i++) {
+			float prob = m_scoreTrees[m_multipleScoreTrees ? i : 0]->Read(bitStream);
+			prob = exp(prob);
+      probs.push_back(prob);
+    }
 
-    return scores;
+    return probs;
   }
+  else {
+     // return empty vector;
+  } 
 
-  return std::vector<float>();
-
+  return probs;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////
@@ -153,7 +158,7 @@ int main(int argc, char** argv)
 		}
 
 		// output
-		for (size_t i = 0; i < toks.size() - 1; ++i) {
+		for (size_t i = 0; i < columns.size() - 1; ++i) {
 			cout << columns[i] << " ||| ";
     }
 		cout << columns[columns.size() - 1] << endl;
