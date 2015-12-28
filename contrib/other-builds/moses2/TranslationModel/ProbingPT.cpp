@@ -162,14 +162,14 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system,
   tp->GetScores().PlusEquals(system, *this, scores);
 
   // extra scores
-  cerr << "probingTargetPhrase.prob.size()=" << probingTargetPhrase.prob.size() << endl;
+  //cerr << "probingTargetPhrase.prob.size()=" << probingTargetPhrase.prob.size() << endl;
   if (probingTargetPhrase.prob.size() > m_numScores) {
 	  // we have extra scores, possibly for lex ro. Keep them in the target phrase.
 	  size_t numExtraScores = probingTargetPhrase.prob.size() - m_numScores;
 	  tp->scoreProperties = pool.Allocate<SCORE>(numExtraScores);
 	  memcpy(tp->scoreProperties, scores + m_numScores, sizeof(SCORE) * numExtraScores);
 
-
+	  /*
 	  for (size_t i = 0; i < probingTargetPhrase.prob.size(); ++i) {
 		  cerr << probingTargetPhrase.prob[i] << " ";
 	  }
@@ -184,6 +184,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system,
 		  cerr << tp->scoreProperties[i] << " ";
 	  }
 	  cerr << endl;
+	  */
   }
 
 //  // alignment

@@ -160,8 +160,7 @@ void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
 		const Phrase &sourcePhrase) const
 {
   if (m_propertyInd >= 0) {
-	  SCORE *scoreArr = NULL;
-	  scoreArr = targetPhrase.GetScoresProperty(m_propertyInd);
+	  SCORE *scoreArr = targetPhrase.GetScoresProperty(m_propertyInd);
 	  targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
   }
   else if (m_compactModel) {
