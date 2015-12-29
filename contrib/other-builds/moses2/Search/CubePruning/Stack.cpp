@@ -83,7 +83,7 @@ void MiniStack::SortAndPruneHypos(const Manager &mgr) const
 Stack::Stack(const Manager &mgr)
 {
   //MemPool &pool = mgr.GetPool();
-  cerr << "Coll=" << sizeof(Coll) << endl;
+  //cerr << "Coll=" << sizeof(Coll) << endl;
 
   //alloc = new MemPoolAllocator< std::pair<HypoCoverage const, MiniStack> > (mgr.GetPool());
   m_coll = new Coll();
