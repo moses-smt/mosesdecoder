@@ -24,13 +24,28 @@ Stacks::Stacks(const Manager &mgr)
 
 Stacks::~Stacks()
 {
+	Recycler<NSCubePruning::Stack*> &recycler = m_mgr.system.GetStackRecycler();
+	for (size_t i = 0; i < m_stacks.size(); ++i) {
+		recycler.Add(m_stacks[i]);
+	}
 }
 
 void Stacks::Init(size_t numStacks)
 {
+	Recycler<NSCubePruning::Stack*> &recycler = m_mgr.system.GetStackRecycler();
+
 	m_stacks.resize(numStacks);
 	for (size_t i = 0; i < m_stacks.size(); ++i) {
-	  m_stacks[i] = new (m_mgr.GetPool().Allocate<Stack>()) Stack(m_mgr);
+		if (recycler.IsEmpty()) {
+			m_stacks[i] = new (m_mgr.GetPool().Allocate<Stack>()) Stack();
+		}
+		else {
+			Stack *stack = recycler.Get();
+			recycler.Pop();
+			stack->Clear();
+
+			m_stacks[i] = stack;
+		}
 	}
 }
 

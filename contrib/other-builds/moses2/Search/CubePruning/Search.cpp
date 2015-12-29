@@ -27,9 +27,8 @@ namespace NSCubePruning
 Search::Search(Manager &mgr)
 :Moses2::Search(mgr)
 ,m_stacks(mgr)
-,m_queueContainer(MemPoolAllocator<QueueItem*>(mgr.GetPool()))
-,m_queue(QueueItemOrderer(), m_queueContainer)
-,m_seenPositions(MemPoolAllocator<std::pair<const CubeEdge*, int> >(mgr.GetPool()))
+,m_queue(mgr.system.GetQueue())
+,m_seenPositions(mgr.system.GetSeenPositions())
 {
 }
 
@@ -80,7 +79,9 @@ template <class T, class S, class C>
 
 void Search::Decode(size_t stackInd)
 {
-	m_queueContainer.clear();
+	std::vector<QueueItem*> &queueContainer = Container(m_queue);
+	queueContainer.clear();
+
 	m_seenPositions.clear();
 
 	//Prefetch(stackInd);
@@ -164,7 +165,7 @@ void Search::PostDecode(size_t stackInd)
   		CubeEdges &edges = m_cubeEdges[numWords];
 
 		// sort hypo for a particular bitmap and hypoEndPos
-		CubeEdge::Hypotheses &sortedHypos = val.second->GetSortedAndPruneHypos(m_mgr);
+		CubeEdge::Hypotheses &sortedHypos = val.second.GetSortedAndPruneHypos(m_mgr);
 
   		BOOST_FOREACH(const TargetPhrases *tps, path.targetPhrases) {
   			if (tps && tps->GetSize()) {

@@ -19,22 +19,15 @@ namespace Moses2
 
 namespace NSCubePruning
 {
-MiniStack::MiniStack(const Manager &mgr)
-:m_sortedHypos(NULL)
-{
-	MemPool &pool = mgr.GetPool();
-	m_coll = new (pool.Allocate<_HCType>()) _HCType(MemPoolAllocator<const Hypothesis*>(pool));
-}
-
 CubeEdge::Hypotheses &MiniStack::GetSortedAndPruneHypos(const Manager &mgr) const
 {
   if (m_sortedHypos == NULL) {
     // create sortedHypos first
     MemPool &pool = mgr.GetPool();
-	m_sortedHypos = new (pool.Allocate< Vector<const Hypothesis*> >()) Vector<const Hypothesis*>(pool, m_coll->size());
+	m_sortedHypos = new (pool.Allocate< Vector<const Hypothesis*> >()) Vector<const Hypothesis*>(pool, m_coll.size());
 
 	  size_t ind = 0;
-	  BOOST_FOREACH(const Hypothesis *hypo, *m_coll) {
+	  BOOST_FOREACH(const Hypothesis *hypo, m_coll) {
 		  (*m_sortedHypos)[ind] = hypo;
 		  ++ind;
 	  }
@@ -87,21 +80,18 @@ void MiniStack::SortAndPruneHypos(const Manager &mgr) const
 }
 
 ///////////////////////////////////////////////////////////////
-Stack::Stack(const Manager &mgr)
-:m_mgr(&mgr)
-{
-  MemPool &pool = mgr.GetPool();
-  m_coll = new (pool.Allocate<Coll>()) Coll(MemPoolAllocator< std::pair<HypoCoverage const, MiniStack*> >(pool));
+Stack::Stack() {
+	// TODO Auto-generated constructor stub
+
 }
 
-Stack::~Stack()
-{
-  //delete m_coll;
+Stack::~Stack() {
+	// TODO Auto-generated destructor stub
 }
 
 void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 {
-	StackAdd added = Add2(hypo);
+	StackAdd added = Add(hypo);
 
 	if (added.toBeDeleted) {
 		hypoRecycle.Add(added.toBeDeleted);
@@ -109,7 +99,7 @@ void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 
 }
 
-StackAdd Stack::Add2(const Hypothesis *hypo)
+StackAdd Stack::Add(const Hypothesis *hypo)
 {
   HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
   MiniStack::_HCType &innerColl = GetMiniStack(key).GetColl();
@@ -146,8 +136,8 @@ StackAdd Stack::Add2(const Hypothesis *hypo)
 std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
 {
   std::vector<const Hypothesis*> ret;
-  BOOST_FOREACH(const Coll::value_type &val, *m_coll) {
-		const MiniStack::_HCType &hypos = val.second->GetColl();
+  BOOST_FOREACH(const Coll::value_type &val, m_coll) {
+		const MiniStack::_HCType &hypos = val.second.GetColl();
 		ret.insert(ret.end(), hypos.begin(), hypos.end());
   }
 
@@ -165,8 +155,8 @@ std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
 size_t Stack::GetHypoSize() const
 {
 	size_t ret = 0;
-	BOOST_FOREACH(const Coll::value_type &val, *m_coll) {
-		const MiniStack::_HCType &hypos = val.second->GetColl();
+	BOOST_FOREACH(const Coll::value_type &val, m_coll) {
+		const MiniStack::_HCType &hypos = val.second.GetColl();
 		ret += hypos.size();
 	}
 	return ret;
@@ -174,20 +164,22 @@ size_t Stack::GetHypoSize() const
 
 MiniStack &Stack::GetMiniStack(const HypoCoverage &key)
 {
-	MiniStack *ret;
-	Coll::iterator iter = m_coll->find(key);
-	if (iter == m_coll->end()) {
-		MemPool &pool = m_mgr->GetPool();
-		ret = new (pool.Allocate<MiniStack>()) MiniStack(*m_mgr);
-		(*m_coll)[key] = ret;
+	/*
+	_HCType *ret;
+	Coll::iterator iter = m_coll.find(key);
+	if (iter == m_coll.end()) {
+		ret = new _HCType();
+		m_coll[key] = ret;
 	}
 	else {
 		ret = iter->second;
 	}
 	return *ret;
+	*/
+	return m_coll[key];
 }
 
-} // namespace NSCubePruning
+}
 
-} //namespace Moses2
+}
 

@@ -12,7 +12,6 @@
 #include "../../Recycler.h"
 #include "../../TypeDef.h"
 #include "../../Vector.h"
-#include "../../MemPool.h"
 #include "../../legacy/Util2.h"
 
 namespace Moses2
@@ -27,23 +26,22 @@ class MiniStack
 {
 public:
 	typedef boost::unordered_set<const Hypothesis*,
-			  UnorderedComparer<Hypothesis>,
-			  UnorderedComparer<Hypothesis>,
-			  MemPoolAllocator<const Hypothesis*>
+			  UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>
 			   > _HCType;
 
-	MiniStack(const Manager &mgr);
+	MiniStack()
+	{}
 
 	_HCType &GetColl()
-	{ return *m_coll; }
+	{ return m_coll; }
 
 	const _HCType &GetColl() const
-	{ return *m_coll; }
+	{ return m_coll; }
 
 	CubeEdge::Hypotheses &GetSortedAndPruneHypos(const Manager &mgr) const;
 
 protected:
-	_HCType *m_coll;
+	_HCType m_coll;
 	mutable CubeEdge::Hypotheses *m_sortedHypos;
 
 	void SortAndPruneHypos(const Manager &mgr) const;
@@ -59,36 +57,29 @@ public:
   typedef std::pair<const Bitmap*, size_t> HypoCoverage;
 		  // bitmap and current endPos of hypos
 
-  typedef boost::unordered_map<const HypoCoverage,
-		  MiniStack*,
-		  boost::hash<HypoCoverage>,
-		  std::equal_to<HypoCoverage>,
-  	  	  MemPoolAllocator< std::pair<HypoCoverage const, MiniStack*> >
-		  > Coll;
+  typedef boost::unordered_map<HypoCoverage, MiniStack> Coll;
 
-  const Manager *m_mgr;
 
-	Stack(const Manager &mgr);
+	Stack();
 	virtual ~Stack();
 
 	size_t GetHypoSize() const;
 
 	Coll &GetColl()
-	{ return *m_coll; }
+	{ return m_coll; }
 
 	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
 
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
 	void Clear()
 	{
-		m_coll->clear();
+		m_coll.clear();
 	}
 
 protected:
-	Coll *m_coll;
+	Coll m_coll;
 
-    Stack(); // don't implement
-	StackAdd Add2(const Hypothesis *hypo);
+	StackAdd Add(const Hypothesis *hypo);
 
 	MiniStack &GetMiniStack(const HypoCoverage &key);
 

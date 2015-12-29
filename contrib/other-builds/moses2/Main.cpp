@@ -32,7 +32,7 @@ int main(int argc, char** argv)
 {
 	cerr << "Starting..." << endl;
 
-	Temp();
+	//Temp();
 
 	Moses2::Parameter params;
 	params.LoadParam(argc, argv);
@@ -80,7 +80,4 @@ void Temp()
 	s.insert(4);
 	s.insert(3);
 	s.erase(3);
-	s.insert(5);
-	cerr << "s=" << s.size() << endl;
-
 }
