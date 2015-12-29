@@ -65,7 +65,6 @@ public:
 	Recycler<Hypothesis*> &GetHypoRecycler() const;
 	ObjectPoolContiguous<Hypothesis*> &GetBatchForEval() const;
 	Bitmaps &GetBitmaps() const;
-	NSCubePruning::CubeEdge::Queue &GetQueue() const;
 	NSCubePruning::CubeEdge::SeenPositions &GetSeenPositions() const;
 
 protected:
@@ -74,7 +73,6 @@ protected:
   mutable boost::thread_specific_ptr< Recycler<Hypothesis*> > m_hypoRecycler;
   mutable boost::thread_specific_ptr< ObjectPoolContiguous<Hypothesis*> > m_batchForEval;
 
-  mutable boost::thread_specific_ptr< NSCubePruning::CubeEdge::Queue> m_queue;
   mutable boost::thread_specific_ptr< NSCubePruning::CubeEdge::SeenPositions> m_seenPositions;
 
   mutable boost::thread_specific_ptr<Bitmaps> m_bitmaps;

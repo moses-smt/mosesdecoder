@@ -58,8 +58,9 @@ class CubeEdge
 public:
 	typedef Vector<const Hypothesis*>  Hypotheses;
 	typedef std::priority_queue<QueueItem*,
-				std::vector<QueueItem*>,
-				QueueItemOrderer> Queue;
+				std::vector<QueueItem*, MemPoolAllocator<QueueItem*> >,
+				QueueItemOrderer
+				> Queue;
 	typedef boost::unordered_set< std::pair<const CubeEdge*, int> > SeenPositions;
 
 	const Hypotheses &hypos;

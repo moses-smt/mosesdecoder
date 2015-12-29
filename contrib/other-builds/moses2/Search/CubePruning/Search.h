@@ -34,7 +34,12 @@ public:
 
 protected:
 	NSCubePruning::Stacks m_stacks;
-	NSCubePruning::CubeEdge::Queue &m_queue;
+
+	MemPoolAllocator<QueueItem*> m_queueAlloc;
+	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > m_queueContainer;
+	QueueItemOrderer m_queueOrderer;
+	NSCubePruning::CubeEdge::Queue m_queue;
+
 	NSCubePruning::CubeEdge::SeenPositions &m_seenPositions;
 
 	// CUBE PRUNING VARIABLES
