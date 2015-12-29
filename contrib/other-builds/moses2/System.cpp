@@ -165,17 +165,6 @@ Bitmaps &System::GetBitmaps() const
   return GetThreadSpecificObj(m_bitmaps);
 }
 
-NSCubePruning::CubeEdge::Queue &System::GetQueue() const
-{
-  return GetThreadSpecificObj(m_queue);
-}
-
-NSCubePruning::CubeEdge::SeenPositions &System::GetSeenPositions() const
-{
-  return GetThreadSpecificObj(m_seenPositions);
-}
-
-
 
 
 }

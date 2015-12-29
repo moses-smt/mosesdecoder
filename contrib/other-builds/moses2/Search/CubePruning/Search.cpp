@@ -27,8 +27,6 @@ namespace NSCubePruning
 Search::Search(Manager &mgr)
 :Moses2::Search(mgr)
 ,m_stacks(mgr)
-,m_queue(mgr.system.GetQueue())
-,m_seenPositions(mgr.system.GetSeenPositions())
 {
 }
 
