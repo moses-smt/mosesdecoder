@@ -80,7 +80,9 @@ void MiniStack::SortAndPruneHypos(const Manager &mgr) const
 }
 
 ///////////////////////////////////////////////////////////////
-Stack::Stack() {
+Stack::Stack(const Manager &mgr)
+:m_coll(MemPoolAllocator< std::pair<HypoCoverage const, MiniStack> >(mgr.GetPool()) )
+{
 	// TODO Auto-generated constructor stub
 
 }

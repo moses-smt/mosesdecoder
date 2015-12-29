@@ -37,7 +37,7 @@ void Stacks::Init(size_t numStacks)
 	m_stacks.resize(numStacks);
 	for (size_t i = 0; i < m_stacks.size(); ++i) {
 		if (recycler.IsEmpty()) {
-			m_stacks[i] = new Stack();
+			m_stacks[i] = new Stack(m_mgr);
 		}
 		else {
 			Stack *stack = recycler.Get();
