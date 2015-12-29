@@ -28,7 +28,7 @@ Search::Search(Manager &mgr)
 :Moses2::Search(mgr)
 ,m_stacks(mgr)
 ,m_queue(mgr.system.GetQueue())
-,m_seenPositions(mgr.system.GetSeenPositions())
+,m_seenPositions(MemPoolAllocator<std::pair<const CubeEdge*, int>>(mgr.GetPool()))
 {
 }
 
