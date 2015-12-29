@@ -84,7 +84,6 @@ public:
 	}
 
 protected:
-	MemPoolAllocator< std::pair<HypoCoverage const, MiniStack> > m_alloc;
 	Coll *m_coll;
 
 	StackAdd Add(const Hypothesis *hypo);
