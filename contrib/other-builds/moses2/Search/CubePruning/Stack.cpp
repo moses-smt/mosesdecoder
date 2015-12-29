@@ -82,15 +82,14 @@ void MiniStack::SortAndPruneHypos(const Manager &mgr) const
 ///////////////////////////////////////////////////////////////
 Stack::Stack(const Manager &mgr)
 {
-  //MemPool &pool = mgr.GetPool();
+  MemPool &pool = mgr.GetPool();
   //cerr << "Coll=" << sizeof(Coll) << endl;
 
-  //alloc = new MemPoolAllocator< std::pair<HypoCoverage const, MiniStack> > (mgr.GetPool());
-  m_coll = new Coll();
-}
+	alloc = new MemPoolAllocator< std::pair<HypoCoverage const, MiniStack> > (pool);
+	m_coll = new (pool.Allocate<Coll>()) Coll(*alloc);}
 
 Stack::~Stack() {
-  delete m_coll;
+  delete alloc;
 }
 
 void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)

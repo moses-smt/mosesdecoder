@@ -62,8 +62,8 @@ public:
   typedef boost::unordered_map<HypoCoverage,
 		  MiniStack,
 		  boost::hash<HypoCoverage>,
-		  std::equal_to<HypoCoverage>
-    // MemPoolAllocator< std::pair<HypoCoverage const, MiniStack> >
+		  std::equal_to<HypoCoverage>,
+  	  	  MemPoolAllocator< std::pair<HypoCoverage const, MiniStack> >
 		  > Coll;
 
 
@@ -84,7 +84,7 @@ public:
 	}
 
 protected:
-	//MemPoolAllocator< std::pair<HypoCoverage const, MiniStack> > *alloc;
+	MemPoolAllocator< std::pair<HypoCoverage const, MiniStack> > *alloc;
 	Coll *m_coll;
 
 	StackAdd Add(const Hypothesis *hypo);
