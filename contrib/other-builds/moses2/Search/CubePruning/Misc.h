@@ -61,13 +61,7 @@ public:
 				std::vector<QueueItem*, MemPoolAllocator<QueueItem*> >,
 				QueueItemOrderer
 				> Queue;
-
-	typedef std::pair<const CubeEdge*, int> SeenItem;
-	typedef boost::unordered_set<SeenItem,
-				boost::hash<SeenItem>,
-				std::equal_to<SeenItem>,
-				MemPoolAllocator<SeenItem>
-				> SeenPositions;
+	typedef boost::unordered_set< std::pair<const CubeEdge*, int> > SeenPositions;
 
 	const Hypotheses &hypos;
 	const InputPath &path;
