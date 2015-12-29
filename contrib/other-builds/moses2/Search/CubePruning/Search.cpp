@@ -27,7 +27,8 @@ namespace NSCubePruning
 Search::Search(Manager &mgr)
 :Moses2::Search(mgr)
 ,m_stacks(mgr)
-,m_queue(mgr.system.GetQueue())
+,m_queueContainer(MemPoolAllocator<QueueItem*>(mgr.GetPool()))
+,m_queue(QueueItemOrderer(), m_queueContainer)
 ,m_seenPositions(MemPoolAllocator<std::pair<const CubeEdge*, int> >(mgr.GetPool()))
 {
 }
@@ -79,9 +80,7 @@ template <class T, class S, class C>
 
 void Search::Decode(size_t stackInd)
 {
-	std::vector<QueueItem*> &queueContainer = Container(m_queue);
-	queueContainer.clear();
-
+	m_queueContainer.clear();
 	m_seenPositions.clear();
 
 	//Prefetch(stackInd);

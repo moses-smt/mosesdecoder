@@ -65,15 +65,12 @@ public:
 	Recycler<Hypothesis*> &GetHypoRecycler() const;
 	ObjectPoolContiguous<Hypothesis*> &GetBatchForEval() const;
 	Bitmaps &GetBitmaps() const;
-	NSCubePruning::CubeEdge::Queue &GetQueue() const;
 
 protected:
   mutable FactorCollection m_vocab;
   mutable boost::thread_specific_ptr<MemPool> m_managerPool;
   mutable boost::thread_specific_ptr< Recycler<Hypothesis*> > m_hypoRecycler;
   mutable boost::thread_specific_ptr< ObjectPoolContiguous<Hypothesis*> > m_batchForEval;
-
-  mutable boost::thread_specific_ptr< NSCubePruning::CubeEdge::Queue> m_queue;
 
   mutable boost::thread_specific_ptr<Bitmaps> m_bitmaps;
 
