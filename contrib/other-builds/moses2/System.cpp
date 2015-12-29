@@ -175,12 +175,5 @@ NSCubePruning::CubeEdge::SeenPositions &System::GetSeenPositions() const
   return GetThreadSpecificObj(m_seenPositions);
 }
 
-Recycler<NSCubePruning::Stack*> &System::GetStackRecycler() const
-{
-  return GetThreadSpecificObj(m_stack);
-}
-
-
-
 }
 
