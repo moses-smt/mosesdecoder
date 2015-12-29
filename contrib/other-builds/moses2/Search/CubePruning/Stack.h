@@ -73,19 +73,19 @@ public:
 	size_t GetHypoSize() const;
 
 	Coll &GetColl()
-	{ return m_coll; }
+	{ return *m_coll; }
 
 	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
 
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
 	void Clear()
 	{
-		m_coll.clear();
+		m_coll->clear();
 	}
 
 protected:
 	MemPoolAllocator< std::pair<HypoCoverage const, MiniStack> > m_alloc;
-	Coll m_coll;
+	Coll *m_coll;
 
 	StackAdd Add(const Hypothesis *hypo);
 
