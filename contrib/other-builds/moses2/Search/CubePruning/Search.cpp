@@ -29,12 +29,15 @@ Search::Search(Manager &mgr)
 ,m_stacks(mgr)
 ,m_queue(mgr.system.GetQueue())
 ,m_seenPositions(mgr.system.GetSeenPositions())
-,m_cubeEdgesAlloc(mgr.GetPool())
-,m_cubeEdges(m_cubeEdgesAlloc)
 {
 }
 
-Search::~Search() {
+Search::~Search()
+{
+	BOOST_FOREACH(CubeEdges &edges, m_cubeEdges) {
+		RemoveAllInColl(edges);
+	}
+
 }
 
 void Search::Decode()
@@ -171,7 +174,7 @@ void Search::PostDecode(size_t stackInd)
 
   		BOOST_FOREACH(const TargetPhrases *tps, path.targetPhrases) {
   			if (tps && tps->GetSize()) {
-  		  		CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
+  		  		CubeEdge *edge = new CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
   		  		edges.push_back(edge);
   			}
   		}
