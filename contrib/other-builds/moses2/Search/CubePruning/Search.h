@@ -40,7 +40,9 @@ protected:
 	// CUBE PRUNING VARIABLES
 	// setup
 	typedef std::list<CubeEdge*> CubeEdges;
-	std::vector<CubeEdges> m_cubeEdges;
+
+	MemPoolAllocator<CubeEdges> m_cubeEdgesAlloc;
+	std::vector<CubeEdges, MemPoolAllocator<CubeEdges> > m_cubeEdges;
 
 	// CUBE PRUNING
 	// decoding

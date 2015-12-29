@@ -29,6 +29,8 @@ Search::Search(Manager &mgr)
 ,m_stacks(mgr)
 ,m_queue(mgr.system.GetQueue())
 ,m_seenPositions(mgr.system.GetSeenPositions())
+,m_cubeEdgesAlloc(mgr.GetPool())
+,m_cubeEdges(m_cubeEdgesAlloc)
 {
 }
 
