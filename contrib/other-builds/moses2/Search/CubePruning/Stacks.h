@@ -29,16 +29,16 @@ public:
 	{ return m_stacks.size(); }
 
 	const Stack &Back() const
-    { return *m_stacks.back(); }
+    { return m_stacks.back(); }
 
     Stack &operator[](size_t ind)
-    { return *m_stacks[ind]; }
+    { return m_stacks[ind]; }
 
 	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
 
 protected:
 	const Manager &m_mgr;
-	std::vector<Stack*> m_stacks;
+	std::vector<Stack> m_stacks;
 };
 
 
