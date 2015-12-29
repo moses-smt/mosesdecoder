@@ -39,8 +39,7 @@ protected:
 
 	// CUBE PRUNING VARIABLES
 	// setup
-	typedef std::list<CubeEdge*> CubeEdges;
-
+	typedef std::vector<CubeEdge*> CubeEdges;
 	std::vector<CubeEdges> m_cubeEdges;
 
 	// CUBE PRUNING
