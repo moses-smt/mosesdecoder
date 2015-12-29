@@ -24,7 +24,6 @@ Stacks::Stacks(const Manager &mgr)
 
 Stacks::~Stacks()
 {
-	RemoveAllInColl(m_stacks);
 }
 
 void Stacks::Init(size_t numStacks)
