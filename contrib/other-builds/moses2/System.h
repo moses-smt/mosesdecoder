@@ -68,8 +68,6 @@ public:
 	NSCubePruning::CubeEdge::Queue &GetQueue() const;
 	NSCubePruning::CubeEdge::SeenPositions &GetSeenPositions() const;
 
-    Recycler<NSCubePruning::Stack*> &GetStackRecycler() const;
-
 protected:
   mutable FactorCollection m_vocab;
   mutable boost::thread_specific_ptr<MemPool> m_managerPool;
@@ -81,7 +79,6 @@ protected:
 
   mutable boost::thread_specific_ptr<Bitmaps> m_bitmaps;
 
-  mutable boost::thread_specific_ptr< Recycler<NSCubePruning::Stack*> > m_stack;
 
   void LoadWeights();
   void LoadMappings();

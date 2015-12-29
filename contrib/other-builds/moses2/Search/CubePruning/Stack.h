@@ -60,7 +60,7 @@ public:
   typedef boost::unordered_map<HypoCoverage, MiniStack> Coll;
 
 
-	Stack();
+	Stack(const Manager &mgr);
 	virtual ~Stack();
 
 	size_t GetHypoSize() const;
