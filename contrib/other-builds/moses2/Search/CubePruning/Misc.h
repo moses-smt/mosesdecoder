@@ -60,7 +60,11 @@ public:
 	typedef std::priority_queue<QueueItem*,
 				std::vector<QueueItem*>,
 				QueueItemOrderer> Queue;
-	typedef boost::unordered_set< std::pair<const CubeEdge*, int> > SeenPositions;
+	typedef boost::unordered_set< std::pair<const CubeEdge*, int>,
+			  boost::hash< std::pair<const CubeEdge*, int> >,
+			  std::equal_to< std::pair<const CubeEdge*, int> >,
+			  MemPoolAllocator< std::pair<const CubeEdge*, int> >
+			  > SeenPositions;
 
 	const Hypotheses &hypos;
 	const InputPath &path;

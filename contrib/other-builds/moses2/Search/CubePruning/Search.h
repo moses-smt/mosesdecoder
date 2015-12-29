@@ -35,7 +35,7 @@ public:
 protected:
 	NSCubePruning::Stacks m_stacks;
 	NSCubePruning::CubeEdge::Queue &m_queue;
-	NSCubePruning::CubeEdge::SeenPositions &m_seenPositions;
+	NSCubePruning::CubeEdge::SeenPositions m_seenPositions;
 
 	// CUBE PRUNING VARIABLES
 	// setup
