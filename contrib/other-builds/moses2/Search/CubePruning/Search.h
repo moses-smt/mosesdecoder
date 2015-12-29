@@ -33,14 +33,15 @@ public:
 	const Hypothesis *GetBestHypothesis() const;
 
 protected:
-	NSCubePruning::Stacks m_stacks;
+	Stacks m_stacks;
 
 	MemPoolAllocator<QueueItem*> m_queueAlloc;
 	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > m_queueContainer;
 	QueueItemOrderer m_queueOrderer;
-	NSCubePruning::CubeEdge::Queue m_queue;
+	CubeEdge::Queue m_queue;
 
-	NSCubePruning::CubeEdge::SeenPositions &m_seenPositions;
+	MemPoolAllocator<CubeEdge::SeenItem> m_seenPositionsAlloc;
+	CubeEdge::SeenPositions m_seenPositions;
 
 	// CUBE PRUNING VARIABLES
 	// setup
