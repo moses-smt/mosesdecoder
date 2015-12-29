@@ -81,14 +81,14 @@ void MiniStack::SortAndPruneHypos(const Manager &mgr) const
 
 ///////////////////////////////////////////////////////////////
 Stack::Stack(const Manager &mgr)
-:m_coll(MemPoolAllocator< std::pair<HypoCoverage const, MiniStack> >(mgr.GetPool()) )
 {
-	// TODO Auto-generated constructor stub
-
+	MemPool &pool = mgr.GetPool();
+	alloc = new MemPoolAllocator< std::pair<HypoCoverage const, MiniStack> > (mgr.GetPool());
+	m_coll = new (pool.Allocate<Coll>()) Coll(*alloc);
 }
 
 Stack::~Stack() {
-	// TODO Auto-generated destructor stub
+	delete alloc;
 }
 
 void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
@@ -138,7 +138,7 @@ StackAdd Stack::Add(const Hypothesis *hypo)
 std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
 {
   std::vector<const Hypothesis*> ret;
-  BOOST_FOREACH(const Coll::value_type &val, m_coll) {
+  BOOST_FOREACH(const Coll::value_type &val, *m_coll) {
 		const MiniStack::_HCType &hypos = val.second.GetColl();
 		ret.insert(ret.end(), hypos.begin(), hypos.end());
   }
@@ -157,7 +157,7 @@ std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
 size_t Stack::GetHypoSize() const
 {
 	size_t ret = 0;
-	BOOST_FOREACH(const Coll::value_type &val, m_coll) {
+	BOOST_FOREACH(const Coll::value_type &val, *m_coll) {
 		const MiniStack::_HCType &hypos = val.second.GetColl();
 		ret += hypos.size();
 	}
@@ -178,7 +178,7 @@ MiniStack &Stack::GetMiniStack(const HypoCoverage &key)
 	}
 	return *ret;
 	*/
-	return m_coll[key];
+	return (*m_coll)[key];
 }
 
 }
