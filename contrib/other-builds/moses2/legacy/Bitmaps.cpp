@@ -18,29 +18,20 @@ Bitmaps::~Bitmaps()
 
 void Bitmaps::Init(size_t inputSize, const std::vector<bool> &initSourceCompleted)
 {
-  m_initBitmap = new Bitmap(inputSize);
-  m_initBitmap->Init(initSourceCompleted);
+  m_initBitmap = new Bitmap(inputSize, initSourceCompleted);
   m_coll[m_initBitmap];
 }
 
 const Bitmap &Bitmaps::GetNextBitmap(const Bitmap &bm, const Range &range)
 {
-  Bitmap *newBM;
-  if (m_recycler.empty()) {
-	  newBM = new Bitmap(bm.GetSize());
-  }
-  else {
-	  newBM = m_recycler.top();
-	  m_recycler.pop();
-  }
-  newBM->Init(bm, range);
+  Bitmap *newBM = new Bitmap(bm, range);
 
   Coll::const_iterator iter = m_coll.find(newBM);
   if (iter == m_coll.end()) {
     m_coll[newBM] = NextBitmaps();
     return *newBM;
   } else {
-	m_recycler.push(newBM);
+    delete newBM;
     return *iter->first;
   }
 }
@@ -72,12 +63,6 @@ void Bitmaps::Clear()
 	delete bm;
   }
   m_coll.clear();
-
-  while (!m_recycler.empty()) {
-	  const Bitmap *bm = m_recycler.top();
-	  delete bm;
-	  m_recycler.pop();
-  }
 }
 
 }
