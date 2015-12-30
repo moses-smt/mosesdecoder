@@ -28,12 +28,10 @@ Search::Search(Manager &mgr)
 :Moses2::Search(mgr)
 ,m_stacks(mgr)
 
-,m_queueContainerAlloc(mgr.GetPool())
-,m_queueContainer(m_queueContainerAlloc)
-,m_queue(m_queueOrder, m_queueContainer)
+,m_queue(QueueItemOrderer(),
+		std::vector<QueueItem*, MemPoolAllocator<QueueItem*> >(MemPoolAllocator<QueueItem*>(mgr.GetPool())) )
 
-,m_seenPositionsAlloc(mgr.GetPool())
-,m_seenPositions(m_seenPositionsAlloc)
+,m_seenPositions(MemPoolAllocator<CubeEdge::SeenPositionItem>(mgr.GetPool()))
 {
 }
 
