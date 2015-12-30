@@ -36,11 +36,11 @@ protected:
 	Stacks m_stacks;
 
 	QueueItemOrderer *m_queueOrder;
-	boost::fast_pool_allocator<QueueItem*> *m_queueContainerAlloc;
-	std::vector<QueueItem*, boost::fast_pool_allocator<QueueItem*> > *m_queueContainer;
+	MemPoolAllocator<QueueItem*> *m_queueContainerAlloc;
+	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > *m_queueContainer;
 	CubeEdge::Queue *m_queue;
 
-	boost::pool_allocator<CubeEdge::SeenPositionItem> *m_seenPositionsAlloc;
+	MemPoolAllocator<CubeEdge::SeenPositionItem> *m_seenPositionsAlloc;
 	CubeEdge::SeenPositions *m_seenPositions;
 
 	// CUBE PRUNING VARIABLES
