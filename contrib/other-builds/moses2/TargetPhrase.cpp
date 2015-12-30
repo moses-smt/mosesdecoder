@@ -45,7 +45,7 @@ TargetPhrase::TargetPhrase(MemPool &pool, const System &system, const TargetPhra
 {
 	// scores
 	m_estimatedScore = copy.m_estimatedScore;
-	m_scores = new (pool.Allocate<Scores>()) Scores(pool, system.featureFunctions.GetNumScores(), copy.GetScores());
+	m_scores = new (pool.Allocate<Scores>()) Scores(system, pool, system.featureFunctions.GetNumScores(), copy.GetScores());
 
 	size_t numWithPtData = system.featureFunctions.GetWithPhraseTableInd().size();
 	ffData = new (pool.Allocate<void *>(numWithPtData)) void *[numWithPtData];

@@ -88,8 +88,7 @@ void Hypothesis::Init(const InputPath &path, const TargetPhrase &tp, const Bitma
 	m_currTargetWordsRange = Range(NOT_FOUND, NOT_FOUND);
 	m_estimatedScore = 0;
 
-	size_t numScores = mgr.system.featureFunctions.GetNumScores();
-	m_scores->Reset(numScores);
+	m_scores->Reset(mgr.system);
 }
 
 void Hypothesis::Init(const Hypothesis &prevHypo,
@@ -107,8 +106,7 @@ void Hypothesis::Init(const Hypothesis &prevHypo,
 	                         + tp.GetSize());
 	m_estimatedScore = estimatedScore;
 
-	size_t numScores = mgr.system.featureFunctions.GetNumScores();
-	m_scores->Reset(numScores);
+	m_scores->Reset(mgr.system);
 	m_scores->PlusEquals(mgr.system, prevHypo.GetScores());
 	m_scores->PlusEquals(mgr.system, GetTargetPhrase().GetScores());
 }
@@ -180,7 +178,7 @@ std::ostream& operator<<(std::ostream &out, const Hypothesis &obj)
 	obj.OutputToStream(out);
 	out << " ";
 	out << "fc=" << obj.GetFutureScore() << " ";
-	obj.GetScores().Debug(out, obj.mgr.system.featureFunctions);
+	obj.GetScores().Debug(out, obj.mgr.system);
 	return out;
 }
 

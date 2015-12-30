@@ -23,14 +23,14 @@ class Scores {
 	  friend std::ostream& operator<<(std::ostream &, const Scores &);
 public:
   Scores(const System &system, MemPool &pool, size_t numScores);
-  Scores(MemPool &pool, size_t numScores, const Scores &origScores);
+  Scores(const System &system, MemPool &pool, size_t numScores, const Scores &origScores);
 
   virtual ~Scores();
 
   SCORE GetTotalScore() const
   { return m_total; }
 
-  void Reset(size_t numScores);
+  void Reset(const System &system);
 
   void CreateFromString(const std::string &str,
 		  const FeatureFunction &featureFunction,
@@ -69,7 +69,7 @@ public:
 		  const FeatureFunction &featureFunction,
 		  const std::vector<SCORE> &scores);
 
-  void Debug(std::ostream &out, const FeatureFunctions &ffs) const;
+  void Debug(std::ostream &out, const System &system) const;
 
   // static functions to work out estimated scores
   static SCORE CalcWeightedScore(const System &system,

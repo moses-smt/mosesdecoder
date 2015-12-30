@@ -33,12 +33,13 @@ Scores::Scores(const System &system, MemPool &pool, size_t numScores)
 	}
 }
 
-Scores::Scores(MemPool &pool,
+Scores::Scores(const System &system,
+		MemPool &pool,
 		size_t numScores,
 		const Scores &origScores)
 :m_total(origScores.m_total)
 {
-	if (origScores.m_scores) {
+	if (system.nbestSize) {
 		m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
 		memcpy(m_scores, origScores.m_scores, sizeof(SCORE) * numScores);
 	}
@@ -51,9 +52,10 @@ Scores::~Scores() {
 
 }
 
-void Scores::Reset(size_t numScores)
+void Scores::Reset(const System &system)
 {
-	if (m_scores) {
+	if (system.nbestSize) {
+		size_t numScores = system.featureFunctions.GetNumScores();
 		Init<SCORE>(m_scores, numScores, 0);
 	}
 	m_total = 0;
@@ -68,7 +70,7 @@ void Scores::PlusEquals(const System &system,
 	const Weights &weights = system.weights;
 
 	size_t ffStartInd = featureFunction.GetStartInd();
-	if (m_scores) {
+	if (system.nbestSize) {
 		m_scores[ffStartInd] += score;
 	}
 	SCORE weight = weights[ffStartInd];
@@ -85,7 +87,7 @@ void Scores::PlusEquals(const System &system,
 	const Weights &weights = system.weights;
 
 	size_t ffStartInd = featureFunction.GetStartInd();
-	if (m_scores) {
+	if (system.nbestSize) {
 		m_scores[ffStartInd + offset] += score;
 	}
 	SCORE weight = weights[ffStartInd + offset];
@@ -103,7 +105,7 @@ void Scores::PlusEquals(const System &system,
 	size_t ffStartInd = featureFunction.GetStartInd();
 	for (size_t i = 0; i < scores.size(); ++i) {
 		SCORE incrScore = scores[i];
-		if (m_scores) {
+		if (system.nbestSize) {
 			m_scores[ffStartInd + i] += incrScore;
 		}
 		//cerr << "ffStartInd=" << ffStartInd << " " << i << endl;
@@ -123,7 +125,7 @@ void Scores::PlusEquals(const System &system,
 	size_t ffStartInd = featureFunction.GetStartInd();
 	for (size_t i = 0; i < scores.size(); ++i) {
 		SCORE incrScore = scores[i];
-		if (m_scores) {
+		if (system.nbestSize) {
 			m_scores[ffStartInd + i] += incrScore;
 		}
 		//cerr << "ffStartInd=" << ffStartInd << " " << i << endl;
@@ -143,7 +145,7 @@ void Scores::PlusEquals(const System &system,
 	size_t ffStartInd = featureFunction.GetStartInd();
 	for (size_t i = 0; i < featureFunction.GetNumScores(); ++i) {
 		SCORE incrScore = scores[i];
-		if (m_scores) {
+		if (system.nbestSize) {
 			m_scores[ffStartInd + i] += incrScore;
 		}
 		//cerr << "ffStartInd=" << ffStartInd << " " << i << endl;
@@ -155,7 +157,7 @@ void Scores::PlusEquals(const System &system,
 void Scores::PlusEquals(const System &system, const Scores &other)
 {
 	size_t numScores = system.featureFunctions.GetNumScores();
-	if (m_scores) {
+	if (system.nbestSize) {
 		for (size_t i = 0; i < numScores; ++i) {
 			m_scores[i] += other.m_scores[i];
 		}
@@ -174,7 +176,7 @@ void Scores::Assign(const System &system,
 
 	size_t ffStartInd = featureFunction.GetStartInd();
 
-	if (m_scores) {
+	if (system.nbestSize) {
 		assert(m_scores[ffStartInd] == 0);
 		m_scores[ffStartInd] = score;
 	}
@@ -195,7 +197,7 @@ void Scores::Assign(const System &system,
 	for (size_t i = 0; i < scores.size(); ++i) {
 		SCORE incrScore = scores[i];
 
-		if (m_scores) {
+		if (system.nbestSize) {
 			assert(m_scores[ffStartInd + i] == 0);
 			m_scores[ffStartInd + i] = incrScore;
 		}
@@ -224,10 +226,10 @@ void Scores::CreateFromString(const std::string &str,
 	PlusEquals(system, featureFunction, scores);
 }
 
-void Scores::Debug(std::ostream &out, const FeatureFunctions &ffs) const
+void Scores::Debug(std::ostream &out, const System &system) const
 {
-	if (m_scores) {
-	  BOOST_FOREACH(const FeatureFunction *ff, ffs.GetFeatureFunctions()) {
+	if (system.nbestSize) {
+	  BOOST_FOREACH(const FeatureFunction *ff, system.featureFunctions.GetFeatureFunctions()) {
 		  out << ff->GetName() << ":";
 		  for (size_t i = ff->GetStartInd(); i < (ff->GetStartInd() + ff->GetNumScores()); ++i) {
 			out << m_scores[i] << " ";
@@ -240,10 +242,6 @@ void Scores::Debug(std::ostream &out, const FeatureFunctions &ffs) const
 std::ostream& operator<<(std::ostream &out, const Scores &obj)
 {
 	out << obj.m_total;
-
-	if (obj.m_scores) {
-		// don't know num of scores
-	}
 	return out;
 }
 
