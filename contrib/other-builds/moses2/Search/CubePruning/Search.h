@@ -41,7 +41,7 @@ protected:
 	CubeEdge::Queue *m_queue;
 
 	MemPoolAllocator<CubeEdge::SeenPositionItem> *m_seenPositionsAlloc;
-	CubeEdge::SeenPositions m_seenPositions;
+	CubeEdge::SeenPositions *m_seenPositions;
 
 	// CUBE PRUNING VARIABLES
 	// setup
