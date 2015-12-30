@@ -22,40 +22,48 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/functional/hash.hpp>
 #include "Bitmap.h"
 
+using namespace std;
+
 namespace Moses2
 {
 
 Bitmap::Bitmap(size_t size, const std::vector<bool>& initializer, MemPool &pool)
 :m_size(size)
-,m_bitmap(initializer.begin(), initializer.end())
 {
+  m_bitmap = (char*) calloc(size, sizeof(char));
 
   // The initializer may not be of the same length.  Change to the desired
   // length.  If we need to add any elements, initialize them to false.
-  m_bitmap.resize(size, false);
+  for (size_t i = 0; i < initializer.size(); ++i) {
+	  m_bitmap[i] = initializer[i];
+  }
 
-  m_numWordsCovered = std::count(m_bitmap.begin(), m_bitmap.end(), true);
+  m_numWordsCovered = std::count(initializer.begin(), initializer.end(), true);
 
   // Find the first gap, and cache it.
-  std::vector<char>::const_iterator first_gap = std::find(
-        m_bitmap.begin(), m_bitmap.end(), false);
-  m_firstGap = (
-                 (first_gap == m_bitmap.end()) ?
-                 NOT_FOUND : first_gap - m_bitmap.begin());
+  m_firstGap = NOT_FOUND;
+  for (size_t i = 0; i < size; ++i) {
+	  if (!m_bitmap[i]) {
+		  m_firstGap = i;
+		  break;
+	  }
+  }
 }
 
 Bitmap::Bitmap(const Bitmap &copy, const Range &range, MemPool &pool)
 :m_size(copy.m_size)
-,m_bitmap(copy.m_bitmap)
 ,m_firstGap(copy.m_firstGap)
 ,m_numWordsCovered(copy.m_numWordsCovered)
 {
+  m_bitmap = (char*) malloc(m_size);
+  memcpy(m_bitmap, copy.m_bitmap, m_size);
+
   SetValueNonOverlap(range);
 }
 
 Bitmap::~Bitmap()
 {
-
+  free(m_bitmap);
 }
 
 // for unordered_set in stack
