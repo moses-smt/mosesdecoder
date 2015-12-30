@@ -33,9 +33,11 @@ public:
 	const Hypothesis *GetBestHypothesis() const;
 
 protected:
-	NSCubePruning::Stacks m_stacks;
-	NSCubePruning::CubeEdge::Queue m_queue;
-	NSCubePruning::CubeEdge::SeenPositions m_seenPositions;
+	Stacks m_stacks;
+	CubeEdge::Queue m_queue;
+
+	MemPoolAllocator<CubeEdge::SeenPositionItem> m_seenPositionsAlloc;
+	CubeEdge::SeenPositions m_seenPositions;
 
 	// CUBE PRUNING VARIABLES
 	// setup
