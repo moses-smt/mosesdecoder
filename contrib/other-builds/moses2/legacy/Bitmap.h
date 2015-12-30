@@ -32,6 +32,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses2
 {
+class MemPool;
 
 typedef unsigned long WordsBitmapID;
 
@@ -50,6 +51,7 @@ class Bitmap
 {
   friend std::ostream& operator<<(std::ostream& out, const Bitmap& bitmap);
 private:
+  size_t m_size;
   std::vector<char> m_bitmap; //! Ticks of words in sentence that have been done.
   size_t m_firstGap; //! Cached position of first gap, or NOT_FOUND.
   size_t m_numWordsCovered;
@@ -63,7 +65,7 @@ private:
       //may remove gap
       if (startPos <= m_firstGap && m_firstGap <= endPos) {
         m_firstGap = NOT_FOUND;
-        for (size_t i = endPos + 1 ; i < m_bitmap.size(); ++i) {
+        for (size_t i = endPos + 1 ; i < m_size; ++i) {
           if (!m_bitmap[i]) {
             m_firstGap = i;
             break;
@@ -95,15 +97,9 @@ private:
 
 public:
   //! Create Bitmap of length size, and initialise with vector.
-  explicit Bitmap(size_t size, const std::vector<bool>& initializer);
-
-  //! Create Bitmap of length size and initialise.
-  explicit Bitmap(size_t size);
-
-  //! Deep copy.
-  explicit Bitmap(const Bitmap &copy);
-
-  explicit Bitmap(const Bitmap &copy, const Range &range);
+  explicit Bitmap(size_t size, const std::vector<bool>& initializer, MemPool &pool);
+  explicit Bitmap(const Bitmap &copy, const Range &range, MemPool &pool);
+  ~Bitmap();
 
   //! Count of words translated.
   size_t GetNumWordsCovered() const {

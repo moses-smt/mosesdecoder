@@ -66,7 +66,7 @@ void Manager::Init()
 
 	CalcFutureScore();
 
-	m_bitmaps.Init(m_input->GetSize(), vector<bool>(0));
+	m_bitmaps.Init(m_input->GetSize(), vector<bool>(0), GetPool());
 
 	switch (system.searchAlgorithm) {
 	case Normal:
