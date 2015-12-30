@@ -52,7 +52,7 @@ class Bitmap
   friend std::ostream& operator<<(std::ostream& out, const Bitmap& bitmap);
 private:
   size_t m_size;
-  char *m_bitmap; //! Ticks of words in sentence that have been done.
+  std::vector<char> m_bitmap; //! Ticks of words in sentence that have been done.
   size_t m_firstGap; //! Cached position of first gap, or NOT_FOUND.
   size_t m_numWordsCovered;
 
@@ -114,7 +114,7 @@ public:
 
   //! position of last word not yet translated, or NOT_FOUND if everything already translated
   size_t GetLastGapPos() const {
-    for (int pos = int(m_size) - 1 ; pos >= 0 ; pos--) {
+    for (int pos = int(m_bitmap.size()) - 1 ; pos >= 0 ; pos--) {
       if (!m_bitmap[pos]) {
         return pos;
       }
@@ -126,7 +126,7 @@ public:
 
   //! position of last translated word
   size_t GetLastPos() const {
-    for (int pos = int(m_size) - 1 ; pos >= 0 ; pos--) {
+    for (int pos = int(m_bitmap.size()) - 1 ; pos >= 0 ; pos--) {
       if (m_bitmap[pos]) {
         return pos;
       }
@@ -169,7 +169,7 @@ public:
   }
   //! number of elements
   size_t GetSize() const {
-    return m_size;
+    return m_bitmap.size();
   }
 
   inline size_t GetEdgeToTheLeftOf(size_t l) const {
@@ -181,14 +181,53 @@ public:
   }
 
   inline size_t GetEdgeToTheRightOf(size_t r) const {
-    if (r+1 == m_size) return r;
+    if (r+1 == m_bitmap.size()) return r;
+    return (
+             std::find(m_bitmap.begin() + r + 1, m_bitmap.end(), true) -
+             m_bitmap.begin()
+           ) - 1;
+  }
 
-    for (size_t i = r + 1; i < m_size; ++i) {
-    	if (m_bitmap[i]) {
-    		return i - 1;
-    	}
+
+  //! converts bitmap into an integer ID: it consists of two parts: the first 16 bit are the pattern between the first gap and the last word-1, the second 16 bit are the number of filled positions. enforces a sentence length limit of 65535 and a max distortion of 16
+  WordsBitmapID GetID() const {
+    assert(m_bitmap.size() < (1<<16));
+
+    size_t start = GetFirstGapPos();
+    if (start == NOT_FOUND) start = m_bitmap.size(); // nothing left
+
+    size_t end = GetLastPos();
+    if (end == NOT_FOUND) end = 0; // nothing translated yet
+
+    assert(end < start || end-start <= 16);
+    WordsBitmapID id = 0;
+    for(size_t pos = end; pos > start; pos--) {
+      id = id*2 + (int) GetValue(pos);
     }
-    return NOT_FOUND;
+    return id + (1<<16) * start;
+  }
+
+  //! converts bitmap into an integer ID, with an additional span covered
+  WordsBitmapID GetIDPlus( size_t startPos, size_t endPos ) const {
+    assert(m_bitmap.size() < (1<<16));
+
+    size_t start = GetFirstGapPos();
+    if (start == NOT_FOUND) start = m_bitmap.size(); // nothing left
+
+    size_t end = GetLastPos();
+    if (end == NOT_FOUND) end = 0; // nothing translated yet
+
+    if (start == startPos) start = endPos+1;
+    if (end < endPos) end = endPos;
+
+    assert(end < start || end-start <= 16);
+    WordsBitmapID id = 0;
+    for(size_t pos = end; pos > start; pos--) {
+      id = id*2;
+      if (GetValue(pos) || (startPos<=pos && pos<=endPos))
+        id++;
+    }
+    return id + (1<<16) * start;
   }
 
   // for unordered_set in stack
