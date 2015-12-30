@@ -65,8 +65,8 @@ std::ostream& operator<<(std::ostream &out, const CubeEdge &obj)
 bool
 CubeEdge::SeenPosition(const size_t x, const size_t y, SeenPositions &seenPositions) const
 {
-  std::pair<const CubeEdge*, int> val(this, (x<<16) + y);
-  boost::unordered_set< std::pair<const CubeEdge*, int> >::iterator iter = seenPositions.find(val);
+  SeenPositionItem val(this, (x<<16) + y);
+  boost::unordered_set<SeenPositionItem>::iterator iter = seenPositions.find(val);
   return (iter != seenPositions.end());
 }
 
@@ -76,7 +76,7 @@ CubeEdge::SetSeenPosition(const size_t x, const size_t y, SeenPositions &seenPos
   //UTIL_THROW_IF2(x >= (1<<17), "Error");
   //UTIL_THROW_IF2(y >= (1<<17), "Error");
 
-  std::pair<const CubeEdge*, int> val(this, (x<<16) + y);
+  SeenPositionItem val(this, (x<<16) + y);
   seenPositions.insert(val);
 }
 
