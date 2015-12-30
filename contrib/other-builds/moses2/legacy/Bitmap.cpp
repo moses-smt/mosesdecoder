@@ -28,21 +28,12 @@ using namespace std;
 namespace Moses2
 {
 
-Bitmap::Bitmap(size_t size, MemPool &pool)
+Bitmap::Bitmap(size_t size, const std::vector<bool>& initializer, MemPool &pool)
 :m_size(size)
 {
   //m_bitmap = (char*) calloc(size, sizeof(char));
   m_bitmap = (bool*) pool.AllocatePadded(size);
-}
-
-Bitmap::~Bitmap()
-{
-  //free(m_bitmap);
-}
-
-void Bitmap::Initialize(const std::vector<bool>& initializer)
-{
-  Init<bool>(m_bitmap, m_size, false);
+  Init<bool>(m_bitmap, size, false);
 
   // The initializer may not be of the same length.  Change to the desired
   // length.  If we need to add any elements, initialize them to false.
@@ -54,23 +45,29 @@ void Bitmap::Initialize(const std::vector<bool>& initializer)
 
   // Find the first gap, and cache it.
   m_firstGap = NOT_FOUND;
-  for (size_t i = 0; i < m_size; ++i) {
+  for (size_t i = 0; i < size; ++i) {
 	  if (!m_bitmap[i]) {
 		  m_firstGap = i;
 		  break;
 	  }
   }
-
 }
 
-void Bitmap::Initialize(const Bitmap &copy, const Range &range)
+Bitmap::Bitmap(const Bitmap &copy, const Range &range, MemPool &pool)
+:m_size(copy.m_size)
+,m_firstGap(copy.m_firstGap)
+,m_numWordsCovered(copy.m_numWordsCovered)
 {
-	m_firstGap = copy.m_firstGap;
-	m_numWordsCovered = copy.m_numWordsCovered;
+  //m_bitmap = (char*) malloc(m_size);
+  m_bitmap = (bool*) pool.AllocatePadded(m_size);
+  memcpy(m_bitmap, copy.m_bitmap, m_size);
 
-	memcpy(m_bitmap, copy.m_bitmap, m_size);
+  SetValueNonOverlap(range);
+}
 
-	SetValueNonOverlap(range);
+Bitmap::~Bitmap()
+{
+  //free(m_bitmap);
 }
 
 // for unordered_set in stack

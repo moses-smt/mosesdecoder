@@ -3,7 +3,6 @@
 #include <boost/unordered_set.hpp>
 #include <boost/unordered_map.hpp>
 #include <set>
-#include <stack>
 #include "Bitmap.h"
 #include "Util2.h"
 
@@ -17,9 +16,8 @@ class Bitmaps
   typedef boost::unordered_map<const Bitmap*, NextBitmaps, UnorderedComparer<Bitmap>, UnorderedComparer<Bitmap> > Coll;
   //typedef std::set<const Bitmap*, OrderedComparer<Bitmap> > Coll;
   Coll m_coll;
-  Bitmap *m_initBitmap;
+  const Bitmap *m_initBitmap;
   MemPool *m_pool;
-  std::stack<Bitmap*> m_recycler;
 
   const Bitmap &GetNextBitmap(const Bitmap &bm, const Range &range);
 public:

@@ -20,29 +20,20 @@ Bitmaps::~Bitmaps()
 void Bitmaps::Init(size_t inputSize, const std::vector<bool> &initSourceCompleted, MemPool &pool)
 {
   m_pool = &pool;
-  m_initBitmap = new (m_pool->Allocate<Bitmap>()) Bitmap(inputSize, pool);
-  m_initBitmap->Initialize(initSourceCompleted);
+  m_initBitmap = new (m_pool->Allocate<Bitmap>()) Bitmap(inputSize, initSourceCompleted, pool);
   m_coll[m_initBitmap];
 }
 
 const Bitmap &Bitmaps::GetNextBitmap(const Bitmap &bm, const Range &range)
 {
-  Bitmap *newBM;
-  if (m_recycler.empty()) {
-	  newBM = new (m_pool->Allocate<Bitmap>()) Bitmap(bm.GetSize(), *m_pool);
-  }
-  else {
-	  newBM = m_recycler.top();
-	  m_recycler.pop();
-  }
-  newBM->Initialize(bm, range);
+  Bitmap *newBM = new (m_pool->Allocate<Bitmap>()) Bitmap(bm, range, *m_pool);
 
   Coll::const_iterator iter = m_coll.find(newBM);
   if (iter == m_coll.end()) {
     m_coll[newBM] = NextBitmaps();
     return *newBM;
   } else {
-	m_recycler.push(newBM);
+    //delete newBM;
     return *iter->first;
   }
 }
