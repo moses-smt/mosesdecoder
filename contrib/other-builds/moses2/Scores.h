@@ -81,7 +81,7 @@ public:
   		SCORE score);
 
 protected:
-	SCORE *m_scores;
+	//SCORE *m_scores;
 	SCORE m_total;
 };
 
