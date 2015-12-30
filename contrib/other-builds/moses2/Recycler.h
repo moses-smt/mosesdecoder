@@ -8,14 +8,14 @@
 #ifndef RECYCLER_H_
 #define RECYCLER_H_
 
-#include <vector>
+#include <deque>
 
 namespace Moses2
 {
 
 template<typename T>
 class Recycler {
-	typedef std::vector<T> Coll;
+	typedef std::deque<T> Coll;
 
 public:
 	  typedef typename Coll::iterator iterator;
@@ -37,7 +37,6 @@ public:
 
 	Recycler()
 	{
-		m_coll.reserve(10000);
 	}
 
 	virtual ~Recycler()
@@ -51,9 +50,7 @@ public:
 
 	void Pop()
 	{
-		if (m_coll.size()) {
-			m_coll.resize(m_coll.size() - 1);
-		}
+		m_coll.pop_back();
 	}
 
 	void Add(T &obj)
