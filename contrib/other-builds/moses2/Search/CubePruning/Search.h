@@ -6,7 +6,7 @@
  */
 
 #pragma once
-
+#include <boost/pool/pool_alloc.hpp>
 #include "../Search.h"
 #include "Misc.h"
 #include "Stacks.h"
@@ -36,11 +36,11 @@ protected:
 	Stacks m_stacks;
 
 	QueueItemOrderer *m_queueOrder;
-	MemPoolAllocator<QueueItem*> *m_queueContainerAlloc;
-	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > *m_queueContainer;
+	boost::pool_allocator<QueueItem*> *m_queueContainerAlloc;
+	std::vector<QueueItem*, boost::pool_allocator<QueueItem*> > *m_queueContainer;
 	CubeEdge::Queue *m_queue;
 
-	MemPoolAllocator<CubeEdge::SeenPositionItem> *m_seenPositionsAlloc;
+	boost::pool_allocator<CubeEdge::SeenPositionItem> *m_seenPositionsAlloc;
 	CubeEdge::SeenPositions *m_seenPositions;
 
 	// CUBE PRUNING VARIABLES
