@@ -97,9 +97,11 @@ private:
 
 public:
   //! Create Bitmap of length size, and initialise with vector.
-  explicit Bitmap(size_t size, const std::vector<bool>& initializer, MemPool &pool);
-  explicit Bitmap(const Bitmap &copy, const Range &range, MemPool &pool);
+  explicit Bitmap(size_t size, MemPool &pool);
   ~Bitmap();
+
+  void Initialize(const std::vector<bool>& initializer);
+  void Initialize(const Bitmap &copy, const Range &range);
 
   //! Count of words translated.
   size_t GetNumWordsCovered() const {
