@@ -160,11 +160,6 @@ ObjectPoolContiguous<Hypothesis*> &System::GetBatchForEval() const
   return GetThreadSpecificObj(m_batchForEval);
 }
 
-Bitmaps &System::GetBitmaps() const
-{
-  return GetThreadSpecificObj(m_bitmaps);
-}
-
 
 
 }

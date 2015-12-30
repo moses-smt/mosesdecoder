@@ -45,7 +45,7 @@ public:
 	{ return *m_hypoRecycle; }
 
 	Bitmaps &GetBitmaps()
-	{ return *m_bitmaps; }
+	{ return m_bitmaps; }
 
 	const Sentence &GetInput() const
 	{ return *m_input; }
@@ -71,7 +71,7 @@ protected:
     long m_translationId;
 	Sentence *m_input;
 	InputPaths m_inputPaths;
-	Bitmaps *m_bitmaps;
+	Bitmaps m_bitmaps;
 	SquareMatrix *m_estimatedScores;
 	TargetPhrase *m_initPhrase;
 
