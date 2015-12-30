@@ -28,12 +28,13 @@ Search::Search(Manager &mgr)
 :Moses2::Search(mgr)
 ,m_stacks(mgr)
 
-,m_queueContainerAlloc(mgr.GetPool())
-,m_queueContainer(m_queueContainerAlloc)
-,m_queue(m_queueOrder, m_queueContainer)
+,m_queueOrder(new QueueItemOrderer())
+,m_queueContainerAlloc(new MemPoolAllocator<QueueItem*>(mgr.GetPool()))
+,m_queueContainer(new std::vector<QueueItem*, MemPoolAllocator<QueueItem*> >(*m_queueContainerAlloc))
+,m_queue(new CubeEdge::Queue(*m_queueOrder, *m_queueContainer))
 
-,m_seenPositionsAlloc(mgr.GetPool())
-,m_seenPositions(m_seenPositionsAlloc)
+,m_seenPositionsAlloc(new MemPoolAllocator<CubeEdge::SeenPositionItem>(mgr.GetPool()))
+,m_seenPositions(new CubeEdge::SeenPositions(*m_seenPositionsAlloc))
 {
 }
 
@@ -43,6 +44,13 @@ Search::~Search()
 		RemoveAllInColl(edges);
 	}
 
+	delete m_queue;
+	delete m_queueContainer;
+	delete m_queueContainerAlloc;
+	delete m_queueOrder;
+
+	delete m_seenPositions;
+	delete m_seenPositionsAlloc;
 }
 
 void Search::Decode()
@@ -87,8 +95,8 @@ template <class T, class S, class C>
 
 void Search::Decode(size_t stackInd)
 {
-	m_queueContainer.clear();
-	m_seenPositions.clear();
+	m_queueContainer->clear();
+	m_seenPositions->clear();
 
 	//Prefetch(stackInd);
 
@@ -97,7 +105,7 @@ void Search::Decode(size_t stackInd)
 
 	BOOST_FOREACH(CubeEdge *edge, edges) {
 		//cerr << "edge=" << *edge << endl;
-		edge->CreateFirst(m_mgr, m_queue, m_seenPositions);
+		edge->CreateFirst(m_mgr, *m_queue, *m_seenPositions);
 	}
 
 	/*
@@ -112,11 +120,11 @@ void Search::Decode(size_t stackInd)
 	*/
 
 	size_t pops = 0;
-	while (!m_queue.empty() && pops < m_mgr.system.popLimit) {
+	while (!m_queue->empty() && pops < m_mgr.system.popLimit) {
 		// get best hypo from queue, add to stack
 		//cerr << "queue=" << queue.size() << endl;
-		QueueItem *item = m_queue.top();
-		m_queue.pop();
+		QueueItem *item = m_queue->top();
+		m_queue->pop();
 
 		CubeEdge &edge = item->edge;
 
@@ -135,7 +143,7 @@ void Search::Decode(size_t stackInd)
 		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
 		m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
 
-		edge.CreateNext(m_mgr, item, m_queue, m_seenPositions);
+		edge.CreateNext(m_mgr, item, *m_queue, *m_seenPositions);
 
 		++pops;
 	}
