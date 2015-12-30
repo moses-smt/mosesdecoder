@@ -59,8 +59,6 @@ void Search::Decode()
 		Decode(stackInd);
 		PostDecode(stackInd);
 
-		//cerr << m_stacks << endl;
-
 		// delete stack to save mem
 		if (stackInd < m_stacks.GetSize() - 1) {
 			//m_stacks.Delete(stackInd);
@@ -140,6 +138,7 @@ void Search::Decode(size_t stackInd)
 		++pops;
 	}
 
+	/*
 	// create hypo from every edge. Increase diversity
 	while (!m_queue.empty()) {
 		QueueItem *item = m_queue.top();
@@ -154,6 +153,7 @@ void Search::Decode(size_t stackInd)
 			m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
 		}
 	}
+	*/
 }
 
 void Search::PostDecode(size_t stackInd)
