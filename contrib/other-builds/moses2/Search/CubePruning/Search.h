@@ -35,7 +35,9 @@ public:
 protected:
 	Stacks m_stacks;
 
-	std::vector<QueueItem*> m_queueContainer;
+	QueueItemOrderer m_queueOrder;
+	MemPoolAllocator<QueueItem*> m_queueContainerAlloc;
+	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > m_queueContainer;
 	CubeEdge::Queue m_queue;
 
 	MemPoolAllocator<CubeEdge::SeenPositionItem> m_seenPositionsAlloc;
