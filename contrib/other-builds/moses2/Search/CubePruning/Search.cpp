@@ -139,6 +139,21 @@ void Search::Decode(size_t stackInd)
 
 		++pops;
 	}
+
+	// create hypo from every edge. Increase diversity
+	while (!m_queue.empty()) {
+		QueueItem *item = m_queue.top();
+		m_queue.pop();
+
+		if (item->hypoIndex == 0 && item->tpIndex == 0) {
+			CubeEdge &edge = item->edge;
+
+			// add hypo to stack
+			Hypothesis *hypo = item->hypo;
+			//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
+			m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
+		}
+	}
 }
 
 void Search::PostDecode(size_t stackInd)
