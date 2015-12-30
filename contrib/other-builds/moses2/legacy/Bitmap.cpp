@@ -21,6 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <boost/functional/hash.hpp>
 #include "Bitmap.h"
+#include "../MemPool.h"
 
 using namespace std;
 
@@ -30,7 +31,9 @@ namespace Moses2
 Bitmap::Bitmap(size_t size, const std::vector<bool>& initializer, MemPool &pool)
 :m_size(size)
 {
-  m_bitmap = (char*) calloc(size, sizeof(char));
+  //m_bitmap = (char*) calloc(size, sizeof(char));
+  m_bitmap = (bool*) pool.AllocatePadded(size);
+  Init<bool>(m_bitmap, size, false);
 
   // The initializer may not be of the same length.  Change to the desired
   // length.  If we need to add any elements, initialize them to false.
@@ -55,7 +58,8 @@ Bitmap::Bitmap(const Bitmap &copy, const Range &range, MemPool &pool)
 ,m_firstGap(copy.m_firstGap)
 ,m_numWordsCovered(copy.m_numWordsCovered)
 {
-  m_bitmap = (char*) malloc(m_size);
+  //m_bitmap = (char*) malloc(m_size);
+  m_bitmap = (bool*) pool.AllocatePadded(m_size);
   memcpy(m_bitmap, copy.m_bitmap, m_size);
 
   SetValueNonOverlap(range);
@@ -63,7 +67,7 @@ Bitmap::Bitmap(const Bitmap &copy, const Range &range, MemPool &pool)
 
 Bitmap::~Bitmap()
 {
-  free(m_bitmap);
+  //free(m_bitmap);
 }
 
 // for unordered_set in stack
