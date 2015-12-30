@@ -25,11 +25,11 @@ Scores::Scores(const System &system, MemPool &pool, size_t numScores)
 :m_total(0)
 {
 	if (system.nbestSize) {
-		//m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
-		//Init<SCORE>(m_scores, numScores, 0);
+		m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
+		Init<SCORE>(m_scores, numScores, 0);
 	}
 	else {
-		//m_scores = NULL;
+		m_scores = NULL;
 	}
 }
 
@@ -40,11 +40,11 @@ Scores::Scores(const System &system,
 :m_total(origScores.m_total)
 {
 	if (system.nbestSize) {
-		//m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
-		//memcpy(m_scores, origScores.m_scores, sizeof(SCORE) * numScores);
+		m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
+		memcpy(m_scores, origScores.m_scores, sizeof(SCORE) * numScores);
 	}
 	else {
-		//m_scores = NULL;
+		m_scores = NULL;
 	}
 }
 
@@ -56,7 +56,7 @@ void Scores::Reset(const System &system)
 {
 	if (system.nbestSize) {
 		size_t numScores = system.featureFunctions.GetNumScores();
-		//Init<SCORE>(m_scores, numScores, 0);
+		Init<SCORE>(m_scores, numScores, 0);
 	}
 	m_total = 0;
 }
@@ -71,7 +71,7 @@ void Scores::PlusEquals(const System &system,
 
 	size_t ffStartInd = featureFunction.GetStartInd();
 	if (system.nbestSize) {
-		//m_scores[ffStartInd] += score;
+		m_scores[ffStartInd] += score;
 	}
 	SCORE weight = weights[ffStartInd];
 	m_total += score * weight;
@@ -88,7 +88,7 @@ void Scores::PlusEquals(const System &system,
 
 	size_t ffStartInd = featureFunction.GetStartInd();
 	if (system.nbestSize) {
-		//m_scores[ffStartInd + offset] += score;
+		m_scores[ffStartInd + offset] += score;
 	}
 	SCORE weight = weights[ffStartInd + offset];
 	m_total += score * weight;
@@ -106,7 +106,7 @@ void Scores::PlusEquals(const System &system,
 	for (size_t i = 0; i < scores.size(); ++i) {
 		SCORE incrScore = scores[i];
 		if (system.nbestSize) {
-			//m_scores[ffStartInd + i] += incrScore;
+			m_scores[ffStartInd + i] += incrScore;
 		}
 		//cerr << "ffStartInd=" << ffStartInd << " " << i << endl;
 		SCORE weight = weights[ffStartInd + i];
@@ -126,7 +126,7 @@ void Scores::PlusEquals(const System &system,
 	for (size_t i = 0; i < scores.size(); ++i) {
 		SCORE incrScore = scores[i];
 		if (system.nbestSize) {
-			//m_scores[ffStartInd + i] += incrScore;
+			m_scores[ffStartInd + i] += incrScore;
 		}
 		//cerr << "ffStartInd=" << ffStartInd << " " << i << endl;
 		SCORE weight = weights[ffStartInd + i];
@@ -146,7 +146,7 @@ void Scores::PlusEquals(const System &system,
 	for (size_t i = 0; i < featureFunction.GetNumScores(); ++i) {
 		SCORE incrScore = scores[i];
 		if (system.nbestSize) {
-			//m_scores[ffStartInd + i] += incrScore;
+			m_scores[ffStartInd + i] += incrScore;
 		}
 		//cerr << "ffStartInd=" << ffStartInd << " " << i << endl;
 		SCORE weight = weights[ffStartInd + i];
@@ -159,7 +159,7 @@ void Scores::PlusEquals(const System &system, const Scores &other)
 	size_t numScores = system.featureFunctions.GetNumScores();
 	if (system.nbestSize) {
 		for (size_t i = 0; i < numScores; ++i) {
-			//m_scores[i] += other.m_scores[i];
+			m_scores[i] += other.m_scores[i];
 		}
 	}
 	m_total += other.m_total;
@@ -177,8 +177,8 @@ void Scores::Assign(const System &system,
 	size_t ffStartInd = featureFunction.GetStartInd();
 
 	if (system.nbestSize) {
-		//assert(m_scores[ffStartInd] == 0);
-		//m_scores[ffStartInd] = score;
+		assert(m_scores[ffStartInd] == 0);
+		m_scores[ffStartInd] = score;
 	}
 	SCORE weight = weights[ffStartInd];
 	m_total += score * weight;
@@ -198,8 +198,8 @@ void Scores::Assign(const System &system,
 		SCORE incrScore = scores[i];
 
 		if (system.nbestSize) {
-			//assert(m_scores[ffStartInd + i] == 0);
-			//m_scores[ffStartInd + i] = incrScore;
+			assert(m_scores[ffStartInd + i] == 0);
+			m_scores[ffStartInd + i] = incrScore;
 		}
 		//cerr << "ffStartInd=" << ffStartInd << " " << i << endl;
 		SCORE weight = weights[ffStartInd + i];
@@ -232,7 +232,7 @@ void Scores::Debug(std::ostream &out, const System &system) const
 	  BOOST_FOREACH(const FeatureFunction *ff, system.featureFunctions.GetFeatureFunctions()) {
 		  out << ff->GetName() << ":";
 		  for (size_t i = ff->GetStartInd(); i < (ff->GetStartInd() + ff->GetNumScores()); ++i) {
-			//out << m_scores[i] << " ";
+			out << m_scores[i] << " ";
 		  }
 	  }
 	}
