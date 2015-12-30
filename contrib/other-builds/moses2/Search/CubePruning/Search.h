@@ -36,8 +36,8 @@ protected:
 	Stacks m_stacks;
 
 	QueueItemOrderer *m_queueOrder;
-	boost::pool_allocator<QueueItem*> *m_queueContainerAlloc;
-	std::vector<QueueItem*, boost::pool_allocator<QueueItem*> > *m_queueContainer;
+	boost::fast_pool_allocator<QueueItem*> *m_queueContainerAlloc;
+	std::vector<QueueItem*, boost::fast_pool_allocator<QueueItem*> > *m_queueContainer;
 	CubeEdge::Queue *m_queue;
 
 	boost::pool_allocator<CubeEdge::SeenPositionItem> *m_seenPositionsAlloc;

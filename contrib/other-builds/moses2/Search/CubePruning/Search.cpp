@@ -29,8 +29,8 @@ Search::Search(Manager &mgr)
 ,m_stacks(mgr)
 
 ,m_queueOrder(new QueueItemOrderer())
-,m_queueContainerAlloc(new boost::pool_allocator<QueueItem*>())
-,m_queueContainer(new std::vector<QueueItem*, boost::pool_allocator<QueueItem*> >(*m_queueContainerAlloc))
+,m_queueContainerAlloc(new boost::fast_pool_allocator<QueueItem*>())
+,m_queueContainer(new std::vector<QueueItem*, boost::fast_pool_allocator<QueueItem*> >(*m_queueContainerAlloc))
 ,m_queue(new CubeEdge::Queue(*m_queueOrder, *m_queueContainer))
 
 ,m_seenPositionsAlloc(new boost::pool_allocator<CubeEdge::SeenPositionItem>())
