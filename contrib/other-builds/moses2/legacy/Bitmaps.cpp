@@ -16,16 +16,15 @@ Bitmaps::~Bitmaps()
 	Clear();
 }
 
-void Bitmaps::Init(size_t inputSize, const std::vector<bool> &initSourceCompleted, MemPool &pool)
+void Bitmaps::Init(size_t inputSize, const std::vector<bool> &initSourceCompleted)
 {
-  m_pool = &pool;
-  m_initBitmap = new Bitmap(inputSize, initSourceCompleted, pool);
+  m_initBitmap = new Bitmap(inputSize, initSourceCompleted);
   m_coll[m_initBitmap];
 }
 
 const Bitmap &Bitmaps::GetNextBitmap(const Bitmap &bm, const Range &range)
 {
-  Bitmap *newBM = new Bitmap(bm, range, *m_pool);
+  Bitmap *newBM = new Bitmap(bm, range);
 
   Coll::const_iterator iter = m_coll.find(newBM);
   if (iter == m_coll.end()) {

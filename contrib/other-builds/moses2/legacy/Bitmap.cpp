@@ -25,9 +25,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses2
 {
 
-Bitmap::Bitmap(size_t size, const std::vector<bool>& initializer, MemPool &pool)
-:m_size(size)
-,m_bitmap(initializer.begin(), initializer.end())
+Bitmap::Bitmap(size_t size, const std::vector<bool>& initializer)
+  :m_bitmap(initializer.begin(), initializer.end())
 {
 
   // The initializer may not be of the same length.  Change to the desired
@@ -44,18 +43,29 @@ Bitmap::Bitmap(size_t size, const std::vector<bool>& initializer, MemPool &pool)
                  NOT_FOUND : first_gap - m_bitmap.begin());
 }
 
-Bitmap::Bitmap(const Bitmap &copy, const Range &range, MemPool &pool)
-:m_size(copy.m_size)
-,m_bitmap(copy.m_bitmap)
-,m_firstGap(copy.m_firstGap)
-,m_numWordsCovered(copy.m_numWordsCovered)
+//! Create Bitmap of length size and initialise.
+Bitmap::Bitmap(size_t size)
+  :m_bitmap(size, false)
+  ,m_firstGap(0)
+  ,m_numWordsCovered(0)
+
 {
-  SetValueNonOverlap(range);
 }
 
-Bitmap::~Bitmap()
+//! Deep copy.
+Bitmap::Bitmap(const Bitmap &copy)
+  :m_bitmap(copy.m_bitmap)
+  ,m_firstGap(copy.m_firstGap)
+  ,m_numWordsCovered(copy.m_numWordsCovered)
 {
+}
 
+Bitmap::Bitmap(const Bitmap &copy, const Range &range)
+  :m_bitmap(copy.m_bitmap)
+  ,m_firstGap(copy.m_firstGap)
+  ,m_numWordsCovered(copy.m_numWordsCovered)
+{
+  SetValueNonOverlap(range);
 }
 
 // for unordered_set in stack
@@ -73,7 +83,7 @@ bool Bitmap::operator==(const Bitmap& other) const
 // friend
 std::ostream& operator<<(std::ostream& out, const Bitmap& bitmap)
 {
-  for (size_t i = 0 ; i < bitmap.m_size ; i++) {
+  for (size_t i = 0 ; i < bitmap.m_bitmap.size() ; i++) {
     out << int(bitmap.GetValue(i));
   }
   return out;

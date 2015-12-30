@@ -8,7 +8,6 @@
 
 namespace Moses2
 {
-class MemPool;
 
 class Bitmaps
 {
@@ -17,13 +16,12 @@ class Bitmaps
   //typedef std::set<const Bitmap*, OrderedComparer<Bitmap> > Coll;
   Coll m_coll;
   const Bitmap *m_initBitmap;
-  MemPool *m_pool;
 
   const Bitmap &GetNextBitmap(const Bitmap &bm, const Range &range);
 public:
   Bitmaps();
   virtual ~Bitmaps();
-  void Init(size_t inputSize, const std::vector<bool> &initSourceCompleted, MemPool &pool);
+  void Init(size_t inputSize, const std::vector<bool> &initSourceCompleted);
 
   const Bitmap &GetInitialBitmap() const {
     return *m_initBitmap;
