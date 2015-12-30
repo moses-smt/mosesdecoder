@@ -60,14 +60,6 @@ class MemPool {
     	return (T*) ret;
     }
 
-    uint8_t *AllocatePadded(std::size_t size) {
-    	size_t remainder = size % 4;
-    	if (remainder) {
-    		size += (4 - remainder);
-    	}
-    	return Allocate(size);
-    }
-
     void Reset();
 
   private:
