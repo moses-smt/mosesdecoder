@@ -25,46 +25,35 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses2
 {
 
-Bitmap::Bitmap(size_t size, const std::vector<bool>& initializer)
-  :m_bitmap(initializer.begin(), initializer.end())
+Bitmap::Bitmap(size_t size)
+:m_bitmap(size)
 {
+}
 
+void Bitmap::Init(const std::vector<bool>& initializer)
+{
   // The initializer may not be of the same length.  Change to the desired
   // length.  If we need to add any elements, initialize them to false.
-  m_bitmap.resize(size, false);
+  std::fill(m_bitmap.begin(), m_bitmap.end(), false);
+  std::copy(initializer.begin(), initializer.end(), m_bitmap.begin());
 
   m_numWordsCovered = std::count(m_bitmap.begin(), m_bitmap.end(), true);
 
   // Find the first gap, and cache it.
   std::vector<char>::const_iterator first_gap = std::find(
-        m_bitmap.begin(), m_bitmap.end(), false);
+		m_bitmap.begin(), m_bitmap.end(), false);
   m_firstGap = (
-                 (first_gap == m_bitmap.end()) ?
-                 NOT_FOUND : first_gap - m_bitmap.begin());
+				 (first_gap == m_bitmap.end()) ?
+				 NOT_FOUND : first_gap - m_bitmap.begin());
+
 }
 
-//! Create Bitmap of length size and initialise.
-Bitmap::Bitmap(size_t size)
-  :m_bitmap(size, false)
-  ,m_firstGap(0)
-  ,m_numWordsCovered(0)
-
+void Bitmap::Init(const Bitmap &copy, const Range &range)
 {
-}
+  std::copy(copy.m_bitmap.begin(), copy.m_bitmap.end(), m_bitmap.begin());
+  m_firstGap = copy.m_firstGap;
+  m_numWordsCovered = copy.m_numWordsCovered;
 
-//! Deep copy.
-Bitmap::Bitmap(const Bitmap &copy)
-  :m_bitmap(copy.m_bitmap)
-  ,m_firstGap(copy.m_firstGap)
-  ,m_numWordsCovered(copy.m_numWordsCovered)
-{
-}
-
-Bitmap::Bitmap(const Bitmap &copy, const Range &range)
-  :m_bitmap(copy.m_bitmap)
-  ,m_firstGap(copy.m_firstGap)
-  ,m_numWordsCovered(copy.m_numWordsCovered)
-{
   SetValueNonOverlap(range);
 }
 
