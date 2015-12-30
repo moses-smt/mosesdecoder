@@ -47,13 +47,6 @@ Scores::Scores(MemPool &pool,
 	}
 }
 
-Scores::Scores(const System &system, size_t numScores)
-:m_total(0)
-,m_scores(NULL)
-{
-}
-
-
 Scores::~Scores() {
 
 }
@@ -252,6 +245,27 @@ std::ostream& operator<<(std::ostream &out, const Scores &obj)
 		// don't know num of scores
 	}
 	return out;
+}
+
+// static functions to work out estimated scores
+SCORE Scores::CalcWeightedScore(const System &system,
+		const FeatureFunction &featureFunction,
+		SCORE scores[])
+{
+	SCORE ret = 0;
+
+	const Weights &weights = system.weights;
+
+	size_t ffStartInd = featureFunction.GetStartInd();
+	for (size_t i = 0; i < featureFunction.GetNumScores(); ++i) {
+		SCORE incrScore = scores[i];
+
+		//cerr << "ffStartInd=" << ffStartInd << " " << i << endl;
+		SCORE weight = weights[ffStartInd + i];
+		ret += incrScore * weight;
+	}
+
+	return ret;
 }
 
 }

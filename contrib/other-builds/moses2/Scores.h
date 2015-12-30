@@ -25,9 +25,6 @@ public:
   Scores(const System &system, MemPool &pool, size_t numScores);
   Scores(MemPool &pool, size_t numScores, const Scores &origScores);
 
-  // Use with care. Doesn't use mempool. Currently only used in method to hold estimated score
-  Scores(const System &system, size_t numScores);
-
   virtual ~Scores();
 
   SCORE GetTotalScore() const
@@ -73,6 +70,11 @@ public:
 		  const std::vector<SCORE> &scores);
 
   void Debug(std::ostream &out, const FeatureFunctions &ffs) const;
+
+  // static functions to work out estimated scores
+  static SCORE CalcWeightedScore(const System &system,
+  		const FeatureFunction &featureFunction,
+  		SCORE scores[]);
 
 protected:
 	SCORE *m_scores;
