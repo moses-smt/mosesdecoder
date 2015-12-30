@@ -95,7 +95,9 @@ template <class T, class S, class C>
 
 void Search::Decode(size_t stackInd)
 {
-	m_queueContainer->clear();
+	std::vector<QueueItem*, boost::fast_pool_allocator<QueueItem*> > &container = Container(*m_queue);
+	container.clear();
+	//m_queueContainer->clear();
 	m_seenPositions->clear();
 
 	//Prefetch(stackInd);
