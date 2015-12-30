@@ -29,7 +29,7 @@ WordPenalty::EvaluateInIsolation(MemPool &pool,
 		const Phrase &source,
 		const TargetPhrase &targetPhrase,
 		Scores &scores,
-		Scores *estimatedScores) const
+		SCORE *estimatedScore) const
 {
   SCORE score = - (SCORE) targetPhrase.GetSize();
   scores.PlusEquals(system, *this, score);

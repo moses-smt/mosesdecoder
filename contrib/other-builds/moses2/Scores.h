@@ -76,6 +76,10 @@ public:
   		const FeatureFunction &featureFunction,
   		SCORE scores[]);
 
+  static SCORE CalcWeightedScore(const System &system,
+  		const FeatureFunction &featureFunction,
+  		SCORE score);
+
 protected:
 	SCORE *m_scores;
 	SCORE m_total;

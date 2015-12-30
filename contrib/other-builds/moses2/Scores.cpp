@@ -268,5 +268,19 @@ SCORE Scores::CalcWeightedScore(const System &system,
 	return ret;
 }
 
+SCORE Scores::CalcWeightedScore(const System &system,
+		const FeatureFunction &featureFunction,
+		SCORE score)
+{
+	const Weights &weights = system.weights;
+	assert(featureFunction.GetNumScores() == 1);
+
+	size_t ffStartInd = featureFunction.GetStartInd();
+	SCORE weight = weights[ffStartInd];
+	SCORE ret = score * weight;
+
+	return ret;
+}
+
 }
 

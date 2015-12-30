@@ -10,6 +10,7 @@
 #include <cstddef>
 #include <string>
 #include <vector>
+#include "../TypeDef.h"
 
 namespace Moses2
 {
@@ -50,7 +51,7 @@ public:
 	  EvaluateInIsolation(MemPool &pool, const System &system,
 			  const Phrase &source, const TargetPhrase &targetPhrase,
 	          Scores &scores,
-	          Scores *estimatedScores) const = 0;
+	          SCORE *estimatedScore) const = 0;
 
 	  virtual void
 	  EvaluateAfterTablePruning(MemPool &pool, const TargetPhrases &tps, const Phrase &sourcePhrase) const

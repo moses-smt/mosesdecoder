@@ -46,7 +46,7 @@ public:
 			  const System &system,
 			  const Phrase &source, const TargetPhrase &targetPhrase,
 	          Scores &scores,
-	          Scores *estimatedScores) const;
+			  SCORE *estimatedScore) const;
 
 	  virtual void EvaluateWhenApplied(const Manager &mgr,
 	    const Hypothesis &hypo,

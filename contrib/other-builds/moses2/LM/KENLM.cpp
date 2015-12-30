@@ -142,7 +142,7 @@ KENLM::EvaluateInIsolation(MemPool &pool,
 		const Phrase &source,
 		const TargetPhrase &targetPhrase,
         Scores &scores,
-        Scores *estimatedScores) const
+		SCORE *estimatedScore) const
 {
   // contains factors used by this LM
   float fullScore, nGramScore;
@@ -154,18 +154,21 @@ KENLM::EvaluateInIsolation(MemPool &pool,
 
   bool GetLMEnableOOVFeature = false;
   if (GetLMEnableOOVFeature) {
-	vector<float> scoresVec(2), estimateScoresVec(2);
+	float scoresVec[2], estimateScoresVec[2];
 	scoresVec[0] = nGramScore;
 	scoresVec[1] = oovCount;
-	scores.Assign(system, *this, scoresVec);
+	scores.PlusEquals(system, *this, scoresVec);
 
 	estimateScoresVec[0] = estimateScore;
 	estimateScoresVec[1] = 0;
-	estimatedScores->Assign(system, *this, estimateScoresVec);
+	SCORE weightedScore = Scores::CalcWeightedScore(system, *this, estimateScoresVec);
+	(*estimatedScore) += weightedScore;
   }
   else {
-	scores.Assign(system, *this, nGramScore);
-	estimatedScores->Assign(system, *this, estimateScore);
+	scores.PlusEquals(system, *this, nGramScore);
+
+	SCORE weightedScore = Scores::CalcWeightedScore(system, *this, estimateScore);
+	(*estimatedScore) += weightedScore;
   }
 }
 

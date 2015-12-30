@@ -42,7 +42,7 @@ public:
 		  const Phrase &source,
 		  const TargetPhrase &targetPhrase,
 		  Scores &scores,
-		  Scores *estimatedScores) const;
+		  SCORE *estimatedScore) const;
 
   virtual void
   EvaluateAfterTablePruning(MemPool &pool,
