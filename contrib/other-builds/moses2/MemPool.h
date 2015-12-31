@@ -79,7 +79,6 @@ class MemPool {
 ////////////////////////////////////////////////////////////////////////////////////////////////
 template <typename T>
 class ObjectPoolContiguous {
-  friend std::ostream& operator<<(std::ostream &, const ObjectPoolContiguous &);
 
   public:
 	ObjectPoolContiguous(std::size_t initSize = 100000)
@@ -151,16 +150,6 @@ class ObjectPoolContiguous {
     ObjectPoolContiguous(const ObjectPoolContiguous &);
     ObjectPoolContiguous &operator=(const ObjectPoolContiguous &);
 };
-
-template <typename T>
-std::ostream& operator<<(std::ostream &out, const ObjectPoolContiguous<T> &obj)
-{
-	for (size_t i = 0; i < obj.size(); ++i) {
-		T &ele = obj.get(i);
-		out << ele;
-	}
-	return out;
-}
 
 //////////////////////////////////////////////////////////////////////////////////////////
 template <typename T>
