@@ -45,12 +45,12 @@ std::ostream& operator<<(std::ostream &out, const Stacks &obj)
   return out;
 }
 
-void Stacks::Add(const Hypothesis *hypo, StackAdd &added)
+void Stacks::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 {
 	size_t numWordsCovered = hypo->GetBitmap().GetNumWordsCovered();
 	//cerr << "numWordsCovered=" << numWordsCovered << endl;
 	Stack &stack = *m_stacks[numWordsCovered];
-	stack.Add(hypo, added);
+	stack.Add(hypo, hypoRecycle);
 
 }
 

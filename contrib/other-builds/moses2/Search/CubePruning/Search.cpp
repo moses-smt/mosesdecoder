@@ -55,9 +55,7 @@ void Search::Decode()
 	initHypo->Init(m_mgr.GetInputPaths().GetBlank(), m_mgr.GetInitPhrase(), initBitmap);
 	initHypo->EmptyHypothesisState(m_mgr.GetInput());
 
-	StackAdd added;
-	m_stacks.Add(initHypo, added);
-	assert(added.added);
+	m_stacks.Add(initHypo, m_mgr.GetHypoRecycle());
 
 	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
 		//cerr << "stackInd=" << stackInd << endl;
@@ -88,8 +86,6 @@ template <class T, class S, class C>
 
 void Search::Decode(size_t stackInd)
 {
-	//cerr << endl << "stackInd=" << stackInd << endl;
-
 	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > &container = Container(m_queue);
 	container.clear();
 	//m_queueContainer->clear();
@@ -123,8 +119,6 @@ void Search::Decode(size_t stackInd)
 		QueueItem *item = m_queue.top();
 		m_queue.pop();
 
-		//cerr << "item=" << item->hypoIndex << " " << item->tpIndex << endl;
-
 		CubeEdge &edge = item->edge;
 
 		// prefetching
@@ -140,12 +134,7 @@ void Search::Decode(size_t stackInd)
 		// add hypo to stack
 		Hypothesis *hypo = item->hypo;
 		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
-		StackAdd added;
-		m_stacks.Add(hypo, added);
-
-		  if (added.toBeDeleted) {
-		    m_mgr.GetHypoRecycle().Add(added.toBeDeleted);
-		  }
+		m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
 
 		edge.CreateNext(m_mgr, item, m_queue, m_seenPositions);
 

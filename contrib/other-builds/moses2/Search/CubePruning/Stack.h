@@ -34,7 +34,7 @@ public:
 
 	MiniStack(const Manager &mgr);
 
-	void Add(const Hypothesis *hypo, StackAdd &added);
+	StackAdd Add(const Hypothesis *hypo);
 
 	_HCType &GetColl()
 	{ return m_coll; }
@@ -76,7 +76,7 @@ public:
 	Coll &GetColl()
 	{ return m_coll; }
 
-	void Add(const Hypothesis *hypo, StackAdd &added);
+	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
 
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
 	void Clear()

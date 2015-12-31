@@ -24,15 +24,14 @@ MiniStack::MiniStack(const Manager &mgr)
 ,m_sortedHypos(NULL)
 {}
 
-void MiniStack::Add(const Hypothesis *hypo, StackAdd &added)
+StackAdd MiniStack::Add(const Hypothesis *hypo)
 {
   std::pair<_HCType::iterator, bool> addRet = m_coll.insert(hypo);
 
   // CHECK RECOMBINATION
   if (addRet.second) {
 	// equiv hypo doesn't exists
-	added.added = true;
-	added.toBeDeleted = NULL;
+	return StackAdd(true, NULL);
   }
   else {
 	  const Hypothesis *hypoExisting = *addRet.first;
@@ -44,15 +43,15 @@ void MiniStack::Add(const Hypothesis *hypo, StackAdd &added)
 
 		  //hypoExisting->Prefetch();
 
-		  added.added = true;
-		  added.toBeDeleted = const_cast<Hypothesis*>(hypoExisting);
+		  return StackAdd(true, const_cast<Hypothesis*>(hypoExisting));
 	  }
 	  else {
 		  // already storing the best hypo. discard incoming hypo
-		  added.added = false;
-		  added.toBeDeleted = const_cast<Hypothesis*>(hypo);
+		  return StackAdd(false, const_cast<Hypothesis*>(hypo));
 	  }
   }
+
+  assert(false);
 }
 
 CubeEdge::Hypotheses &MiniStack::GetSortedAndPruneHypos(const Manager &mgr) const
@@ -126,10 +125,14 @@ Stack::~Stack() {
 	// TODO Auto-generated destructor stub
 }
 
-void Stack::Add(const Hypothesis *hypo, StackAdd &added)
+void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 {
   HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
-  GetMiniStack(key).Add(hypo, added);
+  StackAdd added = GetMiniStack(key).Add(hypo);
+
+  if (added.toBeDeleted) {
+	hypoRecycle.Add(added.toBeDeleted);
+  }
 }
 
 std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
