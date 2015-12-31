@@ -80,9 +80,10 @@ void MiniStack::SortAndPruneHypos(const Manager &mgr) const
 }
 
 ///////////////////////////////////////////////////////////////
-Stack::Stack(const Manager &mgr) {
-	// TODO Auto-generated constructor stub
-
+Stack::Stack(const Manager &mgr)
+:m_alloc(mgr.GetPool())
+,m_coll(m_alloc)
+{
 }
 
 Stack::~Stack() {

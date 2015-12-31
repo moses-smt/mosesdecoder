@@ -12,6 +12,7 @@
 #include "../../Recycler.h"
 #include "../../TypeDef.h"
 #include "../../Vector.h"
+#include "../../MemPool.h"
 #include "../../legacy/Util2.h"
 
 namespace Moses2
@@ -57,7 +58,11 @@ public:
   typedef std::pair<const Bitmap*, size_t> HypoCoverage;
 		  // bitmap and current endPos of hypos
 
-  typedef boost::unordered_map<HypoCoverage, MiniStack> Coll;
+  typedef boost::unordered_map<HypoCoverage, MiniStack
+		  ,boost::hash<HypoCoverage>
+		  ,std::equal_to<HypoCoverage>
+		  ,MemPoolAllocator< std::pair<HypoCoverage, MiniStack> >
+  	  	  > Coll;
 
 
 	Stack(const Manager &mgr);
@@ -77,6 +82,7 @@ public:
 	}
 
 protected:
+	MemPoolAllocator< std::pair<HypoCoverage, MiniStack> > m_alloc;
 	Coll m_coll;
 
 	StackAdd Add(const Hypothesis *hypo);
