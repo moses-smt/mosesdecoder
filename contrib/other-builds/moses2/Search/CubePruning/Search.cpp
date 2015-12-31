@@ -141,11 +141,18 @@ void Search::Decode(size_t stackInd)
 		Hypothesis *hypo = item->hypo;
 		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
 		StackAdd added;
-		m_stacks.Add(hypo, added);
 
-		  if (added.toBeDeleted) {
-		    m_mgr.GetHypoRecycle().Add(added.toBeDeleted);
-		  }
+		if (edge.cacheStack) {
+			edge.cacheStack->Add(hypo, added);
+		}
+		else {
+			MiniStack &miniStack = m_stacks.Add(hypo, added);
+			edge.cacheStack = &miniStack;
+		}
+
+		if (added.toBeDeleted) {
+		  m_mgr.GetHypoRecycle().Add(added.toBeDeleted);
+		}
 
 		edge.CreateNext(m_mgr, item, m_queue, m_seenPositions);
 

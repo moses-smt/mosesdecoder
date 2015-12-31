@@ -26,6 +26,7 @@ class Bitmap;
 namespace NSCubePruning
 {
 class CubeEdge;
+class MiniStack;
 
 ///////////////////////////////////////////
 class QueueItem
@@ -73,6 +74,7 @@ public:
 	const TargetPhrases &tps;
 	const Bitmap &newBitmap;
 	SCORE estimatedScore;
+	mutable MiniStack *cacheStack;
 
 	CubeEdge(Manager &mgr,
 			const Hypotheses &hypos,
