@@ -41,7 +41,7 @@ StackAdd MiniStack::Add(const Hypothesis *hypo)
 		  const Hypothesis *&hypoExisting2 = const_cast<const Hypothesis *&>(hypoExisting1);
 		  hypoExisting2 = hypo;
 
-		  hypoExisting->Prefetch();
+		  //hypoExisting->Prefetch();
 
 		  return StackAdd(true, const_cast<Hypothesis*>(hypoExisting));
 	  }
