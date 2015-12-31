@@ -26,14 +26,12 @@ MiniStack::MiniStack(const Manager &mgr)
 
 StackAdd MiniStack::Add(const Hypothesis *hypo)
 {
-  StackAdd ret;
   std::pair<MiniStack::_HCType::iterator, bool> addRet = m_coll.insert(hypo);
 
   // CHECK RECOMBINATION
   if (addRet.second) {
 	// equiv hypo doesn't exists
-	ret.added = true;
-	ret.toBeDeleted = NULL;
+	return StackAdd(true, NULL);
   }
   else {
 	  const Hypothesis *hypoExisting = *addRet.first;
@@ -43,17 +41,15 @@ StackAdd MiniStack::Add(const Hypothesis *hypo)
 		  const Hypothesis *&hypoExisting2 = const_cast<const Hypothesis *&>(hypoExisting1);
 		  hypoExisting2 = hypo;
 
-		  ret.added = true;
-		  ret.toBeDeleted = const_cast<Hypothesis*>(hypoExisting);
+		  return StackAdd(true, const_cast<Hypothesis*>(hypoExisting));
 	  }
 	  else {
 		  // already storing the best hypo. discard incoming hypo
-		  ret.added = false;
-		  ret.toBeDeleted = const_cast<Hypothesis*>(hypo);
+		  return StackAdd(false, const_cast<Hypothesis*>(hypo));
 	  }
   }
 
-  return ret;
+  assert(false);
 }
 
 CubeEdge::Hypotheses &MiniStack::GetSortedAndPruneHypos(const Manager &mgr) const
