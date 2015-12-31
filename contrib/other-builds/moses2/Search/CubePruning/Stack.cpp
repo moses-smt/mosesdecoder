@@ -24,6 +24,40 @@ MiniStack::MiniStack(const Manager &mgr)
 ,m_sortedHypos(NULL)
 {}
 
+StackAdd MiniStack::Add(const Hypothesis *hypo)
+{
+  StackAdd ret;
+  std::pair<MiniStack::_HCType::iterator, bool> addRet = m_coll.insert(hypo);
+
+  // CHECK RECOMBINATION
+  if (addRet.second) {
+	// equiv hypo doesn't exists
+	ret.added = true;
+	ret.toBeDeleted = NULL;
+  }
+  else {
+	  const Hypothesis *hypoExisting = *addRet.first;
+	  if (hypo->GetScores().GetTotalScore() > hypoExisting->GetScores().GetTotalScore()) {
+		  // incoming hypo is better than the one we have
+		  m_coll.erase(addRet.first);
+
+		  // re-add. It better go in
+		  std::pair<MiniStack::_HCType::iterator, bool> addRet = m_coll.insert(hypo);
+		  assert(addRet.second);
+
+		  ret.added = true;
+		  ret.toBeDeleted = const_cast<Hypothesis*>(hypoExisting);
+	  }
+	  else {
+		  // already storing the best hypo. discard incoming hypo
+		  ret.added = false;
+		  ret.toBeDeleted = const_cast<Hypothesis*>(hypo);
+	  }
+  }
+
+  return ret;
+}
+
 CubeEdge::Hypotheses &MiniStack::GetSortedAndPruneHypos(const Manager &mgr) const
 {
   if (m_sortedHypos == NULL) {
@@ -97,45 +131,11 @@ Stack::~Stack() {
 
 void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 {
-	StackAdd added = Add(hypo);
-
-	if (added.toBeDeleted) {
-		hypoRecycle.Add(added.toBeDeleted);
-	}
-
-}
-
-StackAdd Stack::Add(const Hypothesis *hypo)
-{
   HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
-  MiniStack::_HCType &innerColl = GetMiniStack(key).GetColl();
-  std::pair<MiniStack::_HCType::iterator, bool> addRet = innerColl.insert(hypo);
+  StackAdd added = GetMiniStack(key).Add(hypo);
 
-  // CHECK RECOMBINATION
-  if (addRet.second) {
-    // equiv hypo doesn't exists
-	return StackAdd(true, NULL);
-  }
-  else {
-	  const Hypothesis *hypoExisting = *addRet.first;
-	  if (hypo->GetScores().GetTotalScore() > hypoExisting->GetScores().GetTotalScore()) {
-		  // incoming hypo is better than the one we have
-		  innerColl.erase(addRet.first);
-
-		  // re-add. It better go in
-		  std::pair<MiniStack::_HCType::iterator, bool> addRet = innerColl.insert(hypo);
-		  assert(addRet.second);
-
-		  return StackAdd(true, const_cast<Hypothesis*>(hypoExisting));
-		  /*
-		  const_cast<Hypothesis*>(hypo)->Swap(*const_cast<Hypothesis*>(hypoExisting));
-		  return StackAdd(true, const_cast<Hypothesis*>(hypo));
-		  */
-	  }
-	  else {
-		  // already storing the best hypo. discard incoming hypo
-		  return StackAdd(false, const_cast<Hypothesis*>(hypo));
-	  }
+  if (added.toBeDeleted) {
+	hypoRecycle.Add(added.toBeDeleted);
   }
 }
 

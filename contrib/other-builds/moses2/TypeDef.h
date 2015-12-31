@@ -55,6 +55,7 @@ public:
 	bool added;
 	Hypothesis *toBeDeleted;
 
+	StackAdd() {}
 	StackAdd(bool vadded,
 			Hypothesis *vtoBeDeleted)
 	:added(vadded)

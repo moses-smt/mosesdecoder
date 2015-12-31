@@ -34,6 +34,8 @@ public:
 
 	MiniStack(const Manager &mgr);
 
+	StackAdd Add(const Hypothesis *hypo);
+
 	_HCType &GetColl()
 	{ return m_coll; }
 
@@ -85,8 +87,6 @@ public:
 protected:
 	const Manager &m_mgr;
 	Coll m_coll;
-
-	StackAdd Add(const Hypothesis *hypo);
 
 	MiniStack &GetMiniStack(const HypoCoverage &key);
 
