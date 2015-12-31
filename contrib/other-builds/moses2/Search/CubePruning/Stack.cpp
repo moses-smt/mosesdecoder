@@ -20,8 +20,7 @@ namespace Moses2
 namespace NSCubePruning
 {
 MiniStack::MiniStack(const Manager &mgr)
-:m_alloc(mgr.GetPool())
-,m_coll(m_alloc)
+:m_coll(MemPoolAllocator<const Hypothesis*>(mgr.GetPool()))
 ,m_sortedHypos(NULL)
 {}
 
@@ -88,8 +87,7 @@ void MiniStack::SortAndPruneHypos(const Manager &mgr) const
 ///////////////////////////////////////////////////////////////
 Stack::Stack(const Manager &mgr)
 :m_mgr(mgr)
-,m_alloc(mgr.GetPool())
-,m_coll(m_alloc)
+,m_coll(MemPoolAllocator< std::pair<HypoCoverage, MiniStack*> >(mgr.GetPool()))
 {
 }
 

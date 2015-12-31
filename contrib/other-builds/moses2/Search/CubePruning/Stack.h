@@ -43,7 +43,6 @@ public:
 	CubeEdge::Hypotheses &GetSortedAndPruneHypos(const Manager &mgr) const;
 
 protected:
-	MemPoolAllocator<const Hypothesis*> m_alloc;
 	_HCType m_coll;
 	mutable CubeEdge::Hypotheses *m_sortedHypos;
 
@@ -85,7 +84,6 @@ public:
 
 protected:
 	const Manager &m_mgr;
-	MemPoolAllocator< std::pair<HypoCoverage, MiniStack*> > m_alloc;
 	Coll m_coll;
 
 	StackAdd Add(const Hypothesis *hypo);
