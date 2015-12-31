@@ -27,11 +27,12 @@ class MiniStack
 {
 public:
 	typedef boost::unordered_set<const Hypothesis*,
-			  UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis>
+			  UnorderedComparer<Hypothesis>,
+			  UnorderedComparer<Hypothesis>,
+			  MemPoolAllocator<const Hypothesis*>
 			   > _HCType;
 
-	MiniStack()
-	{}
+	MiniStack(const Manager &mgr);
 
 	_HCType &GetColl()
 	{ return m_coll; }
@@ -42,6 +43,7 @@ public:
 	CubeEdge::Hypotheses &GetSortedAndPruneHypos(const Manager &mgr) const;
 
 protected:
+	MemPoolAllocator<const Hypothesis*> m_alloc;
 	_HCType m_coll;
 	mutable CubeEdge::Hypotheses *m_sortedHypos;
 
@@ -58,10 +60,10 @@ public:
   typedef std::pair<const Bitmap*, size_t> HypoCoverage;
 		  // bitmap and current endPos of hypos
 
-  typedef boost::unordered_map<HypoCoverage, MiniStack
+  typedef boost::unordered_map<HypoCoverage, MiniStack*
 		  ,boost::hash<HypoCoverage>
 		  ,std::equal_to<HypoCoverage>
-		  ,MemPoolAllocator< std::pair<HypoCoverage, MiniStack> >
+		  ,MemPoolAllocator< std::pair<HypoCoverage, MiniStack*> >
   	  	  > Coll;
 
 
@@ -82,7 +84,8 @@ public:
 	}
 
 protected:
-	MemPoolAllocator< std::pair<HypoCoverage, MiniStack> > m_alloc;
+	const Manager &m_mgr;
+	MemPoolAllocator< std::pair<HypoCoverage, MiniStack*> > m_alloc;
 	Coll m_coll;
 
 	StackAdd Add(const Hypothesis *hypo);
