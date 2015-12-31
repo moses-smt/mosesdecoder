@@ -45,9 +45,9 @@ StackAdd Stack::Add(const Hypothesis *hypo)
 	  if (hypo->GetScores().GetTotalScore() > hypoExisting->GetScores().GetTotalScore()) {
 		  // incoming hypo is better than the one we have
 
-		  const Hypothesis *const &h1 = *addRet.first;
-		  const Hypothesis *&h2 = const_cast<const Hypothesis *&>(h1);
-		  h2 = hypo;
+		  const Hypothesis *const &hypoExisting1 = *addRet.first;
+		  const Hypothesis *&hypoExisting2 = const_cast<const Hypothesis *&>(hypoExisting1);
+		  hypoExisting2 = hypo;
 
 		  return StackAdd(true, const_cast<Hypothesis*>(hypoExisting));
 		  /*

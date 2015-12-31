@@ -39,11 +39,9 @@ StackAdd MiniStack::Add(const Hypothesis *hypo)
 	  const Hypothesis *hypoExisting = *addRet.first;
 	  if (hypo->GetScores().GetTotalScore() > hypoExisting->GetScores().GetTotalScore()) {
 		  // incoming hypo is better than the one we have
-		  m_coll.erase(addRet.first);
-
-		  // re-add. It better go in
-		  std::pair<MiniStack::_HCType::iterator, bool> addRet = m_coll.insert(hypo);
-		  assert(addRet.second);
+		  const Hypothesis *const &hypoExisting1 = *addRet.first;
+		  const Hypothesis *&hypoExisting2 = const_cast<const Hypothesis *&>(hypoExisting1);
+		  hypoExisting2 = hypo;
 
 		  ret.added = true;
 		  ret.toBeDeleted = const_cast<Hypothesis*>(hypoExisting);
