@@ -27,6 +27,7 @@ namespace NSCubePruning
 Search::Search(Manager &mgr)
 :Moses2::Search(mgr)
 ,m_stacks(mgr)
+,m_cubeEdgeAlloc(mgr.GetPool())
 
 ,m_queue(QueueItemOrderer(),
 		std::vector<QueueItem*, MemPoolAllocator<QueueItem*> >(MemPoolAllocator<QueueItem*>(mgr.GetPool())) )
@@ -43,7 +44,11 @@ void Search::Decode()
 {
 	// init stacks
 	m_stacks.Init(m_mgr.GetInput().GetSize() + 1);
+
 	m_cubeEdges.resize(m_stacks.GetSize() + 1);
+	for (size_t i = 0; i < m_cubeEdges.size(); ++i) {
+		m_cubeEdges[i] = new (m_mgr.GetPool().Allocate<CubeEdges>()) CubeEdges(m_cubeEdgeAlloc);
+	}
 
 	const Bitmap &initBitmap = m_mgr.GetBitmaps().GetInitialBitmap();
 	Hypothesis *initHypo = Hypothesis::Create(m_mgr);
@@ -89,7 +94,7 @@ void Search::Decode(size_t stackInd)
 	//Prefetch(stackInd);
 
 	// add top hypo from every edge into queue
-	CubeEdges &edges = m_cubeEdges[stackInd];
+	CubeEdges &edges = *m_cubeEdges[stackInd];
 
 	BOOST_FOREACH(CubeEdge *edge, edges) {
 		//cerr << "edge=" << *edge << endl;
@@ -181,7 +186,7 @@ void Search::PostDecode(size_t stackInd)
   		const Bitmap &newBitmap = m_mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
   		size_t numWords = newBitmap.GetNumWordsCovered();
 
-  		CubeEdges &edges = m_cubeEdges[numWords];
+  		CubeEdges &edges = *m_cubeEdges[numWords];
 
 		// sort hypo for a particular bitmap and hypoEndPos
 		CubeEdge::Hypotheses &sortedHypos = val.second->GetSortedAndPruneHypos(m_mgr);
@@ -210,7 +215,7 @@ const Hypothesis *Search::GetBestHypothesis() const
 
 void Search::Prefetch(size_t stackInd)
 {
-	CubeEdges &edges = m_cubeEdges[stackInd];
+	CubeEdges &edges = *m_cubeEdges[stackInd];
 
 	BOOST_FOREACH(CubeEdge *edge, edges) {
 		 __builtin_prefetch(edge);
