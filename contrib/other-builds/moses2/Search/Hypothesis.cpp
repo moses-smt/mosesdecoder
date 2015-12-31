@@ -40,19 +40,16 @@ Hypothesis *Hypothesis::Create(Manager &mgr)
 	return ret;
 }
 
-void Hypothesis::Prefetch(Manager &mgr)
+void Hypothesis::Prefetch() const
 {
-	Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycle();
-	if (recycler.IsEmpty()) {
-		// do nothing
-		return;
-	}
-
-	Hypothesis *hypo = recycler.Get();
-	 __builtin_prefetch(hypo);
-	 __builtin_prefetch(hypo->m_ffStates);
-	 __builtin_prefetch(hypo->m_scores);
-
+  //__builtin_prefetch(hypo);
+  __builtin_prefetch(m_ffStates);
+  __builtin_prefetch(m_ffStates[0]);
+  __builtin_prefetch(m_ffStates[1]);
+  __builtin_prefetch(m_ffStates[2]);
+  __builtin_prefetch(m_scores);
+  __builtin_prefetch(&m_estimatedScore);
+  __builtin_prefetch(&m_currTargetWordsRange);
 }
 
 Hypothesis::Hypothesis(Manager &mgr)

@@ -36,7 +36,6 @@ public:
   Manager &mgr;
 
   static Hypothesis *Create(Manager &mgr);
-  static void Prefetch(Manager &mgr);
   virtual ~Hypothesis();
 
   // initial, empty hypo
@@ -95,6 +94,7 @@ public:
   const Word &GetWord(size_t pos) const;
 
   void Swap(Hypothesis &other);
+  void Prefetch() const;
 protected:
   const TargetPhrase *m_targetPhrase;
   const Bitmap *m_sourceCompleted;
