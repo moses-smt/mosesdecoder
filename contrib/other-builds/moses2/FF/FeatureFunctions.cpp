@@ -178,7 +178,6 @@ void
 FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
 		  const Phrase &source, TargetPhrase &targetPhrase) const
 {
-  size_t numScores = system.featureFunctions.GetNumScores();
   SCORE estimatedScore = 0;
 
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
