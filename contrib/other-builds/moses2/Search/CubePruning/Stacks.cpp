@@ -24,14 +24,13 @@ Stacks::Stacks(const Manager &mgr)
 
 Stacks::~Stacks()
 {
-	RemoveAllInColl(m_stacks);
 }
 
 void Stacks::Init(size_t numStacks)
 {
 	m_stacks.resize(numStacks);
 	for (size_t i = 0; i < m_stacks.size(); ++i) {
-		m_stacks[i] = new Stack(m_mgr);
+		m_stacks[i] = new (m_mgr.GetPool().Allocate<Stack>()) Stack(m_mgr);
 	}
 }
 
