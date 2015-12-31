@@ -85,7 +85,8 @@ void Hypothesis::Init(const InputPath &path, const TargetPhrase &tp, const Bitma
 	m_sourceCompleted = &bitmap;
 	m_path = &path;
 	m_prevHypo = NULL;
-	m_currTargetWordsRange = Range(NOT_FOUND, NOT_FOUND);
+	m_currTargetWordsRange.SetStartPos(NOT_FOUND);
+	m_currTargetWordsRange.SetEndPos(NOT_FOUND);
 	m_estimatedScore = 0;
 
 	m_scores->Reset(mgr.system);
@@ -101,9 +102,10 @@ void Hypothesis::Init(const Hypothesis &prevHypo,
 	m_sourceCompleted = &bitmap;
 	m_path = &path;
 	m_prevHypo = &prevHypo;
-	m_currTargetWordsRange = Range(prevHypo.m_currTargetWordsRange.GetEndPos() + 1,
-	                         prevHypo.m_currTargetWordsRange.GetEndPos()
-	                         + tp.GetSize());
+
+	m_currTargetWordsRange.SetStartPos(prevHypo.m_currTargetWordsRange.GetEndPos() + 1);
+	m_currTargetWordsRange.SetEndPos(prevHypo.m_currTargetWordsRange.GetEndPos() + tp.GetSize());
+
 	m_estimatedScore = estimatedScore;
 
 	m_scores->Reset(mgr.system);

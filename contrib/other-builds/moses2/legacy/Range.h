@@ -58,6 +58,13 @@ public:
     return m_endPos;
   }
 
+  inline void SetStartPos(size_t val) {
+    m_startPos = val;
+  }
+  inline void SetEndPos(size_t val) {
+    m_endPos = val;
+  }
+
   //! count of words translated
   inline size_t GetNumWordsCovered() const {
 	assert((m_startPos == NOT_FOUND && m_endPos == NOT_FOUND)
