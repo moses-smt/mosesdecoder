@@ -126,13 +126,10 @@ Stack::~Stack() {
 	// TODO Auto-generated destructor stub
 }
 
-MiniStack &Stack::Add(const Hypothesis *hypo, StackAdd &added)
+void Stack::Add(const Hypothesis *hypo, StackAdd &added)
 {
   HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
-  MiniStack &ret = GetMiniStack(key);
-  ret.Add(hypo, added);
-
-  return ret;
+  GetMiniStack(key).Add(hypo, added);
 }
 
 std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const

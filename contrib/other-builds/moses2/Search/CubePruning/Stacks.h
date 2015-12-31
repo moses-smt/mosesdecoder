@@ -34,7 +34,7 @@ public:
     Stack &operator[](size_t ind)
     { return *m_stacks[ind]; }
 
-    MiniStack &Add(const Hypothesis *hypo, StackAdd &added);
+	void Add(const Hypothesis *hypo, StackAdd &added);
 
 protected:
 	const Manager &m_mgr;

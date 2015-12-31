@@ -52,7 +52,6 @@ CubeEdge::CubeEdge(
 ,path(path)
 ,tps(tps)
 ,newBitmap(newBitmap)
-,cacheStack(NULL)
 {
 	estimatedScore = mgr.GetEstimatedScores().CalcEstimatedScore(newBitmap);
 }
