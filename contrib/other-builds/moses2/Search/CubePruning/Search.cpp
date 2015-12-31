@@ -37,9 +37,6 @@ Search::Search(Manager &mgr)
 
 Search::~Search()
 {
-	BOOST_FOREACH(CubeEdges &edges, m_cubeEdges) {
-		RemoveAllInColl(edges);
-	}
 }
 
 void Search::Decode()
@@ -191,7 +188,7 @@ void Search::PostDecode(size_t stackInd)
 
   		BOOST_FOREACH(const TargetPhrases *tps, path.targetPhrases) {
   			if (tps && tps->GetSize()) {
-  		  		CubeEdge *edge = new CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
+  		  		CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
   		  		edges.push_back(edge);
   			}
   		}
