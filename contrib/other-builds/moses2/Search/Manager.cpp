@@ -163,7 +163,7 @@ void Manager::OutputBest() const
 		if (system.outputHypoScore) {
 			out << "0 ";
 		}
-		//cerr << "NO TRANSLATION";
+		cerr << "NO TRANSLATION " << m_input->GetTranslationId() << endl;
 	}
 	out << "\n";
 
