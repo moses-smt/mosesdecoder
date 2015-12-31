@@ -26,7 +26,7 @@ MiniStack::MiniStack(const Manager &mgr)
 
 StackAdd MiniStack::Add(const Hypothesis *hypo)
 {
-  std::pair<MiniStack::_HCType::iterator, bool> addRet = m_coll.insert(hypo);
+  std::pair<_HCType::iterator, bool> addRet = m_coll.insert(hypo);
 
   // CHECK RECOMBINATION
   if (addRet.second) {
@@ -127,6 +127,8 @@ void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 {
   HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
   StackAdd added = GetMiniStack(key).Add(hypo);
+
+  __builtin_prefetch(added.toBeDeleted);
 
   if (added.toBeDeleted) {
 	hypoRecycle.Add(added.toBeDeleted);
