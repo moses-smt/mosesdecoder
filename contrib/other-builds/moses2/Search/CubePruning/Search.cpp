@@ -119,7 +119,7 @@ void Search::Decode(size_t stackInd)
 		QueueItem *item = m_queue.top();
 		m_queue.pop();
 
-		CubeEdge &edge = *item->edge;
+		CubeEdge *edge = item->edge;
 
 		// prefetching
 		/*
@@ -136,7 +136,7 @@ void Search::Decode(size_t stackInd)
 		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
 		m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
 
-		edge.CreateNext(m_mgr, item, m_queue, m_seenPositions);
+		edge->CreateNext(m_mgr, item, m_queue, m_seenPositions);
 
 		++pops;
 	}
