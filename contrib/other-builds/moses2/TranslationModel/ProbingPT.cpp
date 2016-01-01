@@ -72,24 +72,31 @@ void ProbingPT::Load(System &system)
 
 void ProbingPT::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 {
+  std::pair<bool, std::vector<target_text*> > query_result;
   BOOST_FOREACH(InputPath &path, inputPaths) {
 	  const SubPhrase &phrase = path.subPhrase;
 
 	TargetPhrases *tpsPtr;
-	tpsPtr = Lookup(mgr, mgr.GetPool(), path);
+	tpsPtr = Lookup(mgr, mgr.GetPool(), path, query_result);
 	path.AddTargetPhrases(*this, tpsPtr);
   }
 
 }
 
-TargetPhrases* ProbingPT::Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const
+TargetPhrases* ProbingPT::Lookup(const Manager &mgr,
+		MemPool &pool,
+		InputPath &inputPath,
+		std::pair<bool, std::vector<target_text*> > &query_result) const
 {
 	const Phrase &sourcePhrase = inputPath.subPhrase;
-	TargetPhrases *ret = CreateTargetPhrase(pool, mgr.system, sourcePhrase);
+	TargetPhrases *ret = CreateTargetPhrase(pool, mgr.system, sourcePhrase, query_result);
 	return ret;
 }
 
-TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase) const
+TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool,
+		const System &system,
+		const Phrase &sourcePhrase,
+		std::pair<bool, std::vector<target_text*> > &query_result) const
 {
 
   // create a target phrase from the 1st word of the source, prefix with 'ProbingPT:'
@@ -106,10 +113,8 @@ TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system
     return tps;
   }
 
-  std::pair<bool, std::vector<target_text*> > query_result;
-
   //Actual lookup
-  query_result = m_engine->query(probingSource, sourceSize);
+  m_engine->query(probingSource, sourceSize, query_result);
 
   if (query_result.first) {
     //m_engine->printTargetInfo(query_result.second);

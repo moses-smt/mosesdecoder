@@ -85,9 +85,10 @@ QueryEngine::~QueryEngine()
 
 }
 
-std::pair<bool, std::vector<target_text*> > QueryEngine::query(uint64_t source_phrase[], size_t size)
+void QueryEngine::query(uint64_t source_phrase[], size_t size, std::pair<bool, std::vector<target_text*> > &output)
 {
-  std::pair<bool, std::vector<target_text*> > output;
+  output.second.clear();
+
   const Entry * entry;
   //TOO SLOW
   //uint64_t key = util::MurmurHashNative(&source_phrase[0], source_phrase.size());
@@ -110,8 +111,6 @@ std::pair<bool, std::vector<target_text*> > QueryEngine::query(uint64_t source_p
     output.second = decoder.full_decode_line(binary_mmaped + initial_index, bytes_toread, num_scores, num_lex_scores);
 
   }
-
-  return output;
 
 }
 
