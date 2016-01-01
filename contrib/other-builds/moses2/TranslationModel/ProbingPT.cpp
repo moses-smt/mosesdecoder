@@ -118,11 +118,11 @@ TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool,
 
   if (query_result.first) {
     //m_engine->printTargetInfo(query_result.second);
-	std::vector<target_text*> *probingTargetPhrases = query_result.second;
-	tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, probingTargetPhrases->size());
+	const std::vector<target_text*> &probingTargetPhrases = *query_result.second;
+	tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, probingTargetPhrases.size());
 
-    for (size_t i = 0; i < probingTargetPhrases->size(); ++i) {
-      target_text *probingTargetPhrase = (*probingTargetPhrases)[i];
+    for (size_t i = 0; i < probingTargetPhrases.size(); ++i) {
+      target_text *probingTargetPhrase = probingTargetPhrases[i];
       TargetPhrase *tp = CreateTargetPhrase(pool, system, sourcePhrase, *probingTargetPhrase);
 
       tps->AddTargetPhrase(*tp);
@@ -136,7 +136,7 @@ TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool,
     system.featureFunctions.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
   }
   else {
-	  assert(query_result.second->size() == 0);
+	  assert(query_result.second.size() == 0);
   }
 
   return tps;
