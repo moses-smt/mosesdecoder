@@ -249,13 +249,22 @@ HuffmanDecoder::HuffmanDecoder (const std::map<unsigned int, std::string> &looku
   lookup_word_all1 = lookup_word1;
 }
 
-std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[],
+std::vector<target_text*> *HuffmanDecoder::full_decode_line (unsigned char lines[],
 		size_t linesCount,
 		int num_scores,
 		int num_lex_scores,
 		RecycleData &recycler)
 {
-  std::vector<target_text*> retvector; //All target phrases
+  std::vector<target_text*> *retvector; //All target phrases
+  if (recycler.tts.IsEmpty()) {
+	  retvector = new std::vector<target_text*>();
+  }
+  else {
+	  retvector = recycler.tts.Get();
+	  recycler.tts.Pop();
+	  retvector->clear();
+  }
+
   std::vector<unsigned int> *decoded_lines = vbyte_decode_line(lines, linesCount, recycler); //All decoded lines
   std::vector<unsigned int>::iterator it = decoded_lines->begin(); //Iterator for them
   std::vector<unsigned int> current_target_phrase; //Current target phrase decoded
@@ -274,7 +283,7 @@ std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[
 
     if (zero_count == 6) {
       //We have finished with this entry, decode it, and add it to the retvector.
-      retvector.push_back(decode_line(current_target_phrase, num_scores, num_lex_scores, recycler));
+      retvector->push_back(decode_line(current_target_phrase, num_scores, num_lex_scores, recycler));
       current_target_phrase.clear(); //Clear the current target phrase and the zero_count
       zero_count = 0; //So that we can reuse them for the next target phrase
     }
@@ -288,7 +297,7 @@ std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[
   //Don't forget the last remaining line!
   if (zero_count == 6) {
     //We have finished with this entry, decode it, and add it to the retvector.
-    retvector.push_back(decode_line(current_target_phrase, num_scores, num_lex_scores, recycler));
+    retvector->push_back(decode_line(current_target_phrase, num_scores, num_lex_scores, recycler));
     current_target_phrase.clear(); //Clear the current target phrase and the zero_count
     zero_count = 0; //So that we can reuse them for the next target phrase
   }

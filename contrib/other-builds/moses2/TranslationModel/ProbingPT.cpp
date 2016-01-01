@@ -111,14 +111,14 @@ TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool,
     return tps;
   }
 
-  std::pair<bool, std::vector<target_text*> > query_result;
+  std::pair<bool, std::vector<target_text*>* > query_result;
 
   //Actual lookup
   query_result = m_engine->query(probingSource, sourceSize, recycler);
 
   if (query_result.first) {
     //m_engine->printTargetInfo(query_result.second);
-	const std::vector<target_text*> &probingTargetPhrases = query_result.second;
+	const std::vector<target_text*> &probingTargetPhrases = *query_result.second;
 	tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, probingTargetPhrases.size());
 
     for (size_t i = 0; i < probingTargetPhrases.size(); ++i) {

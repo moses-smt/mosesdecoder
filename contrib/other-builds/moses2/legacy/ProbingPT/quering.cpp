@@ -85,11 +85,11 @@ QueryEngine::~QueryEngine()
 
 }
 
-std::pair<bool, std::vector<target_text*> > QueryEngine::query(uint64_t source_phrase[],
+std::pair<bool, std::vector<target_text*>* > QueryEngine::query(uint64_t source_phrase[],
 		size_t size,
 		RecycleData &recycler)
 {
-  std::pair<bool, std::vector<target_text*> > output;
+  std::pair<bool, std::vector<target_text*>* > output;
   const Entry * entry;
   //TOO SLOW
   //uint64_t key = util::MurmurHashNative(&source_phrase[0], source_phrase.size());
@@ -117,9 +117,9 @@ std::pair<bool, std::vector<target_text*> > QueryEngine::query(uint64_t source_p
 
 }
 
-std::pair<bool, std::vector<target_text*> > QueryEngine::query(const StringPiece &source_phrase, RecycleData &recycler)
+std::pair<bool, std::vector<target_text*>* > QueryEngine::query(const StringPiece &source_phrase, RecycleData &recycler)
 {
-  std::pair<bool, std::vector<target_text*> > output;
+  std::pair<bool, std::vector<target_text*>* > output;
   const Entry * entry;
   //Convert source frase to VID
   std::vector<uint64_t> source_phrase_vid = getVocabIDs(source_phrase);
