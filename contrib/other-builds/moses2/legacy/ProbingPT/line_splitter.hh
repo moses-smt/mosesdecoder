@@ -31,6 +31,15 @@ struct target_text {
 	  std::vector<char> counts;
 	  std::vector<char> sparse_score;
 	  std::vector<char> property;
+
+	  void Reset() {
+		  target_phrase.clear();
+		  prob.clear();
+		  word_all1.clear();
+		  counts.clear();
+		  sparse_score.clear();
+		  property.clear();
+	  }
 };
 
 //Ask if it's better to have it receive a pointer to a line_text struct

@@ -310,6 +310,8 @@ target_text *HuffmanDecoder::decode_line (const std::vector<unsigned int> &input
   else {
 	  ret = recycler.Get();
 	  recycler.Pop();
+
+	  ret->Reset();
   }
 
   ret->prob.reserve(num_scores);
