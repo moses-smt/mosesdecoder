@@ -13,6 +13,7 @@
 #include <boost/serialization/map.hpp>
 #include <boost/archive/text_iarchive.hpp>
 #include <boost/archive/text_oarchive.hpp>
+#include <boost/foreach.hpp>
 
 namespace Moses2
 {
@@ -22,6 +23,17 @@ class RecycleData
 public:
 	  Recycler<target_text*> tt;
 	  Recycler<std::vector<unsigned int>*> huffman_line;
+
+	  ~RecycleData()
+	  {
+		  BOOST_FOREACH (const target_text *obj, tt) {
+			delete obj;
+		  }
+
+		  BOOST_FOREACH (const std::vector<unsigned int> *obj, huffman_line) {
+			delete obj;
+		  }
+	  }
 };
 ////////////////////////////////////////////////////////////////
 
