@@ -39,7 +39,7 @@ QueryEngine::QueryEngine(const char * filepath) : decoder(filepath)
   read_map(&source_vocabids, path_to_source_vocabid.c_str());
 
   //Target phrase vocabIDs
-  vocabids = decoder.get_target_lookup_map();
+  vocabids = &decoder.get_target_lookup_map();
 
   //Read config file
   std::string line;
@@ -156,7 +156,7 @@ void QueryEngine::printTargetInfo(const std::vector<target_text> &target_phrases
   for (int i = 0; i<entries; i++) {
     std::cout << "Entry " << i+1 << " of " << entries << ":" << std::endl;
     //Print text
-    std::cout << getTargetWordsFromIDs(target_phrases[i].target_phrase, vocabids) << "\t";
+    std::cout << getTargetWordsFromIDs(target_phrases[i].target_phrase, *vocabids) << "\t";
 
     //Print probabilities:
     for (int j = 0; j<target_phrases[i].prob.size(); j++) {

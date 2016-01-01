@@ -18,7 +18,7 @@ char * read_binary_file(char * filename);
 class QueryEngine
 {
   unsigned char * binary_mmaped; //The binari phrase table file
-  std::map<unsigned int, std::string> vocabids;
+  const std::map<unsigned int, std::string> *vocabids;
   std::map<uint64_t, std::string> source_vocabids;
 
   Table table;
