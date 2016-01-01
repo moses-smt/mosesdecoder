@@ -130,6 +130,8 @@ TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool,
       recycler.tt.Add(probingTargetPhrase);
     }
 
+    recycler.tts.Add(probingTargetPhrases);
+
     tps->SortAndPrune(m_tableLimit);
     system.featureFunctions.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
   }
