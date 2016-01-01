@@ -11,6 +11,7 @@
 #include <boost/bimap.hpp>
 #include "PhraseTable.h"
 #include "../Vector.h"
+#include "../Recycler.h"
 
 namespace Moses2
 {
@@ -29,7 +30,10 @@ public:
   void Load(System &system);
 
   void Lookup(const Manager &mgr, InputPaths &inputPaths) const;
-  TargetPhrases *Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const;
+  TargetPhrases *Lookup(const Manager &mgr,
+		  MemPool &pool,
+		  InputPath &inputPath,
+		  Recycler<target_text*> &recycler) const;
 
   virtual void GetScoresProperty(const std::string &key, size_t ind, SCORE *scoreArr);
 
@@ -40,7 +44,10 @@ protected:
   uint64_t m_unkId;
   QueryEngine *m_engine;
 
-  TargetPhrases *CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase) const;
+  TargetPhrases *CreateTargetPhrase(MemPool &pool,
+		  const System &system,
+		  const Phrase &sourcePhrase,
+		  Recycler<target_text*> &recycler) const;
   TargetPhrase *CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const;
 
   void ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok, uint64_t probingSource[]) const;

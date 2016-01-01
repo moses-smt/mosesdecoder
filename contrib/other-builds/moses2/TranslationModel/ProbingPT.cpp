@@ -72,24 +72,36 @@ void ProbingPT::Load(System &system)
 
 void ProbingPT::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 {
+  Recycler<target_text*> recycler;
+
   BOOST_FOREACH(InputPath &path, inputPaths) {
 	  const SubPhrase &phrase = path.subPhrase;
 
 	TargetPhrases *tpsPtr;
-	tpsPtr = Lookup(mgr, mgr.GetPool(), path);
+	tpsPtr = Lookup(mgr, mgr.GetPool(), path, recycler);
 	path.AddTargetPhrases(*this, tpsPtr);
   }
 
+  // delete everything in recycler
+  BOOST_FOREACH(const target_text *obj, recycler) {
+	  delete obj;
+  }
 }
 
-TargetPhrases* ProbingPT::Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const
+TargetPhrases* ProbingPT::Lookup(const Manager &mgr,
+		MemPool &pool,
+		InputPath &inputPath,
+		Recycler<target_text*> &recycler) const
 {
 	const Phrase &sourcePhrase = inputPath.subPhrase;
-	TargetPhrases *ret = CreateTargetPhrase(pool, mgr.system, sourcePhrase);
+	TargetPhrases *ret = CreateTargetPhrase(pool, mgr.system, sourcePhrase, recycler);
 	return ret;
 }
 
-TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase) const
+TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool,
+		const System &system,
+		const Phrase &sourcePhrase,
+		Recycler<target_text*> &recycler) const
 {
 
   // create a target phrase from the 1st word of the source, prefix with 'ProbingPT:'
@@ -109,7 +121,7 @@ TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system
   std::pair<bool, std::vector<target_text*> > query_result;
 
   //Actual lookup
-  query_result = m_engine->query(probingSource, sourceSize);
+  query_result = m_engine->query(probingSource, sourceSize, recycler);
 
   if (query_result.first) {
     //m_engine->printTargetInfo(query_result.second);
@@ -117,12 +129,12 @@ TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system
 	tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, probingTargetPhrases.size());
 
     for (size_t i = 0; i < probingTargetPhrases.size(); ++i) {
-      const target_text *probingTargetPhrase = probingTargetPhrases[i];
+      target_text *probingTargetPhrase = probingTargetPhrases[i];
       TargetPhrase *tp = CreateTargetPhrase(pool, system, sourcePhrase, *probingTargetPhrase);
 
       tps->AddTargetPhrase(*tp);
 
-      delete probingTargetPhrase;
+      recycler.Add(probingTargetPhrase);
     }
 
     tps->SortAndPrune(m_tableLimit);

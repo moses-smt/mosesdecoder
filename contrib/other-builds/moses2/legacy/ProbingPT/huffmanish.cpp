@@ -249,7 +249,11 @@ HuffmanDecoder::HuffmanDecoder (const std::map<unsigned int, std::string> &looku
   lookup_word_all1 = lookup_word1;
 }
 
-std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[], size_t linesCount, int num_scores, int num_lex_scores)
+std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[],
+		size_t linesCount,
+		int num_scores,
+		int num_lex_scores,
+		Moses2::Recycler<target_text*> &recycler)
 {
   std::vector<target_text*> retvector; //All target phrases
   std::vector<unsigned int> decoded_lines = vbyte_decode_line(lines, linesCount); //All decoded lines
@@ -270,7 +274,7 @@ std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[
 
     if (zero_count == 6) {
       //We have finished with this entry, decode it, and add it to the retvector.
-      retvector.push_back(decode_line(current_target_phrase, num_scores, num_lex_scores));
+      retvector.push_back(decode_line(current_target_phrase, num_scores, num_lex_scores, recycler));
       current_target_phrase.clear(); //Clear the current target phrase and the zero_count
       zero_count = 0; //So that we can reuse them for the next target phrase
     }
@@ -284,7 +288,7 @@ std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[
   //Don't forget the last remaining line!
   if (zero_count == 6) {
     //We have finished with this entry, decode it, and add it to the retvector.
-    retvector.push_back(decode_line(current_target_phrase, num_scores, num_lex_scores));
+    retvector.push_back(decode_line(current_target_phrase, num_scores, num_lex_scores, recycler));
     current_target_phrase.clear(); //Clear the current target phrase and the zero_count
     zero_count = 0; //So that we can reuse them for the next target phrase
   }
@@ -293,10 +297,21 @@ std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[
 
 }
 
-target_text *HuffmanDecoder::decode_line (const std::vector<unsigned int> &input, int num_scores, int num_lex_scores)
+target_text *HuffmanDecoder::decode_line (const std::vector<unsigned int> &input,
+		int num_scores,
+		int num_lex_scores,
+		Moses2::Recycler<target_text*> &recycler)
 {
   //demo decoder
-  target_text *ret = new target_text;
+  target_text *ret;
+  if (recycler.IsEmpty()) {
+	  ret = new target_text;
+  }
+  else {
+	  ret = recycler.Get();
+	  recycler.Pop();
+  }
+
   ret->prob.reserve(num_scores);
   //Split everything
   unsigned int wAll;

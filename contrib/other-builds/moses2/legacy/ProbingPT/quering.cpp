@@ -85,7 +85,9 @@ QueryEngine::~QueryEngine()
 
 }
 
-std::pair<bool, std::vector<target_text*> > QueryEngine::query(uint64_t source_phrase[], size_t size)
+std::pair<bool, std::vector<target_text*> > QueryEngine::query(uint64_t source_phrase[],
+		size_t size,
+		Moses2::Recycler<target_text*> &recycler)
 {
   std::pair<bool, std::vector<target_text*> > output;
   const Entry * entry;
@@ -107,7 +109,7 @@ std::pair<bool, std::vector<target_text*> > QueryEngine::query(uint64_t source_p
     unsigned int bytes_toread = entry -> bytes_toread;
 
     //Get only the translation entries necessary
-    output.second = decoder.full_decode_line(binary_mmaped + initial_index, bytes_toread, num_scores, num_lex_scores);
+    output.second = decoder.full_decode_line(binary_mmaped + initial_index, bytes_toread, num_scores, num_lex_scores, recycler);
 
   }
 
@@ -115,7 +117,7 @@ std::pair<bool, std::vector<target_text*> > QueryEngine::query(uint64_t source_p
 
 }
 
-std::pair<bool, std::vector<target_text*> > QueryEngine::query(const StringPiece &source_phrase)
+std::pair<bool, std::vector<target_text*> > QueryEngine::query(const StringPiece &source_phrase, Moses2::Recycler<target_text*> &recycler)
 {
   std::pair<bool, std::vector<target_text*> > output;
   const Entry * entry;
@@ -141,7 +143,7 @@ std::pair<bool, std::vector<target_text*> > QueryEngine::query(const StringPiece
     std::cerr << "Entry size is bytes is: " << bytes_toread << std::endl;
 
     //Get only the translation entries necessary
-    output.second = decoder.full_decode_line(binary_mmaped + initial_index, bytes_toread, num_scores, num_lex_scores);
+    output.second = decoder.full_decode_line(binary_mmaped + initial_index, bytes_toread, num_scores, num_lex_scores, recycler);
 
   }
 

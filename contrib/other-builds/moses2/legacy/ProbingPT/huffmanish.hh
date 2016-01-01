@@ -3,6 +3,7 @@
 //Huffman encodes a line and also produces the vocabulary ids
 #include "hash.hh"
 #include "line_splitter.hh"
+#include "../../Recycler.h"
 #include <cstdio>
 #include <fstream>
 #include <iostream>
@@ -95,10 +96,17 @@ public:
 
   std::string getTargetWordsFromIDs(const std::vector<unsigned int> &ids);
 
-  target_text *decode_line (const std::vector<unsigned int> &input, int num_scores, int num_lex_scores);
+  target_text *decode_line (const std::vector<unsigned int> &input,
+		  int num_scores,
+		  int num_lex_scores,
+		  Moses2::Recycler<target_text*> &recycler);
 
   //Variable byte decodes a all target phrases contained here and then passes them to decode_line
-  std::vector<target_text*> full_decode_line (unsigned char lines[], size_t linesCount, int num_scores, int num_lex_scores);
+  std::vector<target_text*> full_decode_line (unsigned char lines[],
+		  size_t linesCount,
+		  int num_scores,
+		  int num_lex_scores,
+		  Moses2::Recycler<target_text*> &recycler);
 };
 
 std::string getTargetWordsFromIDs(const std::vector<unsigned int> &ids, const std::map<unsigned int, std::string> &lookup_target_phrase);
