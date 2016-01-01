@@ -86,9 +86,15 @@ template <class T, class S, class C>
 
 void Search::Decode(size_t stackInd)
 {
+	// add unused hypos from queue into recycler
+	std::deque<Hypothesis*> hypoRecycler  = m_mgr.GetHypoRecycle();
 	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > &container = Container(m_queue);
+	BOOST_FOREACH(QueueItem *item, container) {
+		Hypothesis *hypo = item->hypo;
+		hypoRecycler.push_back(hypo);
+	}
 	container.clear();
-	//m_queueContainer->clear();
+
 	m_seenPositions.clear();
 
 	//Prefetch(stackInd);
