@@ -8,6 +8,7 @@
 #ifndef FF_TRANSLATIONMODEL_PROBINGPT_H_
 #define FF_TRANSLATIONMODEL_PROBINGPT_H_
 
+#include <boost/thread/tss.hpp>
 #include <boost/bimap.hpp>
 #include "PhraseTable.h"
 #include "../Vector.h"
@@ -43,6 +44,8 @@ protected:
 
   uint64_t m_unkId;
   QueryEngine *m_engine;
+
+  mutable boost::thread_specific_ptr< Recycler<target_text*> > m_recycler;
 
   TargetPhrases *CreateTargetPhrase(MemPool &pool,
 		  const System &system,

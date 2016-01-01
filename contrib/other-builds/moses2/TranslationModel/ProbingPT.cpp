@@ -72,19 +72,12 @@ void ProbingPT::Load(System &system)
 
 void ProbingPT::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 {
-  Recycler<target_text*> recycler;
+  Recycler<target_text*> &recycler = GetThreadSpecificObj(m_recycler);
 
   BOOST_FOREACH(InputPath &path, inputPaths) {
-	  const SubPhrase &phrase = path.subPhrase;
-
 	TargetPhrases *tpsPtr;
 	tpsPtr = Lookup(mgr, mgr.GetPool(), path, recycler);
 	path.AddTargetPhrases(*this, tpsPtr);
-  }
-
-  // delete everything in recycler
-  BOOST_FOREACH(const target_text *obj, recycler) {
-	  delete obj;
   }
 }
 
