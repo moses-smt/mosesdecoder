@@ -10,9 +10,9 @@
 
 #include <boost/thread/tss.hpp>
 #include <boost/bimap.hpp>
+#include <deque>
 #include "PhraseTable.h"
 #include "../Vector.h"
-#include "../Recycler.h"
 
 namespace Moses2
 {
@@ -42,7 +42,7 @@ protected:
   uint64_t m_unkId;
   QueryEngine *m_engine;
 
-  mutable boost::thread_specific_ptr< Recycler<target_text*> > m_recycler;
+  mutable boost::thread_specific_ptr< std::deque<target_text*> > m_recycler;
   mutable boost::thread_specific_ptr<RecycleData> m_recycleData;
 
   TargetPhrases *Lookup(const Manager &mgr,

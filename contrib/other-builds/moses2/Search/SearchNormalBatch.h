@@ -8,11 +8,11 @@
 #pragma once
 
 #include <vector>
+#include <deque>
 #include "../legacy/Range.h"
 #include "../legacy/Bitmap.h"
 #include "../TypeDef.h"
 #include "../MemPool.h"
-#include "../Recycler.h"
 #include "ArcLists.h"
 #include "Search.h"
 #include "Stacks.h"

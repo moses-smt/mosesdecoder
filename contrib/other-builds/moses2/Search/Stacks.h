@@ -35,7 +35,7 @@ public:
     	m_stacks[ind] = NULL;
     }
 
-	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
+	void Add(const Hypothesis *hypo, std::deque<Hypothesis*> &hypoRecycle);
 
 protected:
 	std::vector<Stack*> m_stacks;

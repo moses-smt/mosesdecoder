@@ -7,9 +7,9 @@
 #pragma once
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
+#include <deque>
 #include "../Hypothesis.h"
 #include "Misc.h"
-#include "../../Recycler.h"
 #include "../../TypeDef.h"
 #include "../../Vector.h"
 #include "../../MemPool.h"
@@ -76,7 +76,7 @@ public:
 	Coll &GetColl()
 	{ return m_coll; }
 
-	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
+	void Add(const Hypothesis *hypo, std::deque<Hypothesis*> &hypoRecycle);
 
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
 	void Clear()

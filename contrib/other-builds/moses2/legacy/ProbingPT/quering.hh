@@ -3,11 +3,11 @@
 #include <sys/stat.h> //For finding size of file
 #include "vocabid.hh"
 #include <algorithm> //toLower
+#include <deque>
 #include "probing_hash_utils.hh"
 #include "huffmanish.hh"
 #include "hash.hh" //Includes line splitter
 #include "../../Vector.h"
-#include "../../Recycler.h"
 
 #define API_VERSION 5
 

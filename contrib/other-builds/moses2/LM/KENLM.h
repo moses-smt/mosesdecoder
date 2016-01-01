@@ -36,9 +36,6 @@ public:
 		  const InputType &input,
 		  const Hypothesis &hypo) const;
 
-  //virtual void EvaluateWhenApplied(const Recycler<Hypothesis*> &hypos) const
-  //{}
-
   virtual void
   EvaluateInIsolation(MemPool &pool,
 		  const System &system,

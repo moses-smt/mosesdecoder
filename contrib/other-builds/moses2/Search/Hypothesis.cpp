@@ -7,13 +7,13 @@
 
 #include <boost/foreach.hpp>
 #include <stdlib.h>
+#include <deque>
 #include "Hypothesis.h"
 #include "Manager.h"
 #include "../InputPath.h"
 #include "../System.h"
 #include "../Scores.h"
 #include "../Sentence.h"
-#include "../Recycler.h"
 #include "../FF/StatefulFeatureFunction.h"
 
 using namespace std;
@@ -28,7 +28,7 @@ Hypothesis *Hypothesis::Create(Manager &mgr)
 //	++g_numHypos;
 	Hypothesis *ret;
 
-	Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycle();
+	std::deque<Hypothesis*> &recycler = mgr.GetHypoRecycle();
 	if (recycler.empty()) {
 		MemPool &pool = mgr.GetPool();
 		ret = new (pool.Allocate<Hypothesis>()) Hypothesis(mgr);

@@ -35,7 +35,7 @@ public:
 		  Scores &scores,
 		  SCORE *estimatedScore) const;
 
-  virtual void EvaluateWhenApplied(const Recycler<Hypothesis*> &hypos) const
+  virtual void EvaluateWhenApplied(const std::deque<Hypothesis*> &hypos) const
   {}
 
   virtual void EvaluateWhenApplied(const Manager &mgr,

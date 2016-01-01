@@ -34,7 +34,7 @@ public:
     Stack &operator[](size_t ind)
     { return *m_stacks[ind]; }
 
-	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
+	void Add(const Hypothesis *hypo, std::deque<Hypothesis*> &hypoRecycle);
 
 protected:
 	const Manager &m_mgr;

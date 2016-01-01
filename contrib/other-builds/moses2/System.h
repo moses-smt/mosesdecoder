@@ -7,12 +7,12 @@
 
 #pragma once
 #include <vector>
+#include <deque>
 #include <boost/thread/tss.hpp>
 #include <boost/pool/object_pool.hpp>
 #include "FF/FeatureFunctions.h"
 #include "Weights.h"
 #include "MemPool.h"
-#include "Recycler.h"
 #include "legacy/FactorCollection.h"
 #include "legacy/Parameter.h"
 #include "TypeDef.h"
@@ -62,13 +62,13 @@ public:
 	MemPool &GetManagerPool() const;
 	FactorCollection &GetVocab() const;
 
-	Recycler<Hypothesis*> &GetHypoRecycler() const;
+	std::deque<Hypothesis*> &GetHypoRecycler() const;
 	ObjectPoolContiguous<Hypothesis*> &GetBatchForEval() const;
 
 protected:
   mutable FactorCollection m_vocab;
   mutable boost::thread_specific_ptr<MemPool> m_managerPool;
-  mutable boost::thread_specific_ptr< Recycler<Hypothesis*> > m_hypoRecycler;
+  mutable boost::thread_specific_ptr< std::deque<Hypothesis*> > m_hypoRecycler;
   mutable boost::thread_specific_ptr< ObjectPoolContiguous<Hypothesis*> > m_batchForEval;
 
   void LoadWeights();

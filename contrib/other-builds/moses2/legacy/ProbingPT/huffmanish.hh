@@ -3,11 +3,11 @@
 //Huffman encodes a line and also produces the vocabulary ids
 #include "hash.hh"
 #include "line_splitter.hh"
-#include "../../Recycler.h"
 #include <cstdio>
 #include <fstream>
 #include <iostream>
 #include <sstream>
+#include <deque>
 #include <boost/serialization/serialization.hpp>
 #include <boost/serialization/vector.hpp>
 #include <boost/serialization/map.hpp>
@@ -21,8 +21,8 @@ namespace Moses2
 class RecycleData
 {
 public:
-	  Recycler<target_text*> tt;
-	  Recycler<std::vector<unsigned int>*> huffman_line;
+	std::deque<target_text*> tt;
+	std::deque<std::vector<unsigned int>*> huffman_line;
 
 	  ~RecycleData()
 	  {

@@ -11,7 +11,6 @@
 #include "FeatureFunction.h"
 #include "../legacy/FFState.h"
 #include "../MemPool.h"
-#include "../Recycler.h"
 
 namespace Moses2
 {

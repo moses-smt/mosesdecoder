@@ -7,8 +7,8 @@
 #pragma once
 
 #include <boost/unordered_set.hpp>
+#include <deque>
 #include "Hypothesis.h"
-#include "../Recycler.h"
 #include "../TypeDef.h"
 #include "../legacy/Util2.h"
 
@@ -37,9 +37,9 @@ public:
 	size_t GetSize() const
 	{ return m_hypos.size(); }
 
-	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
+	void Add(const Hypothesis *hypo, std::deque<Hypothesis*> &hypoRecycle);
 
-	std::vector<const Hypothesis*> GetBestHyposAndPrune(size_t num, Recycler<Hypothesis*> &recycler) const;
+	std::vector<const Hypothesis*> GetBestHyposAndPrune(size_t num, std::deque<Hypothesis*> &recycler) const;
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
 protected:
 	StackAdd Add(const Hypothesis *hypo);
