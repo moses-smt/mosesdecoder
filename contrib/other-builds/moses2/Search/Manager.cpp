@@ -38,7 +38,7 @@ Manager::~Manager() {
 	delete m_estimatedScores;
 
 	GetPool().Reset();
-	GetHypoRecycle().Reset();
+	GetHypoRecycle().clear();
 }
 
 void Manager::Init()

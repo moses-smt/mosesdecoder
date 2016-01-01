@@ -98,7 +98,7 @@ void MiniStack::SortAndPruneHypos(const Manager &mgr) const
   if (stackSize && m_sortedHypos->size() > stackSize) {
 	  for (size_t i = stackSize; i < m_sortedHypos->size(); ++i) {
 		  Hypothesis *hypo = const_cast<Hypothesis*>((*m_sortedHypos)[i]);
-		  recycler.Add(hypo);
+		  recycler.push_back(hypo);
 	  }
 	  m_sortedHypos->resize(stackSize);
   }
@@ -131,7 +131,7 @@ void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
   StackAdd added = GetMiniStack(key).Add(hypo);
 
   if (added.toBeDeleted) {
-	hypoRecycle.Add(added.toBeDeleted);
+	hypoRecycle.push_back(added.toBeDeleted);
   }
 }
 

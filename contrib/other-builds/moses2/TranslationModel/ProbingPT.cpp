@@ -127,7 +127,7 @@ TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool,
 
       tps->AddTargetPhrase(*tp);
 
-      recycler.tt.Add(probingTargetPhrase);
+      recycler.tt.push_back(probingTargetPhrase);
     }
 
     tps->SortAndPrune(m_tableLimit);

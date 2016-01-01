@@ -293,7 +293,7 @@ std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[
     zero_count = 0; //So that we can reuse them for the next target phrase
   }
 
-  recycler.huffman_line.Add(decoded_lines);
+  recycler.huffman_line.push_back(decoded_lines);
 
   return retvector;
 
@@ -306,12 +306,12 @@ target_text *HuffmanDecoder::decode_line (const std::vector<unsigned int> &input
 {
   //demo decoder
   target_text *ret;
-  if (recycler.tt.IsEmpty()) {
+  if (recycler.tt.empty()) {
 	  ret = new target_text;
   }
   else {
-	  ret = recycler.tt.Get();
-	  recycler.tt.Pop();
+	  ret = recycler.tt.back();
+	  recycler.tt.pop_back();
 
 	  ret->Reset();
   }
@@ -460,12 +460,12 @@ b1:
 std::vector<unsigned int> *vbyte_decode_line(unsigned char line[], size_t linesSize, RecycleData &recycler)
 {
   std::vector<unsigned int> *huffman_line;
-  if (recycler.huffman_line.IsEmpty()) {
+  if (recycler.huffman_line.empty()) {
 	  huffman_line = new std::vector<unsigned int>();
   }
   else {
-	  huffman_line = recycler.huffman_line.Get();
-	  recycler.huffman_line.Pop();
+	  huffman_line = recycler.huffman_line.back();
+	  recycler.huffman_line.pop_back();
 	  huffman_line->clear();
   }
 

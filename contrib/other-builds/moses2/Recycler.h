@@ -42,21 +42,21 @@ public:
 	virtual ~Recycler()
 	{}
 
-	bool IsEmpty() const
+	bool empty() const
 	{ return m_coll.empty(); }
 
-	T &Get()
+	T &back()
 	{ return m_coll.back(); }
 
-	void Pop()
+	void pop_back()
 	{
 		m_coll.pop_back();
 	}
 
-	void Add(T &obj)
+	void push_back(T &obj)
 	{ m_coll.push_back(obj); }
 
-	void Reset()
+	void clear()
 	{ m_coll.clear(); }
 protected:
 	Coll m_coll;

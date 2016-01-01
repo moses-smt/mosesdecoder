@@ -29,7 +29,7 @@ void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 	StackAdd added = Add(hypo);
 
 	if (added.toBeDeleted) {
-		hypoRecycle.Add(added.toBeDeleted);
+		hypoRecycle.push_back(added.toBeDeleted);
 	}
 }
 
@@ -68,7 +68,7 @@ std::vector<const Hypothesis*> Stack::GetBestHyposAndPrune(size_t num, Recycler<
   if (num && ret.size() > num) {
 	  for (size_t i = num; i < ret.size(); ++i) {
 		  Hypothesis *hypo = const_cast<Hypothesis*>(ret[i]);
-		  recycler.Add(hypo);
+		  recycler.push_back(hypo);
 	  }
 	  ret.resize(num);
   }
