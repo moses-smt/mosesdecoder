@@ -256,12 +256,12 @@ std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[
 		RecycleData &recycler)
 {
   std::vector<target_text*> retvector; //All target phrases
-  std::vector<unsigned int> decoded_lines = vbyte_decode_line(lines, linesCount); //All decoded lines
-  std::vector<unsigned int>::iterator it = decoded_lines.begin(); //Iterator for them
+  std::vector<unsigned int> *decoded_lines = vbyte_decode_line(lines, linesCount, recycler); //All decoded lines
+  std::vector<unsigned int>::iterator it = decoded_lines->begin(); //Iterator for them
   std::vector<unsigned int> current_target_phrase; //Current target phrase decoded
 
   short zero_count = 0; //Count how many zeroes we have met. so far. Every 3 zeroes mean a new target phrase.
-  while(it != decoded_lines.end()) {
+  while(it != decoded_lines->end()) {
     if (zero_count == 1) {
       //We are extracting scores. we know how many scores there are so we can push them
       //to the vector. This is done in case any of the scores is 0, because it would mess
@@ -292,6 +292,8 @@ std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[
     current_target_phrase.clear(); //Clear the current target phrase and the zero_count
     zero_count = 0; //So that we can reuse them for the next target phrase
   }
+
+  recycler.huffman_line.Add(decoded_lines);
 
   return retvector;
 
@@ -455,9 +457,18 @@ b1:
   return byte_vector;
 }
 
-std::vector<unsigned int> vbyte_decode_line(unsigned char line[], size_t linesSize)
+std::vector<unsigned int> *vbyte_decode_line(unsigned char line[], size_t linesSize, RecycleData &recycler)
 {
-  std::vector<unsigned int> huffman_line;
+  std::vector<unsigned int> *huffman_line;
+  if (recycler.huffman_line.IsEmpty()) {
+	  huffman_line = new std::vector<unsigned int>();
+  }
+  else {
+	  huffman_line = recycler.huffman_line.Get();
+	  recycler.huffman_line.Pop();
+	  huffman_line->clear();
+  }
+
   unsigned char current_num[linesSize];
 
   size_t current_num_ind = 0;
@@ -466,7 +477,7 @@ std::vector<unsigned int> vbyte_decode_line(unsigned char line[], size_t linesSi
     current_num[current_num_ind++] = c;
     if ((c >> 7) != 1) {
       //We don't have continuation in the next bit
-      huffman_line.push_back(bytes_to_int(current_num, current_num_ind));
+      huffman_line->push_back(bytes_to_int(current_num, current_num_ind));
       current_num_ind = 0;
     }
   }
