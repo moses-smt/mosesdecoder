@@ -19,7 +19,7 @@ namespace NSCubePruning
 
 ////////////////////////////////////////////////////////////////////////
 QueueItem::QueueItem(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex)
-:edge(edge)
+:edge(&edge)
 ,hypoIndex(hypoIndex)
 ,tpIndex(tpIndex)
 {
@@ -28,8 +28,8 @@ QueueItem::QueueItem(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIn
 
 void QueueItem::CreateHypothesis(Manager &mgr)
 {
-	const Hypothesis *prevHypo = edge.hypos[hypoIndex];
-	const TargetPhrase &tp = edge.tps[tpIndex];
+	const Hypothesis *prevHypo = edge->hypos[hypoIndex];
+	const TargetPhrase &tp = edge->tps[tpIndex];
 
 	//cerr << "hypoIndex=" << hypoIndex << endl;
 	//cerr << "edge.hypos=" << edge.hypos.size() << endl;
@@ -37,7 +37,7 @@ void QueueItem::CreateHypothesis(Manager &mgr)
 	//cerr << *prevHypo << endl;
 
 	hypo = Hypothesis::Create(mgr);
-	hypo->Init(*prevHypo, edge.path, tp, edge.newBitmap, edge.estimatedScore);
+	hypo->Init(*prevHypo, edge->path, tp, edge->newBitmap, edge->estimatedScore);
 	hypo->EvaluateWhenApplied();
 }
 

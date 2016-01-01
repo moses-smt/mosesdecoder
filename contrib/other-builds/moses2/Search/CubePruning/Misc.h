@@ -33,7 +33,7 @@ class QueueItem
 	~QueueItem(); // NOT IMPLEMENTED. Use MemPool
 public:
 	QueueItem(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex);
-	CubeEdge &edge;
+	CubeEdge *edge;
 	size_t hypoIndex, tpIndex;
 	Hypothesis *hypo;
 

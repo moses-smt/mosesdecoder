@@ -119,7 +119,7 @@ void Search::Decode(size_t stackInd)
 		QueueItem *item = m_queue.top();
 		m_queue.pop();
 
-		CubeEdge &edge = item->edge;
+		CubeEdge &edge = *item->edge;
 
 		// prefetching
 		/*
