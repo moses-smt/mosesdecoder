@@ -21,8 +21,6 @@ class RecycleData
 {
 public:
 	  Recycler<target_text*> tt;
-	  Recycler< std::vector<target_text*>* > tts;
-
 	  Recycler<std::vector<unsigned int>*> huffman_line;
 };
 ////////////////////////////////////////////////////////////////
@@ -112,7 +110,7 @@ public:
 		  RecycleData &recycler);
 
   //Variable byte decodes a all target phrases contained here and then passes them to decode_line
-  std::vector<target_text*> *full_decode_line (unsigned char lines[],
+  std::vector<target_text*> full_decode_line (unsigned char lines[],
 		  size_t linesCount,
 		  int num_scores,
 		  int num_lex_scores,
