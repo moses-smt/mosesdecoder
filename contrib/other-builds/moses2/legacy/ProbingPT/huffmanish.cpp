@@ -253,7 +253,7 @@ std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[
 		size_t linesCount,
 		int num_scores,
 		int num_lex_scores,
-		Moses2::Recycler<target_text*> &recycler)
+		RecycleData &recycler)
 {
   std::vector<target_text*> retvector; //All target phrases
   std::vector<unsigned int> decoded_lines = vbyte_decode_line(lines, linesCount); //All decoded lines
@@ -300,16 +300,16 @@ std::vector<target_text*> HuffmanDecoder::full_decode_line (unsigned char lines[
 target_text *HuffmanDecoder::decode_line (const std::vector<unsigned int> &input,
 		int num_scores,
 		int num_lex_scores,
-		Moses2::Recycler<target_text*> &recycler)
+		Moses2::RecycleData &recycler)
 {
   //demo decoder
   target_text *ret;
-  if (recycler.IsEmpty()) {
+  if (recycler.tt.IsEmpty()) {
 	  ret = new target_text;
   }
   else {
-	  ret = recycler.Get();
-	  recycler.Pop();
+	  ret = recycler.tt.Get();
+	  recycler.tt.Pop();
 
 	  ret->Reset();
   }

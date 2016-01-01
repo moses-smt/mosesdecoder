@@ -87,7 +87,7 @@ QueryEngine::~QueryEngine()
 
 std::pair<bool, std::vector<target_text*> > QueryEngine::query(uint64_t source_phrase[],
 		size_t size,
-		Moses2::Recycler<target_text*> &recycler)
+		RecycleData &recycler)
 {
   std::pair<bool, std::vector<target_text*> > output;
   const Entry * entry;
@@ -117,7 +117,7 @@ std::pair<bool, std::vector<target_text*> > QueryEngine::query(uint64_t source_p
 
 }
 
-std::pair<bool, std::vector<target_text*> > QueryEngine::query(const StringPiece &source_phrase, Moses2::Recycler<target_text*> &recycler)
+std::pair<bool, std::vector<target_text*> > QueryEngine::query(const StringPiece &source_phrase, RecycleData &recycler)
 {
   std::pair<bool, std::vector<target_text*> > output;
   const Entry * entry;

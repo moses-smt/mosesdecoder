@@ -22,6 +22,7 @@ class QueryEngine;
 class target_text;
 class MemPool;
 class System;
+class RecycleData;
 
 class ProbingPT : public PhraseTable
 {
@@ -31,10 +32,6 @@ public:
   void Load(System &system);
 
   void Lookup(const Manager &mgr, InputPaths &inputPaths) const;
-  TargetPhrases *Lookup(const Manager &mgr,
-		  MemPool &pool,
-		  InputPath &inputPath,
-		  Recycler<target_text*> &recycler) const;
 
   virtual void GetScoresProperty(const std::string &key, size_t ind, SCORE *scoreArr);
 
@@ -46,11 +43,16 @@ protected:
   QueryEngine *m_engine;
 
   mutable boost::thread_specific_ptr< Recycler<target_text*> > m_recycler;
+  mutable boost::thread_specific_ptr<RecycleData> m_recycleData;
 
+  TargetPhrases *Lookup(const Manager &mgr,
+		  MemPool &pool,
+		  InputPath &inputPath,
+		  RecycleData &recycler) const;
   TargetPhrases *CreateTargetPhrase(MemPool &pool,
 		  const System &system,
 		  const Phrase &sourcePhrase,
-		  Recycler<target_text*> &recycler) const;
+		  RecycleData &recycler) const;
   TargetPhrase *CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const;
 
   void ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok, uint64_t probingSource[]) const;

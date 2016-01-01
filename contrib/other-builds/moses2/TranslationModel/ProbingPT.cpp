@@ -72,7 +72,7 @@ void ProbingPT::Load(System &system)
 
 void ProbingPT::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 {
-  Recycler<target_text*> &recycler = GetThreadSpecificObj(m_recycler);
+  RecycleData &recycler = GetThreadSpecificObj(m_recycleData);
 
   BOOST_FOREACH(InputPath &path, inputPaths) {
 	TargetPhrases *tpsPtr;
@@ -84,7 +84,7 @@ void ProbingPT::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 TargetPhrases* ProbingPT::Lookup(const Manager &mgr,
 		MemPool &pool,
 		InputPath &inputPath,
-		Recycler<target_text*> &recycler) const
+		RecycleData &recycler) const
 {
 	const Phrase &sourcePhrase = inputPath.subPhrase;
 	TargetPhrases *ret = CreateTargetPhrase(pool, mgr.system, sourcePhrase, recycler);
@@ -94,7 +94,7 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr,
 TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool,
 		const System &system,
 		const Phrase &sourcePhrase,
-		Recycler<target_text*> &recycler) const
+		RecycleData &recycler) const
 {
 
   // create a target phrase from the 1st word of the source, prefix with 'ProbingPT:'
@@ -127,7 +127,7 @@ TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool,
 
       tps->AddTargetPhrase(*tp);
 
-      recycler.Add(probingTargetPhrase);
+      recycler.tt.Add(probingTargetPhrase);
     }
 
     tps->SortAndPrune(m_tableLimit);

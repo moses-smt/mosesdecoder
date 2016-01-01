@@ -16,6 +16,13 @@
 
 namespace Moses2
 {
+////////////////////////////////////////////////////////////////
+class RecycleData
+{
+public:
+	  Recycler<target_text*> tt;
+};
+////////////////////////////////////////////////////////////////
 
 //Sorting for the second
 struct sort_pair {
@@ -99,14 +106,14 @@ public:
   target_text *decode_line (const std::vector<unsigned int> &input,
 		  int num_scores,
 		  int num_lex_scores,
-		  Moses2::Recycler<target_text*> &recycler);
+		  RecycleData &recycler);
 
   //Variable byte decodes a all target phrases contained here and then passes them to decode_line
   std::vector<target_text*> full_decode_line (unsigned char lines[],
 		  size_t linesCount,
 		  int num_scores,
 		  int num_lex_scores,
-		  Moses2::Recycler<target_text*> &recycler);
+		  RecycleData &recycler);
 };
 
 std::string getTargetWordsFromIDs(const std::vector<unsigned int> &ids, const std::map<unsigned int, std::string> &lookup_target_phrase);
