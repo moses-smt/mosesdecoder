@@ -9,6 +9,7 @@
 
 #include <vector>
 #include "Stack.h"
+#include "../../Recycler.h"
 
 namespace Moses2
 {
@@ -34,7 +35,7 @@ public:
     Stack &operator[](size_t ind)
     { return *m_stacks[ind]; }
 
-	void Add(const Hypothesis *hypo, std::deque<Hypothesis*> &hypoRecycle);
+	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
 
 protected:
 	const Manager &m_mgr;

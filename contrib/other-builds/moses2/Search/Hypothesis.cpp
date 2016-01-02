@@ -28,7 +28,7 @@ Hypothesis *Hypothesis::Create(Manager &mgr)
 //	++g_numHypos;
 	Hypothesis *ret;
 
-	std::deque<Hypothesis*> &recycler = mgr.GetHypoRecycle();
+	Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycle();
 	if (recycler.empty()) {
 		MemPool &pool = mgr.GetPool();
 		ret = new (pool.Allocate<Hypothesis>()) Hypothesis(mgr);

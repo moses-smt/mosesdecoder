@@ -14,6 +14,7 @@
 #include "../InputPaths.h"
 #include "../TargetPhrase.h"
 #include "../MemPool.h"
+#include "../Recycler.h"
 #include "../legacy/Bitmaps.h"
 #include "../legacy/SquareMatrix.h"
 
@@ -41,7 +42,7 @@ public:
 	MemPool &GetPool() const
 	{ return *m_pool; }
 
-	std::deque<Hypothesis*> &GetHypoRecycle() const
+	Recycler<Hypothesis*> &GetHypoRecycle() const
 	{ return *m_hypoRecycle; }
 
 	Bitmaps &GetBitmaps()
@@ -65,7 +66,7 @@ public:
 
 protected:
 	mutable MemPool *m_pool;
-	mutable std::deque<Hypothesis*> *m_hypoRecycle;
+	mutable Recycler<Hypothesis*> *m_hypoRecycle;
 
     std::string m_inputStr;
     long m_translationId;

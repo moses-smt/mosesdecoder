@@ -13,6 +13,7 @@
 #include "../../TypeDef.h"
 #include "../../Vector.h"
 #include "../../MemPool.h"
+#include "../../Recycler.h"
 #include "../../legacy/Util2.h"
 
 namespace Moses2
@@ -76,7 +77,7 @@ public:
 	Coll &GetColl()
 	{ return m_coll; }
 
-	void Add(const Hypothesis *hypo, std::deque<Hypothesis*> &hypoRecycle);
+	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
 
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
 	void Clear()

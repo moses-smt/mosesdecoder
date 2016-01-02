@@ -156,7 +156,7 @@ FactorCollection &System::GetVocab() const
 	return m_vocab;
 }
 
-std::deque<Hypothesis*> &System::GetHypoRecycler() const
+Recycler<Hypothesis*> &System::GetHypoRecycler() const
 {
 	return GetThreadSpecificObj(m_hypoRecycler);
 }

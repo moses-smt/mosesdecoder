@@ -76,7 +76,7 @@ CubeEdge::Hypotheses &MiniStack::GetSortedAndPruneHypos(const Manager &mgr) cons
 void MiniStack::SortAndPruneHypos(const Manager &mgr) const
 {
   size_t stackSize = mgr.system.stackSize;
-  std::deque<Hypothesis*> &recycler = mgr.GetHypoRecycle();
+  Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycle();
 
   /*
   cerr << "UNSORTED hypos:" << endl;
@@ -125,7 +125,7 @@ Stack::~Stack() {
 	// TODO Auto-generated destructor stub
 }
 
-void Stack::Add(const Hypothesis *hypo, std::deque<Hypothesis*> &hypoRecycle)
+void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 {
   HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
   StackAdd added = GetMiniStack(key).Add(hypo);
