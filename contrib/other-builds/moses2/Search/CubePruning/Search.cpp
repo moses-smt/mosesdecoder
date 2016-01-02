@@ -86,7 +86,7 @@ template <class T, class S, class C>
 
 void Search::Decode(size_t stackInd)
 {
-	std::deque<Hypothesis*> hypoRecycler  = m_mgr.GetHypoRecycle();
+	std::deque<Hypothesis*> &hypoRecycler  = m_mgr.GetHypoRecycle();
 
 	// add unused hypos from queue into recycler
 	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > &container = Container(m_queue);
