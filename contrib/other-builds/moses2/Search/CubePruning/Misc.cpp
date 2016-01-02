@@ -72,21 +72,14 @@ std::ostream& operator<<(std::ostream &out, const CubeEdge &obj)
 }
 
 bool
-CubeEdge::SeenPosition(const size_t x, const size_t y, SeenPositions &seenPositions) const
-{
-  SeenPositionItem val(this, (x<<16) + y);
-  boost::unordered_set<SeenPositionItem>::iterator iter = seenPositions.find(val);
-  return (iter != seenPositions.end());
-}
-
-void
 CubeEdge::SetSeenPosition(const size_t x, const size_t y, SeenPositions &seenPositions) const
 {
   //UTIL_THROW_IF2(x >= (1<<17), "Error");
   //UTIL_THROW_IF2(y >= (1<<17), "Error");
 
   SeenPositionItem val(this, (x<<16) + y);
-  seenPositions.insert(val);
+  std::pair<SeenPositions::iterator, bool> pairRet = seenPositions.insert(val);
+  return pairRet.second;
 }
 
 void CubeEdge::CreateFirst(Manager &mgr, Queue &queue, SeenPositions &seenPositions)
@@ -112,15 +105,13 @@ void CubeEdge::CreateNext(Manager &mgr,
     size_t hypoIndex = item->hypoIndex;
 	size_t tpIndex = item->tpIndex;
 
-	if (hypoIndex + 1 < hypos.size() && !SeenPosition(hypoIndex + 1, tpIndex, seenPositions)) {
+	if (hypoIndex + 1 < hypos.size() && SetSeenPosition(hypoIndex + 1, tpIndex, seenPositions)) {
 		item->Init(mgr, *this, hypoIndex + 1, tpIndex);
 		queue.push(item);
 		item = NULL;
-
-		SetSeenPosition(hypoIndex + 1, tpIndex, seenPositions);
 	}
 
-	if (tpIndex + 1 < tps.GetSize() && !SeenPosition(hypoIndex, tpIndex + 1, seenPositions)) {
+	if (tpIndex + 1 < tps.GetSize() && SetSeenPosition(hypoIndex, tpIndex + 1, seenPositions)) {
 		if (item) {
 			item->Init(mgr, *this, hypoIndex, tpIndex + 1);
 		}
@@ -135,8 +126,6 @@ void CubeEdge::CreateNext(Manager &mgr,
 
 		queue.push(item);
 		item = NULL;
-
-		SetSeenPosition(hypoIndex, tpIndex + 1, seenPositions);
 	}
 
 	if (item) {

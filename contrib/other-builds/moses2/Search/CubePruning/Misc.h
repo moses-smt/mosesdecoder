@@ -83,8 +83,7 @@ public:
 			const TargetPhrases &tps,
 			const Bitmap &newBitmap);
 
-  bool SeenPosition(const size_t x, const size_t y, SeenPositions &seenPositions) const;
-  void SetSeenPosition(const size_t x, const size_t y, SeenPositions &seenPositions) const;
+  bool SetSeenPosition(const size_t x, const size_t y, SeenPositions &seenPositions) const;
 
   void CreateFirst(Manager &mgr, Queue &queue, SeenPositions &seenPositions);
   void CreateNext(Manager &mgr,
