@@ -99,6 +99,12 @@ void System::LoadMappings()
   }
 }
 
+MemPool &System::GetSystemPool() const
+{
+  MemPool &ret = GetThreadSpecificObj(m_systemPool);
+  return ret;
+}
+
 MemPool &System::GetManagerPool() const
 {
   MemPool &ret = GetThreadSpecificObj(m_managerPool);

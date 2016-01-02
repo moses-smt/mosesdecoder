@@ -66,13 +66,15 @@ LexicalReordering::~LexicalReordering()
 
 void LexicalReordering::Load(System &system)
 {
+  MemPool &pool = system.GetSystemPool();
+
   if (m_propertyInd >= 0) {
 	  // Using integrate Lex RO. No loading needed
   }
   else if (FileExists(m_path + ".minlexr") ) {
 	  m_compactModel = new LexicalReorderingTableCompact(m_path + ".minlexr", m_FactorsF,
 			  m_FactorsE, m_FactorsC);
-	  m_blank = new (system.systemPool.Allocate<PhraseImpl>()) PhraseImpl(system.systemPool, 0);
+	  m_blank = new (pool.Allocate<PhraseImpl>()) PhraseImpl(pool, 0);
   }
   else {
 	  m_coll = new Coll();
@@ -87,8 +89,8 @@ void LexicalReordering::Load(System &system)
 
 		std::vector<std::string> toks = TokenizeMultiCharSeparator(line, "|||");
 		assert(toks.size() == 3);
-		PhraseImpl *source = PhraseImpl::CreateFromString(system.systemPool, system.GetVocab(), system, toks[0]);
-		PhraseImpl *target = PhraseImpl::CreateFromString(system.systemPool, system.GetVocab(), system, toks[1]);
+		PhraseImpl *source = PhraseImpl::CreateFromString(pool, system.GetVocab(), system, toks[0]);
+		PhraseImpl *target = PhraseImpl::CreateFromString(pool, system.GetVocab(), system, toks[1]);
 		std::vector<SCORE> scores = Tokenize<SCORE>(toks[2]);
 		std::transform(scores.begin(), scores.end(), scores.begin(), TransformScore);
 		std::transform(scores.begin(), scores.end(), scores.begin(), FloorScore);

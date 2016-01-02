@@ -38,7 +38,6 @@ public:
     FeatureFunctions featureFunctions;
     Weights weights;
     std::vector<const PhraseTable*> mappings;
-    mutable MemPool systemPool;
     mutable OutputCollector bestCollector;
 
     // moses.ini params
@@ -59,6 +58,7 @@ public:
 	System(const Parameter &paramsArg);
 	virtual ~System();
 
+	MemPool &GetSystemPool() const;
 	MemPool &GetManagerPool() const;
 	FactorCollection &GetVocab() const;
 
@@ -68,6 +68,8 @@ public:
 protected:
   mutable FactorCollection m_vocab;
   mutable boost::thread_specific_ptr<MemPool> m_managerPool;
+  mutable boost::thread_specific_ptr<MemPool> m_systemPool;
+
   mutable boost::thread_specific_ptr< std::deque<Hypothesis*> > m_hypoRecycler;
   mutable boost::thread_specific_ptr< ObjectPoolContiguous<Hypothesis*> > m_batchForEval;
 

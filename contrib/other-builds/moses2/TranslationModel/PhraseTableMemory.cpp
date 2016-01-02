@@ -89,7 +89,7 @@ void PhraseTableMemory::Node::SortAndPrune(size_t tableLimit, MemPool &pool, Sys
 	  }
 
 	  m_targetPhrases->SortAndPrune(tableLimit);
-	  system.featureFunctions.EvaluateAfterTablePruning(system.systemPool, *m_targetPhrases, *m_source);
+	  system.featureFunctions.EvaluateAfterTablePruning(system.GetSystemPool(), *m_targetPhrases, *m_source);
 
 	  delete m_unsortedTPS;
   }
@@ -111,6 +111,7 @@ void PhraseTableMemory::Load(System &system)
 {
 	FactorCollection &vocab = system.GetVocab();
 
+	MemPool &systemPool = system.GetSystemPool();
 	MemPool tmpSourcePool;
 	vector<string> toks;
 	size_t lineNum = 0;
@@ -127,7 +128,7 @@ void PhraseTableMemory::Load(System &system)
 
 		PhraseImpl *source = PhraseImpl::CreateFromString(tmpSourcePool, vocab, system, toks[0]);
 		//cerr << "created soure" << endl;
-		TargetPhrase *target = TargetPhrase::CreateFromString(system.systemPool, system, toks[1]);
+		TargetPhrase *target = TargetPhrase::CreateFromString(systemPool, system, toks[1]);
 		//cerr << "created target" << endl;
 		target->GetScores().CreateFromString(toks[2], *this, system, true);
 		//cerr << "created scores" << endl;
@@ -138,11 +139,11 @@ void PhraseTableMemory::Load(System &system)
 			//strcpy(target->properties, toks[6].c_str());
 		}
 
-		system.featureFunctions.EvaluateInIsolation(system.systemPool, system, *source, *target);
+		system.featureFunctions.EvaluateInIsolation(systemPool, system, *source, *target);
 		m_root.AddRule(*source, target);
 	}
 
-	m_root.SortAndPrune(m_tableLimit, system.systemPool, system);
+	m_root.SortAndPrune(m_tableLimit, systemPool, system);
 }
 
 TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const
