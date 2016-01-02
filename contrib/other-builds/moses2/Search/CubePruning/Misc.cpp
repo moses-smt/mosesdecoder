@@ -101,7 +101,7 @@ void CubeEdge::CreateFirst(Manager &mgr, Queue &queue, SeenPositions &seenPositi
 	SetSeenPosition(0, 0, seenPositions);
 }
 
-void CubeEdge::CreateNext(Manager &mgr, const QueueItem *item, Queue &queue, SeenPositions &seenPositions)
+void CubeEdge::CreateNext(Manager &mgr, QueueItem *item, Queue &queue, SeenPositions &seenPositions)
 {
     MemPool &pool = mgr.GetPool();
 
@@ -109,18 +109,26 @@ void CubeEdge::CreateNext(Manager &mgr, const QueueItem *item, Queue &queue, See
 	size_t tpIndex = item->tpIndex;
 
 	if (hypoIndex + 1 < hypos.size() && !SeenPosition(hypoIndex + 1, tpIndex, seenPositions)) {
-		QueueItem *newItem = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, hypoIndex + 1, tpIndex);
-		queue.push(newItem);
+		item->Init(mgr, *this, hypoIndex + 1, tpIndex);
+		queue.push(item);
+		item = NULL;
 
 		SetSeenPosition(hypoIndex + 1, tpIndex, seenPositions);
 	}
 
 	if (tpIndex + 1 < tps.GetSize() && !SeenPosition(hypoIndex, tpIndex + 1, seenPositions)) {
-		QueueItem *newItem = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, hypoIndex, tpIndex + 1);
-		queue.push(newItem);
+		if (item) {
+			item->Init(mgr, *this, hypoIndex, tpIndex + 1);
+		}
+		else {
+			item = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, hypoIndex, tpIndex + 1);
+		}
+		queue.push(item);
+		item = NULL;
 
 		SetSeenPosition(hypoIndex, tpIndex + 1, seenPositions);
 	}
+
 }
 
 void CubeEdge::Prefetch(Manager &mgr, const QueueItem *item, Queue &queue, SeenPositions &seenPositions)
