@@ -101,7 +101,11 @@ void CubeEdge::CreateFirst(Manager &mgr, Queue &queue, SeenPositions &seenPositi
 	SetSeenPosition(0, 0, seenPositions);
 }
 
-void CubeEdge::CreateNext(Manager &mgr, QueueItem *item, Queue &queue, SeenPositions &seenPositions)
+void CubeEdge::CreateNext(Manager &mgr,
+		QueueItem *item,
+		Queue &queue,
+		SeenPositions &seenPositions,
+		std::deque<QueueItem*> &queueItemRecycler)
 {
     MemPool &pool = mgr.GetPool();
 
@@ -120,15 +124,24 @@ void CubeEdge::CreateNext(Manager &mgr, QueueItem *item, Queue &queue, SeenPosit
 		if (item) {
 			item->Init(mgr, *this, hypoIndex, tpIndex + 1);
 		}
+		else if (!queueItemRecycler.empty()) {
+			item = queueItemRecycler.back();
+			item->Init(mgr, *this, hypoIndex, tpIndex + 1);
+			queueItemRecycler.pop_back();
+		}
 		else {
 			item = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, hypoIndex, tpIndex + 1);
 		}
+
 		queue.push(item);
 		item = NULL;
 
 		SetSeenPosition(hypoIndex, tpIndex + 1, seenPositions);
 	}
 
+	if (item) {
+		queueItemRecycler.push_back(item);
+	}
 }
 
 void CubeEdge::Prefetch(Manager &mgr, const QueueItem *item, Queue &queue, SeenPositions &seenPositions)

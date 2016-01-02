@@ -87,7 +87,11 @@ public:
   void SetSeenPosition(const size_t x, const size_t y, SeenPositions &seenPositions) const;
 
   void CreateFirst(Manager &mgr, Queue &queue, SeenPositions &seenPositions);
-  void CreateNext(Manager &mgr, QueueItem *item, Queue &queue, SeenPositions &seenPositions);
+  void CreateNext(Manager &mgr,
+		  QueueItem *item,
+		  Queue &queue,
+		  SeenPositions &seenPositions,
+		  std::deque<QueueItem*> &queueItemRecycler);
 
   void Prefetch(Manager &mgr, const QueueItem *item, Queue &queue, SeenPositions &seenPositions);
 

@@ -92,6 +92,8 @@ void Search::Decode(size_t stackInd)
 	BOOST_FOREACH(QueueItem *item, container) {
 		Hypothesis *hypo = item->hypo;
 		hypoRecycler.push_back(hypo);
+
+		m_queueItemRecycler.push_back(item);
 	}
 	container.clear();
 
@@ -142,7 +144,7 @@ void Search::Decode(size_t stackInd)
 		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
 		m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
 
-		edge->CreateNext(m_mgr, item, m_queue, m_seenPositions);
+		edge->CreateNext(m_mgr, item, m_queue, m_seenPositions, m_queueItemRecycler);
 
 		++pops;
 	}
