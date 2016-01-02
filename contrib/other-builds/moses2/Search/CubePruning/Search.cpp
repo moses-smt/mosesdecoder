@@ -86,8 +86,9 @@ template <class T, class S, class C>
 
 void Search::Decode(size_t stackInd)
 {
-	// add unused hypos from queue into recycler
 	std::deque<Hypothesis*> hypoRecycler  = m_mgr.GetHypoRecycle();
+
+	// add unused hypos from queue into recycler
 	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > &container = Container(m_queue);
 	BOOST_FOREACH(QueueItem *item, container) {
 		Hypothesis *hypo = item->hypo;
@@ -142,7 +143,7 @@ void Search::Decode(size_t stackInd)
 		// add hypo to stack
 		Hypothesis *hypo = item->hypo;
 		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
-		m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
+		m_stacks.Add(hypo, hypoRecycler);
 
 		edge->CreateNext(m_mgr, item, m_queue, m_seenPositions, m_queueItemRecycler);
 
