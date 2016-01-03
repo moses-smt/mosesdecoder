@@ -252,6 +252,7 @@ Parameter::Parameter()
   AddParam(misc_opts,"context-weights", "A key-value map for context-sensitive translation.");
   AddParam(misc_opts,"context-window",
            "Context window (in words) for context-sensitive translation: {+|-|+-}<number>.");
+  AddParam(misc_opts,"cpu-affinity-offset", "CPU Affinity");
 
   // Compact phrase table and reordering table.
   po::options_description cpt_opts("Options when using compact phrase and reordering tables.");

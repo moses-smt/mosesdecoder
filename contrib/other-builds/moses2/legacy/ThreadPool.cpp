@@ -36,39 +36,40 @@ namespace Moses2
 #define handle_error_en(en, msg) \
   do { errno = en; perror(msg); exit(EXIT_FAILURE); } while (0)
 
-ThreadPool::ThreadPool( size_t numThreads )
+ThreadPool::ThreadPool( size_t numThreads, int cpuAffinityOffset )
   : m_stopped(false), m_stopping(false), m_queueLimit(0)
 {
   for (size_t i = 0; i < numThreads; ++i) {
     boost::thread *thread = m_threads.create_thread(boost::bind(&ThreadPool::Execute,this));
 
 #ifdef __linux
-    int s;
-    size_t numCPU = sysconf(_SC_NPROCESSORS_ONLN);
+    if (cpuAffinityOffset >= 0) {
+		int s;
+		size_t numCPU = sysconf(_SC_NPROCESSORS_ONLN);
 
-    boost::thread::native_handle_type handle = thread->native_handle();
+		boost::thread::native_handle_type handle = thread->native_handle();
 
-    //cerr << "numCPU=" << numCPU << endl;
-    cpu_set_t cpuset;
-    CPU_ZERO(&cpuset);
-    CPU_SET(i % numCPU, &cpuset);
-    
-    s = pthread_setaffinity_np(handle, sizeof(cpu_set_t), &cpuset); 
-    if (s != 0) {      
-      handle_error_en(s, "pthread_setaffinity_np");
-      //cerr << "affinity error with thread " << i << endl;
+		//cerr << "numCPU=" << numCPU << endl;
+		cpu_set_t cpuset;
+		CPU_ZERO(&cpuset);
+		CPU_SET(i % numCPU, &cpuset);
+
+		s = pthread_setaffinity_np(handle, sizeof(cpu_set_t), &cpuset);
+		if (s != 0) {
+		  handle_error_en(s, "pthread_setaffinity_np");
+		  //cerr << "affinity error with thread " << i << endl;
+		}
+
+		// get affinity
+		CPU_ZERO(&cpuset);
+		s = pthread_getaffinity_np(handle, sizeof(cpu_set_t), &cpuset);
+		cerr << "Set returned by pthread_getaffinity_np() contained:\n";
+		for (int j = 0; j < CPU_SETSIZE; j++) {
+		  if (CPU_ISSET(j + cpuAffinityOffset, &cpuset)) {
+		   cerr  << "    CPU " << j << "\n";
+		  }
+		}
     }
-
-    // get affini
-    CPU_ZERO(&cpuset);
-    s = pthread_getaffinity_np(handle, sizeof(cpu_set_t), &cpuset);
-    cerr << "Set returned by pthread_getaffinity_np() contained:\n";
-    for (int j = 0; j < CPU_SETSIZE; j++) {
-      if (CPU_ISSET(j, &cpuset)) {
-	   cerr  << "    CPU " << j << "\n";
-      }
-    }
-    
 #endif
   }
 }

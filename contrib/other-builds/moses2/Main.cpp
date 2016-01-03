@@ -45,7 +45,7 @@ int main(int argc, char** argv)
 	Moses2::Timer timer;
 	timer.start();
 
-	Moses2::ThreadPool pool(system.numThreads);
+	Moses2::ThreadPool pool(system.numThreads, system.cpuAffinityOffset);
 
 	long translationId = 0;
 	string line;

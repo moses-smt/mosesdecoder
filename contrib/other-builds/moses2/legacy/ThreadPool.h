@@ -65,7 +65,7 @@ public:
   /**
    * Construct a thread pool of a fixed size.
    **/
-  explicit ThreadPool(size_t numThreads);
+  explicit ThreadPool(size_t numThreads, int cpuAffinityOffset = -1);
 
   ~ThreadPool() {
     Stop();

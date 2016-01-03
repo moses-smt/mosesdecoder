@@ -55,6 +55,7 @@ public:
     bool onlyDistinct;
 
     bool outputHypoScore;
+    int cpuAffinityOffset;
 
 	System(const Parameter &paramsArg);
 	virtual ~System();
