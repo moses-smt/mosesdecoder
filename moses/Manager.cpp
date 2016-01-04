@@ -1505,7 +1505,7 @@ void Manager::OutputBest(OutputCollector *collector)  const
         OutputSurface(out,*bestHypo, true);
         if (options()->output.PrintAlignmentInfo) {
           out << "||| ";
-          bestHypo->OutputAlignment(out, options()->output.WA_SortOrder);
+          bestHypo->OutputAlignment(out, true); 
         }
 
         IFVERBOSE(1) {
