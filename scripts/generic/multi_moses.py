@@ -92,7 +92,7 @@ def run_instance(cmd_base, threads, tasks, cpu_affinity, cpu_offset, n_best=Fals
 
     if cpu_affinity:
        cmd.append('--cpu-affinity-offset')
-       cmd.append(cpu_offset)
+       cmd.append(str(cpu_offset))
 
     print 'BEFORE'
     print cmd
