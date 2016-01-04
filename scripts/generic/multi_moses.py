@@ -36,6 +36,7 @@ import signal
 import subprocess
 import sys
 import threading
+import time
 
 HELP = '''Multiple process decoding with Moses
 
@@ -96,7 +97,7 @@ def run_instance(cmd_base, threads, tasks, cpu_affinity, cpu_offset, n_best=Fals
 
     print 'BEFORE'
     print cmd
-    print 'AFTER'
+    print 'AFTER\n'
 
     try:
         # Queue of tasks instance is currently working on, limited to the number
@@ -291,6 +292,7 @@ def main(argv):
         # Daemon: guaranteed to finish before non-daemons
         t.setDaemon(True)
         t.start()
+        #time.sleep(1)
 
     # Start results writer
     writer = threading.Thread(target=write_results, args=(results, n_best, n_best_out))

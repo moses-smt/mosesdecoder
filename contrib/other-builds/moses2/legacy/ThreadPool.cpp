@@ -52,7 +52,9 @@ ThreadPool::ThreadPool( size_t numThreads, int cpuAffinityOffset )
 		//cerr << "numCPU=" << numCPU << endl;
 		cpu_set_t cpuset;
 		CPU_ZERO(&cpuset);
-		CPU_SET(i % numCPU, &cpuset);
+
+		int cpuInd = (i + cpuAffinityOffset) % numCPU;
+		CPU_SET(cpuInd, &cpuset);
 
 		s = pthread_setaffinity_np(handle, sizeof(cpu_set_t), &cpuset);
 		if (s != 0) {
@@ -65,7 +67,7 @@ ThreadPool::ThreadPool( size_t numThreads, int cpuAffinityOffset )
 		s = pthread_getaffinity_np(handle, sizeof(cpu_set_t), &cpuset);
 		cerr << "Set returned by pthread_getaffinity_np() contained:\n";
 		for (int j = 0; j < CPU_SETSIZE; j++) {
-		  if (CPU_ISSET(j + cpuAffinityOffset, &cpuset)) {
+		  if (CPU_ISSET(j, &cpuset)) {
 		   cerr  << "    CPU " << j << "\n";
 		  }
 		}
