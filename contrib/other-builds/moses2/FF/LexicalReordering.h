@@ -30,7 +30,7 @@ public:
   virtual size_t HasPhraseTableInd() const
   { return true; }
 
-  virtual FFState* BlankState(const Manager &mgr, const InputType &input) const;
+  virtual FFState* BlankState(MemPool &pool) const;
   virtual void EmptyHypothesisState(FFState &state,
 		  const Manager &mgr,
 		  const InputType &input,

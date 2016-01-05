@@ -19,7 +19,7 @@ public:
 	SkeletonStatefulFF(size_t startInd, const std::string &line);
 	virtual ~SkeletonStatefulFF();
 
-  virtual FFState* BlankState(const Manager &mgr, const InputType &input) const;
+  virtual FFState* BlankState(MemPool &pool) const;
   virtual void EmptyHypothesisState(FFState &state,
 		  const Manager &mgr,
 		  const InputType &input,

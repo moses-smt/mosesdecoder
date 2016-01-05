@@ -123,9 +123,8 @@ void LexicalReordering::SetParameter(const std::string& key, const std::string& 
   }
 }
 
-FFState* LexicalReordering::BlankState(const Manager &mgr, const InputType &input) const
+FFState* LexicalReordering::BlankState(MemPool &pool) const
 {
-  MemPool &pool = mgr.GetPool();
   return new (pool.Allocate<LexicalReorderingState>()) LexicalReorderingState();
 }
 

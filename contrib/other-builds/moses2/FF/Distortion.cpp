@@ -62,9 +62,8 @@ Distortion::~Distortion() {
 	// TODO Auto-generated destructor stub
 }
 
-FFState* Distortion::BlankState(const Manager &mgr, const InputType &input) const
+FFState* Distortion::BlankState(MemPool &pool) const
 {
-  MemPool &pool = mgr.GetPool();
   return new (pool.Allocate<DistortionState_traditional>()) DistortionState_traditional();
 }
 
@@ -106,8 +105,6 @@ void Distortion::EvaluateWhenApplied(const Manager &mgr,
   Scores &scores,
   FFState &state) const
 {
-	MemPool &pool = mgr.GetPool();
-
     const DistortionState_traditional &prev = static_cast<const DistortionState_traditional&>(prevState);
 	SCORE distortionScore = CalculateDistortionScore(
             prev.range,

@@ -38,8 +38,8 @@ void SearchNormal::Decode()
 	m_stacks.Init(m_mgr.GetInput().GetSize() + 1);
 
 	const Bitmap &initBitmap = m_mgr.GetBitmaps().GetInitialBitmap();
-	Hypothesis *initHypo = Hypothesis::Create(m_mgr.GetPool(), m_mgr);
-	initHypo->Init(m_mgr.GetInputPaths().GetBlank(), m_mgr.GetInitPhrase(), initBitmap);
+	Hypothesis *initHypo = Hypothesis::Create(m_mgr.system.GetSystemPool(), m_mgr);
+	initHypo->Init(m_mgr, m_mgr.GetInputPaths().GetBlank(), m_mgr.GetInitPhrase(), initBitmap);
 	initHypo->EmptyHypothesisState(m_mgr.GetInput());
 
 	m_stacks.Add(initHypo, m_mgr.GetHypoRecycle());
@@ -117,8 +117,8 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 		const Bitmap &newBitmap,
 		SCORE estimatedScore)
 {
-	Hypothesis *newHypo = Hypothesis::Create(m_mgr.GetPool(), m_mgr);
-	newHypo->Init(hypo, path, tp, newBitmap, estimatedScore);
+	Hypothesis *newHypo = Hypothesis::Create(m_mgr.system.GetSystemPool(), m_mgr);
+	newHypo->Init(m_mgr, hypo, path, tp, newBitmap, estimatedScore);
 	newHypo->EvaluateWhenApplied();
 
 	m_stacks.Add(newHypo, m_mgr.GetHypoRecycle());

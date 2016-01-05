@@ -30,7 +30,7 @@ public:
 	{ return m_statefulInd; }
 
 	  //! return uninitialise state
-	  virtual FFState* BlankState(const Manager &mgr, const InputType &input) const = 0;
+	  virtual FFState* BlankState(MemPool &pool) const = 0;
 
 	  //! return the state associated with the empty hypothesis for a given sentence
 	  virtual void EmptyHypothesisState(FFState &state,

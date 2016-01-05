@@ -30,18 +30,17 @@ class InputPath;
 class Hypothesis {
 	  friend std::ostream& operator<<(std::ostream &, const Hypothesis &);
 
-	  Hypothesis(MemPool &pool, Manager &mgr);
+	  Hypothesis(MemPool &pool, const System &system);
 
 public:
-  Manager &mgr;
 
   static Hypothesis *Create(MemPool &pool, Manager &mgr);
   virtual ~Hypothesis();
 
   // initial, empty hypo
-  void Init(const InputPath &path, const TargetPhrase &tp, const Bitmap &bitmap);
+  void Init(Manager &mgr, const InputPath &path, const TargetPhrase &tp, const Bitmap &bitmap);
 
-  void Init(const Hypothesis &prevHypo,
+  void Init(Manager &mgr, const Hypothesis &prevHypo,
   	    const InputPath &path,
   		const TargetPhrase &tp,
   		const Bitmap &bitmap,
@@ -49,6 +48,9 @@ public:
 
   size_t hash() const;
   bool operator==(const Hypothesis &other) const;
+
+  inline Manager &GetManager() const
+  { return *m_mgr; }
 
   inline const Bitmap &GetBitmap() const
   { return *m_sourceCompleted; }
@@ -96,6 +98,7 @@ public:
   void Swap(Hypothesis &other);
   void Prefetch() const;
 protected:
+  Manager *m_mgr;
   const TargetPhrase *m_targetPhrase;
   const Bitmap *m_sourceCompleted;
   const InputPath *m_path;

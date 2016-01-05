@@ -8,6 +8,7 @@
 #include "Misc.h"
 #include "../Manager.h"
 #include "../../MemPool.h"
+#include "../../System.h"
 
 using namespace std;
 
@@ -45,8 +46,8 @@ void QueueItem::CreateHypothesis(Manager &mgr)
 	//cerr << prevHypo << endl;
 	//cerr << *prevHypo << endl;
 
-	hypo = Hypothesis::Create(mgr.GetPool(), mgr);
-	hypo->Init(*prevHypo, edge->path, tp, edge->newBitmap, edge->estimatedScore);
+	hypo = Hypothesis::Create(mgr.system.GetSystemPool(), mgr);
+	hypo->Init(mgr, *prevHypo, edge->path, tp, edge->newBitmap, edge->estimatedScore);
 	hypo->EvaluateWhenApplied();
 }
 

@@ -119,9 +119,8 @@ void KENLM::SetParameter(const std::string& key, const std::string& value)
   }
 }
 
-FFState* KENLM::BlankState(const Manager &mgr, const InputType &input) const
+FFState* KENLM::BlankState(MemPool &pool) const
 {
-  MemPool &pool = mgr.GetPool();
   KenLMState *ret = new (pool.Allocate<KenLMState>()) KenLMState();
   return ret;
 }

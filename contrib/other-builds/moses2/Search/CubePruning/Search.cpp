@@ -51,8 +51,8 @@ void Search::Decode()
 	}
 
 	const Bitmap &initBitmap = m_mgr.GetBitmaps().GetInitialBitmap();
-	Hypothesis *initHypo = Hypothesis::Create(m_mgr.GetPool(), m_mgr);
-	initHypo->Init(m_mgr.GetInputPaths().GetBlank(), m_mgr.GetInitPhrase(), initBitmap);
+	Hypothesis *initHypo = Hypothesis::Create(m_mgr.system.GetSystemPool(), m_mgr);
+	initHypo->Init(m_mgr, m_mgr.GetInputPaths().GetBlank(), m_mgr.GetInitPhrase(), initBitmap);
 	initHypo->EmptyHypothesisState(m_mgr.GetInput());
 
 	m_stacks.Add(initHypo, m_mgr.GetHypoRecycle());
@@ -92,7 +92,7 @@ void Search::Decode(size_t stackInd)
 	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > &container = Container(m_queue);
 	BOOST_FOREACH(QueueItem *item, container) {
 		Hypothesis *hypo = item->hypo;
-		hypoRecycler.Add(hypo);
+		hypoRecycler.Recycle(hypo);
 
 		m_queueItemRecycler.push_back(item);
 	}
