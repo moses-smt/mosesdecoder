@@ -42,6 +42,9 @@ public:
 	MemPool &GetPool() const
 	{ return *m_pool; }
 
+	MemPool &GetSystemPool() const
+	{ return *m_systemPool; }
+
 	Recycler<Hypothesis*> &GetHypoRecycle() const
 	{ return *m_hypoRecycle; }
 
@@ -65,7 +68,7 @@ public:
     void OutputBest() const;
 
 protected:
-	mutable MemPool *m_pool;
+	mutable MemPool *m_pool, *m_systemPool;
 	mutable Recycler<Hypothesis*> *m_hypoRecycle;
 
     std::string m_inputStr;
