@@ -33,8 +33,8 @@ Hypothesis *Hypothesis::Create(MemPool &pool, Manager &mgr)
 		ret = new (pool.Allocate<Hypothesis>()) Hypothesis(pool, mgr);
 	}
 	else {
-		ret = recycler.back();
-		recycler.pop_back();
+		ret = recycler.Get();
+		recycler.Pop();
 	}
 	return ret;
 }

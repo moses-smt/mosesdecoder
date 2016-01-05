@@ -92,7 +92,7 @@ void Search::Decode(size_t stackInd)
 	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > &container = Container(m_queue);
 	BOOST_FOREACH(QueueItem *item, container) {
 		Hypothesis *hypo = item->hypo;
-		hypoRecycler.push_back(hypo);
+		hypoRecycler.Add(hypo);
 
 		m_queueItemRecycler.push_back(item);
 	}

@@ -5,6 +5,18 @@
  *      Author: hieu
  */
 
+
+
+
+
+
+
+
+
+
+
+
+
 #pragma once
 
 #include <deque>
@@ -22,19 +34,20 @@ public:
 	bool empty() const
 	{ return m_coll.empty(); }
 
-	T &back()
+	T &Get()
 	{ return m_coll.back(); }
 
-	void pop_back()
+	void Pop()
 	{ m_coll.pop_back(); }
 
 	void clear()
 	{ m_coll.clear(); }
 
-	void push_back (const T& val)
+	void Add (const T& val)
 	{ m_coll.push_back(val);	}
 
 protected:
+	std::vector<T> m_all;
 	std::deque<T> m_coll;
 };
 
