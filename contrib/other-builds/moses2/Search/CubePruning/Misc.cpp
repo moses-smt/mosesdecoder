@@ -45,7 +45,7 @@ void QueueItem::CreateHypothesis(Manager &mgr)
 	//cerr << prevHypo << endl;
 	//cerr << *prevHypo << endl;
 
-	hypo = Hypothesis::Create(mgr);
+	hypo = Hypothesis::Create(mgr.GetPool(), mgr);
 	hypo->Init(*prevHypo, edge->path, tp, edge->newBitmap, edge->estimatedScore);
 	hypo->EvaluateWhenApplied();
 }

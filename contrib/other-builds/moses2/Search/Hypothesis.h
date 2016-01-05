@@ -30,12 +30,12 @@ class InputPath;
 class Hypothesis {
 	  friend std::ostream& operator<<(std::ostream &, const Hypothesis &);
 
-	  Hypothesis(Manager &mgr);
+	  Hypothesis(MemPool &pool, Manager &mgr);
 
 public:
   Manager &mgr;
 
-  static Hypothesis *Create(Manager &mgr);
+  static Hypothesis *Create(MemPool &pool, Manager &mgr);
   virtual ~Hypothesis();
 
   // initial, empty hypo

@@ -51,7 +51,7 @@ void Search::Decode()
 	}
 
 	const Bitmap &initBitmap = m_mgr.GetBitmaps().GetInitialBitmap();
-	Hypothesis *initHypo = Hypothesis::Create(m_mgr);
+	Hypothesis *initHypo = Hypothesis::Create(m_mgr.GetPool(), m_mgr);
 	initHypo->Init(m_mgr.GetInputPaths().GetBlank(), m_mgr.GetInitPhrase(), initBitmap);
 	initHypo->EmptyHypothesisState(m_mgr.GetInput());
 

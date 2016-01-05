@@ -23,15 +23,14 @@ namespace Moses2
 
 //size_t g_numHypos = 0;
 
-Hypothesis *Hypothesis::Create(Manager &mgr)
+Hypothesis *Hypothesis::Create(MemPool &pool, Manager &mgr)
 {
 //	++g_numHypos;
 	Hypothesis *ret;
 
 	Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycle();
 	if (recycler.empty()) {
-		MemPool &pool = mgr.GetPool();
-		ret = new (pool.Allocate<Hypothesis>()) Hypothesis(mgr);
+		ret = new (pool.Allocate<Hypothesis>()) Hypothesis(pool, mgr);
 	}
 	else {
 		ret = recycler.back();
@@ -52,12 +51,10 @@ void Hypothesis::Prefetch() const
   __builtin_prefetch(&m_currTargetWordsRange);
 }
 
-Hypothesis::Hypothesis(Manager &mgr)
+Hypothesis::Hypothesis(MemPool &pool, Manager &mgr)
 :mgr(mgr)
 ,m_currTargetWordsRange()
 {
-	MemPool &pool = mgr.GetPool();
-
 	m_scores = new (pool.Allocate<Scores>()) Scores(mgr.system, pool, mgr.system.featureFunctions.GetNumScores());
 
 	// FF states
