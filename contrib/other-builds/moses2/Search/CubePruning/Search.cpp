@@ -55,17 +55,16 @@ void Search::Decode()
 	initHypo->Init(m_mgr, m_mgr.GetInputPaths().GetBlank(), m_mgr.GetInitPhrase(), initBitmap);
 	initHypo->EmptyHypothesisState(m_mgr.GetInput());
 
+	m_stacks.ReadyToDecode(0);
 	m_stacks.Add(initHypo, m_mgr.GetHypoRecycle());
+	PostDecode(0);
 
-	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
+	for (size_t stackInd = 1; stackInd < m_stacks.GetSize(); ++stackInd) {
 		//cerr << "stackInd=" << stackInd << endl;
+		m_stacks.ReadyToDecode(stackInd);
 		Decode(stackInd);
 		PostDecode(stackInd);
 
-		// delete stack to save mem
-		if (stackInd < m_stacks.GetSize() - 1) {
-			//m_stacks.Delete(stackInd);
-		}
 		//cerr << m_stacks << endl;
 	}
 

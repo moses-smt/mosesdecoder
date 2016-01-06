@@ -28,9 +28,21 @@ Stacks::~Stacks()
 
 void Stacks::Init(size_t numStacks)
 {
-	m_stacks.resize(numStacks);
-	for (size_t i = 0; i < m_stacks.size(); ++i) {
-		m_stacks[i] = new (m_mgr.GetPool().Allocate<Stack>()) Stack(m_mgr);
+	m_stacks.resize(numStacks, NULL);
+}
+
+void Stacks::ReadyToDecode(size_t ind)
+{
+	if (ind) {
+		// reuse previous stack
+		Stack *stack = m_stacks[ind - 1];
+		stack->Clear();
+
+		m_stacks[ind - 1] = NULL;
+		m_stacks[ind] = stack;
+	}
+	else {
+		m_stacks[ind] = new (m_mgr.GetPool().Allocate<Stack>()) Stack(m_mgr);
 	}
 }
 
@@ -38,8 +50,13 @@ void Stacks::Init(size_t numStacks)
 std::ostream& operator<<(std::ostream &out, const Stacks &obj)
 {
   for (size_t i = 0; i < obj.GetSize(); ++i) {
-	  const Stack &stack = *obj.m_stacks[i];
-	  out << stack.GetHypoSize() << " ";
+	  const Stack *stack = obj.m_stacks[i];
+	  if (stack) {
+		  out << stack->GetHypoSize() << " ";
+	  }
+	  else {
+		  out << "N ";
+	  }
   }
 
   return out;

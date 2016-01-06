@@ -25,6 +25,7 @@ public:
 	virtual ~Stacks();
 
 	void Init(size_t numStacks);
+	void ReadyToDecode(size_t ind);
 
 	size_t GetSize() const
 	{ return m_stacks.size(); }
