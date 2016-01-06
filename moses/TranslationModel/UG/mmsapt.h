@@ -211,8 +211,8 @@ namespace Moses
     // Mmsapt(std::string const& description, std::string const& line);
     Mmsapt(std::string const& line);
 
-    void Load();
-    void Load(bool with_checks);
+    void Load(AllOptions::ptr const& opts);
+    void Load(AllOptions::ptr const& opts, bool with_checks);
     size_t SetTableLimit(size_t limit); // returns the prior table limit
     std::string const& GetName() const;
 

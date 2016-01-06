@@ -7,35 +7,18 @@
 namespace Moses
 {
 
-Search::Search(Manager& manager, const InputType &source)
+Search::Search(Manager& manager)
   : m_manager(manager)
-  , m_source(source)
-  , m_options(manager.options())
+  , m_source(manager.GetSource())
+  , m_options(*manager.options())
   , m_inputPath()
   , m_initialTransOpt()
-  , m_bitmaps(source.GetSize(), source.m_sourceCompleted)
+  , m_bitmaps(manager.GetSource().GetSize(), manager.GetSource().m_sourceCompleted)
   , interrupted_flag(0)
 {
   m_initialTransOpt.SetInputPath(m_inputPath);
 }
 
-
-Search *
-Search::
-CreateSearch(Manager& manager, const InputType &source,
-             SearchAlgorithm searchAlgorithm,
-             const TranslationOptionCollection &transOptColl)
-{
-  switch(searchAlgorithm) {
-  case Normal:
-    return new SearchNormal(manager,source, transOptColl);
-  case CubePruning:
-    return new SearchCubePruning(manager, source, transOptColl);
-  default:
-    UTIL_THROW2("ERROR: search. Aborting\n");
-    return NULL;
-  }
-}
 
 bool
 Search::

@@ -32,7 +32,8 @@
 namespace Moses
 {
 
-bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
+bool RuleTableLoaderCompact::Load(AllOptions const& opts,
+                                  const std::vector<FactorType> &input,
                                   const std::vector<FactorType> &output,
                                   const std::string &inFile,
                                   size_t /* tableLimit */,

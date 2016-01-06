@@ -36,10 +36,10 @@ namespace Moses
 HypothesisStackCubePruning::HypothesisStackCubePruning(Manager& manager) :
   HypothesisStack(manager)
 {
-  m_nBestIsEnabled = manager.options().nbest.enabled;
+  m_nBestIsEnabled = manager.options()->nbest.enabled;
   m_bestScore = -std::numeric_limits<float>::infinity();
   m_worstScore = -std::numeric_limits<float>::infinity();
-  m_deterministic = manager.options().cube.deterministic_search;
+  m_deterministic = manager.options()->cube.deterministic_search;
 }
 
 /** remove all hypotheses from the collection */
@@ -244,7 +244,7 @@ void HypothesisStackCubePruning::CleanupArcList()
   iterator iter;
   for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter) {
     Hypothesis *mainHypo = *iter;
-    mainHypo->CleanupArcList(this->m_manager.options().nbest.nbest_size, this->m_manager.options().NBestDistinct());
+    mainHypo->CleanupArcList(this->m_manager.options()->nbest.nbest_size, this->m_manager.options()->NBestDistinct());
   }
 }
 

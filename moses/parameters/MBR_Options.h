@@ -13,9 +13,9 @@ namespace Moses
     bool enabled;
     size_t size; //! number of translation candidates considered
     float scale; /*! scaling factor for computing marginal probability 
-		  * of candidate translation */
+                  *  of candidate translation */
     bool init(Parameter const& param);
-    MBR_Options() {}
+    MBR_Options();
   };
 
 }

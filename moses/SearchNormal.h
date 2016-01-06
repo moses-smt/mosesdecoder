@@ -49,7 +49,7 @@ protected:
                    const Bitmap &bitmap);
 
 public:
-  SearchNormal(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl);
+  SearchNormal(Manager& manager, const TranslationOptionCollection &transOptColl);
   ~SearchNormal();
 
   void Decode();

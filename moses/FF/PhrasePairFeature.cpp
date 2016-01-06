@@ -65,8 +65,9 @@ void PhrasePairFeature::SetParameter(const std::string& key, const std::string& 
   }
 }
 
-void PhrasePairFeature::Load()
+void PhrasePairFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   if (m_domainTrigger) {
     // domain trigger terms for each input document
     ifstream inFileSource(m_filePathSource.c_str());

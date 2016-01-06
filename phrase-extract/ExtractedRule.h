@@ -26,6 +26,8 @@
 #include <sstream>
 #include <map>
 
+#include "PhraseOrientation.h"
+
 namespace MosesTraining
 {
 
@@ -37,8 +39,6 @@ public:
   std::string target;
   std::string alignment;
   std::string alignmentInv;
-  std::string orientation;
-  std::string orientationForward;
   std::string sourceContextLeft;
   std::string sourceContextRight;
   std::string targetContextLeft;
@@ -51,14 +51,14 @@ public:
   int endS;
   float count;
   double pcfgScore;
+  PhraseOrientation::REO_CLASS l2rOrientation;
+  PhraseOrientation::REO_CLASS r2lOrientation;
 
   ExtractedRule(int sT, int eT, int sS, int eS)
     : source()
     , target()
     , alignment()
     , alignmentInv()
-    , orientation()
-    , orientationForward()
     , sourceContextLeft()
     , sourceContextRight()
     , targetContextLeft()
@@ -70,8 +70,10 @@ public:
     , startS(sS)
     , endS(eS)
     , count(0)
-    , pcfgScore(0.0) {
-  }
+    , pcfgScore(0.0)
+    , l2rOrientation(PhraseOrientation::REO_CLASS_UNKNOWN)
+    , r2lOrientation(PhraseOrientation::REO_CLASS_UNKNOWN)
+  { }
 };
 
 }

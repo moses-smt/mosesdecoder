@@ -66,7 +66,7 @@ LanguageModelSRI::~LanguageModelSRI()
   delete m_srilmVocab;
 }
 
-void LanguageModelSRI::Load()
+void LanguageModelSRI::Load(AllOptions::ptr const& opts)
 {
   m_srilmVocab  = new ::Vocab();
   m_srilmModel	= new Ngram(*m_srilmVocab, m_nGramOrder);

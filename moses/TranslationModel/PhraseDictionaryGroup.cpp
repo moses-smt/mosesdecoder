@@ -73,8 +73,9 @@ void PhraseDictionaryGroup::SetParameter(const string& key, const string& value)
   }
 }
 
-void PhraseDictionaryGroup::Load()
+void PhraseDictionaryGroup::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   SetFeaturesToApply();
   m_pdFeature.push_back(const_cast<PhraseDictionaryGroup*>(this));
   size_t numScoreComponents = 0;

@@ -2364,18 +2364,18 @@ sub define_training_extract_phrases {
           $cmd .= "-unknown-word-soft-matches $unknown_word_soft_matches ";
       }
 
+      if (&get("TRAINING:phrase-orientation")) {
+        $cmd .= "-phrase-orientation ";
+        my $phrase_orientation_priors_file = &versionize(&long_file_name("phrase-orientation-priors","model",""));
+        $cmd .= "-phrase-orientation-priors-file $phrase_orientation_priors_file ";
+      }
+
       if (&get("TRAINING:use-ghkm")) {
         $cmd .= "-ghkm ";
       }
 
       if (&get("TRAINING:ghkm-tree-fragments")) {
         $cmd .= "-ghkm-tree-fragments ";
-      }
-
-      if (&get("TRAINING:ghkm-phrase-orientation")) {
-        $cmd .= "-ghkm-phrase-orientation ";
-        my $phrase_orientation_priors_file = &versionize(&long_file_name("phrase-orientation-priors","model",""));
-        $cmd .= "-phrase-orientation-priors-file $phrase_orientation_priors_file ";
       }
 
       if (&get("TRAINING:ghkm-source-labels")) {
@@ -2427,14 +2427,14 @@ sub define_training_build_ttable {
 
     if (&get("TRAINING:hierarchical-rule-set")) {
 
-      if (&get("TRAINING:ghkm-tree-fragments")) {
-        $cmd .= "-ghkm-tree-fragments ";
-      }
-
-      if (&get("TRAINING:ghkm-phrase-orientation")) {
-        $cmd .= "-ghkm-phrase-orientation ";
+      if (&get("TRAINING:phrase-orientation")) {
+        $cmd .= "-phrase-orientation ";
         my $phrase_orientation_priors_file = &versionize(&long_file_name("phrase-orientation-priors","model",""));
         $cmd .= "-phrase-orientation-priors-file $phrase_orientation_priors_file ";
+      }
+
+      if (&get("TRAINING:ghkm-tree-fragments")) {
+        $cmd .= "-ghkm-tree-fragments ";
       }
 
       if (&get("TRAINING:ghkm-source-labels")) {
@@ -2638,6 +2638,10 @@ sub define_training_create_config {
       else {
         $cmd .= "-osm-model $osm/operationLM.bin ";
       }
+    }
+
+    if (&get("TRAINING:phrase-orientation")) {
+      $cmd .= "-phrase-orientation ";
     }
 
     if (&get("TRAINING:ghkm-source-labels")) {

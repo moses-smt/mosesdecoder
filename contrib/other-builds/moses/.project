@@ -26,16 +26,6 @@
 	</natures>
 	<linkedResources>
 		<link>
-			<name>Alignment.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-ghkm/Alignment.cpp</locationURI>
-		</link>
-		<link>
-			<name>Alignment.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-ghkm/Alignment.h</locationURI>
-		</link>
-		<link>
 			<name>AlignmentInfo.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/AlignmentInfo.cpp</locationURI>
@@ -721,6 +711,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Phrase.h</locationURI>
 		</link>
 		<link>
+			<name>PhraseOrientation.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/PhraseOrientation.cpp</locationURI>
+		</link>
+		<link>
+			<name>PhraseOrientation.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/PhraseOrientation.h</locationURI>
+		</link>
+		<link>
 			<name>PrefixTree.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PrefixTree.h</locationURI>
@@ -1167,11 +1167,6 @@
 		</link>
 		<link>
 			<name>bin</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>extract-ghkm</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -2211,6 +2206,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMemory.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/PhraseDictionaryMemoryPerSentence.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMemoryPerSentence.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryMemoryPerSentence.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMemoryPerSentence.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/PhraseDictionaryMultiModel.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMultiModel.cpp</locationURI>
@@ -2329,16 +2334,6 @@
 			<name>bin/lm.log</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/bin/lm.log</locationURI>
-		</link>
-		<link>
-			<name>extract-ghkm/PhraseOrientation.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-ghkm/PhraseOrientation.cpp</locationURI>
-		</link>
-		<link>
-			<name>extract-ghkm/PhraseOrientation.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-ghkm/PhraseOrientation.h</locationURI>
 		</link>
 		<link>
 			<name>parameters/AllOptions.cpp</name>
@@ -2489,6 +2484,16 @@
 			<name>parameters/ServerOptions.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ServerOptions.h</locationURI>
+		</link>
+		<link>
+			<name>parameters/SyntaxOptions.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/SyntaxOptions.cpp</locationURI>
+		</link>
+		<link>
+			<name>parameters/SyntaxOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/SyntaxOptions.h</locationURI>
 		</link>
 		<link>
 			<name>FF/LexicalReordering/LexicalReordering.cpp</name>
@@ -3504,6 +3509,11 @@
 			<name>TranslationModel/UG/ptable-describe-features.cc</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/ptable-describe-features.cc</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/ptable-lookup-corpus.cc</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/ptable-lookup-corpus.cc</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/UG/ptable-lookup.cc</name>
@@ -5584,6 +5594,16 @@
 			<name>TranslationModel/UG/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/ptable-lookup</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/ptable-lookup</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/ptable-lookup-corpus</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/ptable-lookup-corpus</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/UG/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/ptable-lookup-corpus.o</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/ptable-lookup-corpus.o</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/UG/bin/gcc-4.8/release/debug-symbols-on/link-static/threading-multi/ptable-lookup.o</name>

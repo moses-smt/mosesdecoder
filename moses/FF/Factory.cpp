@@ -14,6 +14,8 @@
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
+#include "moses/TranslationModel/ProbingPT/ProbingPT.h"
+#include "moses/TranslationModel/PhraseDictionaryMemoryPerSentence.h"
 
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
 
@@ -87,9 +89,6 @@
 #endif
 #ifdef PT_UG
 #include "moses/TranslationModel/UG/mmsapt.h"
-#endif
-#ifdef HAVE_PROBINGPT
-#include "moses/TranslationModel/ProbingPT/ProbingPT.h"
 #endif
 
 #include "moses/LM/Ken.h"
@@ -224,6 +223,8 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhraseDictionaryTransliteration);
   MOSES_FNAME(PhraseDictionaryDynamicCacheBased);
   MOSES_FNAME(PhraseDictionaryFuzzyMatch);
+  MOSES_FNAME(ProbingPT);
+  MOSES_FNAME(PhraseDictionaryMemoryPerSentence);
   MOSES_FNAME2("RuleTable", Syntax::RuleTableFF);
   MOSES_FNAME2("SyntaxInputWeight", Syntax::InputWeightFF);
 
@@ -297,9 +298,6 @@ FeatureRegistry::FeatureRegistry()
 #ifdef PT_UG
   MOSES_FNAME(Mmsapt);
   MOSES_FNAME2("PhraseDictionaryBitextSampling",Mmsapt); // that's an alias for Mmsapt!
-#endif
-#ifdef HAVE_PROBINGPT
-  MOSES_FNAME(ProbingPT);
 #endif
 
 #ifdef HAVE_SYNLM

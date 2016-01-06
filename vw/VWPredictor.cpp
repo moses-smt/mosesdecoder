@@ -44,7 +44,7 @@ void VWPredictor::AddLabelIndependentFeature(const StringPiece &name, float valu
     // the first feature of a new example => create the source namespace for
     // label-independent features to live in
     m_isFirstSource = false;
-    m_ex->clear_features(); // removes all namespaces along with features
+    m_ex->finish();
     m_ex->addns('s');
     if (DEBUG) std::cerr << "VW :: Setting source namespace\n";
   }

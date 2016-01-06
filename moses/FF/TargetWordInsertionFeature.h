@@ -25,7 +25,7 @@ public:
 
   bool IsUseable(const FactorMask &mask) const;
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   virtual void EvaluateInIsolation(const Phrase &source
                                    , const TargetPhrase &targetPhrase

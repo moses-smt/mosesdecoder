@@ -40,6 +40,7 @@ class LexicalReorderingTableCompact:
   public LexicalReorderingTable
 {
 private:
+  static bool s_inMemoryByDefault;
   bool m_inMemory;
 
   size_t m_numScoreComponent;
@@ -82,6 +83,10 @@ public:
 
   void
   Load(std::string filePath);
+
+  static void
+  SetStaticDefaultParameters(Parameter const& param);
+
 };
 
 }

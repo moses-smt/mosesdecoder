@@ -163,11 +163,12 @@ int main(int argc, char const* argv[])
   }
 
   StaticData& SD = const_cast<StaticData&>(StaticData::Instance());
-  LMBR_Options& lmbr = SD.options().lmbr;
-  MBR_Options&   mbr = SD.options().mbr;
+  boost::shared_ptr<AllOptions> opts(new AllOptions(*SD.options()));
+  LMBR_Options& lmbr = opts->lmbr;
+  MBR_Options&   mbr = opts->mbr;
   lmbr.enabled = true;
 
-  boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper);
+  boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper(*opts));
   if (!ioWrapper) {
     throw runtime_error("Failed to initialise IOWrapper");
   }
@@ -205,10 +206,7 @@ int main(int argc, char const* argv[])
                  << r << " " << size_t(prune_i) << " " << scale_i
                  << " ||| ";
             vector<Word> mbrBestHypo = doLatticeMBR(manager,nBestList);
-            manager.OutputBestHypo(mbrBestHypo, lineCount,
-                                   manager.options().output.ReportSegmentation,
-                                   manager.options().output.ReportAllFactors,
-                                   cout);
+            manager.OutputBestHypo(mbrBestHypo, cout);
           }
         }
       }

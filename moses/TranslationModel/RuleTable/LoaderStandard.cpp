@@ -47,19 +47,17 @@ using namespace boost::algorithm;
 
 namespace Moses
 {
-bool RuleTableLoaderStandard::Load(const std::vector<FactorType> &input
-                                   , const std::vector<FactorType> &output
-                                   , const std::string &inFile
-                                   , size_t tableLimit
-                                   , RuleTableTrie &ruleTable)
-{
-  bool ret = Load(MosesFormat
-                  ,input, output
-                  ,inFile
-                  ,tableLimit
-                  ,ruleTable);
-  return ret;
 
+bool
+RuleTableLoaderStandard::
+Load(AllOptions const& opts
+     , const std::vector<FactorType> &input
+     , const std::vector<FactorType> &output
+     , const std::string &inFile
+     , size_t tableLimit
+     , RuleTableTrie &ruleTable)
+{
+  return Load(opts, MosesFormat,input, output ,inFile ,tableLimit ,ruleTable);
 }
 
 void ReformatHieroRule(int sourceTarget, string &phrase, map<size_t, pair<size_t, size_t> > &ntAlign)
@@ -142,7 +140,7 @@ void ReformatHieroRule(const string &lineOrig, string &out)
   out = ret.str();
 }
 
-bool RuleTableLoaderStandard::Load(FormatType format
+bool RuleTableLoaderStandard::Load(AllOptions const& opts, FormatType format
                                    , const std::vector<FactorType> &input
                                    , const std::vector<FactorType> &output
                                    , const std::string &inFile
@@ -151,7 +149,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
 {
   PrintUserTime(string("Start loading text phrase table. ") + (format==MosesFormat?"Moses":"Hiero") + " format");
 
-  const StaticData &staticData = StaticData::Instance();
+  // const StaticData &staticData = StaticData::Instance();
 
   string lineOrig;
   size_t count = 0;
@@ -192,7 +190,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     }
 
     bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
-    if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
+    if (isLHSEmpty && !opts.unk.word_deletion_enabled) {
       TRACE_ERR( ruleTable.GetFilePath() << ":" << count << ": pt entry contains empty target, skipping\n");
       continue;
     }

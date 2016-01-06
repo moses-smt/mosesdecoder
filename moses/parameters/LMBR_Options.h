@@ -19,7 +19,7 @@ namespace Moses
     size_t pruning_factor; //! average number of nodes per word wanted in pruned lattice
     std::vector<float> theta; //! theta(s) for lattice mbr calculation
     bool init(Parameter const& param);
-    LMBR_Options() {}
+    LMBR_Options();
   };
 
 }

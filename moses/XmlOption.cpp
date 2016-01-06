@@ -159,16 +159,19 @@ vector<string> TokenizeXml(const string& str, const std::string& lbrackStr, cons
  * \param rbrackStr xml tag's right bracket string, typically ">"
  */
 bool
-ProcessAndStripXMLTags(AllOptions const& opts, string &line, vector<XmlOption*> &res,
+ProcessAndStripXMLTags(AllOptions const& opts, string &line,
+                       vector<XmlOption const*> &res,
                        ReorderingConstraint &reorderingConstraint,
                        vector< size_t > &walls,
-                       std::vector< std::pair<size_t, std::string> > &placeholders,
-                       int offset, const std::string& lbrackStr,
-                       const std::string& rbrackStr)
+                       std::vector< std::pair<size_t, std::string> > &placeholders)
 {
   //parse XML markup in translation line
 
-  const StaticData &staticData = StaticData::Instance();
+  const std::string& lbrackStr = opts.input.xml_brackets.first;
+  const std::string& rbrackStr = opts.input.xml_brackets.second;
+  int offset = is_syntax(opts.search.algo) ? 1 : 0;
+
+  // const StaticData &staticData = StaticData::Instance();
 
   // hack. What pt should XML trans opt be assigned to?
   PhraseDictionary *firstPt = NULL;
@@ -177,7 +180,6 @@ ProcessAndStripXMLTags(AllOptions const& opts, string &line, vector<XmlOption*> 
   }
 
   // no xml tag? we're done.
-//if (line.find_first_of('<') == string::npos) {
   if (line.find(lbrackStr) == string::npos) {
     return true;
   }
@@ -194,8 +196,7 @@ ProcessAndStripXMLTags(AllOptions const& opts, string &line, vector<XmlOption*> 
   string cleanLine; // return string (text without xml)
   size_t wordPos = 0; // position in sentence (in terms of number of words)
 
-  const vector<FactorType> &outputFactorOrder = staticData.GetOutputFactorOrder();
-  // const string &factorDelimiter = staticData.GetFactorDelimiter();
+  const vector<FactorType> &outputFactorOrder = opts.output.factor_order;
 
   // loop through the tokens
   for (size_t xmlTokenPos = 0 ; xmlTokenPos < xmlTokens.size() ; xmlTokenPos++) {
@@ -459,7 +460,7 @@ ProcessAndStripXMLTags(AllOptions const& opts, string &line, vector<XmlOption*> 
               targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i], NULL);
 
               // lhs
-              const UnknownLHSList &lhsList = staticData.GetUnknownLHS();
+              const UnknownLHSList &lhsList = opts.syntax.unknown_lhs; // staticData.GetUnknownLHS();
               if (!lhsList.empty()) {
                 const Factor *factor = FactorCollection::Instance().AddFactor(lhsList[0].first, true);
                 Word *targetLHS = new Word(true);

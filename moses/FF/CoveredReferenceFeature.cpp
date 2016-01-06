@@ -52,12 +52,13 @@ void CoveredReferenceFeature::EvaluateWithSourceContext(const InputType &input
   estimatedScores->Assign(this, scores);
 }
 
-void CoveredReferenceFeature::Load()
+void CoveredReferenceFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   InputFileStream refFile(m_path);
   std::string line;
   const StaticData &staticData = StaticData::Instance();
-  long sentenceID = staticData.GetStartTranslationId();
+  long sentenceID = opts->output.start_translation_id;
   while (getline(refFile, line)) {
     vector<string> words = Tokenize(line, " ");
     multiset<string> wordSet;

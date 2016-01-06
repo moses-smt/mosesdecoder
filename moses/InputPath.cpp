@@ -11,7 +11,7 @@ using namespace std;
 namespace Moses
 {
 InputPath::
-InputPath(ttaskwptr const theTask,
+InputPath(TranslationTask const* theTask,
           Phrase const& phrase,
           NonTerminalSet const& sourceNonTerms,
           Range const& range, InputPath const *prevNode,

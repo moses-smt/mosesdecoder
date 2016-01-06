@@ -15,7 +15,6 @@
 #include "moses/Hypothesis.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/ChartManager.h"
-#include "phrase-extract/extract-ghkm/Alignment.h"
 #include <boost/shared_ptr.hpp>
 
 
@@ -23,15 +22,59 @@ namespace Moses
 {
 size_t PhraseOrientationFeatureState::hash() const
 {
-  UTIL_THROW2("TODO:Haven't figure this out yet");
+  if (!m_distinguishStates) {
+    return 0;
+  }
+
+  size_t ret = 0;
+
+  if (m_leftBoundaryIsSet) {
+    HashCombineLeftBoundaryRecursive(ret, *this, m_useSparseNT);
+  }
+  if (m_rightBoundaryIsSet) {
+    boost::hash_combine(ret, 42);
+    HashCombineRightBoundaryRecursive(ret, *this, m_useSparseNT);
+  }
+
+  return 0;
 }
 
 bool PhraseOrientationFeatureState::operator==(const FFState& other) const
 {
-  UTIL_THROW2("TODO:Haven't figure this out yet");
+  if (!m_distinguishStates) {
+    return true;
+  }
+
+  const PhraseOrientationFeatureState &otherState = static_cast<const PhraseOrientationFeatureState&>(other);
+
+  if (!m_leftBoundaryIsSet && !otherState.m_leftBoundaryIsSet &&
+      !m_rightBoundaryIsSet && !otherState.m_rightBoundaryIsSet) {
+    return true;
+  }
+  if (m_leftBoundaryIsSet != otherState.m_leftBoundaryIsSet) {
+    return false;
+  }
+  if (m_rightBoundaryIsSet != otherState.m_rightBoundaryIsSet) {
+    return false;
+  }
+
+  if (m_leftBoundaryIsSet) {
+    int compareLeft = CompareLeftBoundaryRecursive(*this, otherState, m_useSparseNT);
+    if (compareLeft != 0) {
+      return false;
+    }
+  }
+  if (m_rightBoundaryIsSet) {
+    int compareRight = CompareRightBoundaryRecursive(*this, otherState, m_useSparseNT);
+    if (compareRight != 0) {
+      return false;
+    }
+  }
+
+  return true;
 }
 
-////////////////////////////////////////////////////////////////////////////////
+
 const std::string PhraseOrientationFeature::MORIENT("M");
 const std::string PhraseOrientationFeature::SORIENT("S");
 const std::string PhraseOrientationFeature::DORIENT("D");
@@ -39,8 +82,8 @@ const std::string PhraseOrientationFeature::DORIENT("D");
 
 PhraseOrientationFeature::PhraseOrientationFeature(const std::string &line)
   : StatefulFeatureFunction(6, line)
-  , m_glueTargetLHSStr("Q")
-  , m_distinguishStates(true)
+  , m_glueLabelStr("Q")
+  , m_distinguishStates(false)
   , m_useSparseWord(false)
   , m_useSparseNT(false)
   , m_offsetR2LScores(m_numScoreComponents/2)
@@ -50,24 +93,24 @@ PhraseOrientationFeature::PhraseOrientationFeature(const std::string &line)
   VERBOSE(1, "Initializing feature " << GetScoreProducerDescription() << " ...");
   ReadParameters();
   FactorCollection &factorCollection = FactorCollection::Instance();
-  m_glueTargetLHS = factorCollection.AddFactor(m_glueTargetLHSStr, true);
+  m_glueLabel = factorCollection.AddFactor(m_glueLabelStr, true);
   VERBOSE(1, " Done." << std::endl);
 }
 
 
 void PhraseOrientationFeature::SetParameter(const std::string& key, const std::string& value)
 {
-  if (key == "glueTargetLHS") {
-    m_glueTargetLHSStr = value;
-  } else if (key == "distinguishStates") {
+  if (key == "glue-label") {
+    m_glueLabelStr = value;
+  } else if (key == "distinguish-states") {
     m_distinguishStates = Scan<bool>(value);
-  } else if (key == "sparseWord") {
+  } else if (key == "sparse-word") {
     m_useSparseWord = Scan<bool>(value);
-  } else if (key == "sparseNT") {
+  } else if (key == "sparse-nt") {
     m_useSparseNT = Scan<bool>(value);
-  } else if (key == "targetWordList") {
+  } else if (key == "target-word-list") {
     m_filenameTargetWordList = value;
-  } else if (key == "sourceWordList") {
+  } else if (key == "source-word-list") {
     m_filenameSourceWordList = value;
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
@@ -75,8 +118,9 @@ void PhraseOrientationFeature::SetParameter(const std::string& key, const std::s
 }
 
 
-void PhraseOrientationFeature::Load()
+void PhraseOrientationFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   if ( !m_filenameTargetWordList.empty() ) {
     LoadWordList(m_filenameTargetWordList,m_targetWordList);
     m_useTargetWordList = true;
@@ -143,7 +187,7 @@ void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source,
   if (targetPhrase.GetAlignNonTerm().GetSize() != 0) {
 
     // Initialize phrase orientation scoring object
-    MosesTraining::Syntax::GHKM::PhraseOrientation phraseOrientation(source.GetSize(), targetPhrase.GetSize(),
+    MosesTraining::PhraseOrientation phraseOrientation(source.GetSize(), targetPhrase.GetSize(),
         targetPhrase.GetAlignTerm(), targetPhrase.GetAlignNonTerm());
 
     PhraseOrientationFeature::ReoClassData* reoClassData = new PhraseOrientationFeature::ReoClassData();
@@ -159,10 +203,10 @@ void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source,
 
       // LEFT-TO-RIGHT DIRECTION
 
-      MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS l2rOrientation = phraseOrientation.GetOrientationInfo(sourceIndex,sourceIndex,MosesTraining::Syntax::GHKM::PhraseOrientation::REO_DIR_L2R);
+      MosesTraining::PhraseOrientation::REO_CLASS l2rOrientation = phraseOrientation.GetOrientationInfo(sourceIndex,sourceIndex,MosesTraining::PhraseOrientation::REO_DIR_L2R);
 
       if ( ((targetIndex == 0) || !phraseOrientation.TargetSpanIsAligned(0,targetIndex)) // boundary non-terminal in rule-initial position (left boundary)
-           && (targetPhraseLHS != m_glueTargetLHS) ) { // and not glue rule
+           && (targetPhraseLHS != m_glueLabel) ) { // and not glue rule
 
         FEATUREVERBOSE(3, "Left boundary: targetIndex== " << targetIndex);
         if (targetIndex != 0) {
@@ -179,7 +223,7 @@ void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source,
         if (reoClassData->firstNonTerminalPreviousSourceSpanIsAligned &&
             reoClassData->firstNonTerminalFollowingSourceSpanIsAligned) {
           // discontinuous
-          l2rOrientation = MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_DLEFT;
+          l2rOrientation = MosesTraining::PhraseOrientation::REO_CLASS_DLEFT;
         } else {
           reoClassData->firstNonTerminalIsBoundary = true;
         }
@@ -189,10 +233,10 @@ void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source,
 
       // RIGHT-TO-LEFT DIRECTION
 
-      MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS r2lOrientation = phraseOrientation.GetOrientationInfo(sourceIndex,sourceIndex,MosesTraining::Syntax::GHKM::PhraseOrientation::REO_DIR_R2L);
+      MosesTraining::PhraseOrientation::REO_CLASS r2lOrientation = phraseOrientation.GetOrientationInfo(sourceIndex,sourceIndex,MosesTraining::PhraseOrientation::REO_DIR_R2L);
 
       if ( ((targetIndex == targetPhrase.GetSize()-1) || !phraseOrientation.TargetSpanIsAligned(targetIndex,targetPhrase.GetSize()-1)) // boundary non-terminal in rule-final position (right boundary)
-           && (targetPhraseLHS != m_glueTargetLHS) ) { // and not glue rule
+           && (targetPhraseLHS != m_glueLabel) ) { // and not glue rule
 
         FEATUREVERBOSE(3, "Right boundary: targetIndex== " << targetIndex);
         if (targetIndex != targetPhrase.GetSize()-1) {
@@ -209,7 +253,7 @@ void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source,
         if (reoClassData->lastNonTerminalPreviousSourceSpanIsAligned &&
             reoClassData->lastNonTerminalFollowingSourceSpanIsAligned) {
           // discontinuous
-          r2lOrientation = MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_DLEFT;
+          r2lOrientation = MosesTraining::PhraseOrientation::REO_CLASS_DLEFT;
         } else {
           reoClassData->lastNonTerminalIsBoundary = true;
         }
@@ -344,25 +388,25 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
       // LEFT-TO-RIGHT DIRECTION
 
-      MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS l2rOrientation = reoClassData->nonTerminalReoClassL2R[nNT];
+      MosesTraining::PhraseOrientation::REO_CLASS l2rOrientation = reoClassData->nonTerminalReoClassL2R[nNT];
 
       IFFEATUREVERBOSE(2) {
         FEATUREVERBOSE(2, "l2rOrientation ");
         switch (l2rOrientation) {
-        case MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_LEFT:
+        case MosesTraining::PhraseOrientation::REO_CLASS_LEFT:
           FEATUREVERBOSE2(2, "mono" << std::endl);
           break;
-        case MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_RIGHT:
+        case MosesTraining::PhraseOrientation::REO_CLASS_RIGHT:
           FEATUREVERBOSE2(2, "swap" << std::endl);
           break;
-        case MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_DLEFT:
+        case MosesTraining::PhraseOrientation::REO_CLASS_DLEFT:
           FEATUREVERBOSE2(2, "dleft" << std::endl);
           break;
-        case MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_DRIGHT:
+        case MosesTraining::PhraseOrientation::REO_CLASS_DRIGHT:
           FEATUREVERBOSE2(2, "dright" << std::endl);
           break;
-        case MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN:
-          // modelType == MosesTraining::Syntax::GHKM::PhraseOrientation::REO_MSLR
+        case MosesTraining::PhraseOrientation::REO_CLASS_UNKNOWN:
+          // modelType == MosesTraining::PhraseOrientation::REO_MSLR
           FEATUREVERBOSE2(2, "unknown->dleft" << std::endl);
           break;
         default:
@@ -405,23 +449,23 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
       } else {
 
-        if ( l2rOrientation == MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_LEFT ) {
+        if ( l2rOrientation == MosesTraining::PhraseOrientation::REO_CLASS_LEFT ) {
 
           newScores[0] += TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityMono());
           // if sub-derivation has left-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x1, newScores, accumulator);
 
-        } else if ( l2rOrientation == MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_RIGHT ) {
+        } else if ( l2rOrientation == MosesTraining::PhraseOrientation::REO_CLASS_RIGHT ) {
 
           newScores[1] += TransformScore(orientationPhraseProperty->GetLeftToRightProbabilitySwap());
           // if sub-derivation has left-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x2, newScores, accumulator);
 
-        } else if ( ( l2rOrientation == MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_DLEFT ) ||
-                    ( l2rOrientation == MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_DRIGHT ) ||
-                    ( l2rOrientation == MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN ) ) {
+        } else if ( ( l2rOrientation == MosesTraining::PhraseOrientation::REO_CLASS_DLEFT ) ||
+                    ( l2rOrientation == MosesTraining::PhraseOrientation::REO_CLASS_DRIGHT ) ||
+                    ( l2rOrientation == MosesTraining::PhraseOrientation::REO_CLASS_UNKNOWN ) ) {
 
           newScores[2] += TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous());
           // if sub-derivation has left-boundary non-terminal:
@@ -446,25 +490,25 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
       // RIGHT-TO-LEFT DIRECTION
 
-      MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS r2lOrientation = reoClassData->nonTerminalReoClassR2L[nNT];
+      MosesTraining::PhraseOrientation::REO_CLASS r2lOrientation = reoClassData->nonTerminalReoClassR2L[nNT];
 
       IFFEATUREVERBOSE(2) {
         FEATUREVERBOSE(2, "r2lOrientation ");
         switch (r2lOrientation) {
-        case MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_LEFT:
+        case MosesTraining::PhraseOrientation::REO_CLASS_LEFT:
           FEATUREVERBOSE2(2, "mono" << std::endl);
           break;
-        case MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_RIGHT:
+        case MosesTraining::PhraseOrientation::REO_CLASS_RIGHT:
           FEATUREVERBOSE2(2, "swap" << std::endl);
           break;
-        case MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_DLEFT:
+        case MosesTraining::PhraseOrientation::REO_CLASS_DLEFT:
           FEATUREVERBOSE2(2, "dleft" << std::endl);
           break;
-        case MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_DRIGHT:
+        case MosesTraining::PhraseOrientation::REO_CLASS_DRIGHT:
           FEATUREVERBOSE2(2, "dright" << std::endl);
           break;
-        case MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN:
-          // modelType == MosesTraining::Syntax::GHKM::PhraseOrientation::REO_MSLR
+        case MosesTraining::PhraseOrientation::REO_CLASS_UNKNOWN:
+          // modelType == MosesTraining::PhraseOrientation::REO_MSLR
           FEATUREVERBOSE2(2, "unknown->dleft" << std::endl);
           break;
         default:
@@ -507,23 +551,23 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
       } else {
 
-        if ( r2lOrientation == MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_LEFT ) {
+        if ( r2lOrientation == MosesTraining::PhraseOrientation::REO_CLASS_LEFT ) {
 
           newScores[m_offsetR2LScores+0] += TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityMono());
           // if sub-derivation has right-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           RightBoundaryR2LScoreRecursive(featureID, prevState, 0x1, newScores, accumulator);
 
-        } else if ( r2lOrientation == MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_RIGHT ) {
+        } else if ( r2lOrientation == MosesTraining::PhraseOrientation::REO_CLASS_RIGHT ) {
 
           newScores[m_offsetR2LScores+1] += TransformScore(orientationPhraseProperty->GetRightToLeftProbabilitySwap());
           // if sub-derivation has right-boundary non-terminal:
           // add recursive actual score of boundary non-terminal from subderivation
           RightBoundaryR2LScoreRecursive(featureID, prevState, 0x2, newScores, accumulator);
 
-        } else if ( ( r2lOrientation == MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_DLEFT ) ||
-                    ( r2lOrientation == MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_DRIGHT ) ||
-                    ( r2lOrientation == MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN ) ) {
+        } else if ( ( r2lOrientation == MosesTraining::PhraseOrientation::REO_CLASS_DLEFT ) ||
+                    ( r2lOrientation == MosesTraining::PhraseOrientation::REO_CLASS_DRIGHT ) ||
+                    ( r2lOrientation == MosesTraining::PhraseOrientation::REO_CLASS_UNKNOWN ) ) {
 
           newScores[m_offsetR2LScores+2] += TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous());
           // if sub-derivation has right-boundary non-terminal:
@@ -847,7 +891,7 @@ void PhraseOrientationFeature::SparseNonTerminalL2RScore(const Factor* nonTermin
     ScoreComponentCollection* scoreBreakdown,
     const std::string* o) const
 {
-  if ( nonTerminalSymbol != m_glueTargetLHS ) {
+  if ( nonTerminalSymbol != m_glueLabel ) {
     const std::string& nonTerminalString = nonTerminalSymbol->GetString().as_string();
     scoreBreakdown->PlusEquals(this,
                                "L2R"+*o+"_n_"+nonTerminalString,
@@ -861,7 +905,7 @@ void PhraseOrientationFeature::SparseNonTerminalR2LScore(const Factor* nonTermin
     ScoreComponentCollection* scoreBreakdown,
     const std::string* o) const
 {
-  if ( nonTerminalSymbol != m_glueTargetLHS ) {
+  if ( nonTerminalSymbol != m_glueLabel ) {
     const std::string& nonTerminalString = nonTerminalSymbol->GetString().as_string();
     scoreBreakdown->PlusEquals(this,
                                "R2L"+*o+"_n_"+nonTerminalString,
@@ -871,17 +915,17 @@ void PhraseOrientationFeature::SparseNonTerminalR2LScore(const Factor* nonTermin
 }
 
 
-const std::string* PhraseOrientationFeature::ToString(const MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS o) const
+const std::string* PhraseOrientationFeature::ToString(const MosesTraining::PhraseOrientation::REO_CLASS o) const
 {
-  if ( o == MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_LEFT ) {
+  if ( o == MosesTraining::PhraseOrientation::REO_CLASS_LEFT ) {
     return &MORIENT;
 
-  } else if ( o == MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_RIGHT ) {
+  } else if ( o == MosesTraining::PhraseOrientation::REO_CLASS_RIGHT ) {
     return &SORIENT;
 
-  } else if ( ( o == MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_DLEFT ) ||
-              ( o == MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_DRIGHT ) ||
-              ( o == MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS_UNKNOWN ) ) {
+  } else if ( ( o == MosesTraining::PhraseOrientation::REO_CLASS_DLEFT ) ||
+              ( o == MosesTraining::PhraseOrientation::REO_CLASS_DRIGHT ) ||
+              ( o == MosesTraining::PhraseOrientation::REO_CLASS_UNKNOWN ) ) {
     return &DORIENT;
 
   } else {

@@ -16,6 +16,7 @@
 #include "CloseSession.h"
 #include "Session.h"
 #include "moses/parameters/ServerOptions.h"
+#include <string>
 
 namespace MosesServer
 {
@@ -28,9 +29,10 @@ namespace MosesServer
     xmlrpc_c::methodPtr const m_optimizer;
     xmlrpc_c::methodPtr const m_translator;
     xmlrpc_c::methodPtr const m_close_session;
+    std::string m_pidfile;
   public:
     Server(Moses::Parameter& params);
-
+    ~Server();
     int run();
     void delete_session(uint64_t const session_id);
 

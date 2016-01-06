@@ -25,7 +25,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "HypothesisStackNormal.h"
 #include "TypeDef.h"
 #include "Util.h"
-#include "StaticData.h"
 #include "Manager.h"
 #include "util/exception.hh"
 
@@ -36,7 +35,7 @@ namespace Moses
 HypothesisStackNormal::HypothesisStackNormal(Manager& manager) :
   HypothesisStack(manager)
 {
-  m_nBestIsEnabled = manager.options().nbest.enabled;
+  m_nBestIsEnabled = manager.options()->nbest.enabled;
   m_bestScore = -std::numeric_limits<float>::infinity();
   m_worstScore = -std::numeric_limits<float>::infinity();
 }
@@ -75,8 +74,12 @@ pair<HypothesisStackNormal::iterator, bool> HypothesisStackNormal::Add(Hypothesi
     // prune only if stack is twice as big as needed (lazy pruning)
     size_t toleratedSize = 2*m_maxHypoStackSize-1;
     // add in room for stack diversity
-    if (m_minHypoStackDiversity)
-      toleratedSize += m_minHypoStackDiversity << StaticData::Instance().GetMaxDistortion();
+    if (m_minHypoStackDiversity) {
+      // so what happens if maxdistortion is negative?
+      toleratedSize += m_minHypoStackDiversity
+                       << m_manager.options()->reordering.max_distortion;
+    }
+
     if (m_hypos.size() > toleratedSize) {
       PruneToSize(m_maxHypoStackSize);
     } else {
@@ -97,8 +100,8 @@ bool HypothesisStackNormal::AddPrune(Hypothesis *hypo)
   }
 
   // too bad for stack. don't bother adding hypo into collection
-  if (!StaticData::Instance().GetDisableDiscarding() &&
-      hypo->GetFutureScore() < m_worstScore
+  if (m_manager.options()->search.disable_discarding == false
+      && hypo->GetFutureScore() < m_worstScore
       && ! ( m_minHypoStackDiversity > 0
              && hypo->GetFutureScore() >= GetWorstScoreForBitmap( hypo->GetWordsBitmap() ) ) ) {
     m_manager.GetSentenceStats().AddDiscarded();
@@ -266,7 +269,7 @@ void HypothesisStackNormal::CleanupArcList()
   iterator iter;
   for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter) {
     Hypothesis *mainHypo = *iter;
-    mainHypo->CleanupArcList(this->m_manager.options().nbest.nbest_size, this->m_manager.options().NBestDistinct());
+    mainHypo->CleanupArcList(this->m_manager.options()->nbest.nbest_size, this->m_manager.options()->NBestDistinct());
   }
 }
 

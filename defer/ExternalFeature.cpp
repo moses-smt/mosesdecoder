@@ -15,7 +15,7 @@ ExternalFeatureState::ExternalFeatureState(int stateSize, void *data)
   memcpy(m_data, data, stateSize);
 }
 
-void ExternalFeature::Load()
+void ExternalFeature::Load(AllOptions const& opts)
 {
   string nparam = "testing";
 

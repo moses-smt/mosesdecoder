@@ -4,6 +4,12 @@
 namespace Moses
 {
   AllOptions::
+  AllOptions()
+    : mira(false)
+    , use_legacy_pt(false)
+  { }
+
+  AllOptions::
   AllOptions(Parameter const& param)
   {
     init(param);
@@ -23,6 +29,7 @@ namespace Moses
     if (!lmbr.init(param))       return false;
     if (!output.init(param))     return false;
     if (!unk.init(param))        return false;
+    if (!syntax.init(param))     return false;
 
     param.SetParameter(mira, "mira", false);
 
@@ -91,6 +98,7 @@ namespace Moses
     if (!lmbr.update(param))       return false;
     if (!output.update(param))     return false;
     if (!unk.update(param))        return false;
+    if (!syntax.update(param))     return false;
     return sanity_check();
   }
 #endif

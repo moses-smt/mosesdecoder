@@ -44,6 +44,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/TargetPhraseCollection.h"
 #include "moses/InputPath.h"
 #include "moses/FF/DecodeFeature.h"
+#include "moses/ContextScope.h"
 
 namespace Moses
 {
@@ -58,15 +59,6 @@ class ChartParser;
 // typedef std::pair<TargetPhraseCollection::shared_ptr, clock_t> TPCollLastUse;
 typedef std::pair<TargetPhraseCollection::shared_ptr, clock_t> CacheCollEntry;
 typedef boost::unordered_map<size_t, CacheCollEntry> CacheColl;
-// class CacheColl : public boost::unordered_map<size_t, TPCollLastUse>
-// {
-// // 1st = hash of source phrase/ address of phrase-table node
-// // 2nd = all translations
-// // 3rd = time of last access
-
-// public:
-//   ~CacheColl();
-// };
 
 /**
   * Abstract base class for phrase dictionaries (tables).

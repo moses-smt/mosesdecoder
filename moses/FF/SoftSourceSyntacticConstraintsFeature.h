@@ -31,7 +31,7 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase

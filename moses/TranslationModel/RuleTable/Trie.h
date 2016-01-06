@@ -46,7 +46,7 @@ public:
 
   virtual ~RuleTableTrie();
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
 private:
   friend class RuleTableLoader;

@@ -99,7 +99,7 @@ private:
   Model1LexicalTable m_model1;
   const Factor* m_emptyWord;
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   // cache
   mutable boost::unordered_map<const InputType*, boost::unordered_map<const Factor*, float> > m_cache;
