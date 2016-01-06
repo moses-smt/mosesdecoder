@@ -114,6 +114,12 @@ void MiniStack::SortAndPruneHypos(const Manager &mgr) const
 
 }
 
+void MiniStack::Clear()
+{
+	m_sortedHypos = NULL;
+	m_coll.clear();
+}
+
 ///////////////////////////////////////////////////////////////
 Stack::Stack(const Manager &mgr)
 :m_mgr(mgr)
@@ -169,13 +175,31 @@ MiniStack &Stack::GetMiniStack(const HypoCoverage &key)
 	MiniStack *ret;
 	Coll::iterator iter = m_coll.find(key);
 	if (iter == m_coll.end()) {
-		ret = new (m_mgr.GetPool().Allocate<MiniStack>()) MiniStack(m_mgr);
+		if (m_miniStackRecycler.empty()) {
+			ret = new (m_mgr.GetPool().Allocate<MiniStack>()) MiniStack(m_mgr);
+		}
+		else {
+			ret = m_miniStackRecycler.back();
+			ret->Clear();
+			m_miniStackRecycler.pop_back();
+		}
+
 		m_coll[key] = ret;
 	}
 	else {
 		ret = iter->second;
 	}
 	return *ret;
+}
+
+void Stack::Clear()
+{
+	BOOST_FOREACH(const Coll::value_type &val, m_coll) {
+		MiniStack *miniStack = val.second;
+		m_miniStackRecycler.push_back(miniStack);
+	}
+
+	m_coll.clear();
 }
 
 }

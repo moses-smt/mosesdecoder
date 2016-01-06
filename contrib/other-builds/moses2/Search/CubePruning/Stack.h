@@ -43,6 +43,8 @@ public:
 	const _HCType &GetColl() const
 	{ return m_coll; }
 
+	void Clear();
+
 	CubeEdge::Hypotheses &GetSortedAndPruneHypos(const Manager &mgr) const;
 
 protected:
@@ -80,14 +82,13 @@ public:
 	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
 
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
-	void Clear()
-	{
-		m_coll.clear();
-	}
+	void Clear();
 
 protected:
 	const Manager &m_mgr;
 	Coll m_coll;
+
+	std::deque<MiniStack*> m_miniStackRecycler;
 
 	MiniStack &GetMiniStack(const HypoCoverage &key);
 
