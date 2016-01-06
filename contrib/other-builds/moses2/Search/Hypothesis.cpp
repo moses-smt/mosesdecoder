@@ -158,6 +158,10 @@ void Hypothesis::OutputToStream(std::ostream &out) const
 	  const Phrase &phrase = GetTargetPhrase();
 	  out << phrase << " ";
   }
+
+  if (m_mgr->system.reportSegmentation && m_path->range.GetStartPos() != NOT_FOUND) {
+	  out << "|"  << m_path->range.GetStartPos() << "-" << m_path->range.GetEndPos() << "| ";
+  }
 }
 
 std::ostream& operator<<(std::ostream &out, const Hypothesis &obj)

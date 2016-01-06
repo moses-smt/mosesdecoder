@@ -36,6 +36,9 @@ System::System(const Parameter &paramsArg)
     params.SetParameter(cpuAffinityOffset, "cpu-affinity-offset",
 		       0);
 
+    params.SetParameter(reportSegmentation, "report-segmentation",
+		       false);
+
     params.SetParameter(outputHypoScore, "output-hypo-score",
 		       false);
 
