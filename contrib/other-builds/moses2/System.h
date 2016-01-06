@@ -55,7 +55,7 @@ public:
     bool onlyDistinct;
 
     bool outputHypoScore;
-    bool reportSegmentation;
+    int reportSegmentation;
     int cpuAffinityOffset;
 
 	System(const Parameter &paramsArg);

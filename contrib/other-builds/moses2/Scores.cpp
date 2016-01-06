@@ -228,15 +228,17 @@ void Scores::CreateFromString(const std::string &str,
 
 void Scores::Debug(std::ostream &out, const System &system) const
 {
+	out << "total=" << m_total;
+
 	if (system.nbestSize) {
+	  out << ", ";
 	  BOOST_FOREACH(const FeatureFunction *ff, system.featureFunctions.GetFeatureFunctions()) {
-		  out << ff->GetName() << ":";
+		  out << ff->GetName() << "= ";
 		  for (size_t i = ff->GetStartInd(); i < (ff->GetStartInd() + ff->GetNumScores()); ++i) {
 			out << m_scores[i] << " ";
 		  }
 	  }
 	}
-	out << "= " << m_total;
 }
 
 std::ostream& operator<<(std::ostream &out, const Scores &obj)

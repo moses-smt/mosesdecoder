@@ -159,8 +159,23 @@ void Hypothesis::OutputToStream(std::ostream &out) const
 	  out << phrase << " ";
   }
 
-  if (m_mgr->system.reportSegmentation && m_path->range.GetStartPos() != NOT_FOUND) {
-	  out << "|"  << m_path->range.GetStartPos() << "-" << m_path->range.GetEndPos() << "| ";
+  if (m_path->range.GetStartPos() != NOT_FOUND) {
+	  if (m_mgr->system.reportSegmentation == 1) {
+		  // just report phrase segmentation
+		  out << "|"  << m_path->range.GetStartPos() << "-" << m_path->range.GetEndPos() << "| ";
+	  }
+	  else if (m_mgr->system.reportSegmentation == 2) {
+		  // more detailed info about every segment
+		  out << "|";
+
+		  // phrase segmentation
+		  out << m_path->range.GetStartPos() << "-" << m_path->range.GetEndPos() << ",";
+
+		  // score breakdown
+		  m_scores->Debug(out, m_mgr->system);
+
+		  out << "| ";
+	  }
   }
 }
 
