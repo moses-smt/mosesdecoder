@@ -33,7 +33,7 @@ public:
 	const Hypothesis *GetBestHypothesis() const;
 
 protected:
-	Stacks m_stacks;
+	Stack m_stack;
 
 	CubeEdge::Queue m_queue;
 	CubeEdge::SeenPositions m_seenPositions;
