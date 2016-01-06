@@ -9,7 +9,7 @@
 #include <boost/pool/pool_alloc.hpp>
 #include "../Search.h"
 #include "Misc.h"
-#include "Stacks.h"
+#include "Stack.h"
 #include "../../legacy/Range.h"
 
 namespace Moses2
