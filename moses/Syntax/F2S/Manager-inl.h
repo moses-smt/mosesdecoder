@@ -57,8 +57,6 @@ Manager<RuleMatcher>::Manager(ttasksptr const& ttask)
 template<typename RuleMatcher>
 void Manager<RuleMatcher>::Decode()
 {
-  const StaticData &staticData = StaticData::Instance();
-
   // Get various pruning-related constants.
   const std::size_t popLimit = options()->cube.pop_limit;
   const std::size_t ruleLimit = options()->syntax.rule_limit;

@@ -160,8 +160,6 @@ void Manager<Parser>::FindOovs(const PChart &pchart, boost::unordered_set<Word> 
 template<typename Parser>
 void Manager<Parser>::Decode()
 {
-  const StaticData &staticData = StaticData::Instance();
-
   // Get various pruning-related constants.
   const std::size_t popLimit = options()->cube.pop_limit;
   const std::size_t ruleLimit = options()->syntax.rule_limit;

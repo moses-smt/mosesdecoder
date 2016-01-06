@@ -1455,7 +1455,6 @@ SentenceStats& Manager::GetSentenceStats() const
 
 void Manager::OutputBest(OutputCollector *collector)  const
 {
-  const StaticData &staticData = StaticData::Instance();
   long translationId = m_source.GetTranslationId();
 
   Timer additionalReportingTime;

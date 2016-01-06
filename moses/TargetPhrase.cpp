@@ -68,8 +68,6 @@ TargetPhrase::TargetPhrase(ttasksptr& ttask, std::string out_string, const Phras
 {
   if (ttask) m_scope = ttask->GetScope();
 
-  //ACAT
-  const StaticData &staticData = StaticData::Instance();
   // XXX should this really be InputFactorOrder???
   CreateFromString(Output, ttask->options()->input.factor_order, out_string,
                    NULL);
@@ -128,12 +126,12 @@ TargetPhrase::TargetPhrase(const Phrase &phrase, const PhraseDictionary *pt)
 TargetPhrase::TargetPhrase(const TargetPhrase &copy)
   : Phrase(copy)
   , m_cached_scores(copy.m_cached_scores)
+  , m_scope(copy.m_scope)
   , m_futureScore(copy.m_futureScore)
   , m_estimatedScore(copy.m_estimatedScore)
   , m_scoreBreakdown(copy.m_scoreBreakdown)
   , m_alignTerm(copy.m_alignTerm)
   , m_alignNonTerm(copy.m_alignNonTerm)
-  , m_scope(copy.m_scope)
   , m_properties(copy.m_properties)
   , m_container(copy.m_container)
 {
