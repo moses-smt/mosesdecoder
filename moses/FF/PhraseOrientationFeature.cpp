@@ -84,6 +84,8 @@ PhraseOrientationFeature::PhraseOrientationFeature(const std::string &line)
   : StatefulFeatureFunction(6, line)
   , m_glueLabelStr("Q")
   , m_distinguishStates(false)
+  , m_lookaheadScore(true)
+  , m_heuristicScoreUseWeights(true)
   , m_useSparseWord(false)
   , m_useSparseNT(false)
   , m_offsetR2LScores(m_numScoreComponents/2)
@@ -104,6 +106,10 @@ void PhraseOrientationFeature::SetParameter(const std::string& key, const std::s
     m_glueLabelStr = value;
   } else if (key == "distinguish-states") {
     m_distinguishStates = Scan<bool>(value);
+  } else if (key == "lookahead-score") {
+    m_lookaheadScore = Scan<bool>(value);
+  } else if (key == "heuristic-score-use-weights") {
+    m_heuristicScoreUseWeights = Scan<bool>(value);
   } else if (key == "sparse-word") {
     m_useSparseWord = Scan<bool>(value);
   } else if (key == "sparse-nt") {
@@ -156,10 +162,13 @@ void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source,
     ScoreComponentCollection &estimatedScores) const
 {
   targetPhrase.SetRuleSource(source);
+  const Factor* targetPhraseLHS = targetPhrase.GetTargetLHS()[0];
 
   if (const PhraseProperty *property = targetPhrase.GetProperty("Orientation")) {
     const OrientationPhraseProperty *orientationPhraseProperty = static_cast<const OrientationPhraseProperty*>(property);
-    LookaheadScore(orientationPhraseProperty, scoreBreakdown);
+    if (m_lookaheadScore) {
+      LookaheadScore(orientationPhraseProperty, scoreBreakdown, targetPhraseLHS);
+    }
   } else {
     // abort with error message if the phrase does not translate an unknown word
     UTIL_THROW_IF2(!targetPhrase.GetWord(0).IsOOV(), GetScoreProducerDescription()
@@ -188,13 +197,11 @@ void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source,
 
     // Initialize phrase orientation scoring object
     MosesTraining::PhraseOrientation phraseOrientation(source.GetSize(), targetPhrase.GetSize(),
-        targetPhrase.GetAlignTerm(), targetPhrase.GetAlignNonTerm());
+                                                       targetPhrase.GetAlignTerm(), targetPhrase.GetAlignNonTerm());
 
     PhraseOrientationFeature::ReoClassData* reoClassData = new PhraseOrientationFeature::ReoClassData();
 
     // Determine orientation classes of non-terminals
-
-    const Factor* targetPhraseLHS = targetPhrase.GetTargetLHS()[0];
 
     for (AlignmentInfo::const_iterator it=targetPhrase.GetAlignNonTerm().begin();
          it!=targetPhrase.GetAlignNonTerm().end(); ++it) {
@@ -272,6 +279,7 @@ void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source,
 
 void PhraseOrientationFeature::LookaheadScore(const OrientationPhraseProperty *orientationPhraseProperty,
     ScoreComponentCollection &scoreBreakdown,
+    const Factor* targetPhraseLHS,
     bool subtract) const
 {
   size_t ffScoreIndex = m_index;
@@ -280,7 +288,10 @@ void PhraseOrientationFeature::LookaheadScore(const OrientationPhraseProperty *o
   scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityMono()) );
   scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilitySwap()) );
   scoresL2R.push_back( TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous()) );
-  size_t heuristicScoreIndexL2R = GetHeuristicScoreIndex(scoresL2R, 0);
+  size_t heuristicScoreIndexL2R = 0;
+  if (targetPhraseLHS != m_glueLabel) {
+    heuristicScoreIndexL2R = GetHeuristicScoreIndex(scoresL2R, 0);
+  }
 
   if (subtract) {
     scoreBreakdown.PlusEquals(ffScoreIndex+heuristicScoreIndexL2R,
@@ -294,7 +305,10 @@ void PhraseOrientationFeature::LookaheadScore(const OrientationPhraseProperty *o
   scoresR2L.push_back( TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityMono()) );
   scoresR2L.push_back( TransformScore(orientationPhraseProperty->GetRightToLeftProbabilitySwap()) );
   scoresR2L.push_back( TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous()) );
-  size_t heuristicScoreIndexR2L = GetHeuristicScoreIndex(scoresR2L, m_offsetR2LScores);
+  size_t heuristicScoreIndexR2L = 0;
+  if (targetPhraseLHS != m_glueLabel) {
+    heuristicScoreIndexR2L = GetHeuristicScoreIndex(scoresR2L, m_offsetR2LScores);
+  }
 
   if (subtract) {
     scoreBreakdown.PlusEquals(ffScoreIndex+m_offsetR2LScores+heuristicScoreIndexR2L,
@@ -380,7 +394,9 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
                      << " R2L_Dleft "  << orientationPhraseProperty->GetRightToLeftProbabilityDleft()
                      << std::endl);
 
-      LookaheadScore(orientationPhraseProperty, *accumulator, true);
+      if (m_lookaheadScore) {
+        LookaheadScore(orientationPhraseProperty, *accumulator, prevTarPhrLHS, true);
+      }
 
       const PhraseOrientationFeatureState* prevState =
         static_cast<const PhraseOrientationFeatureState*>(prevHypo->GetFFState(featureID));
@@ -609,19 +625,27 @@ size_t PhraseOrientationFeature::GetHeuristicScoreIndex(const std::vector<float>
     size_t weightsVectorOffset,
     const std::bitset<3> possibleFutureOrientations) const
 {
-  if (m_weightsVector.empty()) {
-    m_weightsVector = StaticData::Instance().GetAllWeights().GetScoresForProducer(this);
-  }
   std::vector<float> weightedScores;
-  for ( size_t i=0; i<3; ++i ) {
-    weightedScores.push_back( m_weightsVector[weightsVectorOffset+i] * scores[i] );
+  if (m_heuristicScoreUseWeights) {
+    if (m_weightsVector.empty()) {
+      m_weightsVector = StaticData::Instance().GetAllWeights().GetScoresForProducer(this);
+    }
+    for ( size_t i=0; i<3; ++i ) {
+      weightedScores.push_back( m_weightsVector[weightsVectorOffset+i] * scores[i] );
+    }
   }
 
   size_t heuristicScoreIndex = 0;
   for (size_t i=1; i<3; ++i) {
     if (possibleFutureOrientations[i]) {
-      if (weightedScores[i] > weightedScores[heuristicScoreIndex]) {
-        heuristicScoreIndex = i;
+      if (m_heuristicScoreUseWeights) {
+        if (weightedScores[i] > weightedScores[heuristicScoreIndex]) {
+          heuristicScoreIndex = i;
+        }
+      } else {
+        if (scores[i] > scores[heuristicScoreIndex]) {
+          heuristicScoreIndex = i;
+        }
       }
     }
   }
@@ -630,11 +654,13 @@ size_t PhraseOrientationFeature::GetHeuristicScoreIndex(const std::vector<float>
     FEATUREVERBOSE(5, "Heuristic score computation: "
                    << "heuristicScoreIndex== " << heuristicScoreIndex);
     for (size_t i=0; i<3; ++i)
-      FEATUREVERBOSE2(5, " m_weightsVector[" << weightsVectorOffset+i << "]== " << m_weightsVector[weightsVectorOffset+i]);
-    for (size_t i=0; i<3; ++i)
       FEATUREVERBOSE2(5, " scores[" << i << "]== " << scores[i]);
-    for (size_t i=0; i<3; ++i)
-      FEATUREVERBOSE2(5, " weightedScores[" << i << "]== " << weightedScores[i]);
+    if (m_heuristicScoreUseWeights) {
+      for (size_t i=0; i<3; ++i)
+        FEATUREVERBOSE2(5, " m_weightsVector[" << weightsVectorOffset+i << "]== " << m_weightsVector[weightsVectorOffset+i]);
+      for (size_t i=0; i<3; ++i)
+        FEATUREVERBOSE2(5, " weightedScores[" << i << "]== " << weightedScores[i]);
+    }
     for (size_t i=0; i<3; ++i)
       FEATUREVERBOSE2(5, " possibleFutureOrientations[" << i << "]== " << possibleFutureOrientations[i]);
     if ( possibleFutureOrientations == 0x7 ) {
