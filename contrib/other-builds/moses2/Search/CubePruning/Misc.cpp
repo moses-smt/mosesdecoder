@@ -19,6 +19,33 @@ namespace NSCubePruning
 {
 
 ////////////////////////////////////////////////////////////////////////
+QueueItem *QueueItem::Create(QueueItem *currItem,
+		Manager &mgr,
+		CubeEdge &edge,
+		size_t hypoIndex,
+		size_t tpIndex,
+		std::deque<QueueItem*> &queueItemRecycler)
+{
+	QueueItem *ret;
+	if (currItem) {
+		// reuse incoming queue item to create new item
+		ret = currItem;
+		ret->Init(mgr, edge, hypoIndex, tpIndex);
+	}
+	else if (!queueItemRecycler.empty()) {
+		// use item from recycle bin
+		ret = queueItemRecycler.back();
+		ret->Init(mgr, edge, hypoIndex, tpIndex);
+		queueItemRecycler.pop_back();
+	}
+	else {
+		// create new item
+		ret = new (mgr.GetPool().Allocate<QueueItem>()) QueueItem(mgr, edge, hypoIndex, tpIndex);
+	}
+
+	return ret;
+}
+
 QueueItem::QueueItem(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex)
 :edge(&edge)
 ,hypoIndex(hypoIndex)
@@ -83,16 +110,18 @@ CubeEdge::SetSeenPosition(const size_t x, const size_t y, SeenPositions &seenPos
   return pairRet.second;
 }
 
-void CubeEdge::CreateFirst(Manager &mgr, Queue &queue, SeenPositions &seenPositions)
+void CubeEdge::CreateFirst(Manager &mgr,
+		Queue &queue,
+		SeenPositions &seenPositions,
+		std::deque<QueueItem*> &queueItemRecycler)
 {
 	assert(hypos.size());
 	assert(tps.GetSize());
 
-    MemPool &pool = mgr.GetPool();
-
-	QueueItem *item = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, 0, 0);
+	QueueItem *item = QueueItem::Create(NULL, mgr, *this, 0, 0, queueItemRecycler);
 	queue.push(item);
-	SetSeenPosition(0, 0, seenPositions);
+	bool setSeen = SetSeenPosition(0, 0, seenPositions);
+	assert(setSeen);
 }
 
 void CubeEdge::CreateNext(Manager &mgr,
@@ -101,40 +130,25 @@ void CubeEdge::CreateNext(Manager &mgr,
 		SeenPositions &seenPositions,
 		std::deque<QueueItem*> &queueItemRecycler)
 {
-    MemPool &pool = mgr.GetPool();
-
     size_t hypoIndex = item->hypoIndex;
 	size_t tpIndex = item->tpIndex;
 
 	if (hypoIndex + 1 < hypos.size() && SetSeenPosition(hypoIndex + 1, tpIndex, seenPositions)) {
 		// reuse incoming queue item to create new item
-		item->Init(mgr, *this, hypoIndex + 1, tpIndex);
-		queue.push(item);
+		QueueItem *newItem = QueueItem::Create(item, mgr, *this, hypoIndex + 1, tpIndex, queueItemRecycler);
+		assert(newItem == item);
+		queue.push(newItem);
 		item = NULL;
 	}
 
 	if (tpIndex + 1 < tps.GetSize() && SetSeenPosition(hypoIndex, tpIndex + 1, seenPositions)) {
-		if (item) {
-			// reuse incoming queue item to create new item
-			item->Init(mgr, *this, hypoIndex, tpIndex + 1);
-		}
-		else if (!queueItemRecycler.empty()) {
-			// use item from recycle bin
-			item = queueItemRecycler.back();
-			item->Init(mgr, *this, hypoIndex, tpIndex + 1);
-			queueItemRecycler.pop_back();
-		}
-		else {
-			// create new item
-			item = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, hypoIndex, tpIndex + 1);
-		}
-
-		queue.push(item);
+		QueueItem *newItem = QueueItem::Create(item, mgr, *this, hypoIndex, tpIndex + 1, queueItemRecycler);
+		queue.push(newItem);
 		item = NULL;
 	}
 
 	if (item) {
-		// recycle unsued queue item
+		// recycle unused queue item
 		queueItemRecycler.push_back(item);
 	}
 }

@@ -88,7 +88,9 @@ void Search::Decode(size_t stackInd)
 {
 	Recycler<Hypothesis*> &hypoRecycler  = m_mgr.GetHypoRecycle();
 
+	// reuse queue from previous stack. Clear it first
 	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > &container = Container(m_queue);
+	//cerr << "container=" << container.size() << endl;
 	BOOST_FOREACH(QueueItem *item, container) {
 		// recycle unused hypos from queue
 		Hypothesis *hypo = item->hypo;
@@ -108,19 +110,8 @@ void Search::Decode(size_t stackInd)
 
 	BOOST_FOREACH(CubeEdge *edge, edges) {
 		//cerr << "edge=" << *edge << endl;
-		edge->CreateFirst(m_mgr, m_queue, m_seenPositions);
+		edge->CreateFirst(m_mgr, m_queue, m_seenPositions, m_queueItemRecycler);
 	}
-
-	/*
-	cerr << "queue:" << endl;
-	vector<QueueItem*> &queueContainer = Container(queue);
-	for (size_t i = 0; i < queueContainer.size(); ++i) {
-		QueueItem *item = queueContainer[i];
-		Hypothesis *hypo = item->hypo;
-		cerr << *hypo << endl;
-	}
-	cerr << endl;
-	*/
 
 	size_t pops = 0;
 	while (!m_queue.empty() && pops < m_mgr.system.popLimit) {

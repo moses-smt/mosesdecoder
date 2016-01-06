@@ -32,6 +32,12 @@ class QueueItem
 {
 	~QueueItem(); // NOT IMPLEMENTED. Use MemPool
 public:
+	static QueueItem *Create(QueueItem *currItem,
+			Manager &mgr,
+			CubeEdge &edge,
+			size_t hypoIndex,
+			size_t tpIndex,
+			std::deque<QueueItem*> &queueItemRecycler);
 	QueueItem(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex);
 
 	void Init(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex);
@@ -85,7 +91,10 @@ public:
 
   bool SetSeenPosition(const size_t x, const size_t y, SeenPositions &seenPositions) const;
 
-  void CreateFirst(Manager &mgr, Queue &queue, SeenPositions &seenPositions);
+  void CreateFirst(Manager &mgr,
+		  Queue &queue,
+		  SeenPositions &seenPositions,
+		  std::deque<QueueItem*> &queueItemRecycler);
   void CreateNext(Manager &mgr,
 		  QueueItem *item,
 		  Queue &queue,
