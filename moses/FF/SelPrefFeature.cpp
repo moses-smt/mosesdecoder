@@ -25,10 +25,8 @@ using namespace std;
 namespace Moses
 {
 
-float SelPrefFeature::score = 0.0;
-
 SelPrefFeature::SelPrefFeature(const std::string &line)
-  : StatefulFeatureFunction(1, line)
+  : StatefulFeatureFunction(2, line)
 	, m_modelFileARPA("")
 	, m_lemmaFile("")
 	, m_WBmodel(nullptr)
@@ -502,9 +500,10 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 		//cout << "Hash value: " << depRelHash << endl;
 
 		// Compute feature function scores
-		float score =0.0;
+		float tuplesCounter = depRelTuples.size()*1.0;
+		float scoreWB =0.0;
 		for (auto &tuple: depRelTuples){
-			score += GetWBScore(tuple);
+			scoreWB += GetWBScore(tuple);
 	/*		for (auto &elem: tuple)
 				cout << elem << " ";
 			cout <<endl;
@@ -532,8 +531,8 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 		//if(*tree == "[sent [root [VB] [^root [dobj] [^root [prep [IN in]] [^root [prep] [punct [. .]]]]]]]")
 		//	exit(0);
 
-
-		accumulator->PlusEquals(this,score);
+		vector<float> scores = {scoreWB, tuplesCounter};
+		accumulator->PlusEquals(this,scores);
 
 
 		return new SelPrefState(mytree, depRelHash);
