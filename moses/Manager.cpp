@@ -1455,7 +1455,6 @@ SentenceStats& Manager::GetSentenceStats() const
 
 void Manager::OutputBest(OutputCollector *collector)  const
 {
-  const StaticData &staticData = StaticData::Instance();
   long translationId = m_source.GetTranslationId();
 
   Timer additionalReportingTime;
@@ -1505,7 +1504,7 @@ void Manager::OutputBest(OutputCollector *collector)  const
         OutputSurface(out,*bestHypo, true);
         if (options()->output.PrintAlignmentInfo) {
           out << "||| ";
-          bestHypo->OutputAlignment(out, true); 
+          bestHypo->OutputAlignment(out, true);
         }
 
         IFVERBOSE(1) {

@@ -126,7 +126,6 @@ bool
 StaticData
 ::ini_output_options()
 {
-  const PARAM_VEC *params;
   // verbose level
   m_parameter->SetParameter(m_verboseLevel, "verbose", (size_t) 1);
   m_parameter->SetParameter<string>(m_outputUnknownsFile,

@@ -101,6 +101,9 @@ parser.add_argument(
 parser.add_argument(
     "--extra-settings", dest="extra_settings",
     help="Extra settings for nplm")
+parser.add_argument(
+    "--train-host", dest="train_host",
+    help="Execute nplm training on this host, via ssh")
 
 parser.set_defaults(
     working_dir="working",
@@ -143,7 +146,10 @@ def main(options):
     if options.mmap:
         train_file += '.mmap'
 
-    extraction_cmd = [
+    extraction_cmd = []
+    if options.train_host:
+      extraction_cmd = ["ssh", options.train_host]
+    extraction_cmd += [
         os.path.join(options.nplm_home, 'src', 'prepareNeuralLM'),
         '--train_text', options.corpus_stem,
         '--ngramize', '1',
@@ -183,7 +189,10 @@ def main(options):
             os.remove(os.path.join(options.working_dir, train_file))
         except OSError:
             pass
-        mmap_cmd = [
+        mmap_cmd = []
+        if options.train_host:
+          mmap_cmd = ["ssh", options.train_host]
+        mmap_cmd += [
             os.path.join(options.nplm_home, 'src', 'createMmap'),
             '--input_file',
             os.path.join(options.working_dir, numberized_file),
@@ -198,7 +207,10 @@ def main(options):
 
     if options.validation_corpus:
 
-        extraction_cmd = [
+        extraction_cmd = []
+        if options.train_host:
+          extraction_cmd = ["ssh", options.train_host]
+        extraction_cmd += [
             os.path.join(options.nplm_home, 'src', 'prepareNeuralLM'),
             '--train_text', options.validation_corpus,
             '--ngramize', '1',

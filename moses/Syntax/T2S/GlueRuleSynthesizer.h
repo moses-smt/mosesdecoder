@@ -19,8 +19,8 @@ class GlueRuleSynthesizer : public RuleTrieCreator
   Word m_output_default_nonterminal;
 public:
   GlueRuleSynthesizer(RuleTrie &trie, Word dflt_nonterm)
-    : m_ruleTrie(trie)
-    , m_output_default_nonterminal(dflt_nonterm)
+    : m_output_default_nonterminal(dflt_nonterm)
+    , m_ruleTrie(trie)
   {}
 
   // Synthesize the minimal, montone rule that can be applied to the given node

@@ -1165,7 +1165,7 @@ void writeGlueGrammar( const string & fileName, RuleExtractionOptions &options, 
   grammarFile.open(fileName.c_str());
   std::string glueRulesPhraseProperty = "";
   if (options.phraseOrientation) {
-    glueRulesPhraseProperty.append(" ||| ||| {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}");
+    glueRulesPhraseProperty.append(" ||| ||| {{Orientation 1 1 0.5 0.5 1 1 0.5 0.5}}");
   }
   if (!options.targetSyntax) {
     grammarFile << "<s> [X] ||| <s> [S] ||| 1 ||| 0-0 ||| 0" << glueRulesPhraseProperty << endl

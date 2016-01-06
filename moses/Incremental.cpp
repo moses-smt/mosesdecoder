@@ -327,7 +327,6 @@ OutputNBestList(OutputCollector *collector,
                 std::vector<search::Applied> const& nbest,
                 long translationId) const
 {
-  const StaticData &staticData = StaticData::Instance();
   const std::vector<Moses::FactorType> &outputFactorOrder
   = options()->output.factor_order;
 
