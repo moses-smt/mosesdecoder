@@ -176,8 +176,6 @@ MiniStack &Stack::GetMiniStack(const HypoCoverage &key)
 		ret = iter->second;
 	}
 	return *ret;
-
-	//return m_coll[key];
 }
 
 }

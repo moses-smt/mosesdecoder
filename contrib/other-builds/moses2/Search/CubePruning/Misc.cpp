@@ -107,6 +107,7 @@ void CubeEdge::CreateNext(Manager &mgr,
 	size_t tpIndex = item->tpIndex;
 
 	if (hypoIndex + 1 < hypos.size() && SetSeenPosition(hypoIndex + 1, tpIndex, seenPositions)) {
+		// reuse incoming queue item to create new item
 		item->Init(mgr, *this, hypoIndex + 1, tpIndex);
 		queue.push(item);
 		item = NULL;
@@ -114,14 +115,17 @@ void CubeEdge::CreateNext(Manager &mgr,
 
 	if (tpIndex + 1 < tps.GetSize() && SetSeenPosition(hypoIndex, tpIndex + 1, seenPositions)) {
 		if (item) {
+			// reuse incoming queue item to create new item
 			item->Init(mgr, *this, hypoIndex, tpIndex + 1);
 		}
 		else if (!queueItemRecycler.empty()) {
+			// use item from recycle bin
 			item = queueItemRecycler.back();
 			item->Init(mgr, *this, hypoIndex, tpIndex + 1);
 			queueItemRecycler.pop_back();
 		}
 		else {
+			// create new item
 			item = new (pool.Allocate<QueueItem>()) QueueItem(mgr, *this, hypoIndex, tpIndex + 1);
 		}
 
@@ -130,6 +134,7 @@ void CubeEdge::CreateNext(Manager &mgr,
 	}
 
 	if (item) {
+		// recycle unsued queue item
 		queueItemRecycler.push_back(item);
 	}
 }

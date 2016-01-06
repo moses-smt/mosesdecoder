@@ -88,12 +88,13 @@ void Search::Decode(size_t stackInd)
 {
 	Recycler<Hypothesis*> &hypoRecycler  = m_mgr.GetHypoRecycle();
 
-	// add unused hypos from queue into recycler
 	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > &container = Container(m_queue);
 	BOOST_FOREACH(QueueItem *item, container) {
+		// recycle unused hypos from queue
 		Hypothesis *hypo = item->hypo;
 		hypoRecycler.Recycle(hypo);
 
+		// recycle queue item
 		m_queueItemRecycler.push_back(item);
 	}
 	container.clear();
