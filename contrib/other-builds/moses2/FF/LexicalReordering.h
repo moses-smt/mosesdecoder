@@ -61,8 +61,6 @@ protected:
   FactorList m_FactorsE;
   FactorList m_FactorsC;
 
-  std::string GetProperty(const char *properties, const std::string &key) const;
-
   virtual void
   EvaluateAfterTablePruning(MemPool &pool,
 		  const TargetPhrase &targetPhrase,

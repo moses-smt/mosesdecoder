@@ -254,32 +254,9 @@ const LexicalReordering::Values *LexicalReordering::GetValues(const Phrase &sour
 	}
 }
 
-std::string LexicalReordering::GetProperty(const char *properties, const std::string &key) const
-{
-	string ret;
-	if (properties == NULL) {
-		return ret;
-	}
-
-	string propStr(properties);
-
-	size_t start = propStr.find("{{" + key + " ");
-	if (start == propStr.npos) {
-		// do nothing
-	}
-	else {
-		size_t keySize = key.size();
-		size_t end = propStr.find("}}", start);
-		assert(end != propStr.npos);
-		ret = propStr.substr(start + keySize + 3, end - start - keySize - 3);
-	}
-
-	return ret;
-}
-
 size_t LexicalReordering::GetOrientation(Range const& cur) const
 {
-  return (cur.GetStartPos() == 0) ? 0 : 1;
+  return (cur.GetStartPos() == 0) ? 0 : 2;
 }
 
 size_t LexicalReordering::GetOrientation(Range const& prev, Range const& cur) const
