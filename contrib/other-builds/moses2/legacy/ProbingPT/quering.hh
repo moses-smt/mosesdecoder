@@ -32,6 +32,8 @@ class QueryEngine
   int num_scores;
   int num_lex_scores;
   bool is_reordering;
+  bool logProb;
+
 public:
   QueryEngine (const char *);
   ~QueryEngine();

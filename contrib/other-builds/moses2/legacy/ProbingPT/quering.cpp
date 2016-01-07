@@ -56,9 +56,12 @@ QueryEngine::QueryEngine(const char * filepath) : decoder(filepath)
   //Number of scores
   getline(config, line);
   num_scores = atoi(line.c_str());
-  //do we have a reordering table
+  //How may scores from lex reordering models
   getline(config, line);
   num_lex_scores = atoi(line.c_str());
+  // have the scores been log() and FloorScore()?
+  //getline(config, line);
+  //logProb = atoi(line.c_str());
 
   config.close();
 
