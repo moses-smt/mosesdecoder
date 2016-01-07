@@ -197,7 +197,7 @@ void PhraseOrientationFeature::EvaluateInIsolation(const Phrase &source,
 
     // Initialize phrase orientation scoring object
     MosesTraining::PhraseOrientation phraseOrientation(source.GetSize(), targetPhrase.GetSize(),
-                                                       targetPhrase.GetAlignTerm(), targetPhrase.GetAlignNonTerm());
+        targetPhrase.GetAlignTerm(), targetPhrase.GetAlignNonTerm());
 
     PhraseOrientationFeature::ReoClassData* reoClassData = new PhraseOrientationFeature::ReoClassData();
 
