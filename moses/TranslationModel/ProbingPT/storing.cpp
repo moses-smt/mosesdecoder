@@ -39,7 +39,7 @@ BinaryFileWriter::~BinaryFileWriter ()
 }
 
 void createProbingPT(const char * phrasetable_path, const char * target_path,
-                     const char * num_scores, int num_lex_scores)
+                     int num_scores, int num_lex_scores)
 {
   //Get basepath and create directory if missing
   std::string basepath(target_path);

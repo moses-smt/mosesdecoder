@@ -15,7 +15,7 @@
 #define API_VERSION 5
 
 void createProbingPT(const char * phrasetable_path, const char * target_path,
-                     const char * num_scores, int num_lex_scores);
+                     int num_scores, int num_lex_scores);
 
 class BinaryFileWriter
 {
