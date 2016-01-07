@@ -7,6 +7,8 @@
 #include <fcntl.h>
 #include <fstream>
 
+#define API_VERSION 6
+
 
 //Hash table entry
 struct Entry {

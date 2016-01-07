@@ -10,6 +10,8 @@
 namespace Moses2
 {
 
+#define API_VERSION 6
+
 //Hash table entry
 struct Entry {
   uint64_t key;

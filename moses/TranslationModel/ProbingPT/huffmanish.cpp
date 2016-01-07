@@ -141,12 +141,19 @@ void Huffman::serialize_maps(const char * dirname)
   os2.close();
 }
 
-std::vector<unsigned char> Huffman::full_encode_line(line_text &line)
+std::vector<unsigned char> Huffman::full_encode_line(line_text &line, bool log_prob)
 {
-  return vbyte_encode_line((encode_line(line)));
+  return vbyte_encode_line((encode_line(line, log_prob)));
 }
 
-std::vector<unsigned int> Huffman::encode_line(line_text &line)
+//! make sure score doesn't fall below LOWEST_SCORE
+inline float FloorScore(float logScore)
+{
+  const float LOWEST_SCORE = -100.0f;
+  return (std::max)(logScore , LOWEST_SCORE);
+}
+
+std::vector<unsigned int> Huffman::encode_line(line_text &line, bool log_prob)
 {
   std::vector<unsigned int> retvector;
 
@@ -165,12 +172,17 @@ std::vector<unsigned int> Huffman::encode_line(line_text &line)
     //Sometimes we have too big floats to handle, so first convert to double
     double tempnum = atof(probit->data());
     float num = (float)tempnum;
+    if (log_prob) {
+    	num = FloorScore(log(num));
+    	if (num == 0.0f) num = 0.0000000001;
+    }
+    //cerr << "num=" << num << endl;
     retvector.push_back(reinterpret_float(&num));
     probit++;
   }
 
   // append LexRO prob to pt scores
-  AppendLexRO(line, retvector);
+  AppendLexRO(line, retvector, log_prob);
 
   //Add a zero;
   retvector.push_back(0);
@@ -210,7 +222,7 @@ std::vector<unsigned int> Huffman::encode_line(line_text &line)
   return retvector;
 }
 
-void Huffman::AppendLexRO(line_text &line, std::vector<unsigned int> &retvector)
+void Huffman::AppendLexRO(line_text &line, std::vector<unsigned int> &retvector, bool log_prob)
 {
   const StringPiece &origProperty = line.property_orig;
   StringPiece::size_type startPos = origProperty.find("{{LexRO ");
@@ -228,6 +240,11 @@ void Huffman::AppendLexRO(line_text &line, std::vector<unsigned int> &retvector)
 
 		double tempnum = atof(probStr.data());
 		float num = (float)tempnum;
+	    if (log_prob) {
+	    	num = FloorScore(log(num));
+	    	if (num == 0.0f) num = 0.0000000001;
+	    }
+
 		retvector.push_back(reinterpret_float(&num));
 
 		// exclude LexRO property from property column

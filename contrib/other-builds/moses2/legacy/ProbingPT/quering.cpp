@@ -60,8 +60,8 @@ QueryEngine::QueryEngine(const char * filepath) : decoder(filepath)
   getline(config, line);
   num_lex_scores = atoi(line.c_str());
   // have the scores been log() and FloorScore()?
-  //getline(config, line);
-  //logProb = atoi(line.c_str());
+  getline(config, line);
+  logProb = atoi(line.c_str());
 
   config.close();
 

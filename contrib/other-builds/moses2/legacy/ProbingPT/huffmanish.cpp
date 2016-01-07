@@ -318,7 +318,7 @@ target_text *HuffmanDecoder::decode_line (const std::vector<unsigned int> &input
 
   ret->prob.reserve(num_scores);
   //Split everything
-  unsigned int wAll;
+  unsigned int wAll = 1;
 
   //Split the line into the proper arrays
   short num_zeroes = 0;

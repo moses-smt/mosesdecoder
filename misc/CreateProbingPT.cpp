@@ -10,6 +10,7 @@ int main(int argc, char* argv[])
 	string inPath, outPath; 
 	int num_scores = 4;
 	int num_lex_scores = 0;
+	bool log_prob = false;
 
   namespace po = boost::program_options;
   po::options_description desc("Options");
@@ -19,6 +20,7 @@ int main(int argc, char* argv[])
   ("output-dir", po::value<string>()->required(), "Directory when binary files will be written")
   ("num-scores", po::value<int>()->default_value(num_scores), "Number of pt scores")
   ("num-lex-scores", po::value<int>()->default_value(num_lex_scores), "Number of lexicalized reordering scores")
+  ("log-prob", "log (and floor) probabilities before storing")
 
 	;
 
@@ -46,9 +48,10 @@ int main(int argc, char* argv[])
   if (vm.count("output-dir")) outPath = vm["output-dir"].as<string>();
   if (vm.count("num-scores")) num_scores = vm["num-scores"].as<int>();
   if (vm.count("num-lex-scores")) num_lex_scores = vm["num-lex-scores"].as<int>();
+	if (vm.count("log-prob")) log_prob = true;
 
 
-  createProbingPT(inPath.c_str(), outPath.c_str(), num_scores, num_lex_scores);
+  createProbingPT(inPath.c_str(), outPath.c_str(), num_scores, num_lex_scores, log_prob);
 
   util::PrintUsage(std::cout);
   return 0;

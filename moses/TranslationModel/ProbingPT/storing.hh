@@ -12,10 +12,9 @@
 #include "util/file_piece.hh"
 #include "util/file.hh"
 #include "vocabid.hh"
-#define API_VERSION 5
 
 void createProbingPT(const char * phrasetable_path, const char * target_path,
-                     int num_scores, int num_lex_scores);
+                     int num_scores, int num_lex_scores, bool log_prob);
 
 class BinaryFileWriter
 {

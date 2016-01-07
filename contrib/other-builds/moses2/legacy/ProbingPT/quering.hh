@@ -9,8 +9,6 @@
 #include "hash.hh" //Includes line splitter
 #include "../../Vector.h"
 
-#define API_VERSION 5
-
 namespace Moses2
 {
 
@@ -50,6 +48,8 @@ public:
     return source_vocabids;
   }
 
+  bool IsLogProb() const
+  { return logProb; }
 };
 
 }

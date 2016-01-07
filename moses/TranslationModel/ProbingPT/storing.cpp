@@ -39,7 +39,7 @@ BinaryFileWriter::~BinaryFileWriter ()
 }
 
 void createProbingPT(const char * phrasetable_path, const char * target_path,
-                     int num_scores, int num_lex_scores)
+                     int num_scores, int num_lex_scores, bool log_prob)
 {
   //Get basepath and create directory if missing
   std::string basepath(target_path);
@@ -110,7 +110,7 @@ void createProbingPT(const char * phrasetable_path, const char * target_path,
         entrystartidx = binfile.dist_from_start + binfile.extra_counter; //Designate start idx for new entry
 
         //Encode a line and write it to disk.
-        std::vector<unsigned char> encoded_line = huffmanEncoder.full_encode_line(line);
+        std::vector<unsigned char> encoded_line = huffmanEncoder.full_encode_line(line, log_prob);
         binfile.write(&encoded_line);
 
         //Set prevLine
@@ -118,7 +118,7 @@ void createProbingPT(const char * phrasetable_path, const char * target_path,
 
       } else {
         //If we still have the same line, just append to it:
-        std::vector<unsigned char> encoded_line = huffmanEncoder.full_encode_line(line);
+        std::vector<unsigned char> encoded_line = huffmanEncoder.full_encode_line(line, log_prob);
         binfile.write(&encoded_line);
       }
 
@@ -157,5 +157,6 @@ void createProbingPT(const char * phrasetable_path, const char * target_path,
   configfile << uniq_entries << '\n';
   configfile << num_scores << '\n';
   configfile << num_lex_scores << '\n';
+  configfile << log_prob << '\n';
   configfile.close();
 }
