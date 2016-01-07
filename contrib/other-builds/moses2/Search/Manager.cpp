@@ -11,6 +11,7 @@
 #include "SearchNormal.h"
 #include "SearchNormalBatch.h"
 #include "CubePruning/Search.h"
+#include "CubePruningPerMiniStack/Search.h"
 #include "../System.h"
 #include "../TargetPhrases.h"
 #include "../TargetPhrase.h"
@@ -78,6 +79,9 @@ void Manager::Init()
 		break;
 	case CubePruning:
 		m_search = new NSCubePruning::Search(*this);
+		break;
+	case CubePruningPerMiniStack:
+		m_search = new NSCubePruningPerMiniStack::Search(*this);
 		break;
 	default:
 		cerr << "Unknown search algorithm" << endl;

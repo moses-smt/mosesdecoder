@@ -55,6 +55,7 @@ external-lib boost_serialization ;
 		Search/CubePruning/Misc.cpp
  	 	Search/CubePruning/Search.cpp
  	 	Search/CubePruning/Stack.cpp 
+ 	 	Search/CubePruningPerMiniStack/Search.cpp
 		legacy/Bitmap.cpp
 		legacy/Bitmaps.cpp
 		legacy/Factor.cpp
