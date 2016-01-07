@@ -26,10 +26,12 @@ namespace Moses
 {
 
 SelPrefFeature::SelPrefFeature(const std::string &line)
-  : StatefulFeatureFunction(2, line)
+  : StatefulFeatureFunction(1, line)
 	, m_modelFileARPA("")
+	, m_MIModelFile("")
 	, m_lemmaFile("")
 	, m_WBmodel(nullptr)
+	, m_MIModel(nullptr)
 	// allowing ^nsubj because it appears at unbinarized leafNT could get you to score nsubj -> ^nsubj a relation
 	// !!BAD -> ^nsubj tokyo Sich is not known by the model
 	// -> need to go to prev hypothesis in Make Tuples and search the children then mark them as seen -> substract previous score and add new one
@@ -58,6 +60,8 @@ void SelPrefFeature::SetParameter(const std::string& key, const std::string& val
 	} else if (key == "unbinarize"){
 		if (value == "true")
 			m_unbinarize = true;
+	} else if(key=="MIModelFile"){
+			m_MIModelFile = value;
 	}
 
 /*	else{
@@ -95,6 +99,27 @@ void SelPrefFeature::ReadLemmaMap(){
 			}
 
 			tokens.clear();
+		}
+	}
+}
+
+void SelPrefFeature::ReadMIModel(){
+	shared_ptr<map<vector<string>, vector<float>>> (new map<vector<string>, vector<float>>).swap(m_MIModel);
+	std::ifstream file(m_MIModelFile.c_str()); // (fileName);
+	string line;
+	vector<string> tokens;
+	vector<float> scores;
+	if(file.is_open()){
+		while(getline(file,line)){
+			// !!!! SPLIT doesn't work as it should -> problem with delimitors
+			split(line," \t",tokens);
+			// rel head dep
+			vector<string> subcat = {tokens[0], tokens[1], tokens[2]};
+			scores.push_back(std::atof(tokens[3].c_str()));
+			scores.push_back(std::atof(tokens[4].c_str()));
+			m_MIModel->insert(pair<vector<string>, vector<float>> (subcat,scores));
+			tokens.clear();
+			scores.clear();
 		}
 	}
 }
@@ -138,6 +163,10 @@ void SelPrefFeature::Load() {
 
   if(m_lemmaFile != ""){
 	  ReadLemmaMap();
+  }
+
+  if(m_MIModelFile != ""){
+	  ReadMIModel();
   }
 }
 
@@ -501,16 +530,26 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 
 		// Compute feature function scores
 		float tuplesCounter = depRelTuples.size()*1.0;
-		float scoreWB =0.0;
-		for (auto &tuple: depRelTuples){
+		float scoreWB = 0.0;
+		float scoreMI = 0.0;
+		for (auto tuple: depRelTuples){
 			scoreWB += GetWBScore(tuple);
+			if (m_MIModelFile != ""){
+				auto it_MI = m_MIModel->find(tuple);
+				if(it_MI!=m_MIModel->end()){
+					scoreMI += it_MI->second[0];
+					// inverse score available as well
+					//scoreMIInv += it_MI->second[1];
+				}
+			}
 	/*		for (auto &elem: tuple)
 				cout << elem << " ";
 			cout <<endl;
 			SelPrefFeature::score += score;
 			cout << "SCORE: " << score << " "<< SelPrefFeature::score << endl;
 	*/
-			}
+		}
+
 /*
 		if(depRelTuples.size() !=0){
 			std::cout << *tree << endl;
@@ -531,7 +570,11 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 		//if(*tree == "[sent [root [VB] [^root [dobj] [^root [prep [IN in]] [^root [prep] [punct [. .]]]]]]]")
 		//	exit(0);
 
-		vector<float> scores = {scoreWB, tuplesCounter};
+		vector<float> scores = {tuplesCounter};
+		if(m_MIModelFile != "")
+			scores.push_back(scoreMI);
+		if(m_modelFileARPA != "")
+			scores.push_back(scoreWB);
 		accumulator->PlusEquals(this,scores);
 
 

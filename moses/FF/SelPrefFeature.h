@@ -9,6 +9,7 @@
 #include "lm/model.hh"
 
 #include <unordered_map>
+#include <map>
 #include <set>
 
 namespace Moses{
@@ -64,6 +65,7 @@ public:
       ScoreComponentCollection* accumulator) const;
 
   void ReadLemmaMap();
+  void ReadMIModel();
 
   void Load();
 
@@ -76,10 +78,16 @@ protected:
   // WB model file in ARPA format
   std::string m_modelFileARPA;
 
+  // Selectional Preference model file
+  std::string m_MIModelFile;
+
   std::string m_lemmaFile;
 
   // Pointer to the dependency language model
   std::shared_ptr<lm::ngram::Model> m_WBmodel;
+
+  // Pointer to the selectional preference model
+  std::shared_ptr<std::map<std::vector<std::string>, std::vector<float>>> m_MIModel;
 
   // Dependency relations that are considered by this feature
   std::set<std::string> m_allowedLabels;
