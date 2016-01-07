@@ -83,7 +83,8 @@ const std::string PhraseOrientationFeature::DORIENT("D");
 PhraseOrientationFeature::PhraseOrientationFeature(const std::string &line)
   : StatefulFeatureFunction(6, line)
   , m_glueLabelStr("Q")
-  , m_ignoreBoundary(false)
+  , m_noScoreBoundary(false)
+  , m_monotoneScoreBoundary(false)
   , m_distinguishStates(false)
   , m_lookaheadScore(false)
   , m_heuristicScoreUseWeights(false)
@@ -105,8 +106,10 @@ void PhraseOrientationFeature::SetParameter(const std::string& key, const std::s
 {
   if (key == "glue-label") {
     m_glueLabelStr = value;
-  } else if (key == "ignore-boundary") {
-    m_ignoreBoundary = Scan<bool>(value);
+  } else if (key == "no-score-boundary") {
+    m_noScoreBoundary = Scan<bool>(value);
+  } else if (key == "monotone-score-boundary") {
+    m_monotoneScoreBoundary = Scan<bool>(value);
   } else if (key == "distinguish-states") {
     m_distinguishStates = Scan<bool>(value);
   } else if (key == "lookahead-score") {
@@ -392,9 +395,9 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
         }
       }
 
-      if ( (nNT == 0) && reoClassData->firstNonTerminalIsBoundary ) {
+      if ( (nNT == 0) && reoClassData->firstNonTerminalIsBoundary && !m_monotoneScoreBoundary ) {
 
-        if (!m_ignoreBoundary) {
+        if (!m_noScoreBoundary) {
           // delay left-to-right scoring
 
           FEATUREVERBOSE(3, "Delaying left-to-right scoring" << std::endl);
@@ -432,7 +435,7 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
           newScores[0] += TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityMono());
 
-          if (!m_ignoreBoundary) {
+          if (!m_noScoreBoundary && !m_monotoneScoreBoundary) {
             // if sub-derivation has left-boundary non-terminal:
             // add recursive actual score of boundary non-terminal from subderivation
             LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x1, newScores, accumulator);
@@ -442,7 +445,7 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
           newScores[1] += TransformScore(orientationPhraseProperty->GetLeftToRightProbabilitySwap());
 
-          if (!m_ignoreBoundary) {
+          if (!m_noScoreBoundary && !m_monotoneScoreBoundary) {
             // if sub-derivation has left-boundary non-terminal:
             // add recursive actual score of boundary non-terminal from subderivation
             LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x2, newScores, accumulator);
@@ -454,7 +457,7 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
           newScores[2] += TransformScore(orientationPhraseProperty->GetLeftToRightProbabilityDiscontinuous());
 
-          if (!m_ignoreBoundary) {
+          if (!m_noScoreBoundary && !m_monotoneScoreBoundary) {
             // if sub-derivation has left-boundary non-terminal:
             // add recursive actual score of boundary non-terminal from subderivation
             LeftBoundaryL2RScoreRecursive(featureID, prevState, 0x4, newScores, accumulator);
@@ -506,9 +509,9 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
         }
       }
 
-      if ( (nNT == currTarPhr.GetAlignNonTerm().GetSize()-1) && reoClassData->lastNonTerminalIsBoundary ) {
+      if ( (nNT == currTarPhr.GetAlignNonTerm().GetSize()-1) && reoClassData->lastNonTerminalIsBoundary && !m_monotoneScoreBoundary ) {
 
-        if (!m_ignoreBoundary) {
+        if (!m_noScoreBoundary) {
           // delay right-to-left scoring
 
           FEATUREVERBOSE(3, "Delaying right-to-left scoring" << std::endl);
@@ -546,7 +549,7 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
           newScores[m_offsetR2LScores+0] += TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityMono());
 
-          if (!m_ignoreBoundary) {
+          if (!m_noScoreBoundary && !m_monotoneScoreBoundary) {
             // if sub-derivation has right-boundary non-terminal:
             // add recursive actual score of boundary non-terminal from subderivation
             RightBoundaryR2LScoreRecursive(featureID, prevState, 0x1, newScores, accumulator);
@@ -556,7 +559,7 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
           newScores[m_offsetR2LScores+1] += TransformScore(orientationPhraseProperty->GetRightToLeftProbabilitySwap());
 
-          if (!m_ignoreBoundary) {
+          if (!m_noScoreBoundary && !m_monotoneScoreBoundary) {
             // if sub-derivation has right-boundary non-terminal:
             // add recursive actual score of boundary non-terminal from subderivation
             RightBoundaryR2LScoreRecursive(featureID, prevState, 0x2, newScores, accumulator);
@@ -568,7 +571,7 @@ FFState* PhraseOrientationFeature::EvaluateWhenApplied(
 
           newScores[m_offsetR2LScores+2] += TransformScore(orientationPhraseProperty->GetRightToLeftProbabilityDiscontinuous());
 
-          if (!m_ignoreBoundary) {
+          if (!m_noScoreBoundary && !m_monotoneScoreBoundary) {
             // if sub-derivation has right-boundary non-terminal:
             // add recursive actual score of boundary non-terminal from subderivation
             RightBoundaryR2LScoreRecursive(featureID, prevState, 0x4, newScores, accumulator);
