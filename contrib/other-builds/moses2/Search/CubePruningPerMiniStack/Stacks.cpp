@@ -54,6 +54,17 @@ void Stacks::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 
 }
 
+void Stacks::Add(const Bitmap &newBitmap, const Range &pathRange)
+{
+	size_t numWordsCovered = newBitmap.GetNumWordsCovered();
+	//cerr << "numWordsCovered=" << numWordsCovered << endl;
+	NSCubePruning::Stack &stack = *m_stacks[numWordsCovered];
+
+	NSCubePruning::Stack::HypoCoverage key(&newBitmap, pathRange.GetEndPos());
+	stack.GetMiniStack(key);
+
+}
+
 }
 
 }

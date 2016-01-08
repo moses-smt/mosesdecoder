@@ -50,8 +50,6 @@ protected:
 	// decoding
 	void CreateSearchGraph(size_t stackInd);
 	void Decode(size_t stackInd);
-	void PostDecode(size_t stackInd);
-	void Prefetch(size_t stackInd);
 };
 
 }

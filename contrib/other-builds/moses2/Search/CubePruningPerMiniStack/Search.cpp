@@ -56,12 +56,14 @@ void Search::Decode()
 	initHypo->EmptyHypothesisState(m_mgr.GetInput());
 
 	m_stacks.Add(initHypo, m_mgr.GetHypoRecycle());
-	PostDecode(0);
+
+	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
+		CreateSearchGraph(stackInd);
+	}
 
 	for (size_t stackInd = 1; stackInd < m_stacks.GetSize(); ++stackInd) {
 		//cerr << "stackInd=" << stackInd << endl;
 		Decode(stackInd);
-		PostDecode(stackInd);
 
 		//cerr << m_stacks << endl;
 	}
@@ -157,7 +159,7 @@ void Search::Decode(size_t stackInd)
 	*/
 }
 
-void Search::PostDecode(size_t stackInd)
+void Search::CreateSearchGraph(size_t stackInd)
 {
   NSCubePruning::Stack &stack = m_stacks[stackInd];
   MemPool &pool = m_mgr.GetPool();
@@ -171,33 +173,39 @@ void Search::PostDecode(size_t stackInd)
 	  const InputPaths &paths = m_mgr.GetInputPaths();
 
 	  BOOST_FOREACH(const InputPath &path, paths) {
-  		const Range &pathRange = path.range;
-  		//cerr << "pathRange=" << pathRange << endl;
+		const Range &pathRange = path.range;
+		//cerr << "pathRange=" << pathRange << endl;
 
-  		if (!path.IsUsed()) {
-  			continue;
-  		}
-  		if (!CanExtend(hypoBitmap, hypoEndPos, pathRange)) {
-  			continue;
-  		}
+		if (!path.IsUsed()) {
+			continue;
+		}
+		if (!CanExtend(hypoBitmap, hypoEndPos, pathRange)) {
+			continue;
+		}
 
-  		const Bitmap &newBitmap = m_mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
-  		size_t numWords = newBitmap.GetNumWordsCovered();
+		const Bitmap &newBitmap = m_mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
+		size_t numWords = newBitmap.GetNumWordsCovered();
 
-  		CubeEdges &edges = *m_cubeEdges[numWords];
+		CubeEdges &edges = *m_cubeEdges[numWords];
 
 		// sort hypo for a particular bitmap and hypoEndPos
-  		NSCubePruning::Hypotheses &sortedHypos = val.second->GetSortedAndPruneHypos(m_mgr);
+		const NSCubePruning::MiniStack &miniStack = *val.second;
 
-  		BOOST_FOREACH(const TargetPhrases *tps, path.targetPhrases) {
+		// create next mini stack
+		m_stacks.Add(newBitmap, pathRange);
+
+		// add cube edge
+		BOOST_FOREACH(const TargetPhrases *tps, path.targetPhrases) {
   			if (tps && tps->GetSize()) {
-  				CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
-  		  		edges.push_back(edge);
+				CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(m_mgr, miniStack, path, *tps, newBitmap);
+				edges.push_back(edge);
   			}
-  		}
-  	  }
+		}
+	  }
   }
+
 }
+
 
 const Hypothesis *Search::GetBestHypothesis() const
 {
@@ -211,33 +219,6 @@ const Hypothesis *Search::GetBestHypothesis() const
 	return best;
 }
 
-void Search::Prefetch(size_t stackInd)
-{
-	CubeEdges &edges = *m_cubeEdges[stackInd];
-
-	BOOST_FOREACH(CubeEdge *edge, edges) {
-		 __builtin_prefetch(edge);
-
-		 BOOST_FOREACH(const Hypothesis *hypo, edge->hypos) {
-			 __builtin_prefetch(hypo);
-
-			 const TargetPhrase &tp = hypo->GetTargetPhrase();
-			 __builtin_prefetch(&tp);
-
-		 }
-
-		 BOOST_FOREACH(const TargetPhrase *tp, edge->tps) {
-			 __builtin_prefetch(tp);
-
-			 size_t size = tp->GetSize();
-			 for (size_t i = 0; i < size; ++i) {
-				 const Word &word = (*tp)[i];
-				 __builtin_prefetch(&word);
-			 }
-		 }
-
-	}
-}
 
 }
 

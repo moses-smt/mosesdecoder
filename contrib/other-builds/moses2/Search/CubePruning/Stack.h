@@ -81,6 +81,8 @@ public:
 
 	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
 
+	MiniStack &GetMiniStack(const HypoCoverage &key);
+
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
 	void Clear();
 
@@ -90,7 +92,6 @@ protected:
 
 	std::deque<MiniStack*> m_miniStackRecycler;
 
-	MiniStack &GetMiniStack(const HypoCoverage &key);
 
 };
 

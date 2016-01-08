@@ -66,7 +66,7 @@ void QueueItem::Init(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIn
 
 void QueueItem::CreateHypothesis(Manager &mgr)
 {
-	const Hypothesis *prevHypo = edge->hypos[hypoIndex];
+	const Hypothesis *prevHypo = edge->miniStack.GetSortedAndPruneHypos(mgr)[hypoIndex];
 	const TargetPhrase &tp = edge->tps[tpIndex];
 
 	//cerr << "hypoIndex=" << hypoIndex << endl;
@@ -82,11 +82,11 @@ void QueueItem::CreateHypothesis(Manager &mgr)
 ////////////////////////////////////////////////////////////////////////
 CubeEdge::CubeEdge(
 		Manager &mgr,
-		const NSCubePruning::Hypotheses &hypos,
+		const NSCubePruning::MiniStack &miniStack,
 		const InputPath &path,
 		const TargetPhrases &tps,
 		const Bitmap &newBitmap)
-:hypos(hypos)
+:miniStack(miniStack)
 ,path(path)
 ,tps(tps)
 ,newBitmap(newBitmap)
@@ -116,13 +116,14 @@ void CubeEdge::CreateFirst(Manager &mgr,
 		SeenPositions &seenPositions,
 		std::deque<QueueItem*> &queueItemRecycler)
 {
-	assert(hypos.size());
-	assert(tps.GetSize());
+	if (miniStack.GetSortedAndPruneHypos(mgr).size()) {
+		assert(tps.GetSize());
 
-	QueueItem *item = QueueItem::Create(NULL, mgr, *this, 0, 0, queueItemRecycler);
-	queue.push(item);
-	bool setSeen = SetSeenPosition(0, 0, seenPositions);
-	assert(setSeen);
+		QueueItem *item = QueueItem::Create(NULL, mgr, *this, 0, 0, queueItemRecycler);
+		queue.push(item);
+		bool setSeen = SetSeenPosition(0, 0, seenPositions);
+		assert(setSeen);
+	}
 }
 
 void CubeEdge::CreateNext(Manager &mgr,
@@ -134,7 +135,7 @@ void CubeEdge::CreateNext(Manager &mgr,
     size_t hypoIndex = item->hypoIndex;
 	size_t tpIndex = item->tpIndex;
 
-	if (hypoIndex + 1 < hypos.size() && SetSeenPosition(hypoIndex + 1, tpIndex, seenPositions)) {
+	if (hypoIndex + 1 < miniStack.GetSortedAndPruneHypos(mgr).size() && SetSeenPosition(hypoIndex + 1, tpIndex, seenPositions)) {
 		// reuse incoming queue item to create new item
 		QueueItem *newItem = QueueItem::Create(item, mgr, *this, hypoIndex + 1, tpIndex, queueItemRecycler);
 		assert(newItem == item);
@@ -151,36 +152,6 @@ void CubeEdge::CreateNext(Manager &mgr,
 	if (item) {
 		// recycle unused queue item
 		queueItemRecycler.push_back(item);
-	}
-}
-
-void CubeEdge::Prefetch(Manager &mgr, const QueueItem *item, Queue &queue, SeenPositions &seenPositions)
-{
-    size_t hypoIndex = item->hypoIndex + 1;
-	if (hypoIndex < hypos.size() && !SetSeenPosition(hypoIndex, item->tpIndex, seenPositions)) {
-		const Hypothesis *hypo = hypos[hypoIndex];
-		 __builtin_prefetch(hypo);
-
-		const TargetPhrase &hypoTP = hypo->GetTargetPhrase();
-		hypoTP.Prefetch();
-
-		const TargetPhrase &tp = tps[item->tpIndex];
-		tp.Prefetch();
-
-	}
-
-	size_t tpIndex = item->tpIndex + 1;
-	if (tpIndex < tps.GetSize() && !SetSeenPosition(item->hypoIndex, tpIndex, seenPositions)) {
-		const Hypothesis *hypo = hypos[item->hypoIndex];
-		 __builtin_prefetch(hypo);
-
-		const TargetPhrase &hypoTP = hypo->GetTargetPhrase();
-		hypoTP.Prefetch();
-
-		const TargetPhrase &tp = tps[tpIndex];
-		tp.Prefetch();
-
-
 	}
 }
 

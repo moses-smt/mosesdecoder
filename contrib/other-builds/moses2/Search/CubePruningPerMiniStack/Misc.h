@@ -77,14 +77,14 @@ public:
 			std::equal_to<SeenPositionItem>,
 			MemPoolAllocator<SeenPositionItem> > SeenPositions;
 
-	const NSCubePruning::Hypotheses &hypos;
+	const NSCubePruning::MiniStack &miniStack;
 	const InputPath &path;
 	const TargetPhrases &tps;
 	const Bitmap &newBitmap;
 	SCORE estimatedScore;
 
 	CubeEdge(Manager &mgr,
-			const NSCubePruning::Hypotheses &hypos,
+			const NSCubePruning::MiniStack &miniStack,
 			const InputPath &path,
 			const TargetPhrases &tps,
 			const Bitmap &newBitmap);
@@ -101,7 +101,6 @@ public:
 		  SeenPositions &seenPositions,
 		  std::deque<QueueItem*> &queueItemRecycler);
 
-  void Prefetch(Manager &mgr, const QueueItem *item, Queue &queue, SeenPositions &seenPositions);
 
 protected:
 

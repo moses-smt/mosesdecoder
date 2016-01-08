@@ -36,6 +36,7 @@ public:
     { return *m_stacks[ind]; }
 
 	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
+	void Add(const Bitmap &newBitmap, const Range &pathRange);
 
 protected:
 	const Manager &m_mgr;
