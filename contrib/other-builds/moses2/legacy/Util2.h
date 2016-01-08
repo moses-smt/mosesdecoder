@@ -8,6 +8,7 @@
 #include <limits>
 #include <sstream>
 #include <vector>
+#include <queue>
 #include <cmath>
 #include <stdlib.h>
 #include "../TypeDef.h"
@@ -273,6 +274,17 @@ T &GetThreadSpecificObj(boost::thread_specific_ptr<T> &coll)
   assert(obj);
   return *obj;
 
+}
+
+// grab the underlying contain of priority queue
+template <class T, class S, class C>
+    S& Container(std::priority_queue<T, S, C>& q) {
+        struct HackedQueue : private std::priority_queue<T, S, C> {
+            static S& Container(std::priority_queue<T, S, C>& q) {
+                return q.*&HackedQueue::c;
+            }
+        };
+    return HackedQueue::Container(q);
 }
 
 }

@@ -57,7 +57,7 @@ void Search::Decode()
 
 	m_stacks.Add(initHypo, m_mgr.GetHypoRecycle());
 
-	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
+	for (size_t stackInd = 0; stackInd < m_stacks.GetSize() - 1; ++stackInd) {
 		CreateSearchGraph(stackInd);
 	}
 
@@ -70,19 +70,6 @@ void Search::Decode()
 
 	//DebugCounts();
 }
-
-// grab the underlying contain of priority queue
-/////////////////////////////////////////////////
-template <class T, class S, class C>
-    S& Container(priority_queue<T, S, C>& q) {
-        struct HackedQueue : private priority_queue<T, S, C> {
-            static S& Container(priority_queue<T, S, C>& q) {
-                return q.*&HackedQueue::c;
-            }
-        };
-    return HackedQueue::Container(q);
-}
-/////////////////////////////////////////////////
 
 void Search::Decode(size_t stackInd)
 {

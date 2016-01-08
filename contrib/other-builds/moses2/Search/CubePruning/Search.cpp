@@ -69,19 +69,6 @@ void Search::Decode()
 
 }
 
-// grab the underlying contain of priority queue
-/////////////////////////////////////////////////
-template <class T, class S, class C>
-    S& Container(priority_queue<T, S, C>& q) {
-        struct HackedQueue : private priority_queue<T, S, C> {
-            static S& Container(priority_queue<T, S, C>& q) {
-                return q.*&HackedQueue::c;
-            }
-        };
-    return HackedQueue::Container(q);
-}
-/////////////////////////////////////////////////
-
 void Search::Decode(size_t stackInd)
 {
 	Recycler<Hypothesis*> &hypoRecycler  = m_mgr.GetHypoRecycle();
