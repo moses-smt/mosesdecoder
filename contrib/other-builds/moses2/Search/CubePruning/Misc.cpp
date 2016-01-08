@@ -6,6 +6,7 @@
  */
 
 #include "Misc.h"
+#include "Stack.h"
 #include "../Manager.h"
 #include "../../MemPool.h"
 #include "../../System.h"

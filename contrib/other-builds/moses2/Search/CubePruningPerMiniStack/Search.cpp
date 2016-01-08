@@ -187,7 +187,7 @@ void Search::PostDecode(size_t stackInd)
   		CubeEdges &edges = *m_cubeEdges[numWords];
 
 		// sort hypo for a particular bitmap and hypoEndPos
-  		NSCubePruning::CubeEdge::Hypotheses &sortedHypos = val.second->GetSortedAndPruneHypos(m_mgr);
+  		NSCubePruning::Hypotheses &sortedHypos = val.second->GetSortedAndPruneHypos(m_mgr);
 
   		BOOST_FOREACH(const TargetPhrases *tps, path.targetPhrases) {
   			if (tps && tps->GetSize()) {

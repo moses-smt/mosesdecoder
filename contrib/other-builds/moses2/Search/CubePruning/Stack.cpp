@@ -54,7 +54,7 @@ StackAdd MiniStack::Add(const Hypothesis *hypo)
   assert(false);
 }
 
-CubeEdge::Hypotheses &MiniStack::GetSortedAndPruneHypos(const Manager &mgr) const
+Hypotheses &MiniStack::GetSortedAndPruneHypos(const Manager &mgr) const
 {
   if (m_sortedHypos == NULL) {
     // create sortedHypos first
@@ -86,7 +86,7 @@ void MiniStack::SortAndPruneHypos(const Manager &mgr) const
   }
   cerr << endl;
   */
-  Vector<const Hypothesis*>::iterator iterMiddle;
+  Hypotheses::iterator iterMiddle;
   iterMiddle = (stackSize == 0 || m_sortedHypos->size() < stackSize)
 			   ? m_sortedHypos->end()
 			   : m_sortedHypos->begin() + stackSize;

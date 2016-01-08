@@ -9,7 +9,6 @@
 #include <boost/unordered_set.hpp>
 #include <deque>
 #include "../Hypothesis.h"
-#include "Misc.h"
 #include "../../TypeDef.h"
 #include "../../Vector.h"
 #include "../../MemPool.h"
@@ -23,6 +22,7 @@ class Manager;
 
 namespace NSCubePruning
 {
+typedef Vector<const Hypothesis*>  Hypotheses;
 
 class MiniStack
 {
@@ -45,11 +45,11 @@ public:
 
 	void Clear();
 
-	CubeEdge::Hypotheses &GetSortedAndPruneHypos(const Manager &mgr) const;
+	Hypotheses &GetSortedAndPruneHypos(const Manager &mgr) const;
 
 protected:
 	_HCType m_coll;
-	mutable CubeEdge::Hypotheses *m_sortedHypos;
+	mutable Hypotheses *m_sortedHypos;
 
 	void SortAndPruneHypos(const Manager &mgr) const;
 

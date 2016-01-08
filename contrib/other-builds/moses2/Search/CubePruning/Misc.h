@@ -14,6 +14,7 @@
 #include "../Hypothesis.h"
 #include "../../TypeDef.h"
 #include "../../Vector.h"
+#include "Stack.h"
 
 namespace Moses2
 {
@@ -66,7 +67,6 @@ class CubeEdge
   friend std::ostream& operator<<(std::ostream &, const CubeEdge &);
 
 public:
-	typedef Vector<const Hypothesis*>  Hypotheses;
 	typedef std::priority_queue<QueueItem*,
 				std::vector<QueueItem*, MemPoolAllocator<QueueItem*> >,
 				QueueItemOrderer> Queue;
