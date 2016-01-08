@@ -7,6 +7,7 @@
 
 #pragma once
 #include <boost/pool/pool_alloc.hpp>
+#include <boost/unordered_map.hpp>
 #include "../Search.h"
 #include "Misc.h"
 #include "Stacks.h"
@@ -19,6 +20,11 @@ class Bitmap;
 class Hypothesis;
 class InputPath;
 class TargetPhrases;
+
+namespace NSCubePruning
+{
+class MiniStack;
+}
 
 namespace NSCubePruningPerMiniStack
 {
@@ -42,7 +48,7 @@ protected:
 	// setup
 	MemPoolAllocator<CubeEdge*> m_cubeEdgeAlloc;
 	typedef std::vector<CubeEdge*, MemPoolAllocator<CubeEdge*> > CubeEdges;
-	std::vector<CubeEdges*> m_cubeEdges;
+	boost::unordered_map<NSCubePruning::MiniStack*, CubeEdges*> m_cubeEdges;
 
 	std::deque<QueueItem*> m_queueItemRecycler;
 
@@ -50,6 +56,7 @@ protected:
 	// decoding
 	void CreateSearchGraph(size_t stackInd);
 	void Decode(size_t stackInd);
+	void Decode(NSCubePruning::MiniStack &miniStack);
 
 	void DebugCounts();
 };

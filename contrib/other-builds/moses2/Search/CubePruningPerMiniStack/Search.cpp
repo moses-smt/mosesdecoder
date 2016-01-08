@@ -45,11 +45,6 @@ void Search::Decode()
 	// init stacks
 	m_stacks.Init(m_mgr.GetInput().GetSize() + 1);
 
-	m_cubeEdges.resize(m_stacks.GetSize() + 1);
-	for (size_t i = 0; i < m_cubeEdges.size(); ++i) {
-		m_cubeEdges[i] = new (m_mgr.GetPool().Allocate<CubeEdges>()) CubeEdges(m_cubeEdgeAlloc);
-	}
-
 	const Bitmap &initBitmap = m_mgr.GetBitmaps().GetInitialBitmap();
 	Hypothesis *initHypo = Hypothesis::Create(m_mgr.GetSystemPool(), m_mgr);
 	initHypo->Init(m_mgr, m_mgr.GetInputPaths().GetBlank(), m_mgr.GetInitPhrase(), initBitmap);
@@ -73,6 +68,16 @@ void Search::Decode()
 
 void Search::Decode(size_t stackInd)
 {
+  NSCubePruning::Stack &stack = m_stacks[stackInd];
+  BOOST_FOREACH(NSCubePruning::Stack::Coll::value_type &val, stack.GetColl()) {
+	  NSCubePruning::MiniStack &miniStack = *val.second;
+	  Decode(miniStack);
+  }
+
+}
+
+void Search::Decode(NSCubePruning::MiniStack &miniStack)
+{
 	Recycler<Hypothesis*> &hypoRecycler  = m_mgr.GetHypoRecycle();
 
 	// reuse queue from previous stack. Clear it first
@@ -93,7 +98,7 @@ void Search::Decode(size_t stackInd)
 	//Prefetch(stackInd);
 
 	// add top hypo from every edge into queue
-	CubeEdges &edges = *m_cubeEdges[stackInd];
+	CubeEdges &edges = *m_cubeEdges[&miniStack];
 
 	BOOST_FOREACH(CubeEdge *edge, edges) {
 		//cerr << "edge=" << *edge << endl;
@@ -147,6 +152,7 @@ void Search::Decode(size_t stackInd)
 	*/
 }
 
+
 void Search::CreateSearchGraph(size_t stackInd)
 {
   NSCubePruning::Stack &stack = m_stacks[stackInd];
@@ -172,21 +178,30 @@ void Search::CreateSearchGraph(size_t stackInd)
 		}
 
 		const Bitmap &newBitmap = m_mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
-		size_t numWords = newBitmap.GetNumWordsCovered();
-
-		CubeEdges &edges = *m_cubeEdges[numWords];
 
 		// sort hypo for a particular bitmap and hypoEndPos
 		const NSCubePruning::MiniStack &miniStack = *val.second;
 
-		// create next mini stack
-		m_stacks.Add(newBitmap, pathRange);
 
 		// add cube edge
 		BOOST_FOREACH(const TargetPhrases *tps, path.targetPhrases) {
   			if (tps && tps->GetSize()) {
-				CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(m_mgr, miniStack, path, *tps, newBitmap);
-				edges.push_back(edge);
+  				// create next mini stack
+  				NSCubePruning::MiniStack &nextMiniStack = m_stacks.GetMiniStack(newBitmap, pathRange);
+
+  				CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(m_mgr, miniStack, path, *tps, newBitmap);
+
+				CubeEdges *edges;
+				boost::unordered_map<NSCubePruning::MiniStack*, CubeEdges*>::iterator iter = m_cubeEdges.find(&nextMiniStack);
+				if (iter == m_cubeEdges.end()) {
+					edges = new (pool.Allocate<CubeEdges>()) CubeEdges(m_cubeEdgeAlloc);
+					m_cubeEdges[&nextMiniStack] = edges;
+				}
+				else {
+					edges = iter->second;
+				}
+
+				edges->push_back(edge);
   			}
 		}
 	  }

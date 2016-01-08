@@ -54,7 +54,7 @@ void Stacks::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 
 }
 
-void Stacks::Add(const Bitmap &newBitmap, const Range &pathRange)
+NSCubePruning::MiniStack &Stacks::GetMiniStack(const Bitmap &newBitmap, const Range &pathRange)
 {
 	size_t numWordsCovered = newBitmap.GetNumWordsCovered();
 	//cerr << "numWordsCovered=" << numWordsCovered << endl;
