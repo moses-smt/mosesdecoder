@@ -408,6 +408,8 @@ protected:
 
   std::string m_glueLabelStr;
   const Factor* m_glueLabel;
+  bool m_noScoreBoundary;
+  bool m_monotoneScoreBoundary;
   bool m_distinguishStates;
   bool m_lookaheadScore;
   bool m_heuristicScoreUseWeights;
