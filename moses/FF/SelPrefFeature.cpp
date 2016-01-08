@@ -29,9 +29,14 @@ SelPrefFeature::SelPrefFeature(const std::string &line)
   : StatefulFeatureFunction(1, line)
 	, m_modelFileARPA("")
 	, m_MIModelFile("")
+	, m_modelFileARPAPrep("")
+	, m_MIModelFilePrep("")
 	, m_lemmaFile("")
-	, m_WBmodel(nullptr)
-	, m_MIModel(nullptr)
+	, m_WBmodelMain(nullptr)
+	, m_MIModelMain(nullptr)
+	, m_WBmodelPrep(nullptr)
+	, m_MIModelPrep(nullptr)
+	, m_cacheDepRel(nullptr)
 	// allowing ^nsubj because it appears at unbinarized leafNT could get you to score nsubj -> ^nsubj a relation
 	// !!BAD -> ^nsubj tokyo Sich is not known by the model
 	// -> need to go to prev hypothesis in Make Tuples and search the children then mark them as seen -> substract previous score and add new one
@@ -44,7 +49,8 @@ SCORE: -5.016 -19304.324
 [^root [dep [VBD] [nsubj [NNP] [^nsubj]]] [punct [. .]]]
 [^root [dep [VBD met] [nsubj [NNP Tokyo] [^nsubj [NN sich] [prep [IN into] [pobj [det [DT the]]...
 	 */
-	, m_allowedLabels{"nsubj","nsbujpass", "dobj", "iobj", "prep"}//,"^nsubj","^nsbujpass", "^dobj", "^iobj", "^prep"}
+	, m_allowedLabelsMain{"nsubj","nsbujpass", "dobj", "iobj"}//,"^nsubj","^nsbujpass", "^dobj", "^iobj", "^prep"}
+	, m_allowedLabelsPrep{"prep"}
 	, m_unbinarize(false)
 	, m_lemmaMap(nullptr)
    {
@@ -61,7 +67,11 @@ void SelPrefFeature::SetParameter(const std::string& key, const std::string& val
 		if (value == "true")
 			m_unbinarize = true;
 	} else if(key=="MIModelFile"){
-			m_MIModelFile = value;
+		m_MIModelFile = value;
+	} else if(key=="MIModelFilePrep"){
+		m_MIModelFilePrep = value;
+	} else if(key=="modelFileARPAPrep"){
+		m_modelFileARPAPrep = value;
 	}
 
 /*	else{
@@ -103,9 +113,9 @@ void SelPrefFeature::ReadLemmaMap(){
 	}
 }
 
-void SelPrefFeature::ReadMIModel(){
-	shared_ptr<map<vector<string>, vector<float>>> (new map<vector<string>, vector<float>>).swap(m_MIModel);
-	std::ifstream file(m_MIModelFile.c_str()); // (fileName);
+void SelPrefFeature::ReadMIModel(string MIModelFile, shared_ptr<map<vector<string>, vector<float>>>& MIModel){
+	shared_ptr<map<vector<string>, vector<float>>> (new map<vector<string>, vector<float>>).swap(MIModel);
+	std::ifstream file(MIModelFile.c_str()); // (fileName);
 	string line;
 	vector<string> tokens;
 	vector<float> scores;
@@ -117,7 +127,7 @@ void SelPrefFeature::ReadMIModel(){
 			vector<string> subcat = {tokens[0], tokens[1], tokens[2]};
 			scores.push_back(std::atof(tokens[3].c_str()));
 			scores.push_back(std::atof(tokens[4].c_str()));
-			m_MIModel->insert(pair<vector<string>, vector<float>> (subcat,scores));
+			MIModel->insert(pair<vector<string>, vector<float>> (subcat,scores));
 			tokens.clear();
 			scores.clear();
 		}
@@ -158,21 +168,32 @@ void SelPrefFeature::Load() {
   //staticData.SelPrefFeature(this);
 
   if(m_modelFileARPA != ""){
-	 shared_ptr<lm::ngram::Model> (new lm::ngram::Model(m_modelFileARPA.c_str())).swap(m_WBmodel);
+	 shared_ptr<lm::ngram::Model> (new lm::ngram::Model(m_modelFileARPA.c_str())).swap(m_WBmodelMain);
   }
+
+  if(m_modelFileARPAPrep != ""){
+  	 shared_ptr<lm::ngram::Model> (new lm::ngram::Model(m_modelFileARPAPrep.c_str())).swap(m_WBmodelPrep);
+    }
 
   if(m_lemmaFile != ""){
 	  ReadLemmaMap();
   }
 
   if(m_MIModelFile != ""){
-	  ReadMIModel();
+	  ReadMIModel(m_MIModelFile, m_MIModelMain);
+	  if(m_MIModelMain == nullptr)
+		  cerr << "Problem with passing pointer" << endl;
   }
+
+  if(m_MIModelFilePrep != ""){
+  	  ReadMIModel(m_MIModelFilePrep, m_MIModelPrep);
+    }
 }
 
 // For clearing caches and counters
 
 void SelPrefFeature::CleanUpAfterSentenceProcessing(const InputType& source){
+	DepRelCache &localCacheDepRel = ResetCacheDepRel();
 }
 
 /*
@@ -342,7 +363,8 @@ vector<string> SelPrefFeature::ProcessChild(
 	vector<string> depTuple;
 	string rel = ToString(&(child->GetLabel()));
 	if(!child->IsTerminal()
-			&& m_allowedLabels.find(rel) != m_allowedLabels.end()){
+			&& (m_allowedLabelsMain.find(rel) != m_allowedLabelsMain.end()
+					|| m_allowedLabelsPrep.find(rel) != m_allowedLabelsPrep.end())){
 		// {rel, head, dep}
 
 		// I extract tuples top-down looking at the child label
@@ -465,13 +487,18 @@ void SelPrefFeature::MakeTuples(
 // todo: create cache for already seen dep tuples -> should cache all 4 scores
 // todo: marked nodes as scored
 
-float SelPrefFeature::GetWBScore(vector<string>& depRel) const{
+float SelPrefFeature::GetWBScore(vector<string>& depRel, shared_ptr<lm::ngram::Model> WBmodel) const{
+
+	if ((WBmodel == m_WBmodelMain and m_allowedLabelsMain.find(depRel[0]) == m_allowedLabelsMain.end())
+		 || (WBmodel == m_WBmodelPrep and depRel[0].find("prep") != 0))
+		return 0.0;
+
 	using namespace lm::ngram;
 	//Model model("//Users//mnadejde//Documents//workspace//Subcat//DepRelStats.en.100K.ARPA");
 	//Model model(m_modelFileARPA.c_str());
 	  //State stateSentence(m_WBmodel->BeginSentenceState()),state(m_WBmodel->NullContextState());
 	  State out_state0;
-	  const Vocabulary &vocab = m_WBmodel->GetVocabulary();
+	  const Vocabulary &vocab = WBmodel->GetVocabulary();
 	  lm::WordIndex context[3];// = new lm::WordIndex[3];
 	  //depRel = rel gov dep -> rel verb arg
 	  context[0]=vocab.Index(depRel[1]);
@@ -479,11 +506,23 @@ float SelPrefFeature::GetWBScore(vector<string>& depRel) const{
 	  context[2]=vocab.Index("<unk>");
 	  lm::WordIndex arg = vocab.Index(depRel[2]);
 	  float score;
-	  score = m_WBmodel->FullScoreForgotState(context,context+2,arg,out_state0).prob;
+	  score = WBmodel->FullScoreForgotState(context,context+2,arg,out_state0).prob;
 	  //cout<<depRel[0]<<" "<<depRel[1]<<" "<<depRel[2]<<" "<<score<<endl;
 
 	  //delete[] context;
 	  return score;
+}
+
+float SelPrefFeature::GetMIScore(vector<string>& depRel, shared_ptr<map<vector<string>, vector<float>>> MIModel) const{
+	if ((MIModel == m_MIModelMain and m_allowedLabelsMain.find(depRel[0]) == m_allowedLabelsMain.end())
+			 || (MIModel == m_MIModelPrep and depRel[0].find("prep") != 0))
+			return 0.0;
+	auto it_MI = MIModel->find(depRel);
+	if(it_MI != MIModel->end())
+		return it_MI->second[0];
+		// inverse score available as well
+		// return it_MI->second[1];
+	return 0.0;
 }
 
 FFState* SelPrefFeature::EvaluateWhenApplied(
@@ -530,17 +569,41 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 
 		// Compute feature function scores
 		float tuplesCounter = depRelTuples.size()*1.0;
-		float scoreWB = 0.0;
-		float scoreMI = 0.0;
+		float scoreWB = 0.0, scoreMI = 0.0, scoreWBPrep = 0.0, scoreMIPrep = 0.0;
+		// How to initialize it???
+		DepRelCache &localCacheDepRel = GetCacheDepRel();
 		for (auto tuple: depRelTuples){
-			scoreWB += GetWBScore(tuple);
-			if (m_MIModelFile != ""){
-				auto it_MI = m_MIModel->find(tuple);
-				if(it_MI!=m_MIModel->end()){
-					scoreMI += it_MI->second[0];
-					// inverse score available as well
-					//scoreMIInv += it_MI->second[1];
+			if (localCacheDepRel.find(tuple) != localCacheDepRel.end()){
+				cout << "FOUND" << tuple[0] << " " << tuple[1] << " " << tuple[2] << endl;
+				vector<float> cachedScores = localCacheDepRel[tuple];
+				scoreMI += cachedScores[0];
+				scoreWB += cachedScores[1];
+				scoreMIPrep += cachedScores[2];
+				scoreWBPrep += cachedScores[3];
+			}
+			else{
+				float currentWBScore = 0.0, currentMIScore = 0.0, currentWBPrepScore = 0.0, currentMIPrepScore = 0.0;
+
+				if(m_modelFileARPA != ""){
+					currentWBScore = GetWBScore(tuple, m_WBmodelMain);
+					scoreWB += currentWBScore;
 				}
+
+				if (m_MIModelFile != ""){
+					currentMIScore = GetMIScore(tuple, m_MIModelMain);
+					scoreMI += currentMIScore;
+				}
+
+				if(m_modelFileARPAPrep != ""){
+					currentWBPrepScore = GetWBScore(tuple, m_WBmodelPrep);
+					scoreWBPrep += currentWBPrepScore;
+				}
+
+				if (m_MIModelFilePrep != ""){
+					currentMIPrepScore = GetMIScore(tuple, m_MIModelPrep);
+					scoreMIPrep += currentMIPrepScore;
+				}
+				localCacheDepRel[tuple] = {currentMIScore, currentWBScore, currentMIPrepScore, currentWBPrepScore};
 			}
 	/*		for (auto &elem: tuple)
 				cout << elem << " ";
@@ -575,6 +638,10 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 			scores.push_back(scoreMI);
 		if(m_modelFileARPA != "")
 			scores.push_back(scoreWB);
+		if(m_MIModelFilePrep != "")
+			scores.push_back(scoreMIPrep);
+		if(m_modelFileARPAPrep != "")
+			scores.push_back(scoreWBPrep);
 		accumulator->PlusEquals(this,scores);
 
 
