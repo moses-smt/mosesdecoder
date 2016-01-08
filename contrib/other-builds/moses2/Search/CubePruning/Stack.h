@@ -78,6 +78,8 @@ public:
 
 	Coll &GetColl()
 	{ return m_coll; }
+	const Coll &GetColl() const
+	{ return m_coll; }
 
 	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
 

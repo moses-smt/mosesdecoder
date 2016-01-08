@@ -68,6 +68,7 @@ void Search::Decode()
 		//cerr << m_stacks << endl;
 	}
 
+	DebugCounts();
 }
 
 // grab the underlying contain of priority queue
@@ -218,6 +219,35 @@ const Hypothesis *Search::GetBestHypothesis() const
 	}
 	return best;
 }
+
+void Search::DebugCounts()
+{
+	std::map<size_t, size_t> counts;
+
+	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
+		//cerr << "stackInd=" << stackInd << endl;
+		const NSCubePruning::Stack &stack = m_stacks[stackInd];
+		BOOST_FOREACH(const NSCubePruning::Stack::Coll::value_type &val, stack.GetColl()) {
+			const NSCubePruning::MiniStack &miniStack = *val.second;
+			size_t count = miniStack.GetColl().size();
+
+			if (counts.find(count) == counts.end()) {
+				counts[count] = 0;
+			}
+			else {
+				++counts[count];
+			}
+		}
+		//cerr << m_stacks << endl;
+	}
+
+	std::map<size_t, size_t>::const_iterator iter;
+	for (iter = counts.begin(); iter != counts.end(); ++iter) {
+		cerr << iter->first << "=" << iter->second << endl;
+
+	}
+}
+
 
 
 }

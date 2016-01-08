@@ -50,6 +50,8 @@ protected:
 	// decoding
 	void CreateSearchGraph(size_t stackInd);
 	void Decode(size_t stackInd);
+
+	void DebugCounts();
 };
 
 }
