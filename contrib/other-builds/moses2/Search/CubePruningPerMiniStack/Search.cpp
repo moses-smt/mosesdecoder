@@ -29,10 +29,10 @@ Search::Search(Manager &mgr)
 ,m_stacks(mgr)
 ,m_cubeEdgeAlloc(mgr.GetPool())
 
-,m_queue(NSCubePruning::QueueItemOrderer(),
-		std::vector<NSCubePruning::QueueItem*, MemPoolAllocator<NSCubePruning::QueueItem*> >(MemPoolAllocator<NSCubePruning::QueueItem*>(mgr.GetPool())) )
+,m_queue(QueueItemOrderer(),
+		std::vector<QueueItem*, MemPoolAllocator<QueueItem*> >(MemPoolAllocator<QueueItem*>(mgr.GetPool())) )
 
-,m_seenPositions(MemPoolAllocator<NSCubePruning::CubeEdge::SeenPositionItem>(mgr.GetPool()))
+,m_seenPositions(MemPoolAllocator<CubeEdge::SeenPositionItem>(mgr.GetPool()))
 {
 }
 
@@ -86,9 +86,9 @@ void Search::Decode(size_t stackInd)
 	Recycler<Hypothesis*> &hypoRecycler  = m_mgr.GetHypoRecycle();
 
 	// reuse queue from previous stack. Clear it first
-	std::vector<NSCubePruning::QueueItem*, MemPoolAllocator<NSCubePruning::QueueItem*> > &container = Container(m_queue);
+	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > &container = Container(m_queue);
 	//cerr << "container=" << container.size() << endl;
-	BOOST_FOREACH(NSCubePruning::QueueItem *item, container) {
+	BOOST_FOREACH(QueueItem *item, container) {
 		// recycle unused hypos from queue
 		Hypothesis *hypo = item->hypo;
 		hypoRecycler.Recycle(hypo);
@@ -105,7 +105,7 @@ void Search::Decode(size_t stackInd)
 	// add top hypo from every edge into queue
 	CubeEdges &edges = *m_cubeEdges[stackInd];
 
-	BOOST_FOREACH(NSCubePruning::CubeEdge *edge, edges) {
+	BOOST_FOREACH(CubeEdge *edge, edges) {
 		//cerr << "edge=" << *edge << endl;
 		edge->CreateFirst(m_mgr, m_queue, m_seenPositions, m_queueItemRecycler);
 	}
@@ -114,10 +114,10 @@ void Search::Decode(size_t stackInd)
 	while (!m_queue.empty() && pops < m_mgr.system.popLimit) {
 		// get best hypo from queue, add to stack
 		//cerr << "queue=" << queue.size() << endl;
-		NSCubePruning::QueueItem *item = m_queue.top();
+		QueueItem *item = m_queue.top();
 		m_queue.pop();
 
-		NSCubePruning::CubeEdge *edge = item->edge;
+		CubeEdge *edge = item->edge;
 
 		// prefetching
 		/*
@@ -191,7 +191,7 @@ void Search::PostDecode(size_t stackInd)
 
   		BOOST_FOREACH(const TargetPhrases *tps, path.targetPhrases) {
   			if (tps && tps->GetSize()) {
-  				NSCubePruning::CubeEdge *edge = new (pool.Allocate<NSCubePruning::CubeEdge>()) NSCubePruning::CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
+  				CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
   		  		edges.push_back(edge);
   			}
   		}
@@ -215,7 +215,7 @@ void Search::Prefetch(size_t stackInd)
 {
 	CubeEdges &edges = *m_cubeEdges[stackInd];
 
-	BOOST_FOREACH(NSCubePruning::CubeEdge *edge, edges) {
+	BOOST_FOREACH(CubeEdge *edge, edges) {
 		 __builtin_prefetch(edge);
 
 		 BOOST_FOREACH(const Hypothesis *hypo, edge->hypos) {

@@ -8,7 +8,7 @@
 #pragma once
 #include <boost/pool/pool_alloc.hpp>
 #include "../Search.h"
-#include "../CubePruning/Misc.h"
+#include "Misc.h"
 #include "Stacks.h"
 #include "../../legacy/Range.h"
 
@@ -35,19 +35,20 @@ public:
 protected:
 	Stacks m_stacks;
 
-	NSCubePruning::CubeEdge::Queue m_queue;
-	NSCubePruning::CubeEdge::SeenPositions m_seenPositions;
+	CubeEdge::Queue m_queue;
+	CubeEdge::SeenPositions m_seenPositions;
 
 	// CUBE PRUNING VARIABLES
 	// setup
-	MemPoolAllocator<NSCubePruning::CubeEdge*> m_cubeEdgeAlloc;
-	typedef std::vector<NSCubePruning::CubeEdge*, MemPoolAllocator<NSCubePruning::CubeEdge*> > CubeEdges;
+	MemPoolAllocator<CubeEdge*> m_cubeEdgeAlloc;
+	typedef std::vector<CubeEdge*, MemPoolAllocator<CubeEdge*> > CubeEdges;
 	std::vector<CubeEdges*> m_cubeEdges;
 
-	std::deque<NSCubePruning::QueueItem*> m_queueItemRecycler;
+	std::deque<QueueItem*> m_queueItemRecycler;
 
 	// CUBE PRUNING
 	// decoding
+	void CreateSearchGraph(size_t stackInd);
 	void Decode(size_t stackInd);
 	void PostDecode(size_t stackInd);
 	void Prefetch(size_t stackInd);
