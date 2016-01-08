@@ -9,7 +9,7 @@
 #include <boost/pool/pool_alloc.hpp>
 #include "../Search.h"
 #include "../CubePruning/Misc.h"
-#include "../CubePruning/Stack.h"
+#include "Stacks.h"
 #include "../../legacy/Range.h"
 
 namespace Moses2
@@ -33,7 +33,7 @@ public:
 	const Hypothesis *GetBestHypothesis() const;
 
 protected:
-	NSCubePruning::Stack m_stack;
+	Stacks m_stacks;
 
 	NSCubePruning::CubeEdge::Queue m_queue;
 	NSCubePruning::CubeEdge::SeenPositions m_seenPositions;

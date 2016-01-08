@@ -28,21 +28,9 @@ Stacks::~Stacks()
 
 void Stacks::Init(size_t numStacks)
 {
-	m_stacks.resize(numStacks, NULL);
-}
-
-void Stacks::ReadyToDecode(size_t ind)
-{
-	if (ind) {
-		// reuse previous stack
-		NSCubePruning::Stack *stack = m_stacks[ind - 1];
-		stack->Clear();
-
-		m_stacks[ind - 1] = NULL;
-		m_stacks[ind] = stack;
-	}
-	else {
-		m_stacks[ind] = new (m_mgr.GetPool().Allocate<NSCubePruning::Stack>()) NSCubePruning::Stack(m_mgr);
+	m_stacks.resize(numStacks);
+	for (size_t i = 0; i < m_stacks.size(); ++i) {
+		m_stacks[i] = new (m_mgr.GetPool().Allocate<NSCubePruning::Stack>()) NSCubePruning::Stack(m_mgr);
 	}
 }
 
@@ -50,13 +38,8 @@ void Stacks::ReadyToDecode(size_t ind)
 std::ostream& operator<<(std::ostream &out, const Stacks &obj)
 {
   for (size_t i = 0; i < obj.GetSize(); ++i) {
-	  const NSCubePruning::Stack *stack = obj.m_stacks[i];
-	  if (stack) {
-		  out << stack->GetHypoSize() << " ";
-	  }
-	  else {
-		  out << "N ";
-	  }
+	  const NSCubePruning::Stack &stack = *obj.m_stacks[i];
+	  out << stack.GetHypoSize() << " ";
   }
 
   return out;
