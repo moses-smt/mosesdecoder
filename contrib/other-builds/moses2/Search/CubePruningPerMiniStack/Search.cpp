@@ -68,7 +68,7 @@ void Search::Decode()
 		//cerr << m_stacks << endl;
 	}
 
-	DebugCounts();
+	//DebugCounts();
 }
 
 // grab the underlying contain of priority queue
@@ -243,9 +243,9 @@ void Search::DebugCounts()
 
 	std::map<size_t, size_t>::const_iterator iter;
 	for (iter = counts.begin(); iter != counts.end(); ++iter) {
-		cerr << iter->first << "=" << iter->second << endl;
-
+		cerr << iter->first << "=" << iter->second << " ";
 	}
+	cerr << endl;
 }
 
 
