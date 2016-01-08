@@ -88,6 +88,8 @@ public:
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
 	void Clear();
 
+	void DebugCounts();
+
 protected:
 	const Manager &m_mgr;
 	Coll m_coll;

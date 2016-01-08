@@ -63,6 +63,7 @@ void Search::Decode()
 		Decode(stackInd);
 		PostDecode(stackInd);
 
+		m_stack.DebugCounts();
 		//cerr << m_stacks << endl;
 	}
 
