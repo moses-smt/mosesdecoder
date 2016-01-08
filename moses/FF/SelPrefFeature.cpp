@@ -574,7 +574,6 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 		DepRelCache &localCacheDepRel = GetCacheDepRel();
 		for (auto tuple: depRelTuples){
 			if (localCacheDepRel.find(tuple) != localCacheDepRel.end()){
-				cout << "FOUND" << tuple[0] << " " << tuple[1] << " " << tuple[2] << endl;
 				vector<float> cachedScores = localCacheDepRel[tuple];
 				scoreMI += cachedScores[0];
 				scoreWB += cachedScores[1];
