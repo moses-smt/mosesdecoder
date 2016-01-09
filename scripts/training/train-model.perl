@@ -89,6 +89,8 @@ my($_EXTERNAL_BINDIR,
    	$_XML,
    	$_SOURCE_SYNTAX,
    	$_TARGET_SYNTAX,
+    $_TARGET_SYNTACTIC_PREFERENCES,
+    $_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE,
    	$_GLUE_GRAMMAR,
    	$_GLUE_GRAMMAR_FILE,
    	$_DONT_TUNE_GLUE_GRAMMAR,
@@ -227,6 +229,8 @@ $_HELP = 1
 		       'score-options=s' => \@_SCORE_OPTIONS,
 		       'source-syntax' => \$_SOURCE_SYNTAX,
 		       'target-syntax' => \$_TARGET_SYNTAX,
+		       'target-syntactic-preferences' => \$_TARGET_SYNTACTIC_PREFERENCES,
+               'target-syntactic-preferences-labels-file=s' => \$_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE,
 		       'use-syntax-input-weight-feature' => \$_USE_SYNTAX_INPUT_WEIGHT_FEATURE,
 		       'xml' => \$_XML,
 		       'no-word-alignment' => \$_OMIT_WORD_ALIGNMENT,
@@ -1575,6 +1579,7 @@ sub extract_phrase {
         {
           $cmd .= " --SourceSyntax" if $_SOURCE_SYNTAX;
           $cmd .= " --TargetSyntax" if $_TARGET_SYNTAX;
+          $cmd .= " --TargetSyntacticPreferences" if $_TARGET_SYNTACTIC_PREFERENCES;
           $cmd .= " --MaxSpan $max_length";
         }
         $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
@@ -1712,8 +1717,8 @@ sub score_phrase_phrase_extract {
     $CORE_SCORE_OPTIONS .= " --NoLex" if $NO_LEX;
 	$CORE_SCORE_OPTIONS .= " --Singleton" if $SINGLETON;
 	$CORE_SCORE_OPTIONS .= " --CrossedNonTerm" if $CROSSEDNONTERM;
-    $CORE_SCORE_OPTIONS .= " --SourceLabels" if $SOURCE_LABELS;
-    $CORE_SCORE_OPTIONS .= " --SourceLabelCountsLHS " if $SOURCE_LABEL_COUNTS_LHS;
+	$CORE_SCORE_OPTIONS .= " --SourceLabels" if $SOURCE_LABELS;
+	$CORE_SCORE_OPTIONS .= " --SourceLabelCountsLHS " if $SOURCE_LABEL_COUNTS_LHS;
 
     my $substep = 1;
     my $isParent = 1;
@@ -1758,6 +1763,7 @@ sub score_phrase_phrase_extract {
         $cmd .= " --PhraseOrientation" if $_PHRASE_ORIENTATION;
         $cmd .= " --PhraseOrientationPriors $_PHRASE_ORIENTATION_PRIORS_FILE" if $_PHRASE_ORIENTATION && defined($_PHRASE_ORIENTATION_PRIORS_FILE);
         $cmd .= " --SourceLabels $_GHKM_SOURCE_LABELS_FILE" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
+        $cmd .= " --TargetSyntacticPreferences $_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE" if $_TARGET_SYNTACTIC_PREFERENCES && defined($_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE);
         $cmd .= " --PartsOfSpeech $_GHKM_PARTS_OF_SPEECH_FILE" if $_GHKM_PARTS_OF_SPEECH && defined($_GHKM_PARTS_OF_SPEECH_FILE);
         $cmd .= " $DOMAIN" if $DOMAIN;
         $cmd .= " $CORE_SCORE_OPTIONS" if defined($_SCORE_OPTIONS);
@@ -1811,6 +1817,7 @@ sub score_phrase_phrase_extract {
     $cmd .= " --GoodTuring $ttable_file.half.f2e.gz.coc" if $GOOD_TURING;
     $cmd .= " --KneserNey $ttable_file.half.f2e.gz.coc" if $KNESER_NEY;
     $cmd .= " --SourceLabels $_GHKM_SOURCE_LABELS_FILE" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
+    $cmd .= " --TargetSyntacticPreferences $_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE" if $_TARGET_SYNTACTIC_PREFERENCES && defined($_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE);
     $cmd .= " --PartsOfSpeech $_GHKM_PARTS_OF_SPEECH_FILE" if $_GHKM_PARTS_OF_SPEECH && defined($_GHKM_PARTS_OF_SPEECH_FILE);
 
     $cmd .= " | $GZIP_EXEC -c > $ttable_file.gz";
