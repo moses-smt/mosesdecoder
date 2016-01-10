@@ -63,7 +63,7 @@ void Search::Decode()
 		Decode(stackInd);
 		PostDecode(stackInd);
 
-		m_stack.DebugCounts();
+		//m_stack.DebugCounts();
 		//cerr << m_stacks << endl;
 	}
 
@@ -93,10 +93,15 @@ void Search::Decode(size_t stackInd)
 	// add top hypo from every edge into queue
 	CubeEdges &edges = *m_cubeEdges[stackInd];
 
+	cerr << "edges: ";
+	boost::unordered_set<const Bitmap*> uniqueBM;
 	BOOST_FOREACH(CubeEdge *edge, edges) {
-		//cerr << "edge=" << *edge << endl;
+		uniqueBM.insert(&edge->newBitmap);
+		//cerr << *edge << " ";
 		edge->CreateFirst(m_mgr, m_queue, m_seenPositions, m_queueItemRecycler);
 	}
+	cerr << edges.size() << " " << uniqueBM.size();
+	cerr << endl;
 
 	size_t pops = 0;
 	while (!m_queue.empty() && pops < m_mgr.system.popLimit) {
