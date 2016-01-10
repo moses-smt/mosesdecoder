@@ -694,19 +694,19 @@ void ExtractTask::saveTargetSyntacticPreference( const HoleCollection &holeColl,
        iterHoleList != holeColl.GetHoles().end();
        ++iterHoleList) {
 
-      const Hole &hole = *iterHoleList;
+    const Hole &hole = *iterHoleList;
 
-      int labelI = labelIndex[ 2+holeCount ];
-      string targetLabel = "X";
-      int startT = hole.GetStart(1);
-      int endT = hole.GetEnd(1);
-      if (m_sentence.targetTree.HasNode(startT,endT)) {
-        rule.targetSyntacticPreference += m_sentence.targetTree.GetNodes(startT,endT)[labelI]->label;
-        rule.targetSyntacticPreference += " ";
-      } else {
-        rule.targetSyntacticPreference += "X ";
-      }
-      ++holeCount;
+    int labelI = labelIndex[ 2+holeCount ];
+    string targetLabel = "X";
+    int startT = hole.GetStart(1);
+    int endT = hole.GetEnd(1);
+    if (m_sentence.targetTree.HasNode(startT,endT)) {
+      rule.targetSyntacticPreference += m_sentence.targetTree.GetNodes(startT,endT)[labelI]->label;
+      rule.targetSyntacticPreference += " ";
+    } else {
+      rule.targetSyntacticPreference += "X ";
+    }
+    ++holeCount;
   }
 
   rule.targetSyntacticPreference.erase(rule.targetSyntacticPreference.size()-1);

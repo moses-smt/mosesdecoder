@@ -34,8 +34,8 @@ class PropertiesConsolidator
 {
 public:
 
-  PropertiesConsolidator() 
-    : m_sourceLabelsFlag(false) 
+  PropertiesConsolidator()
+    : m_sourceLabelsFlag(false)
     , m_partsOfSpeechFlag(false)
     , m_targetSyntacticPreferencesFlag(false)
   {};

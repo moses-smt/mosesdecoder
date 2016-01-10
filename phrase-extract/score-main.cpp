@@ -212,10 +212,10 @@ int main(int argc, char* argv[])
       std::cerr << "writing target syntactic preferences label set to file " << fileNameTargetSyntacticPreferencesLabelSet << std::endl;
       fileNameLeftHandSideTargetSyntacticPreferencesLabelCounts = std::string(fileNamePhraseTable) + ".tgtpref.lhs";
       fileNameLeftHandSideRuleTargetTargetSyntacticPreferencesLabelCounts = std::string(fileNamePhraseTable) + ".tgt-tgtpref.lhs";
-      std::cerr << "counting left-hand side target syntactic preferences labels and writing them to files " 
-                << fileNameLeftHandSideTargetSyntacticPreferencesLabelCounts 
-                << " and " 
-                << fileNameLeftHandSideRuleTargetTargetSyntacticPreferencesLabelCounts 
+      std::cerr << "counting left-hand side target syntactic preferences labels and writing them to files "
+                << fileNameLeftHandSideTargetSyntacticPreferencesLabelCounts
+                << " and "
+                << fileNameLeftHandSideRuleTargetTargetSyntacticPreferencesLabelCounts
                 << std::endl;
     } else if (strcmp(argv[i],"--UnpairedExtractFormat") == 0) {
       unpairedExtractFormatFlag = true;
@@ -905,10 +905,10 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
     if (targetSyntacticPreferencesFlag) {
       std::string targetSyntacticPreferencesLabelCounts;
       targetSyntacticPreferencesLabelCounts = phrasePair.CollectAllLabelsSeparateLHSAndRHS("TargetPreferences",
-                                                                                           targetSyntacticPreferencesLabelSet,
-                                                                                           targetSyntacticPreferencesLHSCounts,
-                                                                                           ruleTargetLHSAndTargetSyntacticPreferencesLHSJointCounts,
-                                                                                           vcbT);
+                                              targetSyntacticPreferencesLabelSet,
+                                              targetSyntacticPreferencesLHSCounts,
+                                              ruleTargetLHSAndTargetSyntacticPreferencesLHSJointCounts,
+                                              vcbT);
       if (!targetSyntacticPreferencesLabelCounts.empty()) {
         phraseTableFile << " {{TargetPreferences "
                         << nNTs // for convenience: number of non-terminal symbols in this rule (incl. left hand side NT)
