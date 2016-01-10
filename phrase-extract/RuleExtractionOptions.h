@@ -46,6 +46,7 @@ public:
   bool requireAlignedWord;
   bool sourceSyntax;
   bool targetSyntax;
+  bool targetSyntacticPreferences;
   bool duplicateRules;
   bool fractionalCounting;
   bool pcfgScore;
@@ -80,6 +81,7 @@ public:
     , requireAlignedWord(true)
     , sourceSyntax(false)
     , targetSyntax(false)
+    , targetSyntacticPreferences(false)
     , duplicateRules(true)
     , fractionalCounting(true)
     , pcfgScore(false)

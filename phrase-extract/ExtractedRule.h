@@ -45,6 +45,7 @@ public:
   std::string targetContextRight;
   std::string sourceHoleString;
   std::string targetHoleString;
+  std::string targetSyntacticPreference;
   int startT;
   int endT;
   int startS;
@@ -65,6 +66,7 @@ public:
     , targetContextRight()
     , sourceHoleString()
     , targetHoleString()
+    , targetSyntacticPreference()
     , startT(sT)
     , endT(eT)
     , startS(sS)

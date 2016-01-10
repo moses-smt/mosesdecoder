@@ -79,14 +79,15 @@ private:
                      , RuleExist &ruleExist, HoleCollection &holeColl, int numHoles, int initStartF, int wordCountT, int wordCountS);
   void saveHieroPhrase( int startT, int endT, int startS, int endS
                         , HoleCollection &holeColl, LabelIndex &labelIndex, int countS);
-  string saveTargetHieroPhrase(  int startT, int endT, int startS, int endS
-                                 , WordIndex &indexT, HoleCollection &holeColl, const LabelIndex &labelIndex, double &logPCFGScore, int countS);
+  string saveTargetHieroPhrase( int startT, int endT, int startS, int endS
+                                , WordIndex &indexT, HoleCollection &holeColl, const LabelIndex &labelIndex, double &logPCFGScore, int countS);
   string saveSourceHieroPhrase( int startT, int endT, int startS, int endS
                                 , HoleCollection &holeColl, const LabelIndex &labelIndex);
   void preprocessSourceHieroPhrase( int startT, int endT, int startS, int endS
                                     , WordIndex &indexS, HoleCollection &holeColl, const LabelIndex &labelIndex);
   void saveHieroAlignment(  int startT, int endT, int startS, int endS
                             , const WordIndex &indexS, const WordIndex &indexT, HoleCollection &holeColl, ExtractedRule &rule);
+  void saveTargetSyntacticPreference( const HoleCollection &holeColl, const LabelIndex &labelIndex, ExtractedRule &rule);
   void saveAllHieroPhrases( int startT, int endT, int startS, int endS, HoleCollection &holeColl, int countS);
 
   inline string IntToString( int i ) {
@@ -225,6 +226,8 @@ int main(int argc, char* argv[])
     // allow consecutive non-terminals (X Y | X Y)
     else if (strcmp(argv[i],"--TargetSyntax") == 0) {
       options.targetSyntax = true;
+    } else if (strcmp(argv[i],"--TargetSyntacticPreferences") == 0) {
+      options.targetSyntacticPreferences = true;
     } else if (strcmp(argv[i],"--SourceSyntax") == 0) {
       options.sourceSyntax = true;
     } else if (strcmp(argv[i],"--AllowOnlyUnalignedWords") == 0) {
@@ -422,7 +425,8 @@ void ExtractTask::extractRules()
       int endT = startT + lengthT - 1;
 
       // if there is target side syntax, there has to be a node
-      if (m_options.targetSyntax && !m_sentence.targetTree.HasNode(startT,endT))
+      if (m_options.targetSyntax && !m_options.targetSyntacticPreferences && !m_sentence.targetTree.HasNode(startT,endT))
+//      if (m_options.targetSyntax && !m_sentence.targetTree.HasNode(startT,endT))
         continue;
 
       // find find aligned source words
@@ -566,7 +570,7 @@ string ExtractTask::saveTargetHieroPhrase( int startT, int endT, int startS, int
 
       int labelI = labelIndex[ 2+holeCount ];
       string targetLabel;
-      if (m_options.targetSyntax) {
+      if (m_options.targetSyntax && !m_options.targetSyntacticPreferences) {
         targetLabel = m_sentence.targetTree.GetNodes(currPos,hole.GetEnd(1))[labelI]->label;
       } else if (m_options.boundaryRules && (startS == 0 || endS == countS - 1)) {
         targetLabel = "S";
@@ -628,7 +632,7 @@ string ExtractTask::saveSourceHieroPhrase( int startT, int endT, int startS, int
       if (m_options.unpairedExtractFormat) {
         out += "[" + sourceLabel + "] ";
       } else {
-        out += "[" + sourceLabel + "][" + targetLabel + "] ";
+        out += "[" + sourceLabel + "][" + (m_options.targetSyntacticPreferences ? "X" : targetLabel) + "] ";
       }
 
       currPos = hole.GetEnd(0);
@@ -682,6 +686,33 @@ void ExtractTask::saveHieroAlignment( int startT, int endT, int startS, int endS
   }
 }
 
+void ExtractTask::saveTargetSyntacticPreference( const HoleCollection &holeColl, const LabelIndex &labelIndex, ExtractedRule &rule)
+{
+  rule.targetSyntacticPreference = "";
+  int holeCount = 0;
+  for (HoleList::const_iterator iterHoleList = holeColl.GetHoles().begin();
+       iterHoleList != holeColl.GetHoles().end();
+       ++iterHoleList) {
+
+    const Hole &hole = *iterHoleList;
+
+    int labelI = labelIndex[ 2+holeCount ];
+    string targetLabel = "X";
+    int startT = hole.GetStart(1);
+    int endT = hole.GetEnd(1);
+    if (m_sentence.targetTree.HasNode(startT,endT)) {
+      rule.targetSyntacticPreference += m_sentence.targetTree.GetNodes(startT,endT)[labelI]->label;
+      rule.targetSyntacticPreference += " ";
+    } else {
+      rule.targetSyntacticPreference += "X ";
+    }
+    ++holeCount;
+  }
+
+  rule.targetSyntacticPreference.erase(rule.targetSyntacticPreference.size()-1);
+}
+
+
 void ExtractTask::saveHieroPhrase( int startT, int endT, int startS, int endS
                                    , HoleCollection &holeColl, LabelIndex &labelIndex, int countS)
 {
@@ -691,7 +722,8 @@ void ExtractTask::saveHieroPhrase( int startT, int endT, int startS, int endS
 
   // phrase labels
   string targetLabel;
-  if (m_options.targetSyntax) {
+//  if (m_options.targetSyntax && m_sentence.targetTree.HasNode(startT,endT)) {
+  if (m_options.targetSyntax && !m_options.targetSyntacticPreferences) {
     targetLabel = m_sentence.targetTree.GetNodes(startT,endT)[labelIndex[0] ]->label;
   } else if (m_options.boundaryRules && (startS == 0 || endS == countS - 1)) {
     targetLabel = "S";
@@ -776,6 +808,17 @@ void ExtractTask::saveHieroPhrase( int startT, int endT, int startS, int endS
     // std::cerr << "phraseOrientationR2L " << m_phraseOrientation.GetOrientationInfo(startS,endS,PhraseOrientation::REO_DIR_R2L) << std::endl;
   }
 
+  // target syntactic preferences
+  if (m_options.targetSyntacticPreferences) {
+    saveTargetSyntacticPreference(holeColl, labelIndex, rule);
+    if (m_sentence.targetTree.HasNode(startT,endT)) {
+      rule.targetSyntacticPreference += " ";
+      rule.targetSyntacticPreference += m_sentence.targetTree.GetNodes(startT,endT)[labelIndex[0] ]->label;
+    } else {
+      rule.targetSyntacticPreference += " X";
+    }
+  }
+
   addRuleToCollection( rule );
 }
 
@@ -785,6 +828,9 @@ void ExtractTask::saveAllHieroPhrases( int startT, int endT, int startS, int end
 
   // number of target head labels
   int numLabels = m_options.targetSyntax ? m_sentence.targetTree.GetNodes(startT,endT).size() : 1;
+  if (m_options.targetSyntacticPreferences && !numLabels) {
+    numLabels++;
+  }
   labelCount.push_back(numLabels);
   labelIndex.push_back(0);
 
@@ -796,7 +842,10 @@ void ExtractTask::saveAllHieroPhrases( int startT, int endT, int startS, int end
   // number of target hole labels
   for( HoleList::const_iterator hole = holeColl.GetHoles().begin();
        hole != holeColl.GetHoles().end(); hole++ ) {
-    int numLabels =  m_options.targetSyntax ? m_sentence.targetTree.GetNodes(hole->GetStart(1),hole->GetEnd(1)).size() : 1 ;
+    int numLabels = m_options.targetSyntax ? m_sentence.targetTree.GetNodes(hole->GetStart(1),hole->GetEnd(1)).size() : 1 ;
+    if (m_options.targetSyntacticPreferences && !numLabels) {
+      numLabels++;
+    }
     labelCount.push_back(numLabels);
     labelIndex.push_back(0);
   }
@@ -973,12 +1022,19 @@ void ExtractTask::addRule( int startT, int endT, int startS, int endS, int count
   // phrase labels
   string targetLabel,sourceLabel;
   if (m_options.targetSyntax && m_options.conditionOnTargetLhs) {
-    sourceLabel = targetLabel = m_sentence.targetTree.GetNodes(startT,endT)[0]->label;
+    if (m_sentence.targetTree.HasNode(startT,endT) && !m_options.targetSyntacticPreferences) {
+      sourceLabel = targetLabel = m_sentence.targetTree.GetNodes(startT,endT)[0]->label;
+    } else if (m_options.boundaryRules && (startS == 0 || endS == countS - 1)) {
+      sourceLabel = "S";
+    } else {
+      sourceLabel = "X";
+    }
   } else {
     sourceLabel = m_options.sourceSyntax ?
                   m_sentence.sourceTree.GetNodes(startS,endS)[0]->label : "X";
 
-    if (m_options.targetSyntax) {
+    if (m_options.targetSyntax && !m_options.targetSyntacticPreferences) {
+//      if (m_options.targetSyntax && !m_options.targetSyntacticPreferences && !m_sentence.targetTree.HasNode(startT,endT))
       targetLabel = m_sentence.targetTree.GetNodes(startT,endT)[0]->label;
     } else if (m_options.boundaryRules && (startS == 0 || endS == countS - 1)) {
       targetLabel = "S";
@@ -1035,6 +1091,15 @@ void ExtractTask::addRule( int startT, int endT, int startS, int endS, int count
     // std::cerr << "span " << startS << " " << endS << std::endl;
     // std::cerr << "phraseOrientationL2R " << m_phraseOrientation.GetOrientationInfo(startS,endS,PhraseOrientation::REO_DIR_L2R) << std::endl;
     // std::cerr << "phraseOrientationR2L " << m_phraseOrientation.GetOrientationInfo(startS,endS,PhraseOrientation::REO_DIR_R2L) << std::endl;
+  }
+
+  // target syntactic preferences
+  if (m_options.targetSyntacticPreferences) {
+    if (m_sentence.targetTree.HasNode(startT,endT)) {
+      rule.targetSyntacticPreference += m_sentence.targetTree.GetNodes(startT,endT)[0]->label;
+    } else {
+      rule.targetSyntacticPreference += "X";
+    }
   }
 
   addRuleToCollection( rule );
@@ -1114,6 +1179,11 @@ void ExtractTask::writeRulesToFile()
       m_phraseOrientation.IncrementPriorCount(PhraseOrientation::REO_DIR_R2L,rule->r2lOrientation,1);
       out << "}}";
     }
+    if (m_options.targetSyntacticPreferences) {
+      out << " {{TargetPreferences ";
+      out << rule->targetSyntacticPreference;
+      out << "}}";
+    }
     out << "\n";
 
     if (!m_options.onlyDirectFlag) {
@@ -1167,12 +1237,12 @@ void writeGlueGrammar( const string & fileName, RuleExtractionOptions &options, 
   if (options.phraseOrientation) {
     glueRulesPhraseProperty.append(" ||| ||| {{Orientation 1 1 0.5 0.5 1 1 0.5 0.5}}");
   }
-  if (!options.targetSyntax) {
+  if (!options.targetSyntax || options.targetSyntacticPreferences) {
     grammarFile << "<s> [X] ||| <s> [S] ||| 1 ||| 0-0 ||| 0" << glueRulesPhraseProperty << endl
                 << "[X][S] </s> [X] ||| [X][S] </s> [S] ||| 1 ||| 0-0 1-1 ||| 0" << glueRulesPhraseProperty << endl
                 << "[X][S] [X][X] [X] ||| [X][S] [X][X] [S] ||| 2.718 ||| 0-0 1-1 ||| 0" << glueRulesPhraseProperty << endl;
   } else {
-    // chose a top label that is not already a label
+    // choose a top label that is not already a label
     string topLabel = "QQQQQQ";
     for( unsigned int i=1; i<=topLabel.length(); i++) {
       if(targetLabelCollection.find( topLabel.substr(0,i) ) == targetLabelCollection.end() ) {
@@ -1202,7 +1272,7 @@ void writeGlueGrammar( const string & fileName, RuleExtractionOptions &options, 
 
 // collect counts for labels for each word
 // ( labels of singleton words are used to estimate
-//   distribution oflabels for unknown words )
+//   distribution of labels for unknown words )
 
 map<string,int> wordCount;
 map<string,string> wordLabel;
