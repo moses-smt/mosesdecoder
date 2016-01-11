@@ -68,9 +68,12 @@ void Search::Decode()
 
 void Search::Decode(size_t stackInd)
 {
+  NSCubePruning::Stack &stack = m_stacks[stackInd];
+
+  /*
+  // FOR EACH BITMAP IN EACH STACK
   boost::unordered_map<const Bitmap*, vector<NSCubePruning::MiniStack*> > uniqueBM;
 
-  NSCubePruning::Stack &stack = m_stacks[stackInd];
   BOOST_FOREACH(NSCubePruning::Stack::Coll::value_type &val, stack.GetColl()) {
 	  NSCubePruning::MiniStack &miniStack = *val.second;
 
@@ -84,6 +87,16 @@ void Search::Decode(size_t stackInd)
 	  const vector<NSCubePruning::MiniStack*> &miniStacks = iter->second;
 	  Decode(miniStacks);
   }
+  */
+
+  // FOR EACH STACK
+  vector<NSCubePruning::MiniStack*> miniStacks;
+  BOOST_FOREACH(NSCubePruning::Stack::Coll::value_type &val, stack.GetColl()) {
+	  NSCubePruning::MiniStack &miniStack = *val.second;
+
+	  miniStacks.push_back(&miniStack);
+  }
+  Decode(miniStacks);
 }
 
 void Search::Decode(const vector<NSCubePruning::MiniStack*> &miniStacks)
