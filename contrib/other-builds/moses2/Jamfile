@@ -57,6 +57,10 @@ external-lib boost_serialization ;
  	 	Search/CubePruning/Search.cpp
  	 	Search/CubePruning/Stack.cpp 
 
+ 	 	Search/CubePruningCardinalStack/Misc.cpp
+ 	 	Search/CubePruningCardinalStack/Search.cpp
+ 	 	Search/CubePruningCardinalStack/Stack.cpp
+
  	 	Search/CubePruningPerBitmap/Misc.cpp
  	 	Search/CubePruningPerBitmap/Search.cpp
  	 	Search/CubePruningPerBitmap/Stacks.cpp
