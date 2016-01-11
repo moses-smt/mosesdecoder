@@ -697,14 +697,13 @@ void ExtractTask::saveTargetSyntacticPreference( const HoleCollection &holeColl,
     const Hole &hole = *iterHoleList;
 
     int labelI = labelIndex[ 2+holeCount ];
-    string targetLabel = "X";
     int startT = hole.GetStart(1);
     int endT = hole.GetEnd(1);
     if (m_sentence.targetTree.HasNode(startT,endT)) {
       rule.targetSyntacticPreference += m_sentence.targetTree.GetNodes(startT,endT)[labelI]->label;
       rule.targetSyntacticPreference += " ";
     } else {
-      rule.targetSyntacticPreference += "X ";
+      rule.targetSyntacticPreference += "XRHS ";
     }
     ++holeCount;
   }
@@ -815,7 +814,7 @@ void ExtractTask::saveHieroPhrase( int startT, int endT, int startS, int endS
       rule.targetSyntacticPreference += " ";
       rule.targetSyntacticPreference += m_sentence.targetTree.GetNodes(startT,endT)[labelIndex[0] ]->label;
     } else {
-      rule.targetSyntacticPreference += " X";
+      rule.targetSyntacticPreference += " XLHS";
     }
   }
 
@@ -1098,7 +1097,7 @@ void ExtractTask::addRule( int startT, int endT, int startS, int endS, int count
     if (m_sentence.targetTree.HasNode(startT,endT)) {
       rule.targetSyntacticPreference += m_sentence.targetTree.GetNodes(startT,endT)[0]->label;
     } else {
-      rule.targetSyntacticPreference += "X";
+      rule.targetSyntacticPreference += "XLHS";
     }
   }
 
@@ -1233,14 +1232,30 @@ void writeGlueGrammar( const string & fileName, RuleExtractionOptions &options, 
 {
   ofstream grammarFile;
   grammarFile.open(fileName.c_str());
+
   std::string glueRulesPhraseProperty = "";
   if (options.phraseOrientation) {
-    glueRulesPhraseProperty.append(" ||| ||| {{Orientation 1 1 0.5 0.5 1 1 0.5 0.5}}");
+    glueRulesPhraseProperty.append(" {{Orientation 1 1 0.5 0.5 1 1 0.5 0.5}}");
   }
+  const size_t targetSyntacticPreferencesLabelGlueTop = 0;
+  const size_t targetSyntacticPreferencesLabelGlueX = 1;
+
   if (!options.targetSyntax || options.targetSyntacticPreferences) {
-    grammarFile << "<s> [X] ||| <s> [S] ||| 1 ||| 0-0 ||| 0" << glueRulesPhraseProperty << endl
-                << "[X][S] </s> [X] ||| [X][S] </s> [S] ||| 1 ||| 0-0 1-1 ||| 0" << glueRulesPhraseProperty << endl
-                << "[X][S] [X][X] [X] ||| [X][S] [X][X] [S] ||| 2.718 ||| 0-0 1-1 ||| 0" << glueRulesPhraseProperty << endl;
+    grammarFile << "<s> [X] ||| <s> [S] ||| 1 ||| 0-0 ||| 0 ||| |||" << glueRulesPhraseProperty;
+    if (options.targetSyntacticPreferences) {
+      grammarFile << " {{TargetPreferences 1 1 " << targetSyntacticPreferencesLabelGlueTop << " 1}}";
+    }
+    grammarFile << std::endl;
+    grammarFile << "[X][S] </s> [X] ||| [X][S] </s> [S] ||| 1 ||| 0-0 1-1 ||| 0 ||| |||" << glueRulesPhraseProperty;
+    if (options.targetSyntacticPreferences) {
+      grammarFile << " {{TargetPreferences 2 1 " << targetSyntacticPreferencesLabelGlueTop << " 1 1 " << targetSyntacticPreferencesLabelGlueTop << " 1}}";
+    }
+    grammarFile << std::endl;
+    grammarFile << "[X][S] [X][X] [X] ||| [X][S] [X][X] [S] ||| 2.718 ||| 0-0 1-1 ||| 0 ||| |||" << glueRulesPhraseProperty;
+    if (options.targetSyntacticPreferences) {
+      grammarFile << " {{TargetPreferences 3 1 " << targetSyntacticPreferencesLabelGlueTop << " " << targetSyntacticPreferencesLabelGlueX << " 1 1 " << targetSyntacticPreferencesLabelGlueTop << " 1}}";
+    }
+    grammarFile << std::endl;
   } else {
     // choose a top label that is not already a label
     string topLabel = "QQQQQQ";
@@ -1251,21 +1266,21 @@ void writeGlueGrammar( const string & fileName, RuleExtractionOptions &options, 
       }
     }
     // basic rules
-    grammarFile << "<s> [X] ||| <s> [" << topLabel << "] ||| 1  ||| 0-0" << endl
-                << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 1-1" << endl;
+    grammarFile << "<s> [X] ||| <s> [" << topLabel << "] ||| 1  ||| 0-0" << std::endl
+                << "[X][" << topLabel << "] </s> [X] ||| [X][" << topLabel << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 1-1" << std::endl;
 
     // top rules
     for( map<string,int>::const_iterator i =  targetTopLabelCollection.begin();
          i !=  targetTopLabelCollection.end(); i++ ) {
-      grammarFile << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 1-1 2-2" << endl;
+      grammarFile << "<s> [X][" << i->first << "] </s> [X] ||| <s> [X][" << i->first << "] </s> [" << topLabel << "] ||| 1 ||| 0-0 1-1 2-2" << std::endl;
     }
 
     // glue rules
     for( set<string>::const_iterator i =  targetLabelCollection.begin();
          i !=  targetLabelCollection.end(); i++ ) {
-      grammarFile << "[X][" << topLabel << "] [X][" << *i << "] [X] ||| [X][" << topLabel << "] [X][" << *i << "] [" << topLabel << "] ||| 2.718 ||| 0-0 1-1" << endl;
+      grammarFile << "[X][" << topLabel << "] [X][" << *i << "] [X] ||| [X][" << topLabel << "] [X][" << *i << "] [" << topLabel << "] ||| 2.718 ||| 0-0 1-1" << std::endl;
     }
-    grammarFile << "[X][" << topLabel << "] [X][X] [X] ||| [X][" << topLabel << "] [X][X] [" << topLabel << "] ||| 2.718 |||  0-0 1-1 " << endl; // glue rule for unknown word...
+    grammarFile << "[X][" << topLabel << "] [X][X] [X] ||| [X][" << topLabel << "] [X][X] [" << topLabel << "] ||| 2.718 |||  0-0 1-1 " << std::endl; // glue rule for unknown word...
   }
   grammarFile.close();
 }
