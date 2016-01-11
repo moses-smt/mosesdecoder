@@ -159,7 +159,9 @@ int
 run_as_server()
 {
 #ifdef HAVE_XMLRPC_C
-  kill(getppid(),SIGALRM);
+  if (params.GetParam("daemon")) {
+    kill(getppid(),SIGALRM);
+  }
   MosesServer::Server server(params);
   return server.run(); // actually: don't return. see Server::run()
 #else
