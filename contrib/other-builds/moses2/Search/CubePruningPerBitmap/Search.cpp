@@ -68,15 +68,25 @@ void Search::Decode()
 
 void Search::Decode(size_t stackInd)
 {
+  boost::unordered_map<const Bitmap*, vector<NSCubePruning::MiniStack*> > uniqueBM;
+
   NSCubePruning::Stack &stack = m_stacks[stackInd];
   BOOST_FOREACH(NSCubePruning::Stack::Coll::value_type &val, stack.GetColl()) {
 	  NSCubePruning::MiniStack &miniStack = *val.second;
-	  Decode(miniStack);
+
+	  const Bitmap *bitmap = val.first.first;
+	  uniqueBM[bitmap].push_back(&miniStack);
   }
 
+  // decode each bitmap
+  boost::unordered_map<const Bitmap*, vector<NSCubePruning::MiniStack*> >::iterator iter;
+  for (iter = uniqueBM.begin(); iter != uniqueBM.end(); ++iter) {
+	  const vector<NSCubePruning::MiniStack*> &miniStacks = iter->second;
+	  Decode(miniStacks);
+  }
 }
 
-void Search::Decode(NSCubePruning::MiniStack &miniStack)
+void Search::Decode(const vector<NSCubePruning::MiniStack*> &miniStacks)
 {
 	Recycler<Hypothesis*> &hypoRecycler  = m_mgr.GetHypoRecycle();
 
@@ -97,12 +107,14 @@ void Search::Decode(NSCubePruning::MiniStack &miniStack)
 
 	//Prefetch(stackInd);
 
-	// add top hypo from every edge into queue
-	CubeEdges &edges = *m_cubeEdges[&miniStack];
+	BOOST_FOREACH(NSCubePruning::MiniStack *miniStack, miniStacks) {
+		// add top hypo from every edge into queue
+		CubeEdges &edges = *m_cubeEdges[miniStack];
 
-	BOOST_FOREACH(CubeEdge *edge, edges) {
-		//cerr << "edge=" << *edge << endl;
-		edge->CreateFirst(m_mgr, m_queue, m_seenPositions, m_queueItemRecycler);
+		BOOST_FOREACH(CubeEdge *edge, edges) {
+			//cerr << "edge=" << *edge << endl;
+			edge->CreateFirst(m_mgr, m_queue, m_seenPositions, m_queueItemRecycler);
+		}
 	}
 
 	size_t pops = 0;

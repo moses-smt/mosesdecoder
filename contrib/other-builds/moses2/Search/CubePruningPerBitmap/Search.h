@@ -56,7 +56,7 @@ protected:
 	// decoding
 	void CreateSearchGraph(size_t stackInd);
 	void Decode(size_t stackInd);
-	void Decode(NSCubePruning::MiniStack &miniStack);
+	void Decode(const std::vector<NSCubePruning::MiniStack*> &miniStacks);
 
 	void DebugCounts();
 };
