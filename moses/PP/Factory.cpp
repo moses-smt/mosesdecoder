@@ -6,6 +6,7 @@
 
 #include "moses/PP/CountsPhraseProperty.h"
 #include "moses/PP/SourceLabelsPhraseProperty.h"
+#include "moses/PP/TargetPreferencesPhraseProperty.h"
 #include "moses/PP/TreeStructurePhraseProperty.h"
 #include "moses/PP/SpanLengthPhraseProperty.h"
 #include "moses/PP/NonTermContextProperty.h"
@@ -57,6 +58,7 @@ PhrasePropertyFactory::PhrasePropertyFactory()
 
   MOSES_PNAME2("Counts", CountsPhraseProperty);
   MOSES_PNAME2("SourceLabels", SourceLabelsPhraseProperty);
+  MOSES_PNAME2("TargetPreferences", TargetPreferencesPhraseProperty);
   MOSES_PNAME2("Tree",TreeStructurePhraseProperty);
   MOSES_PNAME2("SpanLength", SpanLengthPhraseProperty);
   MOSES_PNAME2("NonTermContext", NonTermContextProperty);

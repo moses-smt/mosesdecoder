@@ -314,7 +314,7 @@ if (!$inverse && defined($partsOfSpeechFile))
 # merge target syntactic preferences labels files
 if (!$inverse && defined($targetSyntacticPreferencesLabelsFile))
 {
-  my $cmd = "(echo \"GlueTop 0\"; echo \"GlueX 1\"; echo \"SSTART 2\"; echo \"SEND 3\"; cat $TMPDIR/phrase-table.half.*.gz.syntaxLabels.tgtpref | LC_ALL=C sort | uniq | perl -pe \"s/\$/ \@{[\$.+3]}/\") > $targetSyntacticPreferencesLabelsFile";
+  my $cmd = "(echo \"GlueTop 0\"; echo \"GlueX 1\"; cat $TMPDIR/phrase-table.half.*.gz.syntaxLabels.tgtpref | LC_ALL=C sort | uniq | perl -pe \"s/\$/ \@{[\$.+3]}/\") > $targetSyntacticPreferencesLabelsFile";
   print STDERR "Merging target syntactic preferences labels files: $cmd \n";
   `$cmd`;
 }
