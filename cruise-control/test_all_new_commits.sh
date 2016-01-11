@@ -148,7 +148,7 @@ function run_single_test () {
       cd ..
       touch giza-pp.ok
     fi
-    ./bjam $MCC_CONFIGURE_ARGS --with-giza="$(pwd)/giza-pp/bin" || err="bjam with-giza"
+    ./bjam $MCC_CONFIGURE_ARGS" || err="bjam"
     srilm_dir=$(echo $MCC_CONFIGURE_ARGS | sed -r 's/.*--with-srilm=([^ ]+) .*/\1/')
     mach_type=$($srilm_dir/sbin/machine-type)
     mkdir -p "$WORKDIR/ems_workdir"
