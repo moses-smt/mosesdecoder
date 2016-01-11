@@ -47,6 +47,7 @@ enum SearchAlgorithm {
   SyntaxT2S_SCFG = 8,
   SyntaxF2S = 9,
   CubePruningPerMiniStack = 10,
+  CubePruningPerBitmap = 11,
   DefaultSearchAlgorithm = 777 // means: use StaticData.m_searchAlgorithm
 };
 
