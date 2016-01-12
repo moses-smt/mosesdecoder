@@ -1723,8 +1723,8 @@ OutputSurface(std::ostream &out, Hypothesis const& edge, bool const recursive) c
     out << *factor;
     for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
       const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
-      UTIL_THROW_IF2(factor==NULL,"No factor "<<i<<" at position "<< pos);
-      out << fd << *factor;
+      if (factor) out << fd << *factor;
+      else        out << fd << UNKNOWN_FACTOR;
     }
 
     if(markUnknown && word.IsOOV()) {
