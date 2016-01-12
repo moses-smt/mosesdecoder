@@ -78,6 +78,8 @@ protected:
     return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
   }
 
+  std::vector<lm::WordIndex> m_lmIdLookup;
+
 private:
   LanguageModelKen(const LanguageModelKen<Model> &copy_from);
 
@@ -96,7 +98,6 @@ private:
     }
   }
 
-  std::vector<lm::WordIndex> m_lmIdLookup;
 
 protected:
   //bool m_oovFeatureEnabled; /// originally from LanguageModel, copied here to separate the interfaces. Called m_enableOOVFeature there
