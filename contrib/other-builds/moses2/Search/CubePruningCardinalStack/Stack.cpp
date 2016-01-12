@@ -89,7 +89,9 @@ void Stack::Clear()
 Stack::SortedHypos Stack::GetSortedAndPruneHypos(const Manager &mgr) const
 {
   SortedHypos ret;
-/*
+
+  MemPool &pool = mgr.GetPool();
+
   // divide hypos by [bitmap, last end pos]
   BOOST_FOREACH(const Hypothesis *hypo, m_coll) {
 	  HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
@@ -98,29 +100,21 @@ Stack::SortedHypos Stack::GetSortedAndPruneHypos(const Manager &mgr) const
 	  SortedHypos::const_iterator iter;
 	  iter = ret.find(key);
 	  if (iter == ret.end()) {
-		  hypos = new (pool.Allocate< Vector<const Hypothesis*> >()) Vector<const Hypothesis*>(pool, m_coll.size());
+		  hypos = new (pool.Allocate<Hypotheses>()) Hypotheses(pool, m_coll.size());
 	  }
 	  ret[key]->push_back(hypo);
   }
-*/
-  if (m_sortedHypos == NULL) {
-    // create sortedHypos first
-    MemPool &pool = mgr.GetPool();
-	m_sortedHypos = new (pool.Allocate< Vector<const Hypothesis*> >()) Vector<const Hypothesis*>(pool, m_coll.size());
 
-	  size_t ind = 0;
-	  BOOST_FOREACH(const Hypothesis *hypo, m_coll) {
-		  (*m_sortedHypos)[ind] = hypo;
-		  ++ind;
-	  }
-
-    SortAndPruneHypos(mgr);
+  // sort each pool
+  BOOST_FOREACH(SortedHypos::value_type &val, ret) {
+	  Hypotheses *hypos = val.second;
+	  SortAndPruneHypos(mgr, *hypos);
   }
 
   return ret;
 }
 
-void Stack::SortAndPruneHypos(const Manager &mgr) const
+void Stack::SortAndPruneHypos(const Manager &mgr, Hypotheses &hypos) const
 {
   size_t stackSize = mgr.system.stackSize;
   Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycle();
@@ -134,20 +128,20 @@ void Stack::SortAndPruneHypos(const Manager &mgr) const
   cerr << endl;
   */
   Hypotheses::iterator iterMiddle;
-  iterMiddle = (stackSize == 0 || m_sortedHypos->size() < stackSize)
-			   ? m_sortedHypos->end()
-			   : m_sortedHypos->begin() + stackSize;
+  iterMiddle = (stackSize == 0 || hypos.size() < stackSize)
+			   ? hypos.end()
+			   : hypos.begin() + stackSize;
 
-  std::partial_sort(m_sortedHypos->begin(), iterMiddle, m_sortedHypos->end(),
+  std::partial_sort(hypos.begin(), iterMiddle, hypos.end(),
 		  HypothesisFutureScoreOrderer());
 
   // prune
-  if (stackSize && m_sortedHypos->size() > stackSize) {
-	  for (size_t i = stackSize; i < m_sortedHypos->size(); ++i) {
-		  Hypothesis *hypo = const_cast<Hypothesis*>((*m_sortedHypos)[i]);
+  if (stackSize && hypos.size() > stackSize) {
+	  for (size_t i = stackSize; i < hypos.size(); ++i) {
+		  Hypothesis *hypo = const_cast<Hypothesis*>(hypos[i]);
 		  recycler.Recycle(hypo);
 	  }
-	  m_sortedHypos->resize(stackSize);
+	  hypos.resize(stackSize);
   }
 
   /*

@@ -54,13 +54,11 @@ public:
 	void Clear();
 
 	SortedHypos GetSortedAndPruneHypos(const Manager &mgr) const;
-	void SortAndPruneHypos(const Manager &mgr) const;
+	void SortAndPruneHypos(const Manager &mgr, Hypotheses &hypos) const;
 
 protected:
 	const Manager &m_mgr;
 	_HCType m_coll;
-
-	mutable Hypotheses *m_sortedHypos;
 
 };
 
