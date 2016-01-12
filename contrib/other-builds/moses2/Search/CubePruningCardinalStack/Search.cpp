@@ -160,6 +160,7 @@ void Search::PostDecode(size_t stackInd)
 {
   MemPool &pool = m_mgr.GetPool();
 
+  /*
   BOOST_FOREACH(const Stack::Coll::value_type &val, m_stack.GetColl()) {
 	  const Bitmap &hypoBitmap = *val.first.first;
 	  size_t hypoEndPos = val.first.second;
@@ -195,6 +196,7 @@ void Search::PostDecode(size_t stackInd)
   		}
   	  }
   }
+  */
 }
 
 const Hypothesis *Search::GetBestHypothesis() const

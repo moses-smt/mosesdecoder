@@ -24,51 +24,17 @@ namespace NSCubePruningCardinalStack
 {
 typedef Vector<const Hypothesis*>  Hypotheses;
 
-class MiniStack
-{
-public:
+
+/////////////////////////////////////////////
+class Stack {
+protected:
 	typedef boost::unordered_set<const Hypothesis*,
 			  UnorderedComparer<Hypothesis>,
 			  UnorderedComparer<Hypothesis>,
 			  MemPoolAllocator<const Hypothesis*>
 			   > _HCType;
 
-	MiniStack(const Manager &mgr);
-
-	StackAdd Add(const Hypothesis *hypo);
-
-	_HCType &GetColl()
-	{ return m_coll; }
-
-	const _HCType &GetColl() const
-	{ return m_coll; }
-
-	void Clear();
-
-	Hypotheses &GetSortedAndPruneHypos(const Manager &mgr) const;
-
-protected:
-	_HCType m_coll;
-	mutable Hypotheses *m_sortedHypos;
-
-	void SortAndPruneHypos(const Manager &mgr) const;
-
-};
-
-/////////////////////////////////////////////
-class Stack {
-protected:
-
-
 public:
-  typedef std::pair<const Bitmap*, size_t> HypoCoverage;
-		  // bitmap and current endPos of hypos
-
-  typedef boost::unordered_map<HypoCoverage, MiniStack*
-		  ,boost::hash<HypoCoverage>
-		  ,std::equal_to<HypoCoverage>
-		  ,MemPoolAllocator< std::pair<HypoCoverage, MiniStack*> >
-  	  	  > Coll;
 
 
 	Stack(const Manager &mgr);
@@ -76,24 +42,24 @@ public:
 
 	size_t GetHypoSize() const;
 
-	Coll &GetColl()
+	_HCType &GetColl()
 	{ return m_coll; }
-	const Coll &GetColl() const
+	const _HCType &GetColl() const
 	{ return m_coll; }
 
 	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
 
-	MiniStack &GetMiniStack(const HypoCoverage &key);
-
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
 	void Clear();
 
+	Hypotheses &GetSortedAndPruneHypos(const Manager &mgr) const;
+	void SortAndPruneHypos(const Manager &mgr) const;
+
 protected:
 	const Manager &m_mgr;
-	Coll m_coll;
+	_HCType m_coll;
 
-	std::deque<MiniStack*, MemPoolAllocator<MiniStack*> > m_miniStackRecycler;
-
+	mutable Hypotheses *m_sortedHypos;
 
 };
 

@@ -19,19 +19,25 @@ namespace Moses2
 
 namespace NSCubePruningCardinalStack
 {
-MiniStack::MiniStack(const Manager &mgr)
-:m_coll(MemPoolAllocator<const Hypothesis*>(mgr.GetPool()))
-,m_sortedHypos(NULL)
-{}
 
-StackAdd MiniStack::Add(const Hypothesis *hypo)
+///////////////////////////////////////////////////////////////
+Stack::Stack(const Manager &mgr)
+:m_mgr(mgr)
+,m_coll(MemPoolAllocator<const Hypothesis*>(mgr.GetPool()))
+{
+}
+
+Stack::~Stack() {
+	// TODO Auto-generated destructor stub
+}
+
+void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 {
   std::pair<_HCType::iterator, bool> addRet = m_coll.insert(hypo);
 
   // CHECK RECOMBINATION
   if (addRet.second) {
 	// equiv hypo doesn't exists
-	return StackAdd(true, NULL);
   }
   else {
 	  const Hypothesis *hypoExisting = *addRet.first;
@@ -42,19 +48,45 @@ StackAdd MiniStack::Add(const Hypothesis *hypo)
 		  hypoExisting2 = hypo;
 
 		  //hypoExisting->Prefetch();
-
-		  return StackAdd(true, const_cast<Hypothesis*>(hypoExisting));
+		  Hypothesis *hypoToBeDeleted = const_cast<Hypothesis*>(hypoExisting);
+		  hypoRecycle.Recycle(hypoToBeDeleted);
 	  }
 	  else {
 		  // already storing the best hypo. discard incoming hypo
-		  return StackAdd(false, const_cast<Hypothesis*>(hypo));
+		  Hypothesis *hypoToBeDeleted = const_cast<Hypothesis*>(hypo);
+		  hypoRecycle.Recycle(hypoToBeDeleted);
 	  }
   }
-
-  assert(false);
 }
 
-Hypotheses &MiniStack::GetSortedAndPruneHypos(const Manager &mgr) const
+std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
+{
+  std::vector<const Hypothesis*> ret;
+  ret.insert(ret.end(), m_coll.begin(), m_coll.end());
+
+  std::vector<const Hypothesis*>::iterator iterMiddle;
+  iterMiddle = (num == 0 || ret.size() < num)
+			   ? ret.end()
+			   : ret.begin()+num;
+
+  std::partial_sort(ret.begin(), iterMiddle, ret.end(),
+		  HypothesisFutureScoreOrderer());
+
+  return ret;
+}
+
+size_t Stack::GetHypoSize() const
+{
+	return m_coll.size();
+}
+
+void Stack::Clear()
+{
+
+	m_coll.clear();
+}
+
+Hypotheses &Stack::GetSortedAndPruneHypos(const Manager &mgr) const
 {
   if (m_sortedHypos == NULL) {
     // create sortedHypos first
@@ -73,7 +105,7 @@ Hypotheses &MiniStack::GetSortedAndPruneHypos(const Manager &mgr) const
   return *m_sortedHypos;
 }
 
-void MiniStack::SortAndPruneHypos(const Manager &mgr) const
+void Stack::SortAndPruneHypos(const Manager &mgr) const
 {
   size_t stackSize = mgr.system.stackSize;
   Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycle();
@@ -114,94 +146,6 @@ void MiniStack::SortAndPruneHypos(const Manager &mgr) const
 
 }
 
-void MiniStack::Clear()
-{
-	m_sortedHypos = NULL;
-	m_coll.clear();
-}
-
-///////////////////////////////////////////////////////////////
-Stack::Stack(const Manager &mgr)
-:m_mgr(mgr)
-,m_coll(MemPoolAllocator< std::pair<HypoCoverage, MiniStack*> >(mgr.GetPool()))
-,m_miniStackRecycler(MemPoolAllocator<MiniStack*>(mgr.GetPool()))
-{
-}
-
-Stack::~Stack() {
-	// TODO Auto-generated destructor stub
-}
-
-void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
-{
-  HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
-  StackAdd added = GetMiniStack(key).Add(hypo);
-
-  if (added.toBeDeleted) {
-	hypoRecycle.Recycle(added.toBeDeleted);
-  }
-}
-
-std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
-{
-  std::vector<const Hypothesis*> ret;
-  BOOST_FOREACH(const Coll::value_type &val, m_coll) {
-		const MiniStack::_HCType &hypos = val.second->GetColl();
-		ret.insert(ret.end(), hypos.begin(), hypos.end());
-  }
-
-  std::vector<const Hypothesis*>::iterator iterMiddle;
-  iterMiddle = (num == 0 || ret.size() < num)
-			   ? ret.end()
-			   : ret.begin()+num;
-
-  std::partial_sort(ret.begin(), iterMiddle, ret.end(),
-		  HypothesisFutureScoreOrderer());
-
-  return ret;
-}
-
-size_t Stack::GetHypoSize() const
-{
-	size_t ret = 0;
-	BOOST_FOREACH(const Coll::value_type &val, m_coll) {
-		const MiniStack::_HCType &hypos = val.second->GetColl();
-		ret += hypos.size();
-	}
-	return ret;
-}
-
-MiniStack &Stack::GetMiniStack(const HypoCoverage &key)
-{
-	MiniStack *ret;
-	Coll::iterator iter = m_coll.find(key);
-	if (iter == m_coll.end()) {
-		if (m_miniStackRecycler.empty()) {
-			ret = new (m_mgr.GetPool().Allocate<MiniStack>()) MiniStack(m_mgr);
-		}
-		else {
-			ret = m_miniStackRecycler.back();
-			ret->Clear();
-			m_miniStackRecycler.pop_back();
-		}
-
-		m_coll[key] = ret;
-	}
-	else {
-		ret = iter->second;
-	}
-	return *ret;
-}
-
-void Stack::Clear()
-{
-	BOOST_FOREACH(const Coll::value_type &val, m_coll) {
-		MiniStack *miniStack = val.second;
-		m_miniStackRecycler.push_back(miniStack);
-	}
-
-	m_coll.clear();
-}
 
 }
 
