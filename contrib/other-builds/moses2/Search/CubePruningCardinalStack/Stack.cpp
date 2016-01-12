@@ -88,8 +88,7 @@ void Stack::Clear()
 
 Stack::SortedHypos Stack::GetSortedAndPruneHypos(const Manager &mgr) const
 {
-  typedef boost::unordered_map<HypoCoverage, vector<const Hypothesis*> > SortedHypos2;
-  SortedHypos2 ret2;
+  SortedHypos ret;
 
   MemPool &pool = mgr.GetPool();
 
@@ -97,23 +96,23 @@ Stack::SortedHypos Stack::GetSortedAndPruneHypos(const Manager &mgr) const
   BOOST_FOREACH(const Hypothesis *hypo, m_coll) {
 	  HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
 
-	  vector<const Hypothesis*> &hypos = ret2[key];
-	  hypos.push_back(hypo);
+	  Hypotheses *hypos;
+	  SortedHypos::iterator iter;
+	  iter = ret.find(key);
+	  if (iter == ret.end()) {
+		  hypos = new (pool.Allocate<Hypotheses>()) Hypotheses(pool, 0);
+		  ret[key] = hypos;
+	  }
+	  else {
+		  hypos = iter->second;
+	  }
+	  hypos->push_back(hypo);
   }
 
   // put into real return variable and sort
-  SortedHypos ret;
-  BOOST_FOREACH(SortedHypos2::value_type &val, ret2) {
-	  const vector<const Hypothesis*> &hypos2 = val.second;
-	  Hypotheses *hypos = new (pool.Allocate<Hypotheses>()) Hypotheses(pool, hypos2.size());
-
-	  for (size_t i = 0; i < hypos2.size(); ++i) {
-		  (*hypos)[i] = hypos2[i];
-	  }
-
-	  SortAndPruneHypos(mgr, *hypos);
-
-	  ret[val.first] = hypos;
+  BOOST_FOREACH(SortedHypos::value_type &val, ret) {
+	  Hypotheses &hypos = *val.second;
+	  SortAndPruneHypos(mgr, hypos);
   }
 
   return ret;
