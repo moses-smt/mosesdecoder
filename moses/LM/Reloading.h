@@ -24,38 +24,64 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 
+#include "moses/LM/Base.h"
 #include "moses/LM/Ken.h"
 
-#include "lm/state.hh"
-
+#include <iostream>
 namespace Moses
 {
 
-//! This will also load. Returns a templated reloading LM.
-LanguageModel *ConstructReloadingLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy);
-
 class FFState;
 
-/*
- * An implementation of single factor reloading LM using Kenneth's code.
- */
-template <class Model> class ReloadingLanguageModel : public LanguageModelKen<Model>
+class ReloadingLanguageModel : public LanguageModel
 {
 public:
-  ReloadingLanguageModel(const std::string &line, const std::string &file, FactorType factorType, bool lazy);
 
-  virtual const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
+ ReloadingLanguageModel(const std::string &line) : LanguageModel(line), m_lm(ConstructKenLM(std::string(line).replace(0,11,"KENLM"))) {
+    std::cout << "ReloadingLM constructor" << std::endl;
+    std::cout << std::string(line).replace(0,11,"KENLM") << std::endl;
+  }
 
-  virtual FFState *EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
+  ~ReloadingLanguageModel() {
+    delete m_lm;
+  }
+
+  virtual const FFState *EmptyHypothesisState(const InputType &input) const {
+    return m_lm->EmptyHypothesisState(input);
+  }
+
+  virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const {
+    m_lm->CalcScore(phrase, fullScore, ngramScore, oovCount);
+  }
+
+  virtual FFState *EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const {
+    return m_lm->EvaluateWhenApplied(hypo, ps, out);
+  }
+
+  virtual FFState *EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const {
+    return m_lm->EvaluateWhenApplied(cur_hypo, featureID, accumulator);
+  }
+
+  virtual FFState *EvaluateWhenApplied(const Syntax::SHyperedge& hyperedge, int featureID, ScoreComponentCollection *accumulator) const {
+    return m_lm->EvaluateWhenApplied(hyperedge, featureID, accumulator);
+  }
+
+  virtual void IncrementalCallback(Incremental::Manager &manager) const {
+    m_lm->IncrementalCallback(manager);
+  }
+
+  virtual void ReportHistoryOrder(std::ostream &out,const Phrase &phrase) const {
+    m_lm->ReportHistoryOrder(out, phrase);
+  }
+
+  virtual bool IsUseable(const FactorMask &mask) const {
+    return m_lm->IsUseable(mask);
+  }
 
 
 private:
 
-  // These lines are required to make the parent class's protected members visible to this class
-  using LanguageModelKen<Model>::m_ngram;
-  //  using LanguageModelKen<Model>::m_beginSentenceFactor;
-  //using LanguageModelKen<Model>::m_factorType;
-  //using LanguageModelKen<Model>::TranslateID;
+  LanguageModel *m_lm;
 
 };
 

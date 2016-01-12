@@ -92,6 +92,7 @@
 #endif
 
 #include "moses/LM/Ken.h"
+#include "moses/LM/Reloading.h"
 #ifdef LM_IRST
 #include "moses/LM/IRST.h"
 #endif
@@ -330,7 +331,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME2("OxSourceFactoredLM", SourceOxLM);
   MOSES_FNAME2("OxTreeLM", OxLM<oxlm::FactoredTreeLM>);
 #endif
-
+  MOSES_FNAME2("ReloadingLM", ReloadingLanguageModel);
   Add("KENLM", new KenFactory());
 }
 

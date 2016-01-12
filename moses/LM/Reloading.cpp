@@ -35,7 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 //#include "moses/Util.h"
 //#include "moses/StaticData.h"
 //#include <iostream>
-
+/*
 namespace Moses
 {
 namespace
@@ -53,21 +53,14 @@ struct ReloadingLMState : public FFState {
 };
 } // namespace
 
-/** Constructs a new reloading language model. */
+
 template <class Model> ReloadingLanguageModel<Model>::ReloadingLanguageModel(const std::string &line, const std::string &file, FactorType factorType, bool lazy) : LanguageModelKen<Model>(line,file,factorType,lazy)
 {
   //
   // This space intentionally left blank
   //
 }
-
-/**
- * Constructs an empty reloading language model state.
- *
- * This state will correspond with a translation hypothesis
- * where no source words have been translated.
- */
-template <class Model> const FFState *ReloadingLanguageModel<Model>::EmptyHypothesisState(const InputType &/*input*/) const
+template <class Model> const FFState *ReloadingLanguageModel<Model>::EmptyHypothesisState(const InputType &input) const
 {
   ReloadingLMState *ret = new ReloadingLMState();
   ret->state = m_ngram->BeginSentenceState();
@@ -77,14 +70,6 @@ template <class Model> const FFState *ReloadingLanguageModel<Model>::EmptyHypoth
 
 template <class Model> FFState *ReloadingLanguageModel<Model>::EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
 {
-  /*
-  const lm::ngram::State &in_state = static_cast<const ReloadingLMState&>(*ps).state;
-
-  std::auto_ptr<KenLMState> kenlmState(new KenLMState());
-  kenlmState->state = in_state;
-
-  std::auto_ptr<KenLMState> kenlmReturn(LanguageModelKen::EvaluateWhenApplied(hypo, kenlmState, out));
-  */
 
   std::auto_ptr<FFState> kenlmState(LanguageModelKen<Model>::EvaluateWhenApplied(hypo, ps, out));
   const lm::ngram::State &out_state = static_cast<const ReloadingLMState&>(*kenlmState).state;
@@ -124,3 +109,4 @@ LanguageModel *ConstructReloadingLM(const std::string &line, const std::string &
 }
 
 } // namespace Moses
+*/
