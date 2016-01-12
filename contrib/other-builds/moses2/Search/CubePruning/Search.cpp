@@ -130,6 +130,11 @@ void Search::Decode(size_t stackInd)
 
 		// add hypo to stack
 		Hypothesis *hypo = item->hypo;
+
+		if (m_mgr.system.cubePruningLazyScoring) {
+			hypo->EvaluateWhenApplied();
+		}
+
 		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
 		m_stack.Add(hypo, hypoRecycler);
 

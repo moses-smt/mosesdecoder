@@ -76,7 +76,10 @@ void QueueItem::CreateHypothesis(Manager &mgr)
 
 	hypo = Hypothesis::Create(mgr.GetSystemPool(), mgr);
 	hypo->Init(mgr, *prevHypo, edge->path, tp, edge->newBitmap, edge->estimatedScore);
-	hypo->EvaluateWhenApplied();
+
+	if (!mgr.system.cubePruningLazyScoring) {
+		hypo->EvaluateWhenApplied();
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////

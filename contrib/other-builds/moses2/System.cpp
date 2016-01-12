@@ -35,6 +35,7 @@ System::System(const Parameter &paramsArg)
 		       DEFAULT_CUBE_PRUNING_POP_LIMIT);
     params.SetParameter(cubePruningDiversity, "cube-pruning-diversity",
 		       (size_t) 0);
+    params.SetParameter(cubePruningLazyScoring, "cube-pruning-lazy-scoring", false);
 
     params.SetParameter(cpuAffinityOffset, "cpu-affinity-offset",
 		       0);
