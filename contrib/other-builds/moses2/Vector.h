@@ -19,7 +19,7 @@ class Vector : public std::vector<T, MemPoolAllocator<T> >
 
 public:
   Vector(MemPool &pool, size_t size)
-  :Parent(size, NULL, MemPoolAllocator<T>(pool) )
+  :Parent(size, T(), MemPoolAllocator<T>(pool) )
   {
   }
 
