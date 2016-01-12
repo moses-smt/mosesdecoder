@@ -38,7 +38,7 @@ class FFState;
 
 //LanguageModel *ConstructReloadingLM(const std::string &line);
 //LanguageModel *ConstructReloadingLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy);
-
+/*
  namespace {
 class MappingBuilder : public lm::EnumerateVocab
 {
@@ -60,7 +60,7 @@ private:
   std::vector<lm::WordIndex> &m_mapping;
 };
  }
-
+*/
 template <class Model> class ReloadingLanguageModel : public LanguageModelKen<Model>
 {
 public:
@@ -75,7 +75,8 @@ public:
 
   virtual void InitializeForInput(ttasksptr const& ttask) { 
     std::cerr << "ReloadingLM InitializeForInput" << std::endl;
-
+    LanguageModelKen<Model>::LoadModel(m_file, m_lazy);
+    /*
     lm::ngram::Config config;
     if(this->m_verbosity >= 1) {
       config.messages = &std::cerr;
@@ -90,7 +91,7 @@ public:
     m_ngram.reset(new Model(m_file.c_str(), config));
     
     m_beginSentenceFactor = collection.AddFactor(BOS_);
-
+    */
   };
 
   /*

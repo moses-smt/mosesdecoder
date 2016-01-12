@@ -148,12 +148,8 @@ private:
 
 } // namespace
 
-template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
-  :LanguageModel(line)
-  ,m_factorType(factorType)
+template <class Model> void LanguageModelKen<Model>::LoadModel(const std::string &file, bool lazy)
 {
-  ReadParameters();
-
   lm::ngram::Config config;
   if(this->m_verbosity >= 1) {
     config.messages = &std::cerr;
@@ -168,6 +164,14 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::stri
   m_ngram.reset(new Model(file.c_str(), config));
 
   m_beginSentenceFactor = collection.AddFactor(BOS_);
+}
+
+template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
+  :LanguageModel(line)
+  ,m_factorType(factorType)
+{
+  ReadParameters();
+  LoadModel(file, lazy);
 }
 
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const LanguageModelKen<Model> &copy_from)
