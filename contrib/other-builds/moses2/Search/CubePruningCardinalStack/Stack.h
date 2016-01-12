@@ -35,7 +35,8 @@ protected:
 			   > _HCType;
 
 public:
-
+	typedef std::pair<const Bitmap*, size_t> HypoCoverage;
+	typedef boost::unordered_map<HypoCoverage, Hypotheses*> SortedHypos;
 
 	Stack(const Manager &mgr);
 	virtual ~Stack();
@@ -52,7 +53,7 @@ public:
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
 	void Clear();
 
-	Hypotheses &GetSortedAndPruneHypos(const Manager &mgr) const;
+	SortedHypos GetSortedAndPruneHypos(const Manager &mgr) const;
 	void SortAndPruneHypos(const Manager &mgr) const;
 
 protected:

@@ -86,8 +86,23 @@ void Stack::Clear()
 	m_coll.clear();
 }
 
-Hypotheses &Stack::GetSortedAndPruneHypos(const Manager &mgr) const
+Stack::SortedHypos Stack::GetSortedAndPruneHypos(const Manager &mgr) const
 {
+  SortedHypos ret;
+/*
+  // divide hypos by [bitmap, last end pos]
+  BOOST_FOREACH(const Hypothesis *hypo, m_coll) {
+	  HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
+
+	  Hypotheses *hypos;
+	  SortedHypos::const_iterator iter;
+	  iter = ret.find(key);
+	  if (iter == ret.end()) {
+		  hypos = new (pool.Allocate< Vector<const Hypothesis*> >()) Vector<const Hypothesis*>(pool, m_coll.size());
+	  }
+	  ret[key]->push_back(hypo);
+  }
+*/
   if (m_sortedHypos == NULL) {
     // create sortedHypos first
     MemPool &pool = mgr.GetPool();
@@ -102,7 +117,7 @@ Hypotheses &Stack::GetSortedAndPruneHypos(const Manager &mgr) const
     SortAndPruneHypos(mgr);
   }
 
-  return *m_sortedHypos;
+  return ret;
 }
 
 void Stack::SortAndPruneHypos(const Manager &mgr) const
