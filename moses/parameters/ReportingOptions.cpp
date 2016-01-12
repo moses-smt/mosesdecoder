@@ -92,15 +92,17 @@ namespace Moses {
       }
     }
 
-    params= param.GetParam("output-factors");
-    if (params) factor_order = Scan<FactorType>(*params);
-    if (factor_order.empty()) factor_order.assign(1,0);
     
     if (ReportAllFactors) {
-      for (size_t i = 1; i < MAX_NUM_FACTORS; ++i)
+      factor_order.clear();
+      for (size_t i = 0; i < MAX_NUM_FACTORS; ++i)
         factor_order.push_back(i);
+    } else {
+      params= param.GetParam("output-factors");
+      if (params) factor_order = Scan<FactorType>(*params);
+      if (factor_order.empty()) factor_order.assign(1,0);
     }
-
+    
     param.SetParameter(factor_delimiter, "factor-delimiter", std::string("|"));
     param.SetParameter(factor_delimiter, "output-factor-delimiter", factor_delimiter);
     
