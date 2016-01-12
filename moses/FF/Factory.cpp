@@ -203,6 +203,14 @@ public:
   }
 };
 
+class ReloadingFactory : public FeatureFactory
+{
+public:
+  void Create(const std::string &line) {
+    DefaultSetup(ConstructReloadingLM(line));
+  }
+};
+
 } // namespace
 
 FeatureRegistry::FeatureRegistry()
@@ -331,7 +339,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME2("OxSourceFactoredLM", SourceOxLM);
   MOSES_FNAME2("OxTreeLM", OxLM<oxlm::FactoredTreeLM>);
 #endif
-  MOSES_FNAME2("ReloadingLM", ReloadingLanguageModel);
+  Add("ReloadingLM", new ReloadingFactory());
   Add("KENLM", new KenFactory());
 }
 
