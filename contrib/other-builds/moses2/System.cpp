@@ -33,6 +33,9 @@ System::System(const Parameter &paramsArg)
     params.SetParameter(searchAlgorithm, "search-algorithm", Normal);
     params.SetParameter(popLimit, "cube-pruning-pop-limit",
 		       DEFAULT_CUBE_PRUNING_POP_LIMIT);
+    params.SetParameter(cubePruningDiversity, "cube-pruning-diversity",
+		       (size_t) 0);
+
     params.SetParameter(cpuAffinityOffset, "cpu-affinity-offset",
 		       0);
 

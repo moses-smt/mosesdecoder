@@ -100,7 +100,7 @@ Stack::SortedHypos Stack::GetSortedAndPruneHypos(const Manager &mgr) const
 	  SortedHypos::iterator iter;
 	  iter = ret.find(key);
 	  if (iter == ret.end()) {
-		  hypos = new (pool.Allocate<Hypotheses>()) Hypotheses(pool, 0);
+		  hypos = new (pool.Allocate<Hypotheses>()) Hypotheses(pool);
 		  ret[key] = hypos;
 	  }
 	  else {

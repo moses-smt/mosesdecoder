@@ -49,6 +49,7 @@ public:
 
     SearchAlgorithm searchAlgorithm;
     size_t popLimit;
+    size_t  cubePruningDiversity;
 
     std::string outputFilePath;
     size_t nbestSize;
