@@ -9,6 +9,7 @@
 #include "Phrase.h"
 #include "System.h"
 #include "legacy/Range.h"
+#include "Search/Manager.h"
 
 using namespace std;
 
@@ -16,20 +17,19 @@ namespace Moses2
 {
 
 InputPaths::~InputPaths() {
-	delete m_blank;
-	RemoveAllInColl(m_inputPaths);
 }
 
-void InputPaths::Init(const PhraseImpl &input, const System &system)
+void InputPaths::Init(const PhraseImpl &input, const Manager &mgr)
 {
-  size_t numPt = system.mappings.size();
+  MemPool &pool = mgr.GetPool();
+  size_t numPt = mgr.system.mappings.size();
   size_t size = input.GetSize();
-  size_t maxLength = min(size, system.maxPhraseLength);
+  size_t maxLength = min(size, mgr.system.maxPhraseLength);
 
   // create blank path for initial hypo
   Range range(NOT_FOUND, NOT_FOUND);
   SubPhrase subPhrase = input.GetSubPhrase(NOT_FOUND, NOT_FOUND);
-  m_blank = new InputPath(subPhrase, range, numPt, NULL);
+  m_blank = new (pool.Allocate<InputPath>()) InputPath(pool, subPhrase, range, numPt, NULL);
 
   // create normal paths of subphrases through the sentence
   for (size_t startPos = 0; startPos < size; ++startPos) {
@@ -45,7 +45,7 @@ void InputPaths::Init(const PhraseImpl &input, const System &system)
 	  SubPhrase subPhrase = input.GetSubPhrase(startPos, endPos);
 	  Range range(startPos, endPos);
 
-	  InputPath *path = new InputPath(subPhrase, range, numPt, prefixPath);
+	  InputPath *path = new (pool.Allocate<InputPath>()) InputPath(pool, subPhrase, range, numPt, prefixPath);
 	  m_inputPaths.push_back(path);
 
 	  prefixPath = m_inputPaths.back();

@@ -184,7 +184,9 @@ void Search::CreateSearchGraph(size_t stackInd)
 
 
 		// add cube edge
-		BOOST_FOREACH(const TargetPhrases *tps, path->targetPhrases) {
+  	    size_t numPt = m_mgr.system.mappings.size();
+  	    for (size_t i = 0; i < numPt; ++i) {
+  	    	const TargetPhrases *tps = path->targetPhrases[i];
   			if (tps && tps->GetSize()) {
   				// create next mini stack
   				NSCubePruning::MiniStack &nextMiniStack = m_stacks.GetMiniStack(newBitmap, pathRange);

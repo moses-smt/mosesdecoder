@@ -22,7 +22,7 @@ class InputPaths {
 	typedef std::vector<InputPath*> Coll;
 public:
 	InputPaths() {}
-	void Init(const PhraseImpl &input, const System &system);
+	void Init(const PhraseImpl &input, const Manager &mgr);
 	virtual ~InputPaths();
 
   //! iterators

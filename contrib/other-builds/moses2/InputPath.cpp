@@ -11,17 +11,18 @@
 namespace Moses2
 {
 
-InputPath::InputPath(const SubPhrase &subPhrase,
+InputPath::InputPath(MemPool &pool,
+		const SubPhrase &subPhrase,
 		const Range &range,
 		size_t numPt,
 		const InputPath *prefixPath)
 :subPhrase(subPhrase)
 ,range(range)
-,targetPhrases(numPt, NULL)
 ,prefixPath(prefixPath)
 ,m_isUsed(false)
 {
-
+  targetPhrases = pool.Allocate<const TargetPhrases*>(numPt);
+  Init<const TargetPhrases*>(targetPhrases, numPt, NULL);
 }
 
 InputPath::~InputPath() {

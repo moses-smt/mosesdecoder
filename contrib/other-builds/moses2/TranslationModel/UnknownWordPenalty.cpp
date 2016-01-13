@@ -49,8 +49,9 @@ TargetPhrases *UnknownWordPenalty::Lookup(const Manager &mgr, MemPool &pool, Inp
 	}
 
 	// any other pt translate this?
-	const std::vector<const TargetPhrases*> &allTPS = inputPath.targetPhrases;
-	for (size_t i = 0; i < allTPS.size(); ++i) {
+    size_t numPt = mgr.system.mappings.size();
+	const TargetPhrases **allTPS = inputPath.targetPhrases;
+	for (size_t i = 0; i < numPt; ++i) {
 		const TargetPhrases *otherTps = allTPS[i];
 
 		if (otherTps && otherTps->GetSize()) {

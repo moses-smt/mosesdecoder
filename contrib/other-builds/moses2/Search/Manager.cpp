@@ -9,7 +9,6 @@
 #include <sstream>
 #include "Manager.h"
 #include "SearchNormal.h"
-#include "SearchNormalBatch.h"
 #include "CubePruning/Search.h"
 #include "CubePruningPerMiniStack/Search.h"
 #include "CubePruningPerBitmap/Search.h"
@@ -58,7 +57,7 @@ void Manager::Init()
 	FactorCollection &vocab = system.GetVocab();
 
 	m_input = Sentence::CreateFromString(GetPool(), vocab, system, m_inputStr, m_translationId);
-	m_inputPaths.Init(*m_input, system);
+	m_inputPaths.Init(*m_input, *this);
 
 	const std::vector<const PhraseTable*> &pts = system.mappings;
 	for (size_t i = 0; i < pts.size(); ++i) {
@@ -75,9 +74,6 @@ void Manager::Init()
 	switch (system.searchAlgorithm) {
 	case Normal:
 		m_search = new SearchNormal(*this);
-		break;
-	case NormalBatch:
-		m_search = new SearchNormalBatch(*this);
 		break;
 	case CubePruning:
 		m_search = new NSCubePruning::Search(*this);
@@ -113,10 +109,12 @@ void Manager::CalcFutureScore()
     // walk all the translation options and record the cheapest option for each span
 	BOOST_FOREACH(const InputPath *path, m_inputPaths) {
 		const Range &range = path->range;
-		const std::vector<const TargetPhrases*> &allTps = path->targetPhrases;
 		SCORE bestScore = -numeric_limits<SCORE>::infinity();
 
-	    BOOST_FOREACH(const TargetPhrases *tps, allTps) {
+		const TargetPhrases **allTps = path->targetPhrases;
+  	    size_t numPt = system.mappings.size();
+  	    for (size_t i = 0; i < numPt; ++i) {
+ 	      const TargetPhrases *tps = path->targetPhrases[i];
      	  if (tps) {
      		 BOOST_FOREACH(const TargetPhrase *tp, *tps) {
      			SCORE score = tp->GetFutureScore();

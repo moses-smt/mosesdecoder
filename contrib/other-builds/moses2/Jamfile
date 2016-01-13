@@ -49,7 +49,6 @@ external-lib boost_serialization ;
  	 	Search/Manager.cpp 
  	 	Search/Search.cpp
  	 	Search/SearchNormal.cpp
- 	 	Search/SearchNormalBatch.cpp
  	 	Search/Stack.cpp 
  	 	Search/Stacks.cpp 
 
