@@ -2378,7 +2378,7 @@ sub create_ini {
     print INI "PhraseOrientationFeature";
     # find the label of the left-hand side non-terminal in glue rules (target non-terminal set)
     my $TOPLABEL = `head -n 1 $___GLUE_GRAMMAR_FILE`;
-    $TOPLABEL =~ s/.* \|\|\| .* \[(.*)\] \|\|\| .*/\1/;
+    $TOPLABEL =~ s/.* \|\|\| .* \[(.*)\] \|\|\| .*/$1/;
     chomp($TOPLABEL);
     print INI " glue-label=$TOPLABEL\n";
   }

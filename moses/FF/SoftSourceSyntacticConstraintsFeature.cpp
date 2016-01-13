@@ -193,7 +193,7 @@ void SoftSourceSyntacticConstraintsFeature::LoadLabelSet(std::string &filename,
     if ( foundSourceLabelIndex != m_sourceLabels.end() ) {
       labelSet.insert(foundSourceLabelIndex->second);
     } else {
-      FEATUREVERBOSE(2, "Ignoring unknown source label \"" << label << "\" "
+      FEATUREVERBOSE(2, "Ignoring undefined source label \"" << label << "\" "
                      << "from core source label set file " << filename << "."
                      << std::endl);
     }
@@ -232,7 +232,7 @@ void SoftSourceSyntacticConstraintsFeature::LoadTargetSourceLeftHandSideJointCou
     boost::unordered_map<std::string,size_t>::iterator foundSourceLabelIndex = m_sourceLabels.find( sourceLabel );
     UTIL_THROW_IF2(foundSourceLabelIndex == m_sourceLabels.end(), GetScoreProducerDescription()
                    << ": Target/source label joint count file " << m_targetSourceLHSJointCountFile
-                   << " contains unknown source label \"" << sourceLabel << "\".");
+                   << " contains undefined source label \"" << sourceLabel << "\".");
 
     const Factor* targetLabelFactor = factorCollection.AddFactor(targetLabel,true);
 
