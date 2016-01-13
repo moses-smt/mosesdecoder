@@ -87,14 +87,11 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr,
 		RecycleData &recycler) const
 {
 	TargetPhrases *ret;
-	/*
 	if (inputPath.prefixPath && inputPath.prefixPath->GetTargetPhrases(*this) == NULL) {
 		// assume all paths have prefixes, except rules with 1 word source
 		ret = NULL;
 	}
 	else {
-	*/
-	{
 		const Phrase &sourcePhrase = inputPath.subPhrase;
 		ret = CreateTargetPhrase(pool, mgr.system, sourcePhrase, recycler);
 	}
