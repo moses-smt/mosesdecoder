@@ -111,9 +111,9 @@ void Manager::CalcFutureScore()
 	m_estimatedScores->InitTriangle(-numeric_limits<SCORE>::infinity());
 
     // walk all the translation options and record the cheapest option for each span
-	BOOST_FOREACH(const InputPath &path, m_inputPaths) {
-		const Range &range = path.range;
-		const std::vector<const TargetPhrases*> &allTps = path.targetPhrases;
+	BOOST_FOREACH(const InputPath *path, m_inputPaths) {
+		const Range &range = path->range;
+		const std::vector<const TargetPhrases*> &allTps = path->targetPhrases;
 		SCORE bestScore = -numeric_limits<SCORE>::infinity();
 
 	    BOOST_FOREACH(const TargetPhrases *tps, allTps) {

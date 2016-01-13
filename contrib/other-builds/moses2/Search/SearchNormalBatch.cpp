@@ -102,8 +102,8 @@ void SearchNormalBatch::Extend(const Hypothesis &hypo)
 {
 	const InputPaths &paths = m_mgr.GetInputPaths();
 
-	BOOST_FOREACH(const InputPath &path, paths) {
-		Extend(hypo, path);
+	BOOST_FOREACH(const InputPath *path, paths) {
+		Extend(hypo, *path);
 	}
 }
 

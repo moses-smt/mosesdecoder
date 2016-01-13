@@ -17,6 +17,7 @@ namespace Moses2
 
 InputPaths::~InputPaths() {
 	delete m_blank;
+	RemoveAllInColl(m_inputPaths);
 }
 
 void InputPaths::Init(const PhraseImpl &input, const System &system)
@@ -44,10 +45,10 @@ void InputPaths::Init(const PhraseImpl &input, const System &system)
 	  SubPhrase subPhrase = input.GetSubPhrase(startPos, endPos);
 	  Range range(startPos, endPos);
 
-	  InputPath path(subPhrase, range, numPt, prefixPath);
+	  InputPath *path = new InputPath(subPhrase, range, numPt, prefixPath);
 	  m_inputPaths.push_back(path);
 
-	  prefixPath = &m_inputPaths.back();
+	  prefixPath = m_inputPaths.back();
 	}
   }
 
@@ -57,8 +58,8 @@ void InputPaths::DeleteUnusedPaths()
 {
 	size_t ind = 0;
 	while (ind < m_inputPaths.size()) {
-		const InputPath &path = m_inputPaths[ind];
-		if (!path.IsUsed()) {
+		const InputPath *path = m_inputPaths[ind];
+		if (!path->IsUsed()) {
 			m_inputPaths.erase(m_inputPaths.begin() + ind);
 		}
 		else {

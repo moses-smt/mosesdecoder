@@ -57,8 +57,8 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
   CacheColl &cache = GetCache();
   MemPool &pool = GetCacheMemPool();
 
-  BOOST_FOREACH(InputPath &path, inputPaths) {
-	  const SubPhrase &phrase = path.subPhrase;
+  BOOST_FOREACH(InputPath *path, inputPaths) {
+	  const SubPhrase &phrase = path->subPhrase;
 
 	  TargetPhrases *tpsPtr = NULL;
 	  if (m_maxCacheSize) {
@@ -69,7 +69,7 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 
 		if (iter == cache.end()) {
 		  // not in cache, need to look up from phrase table
-		  tpsPtr = Lookup(mgr, pool, path);
+		  tpsPtr = Lookup(mgr, pool, *path);
 
 		  CacheColl::value_type val(hash, CacheCollEntry2());
 		  std::pair<CacheColl::iterator, bool> retIns = cache.insert(val);
@@ -87,7 +87,7 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 		}
 	  } else {
 		// don't use cache. look up from phrase table
-		  tpsPtr = Lookup(mgr, mgr.GetPool(), path);
+		  tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
 	  }
 
 		/*
@@ -99,7 +99,7 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 		cerr << endl;
 		*/
 
-		path.AddTargetPhrases(*this, tpsPtr);
+		path->AddTargetPhrases(*this, tpsPtr);
   }
 
 }

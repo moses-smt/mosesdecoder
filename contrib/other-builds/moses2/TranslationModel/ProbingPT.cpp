@@ -74,10 +74,10 @@ void ProbingPT::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 {
   RecycleData &recycler = GetThreadSpecificObj(m_recycleData);
 
-  BOOST_FOREACH(InputPath &path, inputPaths) {
+  BOOST_FOREACH(InputPath *path, inputPaths) {
 	TargetPhrases *tpsPtr;
-	tpsPtr = Lookup(mgr, mgr.GetPool(), path, recycler);
-	path.AddTargetPhrases(*this, tpsPtr);
+	tpsPtr = Lookup(mgr, mgr.GetPool(), *path, recycler);
+	path->AddTargetPhrases(*this, tpsPtr);
   }
 }
 

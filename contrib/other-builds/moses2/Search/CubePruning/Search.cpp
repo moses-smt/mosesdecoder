@@ -171,11 +171,11 @@ void Search::PostDecode(size_t stackInd)
 	  // create edges to next hypos from existing hypos
 	  const InputPaths &paths = m_mgr.GetInputPaths();
 
-	  BOOST_FOREACH(const InputPath &path, paths) {
-  		const Range &pathRange = path.range;
+	  BOOST_FOREACH(const InputPath *path, paths) {
+  		const Range &pathRange = path->range;
   		//cerr << "pathRange=" << pathRange << endl;
 
-  		if (!path.IsUsed()) {
+  		if (!path->IsUsed()) {
   			continue;
   		}
   		if (!CanExtend(hypoBitmap, hypoEndPos, pathRange)) {
@@ -190,9 +190,9 @@ void Search::PostDecode(size_t stackInd)
 		// sort hypo for a particular bitmap and hypoEndPos
   		Hypotheses &sortedHypos = val.second->GetSortedAndPruneHypos(m_mgr);
 
-  		BOOST_FOREACH(const TargetPhrases *tps, path.targetPhrases) {
+  		BOOST_FOREACH(const TargetPhrases *tps, path->targetPhrases) {
   			if (tps && tps->GetSize()) {
-  		  		CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(m_mgr, sortedHypos, path, *tps, newBitmap);
+  		  		CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(m_mgr, sortedHypos, *path, *tps, newBitmap);
   		  		edges.push_back(edge);
   			}
   		}

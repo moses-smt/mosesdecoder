@@ -26,12 +26,12 @@ UnknownWordPenalty::~UnknownWordPenalty() {
 
 void UnknownWordPenalty::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 {
-  BOOST_FOREACH(InputPath &path, inputPaths) {
-	  const SubPhrase &phrase = path.subPhrase;
+  BOOST_FOREACH(InputPath *path, inputPaths) {
+	  const SubPhrase &phrase = path->subPhrase;
 
 	TargetPhrases *tpsPtr;
-	tpsPtr = Lookup(mgr, mgr.GetPool(), path);
-	path.AddTargetPhrases(*this, tpsPtr);
+	tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
+	path->AddTargetPhrases(*this, tpsPtr);
   }
 
 }

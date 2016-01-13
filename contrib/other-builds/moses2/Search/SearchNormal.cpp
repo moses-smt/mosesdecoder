@@ -68,9 +68,9 @@ void SearchNormal::Decode(size_t stackInd)
 
 	const InputPaths &paths = m_mgr.GetInputPaths();
 
-	BOOST_FOREACH(const InputPath &path, paths) {
+	BOOST_FOREACH(const InputPath *path, paths) {
 	  BOOST_FOREACH(const Hypothesis *hypo, hypos) {
-			Extend(*hypo, path);
+			Extend(*hypo, *path);
 	  }
 	}
 }

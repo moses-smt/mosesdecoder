@@ -166,11 +166,11 @@ void Search::CreateSearchGraph(size_t stackInd)
 	  // create edges to next hypos from existing hypos
 	  const InputPaths &paths = m_mgr.GetInputPaths();
 
-	  BOOST_FOREACH(const InputPath &path, paths) {
-		const Range &pathRange = path.range;
+	  BOOST_FOREACH(const InputPath *path, paths) {
+		const Range &pathRange = path->range;
 		//cerr << "pathRange=" << pathRange << endl;
 
-		if (!path.IsUsed()) {
+		if (!path->IsUsed()) {
 			continue;
 		}
 		if (!CanExtend(hypoBitmap, hypoEndPos, pathRange)) {
@@ -184,12 +184,12 @@ void Search::CreateSearchGraph(size_t stackInd)
 
 
 		// add cube edge
-		BOOST_FOREACH(const TargetPhrases *tps, path.targetPhrases) {
+		BOOST_FOREACH(const TargetPhrases *tps, path->targetPhrases) {
   			if (tps && tps->GetSize()) {
   				// create next mini stack
   				NSCubePruning::MiniStack &nextMiniStack = m_stacks.GetMiniStack(newBitmap, pathRange);
 
-  				CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(m_mgr, miniStack, path, *tps, newBitmap);
+  				CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(m_mgr, miniStack, *path, *tps, newBitmap);
 
 				CubeEdges *edges;
 				boost::unordered_map<NSCubePruning::MiniStack*, CubeEdges*>::iterator iter = m_cubeEdges.find(&nextMiniStack);
