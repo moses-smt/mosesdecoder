@@ -30,6 +30,7 @@ public:
 	virtual ~InputPath();
 
 	void AddTargetPhrases(const PhraseTable &pt, const TargetPhrases *tps);
+	const TargetPhrases *GetTargetPhrases(const PhraseTable &pt) const;
 
 	inline bool IsUsed() const
 	{ return m_isUsed; }

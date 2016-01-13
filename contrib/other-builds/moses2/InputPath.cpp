@@ -38,6 +38,12 @@ void InputPath::AddTargetPhrases(const PhraseTable &pt, const TargetPhrases *tps
 	}
 }
 
+const TargetPhrases *InputPath::GetTargetPhrases(const PhraseTable &pt) const
+{
+	size_t ptInd = pt.GetPtInd();
+	return targetPhrases[ptInd];
+}
+
 std::ostream& operator<<(std::ostream &out, const InputPath &obj)
 {
 	out << obj.range << " " << obj.subPhrase;

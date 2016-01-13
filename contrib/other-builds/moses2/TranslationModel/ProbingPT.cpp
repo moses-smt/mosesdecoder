@@ -86,8 +86,18 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr,
 		InputPath &inputPath,
 		RecycleData &recycler) const
 {
-	const Phrase &sourcePhrase = inputPath.subPhrase;
-	TargetPhrases *ret = CreateTargetPhrase(pool, mgr.system, sourcePhrase, recycler);
+	TargetPhrases *ret;
+	/*
+	if (inputPath.prefixPath && inputPath.prefixPath->GetTargetPhrases(*this) == NULL) {
+		// assume all paths have prefixes, except rules with 1 word source
+		ret = NULL;
+	}
+	else {
+	*/
+	{
+		const Phrase &sourcePhrase = inputPath.subPhrase;
+		ret = CreateTargetPhrase(pool, mgr.system, sourcePhrase, recycler);
+	}
 	return ret;
 }
 
@@ -96,12 +106,12 @@ TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool,
 		const Phrase &sourcePhrase,
 		RecycleData &recycler) const
 {
+  TargetPhrases *tps = NULL;
 
   // create a target phrase from the 1st word of the source, prefix with 'ProbingPT:'
   size_t sourceSize = sourcePhrase.GetSize();
-	assert(sourceSize);
+  assert(sourceSize);
 
-  TargetPhrases *tps = NULL;
   uint64_t probingSource[sourceSize];
   bool ok;
   ConvertToProbingSourcePhrase(sourcePhrase, ok, probingSource);
