@@ -19,7 +19,8 @@ using namespace std;
 namespace Moses
 {
 
-void TargetPreferencesFeatureState::AddProbabilityForLHSLabel(size_t label, double cost) {
+void TargetPreferencesFeatureState::AddProbabilityForLHSLabel(size_t label, double cost)
+{
   std::pair< std::map<size_t,double>::iterator, bool > inserted =
     m_probabilitiesForLHSLabels.insert(std::pair<size_t,double>(label,cost));
   if ( !inserted.second ) {
@@ -27,14 +28,16 @@ void TargetPreferencesFeatureState::AddProbabilityForLHSLabel(size_t label, doub
   }
 }
 
-void TargetPreferencesFeatureState::NormalizeProbabilitiesForLHSLabels(double denominator) {
+void TargetPreferencesFeatureState::NormalizeProbabilitiesForLHSLabels(double denominator)
+{
   for ( std::map<size_t,double>::iterator iter=m_probabilitiesForLHSLabels.begin();
         iter!=m_probabilitiesForLHSLabels.end(); ++iter ) {
     (iter->second) /= denominator;
   }
 }
 
-double TargetPreferencesFeatureState::GetProbabilityForLHSLabel(size_t label, bool &isMatch) const {
+double TargetPreferencesFeatureState::GetProbabilityForLHSLabel(size_t label, bool &isMatch) const
+{
   std::map<size_t,double>::const_iterator iter = m_probabilitiesForLHSLabels.find(label);
   if ( iter != m_probabilitiesForLHSLabels.end() ) {
     isMatch = true;
@@ -44,20 +47,22 @@ double TargetPreferencesFeatureState::GetProbabilityForLHSLabel(size_t label, bo
   return 0;
 }
 
-size_t TargetPreferencesFeatureState::hash() const {
+size_t TargetPreferencesFeatureState::hash() const
+{
   if (!m_distinguishStates) {
     return 0;
   }
   size_t ret = 0;
   boost::hash_combine(ret, m_probabilitiesForLHSLabels.size());
-  for (std::map<size_t,double>::const_iterator it=m_probabilitiesForLHSLabels.begin(); 
+  for (std::map<size_t,double>::const_iterator it=m_probabilitiesForLHSLabels.begin();
        it!=m_probabilitiesForLHSLabels.end(); ++it) {
     boost::hash_combine(ret, it->first);
   }
   return ret;
 };
 
-bool TargetPreferencesFeatureState::operator==(const FFState& other) const {
+bool TargetPreferencesFeatureState::operator==(const FFState& other) const
+{
   if (!m_distinguishStates) {
     return true;
   }
@@ -353,11 +358,11 @@ FFState* TargetPreferencesFeature::EvaluateWhenApplied(
     IFFEATUREVERBOSE(2) {
       FEATUREVERBOSE(2, "overallTreeProbability = " << overallTreeProbability);
       if ( overallTreeProbability > 1.0001 ) { // account for some rounding error
-         FEATUREVERBOSE2(2, " -- WARNING: overallTreeProbability > 1");
+        FEATUREVERBOSE2(2, " -- WARNING: overallTreeProbability > 1");
       }
       FEATUREVERBOSE2(2, std::endl);
     }
- 
+
     if ( overallTreeProbability != 0 ) {
       UTIL_THROW_IF2(!boost::math::isnormal(overallTreeProbability), GetScoreProducerDescription()
                      << ": Oops. Numerical precision issues.");
@@ -390,8 +395,8 @@ FFState* TargetPreferencesFeature::EvaluateWhenApplied(
     newScores[0] = -std::numeric_limits<float>::infinity();
   }
   // tree mismatch penalty
-  // TODO: deactivate the tree mismatch penalty score component automatically if feature configuration parameter no-mismatches=true 
-  newScores[1] = (overallTreeProbability == 0 ? 1 : 0 ); 
+  // TODO: deactivate the tree mismatch penalty score component automatically if feature configuration parameter no-mismatches=true
+  newScores[1] = (overallTreeProbability == 0 ? 1 : 0 );
 
   accumulator->PlusEquals(this, newScores);
 
