@@ -7,31 +7,30 @@ using namespace std;
 namespace Moses2
 {
 
-Bitmaps::Bitmaps()
+Bitmaps::Bitmaps(MemPool &pool)
+:m_pool(pool)
 {
 }
 
 Bitmaps::~Bitmaps()
 {
-	Clear();
 }
 
 void Bitmaps::Init(size_t inputSize, const std::vector<bool> &initSourceCompleted)
 {
-  m_initBitmap = new Bitmap(inputSize, initSourceCompleted);
+  m_initBitmap = new (m_pool.Allocate<Bitmap>()) Bitmap(m_pool, inputSize, initSourceCompleted);
   m_coll[m_initBitmap];
 }
 
 const Bitmap &Bitmaps::GetNextBitmap(const Bitmap &bm, const Range &range)
 {
-  Bitmap *newBM = new Bitmap(bm, range);
+  Bitmap *newBM = new (m_pool.Allocate<Bitmap>()) Bitmap(m_pool, bm, range);
 
   Coll::const_iterator iter = m_coll.find(newBM);
   if (iter == m_coll.end()) {
     m_coll[newBM] = NextBitmaps();
     return *newBM;
   } else {
-    delete newBM;
     return *iter->first;
   }
 }
@@ -54,15 +53,6 @@ const Bitmap &Bitmaps::GetBitmap(const Bitmap &bm, const Range &range)
     newBM = iterNext->second;
   }
   return *newBM;
-}
-
-void Bitmaps::Clear()
-{
-  BOOST_FOREACH (const Coll::value_type& myPair, m_coll) {
-	const Bitmap *bm = myPair.first;
-	delete bm;
-  }
-  m_coll.clear();
 }
 
 }

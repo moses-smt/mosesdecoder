@@ -8,6 +8,7 @@
 
 namespace Moses2
 {
+class MemPool;
 
 class Bitmaps
 {
@@ -17,9 +18,11 @@ class Bitmaps
   Coll m_coll;
   const Bitmap *m_initBitmap;
 
+  MemPool &m_pool;
+
   const Bitmap &GetNextBitmap(const Bitmap &bm, const Range &range);
 public:
-  Bitmaps();
+  Bitmaps(MemPool &pool);
   virtual ~Bitmaps();
   void Init(size_t inputSize, const std::vector<bool> &initSourceCompleted);
 
@@ -27,7 +30,6 @@ public:
     return *m_initBitmap;
   }
   const Bitmap &GetBitmap(const Bitmap &bm, const Range &range);
-  void Clear();
 };
 
 }

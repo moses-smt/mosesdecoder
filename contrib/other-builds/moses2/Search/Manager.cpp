@@ -38,6 +38,7 @@ Manager::~Manager() {
 
 	delete m_search;
 	delete m_estimatedScores;
+	delete m_bitmaps;
 
 	GetPool().Reset();
 	GetHypoRecycle().Clear();
@@ -49,6 +50,7 @@ void Manager::Init()
 	m_pool = &system.GetManagerPool();
 	m_systemPool = &system.GetSystemPool();
 	m_hypoRecycle = &system.GetHypoRecycler();
+	m_bitmaps = new Bitmaps(GetPool());
 
 	m_initPhrase = new (GetPool().Allocate<TargetPhrase>()) TargetPhrase(GetPool(), system, 0);
 
@@ -69,7 +71,7 @@ void Manager::Init()
 
 	CalcFutureScore();
 
-	m_bitmaps.Init(m_input->GetSize(), vector<bool>(0));
+	m_bitmaps->Init(m_input->GetSize(), vector<bool>(0));
 
 	switch (system.searchAlgorithm) {
 	case Normal:

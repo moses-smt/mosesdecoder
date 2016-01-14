@@ -18,11 +18,10 @@ class Vector : public std::vector<T, MemPoolAllocator<T> >
   typedef std::vector<T, MemPoolAllocator<T> > Parent;
 
 public:
-  Vector(MemPool &pool, size_t size = 0)
-  :Parent(size, T(), MemPoolAllocator<T>(pool) )
+  Vector(MemPool &pool, size_t size = 0, const T &val = T())
+  :Parent(size, val, MemPoolAllocator<T>(pool) )
   {
   }
-
 
 protected:
 };
