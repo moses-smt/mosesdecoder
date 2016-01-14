@@ -190,15 +190,23 @@ void serialize_cache(std::priority_queue<CacheItem*, std::vector<CacheItem*>, Ca
 		const std::string &path,
 		float totalSourceCount)
 {
+  std::vector<const CacheItem*> vec(cache.size());
+
+  size_t ind = cache.size() - 1;
+  while (!cache.empty()) {
+	  const CacheItem *item = cache.top();
+	  vec[ind] = item;
+	  cache.pop();
+	  --ind;
+  }
+
   std::ofstream os (path.c_str());
 
   os << totalSourceCount << std::endl;
-  while (!cache.empty()) {
-	  const CacheItem *item = cache.top();
+  for (size_t i = 0; i < vec.size(); ++i) {
+	  const CacheItem *item = vec[i];
 	  os << item->count << "\t" << item->source << std::endl;
-
 	  delete item;
-	  cache.pop();
   }
 
   os.close();
