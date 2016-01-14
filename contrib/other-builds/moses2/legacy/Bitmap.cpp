@@ -25,32 +25,38 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses2
 {
 
-Bitmap::Bitmap(MemPool &pool, size_t size, const std::vector<bool>& initializer)
-  :m_bitmap(pool, size, false)
+Bitmap::Bitmap(MemPool &pool, size_t size)
+  :m_bitmap(pool, size)
 {
+}
+
+void Bitmap::Init(const std::vector<bool>& initializer)
+{
+
   for (size_t i = 0; i < initializer.size(); ++i) {
 	  m_bitmap[i] = initializer[i];
   }
 
   // The initializer may not be of the same length.  Change to the desired
   // length.  If we need to add any elements, initialize them to false.
-  m_bitmap.resize(size, false);
+  for (size_t i = initializer.size(); i < m_bitmap.size(); ++i) {
+	  m_bitmap[i] = false;
+  }
 
   m_numWordsCovered = std::count(m_bitmap.begin(), m_bitmap.end(), true);
 
   // Find the first gap, and cache it.
   Vector<char>::const_iterator first_gap = std::find(
-        m_bitmap.begin(), m_bitmap.end(), false);
+		m_bitmap.begin(), m_bitmap.end(), false);
   m_firstGap = (
-                 (first_gap == m_bitmap.end()) ?
-                 NOT_FOUND : first_gap - m_bitmap.begin());
+				 (first_gap == m_bitmap.end()) ?
+				 NOT_FOUND : first_gap - m_bitmap.begin());
 }
 
-Bitmap::Bitmap(MemPool &pool, const Bitmap &copy, const Range &range)
-  :m_bitmap(pool, copy.m_bitmap.size())
-  ,m_firstGap(copy.m_firstGap)
-  ,m_numWordsCovered(copy.m_numWordsCovered)
+void Bitmap::Init(const Bitmap &copy, const Range &range)
 {
+  m_firstGap = copy.m_firstGap;
+  m_numWordsCovered = copy.m_numWordsCovered;
   for (size_t i = 0; i < m_bitmap.size(); ++i) {
 	  m_bitmap[i] = copy.m_bitmap[i];
   }

@@ -16,7 +16,7 @@ class Bitmaps
   typedef boost::unordered_map<const Bitmap*, NextBitmaps, UnorderedComparer<Bitmap>, UnorderedComparer<Bitmap> > Coll;
   //typedef std::set<const Bitmap*, OrderedComparer<Bitmap> > Coll;
   Coll m_coll;
-  const Bitmap *m_initBitmap;
+  Bitmap *m_initBitmap;
 
   MemPool &m_pool;
 
