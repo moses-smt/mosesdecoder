@@ -65,15 +65,14 @@ template <class Model> class ReloadingLanguageModel : public LanguageModelKen<Mo
 {
 public:
 
- ReloadingLanguageModel(const std::string &line, const std::string &file, FactorType factorType, bool lazy) : LanguageModelKen<Model>(line, file, factorType, lazy), m_file(file), m_lazy(lazy)
-  { 
+  ReloadingLanguageModel(const std::string &line, const std::string &file, FactorType factorType, bool lazy) : LanguageModelKen<Model>(line, file, factorType, lazy), m_file(file), m_lazy(lazy) {
 
     std::cerr << "ReloadingLM constructor: " << m_file << std::endl;
     //    std::cerr << std::string(line).replace(0,11,"KENLM") << std::endl;
-    
+
   }
 
-  virtual void InitializeForInput(ttasksptr const& ttask) { 
+  virtual void InitializeForInput(ttasksptr const& ttask) {
     std::cerr << "ReloadingLM InitializeForInput" << std::endl;
     LanguageModelKen<Model>::LoadModel(m_file, m_lazy);
     /*
@@ -87,15 +86,15 @@ public:
     MappingBuilder builder(collection, m_lmIdLookup);
     config.enumerate_vocab = &builder;
     config.load_method = m_lazy ? util::LAZY : util::POPULATE_OR_READ;
-    
+
     m_ngram.reset(new Model(m_file.c_str(), config));
-    
+
     m_beginSentenceFactor = collection.AddFactor(BOS_);
     */
   };
 
   /*
- ReloadingLanguageModel(const std::string &line) : LanguageModelKen<Model>(ConstructKenLM(std::string(line).replace(0,11,"KENLM"))) {
+  ReloadingLanguageModel(const std::string &line) : LanguageModelKen<Model>(ConstructKenLM(std::string(line).replace(0,11,"KENLM"))) {
     std::cerr << "ReloadingLM constructor" << std::endl;
     std::cerr << std::string(line).replace(0,11,"KENLM") << std::endl;
   }
@@ -138,12 +137,12 @@ public:
   }
 
 
-private:
+  private:
 
   LanguageModel *m_lm;
   */
 
- protected:
+protected:
 
   using LanguageModelKen<Model>::m_ngram;
   using LanguageModelKen<Model>::m_lmIdLookup;

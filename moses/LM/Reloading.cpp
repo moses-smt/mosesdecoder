@@ -73,7 +73,7 @@ template <class Model> FFState *ReloadingLanguageModel<Model>::EvaluateWhenAppli
 
   std::auto_ptr<FFState> kenlmState(LanguageModelKen<Model>::EvaluateWhenApplied(hypo, ps, out));
   const lm::ngram::State &out_state = static_cast<const ReloadingLMState&>(*kenlmState).state;
-  
+
 
   std::auto_ptr<ReloadingLMState> ret(new ReloadingLMState());
   ret->state = out_state;
