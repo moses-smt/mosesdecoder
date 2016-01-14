@@ -44,20 +44,20 @@ Search::~Search()
 void Search::Decode()
 {
 	// init cue edges
-	m_cubeEdges.resize(m_mgr.GetInput().GetSize() + 1);
+	m_cubeEdges.resize(mgr.GetInput().GetSize() + 1);
 	for (size_t i = 0; i < m_cubeEdges.size(); ++i) {
-		m_cubeEdges[i] = new (m_mgr.GetPool().Allocate<CubeEdges>()) CubeEdges(m_cubeEdgeAlloc);
+		m_cubeEdges[i] = new (mgr.GetPool().Allocate<CubeEdges>()) CubeEdges(m_cubeEdgeAlloc);
 	}
 
-	const Bitmap &initBitmap = m_mgr.GetBitmaps().GetInitialBitmap();
-	Hypothesis *initHypo = Hypothesis::Create(m_mgr.GetSystemPool(), m_mgr);
-	initHypo->Init(m_mgr, m_mgr.GetInputPaths().GetBlank(), m_mgr.GetInitPhrase(), initBitmap);
-	initHypo->EmptyHypothesisState(m_mgr.GetInput());
+	const Bitmap &initBitmap = mgr.GetBitmaps().GetInitialBitmap();
+	Hypothesis *initHypo = Hypothesis::Create(mgr.GetSystemPool(), mgr);
+	initHypo->Init(mgr, mgr.GetInputPaths().GetBlank(), mgr.GetInitPhrase(), initBitmap);
+	initHypo->EmptyHypothesisState(mgr.GetInput());
 
-	m_stack.Add(initHypo, m_mgr.GetHypoRecycle());
+	m_stack.Add(initHypo, mgr.GetHypoRecycle());
 	PostDecode(0);
 
-	for (size_t stackInd = 1; stackInd < m_mgr.GetInput().GetSize() + 1; ++stackInd) {
+	for (size_t stackInd = 1; stackInd < mgr.GetInput().GetSize() + 1; ++stackInd) {
 		//cerr << "stackInd=" << stackInd << endl;
 		m_stack.Clear();
 		Decode(stackInd);
@@ -71,7 +71,7 @@ void Search::Decode()
 
 void Search::Decode(size_t stackInd)
 {
-	Recycler<Hypothesis*> &hypoRecycler  = m_mgr.GetHypoRecycle();
+	Recycler<Hypothesis*> &hypoRecycler  = mgr.GetHypoRecycle();
 
 	// reuse queue from previous stack. Clear it first
 	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > &container = Container(m_queue);
@@ -95,7 +95,7 @@ void Search::Decode(size_t stackInd)
 
 	BOOST_FOREACH(CubeEdge *edge, edges) {
 		//cerr << *edge << " ";
-		edge->CreateFirst(m_mgr, m_queue, m_seenPositions, m_queueItemRecycler);
+		edge->CreateFirst(mgr, m_queue, m_seenPositions, m_queueItemRecycler);
 	}
 
 	/*
@@ -110,7 +110,7 @@ void Search::Decode(size_t stackInd)
 	*/
 
 	size_t pops = 0;
-	while (!m_queue.empty() && pops < m_mgr.system.popLimit) {
+	while (!m_queue.empty() && pops < mgr.system.popLimit) {
 		// get best hypo from queue, add to stack
 		//cerr << "queue=" << queue.size() << endl;
 		QueueItem *item = m_queue.top();
@@ -120,31 +120,31 @@ void Search::Decode(size_t stackInd)
 
 		// prefetching
 		/*
-		Hypothesis::Prefetch(m_mgr); // next hypo in recycler
-		edge.Prefetch(m_mgr, item, m_queue, m_seenPositions); //next hypos of current item
+		Hypothesis::Prefetch(mgr); // next hypo in recycler
+		edge.Prefetch(mgr, item, m_queue, m_seenPositions); //next hypos of current item
 
 		QueueItem *itemNext = m_queue.top();
 		CubeEdge &edgeNext = itemNext->edge;
-		edgeNext.Prefetch(m_mgr, itemNext, m_queue, m_seenPositions); //next hypos of NEXT item
+		edgeNext.Prefetch(mgr, itemNext, m_queue, m_seenPositions); //next hypos of NEXT item
 		*/
 
 		// add hypo to stack
 		Hypothesis *hypo = item->hypo;
 
-		if (m_mgr.system.cubePruningLazyScoring) {
+		if (mgr.system.cubePruningLazyScoring) {
 			hypo->EvaluateWhenApplied();
 		}
 
 		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
 		m_stack.Add(hypo, hypoRecycler);
 
-		edge->CreateNext(m_mgr, item, m_queue, m_seenPositions, m_queueItemRecycler);
+		edge->CreateNext(mgr, item, m_queue, m_seenPositions, m_queueItemRecycler);
 
 		++pops;
 	}
 
 	// create hypo from every edge. Increase diversity
-	if (m_mgr.system.cubePruningDiversity) {
+	if (mgr.system.cubePruningDiversity) {
 		while (!m_queue.empty()) {
 			QueueItem *item = m_queue.top();
 			m_queue.pop();
@@ -153,7 +153,7 @@ void Search::Decode(size_t stackInd)
 				// add hypo to stack
 				Hypothesis *hypo = item->hypo;
 				//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
-				m_stack.Add(hypo, m_mgr.GetHypoRecycle());
+				m_stack.Add(hypo, mgr.GetHypoRecycle());
 			}
 		}
 	}
@@ -161,7 +161,7 @@ void Search::Decode(size_t stackInd)
 
 void Search::PostDecode(size_t stackInd)
 {
-  MemPool &pool = m_mgr.GetPool();
+  MemPool &pool = mgr.GetPool();
 
   BOOST_FOREACH(const Stack::Coll::value_type &val, m_stack.GetColl()) {
 	  const Bitmap &hypoBitmap = *val.first.first;
@@ -169,7 +169,7 @@ void Search::PostDecode(size_t stackInd)
 	  //cerr << "key=" << hypoBitmap << " " << hypoEndPos << endl;
 
 	  // create edges to next hypos from existing hypos
-	  const InputPaths &paths = m_mgr.GetInputPaths();
+	  const InputPaths &paths = mgr.GetInputPaths();
 
 	  BOOST_FOREACH(const InputPath *path, paths) {
   		const Range &pathRange = path->range;
@@ -182,19 +182,19 @@ void Search::PostDecode(size_t stackInd)
   			continue;
   		}
 
-  		const Bitmap &newBitmap = m_mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
+  		const Bitmap &newBitmap = mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
   		size_t numWords = newBitmap.GetNumWordsCovered();
 
   		CubeEdges &edges = *m_cubeEdges[numWords];
 
 		// sort hypo for a particular bitmap and hypoEndPos
-  		Hypotheses &sortedHypos = val.second->GetSortedAndPruneHypos(m_mgr);
+  		Hypotheses &sortedHypos = val.second->GetSortedAndPruneHypos(mgr);
 
-  	    size_t numPt = m_mgr.system.mappings.size();
+  	    size_t numPt = mgr.system.mappings.size();
   	    for (size_t i = 0; i < numPt; ++i) {
   	    	const TargetPhrases *tps = path->targetPhrases[i];
   			if (tps && tps->GetSize()) {
-  		  		CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(m_mgr, sortedHypos, *path, *tps, newBitmap);
+  		  		CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(mgr, sortedHypos, *path, *tps, newBitmap);
   		  		edges.push_back(edge);
   			}
   		}

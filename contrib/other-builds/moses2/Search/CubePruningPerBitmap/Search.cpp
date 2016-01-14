@@ -43,14 +43,14 @@ Search::~Search()
 void Search::Decode()
 {
 	// init stacks
-	m_stacks.Init(m_mgr.GetInput().GetSize() + 1);
+	m_stacks.Init(mgr.GetInput().GetSize() + 1);
 
-	const Bitmap &initBitmap = m_mgr.GetBitmaps().GetInitialBitmap();
-	Hypothesis *initHypo = Hypothesis::Create(m_mgr.GetSystemPool(), m_mgr);
-	initHypo->Init(m_mgr, m_mgr.GetInputPaths().GetBlank(), m_mgr.GetInitPhrase(), initBitmap);
-	initHypo->EmptyHypothesisState(m_mgr.GetInput());
+	const Bitmap &initBitmap = mgr.GetBitmaps().GetInitialBitmap();
+	Hypothesis *initHypo = Hypothesis::Create(mgr.GetSystemPool(), mgr);
+	initHypo->Init(mgr, mgr.GetInputPaths().GetBlank(), mgr.GetInitPhrase(), initBitmap);
+	initHypo->EmptyHypothesisState(mgr.GetInput());
 
-	m_stacks.Add(initHypo, m_mgr.GetHypoRecycle());
+	m_stacks.Add(initHypo, mgr.GetHypoRecycle());
 
 	for (size_t stackInd = 0; stackInd < m_stacks.GetSize() - 1; ++stackInd) {
 		CreateSearchGraph(stackInd);
@@ -101,7 +101,7 @@ void Search::Decode(size_t stackInd)
 
 void Search::Decode(const vector<NSCubePruning::MiniStack*> &miniStacks)
 {
-	Recycler<Hypothesis*> &hypoRecycler  = m_mgr.GetHypoRecycle();
+	Recycler<Hypothesis*> &hypoRecycler  = mgr.GetHypoRecycle();
 
 	// reuse queue from previous stack. Clear it first
 	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > &container = Container(m_queue);
@@ -126,12 +126,12 @@ void Search::Decode(const vector<NSCubePruning::MiniStack*> &miniStacks)
 
 		BOOST_FOREACH(CubeEdge *edge, edges) {
 			//cerr << "edge=" << *edge << endl;
-			edge->CreateFirst(m_mgr, m_queue, m_seenPositions, m_queueItemRecycler);
+			edge->CreateFirst(mgr, m_queue, m_seenPositions, m_queueItemRecycler);
 		}
 	}
 
 	size_t pops = 0;
-	while (!m_queue.empty() && pops < m_mgr.system.popLimit) {
+	while (!m_queue.empty() && pops < mgr.system.popLimit) {
 		// get best hypo from queue, add to stack
 		//cerr << "queue=" << queue.size() << endl;
 		QueueItem *item = m_queue.top();
@@ -141,12 +141,12 @@ void Search::Decode(const vector<NSCubePruning::MiniStack*> &miniStacks)
 
 		// prefetching
 		/*
-		Hypothesis::Prefetch(m_mgr); // next hypo in recycler
-		edge.Prefetch(m_mgr, item, m_queue, m_seenPositions); //next hypos of current item
+		Hypothesis::Prefetch(mgr); // next hypo in recycler
+		edge.Prefetch(mgr, item, m_queue, m_seenPositions); //next hypos of current item
 
 		QueueItem *itemNext = m_queue.top();
 		CubeEdge &edgeNext = itemNext->edge;
-		edgeNext.Prefetch(m_mgr, itemNext, m_queue, m_seenPositions); //next hypos of NEXT item
+		edgeNext.Prefetch(mgr, itemNext, m_queue, m_seenPositions); //next hypos of NEXT item
 		*/
 
 		// add hypo to stack
@@ -154,7 +154,7 @@ void Search::Decode(const vector<NSCubePruning::MiniStack*> &miniStacks)
 		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
 		m_stacks.Add(hypo, hypoRecycler);
 
-		edge->CreateNext(m_mgr, item, m_queue, m_seenPositions, m_queueItemRecycler);
+		edge->CreateNext(mgr, item, m_queue, m_seenPositions, m_queueItemRecycler);
 
 		++pops;
 	}
@@ -171,7 +171,7 @@ void Search::Decode(const vector<NSCubePruning::MiniStack*> &miniStacks)
 			// add hypo to stack
 			Hypothesis *hypo = item->hypo;
 			//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
-			m_stacks.Add(hypo, m_mgr.GetHypoRecycle());
+			m_stacks.Add(hypo, mgr.GetHypoRecycle());
 		}
 	}
 	*/
@@ -181,7 +181,7 @@ void Search::Decode(const vector<NSCubePruning::MiniStack*> &miniStacks)
 void Search::CreateSearchGraph(size_t stackInd)
 {
   NSCubePruning::Stack &stack = m_stacks[stackInd];
-  MemPool &pool = m_mgr.GetPool();
+  MemPool &pool = mgr.GetPool();
 
   BOOST_FOREACH(const NSCubePruning::Stack::Coll::value_type &val, stack.GetColl()) {
 	  const Bitmap &hypoBitmap = *val.first.first;
@@ -189,7 +189,7 @@ void Search::CreateSearchGraph(size_t stackInd)
 	  //cerr << "key=" << hypoBitmap << " " << hypoEndPos << endl;
 
 	  // create edges to next hypos from existing hypos
-	  const InputPaths &paths = m_mgr.GetInputPaths();
+	  const InputPaths &paths = mgr.GetInputPaths();
 
 	  BOOST_FOREACH(const InputPath *path, paths) {
 		const Range &pathRange = path->range;
@@ -202,21 +202,21 @@ void Search::CreateSearchGraph(size_t stackInd)
 			continue;
 		}
 
-		const Bitmap &newBitmap = m_mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
+		const Bitmap &newBitmap = mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
 
 		// sort hypo for a particular bitmap and hypoEndPos
 		const NSCubePruning::MiniStack &miniStack = *val.second;
 
 
 		// add cube edge
-  	    size_t numPt = m_mgr.system.mappings.size();
+  	    size_t numPt = mgr.system.mappings.size();
   	    for (size_t i = 0; i < numPt; ++i) {
   	    	const TargetPhrases *tps = path->targetPhrases[i];
   			if (tps && tps->GetSize()) {
   				// create next mini stack
   				NSCubePruning::MiniStack &nextMiniStack = m_stacks.GetMiniStack(newBitmap, pathRange);
 
-  				CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(m_mgr, miniStack, *path, *tps, newBitmap);
+  				CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(mgr, miniStack, *path, *tps, newBitmap);
 
 				CubeEdges *edges;
 				boost::unordered_map<NSCubePruning::MiniStack*, CubeEdges*>::iterator iter = m_cubeEdges.find(&nextMiniStack);

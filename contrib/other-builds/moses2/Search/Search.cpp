@@ -15,7 +15,7 @@ namespace Moses2
 {
 
 Search::Search(Manager &mgr)
-:m_mgr(mgr)
+:mgr(mgr)
 {
 	// TODO Auto-generated constructor stub
 
@@ -37,10 +37,10 @@ bool Search::CanExtend(const Bitmap &hypoBitmap, size_t hypoRangeEndPos, const R
 		return false;
 	}
 
-	if (m_mgr.system.maxDistortion >= 0) {
+	if (mgr.system.maxDistortion >= 0) {
 		// distortion limit
 		int distortion = ComputeDistortionDistance(hypoRangeEndPos, pathRange.GetStartPos());
-		if (distortion > m_mgr.system.maxDistortion) {
+		if (distortion > mgr.system.maxDistortion) {
 			//cerr << " NO" << endl;
 			return false;
 		}
@@ -94,7 +94,7 @@ bool Search::CanExtend(const Bitmap &hypoBitmap, size_t hypoRangeEndPos, const R
       Range bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
 
       if (ComputeDistortionDistance(pathRange.GetEndPos(), bestNextExtension.GetStartPos())
-          > m_mgr.system.maxDistortion) {
+          > mgr.system.maxDistortion) {
     	  //cerr << " NO" << endl;
     	  return false;
       }

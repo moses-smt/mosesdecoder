@@ -35,14 +35,14 @@ SearchNormal::~SearchNormal() {
 void SearchNormal::Decode()
 {
 	// init stacks
-	m_stacks.Init(m_mgr.GetInput().GetSize() + 1);
+	m_stacks.Init(mgr.GetInput().GetSize() + 1);
 
-	const Bitmap &initBitmap = m_mgr.GetBitmaps().GetInitialBitmap();
-	Hypothesis *initHypo = Hypothesis::Create(m_mgr.GetSystemPool(), m_mgr);
-	initHypo->Init(m_mgr, m_mgr.GetInputPaths().GetBlank(), m_mgr.GetInitPhrase(), initBitmap);
-	initHypo->EmptyHypothesisState(m_mgr.GetInput());
+	const Bitmap &initBitmap = mgr.GetBitmaps().GetInitialBitmap();
+	Hypothesis *initHypo = Hypothesis::Create(mgr.GetSystemPool(), mgr);
+	initHypo->Init(mgr, mgr.GetInputPaths().GetBlank(), mgr.GetInitPhrase(), initBitmap);
+	initHypo->EmptyHypothesisState(mgr.GetInput());
 
-	m_stacks.Add(initHypo, m_mgr.GetHypoRecycle());
+	m_stacks.Add(initHypo, mgr.GetHypoRecycle());
 
 	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
 		Decode(stackInd);
@@ -64,9 +64,9 @@ void SearchNormal::Decode(size_t stackInd)
 	  return;
   }
 
-  std::vector<const Hypothesis*> hypos = stack.GetBestHyposAndPrune(m_mgr.system.stackSize, m_mgr.GetHypoRecycle());
+  std::vector<const Hypothesis*> hypos = stack.GetBestHyposAndPrune(mgr.system.stackSize, mgr.GetHypoRecycle());
 
-	const InputPaths &paths = m_mgr.GetInputPaths();
+	const InputPaths &paths = mgr.GetInputPaths();
 
 	BOOST_FOREACH(const InputPath *path, paths) {
 	  BOOST_FOREACH(const Hypothesis *hypo, hypos) {
@@ -87,11 +87,11 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
 	//cerr << " YES" << endl;
 
     // extend this hypo
-	const Bitmap &newBitmap = m_mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
-    //SCORE estimatedScore = m_mgr.GetEstimatedScores().CalcFutureScore2(bitmap, pathRange.GetStartPos(), pathRange.GetEndPos());
-    SCORE estimatedScore = m_mgr.GetEstimatedScores().CalcEstimatedScore(newBitmap);
+	const Bitmap &newBitmap = mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
+    //SCORE estimatedScore = mgr.GetEstimatedScores().CalcFutureScore2(bitmap, pathRange.GetStartPos(), pathRange.GetEndPos());
+    SCORE estimatedScore = mgr.GetEstimatedScores().CalcEstimatedScore(newBitmap);
 
-    size_t numPt = m_mgr.system.mappings.size();
+    size_t numPt = mgr.system.mappings.size();
 	const TargetPhrases **tpsAllPt = path.targetPhrases;
 	for (size_t i = 0; i < numPt; ++i) {
 		const TargetPhrases *tps = tpsAllPt[i];
@@ -118,14 +118,14 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 		const Bitmap &newBitmap,
 		SCORE estimatedScore)
 {
-	Hypothesis *newHypo = Hypothesis::Create(m_mgr.GetSystemPool(), m_mgr);
-	newHypo->Init(m_mgr, hypo, path, tp, newBitmap, estimatedScore);
+	Hypothesis *newHypo = Hypothesis::Create(mgr.GetSystemPool(), mgr);
+	newHypo->Init(mgr, hypo, path, tp, newBitmap, estimatedScore);
 	newHypo->EvaluateWhenApplied();
 
-	m_stacks.Add(newHypo, m_mgr.GetHypoRecycle());
+	m_stacks.Add(newHypo, mgr.GetHypoRecycle());
 
 	//m_arcLists.AddArc(stackAdded.added, newHypo, stackAdded.other);
-	//stack.Prune(m_mgr.GetHypoRecycle(), m_mgr.system.stackSize, m_mgr.system.stackSize * 2);
+	//stack.Prune(mgr.GetHypoRecycle(), mgr.system.stackSize, mgr.system.stackSize * 2);
 
 }
 

@@ -28,7 +28,7 @@ public:
 	virtual const Hypothesis *GetBestHypothesis() const = 0;
 
 protected:
-	Manager &m_mgr;
+	Manager &mgr;
 	//ArcLists m_arcLists;
 
 	bool CanExtend(const Bitmap &hypoBitmap, size_t hypoRangeEndPos, const Range &pathRange);
