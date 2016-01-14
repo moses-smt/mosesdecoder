@@ -3,6 +3,7 @@
 #include <boost/unordered_set.hpp>
 #include <boost/unordered_map.hpp>
 #include <set>
+#include <stack>
 #include "Bitmap.h"
 #include "Util2.h"
 
@@ -19,6 +20,7 @@ class Bitmaps
   Bitmap *m_initBitmap;
 
   MemPool &m_pool;
+  std::stack<Bitmap*> m_recycler;
 
   const Bitmap &GetNextBitmap(const Bitmap &bm, const Range &range);
 public:
