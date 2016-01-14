@@ -1,4 +1,5 @@
 #include "storing.hh"
+#include "moses/Util.h"
 
 BinaryFileWriter::BinaryFileWriter (std::string basepath) : os ((basepath + "/binfile.dat").c_str(), std::ios::binary)
 {
@@ -39,7 +40,7 @@ BinaryFileWriter::~BinaryFileWriter ()
 }
 
 void createProbingPT(const char * phrasetable_path, const char * target_path,
-                     int num_scores, int num_lex_scores, bool log_prob)
+                     int num_scores, int num_lex_scores, bool log_prob, int max_cache_size)
 {
   //Get basepath and create directory if missing
   std::string basepath(target_path);
@@ -67,6 +68,9 @@ void createProbingPT(const char * phrasetable_path, const char * target_path,
   Table table(mem, size);
 
   BinaryFileWriter binfile(basepath); //Init the binary file writer.
+
+  std::priority_queue<CacheItem*, std::vector<CacheItem*>, CacheItemOrderer> cache;
+  float totalSourceCount = 0;
 
   line_text prev_line; //Check if the source phrase of the previous line is the same
 
@@ -113,6 +117,25 @@ void createProbingPT(const char * phrasetable_path, const char * target_path,
         std::vector<unsigned char> encoded_line = huffmanEncoder.full_encode_line(line, log_prob);
         binfile.write(&encoded_line);
 
+        // update cache
+        if (max_cache_size) {
+			std::string countStr = line.counts.as_string();
+			countStr = Moses::Trim(countStr);
+			if (!countStr.empty()) {
+				std::vector<float> toks = Moses::Tokenize<float>(countStr);
+
+				if (toks.size() >= 2) {
+					totalSourceCount += toks[1];
+					CacheItem *item = new CacheItem(Moses::Trim(line.source_phrase.as_string()), toks[1]);
+					cache.push(item);
+
+					if (max_cache_size > 0 && cache.size() > max_cache_size) {
+						cache.pop();
+					}
+				}
+			}
+        }
+
         //Set prevLine
         prev_line = line;
 
@@ -144,9 +167,11 @@ void createProbingPT(const char * phrasetable_path, const char * target_path,
     }
   }
 
-  serialize_table(mem, size, (basepath + "/probing_hash.dat").c_str());
+  serialize_table(mem, size, (basepath + "/probing_hash.dat"));
 
-  serialize_map(&source_vocabids, (basepath + "/source_vocabids").c_str());
+  serialize_map(&source_vocabids, (basepath + "/source_vocabids"));
+
+  serialize_cache(cache, (basepath + "/cache"), totalSourceCount);
 
   delete[] mem;
 
@@ -160,3 +185,22 @@ void createProbingPT(const char * phrasetable_path, const char * target_path,
   configfile << log_prob << '\n';
   configfile.close();
 }
+
+void serialize_cache(std::priority_queue<CacheItem*, std::vector<CacheItem*>, CacheItemOrderer> &cache,
+		const std::string &path,
+		float totalSourceCount)
+{
+  std::ofstream os (path.c_str());
+
+  os << totalSourceCount << std::endl;
+  while (!cache.empty()) {
+	  const CacheItem *item = cache.top();
+	  os << item->count << "\t" << item->source << std::endl;
+
+	  delete item;
+	  cache.pop();
+  }
+
+  os.close();
+}
+

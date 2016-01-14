@@ -25,9 +25,9 @@ char * readTable(const char * filename, size_t size)
 }
 
 
-void serialize_table(char *mem, size_t size, const char * filename)
+void serialize_table(char *mem, size_t size, const std::string &filename)
 {
-  std::ofstream os (filename, std::ios::binary);
+  std::ofstream os (filename.c_str(), std::ios::binary);
   os.write((const char*)&mem[0], size);
   os.close();
 

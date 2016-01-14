@@ -11,6 +11,7 @@ int main(int argc, char* argv[])
 	int num_scores = 4;
 	int num_lex_scores = 0;
 	bool log_prob = false;
+	int max_cache_size = 10000;
 
   namespace po = boost::program_options;
   po::options_description desc("Options");
@@ -21,6 +22,7 @@ int main(int argc, char* argv[])
   ("num-scores", po::value<int>()->default_value(num_scores), "Number of pt scores")
   ("num-lex-scores", po::value<int>()->default_value(num_lex_scores), "Number of lexicalized reordering scores")
   ("log-prob", "log (and floor) probabilities before storing")
+  ("max-cache-size", po::value<int>()->default_value(max_cache_size), "Maximum number of high-count source lines to write to cache file. 0=no cache, negative=no limit")
 
 	;
 
@@ -48,10 +50,11 @@ int main(int argc, char* argv[])
   if (vm.count("output-dir")) outPath = vm["output-dir"].as<string>();
   if (vm.count("num-scores")) num_scores = vm["num-scores"].as<int>();
   if (vm.count("num-lex-scores")) num_lex_scores = vm["num-lex-scores"].as<int>();
-	if (vm.count("log-prob")) log_prob = true;
+  if (vm.count("max-cache-size")) max_cache_size = vm["max-cache-size"].as<int>();
+  if (vm.count("log-prob")) log_prob = true;
 
 
-  createProbingPT(inPath.c_str(), outPath.c_str(), num_scores, num_lex_scores, log_prob);
+  createProbingPT(inPath.c_str(), outPath.c_str(), num_scores, num_lex_scores, log_prob, max_cache_size);
 
   util::PrintUsage(std::cout);
   return 0;

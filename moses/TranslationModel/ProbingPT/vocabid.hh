@@ -15,6 +15,6 @@
 
 void add_to_map(std::map<uint64_t, std::string> *karta, StringPiece textin);
 
-void serialize_map(std::map<uint64_t, std::string> *karta, const char* filename);
+void serialize_map(std::map<uint64_t, std::string> *karta, const std::string &filename);
 
 void read_map(std::map<uint64_t, std::string> *karta, const char* filename);
