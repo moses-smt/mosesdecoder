@@ -8,6 +8,8 @@
 #include "ProbingPT.h"
 #include "../System.h"
 #include "../Scores.h"
+#include "../Phrase.h"
+#include "../legacy/InputFileStream.h"
 #include "../FF/FeatureFunctions.h"
 #include "../Search/Manager.h"
 #include "../legacy/FactorCollection.h"
@@ -68,6 +70,9 @@ void ProbingPT::Load(System &system)
 	}
 	m_targetVocab[probingId] = factor;
   }
+
+  // cache
+  CreateCache(system);
 }
 
 void ProbingPT::Lookup(const Manager &mgr, InputPaths &inputPaths) const
@@ -93,16 +98,20 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr,
 	}
 	else {
 		const Phrase &sourcePhrase = inputPath.subPhrase;
-		ret = CreateTargetPhrase(pool, mgr.system, sourcePhrase, recycler);
+		uint64_t key;
+		ret = CreateTargetPhrase(pool, mgr.system, sourcePhrase, recycler, key);
 	}
 	return ret;
 }
 
-TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool,
-		const System &system,
-		const Phrase &sourcePhrase,
-		RecycleData &recycler) const
+TargetPhrases *ProbingPT::CreateTargetPhrase(MemPool &pool,
+		  const System &system,
+		  const Phrase &sourcePhrase,
+		  RecycleData &recycler,
+		  uint64_t &key) const
 {
+  TargetPhrases *tps = NULL;
+
   // create a target phrase from the 1st word of the source, prefix with 'ProbingPT:'
   size_t sourceSize = sourcePhrase.GetSize();
   assert(sourceSize);
@@ -113,22 +122,11 @@ TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool,
   if (!ok) {
     // source phrase contains a word unknown in the pt.
     // We know immediately there's no translation for it
-    return NULL;
+    return tps;
   }
 
   //Actual lookup
-  uint64_t key = m_engine->getKey(probingSource, sourceSize);
-  TargetPhrases *tps = CreateTargetPhrase(pool, system, sourcePhrase, key, recycler);
-  return tps;
-}
-
-TargetPhrases *ProbingPT::CreateTargetPhrase(MemPool &pool,
-		  const System &system,
-		  const Phrase &sourcePhrase,
-		  uint64_t key,
-		  RecycleData &recycler) const
-{
-  TargetPhrases *tps = NULL;
+  key = m_engine->getKey(probingSource, sourceSize);
 
   std::pair<bool, std::vector<target_text*> > query_result;
   query_result = m_engine->query(key, recycler);
@@ -246,10 +244,39 @@ void ProbingPT::ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &o
   ok = true;
 }
 
-void ProbingPT::GetScoresProperty(const std::string &key, size_t ind, SCORE *scoreArr)
-		{
+void ProbingPT::CreateCache(System &system)
+{
+	if (m_maxCacheSize == 0) {
+		return;
+	}
 
-		}
+	string filePath = m_path + "/cache";
+	InputFileStream strme(filePath);
+
+	string line;
+	getline(strme, line);
+	//float totalCount = Scan<float>(line);
+
+	MemPool &pool = system.GetSystemPool();
+	FactorCollection &vocab = system.GetVocab();
+    RecycleData &recycler = GetThreadSpecificObj(m_recycleData); // prob should just create a temporary recycler
+
+	size_t lineCount = 0;
+	while (getline(strme, line) && lineCount < m_maxCacheSize) {
+		vector<string> toks = Tokenize(line, "\t");
+		assert(toks.size() == 2);
+		PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system, toks[1]);
+
+		uint64_t key;
+		TargetPhrases *tps = CreateTargetPhrase(pool, system, *sourcePhrase, recycler, key);
+		assert(tps);
+
+		//cerr << key << " " << *sourcePhrase << endl;
+		m_cache[key] = tps;
+	}
+
+
+}
 
 }
 

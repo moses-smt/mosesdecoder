@@ -33,8 +33,6 @@ public:
 
   void Lookup(const Manager &mgr, InputPaths &inputPaths) const;
 
-  virtual void GetScoresProperty(const std::string &key, size_t ind, SCORE *scoreArr);
-
 protected:
   std::vector<uint64_t> m_sourceVocab; // factor id -> pt id
   std::vector<const Factor*> m_targetVocab; // pt id -> factor*
@@ -52,12 +50,8 @@ protected:
   TargetPhrases *CreateTargetPhrase(MemPool &pool,
 		  const System &system,
 		  const Phrase &sourcePhrase,
-		  RecycleData &recycler) const;
-  TargetPhrases *CreateTargetPhrase(MemPool &pool,
-		  const System &system,
-		  const Phrase &sourcePhrase,
-		  uint64_t key,
-		  RecycleData &recycler) const;
+		  RecycleData &recycler,
+		  uint64_t &key) const;
   TargetPhrase *CreateTargetPhrase(MemPool &pool,
 		  const System &system,
 		  const Phrase &sourcePhrase,
@@ -85,6 +79,8 @@ protected:
 
   // caching
   boost::unordered_map<uint64_t, TargetPhrases*> m_cache;
+  void CreateCache(System &system);
+
 };
 
 }
