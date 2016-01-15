@@ -103,59 +103,68 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr,
 	}
 	*/
 	const Phrase &sourcePhrase = inputPath.subPhrase;
-	CreateTargetPhraseStruct tpsAndKey = CreateTargetPhrase(pool, mgr.system, sourcePhrase, recycler);
-	return tpsAndKey.tps;
+	RetStruct retStruct;
+	TargetPhrases *tps = CreateTargetPhrase(pool, mgr.system, sourcePhrase, recycler, retStruct);
+	return tps;
 }
 
-ProbingPT::CreateTargetPhraseStruct ProbingPT::CreateTargetPhrase(
-		  MemPool &pool,
-		  const System &system,
-		  const Phrase &sourcePhrase,
-		  RecycleData &recycler) const
+void ProbingPT::GetSourceProbingId(const Phrase &sourcePhrase, RetStruct &retStruct) const
 {
-  CreateTargetPhraseStruct ret;
-  ret.tps = NULL;
-
   // create a target phrase from the 1st word of the source, prefix with 'ProbingPT:'
   size_t sourceSize = sourcePhrase.GetSize();
   assert(sourceSize);
 
   uint64_t probingSource[sourceSize];
-  ConvertToProbingSourcePhrase(sourcePhrase, ret.ok, probingSource);
-  if (!ret.ok) {
-    // source phrase contains a word unknown in the pt.
-    // We know immediately there's no translation for it
-    return ret;
+  ConvertToProbingSourcePhrase(sourcePhrase, retStruct.keyOK, probingSource);
+  if (!retStruct.keyOK) {
+	// source phrase contains a word unknown in the pt.
+	// We know immediately there's no translation for it
+	return;
+  }
+
+  retStruct.key = m_engine->getKey(probingSource, sourceSize);
+}
+
+TargetPhrases *ProbingPT::CreateTargetPhrase(
+		  MemPool &pool,
+		  const System &system,
+		  const Phrase &sourcePhrase,
+		  RecycleData &recycler,
+		  RetStruct &retStruct) const
+{
+  TargetPhrases *tps = NULL;
+
+  GetSourceProbingId(sourcePhrase, retStruct);
+  if (!retStruct.keyOK) {
+	  return tps;
   }
 
   //Actual lookup
-  ret.key = m_engine->getKey(probingSource, sourceSize);
-
   std::pair<bool, std::vector<target_text*> > query_result;
-  query_result = m_engine->query(ret.key, recycler);
+  query_result = m_engine->query(retStruct.key, recycler);
 
   if (query_result.first) {
 	//m_engine->printTargetInfo(query_result.second);
 	const std::vector<target_text*> &probingTargetPhrases = query_result.second;
-	ret.tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, probingTargetPhrases.size());
+	tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, probingTargetPhrases.size());
 
 	for (size_t i = 0; i < probingTargetPhrases.size(); ++i) {
 	  target_text *probingTargetPhrase = probingTargetPhrases[i];
 	  TargetPhrase *tp = CreateTargetPhrase(pool, system, sourcePhrase, *probingTargetPhrase);
 
-	  ret.tps->AddTargetPhrase(*tp);
+	  tps->AddTargetPhrase(*tp);
 
 	  recycler.tt.push_back(probingTargetPhrase);
 	}
 
-	ret.tps->SortAndPrune(m_tableLimit);
-	system.featureFunctions.EvaluateAfterTablePruning(pool, *ret.tps, sourcePhrase);
+	tps->SortAndPrune(m_tableLimit);
+	system.featureFunctions.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
   }
   else {
 	  assert(query_result.second.size() == 0);
   }
 
-  return ret;
+  return tps;
 }
 
 TargetPhrase *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const
@@ -270,11 +279,12 @@ void ProbingPT::CreateCache(System &system)
 		assert(toks.size() == 2);
 		PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system, toks[1]);
 
-		CreateTargetPhraseStruct tpsAndKey = CreateTargetPhrase(pool, system, *sourcePhrase, recycler);
-		assert(tpsAndKey.tps);
+		RetStruct retStruct;
+		TargetPhrases *tps = CreateTargetPhrase(pool, system, *sourcePhrase, recycler, retStruct);
+		assert(tps);
 
 		//cerr << key << " " << *sourcePhrase << endl;
-		m_cache[tpsAndKey.key] = tpsAndKey.tps;
+		m_cache[retStruct.key] = tps;
 	}
 
 

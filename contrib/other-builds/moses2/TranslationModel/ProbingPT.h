@@ -26,10 +26,9 @@ class RecycleData;
 
 class ProbingPT : public PhraseTable
 {
-  struct CreateTargetPhraseStruct
+  struct RetStruct
   {
-	  bool ok;
-	  TargetPhrases *tps;
+	  bool keyOK;
 	  uint64_t key;
   };
 
@@ -54,10 +53,11 @@ protected:
 		  MemPool &pool,
 		  InputPath &inputPath,
 		  RecycleData &recycler) const;
-  CreateTargetPhraseStruct CreateTargetPhrase(MemPool &pool,
+  TargetPhrases *CreateTargetPhrase(MemPool &pool,
 		  const System &system,
 		  const Phrase &sourcePhrase,
-		  RecycleData &recycler) const;
+		  RecycleData &recycler,
+		  RetStruct &retStruct) const;
   TargetPhrase *CreateTargetPhrase(MemPool &pool,
 		  const System &system,
 		  const Phrase &sourcePhrase,
@@ -73,6 +73,7 @@ protected:
 	  return m_targetVocab[probingId];
   }
 
+  void GetSourceProbingId(const Phrase &sourcePhrase, RetStruct &retStruct) const;
   inline uint64_t GetSourceProbingId(const Factor *factor) const
   {
 	  size_t factorId = factor->GetId();
