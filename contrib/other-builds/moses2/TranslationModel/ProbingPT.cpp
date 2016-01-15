@@ -91,6 +91,7 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr,
 		InputPath &inputPath,
 		RecycleData &recycler) const
 {
+	/*
 	if (inputPath.prefixPath && inputPath.prefixPath->GetTargetPhrases(*this) == NULL) {
 		// assume all paths have prefixes, except rules with 1 word source
 		return NULL;
@@ -100,6 +101,10 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr,
 		std::pair<TargetPhrases*, uint64_t> tpsAndKey = CreateTargetPhrase(pool, mgr.system, sourcePhrase, recycler);
 		return tpsAndKey.first;
 	}
+	*/
+	const Phrase &sourcePhrase = inputPath.subPhrase;
+	std::pair<TargetPhrases*, uint64_t> tpsAndKey = CreateTargetPhrase(pool, mgr.system, sourcePhrase, recycler);
+	return tpsAndKey.first;
 }
 
 std::pair<TargetPhrases*, uint64_t> ProbingPT::CreateTargetPhrase(
