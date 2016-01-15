@@ -1,3 +1,13 @@
+exe ptable-sigtest-filter : 
+filter-pt.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil
+;
 exe try-align : 
 try-align.cc 
 $(TOP)/moses//moses
