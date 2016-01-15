@@ -121,9 +121,8 @@ ProbingPT::CreateTargetPhraseStruct ProbingPT::CreateTargetPhrase(
   assert(sourceSize);
 
   uint64_t probingSource[sourceSize];
-  bool ok;
-  ConvertToProbingSourcePhrase(sourcePhrase, ok, probingSource);
-  if (!ok) {
+  ConvertToProbingSourcePhrase(sourcePhrase, ret.ok, probingSource);
+  if (!ret.ok) {
     // source phrase contains a word unknown in the pt.
     // We know immediately there's no translation for it
     return ret;

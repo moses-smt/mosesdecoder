@@ -28,6 +28,7 @@ class ProbingPT : public PhraseTable
 {
   struct CreateTargetPhraseStruct
   {
+	  bool ok;
 	  TargetPhrases *tps;
 	  uint64_t key;
   };
