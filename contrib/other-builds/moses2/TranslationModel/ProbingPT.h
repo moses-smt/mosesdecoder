@@ -26,6 +26,12 @@ class RecycleData;
 
 class ProbingPT : public PhraseTable
 {
+  struct CreateTargetPhraseStruct
+  {
+	  TargetPhrases *tps;
+	  uint64_t key;
+  };
+
 public:
   ProbingPT(size_t startInd, const std::string &line);
   virtual ~ProbingPT();
@@ -47,7 +53,7 @@ protected:
 		  MemPool &pool,
 		  InputPath &inputPath,
 		  RecycleData &recycler) const;
-  std::pair<TargetPhrases*, uint64_t> CreateTargetPhrase(MemPool &pool,
+  CreateTargetPhraseStruct CreateTargetPhrase(MemPool &pool,
 		  const System &system,
 		  const Phrase &sourcePhrase,
 		  RecycleData &recycler) const;
