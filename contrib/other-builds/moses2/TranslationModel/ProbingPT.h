@@ -47,11 +47,10 @@ protected:
 		  MemPool &pool,
 		  InputPath &inputPath,
 		  RecycleData &recycler) const;
-  TargetPhrases *CreateTargetPhrase(MemPool &pool,
+  std::pair<TargetPhrases*, uint64_t> CreateTargetPhrase(MemPool &pool,
 		  const System &system,
 		  const Phrase &sourcePhrase,
-		  RecycleData &recycler,
-		  uint64_t &key) const;
+		  RecycleData &recycler) const;
   TargetPhrase *CreateTargetPhrase(MemPool &pool,
 		  const System &system,
 		  const Phrase &sourcePhrase,
