@@ -60,17 +60,6 @@ protected:
 	  clock_t clock;
   };
 
-  typedef boost::unordered_map<size_t, CacheCollEntry2> CacheColl;
-  mutable boost::thread_specific_ptr<CacheColl> m_cache;
-
-  mutable boost::thread_specific_ptr<MemPool> m_cacheMemPool;
-
-
-  CacheColl &GetCache() const;
-  MemPool &GetCacheMemPool() const;
-
-  void ReduceCache() const;
-
 };
 
 }
