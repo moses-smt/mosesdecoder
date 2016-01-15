@@ -88,53 +88,35 @@ QueryEngine::~QueryEngine()
 
 }
 
+uint64_t QueryEngine::getKey(uint64_t source_phrase[], size_t size) const
+{
+  //TOO SLOW
+  //uint64_t key = util::MurmurHashNative(&source_phrase[0], source_phrase.size());
+  uint64_t key = 0;
+  for (size_t i = 0; i < size; i++) {
+	key += (source_phrase[i] << i);
+  }
+  return key;
+}
+
 std::pair<bool, std::vector<target_text*> > QueryEngine::query(uint64_t source_phrase[],
 		size_t size,
 		RecycleData &recycler)
 {
-  std::pair<bool, std::vector<target_text*> > output;
-  const Entry * entry;
   //TOO SLOW
   //uint64_t key = util::MurmurHashNative(&source_phrase[0], source_phrase.size());
-  uint64_t key = 0;
-  for (int i = 0; i < size; i++) {
-    key += (source_phrase[i] << i);
-  }
+  uint64_t key = getKey(source_phrase, size);
 
-
-  output.first = table.Find(key, entry);
-
-  if (output.first) {
-    //The phrase that was searched for was found! We need to get the translation entries.
-    //We will read the largest entry in bytes and then filter the unnecesarry with functions
-    //from line_splitter
-    uint64_t initial_index = entry -> GetValue();
-    unsigned int bytes_toread = entry -> bytes_toread;
-
-    //Get only the translation entries necessary
-    output.second = decoder.full_decode_line(binary_mmaped + initial_index, bytes_toread, num_scores, num_lex_scores, recycler);
-
-  }
-
+  std::pair<bool, std::vector<target_text*> > output = query(key, recycler);
   return output;
-
 }
 
-std::pair<bool, std::vector<target_text*> > QueryEngine::query(const StringPiece &source_phrase, RecycleData &recycler)
+std::pair<bool, std::vector<target_text*> > QueryEngine::query(uint64_t key, RecycleData &recycler)
 {
   std::pair<bool, std::vector<target_text*> > output;
+
   const Entry * entry;
-  //Convert source frase to VID
-  std::vector<uint64_t> source_phrase_vid = getVocabIDs(source_phrase);
-  //TOO SLOW
-  //uint64_t key = util::MurmurHashNative(&source_phrase_vid[0], source_phrase_vid.size());
-  uint64_t key = 0;
-  for (int i = 0; i < source_phrase_vid.size(); i++) {
-    key += (source_phrase_vid[i] << i);
-  }
-
   output.first = table.Find(key, entry);
-
 
   if (output.first) {
     //The phrase that was searched for was found! We need to get the translation entries.
@@ -142,8 +124,6 @@ std::pair<bool, std::vector<target_text*> > QueryEngine::query(const StringPiece
     //from line_splitter
     uint64_t initial_index = entry -> GetValue();
     unsigned int bytes_toread = entry -> bytes_toread;
-    //At the end of the file we can't readd + largest_entry cause we get a segfault.
-    std::cerr << "Entry size is bytes is: " << bytes_toread << std::endl;
 
     //Get only the translation entries necessary
     output.second = decoder.full_decode_line(binary_mmaped + initial_index, bytes_toread, num_scores, num_lex_scores, recycler);

@@ -35,10 +35,12 @@ class QueryEngine
 public:
   QueryEngine (const char *);
   ~QueryEngine();
-  std::pair<bool, std::vector<target_text*> > query(const StringPiece &source_phrase, RecycleData &recycler);
+
   std::pair<bool, std::vector<target_text*> > query(uint64_t source_phrase[],
 		  size_t size,
 		  RecycleData &recycler);
+  std::pair<bool, std::vector<target_text*> > query(uint64_t key, RecycleData &recycler);
+
   void printTargetInfo(const std::vector<target_text> &target_phrases);
   const std::map<unsigned int, std::string> &getVocab() const {
     return decoder.get_target_lookup_map();
@@ -47,6 +49,8 @@ public:
   const std::map<uint64_t, std::string> &getSourceVocab() const {
     return source_vocabids;
   }
+
+  uint64_t getKey(uint64_t source_phrase[], size_t size) const;
 
   bool IsLogProb() const
   { return logProb; }
