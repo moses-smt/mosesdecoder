@@ -103,8 +103,6 @@ TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool,
 		const Phrase &sourcePhrase,
 		RecycleData &recycler) const
 {
-  TargetPhrases *tps = NULL;
-
   // create a target phrase from the 1st word of the source, prefix with 'ProbingPT:'
   size_t sourceSize = sourcePhrase.GetSize();
   assert(sourceSize);
@@ -115,38 +113,48 @@ TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool,
   if (!ok) {
     // source phrase contains a word unknown in the pt.
     // We know immediately there's no translation for it
-    return tps;
+    return NULL;
   }
-
-  std::pair<bool, std::vector<target_text*> > query_result;
 
   //Actual lookup
   uint64_t key = m_engine->getKey(probingSource, sourceSize);
+  TargetPhrases *tps = CreateTargetPhrase(pool, system, sourcePhrase, key, recycler);
+  return tps;
+}
+
+TargetPhrases *ProbingPT::CreateTargetPhrase(MemPool &pool,
+		  const System &system,
+		  const Phrase &sourcePhrase,
+		  uint64_t key,
+		  RecycleData &recycler) const
+{
+  TargetPhrases *tps = NULL;
+
+  std::pair<bool, std::vector<target_text*> > query_result;
   query_result = m_engine->query(key, recycler);
 
   if (query_result.first) {
-    //m_engine->printTargetInfo(query_result.second);
+	//m_engine->printTargetInfo(query_result.second);
 	const std::vector<target_text*> &probingTargetPhrases = query_result.second;
 	tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, probingTargetPhrases.size());
 
-    for (size_t i = 0; i < probingTargetPhrases.size(); ++i) {
-      target_text *probingTargetPhrase = probingTargetPhrases[i];
-      TargetPhrase *tp = CreateTargetPhrase(pool, system, sourcePhrase, *probingTargetPhrase);
+	for (size_t i = 0; i < probingTargetPhrases.size(); ++i) {
+	  target_text *probingTargetPhrase = probingTargetPhrases[i];
+	  TargetPhrase *tp = CreateTargetPhrase(pool, system, sourcePhrase, *probingTargetPhrase);
 
-      tps->AddTargetPhrase(*tp);
+	  tps->AddTargetPhrase(*tp);
 
-      recycler.tt.push_back(probingTargetPhrase);
-    }
+	  recycler.tt.push_back(probingTargetPhrase);
+	}
 
-    tps->SortAndPrune(m_tableLimit);
-    system.featureFunctions.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
+	tps->SortAndPrune(m_tableLimit);
+	system.featureFunctions.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
   }
   else {
 	  assert(query_result.second.size() == 0);
   }
 
   return tps;
-
 }
 
 TargetPhrase *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const

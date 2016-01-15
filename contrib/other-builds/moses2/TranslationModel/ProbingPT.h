@@ -53,7 +53,15 @@ protected:
 		  const System &system,
 		  const Phrase &sourcePhrase,
 		  RecycleData &recycler) const;
-  TargetPhrase *CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const;
+  TargetPhrases *CreateTargetPhrase(MemPool &pool,
+		  const System &system,
+		  const Phrase &sourcePhrase,
+		  uint64_t key,
+		  RecycleData &recycler) const;
+  TargetPhrase *CreateTargetPhrase(MemPool &pool,
+		  const System &system,
+		  const Phrase &sourcePhrase,
+		  const target_text &probingTargetPhrase) const;
 
   void ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok, uint64_t probingSource[]) const;
 
