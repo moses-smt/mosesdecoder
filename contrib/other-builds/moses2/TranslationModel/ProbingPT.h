@@ -26,12 +26,6 @@ class RecycleData;
 
 class ProbingPT : public PhraseTable
 {
-  struct RetStruct
-  {
-	  bool keyOK;
-	  uint64_t key;
-  };
-
 public:
   ProbingPT(size_t startInd, const std::string &line);
   virtual ~ProbingPT();
@@ -56,8 +50,8 @@ protected:
   TargetPhrases *CreateTargetPhrase(MemPool &pool,
 		  const System &system,
 		  const Phrase &sourcePhrase,
-		  RecycleData &recycler,
-		  RetStruct &retStruct) const;
+		  uint64_t key,
+		  RecycleData &recycler) const;
   TargetPhrase *CreateTargetPhrase(MemPool &pool,
 		  const System &system,
 		  const Phrase &sourcePhrase,
@@ -73,7 +67,7 @@ protected:
 	  return m_targetVocab[probingId];
   }
 
-  void GetSourceProbingId(const Phrase &sourcePhrase, RetStruct &retStruct) const;
+  std::pair<bool, uint64_t> GetSourceProbingId(const Phrase &sourcePhrase) const;
   inline uint64_t GetSourceProbingId(const Factor *factor) const
   {
 	  size_t factorId = factor->GetId();
@@ -85,7 +79,9 @@ protected:
   }
 
   // caching
-  boost::unordered_map<uint64_t, TargetPhrases*> m_cache;
+  typedef boost::unordered_map<uint64_t, TargetPhrases*> Cache;
+  Cache m_cache;
+
   void CreateCache(System &system);
 
 };

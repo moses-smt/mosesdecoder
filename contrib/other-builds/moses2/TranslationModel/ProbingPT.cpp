@@ -103,45 +103,59 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr,
 	}
 	*/
 	const Phrase &sourcePhrase = inputPath.subPhrase;
-	RetStruct retStruct;
-	TargetPhrases *tps = CreateTargetPhrase(pool, mgr.system, sourcePhrase, recycler, retStruct);
+
+	// get hash for source phrase
+	std::pair<bool, uint64_t> keyStruct = GetSourceProbingId(sourcePhrase);
+	if (!keyStruct.first) {
+	  return NULL;
+	}
+
+	// check in cache
+	Cache::const_iterator iter = m_cache.find(keyStruct.second);
+	if (iter != m_cache.end()) {
+		TargetPhrases *tps = iter->second;
+		return tps;
+	}
+
+	// query pt
+	TargetPhrases *tps = CreateTargetPhrase(pool, mgr.system, sourcePhrase, keyStruct.second, recycler);
 	return tps;
 }
 
-void ProbingPT::GetSourceProbingId(const Phrase &sourcePhrase, RetStruct &retStruct) const
+std::pair<bool, uint64_t> ProbingPT::GetSourceProbingId(const Phrase &sourcePhrase) const
 {
+  std::pair<bool, uint64_t> ret;
+
   // create a target phrase from the 1st word of the source, prefix with 'ProbingPT:'
   size_t sourceSize = sourcePhrase.GetSize();
   assert(sourceSize);
 
   uint64_t probingSource[sourceSize];
-  ConvertToProbingSourcePhrase(sourcePhrase, retStruct.keyOK, probingSource);
-  if (!retStruct.keyOK) {
+  ConvertToProbingSourcePhrase(sourcePhrase, ret.first, probingSource);
+  if (!ret.first) {
 	// source phrase contains a word unknown in the pt.
 	// We know immediately there's no translation for it
-	return;
+  }
+  else {
+	  ret.second = m_engine->getKey(probingSource, sourceSize);
   }
 
-  retStruct.key = m_engine->getKey(probingSource, sourceSize);
+  return ret;
+
 }
 
 TargetPhrases *ProbingPT::CreateTargetPhrase(
 		  MemPool &pool,
 		  const System &system,
 		  const Phrase &sourcePhrase,
-		  RecycleData &recycler,
-		  RetStruct &retStruct) const
+		  uint64_t key,
+		  RecycleData &recycler) const
 {
   TargetPhrases *tps = NULL;
 
-  GetSourceProbingId(sourcePhrase, retStruct);
-  if (!retStruct.keyOK) {
-	  return tps;
-  }
-
   //Actual lookup
   std::pair<bool, std::vector<target_text*> > query_result;
-  query_result = m_engine->query(retStruct.key, recycler);
+  query_result = m_engine->query(key, recycler);
 
   if (query_result.first) {
 	//m_engine->printTargetInfo(query_result.second);
@@ -279,12 +293,16 @@ void ProbingPT::CreateCache(System &system)
 		assert(toks.size() == 2);
 		PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system, toks[1]);
 
-		RetStruct retStruct;
-		TargetPhrases *tps = CreateTargetPhrase(pool, system, *sourcePhrase, recycler, retStruct);
+		std::pair<bool, uint64_t> retStruct = GetSourceProbingId(*sourcePhrase);
+		if (!retStruct.first) {
+		  return;
+		}
+
+		TargetPhrases *tps = CreateTargetPhrase(pool, system, *sourcePhrase, retStruct.second, recycler);
 		assert(tps);
 
 		//cerr << key << " " << *sourcePhrase << endl;
-		m_cache[retStruct.key] = tps;
+		m_cache[retStruct.second] = tps;
 	}
 
 
