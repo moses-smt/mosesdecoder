@@ -75,6 +75,8 @@ protected:
 
   }
 
+  // caching
+  boost::unordered_map<uint64_t, TargetPhrases*> m_cache;
 };
 
 }

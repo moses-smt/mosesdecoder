@@ -121,7 +121,8 @@ TargetPhrases* ProbingPT::CreateTargetPhrase(MemPool &pool,
   std::pair<bool, std::vector<target_text*> > query_result;
 
   //Actual lookup
-  query_result = m_engine->query(probingSource, sourceSize, recycler);
+  uint64_t key = m_engine->getKey(probingSource, sourceSize);
+  query_result = m_engine->query(key, recycler);
 
   if (query_result.first) {
     //m_engine->printTargetInfo(query_result.second);
