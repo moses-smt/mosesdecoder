@@ -208,7 +208,7 @@ if [ option.get "with-icu" : : "yes" ]
 
 # for probing pt
 external-lib boost_serialization ;
-requirements += <library>boost_serialization ;
+requirements += <library>boost_serialization/<runtime-link>static ;
 
 if [ option.get "with-vw" ] {
   requirements += <define>HAVE_VW ;
