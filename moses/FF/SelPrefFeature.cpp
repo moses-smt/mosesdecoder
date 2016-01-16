@@ -441,7 +441,11 @@ vector<string> SelPrefFeature::ProcessChild(
 			//cout << "No parent head!" << endl;
 			return depTuple;
 		}
-		string head = FilterArg(ToString(currentNode->GetHead().get()), m_lemmaMap, m_w2cMap);
+		string head = ToString(currentNode->GetHead().get());
+		if (m_w2cMap == nullptr)
+			head = FilterArg(head, m_lemmaMap, m_w2cMap);
+		else // in case of clustered arguments we used the lowercased verb without lemmatization
+			boost::algorithm::to_lower(head);
 
 		//cout << "new tuple: " << rel << " " << head << " " << dep <<endl;
 		depTuple = {rel, head, dep};
