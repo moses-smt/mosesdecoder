@@ -32,6 +32,7 @@ SelPrefFeature::SelPrefFeature(const std::string &line)
 	, m_modelFileARPAPrep("")
 	, m_MIModelFilePrep("")
 	, m_lemmaFile("")
+	, m_w2cFile("")
 	, m_WBmodelMain(nullptr)
 	, m_MIModelMain(nullptr)
 	, m_WBmodelPrep(nullptr)
@@ -53,6 +54,7 @@ SCORE: -5.016 -19304.324
 	, m_allowedLabelsPrep{"prep"}
 	, m_unbinarize(false)
 	, m_lemmaMap(nullptr)
+	, m_w2cMap(nullptr)
    {
 
 	ReadParameters();
@@ -63,6 +65,8 @@ void SelPrefFeature::SetParameter(const std::string& key, const std::string& val
 		m_modelFileARPA = value;
 	} else if(key == "lemmaFile"){
 		m_lemmaFile = value;
+	} else if (key == "w2cFile") {
+		m_w2cFile = value;
 	} else if (key == "unbinarize"){
 		if (value == "true")
 			m_unbinarize = true;
@@ -91,13 +95,13 @@ void split(std::string &s, std::string delim, std::vector<std::string> &tokens) 
 }
 
 
-void SelPrefFeature::ReadLemmaMap(){
-	shared_ptr<unordered_map<string, string>> (new unordered_map<string, string>).swap(m_lemmaMap);
-	if(!m_lemmaMap)
-		cerr << "Error creating lemma map" << endl;
+void ReadMap(string dictFile, shared_ptr<unordered_map<string, string>>& dict){
+	shared_ptr<unordered_map<string, string>> (new unordered_map<string, string>).swap(dict);
+	if(!dict)
+		cerr << "Error creating " << dictFile <<" map" << endl;
 	else
-		cerr << "Loading lemma map" << endl;
-	std::ifstream file(m_lemmaFile.c_str()); // (fileName);
+		cerr << "Loading " << dictFile <<" map" << endl;
+	std::ifstream file(dictFile.c_str()); // (fileName);
 	string line,word,lemma;
 	std::vector<std::string> tokens;
 	if(file.is_open()){
@@ -105,13 +109,15 @@ void SelPrefFeature::ReadLemmaMap(){
 			// !!!! SPLIT doesn't work as it should -> problem with delimitors
 			split(line," \t",tokens);
 			if(tokens.size()>1){
-				m_lemmaMap->insert(std::pair<std::string, std::string > (tokens[0],tokens[1]));
+				dict->insert(std::pair<std::string, std::string > (tokens[0],tokens[1]));
 			}
 
 			tokens.clear();
 		}
 	}
 }
+
+
 
 void SelPrefFeature::ReadMIModel(string MIModelFile, shared_ptr<map<vector<string>, vector<float>>>& MIModel){
 	shared_ptr<map<vector<string>, vector<float>>> (new map<vector<string>, vector<float>>).swap(MIModel);
@@ -134,14 +140,33 @@ void SelPrefFeature::ReadMIModel(string MIModelFile, shared_ptr<map<vector<strin
 	}
 }
 
-std::string FilterArg(std::string arg, shared_ptr< std::unordered_map<std::string, std::string>> lemmaMap){
+std::string FilterArg(std::string arg, shared_ptr< std::unordered_map<std::string, std::string>> lemmaMap
+		, shared_ptr< std::unordered_map<std::string, std::string>> w2cMap){
+	//lowercase in place
+	boost::algorithm::to_lower(arg);
+	auto itLemma = lemmaMap->find(arg);
+
+	if(w2cMap != nullptr){
+		auto it = w2cMap->find(arg);
+		if(it!=w2cMap->end()){
+			return it->second;
+		} else {
+			if(itLemma!=lemmaMap->end()){
+				auto itc = w2cMap->find(itLemma->second);
+				if(itc!=w2cMap->end()){
+					return itc->second;
+				}
+			}
+		}
+	}
+
+	// default processing
 	boost::regex web("^bhttp|^bhttps|^bwww");
 	boost::regex date("([0-9]+[.|-|/]?)+"); //some sort of date or other garbage
 	boost::regex nr("[0-9]+");
 	boost::regex prn("i|he|she|we|you|they|it|me|them");
 	boost::regex par("\\(|\\)");
-	//lowercase in place
-	boost::algorithm::to_lower(arg);
+
 	if(boost::regex_match(arg,web))
 		return "WWW";
 	if(boost::regex_match(arg,date))
@@ -152,9 +177,8 @@ std::string FilterArg(std::string arg, shared_ptr< std::unordered_map<std::strin
 			return "PRN";
 	if(boost::regex_match(arg,par))
 			return "-LRB-";
-	auto it = lemmaMap->find(arg);
-	if(it!=lemmaMap->end()){
-		return it->second;
+	if(itLemma!=lemmaMap->end()){
+		return itLemma->second;
 	}
 	else
 		return arg; //no filter needed, use the original arg
@@ -176,8 +200,12 @@ void SelPrefFeature::Load() {
     }
 
   if(m_lemmaFile != ""){
-	  ReadLemmaMap();
+	  ReadMap(m_lemmaFile, m_lemmaMap);
   }
+
+  if(m_w2cFile != ""){
+	  ReadMap(m_w2cFile, m_w2cMap);
+    }
 
   if(m_MIModelFile != ""){
 	  ReadMIModel(m_MIModelFile, m_MIModelMain);
@@ -407,13 +435,13 @@ vector<string> SelPrefFeature::ProcessChild(
 			return depTuple;
 		}
 		string dep;
-		dep = FilterArg(ToString(child->GetHead().get()), m_lemmaMap);
+		dep = FilterArg(ToString(child->GetHead().get()), m_lemmaMap, m_w2cMap);
 
 		if (currentNode->GetHead().get() == nullptr){
 			//cout << "No parent head!" << endl;
 			return depTuple;
 		}
-		string head = FilterArg(ToString(currentNode->GetHead().get()), m_lemmaMap);
+		string head = FilterArg(ToString(currentNode->GetHead().get()), m_lemmaMap, m_w2cMap);
 
 		//cout << "new tuple: " << rel << " " << head << " " << dep <<endl;
 		depTuple = {rel, head, dep};

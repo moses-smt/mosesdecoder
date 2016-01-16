@@ -73,7 +73,7 @@ public:
       int /* featureID - used to index the state in the previous hypotheses */,
       ScoreComponentCollection* accumulator) const;
 
-  void ReadLemmaMap();
+  //void ReadLemmaMap();
   void ReadMIModel(std::string MIModelFile, std::shared_ptr<std::map<std::vector<std::string>, std::vector<float>>>& MIModel);
 
   void Load();
@@ -113,6 +113,7 @@ protected:
   std::string m_MIModelFilePrep;
 
   std::string m_lemmaFile;
+  std::string m_w2cFile;
 
   // Pointer to the dependency language model
   std::shared_ptr<lm::ngram::Model> m_WBmodelMain;
@@ -131,6 +132,7 @@ protected:
 
   // todo: initalize
   std::shared_ptr<std::unordered_map<std::string, std::string>> m_lemmaMap;
+  std::shared_ptr<std::unordered_map<std::string, std::string>> m_w2cMap;
 
   // Cache for mapping deprel tuples to their scores
   mutable boost::thread_specific_ptr<DepRelCache> m_cacheDepRel;
