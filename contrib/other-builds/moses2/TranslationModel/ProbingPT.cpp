@@ -301,7 +301,7 @@ void ProbingPT::CreateCache(System &system)
 		TargetPhrases *tps = CreateTargetPhrase(pool, system, *sourcePhrase, retStruct.second, recycler);
 		assert(tps);
 
-		//cerr << key << " " << *sourcePhrase << endl;
+		//cerr << retStruct.second << " " << *sourcePhrase << endl;
 		m_cache[retStruct.second] = tps;
 	}
 
