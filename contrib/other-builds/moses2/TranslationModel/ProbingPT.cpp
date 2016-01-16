@@ -285,7 +285,7 @@ void ProbingPT::CreateCache(System &system)
 
 	MemPool &pool = system.GetSystemPool();
 	FactorCollection &vocab = system.GetVocab();
-    RecycleData &recycler = GetThreadSpecificObj(m_recycleData); // prob should just create a temporary recycler
+    RecycleData recycler;
 
 	size_t lineCount = 0;
 	while (getline(strme, line) && lineCount < m_maxCacheSize) {
