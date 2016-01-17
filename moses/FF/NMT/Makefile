@@ -1,12 +1,12 @@
-all: test_cuda libnmt-cuda.so
+all: libnmt-cuda.so
 
 NMTCU = nmt.cu cnpy/cnpy.cpp 
 SOURCESCU = test.cu cnpy/cnpy.cpp 
 SOURCES = test.cpp cnpy/cnpy.cpp 
 HEADERS = decoder.h encoder.h model.h npz_converter.h vocab.h mblas/matrix.h mblas/base_matrix.h
 
-test_cuda: $(SOURCESCU) $(HEADERS)
-	nvcc -O3 -std=c++11 $(SOURCESCU) -lboost_system -lboost_timer -lcudart -lcublas -o $@
+#test_cuda: $(SOURCESCU) $(HEADERS)
+#	nvcc -O3 -std=c++11 $(SOURCESCU) -lboost_system -lboost_timer -lcudart -lcublas -o $@
 
 #test.cpp: test.cu
 #	cp $^ $@

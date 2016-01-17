@@ -30,6 +30,18 @@ void NMT::CalcSourceContext(const std::vector<std::string>& s) {
   Matrix& sc = *boost::static_pointer_cast<Matrix>(SourceContext);
   encoder_->GetContext(words, sc);
   debug1(sc);
+  
+  states_.emplace_back(new Matrix());
+  Matrix& firstStates = *boost::static_pointer_cast<Matrix>(states_.back());
+  decoder_->EmptyState(firstStates, sc, 1);
+}
+
+void ConstructPrevStates(Matrix& States,
+                         const std::vector<WhichState>& inputStates,
+                         const std::vector<boost::shared_ptr<mblas::BaseMatrix> >& states) {
+  //for(auto w: inputStates)
+  //  std::cerr << w.stateId << " " << w.rowNo << std::endl;
+  States.Resize(inputStates.size(), 1000);
 }
 
 void NMT::MakeStep(
@@ -37,38 +49,54 @@ void NMT::MakeStep(
   const std::vector<std::string>& lastWords,
   std::vector<WhichState>& inputStates,
   std::vector<double>& logProbs,
-  std::vector<WhichState>& nextStates,
+  std::vector<WhichState>& outputStates,
   std::vector<bool>& unks) {
   
   Matrix& sourceContext = *boost::static_pointer_cast<Matrix>(SourceContext);
   
   Matrix lastEmbeddings;
-  FillEmbeddings(lastEmbeddings, lastWords, decoder_);
+  if(states_.size() > 0) {
+    std::vector<size_t> lastIds(lastWords.size());
+    std::transform(lastWords.begin(), lastWords.end(), lastIds.begin(),
+                   [&](const std::string& w) { return (*trg_)[w]; });
+    decoder_->Lookup(lastEmbeddings, lastIds);
+  }
+  else {
+    decoder_->EmptyEmbedding(lastEmbeddings, lastWords.size());
+  }
   
-  std::vector<size_t> ids;
   Matrix nextEmbeddings;
-  FillEmbeddings(nextEmbeddings, nextWords, ids, unks, decoder_);
+  std::vector<size_t> nextIds;
+  std::transform(nextWords.begin(), nextWords.end(), nextIds.begin(),
+                 [&](const std::string& w) { return (*trg_)[w]; });
+  decoder_->Lookup(nextEmbeddings, nextIds);
+  for(auto id : nextIds) {
+    if(id == 1)
+      unks.push_back(true);
+    else
+      unks.push_back(false);
+  }
   
   Matrix prevStates;
   ConstructPrevStates(prevStates, inputStates, states_);
   
   Matrix probs;
-  Matrix alignedSourceContex;
-  decoder_.GetProbs(probs, alignedSourceContext,
-                    prevStates, lastEmbeddings, sourceContext);  
+  Matrix alignedSourceContext;
+  decoder_->GetProbs(probs, alignedSourceContext,
+                     prevStates, lastEmbeddings, sourceContext);  
 
-  for(size_t i = 0; i < ids.size(); ++j) {
-    float p = Probs(i, ids[i]);
+  for(size_t i = 0; i < nextIds.size(); ++i) {
+    float p = probs(i, nextIds[i]);
     logProbs.push_back(log(p));
   }
                     
-  states_.push_back(new Matrix());
-  Matrix& nextStates = *boost::static_pointer_cast<Matrix>(states.back());
-  decoder_.GetNextState(nextStates, nextEmbeddings,
-                        prevStates, AlignedSourceContext);
+  states_.emplace_back(new Matrix());
+  Matrix& nextStates = *boost::static_pointer_cast<Matrix>(states_.back());
+  decoder_->GetNextState(nextStates, nextEmbeddings,
+                        prevStates, alignedSourceContext);
   
-  size_t current = 0;
+  size_t current = states_.size() - 1;
   for(size_t i = 0; i < nextStates.Rows(); ++i) {
-    nextStates.push_back(Which(states_.size() - 1, i));
+    outputStates.push_back(WhichState(current, i));
   }
 }
