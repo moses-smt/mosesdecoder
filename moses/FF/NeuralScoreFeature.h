@@ -11,7 +11,10 @@
 #include "FFState.h"
 #include <boost/shared_ptr.hpp>
 
-class NMT_Wrapper;
+class NMT;
+class Weights;
+class Vocab;
+
 struct _object;
 typedef _object PyObject;
 
@@ -85,17 +88,17 @@ public:
   void SetParameter(const std::string& key, const std::string& value);
 
 private:
-  bool m_preCalc;
-  std::string m_statePath;
   std::string m_modelPath;
-  std::string m_topnPath;
-  std::string m_wrapperPath;
   std::string m_sourceVocabPath;
   std::string m_targetVocabPath;
   size_t m_batchSize;
   size_t m_stateLength;
   size_t m_factor;
-  boost::shared_ptr<NMT_Wrapper> m_wrapper;
+  
+  boost::shared_ptr<NMT> m_nmt;
+  boost::shared_ptr<Weights> m_weights;
+  boost::shared_ptr<Vocab> m_srcVocab;
+  boost::shared_ptr<Vocab> m_trgVocab;
     
   PrefsByLength m_pbl;
 };

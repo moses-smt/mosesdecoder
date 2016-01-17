@@ -1,37 +1,36 @@
-#!/bin/bash -ex
-CC=g++
-SOURCES=../../../util/exception.o NMT_Wrapper.o test.o
-STATEPATH=/work/nmt_model/state.pkl
-MODELPATH=/work/nmt_model/min_en_de_model.npz
-SOURCEVOCAB=/work/nmt_model/vocab/mini_en_de_.en.pkl
-TARGETVOCAB=/work/nmt_model/vocab/mini_en_de_.de.pkl
-WRAPPERPATH=./wrapper
+all: test_cuda libnmt-cuda.so
 
-FLAGS=-ftemplate-depth-128 -O3 -finline-functions -Wno-inline -Wall
-#FLAGS=-g -O0 -ggdb
+NMTCU = nmt.cu cnpy/cnpy.cpp 
+SOURCESCU = test.cu cnpy/cnpy.cpp 
+SOURCES = test.cpp cnpy/cnpy.cpp 
+HEADERS = decoder.h encoder.h model.h npz_converter.h vocab.h mblas/matrix.h mblas/base_matrix.h
 
-test: $(SOURCES)
-	$(CC) $(FLAGS) -L/usr/lib/python2.7/config-x86_64-linux-gnu $^ -lpython2.7 -lrt -pthread -o $@ 
+test_cuda: $(SOURCESCU) $(HEADERS)
+	nvcc -O3 -std=c++11 $(SOURCESCU) -lboost_system -lboost_timer -lcudart -lcublas -o $@
 
-../../../util/exception.o:../../../util/exception.cc
-	$(CC) -I../../.. -fPIC -c $< -o $@
+#test.cpp: test.cu
+#	cp $^ $@
 
-test.o: test.cpp
-	$(CC) $(FLAGS) -Wall $< -c -o $@
+#test_gsl: $(SOURCES) $(HEADERS)
+#	g++-5 -O3 -Ofast -std=c++11 $(SOURCES) -DNO_CUDA \
+#	-lgslcblas -ftree-vectorize -msse2 -lboost_system -lboost_timer -o $@
 
-%.o: %.cpp
-	$(CC) -fPIC $(FLAGS) -lrt -pthread -I../../.. -I/usr/include/python2.7 -L/usr/lib/python2.7/config-x86_64-linux-gnu $^ -lpython2.7 -c -o $@
+#test_atlas: $(SOURCES) $(HEADERS)
+#	g++-5 -O3 -std=c++11 $(SOURCES) -DNO_CUDA \
+#	-msse2 -Ofast \
+#	-I/home/marcinj/Badania/nmtgit/ATLAS/include -L/home/marcinj/Badania/nmtgit/ATLAS/atlasbuild/lib -lcblas -latlas -pthread \
+#	-march=native -lboost_system -lboost_timer -o $@ \
 
-run:
-	./test $(STATEPATH) $(MODELPATH) $(WRAPPERPATH) $(SOURCEVOCAB) $(TARGETVOCAB)
+#test_ptatlas: $(SOURCES) $(HEADERS)
+#	g++-5 -O3 -Ofast -std=c++11 $(SOURCES) -DNO_CUDA \
+#	-I/home/marcinj/Badania/nmtgit/ATLAS/include -L/home/marcinj/Badania/nmtgit/ATLAS/atlasbuild2/lib \
+#	-lptcblas -latlas -pthread \
+#	-march=native -lboost_system -lboost_timer -o $@ \
 
-run2:
-	LD_LIBRARY_PATH=$$LD_LIBRARY_PATH:`pwd` ./test2 $(STATEPATH) $(MODELPATH) $(WRAPPERPATH) $(SOURCEVOCAB) $(TARGETVOCAB)
+libnmt-cuda.so: $(NMTCU) $(HEADERS)
+	nvcc -shared -O3 -std=c++11 $(NMTCU) -lboost_system -lboost_timer -lcudart -lcublas --compiler-options '-fPIC'  -o $@
 
-.PHONY: run run2
 
-test2: test.o libwrapper.so
-	$(CC) $(FLAGS) -L/usr/lib/python2.7/config-x86_64-linux-gnu -L. $< -lwrapper -lpython2.7 -lrt -pthread -o $@
+clean:
+	rm -rf test_cuda test_gsl test_atlas test_ptatlas libnmt-cuda.so
 
-libwrapper.so: NMT_Wrapper.o ../../../util/exception.o
-	g++ -L/usr/lib/python2.7/config-x86_64-linux-gnu -fPIC -shared -Wall -o $@ -lrt -pthread -lpython2.7 $^
