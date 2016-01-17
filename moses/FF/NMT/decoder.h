@@ -208,12 +208,14 @@ class Decoder {
       Embedding.Resize(batchSize, 620, 0);
     }
     
+    void Lookup(mblas::Matrix& Embedding, const std::vector<size_t>& w) {
+      embeddings_.Lookup(Embedding, w);
+    }
+    
     void GetNextState(mblas::Matrix& State,
-                      mblas::Matrix& Embedding,
-                      const std::vector<size_t>& w,
+                      const mblas::Matrix& Embedding,
                       const mblas::Matrix& PrevState,
                       const mblas::Matrix& AlignedSourceContext) {
-      embeddings_.Lookup(Embedding, w);
       rnn_.GetNextState(State, Embedding, PrevState, AlignedSourceContext);  
     }
     

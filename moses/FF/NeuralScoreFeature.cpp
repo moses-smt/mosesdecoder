@@ -11,7 +11,6 @@
 #include "moses/TargetPhrase.h"
 #include "moses/Hypothesis.h"
 #include "moses/FF/NeuralScoreFeature.h"
-#include "moses/FF/NMT/nmt.h"
 #include "util/string_piece.hh"
 
 namespace Moses
@@ -20,13 +19,15 @@ namespace Moses
 class NeuralScoreState : public FFState
 {
 public:
-  NeuralScoreState(const std::string& lastWord)
-  : m_lastWord(lastWord) {
+  NeuralScoreState(WhichState state, const std::string& lastWord)
+  : m_state(state),
+    m_lastWord(lastWord) {
     m_lastContext.push_back(m_lastWord);
   }
 
-  NeuralScoreState(const std::vector<std::string>& lastPhrase)
-  : m_lastWord(lastPhrase.back()) {
+  NeuralScoreState(WhichState state, const std::vector<std::string>& lastPhrase)
+  : m_state(state),
+    m_lastWord(lastPhrase.back()) {
     for(size_t i = 0; i < lastPhrase.size(); i++)
       m_lastContext.push_back(lastPhrase[i]);
   }
@@ -52,8 +53,13 @@ public:
   std::string GetLastWord() const {
     return m_lastWord;
   }
+  
+  WhichState GetState() const {
+    return m_state;
+  }
 
 private:
+  WhichState m_state;
   std::string m_lastWord;
   std::deque<std::string> m_lastContext;
 };
@@ -70,7 +76,7 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
   
   m_nmt->CalcSourceContext(words);
   
-  return new NeuralScoreState("");
+  return new NeuralScoreState(WhichState(0, 0), "");
 }
 
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
@@ -81,115 +87,112 @@ NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
 }
 
 void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
-  //if(!m_preCalc)
-  //  return;
-  //
-  //PyObject* sourceContext = 0;
-  //std::map<int, const NeuralScoreState*> states;
-  //
-  //m_pbl.clear();
-  //
-  //size_t covered = 0;
-  //size_t total = 0;
-  //
-  //BOOST_FOREACH(const Hypothesis* h, collector.GetHypotheses()) {
-  //  const Hypothesis& hypothesis = *h;
-  //
-  //  const FFState* ffstate = hypothesis.GetFFState(index);
-  //  const NeuralScoreState* state
-  //    = static_cast<const NeuralScoreState*>(ffstate);
-  //
-  //  if(sourceContext == 0) {
-  //    sourceContext = state->GetContext();
-  //    const WordsBitmap hypoBitmap = hypothesis.GetWordsBitmap();
-  //    covered = hypoBitmap.GetNumWordsCovered();
-  //    total = hypoBitmap.GetSize();
-  //  }
-  //
-  //  size_t hypId = hypothesis.GetId();
-  //  states[hypId] = state;
-  //
-  //  BOOST_FOREACH(const TranslationOptionList* tol, collector.GetOptions(hypId)) {
-  //    TranslationOptionList::const_iterator iter;
-  //    for (iter = tol->begin() ; iter != tol->end() ; ++iter) {
-  //      const TranslationOption& to = **iter;
-  //      const TargetPhrase& tp = to.GetTargetPhrase();
-  //
-  //      Prefix prefix;
-  //      for(size_t i = 0; i < tp.GetSize(); ++i) {
-  //        prefix.push_back(tp.GetWord(i).GetString(m_factor).as_string());
-  //        if(m_pbl.size() < prefix.size())
-  //          m_pbl.resize(prefix.size());
-  //
-  //        m_pbl[prefix.size() - 1][prefix][hypId] = Payload();
-  //      }
-  //      if(total - covered == to.GetSize()) {
-  //        prefix.push_back("</s>");
-  //        if(m_pbl.size() < prefix.size())
-  //          m_pbl.resize(prefix.size());
-  //
-  //        m_pbl[prefix.size() - 1][prefix][hypId] = Payload();
-  //      }
-  //
-  //    }
-  //  }
-  //}
-  //
-  //std::cerr << "Stack: " << covered << "/" << total << " - ";
-  //for(size_t l = 0; l < m_pbl.size(); l++) {
-  //  Prefixes& prefixes = m_pbl[l];
-  //
-  //  std::vector<std::string> allWords;
-  //  std::vector<std::string> allLastWords;
-  //  std::vector<PyObject*> allStates;
-  //
-  //  for(Prefixes::iterator it = prefixes.begin(); it != prefixes.end(); it++) {
-  //    const Prefix& prefix = it->first;
-  //    BOOST_FOREACH(SP& hyp, it->second) {
-  //      size_t hypId = hyp.first;
-  //      allWords.push_back(prefix[l]);
-  //      PyObject* state;
-  //      if(prefix.size() == 1) {
-  //        state = states[hypId]->GetState();
-  //        allLastWords.push_back(states[hypId]->GetLastWord());
-  //      }
-  //      else {
-  //        Prefix prevPrefix = prefix;
-  //        prevPrefix.pop_back();
-  //        state = m_pbl[prevPrefix.size() - 1][prevPrefix][hypId].state_;
-  //        allLastWords.push_back(prevPrefix.back());
-  //      }
-  //      allStates.push_back(state);
-  //    }
-  //  }
-  //
-  //  std::cerr << (l+1) << ":"
-  //    << m_pbl[l].size() << ":" << allStates.size() << " ";
-  //
-  //  std::vector<double> allProbs;
-  //  std::vector<PyObject*> allOutStates;
-  //  std::vector<bool> unks;
-  //
-  //  BatchProcess(allWords,
-  //              sourceContext,
-  //              allLastWords,
-  //              allStates,
-  //              allProbs,
-  //              allOutStates,
-  //              unks);
-  //
-  //  size_t k = 0;
-  //  for(Prefixes::iterator it = prefixes.begin(); it != prefixes.end(); it++) {
-  //    BOOST_FOREACH(SP& hyp, it->second) {
-  //      Payload& payload = hyp.second;
-  //      payload.logProb_ = allProbs[k];
-  //      payload.state_ = allOutStates[k];
-  //      payload.known_ = unks[k];
-  //      k++;
-  //    }
-  //  }
-  //}
-  //std::cerr << "ok" << std::endl;
+  std::map<int, const NeuralScoreState*> states;
+  
+  bool first = true;
+  size_t covered;
+  size_t total;
+  
+  m_pbl.clear();
+  
+  BOOST_FOREACH(const Hypothesis* h, collector.GetHypotheses()) {
+    const Hypothesis& hypothesis = *h;
+  
+    const FFState* ffstate = hypothesis.GetFFState(index);
+    const NeuralScoreState* state
+      = static_cast<const NeuralScoreState*>(ffstate);
+  
+    if(first) {
+      const WordsBitmap hypoBitmap = hypothesis.GetWordsBitmap();
+      covered = hypoBitmap.GetNumWordsCovered();
+      total = hypoBitmap.GetSize();
+      first = false;
+    }
+  
+    size_t hypId = hypothesis.GetId();
+    states[hypId] = state;
+  
+    BOOST_FOREACH(const TranslationOptionList* tol, collector.GetOptions(hypId)) {
+      TranslationOptionList::const_iterator iter;
+      for (iter = tol->begin() ; iter != tol->end() ; ++iter) {
+        const TranslationOption& to = **iter;
+        const TargetPhrase& tp = to.GetTargetPhrase();
+  
+        Prefix prefix;
+        for(size_t i = 0; i < tp.GetSize(); ++i) {
+          prefix.push_back(tp.GetWord(i).GetString(m_factor).as_string());
+          if(m_pbl.size() < prefix.size())
+            m_pbl.resize(prefix.size());
+  
+          m_pbl[prefix.size() - 1][prefix][hypId] = Payload();
+        }
+        if(total - covered == to.GetSize()) {
+          prefix.push_back("</s>");
+          if(m_pbl.size() < prefix.size())
+            m_pbl.resize(prefix.size());
+  
+          m_pbl[prefix.size() - 1][prefix][hypId] = Payload();
+        }
+  
+      }
+    }
+  }
+  
+  std::cerr << "Stack: " << covered << "/" << total << " - ";
+  for(size_t l = 0; l < m_pbl.size(); l++) {
+    Prefixes& prefixes = m_pbl[l];
+  
+    std::vector<std::string> allWords;
+    std::vector<std::string> allLastWords;
+    std::vector<WhichState> allStates;
+  
+    for(Prefixes::iterator it = prefixes.begin(); it != prefixes.end(); it++) {
+      const Prefix& prefix = it->first;
+      BOOST_FOREACH(SP& hyp, it->second) {
+        size_t hypId = hyp.first;
+        allWords.push_back(prefix[l]);
+        WhichState state;
+        if(prefix.size() == 1) {
+          state = states[hypId]->GetState();
+          allLastWords.push_back(states[hypId]->GetLastWord());
+        }
+        else {
+          Prefix prevPrefix = prefix;
+          prevPrefix.pop_back();
+          state = m_pbl[prevPrefix.size() - 1][prevPrefix][hypId].state_;
+          allLastWords.push_back(prevPrefix.back());
+        }
+        allStates.push_back(state);
+      }
+    }
+  
+    std::cerr << (l+1) << ":"
+      << m_pbl[l].size() << ":" << allStates.size() << " ";
+  
+    std::vector<double> allProbs;
+    std::vector<WhichState> allOutStates;
+    std::vector<bool> unks;
+    
+    m_nmt->MakeStep(allWords,
+                    allLastWords,
+                    allStates,
+                    /** out **/
+                    allProbs,
+                    allOutStates,
+                    unks);
+  
+    //size_t k = 0;
+    //for(Prefixes::iterator it = prefixes.begin(); it != prefixes.end(); it++) {
+    //  BOOST_FOREACH(SP& hyp, it->second) {
+    //    Payload& payload = hyp.second;
+    //    payload.logProb_ = allProbs[k];
+    //    payload.state_ = allOutStates[k];
+    //    payload.known_ = unks[k];
+    //    k++;
+    //  }
+    //}
+  }
+  std::cerr << "ok" << std::endl;
 }
 
 //void NeuralScoreFeature::BatchProcess(
@@ -317,7 +320,7 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
   accumulator->PlusEquals(this, newScores);
   
   //prevState->LimitLength(m_stateLength);
-  NeuralScoreState* prevState = new NeuralScoreState("");
+  NeuralScoreState* prevState = new NeuralScoreState(WhichState(0,0), "");
   return prevState;
 }
 
@@ -326,7 +329,7 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
-  return new NeuralScoreState("");
+  return new NeuralScoreState(WhichState(0,0), "");
 }
 
 void NeuralScoreFeature::SetParameter(const std::string& key, const std::string& value)

@@ -11,18 +11,13 @@
 #include "FFState.h"
 #include <boost/shared_ptr.hpp>
 
-class NMT;
-class Weights;
-class Vocab;
-
-struct _object;
-typedef _object PyObject;
+#include "moses/FF/NMT/nmt.h"
 
 struct Payload {
-  Payload() : state_(0), logProb_(0), known_(true) {}
-  Payload(PyObject* state, float logProb) : state_(state), logProb_(logProb) {}
+  Payload() : state_(0, 0), logProb_(0), known_(true) {}
+  Payload(WhichState state, float logProb) : state_(state), logProb_(logProb) {}
   
-  PyObject* state_;
+  WhichState state_;
   float logProb_;
   bool known_;
 };
@@ -53,12 +48,12 @@ public:
   */
 
   void ProcessStack(Collector& collector, size_t index);
-  void BatchProcess( const std::vector<std::string>& nextWords,
-    PyObject* pyContextVectors,
-    const std::vector< std::string >& lastWords,
-    std::vector<PyObject*>& inputStates,
-    std::vector<double>& logProbs,
-    std::vector<PyObject*>& nextStates, std::vector<bool>& unks);
+  //void BatchProcess( const std::vector<std::string>& nextWords,
+  //  PyObject* pyContextVectors,
+  //  const std::vector< std::string >& lastWords,
+  //  std::vector<PyObject*>& inputStates,
+  //  std::vector<double>& logProbs,
+  //  std::vector<PyObject*>& nextStates, std::vector<bool>& unks);
   
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
   
@@ -96,9 +91,6 @@ private:
   size_t m_factor;
   
   boost::shared_ptr<NMT> m_nmt;
-  boost::shared_ptr<Weights> m_weights;
-  boost::shared_ptr<Vocab> m_srcVocab;
-  boost::shared_ptr<Vocab> m_trgVocab;
     
   PrefsByLength m_pbl;
 };
