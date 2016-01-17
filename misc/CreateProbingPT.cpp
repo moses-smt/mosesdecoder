@@ -11,7 +11,7 @@ int main(int argc, char* argv[])
 	int num_scores = 4;
 	int num_lex_scores = 0;
 	bool log_prob = false;
-	int max_cache_size = 10000;
+	int max_cache_size = 50000;
 
   namespace po = boost::program_options;
   po::options_description desc("Options");
