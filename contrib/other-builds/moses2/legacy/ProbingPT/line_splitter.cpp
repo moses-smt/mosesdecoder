@@ -57,21 +57,26 @@ std::vector<unsigned char> splitWordAll1(const StringPiece &textin)
   const char delim2[] = "-";
   std::vector<unsigned char> output;
 
+  //Case with no word alignments.
+  if (textin.size() == 0) {
+	return output;
+  }
+
   //Split on space
   util::TokenIter<util::MultiCharacter> it(textin, util::MultiCharacter(delim));
 
   //For each int
   while (it) {
-    //Split on dash (-)
-    util::TokenIter<util::MultiCharacter> itInner(*it, util::MultiCharacter(delim2));
+	//Split on dash (-)
+	util::TokenIter<util::MultiCharacter> itInner(*it, util::MultiCharacter(delim2));
 
-    //Insert the two entries in the vector. User will read entry 0 and 1 to get the first,
-    //2 and 3 for second etc. Use unsigned char instead of int to save space, as
-    //word allignments are all very small numbers that fit in a single byte
-    output.push_back((unsigned char)(atoi(itInner->data())));
-    itInner++;
-    output.push_back((unsigned char)(atoi(itInner->data())));
-    it++;
+	//Insert the two entries in the vector. User will read entry 0 and 1 to get the first,
+	//2 and 3 for second etc. Use unsigned char instead of int to save space, as
+	//word allignments are all very small numbers that fit in a single byte
+	output.push_back((unsigned char)(atoi(itInner->data())));
+	itInner++;
+	output.push_back((unsigned char)(atoi(itInner->data())));
+	it++;
   }
 
   return output;
