@@ -33,7 +33,9 @@ else {
 exe CreateProbingPT : CreateProbingPT.cpp ..//boost_filesystem ../moses//moses ;
 exe QueryProbingPT : QueryProbingPT.cpp ..//boost_filesystem ../moses//moses ;
 
-alias programsProbing : CreateProbingPT QueryProbingPT ;
+exe CreateProbingPT2 : CreateProbingPT2.cpp ..//boost_filesystem ../moses//moses ;
+
+alias programsProbing : CreateProbingPT QueryProbingPT CreateProbingPT2 ;
 
 exe merge-sorted : 
 merge-sorted.cc 

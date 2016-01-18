@@ -31,6 +31,7 @@ struct Entry {
   }
 
   uint64_t value;
+  //uint64_t value2;
 };
 
 //Define table
