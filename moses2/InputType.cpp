@@ -5,7 +5,7 @@
  *      Author: hieu
  */
 
-#include <contrib/other-builds/moses2/InputType.h>
+#include "InputType.h"
 
 namespace Moses2 {
 

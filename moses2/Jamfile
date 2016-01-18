@@ -1,4 +1,4 @@
-alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem ../../../moses//moses ../../../moses/TranslationModel/CompactPT//cmph ;
+alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses//moses ../moses/TranslationModel/CompactPT//cmph ;
 
  exe moses2 :
  	 InputPath.cpp 

@@ -291,8 +291,8 @@ else
 
 alias programs : 
 lm//programs 
-contrib/other-builds/moses2
 moses-cmd//programs 
+moses2
 OnDiskPt//CreateOnDiskPt 
 OnDiskPt//queryOnDiskPt 
 mert//programs 
