@@ -14,13 +14,13 @@ void add_to_map(std::map<uint64_t, std::string> *karta, const StringPiece &texti
   }
 }
 
-void serialize_map(std::map<uint64_t, std::string> *karta, const char* filename)
+void serialize_map(std::map<uint64_t, std::string> *karta, const std::string &filename)
 {
-  std::ofstream os (filename, std::ios::binary);
-  boost::archive::text_oarchive oarch(os);
+	  std::ofstream os (filename.c_str(), std::ios::binary);
+	  boost::archive::text_oarchive oarch(os);
 
-  oarch << *karta;  //Serialise map
-  os.close();
+	  oarch << *karta;  //Serialise map
+	  os.close();
 }
 
 void read_map(std::map<uint64_t, std::string> *karta, const char* filename)

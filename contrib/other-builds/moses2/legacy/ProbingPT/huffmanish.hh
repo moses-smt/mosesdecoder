@@ -77,10 +77,10 @@ public:
   void serialize_maps(const char * dirname);
   void produce_lookups();
 
-  std::vector<unsigned int> encode_line(const line_text &line);
+  std::vector<unsigned int> encode_line(line_text &line, bool log_prob);
 
   //encode line + variable byte ontop
-  std::vector<unsigned char> full_encode_line(const line_text &line);
+  std::vector<unsigned char> full_encode_line(line_text &line, bool log_prob);
 
   //Getters
   const std::map<unsigned int, std::string> get_target_lookup_map() const {
@@ -93,6 +93,9 @@ public:
   unsigned long getUniqLines() {
     return uniq_lines;
   }
+
+  void AppendLexRO(line_text &line, std::vector<unsigned int> &retvector, bool log_prob) const;
+
 };
 
 class HuffmanDecoder

@@ -21,6 +21,7 @@ struct line_text {
   StringPiece counts;
   StringPiece sparse_score;
   StringPiece property;
+  std::string property_to_be_binarized;
 };
 
 //Struct for holding processed line

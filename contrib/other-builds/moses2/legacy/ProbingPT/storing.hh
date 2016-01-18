@@ -15,8 +15,12 @@
 #include "util/file.hh"
 #include "vocabid.hh"
 
-void createProbingPT(const char * phrasetable_path,
-		const char * target_path,
+namespace Moses2
+{
+
+void createProbingPT(
+		const std::string &phrasetable_path,
+		const std::string &basepath,
         int num_scores,
 		int num_lex_scores,
 		bool log_prob,
@@ -67,3 +71,7 @@ public:
 void serialize_cache(std::priority_queue<CacheItem*, std::vector<CacheItem*>, CacheItemOrderer> &cache,
 		const std::string &path,
 		float totalSourceCount);
+
+}
+
+

@@ -1,5 +1,10 @@
+#include <fstream>
+#include <sys/stat.h>
 #include "storing.hh"
 #include "moses/Util.h"
+
+namespace Moses2
+{
 
 BinaryFileWriter::BinaryFileWriter (std::string basepath) : os ((basepath + "/binfile.dat").c_str(), std::ios::binary)
 {
@@ -39,18 +44,29 @@ BinaryFileWriter::~BinaryFileWriter ()
   binfile.clear();
 }
 
-void createProbingPT(const char * phrasetable_path, const char * target_path,
-                     int num_scores, int num_lex_scores, bool log_prob, int max_cache_size)
+void createProbingPT(
+		const std::string &phrasetable_path,
+		const std::string &basepath,
+        int num_scores,
+		int num_lex_scores,
+		bool log_prob,
+		int max_cache_size)
 {
   //Get basepath and create directory if missing
-  std::string basepath(target_path);
   mkdir(basepath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
   //Set up huffman and serialize decoder maps.
-  Huffman huffmanEncoder(phrasetable_path); //initialize
+  Huffman huffmanEncoder(phrasetable_path.c_str()); //initialize
   huffmanEncoder.assign_values();
   huffmanEncoder.produce_lookups();
-  huffmanEncoder.serialize_maps(target_path);
+  huffmanEncoder.serialize_maps(basepath.c_str());
+
+  std::string target_path = basepath + "/TargetInd.dat";
+  std::fstream fileTargetInd;
+  fileTargetInd.open(target_path.c_str(), std::ios::out | std::ios::binary | std::ios::ate | std::ios::trunc);
+  if (!fileTargetInd.is_open()) {
+	  throw "can't create file ";
+  }
 
   //Get uniq lines:
   unsigned long uniq_entries = huffmanEncoder.getUniqLines();
@@ -59,7 +75,7 @@ void createProbingPT(const char * phrasetable_path, const char * target_path,
   std::map<uint64_t, std::string> source_vocabids;
 
   //Read the file
-  util::FilePiece filein(phrasetable_path);
+  util::FilePiece filein(phrasetable_path.c_str());
 
   //Init the probing hash table
   size_t size = Table::Size(uniq_entries, 1.2);
@@ -210,5 +226,7 @@ void serialize_cache(std::priority_queue<CacheItem*, std::vector<CacheItem*>, Ca
   }
 
   os.close();
+}
+
 }
 

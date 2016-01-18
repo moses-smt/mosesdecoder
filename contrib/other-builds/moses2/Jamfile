@@ -74,6 +74,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
     legacy/ProbingPT/line_splitter.cpp
     legacy/ProbingPT/probing_hash_utils.cpp
     legacy/ProbingPT/quering.cpp
+    legacy/ProbingPT/storing.cpp
     legacy/ProbingPT/vocabid.cpp
     legacy/CompactPT/BlockHashIndex.cpp
     legacy/CompactPT/CmphStringVectorAdapter.cpp

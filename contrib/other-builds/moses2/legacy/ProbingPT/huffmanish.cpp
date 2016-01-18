@@ -141,69 +141,120 @@ void Huffman::serialize_maps(const char * dirname)
   os2.close();
 }
 
-std::vector<unsigned char> Huffman::full_encode_line(const line_text &line)
+std::vector<unsigned char> Huffman::full_encode_line(line_text &line, bool log_prob)
 {
-  return vbyte_encode_line((encode_line(line)));
+  return vbyte_encode_line((encode_line(line, log_prob)));
 }
 
-std::vector<unsigned int> Huffman::encode_line(const line_text &line)
+//! make sure score doesn't fall below LOWEST_SCORE
+inline float FloorScore(float logScore)
 {
-  std::vector<unsigned int> retvector;
+  const float LOWEST_SCORE = -100.0f;
+  return (std::max)(logScore , LOWEST_SCORE);
+}
 
-  //Get target_phrase first.
-  util::TokenIter<util::SingleCharacter> it(line.target_phrase, util::SingleCharacter(' '));
-  while (it) {
-    retvector.push_back(target_phrase_huffman.find(it->as_string())->second);
-    it++;
+std::vector<unsigned int> Huffman::encode_line(line_text &line, bool log_prob)
+{
+	  std::vector<unsigned int> retvector;
+
+	  //Get target_phrase first.
+	  util::TokenIter<util::SingleCharacter> it(line.target_phrase, util::SingleCharacter(' '));
+	  while (it) {
+	    retvector.push_back(target_phrase_huffman.find(it->as_string())->second);
+	    it++;
+	  }
+	  //Add a zero;
+	  retvector.push_back(0);
+
+	  //Get probabilities. Reinterpreting the float bytes as unsgined int.
+	  util::TokenIter<util::SingleCharacter> probit(line.prob, util::SingleCharacter(' '));
+	  while (probit) {
+	    //Sometimes we have too big floats to handle, so first convert to double
+	    double tempnum = atof(probit->data());
+	    float num = (float)tempnum;
+	    if (log_prob) {
+	    	num = FloorScore(log(num));
+	    	if (num == 0.0f) num = 0.0000000001;
+	    }
+	    //cerr << "num=" << num << endl;
+	    retvector.push_back(reinterpret_float(&num));
+	    probit++;
+	  }
+
+	  // append LexRO prob to pt scores
+	  AppendLexRO(line, retvector, log_prob);
+
+	  //Add a zero;
+	  retvector.push_back(0);
+
+
+	  //Get Word allignments
+	  retvector.push_back(word_all1_huffman.find(splitWordAll1(line.word_align))->second);
+	  retvector.push_back(0);
+
+	  //The rest of the components might not be there, but add them (as reinterpretation to byte arr)
+	  //In the future we should really make those optional to save space
+
+	  //Counts
+	  const char* counts = line.counts.data();
+	  size_t counts_size = line.counts.size();
+	  for (size_t i = 0; i < counts_size; i++) {
+	    retvector.push_back(counts[i]);
+	  }
+	  retvector.push_back(0);
+
+	  //Sparse score
+	  const char* sparse_score = line.sparse_score.data();
+	  size_t sparse_score_size = line.sparse_score.size();
+	  for (size_t i = 0; i < sparse_score_size; i++) {
+	    retvector.push_back(sparse_score[i]);
+	  }
+	  retvector.push_back(0);
+
+	  //Property
+	  const char* property = line.property_to_be_binarized.data();
+	  size_t property_size = line.property_to_be_binarized.size();
+	  for (size_t i = 0; i < property_size; i++) {
+	    retvector.push_back(property[i]);
+	  }
+	  retvector.push_back(0);
+
+	  return retvector;
+}
+
+void Huffman::AppendLexRO(line_text &line, std::vector<unsigned int> &retvector, bool log_prob) const
+{
+  const StringPiece &origProperty = line.property;
+  StringPiece::size_type startPos = origProperty.find("{{LexRO ");
+
+  if (startPos != StringPiece::npos) {
+	  StringPiece::size_type endPos = origProperty.find("}}", startPos + 8);
+	  StringPiece lexProb = origProperty.substr(startPos + 8, endPos - startPos - 8);
+	  //cerr << "lexProb=" << lexProb << endl;
+
+	  // append lex probs to pt probs
+	  util::TokenIter<util::SingleCharacter> it(lexProb, util::SingleCharacter(' '));
+	  while (it) {
+  	    StringPiece probStr = *it;
+		//cerr << "\t" << probStr << endl;
+
+		double tempnum = atof(probStr.data());
+		float num = (float)tempnum;
+	    if (log_prob) {
+	    	num = FloorScore(log(num));
+	    	if (num == 0.0f) num = 0.0000000001;
+	    }
+
+		retvector.push_back(reinterpret_float(&num));
+
+		// exclude LexRO property from property column
+		line.property_to_be_binarized = origProperty.substr(0, startPos).as_string()
+				+ origProperty.substr(endPos + 2, origProperty.size() - endPos - 2).as_string();
+		//cerr << "line.property_to_be_binarized=" << line.property_to_be_binarized << "AAAA" << endl;
+	    it++;
+	  }
+
   }
-  //Add a zero;
-  retvector.push_back(0);
-
-  //Get probabilities. Reinterpreting the float bytes as unsgined int.
-  util::TokenIter<util::SingleCharacter> probit(line.prob, util::SingleCharacter(' '));
-  while (probit) {
-    //Sometimes we have too big floats to handle, so first convert to double
-    double tempnum = atof(probit->data());
-    float num = (float)tempnum;
-    retvector.push_back(reinterpret_float(&num));
-    probit++;
-  }
-  //Add a zero;
-  retvector.push_back(0);
-
-
-  //Get Word allignments
-  retvector.push_back(word_all1_huffman.find(splitWordAll1(line.word_align))->second);
-  retvector.push_back(0);
-
-  //The rest of the components might not be there, but add them (as reinterpretation to byte arr)
-  //In the future we should really make those optional to save space
-
-  //Counts
-  const char* counts = line.counts.data();
-  size_t counts_size = line.counts.size();
-  for (size_t i = 0; i < counts_size; i++) {
-    retvector.push_back(counts[i]);
-  }
-  retvector.push_back(0);
-
-  //Sparse score
-  const char* sparse_score = line.sparse_score.data();
-  size_t sparse_score_size = line.sparse_score.size();
-  for (size_t i = 0; i < sparse_score_size; i++) {
-    retvector.push_back(sparse_score[i]);
-  }
-  retvector.push_back(0);
-
-  //Property
-  const char* property = line.property.data();
-  size_t property_size = line.property.size();
-  for (size_t i = 0; i < property_size; i++) {
-    retvector.push_back(property[i]);
-  }
-  retvector.push_back(0);
-
-  return retvector;
 }
 
 void Huffman::produce_lookups()
