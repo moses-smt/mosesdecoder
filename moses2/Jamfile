@@ -1,10 +1,9 @@
 alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses//moses ../moses/TranslationModel/CompactPT//cmph ;
 
- exe moses2 :
+ lib moses2_lib :
  	 InputPath.cpp 
  	 InputPaths.cpp
    InputType.cpp
- 	 Main.cpp 
  	 MemPool.cpp
    Phrase.cpp 
    Sentence.cpp
@@ -82,6 +81,8 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses//moses ../
     legacy/CompactPT/MurmurHash3.cpp
     legacy/CompactPT/ThrowingFwrite.cpp
     deps ;
+
+exe moses2 : Main.cpp moses2_lib ..//boost_filesystem ../moses//moses ;
 
 alias programs : moses2 ;
 

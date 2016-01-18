@@ -292,7 +292,7 @@ else
 alias programs : 
 lm//programs 
 moses-cmd//programs 
-moses2
+moses2//programs
 OnDiskPt//CreateOnDiskPt 
 OnDiskPt//queryOnDiskPt 
 mert//programs 
