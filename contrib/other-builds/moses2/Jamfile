@@ -1,4 +1,4 @@
-alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses//moses ../moses/TranslationModel/CompactPT//cmph ;
+alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem ../../../moses/TranslationModel/CompactPT//cmph ../../../moses//moses ;
 
  lib moses2_lib :
  	 InputPath.cpp 
@@ -82,8 +82,8 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses//moses ../
     legacy/CompactPT/ThrowingFwrite.cpp
     deps ;
 
-exe moses2 : Main.cpp moses2_lib ..//boost_filesystem ;
-exe CreateProbingPT2 : CreateProbingPT2.cpp moses2_lib ..//boost_filesystem ;
+exe moses2 : Main.cpp moses2_lib ;
+exe CreateProbingPT2 : CreateProbingPT2.cpp moses2_lib ;
 
 alias programs : moses2 CreateProbingPT2 ;
 

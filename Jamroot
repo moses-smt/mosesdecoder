@@ -292,7 +292,6 @@ else
 alias programs : 
 lm//programs 
 moses-cmd//programs 
-moses2//programs
 OnDiskPt//CreateOnDiskPt 
 OnDiskPt//queryOnDiskPt 
 mert//programs 
@@ -316,6 +315,8 @@ rephraser
 contrib/c++tokenizer//tokenizer
 contrib/expected-bleu-training//train-expected-bleu
 contrib/expected-bleu-training//prepare-expected-bleu-training
+
+contrib/other-builds/moses2//programs
 ;
 
 
