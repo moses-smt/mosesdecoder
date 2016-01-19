@@ -61,6 +61,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
 		legacy/Factor.cpp
 		legacy/FactorCollection.cpp
 		legacy/InputFileStream.cpp
+		legacy/OutputFileStream.cpp
 		legacy/Parameter.cpp
 		legacy/Range.cpp
 		legacy/Range.cpp
