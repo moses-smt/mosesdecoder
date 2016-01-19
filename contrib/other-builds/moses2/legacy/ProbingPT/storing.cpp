@@ -1,6 +1,6 @@
-#include <fstream>
 #include <sys/stat.h>
 #include "storing.hh"
+#include "StoreTarget.h"
 #include "moses/Util.h"
 
 namespace Moses2
@@ -61,12 +61,7 @@ void createProbingPT(
   huffmanEncoder.produce_lookups();
   huffmanEncoder.serialize_maps(basepath.c_str());
 
-  std::string target_path = basepath + "/TargetInd.dat";
-  std::fstream fileTargetInd;
-  fileTargetInd.open(target_path.c_str(), std::ios::out | std::ios::binary | std::ios::ate | std::ios::trunc);
-  if (!fileTargetInd.is_open()) {
-	  throw "can't create file ";
-  }
+  StoreTarget storeTarget(basepath);
 
   //Get uniq lines:
   unsigned long uniq_entries = huffmanEncoder.getUniqLines();
@@ -112,9 +107,16 @@ void createProbingPT(
 
         //Create a new entry even
 
+        // save
+        uint64_t targetInd = storeTarget.Save();
+
+          // next line
+      	storeTarget.Append(line);
+
         //Create an entry for the previous source phrase:
         Entry pesho;
         pesho.value = entrystartidx;
+        pesho.targetInd = targetInd;
         //The key is the sum of hashes of individual words bitshifted by their position in the phrase.
         //Probably not entirerly correct, but fast and seems to work fine in practise.
         pesho.key = 0;
@@ -157,6 +159,8 @@ void createProbingPT(
 
       } else {
         //If we still have the same line, just append to it:
+    	storeTarget.Append(line);
+
         std::vector<unsigned char> encoded_line = huffmanEncoder.full_encode_line(line, log_prob);
         binfile.write(&encoded_line);
       }
@@ -167,8 +171,12 @@ void createProbingPT(
 
       //After the final entry is constructed we need to add it to the phrase_table
       //Create an entry for the previous source phrase:
+      uint64_t targetInd = storeTarget.Save();
+
       Entry pesho;
       pesho.value = entrystartidx;
+      pesho.targetInd = targetInd;
+
       //The key is the sum of hashes of individual words. Probably not entirerly correct, but fast
       pesho.key = 0;
       std::vector<uint64_t> vocabid_source = getVocabIDs(prev_line.source_phrase);

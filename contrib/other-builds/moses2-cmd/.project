@@ -3,6 +3,10 @@
 	<name>moses2-cmd</name>
 	<comment></comment>
 	<projects>
+		<project>lm</project>
+		<project>moses</project>
+		<project>moses2</project>
+		<project>util</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

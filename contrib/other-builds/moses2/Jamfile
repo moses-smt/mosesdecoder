@@ -68,13 +68,16 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
 		legacy/ThreadPool.cpp
 		legacy/Timer.cpp
 		legacy/Util2.cpp
+
     legacy/ProbingPT/hash.cpp
     legacy/ProbingPT/huffmanish.cpp
     legacy/ProbingPT/line_splitter.cpp
     legacy/ProbingPT/probing_hash_utils.cpp
     legacy/ProbingPT/quering.cpp
     legacy/ProbingPT/storing.cpp
+    legacy/ProbingPT/StoreTarget.cpp
     legacy/ProbingPT/vocabid.cpp
+
     legacy/CompactPT/BlockHashIndex.cpp
     legacy/CompactPT/CmphStringVectorAdapter.cpp
     legacy/CompactPT/LexicalReorderingTableCompact.cpp

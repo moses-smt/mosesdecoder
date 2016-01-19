@@ -3,6 +3,9 @@
 	<name>CreateProbingPT2</name>
 	<comment></comment>
 	<projects>
+		<project>lm</project>
+		<project>moses2</project>
+		<project>util</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>

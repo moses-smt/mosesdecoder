@@ -31,7 +31,7 @@ struct Entry {
   }
 
   uint64_t value;
-  //uint64_t value2;
+  uint64_t targetInd;
 };
 
 //Define table
