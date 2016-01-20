@@ -162,6 +162,13 @@ void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
 {
   if (m_propertyInd >= 0) {
 	  SCORE *scoreArr = targetPhrase.GetScoresProperty(m_propertyInd);
+	  /*
+	  cerr << "scoreArr=" << scoreArr << " " << flush;
+	  for (size_t i = 0; i < 6; ++i) {
+		  cerr << scoreArr[i] << " ";
+	  }
+	  cerr << endl;
+	  */
 	  targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
   }
   else if (m_compactModel) {
@@ -224,16 +231,19 @@ void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
   // backwards
   const TargetPhrase &target = hypo.GetTargetPhrase();
 
+  cerr << "HH D" << endl;
   const SCORE *values = (const SCORE *) target.ffData[m_PhraseTableInd];
   if (values) {
 	  scores.PlusEquals(mgr.system, *this, values[orientation], orientation);
   }
+  cerr << "HH D2" << endl;
 
   // forwards
   if (prevRange->GetStartPos() != NOT_FOUND) {
 	  const TargetPhrase &prevTarget = *prevStateCast.targetPhrase;
 	  const SCORE *prevValues = (const SCORE *) prevTarget.ffData[m_PhraseTableInd];
 
+	  cerr << "HH E" << endl;
 	  if (prevValues) {
 		  scores.PlusEquals(mgr.system, *this, prevValues[orientation + 3], orientation + 3);
 	  }

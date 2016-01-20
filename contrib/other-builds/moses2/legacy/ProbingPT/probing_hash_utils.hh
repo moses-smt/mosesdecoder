@@ -41,5 +41,13 @@ void serialize_table(char *mem, size_t size, const std::string &filename);
 
 char * readTable(const char * filename, size_t size);
 
+struct TargetPhraseInfo
+{
+	  uint16_t alignInd;
+	  uint16_t numWords;
+	  uint16_t propLength;
+	  uint16_t filler;
+};
+
 }
 

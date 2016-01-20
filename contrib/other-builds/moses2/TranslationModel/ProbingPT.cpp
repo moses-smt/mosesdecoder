@@ -10,6 +10,7 @@
 #include "../Scores.h"
 #include "../Phrase.h"
 #include "../legacy/InputFileStream.h"
+#include "../legacy/ProbingPT/probing_hash_utils.hh"
 #include "../FF/FeatureFunctions.h"
 #include "../Search/Manager.h"
 #include "../legacy/FactorCollection.h"
@@ -57,19 +58,31 @@ void ProbingPT::Load(System &system)
   }
 
   // target vocab
-  const std::map<unsigned int, std::string> &probingVocab = m_engine->getVocab();
-  std::map<unsigned int, std::string>::const_iterator iter;
-  for (iter = probingVocab.begin(); iter != probingVocab.end(); ++iter) {
-	const string &wordStr = iter->second;
-	const Factor *factor = vocab.AddFactor(wordStr, system);
+  InputFileStream targetVocabStrme(m_path + "/TargetVocab.dat");
+  string line;
+  while (getline(targetVocabStrme, line)) {
+	  vector<string> toks = Tokenize(line, "\t");
+	  assert(toks.size());
+  	  const Factor *factor = vocab.AddFactor(toks[0], system);
+  	  uint32_t probingId = Scan<uint32_t>(toks[1]);
 
-	unsigned int probingId = iter->first;
-
-	if (probingId >= m_targetVocab.size()) {
-		m_targetVocab.resize(probingId + 1, NULL);
-	}
-	m_targetVocab[probingId] = factor;
+  	  if (probingId >= m_targetVocab.size()) {
+  		m_targetVocab.resize(probingId + 1, NULL);
+  	  }
+  	  m_targetVocab[probingId] = factor;
   }
+
+  // memory mapped file to tps
+  string filePath = m_path + "/TargetColl.dat";
+  file.open(filePath.c_str());
+  if (!file.is_open()) {
+    throw "Couldn't open file ";
+  }
+
+  data = file.data();
+
+  size_t size = file.size();
+  //std::cerr << "size=" << size << std::endl;
 
   // cache
   CreateCache(system);
@@ -152,104 +165,114 @@ TargetPhrases *ProbingPT::CreateTargetPhrase(
 		  RecycleData &recycler) const
 {
   TargetPhrases *tps = NULL;
+  cerr << "sourcePhrase=" << sourcePhrase << endl;
 
   //Actual lookup
-  std::pair<bool, std::vector<target_text*> > query_result;
-  query_result = m_engine->query(key, recycler);
+  std::pair<bool, uint64_t> query_result; // 1st=found, 2nd=target file offset
+  query_result = m_engine->query(key);
 
   if (query_result.first) {
-	//m_engine->printTargetInfo(query_result.second);
-	const std::vector<target_text*> &probingTargetPhrases = query_result.second;
-	tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, probingTargetPhrases.size());
+	  const char *offset = data + query_result.second;
+	  uint64_t *numTP = (uint64_t*) offset;
 
-	for (size_t i = 0; i < probingTargetPhrases.size(); ++i) {
-	  target_text *probingTargetPhrase = probingTargetPhrases[i];
-	  TargetPhrase *tp = CreateTargetPhrase(pool, system, sourcePhrase, *probingTargetPhrase);
+	  //cerr << "query_result=" << query_result.second << " " << *numTP << endl;
 
-	  tps->AddTargetPhrase(*tp);
+	  tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, *numTP);
 
-	  recycler.tt.push_back(probingTargetPhrase);
-	}
+	  offset += sizeof(uint64_t);
+	  for (size_t i = 0; i < *numTP; ++i) {
+		  TargetPhrase *tp = CreateTargetPhrase(pool, system, offset);
+		  assert(tp);
+		  const FeatureFunctions &ffs = system.featureFunctions;
+		  ffs.EvaluateInIsolation(pool, system, sourcePhrase, *tp);
 
-	tps->SortAndPrune(m_tableLimit);
-	system.featureFunctions.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
-  }
-  else {
-	  assert(query_result.second.size() == 0);
+		  tps->AddTargetPhrase(*tp);
+
+	  }
+
+	  //cerr << *tps << endl;
+
   }
 
   return tps;
 }
 
-TargetPhrase *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system, const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const
+TargetPhrase *ProbingPT::CreateTargetPhrase(
+		  MemPool &pool,
+		  const System &system,
+		  const char *&offset) const
 {
+	TargetPhraseInfo *tpInfo = (TargetPhraseInfo*) offset;
+	//cerr << "tpInfo=" << tpInfo->numWords << endl;
 
-  const std::vector<unsigned int> &probingPhrase = probingTargetPhrase.target_phrase;
-  size_t size = probingPhrase.size();
+    TargetPhrase *tp = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, tpInfo->numWords);
 
-  TargetPhrase *tp = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, size);
+	offset += sizeof(TargetPhraseInfo);
+
+	// scores
+	SCORE *scores = (SCORE*) offset;
+
+  size_t totalNumScores = m_engine->num_scores + m_engine->num_lex_scores;
+
+  cerr << "scores=";
+  for (size_t i = 0; i < totalNumScores; ++i) {
+  	cerr << scores[i] << " ";
+  }
+  cerr << endl;
+
+  //cerr << "HH A " << m_engine->num_scores << " " << m_engine->num_lex_scores << " " << totalNumScores << endl;
+  if (m_engine->IsLogProb()) {
+	    // set pt score for rule
+	    tp->GetScores().PlusEquals(system, *this, scores);
+	    //cerr << "HH B " << endl;
+
+	    // save scores for other FF, eg. lex RO. Just give the offset
+	    if (m_engine->num_lex_scores) {
+		  tp->scoreProperties = scores + m_engine->num_scores;
+		  if (tp->scoreProperties == NULL) {
+			  cerr << "BOOO!";
+			  abort();
+		  }
+		  cerr << "HH C " << scores << " " << tp->scoreProperties << endl;
+	    }
+  }
+  else {
+	  // log score 1st
+	  SCORE logScores[totalNumScores];
+	  for (size_t i = 0; i < totalNumScores; ++i) {
+		  logScores[i] = FloorScore(TransformScore(scores[i]));
+	  }
+
+      // set pt score for rule
+	  tp->GetScores().PlusEquals(system, *this, logScores);
+
+      // save scores for other FF, eg. lex RO.
+	  tp->scoreProperties = pool.Allocate<SCORE>(m_engine->num_lex_scores);
+	  for (size_t i = 0; i < m_engine->num_lex_scores; ++i) {
+		  tp->scoreProperties[i] = logScores[i + m_engine->num_scores];
+	  }
+  }
+
+  offset += sizeof(SCORE) * totalNumScores;
 
   // words
-  for (size_t i = 0; i < size; ++i) {
-    uint64_t probingId = probingPhrase[i];
-    const Factor *factor = GetTargetFactor(probingId);
-    assert(factor);
+  //cerr << "HH D " << endl;
+  for (size_t i = 0; i < tpInfo->numWords; ++i) {
+	  uint32_t *probingId = (uint32_t*) offset;
+	  //cerr << "HH E " << *probingId << endl;
 
-    Word &word = (*tp)[i];
-    word[0] = factor;
+	  const Factor *factor = GetTargetFactor(*probingId);
+	  assert(factor);
+
+	  Word &word = (*tp)[i];
+	  word[0] = factor;
+
+	  offset += sizeof(uint32_t);
   }
 
-  // score for this phrase table
-  SCORE scores[probingTargetPhrase.prob.size()];
-  std::copy(probingTargetPhrase.prob.begin(), probingTargetPhrase.prob.end(), scores);
+  // properties TODO
 
-  if (!m_engine->IsLogProb()) {
-	  std::transform(scores, scores + probingTargetPhrase.prob.size(), scores, TransformScore);
-	  std::transform(scores, scores + probingTargetPhrase.prob.size(), scores, FloorScore);
-  }
-  tp->GetScores().PlusEquals(system, *this, scores);
-
-  // extra scores
-  //cerr << "probingTargetPhrase.prob.size()=" << probingTargetPhrase.prob.size() << endl;
-  if (probingTargetPhrase.prob.size() > m_numScores) {
-	  // we have extra scores, possibly for lex ro. Keep them in the target phrase.
-	  size_t numExtraScores = probingTargetPhrase.prob.size() - m_numScores;
-	  tp->scoreProperties = pool.Allocate<SCORE>(numExtraScores);
-	  memcpy(tp->scoreProperties, scores + m_numScores, sizeof(SCORE) * numExtraScores);
-
-	  /*
-	  for (size_t i = 0; i < probingTargetPhrase.prob.size(); ++i) {
-		  cerr << probingTargetPhrase.prob[i] << " ";
-	  }
-	  cerr << endl;
-
-	  for (size_t i = 0; i < probingTargetPhrase.prob.size(); ++i) {
-		  cerr << scores[i] << " ";
-	  }
-	  cerr << endl;
-
-	  for (size_t i = 0; i < numExtraScores; ++i) {
-		  cerr << tp->scoreProperties[i] << " ";
-	  }
-	  cerr << endl;
-	  */
-  }
-
-//  // alignment
-//  /*
-//  const std::vector<unsigned char> &alignments = probingTargetPhrase.word_all1;
-//
-//  AlignmentInfo &aligns = tp->GetAlignTerm();
-//  for (size_t i = 0; i < alignS.size(); i += 2 ) {
-//    aligns.Add((size_t) alignments[i], (size_t) alignments[i+1]);
-//  }
-//  */
-
-  // score of all other ff when this rule is being loaded
-  const FeatureFunctions &ffs = system.featureFunctions;
-  ffs.EvaluateInIsolation(pool, system, sourcePhrase, *tp);
   return tp;
-
 }
 
 void ProbingPT::ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok, uint64_t probingSource[]) const

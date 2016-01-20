@@ -111,6 +111,16 @@ std::pair<bool, std::vector<target_text*> > QueryEngine::query(uint64_t source_p
   return output;
 }
 
+std::pair<bool, uint64_t> QueryEngine::query(uint64_t key)
+{
+	std::pair<bool, uint64_t> ret;
+
+  const Entry * entry;
+  ret.first = table.Find(key, entry);
+  ret.second = entry->targetInd;
+  return ret;
+}
+
 std::pair<bool, std::vector<target_text*> > QueryEngine::query(uint64_t key, RecycleData &recycler)
 {
   std::pair<bool, std::vector<target_text*> > output;

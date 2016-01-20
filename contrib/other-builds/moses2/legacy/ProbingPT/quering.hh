@@ -27,18 +27,20 @@ class QueryEngine
 
   size_t binary_filesize;
   size_t table_filesize;
-  int num_scores;
-  int num_lex_scores;
   bool is_reordering;
   bool logProb;
 
 public:
+  int num_scores;
+  int num_lex_scores;
+
   QueryEngine (const char *);
   ~QueryEngine();
 
   std::pair<bool, std::vector<target_text*> > query(uint64_t source_phrase[],
 		  size_t size,
 		  RecycleData &recycler);
+  std::pair<bool, uint64_t> query(uint64_t key);
   std::pair<bool, std::vector<target_text*> > query(uint64_t key, RecycleData &recycler);
 
   void printTargetInfo(const std::vector<target_text> &target_phrases);

@@ -8,6 +8,7 @@
 #ifndef FF_TRANSLATIONMODEL_PROBINGPT_H_
 #define FF_TRANSLATIONMODEL_PROBINGPT_H_
 
+#include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/thread/tss.hpp>
 #include <boost/bimap.hpp>
 #include <deque>
@@ -40,6 +41,9 @@ protected:
   uint64_t m_unkId;
   QueryEngine *m_engine;
 
+  boost::iostreams::mapped_file_source file;
+  const char *data;
+
   mutable boost::thread_specific_ptr< std::deque<target_text*> > m_recycler;
   mutable boost::thread_specific_ptr<RecycleData> m_recycleData;
 
@@ -52,14 +56,14 @@ protected:
 		  const Phrase &sourcePhrase,
 		  uint64_t key,
 		  RecycleData &recycler) const;
-  TargetPhrase *CreateTargetPhrase(MemPool &pool,
-		  const System &system,
-		  const Phrase &sourcePhrase,
-		  const target_text &probingTargetPhrase) const;
+  TargetPhrase *CreateTargetPhrase(
+  		  MemPool &pool,
+  		  const System &system,
+		  const char *&offset) const;
 
   void ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok, uint64_t probingSource[]) const;
 
-  inline const Factor *GetTargetFactor(uint64_t probingId) const
+  inline const Factor *GetTargetFactor(uint32_t probingId) const
   {
 	  if (probingId >= m_targetVocab.size()) {
 		  return NULL;

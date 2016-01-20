@@ -111,7 +111,7 @@ void createProbingPT(
         uint64_t targetInd = storeTarget.Save();
 
           // next line
-      	storeTarget.Append(line);
+      	storeTarget.Append(line, log_prob);
 
         //Create an entry for the previous source phrase:
         Entry pesho;
@@ -159,7 +159,7 @@ void createProbingPT(
 
       } else {
         //If we still have the same line, just append to it:
-    	storeTarget.Append(line);
+    	storeTarget.Append(line, log_prob);
 
         std::vector<unsigned char> encoded_line = huffmanEncoder.full_encode_line(line, log_prob);
         binfile.write(&encoded_line);

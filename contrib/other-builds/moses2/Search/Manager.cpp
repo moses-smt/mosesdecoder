@@ -68,10 +68,13 @@ void Manager::Init()
 		pt.Lookup(*this, m_inputPaths);
 	}
 	//m_inputPaths.DeleteUnusedPaths();
+    std::cerr << "HH E" << std::endl;
 
 	CalcFutureScore();
+    std::cerr << "HH F" << std::endl;
 
 	m_bitmaps->Init(m_input->GetSize(), vector<bool>(0));
+    std::cerr << "HH G" << std::endl;
 
 	switch (system.searchAlgorithm) {
 	case Normal:
