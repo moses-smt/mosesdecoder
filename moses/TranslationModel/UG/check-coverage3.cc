@@ -42,7 +42,7 @@ basename(string const path, string const suffix)
 
 int main(int argc, char* argv[])
 {
-  boost::intrusive_ptr<bitext_t> B(new bitext_t);
+  boost::shared_ptr<bitext_t> B(new bitext_t);
   B->open(argv[1],argv[2],argv[3]);
   string line;
   string ifile = argv[4];
