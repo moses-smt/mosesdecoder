@@ -113,12 +113,14 @@ LanguageModelIRST::LanguageModelIRST(const std::string &line)
 */
 
   m_id = "default";
+  m_weight_map_normalization=false;
   ReadParameters();
 
   VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_lmtb_dub:|" << m_lmtb_dub << "|" << std::endl);
   VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_filePath:|" << m_filePath << "|" << std::endl);
   VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_factorType:|" << m_factorType << "|" << std::endl);
   VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_id:|" << m_id << "|" << std::endl);
+  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_weight_map_normalization:|" << m_weight_map_normalization << "|" << std::endl);
 }
 
 LanguageModelIRST::~LanguageModelIRST()
@@ -335,8 +337,13 @@ void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float 
       scope = ttask->GetScope();
     }
   }
+
   if (scope){
-    weight_map = scope->GetLMContextWeights(m_id);
+    if (m_weight_map_normalization){
+      weight_map = scope->GetNormalizedLMContextWeights(m_id);
+    }else{
+      weight_map = scope->GetLMContextWeights(m_id);
+    }
   }
 
   int _min = min(m_lmtb_size - 1, (int) phrase.GetSize());
@@ -403,7 +410,11 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
   
   weightmap_t* weight_map = NULL;
   if (scope){
-    weight_map = scope->GetLMContextWeights(m_id);
+    if (m_weight_map_normalization){
+      weight_map = scope->GetNormalizedLMContextWeights(m_id);
+    }else{
+      weight_map = scope->GetLMContextWeights(m_id);
+    }
   }
 
   //[begin, end) in STL-like fashion.
@@ -430,10 +441,11 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
   char* msp = NULL;
   ngram_state_t msidx = 0;
   float score;
-  if (weight_map && weight_map->size()>0)
+  if (weight_map && weight_map->size()>0){
     score = m_lmtb->clprob(codes,m_lmtb_size,*weight_map,NULL,NULL,&msidx,&msp);
-  else
+  }else{
     score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp);
+  }
 
   position = (const int) begin+1;
   while (position < adjust_end) {
@@ -580,6 +592,8 @@ void LanguageModelIRST::SetParameter(const std::string& key, const std::string& 
     m_id = Scan<std::string>(value);
   } else if (key == "dub") {
     m_lmtb_dub = Scan<unsigned int>(value);
+  } else if (key == "weight_normalization") {
+    m_weight_map_normalization = Scan<bool>(value);
   } else {
     LanguageModelSingleFactor::SetParameter(key, value);
   }

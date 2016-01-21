@@ -67,7 +67,7 @@ protected:
   int m_lmtb_sentenceEnd;   //lmt symbol to initialize ngram with
   int m_lmtb_dub;           //dictionary upperboud
   int m_lmtb_size;          //max ngram stored in the table
-
+  bool m_weight_map_normalization;     //flag to use normalized LM context weights
   std::string m_id; // internal name to identify this instance of the LanguageModelIRST
 
   dictionary* d;
