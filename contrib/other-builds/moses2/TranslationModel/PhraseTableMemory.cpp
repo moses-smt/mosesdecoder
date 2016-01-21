@@ -128,7 +128,7 @@ void PhraseTableMemory::Load(System &system)
 
 		PhraseImpl *source = PhraseImpl::CreateFromString(tmpSourcePool, vocab, system, toks[0]);
 		//cerr << "created soure" << endl;
-		TargetPhrase *target = TargetPhrase::CreateFromString(systemPool, system, toks[1]);
+		TargetPhrase *target = TargetPhrase::CreateFromString(systemPool, *this, system, toks[1]);
 		//cerr << "created target" << endl;
 		target->GetScores().CreateFromString(toks[2], *this, system, true);
 		//cerr << "created scores" << endl;

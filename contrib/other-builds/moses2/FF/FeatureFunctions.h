@@ -29,6 +29,7 @@ class Scores;
 
 class FeatureFunctions {
 public:
+    std::vector<const PhraseTable*> m_phraseTables;
 
     FeatureFunctions(System &system);
 	virtual ~FeatureFunctions();
@@ -59,7 +60,6 @@ public:
 protected:
 	  std::vector<const FeatureFunction*> m_featureFunctions;
 	  std::vector<const StatefulFeatureFunction*> m_statefulFeatureFunctions;
-	  std::vector<const PhraseTable*> m_phraseTables;
 	  std::vector<const FeatureFunction*> m_withPhraseTableInd;
 
 	  System &m_system;

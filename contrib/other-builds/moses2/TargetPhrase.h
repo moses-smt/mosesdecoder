@@ -17,6 +17,7 @@ namespace Moses2
 class Scores;
 class Manager;
 class System;
+class PhraseTable;
 
 class TargetPhrase : public PhraseImpl
 {
@@ -24,10 +25,11 @@ class TargetPhrase : public PhraseImpl
 public:
   mutable void **ffData;
   SCORE *scoreProperties;
+  const PhraseTable &pt;
 
-  static TargetPhrase *CreateFromString(MemPool &pool, const System &system, const std::string &str);
-  TargetPhrase(MemPool &pool, const System &system, size_t size);
-  TargetPhrase(MemPool &pool, const System &system, const TargetPhrase &copy);
+  static TargetPhrase *CreateFromString(MemPool &pool, const PhraseTable &pt, const System &system, const std::string &str);
+  TargetPhrase(MemPool &pool, const PhraseTable &pt, const System &system, size_t size);
+  //TargetPhrase(MemPool &pool, const System &system, const TargetPhrase &copy);
 
   virtual ~TargetPhrase();
 

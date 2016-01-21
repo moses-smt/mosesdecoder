@@ -17,21 +17,22 @@ using namespace std;
 namespace Moses2
 {
 
-TargetPhrase *TargetPhrase::CreateFromString(MemPool &pool, const System &system, const std::string &str)
+TargetPhrase *TargetPhrase::CreateFromString(MemPool &pool, const PhraseTable &pt, const System &system, const std::string &str)
 {
 	FactorCollection &vocab = system.GetVocab();
 
 	vector<string> toks = Tokenize(str);
 	size_t size = toks.size();
-	TargetPhrase *ret = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, size);
+	TargetPhrase *ret = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, pt, system, size);
 	ret->PhraseImpl::CreateFromString(vocab, system, toks);
 
 	return ret;
 }
 
-TargetPhrase::TargetPhrase(MemPool &pool, const System &system, size_t size)
+TargetPhrase::TargetPhrase(MemPool &pool, const PhraseTable &pt, const System &system, size_t size)
 :PhraseImpl(pool, size)
 ,scoreProperties(NULL)
+,pt(pt)
 {
 	m_scores = new (pool.Allocate<Scores>()) Scores(system, pool, system.featureFunctions.GetNumScores());
 
@@ -39,6 +40,7 @@ TargetPhrase::TargetPhrase(MemPool &pool, const System &system, size_t size)
 	ffData = new (pool.Allocate<void *>(numWithPtData)) void *[numWithPtData];
 }
 
+/*
 TargetPhrase::TargetPhrase(MemPool &pool, const System &system, const TargetPhrase &copy)
 :PhraseImpl(pool, copy)
 ,scoreProperties(NULL)
@@ -50,6 +52,7 @@ TargetPhrase::TargetPhrase(MemPool &pool, const System &system, const TargetPhra
 	size_t numWithPtData = system.featureFunctions.GetWithPhraseTableInd().size();
 	ffData = new (pool.Allocate<void *>(numWithPtData)) void *[numWithPtData];
 }
+*/
 
 TargetPhrase::~TargetPhrase() {
 	// TODO Auto-generated destructor stub

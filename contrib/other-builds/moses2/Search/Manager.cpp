@@ -52,8 +52,8 @@ void Manager::Init()
 	m_hypoRecycle = &system.GetHypoRecycler();
 	m_bitmaps = new Bitmaps(GetPool());
 
-	m_initPhrase = new (GetPool().Allocate<TargetPhrase>()) TargetPhrase(GetPool(), system, 0);
-
+	const PhraseTable &firstPt = *system.featureFunctions.m_phraseTables[0];
+	m_initPhrase = new (GetPool().Allocate<TargetPhrase>()) TargetPhrase(GetPool(), firstPt, system, 0);
 
 	// create input phrase obj
 	FactorCollection &vocab = system.GetVocab();
@@ -68,13 +68,9 @@ void Manager::Init()
 		pt.Lookup(*this, m_inputPaths);
 	}
 	//m_inputPaths.DeleteUnusedPaths();
-    std::cerr << "HH E" << std::endl;
-
 	CalcFutureScore();
-    std::cerr << "HH F" << std::endl;
 
 	m_bitmaps->Init(m_input->GetSize(), vector<bool>(0));
-    std::cerr << "HH G" << std::endl;
 
 	switch (system.searchAlgorithm) {
 	case Normal:

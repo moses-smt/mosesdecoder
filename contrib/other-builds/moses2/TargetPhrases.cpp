@@ -19,6 +19,7 @@ TargetPhrases::TargetPhrases(MemPool &pool, size_t reserve)
 {
 }
 
+/*
 TargetPhrases::TargetPhrases(MemPool &pool, const System &system, const TargetPhrases &copy)
 :m_coll(pool, copy.m_coll.size())
 {
@@ -29,7 +30,7 @@ TargetPhrases::TargetPhrases(MemPool &pool, const System &system, const TargetPh
 		m_coll[i] = tpClone;
 	}
 }
-
+*/
 
 TargetPhrases::~TargetPhrases() {
 	// TODO Auto-generated destructor stub
@@ -61,11 +62,13 @@ void TargetPhrases::SortAndPrune(size_t tableLimit)
   //cerr << "TargetPhrases=" << GetSize() << endl;
 }
 
+/*
 const TargetPhrases *TargetPhrases::Clone(MemPool &pool, const System &system) const
 {
 	const TargetPhrases *ret = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, system, *this);
 	return ret;
 }
+*/
 
 }
 

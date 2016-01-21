@@ -93,8 +93,11 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1097293041.1189716504" name="Main.cpp" rcbsApplicability="disable" resourcePath="Main.cpp" toolsToInvoke="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1686613508.1641877958">
+						<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1686613508.1641877958" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1686613508"/>
+					</fileInfo>
 					<sourceEntries>
-						<entry excluding="CreateProbingPT2.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="Main.cpp|CreateProbingPT2.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

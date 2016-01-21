@@ -65,7 +65,7 @@ TargetPhrases *UnknownWordPenalty::Lookup(const Manager &mgr, MemPool &pool, Inp
 
 	tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, 1);
 
-	TargetPhrase *target = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, 1);
+	TargetPhrase *target = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, *this, system, 1);
 	Word &word = (*target)[0];
 
 	//FactorCollection &fc = system.vocab;

@@ -82,7 +82,6 @@ void ProbingPT::Load(System &system)
   data = file.data();
 
   size_t size = file.size();
-  //std::cerr << "size=" << size << std::endl;
 
   // cache
   CreateCache(system);
@@ -165,7 +164,6 @@ TargetPhrases *ProbingPT::CreateTargetPhrase(
 		  RecycleData &recycler) const
 {
   TargetPhrases *tps = NULL;
-  cerr << "sourcePhrase=" << sourcePhrase << endl;
 
   //Actual lookup
   std::pair<bool, uint64_t> query_result; // 1st=found, 2nd=target file offset
@@ -174,8 +172,6 @@ TargetPhrases *ProbingPT::CreateTargetPhrase(
   if (query_result.first) {
 	  const char *offset = data + query_result.second;
 	  uint64_t *numTP = (uint64_t*) offset;
-
-	  //cerr << "query_result=" << query_result.second << " " << *numTP << endl;
 
 	  tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, *numTP);
 
@@ -190,8 +186,9 @@ TargetPhrases *ProbingPT::CreateTargetPhrase(
 
 	  }
 
+	  tps->SortAndPrune(m_tableLimit);
+	  system.featureFunctions.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
 	  //cerr << *tps << endl;
-
   }
 
   return tps;
@@ -203,9 +200,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(
 		  const char *&offset) const
 {
 	TargetPhraseInfo *tpInfo = (TargetPhraseInfo*) offset;
-	//cerr << "tpInfo=" << tpInfo->numWords << endl;
-
-    TargetPhrase *tp = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, system, tpInfo->numWords);
+    TargetPhrase *tp = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, *this, system, tpInfo->numWords);
 
 	offset += sizeof(TargetPhraseInfo);
 
@@ -214,26 +209,13 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(
 
   size_t totalNumScores = m_engine->num_scores + m_engine->num_lex_scores;
 
-  cerr << "scores=";
-  for (size_t i = 0; i < totalNumScores; ++i) {
-  	cerr << scores[i] << " ";
-  }
-  cerr << endl;
-
-  //cerr << "HH A " << m_engine->num_scores << " " << m_engine->num_lex_scores << " " << totalNumScores << endl;
   if (m_engine->IsLogProb()) {
 	    // set pt score for rule
 	    tp->GetScores().PlusEquals(system, *this, scores);
-	    //cerr << "HH B " << endl;
 
 	    // save scores for other FF, eg. lex RO. Just give the offset
 	    if (m_engine->num_lex_scores) {
 		  tp->scoreProperties = scores + m_engine->num_scores;
-		  if (tp->scoreProperties == NULL) {
-			  cerr << "BOOO!";
-			  abort();
-		  }
-		  cerr << "HH C " << scores << " " << tp->scoreProperties << endl;
 	    }
   }
   else {
@@ -256,10 +238,8 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(
   offset += sizeof(SCORE) * totalNumScores;
 
   // words
-  //cerr << "HH D " << endl;
   for (size_t i = 0; i < tpInfo->numWords; ++i) {
 	  uint32_t *probingId = (uint32_t*) offset;
-	  //cerr << "HH E " << *probingId << endl;
 
 	  const Factor *factor = GetTargetFactor(*probingId);
 	  assert(factor);
@@ -324,7 +304,6 @@ void ProbingPT::CreateCache(System &system)
 		TargetPhrases *tps = CreateTargetPhrase(pool, system, *sourcePhrase, retStruct.second, recycler);
 		assert(tps);
 
-		//cerr << retStruct.second << " " << *sourcePhrase << endl;
 		m_cache[retStruct.second] = tps;
 	}
 
