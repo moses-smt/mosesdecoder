@@ -45,17 +45,14 @@ protected:
   const char *data;
 
   mutable boost::thread_specific_ptr< std::deque<target_text*> > m_recycler;
-  mutable boost::thread_specific_ptr<RecycleData> m_recycleData;
 
   TargetPhrases *Lookup(const Manager &mgr,
 		  MemPool &pool,
-		  InputPath &inputPath,
-		  RecycleData &recycler) const;
+		  InputPath &inputPath) const;
   TargetPhrases *CreateTargetPhrase(MemPool &pool,
 		  const System &system,
 		  const Phrase &sourcePhrase,
-		  uint64_t key,
-		  RecycleData &recycler) const;
+		  uint64_t key) const;
   TargetPhrase *CreateTargetPhrase(
   		  MemPool &pool,
   		  const System &system,

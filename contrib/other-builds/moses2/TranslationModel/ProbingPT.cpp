@@ -89,19 +89,16 @@ void ProbingPT::Load(System &system)
 
 void ProbingPT::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 {
-  RecycleData &recycler = GetThreadSpecificObj(m_recycleData);
-
   BOOST_FOREACH(InputPath *path, inputPaths) {
 	TargetPhrases *tpsPtr;
-	tpsPtr = Lookup(mgr, mgr.GetPool(), *path, recycler);
+	tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
 	path->AddTargetPhrases(*this, tpsPtr);
   }
 }
 
 TargetPhrases* ProbingPT::Lookup(const Manager &mgr,
 		MemPool &pool,
-		InputPath &inputPath,
-		RecycleData &recycler) const
+		InputPath &inputPath) const
 {
 	/*
 	if (inputPath.prefixPath && inputPath.prefixPath->GetTargetPhrases(*this) == NULL) {
@@ -110,7 +107,7 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr,
 	}
 	else {
 		const Phrase &sourcePhrase = inputPath.subPhrase;
-		std::pair<TargetPhrases*, uint64_t> tpsAndKey = CreateTargetPhrase(pool, mgr.system, sourcePhrase, recycler);
+		std::pair<TargetPhrases*, uint64_t> tpsAndKey = CreateTargetPhrase(pool, mgr.system, sourcePhrase);
 		return tpsAndKey.first;
 	}
 	*/
@@ -130,7 +127,7 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr,
 	}
 
 	// query pt
-	TargetPhrases *tps = CreateTargetPhrase(pool, mgr.system, sourcePhrase, keyStruct.second, recycler);
+	TargetPhrases *tps = CreateTargetPhrase(pool, mgr.system, sourcePhrase, keyStruct.second);
 	return tps;
 }
 
@@ -160,8 +157,7 @@ TargetPhrases *ProbingPT::CreateTargetPhrase(
 		  MemPool &pool,
 		  const System &system,
 		  const Phrase &sourcePhrase,
-		  uint64_t key,
-		  RecycleData &recycler) const
+		  uint64_t key) const
 {
   TargetPhrases *tps = NULL;
 
@@ -288,7 +284,6 @@ void ProbingPT::CreateCache(System &system)
 
 	MemPool &pool = system.GetSystemPool();
 	FactorCollection &vocab = system.GetVocab();
-    RecycleData recycler;
 
 	size_t lineCount = 0;
 	while (getline(strme, line) && lineCount < m_maxCacheSize) {
@@ -301,7 +296,7 @@ void ProbingPT::CreateCache(System &system)
 		  return;
 		}
 
-		TargetPhrases *tps = CreateTargetPhrase(pool, system, *sourcePhrase, retStruct.second, recycler);
+		TargetPhrases *tps = CreateTargetPhrase(pool, system, *sourcePhrase, retStruct.second);
 		assert(tps);
 
 		m_cache[retStruct.second] = tps;
