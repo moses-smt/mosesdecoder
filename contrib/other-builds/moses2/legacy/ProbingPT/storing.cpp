@@ -86,13 +86,12 @@ void createProbingPT(
   std::priority_queue<CacheItem*, std::vector<CacheItem*>, CacheItemOrderer> cache;
   float totalSourceCount = 0;
 
-  line_text prev_line; //Check if the source phrase of the previous line is the same
-
   //Keep track of the size of each group of target phrases
   uint64_t entrystartidx = 0;
   size_t line_num = 0;
 
   //Read everything and processs
+  std::string prevSource;
   while(true) {
     try {
       //Process line read
@@ -108,10 +107,10 @@ void createProbingPT(
       add_to_map(&source_vocabids, line.source_phrase);
 
       if ((binfile.dist_from_start + binfile.extra_counter) == 0) {
-        prev_line = line; //For the first iteration assume the previous line is
+    	prevSource = line.source_phrase.as_string(); //For the first iteration assume the previous line is
       } //The same as this one.
 
-      if (line.source_phrase != prev_line.source_phrase) {
+      if (line.source_phrase != prevSource) {
 
         //Create a new entry even
 
@@ -128,7 +127,7 @@ void createProbingPT(
         //The key is the sum of hashes of individual words bitshifted by their position in the phrase.
         //Probably not entirerly correct, but fast and seems to work fine in practise.
         pesho.key = 0;
-        std::vector<uint64_t> vocabid_source = getVocabIDs(prev_line.source_phrase);
+        std::vector<uint64_t> vocabid_source = getVocabIDs(prevSource);
         for (int i = 0; i < vocabid_source.size(); i++) {
           pesho.key += (vocabid_source[i] << i);
         }
@@ -163,7 +162,7 @@ void createProbingPT(
         }
 
         //Set prevLine
-        prev_line = line;
+        prevSource = line.source_phrase.as_string();
 
       } else {
         //If we still have the same line, just append to it:
@@ -187,7 +186,7 @@ void createProbingPT(
 
       //The key is the sum of hashes of individual words. Probably not entirerly correct, but fast
       pesho.key = 0;
-      std::vector<uint64_t> vocabid_source = getVocabIDs(prev_line.source_phrase);
+      std::vector<uint64_t> vocabid_source = getVocabIDs(prevSource);
       for (int i = 0; i < vocabid_source.size(); i++) {
         pesho.key += (vocabid_source[i] << i);
       }
