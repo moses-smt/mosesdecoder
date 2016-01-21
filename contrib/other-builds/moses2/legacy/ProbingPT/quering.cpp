@@ -32,7 +32,6 @@ QueryEngine::QueryEngine(const char * filepath)
   //Create filepaths
   std::string basepath(filepath);
   std::string path_to_hashtable = basepath + "/probing_hash.dat";
-  std::string path_to_data_bin = basepath + "/binfile.dat";
   std::string path_to_source_vocabid = basepath + "/source_vocabids";
 
   ///Source phrase vocabids
@@ -62,12 +61,6 @@ QueryEngine::QueryEngine(const char * filepath)
 
   config.close();
 
-  //Mmap binary table
-  struct stat filestatus;
-  stat(path_to_data_bin.c_str(), &filestatus);
-  binary_filesize = filestatus.st_size;
-  binary_mmaped = read_binary_file(path_to_data_bin.c_str(), binary_filesize);
-
   //Read hashtable
   table_filesize = Table::Size(tablesize, 1.2);
   mem = readTable(path_to_hashtable.c_str(), table_filesize);
@@ -80,7 +73,6 @@ QueryEngine::QueryEngine(const char * filepath)
 QueryEngine::~QueryEngine()
 {
   //Clear mmap content from memory.
-  munmap(binary_mmaped, binary_filesize);
   munmap(mem, table_filesize);
 
 }

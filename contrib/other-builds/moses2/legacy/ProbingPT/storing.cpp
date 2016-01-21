@@ -1,4 +1,5 @@
 #include <sys/stat.h>
+#include "line_splitter.hh"
 #include "storing.hh"
 #include "StoreTarget.h"
 #include "../Util2.h"
@@ -6,44 +7,6 @@
 
 namespace Moses2
 {
-
-BinaryFileWriter::BinaryFileWriter (std::string basepath) : os ((basepath + "/binfile.dat").c_str(), std::ios::binary)
-{
-  binfile.reserve(10000); //Reserve part of the vector to avoid realocation
-  it = binfile.begin();
-  dist_from_start = 0; //Initialize variables
-  extra_counter = 0;
-}
-
-void BinaryFileWriter::write (std::vector<unsigned char> * bytes)
-{
-  binfile.insert(it, bytes->begin(), bytes->end()); //Insert the bytes
-  //Keep track of the offsets
-  it += bytes->size();
-  dist_from_start = distance(binfile.begin(),it);
-  //Flush the vector to disk every once in a while so that we don't consume too much ram
-  if (dist_from_start > 9000) {
-    flush();
-  }
-}
-
-void BinaryFileWriter::flush ()
-{
-  //Cast unsigned char to char before writing...
-  os.write((char *)&binfile[0], dist_from_start);
-  //Clear the vector:
-  binfile.clear();
-  binfile.reserve(10000);
-  extra_counter += dist_from_start; //Keep track of the total number of bytes.
-  it = binfile.begin(); //Reset iterator
-  dist_from_start = distance(binfile.begin(),it); //Reset dist from start
-}
-
-BinaryFileWriter::~BinaryFileWriter ()
-{
-  os.close();
-  binfile.clear();
-}
 
 void createProbingPT(
 		const std::string &phrasetable_path,
@@ -57,12 +20,6 @@ void createProbingPT(
 
   //Get basepath and create directory if missing
   mkdir(basepath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
-
-  //Set up huffman and serialize decoder maps.
-  Huffman huffmanEncoder(phrasetable_path.c_str()); //initialize
-  huffmanEncoder.assign_values();
-  huffmanEncoder.produce_lookups();
-  huffmanEncoder.serialize_maps(basepath.c_str());
 
   StoreTarget storeTarget(basepath);
 
@@ -80,8 +37,6 @@ void createProbingPT(
   char * mem = new char[size];
   memset(mem, 0, size);
   Table table(mem, size);
-
-  BinaryFileWriter binfile(basepath); //Init the binary file writer.
 
   std::priority_queue<CacheItem*, std::vector<CacheItem*>, CacheItemOrderer> cache;
   float totalSourceCount = 0;
@@ -137,16 +92,9 @@ void createProbingPT(
         for (int i = 0; i < vocabid_source.size(); i++) {
           pesho.key += (vocabid_source[i] << i);
         }
-        pesho.bytes_toread = binfile.dist_from_start + binfile.extra_counter - entrystartidx;
 
         //Put into table
         table.Insert(pesho);
-
-        entrystartidx = binfile.dist_from_start + binfile.extra_counter; //Designate start idx for new entry
-
-        //Encode a line and write it to disk.
-        std::vector<unsigned char> encoded_line = huffmanEncoder.full_encode_line(line, log_prob);
-        binfile.write(&encoded_line);
 
         // update cache
         if (max_cache_size) {
@@ -174,7 +122,6 @@ void createProbingPT(
 
     } catch (util::EndOfFileException e) {
       std::cerr << "Reading phrase table finished, writing remaining files to disk." << std::endl;
-      binfile.flush();
 
       //After the final entry is constructed we need to add it to the phrase_table
       //Create an entry for the previous source phrase:
@@ -190,7 +137,6 @@ void createProbingPT(
       for (int i = 0; i < vocabid_source.size(); i++) {
         pesho.key += (vocabid_source[i] << i);
       }
-      pesho.bytes_toread = binfile.dist_from_start + binfile.extra_counter - entrystartidx;
       //Put into table
       table.Insert(pesho);
 

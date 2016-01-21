@@ -16,14 +16,12 @@ char * read_binary_file(char * filename);
 
 class QueryEngine
 {
-  unsigned char * binary_mmaped; //The binari phrase table file
   const std::map<unsigned int, std::string> *vocabids;
   std::map<uint64_t, std::string> source_vocabids;
 
   Table table;
   char *mem; //Memory for the table, necessary so that we can correctly destroy the object
 
-  size_t binary_filesize;
   size_t table_filesize;
   bool is_reordering;
 
