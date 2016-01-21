@@ -1,7 +1,8 @@
 #include <sys/stat.h>
 #include "storing.hh"
 #include "StoreTarget.h"
-#include "moses/Util.h"
+#include "../Util2.h"
+#include "../InputFileStream.h"
 
 namespace Moses2
 {
@@ -64,7 +65,7 @@ void createProbingPT(
   StoreTarget storeTarget(basepath);
 
   //Get uniq lines:
-  unsigned long uniq_entries = huffmanEncoder.getUniqLines();
+  unsigned long uniq_entries = countUniqueSource(phrasetable_path);
 
   //Source phrase vocabids
   std::map<uint64_t, std::string> source_vocabids;
@@ -138,13 +139,13 @@ void createProbingPT(
         // update cache
         if (max_cache_size) {
 			std::string countStr = line.counts.as_string();
-			countStr = Moses::Trim(countStr);
+			countStr = Trim(countStr);
 			if (!countStr.empty()) {
-				std::vector<float> toks = Moses::Tokenize<float>(countStr);
+				std::vector<float> toks = Tokenize<float>(countStr);
 
 				if (toks.size() >= 2) {
 					totalSourceCount += toks[1];
-					CacheItem *item = new CacheItem(Moses::Trim(line.source_phrase.as_string()), toks[1]);
+					CacheItem *item = new CacheItem(Trim(line.source_phrase.as_string()), toks[1]);
 					cache.push(item);
 
 					if (max_cache_size > 0 && cache.size() > max_cache_size) {
@@ -208,6 +209,25 @@ void createProbingPT(
   configfile << num_lex_scores << '\n';
   configfile << log_prob << '\n';
   configfile.close();
+}
+
+size_t countUniqueSource(const std::string &path)
+{
+	size_t ret = 0;
+	InputFileStream strme(path);
+
+	std::string line, prevSource;
+	while (std::getline(strme, line)) {
+		std::vector<std::string> toks = TokenizeMultiCharSeparator(line, "|||");
+		assert(toks.size() == 0);
+
+		if (prevSource != toks[0]) {
+			prevSource = toks[0];
+			++ret;
+		}
+	}
+
+	return ret;
 }
 
 void serialize_cache(std::priority_queue<CacheItem*, std::vector<CacheItem*>, CacheItemOrderer> &cache,

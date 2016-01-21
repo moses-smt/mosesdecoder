@@ -26,6 +26,8 @@ void createProbingPT(
 		bool log_prob,
 		int max_cache_size);
 
+size_t countUniqueSource(const std::string &path);
+
 class BinaryFileWriter
 {
   std::vector<unsigned char> binfile;
