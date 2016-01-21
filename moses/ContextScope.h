@@ -290,9 +290,13 @@ VERBOSE(1,"bool SetLMContextWeights(std::string const& spec, std::string const& 
     weightmap_t::const_iterator it;
     float sum=0.0;
     for (it=in_map->begin(); it != in_map->end(); it++){
-      sum += abs(it->second);
+      sum += fabs(it->second);
     }
+    VERBOSE(1,"void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map) sum:|" << sum << "|" << std::endl);
     for (it=in_map->begin(); it != in_map->end(); it++){
+      VERBOSE(1,"void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map) it->first:|" << it->first << "|" << std::endl);
+      VERBOSE(1,"void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map) it->second:|" << it->second << "|" << std::endl);
+      VERBOSE(1,"void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map) it->second/tmp:|" << it->second/sum << "|" << std::endl);
       (*out_map)[it->first] = (it->second)/sum;
     }
   }
@@ -321,13 +325,26 @@ VERBOSE(1,"bool SetLMContextWeights(std::string const& spec, std::string const& 
 
   void print_context_weights(){
     if (m_context_weights){
-      VERBOSE(1,"printing m_context_weights m_context_weights:|" << m_context_weights << "| size:|" << m_context_weights->size() << "|" << std::endl);
+      weightmap_t* map = (weightmap_t*) m_context_weights.get();
+      VERBOSE(1,"printing m_context_weights m_context_weights:|" << m_context_weights << "| size:|" << map->size() << "|" << std::endl);
       weightmap_t::const_iterator it;
-      for (it = (*m_context_weights).begin(); it != (*m_context_weights).end(); ++it){
+      for (it = map->begin(); it != map->end(); ++it){
         VERBOSE(1,"m_context_weights key:|" << it->first << "| value:|" << it->second << "|" << std::endl);
       }
     }else{
       VERBOSE(1,"printing m_context_weights EMPTY" << std::endl);
+    }
+  }
+
+  void print_normalized_context_weights(){
+    if (m_normalized_context_weights){
+      VERBOSE(1,"printing m_normalized_context_weights m_normalized_context_weights:|" << m_normalized_context_weights << "| size:|" << m_normalized_context_weights->size() << "|" << std::endl);
+      weightmap_t::const_iterator it;
+      for (it = (*m_normalized_context_weights).begin(); it != (*m_normalized_context_weights).end(); ++it){
+        VERBOSE(1,"m_normalized_context_weights key:|" << it->first << "| value:|" << it->second << "|" << std::endl);
+      }
+    }else{
+      VERBOSE(1,"printing m_normalized_context_weights EMPTY" << std::endl);
     }
   }
 
