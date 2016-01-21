@@ -100,8 +100,8 @@ void createProbingPT(
       line = splitLine(filein.ReadLine());
 
       ++line_num;
-      if (line_num % 100000 == 0) {
-	std::cerr << line_num << " " << std::flush;
+      if (line_num % 1000000 == 0) {
+    	  std::cerr << line_num << " " << std::flush;
       }
 
       //Add source phrases to vocabularyIDs
