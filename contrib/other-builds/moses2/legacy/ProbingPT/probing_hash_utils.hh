@@ -10,13 +10,12 @@
 namespace Moses2
 {
 
-#define API_VERSION 8
+#define API_VERSION 9
 
 //Hash table entry
 struct Entry {
   uint64_t key;
   typedef uint64_t Key;
-  unsigned int bytes_toread;
 
   uint64_t GetKey() const {
     return key;
@@ -26,12 +25,7 @@ struct Entry {
     key = to;
   }
 
-  uint64_t GetValue() const {
-    return value;
-  }
-
   uint64_t value;
-  uint64_t targetInd;
 };
 
 //Define table

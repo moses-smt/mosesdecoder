@@ -94,7 +94,9 @@ std::pair<bool, uint64_t> QueryEngine::query(uint64_t key)
 
   const Entry * entry;
   ret.first = table.Find(key, entry);
-  ret.second = entry->targetInd;
+  if (ret.first) {
+	  ret.second = entry->value;
+  }
   return ret;
 }
 

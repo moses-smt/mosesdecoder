@@ -42,7 +42,6 @@ void createProbingPT(
   float totalSourceCount = 0;
 
   //Keep track of the size of each group of target phrases
-  uint64_t entrystartidx = 0;
   size_t line_num = 0;
 
   //Read everything and processs
@@ -83,8 +82,7 @@ void createProbingPT(
 
         //Create an entry for the previous source phrase:
         Entry pesho;
-        pesho.value = entrystartidx;
-        pesho.targetInd = targetInd;
+        pesho.value = targetInd;
         //The key is the sum of hashes of individual words bitshifted by their position in the phrase.
         //Probably not entirerly correct, but fast and seems to work fine in practise.
         pesho.key = 0;
@@ -128,8 +126,7 @@ void createProbingPT(
       uint64_t targetInd = storeTarget.Save();
 
       Entry pesho;
-      pesho.value = entrystartidx;
-      pesho.targetInd = targetInd;
+      pesho.value = targetInd;
 
       //The key is the sum of hashes of individual words. Probably not entirerly correct, but fast
       pesho.key = 0;
