@@ -205,7 +205,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(
 
   size_t totalNumScores = m_engine->num_scores + m_engine->num_lex_scores;
 
-  if (m_engine->IsLogProb()) {
+  if (m_engine->logProb) {
 	    // set pt score for rule
 	    tp->GetScores().PlusEquals(system, *this, scores);
 

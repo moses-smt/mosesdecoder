@@ -5,8 +5,8 @@
 #include <algorithm> //toLower
 #include <deque>
 #include "probing_hash_utils.hh"
-#include "huffmanish.hh"
 #include "hash.hh" //Includes line splitter
+#include "line_splitter.hh"
 #include "../../Vector.h"
 
 namespace Moses2
@@ -26,18 +26,16 @@ class QueryEngine
   size_t binary_filesize;
   size_t table_filesize;
   bool is_reordering;
-  bool logProb;
 
 public:
   int num_scores;
   int num_lex_scores;
+  bool logProb;
 
   QueryEngine (const char *);
   ~QueryEngine();
 
   std::pair<bool, uint64_t> query(uint64_t key);
-
-  void printTargetInfo(const std::vector<target_text> &target_phrases);
 
   const std::map<uint64_t, std::string> &getSourceVocab() const {
     return source_vocabids;
@@ -45,8 +43,6 @@ public:
 
   uint64_t getKey(uint64_t source_phrase[], size_t size) const;
 
-  bool IsLogProb() const
-  { return logProb; }
 };
 
 }

@@ -106,32 +106,5 @@ std::pair<bool, uint64_t> QueryEngine::query(uint64_t key)
   return ret;
 }
 
-void QueryEngine::printTargetInfo(const std::vector<target_text> &target_phrases)
-{
-  int entries = target_phrases.size();
-
-  for (int i = 0; i<entries; i++) {
-    std::cout << "Entry " << i+1 << " of " << entries << ":" << std::endl;
-    //Print text
-    std::cout << getTargetWordsFromIDs(target_phrases[i].target_phrase, *vocabids) << "\t";
-
-    //Print probabilities:
-    for (int j = 0; j<target_phrases[i].prob.size(); j++) {
-      std::cout << target_phrases[i].prob[j] << " ";
-    }
-    std::cout << "\t";
-
-    //Print word_all1
-    for (int j = 0; j<target_phrases[i].word_all1.size(); j++) {
-      if (j%2 == 0) {
-        std::cout << (short)(target_phrases[i].word_all1)[j] << "-";
-      } else {
-        std::cout << (short)(target_phrases[i].word_all1)[j] << " ";
-      }
-    }
-    std::cout << std::endl;
-  }
-}
-
 }
 
