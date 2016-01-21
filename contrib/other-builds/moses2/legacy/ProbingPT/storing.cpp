@@ -106,11 +106,17 @@ void createProbingPT(
       //Add source phrases to vocabularyIDs
       add_to_map(&source_vocabids, line.source_phrase);
 
-      if ((binfile.dist_from_start + binfile.extra_counter) == 0) {
-    	prevSource = line.source_phrase.as_string(); //For the first iteration assume the previous line is
-      } //The same as this one.
-
-      if (line.source_phrase != prevSource) {
+      if (prevSource.empty()) {
+    	  // 1st line
+    	  prevSource = line.source_phrase.as_string();
+          storeTarget.Append(line, log_prob);
+      }
+      else if (prevSource == line.source_phrase) {
+          //If we still have the same line, just append to it:
+    	  storeTarget.Append(line, log_prob);
+      }
+      else {
+    	assert(prevSource != line.source_phrase);
 
         //Create a new entry even
 
@@ -164,12 +170,6 @@ void createProbingPT(
         //Set prevLine
         prevSource = line.source_phrase.as_string();
 
-      } else {
-        //If we still have the same line, just append to it:
-    	storeTarget.Append(line, log_prob);
-
-        std::vector<unsigned char> encoded_line = huffmanEncoder.full_encode_line(line, log_prob);
-        binfile.write(&encoded_line);
       }
 
     } catch (util::EndOfFileException e) {
