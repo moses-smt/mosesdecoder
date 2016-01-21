@@ -220,9 +220,9 @@ interpret_dlt()
       i2 = M.find("weight-map");
       if (i2 == M.end()) break;
       VERBOSE(1,"void TranslationTask::interpret_dlt() i2->first:|" << i2->first <<"| i2->second:|" << i2->second << "|" << std::endl);
-      VERBOSE(1,"void TranslationTask::interpret_dlt() before calling m_scope->SetLMContextWeights(i2->second,id)|" << std::endl);
+      VERBOSE(1,"void TranslationTask::interpret_dlt() before calling m_scope->SetContextWeights(i2->second)|" << std::endl);
       m_scope->SetContextWeights(i2->second);
-      VERBOSE(1,"void TranslationTask::interpret_dlt() after calling m_scope->SetLMContextWeights(i2->second,id)|" << std::endl);
+      VERBOSE(1,"void TranslationTask::interpret_dlt() after calling m_scope->SetContextWeights(i2->second)|" << std::endl);
       break;
     } //end if (i->second == "context-weights")
 
