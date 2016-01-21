@@ -23,8 +23,6 @@ class QueryEngine
   Table table;
   char *mem; //Memory for the table, necessary so that we can correctly destroy the object
 
-  HuffmanDecoder decoder;
-
   size_t binary_filesize;
   size_t table_filesize;
   bool is_reordering;
@@ -37,16 +35,9 @@ public:
   QueryEngine (const char *);
   ~QueryEngine();
 
-  std::pair<bool, std::vector<target_text*> > query(uint64_t source_phrase[],
-		  size_t size,
-		  RecycleData &recycler);
   std::pair<bool, uint64_t> query(uint64_t key);
-  std::pair<bool, std::vector<target_text*> > query(uint64_t key, RecycleData &recycler);
 
   void printTargetInfo(const std::vector<target_text> &target_phrases);
-  const std::map<unsigned int, std::string> &getVocab() const {
-    return decoder.get_target_lookup_map();
-  }
 
   const std::map<uint64_t, std::string> &getSourceVocab() const {
     return source_vocabids;

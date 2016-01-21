@@ -26,7 +26,7 @@ unsigned char * read_binary_file(const char * filename, size_t filesize)
   return map;
 }
 
-QueryEngine::QueryEngine(const char * filepath) : decoder(filepath)
+QueryEngine::QueryEngine(const char * filepath)
 {
 
   //Create filepaths
@@ -37,9 +37,6 @@ QueryEngine::QueryEngine(const char * filepath) : decoder(filepath)
 
   ///Source phrase vocabids
   read_map(&source_vocabids, path_to_source_vocabid.c_str());
-
-  //Target phrase vocabIDs
-  vocabids = &decoder.get_target_lookup_map();
 
   //Read config file
   std::string line;
@@ -99,18 +96,6 @@ uint64_t QueryEngine::getKey(uint64_t source_phrase[], size_t size) const
   return key;
 }
 
-std::pair<bool, std::vector<target_text*> > QueryEngine::query(uint64_t source_phrase[],
-		size_t size,
-		RecycleData &recycler)
-{
-  //TOO SLOW
-  //uint64_t key = util::MurmurHashNative(&source_phrase[0], source_phrase.size());
-  uint64_t key = getKey(source_phrase, size);
-
-  std::pair<bool, std::vector<target_text*> > output = query(key, recycler);
-  return output;
-}
-
 std::pair<bool, uint64_t> QueryEngine::query(uint64_t key)
 {
 	std::pair<bool, uint64_t> ret;
@@ -119,29 +104,6 @@ std::pair<bool, uint64_t> QueryEngine::query(uint64_t key)
   ret.first = table.Find(key, entry);
   ret.second = entry->targetInd;
   return ret;
-}
-
-std::pair<bool, std::vector<target_text*> > QueryEngine::query(uint64_t key, RecycleData &recycler)
-{
-  std::pair<bool, std::vector<target_text*> > output;
-
-  const Entry * entry;
-  output.first = table.Find(key, entry);
-
-  if (output.first) {
-    //The phrase that was searched for was found! We need to get the translation entries.
-    //We will read the largest entry in bytes and then filter the unnecesarry with functions
-    //from line_splitter
-    uint64_t initial_index = entry -> GetValue();
-    unsigned int bytes_toread = entry -> bytes_toread;
-
-    //Get only the translation entries necessary
-    output.second = decoder.full_decode_line(binary_mmaped + initial_index, bytes_toread, num_scores, num_lex_scores, recycler);
-
-  }
-
-  return output;
-
 }
 
 void QueryEngine::printTargetInfo(const std::vector<target_text> &target_phrases)
