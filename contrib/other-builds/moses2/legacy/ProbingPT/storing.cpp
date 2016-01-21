@@ -52,6 +52,8 @@ void createProbingPT(
 		bool log_prob,
 		int max_cache_size)
 {
+  std::cerr << "Starting..." << std::endl;
+
   //Get basepath and create directory if missing
   mkdir(basepath.c_str(), S_IRWXU | S_IRWXG | S_IROTH | S_IXOTH);
 
@@ -87,8 +89,7 @@ void createProbingPT(
 
   //Keep track of the size of each group of target phrases
   uint64_t entrystartidx = 0;
-  //uint64_t line_num = 0;
-
+  size_t line_num = 0;
 
   //Read everything and processs
   while(true) {
@@ -96,6 +97,12 @@ void createProbingPT(
       //Process line read
       line_text line;
       line = splitLine(filein.ReadLine());
+
+      ++line_num;
+      if (line_num % 100000 == 0) {
+	std::cerr << line_num << " " << std::flush;
+      }
+
       //Add source phrases to vocabularyIDs
       add_to_map(&source_vocabids, line.source_phrase);
 
