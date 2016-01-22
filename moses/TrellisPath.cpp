@@ -169,9 +169,6 @@ TrellisPath::
 GetScoreBreakdown() const
 {
   if (!m_scoreBreakdown) {
-    float totalScore = m_path[0]->GetWinningHypo()->GetFutureScore();
-    // calculated for sanity check only
-
     m_scoreBreakdown.reset(new ScoreComponentCollection());
     m_scoreBreakdown->PlusEquals(m_path[0]->GetWinningHypo()->GetScoreBreakdown());
 
@@ -184,13 +181,10 @@ GetScoreBreakdown() const
       const Hypothesis *hypo = m_path[pos];
       const Hypothesis *winningHypo = hypo->GetWinningHypo();
       if (hypo != winningHypo) {
-        totalScore += hypo->GetFutureScore() - winningHypo->GetFutureScore();
         m_scoreBreakdown->MinusEquals(winningHypo->GetScoreBreakdown());
         m_scoreBreakdown->PlusEquals(hypo->GetScoreBreakdown());
       }
     }
-
-    assert(totalScore == m_totalScore);
   }
 
   return m_scoreBreakdown;
