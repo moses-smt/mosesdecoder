@@ -38,6 +38,17 @@ create(Translator* translator, xmlrpc_c::paramList const& paramList,
 }
 
 void
+SetContextWeights(Moses::ContextScope& s, xmlrpc_c::value const& w)
+{
+  SPTR<std::map<std::string,float> > M(new std::map<std::string, float>);
+  typedef std::map<std::string,xmlrpc_c::value> tmap;
+  tmap const tmp = static_cast<tmap>(xmlrpc_c::value_struct(w));
+  for(tmap::const_iterator m = tmp.begin(); m != tmp.end(); ++m)
+    (*M)[m->first] = xmlrpc_c::value_double(m->second);
+  s.SetContextWeights(M);
+}
+
+void
 TranslationRequest::
 Run()
 {
@@ -55,31 +66,31 @@ Run()
     }
   else m_scope.reset(new Moses::ContextScope);
 
-/*
+  
   // settings within the session scope
   param_t::const_iterator si = params.find("context-weights");
   if (si != params.end()) SetContextWeights(*m_scope, si->second);
-*/
+  
 
-  // settings within the session scope
-  param_t::const_iterator si = params.find("context-weights");
-  if (si != params.end()){
-    xmlrpc_c::value parValue = si->second;
-    typedef std::map<std::string,xmlrpc_c::value> tmap;
-    tmap const tmp = static_cast<tmap>(xmlrpc_c::value_struct(parValue));
-    typedef std::map<std::string,float> weightmap_t;
-    weightmap_t* _cwm = new weightmap_t;
-    XVERBOSE(1," reading context-weight map" << endl);
-    for(tmap::const_iterator m = tmp.begin(); m != tmp.end(); ++m) {
-      std::string _key = m->first;
-      double _val = (double) xmlrpc_c::value_double(m->second);
-      XVERBOSE(1,"  |" << _key << "| = " << _val << endl);
-      (*_cwm)[_key] = _val;
-    }
-    XVERBOSE(1,"before calling SetContextWeights" << endl);
-    m_scope->SetContextWeights(*_cwm);
-    XVERBOSE(1,"after calling SetContextWeights" << endl);
-  }
+  // // settings within the session scope
+  // param_t::const_iterator si = params.find("context-weights");
+  // if (si != params.end()){
+  //   xmlrpc_c::value parValue = si->second;
+  //   typedef std::map<std::string,xmlrpc_c::value> tmap;
+  //   tmap const tmp = static_cast<tmap>(xmlrpc_c::value_struct(parValue));
+  //   typedef std::map<std::string,float> weightmap_t;
+  //   weightmap_t* _cwm = new weightmap_t;
+  //   XVERBOSE(1," reading context-weight map" << endl);
+  //   for(tmap::const_iterator m = tmp.begin(); m != tmp.end(); ++m) {
+  //     std::string _key = m->first;
+  //     double _val = (double) xmlrpc_c::value_double(m->second);
+  //     XVERBOSE(1,"  |" << _key << "| = " << _val << endl);
+  //     (*_cwm)[_key] = _val;
+  //   }
+  //   XVERBOSE(1,"before calling SetContextWeights" << endl);
+  //   m_scope->SetContextWeights(*_cwm);
+  //   XVERBOSE(1,"after calling SetContextWeights" << endl);
+  // }
 
   // settings within the session scope (lm-context-weights)
   // requires that also a lm-id is set contemporarily; if not defined the default value "default" is used
