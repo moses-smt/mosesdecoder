@@ -53,18 +53,18 @@ git submodule update regtest
 # -- compile from scratch with server, run regtests
 set -x
 if [ "$full" == true ] ; then
-    ./bjam -j$j --with-irstlm=$irstlm --with-boost=$boost --with-cmph=$cmph --no-xmlrpc-c --with-regtest=$regtest -a $skipcompact $@ $q || exit $?
+    ./bjam -j$j --with-mm --with-mm-extras --with-irstlm=$irstlm --with-boost=$boost --with-cmph=$cmph --no-xmlrpc-c --with-regtest=$regtest -a $skipcompact $@ $q || exit $?
     if ./regression-testing/run-single-test.perl --server --startuptest  ; then
-    	./bjam -j$j --with-irstlm=$irstlm --with-boost=$boost --with-cmph=$cmph $xmlrpc --with-regtest=$regtest -a $skipcompact $@ $q 
+    	./bjam -j$j --with-mm --with-mm-extras --with-irstlm=$irstlm --with-boost=$boost --with-cmph=$cmph $xmlrpc --with-regtest=$regtest -a $skipcompact $@ $q 
     fi
 else
    # when investigating failures, always run single-threaded
    if [ "$q" == "-q" ] ; then j=1; fi 
 
    if ./regression-testing/run-single-test.perl --server --startuptest  ; then
-       ./bjam -j$j $q $a --with-irstlm=$irstlm --with-boost=$boost --with-cmph=$cmph $xmlrpc --with-regtest=$regtest $skipcompact $@ 
+       ./bjam -j$j --with-mm $q $a --with-irstlm=$irstlm --with-boost=$boost --with-cmph=$cmph $xmlrpc --with-regtest=$regtest $skipcompact $@ 
    else
-       ./bjam -j$j $q $a --with-irstlm=$irstlm --with-boost=$boost --with-cmph=$cmph --no-xmlrpc-c --with-regtest=$regtest $skipcompact $@ 
+       ./bjam -j$j --with-mm --with-mm-extras $q $a --with-irstlm=$irstlm --with-boost=$boost --with-cmph=$cmph --no-xmlrpc-c --with-regtest=$regtest $skipcompact $@ 
    fi
 fi
 

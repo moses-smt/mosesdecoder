@@ -73,10 +73,14 @@ protected:
 
   FactorType m_factorType;
 
+  void LoadModel(const std::string &file, bool lazy);
+
   lm::WordIndex TranslateID(const Word &word) const {
     std::size_t factor = word.GetFactor(m_factorType)->GetId();
     return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
   }
+
+  std::vector<lm::WordIndex> m_lmIdLookup;
 
 private:
   LanguageModelKen(const LanguageModelKen<Model> &copy_from);
@@ -96,7 +100,6 @@ private:
     }
   }
 
-  std::vector<lm::WordIndex> m_lmIdLookup;
 
 protected:
   //bool m_oovFeatureEnabled; /// originally from LanguageModel, copied here to separate the interfaces. Called m_enableOOVFeature there

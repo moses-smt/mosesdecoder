@@ -188,7 +188,7 @@ namespace Moses
 
     dflt = pair<string,string>("workers","0");
     m_workers = atoi(param.insert(dflt).first->second.c_str());
-    if (m_workers == 0) m_workers = boost::thread::hardware_concurrency();
+    if (m_workers == 0) m_workers = StaticData::Instance().ThreadCount();
     else m_workers = min(m_workers,size_t(boost::thread::hardware_concurrency()));
     
     dflt = pair<string,string>("bias-loglevel","0");
