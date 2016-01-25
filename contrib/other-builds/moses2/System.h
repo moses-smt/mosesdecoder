@@ -59,6 +59,7 @@ public:
     bool outputHypoScore;
     int reportSegmentation;
     int cpuAffinityOffset;
+    int cpuAffinityOffsetIncr;
 
 	System(const Parameter &paramsArg);
 	virtual ~System();

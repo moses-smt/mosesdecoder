@@ -253,6 +253,7 @@ Parameter::Parameter()
   AddParam(misc_opts,"context-window",
            "Context window (in words) for context-sensitive translation: {+|-|+-}<number>.");
   AddParam(misc_opts,"cpu-affinity-offset", "CPU Affinity");
+  AddParam(misc_opts,"cpu-affinity-increment", "Set to 1 (default) to put each thread on different cores. 0 to run all threads on one core");
 
   // Compact phrase table and reordering table.
   po::options_description cpt_opts("Options when using compact phrase and reordering tables.");

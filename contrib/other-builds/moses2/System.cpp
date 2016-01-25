@@ -39,6 +39,8 @@ System::System(const Parameter &paramsArg)
 
     params.SetParameter(cpuAffinityOffset, "cpu-affinity-offset",
 		       0);
+    params.SetParameter(cpuAffinityOffsetIncr, "cpu-affinity-increment",
+    		       1);
 
     reportSegmentation = (params.GetParam("report-segmentation-enriched")
                           ? 2 : params.GetParam("report-segmentation")

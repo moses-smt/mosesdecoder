@@ -36,16 +36,18 @@ namespace Moses2
 #define handle_error_en(en, msg) \
   do { errno = en; perror(msg); exit(EXIT_FAILURE); } while (0)
 
-ThreadPool::ThreadPool( size_t numThreads, int cpuAffinityOffset )
+ThreadPool::ThreadPool( size_t numThreads, int cpuAffinityOffset, int cpuAffinityIncr )
   : m_stopped(false), m_stopping(false), m_queueLimit(0)
 {
+  size_t numCPU = sysconf(_SC_NPROCESSORS_ONLN);
+  int cpuInd = cpuAffinityOffset % numCPU;
+
   for (size_t i = 0; i < numThreads; ++i) {
     boost::thread *thread = m_threads.create_thread(boost::bind(&ThreadPool::Execute,this));
 
 #ifdef __linux
     if (cpuAffinityOffset >= 0) {
 		int s;
-		size_t numCPU = sysconf(_SC_NPROCESSORS_ONLN);
 
 		boost::thread::native_handle_type handle = thread->native_handle();
 
@@ -53,8 +55,9 @@ ThreadPool::ThreadPool( size_t numThreads, int cpuAffinityOffset )
 		cpu_set_t cpuset;
 		CPU_ZERO(&cpuset);
 
-		int cpuInd = (i + cpuAffinityOffset) % numCPU;
 		CPU_SET(cpuInd, &cpuset);
+		cpuInd += cpuAffinityIncr;
+		cpuInd = cpuInd % numCPU;
 
 		s = pthread_setaffinity_np(handle, sizeof(cpu_set_t), &cpuset);
 		if (s != 0) {
