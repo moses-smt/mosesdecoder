@@ -1823,7 +1823,7 @@ sub score_phrase_phrase_extract {
     $cmd .= " | $GZIP_EXEC -c > $ttable_file.gz";
 
     safesystem($cmd) or die "ERROR: Consolidating the two phrase table halves failed";
-#    if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die("ERROR"); }
+    if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die("ERROR"); }
 }
 
 sub score_phrase_memscore {
