@@ -453,11 +453,11 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
       codes[idx-1] = codes[idx];
     }
     codes[idx-1] =  GetLmID(hypo.GetWord(position));
-    if (weight_map && weight_map->size()>0)
+    if (weight_map && weight_map->size()>0){
       score += m_lmtb->clprob(codes,m_lmtb_size,*weight_map,NULL,NULL,&msidx,&msp);
-    else
+    }else{
       score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp);
-
+    }
     ++position;
   }
 
@@ -477,10 +477,11 @@ VERBOSE(2,"FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hyp
       codes[idx] = m_lmtb_sentenceStart;
       --idx;
     }
-    if (weight_map && weight_map->size()>0)
+    if (weight_map && weight_map->size()>0){
       score += m_lmtb->clprob(codes,m_lmtb_size,*weight_map,NULL,NULL,&msidx,&msp);
-    else
+    }else{
       score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp);
+    }
   } else {
     // need to set the LM state
 
