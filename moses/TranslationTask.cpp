@@ -161,12 +161,12 @@ void
 TranslationTask::
 interpret_dlt()
 {
-  VERBOSE(1,"void TranslationTask::interpret_dlt() START" << std::endl);
+  VERBOSE(2,"void TranslationTask::interpret_dlt() START" << std::endl);
   if (m_source->GetType() != SentenceInput) return;
   Sentence const& snt = static_cast<Sentence const&>(*m_source);
   typedef std::map<std::string,std::string> dltmap_t;
 
-  VERBOSE(1,"void TranslationTask::interpret_dlt() task:|" << this << "| scope:|" << m_scope << "| *m_source:|" << *m_source <<"|" << std::endl);
+  VERBOSE(2,"void TranslationTask::interpret_dlt() task:|" << this << "| scope:|" << m_scope << "| *m_source:|" << *m_source <<"|" << std::endl);
 
   std::string id;
 
@@ -182,7 +182,7 @@ interpret_dlt()
 //else read the rest of parameters
 
     if (i->second == "lm-context-weights"){
-      VERBOSE(1,"void TranslationTask::interpret_dlt() type:|" << i->second << "|" << std::endl);
+      VERBOSE(2,"void TranslationTask::interpret_dlt() type:|" << i->second << "|" << std::endl);
 
 //checking "id"
 //if not pdefined, set id to the default value ("default")
@@ -193,17 +193,17 @@ interpret_dlt()
       }else{
         id=i2->second;
       }
-      VERBOSE(1,"void TranslationTask::interpret_dlt() id:|" << id << "|" << std::endl);
+      VERBOSE(2,"void TranslationTask::interpret_dlt() id:|" << id << "|" << std::endl);
 
 //checking "weight-map"
 //if not defined, do nothing and exit the loop;
 //else set the corresponding weight for the speific LM
       i2 = M.find("weight-map");
       if (i2 == M.end()) break;
-      VERBOSE(1,"void TranslationTask::interpret_dlt() i2->first:|" << i2->first <<"| i2->second:|" << i2->second << "|" << std::endl);
-      VERBOSE(1,"void TranslationTask::interpret_dlt() before calling m_scope->SetLMContextWeights(i2->second,id)|" << std::endl);
+      VERBOSE(2,"void TranslationTask::interpret_dlt() i2->first:|" << i2->first <<"| i2->second:|" << i2->second << "|" << std::endl);
+      VERBOSE(2,"void TranslationTask::interpret_dlt() before calling m_scope->SetLMContextWeights(i2->second,id)|" << std::endl);
       m_scope->SetLMContextWeights(i2->second,id);
-      VERBOSE(1,"void TranslationTask::interpret_dlt() after calling m_scope->SetLMContextWeights(i2->second,id)|" << std::endl);
+      VERBOSE(2,"void TranslationTask::interpret_dlt() after calling m_scope->SetLMContextWeights(i2->second,id)|" << std::endl);
       break;
     } //end if (i->second == "lm-context-weights")
 
@@ -211,7 +211,7 @@ interpret_dlt()
 //if not defined, do nothing and and check for other types
 //else read the rest of parameters
     if (i->second == "context-weights"){
-      VERBOSE(1,"void TranslationTask::interpret_dlt() type:|" << i->second << "|" << std::endl);
+      VERBOSE(2,"void TranslationTask::interpret_dlt() type:|" << i->second << "|" << std::endl);
 
 //checking "weight-map"
 //if not defined, do nothing and exit the loop;
@@ -219,10 +219,10 @@ interpret_dlt()
       dltmap_t::const_iterator i2;
       i2 = M.find("weight-map");
       if (i2 == M.end()) break;
-      VERBOSE(1,"void TranslationTask::interpret_dlt() i2->first:|" << i2->first <<"| i2->second:|" << i2->second << "|" << std::endl);
-      VERBOSE(1,"void TranslationTask::interpret_dlt() before calling m_scope->SetContextWeights(i2->second)|" << std::endl);
+      VERBOSE(2,"void TranslationTask::interpret_dlt() i2->first:|" << i2->first <<"| i2->second:|" << i2->second << "|" << std::endl);
+      VERBOSE(2,"void TranslationTask::interpret_dlt() before calling m_scope->SetContextWeights(i2->second)|" << std::endl);
       m_scope->SetContextWeights(i2->second);
-      VERBOSE(1,"void TranslationTask::interpret_dlt() after calling m_scope->SetContextWeights(i2->second)|" << std::endl);
+      VERBOSE(2,"void TranslationTask::interpret_dlt() after calling m_scope->SetContextWeights(i2->second)|" << std::endl);
       break;
     } //end if (i->second == "context-weights")
 
@@ -235,7 +235,7 @@ interpret_dlt()
 */
 
   }
-  VERBOSE(1,"void TranslationTask::interpret_dlt() END" << std::endl);
+  VERBOSE(2,"void TranslationTask::interpret_dlt() END" << std::endl);
 }
 
 

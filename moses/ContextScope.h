@@ -43,11 +43,8 @@ protected:
 #endif
     SPTR< std::map<std::string,float> const> m_context_weights;
     weightmap_t* m_normalized_context_weights;
-//    weightmap_t* m_context_weights;
     weightmap_map_t* m_lm_context_weights;
     weightmap_map_t* m_normalized_lm_context_weights;
-//  SPTR<weightmap_t const> m_context_weights;
-//  SPTR<weightmap_map_t> m_lm_context_weights;
 public:
 
   template<typename T>
@@ -90,7 +87,6 @@ public:
   }
 
   ContextScope() {
-//    m_context_weights = NULL; 
     m_normalized_context_weights = NULL; 
     m_lm_context_weights = NULL; 
     m_normalized_lm_context_weights = NULL; 
@@ -104,12 +100,6 @@ public:
     m_scratchpad = other.m_scratchpad;
   }
 
-/*
-  weightmap_t*
-  GetContextWeights() {
-    return m_context_weights;
-  }
-*/
   SPTR<std::map<std::string,float> const>
   GetContextWeights() {
     return m_context_weights;
@@ -129,7 +119,6 @@ public:
   GetNormalizedLMContextWeights() {
     return m_normalized_lm_context_weights;
   }
-
 
   weightmap_t*
   GetLMContextWeights(std::string id) {
@@ -163,7 +152,6 @@ public:
     }
   }
 
-
   weightmap_t*
   CreateWeightMap(std::string const& spec) {
     weightmap_t* M = new weightmap_t;
@@ -196,29 +184,9 @@ public:
     return true;
   }
 
-/*
-  bool
-  SetContextWeights(std::string const& spec) {
-    if (m_context_weights) return false;
-    boost::unique_lock<boost::shared_mutex> lock(m_lock);
-    SPTR<weightmap_t> M(new weightmap_t);
-
-    // TO DO; This needs to be done with StringPiece.find, not Tokenize
-    // PRIORITY: low
-    std::vector<std::string> tokens = Tokenize(spec,":");
-    for (std::vector<std::string>::iterator it = tokens.begin();
-         it != tokens.end(); it++) {
-      std::vector<std::string> key_and_value = Tokenize(*it, ",");
-      (*M)[key_and_value[0]] = atof(key_and_value[1].c_str());
-    }
-    m_context_weights = M;
-    return true;
-  }
-*/
-
   bool
   SetContextWeights(weightmap_t const& w) {
-    VERBOSE(1,"bool SetContextWeights(SPTR<weightmap_t const> const& w)" << std::endl);
+    VERBOSE(2,"bool SetContextWeights(SPTR<weightmap_t const> const& w)" << std::endl);
     if (m_context_weights) return false;
 #ifdef WITH_THREADS
     boost::unique_lock<boost::shared_mutex> lock(m_lock);
@@ -237,7 +205,7 @@ public:
 
   bool
   SetContextWeights(SPTR<std::map<std::string,float> const> const& w) {
-    VERBOSE(1,"bool SetContextWeights(SPTR<std::map<std::string,float> const> const& w)" << std::endl);
+    VERBOSE(2,"bool SetContextWeights(SPTR<std::map<std::string,float> const> const& w)" << std::endl);
     if (m_context_weights) return false;
 #ifdef WITH_THREADS
     boost::unique_lock<boost::shared_mutex> lock(m_lock);
@@ -257,8 +225,8 @@ public:
 
   bool
   SetLMContextWeights(std::string const& spec, std::string const& id) {
-VERBOSE(1,"bool SetLMContextWeights(std::string const& spec, std::string const& id)" << std::endl);
-VERBOSE(1,"bool SetLMContextWeights(std::string const& spec, std::string const& id) spec:|" << spec << "| id:|" << id << "|" << std::endl);
+VERBOSE(2,"bool SetLMContextWeights(std::string const& spec, std::string const& id)" << std::endl);
+VERBOSE(3,"bool SetLMContextWeights(std::string const& spec, std::string const& id) spec:|" << spec << "| id:|" << id << "|" << std::endl);
 
 #ifdef WITH_THREADS
     boost::unique_lock<boost::shared_mutex> lock(m_lock);
@@ -286,17 +254,17 @@ VERBOSE(1,"bool SetLMContextWeights(std::string const& spec, std::string const& 
   }
 
   void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map){
-    VERBOSE(1,"void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map)" << std::endl);
+    VERBOSE(2,"void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map)" << std::endl);
     weightmap_t::const_iterator it;
     float sum=0.0;
     for (it=in_map->begin(); it != in_map->end(); it++){
       sum += fabs(it->second);
     }
-    VERBOSE(1,"void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map) sum:|" << sum << "|" << std::endl);
+    VERBOSE(2,"void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map) sum:|" << sum << "|" << std::endl);
     for (it=in_map->begin(); it != in_map->end(); it++){
-      VERBOSE(1,"void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map) it->first:|" << it->first << "|" << std::endl);
-      VERBOSE(1,"void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map) it->second:|" << it->second << "|" << std::endl);
-      VERBOSE(1,"void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map) it->second/tmp:|" << it->second/sum << "|" << std::endl);
+      VERBOSE(3,"void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map) it->first:|" << it->first << "|" << std::endl);
+      VERBOSE(3,"void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map) it->second:|" << it->second << "|" << std::endl);
+      VERBOSE(3,"void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map) it->second/tmp:|" << it->second/sum << "|" << std::endl);
       (*out_map)[it->first] = (it->second)/sum;
     }
   }
