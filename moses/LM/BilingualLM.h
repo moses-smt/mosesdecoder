@@ -117,7 +117,7 @@ public:
     return new BilingualLMState(0);
   }
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,

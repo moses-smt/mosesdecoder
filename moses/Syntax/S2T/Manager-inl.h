@@ -160,12 +160,10 @@ void Manager<Parser>::FindOovs(const PChart &pchart, boost::unordered_set<Word> 
 template<typename Parser>
 void Manager<Parser>::Decode()
 {
-  const StaticData &staticData = StaticData::Instance();
-
   // Get various pruning-related constants.
-  const std::size_t popLimit = staticData.options().cube.pop_limit;
-  const std::size_t ruleLimit = staticData.GetRuleLimit();
-  const std::size_t stackLimit = staticData.options().search.stack_size;
+  const std::size_t popLimit = options()->cube.pop_limit;
+  const std::size_t ruleLimit = options()->syntax.rule_limit;
+  const std::size_t stackLimit = options()->search.stack_size;
 
   // Initialise the PChart and SChart.
   InitializeCharts();
@@ -303,7 +301,7 @@ void Manager<Parser>::ExtractKBest(
   // with 0 being 'unlimited.'  This actually sets a large-ish limit in case
   // too many translations are identical.
   const StaticData &staticData = StaticData::Instance();
-  const std::size_t nBestFactor = staticData.options().nbest.factor;
+  const std::size_t nBestFactor = staticData.options()->nbest.factor;
   std::size_t numDerivations = (nBestFactor == 0) ? k*1000 : k*nBestFactor;
 
   // Extract the derivations.

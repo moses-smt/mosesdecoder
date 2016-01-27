@@ -14,6 +14,8 @@
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
+#include "moses/TranslationModel/ProbingPT/ProbingPT.h"
+#include "moses/TranslationModel/PhraseDictionaryMemoryPerSentence.h"
 
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
 
@@ -40,6 +42,7 @@
 #include "moses/FF/ControlRecombination.h"
 #include "moses/FF/ConstrainedDecoding.h"
 #include "moses/FF/SoftSourceSyntacticConstraintsFeature.h"
+#include "moses/FF/TargetPreferencesFeature.h"
 #include "moses/FF/CoveredReferenceFeature.h"
 #include "moses/FF/TreeStructureFeature.h"
 #include "moses/FF/SoftMatchingFeature.h"
@@ -88,11 +91,9 @@
 #ifdef PT_UG
 #include "moses/TranslationModel/UG/mmsapt.h"
 #endif
-#ifdef HAVE_PROBINGPT
-#include "moses/TranslationModel/ProbingPT/ProbingPT.h"
-#endif
 
 #include "moses/LM/Ken.h"
+#include "moses/LM/Reloading.h"
 #ifdef LM_IRST
 #include "moses/LM/IRST.h"
 #endif
@@ -203,6 +204,14 @@ public:
   }
 };
 
+class ReloadingFactory : public FeatureFactory
+{
+public:
+  void Create(const std::string &line) {
+    DefaultSetup(ConstructReloadingLM(line));
+  }
+};
+
 } // namespace
 
 FeatureRegistry::FeatureRegistry()
@@ -224,6 +233,8 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhraseDictionaryTransliteration);
   MOSES_FNAME(PhraseDictionaryDynamicCacheBased);
   MOSES_FNAME(PhraseDictionaryFuzzyMatch);
+  MOSES_FNAME(ProbingPT);
+  MOSES_FNAME(PhraseDictionaryMemoryPerSentence);
   MOSES_FNAME2("RuleTable", Syntax::RuleTableFF);
   MOSES_FNAME2("SyntaxInputWeight", Syntax::InputWeightFF);
 
@@ -253,6 +264,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(CoveredReferenceFeature);
   MOSES_FNAME(SourceGHKMTreeInputMatchFeature);
   MOSES_FNAME(SoftSourceSyntacticConstraintsFeature);
+  MOSES_FNAME(TargetPreferencesFeature);
   MOSES_FNAME(TreeStructureFeature);
   MOSES_FNAME(SoftMatchingFeature);
   MOSES_FNAME(DynamicCacheBasedLanguageModel);
@@ -298,9 +310,6 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(Mmsapt);
   MOSES_FNAME2("PhraseDictionaryBitextSampling",Mmsapt); // that's an alias for Mmsapt!
 #endif
-#ifdef HAVE_PROBINGPT
-  MOSES_FNAME(ProbingPT);
-#endif
 
 #ifdef HAVE_SYNLM
   MOSES_FNAME(SyntacticLanguageModel);
@@ -332,7 +341,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME2("OxSourceFactoredLM", SourceOxLM);
   MOSES_FNAME2("OxTreeLM", OxLM<oxlm::FactoredTreeLM>);
 #endif
-
+  Add("ReloadingLM", new ReloadingFactory());
   Add("KENLM", new KenFactory());
 }
 

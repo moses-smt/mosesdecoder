@@ -83,8 +83,9 @@ PhraseDictionaryMultiModelCounts::~PhraseDictionaryMultiModelCounts()
 }
 
 
-void PhraseDictionaryMultiModelCounts::Load()
+void PhraseDictionaryMultiModelCounts::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   SetFeaturesToApply();
   for(size_t i = 0; i < m_numModels; ++i) {
 
@@ -143,7 +144,10 @@ TargetPhraseCollection::shared_ptr PhraseDictionaryMultiModelCounts::GetTargetPh
 }
 
 
-void PhraseDictionaryMultiModelCounts::CollectSufficientStats(const Phrase& src, vector<float> &fs, map<string,multiModelCountsStats*>* allStats) const
+void
+PhraseDictionaryMultiModelCounts::
+CollectSufficientStats(const Phrase& src, vector<float> &fs,
+                       map<string,multiModelCountsStats*>* allStats) const
 //fill fs and allStats with statistics from models
 {
   for(size_t i = 0; i < m_numModels; ++i) {

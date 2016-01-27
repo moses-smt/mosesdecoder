@@ -38,6 +38,7 @@ bool onlyDirectFlag = false;
 bool partsOfSpeechFlag = false;
 bool phraseCountFlag = false;
 bool sourceLabelsFlag = false;
+bool targetSyntacticPreferencesFlag = false;
 bool sparseCountBinFeatureFlag = false;
 
 std::vector< int > countBin;
@@ -49,7 +50,7 @@ std::vector< float > goodTuringDiscount;
 float kneserNey_D1, kneserNey_D2, kneserNey_D3, totalCount = -1;
 
 
-void processFiles( const std::string&, const std::string&, const std::string&, const std::string&, const std::string&, const std::string& );
+void processFiles( const std::string&, const std::string&, const std::string&, const std::string&, const std::string&, const std::string&, const std::string& );
 void loadCountOfCounts( const std::string& );
 void breakdownCoreAndSparse( const std::string &combined, std::string &core, std::string &sparse );
 bool getLine( Moses::InputFileStream &file, std::vector< std::string > &item );
@@ -93,6 +94,7 @@ int main(int argc, char* argv[])
   std::string fileNameCountOfCounts;
   std::string fileNameSourceLabelSet;
   std::string fileNamePartsOfSpeechVocabulary;
+  std::string fileNameTargetSyntacticPreferencesLabelSet;
 
   for(int i=4; i<argc; i++) {
     if (strcmp(argv[i],"--Hierarchical") == 0) {
@@ -150,6 +152,11 @@ int main(int argc, char* argv[])
       UTIL_THROW_IF2(i+1==argc, "specify parts-of-speech file!");
       fileNamePartsOfSpeechVocabulary = argv[++i];
       std::cerr << "processing parts-of-speech property" << std::endl;
+    } else if (strcmp(argv[i],"--TargetSyntacticPreferences") == 0) {
+      targetSyntacticPreferencesFlag = true;
+      UTIL_THROW_IF2(i+1==argc, "specify target syntactic preferences label set file!");
+      fileNameTargetSyntacticPreferencesLabelSet = argv[++i];
+      std::cerr << "processing target syntactic preferences property" << std::endl;
     } else if (strcmp(argv[i],"--MinScore") == 0) {
       std::string setting = argv[++i];
       bool done = false;
@@ -182,7 +189,7 @@ int main(int argc, char* argv[])
     }
   }
 
-  processFiles( fileNameDirect, fileNameIndirect, fileNameConsolidated, fileNameCountOfCounts, fileNameSourceLabelSet, fileNamePartsOfSpeechVocabulary );
+  processFiles( fileNameDirect, fileNameIndirect, fileNameConsolidated, fileNameCountOfCounts, fileNameSourceLabelSet, fileNamePartsOfSpeechVocabulary, fileNameTargetSyntacticPreferencesLabelSet );
 }
 
 
@@ -231,7 +238,8 @@ void processFiles( const std::string& fileNameDirect,
                    const std::string& fileNameConsolidated,
                    const std::string& fileNameCountOfCounts,
                    const std::string& fileNameSourceLabelSet,
-                   const std::string& fileNamePartsOfSpeechVocabulary )
+                   const std::string& fileNamePartsOfSpeechVocabulary,
+                   const std::string& fileNameTargetSyntacticPreferencesLabelSet )
 {
   if (goodTuringFlag || kneserNeyFlag)
     loadCountOfCounts( fileNameCountOfCounts );
@@ -255,6 +263,9 @@ void processFiles( const std::string& fileNameDirect,
   }
   if (partsOfSpeechFlag) {
     propertiesConsolidator.ActivatePartsOfSpeechProcessing(fileNamePartsOfSpeechVocabulary);
+  }
+  if (targetSyntacticPreferencesFlag) {
+    propertiesConsolidator.ActivateTargetSyntacticPreferencesProcessing(fileNameTargetSyntacticPreferencesLabelSet);
   }
 
   // loop through all extracted phrase translations

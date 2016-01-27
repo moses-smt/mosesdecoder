@@ -81,7 +81,7 @@ public:
   // source sentence word range.
   virtual void operator()(const InputType &input
                           , const InputPath &inputPath
-                          , const WordsRange &sourceRange
+                          , const Range &sourceRange
                           , Discriminative::Classifier &classifier) const = 0;
 
   // Overload to process target-dependent features, create features once for

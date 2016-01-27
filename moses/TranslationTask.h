@@ -21,6 +21,7 @@
 #ifdef WITH_THREADS
 #include <boost/thread/shared_mutex.hpp>
 #include <boost/thread/locks.hpp>
+#include <boost/thread/tss.hpp>
 #endif
 
 namespace Moses
@@ -44,9 +45,13 @@ class TranslationTask : public Moses::Task
     return *this;
   }
 protected:
-  AllOptions m_options;
+  AllOptions::ptr m_options;
   boost::weak_ptr<TranslationTask> m_self; // weak ptr to myself
   boost::shared_ptr<ContextScope> m_scope; // sores local info
+#ifdef WITH_THREADS
+  static boost::thread_specific_ptr<TranslationTask> s_current;
+#endif
+
   // pointer to ContextScope, which stores context-specific information
   TranslationTask() { } ;
   TranslationTask(boost::shared_ptr<Moses::InputType> const& source,
@@ -115,7 +120,7 @@ public:
   }
 
   boost::shared_ptr<BaseManager>
-  SetupManager(SearchAlgorithm algo = DefaultSearchAlgorithm);
+  SetupManager(SearchAlgorithm algo); //  = DefaultSearchAlgorithm);
 
 
   boost::shared_ptr<ContextScope> const&
@@ -130,17 +135,18 @@ public:
   void
   SetContextWindow(boost::shared_ptr<std::vector<std::string> > const& cw);
 
-  // SPTR<std::map<std::string, float> const> GetContextWeights() const;
-  // void SetContextWeights(std::string const& context_weights);
-  // void ReSetContextWeights(std::map<std::string, float> const& new_weights);
+  AllOptions::ptr const& options() const;
 
-  AllOptions const& options() const;
-
+  static TranslationTask const* current();
+  
 protected:
   boost::shared_ptr<Moses::InputType> m_source;
   boost::shared_ptr<Moses::IOWrapper> m_ioWrapper;
 
   void interpret_dlt();
+
+
+
 };
 
 

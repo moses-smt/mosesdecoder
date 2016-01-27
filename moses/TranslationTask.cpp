@@ -31,19 +31,6 @@ GetContextWindow() const
   return m_context;
 }
 
-// SPTR<std::map<std::string, float> const>
-// TranslationTask::GetContextWeights() const
-// {
-//   return m_context_weights;
-// }
-
-// void
-// TranslationTask
-// ::ReSetContextWeights(std::map<std::string, float> const& new_weights)
-// {
-//   m_context_weights.reset(new std::map<string,float>(new_weights));
-// }
-
 void
 TranslationTask::
 SetContextWindow(boost::shared_ptr<std::vector<std::string> > const& cw)
@@ -55,7 +42,6 @@ boost::shared_ptr<TranslationTask>
 TranslationTask
 ::create(boost::shared_ptr<InputType> const& source)
 {
-VERBOSE(3,"TranslationTask::create(boost::shared_ptr<InputType> const& source)" << std::endl);
   boost::shared_ptr<IOWrapper> nix;
   boost::shared_ptr<TranslationTask> ret(new TranslationTask(source, nix));
   ret->m_self = ret;
@@ -68,7 +54,6 @@ TranslationTask
 ::create(boost::shared_ptr<InputType> const& source,
          boost::shared_ptr<IOWrapper> const& ioWrapper)
 {
-VERBOSE(3,"TranslationTask::create(boost::shared_ptr<InputType> const& source, boost::shared_ptr<IOWrapper> const& ioWrapper)" << std::endl);
   boost::shared_ptr<TranslationTask> ret(new TranslationTask(source, ioWrapper));
   ret->m_self = ret;
   ret->m_scope.reset(new ContextScope);
@@ -81,7 +66,6 @@ TranslationTask
          boost::shared_ptr<IOWrapper> const& ioWrapper,
          boost::shared_ptr<ContextScope> const& scope)
 {
-VERBOSE(3,"TranslationTask::create(boost::shared_ptr<InputType> const& source, boost::shared_ptr<IOWrapper> const& ioWrapper,boost::shared_ptr<ContextScope> const& scope)" << std::endl);
   boost::shared_ptr<TranslationTask> ret(new TranslationTask(source, ioWrapper));
   ret->m_self  = ret;
   ret->m_scope = scope;
@@ -93,8 +77,7 @@ TranslationTask
                   boost::shared_ptr<IOWrapper> const& ioWrapper)
   : m_source(source) , m_ioWrapper(ioWrapper)
 {
-VERBOSE(3,"TranslationTask::TranslationTask(boost::shared_ptr<InputType> const& source, boost::shared_ptr<IOWrapper> const& ioWrapper)" << std::endl);
-  m_options = StaticData::Instance().options();
+  m_options = source->options();
 }
 
 TranslationTask::~TranslationTask()
@@ -106,8 +89,8 @@ TranslationTask
 ::SetupManager(SearchAlgorithm algo)
 {
   boost::shared_ptr<BaseManager> manager;
-  StaticData const& staticData = StaticData::Instance();
-  if (algo == DefaultSearchAlgorithm) algo = staticData.options().search.algo;
+  // StaticData const& staticData = StaticData::Instance();
+  // if (algo == DefaultSearchAlgorithm) algo = staticData.options().search.algo;
 
   if (!is_syntax(algo))
     manager.reset(new Manager(this->self())); // phrase-based
@@ -121,7 +104,7 @@ TranslationTask
 
   else if (algo == SyntaxS2T) {
     // new-style string-to-tree decoding (ask Phil Williams)
-    S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();
+    S2TParsingAlgorithm algorithm = m_options->syntax.s2t_parsing_algo;
     if (algorithm == RecursiveCYKPlus) {
       typedef Syntax::S2T::EagerParserCallback Callback;
       typedef Syntax::S2T::RecursiveCYKPlusParser<Callback> Parser;
@@ -149,7 +132,7 @@ TranslationTask
   return manager;
 }
 
-AllOptions const&
+AllOptions::ptr const&
 TranslationTask::
 options() const
 {
@@ -161,18 +144,10 @@ void
 TranslationTask::
 interpret_dlt()
 {
-  VERBOSE(1,"void TranslationTask::interpret_dlt() START" << std::endl);
   if (m_source->GetType() != SentenceInput) return;
   Sentence const& snt = static_cast<Sentence const&>(*m_source);
   typedef std::map<std::string,std::string> dltmap_t;
-
-  VERBOSE(1,"void TranslationTask::interpret_dlt() task:|" << this << "| scope:|" << m_scope << "| *m_source:|" << *m_source <<"|" << std::endl);
-
-  std::string id;
-
   BOOST_FOREACH(dltmap_t const& M, snt.GetDltMeta()) {
-
-//checking "type"
     dltmap_t::const_iterator i = M.find("type");
     if (i == M.end()) break;
 
@@ -235,20 +210,29 @@ interpret_dlt()
 */
 
   }
-  VERBOSE(1,"void TranslationTask::interpret_dlt() END" << std::endl);
 }
 
-
+TranslationTask const*
+TranslationTask::
+current() {
+#ifdef WITH_THREADS
+  return s_current.get();
+#else
+  return NULL;
+#endif
+}
 
 void TranslationTask::Run()
 {
-VERBOSE(3,"void TranslationTask::Run() START" << std::endl);
+#ifdef WITH_THREADS
+  s_current.reset(this);
+#endif
   UTIL_THROW_IF2(!m_source || !m_ioWrapper,
                  "Base Instances of TranslationTask must be initialized with"
                  << " input and iowrapper.");
 
   const size_t translationId = m_source->GetTranslationId();
-VERBOSE(3,"void TranslationTask::Run() START" << std::endl);
+
 
   // report wall time spent on translation
   Timer translationTime;
@@ -269,7 +253,7 @@ VERBOSE(3,"void TranslationTask::Run() START" << std::endl);
   Timer initTime;
   initTime.start();
 
-  boost::shared_ptr<BaseManager> manager = SetupManager();
+  boost::shared_ptr<BaseManager> manager = SetupManager(m_options->search.algo);
 
   VERBOSE(1, "Line " << translationId << ": Initialize search took "
           << initTime << " seconds total" << endl);
@@ -302,7 +286,7 @@ VERBOSE(3,"void TranslationTask::Run() START" << std::endl);
 
   // Output search graph in hypergraph format for Kenneth Heafield's
   // lazy hypergraph decoder; writes to stderr
-  if (options().output.SearchGraphHG.size()) {
+  if (m_options->output.SearchGraphHG.size()) {
     size_t transId = manager->GetSource().GetTranslationId();
     string fname = io->GetHypergraphOutputFileName(transId);
     manager->OutputSearchGraphAsHypergraph(fname, PRECISION);
@@ -339,6 +323,10 @@ VERBOSE(3,"void TranslationTask::Run() START" << std::endl);
   IFVERBOSE(2) {
     PrintUserTime("Sentence Decoding Time:");
   }
+
+#ifdef WITH_THREADS
+  s_current.release();
+#endif
 }
 
 }

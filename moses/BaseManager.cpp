@@ -19,12 +19,7 @@ namespace Moses
 
 BaseManager::BaseManager(ttasksptr const& ttask)
   : m_ttask(ttask), m_source(*(ttask->GetSource().get()))
-{
-VERBOSE(1,"BaseManager:BaseManager(ttasksptr const& ttask) before calling StaticData::InstanceNonConst().SetTask(ttask)" << std::endl);
-  StaticData::InstanceNonConst().SetTask(ttask);
-  ttasksptr current_ttask = StaticData::InstanceNonConst().GetTask();
-VERBOSE(1,"BaseManager:BaseManager(ttasksptr const& ttask) after calling StaticData::Instance().GetTask() pthread:|" << pthread_self() << "| ttask:|" << current_ttask << "| GetTask():|" << StaticData::InstanceNonConst().GetTask() << "|" << std::endl);
-}
+{ }
 
 const InputType&
 BaseManager::GetSource() const
@@ -103,10 +98,10 @@ void
 BaseManager::
 OutputSurface(std::ostream &out, Phrase const& phrase) const
 {
-  std::vector<FactorType> const& factor_order = options().output.factor_order;
+  std::vector<FactorType> const& factor_order = options()->output.factor_order;
 
-  bool markUnknown = options().unk.mark;
-  std::string const& fd = options().output.FactorDelimiter;
+  bool markUnknown = options()->unk.mark;
+  std::string const& fd = options()->output.factor_delimiter;
 
   size_t size = phrase.GetSize();
   for (size_t pos = 0 ; pos < size ; pos++) {
@@ -115,7 +110,7 @@ OutputSurface(std::ostream &out, Phrase const& phrase) const
 
     const Word &word = phrase.GetWord(pos);
     if(markUnknown && word.IsOOV()) {
-      out << options().unk.prefix;
+      out << options()->unk.prefix;
     }
 
     out << *factor;
@@ -127,7 +122,7 @@ OutputSurface(std::ostream &out, Phrase const& phrase) const
     }
 
     if(markUnknown && word.IsOOV()) {
-      out << options().unk.suffix;
+      out << options()->unk.suffix;
     }
 
     out << " ";
@@ -152,7 +147,7 @@ void BaseManager::WriteApplicationContext(std::ostream &out,
   }
 }
 
-AllOptions const&
+AllOptions::ptr const&
 BaseManager::
 options() const
 {

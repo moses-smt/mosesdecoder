@@ -55,8 +55,28 @@ else
     }
     local prefix  = [ shell_or_die "$(config) --prefix" ] ;
     local version = [ shell_or_die "$(config) --version" ] ;
-    echo "XMLRPC-C: USING VERSION $(version) FROM $(prefix)" ;
     
+    # Check the version is recent enough:
+    # If anyone knows a better way to do this, go ahead and fix this.
+    minversion = 1.32.0 ;
+    local cmd = "perl -e '@a = split(/\\./,@ARGV[0]); @b = split(/\\./,$ARGV[1]); ++$i while $i < $#a && $a[$i] == $b[$i]; die if $a[$i] < $b[$i];'" ;
+    local check = [ SHELL "$(cmd) $(version) $(minversion) 2>/dev/null" : exit-status ] ;
+    if $(check[2]) = 0 
+    {
+       echo "XMLRPC-C: USING VERSION $(version) FROM $(prefix)" ;
+    } 
+    else 
+    {
+      echo "\nCOMPILATION FAILED! YOUR VERSION OF THE XMLRPC-C LIBRARY IS TOO OLD.\n" ;
+      echo "Moses server functionality requires XMLRPC-C version $(minversion) or newer." ;
+      echo "The version provided in $(prefix) is $(version). " ;
+      echo "Install a suitable version if necessary and provide its location with\n " ;
+      echo "   --with-xmlrpc-c=/path/to/correct/version\n" ; 
+      echo "You can also use --no-xmlrpc-c to compile without the xmlrpc-c library, " ; 
+      echo "in which case Moses will work in batch mode, but can't be run as a server. " ; 
+      exit : 1 ;
+    }
+
     # now add stuff to the requirements
     local xmlrpc-cxxflags = [ shell_or_die "$(config) c++2 abyss-server --cflags" ] ;
     requirements += <define>HAVE_XMLRPC_C ;

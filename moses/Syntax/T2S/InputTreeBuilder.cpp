@@ -9,8 +9,8 @@ namespace Syntax
 namespace T2S
 {
 
-InputTreeBuilder::InputTreeBuilder()
-  : m_outputFactorOrder(StaticData::Instance().GetOutputFactorOrder())
+InputTreeBuilder::InputTreeBuilder(std::vector<FactorType> const& oFactors)
+  : m_outputFactorOrder(oFactors)
 {
 }
 

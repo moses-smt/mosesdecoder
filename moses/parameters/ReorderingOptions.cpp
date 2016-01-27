@@ -4,6 +4,14 @@
 namespace Moses {
 
   ReorderingOptions::
+  ReorderingOptions() 
+    : max_distortion(-1)
+    , monotone_at_punct(false)
+    , use_early_distortion_cost(false)
+  {}
+
+
+  ReorderingOptions::
   ReorderingOptions(Parameter const& param)
   {
     init(param);

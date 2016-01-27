@@ -119,7 +119,7 @@ Phrase::
 GetStringRep(vector<FactorType> const& factorsToPrint,
              AllOptions const* opts) const
 {
-  if (!opts) opts = &StaticData::Instance().options();
+  if (!opts) opts = StaticData::Instance().options().get();
   bool markUnk = opts->unk.mark;
   util::StringStream strme;
   for (size_t pos = 0 ; pos < GetSize() ; pos++) {

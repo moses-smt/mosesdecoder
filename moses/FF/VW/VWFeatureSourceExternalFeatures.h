@@ -24,7 +24,7 @@ public:
 
   void operator()(const InputType &input
                   , const InputPath &inputPath
-                  , const WordsRange &sourceRange
+                  , const Range &sourceRange
                   , Discriminative::Classifier &classifier) const {
     const Features& features = *m_tls.GetStored();
     for (size_t i = 0; i < features.size(); i++) {

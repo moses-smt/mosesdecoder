@@ -168,7 +168,7 @@ public:
     const std::vector<VWFeatureBase*>& targetFeatures =
       VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription());
 
-    const WordsRange &sourceRange = translationOptionList.Get(0)->GetSourceWordsRange();
+    const Range &sourceRange = translationOptionList.Get(0)->GetSourceWordsRange();
     const InputPath  &inputPath   = translationOptionList.Get(0)->GetInputPath();
 
     if (m_train) {
@@ -323,7 +323,7 @@ public:
     Phrase *target = new Phrase();
     target->CreateFromString(
       Output
-      , StaticData::Instance().GetOutputFactorOrder()
+      , StaticData::Instance().options().output.factor_order
       , tabbedSentence.GetColumns()[0]
       , NULL);
 

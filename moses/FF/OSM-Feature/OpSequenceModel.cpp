@@ -35,8 +35,9 @@ void OpSequenceModel :: readLanguageModel(const char *lmFile)
 }
 
 
-void OpSequenceModel::Load()
+void OpSequenceModel::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   readLanguageModel(m_lmPath.c_str());
 }
 

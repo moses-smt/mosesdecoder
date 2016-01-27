@@ -24,6 +24,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_Hypergraph_Output_h
 
 #include <ostream>
+#include "moses/parameters/AllOptions.h"
 
 /**
 * Manage the output of hypergraphs.
@@ -58,6 +59,9 @@ private:
 **/
 class ChartSearchGraphWriter
 {
+protected:
+  AllOptions::ptr m_options;
+  ChartSearchGraphWriter(AllOptions::ptr const& opts) : m_options(opts) { }
 public:
   virtual void WriteHeader(size_t winners, size_t losers) const = 0;
   virtual void WriteHypos(const ChartHypothesisCollection& hypos,
@@ -69,8 +73,9 @@ public:
 class ChartSearchGraphWriterMoses : public virtual ChartSearchGraphWriter
 {
 public:
-  ChartSearchGraphWriterMoses(std::ostream* out, size_t lineNumber) :
-    m_out(out), m_lineNumber(lineNumber) {}
+  ChartSearchGraphWriterMoses(AllOptions::ptr const& opts,
+                              std::ostream* out, size_t lineNumber)
+    : ChartSearchGraphWriter(opts), m_out(out), m_lineNumber(lineNumber) {}
   virtual void WriteHeader(size_t, size_t) const {
     /* do nothing */
   }
@@ -86,8 +91,8 @@ private:
 class ChartSearchGraphWriterHypergraph : public virtual ChartSearchGraphWriter
 {
 public:
-  ChartSearchGraphWriterHypergraph(std::ostream* out) :
-    m_out(out), m_nodeId(0) {}
+  ChartSearchGraphWriterHypergraph(AllOptions::ptr const& opts, std::ostream* out)
+    : ChartSearchGraphWriter(opts), m_out(out), m_nodeId(0) { }
   virtual void WriteHeader(size_t winners, size_t losers) const;
   virtual void WriteHypos(const ChartHypothesisCollection& hypos,
                           const std::map<unsigned, bool> &reachable) const;

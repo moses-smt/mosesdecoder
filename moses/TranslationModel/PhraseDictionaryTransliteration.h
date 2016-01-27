@@ -18,7 +18,7 @@ class PhraseDictionaryTransliteration : public PhraseDictionary
 public:
   PhraseDictionaryTransliteration(const std::string &line);
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   virtual void CleanUpAfterSentenceProcessing(const InputType& source);
 

@@ -36,7 +36,7 @@ class ConstrainedDecoding : public StatefulFeatureFunction
 public:
   ConstrainedDecoding(const std::string &line);
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   bool IsUseable(const FactorMask &mask) const {
     return true;

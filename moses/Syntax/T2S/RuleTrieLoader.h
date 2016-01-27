@@ -11,6 +11,7 @@
 
 namespace Moses
 {
+class AllOptions;
 namespace Syntax
 {
 namespace T2S
@@ -19,7 +20,8 @@ namespace T2S
 class RuleTrieLoader : public RuleTrieCreator
 {
 public:
-  bool Load(const std::vector<FactorType> &input,
+  bool Load(Moses::AllOptions const& opts,
+            const std::vector<FactorType> &input,
             const std::vector<FactorType> &output,
             const std::string &inFile,
             const RuleTableFF &,

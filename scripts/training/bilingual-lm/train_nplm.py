@@ -43,6 +43,9 @@ parser.add_argument("--mmap", dest="mmap", action="store_true",
     help="Use memory-mapped file (for lower memory consumption).")
 parser.add_argument("--extra-settings", dest="extra_settings",
   help="Extra settings to be passed to NPLM")
+parser.add_argument(
+    "--train-host", dest="train_host",
+    help="Execute nplm training on this host, via ssh")
 
 parser.set_defaults(
     working_dir="working",
@@ -123,7 +126,10 @@ def main(options):
 
     model_prefix = os.path.join(
         options.output_dir, options.output_model + ".model.nplm")
-    train_args = [
+    train_args = []
+    if options.train_host:
+      train_args = ["ssh", options.train_host]
+    train_args += [
         options.nplm_home + "/src/trainNeuralNetwork",
         "--train_file", in_file,
         "--num_epochs", str(options.epochs),

@@ -8,8 +8,9 @@
 namespace Moses
 {
 
-void TreeStructureFeature::Load()
+void TreeStructureFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
 
   // syntactic constraints can be hooked in here.
   m_constraints = NULL;

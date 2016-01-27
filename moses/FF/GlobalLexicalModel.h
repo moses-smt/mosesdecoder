@@ -57,7 +57,7 @@ private:
   std::vector<FactorType> m_inputFactorsVec, m_outputFactorsVec;
   std::string m_filePath;
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   float ScorePhrase( const TargetPhrase& targetPhrase ) const;
   float GetFromCacheOrScorePhrase( const TargetPhrase& targetPhrase ) const;

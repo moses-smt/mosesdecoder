@@ -33,12 +33,8 @@ public:
   //! Decode the sentence according to the specified search algorithm.
   virtual void Decode() = 0;
 
-  explicit Search(Manager& manager, const InputType &source);
+  explicit Search(Manager& manager);
   virtual ~Search() {}
-
-  // Factory method
-  static Search *CreateSearch(Manager& manager, const InputType &source, SearchAlgorithm searchAlgorithm,
-                              const TranslationOptionCollection &transOptColl);
 
 protected:
   Manager& m_manager;

@@ -10,9 +10,6 @@
 #include "util/exception.hh"
 #include "moses/Util.h"
 #include "util/random.hh"
-//#include <cassert>
-
-// #include "ug_bv_iter.h"
 
 namespace sapt
 {
@@ -88,7 +85,7 @@ namespace sapt
     ushort getOffset(int p) const;
     size_t sntCnt(int p=-1) const;
     size_t rawCnt(int p=-1) const;
-    ::uint64_t getPid(int p=-1) const; // get phrase id
+    uint64_t getPid(int p=-1) const; // get phrase id
 
     virtual bool extend(Token const& id);
     virtual bool extend(id_type id);

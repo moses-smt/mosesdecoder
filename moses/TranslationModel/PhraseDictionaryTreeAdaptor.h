@@ -46,7 +46,7 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary
 public:
   PhraseDictionaryTreeAdaptor(const std::string &line);
   virtual ~PhraseDictionaryTreeAdaptor();
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   // enable/disable caching
   // you enable caching if you request the target candidates for a source phrase multiple times

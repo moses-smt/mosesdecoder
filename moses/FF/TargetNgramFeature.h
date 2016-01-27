@@ -203,7 +203,7 @@ class TargetNgramFeature : public StatefulFeatureFunction
 public:
   TargetNgramFeature(const std::string &line);
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   bool IsUseable(const FactorMask &mask) const;
 

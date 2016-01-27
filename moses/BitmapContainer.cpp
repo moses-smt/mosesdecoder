@@ -139,7 +139,8 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
   }
 
   // Fetch the things we need for distortion cost computation.
-  int maxDistortion = StaticData::Instance().GetMaxDistortion();
+  // int maxDistortion = StaticData::Instance().GetMaxDistortion();
+  int maxDistortion  = itype.options()->reordering.max_distortion;
 
   if (maxDistortion == -1) {
     for (HypothesisSet::const_iterator iter = m_prevBitmapContainer.GetHypotheses().begin(); iter != m_prevBitmapContainer.GetHypotheses().end(); ++iter) {

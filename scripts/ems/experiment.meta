@@ -332,7 +332,7 @@ binarize
 	in: qlm
 	out: binlm
 	pass-unless: lm-binarizer
-	ignore-if: bilingual-lm
+	ignore-if: bilingual-lm nplm
 	rerun-on-change: lm
 	default-name: lm/binlm
 	template: $lm-binarizer IN OUT

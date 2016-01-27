@@ -116,8 +116,16 @@ function run_single_test () {
   #regtest_dir=$PWD/$(basename $regtest_file .tgz)
   cd ..
 
+  # test build with different configurations
+  echo "## test build with different configurations" >> $longlog
+  for configArgs in "${ALTERNATIVE_CONFIGURE_ARGS[@]}"
+  do
+   echo "building with args: $configArgs" >> $longlog
+   ./bjam clean -a $configArgs >> $longlog 2>&1 || warn "bjam clean failed, suspicious"
+  done
+
   echo "## ./bjam clean" >> $longlog
-  ./bjam clean $MCC_CONFIGURE_ARGS --with-regtest=$regtest_dir >> $longlog 2>&1 || warn "bjam clean failed, suspicious"
+  ./bjam clean -a $MCC_CONFIGURE_ARGS --with-regtest=$regtest_dir >> $longlog 2>&1 || warn "bjam clean failed, suspicious"
 
   echo "## ./bjam $MCC_CONFIGURE_ARGS" >> $longlog
   if [ -z "$err" ]; then
@@ -140,7 +148,7 @@ function run_single_test () {
       cd ..
       touch giza-pp.ok
     fi
-    ./bjam $MCC_CONFIGURE_ARGS --with-giza="$(pwd)/giza-pp/bin" || err="bjam with-giza"
+    ./bjam $MCC_CONFIGURE_ARGS" || err="bjam"
     srilm_dir=$(echo $MCC_CONFIGURE_ARGS | sed -r 's/.*--with-srilm=([^ ]+) .*/\1/')
     mach_type=$($srilm_dir/sbin/machine-type)
     mkdir -p "$WORKDIR/ems_workdir"
@@ -169,7 +177,7 @@ function run_single_test () {
   echo "## Status: $status" >> $longlog
 
   nicedate=$(date +"%Y%m%d-%H%M%S")
-  echo "$commit	$status	$configname	$ccversion	$nicedate" \
+  echo "$commit$status$configname$ccversion$nicedate" \
     >> "$LOGDIR/brief.log"
 
   if [ -z "$err" ]; then

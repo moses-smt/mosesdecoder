@@ -42,7 +42,7 @@ TrellisPath::TrellisPath(const Hypothesis *hypo)
 
 void TrellisPath::InitTotalScore()
 {
-  m_totalScore		= m_path[0]->GetWinningHypo()->GetFutureScore();
+  m_totalScore = m_path[0]->GetWinningHypo()->GetFutureScore();
 
   //calc score
   size_t sizePath = m_path.size();
@@ -50,7 +50,7 @@ void TrellisPath::InitTotalScore()
     const Hypothesis *hypo = m_path[pos];
     const Hypothesis *winningHypo = hypo->GetWinningHypo();
     if (hypo != winningHypo) {
-      m_totalScore = m_totalScore - winningHypo->GetFutureScore() + hypo->GetFutureScore();
+      m_totalScore += hypo->GetFutureScore() - winningHypo->GetFutureScore();
     }
   }
 }
@@ -164,27 +164,27 @@ void TrellisPath::CreateDeviantPaths(TrellisPathList &pathColl) const
   }
 }
 
-const boost::shared_ptr<ScoreComponentCollection> TrellisPath::GetScoreBreakdown() const
+boost::shared_ptr<ScoreComponentCollection> const
+TrellisPath::
+GetScoreBreakdown() const
 {
   if (!m_scoreBreakdown) {
-    float totalScore = m_path[0]->GetWinningHypo()->GetFutureScore(); // calculated for sanity check only
+    m_scoreBreakdown.reset(new ScoreComponentCollection());
+    m_scoreBreakdown->PlusEquals(m_path[0]->GetWinningHypo()->GetScoreBreakdown());
 
-    m_scoreBreakdown = boost::shared_ptr<ScoreComponentCollection>(new ScoreComponentCollection());
-    m_scoreBreakdown->PlusEquals(ScoreComponentCollection(m_path[0]->GetWinningHypo()->GetScoreBreakdown()));
-
-    //calc score
+    // adjust score
+    // I assume things are done this way on the assumption that most hypothesis edges
+    // are shared with the winning path, so that score adjustments are cheaper than
+    // recomputing the score from scratch. UG
     size_t sizePath = m_path.size();
     for (size_t pos = 0 ; pos < sizePath ; pos++) {
       const Hypothesis *hypo = m_path[pos];
       const Hypothesis *winningHypo = hypo->GetWinningHypo();
       if (hypo != winningHypo) {
-        totalScore = totalScore - winningHypo->GetFutureScore() + hypo->GetFutureScore();
         m_scoreBreakdown->MinusEquals(winningHypo->GetScoreBreakdown());
         m_scoreBreakdown->PlusEquals(hypo->GetScoreBreakdown());
       }
     }
-
-    assert(totalScore == m_totalScore);
   }
 
   return m_scoreBreakdown;
@@ -208,16 +208,14 @@ Phrase TrellisPath::GetTargetPhrase() const
 
 Phrase TrellisPath::GetSurfacePhrase() const
 {
-  const std::vector<FactorType> &outputFactor
-  = manager().options().output.factor_order;
-  // = StaticData::Instance().GetOutputFactorOrder();
+  std::vector<FactorType> const& oFactor = manager().options()->output.factor_order;
   Phrase targetPhrase = GetTargetPhrase();
   Phrase ret(targetPhrase.GetSize());
 
   for (size_t pos = 0 ; pos < targetPhrase.GetSize() ; ++pos) {
     Word &newWord = ret.AddWord();
-    for (size_t i = 0 ; i < outputFactor.size() ; i++) {
-      FactorType factorType = outputFactor[i];
+    for (size_t i = 0 ; i < oFactor.size() ; i++) {
+      FactorType factorType = oFactor[i];
       const Factor *factor = targetPhrase.GetFactor(pos, factorType);
       UTIL_THROW_IF2(factor == NULL,
                      "No factor " << factorType << " at position " << pos);

@@ -20,8 +20,9 @@ BilingualLM::BilingualLM(const std::string &line)
 
 }
 
-void BilingualLM::Load()
+void BilingualLM::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   ReadParameters();
   loadModel();
 }

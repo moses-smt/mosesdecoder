@@ -1,5 +1,7 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 #include "Server.h"
+#include <sstream>
+
 namespace MosesServer
 {
   Server::
@@ -14,6 +16,12 @@ namespace MosesServer
     m_registry.addMethod("updater",   m_updater);
     m_registry.addMethod("optimize",  m_optimizer);
     m_registry.addMethod("close_session", m_close_session);
+  }
+
+  Server::
+  ~Server()
+  {
+    unlink(m_pidfile.c_str());
   }
 
   int 
@@ -32,7 +40,12 @@ namespace MosesServer
        .keepaliveMaxConn(m_server_options.keepaliveMaxConn)
        .timeout(m_server_options.timeout)
        );
-    
+    std::ostringstream pidfilename;
+    pidfilename << "/tmp/moses-server." << m_server_options.port << ".pid";
+    m_pidfile = pidfilename.str();
+    std::ofstream pidfile(m_pidfile.c_str());
+    pidfile << getpid() << std::endl;
+    pidfile.close();
     XVERBOSE(1,"Listening on port " << m_server_options.port << std::endl);
     if (m_server_options.is_serial) 
       {

@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/TypeDef.h"
 
 #include "moses/StaticData.h"
+#include "moses/parameters/AllOptions.h"
 
 //#include "BackwardLMState.h"
 #include "moses/LM/Backward.h"
@@ -61,12 +62,14 @@ namespace Moses
 // Apparently some Boost versions use templates and are pretty strict about types matching.
 #define SLOPPY_CHECK_CLOSE(ref, value, tol) BOOST_CHECK_CLOSE(static_cast<double>(ref), static_cast<double>(value), static_cast<double>(tol));
 
+AllOptions::ptr DefaultOptions(new AllOptions);
+
 class BackwardLanguageModelTest
 {
 
 public:
   BackwardLanguageModelTest() :
-    dummyInput(new Sentence),
+    dummyInput(new Sentence(DefaultOptions)),
     backwardLM(
       static_cast< BackwardLanguageModel<lm::ngram::ProbingModel> * >(
         ConstructBackwardLM(
@@ -120,7 +123,6 @@ public:
         Input,
         outputFactorOrder,
         "the",
-        // StaticData::Instance().GetFactorDelimiter(),
         NULL);
 
       BOOST_CHECK( phrase.GetSize() == 1 );
@@ -147,7 +149,6 @@ public:
         Input,
         outputFactorOrder,
         "the licenses",
-        // StaticData::Instance().GetFactorDelimiter(),
         NULL);
 
       BOOST_CHECK( phrase.GetSize() == 2 );
@@ -176,7 +177,6 @@ public:
         Input,
         outputFactorOrder,
         "the licenses for",
-        // StaticData::Instance().GetFactorDelimiter(),
         NULL);
 
       BOOST_CHECK( phrase.GetSize() == 3 );
@@ -203,7 +203,6 @@ public:
         Input,
         outputFactorOrder,
         "the licenses for most",
-        // StaticData::Instance().GetFactorDelimiter(),
         NULL);
 
       BOOST_CHECK( phrase.GetSize() == 4 );
@@ -249,7 +248,6 @@ public:
         Input,
         outputFactorOrder,
         "the",
-        // StaticData::Instance().GetFactorDelimiter(),
         NULL);
 
       BOOST_CHECK( phrase.GetSize() == 1 );
@@ -277,7 +275,6 @@ public:
         Input,
         outputFactorOrder,
         "licenses",
-        // StaticData::Instance().GetFactorDelimiter(),
         NULL);
 
       BOOST_CHECK( phrase.GetSize() == 1 );
@@ -305,7 +302,6 @@ public:
         Input,
         outputFactorOrder,
         "for",
-        // StaticData::Instance().GetFactorDelimiter(),
         NULL);
 
       BOOST_CHECK( phrase.GetSize() == 1 );
@@ -333,7 +329,6 @@ public:
         Input,
         outputFactorOrder,
         "most",
-        // StaticData::Instance().GetFactorDelimiter(),
         NULL);
 
       BOOST_CHECK( phrase.GetSize() == 1 );

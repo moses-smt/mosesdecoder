@@ -206,12 +206,9 @@ if [ option.get "with-icu" : : "yes" ]
 #  requirements += <runtime-link>shared ;
 }
 
-if [ option.get "with-probing-pt" : : "yes" ]
-{
-  external-lib boost_serialization ;
-  requirements += <define>HAVE_PROBINGPT ;
-  requirements += <library>boost_serialization ;
-}
+# for probing pt
+external-lib boost_serialization ;
+requirements += <library>boost_serialization/<runtime-link>static ;
 
 if [ option.get "with-vw" ] {
   requirements += <define>HAVE_VW ;
@@ -250,7 +247,9 @@ if [ option.get "with-mm-extras" : : "yes" ]
   moses/TranslationModel/UG//bitext-find 
   moses/TranslationModel/UG//ptable-describe-features 
   moses/TranslationModel/UG//count-ptable-features 
+  moses/TranslationModel/UG//ptable-sigtest-filter 
   moses/TranslationModel/UG//ptable-lookup 
+  moses/TranslationModel/UG//ptable-lookup-corpus 
   moses/TranslationModel/UG//check-coverage 
   moses/TranslationModel/UG/mm//mtt-demo1 
   moses/TranslationModel/UG/mm//mtt-dump 

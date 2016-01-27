@@ -49,7 +49,7 @@ protected:
 //  SPTR<weightmap_t const> m_context_weights;
 //  SPTR<weightmap_map_t> m_lm_context_weights;
 public:
-
+  typedef boost::shared_ptr<ContextScope> ptr;
   template<typename T>
   boost::shared_ptr<void> const&
   set(void const* const key, boost::shared_ptr<T> const& val) {

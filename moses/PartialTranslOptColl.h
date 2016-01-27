@@ -64,7 +64,7 @@ public:
     return m_list.end();
   }
 
-  PartialTranslOptColl();
+  PartialTranslOptColl(size_t const maxSize);
 
   /** destructor, cleans out list */
   ~PartialTranslOptColl() {

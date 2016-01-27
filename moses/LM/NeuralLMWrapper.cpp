@@ -22,7 +22,7 @@ NeuralLMWrapper::~NeuralLMWrapper()
 }
 
 
-void NeuralLMWrapper::Load()
+void NeuralLMWrapper::Load(AllOptions::ptr const& opts)
 {
 
   // Set parameters required by ancestor classes

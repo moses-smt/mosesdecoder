@@ -51,7 +51,7 @@ bool treeFragmentsFlag = false;
 bool partsOfSpeechFlag = false;
 bool sourceSyntaxLabelsFlag = false;
 bool sourceSyntaxLabelCountsLHSFlag = false;
-bool targetPreferenceLabelsFlag = false;
+bool targetSyntacticPreferencesFlag = false;
 bool unpairedExtractFormatFlag = false;
 bool conditionOnTargetLhsFlag = false;
 bool wordAlignmentFlag = true;
@@ -83,11 +83,11 @@ std::vector<std::string> sourceLabelsByIndex;
 
 std::set<std::string> partsOfSpeechSet;
 
-boost::unordered_map<std::string,float> targetPreferenceLHSCounts;
-boost::unordered_map<std::string, boost::unordered_map<std::string,float>* > ruleTargetLHSAndTargetPreferenceLHSJointCounts;
-std::set<std::string> targetPreferenceLabelSet;
-std::map<std::string,size_t> targetPreferenceLabels;
-std::vector<std::string> targetPreferenceLabelsByIndex;
+boost::unordered_map<std::string,float> targetSyntacticPreferencesLHSCounts;
+boost::unordered_map<std::string, boost::unordered_map<std::string,float>* > ruleTargetLHSAndTargetSyntacticPreferencesLHSJointCounts;
+std::set<std::string> targetSyntacticPreferencesLabelSet;
+std::map<std::string,size_t> targetSyntacticPreferencesLabels;
+std::vector<std::string> targetSyntacticPreferencesLabelsByIndex;
 
 std::vector<float> orientationClassPriorsL2R(4,0); // mono swap dleft dright
 std::vector<float> orientationClassPriorsR2L(4,0); // mono swap dleft dright
@@ -150,7 +150,7 @@ int main(int argc, char* argv[])
               "[--TreeFragments] "
               "[--SourceLabels] "
               "[--SourceLabelCountsLHS] "
-              "[--TargetPreferenceLabels] "
+              "[--TargetSyntacticPreferences] "
               "[--UnpairedExtractFormat] "
               "[--ConditionOnTargetLHS] "
               "[--CrossedNonTerm]"
@@ -167,9 +167,9 @@ int main(int argc, char* argv[])
   std::string fileNameFunctionWords;
   std::string fileNameLeftHandSideSourceLabelCounts;
   std::string fileNameLeftHandSideTargetSourceLabelCounts;
-  std::string fileNameTargetPreferenceLabelSet;
-  std::string fileNameLeftHandSideTargetPreferenceLabelCounts;
-  std::string fileNameLeftHandSideRuleTargetTargetPreferenceLabelCounts;
+  std::string fileNameTargetSyntacticPreferencesLabelSet;
+  std::string fileNameLeftHandSideTargetSyntacticPreferencesLabelCounts;
+  std::string fileNameLeftHandSideRuleTargetTargetSyntacticPreferencesLabelCounts;
   std::string fileNamePhraseOrientationPriors;
   // All unknown args are passed to feature manager.
   std::vector<std::string> featureArgs;
@@ -205,14 +205,18 @@ int main(int argc, char* argv[])
       fileNameLeftHandSideSourceLabelCounts = std::string(fileNamePhraseTable) + ".src.lhs";
       fileNameLeftHandSideTargetSourceLabelCounts = std::string(fileNamePhraseTable) + ".tgt-src.lhs";
       std::cerr << "counting left-hand side source labels and writing them to files " << fileNameLeftHandSideSourceLabelCounts << " and " << fileNameLeftHandSideTargetSourceLabelCounts << std::endl;
-    } else if (strcmp(argv[i],"--TargetPreferenceLabels") == 0) {
-      targetPreferenceLabelsFlag = true;
-      std::cerr << "including target preference label information" << std::endl;
-      fileNameTargetPreferenceLabelSet = std::string(fileNamePhraseTable) + ".syntaxLabels.tgtpref";
-      std::cerr << "writing target preference label set to file " << fileNameTargetPreferenceLabelSet << std::endl;
-      fileNameLeftHandSideTargetPreferenceLabelCounts = std::string(fileNamePhraseTable) + ".tgtpref.lhs";
-      fileNameLeftHandSideRuleTargetTargetPreferenceLabelCounts = std::string(fileNamePhraseTable) + ".tgt-tgtpref.lhs";
-      std::cerr << "counting left-hand side target preference labels and writing them to files " << fileNameLeftHandSideTargetPreferenceLabelCounts << " and " << fileNameLeftHandSideRuleTargetTargetPreferenceLabelCounts << std::endl;
+    } else if (strcmp(argv[i],"--TargetSyntacticPreferences") == 0) {
+      targetSyntacticPreferencesFlag = true;
+      std::cerr << "including target syntactic preferences information" << std::endl;
+      fileNameTargetSyntacticPreferencesLabelSet = std::string(fileNamePhraseTable) + ".syntaxLabels.tgtpref";
+      std::cerr << "writing target syntactic preferences label set to file " << fileNameTargetSyntacticPreferencesLabelSet << std::endl;
+      fileNameLeftHandSideTargetSyntacticPreferencesLabelCounts = std::string(fileNamePhraseTable) + ".tgtpref.lhs";
+      fileNameLeftHandSideRuleTargetTargetSyntacticPreferencesLabelCounts = std::string(fileNamePhraseTable) + ".tgt-tgtpref.lhs";
+      std::cerr << "counting left-hand side target syntactic preferences labels and writing them to files "
+                << fileNameLeftHandSideTargetSyntacticPreferencesLabelCounts
+                << " and "
+                << fileNameLeftHandSideRuleTargetTargetSyntacticPreferencesLabelCounts
+                << std::endl;
     } else if (strcmp(argv[i],"--UnpairedExtractFormat") == 0) {
       unpairedExtractFormatFlag = true;
       std::cerr << "processing unpaired extract format" << std::endl;
@@ -508,13 +512,13 @@ int main(int argc, char* argv[])
     writeLabelSet( partsOfSpeechSet, fileNamePartsOfSpeechSet );
   }
 
-  // target preference labels
-  if (targetPreferenceLabelsFlag && !inverseFlag) {
-    writeLabelSet( targetPreferenceLabelSet, fileNameTargetPreferenceLabelSet );
-    writeLeftHandSideLabelCounts( targetPreferenceLHSCounts,
-                                  ruleTargetLHSAndTargetPreferenceLHSJointCounts,
-                                  fileNameLeftHandSideTargetPreferenceLabelCounts,
-                                  fileNameLeftHandSideRuleTargetTargetPreferenceLabelCounts );
+  // target syntactic preferences labels
+  if (targetSyntacticPreferencesFlag && !inverseFlag) {
+    writeLabelSet( targetSyntacticPreferencesLabelSet, fileNameTargetSyntacticPreferencesLabelSet );
+    writeLeftHandSideLabelCounts( targetSyntacticPreferencesLHSCounts,
+                                  ruleTargetLHSAndTargetSyntacticPreferencesLHSJointCounts,
+                                  fileNameLeftHandSideTargetSyntacticPreferencesLabelCounts,
+                                  fileNameLeftHandSideRuleTargetTargetSyntacticPreferencesLabelCounts );
   }
 }
 
@@ -874,7 +878,7 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
   }
 
   // syntax labels
-  if ((sourceSyntaxLabelsFlag || targetPreferenceLabelsFlag) && !inverseFlag) {
+  if ((sourceSyntaxLabelsFlag || targetSyntacticPreferencesFlag) && !inverseFlag) {
     unsigned nNTs = 1;
     for(size_t j=0; j<phraseSource->size()-1; ++j) {
       if (isNonTerminal(vcbS.getWord( phraseSource->at(j) )))
@@ -897,20 +901,20 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
                         << "}}";
       }
     }
-    // target preference labels
-    if (targetPreferenceLabelsFlag) {
-      std::string targetPreferenceLabelCounts;
-      targetPreferenceLabelCounts = phrasePair.CollectAllLabelsSeparateLHSAndRHS("TargetPreferences",
-                                    targetPreferenceLabelSet,
-                                    targetPreferenceLHSCounts,
-                                    ruleTargetLHSAndTargetPreferenceLHSJointCounts,
-                                    vcbT);
-      if ( !targetPreferenceLabelCounts.empty() ) {
+    // target syntactic preferences labels
+    if (targetSyntacticPreferencesFlag) {
+      std::string targetSyntacticPreferencesLabelCounts;
+      targetSyntacticPreferencesLabelCounts = phrasePair.CollectAllLabelsSeparateLHSAndRHS("TargetPreferences",
+                                              targetSyntacticPreferencesLabelSet,
+                                              targetSyntacticPreferencesLHSCounts,
+                                              ruleTargetLHSAndTargetSyntacticPreferencesLHSJointCounts,
+                                              vcbT);
+      if (!targetSyntacticPreferencesLabelCounts.empty()) {
         phraseTableFile << " {{TargetPreferences "
                         << nNTs // for convenience: number of non-terminal symbols in this rule (incl. left hand side NT)
                         << " "
                         << count // rule count
-                        << targetPreferenceLabelCounts
+                        << targetSyntacticPreferencesLabelCounts
                         << "}}";
       }
     }

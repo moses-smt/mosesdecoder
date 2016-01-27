@@ -209,8 +209,8 @@ public:
     return m_arcList;
   }
   const ScoreComponentCollection& GetScoreBreakdown() const {
-    if (!m_scoreBreakdown.get()) {
-      m_scoreBreakdown.reset(new ScoreComponentCollection());
+    if (!m_scoreBreakdown) {
+      m_scoreBreakdown.reset(new ScoreComponentCollection);
       m_scoreBreakdown->PlusEquals(m_currScoreBreakdown);
       if (m_prevHypo) {
         m_scoreBreakdown->PlusEquals(m_prevHypo->GetScoreBreakdown());
@@ -239,25 +239,10 @@ public:
     return m_transOpt;
   }
 
-  void
-  OutputAlignment(std::ostream &out, WordAlignmentSort sortOrder) const;
-
-  static void
-  OutputAlignment(std::ostream &out,
-                  const std::vector<const Hypothesis *> &edges,
-                  WordAlignmentSort waso);
-
-  static void
-  OutputAlignment(std::ostream &out, const Moses::AlignmentInfo &ai,
-                  size_t sourceOffset, size_t targetOffset,
-                  WordAlignmentSort waso);
+  size_t OutputAlignment(std::ostream &out, bool recursive) const;
 
   void OutputInput(std::ostream& os) const;
   static void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo);
-
-  void OutputBestSurface(std::ostream &out, const std::vector<Moses::FactorType> &outputFactorOrder, const ReportingOptions &options) const;
-  void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
-                     const ReportingOptions &options) const;
 
   // creates a map of TARGET positions which should be replaced by word using placeholder
   std::map<size_t, const Moses::Factor*> GetPlaceholders(const Moses::Hypothesis &hypo, Moses::FactorType placeholderFactor) const;

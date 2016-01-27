@@ -50,10 +50,9 @@ public:
 };
 
 SearchCubePruning::
-SearchCubePruning(Manager& manager, const InputType &source,
-                  const TranslationOptionCollection &transOptColl)
-  : Search(manager, source)
-  , m_hypoStackColl(source.GetSize() + 1)
+SearchCubePruning(Manager& manager, TranslationOptionCollection const& transOptColl)
+  : Search(manager)
+  , m_hypoStackColl(manager.GetSource().GetSize() + 1)
   , m_transOptColl(transOptColl)
 {
   std::vector < HypothesisStackCubePruning >::iterator iterStack;
@@ -88,13 +87,13 @@ void SearchCubePruning::Decode()
   firstStack.CleanupArcList();
   CreateForwardTodos(firstStack);
 
-  const size_t PopLimit = m_manager.options().cube.pop_limit;
+  const size_t PopLimit = m_manager.options()->cube.pop_limit;
   VERBOSE(2,"Cube Pruning pop limit is " << PopLimit << std::endl);
 
-  const size_t Diversity = m_manager.options().cube.diversity;
+  const size_t Diversity = m_manager.options()->cube.diversity;
   VERBOSE(2,"Cube Pruning diversity is " << Diversity << std::endl);
   VERBOSE(2,"Max Phrase length is "
-          << m_manager.options().search.max_phrase_length << std::endl);
+          << m_manager.options()->search.max_phrase_length << std::endl);
 
   // go through each stack
   size_t stackNo = 1;
@@ -128,8 +127,6 @@ void SearchCubePruning::Decode()
       BCQueue.push(bmIter->second);
       m_manager.GetSentenceStats().StopTimeManageCubes();
 
-      // old algorithm
-      // bmIter->second->EnsureMinStackHyps(PopLimit);
     }
 
     // main search loop, pop k best hyps
@@ -229,7 +226,7 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
       }
 
       size_t maxSize = size - startPos;
-      size_t maxSizePhrase = m_manager.options().search.max_phrase_length;
+      size_t maxSizePhrase = m_manager.options()->search.max_phrase_length;
       maxSize = std::min(maxSize, maxSizePhrase);
       for (endPos = startPos+1; endPos < startPos + maxSize; endPos++) {
         if (bitmap.GetValue(endPos))
@@ -270,7 +267,7 @@ SearchCubePruning::
 CheckDistortion(const Bitmap &hypoBitmap, const Range &range) const
 {
   // since we check for reordering limits, its good to have that limit handy
-  int maxDistortion = m_manager.options().reordering.max_distortion;
+  int maxDistortion = m_manager.options()->reordering.max_distortion;
   if (maxDistortion < 0) return true;
 
   // if there are reordering limits, make sure it is not violated

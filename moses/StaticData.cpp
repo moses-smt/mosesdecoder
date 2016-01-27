@@ -50,6 +50,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
 #endif
+#ifdef HAVE_CMPH
+#include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
+#endif
+#if defined HAVE_CMPH
+#include "moses/TranslationModel/CompactPT/LexicalReorderingTableCompact.h"
+#endif
 
 using namespace std;
 using namespace boost::algorithm;
@@ -61,18 +67,12 @@ bool g_mosesDebug = false;
 StaticData StaticData::s_instance;
 
 StaticData::StaticData()
-  : m_sourceStartPosMattersForRecombination(false)
+  : m_options(new AllOptions)
   , m_requireSortingAfterSourceContext(false)
-  , m_isAlwaysCreateDirectTranslationOption(false)
   , m_currentWeightSetting("default")
   , m_treeStructure(NULL)
 {
-  m_xmlBrackets.first="<";
-  m_xmlBrackets.second=">";
-
-  // memory pools
   Phrase::InitializeMemPool();
-  SetTask(); // to avoid having to call it in each and every int main()
 }
 
 StaticData::~StaticData()
@@ -124,82 +124,15 @@ StaticData
 
 }
 
-void
-StaticData
-::ini_input_options()
-{
-  const PARAM_VEC *params;
-
-  m_parameter->SetParameter(m_continuePartialTranslation,
-                            "continue-partial-translation", false );
-
-  // use of xml in input
-  // m_parameter->SetParameter<XmlInputType>(m_xmlInputType, "xml-input", XmlPassThrough);
-
-  // specify XML tags opening and closing brackets for XML option
-  params = m_parameter->GetParam("xml-brackets");
-  if (params && params->size()) {
-    std::vector<std::string> brackets = Tokenize(params->at(0));
-    if(brackets.size()!=2) {
-      cerr << "invalid xml-brackets value, must specify exactly 2 blank-delimited strings for XML tags opening and closing brackets" << endl;
-      exit(1);
-    }
-    m_xmlBrackets.first= brackets[0];
-    m_xmlBrackets.second=brackets[1];
-    VERBOSE(1,"XML tags opening and closing brackets for XML input are: "
-            << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl);
-  }
-
-  m_parameter->SetParameter(m_defaultNonTermOnlyForEmptyRange,
-                            "default-non-term-for-empty-range-only", false );
-
-}
-
 bool
 StaticData
 ::ini_output_options()
 {
-  const PARAM_VEC *params;
-
   // verbose level
   m_parameter->SetParameter(m_verboseLevel, "verbose", (size_t) 1);
-
-
-  m_parameter->SetParameter(m_includeLHSInSearchGraph,
-                            "include-lhs-in-search-graph", false );
-
   m_parameter->SetParameter<string>(m_outputUnknownsFile,
                                     "output-unknowns", "");
-
-  //Print Translation Options
-  m_parameter->SetParameter(m_printTranslationOptions,
-                            "print-translation-option", false );
-
-  //Print All Derivations
-  m_parameter->SetParameter(m_printAllDerivations ,
-                            "print-all-derivations", false );
-
-  m_parameter->SetParameter<long>(m_startTranslationId,
-                                  "start-translation-id", 0);
-
-  //lattice samples
   return true;
-}
-
-void
-StaticData::
-ini_compact_table_options()
-{
-  // Compact phrase table and reordering model
-  m_parameter->SetParameter(m_minphrMemory, "minphr-memory", false );
-  m_parameter->SetParameter(m_minlexrMemory, "minlexr-memory", false );
-}
-
-void
-StaticData::
-ini_lm_options()
-{
-  m_parameter->SetParameter<size_t>(m_lmcache_cleanup_threshold, "clean-lm-cache", 1);
 }
 
 // threads, timeouts, etc.
@@ -208,8 +141,6 @@ StaticData
 ::ini_performance_options()
 {
   const PARAM_VEC *params;
-  // m_parameter->SetParameter<size_t>(m_timeout_threshold, "time-out", -1);
-  // m_timeout = (GetTimeoutThreshold() == (size_t)-1) ? false : true;
 
   m_threadCount = 1;
   params = m_parameter->GetParam("threads");
@@ -243,100 +174,39 @@ StaticData
   return true;
 }
 
-void
-StaticData::
-ini_factor_maps()
-{
-  const PARAM_VEC *params;
-  // factor delimiter
-  m_parameter->SetParameter<string>(m_factorDelimiter, "factor-delimiter", "|");
-  if (m_factorDelimiter == "none") {
-    m_factorDelimiter = "";
-  }
-
-  // //input factors
-  // params = m_parameter->GetParam("input-factors");
-  // if (params) {
-  //   m_inputFactorOrder = Scan<FactorType>(*params);
-  // }
-  // if(m_inputFactorOrder.empty()) {
-  //   m_inputFactorOrder.push_back(0);
-  // }
-
-  //output factors
-  // params = m_parameter->GetParam("output-factors");
-  // if (params) {
-  //   m_outputFactorOrder = Scan<FactorType>(*params);
-  // }
-  // if(m_outputFactorOrder.empty()) {
-  //   // default. output factor 0
-  //   m_outputFactorOrder.push_back(0);
-  // }
-}
-
-void
-StaticData::
-ini_oov_options()
-{
-  // unknown word processing
-  // m_parameter->SetParameter(m_dropUnknown, "drop-unknown", false );
-  // m_parameter->SetParameter(m_markUnknown, "mark-unknown", false );
-  // m_parameter->SetParameter<string>(m_unknownWordPrefix, "unknown-word-prefix", "UNK" );
-  // m_parameter->SetParameter<string>(m_unknownWordSuffix, "unknown-word-suffix", "" );
-
-  //source word deletion
-  m_parameter->SetParameter(m_wordDeletionEnabled, "phrase-drop-allowed", false );
-
-  m_parameter->SetParameter(m_isAlwaysCreateDirectTranslationOption, "always-create-direct-transopt", false );
-}
-
-void
-StaticData::
-ini_zombie_options()
-{
-  //Disable discarding
-  m_parameter->SetParameter(m_disableDiscarding, "disable-discarding", false);
-
-}
-
 bool StaticData::LoadData(Parameter *parameter)
 {
   m_parameter = parameter;
 
   const PARAM_VEC *params;
 
-  m_options.init(*parameter);
+  m_options->init(*parameter);
+  if (is_syntax(m_options->search.algo))
+    m_options->syntax.LoadNonTerminals(*parameter, FactorCollection::Instance());
 
-  if (IsSyntax())
+  if (is_syntax(m_options->search.algo))
     LoadChartDecodingParameters();
 
   // ORDER HERE MATTERS, SO DON'T CHANGE IT UNLESS YOU KNOW WHAT YOU ARE DOING!
   // input, output
-  ini_factor_maps();
-  ini_input_options();
+
+  m_parameter->SetParameter<string>(m_factorDelimiter, "factor-delimiter", "|");
+  m_parameter->SetParameter<size_t>(m_lmcache_cleanup_threshold, "clean-lm-cache", 1);
+
   m_bookkeeping_options.init(*parameter);
   if (!ini_output_options()) return false;
 
   // threading etc.
   if (!ini_performance_options()) return false;
 
-  // model loading
-  ini_compact_table_options();
-
-  // search
-  ini_oov_options();
-
-  // S2T decoder
-  m_parameter->SetParameter(m_s2tParsingAlgorithm, "s2t-parsing-algorithm",
-                            RecursiveCYKPlus);
-
-
-  ini_zombie_options(); // probably dead, or maybe not
-
-  // m_parameter->SetParameter(m_placeHolderFactor, "placeholder-factor",
-  // NOT_FOUND);
-
   // FEATURE FUNCTION INITIALIZATION HAPPENS HERE ===============================
+
+  // set class-specific default parameters
+#if defined HAVE_CMPH
+  LexicalReorderingTableCompact::SetStaticDefaultParameters(*parameter);
+  PhraseDictionaryCompact::SetStaticDefaultParameters(*parameter);
+#endif
+
   initialize_features();
 
   if (m_parameter->GetParam("show-weights") == NULL)
@@ -439,8 +309,6 @@ void StaticData::LoadChartDecodingParameters()
   // source label overlap
   m_parameter->SetParameter(m_sourceLabelOverlap, "source-label-overlap",
                             SourceLabelOverlapAdd);
-  m_parameter->SetParameter(m_ruleLimit, "rule-limit",
-                            DEFAULT_MAX_TRANS_OPT_SIZE);
 
 }
 
@@ -555,7 +423,7 @@ LoadDecodeGraphsOld(const vector<string> &mappingVector,
     UTIL_THROW_IF2(decodeStep == NULL, "Null decode step");
     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
       DecodeGraph *decodeGraph;
-      if (IsSyntax()) {
+      if (is_syntax(m_options->search.algo)) {
         size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
         VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
         decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
@@ -623,7 +491,7 @@ void StaticData::LoadDecodeGraphsNew(const std::vector<std::string> &mappingVect
     UTIL_THROW_IF2(decodeStep == NULL, "Null decode step");
     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
       DecodeGraph *decodeGraph;
-      if (IsSyntax()) {
+      if (is_syntax(m_options->search.algo)) {
         size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
         VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
         decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
@@ -736,14 +604,13 @@ void StaticData::LoadFeatureFunctions()
       m_requireSortingAfterSourceContext = true;
     }
 
-    // if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
     if (dynamic_cast<PhraseDictionary*>(ff)) {
       doLoad = false;
     }
 
     if (doLoad) {
       VERBOSE(1, "Loading " << ff->GetScoreProducerDescription() << endl);
-      ff->Load();
+      ff->Load(options());
     }
   }
 
@@ -751,7 +618,7 @@ void StaticData::LoadFeatureFunctions()
   for (size_t i = 0; i < pts.size(); ++i) {
     PhraseDictionary *pt = pts[i];
     VERBOSE(1, "Loading " << pt->GetScoreProducerDescription() << endl);
-    pt->Load();
+    pt->Load(options());
   }
 
   CheckLEGACYPT();
@@ -970,7 +837,7 @@ StaticData
 
   // FIXME Does this make sense for F2S?  Perhaps it should be changed once
   // FIXME the pipeline uses RuleTable consistently.
-  SearchAlgorithm algo = m_options.search.algo;
+  SearchAlgorithm algo = m_options->search.algo;
   if (algo == SyntaxS2T || algo == SyntaxT2S ||
       algo == SyntaxT2S_SCFG || algo == SyntaxF2S) {
     // Automatically override PhraseDictionary{Memory,Scope3}.  This will

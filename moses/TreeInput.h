@@ -35,20 +35,19 @@ protected:
   std::vector<std::vector<NonTerminalSet> > m_sourceChart;
   std::vector<XMLParseOutput> m_labelledSpans;
 
-  void AddChartLabel(size_t startPos, size_t endPos, const std::string &label
-                     ,const std::vector<FactorType>& factorOrder);
-  void AddChartLabel(size_t startPos, size_t endPos, const Word &label
-                     ,const std::vector<FactorType>& factorOrder);
+  void AddChartLabel(size_t startPos, size_t endPos, const std::string &label);
+  void AddChartLabel(size_t startPos, size_t endPos, const Word &label);
+
   NonTerminalSet &GetLabelSet(size_t startPos, size_t endPos) {
     return m_sourceChart[startPos][endPos - startPos];
   }
 
   bool ProcessAndStripXMLTags(AllOptions const& opts, std::string &line,
                               std::vector<XMLParseOutput> &sourceLabels,
-                              std::vector<XmlOption*> &res);
+                              std::vector<XmlOption const*> &res);
 
 public:
-  TreeInput() : Sentence() { }
+  TreeInput(AllOptions::ptr const& opts) : Sentence(opts) { }
 
   InputTypeEnum GetType() const {
     return TreeInputType;
@@ -56,9 +55,7 @@ public:
 
   //! populate this InputType with data from in stream
   virtual int
-  Read(std::istream& in,
-       const std::vector<FactorType>& factorOrder,
-       AllOptions const& opts);
+  Read(std::istream& in);
 
   //! Output debugging info to stream out
   virtual void Print(std::ostream&) const;

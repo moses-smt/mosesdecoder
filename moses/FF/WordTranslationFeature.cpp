@@ -87,8 +87,9 @@ void WordTranslationFeature::SetParameter(const std::string& key, const std::str
   }
 }
 
-void WordTranslationFeature::Load()
+void WordTranslationFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   // load word list for restricted feature set
   if (m_filePathSource.empty()) {
     return;

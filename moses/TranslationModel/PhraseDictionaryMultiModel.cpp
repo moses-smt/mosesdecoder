@@ -79,8 +79,9 @@ PhraseDictionaryMultiModel::
 ~PhraseDictionaryMultiModel()
 { }
 
-void PhraseDictionaryMultiModel::Load()
+void PhraseDictionaryMultiModel::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   SetFeaturesToApply();
 
   for(size_t i = 0; i < m_numModels; ++i) {

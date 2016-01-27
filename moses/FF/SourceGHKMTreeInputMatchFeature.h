@@ -1,6 +1,7 @@
 #pragma once
 
 #include "StatelessFeatureFunction.h"
+#include "moses/parameters/AllOptions.h"
 
 namespace Moses
 {
@@ -40,6 +41,7 @@ public:
   void EvaluateWhenApplied(const ChartHypothesis &hypo,
                            ScoreComponentCollection* accumulator) const {};
 
+  void Load(AllOptions::ptr const& opts);
 };
 
 
