@@ -43,8 +43,9 @@ QueryEngine::QueryEngine(const char * filepath) : decoder(filepath)
   std::ifstream config ((basepath + "/config").c_str());
   //Check API version:
   getline(config, line);
-  if (atoi(line.c_str()) != API_VERSION) {
-    std::cerr << "The ProbingPT API has changed, please rebinarize your phrase tables." << std::endl;
+  int version = atoi(line.c_str());
+  if (version != API_VERSION) {
+    std::cerr << "The ProbingPT API has changed. " << version << "!=" << API_VERSION << " Please rebinarize your phrase tables." << std::endl;
     exit(EXIT_FAILURE);
   }
   //Get tablesize.
