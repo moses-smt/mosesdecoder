@@ -29,34 +29,34 @@ PREFIX ?= $(CWD)/opt
 BUILD_DIR = $(CWD)/opt/build/${URL}
 
 # you can also specify specific prefixes for different packages:
-XMLRPC_PREFIX  ?= ${PREFIX}
-CMPH_PREFIX    ?= ${PREFIX}
-BOOST_PREFIX   ?= ${PREFIX}
-IRSTLM5_PREFIX ?= ${PREFIX}/irstlm-5.80.08
-IRSTLM6_PREFIX ?= ${PREFIX}/irstlm-6.00
+XMLRPC_PREFIX ?= ${PREFIX}
+CMPH_PREFIX   ?= ${PREFIX}
+IRSTLM_PREFIX ?= ${PREFIX}
+BOOST_PREFIX  ?= ${PREFIX}
 
 # currently, the full enchilada means xmlrpc-c, cmph, irstlm, boost
-all: xmlrpc cmph irstlm5 irstlm6 boost
+all: xmlrpc cmph irstlm boost
 
 # we use bash and fail when pipelines fail
 SHELL = /bin/bash -e -o pipefail
 
+
+
 # evaluate prefixes now to avoid recursive evaluation problems later ...
-XMLRPC_PREFIX  := ${XMLRPC_PREFIX}
-CMPH_PREFIX    := ${CMPH_PREFIX}
-BOOST_PREFIX   := ${BOOST_PREFIX}
-IRSTLM5_PREFIX := ${IRSTLM5_PREFIX}
-IRSTLM6_PREFIX := ${IRSTLM6_PREFIX}
+XMLRPC_PREFIX := ${XMLRPC_PREFIX}
+CMPH_PREFIX   := ${CMPH_PREFIX}
+IRSTLM_PREFIX := ${IRSTLM_PREFIX}
+BOOST_PREFIX  := ${BOOST_PREFIX}
 
 # Code repositories:
 github      = https://github.com/
 sourceforge = http://downloads.sourceforge.net/project
 
 # functions for building software from sourceforge
-numproc := $(shell getconf _NPROCESSORS_ONLN)
+nproc := $(shell getconf _NPROCESSORS_ONLN)
 sfget  = mkdir -p '${TMP}' && cd '${TMP}' && wget -qO- ${URL} | tar xz 
 configure-make-install  = cd '$1' && ./configure --prefix='${PREFIX}' 
-configure-make-install += && make -j$(numproc) && make install
+configure-make-install += && make -j$(getconf _NPROCESSORS_ONLN) && make install
 
 # XMLRPC-C for moses server
 xmlrpc: URL=$(sourceforge)/xmlrpc-c/Xmlrpc-c%20Super%20Stable/1.33.17/xmlrpc-c-1.33.17.tgz
@@ -79,25 +79,15 @@ $(call safepath,${CMPH_PREFIX}/bin/cmph):
 	rm -rf ${TMP}
 
 # irstlm for irstlm
-irstlm5: URL=$(sourceforge)/irstlm/irstlm/irstlm-5.80/irstlm-5.80.08.tgz
-irstlm5: TMP=$(CWD)/build/irstlm5
-irstlm5: VERSION=$(basename $(notdir $(irstlm_url)))
-irstlm5: PREFIX=${IRSTLM5_PREFIX}
-irstlm5: | $(call safepath,$(IRSTLM5_PREFIX)/bin/build-lm.sh)
-$(call safepath,$(IRSTLM5_PREFIX)/bin/build-lm.sh):
+irstlm: URL=$(sourceforge)/irstlm/irstlm/irstlm-5.80/irstlm-5.80.08.tgz
+irstlm: TMP=$(CWD)/build/irstlm
+irstlm: VERSION=$(basename $(notdir $(irstlm_url)))
+irstlm: PREFIX=${IRSTLM_PREFIX}
+irstlm: | $(call safepath,$(IRSTLM_PREFIX)/bin/build-lm.sh)
+$(call safepath,$(IRSTLM_PREFIX)/bin/build-lm.sh):
 	$(sfget)
 	cd $$(find '${TMP}' -name trunk) && ./regenerate-makefiles.sh \
-	&& ./configure --prefix='${PREFIX}' && make -j${numproc} && make install -j$(numproc)
-	rm -rf ${TMP}
-
-irstlm6: URL=http://github.com/irstlm-team/irstlm
-irstlm6: TMP=$(CWD)/build/irstlm6
-irstlm6: PREFIX=${IRSTLM6_PREFIX}
-irstlm6: | $(call safepath,$(IRSTLM6_PREFIX)/bin/build-lm.sh)
-$(call safepath,$(IRSTLM6_PREFIX)/bin/build-lm.sh):
-	git clone ${URL} ${TMP}
-	cd ${TMP} && ./regenerate-makefiles.sh \
-	&& ./configure --prefix='${PREFIX}' && make -j${numproc} && make install -j$(numproc)
+	&& ./configure --prefix='${PREFIX}' && make -j${shell getconf _NPROCESSORS_ONLN} && make install -j$(shell getconf _NPROCESSORS_ONLN)
 	rm -rf ${TMP}
 
 # boost 
@@ -107,5 +97,5 @@ boost: PREFIX=${BOOST_PREFIX}
 boost: | $(call safepath,${BOOST_PREFIX}/include/boost)
 $(call safepath,${BOOST_PREFIX}/include/boost):
 	$(sfget)
-	cd '${TMP}/boost_1_59_0' && ./bootstrap.sh && ./b2 --prefix=${PREFIX} -j$(numproc) install
+	cd '${TMP}/boost_1_59_0' && ./bootstrap.sh && ./b2 --prefix=${PREFIX} -j$(shell getconf _NPROCESSORS_ONLN) install
 	rm -rf ${TMP}
