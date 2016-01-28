@@ -48,9 +48,9 @@ protected:
   AllOptions::ptr m_options;
   boost::weak_ptr<TranslationTask> m_self; // weak ptr to myself
   boost::shared_ptr<ContextScope> m_scope; // sores local info
-#ifdef WITH_THREADS
-  static boost::thread_specific_ptr<TranslationTask> s_current;
-#endif
+// #ifdef WITH_THREADS
+//   static boost::thread_specific_ptr<TranslationTask> s_current;
+// #endif
 
   // pointer to ContextScope, which stores context-specific information
   TranslationTask() { } ;

@@ -140,99 +140,54 @@ options() const
 }
 
 /// parse document-level translation info stored on the input
+// SUPER-DEPRECATED DO . NOT . USE . THis . EVER !
 void
 TranslationTask::
 interpret_dlt()
 {
+  typedef std::map<std::string,std::string> dltmap_t;
   if (m_source->GetType() != SentenceInput) return;
   Sentence const& snt = static_cast<Sentence const&>(*m_source);
-  typedef std::map<std::string,std::string> dltmap_t;
+  if (snt.GetDltMeta().size() == 0); return;
+
+  // DLT tags ALWAYS reset the scope!!!
+  SPTR<ContextScope> oldscope = m_scope;
+  m_scope.reset(new ContextScope);
+  
   BOOST_FOREACH(dltmap_t const& M, snt.GetDltMeta()) {
     dltmap_t::const_iterator i = M.find("type");
-    if (i == M.end()) break;
-
-
-//checking for "lm-context-weights" type;
-//if not defined, do nothing and and check for other types
-//else read the rest of parameters
-
-    if (i->second == "lm-context-weights"){
-      VERBOSE(1,"void TranslationTask::interpret_dlt() type:|" << i->second << "|" << std::endl);
-
-//checking "id"
-//if not pdefined, set id to the default value ("default")
-      dltmap_t::const_iterator i2;
-      i2 = M.find("id");
-      if (i2 == M.end()){
-        id="default";
-      }else{
-        id=i2->second;
-      }
-      VERBOSE(1,"void TranslationTask::interpret_dlt() id:|" << id << "|" << std::endl);
-
-//checking "weight-map"
-//if not defined, do nothing and exit the loop;
-//else set the corresponding weight for the speific LM
-      i2 = M.find("weight-map");
-      if (i2 == M.end()) break;
-      VERBOSE(1,"void TranslationTask::interpret_dlt() i2->first:|" << i2->first <<"| i2->second:|" << i2->second << "|" << std::endl);
-      VERBOSE(1,"void TranslationTask::interpret_dlt() before calling m_scope->SetLMContextWeights(i2->second,id)|" << std::endl);
-      m_scope->SetLMContextWeights(i2->second,id);
-      VERBOSE(1,"void TranslationTask::interpret_dlt() after calling m_scope->SetLMContextWeights(i2->second,id)|" << std::endl);
-      break;
-    } //end if (i->second == "lm-context-weights")
-
-//checking for "context-weights" type;
-//if not defined, do nothing and and check for other types
-//else read the rest of parameters
-    if (i->second == "context-weights"){
-      VERBOSE(1,"void TranslationTask::interpret_dlt() type:|" << i->second << "|" << std::endl);
-
-//checking "weight-map"
-//if not defined, do nothing and exit the loop;
-//else set the context weights
+    if (i == M.end()) continue;
+    if (i->second == "context-weights") {
       dltmap_t::const_iterator i2;
       i2 = M.find("weight-map");
       if (i2 == M.end()) break;
-      VERBOSE(1,"void TranslationTask::interpret_dlt() i2->first:|" << i2->first <<"| i2->second:|" << i2->second << "|" << std::endl);
-      VERBOSE(1,"void TranslationTask::interpret_dlt() before calling m_scope->SetContextWeights(i2->second)|" << std::endl);
       m_scope->SetContextWeights(i2->second);
-      VERBOSE(1,"void TranslationTask::interpret_dlt() after calling m_scope->SetContextWeights(i2->second)|" << std::endl);
-      break;
-    } //end if (i->second == "context-weights")
-
-/*
-     dltmap_t::const_iterator i = M.find("type");
-     if (i == M.end() || i->second != "adaptive-lm") continue;
-     dltmap_t::const_iterator j = M.find("context-weights");
-     if (j == M.end()) continue;
-     m_scope->SetContextWeights(j->second);
-*/
-
+    } 
   }
+  if (m_scope->GetContextWeights() == NULL)
+    m_scope->SetContextWeights(oldscope->GetContextWeights());
 }
 
-TranslationTask const*
-TranslationTask::
-current() {
-#ifdef WITH_THREADS
-  return s_current.get();
-#else
-  return NULL;
-#endif
-}
+// TranslationTask const*
+// TranslationTask::
+// current() {
+// #ifdef WITH_THREADS
+//   return s_current.get();
+// #else
+//   return NULL;
+// #endif
+// }
 
 void TranslationTask::Run()
 {
-#ifdef WITH_THREADS
-  s_current.reset(this);
-#endif
+// #ifdef WITH_THREADS
+//   s_current.reset(this);
+// #endif
   UTIL_THROW_IF2(!m_source || !m_ioWrapper,
                  "Base Instances of TranslationTask must be initialized with"
                  << " input and iowrapper.");
 
   const size_t translationId = m_source->GetTranslationId();
-
 
   // report wall time spent on translation
   Timer translationTime;
@@ -324,9 +279,9 @@ void TranslationTask::Run()
     PrintUserTime("Sentence Decoding Time:");
   }
 
-#ifdef WITH_THREADS
-  s_current.release();
-#endif
+// #ifdef WITH_THREADS
+//   s_current.release();
+// #endif
 }
 
 }
