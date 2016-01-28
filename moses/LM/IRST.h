@@ -32,6 +32,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "moses/Util.h"
 
+#ifdef WITH_THREADS
+#include <boost/thread.hpp>
+#endif
+
 //this is required because:
 //- IRSTLM package uses the namespace irstlm
 //- the compilation of "IRST.cpp" requires "using namespace irstlm", which is defined in any file of the IRSTLM package
@@ -57,6 +61,11 @@ class Phrase;
  */
 class LanguageModelIRST : public LanguageModelSingleFactor
 {
+public:
+  // the type weightmap_t  must be equal to the type topic_map_t of IRSTLM
+  typedef std::map<std::string,float> weightmap_t;
+  typedef std::map<std::string, weightmap_t > weightmap_map_t;
+
 protected:
   mutable std::vector<int> m_lmIdLookup;
   lmContainer* m_lmtb;
@@ -80,6 +89,12 @@ protected:
   int GetLmID( const std::string &str ) const;
   int GetLmID( const Factor *factor ) const;
 
+#ifdef WITH_THREAD
+  // mutable boost::shared_mutex m_lock;
+  boost::thread_specific_ptr<SPTR<weightmap_t> > t_context_weights;
+#else
+  boost::scoped_ptr<weightmap_t> t_context_weights; 
+#endif
 
 public:
   LanguageModelIRST(const std::string &line);
@@ -119,7 +134,13 @@ public:
     m_id = id;
   }
 
+  void print_lm_context_weights(std::string const& id);
+  void print_lm_context_weights();
+
+
 };
+
+
 
 }
 

@@ -25,10 +25,6 @@
 
 namespace Moses
 {
-//the type weightmap_t  must be equal to the type topic_map_t of IRSTLM
-typedef std::map<std::string,float> weightmap_t;
-typedef std::map<std::string, weightmap_t*> weightmap_map_t;
-//typedef std::map<std::string, SPTR<weightmap_t const> > weightmap_map_t;
 
 class ContextScope
 {
@@ -41,13 +37,7 @@ protected:
 #ifdef WITH_THREADS
   mutable boost::shared_mutex m_lock;
 #endif
-    SPTR< std::map<std::string,float> const> m_context_weights;
-    weightmap_t* m_normalized_context_weights;
-//    weightmap_t* m_context_weights;
-    weightmap_map_t* m_lm_context_weights;
-    weightmap_map_t* m_normalized_lm_context_weights;
-//  SPTR<weightmap_t const> m_context_weights;
-//  SPTR<weightmap_map_t> m_lm_context_weights;
+  SPTR< std::map<std::string,float> const> m_context_weights;
 public:
   typedef boost::shared_ptr<ContextScope> ptr;
   template<typename T>
@@ -65,7 +55,6 @@ public:
 #ifdef WITH_THREADS
     using boost::shared_mutex;
     using boost::upgrade_lock;
-    // T const* key = reinterpret_cast<T const*>(xkey);
     upgrade_lock<shared_mutex> lock(m_lock);
 #endif
     iter_t m = m_scratchpad.find(key);
@@ -89,12 +78,7 @@ public:
     return ret;
   }
 
-  ContextScope() {
-//    m_context_weights = NULL; 
-    m_normalized_context_weights = NULL; 
-    m_lm_context_weights = NULL; 
-    m_normalized_lm_context_weights = NULL; 
-  }
+  ContextScope() {}
 
   ContextScope(ContextScope const& other) {
 #ifdef WITH_THREADS
@@ -104,274 +88,55 @@ public:
     m_scratchpad = other.m_scratchpad;
   }
 
-/*
-  weightmap_t*
+  SPTR<std::map<std::string,float> const> const&
   GetContextWeights() {
     return m_context_weights;
   }
-*/
-  SPTR<std::map<std::string,float> const>
-  GetContextWeights() {
-    return m_context_weights;
-  }
-
-  weightmap_t*
-  GetNormalizedContextWeights() {
-    return m_normalized_context_weights;
-  }
-
-  weightmap_map_t*
-  GetLMContextWeights() {
-    return m_lm_context_weights;
-  }
-
-  weightmap_map_t*
-  GetNormalizedLMContextWeights() {
-    return m_normalized_lm_context_weights;
-  }
-
-
-  weightmap_t*
-  GetLMContextWeights(std::string id) {
-    if (!GetLMContextWeights()){
-      SPTR<std::map<std::string,float> const> map_sptr = GetContextWeights();
-      weightmap_t* map = (weightmap_t*) map_sptr.get();
-      return map;
-    }
-    weightmap_map_t::const_iterator it = (*m_lm_context_weights).find(id);
-    if (it != m_lm_context_weights->end()){
-      return it->second;
-    }
-    else{
-      SPTR<std::map<std::string,float> const> map_sptr = GetContextWeights();
-      weightmap_t* map = (weightmap_t*) map_sptr.get();
-      return map;
-    }
-  }
-
-  weightmap_t*
-  GetNormalizedLMContextWeights(std::string id) {
-    if (!GetNormalizedLMContextWeights()){
-      return GetNormalizedContextWeights();
-    }
-    weightmap_map_t::const_iterator it = (*m_normalized_lm_context_weights).find(id);
-    if (it != m_normalized_lm_context_weights->end()){
-      return it->second;
-    }
-    else{
-      return GetNormalizedContextWeights();
-    }
-  }
-
-
-  weightmap_t*
+  
+  std::map<std::string,float>*
   CreateWeightMap(std::string const& spec) {
-    weightmap_t* M = new weightmap_t;
-
-    std::vector<std::string> tokens = Tokenize(spec,":");
-    for (std::vector<std::string>::iterator it = tokens.begin();
-         it != tokens.end(); it++) {
-      std::vector<std::string> key_and_value = Tokenize(*it, ",");
-      (*M)[key_and_value[0]] = atof(key_and_value[1].c_str());
-    }
-    return M;
-  }
+   std::map<std::string,float>* M = new std::map<std::string,float>;
+   
+   std::vector<std::string> tokens = Tokenize(spec,":");
+   for (std::vector<std::string>::iterator it = tokens.begin();
+        it != tokens.end(); it++) {
+     std::vector<std::string> key_and_value = Tokenize(*it, ",");
+     (*M)[key_and_value[0]] = atof(key_and_value[1].c_str());
+   }
+   return M;
+ }
 
   bool
   SetContextWeights(std::string const& spec) {
-    VERBOSE(1,"bool SetContextWeights(std::string const& spec) spec:|" << spec << "|" << std::endl);
     if (m_context_weights) return false;
+    // You can set the weights only once during the lifetime of a
+    // ContextScope object!
 #ifdef WITH_THREADS
     boost::unique_lock<boost::shared_mutex> lock(m_lock);
 #endif
     m_context_weights.reset(CreateWeightMap(spec));
-
-    if (!m_normalized_context_weights){ //if m_normalized_context_weights does not exists, create it
-      m_normalized_context_weights = new weightmap_t;
-    }
-
-    weightmap_t* map = (weightmap_t*) m_context_weights.get();
-    NormalizeWeights(map, m_normalized_context_weights);
-
     return true;
   }
 
-/*
-  bool
-  SetContextWeights(std::string const& spec) {
-    if (m_context_weights) return false;
-    boost::unique_lock<boost::shared_mutex> lock(m_lock);
-    SPTR<weightmap_t> M(new weightmap_t);
-
-    // TO DO; This needs to be done with StringPiece.find, not Tokenize
-    // PRIORITY: low
-    std::vector<std::string> tokens = Tokenize(spec,":");
-    for (std::vector<std::string>::iterator it = tokens.begin();
-         it != tokens.end(); it++) {
-      std::vector<std::string> key_and_value = Tokenize(*it, ",");
-      (*M)[key_and_value[0]] = atof(key_and_value[1].c_str());
-    }
-    m_context_weights = M;
-    return true;
-  }
-*/
-
-  bool
-  SetContextWeights(weightmap_t const& w) {
-    VERBOSE(1,"bool SetContextWeights(SPTR<weightmap_t const> const& w)" << std::endl);
-    if (m_context_weights) return false;
-#ifdef WITH_THREADS
-    boost::unique_lock<boost::shared_mutex> lock(m_lock);
-#endif
-    m_context_weights.reset(&w);
-
-    if (!m_normalized_context_weights){ //if m_normalized_context_weights does not exists, create it
-      m_normalized_context_weights = new weightmap_t;
-    }
-
-    weightmap_t* map = (weightmap_t*) m_context_weights.get();
-    NormalizeWeights(map, m_normalized_context_weights);
-
-    return true;
-  }
+//   bool
+//   SetContextWeights(weightmap_t const& w) {
+//     if (m_context_weights) return false;
+// #ifdef WITH_THREADS
+//     boost::unique_lock<boost::shared_mutex> lock(m_lock);
+// #endif
+//     m_context_weights.reset(&w);
+//     return true;
+//   }
 
   bool
   SetContextWeights(SPTR<std::map<std::string,float> const> const& w) {
-    VERBOSE(1,"bool SetContextWeights(SPTR<std::map<std::string,float> const> const& w)" << std::endl);
     if (m_context_weights) return false;
 #ifdef WITH_THREADS
     boost::unique_lock<boost::shared_mutex> lock(m_lock);
 #endif
     m_context_weights = w;
-
-    if (!m_normalized_context_weights){ //if m_normalized_context_weights does not exists, create it
-      m_normalized_context_weights = new weightmap_t;
-    }
-
-    weightmap_t* map = (weightmap_t*) m_context_weights.get();
-    NormalizeWeights(map, m_normalized_context_weights);
-
     return true;
   }
-
-
-  bool
-  SetLMContextWeights(std::string const& spec, std::string const& id) {
-VERBOSE(1,"bool SetLMContextWeights(std::string const& spec, std::string const& id)" << std::endl);
-VERBOSE(1,"bool SetLMContextWeights(std::string const& spec, std::string const& id) spec:|" << spec << "| id:|" << id << "|" << std::endl);
-
-#ifdef WITH_THREADS
-    boost::unique_lock<boost::shared_mutex> lock(m_lock);
-#endif
-    if (!GetLMContextWeights()){ //if m_lm_context_weight does not exists, create it
-      m_lm_context_weights = new weightmap_map_t;
-    }
-    weightmap_map_t::const_iterator it = m_lm_context_weights->find(id);
-    if (it != m_lm_context_weights->end()){ //if the entry associate to "id" already exists, remove it (and then re-create it)
-      m_lm_context_weights->erase(id);
-    }
-    (*m_lm_context_weights)[id] = CreateWeightMap(spec);
-
-    if (!GetNormalizedLMContextWeights()){ //if m_normalized_lm_context_weight does not exists, create it
-      m_normalized_lm_context_weights = new weightmap_map_t;
-    }
-    it = m_normalized_lm_context_weights->find(id);
-    if (it != m_normalized_lm_context_weights->end()){ //if the entry associate to "id" already exists, remove it (and then re-create it as empty weightmap_t)
-      m_normalized_lm_context_weights->erase(id);
-    }
-    (*m_normalized_lm_context_weights)[id] = new weightmap_t;
-    NormalizeWeights((*m_lm_context_weights)[id], (*m_normalized_lm_context_weights)[id]);
-
-    return true;
-  }
-
-  void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map){
-    VERBOSE(1,"void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map)" << std::endl);
-    weightmap_t::const_iterator it;
-    float sum=0.0;
-    for (it=in_map->begin(); it != in_map->end(); it++){
-      sum += fabs(it->second);
-    }
-    VERBOSE(1,"void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map) sum:|" << sum << "|" << std::endl);
-    for (it=in_map->begin(); it != in_map->end(); it++){
-      VERBOSE(1,"void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map) it->first:|" << it->first << "|" << std::endl);
-      VERBOSE(1,"void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map) it->second:|" << it->second << "|" << std::endl);
-      VERBOSE(1,"void NormalizeWeights(weightmap_t* in_map, weightmap_t* out_map) it->second/tmp:|" << it->second/sum << "|" << std::endl);
-      (*out_map)[it->first] = (it->second)/sum;
-    }
-  }
-
-  void print_lm_context_weights(std::string const& id){
-    VERBOSE(1,"void print_lm_context_weights(std::string const& id) id:|" << id << "|" << std::endl);
-    weightmap_map_t::const_iterator it = m_lm_context_weights->find(id);
-    if (it != m_lm_context_weights->end()){ //check whether the entry associate to "id" already existsi
-      VERBOSE(1,"m_lm_context_weights id:|" << it->first << "|" << std::endl);
-      weightmap_t* _map = it->second;
-      if (_map){
-        VERBOSE(1,"m_lm_context_weights id:|" << it->first << "| _map:|" << (void*) (_map) << "| size:|" << (_map)->size() << "|" << std::endl);
-        weightmap_t::const_iterator it2;
-        for (it2 = (*_map).begin(); it2 != (*_map).end(); ++it2){
-          VERBOSE(1,"m_lm_context_weights id:|" << it->first << "| key:|" << it2->first << "| value:|" << it2->second << "|" << std::endl);
-        }
-      }else{
-        VERBOSE(1,"printing m_lm_context_weights for id:|" << it->first << "| EMPTY" << std::endl);
-      }
-
-    }else{
-      VERBOSE(1,"printing m_lm_context_weights does not containd the key id:|" << id << "|" << std::endl);
-    }
-  }
-
-
-  void print_context_weights(){
-    if (m_context_weights){
-      weightmap_t* map = (weightmap_t*) m_context_weights.get();
-      VERBOSE(1,"printing m_context_weights m_context_weights:|" << m_context_weights << "| size:|" << map->size() << "|" << std::endl);
-      weightmap_t::const_iterator it;
-      for (it = map->begin(); it != map->end(); ++it){
-        VERBOSE(1,"m_context_weights key:|" << it->first << "| value:|" << it->second << "|" << std::endl);
-      }
-    }else{
-      VERBOSE(1,"printing m_context_weights EMPTY" << std::endl);
-    }
-  }
-
-  void print_normalized_context_weights(){
-    if (m_normalized_context_weights){
-      VERBOSE(1,"printing m_normalized_context_weights m_normalized_context_weights:|" << m_normalized_context_weights << "| size:|" << m_normalized_context_weights->size() << "|" << std::endl);
-      weightmap_t::const_iterator it;
-      for (it = (*m_normalized_context_weights).begin(); it != (*m_normalized_context_weights).end(); ++it){
-        VERBOSE(1,"m_normalized_context_weights key:|" << it->first << "| value:|" << it->second << "|" << std::endl);
-      }
-    }else{
-      VERBOSE(1,"printing m_normalized_context_weights EMPTY" << std::endl);
-    }
-  }
-
-  void print_lm_context_weights(){
-    if (m_lm_context_weights){
-      VERBOSE(1,"printing m_lm_context_weights m_lm_context_weights:|" << (void*) m_lm_context_weights << "| size:|" << m_lm_context_weights->size() << "|" << std::endl);
-      weightmap_map_t::const_iterator it;
-      for (it = (*m_lm_context_weights).begin(); it != (*m_lm_context_weights).end(); ++it){
-        VERBOSE(1,"m_lm_context_weights id:|" << it->first << "|" << std::endl);
-        weightmap_t* _map = it->second;
-        if (_map){
-          VERBOSE(1,"m_lm_context_weights id:|" << it->first << "| _map:|" << (void*) (_map) << "| size:|" << (_map)->size() << "|" << std::endl);
-          weightmap_t::const_iterator it2;
-          for (it2 = (*_map).begin(); it2 != (*_map).end(); ++it2){
-            VERBOSE(1,"m_lm_context_weights id:|" << it->first << "| key:|" << it2->first << "| value:|" << it2->second << "|" << std::endl);
-          }
-        }else{
-	  VERBOSE(1,"printing m_lm_context_weights for id:|" << it->first << "| EMPTY" << std::endl);
-        }
-      }
-    }else{
-      VERBOSE(1,"printing m_lm_context_weights EMPTY" << std::endl);
-    }
-  }
-
-
-
 };
 
 };
