@@ -115,7 +115,7 @@ int main(int argc, char* argv[])
 	      boost::format fmt("%4d/%d/%d |%s| (%4.2f : %4.2f)"); 
 	      BOOST_FOREACH(PhrasePair<Token>& ppair, ppairs)
 		{
-		  if (ppair.joint * 100 < ppair.good1) break;
+		  // if (ppair.joint * 100 < ppair.good1) break;
 		  ppair.good2 = ppair.raw2 * float(ppair.good1)/ppair.raw1;
 		  ppair.good2 = max(ppair.good2, ppair.joint);
 
