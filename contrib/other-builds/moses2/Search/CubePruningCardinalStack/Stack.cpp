@@ -92,8 +92,16 @@ Stack::SortedHypos Stack::GetSortedAndPruneHypos(const Manager &mgr) const
 
   MemPool &pool = mgr.GetPool();
 
-  // divide hypos by [bitmap, last end pos]
+  // prune and sort
+  Hypotheses *allHypos = new (pool.Allocate<Hypotheses>()) Hypotheses(pool, GetHypoSize());
+  size_t i = 0;
   BOOST_FOREACH(const Hypothesis *hypo, m_coll) {
+	  (*allHypos)[i++] = hypo;
+  }
+  SortAndPruneHypos(mgr, *allHypos);
+
+  // divide hypos by [bitmap, last end pos]
+  BOOST_FOREACH(const Hypothesis *hypo, *allHypos) {
 	  HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
 
 	  Hypotheses *hypos;
@@ -109,14 +117,41 @@ Stack::SortedHypos Stack::GetSortedAndPruneHypos(const Manager &mgr) const
 	  hypos->push_back(hypo);
   }
 
-  // put into real return variable and sort
-  BOOST_FOREACH(SortedHypos::value_type &val, ret) {
-	  Hypotheses &hypos = *val.second;
-	  SortAndPruneHypos(mgr, hypos);
-  }
-
   return ret;
 }
+
+
+//Stack::SortedHypos Stack::GetSortedAndPruneHypos(const Manager &mgr) const
+//{
+//  SortedHypos ret;
+//
+//  MemPool &pool = mgr.GetPool();
+//
+//  // divide hypos by [bitmap, last end pos]
+//  BOOST_FOREACH(const Hypothesis *hypo, m_coll) {
+//	  HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
+//
+//	  Hypotheses *hypos;
+//	  SortedHypos::iterator iter;
+//	  iter = ret.find(key);
+//	  if (iter == ret.end()) {
+//		  hypos = new (pool.Allocate<Hypotheses>()) Hypotheses(pool);
+//		  ret[key] = hypos;
+//	  }
+//	  else {
+//		  hypos = iter->second;
+//	  }
+//	  hypos->push_back(hypo);
+//  }
+//
+//  // put into real return variable and sort
+//  BOOST_FOREACH(SortedHypos::value_type &val, ret) {
+//	  Hypotheses &hypos = *val.second;
+//	  SortAndPruneHypos(mgr, hypos);
+//  }
+//
+//  return ret;
+//}
 
 void Stack::SortAndPruneHypos(const Manager &mgr, Hypotheses &hypos) const
 {
