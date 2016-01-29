@@ -334,7 +334,7 @@ run_chart_decoder()
 
   const Moses::ChartHypothesis *hypo = manager.GetBestHypothesis();
   ostringstream out;
-  outputChartHypo(out,hypo);
+  if (hypo) outputChartHypo(out,hypo);
 
   m_target_string = out.str();
   m_retData["text"] = xmlrpc_c::value_string(m_target_string);
