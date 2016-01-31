@@ -384,11 +384,11 @@ sub read_config {
 	$resolve = 0;
 	foreach my $parameter (keys %CONFIG) {
 	    foreach (@{$CONFIG{$parameter}}) {
-		next unless /\$/;
+		next unless /\$[a-z\{]/i;
 		my $escaped = 0;
 		die ("BAD USE OF \$ IN VALUE used in parameter $parameter")
-		    if ! ( /^(.*)\$([a-z\-\:\d]+)(.*)$/i ||
-			  (/^(.*)\$\{([a-z\-\:\d]+)\}(.*)$/i && ($escaped = 1)));
+		    if ! ( /^(.*)\$([a-z][a-z\-\:\d]*)(.*)$/i ||
+			  (/^(.*)\$\{([a-z][a-z\-\:\d]*)\}(.*)$/i && ($escaped = 1)));
 		my ($pre,$substitution,$post) = ($1,$2,$3);
 		my $pattern = $substitution;
 		if ($substitution !~ /\:/) { # handle local variables
@@ -3601,8 +3601,8 @@ sub define_template {
     print "\tcmd is $cmd\n" if $VERBOSE;
 
     # replace variables
-    while ($cmd =~ /^([\S\s]*)\$(\??)\{([^\s\/\"\']+)\}([\S\s]*)$/ ||
-           $cmd =~ /^([\S\s]*)\$(\??)([^\s\/\"\']+)([\S\s]*)$/) {
+    while ($cmd =~ /^([\S\s]*)\$(\??)\{([a-z][^\s\/\"\']*)\}([\S\s]*)$/i ||
+           $cmd =~ /^([\S\s]*)\$(\??)([a-z][^\s\/\"\']*)([\S\s]*)$/i) {
 	my ($pre,$optional,$variable,$post) = ($1,$2,$3,$4);
 	my $value;
 	if ($optional eq '?') {
@@ -3616,7 +3616,8 @@ sub define_template {
     }
 
     # deal with pipelined commands
-    $cmd =~ s/\|(.*)(\<\s*\S+) /$2 \| $1 /g;
+    $cmd =~ s/\|(.*[^\\])(\<\s*\S+) /$2 \| $1 /g;
+    $cmd =~ s/\\\</\</g;
 
     # deal with gzipped input
     my $c = "";
