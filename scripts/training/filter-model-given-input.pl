@@ -234,7 +234,7 @@ while(my $line = <INI>) {
 			  $w = $args[1];
 			}
 			elsif ($args[0] eq "input-factor") {
-			  $source_factor = chomp($args[1]);
+			  $source_factor = $args[1];
 			}
 			elsif ($args[0] eq "output-factor") {
 			  #$t = chomp($args[1]);
