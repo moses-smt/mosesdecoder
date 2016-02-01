@@ -812,6 +812,7 @@ generation-prune
 	out: generation-table-pruned
 	rerun-on-change: TRAINING:prune-generation
 	pass-unless: TRAINING:prune-generation
+	ignore-unless: generation-factors
 	default-name: model/generation-table-pruned
 	final-model: yes
 	template: $TRAINING:prune-generation IN OUT
