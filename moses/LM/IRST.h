@@ -77,6 +77,8 @@ protected:
   int m_lmtb_dub;           //dictionary upperboud
   int m_lmtb_size;          //max ngram stored in the table
   bool m_weight_map_normalization;     //flag to use normalized LM context weights
+  bool m_use_context_weights; 
+  // => use context weights if no interpolation weights are given
   std::string m_id; // internal name to identify this instance of the LanguageModelIRST
 
   dictionary* d;
@@ -91,9 +93,9 @@ protected:
 
 #ifdef WITH_THREAD
   // mutable boost::shared_mutex m_lock;
-  boost::thread_specific_ptr<SPTR<weightmap_t> > t_context_weights;
+  boost::thread_specific_ptr<SPTR<weightmap_t> > t_interpolation_weights;
 #else
-  boost::scoped_ptr<weightmap_t> t_context_weights; 
+  boost::scoped_ptr<weightmap_t> t_interpolation_weights; 
 #endif
 
 public:
@@ -134,9 +136,8 @@ public:
     m_id = id;
   }
 
-  void print_lm_context_weights(std::string const& id);
-  void print_lm_context_weights();
-
+  // void print_lm_context_weights(std::string const& id);
+  // void print_lm_context_weights();
 
 };
 

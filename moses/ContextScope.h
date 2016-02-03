@@ -38,6 +38,7 @@ protected:
   mutable boost::shared_mutex m_lock;
 #endif
   SPTR< std::map<std::string,float> const> m_context_weights;
+  SPTR< std::map<std::string,float> const> m_lm_interpolation_weights;
 public:
   typedef boost::shared_ptr<ContextScope> ptr;
   template<typename T>
@@ -93,6 +94,11 @@ public:
     return m_context_weights;
   }
   
+  SPTR<std::map<std::string,float> const> const&
+  GetLmInterpolationWeights() {
+    return m_lm_interpolation_weights;
+  }
+
   std::map<std::string,float>*
   CreateWeightMap(std::string const& spec) {
    std::map<std::string,float>* M = new std::map<std::string,float>;
@@ -114,19 +120,25 @@ public:
 #ifdef WITH_THREADS
     boost::unique_lock<boost::shared_mutex> lock(m_lock);
 #endif
+    // may have changed while we waited for the lock
+    if (m_context_weights) return false;
     m_context_weights.reset(CreateWeightMap(spec));
     return true;
   }
 
-//   bool
-//   SetContextWeights(weightmap_t const& w) {
-//     if (m_context_weights) return false;
-// #ifdef WITH_THREADS
-//     boost::unique_lock<boost::shared_mutex> lock(m_lock);
-// #endif
-//     m_context_weights.reset(&w);
-//     return true;
-//   }
+  bool
+  SetLmInterpolationWeights(std::string const& spec) {
+    if (m_lm_interpolation_weights) return false;
+    // You can set the weights only once during the lifetime of a
+    // ContextScope object!
+#ifdef WITH_THREADS
+    boost::unique_lock<boost::shared_mutex> lock(m_lock);
+#endif
+    // may have changed while we waited for the lock
+    if (m_lm_interpolation_weights) return false;
+    m_lm_interpolation_weights.reset(CreateWeightMap(spec));
+    return true;
+  }
 
   bool
   SetContextWeights(SPTR<std::map<std::string,float> const> const& w) {
@@ -134,7 +146,21 @@ public:
 #ifdef WITH_THREADS
     boost::unique_lock<boost::shared_mutex> lock(m_lock);
 #endif
+    // may have changed while we waited for the lock
+    if (m_context_weights) return false;
     m_context_weights = w;
+    return true;
+  }
+
+  bool
+  SetLmInterpolationWeights(SPTR<std::map<std::string,float> const> const& w) {
+    if (m_lm_interpolation_weights) return false;
+#ifdef WITH_THREADS
+    boost::unique_lock<boost::shared_mutex> lock(m_lock);
+#endif
+    // may have changed while we waited for the lock
+    if (m_lm_interpolation_weights) return false;
+    m_lm_interpolation_weights = w;
     return true;
   }
 };

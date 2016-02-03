@@ -114,13 +114,28 @@ LanguageModelIRST::LanguageModelIRST(const std::string &line)
 
   m_id = "default";
   m_weight_map_normalization=false;
+  m_use_context_weights=false; 
   ReadParameters();
 
-  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_lmtb_dub:|" << m_lmtb_dub << "|" << std::endl);
-  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_filePath:|" << m_filePath << "|" << std::endl);
-  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_factorType:|" << m_factorType << "|" << std::endl);
-  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_id:|" << m_id << "|" << std::endl);
-  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_weight_map_normalization:|" << m_weight_map_normalization << "|" << std::endl);
+  VERBOSE(3, GetScoreProducerDescription() 
+	  << " LanguageModelIRST::LanguageModelIRST() m_lmtb_dub:|" 
+	  << m_lmtb_dub << "|" << std::endl);
+  VERBOSE(3, GetScoreProducerDescription() 
+	  << " LanguageModelIRST::LanguageModelIRST() m_filePath:|" 
+	  << m_filePath << "|" << std::endl);
+  VERBOSE(3, GetScoreProducerDescription() 
+	  << " LanguageModelIRST::LanguageModelIRST() m_factorType:|" 
+	  << m_factorType << "|" << std::endl);
+  VERBOSE(3, GetScoreProducerDescription() 
+	  << " LanguageModelIRST::LanguageModelIRST() m_id:|" 
+	  << m_id << "|" << std::endl);
+  VERBOSE(3, GetScoreProducerDescription() 
+	  << " LanguageModelIRST::LanguageModelIRST() m_weight_map_normalization:|" 
+	  << m_weight_map_normalization << "|" << std::endl);
+  VERBOSE(3, GetScoreProducerDescription() 
+	  << " LanguageModelIRST::LanguageModelIRST() "
+	  << "m_use_context_weights:|" << m_use_context_weights << "|" 
+	  << std::endl);
 }
 
 LanguageModelIRST::~LanguageModelIRST()
@@ -326,7 +341,7 @@ void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float 
   if ( !phrase.GetSize() ) return;
 
 
-  weightmap_t* weight_map = t_context_weights.get();
+  weightmap_t* weight_map = t_interpolation_weights.get();
 
   int _min = min(m_lmtb_size - 1, (int) phrase.GetSize());
 
@@ -402,7 +417,7 @@ FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FF
   char* msp = NULL;
   ngram_state_t msidx = 0;
   float score;
-  weightmap_t* weight_map = t_context_weights.get();
+  weightmap_t* weight_map = t_interpolation_weights.get();
   if (weight_map && weight_map->size()>0){
     score = m_lmtb->clprob(codes,m_lmtb_size,*weight_map,NULL,NULL,&msidx,&msp);
   }else{
@@ -513,12 +528,34 @@ void LanguageModelIRST::InitializeForInput(ttasksptr const& ttask)
 #endif
 
   SPTR<ContextScope> const& scope = ttask->GetScope();
-  SPTR<weightmap_t> context_weights = scope->get<weightmap_t>(this);
-  if (context_weights) {
-    t_context_weights.reset(new weightmap_t(*context_weights));
-    if (m_weight_map_normalization) 
-      Normalize(*t_context_weights);
+  bool normalize = m_weight_map_normalization;
+  bool using_context_weights=false;
+  SPTR<weightmap_t const> weights = scope->GetLmInterpolationWeights();
+  if (!weights && m_use_context_weights) {
+    normalize = true; // always normalize context weights
+    weights = scope->GetContextWeights();
+    using_context_weights = true;
   }
+  if (weights) {
+    t_interpolation_weights.reset(new weightmap_t(*weights));
+    if (normalize) 
+      Normalize(*t_interpolation_weights);
+    IFFEATUREVERBOSE(3) {
+      typedef weightmap_t::value_type item;
+      std::string weight_source = (using_context_weights ? "context weight" : 
+				   "lm interpolation weight");
+      BOOST_FOREACH(item const& e, *t_interpolation_weights) {
+	ostringstream buf;
+	weightmap_t::const_iterator m = weights->find(e.first);
+	if (m != weights->end()) buf << m->second; 
+	if (normalize) buf << " => " << (*t_interpolation_weights)[e.first];
+	TRACE_ERR("[" << GetScoreProducerDescription() << "] " 
+		  << weight_source << ": " << e.first << " => "
+		  << buf.str() << std::endl);
+      }
+    }
+  }
+
 }
 
 void LanguageModelIRST::CleanUpAfterSentenceProcessing(const InputType& source)
@@ -533,7 +570,7 @@ void LanguageModelIRST::CleanUpAfterSentenceProcessing(const InputType& source)
     TRACE_ERR( "reset caches\n");
     m_lmtb->reset_caches();
   }
-  t_context_weights.reset();
+  t_interpolation_weights.reset();
 }
 
 void LanguageModelIRST::SetParameter(const std::string& key, const std::string& value)
@@ -544,6 +581,8 @@ void LanguageModelIRST::SetParameter(const std::string& key, const std::string& 
     m_lmtb_dub = Scan<unsigned int>(value);
   } else if (key == "weight_normalization") {
     m_weight_map_normalization = Scan<bool>(value);
+  } else if (key == "consider-context-weights") {
+    m_use_context_weights = Scan<bool>(value);
   } else {
     LanguageModelSingleFactor::SetParameter(key, value);
   }

@@ -153,7 +153,9 @@ interpret_dlt()
   // DLT tags ALWAYS reset the scope!!!
   SPTR<ContextScope> oldscope = m_scope;
   m_scope.reset(new ContextScope);
-  
+
+#if 0  
+  // DO . NOT . USE . DLT BREAKS THINGS!
   BOOST_FOREACH(dltmap_t const& M, snt.GetDltMeta()) {
     dltmap_t::const_iterator i = M.find("type");
     if (i == M.end()) continue;
@@ -166,6 +168,7 @@ interpret_dlt()
   }
   if (m_scope->GetContextWeights() == NULL)
     m_scope->SetContextWeights(oldscope->GetContextWeights());
+#endif
 }
 
 // TranslationTask const*

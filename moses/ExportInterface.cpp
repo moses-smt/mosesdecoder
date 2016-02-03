@@ -207,6 +207,10 @@ batch_run()
   std::string context_weights;
   params.SetParameter(context_weights,"context-weights",string(""));
 
+  // ... or weights for documents/domains from config file / cmd. line
+  std::string lm_interpolation_weights;
+  params.SetParameter(lm_interpolation_weights,"lm-interpolation-weights",string(""));
+
   // ... or the surrounding context (--context-window ...)
   size_t size_t_max = std::numeric_limits<size_t>::max();
   bool use_context_window = ioWrapper->GetLookAhead() || ioWrapper->GetLookBack();
@@ -250,6 +254,9 @@ batch_run()
 
     if (context_weights != "" && !task->GetScope()->GetContextWeights())
       task->GetScope()->SetContextWeights(context_weights);
+    
+    if (lm_interpolation_weights != "" && !task->GetScope()->GetLmInterpolationWeights())
+      task->GetScope()->SetLmInterpolationWeights(lm_interpolation_weights);
 
     // Allow for (sentence-)context-specific processing prior to
     // decoding. This can be used, for example, for context-sensitive
