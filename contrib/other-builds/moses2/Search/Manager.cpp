@@ -13,6 +13,7 @@
 #include "CubePruningPerMiniStack/Search.h"
 #include "CubePruningPerBitmap/Search.h"
 #include "CubePruningCardinalStack/Search.h"
+#include "CubePruningBitmapStack/Search.h"
 #include "../System.h"
 #include "../TargetPhrases.h"
 #include "../TargetPhrase.h"
@@ -87,6 +88,9 @@ void Manager::Init()
 		break;
 	case CubePruningCardinalStack:
 		m_search = new NSCubePruningCardinalStack::Search(*this);
+		break;
+	case CubePruningBitmapStack:
+		m_search = new NSCubePruningBitmapStack::Search(*this);
 		break;
 	default:
 		cerr << "Unknown search algorithm" << endl;
