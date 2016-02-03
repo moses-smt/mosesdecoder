@@ -65,7 +65,7 @@ public:
 		  // bitmap and current endPos of hypos
   typedef boost::unordered_map<HypoCoverage, Hypotheses*> SortedHypos;
 
-  typedef std::pair<const Bitmap*, size_t> HypoCoverageInternal;
+  typedef const Bitmap* HypoCoverageInternal;
   typedef boost::unordered_map<HypoCoverageInternal, MiniStack*
 		  ,boost::hash<HypoCoverageInternal>
 		  ,std::equal_to<HypoCoverageInternal>

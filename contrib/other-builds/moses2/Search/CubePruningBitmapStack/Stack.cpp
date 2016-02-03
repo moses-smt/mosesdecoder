@@ -134,7 +134,7 @@ Stack::~Stack() {
 
 void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 {
-  HypoCoverageInternal key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
+  HypoCoverageInternal key = &hypo->GetBitmap();
   StackAdd added = GetMiniStack(key).Add(hypo);
 
   if (added.toBeDeleted) {
