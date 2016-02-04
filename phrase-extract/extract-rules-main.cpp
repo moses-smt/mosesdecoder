@@ -347,7 +347,7 @@ int main(int argc, char* argv[])
 
     SentenceAlignmentWithSyntax sentence
     (targetLabelCollection, sourceLabelCollection,
-     targetTopLabelCollection, sourceTopLabelCollection, 
+     targetTopLabelCollection, sourceTopLabelCollection,
      options.targetSyntax, options.sourceSyntax);
     //az: output src, tgt, and alingment line
     if (options.onlyOutputSpanInfo) {

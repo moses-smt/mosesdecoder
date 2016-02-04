@@ -415,9 +415,8 @@ void ExtractTask::extract(SentenceAlignment &sentence)
           }
 
         // cout << "doing if for ( " << minF << "-" << maxF << ", " << startE << "," << endE << ")\n";
-        if (!out_of_bounds || 
-            ( m_options.isSingleWordHeuristicFlag() && (endE==startE) && (minF==maxF) )) // extraction of single word phrases even if inconsistent wrt. word alignment
-        {
+        if (!out_of_bounds ||
+            ( m_options.isSingleWordHeuristicFlag() && (endE==startE) && (minF==maxF) )) { // extraction of single word phrases even if inconsistent wrt. word alignment
           // start point of source phrase may retreat over unaligned
           for(int startF=minF;
               ((startF>=0 &&
