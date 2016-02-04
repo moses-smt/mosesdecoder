@@ -93,7 +93,7 @@ void SuffixArray::Create(const string& fileName )
   CheckAllocation(m_sentenceLength != NULL, "m_sentenceLength");
   if (m_useDocument) {
     m_document = (INDEX*) calloc( sizeof( INDEX ), m_documentCount );
-    m_documentName = (INDEX*) calloc( sizeof( char ), m_documentCount );
+    m_documentName = (INDEX*) calloc( sizeof( INDEX ), m_documentCount );
     m_documentNameBuffer = (char*) calloc( sizeof( char ), m_documentNameLength );
     CheckAllocation(m_document != NULL, "m_document");
     CheckAllocation(m_documentName != NULL, "m_documentName");
