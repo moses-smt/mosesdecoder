@@ -122,13 +122,9 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr,
 	// check in cache
 	Cache::const_iterator iter = m_cache.find(keyStruct.second);
 	if (iter != m_cache.end()) {
-    	    cerr << "cache 1\n";
 		TargetPhrases *tps = iter->second;
 		return tps;
 	}
-        else {
-          cerr << "cache 0\n";
-        }
 
 	// query pt
 	TargetPhrases *tps = CreateTargetPhrase(pool, mgr.system, sourcePhrase, keyStruct.second);
