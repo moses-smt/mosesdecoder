@@ -304,6 +304,8 @@ void ProbingPT::CreateCache(System &system)
 		assert(tps);
 
 		m_cache[retStruct.second] = tps;
+
+		++lineCount;
 	}
 
 
