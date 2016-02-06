@@ -56,7 +56,7 @@ namespace sapt  {
       if (m_specs.find("j") != std::string::npos)
 	(*dest)[i++] = log(pp.joint);
       if (m_specs.find("r2") != std::string::npos)
-	(*dest)[++i] = log(pp.raw2);
+	(*dest)[i] = log(pp.raw2);
     }
   };
 } // namespace sapt

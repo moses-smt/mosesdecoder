@@ -51,6 +51,7 @@ private:
   bool gzOutput;
   std::string instanceWeightsFile; //weights for each sentence
   bool flexScoreFlag;
+  bool singleWordHeuristicFlag;
 
 public:
   std::vector<std::string> placeholders;
@@ -73,6 +74,7 @@ public:
     onlyOutputSpanInfo(false),
     gzOutput(false),
     flexScoreFlag(false),
+    singleWordHeuristicFlag(false),
     debug(false) {
   }
 
@@ -119,6 +121,9 @@ public:
   void initFlexScoreFlag(const bool initflexScoreFlag) {
     flexScoreFlag=initflexScoreFlag;
   }
+  void initSingleWordHeuristicFlag(const bool initSingleWordHeuristicFlag) {
+    singleWordHeuristicFlag = initSingleWordHeuristicFlag;
+  }
 
   // functions for getting values
   bool isAllModelsOutputFlag() const {
@@ -162,6 +167,9 @@ public:
   }
   bool isFlexScoreFlag() const {
     return flexScoreFlag;
+  }
+  bool isSingleWordHeuristicFlag() const {
+    return singleWordHeuristicFlag;
   }
 };
 

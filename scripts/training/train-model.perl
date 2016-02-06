@@ -321,7 +321,6 @@ my $_ADDITIONAL_INI; # allow multiple switches
 foreach (@_ADDITIONAL_INI) { $_ADDITIONAL_INI .= $_." "; }
 chop($_ADDITIONAL_INI) if $_ADDITIONAL_INI;
 
-$_HIERARCHICAL = 1 if $_SOURCE_SYNTAX || $_TARGET_SYNTAX;
 $_XML = 1 if $_SOURCE_SYNTAX || $_TARGET_SYNTAX;
 my $___FACTOR_DELIMITER = $_FACTOR_DELIMITER;
 $___FACTOR_DELIMITER = '|' unless ($_FACTOR_DELIMITER);
@@ -2325,7 +2324,7 @@ sub create_ini {
   # hierarchical model settings
   print INI "\n";
   if ($_HIERARCHICAL) {
-    print INI "[unknown-lhs]\n$_UNKNOWN_WORD_LABEL_FILE\n\n" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_LABEL_FILE);
+    print INI "[unknown-lhs]\n$_UNKNOWN_WORD_LABEL_FILE\n\n" if $_TARGET_SYNTAX && !$_TARGET_SYNTACTIC_PREFERENCES && defined($_UNKNOWN_WORD_LABEL_FILE);
     print INI "[cube-pruning-pop-limit]\n1000\n\n";
     print INI "[non-terminals]\nX\n\n";
     print INI "[search-algorithm]\n3\n\n";
@@ -2382,6 +2381,11 @@ sub create_ini {
     chomp($TOPLABEL);
     print INI " glue-label=$TOPLABEL\n";
   }
+  if ($_HIERARCHICAL && $_TARGET_SYNTAX && $_TARGET_SYNTACTIC_PREFERENCES && defined($_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE)) {
+    print INI "TargetPreferencesFeature label-set-file=$_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE";
+    print INI " unknown-word-labels-file=$_UNKNOWN_WORD_LABEL_FILE" if defined($_UNKNOWN_WORD_LABEL_FILE);
+    print INI "\n";
+  }
   print INI $feature_spec;
 
   print INI "\n# dense weights for feature functions\n";
@@ -2393,6 +2397,7 @@ sub create_ini {
   print INI "PhrasePenalty0= 0.2\n";
   print INI "SoftSourceSyntacticConstraintsFeature0= -0.2 -0.2 -0.2 0.1 0.1 0.1\n" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
   print INI "PhraseOrientationFeature0= 0.05 0.05 0.05 0.05 0.05 0.05\n" if $_PHRASE_ORIENTATION;
+  print INI "TargetPreferencesFeature0= 0.2 -0.2\n" if $_HIERARCHICAL && $_TARGET_SYNTAX && $_TARGET_SYNTACTIC_PREFERENCES && defined($_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE);
   print INI $weight_spec;
   close(INI);
 }
