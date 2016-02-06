@@ -155,6 +155,8 @@ int main(int argc, char* argv[])
       options.initOrientationFlag(true);
     } else if (strcmp(argv[i],"--FlexibilityScore") == 0) {
       options.initFlexScoreFlag(true);
+    } else if (strcmp(argv[i],"--SingleWordHeuristic") == 0) {
+      options.initSingleWordHeuristicFlag(true);
     } else if (strcmp(argv[i],"--NoTTable") == 0) {
       options.initTranslationFlag(false);
     } else if (strcmp(argv[i], "--IncludeSentenceId") == 0) {
@@ -413,18 +415,21 @@ void ExtractTask::extract(SentenceAlignment &sentence)
           }
 
         // cout << "doing if for ( " << minF << "-" << maxF << ", " << startE << "," << endE << ")\n";
-        if (!out_of_bounds) {
+        if (!out_of_bounds ||
+            ( m_options.isSingleWordHeuristicFlag() && (endE==startE) && (minF==maxF) )) { // extraction of single word phrases even if inconsistent wrt. word alignment
           // start point of source phrase may retreat over unaligned
           for(int startF=minF;
-              (startF>=0 &&
-               (relaxLimit || startF>maxF-m_options.maxPhraseLength) && // within length limit
-               (startF==minF || sentence.alignedCountS[startF]==0)); // unaligned
+              ((startF>=0 &&
+                (relaxLimit || startF>maxF-m_options.maxPhraseLength) && // within length limit
+                (startF==minF || sentence.alignedCountS[startF]==0)) && // unaligned
+               (!out_of_bounds || (startF==minF))); // if out of bounds, but single word heuristic: don't retreat over unaligned
               startF--)
             // end point of source phrase may advance over unaligned
             for(int endF=maxF;
-                (endF<countF &&
-                 (relaxLimit || endF<startF+m_options.maxPhraseLength) && // within length limit
-                 (endF==maxF || sentence.alignedCountS[endF]==0)); // unaligned
+                ((endF<countF &&
+                  (relaxLimit || endF<startF+m_options.maxPhraseLength) && // within length limit
+                  (endF==maxF || sentence.alignedCountS[endF]==0)) && // unaligned
+                 (!out_of_bounds || (endF==maxF))); // if out of bounds, but single word heuristic: don't advance over unaligned
                 endF++) { // at this point we have extracted a phrase
               if(buildExtraStructure) { // phrase || hier
                 if(endE-startE < m_options.maxPhraseLength && endF-startF < m_options.maxPhraseLength) { // within limit

@@ -18,8 +18,6 @@
  ***********************************************************************/
 
 #pragma once
-#ifndef SENTENCEALIGNMENTWITHSYNTAX_H_INCLUDED_
-#define SENTENCEALIGNMENTWITHSYNTAX_H_INCLUDED_
 
 #include <map>
 #include <set>
@@ -42,18 +40,20 @@ public:
   std::set<std::string> & m_sourceLabelCollection;
   std::map<std::string, int> & m_targetTopLabelCollection;
   std::map<std::string, int> & m_sourceTopLabelCollection;
-  const RuleExtractionOptions & m_options;
+  const bool m_targetSyntax, m_sourceSyntax;
 
   SentenceAlignmentWithSyntax(std::set<std::string> & tgtLabelColl,
                               std::set<std::string> & srcLabelColl,
                               std::map<std::string,int> & tgtTopLabelColl,
                               std::map<std::string,int> & srcTopLabelColl,
-                              const RuleExtractionOptions & options)
+                              bool targetSyntax,
+                              bool sourceSyntax)
     : m_targetLabelCollection(tgtLabelColl)
     , m_sourceLabelCollection(srcLabelColl)
     , m_targetTopLabelCollection(tgtTopLabelColl)
     , m_sourceTopLabelCollection(srcTopLabelColl)
-    , m_options(options) {
+    , m_targetSyntax(targetSyntax)
+    , m_sourceSyntax(sourceSyntax) {
   }
 
   virtual ~SentenceAlignmentWithSyntax() {}
@@ -67,4 +67,3 @@ public:
 
 }
 
-#endif
