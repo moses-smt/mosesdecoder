@@ -29,6 +29,7 @@ namespace sapt
     my_wcnt = other.wcnt();
     my_bcnt = other.bcnt();
     my_aln  = other.aln();
+    my_cnt2 = other.cnt2();
     indoc   = other.indoc;
     for (int i = 0; i <= LRModel::NONE; i++)
       {
