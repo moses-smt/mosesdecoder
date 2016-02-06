@@ -263,7 +263,6 @@ Parameter::Parameter()
   AddParam(misc_opts,"references", "Reference file(s) - used for bleu score feature");
   AddParam(misc_opts,"recover-input-path", "r", "(conf net/word lattice only) - recover input path corresponding to the best translation");
   AddParam(misc_opts,"link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
-  AddParam(misc_opts,"description", "Source language, target language, description");
   AddParam(misc_opts,"feature-name-overwrite", "Override feature name (NOT arguments). Eg. SRILM-->KENLM, PhraseDictionaryMemory-->PhraseDictionaryScope3");
 
   AddParam(misc_opts,"feature", "All the feature functions should be here");
