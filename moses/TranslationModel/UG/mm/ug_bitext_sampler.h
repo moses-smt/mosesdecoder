@@ -262,11 +262,14 @@ perform_random_sampling()
   sapt::tsa::ArrayEntry I(m_next);
   if (m_bias)
     {
-      m_stats->raw_cnt = 0;
+      // Ranked and random sampling use approximate raw count
+      // For consistency of results, biased sampling should also use the
+      // approximate count
+      // m_stats->raw_cnt = 0;
       while (I.next < m_stop)
         {
           m_root->readEntry(I.next,I);
-          ++m_stats->raw_cnt;
+          // ++m_stats->raw_cnt;
           m_bias_total += (*m_bias)[I.sid];
         }
       I.next = m_next;
