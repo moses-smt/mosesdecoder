@@ -29,8 +29,8 @@ void NMT::CalcSourceContext(const std::vector<std::string>& s) {
   SourceContext.reset(new Matrix());
   Matrix& sc = *boost::static_pointer_cast<Matrix>(SourceContext);
   encoder_->GetContext(words, sc);
-  debug1(sc);
   
+  // Put empty decoder state into state cache
   states_.emplace_back(new Matrix());
   Matrix& firstStates = *boost::static_pointer_cast<Matrix>(states_.back());
   decoder_->EmptyState(firstStates, sc, 1);
@@ -39,9 +39,12 @@ void NMT::CalcSourceContext(const std::vector<std::string>& s) {
 void ConstructPrevStates(Matrix& States,
                          const std::vector<WhichState>& inputStates,
                          const std::vector<boost::shared_ptr<mblas::BaseMatrix> >& states) {
-  //for(auto w: inputStates)
-  //  std::cerr << w.stateId << " " << w.rowNo << std::endl;
-  States.Resize(inputStates.size(), 1000);
+  for(auto w: inputStates) {
+    //std::cerr << w.stateId << " " << w.rowNo << std::endl;
+    Matrix& State = *boost::static_pointer_cast<Matrix>(states[w.stateId]);
+    // @TODO: do that with preallocation
+    AppendRow(States, State, w.rowNo);
+  }
 }
 
 void NMT::MakeStep(
@@ -55,18 +58,20 @@ void NMT::MakeStep(
   Matrix& sourceContext = *boost::static_pointer_cast<Matrix>(SourceContext);
   
   Matrix lastEmbeddings;
-  if(states_.size() > 0) {
+  if(states_.size() > 1) {
+    // Not the first word
     std::vector<size_t> lastIds(lastWords.size());
     std::transform(lastWords.begin(), lastWords.end(), lastIds.begin(),
                    [&](const std::string& w) { return (*trg_)[w]; });
     decoder_->Lookup(lastEmbeddings, lastIds);
   }
   else {
+    // Only empty state in state cache, so this is the first word
     decoder_->EmptyEmbedding(lastEmbeddings, lastWords.size());
   }
   
   Matrix nextEmbeddings;
-  std::vector<size_t> nextIds;
+  std::vector<size_t> nextIds(nextWords.size());
   std::transform(nextWords.begin(), nextWords.end(), nextIds.begin(),
                  [&](const std::string& w) { return (*trg_)[w]; });
   decoder_->Lookup(nextEmbeddings, nextIds);
@@ -79,6 +84,7 @@ void NMT::MakeStep(
   
   Matrix prevStates;
   ConstructPrevStates(prevStates, inputStates, states_);
+  //debug1(prevStates);
   
   Matrix probs;
   Matrix alignedSourceContext;
@@ -94,6 +100,8 @@ void NMT::MakeStep(
   Matrix& nextStates = *boost::static_pointer_cast<Matrix>(states_.back());
   decoder_->GetNextState(nextStates, nextEmbeddings,
                         prevStates, alignedSourceContext);
+  //std::cerr << "Next: " << std::endl;
+  //debug1(nextStates);
   
   size_t current = states_.size() - 1;
   for(size_t i = 0; i < nextStates.Rows(); ++i) {

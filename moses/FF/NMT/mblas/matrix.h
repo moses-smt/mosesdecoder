@@ -206,9 +206,20 @@ Matrix& Swap(Matrix& Out, Matrix& In) {
   size_t oRows = Out.Rows();
   size_t oCols = Out.Cols();
   
-  Out.Resize(iRows, iCols);
-  In.Resize(oRows, oCols);
+  Out.Reshape(iRows, iCols);
+  In.Reshape(oRows, oCols);
   In.GetVec().swap(Out.GetVec());
+  return Out;
+}
+
+Matrix& AppendRow(Matrix& Out, const Matrix& In, size_t i) {
+  size_t oldSize = Out.GetVec().size();
+  size_t addSize = In.Cols();
+  Out.Resize(Out.Rows() + 1, In.Cols());
+  Out.GetVec().resize(oldSize + addSize);
+  size_t start = In.Cols() * i;
+  size_t end   = In.Cols() * (i + 1);
+  lib::copy(In.begin() + start, In.begin() + end, Out.begin() + oldSize);
   return Out;
 }
 

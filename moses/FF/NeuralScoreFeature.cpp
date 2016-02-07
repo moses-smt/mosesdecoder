@@ -181,16 +181,17 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
                     allOutStates,
                     unks);
   
-    //size_t k = 0;
-    //for(Prefixes::iterator it = prefixes.begin(); it != prefixes.end(); it++) {
-    //  BOOST_FOREACH(SP& hyp, it->second) {
-    //    Payload& payload = hyp.second;
-    //    payload.logProb_ = allProbs[k];
-    //    payload.state_ = allOutStates[k];
-    //    payload.known_ = unks[k];
-    //    k++;
-    //  }
-    //}
+    size_t k = 0;
+    for(Prefixes::iterator it = prefixes.begin(); it != prefixes.end(); it++) {
+      BOOST_FOREACH(SP& hyp, it->second) {
+        Payload& payload = hyp.second;
+        payload.logProb_ = allProbs[k];
+        std::cerr << allWords[k] << " " << allProbs[k] << std::endl;
+        payload.state_ = allOutStates[k];
+        payload.known_ = unks[k];
+        k++;
+      }
+    }
   }
   std::cerr << "ok" << std::endl;
 }

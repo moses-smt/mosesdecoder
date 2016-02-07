@@ -13,9 +13,9 @@ using namespace mblas;
 
 int main() {  
   std::cerr << "Loading model" << std::endl;
-  Weights weights("../../nmt/en_de_1/search_model.npz");
-  Vocab svcb("src.vocab.txt");
-  Vocab tvcb("trg.vocab.txt");
+  Weights weights("/home/marcinj/Badania/nmt/en_de_1/search_model.npz");
+  Vocab svcb("/home/marcinj/Badania/nmt/en_de_1/src.vocab.txt");
+  Vocab tvcb("/home/marcinj/Badania/nmt/en_de_1/trg.vocab.txt");
   
   std::cerr << "Creating encoder" << std::endl;
   Encoder encoder(weights);
@@ -26,15 +26,27 @@ int main() {
                                 svcb["little"], svcb["test"], svcb["."],
                                 svcb["</s>"]};
   
+  //std::vector<std::vector<size_t>> tWordsBatch = {
+  //  {  tvcb["das"],     tvcb["dies"],    tvcb["das"]     },
+  //  {  tvcb["ist"],     tvcb["war"],     tvcb["ist"]     },
+  //  {  tvcb["ein"],     tvcb["ein"],     tvcb["eine"]    },
+  //  {  tvcb["kleiner"], tvcb["ganz"],    tvcb["kleine"]  },
+  //  {  tvcb["test"],    tvcb["kleiner"], tvcb["frau"]    },
+  //  {  tvcb["."],       tvcb["test"],    tvcb["."]       },
+  //  {  tvcb["</s>"],    tvcb["."],       tvcb["</s>"]    },
+  //  {  0,               tvcb["</s>"],    0               }
+  //};
+  
+  typedef std::vector<size_t> Batch;
+  size_t bs = 100;
   std::vector<std::vector<size_t>> tWordsBatch = {
-    {  tvcb["das"],     tvcb["dies"],    tvcb["das"]     },
-    {  tvcb["ist"],     tvcb["war"],     tvcb["ist"]     },
-    {  tvcb["ein"],     tvcb["ein"],     tvcb["eine"]    },
-    {  tvcb["kleiner"], tvcb["ganz"],    tvcb["kleine"]  },
-    {  tvcb["test"],    tvcb["kleiner"], tvcb["frau"]    },
-    {  tvcb["."],       tvcb["test"],    tvcb["."]       },
-    {  tvcb["</s>"],    tvcb["."],       tvcb["</s>"]    },
-    {  0,               tvcb["</s>"],    0               }
+    Batch(bs, tvcb["das"]),
+    Batch(bs, tvcb["ist"]),
+    Batch(bs, tvcb["ein"]),
+    Batch(bs, tvcb["kleiner"]),
+    Batch(bs, tvcb["test"]),
+    Batch(bs, tvcb["."]),
+    Batch(bs, tvcb["</s>"])
   };
     
   mblas::Matrix SourceContext;
@@ -61,14 +73,15 @@ int main() {
     decoder.GetProbs(Probs, AlignedSourceContext,
                      PrevState, PrevEmbedding, SourceContext);
     
-    for(size_t j = 0; j < 3; ++j) {
+    for(size_t j = 0; j < 1; ++j) {
       float p = Probs(j, w[j]);
-      std::cerr << j << " " << w[j] << " " << p << std::endl;
+      std::cerr << j << " " << w[j] << " " << log(p) << std::endl;
       sum += log(p);
     }
   
+    decoder.Lookup(Embedding, w);
     decoder.GetNextState(State, Embedding,
-                         w, PrevState, AlignedSourceContext);
+                         PrevState, AlignedSourceContext);
     //std::cerr << "State" << std::endl;
     //debug1(State);
     

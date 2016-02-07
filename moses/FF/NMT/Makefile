@@ -1,12 +1,12 @@
-all: libnmt-cuda.so
+all: libnmt-cuda.so test_cuda
 
 NMTCU = nmt.cu cnpy/cnpy.cpp 
 SOURCESCU = test.cu cnpy/cnpy.cpp 
 SOURCES = test.cpp cnpy/cnpy.cpp 
 HEADERS = decoder.h encoder.h model.h npz_converter.h vocab.h mblas/matrix.h mblas/base_matrix.h
 
-#test_cuda: $(SOURCESCU) $(HEADERS)
-#	nvcc -O3 -std=c++11 $(SOURCESCU) -lboost_system -lboost_timer -lcudart -lcublas -o $@
+test_cuda: $(SOURCESCU) $(HEADERS)
+	nvcc -O3 -std=c++11 $(SOURCESCU) -lboost_system -lboost_timer -lcudart -lcublas -o $@
 
 #test.cpp: test.cu
 #	cp $^ $@
@@ -28,7 +28,9 @@ HEADERS = decoder.h encoder.h model.h npz_converter.h vocab.h mblas/matrix.h mbl
 #	-march=native -lboost_system -lboost_timer -o $@ \
 
 libnmt-cuda.so: $(NMTCU) $(HEADERS)
-	nvcc -shared -O3 -std=c++11 $(NMTCU) -lboost_system -lboost_timer -lcudart -lcublas --compiler-options '-fPIC'  -o $@
+	nvcc -g -shared -O0 -std=c++11 $(NMTCU) \
+	-lboost_system -lboost_timer -lcudart -lcublas \
+	--compiler-options '-fPIC'  -o $@
 
 
 clean:

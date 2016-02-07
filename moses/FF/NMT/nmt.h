@@ -46,5 +46,6 @@ class NMT {
     boost::shared_ptr<Decoder> decoder_;
     
     boost::shared_ptr<mblas::BaseMatrix> SourceContext;
+    
     std::vector<boost::shared_ptr<mblas::BaseMatrix> > states_;
 };
