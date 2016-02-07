@@ -25,12 +25,12 @@ public:
     m_lastContext.push_back(m_lastWord);
   }
 
-  NeuralScoreState(WhichState state, const std::vector<std::string>& lastPhrase)
-  : m_state(state),
-    m_lastWord(lastPhrase.back()) {
-    for(size_t i = 0; i < lastPhrase.size(); i++)
-      m_lastContext.push_back(lastPhrase[i]);
-  }
+  //NeuralScoreState(WhichState state, const std::vector<std::string>& lastPhrase)
+  //: m_state(state),
+  //  m_lastWord(lastPhrase.back()) {
+  //  for(size_t i = 0; i < lastPhrase.size(); i++)
+  //    m_lastContext.push_back(lastPhrase[i]);
+  //}
 
   int Compare(const FFState& other) const
   {
@@ -186,7 +186,7 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
       BOOST_FOREACH(SP& hyp, it->second) {
         Payload& payload = hyp.second;
         payload.logProb_ = allProbs[k];
-        std::cerr << allWords[k] << " " << allProbs[k] << std::endl;
+        //std::cerr << allWords[k] << " " << allProbs[k] << std::endl;
         payload.state_ = allOutStates[k];
         payload.known_ = unks[k];
         k++;
@@ -261,67 +261,46 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const
 {
-  //NeuralScoreState* prevState = static_cast<NeuralScoreState*>(
-  //                                const_cast<FFState*>(prev_state));
-  
   std::vector<float> newScores(m_numScoreComponents, 0);
   
-  //PyObject* nextState = NULL;
-  //const TargetPhrase& tp = cur_hypo.GetCurrTargetPhrase();
-  //Prefix phrase;
-  //
-  //for(size_t i = 0; i < tp.GetSize(); ++i) {
-  //  std::string word = tp.GetWord(i).GetString(m_factor).as_string();
-  //  phrase.push_back(word);
-  //}
-  //if(cur_hypo.IsSourceCompleted()) {
-  //  phrase.push_back("</s>");
-  //}
-  //
-  //int prevId = cur_hypo.GetPrevHypo()->GetId();
-  //
-  //if(!m_preCalc) {
-  //  double prob = 0;
-  //  m_wrapper->GetProb(phrase, context,
-  //                     prevState->GetLastWord(),
-  //                     prevState->GetState(),
-  //                     prob, nextState);
-  //  prevState = new NeuralScoreState(context, phrase, nextState);
-  //  nextState = NULL;
-  //
-  //  newScores[0] = prob;
-  //  newScores[1] = 0;
-  //}
-  //else {
-  //  double prob = 0;
-  //  size_t unks = 0;
-  //  PyObject* state = 0;
-  //  Prefix prefix;
-  //  for(size_t i = 0; i < phrase.size(); i++) {
-  //    prefix.push_back(phrase[i]);
-  //    //std::cerr << "p3:" << const_cast<PrefsByLength&>(m_pbl)[prefix.size() - 1][prefix].count(prevId) << std::endl;
-  //    if(!const_cast<PrefsByLength&>(m_pbl)[prefix.size() - 1][prefix].count(prevId)) {
-  //      BOOST_FOREACH(std::string s, prefix) {
-  //        std::cerr << s << " ";
-  //      }
-  //      std::cerr << std::endl;
-  //    }
-  //
-  //    Payload& payload = const_cast<PrefsByLength&>(m_pbl)[prefix.size() - 1][prefix][prevId];
-  //    state = payload.state_;
-  //    unks += payload.known_ ? 0 : 1;
-  //    prob += payload.logProb_;
-  //  }
-  //  prevState = new NeuralScoreState(context, phrase, state);
-  //  nextState = NULL;
-  //  newScores[0] = prob;
-  //  newScores[1] = unks;
-  //}
+  const TargetPhrase& tp = cur_hypo.GetCurrTargetPhrase();
+  Prefix phrase;
   
+  for(size_t i = 0; i < tp.GetSize(); ++i) {
+    std::string word = tp.GetWord(i).GetString(m_factor).as_string();
+    phrase.push_back(word);
+  }
+  if(cur_hypo.IsSourceCompleted()) {
+    phrase.push_back("</s>");
+  }
+  
+  int prevId = cur_hypo.GetPrevHypo()->GetId();
+  double prob = 0;
+  size_t unks = 0;
+  WhichState state(0, 0);
+  Prefix prefix;
+  for(size_t i = 0; i < phrase.size(); i++) {
+    prefix.push_back(phrase[i]);
+    //std::cerr << "p3:" << const_cast<PrefsByLength&>(m_pbl)[prefix.size() - 1][prefix].count(prevId) << std::endl;
+    if(!const_cast<PrefsByLength&>(m_pbl)[prefix.size() - 1][prefix].count(prevId)) {
+      BOOST_FOREACH(std::string s, prefix) {
+        std::cerr << s << " ";
+      }
+      std::cerr << std::endl;
+    }
+
+    Payload& payload = const_cast<PrefsByLength&>(m_pbl)[prefix.size() - 1][prefix][prevId];
+    state = payload.state_;
+    unks += payload.known_ ? 0 : 1;
+    prob += payload.logProb_;
+  }
+  NeuralScoreState* prevState = new NeuralScoreState(state, prefix.back());
+  newScores[0] = prob;
+  newScores[1] = unks;
+
   accumulator->PlusEquals(this, newScores);
   
-  //prevState->LimitLength(m_stateLength);
-  NeuralScoreState* prevState = new NeuralScoreState(WhichState(0,0), "");
+  prevState->LimitLength(m_stateLength);
   return prevState;
 }
 

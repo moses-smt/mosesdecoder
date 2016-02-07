@@ -38,7 +38,7 @@ int main() {
   //};
   
   typedef std::vector<size_t> Batch;
-  size_t bs = 100;
+  size_t bs = 50;
   std::vector<std::vector<size_t>> tWordsBatch = {
     Batch(bs, tvcb["das"]),
     Batch(bs, tvcb["ist"]),
