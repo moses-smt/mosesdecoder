@@ -16,7 +16,9 @@ using namespace std;
 namespace Moses2
 {
 
-InputPaths::~InputPaths() {
+InputPaths::~InputPaths()
+{
+	delete m_matrix;
 }
 
 void InputPaths::Init(const PhraseImpl &input, const Manager &mgr)
@@ -25,6 +27,9 @@ void InputPaths::Init(const PhraseImpl &input, const Manager &mgr)
   size_t numPt = mgr.system.mappings.size();
   size_t size = input.GetSize();
   size_t maxLength = min(size, mgr.system.maxPhraseLength);
+
+  m_matrix = new SquareMatrix<InputPath*>(size, maxLength);
+  m_matrix->Init(NULL);
 
   // create blank path for initial hypo
   Range range(NOT_FOUND, NOT_FOUND);
@@ -49,6 +54,8 @@ void InputPaths::Init(const PhraseImpl &input, const Manager &mgr)
 	  m_inputPaths.push_back(path);
 
 	  prefixPath = m_inputPaths.back();
+
+	  m_matrix->SetValue(startPos, phaseSize - 1, path);
 	}
   }
 

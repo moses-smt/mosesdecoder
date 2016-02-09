@@ -30,16 +30,18 @@ template<typename T>
 class SquareMatrix
 {
 protected:
-  const size_t m_size; /**< length of the square (sentence length) */
+  size_t m_rows, m_cols; /**< length of the square (sentence length) */
   T *m_array; /**< two-dimensional array to store floats */
 
   SquareMatrix(); // not implemented
   SquareMatrix(const SquareMatrix &copy); // not implemented
 
 public:
-  SquareMatrix(size_t size)
-    :m_size(size) {
-    m_array = (T*) malloc(sizeof(T) * size * size);
+  SquareMatrix(size_t rows, size_t cols)
+  :m_rows(rows)
+  ,m_cols(cols)
+  {
+    m_array = (T*) malloc(sizeof(T) * rows * cols);
   }
   ~SquareMatrix() {
     free(m_array);
@@ -48,24 +50,36 @@ public:
   // set upper triangle
   void InitTriangle(const T &val)
   {
-    for(size_t row=0; row < m_size; row++) {
-      for(size_t col=row; col<m_size; col++) {
+	assert(m_rows == m_cols);
+    for(size_t row = 0; row < m_rows; row++) {
+      for(size_t col = row; col < m_cols; col++) {
     	  SetValue(row, col, val);
       }
     }
   }
 
+  // everything
+  void Init(const T &val)
+  {
+	    for(size_t row = 0; row < m_rows; row++) {
+	      for(size_t col = 0; col < m_cols; col++) {
+	    	  SetValue(row, col, val);
+	      }
+	    }
+  }
+
   /** Returns length of the square: typically the sentence length */
   inline size_t GetSize() const {
-    return m_size;
+	assert(m_rows == m_cols);
+    return m_rows;
   }
   /** Get a future cost score for a span */
-  inline const T &GetValue(size_t startPos, size_t endPos) const {
-    return m_array[startPos * m_size + endPos];
+  inline const T &GetValue(size_t row, size_t col) const {
+    return m_array[row * m_rows + col];
   }
   /** Set a future cost score for a span */
-  inline void SetValue(size_t startPos, size_t endPos, const T &value) {
-    m_array[startPos * m_size + endPos] = value;
+  inline void SetValue(size_t row, size_t col, const T &value) {
+    m_array[row * m_rows + col] = value;
   }
 };
 

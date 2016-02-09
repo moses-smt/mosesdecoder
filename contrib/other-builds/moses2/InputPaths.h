@@ -11,6 +11,7 @@
 #include <vector>
 #include "InputPath.h"
 #include "MemPool.h"
+#include "legacy/SquareMatrix.h"
 
 namespace Moses2
 {
@@ -51,6 +52,7 @@ public:
 protected:
 	Coll m_inputPaths;
 	InputPath *m_blank;
+	SquareMatrix<InputPath*> *m_matrix;
 };
 
 }

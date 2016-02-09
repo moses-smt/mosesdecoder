@@ -35,7 +35,7 @@ class EstimatedScores : public SquareMatrix<float>
 
 public:
   EstimatedScores(size_t size)
-  :SquareMatrix(size)
+  :SquareMatrix(size, size)
   {}
 
   float CalcEstimatedScore( Bitmap const& ) const;
