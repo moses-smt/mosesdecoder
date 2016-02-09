@@ -49,6 +49,9 @@ public:
   const InputPath &GetBlank() const
   { return *m_blank; }
 
+  const SquareMatrix<InputPath*> &GetMatrix() const
+  { return *m_matrix; }
+
 protected:
 	Coll m_inputPaths;
 	InputPath *m_blank;

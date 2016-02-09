@@ -163,42 +163,50 @@ void Search::PostDecode(size_t stackInd)
 {
   MemPool &pool = mgr.GetPool();
 
+  const InputPaths &paths = mgr.GetInputPaths();
+  const SquareMatrix<InputPath*> &pathMatrix = paths.GetMatrix();
+  size_t inputSize = pathMatrix.GetRows();
+  size_t numPaths = pathMatrix.GetCols();
+
   BOOST_FOREACH(const Stack::Coll::value_type &val, m_stack.GetColl()) {
 	  const Bitmap &hypoBitmap = *val.first.first;
+	  size_t firstGap = hypoBitmap.GetFirstGapPos();
 	  size_t hypoEndPos = val.first.second;
-	  //cerr << "key=" << hypoBitmap << " " << hypoEndPos << endl;
+	  //cerr << "key=" << hypoBitmap << " " << firstGap << " " << inputSize << endl;
 
 	  // create edges to next hypos from existing hypos
-	  const InputPaths &paths = mgr.GetInputPaths();
+	  for (size_t startPos = firstGap; startPos < inputSize; ++startPos) {
+		  for (size_t pathInd = 0; pathInd < numPaths; ++pathInd) {
+			  const InputPath *path = pathMatrix.GetValue(startPos, pathInd);
 
-	  BOOST_FOREACH(const InputPath *path, paths) {
-  		const Range &pathRange = path->range;
-  		//cerr << "pathRange=" << pathRange << endl;
+		  		if (path == NULL || !path->IsUsed()) {
+		  			continue;
+		  		}
 
-  		if (!path->IsUsed()) {
-  			continue;
-  		}
-  		if (!CanExtend(hypoBitmap, hypoEndPos, pathRange)) {
-  			continue;
-  		}
+		  		const Range &pathRange = path->range;
+		  		//cerr << "pathRange=" << pathRange << endl;
+		  		if (!CanExtend(hypoBitmap, hypoEndPos, pathRange)) {
+		  			continue;
+		  		}
 
-  		const Bitmap &newBitmap = mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
-  		size_t numWords = newBitmap.GetNumWordsCovered();
+		  		const Bitmap &newBitmap = mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
+		  		size_t numWords = newBitmap.GetNumWordsCovered();
 
-  		CubeEdges &edges = *m_cubeEdges[numWords];
+		  		CubeEdges &edges = *m_cubeEdges[numWords];
 
-		// sort hypo for a particular bitmap and hypoEndPos
-  		Hypotheses &sortedHypos = val.second->GetSortedAndPruneHypos(mgr);
+				// sort hypo for a particular bitmap and hypoEndPos
+		  		Hypotheses &sortedHypos = val.second->GetSortedAndPruneHypos(mgr);
 
-  	    size_t numPt = mgr.system.mappings.size();
-  	    for (size_t i = 0; i < numPt; ++i) {
-  	    	const TargetPhrases *tps = path->targetPhrases[i];
-  			if (tps && tps->GetSize()) {
-  		  		CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(mgr, sortedHypos, *path, *tps, newBitmap);
-  		  		edges.push_back(edge);
-  			}
-  		}
-  	  }
+		  	    size_t numPt = mgr.system.mappings.size();
+		  	    for (size_t i = 0; i < numPt; ++i) {
+		  	    	const TargetPhrases *tps = path->targetPhrases[i];
+		  			if (tps && tps->GetSize()) {
+		  		  		CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(mgr, sortedHypos, *path, *tps, newBitmap);
+		  		  		edges.push_back(edge);
+		  			}
+		  		}
+		  }
+	  }
   }
 }
 

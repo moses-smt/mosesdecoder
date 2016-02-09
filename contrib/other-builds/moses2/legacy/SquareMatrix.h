@@ -73,6 +73,15 @@ public:
 	assert(m_rows == m_cols);
     return m_rows;
   }
+
+  inline size_t GetRows() const {
+    return m_rows;
+  }
+
+  inline size_t GetCols() const {
+    return m_cols;
+  }
+
   /** Get a future cost score for a span */
   inline const T &GetValue(size_t row, size_t col) const {
     return m_array[row * m_cols + col];
