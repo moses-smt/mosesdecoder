@@ -38,7 +38,6 @@ Manager::Manager(System &sys, const TranslationTask &task, const std::string &in
 Manager::~Manager() {
 
 	delete m_search;
-	delete m_estimatedScores;
 	delete m_bitmaps;
 
 	GetPool().Reset();
@@ -109,7 +108,7 @@ void Manager::Decode()
 void Manager::CalcFutureScore()
 {
 	size_t size = m_input->GetSize();
-	m_estimatedScores = new EstimatedScores(size);
+	m_estimatedScores = new (GetPool().Allocate<EstimatedScores>()) EstimatedScores(GetPool(), size);
 	m_estimatedScores->InitTriangle(-numeric_limits<SCORE>::infinity());
 
     // walk all the translation options and record the cheapest option for each span

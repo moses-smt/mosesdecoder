@@ -18,7 +18,6 @@ namespace Moses2
 
 InputPaths::~InputPaths()
 {
-	delete m_matrix;
 }
 
 void InputPaths::Init(const PhraseImpl &input, const Manager &mgr)
@@ -28,7 +27,7 @@ void InputPaths::Init(const PhraseImpl &input, const Manager &mgr)
   size_t size = input.GetSize();
   size_t maxLength = min(size, mgr.system.maxPhraseLength);
 
-  m_matrix = new SquareMatrix<InputPath*>(size, maxLength);
+  m_matrix = new (pool.Allocate< SquareMatrix<InputPath*> >()) SquareMatrix<InputPath*>(pool, size, maxLength);
   m_matrix->Init(NULL);
 
   // create blank path for initial hypo

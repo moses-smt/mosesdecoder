@@ -23,6 +23,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <iostream>
 #include "Util2.h"
+#include "../MemPool.h"
 
 namespace Moses2
 {
@@ -37,15 +38,14 @@ protected:
   SquareMatrix(const SquareMatrix &copy); // not implemented
 
 public:
-  SquareMatrix(size_t rows, size_t cols)
+  SquareMatrix(MemPool &pool, size_t rows, size_t cols)
   :m_rows(rows)
   ,m_cols(cols)
   {
-    m_array = (T*) malloc(sizeof(T) * rows * cols);
+    m_array = pool.Allocate<T>(rows * cols);
   }
-  ~SquareMatrix() {
-    free(m_array);
-  }
+
+  ~SquareMatrix(); // not implemented
 
   // set upper triangle
   void InitTriangle(const T &val)

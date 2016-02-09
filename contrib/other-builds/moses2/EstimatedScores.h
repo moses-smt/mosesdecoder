@@ -28,15 +28,19 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses2
 {
+class MemPool;
+
 //! A square array of floats to store future costs in the phrase-based decoder
 class EstimatedScores : public SquareMatrix<float>
 {
   friend std::ostream& operator<<(std::ostream &out, const EstimatedScores &matrix);
 
 public:
-  EstimatedScores(size_t size)
-  :SquareMatrix(size, size)
+  EstimatedScores(MemPool &pool, size_t size)
+  :SquareMatrix(pool, size, size)
   {}
+
+  ~EstimatedScores(); // not implemented
 
   float CalcEstimatedScore( Bitmap const& ) const;
   float CalcEstimatedScore( Bitmap const&, size_t startPos, size_t endPos ) const;
