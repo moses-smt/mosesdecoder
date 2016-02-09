@@ -130,7 +130,7 @@ void Manager::CalcFutureScore()
      		 }
      	  }
 	    }
-	    m_estimatedScores->SetScore(range.GetStartPos(), range.GetEndPos(), bestScore);
+	    m_estimatedScores->SetValue(range.GetStartPos(), range.GetEndPos(), bestScore);
 	}
 
 	  // now fill all the cells in the strictly upper triangle
@@ -145,8 +145,8 @@ void Manager::CalcFutureScore()
 	      size_t sPos = diagshift;
 	      size_t ePos = colstart+diagshift;
 	      for(size_t joinAt = sPos; joinAt < ePos ; joinAt++)  {
-	        float joinedScore = m_estimatedScores->GetScore(sPos, joinAt)
-	                            + m_estimatedScores->GetScore(joinAt+1, ePos);
+	        float joinedScore = m_estimatedScores->GetValue(sPos, joinAt)
+	                            + m_estimatedScores->GetValue(joinAt+1, ePos);
 	        // uncomment to see the cell filling scheme
 	        // TRACE_ERR("[" << sPos << "," << ePos << "] <-? ["
 	        // 	  << sPos << "," << joinAt << "]+["
@@ -154,8 +154,8 @@ void Manager::CalcFutureScore()
 	        // 	  << colstart << ", diagshift: " << diagshift << ")"
 	        // 	  << endl);
 
-	        if (joinedScore > m_estimatedScores->GetScore(sPos, ePos))
-	          m_estimatedScores->SetScore(sPos, ePos, joinedScore);
+	        if (joinedScore > m_estimatedScores->GetValue(sPos, ePos))
+	          m_estimatedScores->SetValue(sPos, ePos, joinedScore);
 	      }
 	    }
 	  }

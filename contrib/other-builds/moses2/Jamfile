@@ -1,6 +1,7 @@
 alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem ../../../moses/TranslationModel/CompactPT//cmph ../../../moses//moses ;
 
  lib moses2_lib :
+	EstimatedScores.cpp
  	 InputPath.cpp 
  	 InputPaths.cpp
    InputType.cpp

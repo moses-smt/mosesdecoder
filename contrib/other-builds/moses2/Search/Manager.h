@@ -15,8 +15,8 @@
 #include "../TargetPhrase.h"
 #include "../MemPool.h"
 #include "../Recycler.h"
+#include "../EstimatedScores.h"
 #include "../legacy/Bitmaps.h"
-#include "../legacy/SquareMatrix.h"
 
 namespace Moses2
 {

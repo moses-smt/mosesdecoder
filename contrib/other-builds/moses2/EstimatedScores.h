@@ -1,5 +1,4 @@
 // $Id$
-// vim:tabstop=2
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -20,17 +19,40 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#include <string>
-#include <iostream>
-#include "SquareMatrix.h"
-#include "Util2.h"
+#pragma once
 
-using namespace std;
+#include <iostream>
+#include "legacy/Util2.h"
+#include "legacy/Bitmap.h"
+#include "legacy/SquareMatrix.h"
 
 namespace Moses2
 {
+//! A square array of floats to store future costs in the phrase-based decoder
+class EstimatedScores : public SquareMatrix<float>
+{
+  friend std::ostream& operator<<(std::ostream &out, const EstimatedScores &matrix);
 
+public:
+  EstimatedScores(size_t size)
+  :SquareMatrix(size)
+  {}
 
+  float CalcEstimatedScore( Bitmap const& ) const;
+  float CalcEstimatedScore( Bitmap const&, size_t startPos, size_t endPos ) const;
+
+};
+
+inline std::ostream& operator<<(std::ostream &out, const EstimatedScores &matrix)
+{
+  for (size_t endPos = 0 ; endPos < matrix.GetSize() ; endPos++) {
+    for (size_t startPos = 0 ; startPos < matrix.GetSize() ; startPos++)
+      out << matrix.GetValue(startPos, endPos) << " ";
+    out << std::endl;
+  }
+
+  return out;
 }
 
+}
 
