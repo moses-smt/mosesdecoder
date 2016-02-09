@@ -10,6 +10,7 @@
 #include "../TranslationModel/PhraseTable.h"
 #include "../System.h"
 #include "../Search/Manager.h"
+#include "../Search/Hypothesis.h"
 #include "../legacy/InputFileStream.h"
 #include "../legacy/Util2.h"
 #include "../legacy/CompactPT/LexicalReorderingTableCompact.h"

@@ -50,6 +50,7 @@ enum SearchAlgorithm {
   CubePruningPerBitmap = 11,
   CubePruningCardinalStack = 12,
   CubePruningBitmapStack = 13,
+  CubePruningMiniStack = 14,
   DefaultSearchAlgorithm = 777 // means: use StaticData.m_searchAlgorithm
 };
 

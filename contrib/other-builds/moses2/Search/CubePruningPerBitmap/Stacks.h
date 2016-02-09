@@ -8,7 +8,7 @@
 #pragma once
 
 #include <vector>
-#include "../CubePruning/Stack.h"
+#include "../CubePruningMiniStack/Stack.h"
 #include "../../Recycler.h"
 
 namespace Moses2

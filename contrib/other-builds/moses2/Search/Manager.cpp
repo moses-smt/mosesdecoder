@@ -9,7 +9,7 @@
 #include <sstream>
 #include "Manager.h"
 #include "SearchNormal.h"
-#include "CubePruning/Search.h"
+#include "CubePruningMiniStack/Search.h"
 #include "CubePruningPerMiniStack/Search.h"
 #include "CubePruningPerBitmap/Search.h"
 #include "CubePruningCardinalStack/Search.h"
@@ -78,6 +78,7 @@ void Manager::Init()
 		m_search = new SearchNormal(*this);
 		break;
 	case CubePruning:
+	case CubePruningMiniStack:
 		m_search = new NSCubePruning::Search(*this);
 		break;
 	case CubePruningPerMiniStack:

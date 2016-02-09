@@ -14,7 +14,7 @@
 #include "../Hypothesis.h"
 #include "../../TypeDef.h"
 #include "../../Vector.h"
-#include "../CubePruning/Stack.h"
+#include "../CubePruningMiniStack/Stack.h"
 
 namespace Moses2
 {

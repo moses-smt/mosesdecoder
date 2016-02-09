@@ -40,9 +40,9 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
  	 	Search/Stack.cpp 
  	 	Search/Stacks.cpp 
 
-		Search/CubePruning/Misc.cpp
- 	 	Search/CubePruning/Search.cpp
- 	 	Search/CubePruning/Stack.cpp 
+		Search/CubePruningMiniStack/Misc.cpp
+ 	 	Search/CubePruningMiniStack/Search.cpp
+ 	 	Search/CubePruningMiniStack/Stack.cpp 
 
  	 	Search/CubePruningCardinalStack/Misc.cpp
  	 	Search/CubePruningCardinalStack/Search.cpp

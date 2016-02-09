@@ -17,7 +17,6 @@
 #include "legacy/FactorCollection.h"
 #include "legacy/Parameter.h"
 #include "TypeDef.h"
-#include "Search/CubePruning/Misc.h"
 #include "legacy/Bitmaps.h"
 #include "legacy/OutputCollector.h"
 
