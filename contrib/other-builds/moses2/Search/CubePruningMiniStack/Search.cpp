@@ -179,7 +179,10 @@ void Search::PostDecode(size_t stackInd)
 		  for (size_t pathInd = 0; pathInd < numPaths; ++pathInd) {
 			  const InputPath *path = pathMatrix.GetValue(startPos, pathInd);
 
-		  		if (path == NULL || !path->IsUsed()) {
+		  		if (path == NULL) {
+		  			break;
+		  		}
+		  		if (!path->IsUsed()) {
 		  			continue;
 		  		}
 
