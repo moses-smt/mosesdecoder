@@ -77,14 +77,14 @@ public:
 			std::equal_to<SeenPositionItem>,
 			MemPoolAllocator<SeenPositionItem> > SeenPositions;
 
-	const NSCubePruning::MiniStack &miniStack;
+	const NSCubePruningMiniStack::MiniStack &miniStack;
 	const InputPath &path;
 	const TargetPhrases &tps;
 	const Bitmap &newBitmap;
 	SCORE estimatedScore;
 
 	CubeEdge(Manager &mgr,
-			const NSCubePruning::MiniStack &miniStack,
+			const NSCubePruningMiniStack::MiniStack &miniStack,
 			const InputPath &path,
 			const TargetPhrases &tps,
 			const Bitmap &newBitmap);

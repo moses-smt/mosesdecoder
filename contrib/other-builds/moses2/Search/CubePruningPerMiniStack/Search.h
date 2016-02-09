@@ -21,7 +21,7 @@ class Hypothesis;
 class InputPath;
 class TargetPhrases;
 
-namespace NSCubePruning
+namespace NSCubePruningMiniStack
 {
 class MiniStack;
 }
@@ -48,7 +48,7 @@ protected:
 	// setup
 	MemPoolAllocator<CubeEdge*> m_cubeEdgeAlloc;
 	typedef std::vector<CubeEdge*, MemPoolAllocator<CubeEdge*> > CubeEdges;
-	boost::unordered_map<NSCubePruning::MiniStack*, CubeEdges*> m_cubeEdges;
+	boost::unordered_map<NSCubePruningMiniStack::MiniStack*, CubeEdges*> m_cubeEdges;
 
 	std::deque<QueueItem*> m_queueItemRecycler;
 
@@ -56,7 +56,7 @@ protected:
 	// decoding
 	void CreateSearchGraph(size_t stackInd);
 	void Decode(size_t stackInd);
-	void Decode(NSCubePruning::MiniStack &miniStack);
+	void Decode(NSCubePruningMiniStack::MiniStack &miniStack);
 
 	void DebugCounts();
 };

@@ -81,7 +81,7 @@ void QueueItem::CreateHypothesis(Manager &mgr)
 ////////////////////////////////////////////////////////////////////////
 CubeEdge::CubeEdge(
 		Manager &mgr,
-		const NSCubePruning::MiniStack &miniStack,
+		const NSCubePruningMiniStack::MiniStack &miniStack,
 		const InputPath &path,
 		const TargetPhrases &tps,
 		const Bitmap &newBitmap)

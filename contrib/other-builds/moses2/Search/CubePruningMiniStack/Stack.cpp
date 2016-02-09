@@ -17,7 +17,7 @@ using namespace std;
 namespace Moses2
 {
 
-namespace NSCubePruning
+namespace NSCubePruningMiniStack
 {
 MiniStack::MiniStack(const Manager &mgr)
 :m_coll(MemPoolAllocator<const Hypothesis*>(mgr.GetPool()))
@@ -207,7 +207,7 @@ void Stack::DebugCounts()
 {
 	cerr << "counts=";
 	BOOST_FOREACH(const Coll::value_type &val, GetColl()) {
-		const NSCubePruning::MiniStack &miniStack = *val.second;
+		const MiniStack &miniStack = *val.second;
 		size_t count = miniStack.GetColl().size();
 		cerr << count << " ";
 	}

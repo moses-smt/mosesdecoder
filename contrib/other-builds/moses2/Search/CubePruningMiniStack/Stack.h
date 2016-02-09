@@ -20,7 +20,7 @@ namespace Moses2
 
 class Manager;
 
-namespace NSCubePruning
+namespace NSCubePruningMiniStack
 {
 typedef Vector<const Hypothesis*>  Hypotheses;
 

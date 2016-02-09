@@ -79,7 +79,7 @@ void Manager::Init()
 		break;
 	case CubePruning:
 	case CubePruningMiniStack:
-		m_search = new NSCubePruning::Search(*this);
+		m_search = new NSCubePruningMiniStack::Search(*this);
 		break;
 	case CubePruningPerMiniStack:
 		m_search = new NSCubePruningPerMiniStack::Search(*this);

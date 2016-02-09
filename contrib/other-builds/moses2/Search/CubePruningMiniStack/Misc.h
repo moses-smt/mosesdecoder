@@ -24,7 +24,7 @@ class InputPath;
 class TargetPhrases;
 class Bitmap;
 
-namespace NSCubePruning
+namespace NSCubePruningMiniStack
 {
 class CubeEdge;
 

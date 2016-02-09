@@ -29,18 +29,18 @@ public:
 	size_t GetSize() const
 	{ return m_stacks.size(); }
 
-	const NSCubePruning::Stack &Back() const
+	const NSCubePruningMiniStack::Stack &Back() const
     { return *m_stacks.back(); }
 
-	NSCubePruning::Stack &operator[](size_t ind)
+	NSCubePruningMiniStack::Stack &operator[](size_t ind)
     { return *m_stacks[ind]; }
 
 	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
-	NSCubePruning::MiniStack &GetMiniStack(const Bitmap &newBitmap, const Range &pathRange);
+	NSCubePruningMiniStack::MiniStack &GetMiniStack(const Bitmap &newBitmap, const Range &pathRange);
 
 protected:
 	const Manager &m_mgr;
-	std::vector<NSCubePruning::Stack*> m_stacks;
+	std::vector<NSCubePruningMiniStack::Stack*> m_stacks;
 };
 
 

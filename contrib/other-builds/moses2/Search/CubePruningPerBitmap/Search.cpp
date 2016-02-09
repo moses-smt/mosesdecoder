@@ -68,30 +68,30 @@ void Search::Decode()
 
 void Search::Decode(size_t stackInd)
 {
-  NSCubePruning::Stack &stack = m_stacks[stackInd];
+  NSCubePruningMiniStack::Stack &stack = m_stacks[stackInd];
 
   // FOR EACH BITMAP IN EACH STACK
-  boost::unordered_map<const Bitmap*, vector<NSCubePruning::MiniStack*> > uniqueBM;
+  boost::unordered_map<const Bitmap*, vector<NSCubePruningMiniStack::MiniStack*> > uniqueBM;
 
-  BOOST_FOREACH(NSCubePruning::Stack::Coll::value_type &val, stack.GetColl()) {
-	  NSCubePruning::MiniStack &miniStack = *val.second;
+  BOOST_FOREACH(NSCubePruningMiniStack::Stack::Coll::value_type &val, stack.GetColl()) {
+	  NSCubePruningMiniStack::MiniStack &miniStack = *val.second;
 
 	  const Bitmap *bitmap = val.first.first;
 	  uniqueBM[bitmap].push_back(&miniStack);
   }
 
   // decode each bitmap
-  boost::unordered_map<const Bitmap*, vector<NSCubePruning::MiniStack*> >::iterator iter;
+  boost::unordered_map<const Bitmap*, vector<NSCubePruningMiniStack::MiniStack*> >::iterator iter;
   for (iter = uniqueBM.begin(); iter != uniqueBM.end(); ++iter) {
-	  const vector<NSCubePruning::MiniStack*> &miniStacks = iter->second;
+	  const vector<NSCubePruningMiniStack::MiniStack*> &miniStacks = iter->second;
 	  Decode(miniStacks);
   }
 
   /*
   // FOR EACH STACK
-  vector<NSCubePruning::MiniStack*> miniStacks;
-  BOOST_FOREACH(NSCubePruning::Stack::Coll::value_type &val, stack.GetColl()) {
-	  NSCubePruning::MiniStack &miniStack = *val.second;
+  vector<NSCubePruningMiniStack::MiniStack*> miniStacks;
+  BOOST_FOREACH(NSCubePruningMiniStack::Stack::Coll::value_type &val, stack.GetColl()) {
+	  NSCubePruningMiniStack::MiniStack &miniStack = *val.second;
 
 	  miniStacks.push_back(&miniStack);
   }
@@ -99,7 +99,7 @@ void Search::Decode(size_t stackInd)
   */
 }
 
-void Search::Decode(const vector<NSCubePruning::MiniStack*> &miniStacks)
+void Search::Decode(const vector<NSCubePruningMiniStack::MiniStack*> &miniStacks)
 {
 	Recycler<Hypothesis*> &hypoRecycler  = mgr.GetHypoRecycle();
 
@@ -120,7 +120,7 @@ void Search::Decode(const vector<NSCubePruning::MiniStack*> &miniStacks)
 
 	//Prefetch(stackInd);
 
-	BOOST_FOREACH(NSCubePruning::MiniStack *miniStack, miniStacks) {
+	BOOST_FOREACH(NSCubePruningMiniStack::MiniStack *miniStack, miniStacks) {
 		// add top hypo from every edge into queue
 		CubeEdges &edges = *m_cubeEdges[miniStack];
 
@@ -180,10 +180,10 @@ void Search::Decode(const vector<NSCubePruning::MiniStack*> &miniStacks)
 
 void Search::CreateSearchGraph(size_t stackInd)
 {
-  NSCubePruning::Stack &stack = m_stacks[stackInd];
+  NSCubePruningMiniStack::Stack &stack = m_stacks[stackInd];
   MemPool &pool = mgr.GetPool();
 
-  BOOST_FOREACH(const NSCubePruning::Stack::Coll::value_type &val, stack.GetColl()) {
+  BOOST_FOREACH(const NSCubePruningMiniStack::Stack::Coll::value_type &val, stack.GetColl()) {
 	  const Bitmap &hypoBitmap = *val.first.first;
 	  size_t hypoEndPos = val.first.second;
 	  //cerr << "key=" << hypoBitmap << " " << hypoEndPos << endl;
@@ -205,7 +205,7 @@ void Search::CreateSearchGraph(size_t stackInd)
 		const Bitmap &newBitmap = mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
 
 		// sort hypo for a particular bitmap and hypoEndPos
-		const NSCubePruning::MiniStack &miniStack = *val.second;
+		const NSCubePruningMiniStack::MiniStack &miniStack = *val.second;
 
 
 		// add cube edge
@@ -214,12 +214,12 @@ void Search::CreateSearchGraph(size_t stackInd)
   	    	const TargetPhrases *tps = path->targetPhrases[i];
   			if (tps && tps->GetSize()) {
   				// create next mini stack
-  				NSCubePruning::MiniStack &nextMiniStack = m_stacks.GetMiniStack(newBitmap, pathRange);
+  				NSCubePruningMiniStack::MiniStack &nextMiniStack = m_stacks.GetMiniStack(newBitmap, pathRange);
 
   				CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(mgr, miniStack, *path, *tps, newBitmap);
 
 				CubeEdges *edges;
-				boost::unordered_map<NSCubePruning::MiniStack*, CubeEdges*>::iterator iter = m_cubeEdges.find(&nextMiniStack);
+				boost::unordered_map<NSCubePruningMiniStack::MiniStack*, CubeEdges*>::iterator iter = m_cubeEdges.find(&nextMiniStack);
 				if (iter == m_cubeEdges.end()) {
 					edges = new (pool.Allocate<CubeEdges>()) CubeEdges(m_cubeEdgeAlloc);
 					m_cubeEdges[&nextMiniStack] = edges;
@@ -239,7 +239,7 @@ void Search::CreateSearchGraph(size_t stackInd)
 
 const Hypothesis *Search::GetBestHypothesis() const
 {
-	const NSCubePruning::Stack &lastStack = m_stacks.Back();
+	const NSCubePruningMiniStack::Stack &lastStack = m_stacks.Back();
 	std::vector<const Hypothesis*> sortedHypos = lastStack.GetBestHypos(1);
 
 	const Hypothesis *best = NULL;
@@ -255,9 +255,9 @@ void Search::DebugCounts()
 
 	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
 		//cerr << "stackInd=" << stackInd << endl;
-		const NSCubePruning::Stack &stack = m_stacks[stackInd];
-		BOOST_FOREACH(const NSCubePruning::Stack::Coll::value_type &val, stack.GetColl()) {
-			const NSCubePruning::MiniStack &miniStack = *val.second;
+		const NSCubePruningMiniStack::Stack &stack = m_stacks[stackInd];
+		BOOST_FOREACH(const NSCubePruningMiniStack::Stack::Coll::value_type &val, stack.GetColl()) {
+			const NSCubePruningMiniStack::MiniStack &miniStack = *val.second;
 			size_t count = miniStack.GetColl().size();
 
 			if (counts.find(count) == counts.end()) {

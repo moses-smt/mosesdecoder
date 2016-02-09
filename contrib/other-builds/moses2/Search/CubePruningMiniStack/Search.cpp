@@ -21,7 +21,7 @@ using namespace std;
 namespace Moses2
 {
 
-namespace NSCubePruning
+namespace NSCubePruningMiniStack
 {
 
 ////////////////////////////////////////////////////////////////////////

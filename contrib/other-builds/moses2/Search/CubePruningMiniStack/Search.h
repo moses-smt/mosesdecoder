@@ -20,7 +20,7 @@ class Hypothesis;
 class InputPath;
 class TargetPhrases;
 
-namespace NSCubePruning
+namespace NSCubePruningMiniStack
 {
 
 class Search : public Moses2::Search

@@ -30,7 +30,7 @@ void Stacks::Init(size_t numStacks)
 {
 	m_stacks.resize(numStacks);
 	for (size_t i = 0; i < m_stacks.size(); ++i) {
-		m_stacks[i] = new (m_mgr.GetPool().Allocate<NSCubePruning::Stack>()) NSCubePruning::Stack(m_mgr);
+		m_stacks[i] = new (m_mgr.GetPool().Allocate<NSCubePruningMiniStack::Stack>()) NSCubePruningMiniStack::Stack(m_mgr);
 	}
 }
 
@@ -38,7 +38,7 @@ void Stacks::Init(size_t numStacks)
 std::ostream& operator<<(std::ostream &out, const Stacks &obj)
 {
   for (size_t i = 0; i < obj.GetSize(); ++i) {
-	  const NSCubePruning::Stack &stack = *obj.m_stacks[i];
+	  const NSCubePruningMiniStack::Stack &stack = *obj.m_stacks[i];
 	  out << stack.GetHypoSize() << " ";
   }
 
@@ -49,18 +49,18 @@ void Stacks::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 {
 	size_t numWordsCovered = hypo->GetBitmap().GetNumWordsCovered();
 	//cerr << "numWordsCovered=" << numWordsCovered << endl;
-	NSCubePruning::Stack &stack = *m_stacks[numWordsCovered];
+	NSCubePruningMiniStack::Stack &stack = *m_stacks[numWordsCovered];
 	stack.Add(hypo, hypoRecycle);
 
 }
 
-NSCubePruning::MiniStack &Stacks::GetMiniStack(const Bitmap &newBitmap, const Range &pathRange)
+NSCubePruningMiniStack::MiniStack &Stacks::GetMiniStack(const Bitmap &newBitmap, const Range &pathRange)
 {
 	size_t numWordsCovered = newBitmap.GetNumWordsCovered();
 	//cerr << "numWordsCovered=" << numWordsCovered << endl;
-	NSCubePruning::Stack &stack = *m_stacks[numWordsCovered];
+	NSCubePruningMiniStack::Stack &stack = *m_stacks[numWordsCovered];
 
-	NSCubePruning::Stack::HypoCoverage key(&newBitmap, pathRange.GetEndPos());
+	NSCubePruningMiniStack::Stack::HypoCoverage key(&newBitmap, pathRange.GetEndPos());
 	stack.GetMiniStack(key);
 
 }
