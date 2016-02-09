@@ -28,7 +28,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses2
 {
 
-//! A square array of floats to store future costs in the phrase-based decoder
 class SquareMatrix
 {
   friend std::ostream& operator<<(std::ostream &out, const SquareMatrix &matrix);
@@ -49,23 +48,27 @@ public:
   }
 
   // set upper triangle
-  void InitTriangle(float val);
+  void InitTriangle(const float &val)
+  {
+    for(size_t row=0; row < m_size; row++) {
+      for(size_t col=row; col<m_size; col++) {
+        SetScore(row, col, val);
+      }
+    }
+  }
 
   /** Returns length of the square: typically the sentence length */
   inline size_t GetSize() const {
     return m_size;
   }
   /** Get a future cost score for a span */
-  inline float GetScore(size_t startPos, size_t endPos) const {
+  inline const float &GetScore(size_t startPos, size_t endPos) const {
     return m_array[startPos * m_size + endPos];
   }
   /** Set a future cost score for a span */
-  inline void SetScore(size_t startPos, size_t endPos, float value) {
+  inline void SetScore(size_t startPos, size_t endPos, const float &value) {
     m_array[startPos * m_size + endPos] = value;
   }
-  float CalcEstimatedScore( Bitmap const& ) const;
-  float CalcEstimatedScore( Bitmap const&, size_t startPos, size_t endPos ) const;
-
 };
 
 inline std::ostream& operator<<(std::ostream &out, const SquareMatrix &matrix)
@@ -78,6 +81,20 @@ inline std::ostream& operator<<(std::ostream &out, const SquareMatrix &matrix)
 
   return out;
 }
+
+/////////////////////////////////////////////////////////////////////////////////////
+//! A square array of floats to store future costs in the phrase-based decoder
+class EstimatedScores : public SquareMatrix
+{
+public:
+  EstimatedScores(size_t size)
+  :SquareMatrix(size)
+  {}
+
+  float CalcEstimatedScore( Bitmap const& ) const;
+  float CalcEstimatedScore( Bitmap const&, size_t startPos, size_t endPos ) const;
+
+};
 
 }
 

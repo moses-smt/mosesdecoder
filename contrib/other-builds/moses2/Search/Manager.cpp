@@ -109,7 +109,7 @@ void Manager::Decode()
 void Manager::CalcFutureScore()
 {
 	size_t size = m_input->GetSize();
-	m_estimatedScores = new SquareMatrix(size);
+	m_estimatedScores = new EstimatedScores(size);
 	m_estimatedScores->InitTriangle(-numeric_limits<SCORE>::infinity());
 
     // walk all the translation options and record the cheapest option for each span

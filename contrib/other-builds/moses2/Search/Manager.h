@@ -54,7 +54,7 @@ public:
 	const Sentence &GetInput() const
 	{ return *m_input; }
 
-	const SquareMatrix &GetEstimatedScores() const
+	const EstimatedScores &GetEstimatedScores() const
 	{ return *m_estimatedScores; }
 
 	const InputPaths &GetInputPaths() const
@@ -76,7 +76,7 @@ protected:
 	Sentence *m_input;
 	InputPaths m_inputPaths;
 	Bitmaps *m_bitmaps;
-	SquareMatrix *m_estimatedScores;
+	EstimatedScores *m_estimatedScores;
 	TargetPhrase *m_initPhrase;
 
 	Search *m_search;

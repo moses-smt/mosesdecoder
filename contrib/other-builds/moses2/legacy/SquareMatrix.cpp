@@ -30,22 +30,15 @@ using namespace std;
 namespace Moses2
 {
 
-void SquareMatrix::InitTriangle(float val)
-{
-  for(size_t row=0; row < m_size; row++) {
-    for(size_t col=row; col<m_size; col++) {
-      SetScore(row, col, -numeric_limits<float>::infinity());
-    }
-  }
-}
 
+/////////////////////////////////////////////////////////////////////////////////////
 /**
  * Calculate future score estimate for a given coverage bitmap
  *
  * /param bitmap coverage bitmap
  */
 
-float SquareMatrix::CalcEstimatedScore( Bitmap const &bitmap ) const
+float EstimatedScores::CalcEstimatedScore( Bitmap const &bitmap ) const
 {
   const size_t notInGap= numeric_limits<size_t>::max();
   size_t startGap = notInGap;
@@ -84,7 +77,7 @@ float SquareMatrix::CalcEstimatedScore( Bitmap const &bitmap ) const
  * /param endPos end of the span that is added to the coverage
  */
 
-float SquareMatrix::CalcEstimatedScore( Bitmap const &bitmap, size_t startPos, size_t endPos ) const
+float EstimatedScores::CalcEstimatedScore( Bitmap const &bitmap, size_t startPos, size_t endPos ) const
 {
   const size_t notInGap= numeric_limits<size_t>::max();
   float estimatedScore = 0.0f;
