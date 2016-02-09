@@ -10,6 +10,7 @@
 #include "StatefulFeatureFunction.h"
 #include "FFState.h"
 #include <boost/shared_ptr.hpp>
+#include <boost/thread/tss.hpp>
 
 #include "moses/FF/NMT/nmt.h"
 
@@ -42,18 +43,13 @@ public:
     return true;
   }
 
-  /*
+  
   void InitializeForInput(ttasksptr const& ttask);
   void CleanUpAfterSentenceProcessing(ttasksptr const& ttask);
-  */
+  
 
   void ProcessStack(Collector& collector, size_t index);
-  //void BatchProcess( const std::vector<std::string>& nextWords,
-  //  PyObject* pyContextVectors,
-  //  const std::vector< std::string >& lastWords,
-  //  std::vector<PyObject*>& inputStates,
-  //  std::vector<double>& logProbs,
-  //  std::vector<PyObject*>& nextStates, std::vector<bool>& unks);
+
   
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
   
@@ -89,10 +85,14 @@ private:
   size_t m_batchSize;
   size_t m_stateLength;
   size_t m_factor;
+  std::vector<std::string> m_gpus;
   
-  boost::shared_ptr<NMT> m_nmt;
+  std::vector<boost::shared_ptr<Weights> > m_models;
+  boost::shared_ptr<Vocab> m_sourceVocab;
+  boost::shared_ptr<Vocab> m_targetVocab;
+  boost::thread_specific_ptr<NMT> m_nmt;
     
-  PrefsByLength m_pbl;
+  boost::thread_specific_ptr<PrefsByLength> m_pbl;
 };
 
 }

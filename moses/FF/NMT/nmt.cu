@@ -13,14 +13,48 @@
 
 using namespace mblas;
 
-NMT::NMT(const std::string& model,
-         const std::string& src,
-         const std::string& trg)
-  : w_(new Weights(model)), src_(new Vocab(src)), trg_(new Vocab(trg)),
+NMT::NMT(const boost::shared_ptr<Weights> model,
+         const boost::shared_ptr<Vocab> src,
+         const boost::shared_ptr<Vocab> trg)
+  : w_(model), src_(src), trg_(trg),
     encoder_(new Encoder(*w_)), decoder_(new Decoder(*w_))
-  {}
+  { }
+
+size_t NMT::GetDevices() {
+  int num_gpus = 0;   // number of CUDA GPUs
+  cudaGetDeviceCount(&num_gpus);
+  std::cerr << "Number of CUDA devices: " << num_gpus << std::endl;
+
+  for (int i = 0; i < num_gpus; i++) {
+      cudaDeviceProp dprop;
+      cudaGetDeviceProperties(&dprop, i);
+      std::cerr << i << ": " << dprop.name << std::endl;
+  }
+  return (size_t)num_gpus;
+}
+
+void NMT::ClearStates() {
+  cudaSetDevice(w_->GetDevice());
+  
+  std::vector<boost::shared_ptr<mblas::BaseMatrix> > temp;
+  states_.swap(temp);
+}
+
+boost::shared_ptr<Weights> NMT::NewModel(const std::string& path, size_t device) {
+  cudaSetDevice(device);
+  
+  boost::shared_ptr<Weights> weights(new Weights(path, device));
+  return weights;
+}
+
+boost::shared_ptr<Vocab> NMT::NewVocab(const std::string& path) {
+  boost::shared_ptr<Vocab> vocab(new Vocab(path));
+  return vocab;
+}
 
 void NMT::CalcSourceContext(const std::vector<std::string>& s) {
+  cudaSetDevice(w_->GetDevice());
+  
   std::vector<size_t> words(s.size());
   std::transform(s.begin(), s.end(), words.begin(),
                  [&](const std::string& w) { return (*src_)[w]; });
@@ -55,6 +89,8 @@ void NMT::MakeStep(
   std::vector<WhichState>& outputStates,
   std::vector<bool>& unks) {
   
+  cudaSetDevice(w_->GetDevice());
+  
   Matrix& sourceContext = *boost::static_pointer_cast<Matrix>(SourceContext);
   
   Matrix lastEmbeddings;
@@ -84,13 +120,12 @@ void NMT::MakeStep(
   
   Matrix prevStates;
   ConstructPrevStates(prevStates, inputStates, states_);
-  //debug1(prevStates);
-  
+
   Matrix probs;
   Matrix alignedSourceContext;
   decoder_->GetProbs(probs, alignedSourceContext,
                      prevStates, lastEmbeddings, sourceContext);  
-
+  
   for(size_t i = 0; i < nextIds.size(); ++i) {
     float p = probs(i, nextIds[i]);
     logProbs.push_back(log(p));
@@ -100,8 +135,6 @@ void NMT::MakeStep(
   Matrix& nextStates = *boost::static_pointer_cast<Matrix>(states_.back());
   decoder_->GetNextState(nextStates, nextEmbeddings,
                         prevStates, alignedSourceContext);
-  //std::cerr << "Next: " << std::endl;
-  //debug1(nextStates);
   
   size_t current = states_.size() - 1;
   for(size_t i = 0; i < nextStates.Rows(); ++i) {

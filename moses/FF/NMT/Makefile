@@ -1,6 +1,7 @@
 all: libnmt-cuda.so test_cuda
 
 NMTCU = nmt.cu cnpy/cnpy.cpp 
+NMT = nmt.cpp cnpy/cnpy.cpp 
 SOURCESCU = test.cu cnpy/cnpy.cpp 
 SOURCES = test.cpp cnpy/cnpy.cpp 
 HEADERS = decoder.h encoder.h model.h npz_converter.h vocab.h mblas/matrix.h mblas/base_matrix.h
@@ -8,8 +9,11 @@ HEADERS = decoder.h encoder.h model.h npz_converter.h vocab.h mblas/matrix.h mbl
 test_cuda: $(SOURCESCU) $(HEADERS)
 	nvcc -O3 -std=c++11 $(SOURCESCU) -lboost_system -lboost_timer -lcudart -lcublas -o $@
 
-#test.cpp: test.cu
-#	cp $^ $@
+test.cpp: test.cu
+	cp $^ $@
+
+nmt.cpp: nmt.cu
+	cp $^ $@
 
 #test_gsl: $(SOURCES) $(HEADERS)
 #	g++-5 -O3 -Ofast -std=c++11 $(SOURCES) -DNO_CUDA \
@@ -28,10 +32,14 @@ test_cuda: $(SOURCESCU) $(HEADERS)
 #	-march=native -lboost_system -lboost_timer -o $@ \
 
 libnmt-cuda.so: $(NMTCU) $(HEADERS)
-	nvcc -g -shared -O0 -std=c++11 $(NMTCU) \
+	nvcc -shared -O3 -std=c++11 $(NMTCU) \
 	-lboost_system -lboost_timer -lcudart -lcublas \
 	--compiler-options '-fPIC'  -o $@
 
+#libnmt-gsl.so: $(NMT) $(HEADERS)
+#	g++-5 -shared -fPIC -O3 -Ofast -std=c++11 $(NMT) -DNO_CUDA \
+#	-lgslcblas -ftree-vectorize -msse2 -lboost_system -lboost_timer -o $@
+#
 
 clean:
 	rm -rf test_cuda test_gsl test_atlas test_ptatlas libnmt-cuda.so

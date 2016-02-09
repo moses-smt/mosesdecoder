@@ -26,28 +26,28 @@ int main() {
                                 svcb["little"], svcb["test"], svcb["."],
                                 svcb["</s>"]};
   
-  //std::vector<std::vector<size_t>> tWordsBatch = {
-  //  {  tvcb["das"],     tvcb["dies"],    tvcb["das"]     },
-  //  {  tvcb["ist"],     tvcb["war"],     tvcb["ist"]     },
-  //  {  tvcb["ein"],     tvcb["ein"],     tvcb["eine"]    },
-  //  {  tvcb["kleiner"], tvcb["ganz"],    tvcb["kleine"]  },
-  //  {  tvcb["test"],    tvcb["kleiner"], tvcb["frau"]    },
-  //  {  tvcb["."],       tvcb["test"],    tvcb["."]       },
-  //  {  tvcb["</s>"],    tvcb["."],       tvcb["</s>"]    },
-  //  {  0,               tvcb["</s>"],    0               }
-  //};
-  
-  typedef std::vector<size_t> Batch;
-  size_t bs = 50;
   std::vector<std::vector<size_t>> tWordsBatch = {
-    Batch(bs, tvcb["das"]),
-    Batch(bs, tvcb["ist"]),
-    Batch(bs, tvcb["ein"]),
-    Batch(bs, tvcb["kleiner"]),
-    Batch(bs, tvcb["test"]),
-    Batch(bs, tvcb["."]),
-    Batch(bs, tvcb["</s>"])
+    {  tvcb["das"],     tvcb["dies"],    tvcb["das"]     },
+    {  tvcb["ist"],     tvcb["war"],     tvcb["ist"]     },
+    {  tvcb["ein"],     tvcb["ein"],     tvcb["eine"]    },
+    {  tvcb["kleiner"], tvcb["ganz"],    tvcb["kleine"]  },
+    {  tvcb["test"],    tvcb["kleiner"], tvcb["frau"]    },
+    {  tvcb["."],       tvcb["test"],    tvcb["."]       },
+    {  tvcb["</s>"],    tvcb["."],       tvcb["</s>"]    },
+    {  0,               tvcb["</s>"],    0               }
   };
+  
+  //typedef std::vector<size_t> Batch;
+  //size_t bs = 50;
+  //std::vector<std::vector<size_t>> tWordsBatch = {
+  //  Batch(bs, tvcb["das"]),
+  //  Batch(bs, tvcb["ist"]),
+  //  Batch(bs, tvcb["ein"]),
+  //  Batch(bs, tvcb["kleiner"]),
+  //  Batch(bs, tvcb["test"]),
+  //  Batch(bs, tvcb["."]),
+  //  Batch(bs, tvcb["</s>"])
+  //};
     
   mblas::Matrix SourceContext;
   encoder.GetContext(sWords, SourceContext);

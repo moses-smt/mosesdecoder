@@ -23,9 +23,15 @@ struct WhichState {
 
 class NMT {
   public:
-    NMT(const std::string& model,
-        const std::string& src,
-        const std::string& trg);
+    NMT(const boost::shared_ptr<Weights> model,
+        const boost::shared_ptr<Vocab> src,
+        const boost::shared_ptr<Vocab> trg);
+  
+    static size_t GetDevices();
+  
+    static boost::shared_ptr<Weights> NewModel(const std::string& path, size_t device = 0);
+  
+    static boost::shared_ptr<Vocab> NewVocab(const std::string& path);
   
     void CalcSourceContext(const std::vector<std::string>& s);
     
@@ -37,6 +43,8 @@ class NMT {
       std::vector<WhichState>& nextStates,
       std::vector<bool>& unks);
   
+    void ClearStates();
+    
   private:
     const boost::shared_ptr<Weights> w_;
     const boost::shared_ptr<Vocab> src_;

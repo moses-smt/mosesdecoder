@@ -330,36 +330,47 @@ struct Functor2 : public func::unary_function<difference_type, difference_type> 
   }
 };
 
+// Extend the matrix with itself factor times
 Matrix& Broadcast1(Matrix& Out, size_t factor) {
-  typedef FVec::const_iterator It;
-  typedef typename iterlib::iterator_difference<It>::type difference_type;
-  typedef typename iterlib::counting_iterator<difference_type> CountingIterator;
-  typedef typename iterlib::transform_iterator<Functor1<difference_type>, CountingIterator> TransformIterator1;
-  typedef typename iterlib::permutation_iterator<It, TransformIterator1> PermutationIterator1;
+  //@TODO: fix this!!!
   
-  PermutationIterator1 it1(Out.begin(),
-                           TransformIterator1(CountingIterator(0),
-                                              Functor1<difference_type>(Out.Rows(), Out.Cols())));
-  PermutationIterator1 end1 = it1 + (Out.end() - Out.begin()) * factor;
+  //typedef FVec::const_iterator It;
+  //typedef typename iterlib::iterator_difference<It>::type difference_type;
+  //typedef typename iterlib::counting_iterator<difference_type> CountingIterator;
+  //typedef typename iterlib::transform_iterator<Functor1<difference_type>, CountingIterator> TransformIterator1;
+  //typedef typename iterlib::permutation_iterator<It, TransformIterator1> PermutationIterator1;
+  //
+  //PermutationIterator1 it1(Out.begin(),
+  //                         TransformIterator1(CountingIterator(0),
+  //                                            Functor1<difference_type>(Out.Rows(), Out.Cols())));
+  //PermutationIterator1 end1 = it1 + (Out.end() - Out.begin()) * factor;
+  //
+  //Out.Resize(Out.Rows() * factor, Out.Cols());
+  //lib::copy(it1, end1, Out.begin());
   
+  size_t oldSize = Out.GetVec().size();
   Out.Resize(Out.Rows() * factor, Out.Cols());
-  lib::copy(it1, end1, Out.begin());
+  for(size_t i = 1; i < factor; i++) {
+    size_t copyStart = oldSize * i;
+    lib::copy(Out.begin(), Out.begin() + oldSize, Out.begin() + copyStart);  
+  }
   
   return Out;
 }
 
-Matrix& Broadcast2(Matrix& Out, size_t factor) {
+// Repeat every row factor times, keep rows together
+Matrix& Broadcast2(Matrix& Out, size_t factor) {  
   typedef FVec::const_iterator It;
   typedef typename iterlib::iterator_difference<It>::type difference_type;
   typedef typename iterlib::counting_iterator<difference_type> CountingIterator;
   typedef typename iterlib::transform_iterator<Functor2<difference_type>, CountingIterator> TransformIterator2;
   typedef typename iterlib::permutation_iterator<It, TransformIterator2> PermutationIterator2;
-
+  
   PermutationIterator2 it2(Out.begin(),
                            TransformIterator2(CountingIterator(0),
                                               Functor2<difference_type>(factor, Out.Cols())));
   PermutationIterator2 end2 = it2 + (Out.end() - Out.begin()) * factor;
- 
+  
   Matrix Temp(Out.Rows() * factor, Out.Cols());
   lib::copy(it2, end2, Temp.begin());
   
