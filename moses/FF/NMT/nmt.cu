@@ -33,16 +33,16 @@ size_t NMT::GetDevices() {
   return (size_t)num_gpus;
 }
 
-void NMT::ClearStates() {
+void NMT::SetDevice() {
   cudaSetDevice(w_->GetDevice());
-  
+}
+
+void NMT::ClearStates() { 
   std::vector<boost::shared_ptr<mblas::BaseMatrix> > temp;
   states_.swap(temp);
 }
 
 boost::shared_ptr<Weights> NMT::NewModel(const std::string& path, size_t device) {
-  cudaSetDevice(device);
-  
   boost::shared_ptr<Weights> weights(new Weights(path, device));
   return weights;
 }
@@ -52,9 +52,7 @@ boost::shared_ptr<Vocab> NMT::NewVocab(const std::string& path) {
   return vocab;
 }
 
-void NMT::CalcSourceContext(const std::vector<std::string>& s) {
-  cudaSetDevice(w_->GetDevice());
-  
+void NMT::CalcSourceContext(const std::vector<std::string>& s) {  
   std::vector<size_t> words(s.size());
   std::transform(s.begin(), s.end(), words.begin(),
                  [&](const std::string& w) { return (*src_)[w]; });
@@ -88,8 +86,6 @@ void NMT::MakeStep(
   std::vector<double>& logProbs,
   std::vector<WhichState>& outputStates,
   std::vector<bool>& unks) {
-  
-  cudaSetDevice(w_->GetDevice());
   
   Matrix& sourceContext = *boost::static_pointer_cast<Matrix>(SourceContext);
   

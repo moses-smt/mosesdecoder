@@ -62,6 +62,7 @@ void NeuralScoreFeature::InitializeForInput(ttasksptr const& ttask) {
   if(!m_nmt.get())  {
     size_t device = threads++ % m_models.size();
     m_nmt.reset(new NMT(m_models[device], m_sourceVocab, m_targetVocab));
+    m_nmt->SetDevice();
   }
 }
 
