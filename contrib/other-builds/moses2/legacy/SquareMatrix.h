@@ -75,11 +75,11 @@ public:
   }
   /** Get a future cost score for a span */
   inline const T &GetValue(size_t row, size_t col) const {
-    return m_array[row * m_rows + col];
+    return m_array[row * m_cols + col];
   }
   /** Set a future cost score for a span */
   inline void SetValue(size_t row, size_t col, const T &value) {
-    m_array[row * m_rows + col] = value;
+    m_array[row * m_cols + col] = value;
   }
 };
 
