@@ -24,7 +24,7 @@ size_t NMT::GetDevices() {
   int num_gpus = 0;   // number of CUDA GPUs
   cudaGetDeviceCount(&num_gpus);
   std::cerr << "Number of CUDA devices: " << num_gpus << std::endl;
-
+  
   for (int i = 0; i < num_gpus; i++) {
       cudaDeviceProp dprop;
       cudaGetDeviceProperties(&dprop, i);
@@ -35,6 +35,7 @@ size_t NMT::GetDevices() {
 
 void NMT::SetDevice() {
   cudaSetDevice(w_->GetDevice());
+  //CublasHandle::Init(w_->GetDevice());
 }
 
 void NMT::ClearStates() { 
@@ -43,6 +44,8 @@ void NMT::ClearStates() {
 }
 
 boost::shared_ptr<Weights> NMT::NewModel(const std::string& path, size_t device) {
+  // this should be solved in a better way
+  cudaSetDevice(device);
   boost::shared_ptr<Weights> weights(new Weights(path, device));
   return weights;
 }
@@ -108,7 +111,7 @@ void NMT::MakeStep(
                  [&](const std::string& w) { return (*trg_)[w]; });
   decoder_->Lookup(nextEmbeddings, nextIds);
   for(auto id : nextIds) {
-    if(id == 1)
+    if(id != 1)
       unks.push_back(true);
     else
       unks.push_back(false);

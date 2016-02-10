@@ -63,6 +63,7 @@ void NeuralScoreFeature::InitializeForInput(ttasksptr const& ttask) {
     size_t device = threads++ % m_models.size();
     m_nmt.reset(new NMT(m_models[device], m_sourceVocab, m_targetVocab));
     m_nmt->SetDevice();
+    
   }
 }
 
@@ -195,7 +196,7 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
                     allProbs,
                     allOutStates,
                     unks);
-  
+    
     size_t k = 0;
     for(Prefixes::iterator it = prefixes.begin(); it != prefixes.end(); it++) {
       BOOST_FOREACH(SP& hyp, it->second) {

@@ -97,13 +97,16 @@ class Decoder {
                         const mblas::Matrix& SourceContext,
                         const mblas::Matrix& PrevState) {
           using namespace mblas;  
+          
           Prod(Temp1_, SourceContext, w_.Ua_);
           Prod(Temp2_, PrevState, w_.Wa_);
           
           size_t rows1 = Temp1_.Rows();
           size_t rows2 = Temp2_.Rows();
+          
           Broadcast1(Temp1_, rows2);
           Broadcast2(Temp2_, rows1);
+          
           Element(Tanh(_1 + _2), Temp1_, Temp2_);
 
           Prod(A_, w_.Va_, Temp1_, false, true);
@@ -150,16 +153,6 @@ class Decoder {
           Element(_1 + _2, Probs, w_.WoB_); // Broadcasting row-wise
           SoftmaxRows(Probs, Ones_, Sums_);
         }
-        
-        void GetLogProbs(mblas::Matrix& Probs,
-                      const mblas::Matrix& PrevState,
-                      const mblas::Matrix& PrevEmbd,
-                      const mblas::Matrix& Context) {
-          using namespace mblas;
-          
-          GetProbs(Probs, PrevState, PrevEmbd, Context);
-          Element(Log(_1), Probs);
-        }
       
       private:        
         const Weights& w_;
@@ -186,15 +179,6 @@ class Decoder {
                   const mblas::Matrix& SourceContext) {
       alignment_.GetContext(AlignedSourceContext, SourceContext, PrevState);
       softmax_.GetProbs(Probs, PrevState, PrevEmbedding, AlignedSourceContext);
-    }
-    
-    void GetLogProbs(mblas::Matrix& Probs,
-                  mblas::Matrix& AlignedSourceContext,
-                  const mblas::Matrix& PrevState,
-                  const mblas::Matrix& PrevEmbedding,
-                  const mblas::Matrix& SourceContext) {
-      alignment_.GetContext(AlignedSourceContext, SourceContext, PrevState);
-      softmax_.GetLogProbs(Probs, PrevState, PrevEmbedding, AlignedSourceContext);
     }
     
     void EmptyState(mblas::Matrix& State, const mblas::Matrix& SourceContext,

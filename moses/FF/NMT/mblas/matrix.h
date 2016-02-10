@@ -44,21 +44,38 @@ using namespace thrust::placeholders;
 #endif
 
 #ifndef NO_CUDA
-struct CublasHandle {
-  static cublasHandle_t Init() {
-    cublasHandle_t handle;
-    cublasCreate(&handle);
-    return handle;
-  }
-  
-  static cublasHandle_t GetInstance() {
-    return handle_;
-  }
-  
-  static cublasHandle_t handle_;
-};
 
-cublasHandle_t CublasHandle::handle_ = CublasHandle::Init();
+//struct CublasHandle {
+//  static void Init(size_t device = 0) {
+//    cudaSetDevice(device);
+//    cublasCreate(&handle_);
+//  }
+//  
+//  static cublasHandle_t GetInstance() {
+//    return handle_;
+//  }
+//  
+//  static thread_local cublasHandle_t handle_;
+//};
+//
+//thread_local cublasHandle_t CublasHandle::handle_;
+
+//struct CublasHandle {
+//  static cublasHandle_t Init() {
+//    cublasHandle_t handle;
+//    cublasCreate(&handle);
+//    return handle;
+//  }
+//  
+//  static cublasHandle_t GetInstance() {
+//    return handle_;
+//  }
+//  
+//  static cublasHandle_t handle_;
+//};
+//
+//cublasHandle_t CublasHandle::handle_ = CublasHandle::Init();
+
 #endif
 
 template <class VecType>
@@ -471,7 +488,11 @@ Matrix& Prod(Matrix& C, const Matrix& A, const Matrix& B,
   cublasOperation_t opA = transA ? CUBLAS_OP_T : CUBLAS_OP_N;
   cublasOperation_t opB = transB ? CUBLAS_OP_T : CUBLAS_OP_N;
 
-  cublasSgemm(CublasHandle::GetInstance(), opB, opA,
+  cublasHandle_t handle;
+  cublasCreate(&handle);
+  
+  //cublasSgemm(CublasHandle::GetInstance(), opB, opA,
+  cublasSgemm(handle, opB, opA,
               n, m, k, &alpha, B.data(), ldb, A.data(), lda, &beta, C.data(), ldc);
 #else
   CBLAS_TRANSPOSE opA = transA ? CblasTrans : CblasNoTrans;
