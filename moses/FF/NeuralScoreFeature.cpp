@@ -19,7 +19,7 @@ namespace Moses
 class NeuralScoreState : public FFState
 {
 public:
-  NeuralScoreState(WhichState state, const std::string& lastWord)
+  NeuralScoreState(StateInfoPtr state, const std::string& lastWord)
   : m_state(state),
     m_lastWord(lastWord) {
     m_lastContext.push_back(m_lastWord);
@@ -47,12 +47,12 @@ public:
     return m_lastWord;
   }
   
-  WhichState GetState() const {
+  StateInfoPtr GetState() const {
     return m_state;
   }
 
 private:
-  WhichState m_state;
+  StateInfoPtr m_state;
   std::string m_lastWord;
   std::deque<std::string> m_lastContext;
 };
@@ -62,8 +62,7 @@ void NeuralScoreFeature::InitializeForInput(ttasksptr const& ttask) {
   if(!m_nmt.get())  {
     size_t device = threads++ % m_models.size();
     m_nmt.reset(new NMT(m_models[device], m_sourceVocab, m_targetVocab));
-    m_nmt->SetDevice();
-    
+    m_nmt->SetDevice();  
   }
 }
 
@@ -83,7 +82,7 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
   
   m_nmt->CalcSourceContext(words);
   
-  return new NeuralScoreState(WhichState(0, 0), "");
+  return new NeuralScoreState(m_nmt->EmptyState(), "");
 }
 
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
@@ -160,14 +159,14 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
   
     std::vector<std::string> allWords;
     std::vector<std::string> allLastWords;
-    std::vector<WhichState> allStates;
+    std::vector<StateInfoPtr> allStates;
   
     for(Prefixes::iterator it = prefixes.begin(); it != prefixes.end(); it++) {
       const Prefix& prefix = it->first;
       BOOST_FOREACH(SP& hyp, it->second) {
         size_t hypId = hyp.first;
         allWords.push_back(prefix[l]);
-        WhichState state;
+        StateInfoPtr state;
         if(prefix.size() == 1) {
           state = states[hypId]->GetState();
           allLastWords.push_back(states[hypId]->GetLastWord());
@@ -183,7 +182,7 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
     }
   
     std::vector<double> allProbs;
-    std::vector<WhichState> allOutStates;
+    std::vector<StateInfoPtr> allOutStates;
     std::vector<bool> unks;
     
     m_nmt->MakeStep(allWords,
@@ -246,7 +245,7 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
   int prevId = cur_hypo.GetPrevHypo()->GetId();
   double prob = 0;
   size_t unks = 0;
-  WhichState state(0, 0);
+  StateInfoPtr state;
   Prefix prefix;
   for(size_t i = 0; i < phrase.size(); i++) {
     prefix.push_back(phrase[i]);
@@ -278,7 +277,7 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
-  return new NeuralScoreState(WhichState(0,0), "");
+  return new NeuralScoreState(StateInfoPtr(), "");
 }
 
 void NeuralScoreFeature::SetParameter(const std::string& key, const std::string& value)

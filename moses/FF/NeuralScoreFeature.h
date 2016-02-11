@@ -15,10 +15,10 @@
 #include "moses/FF/NMT/nmt.h"
 
 struct Payload {
-  Payload() : state_(0, 0), logProb_(0), known_(true) {}
-  Payload(WhichState state, float logProb) : state_(state), logProb_(logProb) {}
+  Payload() : logProb_(0), known_(true) {}
+  Payload(StateInfoPtr state, float logProb) : state_(state), logProb_(logProb) {}
   
-  WhichState state_;
+  StateInfoPtr state_;
   float logProb_;
   bool known_;
 };

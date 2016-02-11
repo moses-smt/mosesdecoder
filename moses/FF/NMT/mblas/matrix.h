@@ -124,6 +124,12 @@ class TMatrix : public BaseMatrix {
       rows_ = rows;
       cols_ = cols;
     }
+    
+    void Purge() {
+      Clear();
+      VecType temp;
+      data_.swap(temp);
+    }
 
     void Clear() {
       data_.clear();
@@ -274,6 +280,21 @@ Matrix& CopyRow(Matrix& Out,
   return Out;
 }
 
+Matrix& CopyRow2(Matrix& Out,
+                const Matrix& In,
+                const size_t rOut,
+                const size_t rIn) {
+  size_t length = In.Cols();
+  
+  size_t startIn = rIn * length;
+  size_t endIn   = startIn + length;
+  
+  size_t startOut = rOut * length;
+  
+  lib::copy(In.begin() + startIn, In.begin() + endIn, Out.begin() + startOut);
+  return Out;
+}
+
 // @TODO : get rid of loop
 Matrix& CopyRows(Matrix& Out,
                 const Matrix& In,
@@ -289,6 +310,8 @@ Matrix& CopyRows(Matrix& Out,
   }
   return Out;
 }
+
+
 
 Matrix& Lookup(Matrix& Out,
                const Matrix& Embeddings,

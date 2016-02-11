@@ -9,17 +9,10 @@ class Weights;
 class Vocab;
 class Encoder;
 class Decoder;
+class States;
 
-struct WhichState {
-  WhichState()
-  : stateId(0), rowNo(0) {}
-  
-  WhichState(size_t s, size_t r)
-  : stateId(s), rowNo(r) {}
-  
-  size_t stateId;
-  size_t rowNo;
-};
+class StateInfo;
+typedef boost::shared_ptr<StateInfo> StateInfoPtr;
 
 class NMT {
   public:
@@ -36,12 +29,14 @@ class NMT {
   
     void CalcSourceContext(const std::vector<std::string>& s);
     
+    StateInfoPtr EmptyState();     
+    
     void MakeStep(
       const std::vector<std::string>& nextWords,
       const std::vector<std::string>& lastWords,
-      std::vector<WhichState>& inputStates,
+      std::vector<StateInfoPtr>& inputStates,
       std::vector<double>& logProbs,
-      std::vector<WhichState>& nextStates,
+      std::vector<StateInfoPtr>& nextStates,
       std::vector<bool>& unks);
   
     void ClearStates();
@@ -54,7 +49,8 @@ class NMT {
     boost::shared_ptr<Encoder> encoder_;
     boost::shared_ptr<Decoder> decoder_;
     
-    boost::shared_ptr<mblas::BaseMatrix> SourceContext;
+    boost::shared_ptr<mblas::BaseMatrix> SourceContext_;
     
-    std::vector<boost::shared_ptr<mblas::BaseMatrix> > states_;
+    boost::shared_ptr<States> states_;
+    bool firstWord_;
 };

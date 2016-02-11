@@ -10,6 +10,7 @@
 #include "encoder.h"
 #include "decoder.h"
 #include "vocab.h"
+#include "states.h"
 
 using namespace mblas;
 
@@ -17,20 +18,22 @@ NMT::NMT(const boost::shared_ptr<Weights> model,
          const boost::shared_ptr<Vocab> src,
          const boost::shared_ptr<Vocab> trg)
   : w_(model), src_(src), trg_(trg),
-    encoder_(new Encoder(*w_)), decoder_(new Decoder(*w_))
+    encoder_(new Encoder(*w_)), decoder_(new Decoder(*w_)),
+    states_(new States()), firstWord_(true)
   { }
 
 size_t NMT::GetDevices() {
-  int num_gpus = 0;   // number of CUDA GPUs
-  cudaGetDeviceCount(&num_gpus);
-  std::cerr << "Number of CUDA devices: " << num_gpus << std::endl;
-  
-  for (int i = 0; i < num_gpus; i++) {
-      cudaDeviceProp dprop;
-      cudaGetDeviceProperties(&dprop, i);
-      std::cerr << i << ": " << dprop.name << std::endl;
-  }
-  return (size_t)num_gpus;
+  return 1;
+  //int num_gpus = 0;   // number of CUDA GPUs
+  //cudaGetDeviceCount(&num_gpus);
+  //std::cerr << "Number of CUDA devices: " << num_gpus << std::endl;
+  //
+  //for (int i = 0; i < num_gpus; i++) {
+  //    cudaDeviceProp dprop;
+  //    cudaGetDeviceProperties(&dprop, i);
+  //    std::cerr << i << ": " << dprop.name << std::endl;
+  //}
+  //return (size_t)num_gpus;
 }
 
 void NMT::SetDevice() {
@@ -38,8 +41,7 @@ void NMT::SetDevice() {
 }
 
 void NMT::ClearStates() { 
-  std::vector<boost::shared_ptr<mblas::BaseMatrix> > temp;
-  states_.swap(temp);
+  states_->Clear();
 }
 
 boost::shared_ptr<Weights> NMT::NewModel(const std::string& path, size_t device) {
@@ -59,48 +61,42 @@ void NMT::CalcSourceContext(const std::vector<std::string>& s) {
                  [&](const std::string& w) { return (*src_)[w]; });
   words.push_back((*src_)["</s>"]);
   
-  SourceContext.reset(new Matrix());
-  Matrix& sc = *boost::static_pointer_cast<Matrix>(SourceContext);
-  encoder_->GetContext(words, sc);
-  
-  // Put empty decoder state into state cache
-  states_.emplace_back(new Matrix());
-  Matrix& firstStates = *boost::static_pointer_cast<Matrix>(states_.back());
-  decoder_->EmptyState(firstStates, sc, 1);
+  SourceContext_.reset(new Matrix());
+  Matrix& SC = *boost::static_pointer_cast<Matrix>(SourceContext_);
+  encoder_->GetContext(words, SC);
 }
 
-void ConstructPrevStates(Matrix& States,
-                         const std::vector<WhichState>& inputStates,
-                         const std::vector<boost::shared_ptr<mblas::BaseMatrix> >& states) {
-  for(auto w: inputStates) {
-    //std::cerr << w.stateId << " " << w.rowNo << std::endl;
-    Matrix& State = *boost::static_pointer_cast<Matrix>(states[w.stateId]);
-    // @TODO: do that with preallocation
-    AppendRow(States, State, w.rowNo);
-  }
+StateInfoPtr NMT::EmptyState() {
+  Matrix& SC = *boost::static_pointer_cast<Matrix>(SourceContext_);
+  Matrix Empty;
+  decoder_->EmptyState(Empty, SC, 1);
+  std::vector<StateInfoPtr> infos;
+  states_->SaveStates(infos, Empty);
+  return infos.back();
 }
 
 void NMT::MakeStep(
   const std::vector<std::string>& nextWords,
   const std::vector<std::string>& lastWords,
-  std::vector<WhichState>& inputStates,
+  std::vector<StateInfoPtr>& inputStates,
   std::vector<double>& logProbs,
-  std::vector<WhichState>& outputStates,
+  std::vector<StateInfoPtr>& outputStates,
   std::vector<bool>& unks) {
   
-  Matrix& sourceContext = *boost::static_pointer_cast<Matrix>(SourceContext);
+  Matrix& sourceContext = *boost::static_pointer_cast<Matrix>(SourceContext_);
   
   Matrix lastEmbeddings;
-  if(states_.size() > 1) {
+  if(firstWord_) {
+    firstWord_ = false;
+    // Only empty state in state cache, so this is the first word
+    decoder_->EmptyEmbedding(lastEmbeddings, lastWords.size());
+  }
+  else {
     // Not the first word
     std::vector<size_t> lastIds(lastWords.size());
     std::transform(lastWords.begin(), lastWords.end(), lastIds.begin(),
                    [&](const std::string& w) { return (*trg_)[w]; });
     decoder_->Lookup(lastEmbeddings, lastIds);
-  }
-  else {
-    // Only empty state in state cache, so this is the first word
-    decoder_->EmptyEmbedding(lastEmbeddings, lastWords.size());
   }
   
   Matrix nextEmbeddings;
@@ -116,7 +112,7 @@ void NMT::MakeStep(
   }
   
   Matrix prevStates;
-  ConstructPrevStates(prevStates, inputStates, states_);
+  states_->ConstructStates(prevStates, inputStates);
 
   Matrix probs;
   Matrix alignedSourceContext;
@@ -128,13 +124,9 @@ void NMT::MakeStep(
     logProbs.push_back(log(p));
   }
                     
-  states_.emplace_back(new Matrix());
-  Matrix& nextStates = *boost::static_pointer_cast<Matrix>(states_.back());
+  Matrix nextStates;
   decoder_->GetNextState(nextStates, nextEmbeddings,
                         prevStates, alignedSourceContext);
+  states_->SaveStates(outputStates, nextStates);
   
-  size_t current = states_.size() - 1;
-  for(size_t i = 0; i < nextStates.Rows(); ++i) {
-    outputStates.push_back(WhichState(current, i));
-  }
 }

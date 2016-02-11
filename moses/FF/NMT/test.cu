@@ -9,6 +9,8 @@
 #include "decoder.h"
 #include "vocab.h"
 
+#include "states.h"
+
 using namespace mblas;
 
 int main(int argc, char** argv) {
@@ -18,7 +20,8 @@ int main(int argc, char** argv) {
     device = 1;
   
   cudaSetDevice(device);
-  //CublasHandle::Init(device);
+  
+  
   
   std::cerr << "Loading model" << std::endl;
   Weights weights("/home/marcinj/Badania/nmt/en_de_1/search_model.npz", device);
@@ -62,17 +65,17 @@ int main(int argc, char** argv) {
   
   mblas::Matrix PrevState;
   mblas::Matrix PrevEmbedding;
-
+  
   mblas::Matrix AlignedSourceContext;
   mblas::Matrix Probs;
   
   mblas::Matrix State;
   mblas::Matrix Embedding;
-
+  
   std::cerr << "Testing" << std::endl;
   boost::timer::auto_cpu_timer timer;
   size_t batchSize = tWordsBatch[0].size();
-
+  
   decoder.EmptyState(PrevState, SourceContext, batchSize);
   decoder.EmptyEmbedding(PrevEmbedding, batchSize);
   

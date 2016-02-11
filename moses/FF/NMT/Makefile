@@ -1,13 +1,16 @@
 all: libnmt-cuda.so test_cuda
 
-NMTCU = nmt.cu cnpy/cnpy.cpp 
+NMTCU = nmt.cu murmur3.cu cnpy/cnpy.cpp 
 NMT = nmt.cpp cnpy/cnpy.cpp 
-SOURCESCU = test.cu cnpy/cnpy.cpp 
+SOURCESCU = test.cu murmur3.cu cnpy/cnpy.cpp 
 SOURCES = test.cpp cnpy/cnpy.cpp 
-HEADERS = decoder.h encoder.h model.h npz_converter.h vocab.h mblas/matrix.h mblas/base_matrix.h
+HEADERS = decoder.h encoder.h model.h states.h npz_converter.h vocab.h mblas/matrix.h mblas/base_matrix.h
 
 test_cuda: $(SOURCESCU) $(HEADERS)
 	nvcc -O3 -std=c++11 $(SOURCESCU) -lboost_system -lboost_timer -lcudart -lcublas -o $@
+
+%.o : %.cu
+	nvcc -O3 -std=c++11 -c $^ -o $@
 
 test.cpp: test.cu
 	cp $^ $@
@@ -42,5 +45,5 @@ libnmt-cuda.so: $(NMTCU) $(HEADERS)
 #
 
 clean:
-	rm -rf test_cuda test_gsl test_atlas test_ptatlas libnmt-cuda.so
+	rm -rf test_cuda test_gsl test_atlas test_ptatlas libnmt-cuda.so *.o *.so
 
