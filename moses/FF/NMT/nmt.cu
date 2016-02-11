@@ -22,22 +22,25 @@ NMT::NMT(const boost::shared_ptr<Weights> model,
     states_(new States()), firstWord_(true)
   { }
 
-size_t NMT::GetDevices() {
-  return 1;
-  //int num_gpus = 0;   // number of CUDA GPUs
-  //cudaGetDeviceCount(&num_gpus);
-  //std::cerr << "Number of CUDA devices: " << num_gpus << std::endl;
-  //
-  //for (int i = 0; i < num_gpus; i++) {
-  //    cudaDeviceProp dprop;
-  //    cudaGetDeviceProperties(&dprop, i);
-  //    std::cerr << i << ": " << dprop.name << std::endl;
-  //}
-  //return (size_t)num_gpus;
+size_t NMT::GetDevices(size_t maxDevices) {
+  int num_gpus = 0;   // number of CUDA GPUs
+  cudaGetDeviceCount(&num_gpus);
+  std::cerr << "Number of CUDA devices: " << num_gpus << std::endl;
+  
+  for (int i = 0; i < num_gpus; i++) {
+      cudaDeviceProp dprop;
+      cudaGetDeviceProperties(&dprop, i);
+      std::cerr << i << ": " << dprop.name << std::endl;
+  }
+  return (size_t)std::min(num_gpus, (int)maxDevices);
 }
 
 void NMT::SetDevice() {
   cudaSetDevice(w_->GetDevice());
+}
+
+size_t NMT::GetDevice() {
+  return w_->GetDevice();
 }
 
 void NMT::ClearStates() { 

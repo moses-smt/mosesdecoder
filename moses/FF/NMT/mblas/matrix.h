@@ -415,6 +415,19 @@ Matrix& Broadcast2(Matrix& Out, size_t factor) {
   lib::copy(it2, end2, Temp.begin());
   
   Swap(Out, Temp);
+  
+  //size_t oldRows = Out.Rows();
+  //size_t length = Out.Cols();
+  //Out.Resize(Out.Rows() * factor, Out.Cols());
+  //for(int i = oldRows - 1; i >= 0; --i) {
+  //  for(size_t j = 0; j < factor; ++j) {
+  //    size_t copyStart = i * length;
+  //    size_t copyEnd   = i * length + length;
+  //    size_t outStart  = (i * factor + j) * length;
+  //    lib::copy(Out.begin() + copyStart, Out.begin() + copyEnd , Out.begin() + outStart);    
+  //  }
+  //}
+  
   return Out;
 }
 
@@ -511,12 +524,18 @@ Matrix& Prod(Matrix& C, const Matrix& A, const Matrix& B,
   cublasOperation_t opA = transA ? CUBLAS_OP_T : CUBLAS_OP_N;
   cublasOperation_t opB = transB ? CUBLAS_OP_T : CUBLAS_OP_N;
 
-  cublasHandle_t handle;
-  cublasCreate(&handle);
+  thread_local cublasHandle_t handle;
+  thread_local bool initialized;
   
-  //cublasSgemm(CublasHandle::GetInstance(), opB, opA,
+  if(!initialized) {
+    initialized = true;
+    std::cerr << "Creating cuBLAS handle" << std::endl;
+    cublasCreate(&handle); 
+  }
+  
   cublasSgemm(handle, opB, opA,
               n, m, k, &alpha, B.data(), ldb, A.data(), lda, &beta, C.data(), ldc);
+  
 #else
   CBLAS_TRANSPOSE opA = transA ? CblasTrans : CblasNoTrans;
   CBLAS_TRANSPOSE opB = transB ? CblasTrans : CblasNoTrans;
@@ -524,6 +543,7 @@ Matrix& Prod(Matrix& C, const Matrix& A, const Matrix& B,
   cblas_sgemm(CblasColMajor, opB, opA,
               n, m, k, alpha, B.data(), ldb, A.data(), lda, beta, C.data(), ldc);
 #endif
+
   return C;
 }
 

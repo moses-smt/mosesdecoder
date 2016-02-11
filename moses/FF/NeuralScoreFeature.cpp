@@ -86,11 +86,12 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
 }
 
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
-  : StatefulFeatureFunction(2, line), m_batchSize(1000), m_stateLength(3), m_factor(0)
+  : StatefulFeatureFunction(2, line), m_batchSize(1000), m_stateLength(3),
+    m_factor(0), m_maxDevices(1)
 {
   ReadParameters();
   
-  size_t devices = NMT::GetDevices();
+  size_t devices = NMT::GetDevices(m_maxDevices);
   for(size_t device = 0; device < devices; ++device)
     m_models.push_back(NMT::NewModel(m_modelPath, device));
   
@@ -286,6 +287,8 @@ void NeuralScoreFeature::SetParameter(const std::string& key, const std::string&
     m_stateLength = Scan<size_t>(value);
   } else if (key == "model") {
     m_modelPath = value;
+  } else if (key == "devices") {
+    m_maxDevices = Scan<size_t>(value);
   } else if (key == "source-vocab") {
     m_sourceVocabPath = value;
   } else if (key == "target-vocab") {

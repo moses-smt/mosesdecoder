@@ -85,7 +85,7 @@ private:
   size_t m_batchSize;
   size_t m_stateLength;
   size_t m_factor;
-  std::vector<std::string> m_gpus;
+  size_t m_maxDevices;
   
   std::vector<boost::shared_ptr<Weights> > m_models;
   boost::shared_ptr<Vocab> m_sourceVocab;

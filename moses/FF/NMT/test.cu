@@ -21,8 +21,6 @@ int main(int argc, char** argv) {
   
   cudaSetDevice(device);
   
-  
-  
   std::cerr << "Loading model" << std::endl;
   Weights weights("/home/marcinj/Badania/nmt/en_de_1/search_model.npz", device);
   Vocab svcb("/home/marcinj/Badania/nmt/en_de_1/src.vocab.txt");

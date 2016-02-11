@@ -20,8 +20,9 @@ class NMT {
         const boost::shared_ptr<Vocab> src,
         const boost::shared_ptr<Vocab> trg);
   
-    static size_t GetDevices();
+    static size_t GetDevices(size_t = 1);
     void SetDevice();
+    size_t GetDevice();
   
     static boost::shared_ptr<Weights> NewModel(const std::string& path, size_t device = 0);
   
