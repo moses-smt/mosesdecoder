@@ -182,9 +182,6 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
       }
     }
   
-    //std::cerr << (l+1) << ":"
-    //  << (*m_pbl)[l].size() << ":" << allStates.size() << " ";
-  
     std::vector<double> allProbs;
     std::vector<WhichState> allOutStates;
     std::vector<bool> unks;
@@ -208,7 +205,6 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
       }
     }
   }
-  //std::cerr << "ok" << std::endl;
 }
 
 void NeuralScoreFeature::EvaluateInIsolation(const Phrase &source

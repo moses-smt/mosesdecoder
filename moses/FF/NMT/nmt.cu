@@ -35,7 +35,6 @@ size_t NMT::GetDevices() {
 
 void NMT::SetDevice() {
   cudaSetDevice(w_->GetDevice());
-  //CublasHandle::Init(w_->GetDevice());
 }
 
 void NMT::ClearStates() { 
@@ -44,7 +43,6 @@ void NMT::ClearStates() {
 }
 
 boost::shared_ptr<Weights> NMT::NewModel(const std::string& path, size_t device) {
-  // this should be solved in a better way
   cudaSetDevice(device);
   boost::shared_ptr<Weights> weights(new Weights(path, device));
   return weights;
