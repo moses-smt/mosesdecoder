@@ -42,14 +42,19 @@ public:
   bool IsUseable(const FactorMask &mask) const {
     return true;
   }
-
   
   void InitializeForInput(ttasksptr const& ttask);
   void CleanUpAfterSentenceProcessing(ttasksptr const& ttask);
   
-
   void ProcessStack(Collector& collector, size_t index);
 
+  void BatchProcess(
+      const std::vector<std::string>& nextWords,
+      const std::vector<std::string>& lastWords,
+      std::vector<StateInfoPtr>& inputStates,
+      std::vector<double>& logProbs,
+      std::vector<StateInfoPtr>& nextStates,
+      std::vector<bool>& unks);
   
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
   

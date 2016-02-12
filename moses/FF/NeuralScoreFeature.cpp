@@ -186,13 +186,21 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
     std::vector<StateInfoPtr> allOutStates;
     std::vector<bool> unks;
     
-    m_nmt->MakeStep(allWords,
-                    allLastWords,
-                    allStates,
-                    /** out **/
-                    allProbs,
-                    allOutStates,
-                    unks);
+    //m_nmt->MakeStep(allWords,
+    //                allLastWords,
+    //                allStates,
+    //                /** out **/
+    //                allProbs,
+    //                allOutStates,
+    //                unks);
+    
+   BatchProcess(allWords,
+                allLastWords,
+                allStates,
+                /** out **/
+                allProbs,
+                allOutStates,
+                unks);
     
     size_t k = 0;
     for(Prefixes::iterator it = prefixes.begin(); it != prefixes.end(); it++) {
@@ -206,6 +214,51 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
     }
   }
 }
+
+void NeuralScoreFeature::BatchProcess(
+  const std::vector<std::string>& nextWords,
+  const std::vector<std::string>& lastWords,
+  std::vector<StateInfoPtr>& inputStates,
+  std::vector<double>& logProbs,
+  std::vector<StateInfoPtr>& outputStates,
+  std::vector<bool>& unks) {
+  
+    size_t m_batchSize = 1000;
+  
+    size_t items = nextWords.size();
+    size_t batches = ceil(items/(float)m_batchSize);
+    for(size_t i = 0; i < batches; ++i) {
+      size_t thisBatchStart = i * m_batchSize;
+      size_t thisBatchEnd = std::min(thisBatchStart + m_batchSize, items);
+      
+      
+      std::vector<std::string> nextWordsBatch(nextWords.begin() + thisBatchStart,
+                                              nextWords.begin() + thisBatchEnd);
+      std::vector<std::string> lastWordsBatch(lastWords.begin() + thisBatchStart,
+                                              lastWords.begin() + thisBatchEnd);
+      std::vector<StateInfoPtr> inputStatesBatch(inputStates.begin() + thisBatchStart,
+                                              inputStates.begin() + thisBatchEnd);
+
+      std::vector<double> logProbsBatch;
+      std::vector<StateInfoPtr> nextStatesBatch;
+      std::vector<bool> unksBatch;
+      
+      m_nmt->MakeStep(nextWordsBatch,
+                lastWordsBatch,
+                inputStatesBatch,
+                /** out **/
+                logProbsBatch,
+                nextStatesBatch,
+                unksBatch);
+          
+      logProbs.insert(logProbs.end(), logProbsBatch.begin(), logProbsBatch.end());
+      outputStates.insert(outputStates.end(), nextStatesBatch.begin(), nextStatesBatch.end());
+      unks.insert(unks.end(), unksBatch.begin(), unksBatch.end());
+    }
+}
+
+  
+
 
 void NeuralScoreFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
