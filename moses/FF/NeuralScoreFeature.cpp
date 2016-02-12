@@ -149,7 +149,6 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
   
           (*m_pbl)[prefix.size() - 1][prefix][hypId] = Payload();
         }
-  
       }
     }
   }
@@ -185,13 +184,13 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
     std::vector<StateInfoPtr> allOutStates;
     std::vector<bool> unks;
     
-   BatchProcess(allWords,
-                allLastWords,
-                allStates,
-                /** out **/
-                allProbs,
-                allOutStates,
-                unks);
+    BatchProcess(allWords,
+                 allLastWords,
+                 allStates,
+                 /** out **/
+                 allProbs,
+                 allOutStates,
+                 unks);
     
     size_t k = 0;
     for(Prefixes::iterator it = prefixes.begin(); it != prefixes.end(); it++) {

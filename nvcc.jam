@@ -1,0 +1,9 @@
+import type ;
+type.register CUDA : cu ;
+
+import generators ;
+generators.register-standard nvcc.compile : CUDA : OBJ ;
+actions compile
+{
+    "/usr/local/cuda/bin/nvcc" -std=c++11 -O3 -o $(<) -c $(>)
+}
