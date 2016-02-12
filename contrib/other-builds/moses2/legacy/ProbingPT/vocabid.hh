@@ -20,7 +20,7 @@ void add_to_map(std::map<uint64_t, std::string> *karta, const StringPiece &texti
 
 void serialize_map(const std::map<uint64_t, std::string> &karta, const std::string &filename);
 
-void read_map(std::map<uint64_t, std::string> *karta, const char* filename);
+void read_map(std::map<uint64_t, std::string> &karta, const char* filename);
 
 
 }

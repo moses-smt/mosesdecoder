@@ -1,5 +1,6 @@
 #include <boost/foreach.hpp>
 #include "vocabid.hh"
+#include "../Util2.h"
 
 namespace Moses2
 {
@@ -27,12 +28,17 @@ void serialize_map(const std::map<uint64_t, std::string> &karta, const std::stri
 	  os.close();
 }
 
-void read_map(std::map<uint64_t, std::string> *karta, const char* filename)
+void read_map(std::map<uint64_t, std::string> &karta, const char* filename)
 {
-  std::ifstream is (filename, std::ios::binary);
-  boost::archive::text_iarchive iarch(is);
+  std::ifstream is (filename);
 
-  iarch >> *karta;
+  std::string line;
+  while (getline(is, line)){
+	  std::vector<std::string> toks = Tokenize(line);
+	  assert(toks.size() == 2);
+	  uint64_t ind = Scan<uint64_t>(toks[0]);
+	  karta[ind] = toks[1];
+  }
 
   //Close the stream after we are done.
   is.close();

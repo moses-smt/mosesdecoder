@@ -35,7 +35,7 @@ QueryEngine::QueryEngine(const char * filepath)
   std::string path_to_source_vocabid = basepath + "/source_vocabids";
 
   ///Source phrase vocabids
-  read_map(&source_vocabids, path_to_source_vocabid.c_str());
+  read_map(source_vocabids, path_to_source_vocabid.c_str());
 
   //Read config file
   std::string line;
