@@ -47,7 +47,7 @@ int main(int argc, char** argv) {
   //};
   
   typedef std::vector<size_t> Batch;
-  size_t bs = 1;
+  size_t bs = 500;
   std::vector<std::vector<size_t>> tWordsBatch = {
     Batch(bs, tvcb["das"]),
     Batch(bs, tvcb["ist"]),
@@ -74,26 +74,28 @@ int main(int argc, char** argv) {
   boost::timer::auto_cpu_timer timer;
   size_t batchSize = tWordsBatch[0].size();
   
-  decoder.EmptyState(PrevState, SourceContext, batchSize);
-  decoder.EmptyEmbedding(PrevEmbedding, batchSize);
-  
-  float sum = 0;
-  for(auto w : tWordsBatch) {
-  
-    decoder.GetProbs(Probs, AlignedSourceContext,
-                     PrevState, PrevEmbedding, SourceContext);
+  for(size_t i = 0; i < 10; ++i) {
+    decoder.EmptyState(PrevState, SourceContext, batchSize);
+    decoder.EmptyEmbedding(PrevEmbedding, batchSize);
     
-    for(size_t j = 0; j < 1; ++j) {
-      float p = Probs(j, w[j]);
-      std::cerr << j << " " << w[j] << " " << log(p) << std::endl;
-      sum += log(p);
+    float sum = 0;
+    for(auto w : tWordsBatch) {
+    
+      decoder.GetProbs(Probs, AlignedSourceContext,
+                       PrevState, PrevEmbedding, SourceContext);
+      
+      for(size_t j = 0; j < 1; ++j) {
+        float p = Probs(j, w[j]);
+        std::cerr << j << " " << w[j] << " " << log(p) << std::endl;
+        sum += log(p);
+      }
+    
+      decoder.Lookup(Embedding, w);
+      decoder.GetNextState(State, Embedding,
+                           PrevState, AlignedSourceContext);
+      
+      mblas::Swap(State, PrevState);
+      mblas::Swap(Embedding, PrevEmbedding);
     }
-  
-    decoder.Lookup(Embedding, w);
-    decoder.GetNextState(State, Embedding,
-                         PrevState, AlignedSourceContext);
-    
-    mblas::Swap(State, PrevState);
-    mblas::Swap(Embedding, PrevEmbedding);
   }
 }

@@ -14,7 +14,7 @@ class Decoder {
             
         void Lookup(mblas::Matrix& Rows, const std::vector<size_t>& ids) {
           using namespace mblas;
-          CopyRows(Rows, w_.E_, ids);
+          Assemble(Rows, w_.E_, ids);
           Element(_1 + _2, Rows, w_.EB_);
         }
       

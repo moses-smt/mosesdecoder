@@ -1,8 +1,8 @@
 all: libnmt-cuda.so test_cuda
 
-NMTCU = nmt.cu murmur3.cu cnpy/cnpy.cpp 
+NMTCU = nmt.cu cnpy/cnpy.cpp 
 NMT = nmt.cpp cnpy/cnpy.cpp 
-SOURCESCU = test.cu murmur3.cu cnpy/cnpy.cpp 
+SOURCESCU = test.cu cnpy/cnpy.cpp 
 SOURCES = test.cpp cnpy/cnpy.cpp 
 HEADERS = decoder.h encoder.h model.h states.h npz_converter.h vocab.h mblas/matrix.h mblas/base_matrix.h
 

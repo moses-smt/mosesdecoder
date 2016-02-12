@@ -154,7 +154,6 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
     }
   }
   
-  //std::cerr << "Stack: " << covered << "/" << total << " - ";
   for(size_t l = 0; l < m_pbl->size(); l++) {
     Prefixes& prefixes = (*m_pbl)[l];
   
@@ -186,14 +185,6 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
     std::vector<StateInfoPtr> allOutStates;
     std::vector<bool> unks;
     
-    //m_nmt->MakeStep(allWords,
-    //                allLastWords,
-    //                allStates,
-    //                /** out **/
-    //                allProbs,
-    //                allOutStates,
-    //                unks);
-    
    BatchProcess(allWords,
                 allLastWords,
                 allStates,
@@ -222,8 +213,6 @@ void NeuralScoreFeature::BatchProcess(
   std::vector<double>& logProbs,
   std::vector<StateInfoPtr>& outputStates,
   std::vector<bool>& unks) {
-  
-    size_t m_batchSize = 1000;
   
     size_t items = nextWords.size();
     size_t batches = ceil(items/(float)m_batchSize);
@@ -303,7 +292,6 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
   Prefix prefix;
   for(size_t i = 0; i < phrase.size(); i++) {
     prefix.push_back(phrase[i]);
-    //std::cerr << "p3:" << const_cast<PrefsByLength&>(m_pbl)[prefix.size() - 1][prefix].count(prevId) << std::endl;
     if(!const_cast<PrefsByLength&>(*m_pbl)[prefix.size() - 1][prefix].count(prevId)) {
       BOOST_FOREACH(std::string s, prefix) {
         std::cerr << s << " ";
@@ -342,6 +330,8 @@ void NeuralScoreFeature::SetParameter(const std::string& key, const std::string&
     m_modelPath = value;
   } else if (key == "devices") {
     m_maxDevices = Scan<size_t>(value);
+  } else if (key == "batch-size") {
+    m_batchSize = Scan<size_t>(value);
   } else if (key == "source-vocab") {
     m_sourceVocabPath = value;
   } else if (key == "target-vocab") {

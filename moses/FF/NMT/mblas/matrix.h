@@ -43,41 +43,6 @@ using namespace boost::phoenix::placeholders;
 using namespace thrust::placeholders;
 #endif
 
-#ifndef NO_CUDA
-
-//struct CublasHandle {
-//  static void Init(size_t device = 0) {
-//    cudaSetDevice(device);
-//    cublasCreate(&handle_);
-//  }
-//  
-//  static cublasHandle_t GetInstance() {
-//    return handle_;
-//  }
-//  
-//  static thread_local cublasHandle_t handle_;
-//};
-//
-//thread_local cublasHandle_t CublasHandle::handle_;
-
-//struct CublasHandle {
-//  static cublasHandle_t Init() {
-//    cublasHandle_t handle;
-//    cublasCreate(&handle);
-//    return handle;
-//  }
-//  
-//  static cublasHandle_t GetInstance() {
-//    return handle_;
-//  }
-//  
-//  static cublasHandle_t handle_;
-//};
-//
-//cublasHandle_t CublasHandle::handle_ = CublasHandle::Init();
-
-#endif
-
 template <class VecType>
 class TMatrix : public BaseMatrix {
   public:
@@ -89,7 +54,11 @@ class TMatrix : public BaseMatrix {
     : rows_(0), cols_(0)
     {}
     
-    TMatrix(size_t rows, size_t cols, value_type val = 0.0)
+    TMatrix(size_t rows, size_t cols)
+    : rows_(rows), cols_(cols), data_(rows_ * cols_)
+    {}
+    
+    TMatrix(size_t rows, size_t cols, value_type val)
     : rows_(rows), cols_(cols), data_(rows_ * cols_, val)
     {}
     
@@ -110,7 +79,13 @@ class TMatrix : public BaseMatrix {
       return cols_;
     }
     
-    void Resize(size_t rows, size_t cols, value_type val = 0.0) {
+    void Resize(size_t rows, size_t cols) {
+      rows_ = rows;
+      cols_ = cols;
+      data_.resize(rows_ * cols_);
+    }
+    
+    void Resize(size_t rows, size_t cols, value_type val) {
       rows_ = rows;
       cols_ = cols;
       data_.resize(rows_ * cols_, val);
@@ -188,7 +163,21 @@ class TMatrix : public BaseMatrix {
 };
 
 #ifndef NO_CUDA
-typedef thrust::device_vector<float> FVec;
+
+//template<typename T>
+//  struct uninitialized_allocator
+//    : thrust::device_malloc_allocator<T>
+//{
+//  // note that construct is annotated as
+//  // a __host__ __device__ function
+//  __host__ __device__
+//  void construct(T *p)
+//  {
+//    // no-op
+//  }
+//};
+
+typedef thrust::device_vector<float /*, uninitialized_allocator<float>*/> FVec;
 typedef thrust::device_vector<unsigned int> IVec;
 #else
 typedef std::vector<float> FVec;
@@ -280,45 +269,79 @@ Matrix& CopyRow(Matrix& Out,
   return Out;
 }
 
-Matrix& CopyRow2(Matrix& Out,
-                const Matrix& In,
-                const size_t rOut,
-                const size_t rIn) {
-  size_t length = In.Cols();
-  
-  size_t startIn = rIn * length;
-  size_t endIn   = startIn + length;
-  
-  size_t startOut = rOut * length;
-  
-  lib::copy(In.begin() + startIn, In.begin() + endIn, Out.begin() + startOut);
-  return Out;
-}
+typedef std::pair<size_t, size_t> RowPair;
+typedef std::vector<RowPair> RowPairs;
+typedef thrust::device_vector<RowPair> DeviceRowPairs;
 
-// @TODO : get rid of loop
-Matrix& CopyRows(Matrix& Out,
-                const Matrix& In,
-                const std::vector<size_t>& ids) {
-  size_t length = In.Cols();
-  Out.Resize(ids.size(), length);
-  size_t i = 0;
-  for(auto r : ids) {
-    size_t start = r * length;
-    size_t end   = start + length;  
-    lib::copy(In.begin() + start, In.begin() + end, Out.begin() + i * length);
-    i++;
+template <typename difference_type>
+struct Functor : public func::unary_function<difference_type, difference_type> {
+  const RowPair* rowPairs_;
+  bool first_;
+  difference_type rowLength_;
+
+  Functor(const RowPair* rowPairs, bool first, difference_type rowLength)
+  : rowPairs_(rowPairs), first_(first), rowLength_(rowLength) {}
+
+#ifndef NO_CUDA
+  __host__ __device__
+#endif
+  difference_type operator()(const difference_type& k) const {
+    difference_type i = k / rowLength_;
+    difference_type j = k % rowLength_;
+    if(first_)
+      return rowPairs_[i].first * rowLength_ + j;
+    else
+      return rowPairs_[i].second * rowLength_ + j;
   }
+};
+
+Matrix& CopyRows(Matrix& Out,
+                 const Matrix& In,
+                 const RowPair* devPairs,
+                 size_t numPairs) {
+  
+  typedef FVec::iterator It;
+  typedef typename iterlib::iterator_difference<It>::type difference_type;
+  typedef typename iterlib::counting_iterator<difference_type> CountingIterator;
+  typedef typename iterlib::transform_iterator<Functor<difference_type>, CountingIterator> TransformIterator;
+  typedef typename iterlib::permutation_iterator<It, TransformIterator> PermutationIterator;
+  
+  typedef FVec::const_iterator CIt;
+  typedef typename iterlib::iterator_difference<CIt>::type Cdifference_type;
+  typedef typename iterlib::counting_iterator<Cdifference_type> CCountingIterator;
+  typedef typename iterlib::transform_iterator<Functor<Cdifference_type>, CCountingIterator> CTransformIterator;
+  typedef typename iterlib::permutation_iterator<CIt, CTransformIterator> CPermutationIterator;
+  
+  size_t rowLength = In.Cols();  
+  CPermutationIterator itInBegin(In.begin(),
+                                 CTransformIterator(CCountingIterator(0),
+                                                    Functor<Cdifference_type>(devPairs, false, rowLength)));
+  CPermutationIterator itInEnd = itInBegin + numPairs * rowLength;
+  
+  PermutationIterator itOutBegin(Out.begin(),
+                                 TransformIterator(CountingIterator(0),
+                                                   Functor<difference_type>(devPairs, true, rowLength)));
+  
+  lib::copy(itInBegin, itInEnd, itOutBegin);
   return Out;
 }
 
+Matrix& CopyRows(Matrix& Out,
+                 const Matrix& In,
+                 const RowPairs& pairs) {
+  thrust::device_vector<RowPair> devPairs = pairs;
+  CopyRows(Out, In, thrust::raw_pointer_cast(devPairs.data()), devPairs.size());
+  return Out;
+}
 
-
-Matrix& Lookup(Matrix& Out,
-               const Matrix& Embeddings,
-               const IMatrix& Batch,
-               const size_t rowIndex) {
-  Out.Resize(Batch.Cols(), Embeddings.Cols());
-  //lib::copy();
+Matrix& Assemble(Matrix& Out,
+                 const Matrix& In,
+                 const std::vector<size_t>& indeces) {
+  RowPairs rowPairs;
+  for(size_t i = 0; i < indeces.size(); i++)
+    rowPairs.emplace_back(i, indeces[i]);
+  Out.Resize(rowPairs.size(), In.Cols());
+  CopyRows(Out, In, rowPairs);
   return Out;
 }
 
@@ -335,6 +358,62 @@ Matrix& PairwiseReduce(F f, Matrix& Out) {
 template <class F>
 Matrix& Element(F f, Matrix& Out) {
   lib::transform(Out.begin(), Out.end(), Out.begin(), f);
+  return Out;
+}
+
+void fill1(RowPair* ptr, size_t r, size_t factor) {
+  for(size_t i = 0; i < factor; ++i) {
+    for(size_t j = 0; j < r; ++j) {
+      ptr->first = i * r + j;
+      ptr->second = j;
+      ptr++;
+    }
+  }
+}
+
+void fill2(RowPair* ptr, size_t r, size_t factor) {
+  size_t k = 0;
+  for(size_t i = 0; i < r; ++i) {
+    for(size_t j = 0; j < factor; ++j) {
+      ptr->first = k++;
+      ptr->second = i;
+      ptr++;
+    }
+  }
+}
+
+template <class Filler>
+void gfiller(Filler filler, RowPair* ptr, size_t r, size_t factor) {
+  filler(ptr, r, factor);
+}
+
+template <class Filler>
+Matrix& Broadcast(Filler filler, Matrix& Out, size_t factor) {
+  size_t r = Out.Rows();
+  size_t c = Out.Cols();
+  
+  size_t newRows = r * factor;
+  
+  Matrix Temp;
+  Temp.Resize(newRows, c);
+  
+  // Try to put this on the device
+  RowPairs rowPairs(newRows);
+  gfiller(filler, rowPairs.data(), r, factor);
+  CopyRows(Temp, Out, rowPairs);
+  
+  Swap(Out, Temp);
+  
+  return Out;
+}
+
+Matrix& Broadcast1(Matrix& Out, size_t factor) {  
+  Broadcast(fill1, Out, factor);
+  return Out;
+}
+
+Matrix& Broadcast2(Matrix& Out, size_t factor) {  
+  Broadcast(fill2, Out, factor);
   return Out;
 }
 
@@ -369,67 +448,6 @@ struct Functor2 : public func::unary_function<difference_type, difference_type> 
       return cols * (i / (rows * cols)) + i % cols;
   }
 };
-
-// Extend the matrix with itself factor times
-Matrix& Broadcast1(Matrix& Out, size_t factor) {
-  //@TODO: fix this!!!
-  
-  //typedef FVec::const_iterator It;
-  //typedef typename iterlib::iterator_difference<It>::type difference_type;
-  //typedef typename iterlib::counting_iterator<difference_type> CountingIterator;
-  //typedef typename iterlib::transform_iterator<Functor1<difference_type>, CountingIterator> TransformIterator1;
-  //typedef typename iterlib::permutation_iterator<It, TransformIterator1> PermutationIterator1;
-  //
-  //PermutationIterator1 it1(Out.begin(),
-  //                         TransformIterator1(CountingIterator(0),
-  //                                            Functor1<difference_type>(Out.Rows(), Out.Cols())));
-  //PermutationIterator1 end1 = it1 + (Out.end() - Out.begin()) * factor;
-  //
-  //Out.Resize(Out.Rows() * factor, Out.Cols());
-  //lib::copy(it1, end1, Out.begin());
-  
-  size_t oldSize = Out.GetVec().size();
-  Out.Resize(Out.Rows() * factor, Out.Cols());
-  for(size_t i = 1; i < factor; i++) {
-    size_t copyStart = oldSize * i;
-    lib::copy(Out.begin(), Out.begin() + oldSize, Out.begin() + copyStart);  
-  }
-  
-  return Out;
-}
-
-// Repeat every row factor times, keep rows together
-Matrix& Broadcast2(Matrix& Out, size_t factor) {  
-  typedef FVec::const_iterator It;
-  typedef typename iterlib::iterator_difference<It>::type difference_type;
-  typedef typename iterlib::counting_iterator<difference_type> CountingIterator;
-  typedef typename iterlib::transform_iterator<Functor2<difference_type>, CountingIterator> TransformIterator2;
-  typedef typename iterlib::permutation_iterator<It, TransformIterator2> PermutationIterator2;
-  
-  PermutationIterator2 it2(Out.begin(),
-                           TransformIterator2(CountingIterator(0),
-                                              Functor2<difference_type>(factor, Out.Cols())));
-  PermutationIterator2 end2 = it2 + (Out.end() - Out.begin()) * factor;
-  
-  Matrix Temp(Out.Rows() * factor, Out.Cols());
-  lib::copy(it2, end2, Temp.begin());
-  
-  Swap(Out, Temp);
-  
-  //size_t oldRows = Out.Rows();
-  //size_t length = Out.Cols();
-  //Out.Resize(Out.Rows() * factor, Out.Cols());
-  //for(int i = oldRows - 1; i >= 0; --i) {
-  //  for(size_t j = 0; j < factor; ++j) {
-  //    size_t copyStart = i * length;
-  //    size_t copyEnd   = i * length + length;
-  //    size_t outStart  = (i * factor + j) * length;
-  //    lib::copy(Out.begin() + copyStart, Out.begin() + copyEnd , Out.begin() + outStart);    
-  //  }
-  //}
-  
-  return Out;
-}
 
 template <class F>
 Matrix& Element(F f, Matrix& Out, const Matrix& In) {
