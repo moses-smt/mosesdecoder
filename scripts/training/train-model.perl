@@ -134,6 +134,7 @@ my($_EXTERNAL_BINDIR,
    	$_LMODEL_OOV_FEATURE,
    	$_NUM_LATTICE_FEATURES,
    	$IGNORE,
+    $_TARGET_CONSTITUENT_BOUNDARIES,
    	$_FLEXIBILITY_SCORE,
    	$_FEATURE_LINES,
    	$_WEIGHT_LINES,
@@ -258,6 +259,7 @@ $_HELP = 1
 		       'instance-weights-file=s' => \$_INSTANCE_WEIGHTS_FILE,
 		       'lmodel-oov-feature' => \$_LMODEL_OOV_FEATURE,
 		       'num-lattice-features=i' => \$_NUM_LATTICE_FEATURES,
+               'target-constituent-boundaries' => \$_TARGET_CONSTITUENT_BOUNDARIES,
 		       'flexibility-score' => \$_FLEXIBILITY_SCORE,
 		       'config-add-feature-lines=s' => \$_FEATURE_LINES,
 		       'config-add-weight-lines=s' => \$_WEIGHT_LINES,
@@ -1607,6 +1609,7 @@ sub extract_phrase {
     $cmd .= " --GZOutput ";
     $cmd .= " --InstanceWeights $_INSTANCE_WEIGHTS_FILE " if defined $_INSTANCE_WEIGHTS_FILE;
     $cmd .= " --BaselineExtract $_BASELINE_EXTRACT" if defined($_BASELINE_EXTRACT) && $PHRASE_EXTRACT =~ /extract-parallel.perl/;
+    $cmd .= " --TargetConstituentBoundaries" if $_TARGET_CONSTITUENT_BOUNDARIES;
     $cmd .= " --FlexibilityScore" if $_FLEXIBILITY_SCORE;
     $cmd .= " --NoTTable" if $_MMSAPT;
 
@@ -1764,9 +1767,10 @@ sub score_phrase_phrase_extract {
         $cmd .= " --SourceLabels $_GHKM_SOURCE_LABELS_FILE" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
         $cmd .= " --TargetSyntacticPreferences $_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE" if $_TARGET_SYNTACTIC_PREFERENCES && defined($_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE);
         $cmd .= " --PartsOfSpeech $_GHKM_PARTS_OF_SPEECH_FILE" if $_GHKM_PARTS_OF_SPEECH && defined($_GHKM_PARTS_OF_SPEECH_FILE);
+        $cmd .= " --TargetConstituentBoundaries" if $_TARGET_CONSTITUENT_BOUNDARIES;
+        $cmd .= " --FlexibilityScore=$FLEX_SCORER" if $_FLEXIBILITY_SCORE;
         $cmd .= " $DOMAIN" if $DOMAIN;
         $cmd .= " $CORE_SCORE_OPTIONS" if defined($_SCORE_OPTIONS);
-        $cmd .= " --FlexibilityScore=$FLEX_SCORER" if $_FLEXIBILITY_SCORE;
 
 				# sorting
 				if ($direction eq "e2f" || $_ALT_DIRECT_RULE_SCORE_1 || $_ALT_DIRECT_RULE_SCORE_2) {
@@ -2386,6 +2390,7 @@ sub create_ini {
     print INI " unknown-word-labels-file=$_UNKNOWN_WORD_LABEL_FILE" if defined($_UNKNOWN_WORD_LABEL_FILE);
     print INI "\n";
   }
+  print INI "TargetConstituentAdjacencyFeature\n" if $_TARGET_CONSTITUENT_BOUNDARIES;
   print INI $feature_spec;
 
   print INI "\n# dense weights for feature functions\n";
@@ -2398,6 +2403,7 @@ sub create_ini {
   print INI "SoftSourceSyntacticConstraintsFeature0= -0.2 -0.2 -0.2 0.1 0.1 0.1\n" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
   print INI "PhraseOrientationFeature0= 0.05 0.05 0.05 0.05 0.05 0.05\n" if $_PHRASE_ORIENTATION;
   print INI "TargetPreferencesFeature0= 0.2 -0.2\n" if $_HIERARCHICAL && $_TARGET_SYNTAX && $_TARGET_SYNTACTIC_PREFERENCES && defined($_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE);
+  print INI "TargetConstituentAdjacencyFeature0= 0.05 -0.1\n" if $_TARGET_CONSTITUENT_BOUNDARIES;
   print INI $weight_spec;
   close(INI);
 }
