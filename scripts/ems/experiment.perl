@@ -1800,6 +1800,10 @@ sub define_lm_train_bilingual_lm {
     my $epochs = &get_bilingual_lm_epochs($set);
     $cmd .= " -e $epochs" if defined($epochs);
 
+    my $nnjm_settings = backoff_and_get("LM:$set:nnjm-settings");
+    $cmd .= " ";
+    $cmd .= $nnjm_settings;
+
     my $nplm_settings = backoff_and_get("LM:$set:nplm-settings");
     $cmd .= " --extra-settings \"$nplm_settings\"" if defined($nplm_settings);
 
@@ -2403,6 +2407,12 @@ sub define_training_extract_phrases {
       if (&get("TRAINING:ghkm-strip-bitpar-nonterminal-labels")) {
         $cmd .= "-ghkm-strip-bitpar-nonterminal-labels ";
       }
+
+    } else { # !hierarchical-rule-set
+
+      if (&get("TRAINING:target-constituent-boundaries")) {
+        $cmd .= "-target-constituent-boundaries ";
+      }
     }
 
     my $extract_settings = &get("TRAINING:extract-settings");
@@ -2459,6 +2469,12 @@ sub define_training_build_ttable {
         $cmd .= "-ghkm-parts-of-speech ";
         my $parts_of_speech_labels_file = &versionize(&long_file_name("parts-of-speech","model",""));
         $cmd .= "-ghkm-parts-of-speech-file $parts_of_speech_labels_file ";
+      }
+
+    } else { # !hierarchical-rule-set
+
+      if (&get("TRAINING:target-constituent-boundaries")) {
+        $cmd .= "-target-constituent-boundaries ";
       }
     }
 
@@ -2672,6 +2688,10 @@ sub define_training_create_config {
       $cmd .= "-ghkm-parts-of-speech ";
       my $parts_of_speech_labels_file = &versionize(&long_file_name("parts-of-speech","model",""));
       $cmd .= "-ghkm-parts-of-speech-file $parts_of_speech_labels_file ";
+    }
+
+    if (&get("TRAINING:target-constituent-boundaries")) {
+      $cmd .= "-target-constituent-boundaries ";
     }
 
     # sparse lexical features provide additional content for config file
