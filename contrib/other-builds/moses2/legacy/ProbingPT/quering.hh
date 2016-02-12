@@ -7,7 +7,6 @@
 #include "probing_hash_utils.hh"
 #include "hash.hh" //Includes line splitter
 #include "line_splitter.hh"
-#include "../../Vector.h"
 
 namespace Moses2
 {
