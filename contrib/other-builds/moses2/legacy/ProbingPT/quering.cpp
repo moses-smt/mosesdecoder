@@ -3,29 +3,6 @@
 namespace Moses2
 {
 
-unsigned char * read_binary_file(const char * filename, size_t filesize)
-{
-  //Get filesize
-  int fd;
-  unsigned char * map;
-
-  fd = open(filename, O_RDONLY);
-
-  if (fd == -1) {
-    perror("Error opening file for reading");
-    exit(EXIT_FAILURE);
-  }
-
-  map = (unsigned char *)mmap(0, filesize, PROT_READ, MAP_SHARED, fd, 0);
-  if (map == MAP_FAILED) {
-    close(fd);
-    perror("Error mmapping the file");
-    exit(EXIT_FAILURE);
-  }
-
-  return map;
-}
-
 QueryEngine::QueryEngine(const char * filepath)
 {
 

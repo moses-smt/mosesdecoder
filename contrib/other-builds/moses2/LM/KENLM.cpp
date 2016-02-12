@@ -147,7 +147,8 @@ KENLM::EvaluateInIsolation(MemPool &pool,
   float fullScore, nGramScore;
   size_t oovCount;
 
-  CalcScore(targetPhrase, fullScore, nGramScore, oovCount);
+  lm::ngram::ChartState state;
+  CalcScore(targetPhrase, fullScore, nGramScore, oovCount, state);
 
   float estimateScore = fullScore - nGramScore;
 
@@ -177,13 +178,17 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
   Scores &scores,
   FFState &state) const
 {
+  const KenLMState &prevStateCast = static_cast<const KenLMState&>(prevState);
   KenLMState &stateCast = static_cast<KenLMState&>(state);
 
   const System &system = mgr.system;
 
   const lm::ngram::State &in_state = static_cast<const KenLMState&>(prevState).state;
 
-  if (!hypo.GetTargetPhrase().GetSize()) {
+  const TargetPhrase &tp = hypo.GetTargetPhrase();
+  //const lm::ngram::ChartState &chartState = *static_cast<const lm::ngram::ChartState*>(tp.chartState);
+
+  if (!tp.GetSize()) {
     stateCast.state = in_state;
 	return;
   }
@@ -194,6 +199,7 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
   const std::size_t adjust_end = std::min(end, begin + m_ngram->Order() - 1);
 
   std::size_t position = begin;
+
   typename Model::State aux_state;
   typename Model::State *state0 = &stateCast.state, *state1 = &aux_state;
 
@@ -203,6 +209,12 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
 	score += m_ngram->Score(*state0, TranslateID(hypo.GetWord(position)), *state1);
 	std::swap(state0, state1);
   }
+
+  /*
+  const lm::ngram::ChartState newState;
+  lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState);
+  ruleScore.NonTerminal(prevStateCast);
+  */
 
   if (hypo.GetBitmap().IsComplete()) {
 	// Score end of sentence.
@@ -232,7 +244,7 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
   }
 }
 
-void KENLM::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const
+void KENLM::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount, lm::ngram::ChartState &state) const
 {
 	  fullScore = 0;
 	  ngramScore = 0;
@@ -240,8 +252,7 @@ void KENLM::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore,
 
 	  if (!phrase.GetSize()) return;
 
-	  lm::ngram::ChartState discarded_sadly;
-	  lm::ngram::RuleScore<Model> scorer(*m_ngram, discarded_sadly);
+	  lm::ngram::RuleScore<Model> scorer(*m_ngram, state);
 
 	  size_t position;
 	  if (m_bos == phrase[0][m_factorType]) {

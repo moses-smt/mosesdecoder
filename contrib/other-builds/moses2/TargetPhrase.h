@@ -45,6 +45,9 @@ public:
   { m_estimatedScore = value; }
 
   SCORE *GetScoresProperty(int propertyInd) const;
+
+  //void *chartState;
+
 protected:
 	Scores *m_scores;
 	SCORE m_estimatedScore;

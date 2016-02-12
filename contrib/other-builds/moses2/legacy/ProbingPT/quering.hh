@@ -11,8 +11,6 @@
 namespace Moses2
 {
 
-char * read_binary_file(char * filename);
-
 class QueryEngine
 {
   const std::map<unsigned int, std::string> *vocabids;
