@@ -143,7 +143,7 @@ void createProbingPT(
 
   serialize_table(mem, size, (basepath + "/probing_hash.dat"));
 
-  serialize_map(&source_vocabids, (basepath + "/source_vocabids"));
+  serialize_map(source_vocabids, (basepath + "/source_vocabids"));
 
   serialize_cache(cache, (basepath + "/cache"), totalSourceCount);
 
