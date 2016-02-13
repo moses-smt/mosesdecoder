@@ -1,7 +1,9 @@
 #include <cstdlib>
 #include <iostream>
+#include <fstream>
 #include <algorithm>
 #include <boost/timer/timer.hpp>
+#include <boost/algorithm/string.hpp>
 
 #include "mblas/matrix.h"
 #include "model.h"
@@ -20,52 +22,61 @@ int main(int argc, char** argv) {
     device = 1;
   
   cudaSetDevice(device);
+
+  //std::string source = "this is a little test .";
+  //std::string target = "das ist ein kleiner test .";
   
+  std::string source = "you know , one of the intense pleasures of travel and one of the delights of ethnographic research is the opportunity to live amongst those who have not forgotten the old ways , who still feel their past in the wind , touch it in stones polished by rain , taste it in the bitter leaves of plants .";
+  
+  std::string target = "wissen sie , ein intensives vergnügen reisen und die freuden der ethnographischen forschung ist die möglichkeit , unter denen leben nicht vergessen , die alte art , die sich ihrer vergangenheit noch im wind , berühren sie in steine poliert von regen , geschmack in den bitteren blätter von pflanzen .";
+ 
   std::cerr << "Loading model" << std::endl;
-  Weights weights("/home/marcinj/Badania/nmt/en_de_1/search_model.npz", device);
-  Vocab svcb("/home/marcinj/Badania/nmt/en_de_1/src.vocab.txt");
-  Vocab tvcb("/home/marcinj/Badania/nmt/en_de_1/trg.vocab.txt");
+  Weights weights("/home/marcinj/Badania/best_nmt/search_model.npz", device);
+  Vocab svcb("/home/marcinj/Badania/best_nmt/vocab/en_de.en.txt");
+  Vocab tvcb("/home/marcinj/Badania/best_nmt/vocab/en_de.de.txt");
   
   std::cerr << "Creating encoder" << std::endl;
   Encoder encoder(weights);
   std::cerr << "Creating decoder" << std::endl;
   Decoder decoder(weights);
   
-  std::vector<size_t> sWords = {svcb["this"], svcb["is"], svcb["a"],
-                                svcb["little"], svcb["test"], svcb["."],
-                                svcb["</s>"]};
+  std::vector<std::string> sourceSplit;
+  boost::split(sourceSplit, source, boost::is_any_of(" "),
+               boost::token_compress_on);
+    
+  std::cerr << "Source: " << std::endl;
+  std::vector<size_t> sWords(sourceSplit.size());
+  std::transform(sourceSplit.begin(), sourceSplit.end(), sWords.begin(),
+                 [&](const std::string& w) { std::cerr << svcb[w] << ", "; return svcb[w]; });
+  sWords.push_back(svcb["</s>"]);
+  std::cerr << svcb["</s>"] << std::endl;
   
-  //std::vector<std::vector<size_t>> tWordsBatch = {
-  //  {  tvcb["das"],     tvcb["dies"],    tvcb["das"]     },
-  //  {  tvcb["ist"],     tvcb["war"],     tvcb["ist"]     },
-  //  {  tvcb["ein"],     tvcb["ein"],     tvcb["eine"]    },
-  //  {  tvcb["kleiner"], tvcb["ganz"],    tvcb["kleine"]  },
-  //  {  tvcb["test"],    tvcb["kleiner"], tvcb["frau"]    },
-  //  {  tvcb["."],       tvcb["test"],    tvcb["."]       },
-  //  {  tvcb["</s>"],    tvcb["."],       tvcb["</s>"]    },
-  //  {  0,               tvcb["</s>"],    0               }
-  //};
   
   typedef std::vector<size_t> Batch;
-  size_t bs = 500;
-  std::vector<std::vector<size_t>> tWordsBatch = {
-    Batch(bs, tvcb["das"]),
-    Batch(bs, tvcb["ist"]),
-    Batch(bs, tvcb["ein"]),
-    Batch(bs, tvcb["kleiner"]),
-    Batch(bs, tvcb["test"]),
-    Batch(bs, tvcb["."]),
-    Batch(bs, tvcb["</s>"])
-  };
   
-  std::vector<size_t> filter = {
-    tvcb["das"], tvcb["ist"], tvcb["ein"], tvcb["kleiner"], tvcb["test"],
-    tvcb["."], tvcb["</s>"], 0, tvcb["dies"], tvcb["ist"], tvcb["war"],        
-    tvcb["eine"], tvcb["ganz"], tvcb["kleine"], tvcb["frau"], 
-  };
+  std::vector<std::string> targetSplit;
+  boost::split(targetSplit, target, boost::is_any_of(" "),
+               boost::token_compress_on);
     
+  std::cerr << "Target: " << std::endl;
+  size_t bs = 1;
+  std::vector<std::vector<size_t>> tWordsBatch(targetSplit.size());
+  std::transform(targetSplit.begin(), targetSplit.end(), tWordsBatch.begin(),
+                 [&](const std::string& w) { std::cerr << tvcb[w] << ", "; return Batch(bs, tvcb[w]); });
+  tWordsBatch.push_back(Batch(bs, tvcb["</s>"]));
+  std::cerr << tvcb["</s>"] << std::endl;
+  
+  std::vector<size_t> filter;
+  std::vector<size_t> filterMap(tvcb.size());
+  std::fstream in("/home/marcinj/Badania/mosesNMT/softmax.txt");
+  std::string line;
+  while(std::getline(in, line)) {
+    filter.push_back(tvcb[line]);
+    filterMap[filter.back()] = filter.size() - 1;
+  }
   decoder.Filter(filter); // Limit to allowed vocabulary
-    
+  
+  
   mblas::Matrix SourceContext;
   encoder.GetContext(sWords, SourceContext);
   
@@ -82,19 +93,26 @@ int main(int argc, char** argv) {
   boost::timer::auto_cpu_timer timer;
   size_t batchSize = tWordsBatch[0].size();
   
-  for(size_t i = 0; i < 10; ++i) {
+  for(size_t i = 0; i < 1; ++i) {
     decoder.EmptyState(PrevState, SourceContext, batchSize);
     decoder.EmptyEmbedding(PrevEmbedding, batchSize);
     
-    size_t k = 0;
+    float sum = 0;
     for(auto w : tWordsBatch) {
     
       decoder.GetProbs(Probs, AlignedSourceContext,
                        PrevState, PrevEmbedding, SourceContext);
       
       
-      float p = Probs(0, k);
-      std::cerr << k << " " << filter[k++] << " " << p << std::endl;
+      float p = Probs(0, filterMap[w[0]]);
+      
+      std::vector<float> ps;
+      for(auto id : filter)
+        ps.push_back(Probs(0, filterMap[id]));
+      std::sort(ps.begin(), ps.end());
+      
+      std::cerr << log(p) << " max: " << log(ps.back()) << std::endl;
+      sum += log(p);
       
       decoder.Lookup(Embedding, w);
       decoder.GetNextState(State, Embedding,
@@ -103,5 +121,8 @@ int main(int argc, char** argv) {
       mblas::Swap(State, PrevState);
       mblas::Swap(Embedding, PrevEmbedding);
     }
+    
+    std::cerr << sum << std::endl;
+    
   }
 }

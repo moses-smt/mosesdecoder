@@ -143,8 +143,8 @@ void NMT::MakeStep(
                      prevStates, lastEmbeddings, sourceContext);  
   
   for(size_t i = 0; i < nextIds.size(); ++i) {
-    //float p = probs(i, filteredId_[nextIds[i]]);
-    float p = probs(i, nextIds[i]);
+    float p = probs(i, filteredId_[nextIds[i]]);
+    //float p = probs(i, nextIds[i]);
     logProbs.push_back(log(p));
   }
                     
