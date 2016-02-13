@@ -97,9 +97,9 @@ FFState* TargetConstituentAdjacencyFeature::EvaluateWhenApplied(
 
   if (const PhraseProperty *property = currTarPhr.GetProperty("TargetConstituentBoundariesLeft")) {
 
-    const TargetConstituentBoundariesLeftPhraseProperty *targetConstituentBoundariesLeftPhraseProperty = 
+    const TargetConstituentBoundariesLeftPhraseProperty *targetConstituentBoundariesLeftPhraseProperty =
       static_cast<const TargetConstituentBoundariesLeftPhraseProperty*>(property);
-    const TargetConstituentBoundariesLeftCollection& leftConstituentCollection = 
+    const TargetConstituentBoundariesLeftCollection& leftConstituentCollection =
       targetConstituentBoundariesLeftPhraseProperty->GetCollection();
     float prob = 0;
     size_t numMatch = 0;
@@ -111,7 +111,7 @@ FFState* TargetConstituentAdjacencyFeature::EvaluateWhenApplied(
       ++numOverall;
       FactorCollection &factorCollection = FactorCollection::Instance();
       const Factor* bosFactor = factorCollection.AddFactor("BOS_",false);
-      TargetConstituentBoundariesLeftCollection::const_iterator found = 
+      TargetConstituentBoundariesLeftCollection::const_iterator found =
         leftConstituentCollection.find(bosFactor);
       if ( found != leftConstituentCollection.end() ) {
         ++numMatch;
@@ -149,13 +149,13 @@ FFState* TargetConstituentAdjacencyFeature::EvaluateWhenApplied(
         newScores[0] += TransformScore( (float)numMatch/numOverall );
       }
     }
-      
+
   } else {
 
     // abort with error message if the phrase does not translate an unknown word
     UTIL_THROW_IF2(!currTarPhr.GetWord(0).IsOOV(), GetScoreProducerDescription()
                    << ": Missing TargetConstituentBoundariesLeft property.");
-      
+
     ++newScores[1];
 
   }
@@ -164,7 +164,7 @@ FFState* TargetConstituentAdjacencyFeature::EvaluateWhenApplied(
 
   if (const PhraseProperty *property = currTarPhr.GetProperty("TargetConstituentBoundariesRightAdjacent")) {
 
-    const TargetConstituentBoundariesRightAdjacentPhraseProperty *targetConstituentBoundariesRightAdjacentPhraseProperty = 
+    const TargetConstituentBoundariesRightAdjacentPhraseProperty *targetConstituentBoundariesRightAdjacentPhraseProperty =
       static_cast<const TargetConstituentBoundariesRightAdjacentPhraseProperty*>(property);
     const TargetConstituentBoundariesLeftCollection& rightAdjacentConstituentCollection = targetConstituentBoundariesRightAdjacentPhraseProperty->GetCollection();
 

@@ -303,7 +303,7 @@ int main(int argc, char* argv[])
 
     SentenceAlignmentWithSyntax sentence
     (targetLabelCollection, sourceLabelCollection,
-     targetTopLabelCollection, sourceTopLabelCollection, 
+     targetTopLabelCollection, sourceTopLabelCollection,
      targetSyntax, false);
     // cout << "read in: " << englishString << " & " << foreignString << " & " << alignmentString << endl;
     //az: output src, tgt, and alingment line
@@ -740,11 +740,11 @@ string getOrientString(REO_POS orient, REO_MODEL_TYPE modelType)
   }
   return "";
 }
-  
+
 
 bool ExtractTask::checkTargetConstituentBoundaries( const SentenceAlignmentWithSyntax &sentence,
-                                                    int startE, int endE, int startF, int endF,
-                                                    std::string &phrasePropertiesString)
+    int startE, int endE, int startF, int endF,
+    std::string &phrasePropertiesString)
 {
   ostringstream outextractstrPhrasePropertyTargetConstituentBoundariesLeft;
 
@@ -814,8 +814,8 @@ bool ExtractTask::checkTargetConstituentBoundaries( const SentenceAlignmentWithS
 
     if ( (relaxedStartE != startE) || (relaxedEndE !=endE) ) {
       const std::vector< SyntaxNode* >& startingNodes = sentence.targetTree.GetNodesByStartPosition(relaxedStartE);
-      for ( std::vector< SyntaxNode* >::const_reverse_iterator iter = startingNodes.rbegin(); 
-            (iter != startingNodes.rend() && !relaxedValidTargetConstituentBoundaries); 
+      for ( std::vector< SyntaxNode* >::const_reverse_iterator iter = startingNodes.rbegin();
+            (iter != startingNodes.rend() && !relaxedValidTargetConstituentBoundaries);
             ++iter ) {
         if ( (*iter)->end == relaxedEndE ) {
           relaxedValidTargetConstituentBoundaries = true;
@@ -868,8 +868,8 @@ bool ExtractTask::checkTargetConstituentBoundaries( const SentenceAlignmentWithS
 }
 
 
-void ExtractTask::addPhrase( const SentenceAlignmentWithSyntax &sentence, 
-                             int startE, int endE, int startF, int endF, 
+void ExtractTask::addPhrase( const SentenceAlignmentWithSyntax &sentence,
+                             int startE, int endE, int startF, int endF,
                              const std::string &orientationInfo,
                              const std::string &phrasePropertiesString)
 {
