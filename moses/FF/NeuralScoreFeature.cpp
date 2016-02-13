@@ -62,13 +62,14 @@ void NeuralScoreFeature::InitializeForInput(ttasksptr const& ttask) {
   if(!m_nmt.get())  {
     size_t device = threads++ % m_models.size();
     m_nmt.reset(new NMT(m_models[device], m_sourceVocab, m_targetVocab));
+    m_targetWords.reset(new std::set<std::string>());
     m_nmt->SetDevice();  
   }
 }
 
 void NeuralScoreFeature::CleanUpAfterSentenceProcessing(ttasksptr const& ttask) {
   m_nmt->ClearStates();
-  targetWords_.clear();
+  m_targetWords->clear();
 }  
 
 const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) const {
@@ -77,11 +78,9 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
   const Sentence& sentence = static_cast<const Sentence&>(input);
   
   if(m_filteredSoftmax) {
-    std::vector<std::string> filter;
-    filter.push_back("</s>");
-    filter.push_back("UNK");
-    filter.insert(filter.end(), targetWords_.begin(), targetWords_.end());
-    m_nmt->FilterTargetVocab(filter);
+    m_targetWords->insert("</s>");
+    m_targetWords->insert("UNK");
+    m_nmt->FilterTargetVocab(*m_targetWords);
   }
   
   std::vector<std::string> sourceSentence;
@@ -279,7 +278,7 @@ void NeuralScoreFeature::EvaluateTranslationOptionListWithSourceContext(const In
     
       for(size_t i = 0; i < tp.GetSize(); ++i) {
         std::string temp = tp.GetWord(i).GetString(m_factor).as_string();
-        const_cast<std::set<std::string>&>(targetWords_).insert(temp);
+        const_cast<std::set<std::string>&>(*m_targetWords).insert(temp);
       }
     }
   }

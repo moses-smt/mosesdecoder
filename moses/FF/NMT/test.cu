@@ -66,15 +66,15 @@ int main(int argc, char** argv) {
   tWordsBatch.push_back(Batch(bs, tvcb["</s>"]));
   std::cerr << tvcb["</s>"] << std::endl;
   
-  std::vector<size_t> filter;
-  std::vector<size_t> filterMap(tvcb.size());
-  std::fstream in("/home/marcinj/Badania/mosesNMT/softmax.txt");
-  std::string line;
-  while(std::getline(in, line)) {
-    filter.push_back(tvcb[line]);
-    filterMap[filter.back()] = filter.size() - 1;
-  }
-  decoder.Filter(filter); // Limit to allowed vocabulary
+  //std::vector<size_t> filter;
+  //std::vector<size_t> filterMap(tvcb.size());
+  //std::fstream in("/home/marcinj/Badania/mosesNMT/softmax.txt");
+  //std::string line;
+  //while(std::getline(in, line)) {
+  //  filter.push_back(tvcb[line]);
+  //  filterMap[filter.back()] = filter.size() - 1;
+  //}
+  //decoder.Filter(filter); // Limit to allowed vocabulary
   
   
   mblas::Matrix SourceContext;
@@ -104,14 +104,14 @@ int main(int argc, char** argv) {
                        PrevState, PrevEmbedding, SourceContext);
       
       
-      float p = Probs(0, filterMap[w[0]]);
+      float p = Probs(0, w[0]);
+      //float p = Probs(0, filterMap[w[0]]);
+      //std::vector<float> ps;
+      //for(auto id : filter)
+      //  ps.push_back(Probs(0, filterMap[id]));
+      //std::sort(ps.begin(), ps.end());
       
-      std::vector<float> ps;
-      for(auto id : filter)
-        ps.push_back(Probs(0, filterMap[id]));
-      std::sort(ps.begin(), ps.end());
-      
-      std::cerr << log(p) << " max: " << log(ps.back()) << std::endl;
+      //std::cerr << log(p) << " max: " << log(ps.back()) << std::endl;
       sum += log(p);
       
       decoder.Lookup(Embedding, w);

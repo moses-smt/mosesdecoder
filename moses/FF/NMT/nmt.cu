@@ -81,7 +81,7 @@ StateInfoPtr NMT::EmptyState() {
   return infos.back();
 }
 
-void NMT::FilterTargetVocab(const std::vector<std::string>& filter) {
+void NMT::FilterTargetVocab(const std::set<std::string>& filter) {
   filteredId_.clear();
   filteredId_.resize(trg_->size(), 1); // set all to UNK
   

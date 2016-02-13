@@ -1,6 +1,7 @@
 #include <iostream>
 #include <algorithm>
 #include <vector>
+#include <set>
 #include <boost/shared_ptr.hpp>
 
 #include "mblas/base_matrix.h"
@@ -32,7 +33,7 @@ class NMT {
     
     StateInfoPtr EmptyState();
     
-    void FilterTargetVocab(const std::vector<std::string>& filter);
+    void FilterTargetVocab(const std::set<std::string>& filter);
     
     void MakeStep(
       const std::vector<std::string>& nextWords,

@@ -96,11 +96,10 @@ private:
   std::vector<boost::shared_ptr<Weights> > m_models;
   boost::shared_ptr<Vocab> m_sourceVocab;
   boost::shared_ptr<Vocab> m_targetVocab;
-  boost::thread_specific_ptr<NMT> m_nmt;
-    
-  boost::thread_specific_ptr<PrefsByLength> m_pbl;
   
-  std::set<std::string> targetWords_;
+  boost::thread_specific_ptr<NMT> m_nmt;
+  boost::thread_specific_ptr<PrefsByLength> m_pbl;
+  boost::thread_specific_ptr<std::set<std::string> > m_targetWords;
 };
 
 }
