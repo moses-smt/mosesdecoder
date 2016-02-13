@@ -100,6 +100,9 @@ private:
   boost::thread_specific_ptr<NMT> m_nmt;
   boost::thread_specific_ptr<PrefsByLength> m_pbl;
   boost::thread_specific_ptr<std::set<std::string> > m_targetWords;
+  
+  size_t m_threadId;
+  boost::mutex m_mutex;
 };
 
 }

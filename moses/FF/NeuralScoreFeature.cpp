@@ -57,10 +57,10 @@ private:
   std::deque<std::string> m_lastContext;
 };
 
-void NeuralScoreFeature::InitializeForInput(ttasksptr const& ttask) {
-  static size_t threads = 0;
+void NeuralScoreFeature::InitializeForInput(ttasksptr const& ttask) {  
   if(!m_nmt.get())  {
-    size_t device = threads++ % m_models.size();
+    boost::mutex::scoped_lock lock(m_mutex);
+    size_t device = m_threadId++ % m_models.size();
     m_nmt.reset(new NMT(m_models[device], m_sourceVocab, m_targetVocab));
     m_targetWords.reset(new std::set<std::string>());
     m_nmt->SetDevice();  
@@ -94,7 +94,7 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
 
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
   : StatefulFeatureFunction(2, line), m_batchSize(1000), m_stateLength(5),
-    m_factor(0), m_maxDevices(1), m_filteredSoftmax(false)
+    m_factor(0), m_maxDevices(1), m_filteredSoftmax(false), m_threadId(0)
 {
   ReadParameters();
   
