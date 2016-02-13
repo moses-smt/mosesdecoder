@@ -82,9 +82,6 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
     filter.push_back("UNK");
     filter.insert(filter.end(), targetWords_.begin(), targetWords_.end());
     m_nmt->FilterTargetVocab(filter);
-    std::ofstream of("softmax.txt");
-    for(size_t i = 0; i < filter.size(); ++i)
-      of << filter[i] << std::endl;
   }
   
   std::vector<std::string> sourceSentence;
