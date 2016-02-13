@@ -11,7 +11,7 @@
 #include <vector>
 #include "InputPath.h"
 #include "MemPool.h"
-#include "legacy/SquareMatrix.h"
+#include "legacy/Matrix.h"
 
 namespace Moses2
 {
@@ -49,13 +49,13 @@ public:
   const InputPath &GetBlank() const
   { return *m_blank; }
 
-  const SquareMatrix<InputPath*> &GetMatrix() const
+  const Matrix<InputPath*> &GetMatrix() const
   { return *m_matrix; }
 
 protected:
 	Coll m_inputPaths;
 	InputPath *m_blank;
-	SquareMatrix<InputPath*> *m_matrix;
+	Matrix<InputPath*> *m_matrix;
 };
 
 }

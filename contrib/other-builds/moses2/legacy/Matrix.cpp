@@ -22,7 +22,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include <iostream>
-#include "SquareMatrix.h"
+#include "Matrix.h"
 #include "Util2.h"
 
 using namespace std;

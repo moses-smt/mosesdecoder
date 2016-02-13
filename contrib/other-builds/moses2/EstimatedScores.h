@@ -24,20 +24,20 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <iostream>
 #include "legacy/Util2.h"
 #include "legacy/Bitmap.h"
-#include "legacy/SquareMatrix.h"
+#include "legacy/Matrix.h"
 
 namespace Moses2
 {
 class MemPool;
 
 //! A square array of floats to store future costs in the phrase-based decoder
-class EstimatedScores : public SquareMatrix<float>
+class EstimatedScores : public Matrix<float>
 {
   friend std::ostream& operator<<(std::ostream &out, const EstimatedScores &matrix);
 
 public:
   EstimatedScores(MemPool &pool, size_t size)
-  :SquareMatrix(pool, size, size)
+  :Matrix(pool, size, size)
   {}
 
   ~EstimatedScores(); // not implemented

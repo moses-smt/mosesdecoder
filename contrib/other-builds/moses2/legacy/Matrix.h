@@ -28,24 +28,24 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses2
 {
 template<typename T>
-class SquareMatrix
+class Matrix
 {
 protected:
   size_t m_rows, m_cols; /**< length of the square (sentence length) */
   T *m_array; /**< two-dimensional array to store floats */
 
-  SquareMatrix(); // not implemented
-  SquareMatrix(const SquareMatrix &copy); // not implemented
+  Matrix(); // not implemented
+  Matrix(const Matrix &copy); // not implemented
 
 public:
-  SquareMatrix(MemPool &pool, size_t rows, size_t cols)
+  Matrix(MemPool &pool, size_t rows, size_t cols)
   :m_rows(rows)
   ,m_cols(cols)
   {
     m_array = pool.Allocate<T>(rows * cols);
   }
 
-  ~SquareMatrix(); // not implemented
+  ~Matrix(); // not implemented
 
   // set upper triangle
   void InitTriangle(const T &val)

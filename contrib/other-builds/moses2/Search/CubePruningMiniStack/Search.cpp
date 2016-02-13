@@ -164,7 +164,7 @@ void Search::PostDecode(size_t stackInd)
   MemPool &pool = mgr.GetPool();
 
   const InputPaths &paths = mgr.GetInputPaths();
-  const SquareMatrix<InputPath*> &pathMatrix = paths.GetMatrix();
+  const Matrix<InputPath*> &pathMatrix = paths.GetMatrix();
   size_t inputSize = pathMatrix.GetRows();
   size_t numPaths = pathMatrix.GetCols();
 
