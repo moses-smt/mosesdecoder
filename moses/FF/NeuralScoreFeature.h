@@ -91,6 +91,7 @@ private:
   size_t m_stateLength;
   size_t m_factor;
   size_t m_maxDevices;
+  bool m_filteredSoftmax;
   
   std::vector<boost::shared_ptr<Weights> > m_models;
   boost::shared_ptr<Vocab> m_sourceVocab;
@@ -98,6 +99,8 @@ private:
   boost::thread_specific_ptr<NMT> m_nmt;
     
   boost::thread_specific_ptr<PrefsByLength> m_pbl;
+  
+  std::set<std::string> targetWords_;
 };
 
 }

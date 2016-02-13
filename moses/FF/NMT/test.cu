@@ -57,6 +57,14 @@ int main(int argc, char** argv) {
     Batch(bs, tvcb["."]),
     Batch(bs, tvcb["</s>"])
   };
+  
+  std::vector<size_t> filter = {
+    tvcb["das"], tvcb["ist"], tvcb["ein"], tvcb["kleiner"], tvcb["test"],
+    tvcb["."], tvcb["</s>"], 0, tvcb["dies"], tvcb["ist"], tvcb["war"],        
+    tvcb["eine"], tvcb["ganz"], tvcb["kleine"], tvcb["frau"], 
+  };
+    
+  decoder.Filter(filter); // Limit to allowed vocabulary
     
   mblas::Matrix SourceContext;
   encoder.GetContext(sWords, SourceContext);
@@ -78,18 +86,16 @@ int main(int argc, char** argv) {
     decoder.EmptyState(PrevState, SourceContext, batchSize);
     decoder.EmptyEmbedding(PrevEmbedding, batchSize);
     
-    float sum = 0;
+    size_t k = 0;
     for(auto w : tWordsBatch) {
     
       decoder.GetProbs(Probs, AlignedSourceContext,
                        PrevState, PrevEmbedding, SourceContext);
       
-      for(size_t j = 0; j < 1; ++j) {
-        float p = Probs(j, w[j]);
-        std::cerr << j << " " << w[j] << " " << log(p) << std::endl;
-        sum += log(p);
-      }
-    
+      
+      float p = Probs(0, k);
+      std::cerr << k << " " << filter[k++] << " " << p << std::endl;
+      
       decoder.Lookup(Embedding, w);
       decoder.GetNextState(State, Embedding,
                            PrevState, AlignedSourceContext);

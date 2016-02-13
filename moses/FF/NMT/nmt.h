@@ -30,7 +30,9 @@ class NMT {
   
     void CalcSourceContext(const std::vector<std::string>& s);
     
-    StateInfoPtr EmptyState();     
+    StateInfoPtr EmptyState();
+    
+    void FilterTargetVocab(const std::vector<std::string>& filter);
     
     void MakeStep(
       const std::vector<std::string>& nextWords,
@@ -54,4 +56,6 @@ class NMT {
     
     boost::shared_ptr<States> states_;
     bool firstWord_;
+    
+    std::vector<size_t> filteredId_;
 };

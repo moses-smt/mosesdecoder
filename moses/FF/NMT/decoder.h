@@ -132,7 +132,7 @@ class Decoder {
     class Softmax {
       public:
         Softmax(const Weights& model)
-        : w_(model)
+        : w_(model), filtered_(false)
         {}
           
         void GetProbs(mblas::Matrix& Probs,
@@ -149,13 +149,39 @@ class Decoder {
           Element(_1 + _2, T_, w_.UoB_); // Broadcasting row-wise
           PairwiseReduce(Max(_1, _2), T_);
           
-          Prod(Probs, T_, w_.Wo_);
-          Element(_1 + _2, Probs, w_.WoB_); // Broadcasting row-wise
+          if(filtered_) { // use only filtered vocabulary for SoftMax
+            Prod(Probs, T_, FilteredWo_);
+            Element(_1 + _2, Probs, FilteredWoB_); // Broadcasting row-wise
+          }
+          else {
+            Prod(Probs, T_, w_.Wo_);
+            Element(_1 + _2, Probs, w_.WoB_); // Broadcasting row-wise
+          }
           SoftmaxRows(Probs, Ones_, Sums_);
         }
-      
+        
+        void Filter(const std::vector<size_t>& ids) {
+          using namespace mblas;
+          
+          Matrix TempWo;
+          Transpose(TempWo, w_.Wo_);
+          Assemble(FilteredWo_, TempWo, ids);
+          Transpose(FilteredWo_);
+          
+          Matrix TempWoB;
+          Transpose(TempWoB, w_.WoB_);
+          Assemble(FilteredWoB_, TempWoB, ids);
+          Transpose(FilteredWoB_);
+          
+          filtered_ = true;
+        }
+       
       private:        
         const Weights& w_;
+        
+        bool filtered_;
+        mblas::Matrix FilteredWo_;
+        mblas::Matrix FilteredWoB_;
         
         mblas::Matrix T_;
         mblas::Matrix Temp1_;
@@ -171,6 +197,10 @@ class Decoder {
       rnn_(model.decRnn_), alignment_(model.decAlignment_),
       softmax_(model.decSoftmax_)
     {}
+    
+    void Filter(const std::vector<size_t>& ids) {
+      softmax_.Filter(ids);
+    }
     
     void GetProbs(mblas::Matrix& Probs,
                   mblas::Matrix& AlignedSourceContext,

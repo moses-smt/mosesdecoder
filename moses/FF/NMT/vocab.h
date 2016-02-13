@@ -19,7 +19,7 @@ class Vocab {
         id2str_.push_back("</s>");
     }
     
-    size_t operator[](const std::string word) const {
+    size_t operator[](const std::string& word) const {
         auto it = str2id_.find(word);
         if(it != str2id_.end())
             return it->second;
@@ -29,6 +29,10 @@ class Vocab {
     
     const std::string& operator[](size_t id) const {
         return id2str_[id];
+    }
+    
+    size_t size() {
+      return id2str_.size();
     }
     
   private:

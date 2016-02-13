@@ -20,7 +20,10 @@ NMT::NMT(const boost::shared_ptr<Weights> model,
   : w_(model), src_(src), trg_(trg),
     encoder_(new Encoder(*w_)), decoder_(new Decoder(*w_)),
     states_(new States()), firstWord_(true)
-  { }
+  {
+    for(size_t i = 0; i < trg_->size(); ++i)
+      filteredId_.push_back(i);
+  }
 
 size_t NMT::GetDevices(size_t maxDevices) {
   int num_gpus = 0;   // number of CUDA GPUs
@@ -78,6 +81,23 @@ StateInfoPtr NMT::EmptyState() {
   return infos.back();
 }
 
+void NMT::FilterTargetVocab(const std::vector<std::string>& filter) {
+  filteredId_.clear();
+  filteredId_.resize(trg_->size(), 1); // set all to UNK
+  
+  std::vector<size_t> numericFilter;
+  size_t k = 0;
+  for(auto& s : filter) {
+    size_t id = (*trg_)[s];
+    numericFilter.push_back(id);
+    filteredId_[id] = k;
+    k++;
+  }
+  // eol
+  numericFilter.push_back(numericFilter.size());
+  decoder_->Filter(numericFilter);
+}
+
 void NMT::MakeStep(
   const std::vector<std::string>& nextWords,
   const std::vector<std::string>& lastWords,
@@ -123,6 +143,7 @@ void NMT::MakeStep(
                      prevStates, lastEmbeddings, sourceContext);  
   
   for(size_t i = 0; i < nextIds.size(); ++i) {
+    //float p = probs(i, filteredId_[nextIds[i]]);
     float p = probs(i, nextIds[i]);
     logProbs.push_back(log(p));
   }

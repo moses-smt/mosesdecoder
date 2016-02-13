@@ -22,6 +22,11 @@ class FunctorNormal {
     
     virtual void operator()(const Hypothesis &hypothesis,
                        size_t startPos, size_t endPos) = 0;
+    
+    virtual SearchNormal* GetSearch() {
+      return m_search;
+    }
+    
   protected:
     SearchNormal* m_search;
 };

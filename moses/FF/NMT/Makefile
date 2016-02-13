@@ -1,4 +1,4 @@
-all: libnmt-cuda.so test_cuda
+all: test_cuda
 
 NMTCU = nmt.cu cnpy/cnpy.cpp 
 NMT = nmt.cpp cnpy/cnpy.cpp 

@@ -68,26 +68,34 @@ void NeuralScoreFeature::InitializeForInput(ttasksptr const& ttask) {
 
 void NeuralScoreFeature::CleanUpAfterSentenceProcessing(ttasksptr const& ttask) {
   m_nmt->ClearStates();
+  targetWords_.clear();
 }  
 
 const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) const {
   UTIL_THROW_IF2(input.GetType() != SentenceInput,
                  "This feature function requires the Sentence input type");
-  
   const Sentence& sentence = static_cast<const Sentence&>(input);
   
-  std::vector<std::string> words;
-  for(size_t i = 0; i < sentence.GetSize(); i++)
-    words.push_back(sentence.GetWord(i).GetString(0).as_string());
+  if(m_filteredSoftmax) {
+    std::vector<std::string> filter;
+    filter.push_back("</s>");
+    filter.push_back("UNK");
+    filter.insert(filter.end(), targetWords_.begin(), targetWords_.end());
+    m_nmt->FilterTargetVocab(filter);
+  }
   
-  m_nmt->CalcSourceContext(words);
+  std::vector<std::string> sourceSentence;
+  for(size_t i = 0; i < sentence.GetSize(); i++)
+    sourceSentence.push_back(sentence.GetWord(i).GetString(0).as_string());
+  
+  m_nmt->CalcSourceContext(sourceSentence);
   
   return new NeuralScoreState(m_nmt->EmptyState(), "");
 }
 
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
-  : StatefulFeatureFunction(2, line), m_batchSize(1000), m_stateLength(3),
-    m_factor(0), m_maxDevices(1)
+  : StatefulFeatureFunction(2, line), m_batchSize(1000), m_stateLength(5),
+    m_factor(0), m_maxDevices(1), m_filteredSoftmax(false)
 {
   ReadParameters();
   
@@ -245,9 +253,6 @@ void NeuralScoreFeature::BatchProcess(
     }
 }
 
-  
-
-
 void NeuralScoreFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
@@ -260,11 +265,25 @@ void NeuralScoreFeature::EvaluateWithSourceContext(const InputType &input
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
     , ScoreComponentCollection *estimatedFutureScore) const
-{}
+{ }
 
 void NeuralScoreFeature::EvaluateTranslationOptionListWithSourceContext(const InputType &input
     , const TranslationOptionList &translationOptionList) const
-{}
+{
+  if(m_filteredSoftmax) {
+    TranslationOptionList::const_iterator iter;
+    for (iter = translationOptionList.begin();
+         iter != translationOptionList.end(); ++iter) {
+      const TranslationOption& to = **iter;
+      const TargetPhrase& tp = to.GetTargetPhrase();
+    
+      for(size_t i = 0; i < tp.GetSize(); ++i) {
+        std::string temp = tp.GetWord(i).GetString(m_factor).as_string();
+        const_cast<std::set<std::string>&>(targetWords_).insert(temp);
+      }
+    }
+  }
+}
 
 FFState* NeuralScoreFeature::EvaluateWhenApplied(
   const Hypothesis& cur_hypo,
@@ -327,6 +346,8 @@ void NeuralScoreFeature::SetParameter(const std::string& key, const std::string&
     m_stateLength = Scan<size_t>(value);
   } else if (key == "model") {
     m_modelPath = value;
+  } else if (key == "filtered-softmax") {
+    m_filteredSoftmax = Scan<size_t>(value);
   } else if (key == "devices") {
     m_maxDevices = Scan<size_t>(value);
   } else if (key == "batch-size") {

@@ -163,21 +163,7 @@ class TMatrix : public BaseMatrix {
 };
 
 #ifndef NO_CUDA
-
-//template<typename T>
-//  struct uninitialized_allocator
-//    : thrust::device_malloc_allocator<T>
-//{
-//  // note that construct is annotated as
-//  // a __host__ __device__ function
-//  __host__ __device__
-//  void construct(T *p)
-//  {
-//    // no-op
-//  }
-//};
-
-typedef thrust::device_vector<float /*, uninitialized_allocator<float>*/> FVec;
+typedef thrust::device_vector<float> FVec;
 typedef thrust::device_vector<unsigned int> IVec;
 #else
 typedef std::vector<float> FVec;
@@ -198,20 +184,6 @@ void debug1(const M& m, size_t pos = 0, size_t l = 5) {
   }
 }
 
-Matrix& Transpose(Matrix& Out) {
-  if(Out.Cols() != 1 && Out.Rows() != 1)
-    std::cerr << "Warning: Transposition only works for vector matrices!" << std::endl;
-  else
-    Out.Reshape(Out.Cols(), Out.Rows());
-  return Out;
-}
-
-Matrix& Copy(Matrix& Out, const Matrix& In) {
-  Out.Resize(In.Rows(), In.Cols());
-  lib::copy(In.begin(), In.end(), Out.begin());
-  return Out;
-}
-
 Matrix& Swap(Matrix& Out, Matrix& In) {
   size_t iRows = In.Rows();
   size_t iCols = In.Cols();
@@ -221,6 +193,42 @@ Matrix& Swap(Matrix& Out, Matrix& In) {
   Out.Reshape(iRows, iCols);
   In.Reshape(oRows, oCols);
   In.GetVec().swap(Out.GetVec());
+  return Out;
+}
+
+Matrix& Transpose(Matrix& Out, const Matrix& In) {
+  size_t m = In.Rows();
+  size_t n = In.Cols();
+  
+  Out.Resize(n, m);
+  
+  float alpha = 1.0;
+  float beta  = 0.0;
+  
+  thread_local cublasHandle_t handle;
+  thread_local bool initialized;
+  
+  if(!initialized) {
+    initialized = true;
+    cublasCreate(&handle); //memory leak
+  }
+  
+  cublasSgeam(handle, CUBLAS_OP_T, CUBLAS_OP_T, m, n, &alpha, In.data(), n,
+              &beta, In.data(), n, Out.data(), m); 
+  
+  return Out;
+}
+
+Matrix& Transpose(Matrix& Out) {
+  Matrix Temp;
+  Transpose(Temp, Out);
+  Swap(Out, Temp);
+  return Out;
+}
+
+Matrix& Copy(Matrix& Out, const Matrix& In) {
+  Out.Resize(In.Rows(), In.Cols());
+  lib::copy(In.begin(), In.end(), Out.begin());
   return Out;
 }
 
@@ -547,7 +555,6 @@ Matrix& Prod(Matrix& C, const Matrix& A, const Matrix& B,
   
   if(!initialized) {
     initialized = true;
-    std::cerr << "Creating cuBLAS handle" << std::endl;
     cublasCreate(&handle); 
   }
   
