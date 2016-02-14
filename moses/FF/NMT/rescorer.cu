@@ -32,7 +32,7 @@ void ProgramOptions(int argc, char *argv[],
   cmdline_options.add_options()
     ("device,d", po::value(&device)->default_value(0),
      "CUDA Device")
-    ("batch,b", po::value(&maxBatchSize)->default_value(64),
+    ("batch,b", po::value(&maxBatchSize)->default_value(1000),
      "Max batch size")
     ("model,m", po::value(&modelPath)->required(),
      "Path to a model")
@@ -120,7 +120,7 @@ int main(int argc, char* argv[]) {
   std::string modelPath, svPath, tvPath, corpusPath, nbestPath;
 
   size_t device;
-  size_t maxBatchSize = 64;
+  size_t maxBatchSize;
   ProgramOptions(argc, argv, modelPath, svPath,tvPath, corpusPath, nbestPath,
                  maxBatchSize, device);
   cudaSetDevice(device);
@@ -138,7 +138,7 @@ int main(int argc, char* argv[]) {
   size_t index = 0;
   size_t nbestIndex = 0;
   for (auto& in: input) {
-    /* std::cout << "INPUT: " << in << std::endl; */
+
     Encoder encoder(weights);
     Decoder decoder(weights);
 
@@ -167,6 +167,11 @@ int main(int argc, char* argv[]) {
 
       std::vector<std::vector<size_t>> batch;
       PrepareBatch(sentences2score, batch);
+
+      if(index > 0 && index % 5 == 0)
+        std::cerr << ".";
+      if(index > 0 && index % 100 == 0)
+        std::cerr << "[" << index << "]" << std::endl;
 
       mblas::Matrix SourceContext;
       encoder.GetContext(sIndexes, SourceContext);
