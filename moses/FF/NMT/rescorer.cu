@@ -116,6 +116,48 @@ void PrepareBatch(const std::vector<std::vector<size_t>>& input,
     }
 }
 
+std::vector<float> ScoreBatch(
+    Encoder& encoder,
+    Decoder& decoder,
+    mblas::Matrix& SourceContext,
+    std::vector<std::vector<size_t>>& batch) {
+  mblas::Matrix PrevState;
+  mblas::Matrix PrevEmbedding;
+
+  mblas::Matrix AlignedSourceContext;
+  mblas::Matrix Probs;
+
+  mblas::Matrix State;
+  mblas::Matrix Embedding;
+  size_t batchSize = batch[0].size();
+
+  decoder.EmptyState(PrevState, SourceContext, batchSize);
+  decoder.EmptyEmbedding(PrevEmbedding, batchSize);
+
+  std::vector<float> scores(batch[0].size(), 0.0f);
+  size_t lengthIndex = 0;
+  for (auto& w : batch) {
+    decoder.GetProbs(Probs, AlignedSourceContext,
+                     PrevState, PrevEmbedding, SourceContext);
+
+    for (size_t j = 0; j < w.size(); ++j) {
+      if (batch[lengthIndex][j]) {
+        float p = Probs(j, w[j]);
+        scores[j] += log(p);
+      }
+    }
+
+    decoder.Lookup(Embedding, w);
+    decoder.GetNextState(State, Embedding,
+                          PrevState, AlignedSourceContext);
+
+    mblas::Swap(State, PrevState);
+    mblas::Swap(Embedding, PrevEmbedding);
+    ++lengthIndex;
+  }
+  return scores;
+}
+
 int main(int argc, char* argv[]) {
   std::string modelPath, svPath, tvPath, corpusPath, nbestPath;
 
@@ -135,14 +177,17 @@ int main(int argc, char* argv[]) {
   std::vector<std::vector<std::string>> nbest;
   ParseNBestFile(nbestPath, nbest);
 
+  Encoder encoder(weights);
+  Decoder decoder(weights);
+
   size_t index = 0;
   size_t nbestIndex = 0;
   for (auto& in: input) {
-    Encoder encoder(weights);
-    Decoder decoder(weights);
 
     auto words = Split(in);
     auto sIndexes = svcb.Encode(words);
+    mblas::Matrix SourceContext;
+    encoder.GetContext(sIndexes, SourceContext);
 
     std::vector<std::vector<size_t> > sentences2score;
     while (nbestIndex < nbest.size()) {
@@ -165,43 +210,8 @@ int main(int argc, char* argv[]) {
       std::vector<std::vector<size_t>> batch;
       PrepareBatch(sentences2score, batch);
 
-      mblas::Matrix SourceContext;
-      encoder.GetContext(sIndexes, SourceContext);
+      auto scores = ScoreBatch(encoder, decoder, SourceContext, batch);
 
-      mblas::Matrix PrevState;
-      mblas::Matrix PrevEmbedding;
-
-      mblas::Matrix AlignedSourceContext;
-      mblas::Matrix Probs;
-
-      mblas::Matrix State;
-      mblas::Matrix Embedding;
-      size_t batchSize = batch[0].size();
-
-      decoder.EmptyState(PrevState, SourceContext, batchSize);
-      decoder.EmptyEmbedding(PrevEmbedding, batchSize);
-
-      std::vector<float> scores(batch[0].size(), 0.0f);
-      size_t lengthIndex = 0;
-      for (auto& w : batch) {
-        decoder.GetProbs(Probs, AlignedSourceContext,
-                         PrevState, PrevEmbedding, SourceContext);
-
-        for (size_t j = 0; j < w.size(); ++j) {
-          if (batch[lengthIndex][j]) {
-            float p = Probs(j, w[j]);
-            scores[j] += log(p);
-          }
-        }
-
-        decoder.Lookup(Embedding, w);
-        decoder.GetNextState(State, Embedding,
-                             PrevState, AlignedSourceContext);
-
-        mblas::Swap(State, PrevState);
-        mblas::Swap(Embedding, PrevEmbedding);
-        ++lengthIndex;
-      }
       for (size_t j = 0; j < batch[0].size(); ++j) {
         std::cout
           << nbest[nbestIndex - sentences2score.size() + j][0] << " ||| "
@@ -210,7 +220,12 @@ int main(int argc, char* argv[]) {
           << nbest[nbestIndex - sentences2score.size() + j][3] << " ||| "
           << std::endl;
       }
-      index = boost::lexical_cast<size_t>(nbest[nbestIndex][0]);
+      if (nbestIndex < nbest.size()) {
+        index = boost::lexical_cast<size_t>(nbest[nbestIndex][0]);
+      }
+      else {
+        return 0;
+      }
     }
   }
   return 0;
