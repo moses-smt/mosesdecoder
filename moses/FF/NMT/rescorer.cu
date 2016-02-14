@@ -7,6 +7,7 @@
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
+ #include <boost/algorithm/string.hpp>
 #include <boost/lexical_cast.hpp>
 
 #include "mblas/matrix.h"
@@ -75,6 +76,7 @@ void ParseInputFile(std::string path, std::vector<std::string>& output) {
     output.clear();
     std::string line;
     while (std::getline(file, line).good()) {
+      boost::trim(line);
       line += " </s>";
       output.push_back(line);
     }
@@ -82,6 +84,7 @@ void ParseInputFile(std::string path, std::vector<std::string>& output) {
 
 std::vector<std::string> Split(std::string& line, std::string del=" ") {
     std::vector<std::string> output;
+    boost::trim(line);
     size_t pos = 0;
     std::string token;
     while ((pos = line.find(del)) != std::string::npos) {
@@ -97,7 +100,8 @@ void ParseNBestFile(std::string path, std::vector<std::vector<std::string>>& out
     std::ifstream file(path);
     std::string line;
     while (std::getline(file, line).good()) {
-        output.push_back(Split(line, " ||| "));
+      boost::trim(line);
+      output.push_back(Split(line, " ||| "));
     }
 }
 
@@ -137,7 +141,7 @@ std::vector<float> ScoreBatch(
   decoder.EmptyState(PrevState, SourceContext, batchSize);
   decoder.EmptyEmbedding(PrevEmbedding, batchSize);
 
-  std::vector<float> scores(batch[0].size(), 0.0f);
+  std::vector<float> scores(batch[0].size(), float(0.0f));
   size_t lengthIndex = 0;
   for (auto& w : batch) {
     decoder.GetProbs(Probs, AlignedSourceContext,
@@ -198,7 +202,7 @@ int main(int argc, char* argv[]) {
       sentences2score.clear();
       for (; (nbestIndex < nbest.size()) && (sentences2score.size() < maxBatchSize); ++nbestIndex) {
         if (boost::lexical_cast<size_t>(nbest[nbestIndex][0]) == index) {
-          std::string sentence = nbest[nbestIndex][1] + " </s>";
+          std::string sentence = nbest[nbestIndex][1] + "</s>";
           sentences2score.push_back(tvcb.Encode(Split(sentence)));
         }
         else {
@@ -224,7 +228,7 @@ int main(int argc, char* argv[]) {
         std::cout
           << nbest[nbestIndex - sentences2score.size() + j][0] << " ||| "
           << nbest[nbestIndex - sentences2score.size() + j][1] << " ||| "
-          << nbest[nbestIndex - sentences2score.size() + j][2] << " " 
+          << nbest[nbestIndex - sentences2score.size() + j][2] << " "
           << fname << "= " << scores[j] << " ||| "
           << nbest[nbestIndex - sentences2score.size() + j][3] << std::endl;
       }
