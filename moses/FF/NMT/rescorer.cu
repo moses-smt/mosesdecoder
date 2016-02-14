@@ -138,6 +138,8 @@ int main(int argc, char* argv[]) {
   std::vector<std::vector<std::string>> nbest;
   ParseNBestFile(nbestPath, nbest);
 
+  boost::timer::auto_cpu_timer timer;
+
   size_t index = 0;
   size_t nbestIndex = 0;
   for (auto& in: input) {

@@ -23,9 +23,9 @@ int main(int argc, char** argv) {
   
   cudaSetDevice(device);
   
-  std::string source = "you know , one of the intense pleasures of travel and one of the delights of ethnographic research is the opportunity to live amongst those who have not forgotten the old ways , who still feel their past in the wind , touch it in stones polished by rain , taste it in the bitter leaves of plants .";
+  std::string source = "and of course , we all share the same adaptive imperatives .";
   
-  std::string target = "wissen sie , ein intensives vergnügen reisen und die freuden der ethnographischen forschung ist die möglichkeit , unter denen leben nicht vergessen , die alte art , die sich ihrer vergangenheit noch im wind , berühren sie in steine poliert von regen , geschmack in den bitteren blätter von pflanzen .";
+  std::string target = "und natürlich sind wir alle teilen die gleichen adaptive notwendigkeiten .";
  
   std::cerr << "Loading model" << std::endl;
   Weights weights("/home/marcinj/Badania/best_nmt/search_model.npz", device);

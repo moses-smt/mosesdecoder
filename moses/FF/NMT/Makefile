@@ -46,8 +46,8 @@ libnmt-cuda.so: $(NMTCU) $(HEADERS)
 #
 #
 rescorer: $(RESCORERCU) $(HEADERS)
-	nvcc -O3 -std=c++11 $(RESCORERCU) -lboost_system -lboost_program_options -lcudart -lcublas -o $@
+	nvcc -O3 -std=c++11 $(RESCORERCU) -lboost_system -lboost_timer -lboost_program_options -lcudart -lcublas -o $@
 
 clean:
-	rm -rf test_cuda test_gsl test_atlas test_ptatlas libnmt-cuda.so *.o *.so
+	rm -rf test_cuda test_gsl test_atlas test_ptatlas libnmt-cuda.so rescorer *.o *.so
 
