@@ -23,6 +23,7 @@ void ProgramOptions(int argc, char *argv[],
     std::string& tvPath,
     std::string& corpusPath,
     std::string& nbestPath,
+    std::string& fname,
     size_t& maxBatchSize,
     size_t& device) {
   bool help = false;
@@ -32,7 +33,7 @@ void ProgramOptions(int argc, char *argv[],
   cmdline_options.add_options()
     ("device,d", po::value(&device)->default_value(0),
      "CUDA Device")
-    ("batch,b", po::value(&maxBatchSize)->default_value(64),
+    ("batch,b", po::value(&maxBatchSize)->default_value(1000),
      "Max batch size")
     ("model,m", po::value(&modelPath)->required(),
      "Path to a model")
@@ -44,6 +45,8 @@ void ProgramOptions(int argc, char *argv[],
      "Path to the input of the nbest file.")
     ("n-best,n", po::value(&nbestPath)->required(),
      "Path to an nbest file.")
+    ("feature-name,f", po::value(&fname)->default_value("NMT0"),
+     "Feature name")
     ("help,h", po::value(&help)->zero_tokens()->default_value(false),
      "Print this help message and exit.")
   ;
@@ -159,12 +162,12 @@ std::vector<float> ScoreBatch(
 }
 
 int main(int argc, char* argv[]) {
-  std::string modelPath, svPath, tvPath, corpusPath, nbestPath;
+  std::string modelPath, svPath, tvPath, corpusPath, nbestPath, fname;
 
   size_t device;
-  size_t maxBatchSize = 64;
+  size_t maxBatchSize;
   ProgramOptions(argc, argv, modelPath, svPath,tvPath, corpusPath, nbestPath,
-                 maxBatchSize, device);
+                 fname, maxBatchSize, device);
   cudaSetDevice(device);
   std::cerr << "Loading model: " << modelPath << std::endl;
   Weights weights(modelPath, device);
@@ -211,14 +214,18 @@ int main(int argc, char* argv[]) {
       PrepareBatch(sentences2score, batch);
 
       auto scores = ScoreBatch(encoder, decoder, SourceContext, batch);
+      if(index > 0 && index % 5 == 0)
+        std::cerr << ".";
+      if(index > 0 && index % 100 == 0)
+        std::cerr << "[" << index << "]" << std::endl;
 
       for (size_t j = 0; j < batch[0].size(); ++j) {
         std::cout
           << nbest[nbestIndex - sentences2score.size() + j][0] << " ||| "
           << nbest[nbestIndex - sentences2score.size() + j][1] << " ||| "
-          << nbest[nbestIndex - sentences2score.size() + j][2]  << " NMT= " << scores[j] << " ||| "
-          << nbest[nbestIndex - sentences2score.size() + j][3] << " ||| "
-          << std::endl;
+          << nbest[nbestIndex - sentences2score.size() + j][2] << " " 
+          << fname << "= " << scores[j] << " ||| "
+          << nbest[nbestIndex - sentences2score.size() + j][3] << std::endl;
       }
       if (nbestIndex < nbest.size()) {
         index = boost::lexical_cast<size_t>(nbest[nbestIndex][0]);

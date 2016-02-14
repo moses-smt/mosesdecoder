@@ -56,7 +56,7 @@ int main(int argc, char** argv) {
                boost::token_compress_on);
     
   std::cerr << "Target: " << std::endl;
-  size_t bs = 3000;
+  size_t bs = 100;
   std::vector<std::vector<size_t>> tWordsBatch(targetSplit.size());
   std::transform(targetSplit.begin(), targetSplit.end(), tWordsBatch.begin(),
                  [&](const std::string& w) { std::cerr << tvcb[w] << ", "; return Batch(bs, tvcb[w]); });
