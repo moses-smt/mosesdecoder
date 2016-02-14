@@ -23,6 +23,7 @@ void ProgramOptions(int argc, char *argv[],
     std::string& tvPath,
     std::string& corpusPath,
     std::string& nbestPath,
+    std::string& fname,
     size_t& maxBatchSize,
     size_t& device) {
   bool help = false;
@@ -44,6 +45,8 @@ void ProgramOptions(int argc, char *argv[],
      "Path to the input of the nbest file.")
     ("n-best,n", po::value(&nbestPath)->required(),
      "Path to an nbest file.")
+    ("feature-name,f", po::value(&fname)->default_value("NMT0"),
+     "Feature name")
     ("help,h", po::value(&help)->zero_tokens()->default_value(false),
      "Print this help message and exit.")
   ;
@@ -117,12 +120,12 @@ void PrepareBatch(const std::vector<std::vector<size_t>>& input,
 }
 
 int main(int argc, char* argv[]) {
-  std::string modelPath, svPath, tvPath, corpusPath, nbestPath;
+  std::string modelPath, svPath, tvPath, corpusPath, nbestPath, fname;
 
   size_t device;
   size_t maxBatchSize;
   ProgramOptions(argc, argv, modelPath, svPath,tvPath, corpusPath, nbestPath,
-                 maxBatchSize, device);
+                 fname, maxBatchSize, device);
   cudaSetDevice(device);
   std::cerr << "Loading model: " << modelPath << std::endl;
   Weights weights(modelPath, device);
@@ -211,9 +214,9 @@ int main(int argc, char* argv[]) {
         std::cout
           << nbest[nbestIndex - sentences2score.size() + j][0] << " ||| "
           << nbest[nbestIndex - sentences2score.size() + j][1] << " ||| "
-          << nbest[nbestIndex - sentences2score.size() + j][2]  << " NMT= " << scores[j] << " ||| "
-          << nbest[nbestIndex - sentences2score.size() + j][3] << " ||| "
-          << std::endl;
+          << nbest[nbestIndex - sentences2score.size() + j][2] << " " 
+          << fname << "= " << scores[j] << " ||| "
+          << nbest[nbestIndex - sentences2score.size() + j][3] << std::endl;
       }
       index = boost::lexical_cast<size_t>(nbest[nbestIndex][0]);
     }
