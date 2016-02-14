@@ -138,7 +138,6 @@ int main(int argc, char* argv[]) {
   size_t index = 0;
   size_t nbestIndex = 0;
   for (auto& in: input) {
-    /* std::cout << "INPUT: " << in << std::endl; */
     Encoder encoder(weights);
     Decoder decoder(weights);
 
@@ -156,10 +155,8 @@ int main(int argc, char* argv[]) {
         else {
           break;
         }
-        /* std::cout << "TMP " << nbestIndex<< " " << sentences2score.size() << std::endl; */
 
       }
-      /* std::cout << "BATch size: " << sentences2score.size() << std::endl; */
       if (sentences2score.size() == 0 ) {
         index = boost::lexical_cast<size_t>(nbest[nbestIndex][0]);
         continue;
@@ -185,13 +182,16 @@ int main(int argc, char* argv[]) {
       decoder.EmptyEmbedding(PrevEmbedding, batchSize);
 
       std::vector<float> scores(batch[0].size(), 0.0f);
+      size_t lengthIndex = 0;
       for (auto& w : batch) {
         decoder.GetProbs(Probs, AlignedSourceContext,
                          PrevState, PrevEmbedding, SourceContext);
 
         for (size_t j = 0; j < w.size(); ++j) {
+          if (batch[lengthIndex][j]) {
             float p = Probs(j, w[j]);
             scores[j] += log(p);
+          }
         }
 
         decoder.Lookup(Embedding, w);
@@ -200,6 +200,7 @@ int main(int argc, char* argv[]) {
 
         mblas::Swap(State, PrevState);
         mblas::Swap(Embedding, PrevEmbedding);
+        ++lengthIndex;
       }
       for (size_t j = 0; j < batch[0].size(); ++j) {
         std::cout
