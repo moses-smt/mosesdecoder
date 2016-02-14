@@ -23,10 +23,9 @@ int main(int argc, char** argv) {
   
   cudaSetDevice(device);
   
-  std::string source = "and of course , we all share the same adaptive imperatives .";
-  
-  std::string target = "und natürlich sind wir alle teilen die gleichen adaptive notwendigkeiten .";
- 
+  std::string source = "you know , one of the intense pleasures of travel and one of the delights of ethnographic research is the opportunity to live amongst those who have not forgotten the old ways , who still feel their past in the wind , touch it in stones polished by rain , taste it in the bitter leaves of plants .";
+
+  std::string target = "wissen sie , eine der intensiven freuden des reisens und einer der freuden des ethnographischen forschung ist die chance zu leben , bei denen , die nicht vergessen haben , die alten wege , die noch ihre vergangenheit in den wind fühlen , berühren sie in steine poliert durch regen , es in dem bitteren geschmack blätter von pflanzen .";
   std::cerr << "Loading model" << std::endl;
   Weights weights("/home/marcinj/Badania/best_nmt/search_model.npz", device);
   Vocab svcb("/home/marcinj/Badania/best_nmt/vocab/en_de.en.txt");
@@ -92,6 +91,7 @@ int main(int argc, char** argv) {
       
       
       float p = Probs(0, w[0]);
+      std:: cout << log(p) << std::endl;
       sum += log(p);
       
       decoder.Lookup(Embedding, w);
