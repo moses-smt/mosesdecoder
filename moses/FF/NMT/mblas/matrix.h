@@ -192,6 +192,7 @@ Matrix& Swap(Matrix& Out, Matrix& In) {
   
   Out.Reshape(iRows, iCols);
   In.Reshape(oRows, oCols);
+  
   In.GetVec().swap(Out.GetVec());
   return Out;
 }
@@ -228,6 +229,17 @@ Matrix& Transpose(Matrix& Out) {
 
 Matrix& Copy(Matrix& Out, const Matrix& In) {
   Out.Resize(In.Rows(), In.Cols());
+  
+  //thread_local cublasHandle_t handle;
+  //thread_local bool initialized;
+  //
+  //if(!initialized) {
+  //  initialized = true;
+  //  cublasCreate(&handle); //memory leak
+  //}
+  //
+  //cublasScopy(handle, In.size(), In.data(), 1, Out.data(), 1);
+
   lib::copy(In.begin(), In.end(), Out.begin());
   return Out;
 }

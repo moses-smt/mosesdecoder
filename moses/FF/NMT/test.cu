@@ -22,9 +22,6 @@ int main(int argc, char** argv) {
     device = 1;
   
   cudaSetDevice(device);
-
-  //std::string source = "this is a little test .";
-  //std::string target = "das ist ein kleiner test .";
   
   std::string source = "you know , one of the intense pleasures of travel and one of the delights of ethnographic research is the opportunity to live amongst those who have not forgotten the old ways , who still feel their past in the wind , touch it in stones polished by rain , taste it in the bitter leaves of plants .";
   
@@ -59,22 +56,12 @@ int main(int argc, char** argv) {
                boost::token_compress_on);
     
   std::cerr << "Target: " << std::endl;
-  size_t bs = 1;
+  size_t bs = 3000;
   std::vector<std::vector<size_t>> tWordsBatch(targetSplit.size());
   std::transform(targetSplit.begin(), targetSplit.end(), tWordsBatch.begin(),
                  [&](const std::string& w) { std::cerr << tvcb[w] << ", "; return Batch(bs, tvcb[w]); });
   tWordsBatch.push_back(Batch(bs, tvcb["</s>"]));
   std::cerr << tvcb["</s>"] << std::endl;
-  
-  //std::vector<size_t> filter;
-  //std::vector<size_t> filterMap(tvcb.size());
-  //std::fstream in("/home/marcinj/Badania/mosesNMT/softmax.txt");
-  //std::string line;
-  //while(std::getline(in, line)) {
-  //  filter.push_back(tvcb[line]);
-  //  filterMap[filter.back()] = filter.size() - 1;
-  //}
-  //decoder.Filter(filter); // Limit to allowed vocabulary
   
   
   mblas::Matrix SourceContext;
@@ -105,13 +92,6 @@ int main(int argc, char** argv) {
       
       
       float p = Probs(0, w[0]);
-      //float p = Probs(0, filterMap[w[0]]);
-      //std::vector<float> ps;
-      //for(auto id : filter)
-      //  ps.push_back(Probs(0, filterMap[id]));
-      //std::sort(ps.begin(), ps.end());
-      
-      //std::cerr << log(p) << " max: " << log(ps.back()) << std::endl;
       sum += log(p);
       
       decoder.Lookup(Embedding, w);

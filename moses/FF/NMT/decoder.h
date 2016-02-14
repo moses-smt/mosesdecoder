@@ -106,7 +106,6 @@ class Decoder {
           
           Broadcast1(Temp1_, rows2);
           Broadcast2(Temp2_, rows1);
-          
           Element(Tanh(_1 + _2), Temp1_, Temp2_);
 
           Prod(A_, w_.Va_, Temp1_, false, true);
