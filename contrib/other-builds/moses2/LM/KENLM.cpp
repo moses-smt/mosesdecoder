@@ -187,18 +187,35 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
   const lm::ngram::State &in_state = static_cast<const KenLMState&>(prevState).state;
 
   const TargetPhrase &tp = hypo.GetTargetPhrase();
-  //const lm::ngram::ChartState &chartState = *static_cast<const lm::ngram::ChartState*>(tp.chartState);
-
-  if (!tp.GetSize()) {
+  size_t tpSize = tp.GetSize();
+  if (!tpSize) {
     stateCast.state = in_state;
 	return;
   }
+
+  // NEW CODE - start
+  //const lm::ngram::ChartState &chartStateInIsolation = *static_cast<const lm::ngram::ChartState*>(tp.chartState);
+  lm::ngram::ChartState newState;
+  lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState);
+
+  // each word in new tp
+  for (size_t i = 0; i < tpSize; ++i) {
+	  const Word &word = tp[i];
+	  lm::WordIndex lmInd = TranslateID(word);
+	  ruleScore.Terminal(lmInd);
+  }
+  float score = ruleScore.Finish();
+  stateCast.state = newState.right;
+  Model::State *state0 = &stateCast.state;
+  // NEW CODE - end
 
   const std::size_t begin = hypo.GetCurrTargetWordsRange().GetStartPos();
   //[begin, end) in STL-like fashion.
   const std::size_t end = hypo.GetCurrTargetWordsRange().GetEndPos() + 1;
   const std::size_t adjust_end = std::min(end, begin + m_ngram->Order() - 1);
 
+  /*
+   * OLD CODE
   std::size_t position = begin;
 
   typename Model::State aux_state;
@@ -210,11 +227,6 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
 	score += m_ngram->Score(*state0, TranslateID(hypo.GetWord(position)), *state1);
 	std::swap(state0, state1);
   }
-
-  /*
-  const lm::ngram::ChartState newState;
-  lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState);
-  ruleScore.NonTerminal(prevStateCast);
   */
 
   if (hypo.GetBitmap().IsComplete()) {
