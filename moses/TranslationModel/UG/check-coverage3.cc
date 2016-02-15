@@ -23,6 +23,13 @@ using namespace boost;
 typedef sapt::L2R_Token<sapt::SimpleWordId> Token;
 typedef mmBitext<Token> bitext_t;
 
+size_t topN;
+string docname;
+string reference_file;
+string domain_name;
+string bname, L1, L2;
+string ifile;
+
 struct mycmp 
 {
   bool operator() (pair<string,uint32_t> const& a, 
@@ -32,17 +39,20 @@ struct mycmp
   }
 };
 
+
+
+void interpret_args(int ac, char* av[]);
+
 string 
-basename(string const path, string const suffix)
+basename(string const path)
 {
   size_t p = path.find_last_of("/");
-  size_t k = path.size() - suffix.size();
-  cout << path << " " << suffix << endl;
-  cout << path.substr(0,p) << " " << path.substr(k) << endl;
-  return path.substr(p+1, suffix == &path[k] ? k-p-1 : path.size() - p);
+  string dot = ".";
+  size_t k = path.find((dot + L1),p+1);
+  if (k == string::npos) k = path.find(dot + L1 + ".gz");
+  if (k == string::npos) return path.substr(p+1);
+  return path.substr(p+1, k-p-1);
 }
-
-string docname;
 
 void 
 print_evidence_list(bitext_t const& B, std::map<uint32_t, uint32_t> const& indoc)
@@ -56,30 +66,33 @@ print_evidence_list(bitext_t const& B, std::map<uint32_t, uint32_t> const& indoc
     where.push_back(item(d->second, B.docid2name(d->first)));
   sort(where.begin(),where.end(),greater<item>());
   BOOST_FOREACH(item const& doc, where)
-    if (docname == doc.second)
+    if (domain_name == doc.second)
       cout << (boost::format("\t\t%4d ! %s") % doc.first % doc.second) << endl;
     else
       cout << (boost::format("\t\t%4d   %s") % doc.first % doc.second) << endl;
 }
 
-
 int main(int argc, char* argv[])
 {
   boost::shared_ptr<bitext_t> B(new bitext_t);
-  B->open(argv[1],argv[2],argv[3]);
+  interpret_args(argc,argv);
+
+  B->open(bname, L1, L2);
   string line, refline;
-  string ifile = argv[4];
-  string rfile = argc > 5 ? argv[5] : "";
-  docname = basename(ifile, string(".") + argv[2] + ".gz");
-  id_type docid = B->docname2docid(docname);
+  if (domain_name == "" && ifile != "-")
+    domain_name = basename(ifile);
+  
+  id_type docid = B->docname2docid(domain_name);
   boost::iostreams::filtering_istream in, ref;
   ugdiss::open_input_stream(ifile,in);
-  if (rfile.size()) ugdiss::open_input_stream(rfile,ref);
+  if (reference_file.size()) 
+    ugdiss::open_input_stream(reference_file,ref);
+
   while(getline(in,line))
     {
-      if (rfile.size()) getline(ref,refline);
+      if (reference_file.size()) getline(ref, refline);
       cout << string(80,'-') << endl;
-      cout << " [" << docname << "]" << endl;
+      cout << " [" << domain_name << "]" << endl;
       cout << line << endl;
       if (refline.size()) cout << refline << endl;
       cout << string(80,'-') << endl;
@@ -98,12 +111,10 @@ int main(int argc, char* argv[])
 				     sapt::random_sampling);
 	      s();
 	      if (s.stats()->trg.size() == 0) continue;
-	      // if (s.stats()->indoc[docname] > 10) continue;
 	      sapt::pstats::indoc_map_t::const_iterator d
 		= s.stats()->indoc.find(docid);
 	      size_t indoccnt = d != s.stats()->indoc.end() ? d->second : 0;
-	      cout // << m.size() << " : " 
-		   << m.str(B->V1.get()) << " (" 
+	      cout << m.str(B->V1.get()) << " (" 
 		   << s.stats()->trg.size() << " entries; " 
 		   << indoccnt << "/" << s.stats()->good 
 		   << " samples in domain; " << num_occurrences
@@ -113,8 +124,20 @@ int main(int argc, char* argv[])
 	      expand(m,*B,*s.stats(),ppairs,NULL);
 	      sort(ppairs.begin(),ppairs.end(),sorter);
 	      boost::format fmt("%4d/%d/%d |%s| (%4.2f : %4.2f)"); 
+	      size_t ctr = 0;
+	      bool skipped_some = false;
 	      BOOST_FOREACH(PhrasePair<Token>& ppair, ppairs)
 		{
+		  if (++ctr > topN && ppair.indoc.find(docid) == ppair.indoc.end())
+		    {
+		      skipped_some = true;
+		      continue;
+		    }
+		  if (skipped_some) 
+		    {
+		      cout << string(17,' ') << "..." << endl;
+		      skipped_some = false;
+		    }
 		  // if (ppair.joint * 100 < ppair.good1) break;
 		  ppair.good2 = ppair.raw2 * float(ppair.good1)/ppair.raw1;
 		  ppair.good2 = max(ppair.good2, ppair.joint);
@@ -149,5 +172,50 @@ int main(int argc, char* argv[])
 		}
 	    }
 	}
+    }
+}
+
+void
+interpret_args(int ac, char* av[])
+{
+  po::variables_map vm;
+  po::options_description o("Options");
+  o.add_options()
+
+    ("help,h",  "print this message")
+    ("top,n", po::value<size_t>(&topN)->default_value(5),
+     "max. number of entries to show")
+    ("domain,D", po::value<string>(&domain_name),
+     "domain name (when reading from stdin)")
+    ("reference,r", po::value<string>(&reference_file),
+     "reference file")
+    ;
+
+  po::options_description h("Hidden Options");
+  h.add_options()
+    ("bname", po::value<string>(&bname), "base name of corpus")
+    ("L1", po::value<string>(&L1), "L1 tag")
+    ("L2", po::value<string>(&L2), "L2 tag")
+    ("input", po::value<string>(&ifile), "input file")
+    ;
+
+  h.add(o);
+  po::positional_options_description a;
+  a.add("bname",1);
+  a.add("L1",1);
+  a.add("L2",1);
+  a.add("input",1);
+
+  po::store(po::command_line_parser(ac,av)
+            .options(h)
+            .positional(a)
+            .run(),vm);
+  po::notify(vm);
+  if (vm.count("help"))
+    {
+      std::cout << "\nusage:\n\t" << av[0]
+           << " [options] <model file stem> <L1> <L2> <input file>" << std::endl;
+      std::cout << o << std::endl;
+      exit(0);
     }
 }
