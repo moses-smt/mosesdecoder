@@ -27,10 +27,13 @@ class Vocab {
             return 1;
     }
 
-    inline std::vector<size_t> Encode(const std::vector<std::string> sentence) {
+    inline std::vector<size_t> Encode(const std::vector<std::string>& sentence, bool addEOS=false) const {
       std::vector<size_t> indexes;
-      for (auto& word : sentence) {
+      for (auto& word: sentence) {
         indexes.push_back((*this)[word]);
+      }
+      if (addEOS) {
+        indexes.push_back((*this)["</s>"]);
       }
       return indexes;
     }

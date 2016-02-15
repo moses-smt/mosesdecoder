@@ -2,19 +2,18 @@
 #include <cstdlib>
 #include <iostream>
 #include <string>
-#include <algorithm>
 #include <boost/timer/timer.hpp>
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
- #include <boost/algorithm/string.hpp>
-#include <boost/lexical_cast.hpp>
 
 #include "mblas/matrix.h"
 #include "model.h"
 #include "encoder.h"
 #include "decoder.h"
 #include "vocab.h"
+#include "nbest.h"
+#include "utils.h"
 
 #include "states.h"
 
@@ -76,52 +75,11 @@ void ParseInputFile(std::string path, std::vector<std::string>& output) {
     output.clear();
     std::string line;
     while (std::getline(file, line).good()) {
-      boost::trim(line);
-      line += " </s>";
+      Trim(line);
       output.push_back(line);
     }
 }
 
-std::vector<std::string> Split(std::string& line, std::string del=" ") {
-    std::vector<std::string> output;
-    boost::trim(line);
-    size_t pos = 0;
-    std::string token;
-    while ((pos = line.find(del)) != std::string::npos) {
-        token = line.substr(0, pos);
-        output.push_back(token);
-        line.erase(0, pos + del.size());
-    }
-    output.push_back(line);
-    return output;
-}
-
-void ParseNBestFile(std::string path, std::vector<std::vector<std::string>>& output) {
-    std::ifstream file(path);
-    std::string line;
-    while (std::getline(file, line).good()) {
-      boost::trim(line);
-      output.push_back(Split(line, " ||| "));
-    }
-}
-
-void PrepareBatch(const std::vector<std::vector<size_t>>& input,
-                  std::vector<std::vector<size_t>>& output) {
-
-    size_t maxSentenceLength = 0;
-    for (auto& sentence: input) {
-        maxSentenceLength = max(maxSentenceLength, sentence.size());
-    }
-
-    for (size_t i = 0; i < maxSentenceLength; ++i) {
-        output.emplace_back(input.size(), 0);
-        for (size_t j = 0; j < input.size(); ++j) {
-            if (i < input[j].size()) {
-                output[i][j] = input[j][i];
-            }
-        }
-    }
-}
 
 std::vector<float> ScoreBatch(
     Encoder& encoder,
@@ -141,7 +99,7 @@ std::vector<float> ScoreBatch(
   decoder.EmptyState(PrevState, SourceContext, batchSize);
   decoder.EmptyEmbedding(PrevEmbedding, batchSize);
 
-  std::vector<float> scores(batch[0].size(), float(0.0f));
+  std::vector<float> scores(batch[0].size(), 0.0f);
   size_t lengthIndex = 0;
   for (auto& w : batch) {
     decoder.GetProbs(Probs, AlignedSourceContext,
@@ -156,7 +114,7 @@ std::vector<float> ScoreBatch(
 
     decoder.Lookup(Embedding, w);
     decoder.GetNextState(State, Embedding,
-                          PrevState, AlignedSourceContext);
+                         PrevState, AlignedSourceContext);
 
     mblas::Swap(State, PrevState);
     mblas::Swap(Embedding, PrevEmbedding);
@@ -176,68 +134,45 @@ int main(int argc, char* argv[]) {
   std::cerr << "Loading model: " << modelPath << std::endl;
   Weights weights(modelPath, device);
   Vocab svcb(svPath);
-  Vocab tvcb(tvPath);
 
+  std::cerr << "Loading source sentences: " << corpusPath << std::endl;
   std::vector<std::string> input;
   ParseInputFile(corpusPath, input);
 
-  std::vector<std::vector<std::string>> nbest;
-  ParseNBestFile(nbestPath, nbest);
+  std::cerr << "Loading nbest list: " << nbestPath << std::endl;
+  NBest nbest(nbestPath, tvPath);
+
 
   boost::timer::auto_cpu_timer timer;
+
+  std::cerr << "Creating encoder and decoder." << std::endl;
   Encoder encoder(weights);
   Decoder decoder(weights);
+  std::cerr << "Start scoring" << std::endl;
+  for (size_t i = 0; i < input.size(); ++i) {
+    std::vector<std::string> words;
+    Split(input[i], words);
+    const std::vector<size_t> sIndexes = svcb.Encode(words, true);
+    std::cerr << "Source sentence["<< i << "]: ";
+    for (auto& word: sIndexes) std::cerr << word << " ";
+    std::cerr << std::endl;
 
-  size_t index = 0;
-  size_t nbestIndex = 0;
-  for (auto& in: input) {
-
-    auto words = Split(in);
-    auto sIndexes = svcb.Encode(words);
     mblas::Matrix SourceContext;
     encoder.GetContext(sIndexes, SourceContext);
-
-    std::vector<std::vector<size_t> > sentences2score;
-    while (nbestIndex < nbest.size()) {
-      sentences2score.clear();
-      for (; (nbestIndex < nbest.size()) && (sentences2score.size() < maxBatchSize); ++nbestIndex) {
-        if (boost::lexical_cast<size_t>(nbest[nbestIndex][0]) == index) {
-          std::string sentence = nbest[nbestIndex][1] + "</s>";
-          sentences2score.push_back(tvcb.Encode(Split(sentence)));
-        }
-        else {
-          break;
-        }
-
-      }
-      if (sentences2score.size() == 0 ) {
-        index = boost::lexical_cast<size_t>(nbest[nbestIndex][0]);
-        continue;
-      }
-
-      std::vector<std::vector<size_t>> batch;
-      PrepareBatch(sentences2score, batch);
-
-      auto scores = ScoreBatch(encoder, decoder, SourceContext, batch);
-      if(index > 0 && index % 5 == 0)
-        std::cerr << ".";
-      if(index > 0 && index % 100 == 0)
-        std::cerr << "[" << index << "]" << std::endl;
-
+    size_t batchIndex = 0;
+    for(auto& batch: nbest.GetBatches(i, maxBatchSize)) {
+      std::cerr << "Scoring batch (" << batch.size() << " x " << batch[0].size() << ")\n";
+      const auto scores = ScoreBatch(encoder, decoder, SourceContext, batch);
       for (size_t j = 0; j < batch[0].size(); ++j) {
-        std::cout
-          << nbest[nbestIndex - sentences2score.size() + j][0] << " ||| "
-          << nbest[nbestIndex - sentences2score.size() + j][1] << " ||| "
-          << nbest[nbestIndex - sentences2score.size() + j][2] << " "
+        std::cerr
+          << nbest[nbest.GetIndex(i) + batchIndex + j][0] << " ||| "
+          << nbest[nbest.GetIndex(i) + batchIndex + j][1] << " ||| "
+          << nbest[nbest.GetIndex(i) + batchIndex + j][2] << " "
           << fname << "= " << scores[j] << " ||| "
-          << nbest[nbestIndex - sentences2score.size() + j][3] << std::endl;
+          << nbest[nbest.GetIndex(i) + batchIndex + j][3]
+          << std::endl;
       }
-      if (nbestIndex < nbest.size()) {
-        index = boost::lexical_cast<size_t>(nbest[nbestIndex][0]);
-      }
-      else {
-        return 0;
-      }
+      batchIndex += batch[0].size();
     }
   }
   return 0;
