@@ -68,6 +68,7 @@ bool spanLength = false;
 bool ruleLength = false;
 bool nonTermContext = false;
 bool nonTermContextTarget = false;
+bool targetConstituentBoundariesFlag = false;
 
 int countOfCounts[COC_MAX+1];
 int totalDistinct = 0;
@@ -286,6 +287,9 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i],"--NonTermContextTarget") == 0) {
       nonTermContextTarget = true;
       std::cerr << "non-term context (target)" << std::endl;
+    } else if (strcmp(argv[i],"--TargetConstituentBoundaries") == 0) {
+      targetConstituentBoundariesFlag = true;
+      std::cerr << "including target constituent boundaries information" << std::endl;
     } else {
       featureArgs.push_back(argv[i]);
       ++i;
@@ -954,6 +958,18 @@ void outputPhrasePair(const ExtractionPhrasePair &phrasePair,
     if (!propValue.empty() && propValue.size() < 50000) {
       size_t nNTs = NumNonTerminal(phraseSource);
       phraseTableFile << " {{NonTermContextTarget " << nNTs << " " << propValue << "}}";
+    }
+  }
+
+  // target constituent boundaries
+  if (targetConstituentBoundariesFlag && !inverseFlag) {
+    const std::string targetConstituentBoundariesLeftValues = phrasePair.CollectAllPropertyValues("TargetConstituentBoundariesLeft");
+    if (!targetConstituentBoundariesLeftValues.empty()) {
+      phraseTableFile << " {{TargetConstituentBoundariesLeft " << targetConstituentBoundariesLeftValues << "}}";
+    }
+    const std::string targetConstituentBoundariesRightAdjacentValues = phrasePair.CollectAllPropertyValues("TargetConstituentBoundariesRightAdjacent");
+    if (!targetConstituentBoundariesRightAdjacentValues.empty()) {
+      phraseTableFile << " {{TargetConstituentBoundariesRightAdjacent " << targetConstituentBoundariesRightAdjacentValues << "}}";
     }
   }
 

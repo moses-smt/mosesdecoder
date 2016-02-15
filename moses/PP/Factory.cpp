@@ -11,6 +11,8 @@
 #include "moses/PP/SpanLengthPhraseProperty.h"
 #include "moses/PP/NonTermContextProperty.h"
 #include "moses/PP/OrientationPhraseProperty.h"
+#include "moses/PP/TargetConstituentBoundariesLeftPhraseProperty.h"
+#include "moses/PP/TargetConstituentBoundariesRightAdjacentPhraseProperty.h"
 
 namespace Moses
 {
@@ -58,6 +60,8 @@ PhrasePropertyFactory::PhrasePropertyFactory()
 
   MOSES_PNAME2("Counts", CountsPhraseProperty);
   MOSES_PNAME2("SourceLabels", SourceLabelsPhraseProperty);
+  MOSES_PNAME2("TargetConstituentBoundariesLeft", TargetConstituentBoundariesLeftPhraseProperty);
+  MOSES_PNAME2("TargetConstituentBoundariesRightAdjacent", TargetConstituentBoundariesRightAdjacentPhraseProperty);
   MOSES_PNAME2("TargetPreferences", TargetPreferencesPhraseProperty);
   MOSES_PNAME2("Tree",TreeStructurePhraseProperty);
   MOSES_PNAME2("SpanLength", SpanLengthPhraseProperty);

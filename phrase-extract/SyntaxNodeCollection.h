@@ -50,6 +50,11 @@ public:
   //! Lookup the SyntaxNodes for a given span.
   const std::vector< SyntaxNode* >& GetNodes( int startPos, int endPos ) const;
 
+  bool HasNodeStartingAtPosition( int startPos ) const;
+  const std::vector< SyntaxNode* >& GetNodesByStartPosition( int startPos ) const;
+  bool HasNodeEndingAtPosition( int endPos ) const;
+  const std::vector< SyntaxNode* >& GetNodesByEndPosition( int endPos ) const;
+
   //! Get a vector of pointers to all SyntaxNodes (unordered).
   const std::vector< SyntaxNode* >& GetAllNodes() {
     return m_nodes;
@@ -78,6 +83,9 @@ private:
   NodeIndex m_index;
   int m_numWords;
   std::vector< SyntaxNode* > m_emptyNode;
+
+  InnerNodeIndex m_endPositionsIndex;
+  InnerNodeIndex m_startPositionsIndex;
 };
 
 }  // namespace MosesTraining

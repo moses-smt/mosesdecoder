@@ -47,6 +47,8 @@ SyntaxNode *SyntaxNodeCollection::AddNode(int startPos, int endPos,
   SyntaxNode* newNode = new SyntaxNode(label, startPos, endPos);
   m_nodes.push_back( newNode );
   m_index[ startPos ][ endPos ].push_back( newNode );
+  m_endPositionsIndex[ endPos ].push_back( newNode );
+  m_startPositionsIndex[ startPos ].push_back( newNode ); // TODO: may not need this: access m_index by startPos and iterate over its InnerNodeIndex (= end positions)?
   m_numWords = std::max(endPos+1, m_numWords);
   return newNode;
 }
@@ -65,6 +67,36 @@ const std::vector< SyntaxNode* >& SyntaxNodeCollection::GetNodes(
 
   InnerNodeIndex::const_iterator endIndex = startIndex->second.find( endPos );
   if (endIndex == startIndex->second.end())
+    return m_emptyNode;
+
+  return endIndex->second;
+}
+
+bool SyntaxNodeCollection::HasNodeStartingAtPosition( int startPos ) const
+{
+  return GetNodesByStartPosition(startPos).size() > 0;
+}
+
+const std::vector< SyntaxNode* >& SyntaxNodeCollection::GetNodesByStartPosition(
+  int startPos ) const
+{
+  InnerNodeIndex::const_iterator startIndex = m_startPositionsIndex.find( startPos );
+  if (startIndex == m_startPositionsIndex.end() )
+    return m_emptyNode;
+
+  return startIndex->second;
+}
+
+bool SyntaxNodeCollection::HasNodeEndingAtPosition( int endPos ) const
+{
+  return GetNodesByEndPosition(endPos).size() > 0;
+}
+
+const std::vector< SyntaxNode* >& SyntaxNodeCollection::GetNodesByEndPosition(
+  int endPos ) const
+{
+  InnerNodeIndex::const_iterator endIndex = m_endPositionsIndex.find( endPos );
+  if (endIndex == m_endPositionsIndex.end() )
     return m_emptyNode;
 
   return endIndex->second;
