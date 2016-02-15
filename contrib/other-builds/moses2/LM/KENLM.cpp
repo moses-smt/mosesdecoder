@@ -147,8 +147,9 @@ KENLM::EvaluateInIsolation(MemPool &pool,
   float fullScore, nGramScore;
   size_t oovCount;
 
-  lm::ngram::ChartState state;
-  CalcScore(targetPhrase, fullScore, nGramScore, oovCount, state);
+  lm::ngram::ChartState *state = new lm::ngram::ChartState();
+  CalcScore(targetPhrase, fullScore, nGramScore, oovCount, *state);
+  targetPhrase.chartState = (void*) state;
 
   float estimateScore = fullScore - nGramScore;
 

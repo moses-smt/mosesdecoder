@@ -46,7 +46,7 @@ public:
 
   SCORE *GetScoresProperty(int propertyInd) const;
 
-  //void *chartState;
+  mutable void *chartState;
 
 protected:
 	Scores *m_scores;
