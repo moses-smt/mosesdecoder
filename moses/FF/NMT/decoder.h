@@ -107,7 +107,7 @@ class Decoder {
           Broadcast1(Temp1_, rows2);
           Broadcast2(Temp2_, rows1);
           Element(Tanh(_1 + _2), Temp1_, Temp2_);
-
+          
           Prod(A_, w_.Va_, Temp1_, false, true);
           
           A_.Reshape(rows2, rows1); // due to broadcasting above
@@ -147,7 +147,7 @@ class Decoder {
           Element(_1 + _2 + _3, T_, Temp1_, Temp2_);
           Element(_1 + _2, T_, w_.UoB_); // Broadcasting row-wise
           PairwiseReduce(Max(_1, _2), T_);
-          
+            
           if(filtered_) { // use only filtered vocabulary for SoftMax
             Prod(Probs, T_, FilteredWo_);
             Element(_1 + _2, Probs, FilteredWoB_); // Broadcasting row-wise

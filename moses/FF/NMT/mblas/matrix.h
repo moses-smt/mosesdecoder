@@ -181,6 +181,8 @@ void debug1(const M& m, size_t pos = 0, size_t l = 5) {
       std::cerr << m.GetVec()[i * m.Cols() + j] << " ";
     }
     std::cerr << std::endl;
+    if(i == 4)
+      break;
   }
 }
 
@@ -368,10 +370,11 @@ Matrix& Assemble(Matrix& Out,
 template <class F>
 Matrix& PairwiseReduce(F f, Matrix& Out) {
   typedef FVec::iterator It;
+  Matrix Temp(Out.Rows(), Out.Cols() / 2);
   strided_range<It> evens(Out.begin(), Out.end(), 2);
   strided_range<It> odds(Out.begin() + 1, Out.end(), 2);
-  lib::transform(evens.begin(), evens.end(), odds.begin(), Out.begin(), f);
-  Out.Resize(Out.Rows(), Out.Cols() / 2);
+  lib::transform(evens.begin(), evens.end(), odds.begin(), Temp.begin(), f);
+  Swap(Out, Temp);
   return Out;
 }
 
@@ -569,7 +572,7 @@ Matrix& Prod(Matrix& C, const Matrix& A, const Matrix& B,
     initialized = true;
     cublasCreate(&handle); 
   }
-  
+
   cublasSgemm(handle, opB, opA,
               n, m, k, &alpha, B.data(), ldb, A.data(), lda, &beta, C.data(), ldc);
   

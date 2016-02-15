@@ -24,8 +24,10 @@ int main(int argc, char** argv) {
   cudaSetDevice(device);
   
   std::string source = "you know , one of the intense pleasures of travel and one of the delights of ethnographic research is the opportunity to live amongst those who have not forgotten the old ways , who still feel their past in the wind , touch it in stones polished by rain , taste it in the bitter leaves of plants .";
-
   std::string target = "wissen sie , eine der intensiven freuden des reisens und einer der freuden des ethnographischen forschung ist die chance zu leben , bei denen , die nicht vergessen haben , die alten wege , die noch ihre vergangenheit in den wind fühlen , berühren sie in steine poliert durch regen , es in dem bitteren geschmack blätter von pflanzen .";
+  //std::string source = "taste it in the bitter leaves of plants .";
+  //std::string target = "blätter von pflanzen .";
+  
   std::cerr << "Loading model" << std::endl;
   Weights weights("/home/marcinj/Badania/best_nmt/search_model.npz", device);
   Vocab svcb("/home/marcinj/Badania/best_nmt/vocab/en_de.en.txt");
@@ -55,7 +57,7 @@ int main(int argc, char** argv) {
                boost::token_compress_on);
     
   std::cerr << "Target: " << std::endl;
-  size_t bs = 100;
+  size_t bs = 1000;
   std::vector<std::vector<size_t>> tWordsBatch(targetSplit.size());
   std::transform(targetSplit.begin(), targetSplit.end(), tWordsBatch.begin(),
                  [&](const std::string& w) { std::cerr << tvcb[w] << ", "; return Batch(bs, tvcb[w]); });
