@@ -99,6 +99,7 @@ NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
   ReadParameters();
   
   size_t devices = NMT::GetDevices(m_maxDevices);
+  std::cerr << devices << std::endl;
   for(size_t device = 0; device < devices; ++device)
     m_models.push_back(NMT::NewModel(m_modelPath, device));
   

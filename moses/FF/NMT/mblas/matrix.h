@@ -165,6 +165,47 @@ class TMatrix : public BaseMatrix {
 #ifndef NO_CUDA
 typedef thrust::device_vector<float> FVec;
 typedef thrust::device_vector<unsigned int> IVec;
+
+class CublasHandler {
+  public:
+
+    ~CublasHandler() {
+      if(handle_ != nullptr) {
+        cublasDestroy(*handle_);
+        delete handle_;
+        handle_ = nullptr;
+      }
+    }
+    
+    static cublasHandle_t GetHandle() {
+      if(instance_.handle_ == nullptr) {
+        instance_.CreateHandle();
+      }
+      return *instance_.handle_;
+    }
+    
+    static void StaticHandle() {
+      instance_.CreateHandle();
+    }
+    
+  private:    
+
+    void CreateHandle() {
+      if(handle_ != nullptr) {
+        cublasDestroy(*handle_);
+        delete handle_;
+      }
+      handle_ = new cublasHandle_t;
+      cublasCreate(handle_);
+    }
+
+    static thread_local cublasHandle_t* handle_;
+    static CublasHandler instance_;
+};
+
+CublasHandler CublasHandler::instance_;
+thread_local cublasHandle_t* CublasHandler::handle_ = nullptr;
+
 #else
 typedef std::vector<float> FVec;
 typedef std::vector<unsigned int> IVec;
@@ -208,15 +249,7 @@ Matrix& Transpose(Matrix& Out, const Matrix& In) {
   float alpha = 1.0;
   float beta  = 0.0;
   
-  thread_local cublasHandle_t handle;
-  thread_local bool initialized;
-  
-  if(!initialized) {
-    initialized = true;
-    cublasCreate(&handle); //memory leak
-  }
-  
-  cublasSgeam(handle, CUBLAS_OP_T, CUBLAS_OP_T, m, n, &alpha, In.data(), n,
+  cublasSgeam(CublasHandler::GetHandle(), CUBLAS_OP_T, CUBLAS_OP_T, m, n, &alpha, In.data(), n,
               &beta, In.data(), n, Out.data(), m); 
   
   return Out;
@@ -231,17 +264,6 @@ Matrix& Transpose(Matrix& Out) {
 
 Matrix& Copy(Matrix& Out, const Matrix& In) {
   Out.Resize(In.Rows(), In.Cols());
-  
-  //thread_local cublasHandle_t handle;
-  //thread_local bool initialized;
-  //
-  //if(!initialized) {
-  //  initialized = true;
-  //  cublasCreate(&handle); //memory leak
-  //}
-  //
-  //cublasScopy(handle, In.size(), In.data(), 1, Out.data(), 1);
-
   lib::copy(In.begin(), In.end(), Out.begin());
   return Out;
 }
@@ -565,15 +587,7 @@ Matrix& Prod(Matrix& C, const Matrix& A, const Matrix& B,
   cublasOperation_t opA = transA ? CUBLAS_OP_T : CUBLAS_OP_N;
   cublasOperation_t opB = transB ? CUBLAS_OP_T : CUBLAS_OP_N;
 
-  thread_local cublasHandle_t handle;
-  thread_local bool initialized;
-  
-  if(!initialized) {
-    initialized = true;
-    cublasCreate(&handle); 
-  }
-
-  cublasSgemm(handle, opB, opA,
+  cublasSgemm(CublasHandler::GetHandle(), opB, opA,
               n, m, k, &alpha, B.data(), ldb, A.data(), lda, &beta, C.data(), ldc);
   
 #else
@@ -587,17 +601,44 @@ Matrix& Prod(Matrix& C, const Matrix& A, const Matrix& B,
   return C;
 }
 
-mblas::Matrix& SoftmaxRows(mblas::Matrix& In,
-                           mblas::Matrix& Ones,
-                           mblas::Matrix& Sums) {
-  using namespace mblas;
-  
-  Element(Exp(_1), In);
-  Ones.Resize(In.Cols(), 1, 1.0);
-  Prod(Sums, In, Ones);
-  Element(_1 / _2, In, Sums); // Broadcasting col-wise
-  
-  return In;
+__global__ void gSoftMax(float* softMaxP, int cols) {
+  int bid = blockIdx.x;
+  extern __shared__ float _share[];
+  float * _sum = _share + blockDim.x;
+  float* sp = softMaxP + bid * cols;
+  _sum[threadIdx.x] = 0.0;
+  for(int tid = 0; tid < cols; tid += blockDim.x) {
+    int id = tid + threadIdx.x;
+    if(id < cols) {
+      sp[id] = __expf(sp[id]);
+      _sum[threadIdx.x] += sp[id];
+    }
+  }
+  __syncthreads();
+  int len = blockDim.x;
+  while(len != 1) {
+    __syncthreads();
+    int skip = (len + 1) >> 1;
+    if(threadIdx.x < (len >> 1)) {
+      _sum[threadIdx.x] += _sum[threadIdx.x + skip];
+    }
+    len = (len + 1) >> 1;
+  }
+  __syncthreads();
+  for(int tid = 0; tid < cols; tid += blockDim.x){
+    int id = tid + threadIdx.x;
+    if(id < cols) {
+      sp[id] /= _sum[0];
+    }
+  }
+}
+
+mblas::Matrix& Softmax(mblas::Matrix& Out) {
+  int threads = std::min(512, (int)Out.Cols());
+  int blocks  = sizeof(float) * threads * 2;
+  gSoftMax<<<Out.Rows(), threads, blocks>>>(Out.data(), Out.Cols());
+  cudaStreamSynchronize(0);
+  return Out;
 }
 
 }

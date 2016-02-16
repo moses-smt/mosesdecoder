@@ -112,7 +112,7 @@ class Decoder {
           
           A_.Reshape(rows2, rows1); // due to broadcasting above
           
-          SoftmaxRows(A_, Ones_, Sums_);
+          mblas::Softmax(A_);
           Prod(Context, A_, SourceContext);
         }
       
@@ -156,7 +156,7 @@ class Decoder {
             Prod(Probs, T_, w_.Wo_);
             Element(_1 + _2, Probs, w_.WoB_); // Broadcasting row-wise
           }
-          SoftmaxRows(Probs, Ones_, Sums_);
+          mblas::Softmax(Probs);
         }
         
         void Filter(const std::vector<size_t>& ids) {

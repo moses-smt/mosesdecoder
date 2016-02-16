@@ -39,10 +39,13 @@ size_t NMT::GetDevices(size_t maxDevices) {
 }
 
 void NMT::SetDevice() {
+  std::cerr << "Setting device " << w_->GetDevice() << std::endl;
   cudaSetDevice(w_->GetDevice());
+  CublasHandler::StaticHandle();
 }
 
 size_t NMT::GetDevice() {
+  std::cerr << "Returning device " << w_->GetDevice() << std::endl;
   return w_->GetDevice();
 }
 
@@ -51,7 +54,9 @@ void NMT::ClearStates() {
 }
 
 boost::shared_ptr<Weights> NMT::NewModel(const std::string& path, size_t device) {
+  std::cerr << "Got device " << device << std::endl;
   cudaSetDevice(device);
+  CublasHandler::StaticHandle();
   boost::shared_ptr<Weights> weights(new Weights(path, device));
   return weights;
 }
