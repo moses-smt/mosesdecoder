@@ -1,10 +1,10 @@
 all: test_cuda rescorer
 
-NMTCU = nmt.cu cnpy/cnpy.cpp 
-NMT = nmt.cpp cnpy/cnpy.cpp 
-SOURCESCU = test.cu cnpy/cnpy.cpp 
-RESCORERCU = rescorer.cu cnpy/cnpy.cpp
-SOURCES = test.cpp cnpy/cnpy.cpp 
+NMTCU = nmt.cu cnpy/cnpy.cpp
+NMT = nmt.cpp cnpy/cnpy.cpp
+SOURCESCU = test.cu cnpy/cnpy.cpp
+RESCORERCU = utils.cu nbest.cu rescorer.cu cnpy/cnpy.cpp
+SOURCES = test.cpp cnpy/cnpy.cpp
 HEADERS = decoder.h encoder.h model.h states.h npz_converter.h vocab.h mblas/matrix.h mblas/base_matrix.h
 
 test_cuda: $(SOURCESCU) $(HEADERS)
