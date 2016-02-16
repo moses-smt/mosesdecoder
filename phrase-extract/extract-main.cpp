@@ -18,6 +18,7 @@
 #include "PhraseExtractionOptions.h"
 #include "SentenceAlignmentWithSyntax.h"
 #include "SyntaxNode.h"
+#include "moses/Util.h"
 
 using namespace std;
 using namespace MosesTraining;
@@ -66,15 +67,6 @@ bool isAligned (SentenceAlignmentWithSyntax &, int, int);
 
 int sentenceOffset = 0;
 
-std::vector<std::string> Tokenize(const std::string& str,
-                                  const std::string& delimiters = " \t");
-
-bool flexScoreFlag = false;
-
-}
-
-namespace MosesTraining
-{
 
 class ExtractTask
 {
@@ -102,15 +94,24 @@ private:
   vector< string > m_extractedPhrasesSid;
   vector< string > m_extractedPhrasesContext;
   vector< string > m_extractedPhrasesContextInv;
-  void extractBase(SentenceAlignmentWithSyntax &);
-  void extract(SentenceAlignmentWithSyntax &);
-  void addPhrase(const SentenceAlignmentWithSyntax &, int, int, int, int, const std::string &, const std::string &);
+  void extractBase();
+  void extract();
+  void addPhrase(int, int, int, int, const std::string &);
   void writePhrasesToFile();
-  bool checkPlaceholders (const SentenceAlignmentWithSyntax &sentence, int startE, int endE, int startF, int endF);
-  bool isPlaceholder(const string &word);
-  bool checkTargetConstituentBoundaries(const SentenceAlignmentWithSyntax &sentence,
-                                        int startE, int endE, int startF, int endF,
-                                        std::string &phrasePropertiesString);
+  bool checkPlaceholders(int startE, int endE, int startF, int endF) const;
+  bool isPlaceholder(const string &word) const;
+  bool checkTargetConstituentBoundaries(int startE, int endE, int startF, int endF,
+                                        ostringstream &outextractstrPhraseProperties) const;
+  void getOrientationInfo(int startE, int endE, int startF, int endF, 
+                          const HSentenceVertices& inTopLeft, 
+                          const HSentenceVertices& inTopRight,
+                          const HSentenceVertices& inBottomLeft, 
+                          const HSentenceVertices& inBottomRight, 
+                          const HSentenceVertices& outTopLeft, 
+                          const HSentenceVertices& outTopRight, 
+                          const HSentenceVertices& outBottomLeft, 
+                          const HSentenceVertices& outBottomRight,
+                          std::string &orientationInfo) const;
 
   SentenceAlignmentWithSyntax &m_sentence;
   const PhraseExtractionOptions &m_options;
@@ -124,8 +125,8 @@ private:
 
 int main(int argc, char* argv[])
 {
-  cerr	<< "PhraseExtract v1.4, written by Philipp Koehn\n"
-        << "phrase extraction from an aligned parallel corpus\n";
+  cerr	<< "PhraseExtract v1.5, written by Philipp Koehn et al." << std::endl
+        << "phrase extraction from an aligned parallel corpus" << std::endl;
 
   if (argc < 6) {
     cerr << "syntax: extract en de align extract max-length [orientation [ --model [wbe|phrase|hier]-[msd|mslr|mono] ] ";
@@ -234,9 +235,9 @@ int main(int argc, char* argv[])
     } else if (strcmp(argv[i], "--Placeholders") == 0) {
       ++i;
       string str = argv[i];
-      options.placeholders = Tokenize(str.c_str(), ",");
+      Moses::Tokenize(options.placeholders, str.c_str(), ",");
     } else {
-      cerr << "extract: syntax error, unknown option '" << string(argv[i]) << "'\n";
+      cerr << "extract: syntax error, unknown option '" << string(argv[i]) << "'" << std::endl;
       exit(1);
     }
   }
@@ -290,7 +291,7 @@ int main(int argc, char* argv[])
 
   string englishString, foreignString, alignmentString, weightString;
 
-  while(getline(*eFileP, englishString)) {
+  while (getline(*eFileP, englishString)) {
     // Print progress dots to stderr.
     i++;
     if (i%10000 == 0) cerr << "." << flush;
@@ -358,7 +359,7 @@ namespace MosesTraining
 {
 void ExtractTask::Run()
 {
-  extract(m_sentence);
+  extract();
   writePhrasesToFile();
   m_extractedPhrases.clear();
   m_extractedPhrasesInv.clear();
@@ -369,10 +370,10 @@ void ExtractTask::Run()
 
 }
 
-void ExtractTask::extract(SentenceAlignmentWithSyntax &sentence)
+void ExtractTask::extract()
 {
-  int countE = sentence.target.size();
-  int countF = sentence.source.size();
+  int countE = m_sentence.target.size();
+  int countF = m_sentence.source.size();
 
   HPhraseVector inboundPhrases;
 
@@ -387,21 +388,20 @@ void ExtractTask::extract(SentenceAlignmentWithSyntax &sentence)
   HSentenceVertices outBottomRight;
 
   bool relaxLimit = m_options.isHierModel();
-  bool buildExtraStructure = m_options.isPhraseModel() || m_options.isHierModel();
 
   // check alignments for target phrase startE...endE
   // loop over extracted phrases which are compatible with the word-alignments
-  for(int startE=0; startE<countE; startE++) {
-    for(int endE=startE;
+  for (int startE=0; startE<countE; startE++) {
+    for (int endE=startE;
         (endE<countE && (relaxLimit || endE<startE+m_options.maxPhraseLength));
         endE++) {
 
       int minF = std::numeric_limits<int>::max();
       int maxF = -1;
-      vector< int > usedF = sentence.alignedCountS;
-      for(int ei=startE; ei<=endE; ei++) {
-        for(size_t i=0; i<sentence.alignedToT[ei].size(); i++) {
-          int fi = sentence.alignedToT[ei][i];
+      vector< int > usedF = m_sentence.alignedCountS;
+      for (int ei=startE; ei<=endE; ei++) {
+        for (size_t i=0; i<m_sentence.alignedToT[ei].size(); i++) {
+          int fi = m_sentence.alignedToT[ei][i];
           if (fi<minF) {
             minF = fi;
           }
@@ -417,128 +417,140 @@ void ExtractTask::extract(SentenceAlignmentWithSyntax &sentence)
 
         // check if source words are aligned to out of bound target words
         bool out_of_bounds = false;
-        for(int fi=minF; fi<=maxF && !out_of_bounds; fi++)
+        for (int fi=minF; fi<=maxF && !out_of_bounds; fi++)
           if (usedF[fi]>0) {
-            // cout << "ouf of bounds: " << fi << "\n";
+            // cout << "ouf of bounds: " << fi << std::endl;
             out_of_bounds = true;
           }
 
-        // cout << "doing if for ( " << minF << "-" << maxF << ", " << startE << "," << endE << ")\n";
-        if (!out_of_bounds ||
-            ( m_options.isSingleWordHeuristicFlag() && (endE==startE) && (minF==maxF) )) { // extraction of single word phrases even if inconsistent wrt. word alignment
+        // cout << "doing if for ( " << minF << "-" << maxF << ", " << startE << "," << endE << ")" << std::endl;
+        if (!out_of_bounds) {
           // start point of source phrase may retreat over unaligned
-          for(int startF=minF;
-              ((startF>=0 &&
+          for (int startF=minF;
+               (startF>=0 &&
                 (relaxLimit || startF>maxF-m_options.maxPhraseLength) && // within length limit
-                (startF==minF || sentence.alignedCountS[startF]==0)) && // unaligned
-               (!out_of_bounds || (startF==minF))); // if out of bounds, but single word heuristic: don't retreat over unaligned
-              startF--)
+                (startF==minF || m_sentence.alignedCountS[startF]==0)); // unaligned
+               startF--) {
             // end point of source phrase may advance over unaligned
-            for(int endF=maxF;
-                ((endF<countF &&
+            for (int endF=maxF;
+                 (endF<countF &&
                   (relaxLimit || endF<startF+m_options.maxPhraseLength) && // within length limit
-                  (endF==maxF || sentence.alignedCountS[endF]==0)) && // unaligned
-                 (!out_of_bounds || (endF==maxF))); // if out of bounds, but single word heuristic: don't advance over unaligned
-                endF++) { // at this point we have extracted a phrase
-              if(buildExtraStructure) { // phrase || hier
+                  (endF==maxF || m_sentence.alignedCountS[endF]==0)); // unaligned
+                 endF++) { // at this point we have extracted a phrase
+
                 if(endE-startE < m_options.maxPhraseLength && endF-startF < m_options.maxPhraseLength) { // within limit
                   inboundPhrases.push_back(HPhrase(HPhraseVertex(startF,startE),
                                                    HPhraseVertex(endF,endE)));
                   insertPhraseVertices(inTopLeft, inTopRight, inBottomLeft, inBottomRight,
                                        startF, startE, endF, endE);
-                } else
+                } else {
                   insertPhraseVertices(outTopLeft, outTopRight, outBottomLeft, outBottomRight,
                                        startF, startE, endF, endE);
-              } else {
-                string orientationInfo = "";
-                if(m_options.isWordModel()) {
-                  REO_POS wordPrevOrient, wordNextOrient;
-                  bool connectedLeftTopP  = isAligned( sentence, startF-1, startE-1 );
-                  bool connectedRightTopP = isAligned( sentence, endF+1,   startE-1 );
-                  bool connectedLeftTopN  = isAligned( sentence, endF+1, endE+1 );
-                  bool connectedRightTopN = isAligned( sentence, startF-1,   endE+1 );
-                  wordPrevOrient = getOrientWordModel(sentence, m_options.isWordType(), connectedLeftTopP, connectedRightTopP, startF, endF, startE, endE, countF, 0, 1, &ge, &lt);
-                  wordNextOrient = getOrientWordModel(sentence, m_options.isWordType(), connectedLeftTopN, connectedRightTopN, endF, startF, endE, startE, 0, countF, -1, &lt, &ge);
-                  orientationInfo += getOrientString(wordPrevOrient, m_options.isWordType()) + " " + getOrientString(wordNextOrient, m_options.isWordType());
-                  // if(m_options.isAllModelsOutputFlag())
-                  // " | | ";
                 }
-                std::string phrasePropertiesString;
-                bool doAdd = !m_options.isTargetConstituentBoundariesFlag();
-                if (m_options.isTargetConstituentBoundariesFlag() || m_options.isTargetConstituentConstrainedFlag()) {
-                  bool isTargetConstituentCovered = checkTargetConstituentBoundaries(sentence, startE, endE, startF, endF, phrasePropertiesString);
-                  doAdd = doAdd || isTargetConstituentCovered;
-                }
-                if (doAdd) {
-                  addPhrase(sentence, startE, endE, startF, endF, orientationInfo, phrasePropertiesString);
-                }
-              }
             }
+          }
         }
       }
     }
   }
 
-  if(buildExtraStructure) { // phrase || hier
-    string orientationInfo = "";
-    REO_POS wordPrevOrient=UNKNOWN, wordNextOrient=UNKNOWN, phrasePrevOrient, phraseNextOrient, hierPrevOrient, hierNextOrient;
+  std::string orientationInfo = "";
 
-    for(size_t i = 0; i < inboundPhrases.size(); i++) {
-      int startF = inboundPhrases[i].first.first;
-      int startE = inboundPhrases[i].first.second;
-      int endF = inboundPhrases[i].second.first;
-      int endE = inboundPhrases[i].second.second;
+  for (size_t i = 0; i < inboundPhrases.size(); i++) {
 
-      bool connectedLeftTopP  = isAligned( sentence, startF-1, startE-1 );
-      bool connectedRightTopP = isAligned( sentence, endF+1,   startE-1 );
-      bool connectedLeftTopN  = isAligned( sentence, endF+1, endE+1 );
-      bool connectedRightTopN = isAligned( sentence, startF-1,   endE+1 );
+    int startF = inboundPhrases[i].first.first;
+    int startE = inboundPhrases[i].first.second;
+    int endF = inboundPhrases[i].second.first;
+    int endE = inboundPhrases[i].second.second;
 
-      if(m_options.isWordModel()) {
-        wordPrevOrient = getOrientWordModel(sentence, m_options.isWordType(),
-                                            connectedLeftTopP, connectedRightTopP,
-                                            startF, endF, startE, endE, countF, 0, 1,
-                                            &ge, &lt);
-        wordNextOrient = getOrientWordModel(sentence, m_options.isWordType(),
-                                            connectedLeftTopN, connectedRightTopN,
-                                            endF, startF, endE, startE, 0, countF, -1,
-                                            &lt, &ge);
-      }
-      if (m_options.isPhraseModel()) {
-        phrasePrevOrient = getOrientPhraseModel(sentence, m_options.isPhraseType(),
-                                                connectedLeftTopP, connectedRightTopP,
-                                                startF, endF, startE, endE, countF-1, 0, 1, &ge, &lt, inBottomRight, inBottomLeft);
-        phraseNextOrient = getOrientPhraseModel(sentence, m_options.isPhraseType(),
-                                                connectedLeftTopN, connectedRightTopN,
-                                                endF, startF, endE, startE, 0, countF-1, -1, &lt, &ge, inBottomLeft, inBottomRight);
-      } else {
-        phrasePrevOrient = phraseNextOrient = UNKNOWN;
-      }
-      if(m_options.isHierModel()) {
-        hierPrevOrient = getOrientHierModel(sentence, m_options.isHierType(),
-                                            connectedLeftTopP, connectedRightTopP,
-                                            startF, endF, startE, endE, countF-1, 0, 1, &ge, &lt, inBottomRight, inBottomLeft, outBottomRight, outBottomLeft, phrasePrevOrient);
-        hierNextOrient = getOrientHierModel(sentence, m_options.isHierType(),
-                                            connectedLeftTopN, connectedRightTopN,
-                                            endF, startF, endE, startE, 0, countF-1, -1, &lt, &ge, inBottomLeft, inBottomRight, outBottomLeft, outBottomRight, phraseNextOrient);
-      }
+    getOrientationInfo(startE, endE, startF, endF, 
+                       inTopLeft, inTopRight, inBottomLeft, inBottomRight, 
+                       outTopLeft, outTopRight, outBottomLeft, outBottomRight,
+                       orientationInfo);
 
-      orientationInfo = ((m_options.isWordModel())? getOrientString(wordPrevOrient, m_options.isWordType()) + " " + getOrientString(wordNextOrient, m_options.isWordType()) : "") + " | " +
-                        ((m_options.isPhraseModel())? getOrientString(phrasePrevOrient, m_options.isPhraseType()) + " " + getOrientString(phraseNextOrient, m_options.isPhraseType()) : "") + " | " +
-                        ((m_options.isHierModel())? getOrientString(hierPrevOrient, m_options.isHierType()) + " " + getOrientString(hierNextOrient, m_options.isHierType()) : "");
+    addPhrase(startE, endE, startF, endF, orientationInfo);
+  }
 
-      std::string phrasePropertiesString;
-      bool doAdd = !m_options.isTargetConstituentBoundariesFlag();
-      if (m_options.isTargetConstituentBoundariesFlag() || m_options.isTargetConstituentConstrainedFlag()) {
-        bool isTargetConstituentCovered = checkTargetConstituentBoundaries(sentence, startE, endE, startF, endF, phrasePropertiesString);
-        doAdd = doAdd || isTargetConstituentCovered;
-      }
-      if (doAdd) {
-        addPhrase(sentence, startE, endE, startF, endF, orientationInfo, phrasePropertiesString);
-      }
+  if (m_options.isSingleWordHeuristicFlag()) {
+    // add single word phrases that are not consistent with the word alignment
+    m_sentence.invertAlignment();
+    for (int ei=0; ei<countE; ei++) {
+        for (size_t i=0; i<m_sentence.alignedToT[ei].size(); i++) {
+          int fi = m_sentence.alignedToT[ei][i];
+          if ((m_sentence.alignedToT[ei].size() > 1) || (m_sentence.alignedToS[fi].size() > 1)) {
+
+            if (m_options.isOrientationFlag()) {
+              getOrientationInfo(ei, ei, fi, fi, 
+                                 inTopLeft, inTopRight, inBottomLeft, inBottomRight, 
+                                 outTopLeft, outTopRight, outBottomLeft, outBottomRight,
+                                 orientationInfo);
+            }
+
+            addPhrase(ei, ei, fi, fi, orientationInfo);
+          }
+        }
     }
   }
 }
+
+void ExtractTask::getOrientationInfo(int startE, int endE, int startF, int endF,
+                                     const HSentenceVertices& inTopLeft, 
+                                     const HSentenceVertices& inTopRight,
+                                     const HSentenceVertices& inBottomLeft, 
+                                     const HSentenceVertices& inBottomRight, 
+                                     const HSentenceVertices& outTopLeft, 
+                                     const HSentenceVertices& outTopRight, 
+                                     const HSentenceVertices& outBottomLeft, 
+                                     const HSentenceVertices& outBottomRight,
+                                     std::string &orientationInfo) const
+{
+  REO_POS wordPrevOrient=UNKNOWN, wordNextOrient=UNKNOWN;
+  REO_POS phrasePrevOrient=UNKNOWN, phraseNextOrient=UNKNOWN;
+  REO_POS hierPrevOrient=UNKNOWN, hierNextOrient=UNKNOWN;
+
+  bool connectedLeftTopP  = isAligned( m_sentence, startF-1, startE-1 );
+  bool connectedRightTopP = isAligned( m_sentence, endF+1,   startE-1 );
+  bool connectedLeftTopN  = isAligned( m_sentence, endF+1, endE+1 );
+  bool connectedRightTopN = isAligned( m_sentence, startF-1,   endE+1 );
+
+  const int countF = m_sentence.source.size();
+
+  if (m_options.isWordModel()) {
+    wordPrevOrient = getOrientWordModel(m_sentence, m_options.isWordType(),
+                                        connectedLeftTopP, connectedRightTopP,
+                                        startF, endF, startE, endE, countF, 0, 1,
+                                        &ge, &lt);
+    wordNextOrient = getOrientWordModel(m_sentence, m_options.isWordType(),
+                                        connectedLeftTopN, connectedRightTopN,
+                                        endF, startF, endE, startE, 0, countF, -1,
+                                        &lt, &ge);
+  }
+  if (m_options.isPhraseModel()) {
+    phrasePrevOrient = getOrientPhraseModel(m_sentence, m_options.isPhraseType(),
+                                            connectedLeftTopP, connectedRightTopP,
+                                            startF, endF, startE, endE, countF-1, 0, 1, &ge, &lt, inBottomRight, inBottomLeft);
+    phraseNextOrient = getOrientPhraseModel(m_sentence, m_options.isPhraseType(),
+                                            connectedLeftTopN, connectedRightTopN,
+                                            endF, startF, endE, startE, 0, countF-1, -1, &lt, &ge, inBottomLeft, inBottomRight);
+  }
+  if (m_options.isHierModel()) {
+    hierPrevOrient = getOrientHierModel(m_sentence, m_options.isHierType(),
+                                        connectedLeftTopP, connectedRightTopP,
+                                        startF, endF, startE, endE, countF-1, 0, 1, &ge, &lt, inBottomRight, inBottomLeft, outBottomRight, outBottomLeft, phrasePrevOrient);
+    hierNextOrient = getOrientHierModel(m_sentence, m_options.isHierType(),
+                                        connectedLeftTopN, connectedRightTopN,
+                                        endF, startF, endE, startE, 0, countF-1, -1, &lt, &ge, inBottomLeft, inBottomRight, outBottomLeft, outBottomRight, phraseNextOrient);
+  }
+
+  if (m_options.isWordModel()) {
+    orientationInfo = getOrientString(wordPrevOrient, m_options.isWordType()) + " " + getOrientString(wordNextOrient, m_options.isWordType());
+  } else {
+    orientationInfo = " | " +
+      ((m_options.isPhraseModel())? getOrientString(phrasePrevOrient, m_options.isPhraseType()) + " " + getOrientString(phraseNextOrient, m_options.isPhraseType()) : "") + " | " +
+      ((m_options.isHierModel())? getOrientString(hierPrevOrient, m_options.isHierType()) + " " + getOrientString(hierNextOrient, m_options.isHierType()) : "");
+  }
+}
+
 
 REO_POS getOrientWordModel(SentenceAlignmentWithSyntax & sentence, REO_MODEL_TYPE modelType,
                            bool connectedLeftTop, bool connectedRightTop,
@@ -690,7 +702,7 @@ void insertVertex( HSentenceVertices & corners, int x, int y )
   set<int> tmp;
   tmp.insert(x);
   pair< HSentenceVertices::iterator, bool > ret = corners.insert( pair<int, set<int> > (y, tmp) );
-  if(ret.second == false) {
+  if (ret.second == false) {
     ret.first->second.insert(x);
   }
 }
@@ -742,14 +754,11 @@ string getOrientString(REO_POS orient, REO_MODEL_TYPE modelType)
 }
 
 
-bool ExtractTask::checkTargetConstituentBoundaries( const SentenceAlignmentWithSyntax &sentence,
-    int startE, int endE, int startF, int endF,
-    std::string &phrasePropertiesString)
+bool ExtractTask::checkTargetConstituentBoundaries(int startE, int endE, int startF, int endF,
+                                                   ostringstream &outextractstrPhraseProperties) const
 {
-  ostringstream outextractstrPhrasePropertyTargetConstituentBoundariesLeft;
-
   if (m_options.isTargetConstituentBoundariesFlag()) {
-    outextractstrPhrasePropertyTargetConstituentBoundariesLeft << "{{TargetConstituentBoundariesLeft ";
+    outextractstrPhraseProperties << " {{TargetConstituentBoundariesLeft ";
   }
 
   bool validTargetConstituentBoundaries = false;
@@ -758,17 +767,17 @@ bool ExtractTask::checkTargetConstituentBoundaries( const SentenceAlignmentWithS
   if (m_options.isTargetConstituentBoundariesFlag()) {
     if (startE==0) {
       outextractstrPhrasePropertyTargetConstituentBoundariesIsFirst = false;
-      outextractstrPhrasePropertyTargetConstituentBoundariesLeft << "BOS_";
+      outextractstrPhraseProperties << "BOS_";
     }
   }
 
-  if (!sentence.targetTree.HasNodeStartingAtPosition(startE)) {
+  if (!m_sentence.targetTree.HasNodeStartingAtPosition(startE)) {
 
     validTargetConstituentBoundaries = false;
 
   } else {
 
-    const std::vector< SyntaxNode* >& startingNodes = sentence.targetTree.GetNodesByStartPosition(startE);
+    const std::vector< SyntaxNode* >& startingNodes = m_sentence.targetTree.GetNodesByStartPosition(startE);
     for ( std::vector< SyntaxNode* >::const_reverse_iterator iter = startingNodes.rbegin(); iter != startingNodes.rend(); ++iter ) {
       if ( (*iter)->end == endE ) {
         validTargetConstituentBoundaries = true;
@@ -780,18 +789,18 @@ bool ExtractTask::checkTargetConstituentBoundaries( const SentenceAlignmentWithS
         if (outextractstrPhrasePropertyTargetConstituentBoundariesIsFirst) {
           outextractstrPhrasePropertyTargetConstituentBoundariesIsFirst = false;
         } else {
-          outextractstrPhrasePropertyTargetConstituentBoundariesLeft << "<";
+          outextractstrPhraseProperties << "<";
         }
-        outextractstrPhrasePropertyTargetConstituentBoundariesLeft << (*iter)->label;
+        outextractstrPhraseProperties << (*iter)->label;
       }
     }
   }
 
   if (m_options.isTargetConstituentBoundariesFlag()) {
     if (outextractstrPhrasePropertyTargetConstituentBoundariesIsFirst) {
-      outextractstrPhrasePropertyTargetConstituentBoundariesLeft << "<";
+      outextractstrPhraseProperties << "<";
     }
-    outextractstrPhrasePropertyTargetConstituentBoundariesLeft << "}}";
+    outextractstrPhraseProperties << "}}";
   }
 
 
@@ -802,18 +811,18 @@ bool ExtractTask::checkTargetConstituentBoundaries( const SentenceAlignmentWithS
     int relaxedEndE = endE;
     const std::string punctuation = ",;.:!?";
     while ( (relaxedStartE < endE) &&
-            (sentence.target[relaxedStartE].size() == 1) &&
-            (punctuation.find(sentence.target[relaxedStartE].at(0)) != std::string::npos) ) {
+            (m_sentence.target[relaxedStartE].size() == 1) &&
+            (punctuation.find(m_sentence.target[relaxedStartE].at(0)) != std::string::npos) ) {
       ++relaxedStartE;
     }
     while ( (relaxedEndE > relaxedStartE) &&
-            (sentence.target[relaxedEndE].size() == 1) &&
-            (punctuation.find(sentence.target[relaxedEndE].at(0)) != std::string::npos) ) {
+            (m_sentence.target[relaxedEndE].size() == 1) &&
+            (punctuation.find(m_sentence.target[relaxedEndE].at(0)) != std::string::npos) ) {
       --relaxedEndE;
     }
 
     if ( (relaxedStartE != startE) || (relaxedEndE !=endE) ) {
-      const std::vector< SyntaxNode* >& startingNodes = sentence.targetTree.GetNodesByStartPosition(relaxedStartE);
+      const std::vector< SyntaxNode* >& startingNodes = m_sentence.targetTree.GetNodesByStartPosition(relaxedStartE);
       for ( std::vector< SyntaxNode* >::const_reverse_iterator iter = startingNodes.rbegin();
             (iter != startingNodes.rend() && !relaxedValidTargetConstituentBoundaries);
             ++iter ) {
@@ -831,72 +840,71 @@ bool ExtractTask::checkTargetConstituentBoundaries( const SentenceAlignmentWithS
 
   if (m_options.isTargetConstituentBoundariesFlag()) {
 
-    ostringstream outextractstrPhrasePropertyTargetConstituentBoundariesRightAdjacent;
-    outextractstrPhrasePropertyTargetConstituentBoundariesRightAdjacent << "{{TargetConstituentBoundariesRightAdjacent ";
+    outextractstrPhraseProperties << " {{TargetConstituentBoundariesRightAdjacent ";
     outextractstrPhrasePropertyTargetConstituentBoundariesIsFirst = true;
 
-    if (endE==sentence.target.size()-1) {
+    if (endE==(int)m_sentence.target.size()-1) {
 
-      outextractstrPhrasePropertyTargetConstituentBoundariesRightAdjacent << "EOS_";
+      outextractstrPhraseProperties << "EOS_";
       outextractstrPhrasePropertyTargetConstituentBoundariesIsFirst = false;
 
     } else {
 
-      const std::vector< SyntaxNode* >& adjacentNodes = sentence.targetTree.GetNodesByStartPosition(endE+1);
+      const std::vector< SyntaxNode* >& adjacentNodes = m_sentence.targetTree.GetNodesByStartPosition(endE+1);
       for ( std::vector< SyntaxNode* >::const_reverse_iterator iter = adjacentNodes.rbegin(); iter != adjacentNodes.rend(); ++iter ) {
         if (outextractstrPhrasePropertyTargetConstituentBoundariesIsFirst) {
           outextractstrPhrasePropertyTargetConstituentBoundariesIsFirst = false;
         } else {
-          outextractstrPhrasePropertyTargetConstituentBoundariesRightAdjacent << "<";
+          outextractstrPhraseProperties << "<";
         }
-        outextractstrPhrasePropertyTargetConstituentBoundariesRightAdjacent << (*iter)->label;
+        outextractstrPhraseProperties << (*iter)->label;
       }
     }
 
     if (outextractstrPhrasePropertyTargetConstituentBoundariesIsFirst) {
-      outextractstrPhrasePropertyTargetConstituentBoundariesRightAdjacent << "<";
+      outextractstrPhraseProperties << "<";
     }
-    outextractstrPhrasePropertyTargetConstituentBoundariesRightAdjacent << "}}";
-
-    phrasePropertiesString += " ";
-    phrasePropertiesString += outextractstrPhrasePropertyTargetConstituentBoundariesLeft.str();
-    phrasePropertiesString += " ";
-    phrasePropertiesString += outextractstrPhrasePropertyTargetConstituentBoundariesRightAdjacent.str();
+    outextractstrPhraseProperties << "}}";
   }
 
   return true;
 }
 
 
-void ExtractTask::addPhrase( const SentenceAlignmentWithSyntax &sentence,
-                             int startE, int endE, int startF, int endF,
-                             const std::string &orientationInfo,
-                             const std::string &phrasePropertiesString)
+void ExtractTask::addPhrase( int startE, int endE, int startF, int endF,
+                             const std::string &orientationInfo)
 {
-  // source
-  //   // cout << "adding ( " << startF << "-" << endF << ", " << startE << "-" << endE << ")\n";
+  ostringstream outextractstrPhraseProperties;
+  if (m_options.isTargetConstituentBoundariesFlag() || m_options.isTargetConstituentConstrainedFlag()) {
+    bool isTargetConstituentCovered = checkTargetConstituentBoundaries(startE, endE, startF, endF, outextractstrPhraseProperties);
+    if (m_options.isTargetConstituentBoundariesFlag() && !isTargetConstituentCovered) {
+      return;
+    }
+  }
+
+  if (m_options.placeholders.size() && !checkPlaceholders(startE, endE, startF, endF)) {
+    return;
+  }
+
+  if (m_options.isOnlyOutputSpanInfo()) {
+    cout << startF << " " << endF << " " << startE << " " << endE << std::endl;
+    return;
+  }
+
   ostringstream outextractstr;
   ostringstream outextractstrInv;
   ostringstream outextractstrOrientation;
 
-  if (m_options.isOnlyOutputSpanInfo()) {
-    cout << startF << " " << endF << " " << startE << " " << endE << endl;
-    return;
-  }
-
-  if (m_options.placeholders.size() && !checkPlaceholders(sentence, startE, endE, startF, endF)) {
-    return;
-  }
-
   if (m_options.debug) {
-    outextractstr << "sentenceID=" << sentence.sentenceID << " ";
-    outextractstrInv << "sentenceID=" << sentence.sentenceID << " ";
-    outextractstrOrientation << "sentenceID=" << sentence.sentenceID << " ";
+    outextractstr << "sentenceID=" << m_sentence.sentenceID << " ";
+    outextractstrInv << "sentenceID=" << m_sentence.sentenceID << " ";
+    outextractstrOrientation << "sentenceID=" << m_sentence.sentenceID << " ";
   }
 
+  // source
   for(int fi=startF; fi<=endF; fi++) {
-    if (m_options.isTranslationFlag()) outextractstr << sentence.source[fi] << " ";
-    if (m_options.isOrientationFlag()) outextractstrOrientation << sentence.source[fi] << " ";
+    if (m_options.isTranslationFlag()) outextractstr << m_sentence.source[fi] << " ";
+    if (m_options.isOrientationFlag()) outextractstrOrientation << m_sentence.source[fi] << " ";
   }
   if (m_options.isTranslationFlag()) outextractstr << "||| ";
   if (m_options.isOrientationFlag()) outextractstrOrientation << "||| ";
@@ -906,12 +914,12 @@ void ExtractTask::addPhrase( const SentenceAlignmentWithSyntax &sentence,
   for(int ei=startE; ei<=endE; ei++) {
 
     if (m_options.isTranslationFlag()) {
-      outextractstr << sentence.target[ei] << " ";
-      outextractstrInv << sentence.target[ei] << " ";
+      outextractstr << m_sentence.target[ei] << " ";
+      outextractstrInv << m_sentence.target[ei] << " ";
     }
 
     if (m_options.isOrientationFlag()) {
-      outextractstrOrientation << sentence.target[ei] << " ";
+      outextractstrOrientation << m_sentence.target[ei] << " ";
     }
   }
   if (m_options.isTranslationFlag()) outextractstr << "|||";
@@ -922,17 +930,22 @@ void ExtractTask::addPhrase( const SentenceAlignmentWithSyntax &sentence,
 
   if (m_options.isTranslationFlag()) {
     for(int fi=startF; fi<=endF; fi++)
-      outextractstrInv << sentence.source[fi] << " ";
+      outextractstrInv << m_sentence.source[fi] << " ";
     outextractstrInv << "|||";
   }
 
   // alignment
   if (m_options.isTranslationFlag()) {
-    for(int ei=startE; ei<=endE; ei++) {
-      for(unsigned int i=0; i<sentence.alignedToT[ei].size(); i++) {
-        int fi = sentence.alignedToT[ei][i];
-        outextractstr << " " << fi-startF << "-" << ei-startE;
-        outextractstrInv << " " << ei-startE << "-" << fi-startF;
+    if (m_options.isSingleWordHeuristicFlag() && (startE==endE) && (startF==endF)) {
+      outextractstr << " 0-0";
+      outextractstrInv << " 0-0";
+    } else {
+      for(int ei=startE; ei<=endE; ei++) {
+        for(unsigned int i=0; i<m_sentence.alignedToT[ei].size(); i++) {
+          int fi = m_sentence.alignedToT[ei][i];
+          outextractstr << " " << fi-startF << "-" << ei-startE;
+          outextractstrInv << " " << ei-startE << "-" << fi-startF;
+        }
       }
     }
   }
@@ -941,20 +954,20 @@ void ExtractTask::addPhrase( const SentenceAlignmentWithSyntax &sentence,
     outextractstrOrientation << orientationInfo;
 
   if (m_options.isIncludeSentenceIdFlag()) {
-    outextractstr << " ||| " << sentence.sentenceID;
+    outextractstr << " ||| " << m_sentence.sentenceID;
   }
 
   if (m_options.getInstanceWeightsFile().length()) {
     if (m_options.isTranslationFlag()) {
-      outextractstr << " ||| " << sentence.weightString;
-      outextractstrInv << " ||| " << sentence.weightString;
+      outextractstr << " ||| " << m_sentence.weightString;
+      outextractstrInv << " ||| " << m_sentence.weightString;
     }
     if (m_options.isOrientationFlag()) {
-      outextractstrOrientation << " ||| " << sentence.weightString;
+      outextractstrOrientation << " ||| " << m_sentence.weightString;
     }
   }
 
-  outextractstr << phrasePropertiesString;
+  outextractstr << outextractstrPhraseProperties.str();
 
   // generate two lines for every extracted phrase:
   // once with left, once with right context
@@ -964,20 +977,20 @@ void ExtractTask::addPhrase( const SentenceAlignmentWithSyntax &sentence,
     ostringstream outextractstrContextInv;
 
     for(int fi=startF; fi<=endF; fi++) {
-      outextractstrContext << sentence.source[fi] << " ";
+      outextractstrContext << m_sentence.source[fi] << " ";
     }
     outextractstrContext << "||| ";
 
     // target
     for(int ei=startE; ei<=endE; ei++) {
-      outextractstrContext << sentence.target[ei] << " ";
-      outextractstrContextInv << sentence.target[ei] << " ";
+      outextractstrContext << m_sentence.target[ei] << " ";
+      outextractstrContextInv << m_sentence.target[ei] << " ";
     }
     outextractstrContext << "||| ";
     outextractstrContextInv << "||| ";
 
     for(int fi=startF; fi<=endF; fi++)
-      outextractstrContextInv << sentence.source[fi] << " ";
+      outextractstrContextInv << m_sentence.source[fi] << " ";
 
     outextractstrContextInv << "|||";
 
@@ -990,25 +1003,25 @@ void ExtractTask::addPhrase( const SentenceAlignmentWithSyntax &sentence,
     // write context to left
     outextractstrContext << "< ";
     if (startF == 0) outextractstrContext << "<s>";
-    else outextractstrContext << sentence.source[startF-1];
+    else outextractstrContext << m_sentence.source[startF-1];
 
     outextractstrContextInv << " < ";
     if (startE == 0) outextractstrContextInv << "<s>";
-    else outextractstrContextInv << sentence.target[startE-1];
+    else outextractstrContextInv << m_sentence.target[startE-1];
 
     // write context to right
     outextractstrContextRight << "> ";
-    if (endF+1 == sentence.source.size()) outextractstrContextRight << "<s>";
-    else outextractstrContextRight << sentence.source[endF+1];
+    if (endF+1 == (int)m_sentence.source.size()) outextractstrContextRight << "<s>";
+    else outextractstrContextRight << m_sentence.source[endF+1];
 
     outextractstrContextRightInv << " > ";
-    if (endE+1 == sentence.target.size()) outextractstrContextRightInv << "<s>";
-    else outextractstrContextRightInv << sentence.target[endE+1];
+    if (endE+1 == (int)m_sentence.target.size()) outextractstrContextRightInv << "<s>";
+    else outextractstrContextRightInv << m_sentence.target[endE+1];
 
-    outextractstrContext << "\n";
-    outextractstrContextInv << "\n";
-    outextractstrContextRight << "\n";
-    outextractstrContextRightInv << "\n";
+    outextractstrContext << std::endl;
+    outextractstrContextInv << std::endl;
+    outextractstrContextRight << std::endl;
+    outextractstrContextRightInv << std::endl;
 
     m_extractedPhrasesContext.push_back(outextractstrContext.str());
     m_extractedPhrasesContextInv.push_back(outextractstrContextInv.str());
@@ -1016,9 +1029,9 @@ void ExtractTask::addPhrase( const SentenceAlignmentWithSyntax &sentence,
     m_extractedPhrasesContextInv.push_back(outextractstrContextRightInv.str());
   }
 
-  if (m_options.isTranslationFlag()) outextractstr << "\n";
-  if (m_options.isTranslationFlag()) outextractstrInv << "\n";
-  if (m_options.isOrientationFlag()) outextractstrOrientation << "\n";
+  if (m_options.isTranslationFlag()) outextractstr << std::endl;
+  if (m_options.isTranslationFlag()) outextractstrInv << std::endl;
+  if (m_options.isOrientationFlag()) outextractstrOrientation << std::endl;
 
 
   m_extractedPhrases.push_back(outextractstr.str());
@@ -1063,30 +1076,30 @@ void ExtractTask::writePhrasesToFile()
 
 // if proper conditioning, we need the number of times a source phrase occured
 
-void ExtractTask::extractBase( SentenceAlignmentWithSyntax &sentence )
+void ExtractTask::extractBase()
 {
   ostringstream outextractFile;
   ostringstream outextractFileInv;
 
-  int countF = sentence.source.size();
+  int countF = m_sentence.source.size();
   for(int startF=0; startF<countF; startF++) {
     for(int endF=startF;
         (endF<countF && endF<startF+m_options.maxPhraseLength);
         endF++) {
       for(int fi=startF; fi<=endF; fi++) {
-        outextractFile << sentence.source[fi] << " ";
+        outextractFile << m_sentence.source[fi] << " ";
       }
       outextractFile << "|||" << endl;
     }
   }
 
-  int countE = sentence.target.size();
+  int countE = m_sentence.target.size();
   for(int startE=0; startE<countE; startE++) {
     for(int endE=startE;
         (endE<countE && endE<startE+m_options.maxPhraseLength);
         endE++) {
       for(int ei=startE; ei<=endE; ei++) {
-        outextractFileInv << sentence.target[ei] << " ";
+        outextractFileInv << m_sentence.target[ei] << " ";
       }
       outextractFileInv << "|||" << endl;
     }
@@ -1097,17 +1110,17 @@ void ExtractTask::extractBase( SentenceAlignmentWithSyntax &sentence )
 }
 
 
-bool ExtractTask::checkPlaceholders (const SentenceAlignmentWithSyntax &sentence, int startE, int endE, int startF, int endF)
+bool ExtractTask::checkPlaceholders(int startE, int endE, int startF, int endF) const
 {
-  for (size_t pos = startF; pos <= endF; ++pos) {
-    const string &sourceWord = sentence.source[pos];
+  for (int pos = startF; pos <= endF; ++pos) {
+    const string &sourceWord = m_sentence.source[pos];
     if (isPlaceholder(sourceWord)) {
-      if (sentence.alignedToS.at(pos).size() != 1) {
+      if (m_sentence.alignedToS.at(pos).size() != 1) {
         return false;
       } else {
         // check it actually lines up to another placeholder
-        int targetPos = sentence.alignedToS.at(pos).at(0);
-        const string &otherWord = sentence.target[targetPos];
+        int targetPos = m_sentence.alignedToS.at(pos).at(0);
+        const string &otherWord = m_sentence.target[targetPos];
         if (!isPlaceholder(otherWord)) {
           return false;
         }
@@ -1115,15 +1128,15 @@ bool ExtractTask::checkPlaceholders (const SentenceAlignmentWithSyntax &sentence
     }
   }
 
-  for (size_t pos = startE; pos <= endE; ++pos) {
-    const string &targetWord = sentence.target[pos];
+  for (int pos = startE; pos <= endE; ++pos) {
+    const string &targetWord = m_sentence.target[pos];
     if (isPlaceholder(targetWord)) {
-      if (sentence.alignedToT.at(pos).size() != 1) {
+      if (m_sentence.alignedToT.at(pos).size() != 1) {
         return false;
       } else {
         // check it actually lines up to another placeholder
-        int sourcePos = sentence.alignedToT.at(pos).at(0);
-        const string &otherWord = sentence.source[sourcePos];
+        int sourcePos = m_sentence.alignedToT.at(pos).at(0);
+        const string &otherWord = m_sentence.source[sourcePos];
         if (!isPlaceholder(otherWord)) {
           return false;
         }
@@ -1133,7 +1146,7 @@ bool ExtractTask::checkPlaceholders (const SentenceAlignmentWithSyntax &sentence
   return true;
 }
 
-bool ExtractTask::isPlaceholder(const string &word)
+bool ExtractTask::isPlaceholder(const string &word) const
 {
   for (size_t i = 0; i < m_options.placeholders.size(); ++i) {
     const string &placeholder = m_options.placeholders[i];
@@ -1142,29 +1155,6 @@ bool ExtractTask::isPlaceholder(const string &word)
     }
   }
   return false;
-}
-/** tokenise input string to vector of string. each element has been separated by a character in the delimiters argument.
-		The separator can only be 1 character long. The default delimiters are space or tab
-*/
-std::vector<std::string> Tokenize(const std::string& str,
-                                  const std::string& delimiters)
-{
-  std::vector<std::string> tokens;
-  // Skip delimiters at beginning.
-  std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
-  // Find first "non-delimiter".
-  std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
-
-  while (std::string::npos != pos || std::string::npos != lastPos) {
-    // Found a token, add it to the vector.
-    tokens.push_back(str.substr(lastPos, pos - lastPos));
-    // Skip delimiters.  Note the "not_of"
-    lastPos = str.find_first_not_of(delimiters, pos);
-    // Find next "non-delimiter"
-    pos = str.find_first_of(delimiters, lastPos);
-  }
-
-  return tokens;
 }
 
 }
