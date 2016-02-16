@@ -22,7 +22,7 @@ namespace Moses2
 {
 
 struct KenLMState : public FFState {
-  lm::ngram::ChartState state;
+  lm::ngram::State state;
   virtual size_t hash() const {
     size_t ret = hash_value(state);
     return ret;
@@ -35,14 +35,11 @@ struct KenLMState : public FFState {
 
   virtual std::string ToString() const
   {
-	  /*
 	  stringstream ss;
 	  for (size_t i = 0; i < state.Length(); ++i) {
 		  ss << state.words[i] << " ";
 	  }
 	  return ss.str();
-	  */
-	  return "KenLMState";
   }
 
 };
@@ -135,9 +132,7 @@ void KENLM::EmptyHypothesisState(FFState &state,
 		const Hypothesis &hypo) const
 {
   KenLMState &stateCast = static_cast<KenLMState&>(state);
-  lm::ngram::RuleScore<Model> scorer(*m_ngram, stateCast.state);
-  scorer.BeginSentence();
-  scorer.Finish();
+  stateCast.state = m_ngram->BeginSentenceState();
 }
 
 void
@@ -152,9 +147,7 @@ KENLM::EvaluateInIsolation(MemPool &pool,
   float fullScore, nGramScore;
   size_t oovCount;
 
-  lm::ngram::ChartState *state = new (pool.Allocate<lm::ngram::ChartState>()) lm::ngram::ChartState();
-  CalcScore(targetPhrase, fullScore, nGramScore, oovCount, *state);
-  targetPhrase.chartState = (void*) state;
+  CalcScore(targetPhrase, fullScore, nGramScore, oovCount);
 
   float estimateScore = fullScore - nGramScore;
 
@@ -184,47 +177,49 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
   Scores &scores,
   FFState &state) const
 {
-  const System &system = mgr.system;
-
-  const KenLMState &prevStateCast = static_cast<const KenLMState&>(prevState);
   KenLMState &stateCast = static_cast<KenLMState&>(state);
 
-  const lm::ngram::ChartState &prevKenState = prevStateCast.state;
-  lm::ngram::ChartState &kenState = stateCast.state;
+  const System &system = mgr.system;
 
-  const TargetPhrase &tp = hypo.GetTargetPhrase();
-  size_t tpSize = tp.GetSize();
-  if (!tpSize) {
-    stateCast.state = prevKenState;
+  const lm::ngram::State &in_state = static_cast<const KenLMState&>(prevState).state;
+
+  if (!hypo.GetTargetPhrase().GetSize()) {
+    stateCast.state = in_state;
 	return;
   }
 
-  // NEW CODE - start
-  //const lm::ngram::ChartState &chartStateInIsolation = *static_cast<const lm::ngram::ChartState*>(tp.chartState);
-  lm::ngram::RuleScore<Model> ruleScore(*m_ngram, kenState);
-  ruleScore.NonTerminal(prevKenState, 0);
+  const std::size_t begin = hypo.GetCurrTargetWordsRange().GetStartPos();
+  //[begin, end) in STL-like fashion.
+  const std::size_t end = hypo.GetCurrTargetWordsRange().GetEndPos() + 1;
+  const std::size_t adjust_end = std::min(end, begin + m_ngram->Order() - 1);
 
-  // each word in new tp
-  for (size_t i = 0; i < tpSize; ++i) {
-	  const Word &word = tp[i];
-	  lm::WordIndex lmInd = TranslateID(word);
-	  ruleScore.Terminal(lmInd);
+  std::size_t position = begin;
+  typename Model::State aux_state;
+  typename Model::State *state0 = &stateCast.state, *state1 = &aux_state;
+
+  float score = m_ngram->Score(in_state, TranslateID(hypo.GetWord(position)), *state0);
+  ++position;
+  for (; position < adjust_end; ++position) {
+	score += m_ngram->Score(*state0, TranslateID(hypo.GetWord(position)), *state1);
+	std::swap(state0, state1);
   }
 
   if (hypo.GetBitmap().IsComplete()) {
-	  ruleScore.Terminal(m_ngram->GetVocabulary().EndSentence());
+	// Score end of sentence.
+	std::vector<lm::WordIndex> indices(m_ngram->Order() - 1);
+	const lm::WordIndex *last = LastIDs(hypo, &indices.front());
+	score += m_ngram->FullScoreForgotState(&indices.front(), last, m_ngram->GetVocabulary().EndSentence(), stateCast.state).prob;
+  } else if (adjust_end < end) {
+	// Get state after adding a long phrase.
+	std::vector<lm::WordIndex> indices(m_ngram->Order() - 1);
+	const lm::WordIndex *last = LastIDs(hypo, &indices.front());
+	m_ngram->GetState(&indices.front(), last, stateCast.state);
+  } else if (state0 != &stateCast.state) {
+	// Short enough phrase that we can just reuse the state.
+	  stateCast.state = *state0;
   }
-  // NEW CODE - end
 
-
-  float score10 = ruleScore.Finish();
-  float score = TransformLMScore(score10);
-
-  /*
-  stringstream strme;
-  hypo.OutputToStream(strme);
-  cerr << "HELLO " << score10 << " " << score << " " << strme.str() << " " << hypo.GetBitmap() << endl;
-  */
+  score = TransformLMScore(score);
 
   bool OOVFeatureEnabled = false;
   if (OOVFeatureEnabled) {
@@ -237,7 +232,7 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
   }
 }
 
-void KENLM::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount, lm::ngram::ChartState &state) const
+void KENLM::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const
 {
 	  fullScore = 0;
 	  ngramScore = 0;
@@ -245,7 +240,8 @@ void KENLM::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore,
 
 	  if (!phrase.GetSize()) return;
 
-	  lm::ngram::RuleScore<Model> scorer(*m_ngram, state);
+	  lm::ngram::ChartState discarded_sadly;
+	  lm::ngram::RuleScore<Model> scorer(*m_ngram, discarded_sadly);
 
 	  size_t position;
 	  if (m_bos == phrase[0][m_factorType]) {

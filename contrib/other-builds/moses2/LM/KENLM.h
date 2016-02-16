@@ -73,7 +73,7 @@ protected:
   typedef lm::ngram::ProbingModel Model;
   boost::shared_ptr<Model> m_ngram;
 
-  void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount, lm::ngram::ChartState &state) const;
+  void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const;
 
   inline lm::WordIndex TranslateID(const Word &word) const
   {
