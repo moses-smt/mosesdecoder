@@ -7,8 +7,6 @@
 #include <fcntl.h>
 #include <fstream>
 
-#define API_VERSION 7
-
 
 //Hash table entry
 struct Entry {
@@ -34,6 +32,6 @@ struct Entry {
 //Define table
 typedef util::ProbingHashTable<Entry, boost::hash<uint64_t> > Table;
 
-void serialize_table(char *mem, size_t size, const std::string &filename);
+void serialize_table(char *mem, size_t size, const char * filename);
 
 char * readTable(const char * filename, size_t size);

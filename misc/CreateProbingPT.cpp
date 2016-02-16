@@ -1,60 +1,27 @@
-#include <string>
-#include <boost/program_options.hpp>
 #include "util/usage.hh"
 #include "moses/TranslationModel/ProbingPT/storing.hh"
 
-using namespace std;
+
 
 int main(int argc, char* argv[])
 {
-	string inPath, outPath; 
-	int num_scores = 4;
-	int num_lex_scores = 0;
-	bool log_prob = false;
-	int max_cache_size = 50000;
 
-  namespace po = boost::program_options;
-  po::options_description desc("Options");
-  desc.add_options()
-  ("help", "Print help messages")
-  ("input-pt", po::value<string>()->required(), "Text pt")
-  ("output-dir", po::value<string>()->required(), "Directory when binary files will be written")
-  ("num-scores", po::value<int>()->default_value(num_scores), "Number of pt scores")
-  ("num-lex-scores", po::value<int>()->default_value(num_lex_scores), "Number of lexicalized reordering scores")
-  ("log-prob", "log (and floor) probabilities before storing")
-  ("max-cache-size", po::value<int>()->default_value(max_cache_size), "Maximum number of high-count source lines to write to cache file. 0=no cache, negative=no limit")
+  const char * is_reordering = "false";
 
-	;
-
-  po::variables_map vm;
-  try {
-    po::store(po::parse_command_line(argc, argv, desc),
-              vm); // can throw
-
-    /** --help option
-     */
-    if ( vm.count("help")) {
-      std::cout << desc << std::endl;
-      return EXIT_SUCCESS;
-    }
-
-    po::notify(vm); // throws on error, so do after help in case
-    // there are any problems
-  } catch(po::error& e) {
-    std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
-    std::cerr << desc << std::endl;
-    return EXIT_FAILURE;
+  if (!(argc == 5 || argc == 4)) {
+    // Tell the user how to run the program
+    std::cerr << "Provided " << argc << " arguments, needed 4 or 5." << std::endl;
+    std::cerr << "Usage: " << argv[0] << " path_to_phrasetable output_dir num_scores is_reordering" << std::endl;
+    std::cerr << "is_reordering should be either true or false, but it is currently a stub feature." << std::endl;
+    //std::cerr << "Usage: " << argv[0] << " path_to_phrasetable number_of_uniq_lines output_bin_file output_hash_table output_vocab_id" << std::endl;
+    return 1;
   }
 
-  if (vm.count("input-pt")) inPath = vm["input-pt"].as<string>();
-  if (vm.count("output-dir")) outPath = vm["output-dir"].as<string>();
-  if (vm.count("num-scores")) num_scores = vm["num-scores"].as<int>();
-  if (vm.count("num-lex-scores")) num_lex_scores = vm["num-lex-scores"].as<int>();
-  if (vm.count("max-cache-size")) max_cache_size = vm["max-cache-size"].as<int>();
-  if (vm.count("log-prob")) log_prob = true;
+  if (argc == 5) {
+    is_reordering = argv[4];
+  }
 
-
-  createProbingPT(inPath.c_str(), outPath.c_str(), num_scores, num_lex_scores, log_prob, max_cache_size);
+  createProbingPT(argv[1], argv[2], argv[3], is_reordering);
 
   util::PrintUsage(std::cout);
   return 0;

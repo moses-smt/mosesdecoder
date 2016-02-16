@@ -2,48 +2,41 @@
 
 line_text splitLine(StringPiece textin)
 {
-  const char delim[] = "|||";
+  const char delim[] = " ||| ";
   line_text output;
 
   //Tokenize
   util::TokenIter<util::MultiCharacter> it(textin, util::MultiCharacter(delim));
   //Get source phrase
-  output.source_phrase = Trim(*it);
-  //std::cerr << "output.source_phrase=" << output.source_phrase << "AAAA" << std::endl;
+  output.source_phrase = *it;
 
   //Get target_phrase
   it++;
-  output.target_phrase = Trim(*it);
-  //std::cerr << "output.target_phrase=" << output.target_phrase << "AAAA" << std::endl;
+  output.target_phrase = *it;
 
   //Get probabilities
   it++;
-  output.prob = Trim(*it);
-  //std::cerr << "output.prob=" << output.prob << "AAAA" << std::endl;
+  output.prob = *it;
 
   //Get WordAllignment
   it++;
   if (it == util::TokenIter<util::MultiCharacter>::end()) return output;
-  output.word_align = Trim(*it);
-  //std::cerr << "output.word_align=" << output.word_align << "AAAA" << std::endl;
+  output.word_align = *it;
 
   //Get count
   it++;
   if (it == util::TokenIter<util::MultiCharacter>::end()) return output;
-  output.counts = Trim(*it);
-  //std::cerr << "output.counts=" << output.counts << "AAAA" << std::endl;
+  output.counts = *it;
 
   //Get sparse_score
   it++;
   if (it == util::TokenIter<util::MultiCharacter>::end()) return output;
-  output.sparse_score = Trim(*it);
-  //std::cerr << "output.sparse_score=" << output.sparse_score << "AAAA" << std::endl;
+  output.sparse_score = *it;
 
   //Get property
   it++;
   if (it == util::TokenIter<util::MultiCharacter>::end()) return output;
-  output.property_orig = Trim(*it);
-  //std::cerr << "output.property=" << output.property << "AAAA" << std::endl;
+  output.property = *it;
 
   return output;
 }
@@ -53,11 +46,6 @@ std::vector<unsigned char> splitWordAll1(StringPiece textin)
   const char delim[] = " ";
   const char delim2[] = "-";
   std::vector<unsigned char> output;
-
-  //Case with no word alignments.
-  if (textin.size() == 0) {
-  	return output;
-  }
 
   //Split on space
   util::TokenIter<util::MultiCharacter> it(textin, util::MultiCharacter(delim));

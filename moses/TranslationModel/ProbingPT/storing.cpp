@@ -1,5 +1,4 @@
 #include "storing.hh"
-#include "moses/Util.h"
 
 BinaryFileWriter::BinaryFileWriter (std::string basepath) : os ((basepath + "/binfile.dat").c_str(), std::ios::binary)
 {
@@ -40,7 +39,7 @@ BinaryFileWriter::~BinaryFileWriter ()
 }
 
 void createProbingPT(const char * phrasetable_path, const char * target_path,
-                     int num_scores, int num_lex_scores, bool log_prob, int max_cache_size)
+                     const char * num_scores, const char * is_reordering)
 {
   //Get basepath and create directory if missing
   std::string basepath(target_path);
@@ -68,9 +67,6 @@ void createProbingPT(const char * phrasetable_path, const char * target_path,
   Table table(mem, size);
 
   BinaryFileWriter binfile(basepath); //Init the binary file writer.
-
-  std::priority_queue<CacheItem*, std::vector<CacheItem*>, CacheItemOrderer> cache;
-  float totalSourceCount = 0;
 
   line_text prev_line; //Check if the source phrase of the previous line is the same
 
@@ -114,34 +110,15 @@ void createProbingPT(const char * phrasetable_path, const char * target_path,
         entrystartidx = binfile.dist_from_start + binfile.extra_counter; //Designate start idx for new entry
 
         //Encode a line and write it to disk.
-        std::vector<unsigned char> encoded_line = huffmanEncoder.full_encode_line(line, log_prob);
+        std::vector<unsigned char> encoded_line = huffmanEncoder.full_encode_line(line);
         binfile.write(&encoded_line);
-
-        // update cache
-        if (max_cache_size) {
-			std::string countStr = line.counts.as_string();
-			countStr = Moses::Trim(countStr);
-			if (!countStr.empty()) {
-				std::vector<float> toks = Moses::Tokenize<float>(countStr);
-
-				if (toks.size() >= 2) {
-					totalSourceCount += toks[1];
-					CacheItem *item = new CacheItem(Moses::Trim(line.source_phrase.as_string()), toks[1]);
-					cache.push(item);
-
-					if (max_cache_size > 0 && cache.size() > max_cache_size) {
-						cache.pop();
-					}
-				}
-			}
-        }
 
         //Set prevLine
         prev_line = line;
 
       } else {
         //If we still have the same line, just append to it:
-        std::vector<unsigned char> encoded_line = huffmanEncoder.full_encode_line(line, log_prob);
+        std::vector<unsigned char> encoded_line = huffmanEncoder.full_encode_line(line);
         binfile.write(&encoded_line);
       }
 
@@ -167,11 +144,9 @@ void createProbingPT(const char * phrasetable_path, const char * target_path,
     }
   }
 
-  serialize_table(mem, size, (basepath + "/probing_hash.dat"));
+  serialize_table(mem, size, (basepath + "/probing_hash.dat").c_str());
 
-  serialize_map(&source_vocabids, (basepath + "/source_vocabids"));
-
-  serialize_cache(cache, (basepath + "/cache"), totalSourceCount);
+  serialize_map(&source_vocabids, (basepath + "/source_vocabids").c_str());
 
   delete[] mem;
 
@@ -181,34 +156,6 @@ void createProbingPT(const char * phrasetable_path, const char * target_path,
   configfile << API_VERSION << '\n';
   configfile << uniq_entries << '\n';
   configfile << num_scores << '\n';
-  configfile << num_lex_scores << '\n';
-  configfile << log_prob << '\n';
+  configfile << is_reordering << '\n';
   configfile.close();
 }
-
-void serialize_cache(std::priority_queue<CacheItem*, std::vector<CacheItem*>, CacheItemOrderer> &cache,
-		const std::string &path,
-		float totalSourceCount)
-{
-  std::vector<const CacheItem*> vec(cache.size());
-
-  size_t ind = cache.size() - 1;
-  while (!cache.empty()) {
-	  const CacheItem *item = cache.top();
-	  vec[ind] = item;
-	  cache.pop();
-	  --ind;
-  }
-
-  std::ofstream os (path.c_str());
-
-  os << totalSourceCount << std::endl;
-  for (size_t i = 0; i < vec.size(); ++i) {
-	  const CacheItem *item = vec[i];
-	  os << item->count << "\t" << item->source << std::endl;
-	  delete item;
-  }
-
-  os.close();
-}
-

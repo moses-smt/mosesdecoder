@@ -11,9 +11,9 @@ void add_to_map(std::map<uint64_t, std::string> *karta, StringPiece textin)
   }
 }
 
-void serialize_map(std::map<uint64_t, std::string> *karta, const std::string &filename)
+void serialize_map(std::map<uint64_t, std::string> *karta, const char* filename)
 {
-  std::ofstream os (filename.c_str(), std::ios::binary);
+  std::ofstream os (filename, std::ios::binary);
   boost::archive::text_oarchive oarch(os);
 
   oarch << *karta;  //Serialise map

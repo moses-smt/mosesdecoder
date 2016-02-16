@@ -22,7 +22,7 @@ namespace Moses2
 {
 
 struct KenLMState : public FFState {
-  lm::ngram::State state;
+  lm::ngram::ChartState state;
   virtual size_t hash() const {
     size_t ret = hash_value(state);
     return ret;
@@ -35,11 +35,14 @@ struct KenLMState : public FFState {
 
   virtual std::string ToString() const
   {
+	  /*
 	  stringstream ss;
 	  for (size_t i = 0; i < state.Length(); ++i) {
 		  ss << state.words[i] << " ";
 	  }
 	  return ss.str();
+	  */
+	  return "KenLMState";
   }
 
 };
@@ -132,7 +135,9 @@ void KENLM::EmptyHypothesisState(FFState &state,
 		const Hypothesis &hypo) const
 {
   KenLMState &stateCast = static_cast<KenLMState&>(state);
-  stateCast.state = m_ngram->BeginSentenceState();
+  lm::ngram::RuleScore<Model> scorer(*m_ngram, stateCast.state);
+  scorer.BeginSentence();
+  scorer.Finish();
 }
 
 void
@@ -179,24 +184,25 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
   Scores &scores,
   FFState &state) const
 {
+  const System &system = mgr.system;
+
   const KenLMState &prevStateCast = static_cast<const KenLMState&>(prevState);
   KenLMState &stateCast = static_cast<KenLMState&>(state);
 
-  const System &system = mgr.system;
-
-  const lm::ngram::State &in_state = static_cast<const KenLMState&>(prevState).state;
+  const lm::ngram::ChartState &prevKenState = prevStateCast.state;
+  lm::ngram::ChartState &kenState = stateCast.state;
 
   const TargetPhrase &tp = hypo.GetTargetPhrase();
   size_t tpSize = tp.GetSize();
   if (!tpSize) {
-    stateCast.state = in_state;
+    stateCast.state = prevKenState;
 	return;
   }
 
   // NEW CODE - start
   //const lm::ngram::ChartState &chartStateInIsolation = *static_cast<const lm::ngram::ChartState*>(tp.chartState);
-  lm::ngram::ChartState newState;
-  lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState);
+  lm::ngram::RuleScore<Model> ruleScore(*m_ngram, kenState);
+  ruleScore.NonTerminal(prevKenState, 0);
 
   // each word in new tp
   for (size_t i = 0; i < tpSize; ++i) {
@@ -204,47 +210,21 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
 	  lm::WordIndex lmInd = TranslateID(word);
 	  ruleScore.Terminal(lmInd);
   }
-  float score = ruleScore.Finish();
-  stateCast.state = newState.right;
-  Model::State *state0 = &stateCast.state;
-  // NEW CODE - end
-
-  const std::size_t begin = hypo.GetCurrTargetWordsRange().GetStartPos();
-  //[begin, end) in STL-like fashion.
-  const std::size_t end = hypo.GetCurrTargetWordsRange().GetEndPos() + 1;
-  const std::size_t adjust_end = std::min(end, begin + m_ngram->Order() - 1);
-
-  /*
-   * OLD CODE
-  std::size_t position = begin;
-
-  typename Model::State aux_state;
-  typename Model::State *state0 = &stateCast.state, *state1 = &aux_state;
-
-  float score = m_ngram->Score(in_state, TranslateID(hypo.GetWord(position)), *state0);
-  ++position;
-  for (; position < adjust_end; ++position) {
-	score += m_ngram->Score(*state0, TranslateID(hypo.GetWord(position)), *state1);
-	std::swap(state0, state1);
-  }
-  */
 
   if (hypo.GetBitmap().IsComplete()) {
-	// Score end of sentence.
-	std::vector<lm::WordIndex> indices(m_ngram->Order() - 1);
-	const lm::WordIndex *last = LastIDs(hypo, &indices.front());
-	score += m_ngram->FullScoreForgotState(&indices.front(), last, m_ngram->GetVocabulary().EndSentence(), stateCast.state).prob;
-  } else if (adjust_end < end) {
-	// Get state after adding a long phrase.
-	std::vector<lm::WordIndex> indices(m_ngram->Order() - 1);
-	const lm::WordIndex *last = LastIDs(hypo, &indices.front());
-	m_ngram->GetState(&indices.front(), last, stateCast.state);
-  } else if (state0 != &stateCast.state) {
-	// Short enough phrase that we can just reuse the state.
-	  stateCast.state = *state0;
+	  ruleScore.Terminal(m_ngram->GetVocabulary().EndSentence());
   }
+  // NEW CODE - end
 
-  score = TransformLMScore(score);
+
+  float score10 = ruleScore.Finish();
+  float score = TransformLMScore(score10);
+
+  /*
+  stringstream strme;
+  hypo.OutputToStream(strme);
+  cerr << "HELLO " << score10 << " " << score << " " << strme.str() << " " << hypo.GetBitmap() << endl;
+  */
 
   bool OOVFeatureEnabled = false;
   if (OOVFeatureEnabled) {

@@ -6,6 +6,7 @@
 #include <sys/stat.h> //For finding size of file
 #include "vocabid.hh"
 #include <algorithm> //toLower
+#define API_VERSION 3
 
 
 char * read_binary_file(char * filename);

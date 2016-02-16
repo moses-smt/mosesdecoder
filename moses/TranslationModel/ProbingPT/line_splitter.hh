@@ -17,8 +17,7 @@ struct line_text {
   StringPiece word_align;
   StringPiece counts;
   StringPiece sparse_score;
-  StringPiece property_orig;
-  std::string property_to_be_binarized;
+  StringPiece property;
 };
 
 //Struct for holding processed line
@@ -26,9 +25,6 @@ struct target_text {
   std::vector<unsigned int> target_phrase;
   std::vector<float> prob;
   std::vector<unsigned char> word_all1;
-  std::vector<char> counts;
-  std::vector<char> sparse_score;
-  std::vector<char> property;
 };
 
 //Ask if it's better to have it receive a pointer to a line_text struct

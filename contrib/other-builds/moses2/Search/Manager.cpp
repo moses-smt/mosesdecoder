@@ -173,7 +173,7 @@ void Manager::OutputBest() const
 		}
 
 		bestHypo->OutputToStream(out);
-		//cerr << "BEST TRANSLATION: " << *bestHypo;
+		cerr << "BEST TRANSLATION: " << *bestHypo;
 	}
 	else {
 		if (system.outputHypoScore) {
@@ -184,7 +184,7 @@ void Manager::OutputBest() const
 	out << "\n";
 
 	system.bestCollector.Write(m_input->GetTranslationId(), out.str());
-	//cerr << endl;
+	cerr << endl;
 
 
 }
