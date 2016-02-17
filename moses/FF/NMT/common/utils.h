@@ -4,4 +4,4 @@
 
 void Trim(std::string& s);
 
-void Split(std::string& line, std::vector<std::string>& pieces, const std::string del=" ");
+void Split(const std::string& line, std::vector<std::string>& pieces, const std::string del=" ");
