@@ -72,7 +72,7 @@ private:
   std::string MakeNGram(const TargetPhrase &phrase, size_t start, size_t end) const {
     std::vector<std::string> words;
     while (start != end) {
-      words.push_back(phrase.GetWord(start).GetString(StaticData::Instance().options().output.factor_order, false));
+      words.push_back(phrase.GetWord(start).GetString(StaticData::Instance().options()->output.factor_order, false));
       start++;
     }
     return Join(" ", words);

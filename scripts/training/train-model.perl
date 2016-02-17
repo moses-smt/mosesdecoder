@@ -1907,7 +1907,7 @@ sub get_reordering {
                 # * the value stored in $REORDERING_MODEL_TYPES{$mtype} is a concatenation of the "orient"
                 #   attributes such as "msd"
                 # * the "filename" attribute is appended to the filename, but actually serves as the main configuration specification
-                #   for reordering scoring. it holds a string such as "wbe-msd-didirectional-fe"
+                #   for reordering scoring. it holds a string such as "wbe-msd-bidirectional-fe"
                 #   which has the more general format type-orient-dir-lang
 		$cmd .= " --model \"$mtype $REORDERING_MODEL_TYPES{$mtype}";
 		foreach my $model (@REORDERING_MODELS) {
