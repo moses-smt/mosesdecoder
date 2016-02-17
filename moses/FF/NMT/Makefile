@@ -3,7 +3,7 @@ all: test_cuda rescorer
 NMTCU = plugin/nmt.cu cnpy/cnpy.cpp
 NMT = plugin/nmt.cpp cnpy/cnpy.cpp
 SOURCESCU = test/test.cu cnpy/cnpy.cpp
-RESCORERCU = rescorer/rescorer_main.cu rescorer/rescorer.cu common/utils.cu rescorer/nbest.cu cnpy/cnpy.cpp
+RESCORERCU = rescorer/rescorer_main.cu common/utils.cu rescorer/nbest.cu cnpy/cnpy.cpp
 SOURCES = test/test.cpp cnpy/cnpy.cpp
 HEADERS = common/decoder.h common/encoder.h common/model.h common/states.h common/npz_converter.h common/vocab.h mblas/matrix.h mblas/base_matrix.h
 
