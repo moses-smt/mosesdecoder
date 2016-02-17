@@ -27,10 +27,10 @@ void TargetConstituentBoundariesLeftPhraseProperty::ProcessValue(const std::stri
 
       for ( std::vector<std::string>::iterator constituentIter = constituents.begin();
             constituentIter != constituents.end(); ++constituentIter ) {
-  
+
         const Factor* constituentFactor = factorCollection.AddFactor(*constituentIter,false);
 
-        std::pair< std::set<const Factor* >::iterator, bool > dedupIns = 
+        std::pair< std::set<const Factor* >::iterator, bool > dedupIns =
           dedup.insert(constituentFactor);
         if ( dedupIns.second ) {
 

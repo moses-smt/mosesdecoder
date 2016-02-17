@@ -8,14 +8,14 @@
 
 namespace Moses
 {
-  
+
 typedef std::map<const Factor*, float> TargetConstituentBoundariesLeftCollection;
 
 
 class TargetConstituentBoundariesLeftPhraseProperty : public PhraseProperty
 {
 public:
-  TargetConstituentBoundariesLeftPhraseProperty() 
+  TargetConstituentBoundariesLeftPhraseProperty()
   {};
 
   virtual void ProcessValue(const std::string &value);
