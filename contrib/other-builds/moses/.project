@@ -1626,6 +1626,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetBigramFeature.h</locationURI>
 		</link>
 		<link>
+			<name>FF/TargetConstituentAdjacencyFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetConstituentAdjacencyFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/TargetConstituentAdjacencyFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetConstituentAdjacencyFeature.h</locationURI>
+		</link>
+		<link>
 			<name>FF/TargetNgramFeature.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetNgramFeature.cpp</locationURI>
@@ -1634,6 +1644,16 @@
 			<name>FF/TargetNgramFeature.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetNgramFeature.h</locationURI>
+		</link>
+		<link>
+			<name>FF/TargetPreferencesFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetPreferencesFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/TargetPreferencesFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/TargetPreferencesFeature.h</locationURI>
 		</link>
 		<link>
 			<name>FF/TargetWordInsertionFeature.cpp</name>
@@ -1994,6 +2014,36 @@
 			<name>PP/SpanLengthPhraseProperty.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/SpanLengthPhraseProperty.h</locationURI>
+		</link>
+		<link>
+			<name>PP/TargetConstituentBoundariesLeftPhraseProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/TargetConstituentBoundariesLeftPhraseProperty.cpp</locationURI>
+		</link>
+		<link>
+			<name>PP/TargetConstituentBoundariesLeftPhraseProperty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/TargetConstituentBoundariesLeftPhraseProperty.h</locationURI>
+		</link>
+		<link>
+			<name>PP/TargetConstituentBoundariesRightAdjacentPhraseProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/TargetConstituentBoundariesRightAdjacentPhraseProperty.cpp</locationURI>
+		</link>
+		<link>
+			<name>PP/TargetConstituentBoundariesRightAdjacentPhraseProperty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/TargetConstituentBoundariesRightAdjacentPhraseProperty.h</locationURI>
+		</link>
+		<link>
+			<name>PP/TargetPreferencesPhraseProperty.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/TargetPreferencesPhraseProperty.cpp</locationURI>
+		</link>
+		<link>
+			<name>PP/TargetPreferencesPhraseProperty.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/PP/TargetPreferencesPhraseProperty.h</locationURI>
 		</link>
 		<link>
 			<name>PP/TreeStructurePhraseProperty.h</name>
