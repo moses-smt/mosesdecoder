@@ -17,6 +17,8 @@
 #include "../Recycler.h"
 #include "../EstimatedScores.h"
 #include "../legacy/Bitmaps.h"
+#include "lm/state.hh"
+#include "lm/word_index.hh"
 
 namespace Moses2
 {
@@ -67,6 +69,8 @@ public:
 
     void OutputBest() const;
 
+    void AddLMCache(const lm::ngram::State &in_state, const lm::WordIndex new_word) const;
+
 protected:
 	mutable MemPool *m_pool, *m_systemPool;
 	mutable Recycler<Hypothesis*> *m_hypoRecycle;
@@ -80,6 +84,8 @@ protected:
 	TargetPhrase *m_initPhrase;
 
 	Search *m_search;
+
+	mutable boost::unordered_map<uint64_t, uint64_t> m_lmCache;
 
 	// must be run in same thread as Decode()
 	void Init();
