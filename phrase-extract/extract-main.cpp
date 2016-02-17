@@ -102,14 +102,14 @@ private:
   bool isPlaceholder(const string &word) const;
   bool checkTargetConstituentBoundaries(int startE, int endE, int startF, int endF,
                                         ostringstream &outextractstrPhraseProperties) const;
-  void getOrientationInfo(int startE, int endE, int startF, int endF, 
-                          const HSentenceVertices& inTopLeft, 
+  void getOrientationInfo(int startE, int endE, int startF, int endF,
+                          const HSentenceVertices& inTopLeft,
                           const HSentenceVertices& inTopRight,
-                          const HSentenceVertices& inBottomLeft, 
-                          const HSentenceVertices& inBottomRight, 
-                          const HSentenceVertices& outTopLeft, 
-                          const HSentenceVertices& outTopRight, 
-                          const HSentenceVertices& outBottomLeft, 
+                          const HSentenceVertices& inBottomLeft,
+                          const HSentenceVertices& inBottomRight,
+                          const HSentenceVertices& outTopLeft,
+                          const HSentenceVertices& outTopRight,
+                          const HSentenceVertices& outBottomLeft,
                           const HSentenceVertices& outBottomRight,
                           std::string &orientationInfo) const;
 
@@ -393,8 +393,8 @@ void ExtractTask::extract()
   // loop over extracted phrases which are compatible with the word-alignments
   for (int startE=0; startE<countE; startE++) {
     for (int endE=startE;
-        (endE<countE && (relaxLimit || endE<startE+m_options.maxPhraseLength));
-        endE++) {
+         (endE<countE && (relaxLimit || endE<startE+m_options.maxPhraseLength));
+         endE++) {
 
       int minF = std::numeric_limits<int>::max();
       int maxF = -1;
@@ -438,15 +438,15 @@ void ExtractTask::extract()
                   (endF==maxF || m_sentence.alignedCountS[endF]==0)); // unaligned
                  endF++) { // at this point we have extracted a phrase
 
-                if(endE-startE < m_options.maxPhraseLength && endF-startF < m_options.maxPhraseLength) { // within limit
-                  inboundPhrases.push_back(HPhrase(HPhraseVertex(startF,startE),
-                                                   HPhraseVertex(endF,endE)));
-                  insertPhraseVertices(inTopLeft, inTopRight, inBottomLeft, inBottomRight,
-                                       startF, startE, endF, endE);
-                } else {
-                  insertPhraseVertices(outTopLeft, outTopRight, outBottomLeft, outBottomRight,
-                                       startF, startE, endF, endE);
-                }
+              if(endE-startE < m_options.maxPhraseLength && endF-startF < m_options.maxPhraseLength) { // within limit
+                inboundPhrases.push_back(HPhrase(HPhraseVertex(startF,startE),
+                                                 HPhraseVertex(endF,endE)));
+                insertPhraseVertices(inTopLeft, inTopRight, inBottomLeft, inBottomRight,
+                                     startF, startE, endF, endE);
+              } else {
+                insertPhraseVertices(outTopLeft, outTopRight, outBottomLeft, outBottomRight,
+                                     startF, startE, endF, endE);
+              }
             }
           }
         }
@@ -463,8 +463,8 @@ void ExtractTask::extract()
     int endF = inboundPhrases[i].second.first;
     int endE = inboundPhrases[i].second.second;
 
-    getOrientationInfo(startE, endE, startF, endF, 
-                       inTopLeft, inTopRight, inBottomLeft, inBottomRight, 
+    getOrientationInfo(startE, endE, startF, endF,
+                       inTopLeft, inTopRight, inBottomLeft, inBottomRight,
                        outTopLeft, outTopRight, outBottomLeft, outBottomRight,
                        orientationInfo);
 
@@ -475,32 +475,32 @@ void ExtractTask::extract()
     // add single word phrases that are not consistent with the word alignment
     m_sentence.invertAlignment();
     for (int ei=0; ei<countE; ei++) {
-        for (size_t i=0; i<m_sentence.alignedToT[ei].size(); i++) {
-          int fi = m_sentence.alignedToT[ei][i];
-          if ((m_sentence.alignedToT[ei].size() > 1) || (m_sentence.alignedToS[fi].size() > 1)) {
+      for (size_t i=0; i<m_sentence.alignedToT[ei].size(); i++) {
+        int fi = m_sentence.alignedToT[ei][i];
+        if ((m_sentence.alignedToT[ei].size() > 1) || (m_sentence.alignedToS[fi].size() > 1)) {
 
-            if (m_options.isOrientationFlag()) {
-              getOrientationInfo(ei, ei, fi, fi, 
-                                 inTopLeft, inTopRight, inBottomLeft, inBottomRight, 
-                                 outTopLeft, outTopRight, outBottomLeft, outBottomRight,
-                                 orientationInfo);
-            }
-
-            addPhrase(ei, ei, fi, fi, orientationInfo);
+          if (m_options.isOrientationFlag()) {
+            getOrientationInfo(ei, ei, fi, fi,
+                               inTopLeft, inTopRight, inBottomLeft, inBottomRight,
+                               outTopLeft, outTopRight, outBottomLeft, outBottomRight,
+                               orientationInfo);
           }
+
+          addPhrase(ei, ei, fi, fi, orientationInfo);
         }
+      }
     }
   }
 }
 
 void ExtractTask::getOrientationInfo(int startE, int endE, int startF, int endF,
-                                     const HSentenceVertices& inTopLeft, 
+                                     const HSentenceVertices& inTopLeft,
                                      const HSentenceVertices& inTopRight,
-                                     const HSentenceVertices& inBottomLeft, 
-                                     const HSentenceVertices& inBottomRight, 
-                                     const HSentenceVertices& outTopLeft, 
-                                     const HSentenceVertices& outTopRight, 
-                                     const HSentenceVertices& outBottomLeft, 
+                                     const HSentenceVertices& inBottomLeft,
+                                     const HSentenceVertices& inBottomRight,
+                                     const HSentenceVertices& outTopLeft,
+                                     const HSentenceVertices& outTopRight,
+                                     const HSentenceVertices& outBottomLeft,
                                      const HSentenceVertices& outBottomRight,
                                      std::string &orientationInfo) const
 {
@@ -546,8 +546,8 @@ void ExtractTask::getOrientationInfo(int startE, int endE, int startF, int endF,
     orientationInfo = getOrientString(wordPrevOrient, m_options.isWordType()) + " " + getOrientString(wordNextOrient, m_options.isWordType());
   } else {
     orientationInfo = " | " +
-      ((m_options.isPhraseModel())? getOrientString(phrasePrevOrient, m_options.isPhraseType()) + " " + getOrientString(phraseNextOrient, m_options.isPhraseType()) : "") + " | " +
-      ((m_options.isHierModel())? getOrientString(hierPrevOrient, m_options.isHierType()) + " " + getOrientString(hierNextOrient, m_options.isHierType()) : "");
+                      ((m_options.isPhraseModel())? getOrientString(phrasePrevOrient, m_options.isPhraseType()) + " " + getOrientString(phraseNextOrient, m_options.isPhraseType()) : "") + " | " +
+                      ((m_options.isHierModel())? getOrientString(hierPrevOrient, m_options.isHierType()) + " " + getOrientString(hierNextOrient, m_options.isHierType()) : "");
   }
 }
 
@@ -755,7 +755,7 @@ string getOrientString(REO_POS orient, REO_MODEL_TYPE modelType)
 
 
 bool ExtractTask::checkTargetConstituentBoundaries(int startE, int endE, int startF, int endF,
-                                                   ostringstream &outextractstrPhraseProperties) const
+    ostringstream &outextractstrPhraseProperties) const
 {
   if (m_options.isTargetConstituentBoundariesFlag()) {
     outextractstrPhraseProperties << " {{TargetConstituentBoundariesLeft ";
