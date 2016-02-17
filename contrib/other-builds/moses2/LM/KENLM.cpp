@@ -197,10 +197,11 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
   typename Model::State aux_state;
   typename Model::State *state0 = &stateCast.state, *state1 = &aux_state;
 
-  float score = m_ngram->Score(in_state, TranslateID(hypo.GetWord(position)), *state0);
+  float score = ScoreAndCache(mgr, in_state, TranslateID(hypo.GetWord(position)), *state0);
+
   ++position;
   for (; position < adjust_end; ++position) {
-	score += m_ngram->Score(*state0, TranslateID(hypo.GetWord(position)), *state1);
+	score += ScoreAndCache(mgr, *state0, TranslateID(hypo.GetWord(position)), *state1);
 	std::swap(state0, state1);
   }
 
@@ -286,6 +287,12 @@ lm::WordIndex *KENLM::LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) co
     }
     *index = TranslateID(hypo.GetWord(position));
   }
+}
+
+float KENLM::ScoreAndCache(const Manager &mgr, const lm::ngram::State &in_state, const lm::WordIndex new_word, lm::ngram::State &out_state) const
+{
+  float score = m_ngram->Score(in_state, new_word, out_state);
+  return score;
 }
 
 }
