@@ -323,7 +323,7 @@ public:
     Phrase *target = new Phrase();
     target->CreateFromString(
       Output
-      , StaticData::Instance().options().output.factor_order
+      , StaticData::Instance().options()->output.factor_order
       , tabbedSentence.GetColumns()[0]
       , NULL);
 
