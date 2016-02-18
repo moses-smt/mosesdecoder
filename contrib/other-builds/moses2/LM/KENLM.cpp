@@ -291,21 +291,8 @@ lm::WordIndex *KENLM::LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) co
 
 float KENLM::ScoreAndCache(const Manager &mgr, const lm::ngram::State &in_state, const lm::WordIndex new_word, lm::ngram::State &out_state) const
 {
-  //cerr << "score=";
-  float score;
-  if (mgr.FindLMCache(in_state, new_word, score, out_state)) {
-	  // found in cache. score & set set in the call
-	  //cerr << "in cache ";
-  }
-  else {
-	  //cerr << "not cache ";
-	  score = m_ngram->Score(in_state, new_word, out_state);
-	  mgr.AddLMCache(in_state, new_word, score, out_state);
-  }
-
-  //score = m_ngram->Score(in_state, new_word, out_state);
-
-  //cerr << score << " " << (int) out_state.length << endl;
+  mgr.AddLMCache(in_state, new_word);
+  float score = m_ngram->Score(in_state, new_word, out_state);
   return score;
 }
 

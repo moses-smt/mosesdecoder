@@ -31,7 +31,6 @@
 								</option>
 								<option id="gnu.cpp.compiler.option.preprocessor.def.758438174" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="MAX_NUM_FACTORS=4"/>
-									<listOptionValue builtIn="false" value="KENLM_MAX_ORDER=7"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.123491630" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
