@@ -88,6 +88,12 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
     legacy/CompactPT/LexicalReorderingTableCompact.cpp
     legacy/CompactPT/MurmurHash3.cpp
     legacy/CompactPT/ThrowingFwrite.cpp
+
+    Syntax/TargetPhrase.cpp
+    Syntax/Word.cpp
+
+    Syntax/TranslationModel/PhraseTableMemory.cpp
+
     deps ;
 
 exe moses2 : Main.cpp moses2_lib ;
