@@ -96,9 +96,6 @@ protected:
   lm::WordIndex *LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const;
 
   const LMCacheValue &ScoreAndCache(const Manager &mgr, const lm::ngram::State &in_state, const lm::WordIndex new_word) const;
-
-  CacheColl &GetCache() const;
-
 };
 
 }

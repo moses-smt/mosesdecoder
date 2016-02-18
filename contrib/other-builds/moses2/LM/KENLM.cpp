@@ -101,14 +101,14 @@ void KENLM::Load(System &system)
 
 void KENLM::InitializeForInput(const Manager &mgr) const
 {
-	CacheColl &cache = GetCache();
-	cache.clear();
-	mgr.lmCache = &cache;
+	mgr.lmCache = new CacheColl();
 }
 
 // clean up temporary memory, called after processing each sentence
 void KENLM::CleanUpAfterSentenceProcessing(const Manager &mgr) const
 {
+	CacheColl *lmCache = (CacheColl*)mgr.lmCache;
+	delete lmCache;
 }
 
 void KENLM::SetParameter(const std::string& key, const std::string& value)
@@ -338,11 +338,6 @@ const KENLM::LMCacheValue &KENLM::ScoreAndCache(const Manager &mgr, const lm::ng
 
 	//cerr << score << " " << (int) out_state.length << endl;
 	return *val;
-}
-
-KENLM::CacheColl &KENLM::GetCache() const
-{
-	return GetThreadSpecificObj(m_cache);
 }
 
 }
