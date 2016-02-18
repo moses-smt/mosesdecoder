@@ -29,7 +29,8 @@ int main(int argc, char** argv) {
   cudaSetDevice(device);
   
   std::string source = "you know , one of the intense pleasures of travel and one of the delights of ethnographic research is the opportunity to live amongst those who have not forgotten the old ways , who still feel their past in the wind , touch it in stones polished by rain , taste it in the bitter leaves of plants .";
-  std::string target = "wissen sie , eine der intensiven freuden des reisens und einer der freuden des ethnographischen forschung ist die chance zu leben , bei denen , die nicht vergessen haben , die alten wege , die noch ihre vergangenheit in den wind fühlen , berühren sie in steine poliert durch regen , es in dem bitteren geschmack blätter von pflanzen .";
+  std::string target = "wissen sie , ein intensives vergnügen reisen und die freuden der ethnographischen forschung ist die gelegenheit , unter denen zu leben , die alten möglichkeiten nicht vergessen , die noch ihre vergangenheit in den wind fühlen , berühren sie steine polierten durch regen , der bitteren geschmack aus pflanzen .";
+  //std::string target = "wissen sie , eine der intensiven freuden des reisens und einer der freuden des ethnographischen forschung ist die chance zu leben , bei denen , die nicht vergessen haben , die alten wege , die noch ihre vergangenheit in den wind fühlen , berühren sie in steine poliert durch regen , es in dem bitteren geschmack blätter von pflanzen .";
   
   //std::string source = "this is a little test .";
   //std::string target = "das ist ein kleiner test .";
@@ -87,19 +88,22 @@ int main(int argc, char** argv) {
   size_t batchSize = tWordsBatch[0].size();
   
   for(size_t i = 0; i < 1; ++i) {
-    decoder.EmptyState(PrevState, SourceContext, batchSize);
+    decoder.EmptyState(PrevState, SourceContext, batchSize);      
     decoder.EmptyEmbedding(PrevEmbedding, batchSize);
     
     float sum = 0;
     for(auto w : tWordsBatch) {
-    
       decoder.GetProbs(Probs, AlignedSourceContext,
                        PrevState, PrevEmbedding, SourceContext);
       
-      
-      float p = Probs(0, w[0]);
-      std:: cout << log(p) << std::endl;
-      sum += log(p);
+      for(size_t i = 0; i < 1; ++i) {
+        float p = Probs(i, w[i]);
+        std:: cout << log(p) << " ";
+        if(i == 0) {  
+          sum += log(p);
+        }
+      }
+      std::cout << std::endl;
       
       decoder.Lookup(Embedding, w);
       decoder.GetNextState(State, Embedding,

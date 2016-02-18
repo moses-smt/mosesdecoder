@@ -15,7 +15,7 @@ class Decoder {
         void Lookup(mblas::Matrix& Rows, const std::vector<size_t>& ids) {
           using namespace mblas;
           Assemble(Rows, w_.E_, ids);
-          Element(_1 + _2, Rows, w_.EB_);
+          Broadcast(_1 + _2, Rows, w_.EB_);
         }
       
       private:
@@ -35,9 +35,9 @@ class Decoder {
           CopyRow(Temp1_, SourceContext, 0, 1000);
           Temp2_.Clear();
           Temp2_.Resize(batchSize, 1000, 0.0);
-          Element(_1 + _2, Temp2_, Temp1_);
+          Broadcast(_1 + _2, Temp2_, Temp1_);
           Prod(State, Temp2_, w_.Ws_);
-          Broadcast(Tanh(_1 + _2), State, w_.WsB_); // Broadcasting?
+          Broadcast(Tanh(_1 + _2), State, w_.WsB_);
         }
         
         mblas::Matrix& GetNextState(mblas::Matrix& State,
@@ -138,12 +138,13 @@ class Decoder {
           using namespace mblas;
           
           Prod(T_, PrevState, w_.Uo_);
+          
           Prod(Temp1_, PrevEmbd, w_.Vo_);
           Prod(Temp2_, Context, w_.Co_);
           Element(_1 + _2 + _3, T_, Temp1_, Temp2_);
           Broadcast(_1 + _2, T_, w_.UoB_); // Broadcasting row-wise
           PairwiseReduce(Max(_1, _2), T_);
-            
+          
           if(filtered_) { // use only filtered vocabulary for SoftMax
             Prod(Probs, T_, FilteredWo_);
             Broadcast(_1 + _2, Probs, FilteredWoB_); // Broadcasting row-wise

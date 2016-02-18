@@ -22,7 +22,7 @@ namespace iterlib = boost;
 
 #else
 
-#define MAX_THREADS 256
+#define MAX_THREADS 512
 
 #include <cublas_v2.h>   
 #include <thrust/device_vector.h>
@@ -572,25 +572,27 @@ Matrix& Element(Functor functor,
 
 template <class Functor>
 __global__ void gPairwiseReduce(Functor functor,
-                                float* out, size_t cols) {
+                                float* out, const float* in, size_t cols) {
   int bid = blockIdx.x;
-  float* rowOut = out + bid * cols;  
-  for(int tid = 0; tid < cols / 2; tid += blockDim.x) {
+  const float* rowIn = in + bid * cols * 2;
+  float* rowOut = out + bid * cols;
+  for(int tid = 0; tid < cols; tid += blockDim.x) {
     int i = tid + threadIdx.x;
-    if(i * 2 + 1 < cols) {
-      float temp = functor(rowOut[i * 2], rowOut[i * 2 + 1]);
-      __syncthreads();
-      rowOut[i] = temp;
+    if(i < cols) {
+      rowOut[i] = functor(rowIn[i * 2], rowIn[i * 2 + 1]);
     }
   }
 }
 
 template <class Functor>
 Matrix& PairwiseReduce(Functor functor, Matrix& Out) {
-  float* d_out = Out.data();
-  int threads = std::min(MAX_THREADS, (int)Out.Cols() / 2);
-  gPairwiseReduce<<<Out.Rows(), threads>>>(functor, d_out, Out.Cols());
-  Out.Resize(Out.Rows(), Out.Cols() / 2);
+  Matrix Temp(Out.Rows(), Out.Cols() / 2);
+  const float* d_in = Out.data();
+  float* d_out = Temp.data();
+  
+  int threads = std::min(MAX_THREADS, (int)Temp.Cols());
+  gPairwiseReduce<<<Temp.Rows(), threads>>>(functor, d_out, d_in, Temp.Cols());
+  Swap(Out, Temp);
   return Out;
 }
 
