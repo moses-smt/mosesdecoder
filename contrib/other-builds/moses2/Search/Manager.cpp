@@ -6,7 +6,6 @@
  */
 #include <boost/foreach.hpp>
 #include <vector>
-#include <map>
 #include <sstream>
 #include "Manager.h"
 #include "SearchNormal.h"
@@ -43,31 +42,6 @@ Manager::~Manager() {
 
 	GetPool().Reset();
 	GetHypoRecycle().Clear();
-
-	map<uint64_t, uint64_t> countOfCounts;
-	boost::unordered_map<uint64_t, uint64_t>::iterator iter;
-	for (iter = m_lmCache.begin(); iter != m_lmCache.end(); ++iter) {
-		//cerr << iter->first << "=" << iter->second << " ";
-
-		map<uint64_t, uint64_t>::iterator iterCountOfCounts;
-		uint64_t count = iter->second;
-		iterCountOfCounts = countOfCounts.find(count);
-		if (iterCountOfCounts == countOfCounts.end()) {
-			countOfCounts[iter->second] = 1;
-		}
-		else {
-			uint64_t &count = iterCountOfCounts->second;
-			++count;
-		}
-	}
-
-	cerr << "LM Cache: ";
-	map<uint64_t, uint64_t>::iterator iterCountOfCounts;
-	for (iterCountOfCounts = countOfCounts.begin(); iterCountOfCounts != countOfCounts.end(); ++iterCountOfCounts) {
-		cerr << iterCountOfCounts->first << "=" << iterCountOfCounts->second << " ";
-
-	}
-	cerr << endl;
 }
 
 void Manager::Init()
@@ -211,20 +185,8 @@ void Manager::OutputBest() const
 
 	system.bestCollector.Write(m_input->GetTranslationId(), out.str());
 	//cerr << endl;
-}
 
-void Manager::AddLMCache(const lm::ngram::State &in_state, const lm::WordIndex new_word) const
-{
-	uint64_t hash = lm::ngram::hash_value(in_state, new_word);
-	boost::unordered_map<uint64_t, uint64_t>::iterator iter;
-	iter = m_lmCache.find(hash);
-	if (iter == m_lmCache.end()) {
-		m_lmCache[hash] = 1;
-	}
-	else {
-		uint64_t &count = iter->second;
-		++count;
-	}
+
 }
 
 }
