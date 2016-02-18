@@ -303,24 +303,27 @@ lm::WordIndex *KENLM::LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) co
 
 float KENLM::ScoreAndCache(const Manager &mgr, const lm::ngram::State &in_state, const lm::WordIndex new_word, lm::ngram::State &out_state) const
 {
+	MemPool &pool = mgr.GetPool();
 	//cerr << "score=";
 	float score;
 
-	CacheColl &m_lmCache = *((CacheColl*)mgr.lmCache);
+	CacheColl &lmCache = *((CacheColl*)mgr.lmCache);
 	LMCacheKey key(in_state, new_word);
 	CacheColl::iterator iter;
-	iter = m_lmCache.find(key);
-	if (iter == m_lmCache.end()) {
-		score = m_ngram->Score(in_state, new_word, out_state);
+	iter = lmCache.find(key);
+	if (iter == lmCache.end()) {
+		lm::ngram::State *newState = new (pool.Allocate<lm::ngram::State>()) lm::ngram::State();
+		score = m_ngram->Score(in_state, new_word, *newState);
 
-		LMCacheValue &val = m_lmCache[key];
+		LMCacheValue &val = lmCache[key];
 		val.first = score;
-		val.second = out_state;
+		val.second = newState;
+		out_state = *newState;
 	}
 	else {
 		const LMCacheValue &val = iter->second;
 		score = val.first;
-		out_state = val.second;
+		out_state = *val.second;
 	}
 
 	//score = m_ngram->Score(in_state, new_word, out_state);
