@@ -57,8 +57,10 @@ public:
 	  EvaluateAfterTablePruning(MemPool &pool, const TargetPhrases &tps, const Phrase &sourcePhrase) const
 	  {}
 
+	  virtual void InitializeForInput(const Manager &mgr) const { };
+
 	  // clean up temporary memory, called after processing each sentence
-	  virtual void CleanUpAfterSentenceProcessing() {}
+	  virtual void CleanUpAfterSentenceProcessing(const Manager &mgr) const {}
 
 protected:
 	size_t m_startInd;

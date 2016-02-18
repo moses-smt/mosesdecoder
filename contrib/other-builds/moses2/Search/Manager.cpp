@@ -36,7 +36,12 @@ Manager::Manager(System &sys, const TranslationTask &task, const std::string &in
 ,m_translationId(translationId)
 {}
 
-Manager::~Manager() {
+Manager::~Manager()
+{
+	const std::vector<const FeatureFunction*> &ffs = system.featureFunctions.GetFeatureFunctions();
+	BOOST_FOREACH(const FeatureFunction *ff, ffs) {
+		ff->CleanUpAfterSentenceProcessing(*this);
+	}
 
 	delete m_search;
 	delete m_bitmaps;
@@ -123,6 +128,12 @@ void Manager::Init()
 	default:
 		cerr << "Unknown search algorithm" << endl;
 		abort();
+	}
+
+	// init ffs
+	const std::vector<const FeatureFunction*> &ffs = system.featureFunctions.GetFeatureFunctions();
+	BOOST_FOREACH(const FeatureFunction *ff, ffs) {
+		ff->InitializeForInput(*this);
 	}
 }
 
