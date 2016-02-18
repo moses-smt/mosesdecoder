@@ -15,6 +15,8 @@ namespace Syntax
 
 class PhraseTableMemory : public Moses2::PhraseTableMemory
 {
+public:
+	virtual void Load(System &system);
 
 };
 
