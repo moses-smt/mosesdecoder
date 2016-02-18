@@ -211,15 +211,15 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
   const Model::State *state0 = stateCast.state;
   const Model::State *state1 = &aux_state;
 
-  const LMCacheValue &val = ScoreAndCache(mgr, *in_state, TranslateID(hypo.GetWord(position)));
-  float score = val.first;
-  state0 = val.second;
+  const LMCacheValue &val0 = ScoreAndCache(mgr, *in_state, TranslateID(hypo.GetWord(position)));
+  float score = val0.first;
+  state0 = val0.second;
 
   ++position;
   for (; position < adjust_end; ++position) {
-	const LMCacheValue &val = ScoreAndCache(mgr, *state0, TranslateID(hypo.GetWord(position)));
-	score += val.first;
-	state1 = val.second;
+	const LMCacheValue &val1 = ScoreAndCache(mgr, *state0, TranslateID(hypo.GetWord(position)));
+	score += val1.first;
+	state1 = val1.second;
 
 	std::swap(state0, state1);
   }
