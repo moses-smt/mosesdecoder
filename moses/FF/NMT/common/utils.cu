@@ -2,7 +2,7 @@
 #include <iostream>
 
 void Trim(std::string& s) {
-  boost::trim_left_if(s, boost::is_any_of(" \t\n"));
+  boost::trim_if(s, boost::is_any_of(" \t\n"));
 }
 
 void Split(const std::string& line, std::vector<std::string>& pieces, const std::string del) {
@@ -10,10 +10,14 @@ void Split(const std::string& line, std::vector<std::string>& pieces, const std:
   size_t pos = 0;
   std::string token;
   while ((pos = line.find(del, begin)) != std::string::npos) {
-    token = line.substr(begin, pos-begin);
-    pieces.push_back(token);
+    if (pos > begin) {
+      token = line.substr(begin, pos-begin);
+      pieces.push_back(token);
+    }
     begin = pos + del.size();
   }
-  token = line.substr(begin, pos);
+  if (pos > begin) {
+    token = line.substr(begin, pos-begin);
+  }
   pieces.push_back(token);
 }

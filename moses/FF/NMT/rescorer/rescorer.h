@@ -29,7 +29,6 @@ class Rescorer {
   void Score(const size_t index) {
     std::vector<size_t> sIndexes = nbest_->GetEncodedTokens(index);
 
-
     encoder_->GetContext(sIndexes, SourceContext_);
     size_t batchIndex = 0;
     for(auto& batch: nbest_->GetBatches(index)) {
