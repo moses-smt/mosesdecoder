@@ -28,12 +28,11 @@ int main(int argc, char** argv) {
   std::cerr << device << std::endl;
   cudaSetDevice(device);
   
-  std::string source = "you know , one of the intense pleasures of travel and one of the delights of ethnographic research is the opportunity to live amongst those who have not forgotten the old ways , who still feel their past in the wind , touch it in stones polished by rain , taste it in the bitter leaves of plants .";
-  std::string target = "wissen sie , ein intensives vergnügen reisen und die freuden der ethnographischen forschung ist die gelegenheit , unter denen zu leben , die alten möglichkeiten nicht vergessen , die noch ihre vergangenheit in den wind fühlen , berühren sie steine polierten durch regen , der bitteren geschmack aus pflanzen .";
-  //std::string target = "wissen sie , eine der intensiven freuden des reisens und einer der freuden des ethnographischen forschung ist die chance zu leben , bei denen , die nicht vergessen haben , die alten wege , die noch ihre vergangenheit in den wind fühlen , berühren sie in steine poliert durch regen , es in dem bitteren geschmack blätter von pflanzen .";
+  //std::string source = "you know , one of the intense pleasures of travel and one of the delights of ethnographic research is the opportunity to live amongst those who have not forgotten the old ways , who still feel their past in the wind , touch it in stones polished by rain , taste it in the bitter leaves of plants .";
+  //std::string target = "wissen sie , ein intensives vergnügen reisen und die freuden der ethnographischen forschung ist die gelegenheit , unter denen zu leben , die alten möglichkeiten nicht vergessen , die noch ihre vergangenheit in den wind fühlen , berühren sie steine polierten durch regen , der bitteren geschmack aus pflanzen .";
   
-  //std::string source = "this is a little test .";
-  //std::string target = "das ist ein kleiner test .";
+  std::string source = "just to know that jaguar shamans still journey beyond the milky way , or the myths of the inuit elders still resonate with meaning , or that in the himalaya , the buddhists still pursue the breath of the dharma , is to really remember the central revelation of anthropology , and that is the idea that the world in which we live does not exist in some absolute sense , but is just one model of reality , the consequence of one particular set of adaptive choices that our lineage made , albeit successfully , many generations ago .";
+  std::string target = "nur um zu wissen , dass jaguar schamanen noch jenseits der milchstraße reise , oder die mythen der inuit elders noch mit sinn oder dröhnen im himalaya , die buddhisten immer noch den atem des dharma verfolgen , ist wirklich an die zentrale offenbarung der anthropologie , und das ist die idee , dass wir in der welt leben nicht existieren , sondern einen absoluten spüre der realität , nur ein modell aus der reihe von adaptiven entscheidungen , die man vor allem unserer abstammung , wenn auch erfolgreich , aus vielen generationen zurückliegt .";
   
   std::cerr << "Loading model" << std::endl;
   Weights weights("/home/marcinj/Badania/best_nmt/search_model.npz", device);
