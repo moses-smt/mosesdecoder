@@ -207,19 +207,13 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
 
   std::size_t position = begin;
   typename Model::State aux_state;
-  const Model::State *state0 = &stateCast.state;
-  const Model::State *state1 = &aux_state;
+  typename Model::State *state0 = &stateCast.state, *state1 = &aux_state;
 
-  const LMCacheValue &val0 = ScoreAndCache(mgr, in_state, TranslateID(hypo.GetWord(position)));
-  float score = val0.first;
-  state0 = val0.second;
+  float score = ScoreAndCache(mgr, in_state, TranslateID(hypo.GetWord(position)), *state0);
 
   ++position;
   for (; position < adjust_end; ++position) {
-	const LMCacheValue &val1 = ScoreAndCache(mgr, *state0, TranslateID(hypo.GetWord(position)));
-	score += val1.first;
-	state1 = val1.second;
-
+	score += ScoreAndCache(mgr, *state0, TranslateID(hypo.GetWord(position)), *state1);
 	std::swap(state0, state1);
   }
 
@@ -307,11 +301,11 @@ lm::WordIndex *KENLM::LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) co
   }
 }
 
-const KENLM::LMCacheValue &KENLM::ScoreAndCache(const Manager &mgr, const lm::ngram::State &in_state, const lm::WordIndex new_word) const
+float KENLM::ScoreAndCache(const Manager &mgr, const lm::ngram::State &in_state, const lm::WordIndex new_word, lm::ngram::State &out_state) const
 {
 	MemPool &pool = mgr.GetPool();
 	//cerr << "score=";
-	LMCacheValue *val;
+	float score;
 
 	CacheColl &lmCache = *((CacheColl*)mgr.lmCache);
 	LMCacheKey key(in_state, new_word);
@@ -319,18 +313,23 @@ const KENLM::LMCacheValue &KENLM::ScoreAndCache(const Manager &mgr, const lm::ng
 	iter = lmCache.find(key);
 	if (iter == lmCache.end()) {
 		lm::ngram::State *newState = new (pool.Allocate<lm::ngram::State>()) lm::ngram::State();
-		float score = m_ngram->Score(in_state, new_word, *newState);
+		score = m_ngram->Score(in_state, new_word, *newState);
 
-		val = &lmCache[key];
-		val->first = score;
-		val->second = newState;
+		LMCacheValue &val = lmCache[key];
+		val.first = score;
+		val.second = newState;
+		out_state = *newState;
 	}
 	else {
-		val = &iter->second;
+		const LMCacheValue &val = iter->second;
+		score = val.first;
+		out_state = *val.second;
 	}
 
+	//score = m_ngram->Score(in_state, new_word, out_state);
+
 	//cerr << score << " " << (int) out_state.length << endl;
-	return *val;
+	return score;
 }
 
 KENLM::CacheColl &KENLM::GetCache() const
