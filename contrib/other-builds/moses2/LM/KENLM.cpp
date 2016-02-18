@@ -206,9 +206,8 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
   const std::size_t adjust_end = std::min(end, begin + m_ngram->Order() - 1);
 
   std::size_t position = begin;
-  typename Model::State aux_state;
   const Model::State *state0 = stateCast.state;
-  const Model::State *state1 = &aux_state;
+  const Model::State *state1;
 
   const LMCacheValue &val = ScoreAndCache(mgr, *in_state, TranslateID(hypo.GetWord(position)));
   float score = val.first;
