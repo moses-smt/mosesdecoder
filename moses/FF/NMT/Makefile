@@ -8,7 +8,7 @@ SOURCES = test.cpp cnpy/cnpy.cpp
 HEADERS = decoder.h encoder.h model.h states.h npz_converter.h vocab.h mblas/matrix.h mblas/base_matrix.h
 
 test_cuda: $(SOURCESCU) $(HEADERS)
-	nvcc --use_fast_math -O3 -std=c++11 $(SOURCESCU) -lboost_system -lboost_timer -lcudart -lcublas -o $@
+	nvcc --use_fast_math -O2 -std=c++11 $(SOURCESCU) -arch=sm_35 -lineinfo -lboost_system -lboost_timer -lcudart -lcublas -o $@
 
 %.o : %.cu
 	nvcc -O3 -std=c++11 -c $^ -o $@

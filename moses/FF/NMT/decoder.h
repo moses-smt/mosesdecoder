@@ -37,7 +37,7 @@ class Decoder {
           Temp2_.Resize(batchSize, 1000, 0.0);
           Element(_1 + _2, Temp2_, Temp1_);
           Prod(State, Temp2_, w_.Ws_);
-          Element(Tanh(_1 + _2), State, w_.WsB_); // Broadcasting?
+          Broadcast(Tanh(_1 + _2), State, w_.WsB_); // Broadcasting?
         }
         
         mblas::Matrix& GetNextState(mblas::Matrix& State,
@@ -59,7 +59,7 @@ class Decoder {
                   R_, Temp1_, Temp2_);
           
           Prod(S_, Embd, w_.W_);
-          Element(_1 + _2, S_, w_.B_); // Broadcasting row-wise
+          Broadcast(_1 + _2, S_, w_.B_); // Broadcasting row-wise
           Prod(Temp1_, Element(_1 * _2, R_, PrevState), w_.U_);
           Prod(Temp2_, Context, w_.C_);
           Element(Tanh(_1 + _2 + _3), S_, Temp1_, Temp2_);
@@ -101,15 +101,11 @@ class Decoder {
           Prod(Temp1_, SourceContext, w_.Ua_);
           Prod(Temp2_, PrevState, w_.Wa_);
           
-          size_t rows1 = Temp1_.Rows();
-          size_t rows2 = Temp2_.Rows();
-          
-          Broadcast1(Temp1_, rows2);
-          Broadcast2(Temp2_, rows1);
-          Element(Tanh(_1 + _2), Temp1_, Temp2_);
+          Broadcast(Tanh(_1 + _2), Temp1_, Temp2_);
           
           Prod(A_, w_.Va_, Temp1_, false, true);
-          
+          size_t rows1 = SourceContext.Rows();
+          size_t rows2 = PrevState.Rows();     
           A_.Reshape(rows2, rows1); // due to broadcasting above
           
           mblas::Softmax(A_);
@@ -145,16 +141,16 @@ class Decoder {
           Prod(Temp1_, PrevEmbd, w_.Vo_);
           Prod(Temp2_, Context, w_.Co_);
           Element(_1 + _2 + _3, T_, Temp1_, Temp2_);
-          Element(_1 + _2, T_, w_.UoB_); // Broadcasting row-wise
+          Broadcast(_1 + _2, T_, w_.UoB_); // Broadcasting row-wise
           PairwiseReduce(Max(_1, _2), T_);
             
           if(filtered_) { // use only filtered vocabulary for SoftMax
             Prod(Probs, T_, FilteredWo_);
-            Element(_1 + _2, Probs, FilteredWoB_); // Broadcasting row-wise
+            Broadcast(_1 + _2, Probs, FilteredWoB_); // Broadcasting row-wise
           }
           else {
             Prod(Probs, T_, w_.Wo_);
-            Element(_1 + _2, Probs, w_.WoB_); // Broadcasting row-wise
+            Broadcast(_1 + _2, Probs, w_.WoB_); // Broadcasting row-wise
           }
           mblas::Softmax(Probs);
         }

@@ -22,6 +22,8 @@ namespace iterlib = boost;
 
 #else
 
+#define MAX_THREADS 256
+
 #include <cublas_v2.h>   
 #include <thrust/device_vector.h>
 #include <thrust/functional.h>
@@ -317,56 +319,31 @@ typedef std::pair<size_t, size_t> RowPair;
 typedef std::vector<RowPair> RowPairs;
 typedef thrust::device_vector<RowPair> DeviceRowPairs;
 
-template <typename difference_type>
-struct Functor : public func::unary_function<difference_type, difference_type> {
-  const RowPair* rowPairs_;
-  bool first_;
-  difference_type rowLength_;
-
-  Functor(const RowPair* rowPairs, bool first, difference_type rowLength)
-  : rowPairs_(rowPairs), first_(first), rowLength_(rowLength) {}
-
-#ifndef NO_CUDA
-  __host__ __device__
-#endif
-  difference_type operator()(const difference_type& k) const {
-    difference_type i = k / rowLength_;
-    difference_type j = k % rowLength_;
-    if(first_)
-      return rowPairs_[i].first * rowLength_ + j;
-    else
-      return rowPairs_[i].second * rowLength_ + j;
+__global__ void gCopyRows(float* out, const float* in, size_t cols,
+                          const RowPair* devPairs) {
+  int bid = blockIdx.x;
+  size_t dstId = devPairs[bid].first;
+  size_t srcId = devPairs[bid].second;
+  
+  float* rowOut = out + dstId * cols;
+  const float* rowIn = in + srcId * cols;
+  
+  for(int tid = 0; tid < cols; tid += blockDim.x) {
+    int i = tid + threadIdx.x;
+    if(i < cols)
+      rowOut[i] = rowIn[i];
   }
-};
+}
 
 Matrix& CopyRows(Matrix& Out,
                  const Matrix& In,
                  const RowPair* devPairs,
                  size_t numPairs) {
+  float* d_out = Out.data();
+  const float* d_in = In.data();
   
-  typedef FVec::iterator It;
-  typedef typename iterlib::iterator_difference<It>::type difference_type;
-  typedef typename iterlib::counting_iterator<difference_type> CountingIterator;
-  typedef typename iterlib::transform_iterator<Functor<difference_type>, CountingIterator> TransformIterator;
-  typedef typename iterlib::permutation_iterator<It, TransformIterator> PermutationIterator;
-  
-  typedef FVec::const_iterator CIt;
-  typedef typename iterlib::iterator_difference<CIt>::type Cdifference_type;
-  typedef typename iterlib::counting_iterator<Cdifference_type> CCountingIterator;
-  typedef typename iterlib::transform_iterator<Functor<Cdifference_type>, CCountingIterator> CTransformIterator;
-  typedef typename iterlib::permutation_iterator<CIt, CTransformIterator> CPermutationIterator;
-  
-  size_t rowLength = In.Cols();  
-  CPermutationIterator itInBegin(In.begin(),
-                                 CTransformIterator(CCountingIterator(0),
-                                                    Functor<Cdifference_type>(devPairs, false, rowLength)));
-  CPermutationIterator itInEnd = itInBegin + numPairs * rowLength;
-  
-  PermutationIterator itOutBegin(Out.begin(),
-                                 TransformIterator(CountingIterator(0),
-                                                   Functor<difference_type>(devPairs, true, rowLength)));
-  
-  lib::copy(itInBegin, itInEnd, itOutBegin);
+  int threads = std::min(MAX_THREADS, (int)In.Cols());
+  gCopyRows<<<numPairs, threads>>>(d_out, d_in, In.Cols(), devPairs);
   return Out;
 }
 
@@ -386,176 +363,6 @@ Matrix& Assemble(Matrix& Out,
     rowPairs.emplace_back(i, indeces[i]);
   Out.Resize(rowPairs.size(), In.Cols());
   CopyRows(Out, In, rowPairs);
-  return Out;
-}
-
-template <class F>
-Matrix& PairwiseReduce(F f, Matrix& Out) {
-  typedef FVec::iterator It;
-  Matrix Temp(Out.Rows(), Out.Cols() / 2);
-  strided_range<It> evens(Out.begin(), Out.end(), 2);
-  strided_range<It> odds(Out.begin() + 1, Out.end(), 2);
-  lib::transform(evens.begin(), evens.end(), odds.begin(), Temp.begin(), f);
-  Swap(Out, Temp);
-  return Out;
-}
-
-template <class F>
-Matrix& Element(F f, Matrix& Out) {
-  lib::transform(Out.begin(), Out.end(), Out.begin(), f);
-  return Out;
-}
-
-void fill1(RowPair* ptr, size_t r, size_t factor) {
-  for(size_t i = 0; i < factor; ++i) {
-    for(size_t j = 0; j < r; ++j) {
-      ptr->first = i * r + j;
-      ptr->second = j;
-      ptr++;
-    }
-  }
-}
-
-void fill2(RowPair* ptr, size_t r, size_t factor) {
-  size_t k = 0;
-  for(size_t i = 0; i < r; ++i) {
-    for(size_t j = 0; j < factor; ++j) {
-      ptr->first = k++;
-      ptr->second = i;
-      ptr++;
-    }
-  }
-}
-
-template <class Filler>
-void gfiller(Filler filler, RowPair* ptr, size_t r, size_t factor) {
-  filler(ptr, r, factor);
-}
-
-template <class Filler>
-Matrix& Broadcast(Filler filler, Matrix& Out, size_t factor) {
-  size_t r = Out.Rows();
-  size_t c = Out.Cols();
-  
-  size_t newRows = r * factor;
-  
-  Matrix Temp;
-  Temp.Resize(newRows, c);
-  
-  // Try to put this on the device
-  RowPairs rowPairs(newRows);
-  gfiller(filler, rowPairs.data(), r, factor);
-  CopyRows(Temp, Out, rowPairs);
-  
-  Swap(Out, Temp);
-  
-  return Out;
-}
-
-Matrix& Broadcast1(Matrix& Out, size_t factor) {  
-  Broadcast(fill1, Out, factor);
-  return Out;
-}
-
-Matrix& Broadcast2(Matrix& Out, size_t factor) {  
-  Broadcast(fill2, Out, factor);
-  return Out;
-}
-
-template <typename difference_type>
-struct Functor1 : public func::unary_function<difference_type, difference_type> {
-  difference_type rows;
-  difference_type cols;
-
-  Functor1(difference_type rows, difference_type cols)
-  : rows(rows), cols(cols) {}
-
-#ifndef NO_CUDA
-  __host__ __device__
-#endif
-  difference_type operator()(const difference_type& i) const { 
-      return i % (rows * cols);
-  }
-};
-
-template <typename difference_type>
-struct Functor2 : public func::unary_function<difference_type, difference_type> {
-  difference_type rows;
-  difference_type cols;
-
-  Functor2(difference_type rows, difference_type cols)
-  : rows(rows), cols(cols) {}
-
-#ifndef NO_CUDA
-  __host__ __device__
-#endif
-  difference_type operator()(const difference_type& i) const { 
-      return cols * (i / (rows * cols)) + i % cols;
-  }
-};
-
-template <class F>
-Matrix& Element(F f, Matrix& Out, const Matrix& In) {
-  if(Out.Rows() == In.Rows() && Out.Cols() == In.Cols()) {
-    lib::transform(Out.begin(), Out.end(), In.begin(), Out.begin(), f);
-  }
-  // @TODO: fix bug here!
-  else if(In.Rows() != Out.Rows() && Out.Cols() == In.Cols()) {
-    typedef FVec::const_iterator It;
-    typedef typename iterlib::iterator_difference<It>::type difference_type;
-    typedef typename iterlib::counting_iterator<difference_type> CountingIterator;
-    typedef typename iterlib::transform_iterator<Functor1<difference_type>, CountingIterator> TransformIterator1;
-    typedef typename iterlib::permutation_iterator<It, TransformIterator1> PermutationIterator1;
-    typedef typename iterlib::transform_iterator<Functor2<difference_type>, CountingIterator> TransformIterator2;
-    typedef typename iterlib::permutation_iterator<It, TransformIterator2> PermutationIterator2;
-  
-    PermutationIterator1 it1(Out.begin(),
-                             TransformIterator1(CountingIterator(0),
-                                                Functor1<difference_type>(Out.Rows(), Out.Cols())));
-    PermutationIterator2 it2(In.begin(),
-                             TransformIterator2(CountingIterator(0),
-                                                Functor2<difference_type>(Out.Rows(), Out.Cols())));
-    PermutationIterator1 end1 = it1 + (Out.end() - Out.begin()) * In.Rows();
-    
-    Out.Resize(Out.Rows() * In.Rows(), Out.Cols());
-    lib::transform(it1, end1, it2, Out.begin(), f);
-  }
-  // TODO: finish this
-  else if(In.Cols() == 1 && Out.Rows() == In.Rows()) {
-    
-    typedef FVec::const_iterator It;
-    col_repeater<It> repeater(In.begin(), In.end(), Out.Cols());
-    lib::transform(Out.begin(), Out.end(), repeater.begin(), Out.begin(), f);
-  }
-  return Out;
-}
-
-template <class F, typename T>
-struct Tuple3Func {
-    Tuple3Func(F f) : f_(f) {}
-  
-#ifndef NO_CUDA
-  __host__ __device__
-#endif
-  T operator()(const iterlib::tuple<T, T, T>& t) const { 
-    return f_(iterlib::get<0>(t), iterlib::get<1>(t), iterlib::get<2>(t));
-  }
-
-  F f_;
-};
-
-template <class F>
-Matrix& Element(F f, Matrix& Out, const Matrix& In1, const Matrix& In2) {
-  typedef FVec::const_iterator CIt;
-  typedef iterlib::tuple<CIt, CIt, CIt> IteratorTuple;
-  typedef iterlib::zip_iterator<IteratorTuple> ZipIterator;
-  
-  ZipIterator begin(iterlib::make_tuple(Out.begin(), In1.begin(), In2.begin()));
-  ZipIterator end(iterlib::make_tuple(Out.end(), In1.end(), In2.end()));
-
-  Tuple3Func<F, Matrix::value_type> t3f(f);
-  
-  lib::transform(begin, end, Out.begin(), t3f);
   return Out;
 }
 
@@ -604,7 +411,7 @@ Matrix& Prod(Matrix& C, const Matrix& A, const Matrix& B,
 __global__ void gSoftMax(float* softMaxP, int cols) {
   int bid = blockIdx.x;
   extern __shared__ float _share[];
-  float * _sum = _share + blockDim.x;
+  float* _sum = _share + blockDim.x;
   float* sp = softMaxP + bid * cols;
   _sum[threadIdx.x] = 0.0;
   for(int tid = 0; tid < cols; tid += blockDim.x) {
@@ -619,25 +426,171 @@ __global__ void gSoftMax(float* softMaxP, int cols) {
   while(len != 1) {
     __syncthreads();
     int skip = (len + 1) >> 1;
-    if(threadIdx.x < (len >> 1)) {
+    if(threadIdx.x < (len >> 1))
       _sum[threadIdx.x] += _sum[threadIdx.x + skip];
-    }
     len = (len + 1) >> 1;
   }
   __syncthreads();
   for(int tid = 0; tid < cols; tid += blockDim.x){
     int id = tid + threadIdx.x;
-    if(id < cols) {
+    if(id < cols)
       sp[id] /= _sum[0];
+  }
+}
+
+Matrix& Softmax(Matrix& Out) {
+  int blocks = Out.Rows();
+  int threads = std::min(MAX_THREADS, (int)Out.Cols());
+  int shared = sizeof(float) * threads * 2;
+  gSoftMax<<<blocks, threads, shared>>>(Out.data(), Out.Cols());
+  cudaStreamSynchronize(0);
+  return Out;
+}
+
+template <class Functor>
+__global__ void gBroadcast(Functor functor,
+                           float* out, const float* in1, const float* in2,
+                           size_t rows1, size_t cols) {
+  int bid = blockIdx.x;
+  
+  float* rowOut = out + bid * cols;
+
+  const float* rowIn1 = in1 + (bid % rows1) * cols;
+  const float* rowIn2 = in2 + (bid / rows1) * cols;
+  
+  for(int tid = 0; tid < cols; tid += blockDim.x) {
+    int i = tid + threadIdx.x;
+    if(i < cols)
+      rowOut[i] = functor(rowIn1[i], rowIn2[i]);
+  }
+}
+
+template <class Functor>
+Matrix& Broadcast(Functor functor, Matrix& Out, const Matrix& In) {
+  size_t rows1 = Out.Rows();
+  size_t rows2 = In.Rows();
+  
+  size_t rows = rows1 * rows2;
+  size_t cols  = Out.Cols();
+  
+  Matrix Temp(rows, cols, 1.0);
+  
+  float* d_out = Temp.data();
+  const float* d_in1 = Out.data();
+  const float* d_in2 = In.data();
+  
+  int threads = std::min(MAX_THREADS, (int)cols);
+  gBroadcast<<<rows, threads>>>(functor, d_out, d_in1, d_in2, rows1, cols);
+  
+  Swap(Out, Temp);
+  return Out;
+}
+
+template <class Functor>
+__global__ void gElement(Functor functor, float* out, size_t cols) {
+  int bid = blockIdx.x;
+  
+  float* rowOut = out + bid * cols;
+  
+  for(int tid = 0; tid < cols; tid += blockDim.x) {
+    int i = tid + threadIdx.x;
+    if(i < cols) {
+      rowOut[i] = functor(rowOut[i]);;
     }
   }
 }
 
-mblas::Matrix& Softmax(mblas::Matrix& Out) {
-  int threads = std::min(512, (int)Out.Cols());
-  int blocks  = sizeof(float) * threads * 2;
-  gSoftMax<<<Out.Rows(), threads, blocks>>>(Out.data(), Out.Cols());
-  cudaStreamSynchronize(0);
+template <class Functor>
+__global__ void gElement(Functor functor,
+                         float* out, const float* in, size_t cols) {
+  int bid = blockIdx.x;
+  
+  float* rowOut = out + bid * cols;
+  const float* rowIn = in + bid * cols;
+  
+  for(int tid = 0; tid < cols; tid += blockDim.x) {
+    int i = tid + threadIdx.x;
+    if(i < cols) {
+      rowOut[i] = functor(rowOut[i], rowIn[i]);;
+    }
+  }
+}
+
+template <class Functor>
+__global__ void gElement(Functor functor,
+                         float* out, const float* in1, const float* in2,
+                         size_t cols) {
+  int bid = blockIdx.x;
+  
+  float* rowOut = out + bid * cols;
+  const float* rowIn1 = in1 + bid * cols;
+  const float* rowIn2 = in2 + bid * cols;
+  
+  for(int tid = 0; tid < cols; tid += blockDim.x) {
+    int i = tid + threadIdx.x;
+    if(i < cols) {
+      rowOut[i] = functor(rowOut[i], rowIn1[i], rowIn2[i]);
+    }
+  }
+}
+
+template <class Functor>
+Matrix& Element(Functor functor, Matrix& Out) {
+  float* d_out = Out.data();  
+  int threads = std::min(MAX_THREADS, (int)Out.Cols());
+  gElement<<<Out.Rows(), threads>>>(functor, d_out, Out.Cols());
+  
+  return Out;
+}
+
+template <class Functor>
+Matrix& Element(Functor functor,
+                Matrix& Out, const Matrix& In) {
+  
+  float* d_out = Out.data();
+  const float* d_in = In.data();
+  
+  int threads = std::min(MAX_THREADS, (int)Out.Cols());
+  gElement<<<Out.Rows(), threads>>>(functor, d_out, d_in, Out.Cols());
+  
+  return Out;
+}
+
+template <class Functor>
+Matrix& Element(Functor functor,
+                Matrix& Out, const Matrix& In1, const Matrix& In2) {
+  
+  float* d_out = Out.data();
+  const float* d_in1 = In1.data();
+  const float* d_in2 = In2.data();
+  
+  int threads = std::min(MAX_THREADS, (int)Out.Cols());
+  gElement<<<Out.Rows(), threads>>>(functor, d_out, d_in1, d_in2, Out.Cols());
+  
+  return Out;
+}
+
+template <class Functor>
+__global__ void gPairwiseReduce(Functor functor,
+                                float* out, size_t cols) {
+  int bid = blockIdx.x;
+  float* rowOut = out + bid * cols;  
+  for(int tid = 0; tid < cols / 2; tid += blockDim.x) {
+    int i = tid + threadIdx.x;
+    if(i * 2 + 1 < cols) {
+      float temp = functor(rowOut[i * 2], rowOut[i * 2 + 1]);
+      __syncthreads();
+      rowOut[i] = temp;
+    }
+  }
+}
+
+template <class Functor>
+Matrix& PairwiseReduce(Functor functor, Matrix& Out) {
+  float* d_out = Out.data();
+  int threads = std::min(MAX_THREADS, (int)Out.Cols() / 2);
+  gPairwiseReduce<<<Out.Rows(), threads>>>(functor, d_out, Out.Cols());
+  Out.Resize(Out.Rows(), Out.Cols() / 2);
   return Out;
 }
 
