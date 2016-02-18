@@ -81,7 +81,7 @@ protected:
   std::vector<lm::WordIndex> m_lmIdLookup;
 
   typedef std::pair<lm::ngram::State, lm::WordIndex> LMCacheKey;
-  typedef std::pair<float, lm::ngram::State*> LMCacheValue;
+  typedef std::pair<float, const lm::ngram::State*> LMCacheValue;
   typedef boost::unordered_map<LMCacheKey, LMCacheValue> CacheColl;
   mutable boost::thread_specific_ptr<CacheColl> m_cache;
 
@@ -95,7 +95,7 @@ protected:
   // Convert last words of hypothesis into vocab ids, returning an end pointer.
   lm::WordIndex *LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const;
 
-  float ScoreAndCache(const Manager &mgr, const lm::ngram::State &in_state, const lm::WordIndex new_word, lm::ngram::State &out_state) const;
+  const LMCacheValue &ScoreAndCache(const Manager &mgr, const lm::ngram::State &in_state, const lm::WordIndex new_word) const;
 
   CacheColl &GetCache() const;
 
