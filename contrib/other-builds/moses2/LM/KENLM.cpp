@@ -24,12 +24,11 @@ namespace Moses2
 struct KenLMState : public FFState {
   const lm::ngram::State *state;
   virtual size_t hash() const {
-    size_t ret = hash_value(*state);
-    return ret;
+    return (size_t) state;
   }
   virtual bool operator==(const FFState& o) const {
     const KenLMState &other = static_cast<const KenLMState &>(o);
-    bool ret = *state == *other.state;
+    bool ret = state == other.state;
     return ret;
   }
 
@@ -323,7 +322,7 @@ const KENLM::LMCacheValue &KENLM::ScoreAndCache(const Manager &mgr, const lm::ng
 	LMCacheValue *val;
 
 	CacheColl &lmCache = *((CacheColl*)mgr.lmCache);
-	LMCacheKey key(in_state, new_word);
+	LMCacheKey key(&in_state, new_word);
 	CacheColl::iterator iter;
 	iter = lmCache.find(key);
 	if (iter == lmCache.end()) {
