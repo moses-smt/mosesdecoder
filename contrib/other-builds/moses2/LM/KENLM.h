@@ -80,7 +80,7 @@ protected:
   boost::shared_ptr<Model> m_ngram;
   std::vector<lm::WordIndex> m_lmIdLookup;
 
-  typedef std::pair<const lm::ngram::State*, lm::WordIndex> LMCacheKey;
+  typedef std::pair<lm::ngram::State, lm::WordIndex> LMCacheKey;
   typedef std::pair<float, const lm::ngram::State*> LMCacheValue;
   typedef boost::unordered_map<LMCacheKey, LMCacheValue> CacheColl;
   mutable boost::thread_specific_ptr<CacheColl> m_cache;
