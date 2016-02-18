@@ -9,6 +9,7 @@
 #define FF_LM_KENLM_H_
 
 #include <boost/shared_ptr.hpp>
+#include <boost/unordered_map.hpp>
 #include "../FF/StatefulFeatureFunction.h"
 #include "lm/model.hh"
 #include "../legacy/Factor.h"
@@ -77,6 +78,12 @@ protected:
 
   typedef lm::ngram::ProbingModel Model;
   boost::shared_ptr<Model> m_ngram;
+  std::vector<lm::WordIndex> m_lmIdLookup;
+
+  typedef std::pair<lm::ngram::State, lm::WordIndex> LMCacheKey;
+  typedef std::pair<float, lm::ngram::State> LMCacheValue;
+  typedef boost::unordered_map<LMCacheKey, LMCacheValue> CacheColl;
+  mutable boost::thread_specific_ptr<CacheColl> m_cache;
 
   void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const;
 
@@ -88,9 +95,10 @@ protected:
   // Convert last words of hypothesis into vocab ids, returning an end pointer.
   lm::WordIndex *LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const;
 
-  std::vector<lm::WordIndex> m_lmIdLookup;
-
   float ScoreAndCache(const Manager &mgr, const lm::ngram::State &in_state, const lm::WordIndex new_word, lm::ngram::State &out_state) const;
+
+  CacheColl &GetCache() const;
+
 };
 
 }

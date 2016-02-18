@@ -69,10 +69,7 @@ public:
 
     void OutputBest() const;
 
-    //void AddLMCache(const lm::ngram::State &in_state, const lm::WordIndex new_word) const;
-    bool FindLMCache(const lm::ngram::State &in_state, const lm::WordIndex new_word, float &score, lm::ngram::State &out_state) const;
-    void AddLMCache(const lm::ngram::State &in_state, const lm::WordIndex new_word, float score, const lm::ngram::State &out_state) const;
-
+    mutable void *lmCache;
 protected:
 	mutable MemPool *m_pool, *m_systemPool;
 	mutable Recycler<Hypothesis*> *m_hypoRecycle;
@@ -86,10 +83,6 @@ protected:
 	TargetPhrase *m_initPhrase;
 
 	Search *m_search;
-
-	typedef std::pair<lm::ngram::State, lm::WordIndex> LMCacheKey;
-	typedef std::pair<float, lm::ngram::State> LMCacheValue;
-	mutable boost::unordered_map<LMCacheKey, LMCacheValue> m_lmCache;
 
 	// must be run in same thread as Decode()
 	void Init();

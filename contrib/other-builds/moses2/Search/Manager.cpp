@@ -226,29 +226,5 @@ void Manager::OutputBest() const
 	//cerr << endl;
 }
 
-void Manager::AddLMCache(const lm::ngram::State &in_state, const lm::WordIndex new_word, float score, const lm::ngram::State &out_state) const
-{
-	LMCacheKey key(in_state, new_word);
-	LMCacheValue &val = m_lmCache[key];
-	val.first = score;
-	val.second = out_state;
-}
-
-bool Manager::FindLMCache(const lm::ngram::State &in_state, const lm::WordIndex new_word, float &score, lm::ngram::State &out_state) const
-{
-	LMCacheKey key(in_state, new_word);
-	boost::unordered_map<LMCacheKey, LMCacheValue>::iterator iter;
-	iter = m_lmCache.find(key);
-	if (iter == m_lmCache.end()) {
-		return false;
-	}
-	else {
-		const LMCacheValue &val = iter->second;
-		score = val.first;
-		out_state = val.second;
-		return true;
-	}
-}
-
 }
 
