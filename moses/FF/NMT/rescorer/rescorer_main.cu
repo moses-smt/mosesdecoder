@@ -79,10 +79,12 @@ int main(int argc, char* argv[]) {
   std::shared_ptr<Vocab> trgVocab(new Vocab(tvPath));
 
   std::cerr << "Loading nbest list: " << nbestPath << std::endl;
-  std::shared_ptr<NBest> nbest(new NBest(nbestPath, tvPath, srcVocab, trgVocab));
+  std::shared_ptr<NBest> nbest(new NBest(corpusPath,nbestPath, srcVocab, trgVocab, maxBatchSize));
 
+  std::cerr << "Creating rescorer..." << std::endl;
   std::shared_ptr<Rescorer> rescorer(new Rescorer(weights, nbest, fname));
 
+  std::cerr << "Start rescoring..." << std::endl;
   for (size_t i = 0; i < nbest->size(); ++i) {
     rescorer->Score(i);
   }

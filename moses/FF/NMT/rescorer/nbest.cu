@@ -59,6 +59,7 @@ void NBest::Parse_(const std::string& path) {
       indexes_.push_back(lineCount);
     }
     data_.push_back(fields);
+    ++lineCount;
   }
   indexes_.push_back(data_.size());
 }
@@ -123,5 +124,5 @@ std::vector<Batch> NBest::GetBatches(const size_t index) const {
 
 
 size_t NBest::size() const {
-  return srcSentences_.size();
+  return indexes_.size() - 1;
 }
