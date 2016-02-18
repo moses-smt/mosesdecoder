@@ -102,14 +102,13 @@ void KENLM::Load(System &system)
 
 void KENLM::InitializeForInput(const Manager &mgr) const
 {
-	CacheColl &cache = GetCache();
-	cache.clear();
-	mgr.lmCache = &cache;
+
 }
 
 // clean up temporary memory, called after processing each sentence
 void KENLM::CleanUpAfterSentenceProcessing(const Manager &mgr) const
 {
+
 }
 
 void KENLM::SetParameter(const std::string& key, const std::string& value)
@@ -303,35 +302,22 @@ lm::WordIndex *KENLM::LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) co
 
 float KENLM::ScoreAndCache(const Manager &mgr, const lm::ngram::State &in_state, const lm::WordIndex new_word, lm::ngram::State &out_state) const
 {
-	//cerr << "score=";
-	float score;
+  //cerr << "score=";
+  float score;
+  if (mgr.FindLMCache(in_state, new_word, score, out_state)) {
+	  // found in cache. score & set set in the call
+	  //cerr << "in cache ";
+  }
+  else {
+	  //cerr << "not cache ";
+	  score = m_ngram->Score(in_state, new_word, out_state);
+	  mgr.AddLMCache(in_state, new_word, score, out_state);
+  }
 
-	CacheColl &m_lmCache = *((CacheColl*)mgr.lmCache);
-	LMCacheKey key(in_state, new_word);
-	CacheColl::iterator iter;
-	iter = m_lmCache.find(key);
-	if (iter == m_lmCache.end()) {
-		score = m_ngram->Score(in_state, new_word, out_state);
+  //score = m_ngram->Score(in_state, new_word, out_state);
 
-		LMCacheValue &val = m_lmCache[key];
-		val.first = score;
-		val.second = out_state;
-	}
-	else {
-		const LMCacheValue &val = iter->second;
-		score = val.first;
-		out_state = val.second;
-	}
-
-	//score = m_ngram->Score(in_state, new_word, out_state);
-
-	//cerr << score << " " << (int) out_state.length << endl;
-	return score;
-}
-
-KENLM::CacheColl &KENLM::GetCache() const
-{
-	return GetThreadSpecificObj(m_cache);
+  //cerr << score << " " << (int) out_state.length << endl;
+  return score;
 }
 
 }
