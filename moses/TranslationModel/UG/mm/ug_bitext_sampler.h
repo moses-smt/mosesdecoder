@@ -71,13 +71,22 @@ BitextSampler : public Moses::reference_counter
   boost::taus88 m_rnd;  // every job has its own pseudo random generator
   double m_bias_total;
 
+  size_t m_random_size_t;
+  double m_rnd_float; 
+
   size_t consider_sample(TokenPosition const& p);
   size_t perform_random_sampling();
   size_t perform_full_phrase_extraction();
 
   int check_sample_distribution(uint64_t const& sid, uint64_t const& offset);
-  bool flip_coin(id_type const& sid, ushort const& offset, SamplingBias const* bias);
-    
+  bool flip_coin(id_type const& sid, ushort const& offset, 
+                 SamplingBias const* bias);
+  bool 
+  flip_coin(size_t options_total, 
+            size_t const options_considered, 
+            size_t const options_chosen,
+            size_t const threshold);
+  
 public:
   BitextSampler(BitextSampler const& other);
   // BitextSampler const& operator=(BitextSampler const& other);
@@ -134,7 +143,7 @@ check_sample_distribution(uint64_t const& sid, uint64_t const& offset)
   if (log)
     {
       Token const* t = m_root->getCorpus()->sntStart(sid)+offset;
-      Token const* x = t - min(offset,uint64_t(3));
+      Token const* x = t - std::min(offset,uint64_t(3));
       Token const* e = t + 4;
       if (e > m_root->getCorpus()->sntEnd(sid))
         e = m_root->getCorpus()->sntEnd(sid);
@@ -159,32 +168,42 @@ check_sample_distribution(uint64_t const& sid, uint64_t const& offset)
 template<typename Token>
 bool 
 BitextSampler<Token>::
+flip_coin(size_t options_total, 
+          size_t const options_considered, 
+          size_t const options_chosen,
+          size_t const threshold) 
+{
+  if (options_considered > options_total)
+    options_total = options_considered;
+  size_t options_left = (options_total - options_considered);
+  m_rnd_float = (m_rnd()/(m_rnd.max()+1.));
+  m_random_size_t = options_left * m_rnd_float;
+  return m_random_size_t + options_chosen < threshold;
+}
+
+template<typename Token>
+bool 
+BitextSampler<Token>::
 flip_coin(id_type const& sid, ushort const& offset, bias_t const* bias)
 {
   int no_maybe_yes = bias ? check_sample_distribution(sid, offset) : 1;
   if (no_maybe_yes == 0) return false; // no
   if (no_maybe_yes > 1)  return true;  // yes
   // ... maybe: flip a coin
-  size_t options_chosen = m_stats->good;
   size_t options_total  = std::max(m_stats->raw_cnt, m_ctr);
-  size_t options_left   = (options_total - m_ctr);
-  size_t random_number  = options_left * (m_rnd()/(m_rnd.max()+1.));
-  size_t threshold;
-  if (bias && m_bias_total > 0) // we have a bias and there are candidates with non-zero prob
-    threshold = ((*bias)[sid]/m_bias_total * options_total * m_samples);
-  else // no bias, or all have prob 0 (can happen with a very opinionated bias)
-    threshold = m_samples;
-  return random_number + options_chosen < threshold;
+  size_t threshold = ((bias && m_bias_total > 0 && m_method != ranked_sampling)
+                      ? ((*bias)[sid]/m_bias_total * options_total * m_samples) // w/ bias
+                      : m_samples); // no bias
+  return flip_coin(m_stats->raw_cnt, m_ctr, m_stats->good,threshold);
 }
-
-
-
 
 template<typename Token>
 BitextSampler<Token>::
 BitextSampler(SPTR<Bitext<Token> const> const& bitext, 
               typename bitext::iter const& phrase,
-              SPTR<SamplingBias const> const& bias, size_t const min_samples, size_t const max_samples,
+              SPTR<SamplingBias const> const& bias, 
+              size_t const min_samples, 
+              size_t const max_samples,
               sampling_method const method)
   : m_bitext(bitext)
   , m_plen(phrase.size())
@@ -203,7 +222,7 @@ BitextSampler(SPTR<Bitext<Token> const> const& bitext,
   , m_rnd(0)
 {
   m_stats.reset(new pstats);
-  m_stats->raw_cnt = phrase.ca();
+  m_stats->raw_cnt = phrase.rawCnt(); // phrase.ca();
   m_stats->register_worker();
 }
   
@@ -233,6 +252,7 @@ BitextSampler(BitextSampler const& other)
   m_total_bias = other.m_total_bias;
   m_finished = other.m_finished;
 }
+
 
 // Uniform sampling 
 template<typename Token>
@@ -269,7 +289,6 @@ perform_random_sampling()
       while (I.next < m_stop)
         {
           m_root->readEntry(I.next,I);
-          // ++m_stats->raw_cnt;
           m_bias_total += (*m_bias)[I.sid];
         }
       I.next = m_next;
@@ -277,10 +296,10 @@ perform_random_sampling()
       
   while (m_stats->good < m_samples && I.next < m_stop)
     {
-      ++m_ctr;
       m_root->readEntry(I.next,I);
-      if (!flip_coin(I.sid, I.offset, m_bias.get())) continue;
-      consider_sample(I);
+      bool foo = flip_coin(I.sid, I.offset, m_bias.get());
+      ++m_ctr;
+      size_t maxevid = foo ? consider_sample(I) : 0;
     }
   return m_ctr;
 }
@@ -365,7 +384,6 @@ operator()()
   return true;
 }
 #endif
-
   
 template<typename Token>
 bool
