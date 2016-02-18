@@ -6,11 +6,11 @@
 
 #include "nmt.h"
 #include "mblas/matrix.h"
-#include "model.h"
-#include "encoder.h"
-#include "decoder.h"
-#include "vocab.h"
-#include "states.h"
+#include "common/model.h"
+#include "common/encoder.h"
+#include "common/decoder.h"
+#include "common/vocab.h"
+#include "common/states.h"
 
 using namespace mblas;
 
