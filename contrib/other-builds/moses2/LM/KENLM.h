@@ -85,7 +85,6 @@ protected:
 
   std::vector<lm::WordIndex> m_lmIdLookup;
 
-  float ScoreAndCache(const Manager &mgr, const lm::ngram::State &in_state, const lm::WordIndex new_word, lm::ngram::State &out_state) const;
 };
 
 }
