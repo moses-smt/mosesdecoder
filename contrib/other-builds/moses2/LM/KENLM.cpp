@@ -100,17 +100,6 @@ void KENLM::Load(System &system)
   m_ngram.reset(new Model(m_path.c_str(), config));
 }
 
-void KENLM::InitializeForInput(const Manager &mgr) const
-{
-
-}
-
-// clean up temporary memory, called after processing each sentence
-void KENLM::CleanUpAfterSentenceProcessing(const Manager &mgr) const
-{
-
-}
-
 void KENLM::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "path") {
