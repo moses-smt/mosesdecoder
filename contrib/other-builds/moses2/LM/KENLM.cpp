@@ -22,22 +22,22 @@ namespace Moses2
 {
 
 struct KenLMState : public FFState {
-  const lm::ngram::State *state;
+  lm::ngram::State state;
   virtual size_t hash() const {
-    size_t ret = hash_value(*state);
+    size_t ret = hash_value(state);
     return ret;
   }
   virtual bool operator==(const FFState& o) const {
     const KenLMState &other = static_cast<const KenLMState &>(o);
-    bool ret = *state == *other.state;
+    bool ret = state == other.state;
     return ret;
   }
 
   virtual std::string ToString() const
   {
 	  stringstream ss;
-	  for (size_t i = 0; i < state->Length(); ++i) {
-		  ss << state->words[i] << " ";
+	  for (size_t i = 0; i < state.Length(); ++i) {
+		  ss << state.words[i] << " ";
 	  }
 	  return ss.str();
   }
@@ -144,7 +144,7 @@ void KENLM::EmptyHypothesisState(FFState &state,
 		const Hypothesis &hypo) const
 {
   KenLMState &stateCast = static_cast<KenLMState&>(state);
-  stateCast.state = &m_ngram->BeginSentenceState();
+  stateCast.state = m_ngram->BeginSentenceState();
 }
 
 void
@@ -189,12 +189,11 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
   Scores &scores,
   FFState &state) const
 {
-  MemPool &pool = mgr.GetPool();
   KenLMState &stateCast = static_cast<KenLMState&>(state);
 
   const System &system = mgr.system;
 
-  const lm::ngram::State *in_state = static_cast<const KenLMState&>(prevState).state;
+  const lm::ngram::State &in_state = static_cast<const KenLMState&>(prevState).state;
 
   if (!hypo.GetTargetPhrase().GetSize()) {
     stateCast.state = in_state;
@@ -208,10 +207,10 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
 
   std::size_t position = begin;
   typename Model::State aux_state;
-  const Model::State *state0 = stateCast.state;
+  const Model::State *state0 = &stateCast.state;
   const Model::State *state1 = &aux_state;
 
-  const LMCacheValue &val0 = ScoreAndCache(mgr, *in_state, TranslateID(hypo.GetWord(position)));
+  const LMCacheValue &val0 = ScoreAndCache(mgr, in_state, TranslateID(hypo.GetWord(position)));
   float score = val0.first;
   state0 = val0.second;
 
@@ -228,23 +227,15 @@ void KENLM::EvaluateWhenApplied(const Manager &mgr,
 	// Score end of sentence.
 	std::vector<lm::WordIndex> indices(m_ngram->Order() - 1);
 	const lm::WordIndex *last = LastIDs(hypo, &indices.front());
-	lm::ngram::State *newState = new (pool.Allocate<lm::ngram::State>()) lm::ngram::State();
-
-	score += m_ngram->FullScoreForgotState(&indices.front(), last, m_ngram->GetVocabulary().EndSentence(), *newState).prob;
-	stateCast.state = newState;
-  }
-  else if (adjust_end < end) {
+	score += m_ngram->FullScoreForgotState(&indices.front(), last, m_ngram->GetVocabulary().EndSentence(), stateCast.state).prob;
+  } else if (adjust_end < end) {
 	// Get state after adding a long phrase.
 	std::vector<lm::WordIndex> indices(m_ngram->Order() - 1);
 	const lm::WordIndex *last = LastIDs(hypo, &indices.front());
-	lm::ngram::State *newState = new (pool.Allocate<lm::ngram::State>()) lm::ngram::State();
-
-	m_ngram->GetState(&indices.front(), last, *newState);
-	stateCast.state = newState;
-  }
-  else {
+	m_ngram->GetState(&indices.front(), last, stateCast.state);
+  } else if (state0 != &stateCast.state) {
 	// Short enough phrase that we can just reuse the state.
-	  stateCast.state = state0;
+	  stateCast.state = *state0;
   }
 
   score = TransformLMScore(score);
