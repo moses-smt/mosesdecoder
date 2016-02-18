@@ -38,6 +38,20 @@ namespace sapt
       }
   }
 
+  bool 
+  jstats::
+  operator==(jstats const& other) const
+  {
+    if (my_rcnt != other.my_rcnt || my_cnt2 != other.my_cnt2 || 
+        my_wcnt != other.my_wcnt || my_bcnt != other.my_bcnt ||
+        my_aln  != other.my_aln  || indoc   != other.indoc) 
+      return false;
+    for (int i = 0; i <= LRModel::NONE; ++i)
+      if (ofwd[i] != other.ofwd[i] || obwd[i] != other.obwd[i])
+        return false;
+    return true;
+  }
+
   uint32_t
   jstats::
   dcnt_fwd(PhraseOrientation const idx) const

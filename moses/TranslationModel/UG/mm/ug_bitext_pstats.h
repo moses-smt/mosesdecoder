@@ -53,10 +53,12 @@ namespace sapt
     
     void
     count_sample(int const docid,        // document where sample was found
-		 size_t const num_pairs, // # of phrases extractable here
-		 int const po_fwd,       // fwd phrase orientation
-		 int const po_bwd);      // bwd phrase orientation
+                 size_t const num_pairs, // # of phrases extractable here
+                 int const po_fwd,       // fwd phrase orientation
+                 int const po_bwd);      // bwd phrase orientation
     void wait() const;
+    bool operator==(pstats const& other) const;
+    void diff(std::ostream& out, pstats const& other) const;
   };
 
 }

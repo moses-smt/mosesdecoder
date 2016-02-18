@@ -1,6 +1,7 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #include <boost/thread/locks.hpp>
 #include "ug_bitext_pstats.h"
+#include <boost/format.hpp>
 
 namespace sapt
 {
@@ -90,6 +91,57 @@ namespace sapt
     while (this->in_progress)
       this->ready.wait(lock);
   }
+
+  bool 
+  pstats::
+  operator==(pstats const& other) const
+  {
+    if (raw_cnt    != other.raw_cnt    || 
+        sample_cnt != other.sample_cnt ||
+        good       != other.good       || 
+        sum_pairs  != other.sum_pairs  || 
+        indoc      != other.indoc      ||
+        trg        != other.trg) return false;
+
+    for (int i =0; i <= LRModel::NONE; ++i)
+      if (ofwd[i] != other.ofwd[i] || obwd[i] != other.obwd[i])
+        return false;
+      
+    return true;
+  }
+
+  /// 
+  void 
+  pstats::
+  diff(std::ostream& out, pstats const& other) const
+  {
+    boost::format fmt("%20s: %10d %10d\n");
+    boost::format indoc_fmt("indoc %4d: %10d %10d\n");
+    out << (fmt % "raw_cnt" % raw_cnt % other.raw_cnt);
+    out << (fmt % "sample_cnt" % sample_cnt % other.sample_cnt);
+    out << (fmt % "good" % good % other.good);
+    out << (fmt % "sum_pairs" % sum_pairs % other.sum_pairs);
+    indoc_map_t::const_iterator m1,m2;
+    for (m1 = indoc.begin(); m1 != indoc.end(); ++m1)
+      {
+        m2 = other.indoc.find(m1->first);
+        size_t cnt2 = m2 == other.indoc.end() ? 0 : m2->second;
+        out << (indoc_fmt % m1->first % m1->second % cnt2);
+      }
+    for (m2 = other.indoc.begin(); m2 != other.indoc.end(); ++m2)
+      {
+        m1 = indoc.find(m2->first);
+        size_t cnt1 = m1 == indoc.end() ? 0 : m1->second;
+        out << (indoc_fmt % m2->first % cnt1 % m2->second);
+      }
+
+    for (int i =0; i <= LRModel::NONE; ++i)
+      out << (fmt % "lrmdl fwd" % ofwd[i] % other.ofwd[i]); 
+
+    for (int i =0; i <= LRModel::NONE; ++i)
+      out << (fmt % "lrmdl bwd" % obwd[i] % other.obwd[i]); 
+  }
+
 
 } // end of namespace sapt
 
