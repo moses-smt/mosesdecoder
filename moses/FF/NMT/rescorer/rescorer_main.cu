@@ -71,6 +71,7 @@ int main(int argc, char* argv[]) {
   size_t maxBatchSize;
   ProgramOptions(argc, argv, modelPath, svPath,tvPath, corpusPath, nbestPath,
                  fname, maxBatchSize, device);
+  std::cerr << "Using device: " << device << std::endl;
   cudaSetDevice(device);
 
   std::cerr << "Loading model: " << modelPath << std::endl;
