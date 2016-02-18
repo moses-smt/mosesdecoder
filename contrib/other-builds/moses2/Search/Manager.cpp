@@ -44,6 +44,7 @@ Manager::~Manager() {
 	GetPool().Reset();
 	GetHypoRecycle().Clear();
 
+	/*
 	map<uint64_t, uint64_t> countOfCounts;
 	boost::unordered_map<uint64_t, uint64_t>::iterator iter;
 	for (iter = m_lmCache.begin(); iter != m_lmCache.end(); ++iter) {
@@ -68,6 +69,7 @@ Manager::~Manager() {
 
 	}
 	cerr << endl;
+	*/
 }
 
 void Manager::Init()
@@ -213,17 +215,27 @@ void Manager::OutputBest() const
 	//cerr << endl;
 }
 
-void Manager::AddLMCache(const lm::ngram::State &in_state, const lm::WordIndex new_word) const
+void Manager::AddLMCache(const lm::ngram::State &in_state, const lm::WordIndex new_word, float score, const lm::ngram::State &out_state) const
 {
-	uint64_t hash = lm::ngram::hash_value(in_state, new_word);
-	boost::unordered_map<uint64_t, uint64_t>::iterator iter;
-	iter = m_lmCache.find(hash);
+	LMCacheKey key(in_state, new_word);
+	LMCacheValue &val = m_lmCache[key];
+	val.first = score;
+	val.second = out_state;
+}
+
+bool Manager::FindLMCache(const lm::ngram::State &in_state, const lm::WordIndex new_word, float &score, lm::ngram::State &out_state) const
+{
+	LMCacheKey key(in_state, new_word);
+	boost::unordered_map<LMCacheKey, LMCacheValue>::iterator iter;
+	iter = m_lmCache.find(key);
 	if (iter == m_lmCache.end()) {
-		m_lmCache[hash] = 1;
+		return false;
 	}
 	else {
-		uint64_t &count = iter->second;
-		++count;
+		const LMCacheValue &val = iter->second;
+		score = val.first;
+		out_state = val.second;
+		return true;
 	}
 }
 
