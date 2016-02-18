@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mblas/matrix.h"
-#include "model.h"
+#include "common/model.h"
  
 class Decoder {
   private:

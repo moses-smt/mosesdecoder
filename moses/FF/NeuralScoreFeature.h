@@ -12,7 +12,7 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/thread/tss.hpp>
 
-#include "moses/FF/NMT/nmt.h"
+#include "moses/FF/NMT/plugin/nmt.h"
 
 struct Payload {
   Payload() : logProb_(0), known_(true) {}
