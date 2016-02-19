@@ -474,11 +474,6 @@ void show_version()
   // there's no easy way to determine the cmph version at compile time
   std::cout << "       CMPH (version unknown)" << std::endl;
 #endif
-
-#ifdef MMT_VERSION_ID
-  std::cout << string(20,'-')
-            << "\nMMT extras version: " << MMT_VERSION_ID << std::endl;
-#endif
 }
 
 /** load all parameters from the configuration file and the command line switches */

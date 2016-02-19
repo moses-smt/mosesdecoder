@@ -7,9 +7,7 @@
 #include "moses/Timer.h"
 #endif
 
-// #ifdef WITH_MMT_BIAS_CLIENT
 #include "ug_http_client.h"
-// #endif
 
 namespace sapt
 {
