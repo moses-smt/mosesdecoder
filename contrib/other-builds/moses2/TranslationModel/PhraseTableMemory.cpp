@@ -8,7 +8,7 @@
 #include <cassert>
 #include <boost/foreach.hpp>
 #include "PhraseTableMemory.h"
-#include "../Phrase.h"
+#include "../PhraseImpl.h"
 #include "../TargetPhrase.h"
 #include "../System.h"
 #include "../Scores.h"

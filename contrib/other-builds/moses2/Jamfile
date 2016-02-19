@@ -7,18 +7,20 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
    InputType.cpp
  	 MemPool.cpp
    Phrase.cpp 
+   PhraseImpl.cpp 
    Sentence.cpp
    Scores.cpp 
- 	 System.cpp 
+   SubPhrase.cpp
+   System.cpp 
    TargetPhrase.cpp 
    TargetPhrases.cpp
    TranslationTask.cpp
    Vector.cpp
    Weights.cpp 
-		Word.cpp 
-		FF/Distortion.cpp
-   	FF/FeatureFunction.cpp 
-   	FF/FeatureFunctions.cpp 
+   Word.cpp 
+   FF/Distortion.cpp
+   FF/FeatureFunction.cpp 
+   FF/FeatureFunctions.cpp 
     FF/LexicalReordering.cpp
     FF/PhrasePenalty.cpp
     FF/SkeletonStatefulFF.cpp

@@ -8,7 +8,7 @@
 #pragma once
 
 #include <iostream>
-#include "Phrase.h"
+#include "PhraseImpl.h"
 #include "MemPool.h"
 
 namespace Moses2

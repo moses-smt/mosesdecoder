@@ -9,7 +9,7 @@
 #define SENTENCE_H_
 #include <string>
 #include "InputType.h"
-#include "Phrase.h"
+#include "PhraseImpl.h"
 
 namespace Moses2
 {

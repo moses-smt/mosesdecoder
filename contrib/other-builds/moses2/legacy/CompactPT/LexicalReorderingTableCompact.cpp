@@ -21,7 +21,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include "LexicalReorderingTableCompact.h"
-#include "../../Phrase.h"
+#include "../../SubPhrase.h"
 #include "../Util2.h"
 
 namespace Moses2
