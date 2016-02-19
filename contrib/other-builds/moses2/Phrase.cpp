@@ -62,5 +62,17 @@ std::string Phrase::GetString(const FactorList &factorTypes) const
 
 }
 
+std::ostream& operator<<(std::ostream &out, const Phrase &obj)
+{
+	if (obj.GetSize()) {
+		out << obj[0];
+		for (size_t i = 1; i < obj.GetSize(); ++i) {
+			const Word &word = obj[i];
+			out << " " << word;
+		}
+	}
+	return out;
+}
+
 }
 

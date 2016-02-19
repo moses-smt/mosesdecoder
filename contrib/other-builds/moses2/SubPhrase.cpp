@@ -5,6 +5,7 @@
  *      Author: hieu
  */
 #include "SubPhrase.h"
+#include "PhraseImpl.h"
 
 using namespace std;
 
@@ -15,8 +16,10 @@ SubPhrase::SubPhrase(const PhraseImpl &origPhrase, size_t start, size_t end)
 ,m_start(start)
 ,m_end(end)
 {
-
 }
+
+const Word &SubPhrase::operator[](size_t pos) const
+{ return (*m_origPhrase)[pos + m_start]; }
 
 std::ostream& operator<<(std::ostream &out, const SubPhrase &obj)
 {
