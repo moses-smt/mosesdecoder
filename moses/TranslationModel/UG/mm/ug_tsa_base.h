@@ -15,7 +15,6 @@
 #include "ug_corpus_token.h"
 #include "ug_tsa_tree_iterator.h"
 #include "ug_tsa_array_entry.h"
-#include "ug_tsa_bitset_cache.h"
 #include "ug_typedefs.h"
 
 namespace sapt
@@ -51,9 +50,7 @@ namespace sapt
     /* an entry in the array, for iteration over all occurrences of a
      * particular sequence */
     // typedef boost::dynamic_bitset<uint64_t>           bitset;
-    typedef boost::shared_ptr<bitvector>         bitset_pointer;
     typedef TKN                                        Token;
-    typedef BitSetCache<TSA<TKN> >                     BSC_t;
     /* to allow caching of bit std::vectors that are expensive to create on
      * the fly */
 
@@ -86,8 +83,6 @@ namespace sapt
 
     id_type indexSize;
     // (number of entries +1) in the index of root-level nodes
-
-    size_t BitSetCachingThreshold;
 
     ////////////////////////////////////////////////////////////////
     // private member functions:
@@ -137,8 +132,6 @@ namespace sapt
     getUpperBound(id_type id) const = 0;
 
   public:
-    boost::shared_ptr<BSC_t> bsc;
-
     char const* arrayStart() const { return startArray; }
     char const* arrayEnd()   const { return endArray;   }
 
@@ -164,27 +157,9 @@ namespace sapt
     char const*
     upper_bound(TKN const* keyStart, int keyLength) const;
 
-
-    /** dump all suffixes in order to /out/ */
-    void dump(std::ostream& out, TokenIndex const& T) const;
-
-    /** fill the dynamic bit set with true for all sentences that contain
-     *  /phrase/.
-     *  @return the raw number of occurrences.
-     */
-    count_type
-    fillBitSet(std::vector<TKN> const& phrase, bdBitset& dest) const;
-
-    count_type
-    fillBitSet(TKN const* key, size_t keyLen, bdBitset& dest) const;
-
     count_type
     setBits(char const* startRange, char const* endRange,
             boost::dynamic_bitset<uint64_t>& bs) const;
-
-    void
-    setTokenBits(char const* startRange, char const* endRange, size_t len,
-                 bitvector& bs) const;
 
     /** read the sentence ID into /sid/
      *  @return position of associated offset.
@@ -216,14 +191,6 @@ namespace sapt
     char const*
     readOffset(char const* p, char const* q, ::uint64_t& offset) const = 0;
 
-    /** @return sentence count
-     */
-    count_type
-    sntCnt(char const* p, char const* const q) const;
-
-    count_type
-    rawCnt2(TKN const* keyStart, size_t keyLen) const;
-
     /** @return raw occurrence count
      *
      *  depending on the subclass, this is constant time (imTSA) or
@@ -244,69 +211,13 @@ namespace sapt
     getCounts(char const* p, char const* const q,
 	      count_type& sids, count_type& raw) const = 0;
 
-    std::string
-    suffixAt(char const* p, TokenIndex const* V=NULL, size_t maxlen=0)
-      const;
-
-    std::string
-    suffixAt(ArrayEntry const& I, TokenIndex const* V=NULL, size_t maxlen=0)
-      const;
-
     tsa::ArrayEntry& readEntry(char const* p, tsa::ArrayEntry& I) const;
-
-    /** return pointer to the end of the data block */
-    char const* dataEnd() const;
-
-    bool sanityCheck1() const;
-
-    /** Return an ID that represents a given phrase;
-        This should NEVER be 0!
-        Structure of a phrase ID:
-        leftmost 32 bits: sentence ID in the corpus
-        next 16 bits: offset from the start of the sentence
-        next 16 bits: length of the phrase
-    */
-    ::uint64_t
-    getSequenceId(typename std::vector<TKN>::const_iterator const& pstart,
-                  typename std::vector<TKN>::const_iterator const& pstop) const;
-
-    ::uint64_t
-    getSequenceId(TKN const* t, ushort plen) const;
-
-    /** Return the phrase represented by phrase ID pid_ */
-    std::string
-    getSequence(::uint64_t pid, TokenIndex const& V) const;
-
-    /** Return the phrase represented by phrase ID pid_ */
-    std::vector<TKN>
-    getSequence(::uint64_t pid) const;
-
-    TKN const*
-    getSequenceStart(::uint64_t) const;
-
-    ushort
-    getSequenceLength(::uint64_t) const;
 
     size_t
     getCorpusSize() const;
 
     Ttrack<TKN> const*
     getCorpus() const;
-
-    bitset_pointer
-    getBitSet(TKN const* startKey, size_t keyLen) const;
-
-    boost::shared_ptr<bitvector>
-    findTree(TKN const* treeStart, TKN const* treeEnd,
-             bitvector const* filter) const;
-
-    size_t markOccurrences(char const* lo, char const* up, size_t len,
-                           bitvector& bitset,
-                           bool markOnlyStartPosition) const;
-
-    bool
-    findBranches(TKN const* base, bitvector const& terminals,
-                 std::vector<tree_iterator>& dest) const;
 
     double aveIndexEntrySize() const
     {
@@ -328,58 +239,6 @@ namespace sapt
 
   };
 
-  // ======================================================================
-
-  // template<typename TOKEN>
-  // SPTR<TSA_tree_iterator<TOKEN> >
-  // TSA<TOKEN>::
-  // find(TOKEN const* start, size_t len) const
-  // {
-  //   typedef TSA_tree_iterator<TOKEN> iter;
-  //   SPTR<iter> ret(new iter(this));
-  //   size_t i = 0;
-  //   while (i < len && ret->extend(start[i])) ++i;
-  //   if (i < len) ret.reset();
-  //   return ret;
-  // }
-
-
-  // ---------------------------------------------------------------------------
-
-
-  /** fill the dynamic bitset with information as to which sentences
-   *  the phrase occurs in
-   * @return number of total occurrences of the phrase in the corpus
-   */
-  template<typename TKN>
-  count_type
-  TSA<TKN>::
-  fillBitSet(std::vector<TKN> const& key,
-             bitvector& bitset) const
-  {
-    if (!key.size()) return 0;
-    return fillBitset(&(key[0]),key.size(),bitset);
-  }
-
-  // ---------------------------------------------------------------------------
-
-  /** fill the dynamic bitset with information as to which sentences
-   *  the phrase occurs in
-   * @return number of total occurrences of the phrase in the corpus
-   */
-  template<typename TKN>
-  count_type
-  TSA<TKN>::
-  fillBitSet(TKN const* key, size_t keyLen,
-             bitvector& bitset) const
-  {
-    char const* lo = lower_bound(key,keyLen);
-    char const* up = upper_bound(key,keyLen);
-    bitset.resize(corpus->size());
-    bitset.reset();
-    return setBits(lo,up,bitset);
-  }
-
   // ---------------------------------------------------------------------------
 
   template<typename TKN>
@@ -400,48 +259,6 @@ namespace sapt
         wcount++;
       }
     return wcount;
-  }
-
-  // ---------------------------------------------------------------------------
-
-  template<typename TKN>
-  void
-  TSA<TKN>::
-  setTokenBits(char const* startRange, char const* endRange, size_t len,
-          bitvector& bs) const
-  {
-    ArrayEntry I;
-    I.next = startRange;
-    do {
-        readEntry(I.next,I);
-        Token const*    t = corpus->getToken(I);
-        Token const* stop = t->stop(*corpus,I.sid);
-        for (size_t i = 1; i < len; ++i)
-          {
-            assert(t != stop);
-            t = t->next();
-          }
-        assert(t != stop);
-        bs.set(t - corpus->sntStart(0));
-    } while (I.next != endRange);
-  }
-
-  // ---------------------------------------------------------------------------
-
-  template<typename TKN>
-  count_type
-  TSA<TKN>::
-  sntCnt(char const* p, char const* const q) const
-  {
-    id_type sid; uint16_t off;
-    bitvector check(corpus->size());
-    while (p < q)
-      {
-	p = readSid(p,q,sid);
-	p = readOffset(p,q,off);
-	check.set(sid);
-      }
-    return check.count();
   }
 
   //---------------------------------------------------------------------------
@@ -623,104 +440,6 @@ namespace sapt
   //---------------------------------------------------------------------------
 
   template<typename TKN>
-  count_type
-  TSA<TKN>::
-  rawCnt2(TKN const* keyStart, size_t keyLen) const
-  {
-    char const* lo = lower_bound(keyStart,keyLen);
-    char const* up = upper_bound(keyStart,keyLen);
-    // cerr << up-lo << std::endl;
-    return rawCnt(lo,up);
-  }
-
-  //---------------------------------------------------------------------------
-
-  template<typename TKN>
-  ::uint64_t
-  TSA<TKN>::
-  getSequenceId(typename std::vector<TKN>::const_iterator const& pstart,
-                typename std::vector<TKN>::const_iterator const& pstop) const
-  {
-    return getSequenceId(&(*pstart),pstop-pstart);
-  }
-
-  //---------------------------------------------------------------------------
-
-  template<typename TKN>
-  ::uint64_t
-  TSA<TKN>::
-  getSequenceId(TKN const* pstart, ushort plen) const
-  {
-    char const* p = lower_bound(pstart,plen);
-    if (!p) return 0; // not found!
-    ArrayEntry I;
-    readEntry(p,I);
-    ::uint64_t ret = I.sid;
-    ret <<= 16;
-    ret += I.offset;
-    ret <<= 16;
-    ret += plen;
-    return ret;
-  }
-
-  //---------------------------------------------------------------------------
-
-  template<typename TKN>
-  std::vector<TKN>
-  TSA<TKN>::
-  getSequence(::uint64_t pid) const
-  {
-    size_t   plen = pid % 65536;
-    size_t offset = (pid >> 16) % 65536;
-    TKN const* w = corpus->sntStart(pid >> 32)+offset;
-    std::vector<TKN> ret(plen);
-    for (size_t i = 0; i < plen; i++, w = w->next())
-      {
-        assert(w);
-        ret[i] = *w;
-      }
-    return ret;
-  }
-
-  template<typename TKN>
-  std::string
-  TSA<TKN>::
-  getSequence(::uint64_t pid, TokenIndex const& V) const
-  {
-    std::ostringstream buf;
-    TKN const* a = getSequenceStart(pid);
-    buf << V[a->id()];
-    size_t len = getSequenceLength(pid);
-    for (a = a->next(); --len>0; a = a->next())
-      buf << " " << V[a->id()];
-    return buf.str();
-  }
-
-
-  //---------------------------------------------------------------------------
-
-  template<typename TKN>
-  TKN const*
-  TSA<TKN>::
-  getSequenceStart(::uint64_t pid) const
-  {
-    size_t offset = (pid >> 16) % 65536;
-    return corpus->sntStart(pid >> 32)+offset;
-  }
-
-  //---------------------------------------------------------------------------
-
-  template<typename TKN>
-  ushort
-  TSA<TKN>::
-  getSequenceLength(::uint64_t pid) const
-  {
-    return (pid % 65536);
-  }
-
-  //---------------------------------------------------------------------------
-
-  template<typename TKN>
   size_t
   TSA<TKN>::
   getCorpusSize() const
@@ -754,72 +473,6 @@ namespace sapt
   };
 
   //---------------------------------------------------------------------------
-
-  /// find all instances of the tree described by [treeStart, treeEnd)
-  template<typename TKN>
-  typename TSA<TKN>::bitset_pointer
-  TSA<TKN>::
-  getBitSet(TKN const* startKey, size_t keyLen) const
-  {
-    bitset_pointer ret;
-    if (bsc != NULL)
-      ret =  bsc->get(startKey,keyLen);
-    else
-      {
-        ret.reset(new bitvector(corpus->size()));
-        fillBitSet(startKey,keyLen,*ret);
-      }
-    return ret;
-  }
-
-  //---------------------------------------------------------------------------
-
-  template<typename TKN>
-  size_t
-  TSA<TKN>::
-  markOccurrences(char const* lo, char const* up, size_t len,
-                  bitvector& bitset, bool markOnlyStartPosition) const
-  {
-    id_type sid;
-    ushort  off;
-    count_type wcount=0;
-    TKN const* crpStart = corpus->sntStart(0);
-    char const* p = lo;
-    while (p < up)
-      {
-        p = readSid(p,up,sid);
-        p = readOffset(p,up,off);
-        TKN const* t = corpus->sntStart(sid)+off;
-        if (markOnlyStartPosition)
-          bitset.set(t-crpStart);
-        else
-          for (size_t i = 0; i < len; ++i, t = t->next())
-            bitset.set(t-crpStart);
-        wcount++;
-      }
-    return wcount;
-  }
-#if 1
-  template<typename TKN>
-  bool
-  TSA<TKN>::
-  findBranches(TKN const* base, bitvector const& terminals,
-               std::vector<tree_iterator>& dest) const
-  {
-    dest.assign(terminals.count(),tree_iterator(this));
-    for (size_t i = terminals.find_first(), k = 0;
-         i < terminals.size();
-         i = terminals.find_next(i),++k)
-      {
-        for (TKN const* x = base+i; x && x->id(); x = x->next())
-          if (!dest[k].extend(x->id()))
-            return false;
-      }
-    typename tree_iterator::SortByApproximateCount sorter;
-    sort(dest.begin(),dest.end(),sorter);
-    return true;
-  }
-#endif
 
 }
 #endif

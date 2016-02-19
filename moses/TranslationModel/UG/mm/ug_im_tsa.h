@@ -158,7 +158,6 @@ namespace sapt
     this->startArray = NULL;
     this->endArray   = NULL;
     this->corpusSize = 0;
-    this->BitSetCachingThreshold=4096;
   };
 
   // build an array from all the tokens in the sentences in *c that are

@@ -101,7 +101,6 @@ namespace sapt
   {
     this->startArray   = NULL;
     this->endArray     = NULL;
-    this->BitSetCachingThreshold=4096;
   };
 
   // ======================================================================
@@ -120,7 +119,6 @@ namespace sapt
   mmTSA<TOKEN>::
   open(std::string fname, typename boost::shared_ptr<Ttrack<TOKEN> const> c)
   {
-    this->bsc.reset(new BitSetCache<TSA<TOKEN> >(this));
     if (access(fname.c_str(),F_OK))
       {
         std::ostringstream msg;

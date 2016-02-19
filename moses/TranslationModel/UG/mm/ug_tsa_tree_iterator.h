@@ -81,9 +81,6 @@ namespace sapt
     size_t size() const;
     // Token const& wid(int p) const;
     Token const* getToken(int p) const;
-    id_type getSid() const;
-    ushort getOffset(int p) const;
-    size_t sntCnt(int p=-1) const;
     size_t rawCnt(int p=-1) const;
     uint64_t getPid(int p=-1) const; // get phrase id
 
@@ -93,45 +90,14 @@ namespace sapt
     virtual bool over();
     virtual bool up();
 
-    std::string str(TokenIndex const* V=NULL, int start=0, int stop=0) const;
-
     // checks if the sentence [start,stop) contains the given sequence.
     bool match(Token const* start, Token const* stop) const;
     // checks if the sentence /sid/ contains the given sequence.
     bool match(id_type sid) const;
 
-    // fillBitSet: deprecated; use markSentences() instead
-    count_type
-    fillBitSet(boost::dynamic_bitset<uint64_t>& bitset) const;
-
-    count_type
-    markEndOfSequence(Token const*  start, Token const*  stop,
-		      boost::dynamic_bitset<uint64_t>& dest) const;
-    count_type
-    markSequence(Token const* start, Token const* stop, bitvector& dest) const;
-
+    // only used by bitext-find.cc
     count_type
     markSentences(boost::dynamic_bitset<uint64_t>& bitset) const;
-
-    count_type
-    markOccurrences(boost::dynamic_bitset<uint64_t>& bitset,
-		    bool markOnlyStartPosition=false) const;
-
-    count_type
-    markOccurrences(std::vector<ushort>& dest) const;
-
-    ::uint64_t
-    getSequenceId() const;
-
-    // equivalent but more efficient than
-    // bitvector tmp; markSentences(tmp); foo &= tmp;
-    bitvector& filterSentences(bitvector& foo) const;
-
-    /// a special auxiliary function for finding trees
-    void
-    tfAndRoot(bitvector const& ref, // reference root positions
-              bitvector const& snt, // relevant sentences
-              bitvector& dest) const;
 
     size_t arrayByteSpanSize(int p = -1) const
     {
@@ -140,17 +106,6 @@ namespace sapt
       assert(p >=0 && p < int(lower.size()));
       return lower.size() ? upper[p]-lower[p] : 0;
     }
-
-    struct SortByApproximateCount
-    {
-      bool operator()(TSA_tree_iterator const& a,
-                      TSA_tree_iterator const& b) const
-      {
-        if (a.size()==0) return b.size() ? true : false;
-        if (b.size()==0) return false;
-        return a.arrayByteSpanSize() < b.arrayByteSpanSize();
-      }
-    };
 
     double 
     ca(int p=-1) const // approximate occurrence count
@@ -188,9 +143,6 @@ namespace sapt
         x = cov.find_next(x);
       return this->size();
     }
-
-    SPTR<std::vector<typename ttrack::Position> >
-    randomSample(int level, size_t N) const;
 
   };
 
@@ -362,7 +314,6 @@ namespace sapt
 
   // ---------------------------------------------------------------------------
 
-#if 1
   template<typename Token>
   TSA_tree_iterator<Token>::
   TSA_tree_iterator(TSA<Token> const* s,
@@ -383,37 +334,6 @@ namespace sapt
 	  }
       }
   };
-#endif
-
-#if 0
-  // ---------------------------------------------------------------------------
-
-  template<typename Token>
-  TSA_tree_iterator<Token>::
-  TSA_tree_iterator(TSA_tree_iterator<Token> const& other)
-    : root(other.root)
-  {
-    lower = other.lower;
-    upper = other.upper;
-  };
-
-  // ---------------------------------------------------------------------------
-
-  template<typename Token>
-  TSA_tree_iterator<Token>::
-  TSA_tree_iterator(TSA<Token> const* s, Token const& t)
-    : root(s)
-  {
-    if (!root) return;
-    char const* up = root->getUpperBound(t.id());
-    if (!up) return;
-    lower.push_back(root->getLowerBound(t.id()));
-    upper.push_back(up);
-  };
-
-  // ---------------------------------------------------------------------------
-
-#endif
 
   template<typename Token>
   TSA_tree_iterator<Token>::
@@ -512,20 +432,6 @@ namespace sapt
   // ---------------------------------------------------------------------------
 
   template<typename Token>
-  id_type
-  TSA_tree_iterator<Token>::
-  getSid() const
-  {
-    char const* p = (lower.size() ? lower.back() : root->startArray);
-    char const* q = (upper.size() ? upper.back() : root->endArray);
-    id_type sid;
-    root->readSid(p,q,sid);
-    return sid;
-  }
-
-  // ---------------------------------------------------------------------------
-
-  template<typename Token>
   ::uint64_t
   TSA_tree_iterator<Token>::
   getPid(int p) const
@@ -597,36 +503,12 @@ namespace sapt
   template<typename Token>
   size_t
   TSA_tree_iterator<Token>::
-  sntCnt(int p) const
-  {
-    if (p < 0)
-      p = lower.size()+p;
-    assert(p>=0);
-    if (lower.size() == 0) return root->getCorpusSize();
-    return reinterpret_cast<TSA<Token> const* const>(root)->sntCnt(lower[p],upper[p]);
-  }
-
-  // ---------------------------------------------------------------------------
-
-  template<typename Token>
-  size_t
-  TSA_tree_iterator<Token>::
   rawCnt(int p) const
   {
     if (p < 0) p += lower.size();
     assert(p>=0);
     if (lower.size() == 0) return root->getCorpusSize();
     return root->rawCnt(lower[p],upper[p]);
-  }
-
-  //---------------------------------------------------------------------------
-
-  template<typename Token>
-  count_type
-  TSA_tree_iterator<Token>::
-  fillBitSet(boost::dynamic_bitset<uint64_t>& bitset) const
-  {
-    return markSentences(bitset);
   }
 
   //---------------------------------------------------------------------------
@@ -655,171 +537,6 @@ namespace sapt
       }
     return wcount;
   }
-
-  //---------------------------------------------------------------------------
-
-  template<typename Token>
-  count_type
-  TSA_tree_iterator<Token>::
-  markOccurrences(boost::dynamic_bitset<uint64_t>& bitset, bool markOnlyStartPosition) const
-  {
-    assert(root && root->corpus);
-    if (bitset.size() != root->corpus->numTokens())
-      bitset.resize(root->corpus->numTokens());
-    bitset.reset();
-    if (lower.size()==0) return 0;
-    char const* lo = lower.back();
-    char const* up = upper.back();
-    return root->markOccurrences(lo,up,lower.size(),bitset,markOnlyStartPosition);
-  }
-  //---------------------------------------------------------------------------
-
-  template<typename Token>
-  count_type
-  TSA_tree_iterator<Token>::
-  markOccurrences(std::vector<ushort>& dest) const
-  {
-    assert(root && root->corpus);
-    assert(dest.size() == root->corpus->numTokens());
-    if (lower.size()==0) return 0;
-    char const* lo = lower.back();
-    char const* up = upper.back();
-    char const* p = lo;
-    id_type sid;
-    ushort  off;
-    count_type wcount=0;
-    Token const* crpStart = root->corpus->sntStart(0);
-    while (p < up)
-      {
-        p = root->readSid(p,up,sid);
-        p = root->readOffset(p,up,off);
-        Token const* t = root->corpus->sntStart(sid)+off;
-        for (size_t i = 1; i < lower.size(); ++i, t = t->next());
-        dest[t-crpStart]++;
-        wcount++;
-      }
-    return wcount;
-  }
-  //---------------------------------------------------------------------------
-
-  // mark all endpoints of instances of the path represented by this
-  // iterator in the sentence [start,stop)
-  template<typename Token>
-  count_type
-  TSA_tree_iterator<Token>::
-  markEndOfSequence(Token const*  start, Token const*  stop,
-                    boost::dynamic_bitset<uint64_t>& dest) const
-  {
-    count_type matchCount=0;
-    Token const* a = getToken(0);
-    for (Token const* x = start; x < stop; ++x)
-      {
-        if (*x != *a) continue;
-        Token const* y = x;
-        Token const* b = a;
-        size_t i;
-        for (i = 0; *b==*y && ++i < this->size();)
-          {
-            b = b->next();
-            y = y->next();
-            if (y < start || y >= stop) break;
-          }
-        if (i == this->size())
-          {
-            dest.set(y-start);
-            ++matchCount;
-          }
-      }
-    return matchCount;
-  }
-  //---------------------------------------------------------------------------
-
-  // mark all occurrences of the sequence represented by this
-  // iterator in the sentence [start,stop)
-  template<typename Token>
-  count_type
-  TSA_tree_iterator<Token>::
-  markSequence(Token const*  start,
-               Token const*  stop,
-               bitvector& dest) const
-  {
-    count_type numMatches=0;
-    Token const* a = getToken(0);
-    for (Token const* x = start; x < stop; ++x)
-      {
-        if (*x != *a) continue;
-        Token const* y = x;
-        Token const* b = a;
-        size_t i;
-        for (i = 0; *b==*y && i++ < this->size();)
-          {
-            dest.set(y-start);
-            b = b->next();
-            y = y->next();
-            if (y < start || y >= stop) break;
-          }
-        if (i == this->size()) ++numMatches;
-      }
-    return numMatches;
-  }
-  //---------------------------------------------------------------------------
-
-  template<typename Token>
-  ::uint64_t
-  TSA_tree_iterator<Token>::
-  getSequenceId() const
-  {
-    if (this->size() == 0) return 0;
-    char const* p = this->lower_bound(-1);
-    typename Token::ArrayEntry I;
-    root->readEntry(p,I);
-    return (::uint64_t(I.sid)<<32)+(I.offset<<16)+this->size();
-  }
-
-  template<typename Token>
-  std::string
-  TSA_tree_iterator<Token>::
-  str(TokenIndex const* V, int start, int stop) const
-  {
-    if (this->size()==0) return "";
-    if (start < 0) start = this->size()+start;
-    if (stop <= 0) stop  = this->size()+stop;
-    assert(start>=0 && start < int(this->size()));
-    assert(stop > 0 && stop <= int(this->size()));
-    Token const* x = this->getToken(0);
-    std::ostringstream buf;
-    for (int i = start; i < stop; ++i, x = x->next())
-      {
-        assert(x);
-        buf << (i > start ? " " : "");
-        if (V) buf << (*V)[x->id()];
-        else   buf << x->id();
-      }
-    return buf.str();
-  }
-
-#if 0
-  template<typename Token>
-  string
-  TSA_tree_iterator<Token>::
-  str(Vocab const& V, int start, int stop) const
-  {
-    if (this->size()==0) return "";
-    if (start < 0) start = this->size()+start;
-    if (stop <= 0) stop  = this->size()+stop;
-    assert(start>=0 && start < int(this->size()));
-    assert(stop > 0 && stop <= int(this->size()));
-    Token const* x = this->getToken(0);
-    std::ostringstream buf;
-    for (int i = start; i < stop; ++i, x = x->next())
-      {
-        assert(x);
-        buf << (i > start ? " " : "");
-        buf << V[x->id()].str;
-      }
-    return buf.str();
-  }
-#endif
 
   /// @return true if the sentence [start,stop) contains the sequence
   template<typename Token>
@@ -853,90 +570,6 @@ namespace sapt
   match(id_type sid) const
   {
     return match(root->corpus->sntStart(sid),root->corpus->sntEnd(sid));
-  }
-
-  /// a special auxiliary function for finding trees
-  // @param sntcheck: number of roots in the respective sentence
-  // @param dest:     bitvector to keep track of the exact root location
-  template<typename Token>
-  void
-  TSA_tree_iterator<Token>::
-  tfAndRoot(bitvector const& ref, // reference root positions
-            bitvector const& snt, // relevant sentences
-            bitvector& dest) const
-  {
-    tsa::ArrayEntry I(lower.back());
-    Token const* crpStart = root->corpus->sntStart(0);
-    do
-      {
-        root->readEntry(I.next,I);
-        if (!snt.test(I.sid)) continue; // skip, no root there
-        // find my endpoint:
-        Token const* t = root->corpus->getToken(I)->next(lower.size()-1);
-        assert(t >= crpStart);
-        size_t p = t-crpStart;
-        if (ref.test(p)) // it's a valid root
-          dest.set(p);
-      } while (I.next != upper.back());
-  }
-
-  // @param bv: bitvector with bits set for selected sentences
-  // @return: reference to bv
-  template<typename Token>
-  bitvector&
-  TSA_tree_iterator<Token>::
-  filterSentences(bitvector& bv) const
-  {
-    float  aveSntLen    = root->corpus->numTokens()/root->corpus->size();
-    size_t ANDcost      = bv.size()/8; // cost of dest&=ref;
-    float  aveEntrySize = ((root->endArray-root->startArray)
-                           /root->corpus->numTokens());
-    if (arrayByteSpanSize()+ANDcost < aveEntrySize*aveSntLen*bv.count())
-      {
-        bitvector tmp(bv.size());
-        markSentences(tmp);
-        bv &= tmp;
-      }
-    else
-      {
-        for (size_t i = bv.find_first(); i < bv.size(); i = bv.find_next(i))
-          if (!match(i)) bv.reset(i);
-      }
-    return bv;
-  }
-
-  /// randomly select up to N occurrences of the sequence
-  template<typename Token>
-  SPTR<std::vector<typename ttrack::Position> >
-  TSA_tree_iterator<Token>::
-  randomSample(int level, size_t N) const
-  {
-    if (level < 0) level += lower.size();
-    assert(level >=0);
-
-    SPTR<std::vector<typename ttrack::Position> >
-      ret(new std::vector<typename ttrack::Position>(N));
-
-    size_t m=0; // number of samples selected so far
-    typename Token::ArrayEntry I(lower.at(level));
-
-    char const* stop = upper.at(level);
-    while (m < N && (I.next) < stop)
-      {
-        root->readEntry(I.next,I);
-
-        // t: expected number of remaining samples
-        const double t = (stop - I.pos)/root->aveIndexEntrySize();
-        const double r = util::rand_excl(t);
-        if (r < N-m)
-          {
-            ret->at(m).offset = I.offset;
-            ret->at(m++).sid  = I.sid;
-          }
-      }
-    ret->resize(m);
-
-    return ret;
   }
 
 } // end of namespace ugdiss
