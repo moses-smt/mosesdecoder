@@ -192,7 +192,7 @@ flip_coin(id_type const& sid, ushort const& offset, bias_t const* bias)
   // ... maybe: flip a coin
   size_t options_total  = std::max(m_stats->raw_cnt, m_ctr);
   size_t threshold = ((bias && m_bias_total > 0 && m_method != ranked_sampling)
-                      ? ((*bias)[sid]/m_bias_total * options_total * m_samples) // w/ bias
+                      ? round((*bias)[sid]/m_bias_total * options_total * m_samples) // w/ bias
                       : m_samples); // no bias
   return flip_coin(m_stats->raw_cnt, m_ctr, m_stats->good,threshold);
 }
@@ -298,6 +298,17 @@ perform_random_sampling()
     {
       m_root->readEntry(I.next,I);
       bool foo = flip_coin(I.sid, I.offset, m_bias.get());
+#if 0
+      size_t options_total  = std::max(m_stats->raw_cnt, m_ctr);
+      size_t threshold = ((m_bias && m_bias_total > 0 && m_method != ranked_sampling)
+                          ? round((*m_bias)[I.sid]/m_bias_total * options_total * m_samples) // w/ bias
+                          : m_samples); // no bias
+
+      std::cerr << "[" << m_ctr << "/ " << m_stats->raw_cnt << ": " << m_rnd_float << "] " 
+                << m_stats->good << " + " << m_random_size_t << " = " 
+                << m_stats->good + m_random_size_t << " | " << threshold << "; "
+                << I.sid << ":" << I.offset << " " << (foo ? "Y" : "N") << std::endl;
+#endif
       ++m_ctr;
       size_t maxevid = foo ? consider_sample(I) : 0;
     }
