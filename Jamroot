@@ -181,8 +181,11 @@ if [ option.get "with-oxlm" ] {
   requirements += <library>gomp ;
 }
 
+with-cmph = [ option.get "with-cmph" : : "yes" ] ;
 if [ option.get "with-cmph" : : "yes" ] {
   requirements += <define>HAVE_CMPH ;
+  cmph_version = [ _shell "$(with-cmph)/bin/cmph -V" ] ;
+  requirements += <define>CMPH_VERSION=\\\"$(cmph_version)\\\" ;
 }
 
 if [ option.get "with-icu" : : "yes" ]

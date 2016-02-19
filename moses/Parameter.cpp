@@ -471,8 +471,7 @@ void show_version()
             << major << "." << minor << "." << point << std::endl;
 #endif
 #ifdef HAVE_CMPH
-  // there's no easy way to determine the cmph version at compile time
-  std::cout << "       CMPH (version unknown)" << std::endl;
+  std::cout << "       CMPH  version " << CMPH_VERSION << std::endl;
 #endif
 }
 
