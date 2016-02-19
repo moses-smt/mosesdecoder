@@ -12,18 +12,23 @@
 #include "common/vocab.h"
 #include "common/states.h"
 
+
 using namespace mblas;
 
 NMT::NMT(const boost::shared_ptr<Weights> model,
          const boost::shared_ptr<Vocab> src,
          const boost::shared_ptr<Vocab> trg)
-  : w_(model), src_(src), trg_(trg),
+  : debug_(false), w_(model), src_(src), trg_(trg),
     encoder_(new Encoder(*w_)), decoder_(new Decoder(*w_)),
     states_(new States()), firstWord_(true)
   {
     for(size_t i = 0; i < trg_->size(); ++i)
       filteredId_.push_back(i);
   }
+  
+void NMT::PrintState(StateInfoPtr ptr) {
+  std::cerr << *ptr << std::endl;
+}
 
 size_t NMT::GetDevices(size_t maxDevices) {
   int num_gpus = 0;   // number of CUDA GPUs
@@ -43,6 +48,7 @@ void NMT::SetDevice() {
   cudaSetDevice(w_->GetDevice());
   CublasHandler::StaticHandle();
 }
+
 
 size_t NMT::GetDevice() {
   std::cerr << "Returning device " << w_->GetDevice() << std::endl;

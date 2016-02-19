@@ -25,6 +25,10 @@ class NMT {
     void SetDevice();
     size_t GetDevice();
   
+    void SetDebug(bool debug) {
+      debug_ = debug;
+    }
+  
     static boost::shared_ptr<Weights> NewModel(const std::string& path, size_t device = 0);
   
     static boost::shared_ptr<Vocab> NewVocab(const std::string& path);
@@ -32,6 +36,8 @@ class NMT {
     void CalcSourceContext(const std::vector<std::string>& s);
     
     StateInfoPtr EmptyState();
+    
+    void PrintState(StateInfoPtr);
     
     void FilterTargetVocab(const std::set<std::string>& filter);
     
@@ -46,6 +52,8 @@ class NMT {
     void ClearStates();
     
   private:
+    bool debug_;
+    
     const boost::shared_ptr<Weights> w_;
     const boost::shared_ptr<Vocab> src_;
     const boost::shared_ptr<Vocab> trg_;

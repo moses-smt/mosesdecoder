@@ -19,12 +19,29 @@ namespace Moses
 class NeuralScoreState : public FFState
 {
 public:
-  NeuralScoreState(StateInfoPtr state, const std::string& lastWord)
+  NeuralScoreState(StateInfoPtr state, const std::deque<std::string>& context,
+                   const std::vector<std::string>& lastWords)
   : m_state(state),
-    m_lastWord(lastWord) {
-    m_lastContext.push_back(m_lastWord);
+    m_lastWord(lastWords.back()),
+    m_lastContext(context) {
+    for(size_t i = 0; i  < lastWords.size(); ++i)
+      m_lastContext.push_back(lastWords[i]);
   }
 
+  NeuralScoreState(StateInfoPtr state)
+  : m_state(state),
+    m_lastWord("") {}
+
+  std::string ToString() const {
+    std::stringstream ss;
+    for(size_t i = 0; i < m_lastContext.size(); ++i) {
+      if(i != 0)
+        ss << " ";
+      ss << m_lastContext[i];
+    }
+    return ss.str();
+  }
+  
   int Compare(const FFState& other) const
   {
     const NeuralScoreState &otherState = static_cast<const NeuralScoreState&>(other);
@@ -43,8 +60,12 @@ public:
       m_lastContext.pop_front();
   }
 
-  std::string GetLastWord() const {
+  const std::string& GetLastWord() const {
     return m_lastWord;
+  }
+  
+  const std::deque<std::string>& GetContext() const {
+    return m_lastContext;
   }
   
   StateInfoPtr GetState() const {
@@ -89,7 +110,7 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
   
   m_nmt->CalcSourceContext(sourceSentence);
   
-  return new NeuralScoreState(m_nmt->EmptyState(), "");
+  return new NeuralScoreState(m_nmt->EmptyState());
 }
 
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
@@ -322,7 +343,8 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
     unks += payload.known_ ? 0 : 1;
     prob += payload.logProb_;
   }
-  NeuralScoreState* prevState = new NeuralScoreState(state, prefix.back());
+  NeuralScoreState* prevState = new NeuralScoreState(state, static_cast<const NeuralScoreState*>(prev_state)->GetContext(), phrase);
+  
   newScores[0] = prob;
   newScores[1] = unks;
 
@@ -337,7 +359,7 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
-  return new NeuralScoreState(StateInfoPtr(), "");
+  return new NeuralScoreState(StateInfoPtr());
 }
 
 void NeuralScoreFeature::SetParameter(const std::string& key, const std::string& value)

@@ -45,7 +45,7 @@ public:
   
   void InitializeForInput(ttasksptr const& ttask);
   void CleanUpAfterSentenceProcessing(ttasksptr const& ttask);
-  
+    
   void ProcessStack(Collector& collector, size_t index);
 
   void BatchProcess(

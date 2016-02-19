@@ -41,7 +41,7 @@ std::vector<std::string> NBest::GetTokens(const size_t index) const {
 std::vector<size_t> NBest::GetEncodedTokens(const size_t index) const {
   std::vector<std::string> tokens;
   Split(srcSentences_[index], tokens);
-  return srcVocab_->Encode(tokens);
+  return srcVocab_->Encode(tokens, true);
 }
 
 void NBest::Parse_(const std::string& path) {

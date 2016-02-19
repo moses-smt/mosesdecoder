@@ -32,7 +32,9 @@ int main(int argc, char** argv) {
   //std::string target = "wissen sie , ein intensives vergnügen reisen und die freuden der ethnographischen forschung ist die gelegenheit , unter denen zu leben , die alten möglichkeiten nicht vergessen , die noch ihre vergangenheit in den wind fühlen , berühren sie steine polierten durch regen , der bitteren geschmack aus pflanzen .";
   
   std::string source = "just to know that jaguar shamans still journey beyond the milky way , or the myths of the inuit elders still resonate with meaning , or that in the himalaya , the buddhists still pursue the breath of the dharma , is to really remember the central revelation of anthropology , and that is the idea that the world in which we live does not exist in some absolute sense , but is just one model of reality , the consequence of one particular set of adaptive choices that our lineage made , albeit successfully , many generations ago .";
-  std::string target = "nur um zu wissen , dass jaguar schamanen noch jenseits der milchstraße reise , oder die mythen der inuit elders noch mit sinn oder dröhnen im himalaya , die buddhisten immer noch den atem des dharma verfolgen , ist wirklich an die zentrale offenbarung der anthropologie , und das ist die idee , dass wir in der welt leben nicht existieren , sondern einen absoluten spüre der realität , nur ein modell aus der reihe von adaptiven entscheidungen , die man vor allem unserer abstammung , wenn auch erfolgreich , aus vielen generationen zurückliegt .";
+  //std::string target = "nur um zu wissen , dass jaguar schamanen noch jenseits der milchstraße reise , oder die mythen der inuit elders noch mit sinn oder dröhnen im himalaya , die buddhisten immer noch den atem des dharma verfolgen , ist wirklich an die zentrale offenbarung der anthropologie , und das ist die idee , dass wir in der welt leben nicht existieren , sondern einen absoluten spüre der realität , nur ein modell aus der reihe von adaptiven entscheidungen , die man vor allem unserer abstammung , wenn auch erfolgreich , aus vielen generationen zurückliegt .";
+
+  std::string target = "um zu wissen , dass nur noch über die jaguar journey milky schamanen oder die inuit der myths elders oder dröhnen noch die bedeutung der himalaya , die buddhisten nachgehe , der dharma durchatmen , die enthüllung mittelund wirklich erinnern , und das ist die anthropologie vorstellung , dass die welt , in der wir leben , nicht existieren , sondern einen absoluten sinn für die wirklichkeit , nur ein modell , das einen bestimmten folgerung auswahlmöglichkeiten , adaptive , wenn unsere abstammungslinie gewinnbringend , erzeugungen zurückliegt . ";
   
   std::cerr << "Loading model" << std::endl;
   Weights weights("/home/marcinj/Badania/best_nmt/search_model.npz", device);
@@ -62,55 +64,74 @@ int main(int argc, char** argv) {
                boost::token_compress_on);
     
   std::cerr << "Target: " << std::endl;
-  size_t bs = 1000;
+  size_t bs = 3000;
   std::vector<std::vector<size_t>> tWordsBatch(targetSplit.size());
   std::transform(targetSplit.begin(), targetSplit.end(), tWordsBatch.begin(),
                  [&](const std::string& w) { std::cerr << tvcb[w] << ", "; return Batch(bs, tvcb[w]); });
   tWordsBatch.push_back(Batch(bs, tvcb["</s>"]));
   std::cerr << tvcb["</s>"] << std::endl;
-  
-  
+
+
   mblas::Matrix SourceContext;
   encoder.GetContext(sWords, SourceContext);
-  
+
   mblas::Matrix PrevState;
   mblas::Matrix PrevEmbedding;
-  
+
   mblas::Matrix AlignedSourceContext;
   mblas::Matrix Probs;
-  
+
   mblas::Matrix State;
   mblas::Matrix Embedding;
-  
+
   std::cerr << "Testing" << std::endl;
   boost::timer::auto_cpu_timer timer;
   size_t batchSize = tWordsBatch[0].size();
+
+  States states;
   
   for(size_t i = 0; i < 1; ++i) {
-    decoder.EmptyState(PrevState, SourceContext, batchSize);      
+    decoder.EmptyState(PrevState, SourceContext, batchSize);
     decoder.EmptyEmbedding(PrevEmbedding, batchSize);
+
+    std::vector<StateInfoPtr> infos;
+    states.SaveStates(infos, PrevState);
     
     float sum = 0;
+    size_t c = 0;
     for(auto w : tWordsBatch) {
-      decoder.GetProbs(Probs, AlignedSourceContext,
-                       PrevState, PrevEmbedding, SourceContext);
       
-      for(size_t i = 0; i < 1; ++i) {
+      for(size_t i = 1; i < w.size(); ++i) {
+        w[i] = min(w[i] + i, 30000ul);
+      }
+      
+      mblas::Matrix PrevState1;
+      states.ConstructStates(PrevState1, infos);
+      
+      decoder.GetProbs(Probs, AlignedSourceContext,
+                       PrevState1, PrevEmbedding, SourceContext);
+
+      if(c < targetSplit.size())
+        std::cerr << targetSplit[c++] << " : ";
+      for(size_t i = 0; i < 10; ++i) {
         float p = Probs(i, w[i]);
         std:: cout << log(p) << " ";
-        if(i == 0) {  
+        if(i == 0) {
           sum += log(p);
         }
       }
-      std::cout << std::endl;
-      
+      std::cerr << std::endl;
+
       decoder.Lookup(Embedding, w);
       decoder.GetNextState(State, Embedding,
-                           PrevState, AlignedSourceContext);
-      
-      mblas::Swap(State, PrevState);
+                           PrevState1, AlignedSourceContext);
+
+      infos.clear();
+      states.SaveStates(infos, State);
+      //mblas::Swap(State, PrevState);
       mblas::Swap(Embedding, PrevEmbedding);
     }
+    std::cout << std::endl;
     std::cerr << sum << std::endl;
   }
 }

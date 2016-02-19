@@ -3,6 +3,8 @@
 #include <cmath>
 #include <boost/shared_ptr.hpp>
 #include <queue>
+#include <iostream>
+#include <sstream>
 #include "mblas/matrix.h"
 
 class States;
@@ -17,7 +19,9 @@ class StateInfo {
   size_t GetRowNo() {
     return rowNo_;
   }
-    
+  
+  friend std::ostream& operator<<(std::ostream& o, const StateInfo& s);
+  
   private:
     size_t rowNo_;
     States* states_;
@@ -57,6 +61,15 @@ class States {
       mblas::CopyRows(States_, In, rowPairs);
     }
       
+    std::string ToString(size_t rowNo) {
+      std::stringstream ss;
+      ss << rowNo << " : ";
+      for(size_t i = 0; i < 5; ++i) {
+        ss << States_(rowNo, i) << " ";
+      }
+      return ss.str();
+    }
+    
     void Clear() {
       std::priority_queue<size_t> empty;
       freeRows_.swap(empty);
@@ -82,3 +95,8 @@ class States {
 StateInfo::~StateInfo() {
   states_->Free(rowNo_);
 }
+
+std::ostream& operator<<(std::ostream& o, const StateInfo& s) {
+  return o << s.states_->ToString(s.rowNo_);
+}
+  

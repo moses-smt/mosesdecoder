@@ -23,6 +23,7 @@ namespace iterlib = boost;
 #else
 
 #define MAX_THREADS 512
+#define MAX_BLOCKS 65535
 
 #include <cublas_v2.h>   
 #include <thrust/device_vector.h>
@@ -320,18 +321,22 @@ typedef std::vector<RowPair> RowPairs;
 typedef thrust::device_vector<RowPair> DeviceRowPairs;
 
 __global__ void gCopyRows(float* out, const float* in, size_t cols,
-                          const RowPair* devPairs) {
-  int bid = blockIdx.x;
-  size_t dstId = devPairs[bid].first;
-  size_t srcId = devPairs[bid].second;
-  
-  float* rowOut = out + dstId * cols;
-  const float* rowIn = in + srcId * cols;
-  
-  for(int tid = 0; tid < cols; tid += blockDim.x) {
-    int i = tid + threadIdx.x;
-    if(i < cols)
-      rowOut[i] = rowIn[i];
+                          const RowPair* devPairs, size_t numPairs) {
+  for(int bid = 0; bid < numPairs; bid += gridDim.x) {
+    int j = bid + blockIdx.x;
+    if(j < numPairs) {
+      size_t dstId = devPairs[j].first;
+      size_t srcId = devPairs[j].second;
+      
+      float* rowOut = out + dstId * cols;
+      const float* rowIn = in + srcId * cols;
+      
+      for(int tid = 0; tid < cols; tid += blockDim.x) {
+        int i = tid + threadIdx.x;
+        if(i < cols)
+          rowOut[i] = rowIn[i];
+      }
+    }
   }
 }
 
@@ -343,7 +348,8 @@ Matrix& CopyRows(Matrix& Out,
   const float* d_in = In.data();
   
   int threads = std::min(MAX_THREADS, (int)In.Cols());
-  gCopyRows<<<numPairs, threads>>>(d_out, d_in, In.Cols(), devPairs);
+  int blocks = std::min(MAX_BLOCKS, (int)numPairs);;
+  gCopyRows<<<blocks, threads>>>(d_out, d_in, In.Cols(), devPairs, numPairs);
   return Out;
 }
 
@@ -408,7 +414,8 @@ Matrix& Prod(Matrix& C, const Matrix& A, const Matrix& B,
   return C;
 }
 
-__global__ void gSoftMax(float* softMaxP, int cols) {
+// How handle matrixes larger than number of blocks?
+__global__ void gSoftMax(float* softMaxP, size_t rows, size_t cols) {
   int bid = blockIdx.x;
   extern __shared__ float _share[];
   float* _sum = _share + blockDim.x;
@@ -439,10 +446,10 @@ __global__ void gSoftMax(float* softMaxP, int cols) {
 }
 
 Matrix& Softmax(Matrix& Out) {
-  int blocks = Out.Rows();
+  int blocks = std::min(MAX_BLOCKS, (int)Out.Rows());
   int threads = std::min(MAX_THREADS, (int)Out.Cols());
   int shared = sizeof(float) * threads * 2;
-  gSoftMax<<<blocks, threads, shared>>>(Out.data(), Out.Cols());
+  gSoftMax<<<blocks, threads, shared>>>(Out.data(), Out.Rows(), Out.Cols());
   cudaStreamSynchronize(0);
   return Out;
 }
@@ -450,18 +457,21 @@ Matrix& Softmax(Matrix& Out) {
 template <class Functor>
 __global__ void gBroadcast(Functor functor,
                            float* out, const float* in1, const float* in2,
-                           size_t rows1, size_t cols) {
-  int bid = blockIdx.x;
-  
-  float* rowOut = out + bid * cols;
-
-  const float* rowIn1 = in1 + (bid % rows1) * cols;
-  const float* rowIn2 = in2 + (bid / rows1) * cols;
-  
-  for(int tid = 0; tid < cols; tid += blockDim.x) {
-    int i = tid + threadIdx.x;
-    if(i < cols)
-      rowOut[i] = functor(rowIn1[i], rowIn2[i]);
+                           size_t rows, size_t rows1, size_t cols) {
+  for(int bid = 0; bid < rows; bid += gridDim.x) {
+    int j = bid + blockIdx.x;
+    if(j < rows) { 
+      float* rowOut = out + j * cols;
+    
+      const float* rowIn1 = in1 + (j % rows1) * cols;
+      const float* rowIn2 = in2 + (j / rows1) * cols;
+      
+      for(int tid = 0; tid < cols; tid += blockDim.x) {
+        int i = tid + threadIdx.x;
+        if(i < cols)
+          rowOut[i] = functor(rowIn1[i], rowIn2[i]);
+      }
+    }
   }
 }
 
@@ -480,38 +490,47 @@ Matrix& Broadcast(Functor functor, Matrix& Out, const Matrix& In) {
   const float* d_in2 = In.data();
   
   int threads = std::min(MAX_THREADS, (int)cols);
-  gBroadcast<<<rows, threads>>>(functor, d_out, d_in1, d_in2, rows1, cols);
+  int blocks  = std::min(MAX_BLOCKS, (int)rows);
+  gBroadcast<<<blocks, threads>>>(functor, d_out, d_in1, d_in2,
+                                  rows, rows1, cols);
   
   Swap(Out, Temp);
   return Out;
 }
 
 template <class Functor>
-__global__ void gElement(Functor functor, float* out, size_t cols) {
-  int bid = blockIdx.x;
-  
-  float* rowOut = out + bid * cols;
-  
-  for(int tid = 0; tid < cols; tid += blockDim.x) {
-    int i = tid + threadIdx.x;
-    if(i < cols) {
-      rowOut[i] = functor(rowOut[i]);;
+__global__ void gElement(Functor functor, float* out,
+                         size_t rows, size_t cols) {
+  for(int bid = 0; bid < rows; bid += gridDim.x) {
+    int j = bid + blockIdx.x;
+    if(j < rows) {
+      float* rowOut = out + j * cols;
+      for(int tid = 0; tid < cols; tid += blockDim.x) {
+        int i = tid + threadIdx.x;
+        if(i < cols) {
+          rowOut[i] = functor(rowOut[i]);;
+        }
+      }
     }
   }
 }
 
 template <class Functor>
 __global__ void gElement(Functor functor,
-                         float* out, const float* in, size_t cols) {
-  int bid = blockIdx.x;
-  
-  float* rowOut = out + bid * cols;
-  const float* rowIn = in + bid * cols;
-  
-  for(int tid = 0; tid < cols; tid += blockDim.x) {
-    int i = tid + threadIdx.x;
-    if(i < cols) {
-      rowOut[i] = functor(rowOut[i], rowIn[i]);;
+                         float* out, const float* in,
+                         size_t rows, size_t cols) {
+  for(int bid = 0; bid < rows; bid += gridDim.x) {
+    int j = bid + blockIdx.x;
+    if(j < rows) {
+      float* rowOut = out + j * cols;
+      const float* rowIn = in + j * cols;
+      
+      for(int tid = 0; tid < cols; tid += blockDim.x) {
+        int i = tid + threadIdx.x;
+        if(i < cols) {
+          rowOut[i] = functor(rowOut[i], rowIn[i]);;
+        }
+      }
     }
   }
 }
@@ -519,17 +538,20 @@ __global__ void gElement(Functor functor,
 template <class Functor>
 __global__ void gElement(Functor functor,
                          float* out, const float* in1, const float* in2,
-                         size_t cols) {
-  int bid = blockIdx.x;
-  
-  float* rowOut = out + bid * cols;
-  const float* rowIn1 = in1 + bid * cols;
-  const float* rowIn2 = in2 + bid * cols;
-  
-  for(int tid = 0; tid < cols; tid += blockDim.x) {
-    int i = tid + threadIdx.x;
-    if(i < cols) {
-      rowOut[i] = functor(rowOut[i], rowIn1[i], rowIn2[i]);
+                         size_t rows, size_t cols) {
+  for(int bid = 0; bid < rows; bid += gridDim.x) {
+    int j = bid + blockIdx.x;
+    if(j < rows) {
+      float* rowOut = out + j * cols;
+      const float* rowIn1 = in1 + j * cols;
+      const float* rowIn2 = in2 + j * cols;
+      
+      for(int tid = 0; tid < cols; tid += blockDim.x) {
+        int i = tid + threadIdx.x;
+        if(i < cols) {
+          rowOut[i] = functor(rowOut[i], rowIn1[i], rowIn2[i]);
+        }
+      }
     }
   }
 }
@@ -537,8 +559,9 @@ __global__ void gElement(Functor functor,
 template <class Functor>
 Matrix& Element(Functor functor, Matrix& Out) {
   float* d_out = Out.data();  
+  int blocks  = std::min(MAX_BLOCKS, (int)Out.Rows());
   int threads = std::min(MAX_THREADS, (int)Out.Cols());
-  gElement<<<Out.Rows(), threads>>>(functor, d_out, Out.Cols());
+  gElement<<<blocks, threads>>>(functor, d_out, Out.Rows(), Out.Cols());
   
   return Out;
 }
@@ -550,8 +573,9 @@ Matrix& Element(Functor functor,
   float* d_out = Out.data();
   const float* d_in = In.data();
   
+  int blocks  = std::min(MAX_BLOCKS, (int)Out.Rows());
   int threads = std::min(MAX_THREADS, (int)Out.Cols());
-  gElement<<<Out.Rows(), threads>>>(functor, d_out, d_in, Out.Cols());
+  gElement<<<blocks, threads>>>(functor, d_out, d_in, Out.Rows(), Out.Cols());
   
   return Out;
 }
@@ -564,22 +588,29 @@ Matrix& Element(Functor functor,
   const float* d_in1 = In1.data();
   const float* d_in2 = In2.data();
   
+  int blocks  = std::min(MAX_BLOCKS, (int)Out.Rows());
   int threads = std::min(MAX_THREADS, (int)Out.Cols());
-  gElement<<<Out.Rows(), threads>>>(functor, d_out, d_in1, d_in2, Out.Cols());
+  gElement<<<blocks, threads>>>(functor, d_out, d_in1, d_in2,
+                                Out.Rows(), Out.Cols());
   
   return Out;
 }
 
 template <class Functor>
 __global__ void gPairwiseReduce(Functor functor,
-                                float* out, const float* in, size_t cols) {
-  int bid = blockIdx.x;
-  const float* rowIn = in + bid * cols * 2;
-  float* rowOut = out + bid * cols;
-  for(int tid = 0; tid < cols; tid += blockDim.x) {
-    int i = tid + threadIdx.x;
-    if(i < cols) {
-      rowOut[i] = functor(rowIn[i * 2], rowIn[i * 2 + 1]);
+                                float* out, const float* in,
+                                size_t rows, size_t cols) {
+  for(int bid = 0; bid < rows; bid += gridDim.x) {
+    int j = bid + blockIdx.x;
+    if(j < rows) {
+      const float* rowIn = in + j * cols * 2;
+      float* rowOut = out + j * cols;
+      for(int tid = 0; tid < cols; tid += blockDim.x) {
+        int i = tid + threadIdx.x;
+        if(i < cols) {
+          rowOut[i] = functor(rowIn[i * 2], rowIn[i * 2 + 1]);
+        }
+      }
     }
   }
 }
@@ -590,8 +621,10 @@ Matrix& PairwiseReduce(Functor functor, Matrix& Out) {
   const float* d_in = Out.data();
   float* d_out = Temp.data();
   
+  int blocks  = std::min(MAX_BLOCKS, (int)Temp.Rows());
   int threads = std::min(MAX_THREADS, (int)Temp.Cols());
-  gPairwiseReduce<<<Temp.Rows(), threads>>>(functor, d_out, d_in, Temp.Cols());
+  gPairwiseReduce<<<blocks, threads>>>(functor, d_out, d_in,
+                                       Temp.Rows(), Temp.Cols());
   Swap(Out, Temp);
   return Out;
 }

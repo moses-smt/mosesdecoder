@@ -4,6 +4,7 @@ NMTCU = plugin/nmt.cu cnpy/cnpy.cpp
 NMT = plugin/nmt.cpp cnpy/cnpy.cpp
 SOURCESCU = test/test.cu cnpy/cnpy.cpp
 RESCORERCU = rescorer/rescorer_main.cu common/utils.cu rescorer/nbest.cu cnpy/cnpy.cpp
+RESCORER_HEADERS = rescorer/nbest.h
 SOURCES = test/test.cpp cnpy/cnpy.cpp
 HEADERS = common/decoder.h common/encoder.h common/model.h common/states.h common/npz_converter.h common/vocab.h mblas/matrix.h mblas/base_matrix.h
 
@@ -13,7 +14,7 @@ test_cuda: $(SOURCESCU) $(HEADERS)
 %.o : %.cu
 	nvcc -O3 -std=c++11 -c $^ -o $@
 
-rescorer_cuda: $(RESCORERCU) $(HEADERS)
+rescorer_cuda: $(RESCORERCU) $(HEADERS) $(RESCORER_HEADERS)
 	nvcc --use_fast_math -O3 -std=c++11 $(RESCORERCU) -Icommon -I. -lboost_system -lboost_timer -lboost_program_options -lcudart -lcublas -o $@
 
 clean:
