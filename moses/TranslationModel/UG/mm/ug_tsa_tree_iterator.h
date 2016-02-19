@@ -68,10 +68,6 @@ namespace sapt
 		      size_t const len,
 		      bool full_match_only=true);
     TSA_tree_iterator(TSA<Token> const* s,
-		      Token const* kstart,
-		      Token const* kend,
-		      bool full_match_only=true);
-    TSA_tree_iterator(TSA<Token> const* s,
     		      TokenIndex const& V,
      		      std::string const& key);
 
@@ -346,24 +342,6 @@ namespace sapt
     for (; i < len && kstart && extend(*kstart); ++i)
       kstart = kstart->next();
     if (full_match_only && i != len)
-      {
-        lower.clear();
-        upper.clear();
-      }
-  };
-
-  // DEPRECATED: DO NOT USE. Use the one that takes the length
-  // instead of kend.
-  template<typename Token>
-  TSA_tree_iterator<Token>::
-  TSA_tree_iterator(TSA<Token> const* s, Token const* kstart,
-		    Token const* kend, bool full_match_only)
-    : root(s)
-  {
-    for (;kstart != kend; kstart = kstart->next())
-      if (!extend(*kstart))
-        break;
-    if (full_match_only && kstart != kend)
       {
         lower.clear();
         upper.clear();
