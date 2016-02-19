@@ -51,12 +51,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "hypergraph.pb.h"
 #endif
 
-#ifdef PT_UG
-#include <boost/foreach.hpp>
-#include "moses/TranslationModel/UG/mmsapt.h"
-#include "moses/TranslationModel/UG/generic/program_options/ug_splice_arglist.h"
-#endif
-
 using namespace std;
 using namespace Moses;
 
