@@ -64,8 +64,8 @@ private:
 template <class Model> class ReloadingLanguageModel : public LanguageModelKen<Model>
 {
 public:
-
-  ReloadingLanguageModel(const std::string &line, const std::string &file, FactorType factorType, bool lazy) : LanguageModelKen<Model>(line, file, factorType, lazy), m_file(file), m_lazy(lazy) {
+  // TODO(Lane) copy less code, update to load_method
+  ReloadingLanguageModel(const std::string &line, const std::string &file, FactorType factorType, bool lazy) : LanguageModelKen<Model>(line, file, factorType, lazy ? util::LAZY : util::POPULATE_OR_READ), m_file(file), m_lazy(lazy) {
 
     std::cerr << "ReloadingLM constructor: " << m_file << std::endl;
     //    std::cerr << std::string(line).replace(0,11,"KENLM") << std::endl;
@@ -74,7 +74,8 @@ public:
 
   virtual void InitializeForInput(ttasksptr const& ttask) {
     std::cerr << "ReloadingLM InitializeForInput" << std::endl;
-    LanguageModelKen<Model>::LoadModel(m_file, m_lazy);
+    // TODO(lane): load_method
+    LanguageModelKen<Model>::LoadModel(m_file, m_lazy ? util::LAZY : util::POPULATE_OR_READ);
     /*
     lm::ngram::Config config;
     if(this->m_verbosity >= 1) {
