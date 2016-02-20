@@ -23,7 +23,7 @@ namespace NSCubePruningCardinalStack
 ///////////////////////////////////////////////////////////////
 Stack::Stack(const Manager &mgr)
 :m_mgr(mgr)
-,m_coll(MemPoolAllocator<const Hypothesis*>(mgr.GetPool()))
+,m_coll()
 {
 }
 

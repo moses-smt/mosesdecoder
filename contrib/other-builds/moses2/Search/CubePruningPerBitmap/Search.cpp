@@ -27,12 +27,11 @@ namespace NSCubePruningPerBitmap
 Search::Search(Manager &mgr)
 :Moses2::Search(mgr)
 ,m_stacks(mgr)
-,m_cubeEdgeAlloc(mgr.GetPool())
 
 ,m_queue(QueueItemOrderer(),
-		std::vector<QueueItem*, MemPoolAllocator<QueueItem*> >(MemPoolAllocator<QueueItem*>(mgr.GetPool())) )
+		std::vector<QueueItem*>() )
 
-,m_seenPositions(MemPoolAllocator<CubeEdge::SeenPositionItem>(mgr.GetPool()))
+,m_seenPositions()
 {
 }
 
@@ -104,7 +103,7 @@ void Search::Decode(const vector<NSCubePruningMiniStack::MiniStack*> &miniStacks
 	Recycler<Hypothesis*> &hypoRecycler  = mgr.GetHypoRecycle();
 
 	// reuse queue from previous stack. Clear it first
-	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > &container = Container(m_queue);
+	std::vector<QueueItem*> &container = Container(m_queue);
 	//cerr << "container=" << container.size() << endl;
 	BOOST_FOREACH(QueueItem *item, container) {
 		// recycle unused hypos from queue
@@ -221,7 +220,7 @@ void Search::CreateSearchGraph(size_t stackInd)
 				CubeEdges *edges;
 				boost::unordered_map<NSCubePruningMiniStack::MiniStack*, CubeEdges*>::iterator iter = m_cubeEdges.find(&nextMiniStack);
 				if (iter == m_cubeEdges.end()) {
-					edges = new (pool.Allocate<CubeEdges>()) CubeEdges(m_cubeEdgeAlloc);
+					edges = new (pool.Allocate<CubeEdges>()) CubeEdges();
 					m_cubeEdges[&nextMiniStack] = edges;
 				}
 				else {

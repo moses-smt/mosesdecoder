@@ -20,7 +20,7 @@ namespace Moses2
 namespace NSCubePruningBitmapStack
 {
 MiniStack::MiniStack(const Manager &mgr)
-:m_coll(MemPoolAllocator<const Hypothesis*>(mgr.GetPool()))
+:m_coll()
 ,m_sortedHypos(NULL)
 {}
 
@@ -123,8 +123,8 @@ void MiniStack::Clear()
 ///////////////////////////////////////////////////////////////
 Stack::Stack(const Manager &mgr)
 :m_mgr(mgr)
-,m_coll(MemPoolAllocator< std::pair<HypoCoverageInternal, MiniStack*> >(mgr.GetPool()))
-,m_miniStackRecycler(MemPoolAllocator<MiniStack*>(mgr.GetPool()))
+,m_coll()
+,m_miniStackRecycler()
 {
 }
 

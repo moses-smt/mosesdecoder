@@ -28,12 +28,10 @@ namespace NSCubePruningBitmapStack
 Search::Search(Manager &mgr)
 :Moses2::Search(mgr)
 ,m_stack(mgr)
-,m_cubeEdgeAlloc(mgr.GetPool())
 
-,m_queue(QueueItemOrderer(),
-		std::vector<QueueItem*, MemPoolAllocator<QueueItem*> >(MemPoolAllocator<QueueItem*>(mgr.GetPool())) )
+,m_queue(QueueItemOrderer(), std::vector<QueueItem*>() )
 
-,m_seenPositions(MemPoolAllocator<CubeEdge::SeenPositionItem>(mgr.GetPool()))
+,m_seenPositions()
 {
 }
 
@@ -46,7 +44,7 @@ void Search::Decode()
 	// init cue edges
 	m_cubeEdges.resize(mgr.GetInput().GetSize() + 1);
 	for (size_t i = 0; i < m_cubeEdges.size(); ++i) {
-		m_cubeEdges[i] = new (mgr.GetPool().Allocate<CubeEdges>()) CubeEdges(m_cubeEdgeAlloc);
+		m_cubeEdges[i] = new (mgr.GetPool().Allocate<CubeEdges>()) CubeEdges();
 	}
 
 	const Bitmap &initBitmap = mgr.GetBitmaps().GetInitialBitmap();
@@ -74,7 +72,7 @@ void Search::Decode(size_t stackInd)
 	Recycler<Hypothesis*> &hypoRecycler  = mgr.GetHypoRecycle();
 
 	// reuse queue from previous stack. Clear it first
-	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > &container = Container(m_queue);
+	std::vector<QueueItem*> &container = Container(m_queue);
 	//cerr << "container=" << container.size() << endl;
 	BOOST_FOREACH(QueueItem *item, container) {
 		// recycle unused hypos from queue
