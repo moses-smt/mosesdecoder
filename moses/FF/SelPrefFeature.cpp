@@ -33,6 +33,7 @@ SelPrefFeature::SelPrefFeature(const std::string &line)
 	, m_MIModelFilePrep("")
 	, m_lemmaFile("")
 	, m_w2cFile("")
+	, m_counter(true)
 	, m_WBmodelMain(nullptr)
 	, m_MIModelMain(nullptr)
 	, m_WBmodelPrep(nullptr)
@@ -76,6 +77,9 @@ void SelPrefFeature::SetParameter(const std::string& key, const std::string& val
 		m_MIModelFilePrep = value;
 	} else if(key=="modelFileARPAPrep"){
 		m_modelFileARPAPrep = value;
+	} else if(key == "counter"){
+		if(value == "false")
+			m_counter = false;
 	}
 
 /*	else{
@@ -664,7 +668,9 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 		//if(*tree == "[sent [root [VB] [^root [dobj] [^root [prep [IN in]] [^root [prep] [punct [. .]]]]]]]")
 		//	exit(0);
 
-		vector<float> scores = {tuplesCounter};
+		vector<float> scores = {};
+		if(m_counter == true)
+			scores.push_back(tuplesCounter);
 		if(m_MIModelFile != "")
 			scores.push_back(scoreMI);
 		if(m_modelFileARPA != "")

@@ -115,6 +115,8 @@ protected:
   std::string m_lemmaFile;
   std::string m_w2cFile;
 
+  bool m_counter;
+
   // Pointer to the dependency language model
   std::shared_ptr<lm::ngram::Model> m_WBmodelMain;
   std::shared_ptr<lm::ngram::Model> m_WBmodelPrep;
