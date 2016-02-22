@@ -136,7 +136,7 @@ void SelPrefFeature::ReadMIModel(string MIModelFile, shared_ptr<map<vector<strin
 			// rel head dep
 			vector<string> subcat = {tokens[0], tokens[1], tokens[2]};
 			scores.push_back(std::atof(tokens[3].c_str()));
-			scores.push_back(std::atof(tokens[4].c_str()));
+			//scores.push_back(std::atof(tokens[4].c_str()));
 			MIModel->insert(pair<vector<string>, vector<float>> (subcat,scores));
 			tokens.clear();
 			scores.clear();
