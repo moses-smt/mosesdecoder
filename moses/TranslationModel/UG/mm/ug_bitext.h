@@ -513,6 +513,11 @@ namespace sapt
     SPTR<DocumentBias> ret;
     UTIL_THROW_IF2(m_sid2docid == NULL,
                    "Document bias requested but no document map loaded.");
+
+    if (m_docname2docid.size() == 1) 
+      // a document bias make no sense if this corpus is single-doc
+      return ret;
+
     ret.reset(new DocumentBias(*m_sid2docid, m_docname2docid,
                                bserver, text, log));
     return ret;
@@ -527,6 +532,11 @@ namespace sapt
     SPTR<DocumentBias> ret;
     UTIL_THROW_IF2(m_sid2docid == NULL,
                    "Document bias requested but no document map loaded.");
+
+    if (m_docname2docid.size() == 1) 
+      // a document bias make no sense if this corpus is single-doc
+      return ret;
+    
     ret.reset(new DocumentBias(*m_sid2docid, m_docname2docid,
                                context_weights, log));
     return ret;
