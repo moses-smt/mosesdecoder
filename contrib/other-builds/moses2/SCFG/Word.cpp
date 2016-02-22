@@ -11,7 +11,7 @@ using namespace std;
 
 namespace Moses2
 {
-namespace Syntax
+namespace SCFG
 {
 
 }

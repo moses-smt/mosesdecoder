@@ -27,6 +27,11 @@ class TargetPhrase;
 class TargetPhrases;
 class Scores;
 
+	namespace SCFG
+	{
+		class TargetPhrase;
+	}
+
 class FeatureFunctions {
 public:
     std::vector<const PhraseTable*> m_phraseTables;
@@ -52,10 +57,13 @@ public:
     const FeatureFunction *FindFeatureFunction(const std::string &name) const;
     const PhraseTable *GetPhraseTablesExcludeUnknownWordPenalty(size_t ptInd);
 
-    // the pool here must be the system pool if the rule was loaded during load, or the mgr if it was loaded on demand
+    // the pool here must be the system pool if the rule was loaded during load, or the mgr pool if it was loaded on demand
     void EvaluateInIsolation(MemPool &pool, const System &system,
 			  const Phrase &source, TargetPhrase &targetPhrase) const;
     void EvaluateAfterTablePruning(MemPool &pool, const TargetPhrases &tps, const Phrase &sourcePhrase) const;
+
+    void EvaluateInIsolation(MemPool &pool, const System &system,
+			  const Phrase &source, SCFG::TargetPhrase &targetPhrase) const;
 
 protected:
 	  std::vector<const FeatureFunction*> m_featureFunctions;

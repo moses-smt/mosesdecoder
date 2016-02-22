@@ -24,6 +24,7 @@
 #include "../LM/LanguageModel.h"
 //#include "../LM/LanguageModelDALM.h"
 #include "../LM/KENLM.h"
+#include "../SCFG/TargetPhrase.h"
 #include "util/exception.hh"
 
 using namespace std;
@@ -194,6 +195,20 @@ void FeatureFunctions::EvaluateAfterTablePruning(MemPool &pool, const TargetPhra
 	  ff->EvaluateAfterTablePruning(pool, tps, sourcePhrase);
   }
 
+}
+
+void
+FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
+		  const Phrase &source, SCFG::TargetPhrase &targetPhrase) const
+{
+  SCORE estimatedScore = 0;
+
+  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
+	  Scores& scores = targetPhrase.GetScores();
+	  ff->EvaluateInIsolation(pool, system, source, targetPhrase, scores, &estimatedScore);
+  }
+
+  //targetPhrase.SetEstimatedScore(estimatedScore);
 }
 
 }

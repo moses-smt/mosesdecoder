@@ -91,10 +91,11 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
     legacy/CompactPT/MurmurHash3.cpp
     legacy/CompactPT/ThrowingFwrite.cpp
 
-    Syntax/TargetPhrase.cpp
-    Syntax/Word.cpp
+    SCFG/PhraseImpl.cpp
+    SCFG/TargetPhrase.cpp
+    SCFG/Word.cpp
 
-    Syntax/TranslationModel/PhraseTableMemory.cpp
+    SCFG/TranslationModel/PhraseTableMemory.cpp
 
     deps ;
 

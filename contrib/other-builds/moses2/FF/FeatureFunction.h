@@ -24,6 +24,11 @@ class Scores;
 class Manager;
 class MemPool;
 
+	namespace SCFG
+	{
+		class TargetPhrase;
+	}
+
 class FeatureFunction {
 public:
 
@@ -52,6 +57,12 @@ public:
 			  const Phrase &source, const TargetPhrase &targetPhrase,
 	          Scores &scores,
 	          SCORE *estimatedScore) const = 0;
+
+	  virtual void
+	  EvaluateInIsolation(MemPool &pool, const System &system,
+			  const Phrase &source, const SCFG::TargetPhrase &targetPhrase,
+	          Scores &scores,
+	          SCORE *estimatedScore) const {}
 
 	  virtual void
 	  EvaluateAfterTablePruning(MemPool &pool, const TargetPhrases &tps, const Phrase &sourcePhrase) const

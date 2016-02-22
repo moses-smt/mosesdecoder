@@ -10,7 +10,7 @@
 
 namespace Moses2
 {
-namespace Syntax
+namespace SCFG
 {
 
 class PhraseTableMemory : public Moses2::PhraseTableMemory

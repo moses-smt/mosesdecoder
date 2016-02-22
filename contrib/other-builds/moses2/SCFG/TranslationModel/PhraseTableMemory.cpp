@@ -17,7 +17,7 @@ using namespace std;
 
 namespace Moses2
 {
-namespace Syntax
+namespace SCFG
 {
 
 void PhraseTableMemory::Load(System &system)
@@ -53,7 +53,7 @@ void PhraseTableMemory::Load(System &system)
 		}
 
 		system.featureFunctions.EvaluateInIsolation(systemPool, system, *source, *target);
-		m_root.AddRule(*source, target);
+		//m_root.AddRule(*source, target);
 	}
 	m_root.SortAndPrune(m_tableLimit, systemPool, system);
 }

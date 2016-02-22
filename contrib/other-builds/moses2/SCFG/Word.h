@@ -11,7 +11,7 @@
 
 namespace Moses2
 {
-namespace Syntax
+namespace SCFG
 {
 
 class Word : public Moses2::Word
