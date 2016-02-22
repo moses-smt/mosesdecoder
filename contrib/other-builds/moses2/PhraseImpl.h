@@ -9,47 +9,36 @@ namespace Moses2
 {
 class SubPhrase;
 
-class PhraseImpl : public Phrase
+template<typename WORD>
+class PhraseImplTemplate : public Phrase
 {
 public:
-  static PhraseImpl *CreateFromString(MemPool &pool, FactorCollection &vocab, const System &system, const std::string &str)
-  {
-	std::vector<std::string> toks = Moses2::Tokenize(str);
-	size_t size = toks.size();
-	PhraseImpl *ret;
-
-	ret = new (pool.Allocate<PhraseImpl>()) PhraseImpl(pool, size);
-
-	ret->CreateFromString(vocab, system, toks);
-	return ret;
-  }
-
-  PhraseImpl(MemPool &pool, size_t size)
+  PhraseImplTemplate(MemPool &pool, size_t size)
   :m_size(size)
   {
-    m_words = new (pool.Allocate<Word>(size)) Word[size];
+    m_words = new (pool.Allocate<WORD>(size)) WORD[size];
 
   }
 
-  PhraseImpl(MemPool &pool, const PhraseImpl &copy)
+  PhraseImplTemplate(MemPool &pool, const PhraseImplTemplate &copy)
   :m_size(copy.GetSize())
   {
-    m_words = new (pool.Allocate<Word>(m_size)) Word[m_size];
+    m_words = new (pool.Allocate<WORD>(m_size)) WORD[m_size];
   	for (size_t i = 0; i < m_size; ++i) {
-  		const Word &word = copy[i];
+  		const WORD &word = copy[i];
   		(*this)[i] = word;
   	}
   }
 
 
-  virtual ~PhraseImpl()
+  virtual ~PhraseImplTemplate()
   {}
 
-  const Word& operator[](size_t pos) const {
+  const WORD& operator[](size_t pos) const {
 	return m_words[pos];
   }
 
-  Word& operator[](size_t pos) {
+  WORD& operator[](size_t pos) {
 	return m_words[pos];
   }
 
@@ -62,25 +51,37 @@ public:
 	return ret;
   }
 
-  void Prefetch() const
-  {
-		for (size_t i = 0; i < m_size; ++i) {
-			const Word &word = m_words[i];
-			const Factor *factor = word[0];
-			 __builtin_prefetch(factor);
-		}
-  }
 protected:
   size_t m_size;
-  Word *m_words;
+  WORD *m_words;
 
-  void CreateFromString(FactorCollection &vocab, const System &system, const std::vector<std::string> &toks)
+  virtual void CreateFromString(FactorCollection &vocab, const System &system, const std::vector<std::string> &toks)
   {
 	for (size_t i = 0; i < m_size; ++i) {
-		Word &word = (*this)[i];
+		WORD &word = (*this)[i];
 		word.CreateFromString(vocab, system, toks[i]);
 	}
   }
+};
+
+class PhraseImpl : public PhraseImplTemplate<Word>
+{
+public:
+  static PhraseImpl *CreateFromString(MemPool &pool, FactorCollection &vocab, const System &system, const std::string &str)
+  {
+	std::vector<std::string> toks = Moses2::Tokenize(str);
+	size_t size = toks.size();
+	PhraseImpl *ret;
+
+	ret = new (pool.Allocate<PhraseImpl>()) PhraseImpl(pool, size);
+
+	ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks);
+	return ret;
+  }
+
+  PhraseImpl(MemPool &pool, size_t size)
+  :PhraseImplTemplate(pool, size)
+  {}
 
 };
 

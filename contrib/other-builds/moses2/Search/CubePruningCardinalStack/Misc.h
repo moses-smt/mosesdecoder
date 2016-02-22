@@ -101,8 +101,6 @@ public:
 		  SeenPositions &seenPositions,
 		  std::deque<QueueItem*> &queueItemRecycler);
 
-  void Prefetch(Manager &mgr, const QueueItem *item, Queue &queue, SeenPositions &seenPositions);
-
 protected:
 
 };

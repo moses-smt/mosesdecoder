@@ -154,36 +154,6 @@ void CubeEdge::CreateNext(Manager &mgr,
 	}
 }
 
-void CubeEdge::Prefetch(Manager &mgr, const QueueItem *item, Queue &queue, SeenPositions &seenPositions)
-{
-    size_t hypoIndex = item->hypoIndex + 1;
-	if (hypoIndex < hypos.size() && !SetSeenPosition(hypoIndex, item->tpIndex, seenPositions)) {
-		const Hypothesis *hypo = hypos[hypoIndex];
-		 __builtin_prefetch(hypo);
-
-		const TargetPhrase &hypoTP = hypo->GetTargetPhrase();
-		hypoTP.Prefetch();
-
-		const TargetPhrase &tp = tps[item->tpIndex];
-		tp.Prefetch();
-
-	}
-
-	size_t tpIndex = item->tpIndex + 1;
-	if (tpIndex < tps.GetSize() && !SetSeenPosition(item->hypoIndex, tpIndex, seenPositions)) {
-		const Hypothesis *hypo = hypos[item->hypoIndex];
-		 __builtin_prefetch(hypo);
-
-		const TargetPhrase &hypoTP = hypo->GetTargetPhrase();
-		hypoTP.Prefetch();
-
-		const TargetPhrase &tp = tps[tpIndex];
-		tp.Prefetch();
-
-
-	}
-}
-
 }
 
 }

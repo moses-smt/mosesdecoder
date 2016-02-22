@@ -3,7 +3,6 @@
 
 namespace Moses2
 {
-class PhraseImpl;
 
 class SubPhrase : public Phrase
 {

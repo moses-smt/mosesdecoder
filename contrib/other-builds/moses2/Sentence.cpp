@@ -39,7 +39,7 @@ Sentence *Sentence::CreateFromString(MemPool &pool,
 
 	ret = new (pool.Allocate<Sentence>()) Sentence(translationId, pool, size);
 
-	ret->PhraseImpl::CreateFromString(vocab, system, toks);
+	ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks);
 
 
 	return ret;
