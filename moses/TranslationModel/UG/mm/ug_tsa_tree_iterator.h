@@ -1,5 +1,12 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2007 - 2010 Ulrich Germann. All rights reserved.
+
+// Lots of functionality was removed by David Madl 
+// with commit fa0312f45a7559740fc04d692b8f0eda456e5ee1 
+// Check the respective githup commit diff or copy from commit 
+// b32d7754cdf3a2090e3685dc3a0851d343891a70
+// if you need the functions back.
+
 #ifndef __ug_tsa_tree_iterator_h
 #define __ug_tsa_tree_iterator_h
 
@@ -85,6 +92,8 @@ namespace sapt
     virtual bool down();
     virtual bool over();
     virtual bool up();
+
+    std::string str(TokenIndex const* V=NULL, int start=0, int stop=0) const;
 
     // checks if the sentence [start,stop) contains the given sequence.
     bool match(Token const* start, Token const* stop) const;
@@ -275,6 +284,27 @@ namespace sapt
       return false;
   }
 
+  template<typename Token>
+  std::string
+  TSA_tree_iterator<Token>::
+  str(TokenIndex const* V, int start, int stop) const
+  {
+    if (this->size()==0) return "";
+    if (start < 0) start = this->size()+start;
+    if (stop <= 0) stop  = this->size()+stop;
+    assert(start>=0 && start < int(this->size()));
+    assert(stop > 0 && stop <= int(this->size()));
+    Token const* x = this->getToken(0);
+    std::ostringstream buf;
+    for (int i = start; i < stop; ++i, x = x->next())
+      {
+        assert(x);
+        buf << (i > start ? " " : "");
+        if (V) buf << (*V)[x->id()];
+        else   buf << x->id();
+      }
+    return buf.str();
+  }
 
   // ---------------------------------------------------------------------------
   // CONSTRUCTORS
