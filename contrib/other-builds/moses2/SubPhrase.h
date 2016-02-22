@@ -9,7 +9,7 @@ class SubPhrase : public Phrase
 {
   friend std::ostream& operator<<(std::ostream &, const SubPhrase &);
 public:
-  SubPhrase(const PhraseImpl &origPhrase, size_t start, size_t end);
+  SubPhrase(const Phrase &origPhrase, size_t start, size_t end);
   virtual const Word& operator[](size_t pos) const;
 
   virtual size_t GetSize() const
@@ -18,7 +18,7 @@ public:
   SubPhrase GetSubPhrase(size_t start, size_t end) const;
 
 protected:
-  const PhraseImpl *m_origPhrase;
+  const Phrase *m_origPhrase;
   size_t m_start, m_end;
 };
 

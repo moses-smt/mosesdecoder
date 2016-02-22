@@ -11,7 +11,7 @@ using namespace std;
 
 namespace Moses2
 {
-SubPhrase::SubPhrase(const PhraseImpl &origPhrase, size_t start, size_t end)
+SubPhrase::SubPhrase(const Phrase &origPhrase, size_t start, size_t end)
 :m_origPhrase(&origPhrase)
 ,m_start(start)
 ,m_end(end)
