@@ -442,7 +442,7 @@ BitextSampler(SPTR<Bitext<Token> const> const& bitext,
   , m_rnd(0)
 {
   m_stats.reset(new pstats);
-  m_stats->raw_cnt = phrase.rawCnt(); // phrase.ca();
+  m_stats->raw_cnt = phrase.ca();
   m_stats->register_worker();
 }
   
