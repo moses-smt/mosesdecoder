@@ -303,6 +303,12 @@ EvaluateWhenApplied(const SquareMatrix &futureScore)
   }
 }
 
+void Hypothesis::Recalc() {
+  // TOTAL
+  m_totalScore = m_currScoreBreakdown.GetWeightedScore() + m_futureScore;
+  if (m_prevHypo) m_totalScore += m_prevHypo->GetScore();
+}
+
 const Hypothesis* Hypothesis::GetPrevHypo()const
 {
   return m_prevHypo;

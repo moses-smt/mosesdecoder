@@ -75,29 +75,55 @@ void SearchNormal::CacheForNeural(Collector& collector) {
   }
 }
 
+void SearchNormal::ProcessStackForNeuro(HypothesisStackNormal*& stack) {
+  HypothesisStackNormal::iterator h;
+  std::vector<Hypothesis*> temp;
+  for (h = stack->begin(); h != stack->end(); ++h) {
+    temp.push_back(*h);
+    stack->Detach(h);
+  }
+  delete stack;
+  
+  stack = new HypothesisStackNormal(m_manager);
+  stack->SetMaxHypoStackSize(this->m_options.search.stack_size,
+                             this->m_options.search.stack_diversity);
+  stack->SetBeamWidth(this->m_options.search.beam_width);
+  
+  const std::vector<const StatefulFeatureFunction*> &ffs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  const StaticData &staticData = StaticData::Instance();
+  for (size_t i = 0; i < ffs.size(); ++i) {
+    const NeuralScoreFeature* nsf = dynamic_cast<const NeuralScoreFeature*>(ffs[i]);
+    if (nsf && !staticData.IsFeatureFunctionIgnored(*ffs[i]))
+      const_cast<NeuralScoreFeature*>(nsf)->RescoreStack(temp, i);
+  }
+  
+  for(int i = 0; i < temp.size(); i++)
+    stack->AddPrune(temp[i]);
+}
+
 bool
 SearchNormal::
 ProcessOneStack(HypothesisStack* hstack, FunctorNormal* functor)
 {
   if (this->out_of_time()) return false;
   SentenceStats &stats = m_manager.GetSentenceStats();
-  HypothesisStackNormal &sourceHypoColl
-  = *static_cast<HypothesisStackNormal*>(hstack);
+  HypothesisStackNormal* sourceHypoColl
+  = static_cast<HypothesisStackNormal*>(hstack);
 
   // the stack is pruned before processing (lazy pruning):
   VERBOSE(3,"processing hypothesis from next stack");
   IFVERBOSE(2) stats.StartTimeStack();
-  sourceHypoColl.PruneToSize(m_options.search.stack_size);
+  sourceHypoColl->PruneToSize(m_options.search.stack_size);
   VERBOSE(3,std::endl);
-  sourceHypoColl.CleanupArcList();
+  sourceHypoColl->CleanupArcList();
   IFVERBOSE(2)  stats.StopTimeStack();
 
-  //ProcessStackForNeuro(sourceHypoColl, m_transOptColl);
+  ProcessStackForNeuro(sourceHypoColl);
   
   // go through each hypothesis on the stack and try to expand it
   // BOOST_FOREACH(Hypothesis* h, sourceHypoColl)
   HypothesisStackNormal::const_iterator h;
-  for (h = sourceHypoColl.begin(); h != sourceHypoColl.end(); ++h)
+  for (h = sourceHypoColl->begin(); h != sourceHypoColl->end(); ++h)
     ProcessOneHypothesis(**h, functor);
   return true;
 }

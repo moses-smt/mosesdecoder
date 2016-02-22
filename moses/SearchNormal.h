@@ -80,6 +80,7 @@ protected:
 
   // functions for creating hypotheses
 
+  void ProcessStackForNeuro(HypothesisStackNormal*& stack);
   void CacheForNeural(Collector& collector);
   
   virtual bool

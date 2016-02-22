@@ -56,6 +56,7 @@ size_t NMT::GetDevice() {
 }
 
 void NMT::ClearStates() { 
+  firstWord_ = true;
   states_->Clear();
 }
 
@@ -107,6 +108,60 @@ void NMT::FilterTargetVocab(const std::set<std::string>& filter) {
   // eol
   numericFilter.push_back(numericFilter.size());
   decoder_->Filter(numericFilter);
+}
+
+void NMT::OnePhrase(
+  const std::vector<std::string>& phrase,
+  const std::string& lastWord,
+  bool firstWord,
+  StateInfoPtr inputState,
+  float& prob, size_t& unks,
+  StateInfoPtr& outputState) {
+  
+  Matrix& sourceContext = *boost::static_pointer_cast<Matrix>(SourceContext_);
+  
+  Matrix prevEmbeddings;
+  Matrix nextEmbeddings;
+  Matrix prevStates;
+  Matrix probs;
+  Matrix alignedSourceContext;
+  Matrix nextStates;
+    
+  if(firstWord) {
+    decoder_->EmptyEmbedding(prevEmbeddings, 1);
+  }
+  else {
+    // Not the first word
+    std::vector<size_t> ids = { (*trg_)[lastWord] };
+    decoder_->Lookup(prevEmbeddings, ids);
+  }
+    
+  std::vector<StateInfoPtr> inputStates = { inputState };
+  states_->ConstructStates(prevStates, inputStates);
+    
+  for(auto& w : phrase) {
+    size_t id = (*trg_)[w];
+    std::vector<size_t> nextIds = { id };
+    decoder_->Lookup(nextEmbeddings, nextIds);
+    if(id == 1)
+      unks++;
+    
+    decoder_->GetProbs(probs, alignedSourceContext,
+                       prevStates, prevEmbeddings, sourceContext);  
+    
+    float p = probs(0, filteredId_[id]);
+    prob += log(p);
+      
+    decoder_->GetNextState(nextStates, nextEmbeddings,
+                           prevStates, alignedSourceContext);
+    
+    Swap(nextStates, prevStates);
+    Swap(nextEmbeddings, prevEmbeddings);
+  }
+  
+  std::vector<StateInfoPtr> outputStates;
+  states_->SaveStates(outputStates, prevStates);
+  outputState = outputStates.back();
 }
 
 void NMT::MakeStep(

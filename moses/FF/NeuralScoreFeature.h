@@ -46,6 +46,7 @@ public:
   void InitializeForInput(ttasksptr const& ttask);
   void CleanUpAfterSentenceProcessing(ttasksptr const& ttask);
     
+  void RescoreStack(std::vector<Hypothesis*>& hyps, size_t index);
   void ProcessStack(Collector& collector, size_t index);
 
   void BatchProcess(
@@ -92,6 +93,7 @@ private:
   size_t m_factor;
   size_t m_maxDevices;
   bool m_filteredSoftmax;
+  std::string m_mode;
   
   std::vector<boost::shared_ptr<Weights> > m_models;
   boost::shared_ptr<Vocab> m_sourceVocab;

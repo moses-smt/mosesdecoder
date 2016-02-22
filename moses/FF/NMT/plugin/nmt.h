@@ -21,6 +21,10 @@ class NMT {
         const boost::shared_ptr<Vocab> src,
         const boost::shared_ptr<Vocab> trg);
   
+    const boost::shared_ptr<Weights> GetModel() {
+      return w_;
+    }
+  
     static size_t GetDevices(size_t = 1);
     void SetDevice();
     size_t GetDevice();
@@ -41,6 +45,14 @@ class NMT {
     
     void FilterTargetVocab(const std::set<std::string>& filter);
     
+    void OnePhrase(
+      const std::vector<std::string>& phrase,
+      const std::string& lastWord,
+      bool firstWord,
+      StateInfoPtr inputState,
+      float& prob, size_t& unks,
+      StateInfoPtr& outputState);
+
     void MakeStep(
       const std::vector<std::string>& nextWords,
       const std::vector<std::string>& lastWords,

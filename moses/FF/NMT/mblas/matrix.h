@@ -4,24 +4,6 @@
 
 #include "base_matrix.h"
 
-#ifdef NO_CUDA
-
-#include <vector>
-#include <functional>
-#include <algorithm>
-#include <boost/iterator/counting_iterator.hpp>
-#include <boost/iterator/zip_iterator.hpp>
-#include <boost/tuple/tuple.hpp>
-#include <boost/phoenix/phoenix.hpp>
-#include "phoenix_functions.h"
-extern "C" {
-#include <cblas.h>
-}
-namespace lib = std;
-namespace iterlib = boost;
-
-#else
-
 #define MAX_THREADS 512
 #define MAX_BLOCKS 65535
 
@@ -34,17 +16,9 @@ namespace iterlib = boost;
 namespace lib = thrust;
 namespace iterlib = thrust;
 
-#endif
-
-#include "strided_iterator.h"
-
 namespace mblas {
 
-#ifdef NO_CUDA
-using namespace boost::phoenix::placeholders;
-#else
 using namespace thrust::placeholders;
-#endif
 
 template <class VecType>
 class TMatrix : public BaseMatrix {
@@ -124,19 +98,11 @@ class TMatrix : public BaseMatrix {
     }
     
     value_type* data() {
-#ifndef NO_CUDA
       return thrust::raw_pointer_cast(data_.data());
-#else
-      return data_.data();
-#endif
     }
     
     const value_type* data() const {
-#ifndef NO_CUDA
       return thrust::raw_pointer_cast(data_.data());
-#else
-      return data_.data();
-#endif
     }
     
     iterator begin() {
@@ -165,7 +131,6 @@ class TMatrix : public BaseMatrix {
     VecType data_;
 };
 
-#ifndef NO_CUDA
 typedef thrust::device_vector<float> FVec;
 typedef thrust::device_vector<unsigned int> IVec;
 
@@ -208,11 +173,6 @@ class CublasHandler {
 
 CublasHandler CublasHandler::instance_;
 thread_local cublasHandle_t* CublasHandler::handle_ = nullptr;
-
-#else
-typedef std::vector<float> FVec;
-typedef std::vector<unsigned int> IVec;
-#endif
 
 typedef TMatrix<FVec> Matrix;
 typedef TMatrix<IVec> IMatrix;
@@ -350,6 +310,7 @@ Matrix& CopyRows(Matrix& Out,
   int threads = std::min(MAX_THREADS, (int)In.Cols());
   int blocks = std::min(MAX_BLOCKS, (int)numPairs);;
   gCopyRows<<<blocks, threads>>>(d_out, d_in, In.Cols(), devPairs, numPairs);
+  cudaStreamSynchronize(0);
   return Out;
 }
 
@@ -396,52 +357,54 @@ Matrix& Prod(Matrix& C, const Matrix& A, const Matrix& B,
   
   C.Resize(m, n);
   
-#ifndef NO_CUDA
   cublasOperation_t opA = transA ? CUBLAS_OP_T : CUBLAS_OP_N;
   cublasOperation_t opB = transB ? CUBLAS_OP_T : CUBLAS_OP_N;
 
   cublasSgemm(CublasHandler::GetHandle(), opB, opA,
               n, m, k, &alpha, B.data(), ldb, A.data(), lda, &beta, C.data(), ldc);
   
-#else
-  CBLAS_TRANSPOSE opA = transA ? CblasTrans : CblasNoTrans;
-  CBLAS_TRANSPOSE opB = transB ? CblasTrans : CblasNoTrans;
-
-  cblas_sgemm(CblasColMajor, opB, opA,
-              n, m, k, alpha, B.data(), ldb, A.data(), lda, beta, C.data(), ldc);
-#endif
+//#else
+//  CBLAS_TRANSPOSE opA = transA ? CblasTrans : CblasNoTrans;
+//  CBLAS_TRANSPOSE opB = transB ? CblasTrans : CblasNoTrans;
+//
+//  cblas_sgemm(CblasColMajor, opB, opA,
+//              n, m, k, alpha, B.data(), ldb, A.data(), lda, beta, C.data(), ldc);
+//#endif
 
   return C;
 }
 
-// How handle matrixes larger than number of blocks?
 __global__ void gSoftMax(float* softMaxP, size_t rows, size_t cols) {
-  int bid = blockIdx.x;
-  extern __shared__ float _share[];
-  float* _sum = _share + blockDim.x;
-  float* sp = softMaxP + bid * cols;
-  _sum[threadIdx.x] = 0.0;
-  for(int tid = 0; tid < cols; tid += blockDim.x) {
-    int id = tid + threadIdx.x;
-    if(id < cols) {
-      sp[id] = __expf(sp[id]);
-      _sum[threadIdx.x] += sp[id];
+  for(int bid = 0; bid < rows; bid += gridDim.x) {
+    int j = bid + blockIdx.x;
+    if(j < rows) { 
+      extern __shared__ float _share[];
+      float* _sum = _share + blockDim.x;
+      float* sp = softMaxP + j * cols;
+      _sum[threadIdx.x] = 0.0;
+      for(int tid = 0; tid < cols; tid += blockDim.x) {
+        int id = tid + threadIdx.x;
+        if(id < cols) {
+          sp[id] = __expf(sp[id]);
+          _sum[threadIdx.x] += sp[id];
+        }
+      }
+      __syncthreads();
+      int len = blockDim.x;
+      while(len != 1) {
+        __syncthreads();
+        int skip = (len + 1) >> 1;
+        if(threadIdx.x < (len >> 1))
+          _sum[threadIdx.x] += _sum[threadIdx.x + skip];
+        len = (len + 1) >> 1;
+      }
+      __syncthreads();
+      for(int tid = 0; tid < cols; tid += blockDim.x){
+        int id = tid + threadIdx.x;
+        if(id < cols)
+          sp[id] /= _sum[0];
+      }
     }
-  }
-  __syncthreads();
-  int len = blockDim.x;
-  while(len != 1) {
-    __syncthreads();
-    int skip = (len + 1) >> 1;
-    if(threadIdx.x < (len >> 1))
-      _sum[threadIdx.x] += _sum[threadIdx.x + skip];
-    len = (len + 1) >> 1;
-  }
-  __syncthreads();
-  for(int tid = 0; tid < cols; tid += blockDim.x){
-    int id = tid + threadIdx.x;
-    if(id < cols)
-      sp[id] /= _sum[0];
   }
 }
 
@@ -489,11 +452,11 @@ Matrix& Broadcast(Functor functor, Matrix& Out, const Matrix& In) {
   const float* d_in1 = Out.data();
   const float* d_in2 = In.data();
   
-  int threads = std::min(MAX_THREADS, (int)cols);
   int blocks  = std::min(MAX_BLOCKS, (int)rows);
+  int threads = std::min(MAX_THREADS, (int)cols);
   gBroadcast<<<blocks, threads>>>(functor, d_out, d_in1, d_in2,
                                   rows, rows1, cols);
-  
+  cudaStreamSynchronize(0);
   Swap(Out, Temp);
   return Out;
 }
@@ -507,9 +470,8 @@ __global__ void gElement(Functor functor, float* out,
       float* rowOut = out + j * cols;
       for(int tid = 0; tid < cols; tid += blockDim.x) {
         int i = tid + threadIdx.x;
-        if(i < cols) {
+        if(i < cols)
           rowOut[i] = functor(rowOut[i]);;
-        }
       }
     }
   }
@@ -527,9 +489,8 @@ __global__ void gElement(Functor functor,
       
       for(int tid = 0; tid < cols; tid += blockDim.x) {
         int i = tid + threadIdx.x;
-        if(i < cols) {
+        if(i < cols)
           rowOut[i] = functor(rowOut[i], rowIn[i]);;
-        }
       }
     }
   }
@@ -548,9 +509,8 @@ __global__ void gElement(Functor functor,
       
       for(int tid = 0; tid < cols; tid += blockDim.x) {
         int i = tid + threadIdx.x;
-        if(i < cols) {
+        if(i < cols)
           rowOut[i] = functor(rowOut[i], rowIn1[i], rowIn2[i]);
-        }
       }
     }
   }
@@ -562,21 +522,20 @@ Matrix& Element(Functor functor, Matrix& Out) {
   int blocks  = std::min(MAX_BLOCKS, (int)Out.Rows());
   int threads = std::min(MAX_THREADS, (int)Out.Cols());
   gElement<<<blocks, threads>>>(functor, d_out, Out.Rows(), Out.Cols());
-  
+  cudaStreamSynchronize(0);
   return Out;
 }
 
 template <class Functor>
 Matrix& Element(Functor functor,
                 Matrix& Out, const Matrix& In) {
-  
   float* d_out = Out.data();
   const float* d_in = In.data();
   
   int blocks  = std::min(MAX_BLOCKS, (int)Out.Rows());
   int threads = std::min(MAX_THREADS, (int)Out.Cols());
   gElement<<<blocks, threads>>>(functor, d_out, d_in, Out.Rows(), Out.Cols());
-  
+  cudaStreamSynchronize(0);
   return Out;
 }
 
@@ -592,7 +551,7 @@ Matrix& Element(Functor functor,
   int threads = std::min(MAX_THREADS, (int)Out.Cols());
   gElement<<<blocks, threads>>>(functor, d_out, d_in1, d_in2,
                                 Out.Rows(), Out.Cols());
-  
+  cudaStreamSynchronize(0);
   return Out;
 }
 
@@ -607,9 +566,8 @@ __global__ void gPairwiseReduce(Functor functor,
       float* rowOut = out + j * cols;
       for(int tid = 0; tid < cols; tid += blockDim.x) {
         int i = tid + threadIdx.x;
-        if(i < cols) {
+        if(i < cols)
           rowOut[i] = functor(rowIn[i * 2], rowIn[i * 2 + 1]);
-        }
       }
     }
   }
@@ -625,6 +583,7 @@ Matrix& PairwiseReduce(Functor functor, Matrix& Out) {
   int threads = std::min(MAX_THREADS, (int)Temp.Cols());
   gPairwiseReduce<<<blocks, threads>>>(functor, d_out, d_in,
                                        Temp.Rows(), Temp.Cols());
+  cudaStreamSynchronize(0);
   Swap(Out, Temp);
   return Out;
 }

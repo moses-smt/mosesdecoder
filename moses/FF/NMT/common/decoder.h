@@ -17,7 +17,7 @@ class Decoder {
           Assemble(Rows, w_.E_, ids);
           Broadcast(_1 + _2, Rows, w_.EB_);
         }
-      
+            
       private:
         const Weights& w_;
     };

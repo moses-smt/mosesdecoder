@@ -118,6 +118,7 @@ public:
   /** return the subclass of Hypothesis most appropriate to the given translation option */
   Hypothesis* CreateNext(const TranslationOption &transOpt) const;
 
+  void Recalc();
   void PrintHypothesis() const;
 
   const InputType& GetInput() const {
@@ -246,6 +247,11 @@ public:
     }
     return *(m_scoreBreakdown.get());
   }
+  
+  ScoreComponentCollection& GetCurrScoreBreakdown() {
+    return m_currScoreBreakdown;
+  }
+  
   float GetTotalScore() const {
     return m_totalScore;
   }
