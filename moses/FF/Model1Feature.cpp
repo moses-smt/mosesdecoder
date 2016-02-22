@@ -185,7 +185,7 @@ void Model1Feature::Load(AllOptions::ptr const& opts)
   for (size_t i=0; i<punctuation.size(); ++i) {
     const std::string punct = punctuation.substr(i,1);
     FactorCollection &factorCollection = FactorCollection::Instance();
-    const Factor* punctFactor = factorCollection.AddFactor(punct,false);  
+    const Factor* punctFactor = factorCollection.AddFactor(punct,false);
     std::pair<std::set<const Factor*>::iterator,bool> inserted = m_punctuation.insert(punctFactor);
   }
 }
