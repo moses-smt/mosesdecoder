@@ -215,21 +215,21 @@ bool debug=true;
 
     id_type foo;
     for(foo = tightread(in,stop);
-	(foo>>FLAGBITS) < key;
-      foo = tightread(in,stop))
+        (foo>>FLAGBITS) < key;
+        foo = tightread(in,stop))
       {
-	// skip the value associated with key /foo/
-	while (static_cast<filepos_type>(in.tellg()) < stop
-	       && in.peek() >= 128) in.get();
-
+        // skip the value associated with key /foo/
+        while (static_cast<filepos_type>(in.tellg()) < stop
+               && in.peek() >= 128) in.get();
+        
 #if DEBUG_TIGHTFIND
-	if (debug)
-	  std::cerr << (foo>>FLAGBITS) << " [" << key << "] "
-	       << in.tellg() << std::endl;
+        if (debug)
+          std::cerr << (foo>>FLAGBITS) << " [" << key << "] "
+                    << in.tellg() << std::endl;
 #endif
-
-	if (in.tellg() == std::ios::pos_type(stop))
-	  return false; // not found
+        
+        if (in.tellg() == std::ios::pos_type(stop))
+          return false; // not found
       }
 
 #if DEBUG_TIGHTFIND
