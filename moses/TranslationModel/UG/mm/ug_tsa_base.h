@@ -237,6 +237,11 @@ namespace sapt
       return ret;
     }
 
+    // necessary for mmTSA
+    virtual
+    char const* 
+    adjustPosition(char const* p, char const* stop) const = 0;
+
   };
 
   // ---------------------------------------------------------------------------

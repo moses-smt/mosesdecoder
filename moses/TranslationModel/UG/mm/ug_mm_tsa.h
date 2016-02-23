@@ -17,6 +17,8 @@
 #include "tpt_pickler.h"
 #include "ug_tsa_base.h"
 
+#include "util/exception.hh"
+
 namespace sapt
 {
   namespace bio=boost::iostreams;
@@ -68,6 +70,9 @@ namespace sapt
     readOffset(char const* p, char const* q, ::uint64_t& offset) const;
 
     void sanityCheck() const;
+
+    char const* 
+    adjustPosition(char const* p, char const* stop) const;
 
   };
 
@@ -223,13 +228,13 @@ namespace sapt
     size_t ret=0;
     while (p < q)
       {
-	p = tpt::tightread(p,q,sid);
-	p = tpt::tightread(p,q,off);
-	ret++;
+        p = tpt::tightread(p,q,sid);
+        p = tpt::tightread(p,q,off);
+        ret++;
       }
     return ret;
   }
-
+  
   // ======================================================================
 
   template<typename TOKEN>
@@ -253,6 +258,18 @@ namespace sapt
 
   // ======================================================================
 
+  template<typename TOKEN>
+  char const* 
+  mmTSA<TOKEN>::
+  adjustPosition(char const* p, char const* stop) const
+  {
+    UTIL_THROW_IF2(stop > p,"stop parameter must be <= p at " 
+                   << __FILE__ << ":" << __LINE__);
+    while (*p < 0  && p > stop) p--;
+    while (*p >= 0 && p > stop) p--;
+    return (*p < 0) ? ++p : p;
+  }
+  
 } // end of namespace ugdiss
 
 // #include "ug_mm_tsa_extra.h"

@@ -116,6 +116,12 @@ namespace sapt
     /// add a sentence to the database
     // shared_ptr<imTSA<TOKEN> > add(vector<TOKEN> const& snt) const;
 
+    char const* 
+    adjustPosition(char const* p, char const* stop) const 
+    { 
+      return p; 
+    }
+
   };
 
   template<typename TOKEN>
