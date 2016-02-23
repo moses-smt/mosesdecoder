@@ -4,9 +4,8 @@
  *  Created on: 28 Oct 2015
  *      Author: hieu
  */
+#pragma once
 
-#ifndef PHRASETABLEMEMORY_H_
-#define PHRASETABLEMEMORY_H_
 #include "PhraseTable.h"
 #include "../legacy/Util2.h"
 
@@ -51,4 +50,3 @@ protected:
 }
 
 
-#endif /* PHRASETABLEMEMORY_H_ */
