@@ -8,6 +8,7 @@
 #include "Phrase.h"
 #include "Word.h"
 #include "MemPool.h"
+#include "Scores.h"
 
 using namespace std;
 
@@ -73,6 +74,10 @@ std::ostream& operator<<(std::ostream &out, const Phrase &obj)
 	}
 	return out;
 }
+
+////////////////////////////////////////////////////////////////////////
+SCORE TPBase::GetFutureScore() const
+{ return m_scores->GetTotalScore() + m_estimatedScore; }
 
 }
 

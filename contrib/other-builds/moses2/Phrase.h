@@ -18,6 +18,7 @@ namespace Moses2
 {
 
 class SubPhrase;
+class Scores;
 
 class Phrase
 {
@@ -35,8 +36,29 @@ public:
   virtual SubPhrase GetSubPhrase(size_t start, size_t end) const = 0;
 
 };
+////////////////////////////////////////////////////////////////////////
+class TPBase : public Phrase
+{
+public:
+  Scores &GetScores()
+  { return *m_scores; }
 
+  const Scores &GetScores() const
+  { return *m_scores; }
 
+  SCORE GetFutureScore() const;
+
+  void SetEstimatedScore(const SCORE &value)
+  { m_estimatedScore = value; }
+
+  SCORE *GetScoresProperty(int propertyInd) const;
+protected:
+	Scores *m_scores;
+	SCORE m_estimatedScore;
+
+};
+
+////////////////////////////////////////////////////////////////////////
 class PhraseOrdererLexical
 {
 public:
