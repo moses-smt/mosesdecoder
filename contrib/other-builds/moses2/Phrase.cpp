@@ -9,6 +9,7 @@
 #include "Word.h"
 #include "MemPool.h"
 #include "Scores.h"
+#include "System.h"
 
 using namespace std;
 
@@ -76,6 +77,12 @@ std::ostream& operator<<(std::ostream &out, const Phrase &obj)
 }
 
 ////////////////////////////////////////////////////////////////////////
+TPBase::TPBase(MemPool &pool, const PhraseTable &pt, const System &system)
+:pt(pt)
+{
+	m_scores = new (pool.Allocate<Scores>()) Scores(system, pool, system.featureFunctions.GetNumScores());
+}
+
 SCORE TPBase::GetFutureScore() const
 { return m_scores->GetTotalScore() + m_estimatedScore; }
 

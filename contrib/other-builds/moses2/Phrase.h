@@ -19,6 +19,9 @@ namespace Moses2
 
 class SubPhrase;
 class Scores;
+class PhraseTable;
+class MemPool;
+class System;
 
 class Phrase
 {
@@ -40,6 +43,10 @@ public:
 class TPBase : public Phrase
 {
 public:
+  const PhraseTable &pt;
+
+  TPBase(MemPool &pool, const PhraseTable &pt, const System &system);
+
   Scores &GetScores()
   { return *m_scores; }
 
