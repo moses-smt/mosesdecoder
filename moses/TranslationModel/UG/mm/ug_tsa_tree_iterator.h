@@ -1,12 +1,6 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2007 - 2010 Ulrich Germann. All rights reserved.
 
-// Lots of functionality was removed by David Madl 
-// with commit fa0312f45a7559740fc04d692b8f0eda456e5ee1 
-// Check the respective githup commit diff or copy from commit 
-// b32d7754cdf3a2090e3685dc3a0851d343891a70
-// if you need the functions back.
-
 #ifndef __ug_tsa_tree_iterator_h
 #define __ug_tsa_tree_iterator_h
 
