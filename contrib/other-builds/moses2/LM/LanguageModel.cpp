@@ -199,7 +199,7 @@ void LanguageModel::EvaluateWhenApplied(const Manager &mgr,
 
 	SCORE score = 0;
 	std::pair<SCORE, void*> fromScoring;
-	const PhraseImpl &tp = hypo.GetTargetPhrase();
+	const TargetPhrase &tp = hypo.GetTargetPhrase();
 	for (size_t i = 0; i < tp.GetSize(); ++i) {
 		const Word &word = tp[i];
 		const Factor *factor = word[m_factorType];

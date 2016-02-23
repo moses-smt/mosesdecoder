@@ -9,6 +9,7 @@
 #include "LexicalReordering.h"
 #include "../TranslationModel/PhraseTable.h"
 #include "../System.h"
+#include "../PhraseImpl.h"
 #include "../Search/Manager.h"
 #include "../Search/Hypothesis.h"
 #include "../legacy/InputFileStream.h"

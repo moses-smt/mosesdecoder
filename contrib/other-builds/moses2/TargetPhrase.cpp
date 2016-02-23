@@ -30,9 +30,9 @@ TargetPhrase *TargetPhrase::CreateFromString(MemPool &pool, const PhraseTable &p
 }
 
 TargetPhrase::TargetPhrase(MemPool &pool, const PhraseTable &pt, const System &system, size_t size)
-:PhraseImpl(pool, size)
+:TPBase(pool, pt, system)
+,PhraseImplTemplate(pool, size)
 ,scoreProperties(NULL)
-,pt(pt)
 {
 	m_scores = new (pool.Allocate<Scores>()) Scores(system, pool, system.featureFunctions.GetNumScores());
 
@@ -58,12 +58,9 @@ TargetPhrase::~TargetPhrase() {
 	// TODO Auto-generated destructor stub
 }
 
-SCORE TargetPhrase::GetFutureScore() const
-{ return m_scores->GetTotalScore() + m_estimatedScore; }
-
 std::ostream& operator<<(std::ostream &out, const TargetPhrase &obj)
 {
-	out << (const PhraseImpl&) obj << " SCORES:" << obj.GetScores();
+	out << (const Phrase&) obj << " SCORES:" << obj.GetScores();
 	return out;
 }
 
