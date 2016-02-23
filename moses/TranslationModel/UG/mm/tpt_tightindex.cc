@@ -33,50 +33,50 @@ namespace tpt
 #ifdef LOG_WRITE_ACTIVITY
     size_t bytes_written=1;
     std::cerr << "starting at file position " << out.tellp()
-	      << ": tightwrite " << data;
+              << ": tightwrite " << data;
 #endif
     if (flag)
       {
 #ifdef LOG_WRITE_ACTIVITY
-	std::cerr << " with flag 1 ";
+        std::cerr << " with flag 1 ";
 #endif
-	while (data >= 128)
-	  {
-	    char c = char(data%128)|char(-128);
-	    out.put(c);
-	    data >>= 7;
+        while (data >= 128)
+          {
+            char c = char(data%128)|char(-128);
+            out.put(c);
+            data >>= 7;
 #ifdef LOG_WRITE_ACTIVITY
-	    bytes_written++;
+            bytes_written++;
 #endif
-	  }
-	char c = char(data%128)|char(-128);
-	out.put(c);
+          }
+        char c = char(data%128)|char(-128);
+        out.put(c);
       }
     else
       {
 #ifdef LOG_WRITE_ACTIVITY
-	std::cerr << " with flag 0 ";
+        std::cerr << " with flag 0 ";
 #endif
-	while (data >= 128)
-	  {
-	    char c = data&127;
-	    out.put(c);
-	    data >>= 7;
+        while (data >= 128)
+          {
+            char c = data&127;
+            out.put(c);
+            data >>= 7;
 #ifdef LOG_WRITE_ACTIVITY
-	    bytes_written++;
+            bytes_written++;
 #endif
-	  }
-	char c = (data&127);
-	out.put(c);
+          }
+        char c = (data&127);
+        out.put(c);
       }
 #ifdef LOG_WRITE_ACTIVITY
     std::cerr << " in " << bytes_written << " bytes" << std::endl;
 #endif
   }
 
-// For the code below: does it make a difference if I hard-code the
-// unraveled loop or does code optimization by the compiler take care
-// of that?
+  // For the code below: does it make a difference if I hard-code the
+  // unraveled loop or does code optimization by the compiler take care
+  // of that?
 
 #define DEBUG_TIGHTREAD 0
 
@@ -94,7 +94,7 @@ namespace tpt
 #if DEBUG_TIGHTREAD
     if (debug)
       cerr << bitpattern(uint(in.peek())) << " " << in.peek()
-	   << " pos=" << in.tellg() << "\n";
+           << " pos=" << in.tellg() << "\n";
 #endif
     int buf = in.get();
     if (stop == std::ios::pos_type(0))
@@ -103,52 +103,52 @@ namespace tpt
       stop = std::min(size_t(stop),size_t(in.tellg())+in.rdbuf()->in_avail());
     if (buf < 0)
       std::cerr << "number read: " << buf << " " << pos << " "
-		<< in.tellg() << std::endl;
+                << in.tellg() << std::endl;
     assert (buf>=0);
 
     if (buf >= 128) // continuation bit is 1
       {
-	data = buf-128; // unset the bit
-	while (in.tellg() < stop && in.peek() >= 128)
-	  {
+        data = buf-128; // unset the bit
+        while (in.tellg() < stop && in.peek() >= 128)
+          {
 #if DEBUG_TIGHTREAD
-	    if (debug)
-	      cerr << bitpattern(uint(in.peek())) << " " << in.peek();
+            if (debug)
+              cerr << bitpattern(uint(in.peek())) << " " << in.peek();
 #endif
-	    // cerr << bitpattern(size_t(in.peek())) << std::endl;
-	    data += size_t(in.get()-128)<<bitshift;
-	    bitshift += 7;
+            // cerr << bitpattern(size_t(in.peek())) << std::endl;
+            data += size_t(in.get()-128)<<bitshift;
+            bitshift += 7;
 #if DEBUG_TIGHTREAD
-	    if (debug)
-	      cerr << " " << data << " pos=" << in.tellg() << std::endl;
+            if (debug)
+              cerr << " " << data << " pos=" << in.tellg() << std::endl;
 #endif
-	  }
+          }
       }
     else
       {
-	data = buf;
-	while (in.tellg() < stop && in.peek() < 128)
-	  {
-	    // cerr << bitpattern(size_t(in.peek())) << std::endl;
+        data = buf;
+        while (in.tellg() < stop && in.peek() < 128)
+          {
+            // cerr << bitpattern(size_t(in.peek())) << std::endl;
 #if DEBUG_TIGHTREAD
-	    if (debug)
-	      cerr << bitpattern(uint(in.peek())) << " " << in.peek();
+            if (debug)
+              cerr << bitpattern(uint(in.peek())) << " " << in.peek();
 
 #endif
-	    data += size_t(in.get())<<bitshift;
-	    bitshift += 7;
+            data += size_t(in.get())<<bitshift;
+            bitshift += 7;
 #if DEBUG_TIGHTREAD
-	    if (debug)
-	      cerr << " " << data << " pos=" << in.tellg() << "\n";
+            if (debug)
+              cerr << " " << data << " pos=" << in.tellg() << "\n";
 #endif
-	  }
+          }
       }
     return data;
   }
 
 #define DEBUG_TIGHTFIND 0
 #if DEBUG_TIGHTFIND
-bool debug=true;
+  bool debug=true;
 #endif
   bool
   tightfind_midpoint(std::istream& in, filepos_type start, filepos_type stop)
@@ -164,26 +164,26 @@ bool debug=true;
     while (static_cast<filepos_type>(in.tellg()) < stop && in.get() < 128)
       {
 #if DEBUG_TIGHTFIND
-	if (debug)
-	  {
-	    in.unget();
-	    char c = in.get();
-	    std::cerr << in.tellg() << " skipped key byte " << c << std::endl;
-	  }
+        if (debug)
+          {
+            in.unget();
+            char c = in.get();
+            std::cerr << in.tellg() << " skipped key byte " << c << std::endl;
+          }
 #endif
-	if (in.eof()) return false;
+        if (in.eof()) return false;
       }
-  // Also skip the associated file offset:
+    // Also skip the associated file offset:
     while (static_cast<filepos_type>(in.tellg()) < stop && in.peek() >= 128)
       {
 #if DEBUG_TIGHTFIND
-	int r = in.get();
-	if (debug)
-	  std::cerr << in.tellg() << " skipped value byte " << r
-	       << " next is " << in.peek()
-	       << std::endl;
+        int r = in.get();
+        if (debug)
+          std::cerr << in.tellg() << " skipped value byte " << r
+                    << " next is " << in.peek()
+                    << std::endl;
 #else
-	in.get();
+        in.get();
 #endif
       }
     return true;
@@ -201,7 +201,7 @@ bool debug=true;
 
   bool
   linear_search(std::istream& in, filepos_type start, filepos_type stop,
-		id_type key, unsigned char& flags)
+                id_type key, unsigned char& flags)
   { // performs a linear search in the range
     in.seekg(start);
 
@@ -242,9 +242,9 @@ bool debug=true;
     assert(static_cast<filepos_type>(in.tellg()) < stop);
     if ((foo>>FLAGBITS)==key)
       {
-	flags = (foo%256);
-	flags &= FLAGMASK;
-	return true;
+        flags = (foo%256);
+        flags &= FLAGMASK;
+        return true;
       }
     else
       return false;
@@ -252,13 +252,13 @@ bool debug=true;
 
   bool
   tightfind(std::istream& in, filepos_type start, filepos_type stop,
-	    id_type key, unsigned char& flags)
+            id_type key, unsigned char& flags)
   {
     // returns true if the value is found
 #if DEBUG_TIGHTFIND
     if (debug)
       std::cerr << "looking for " << key
-	   << " in range [" << start << ":" << stop << "]" << std::endl;
+                << " in range [" << start << ":" << stop << "]" << std::endl;
 #endif
     if (start==stop) return false;
     assert(stop>start);
@@ -271,13 +271,13 @@ bool debug=true;
 
     if (stop > start + granularity)
       if (!tightfind_midpoint(in,start,stop))
-	return false; // something went wrong (empty index)
+        return false; // something went wrong (empty index)
 
     if (stop <= start + granularity || in.tellg() == std::ios::pos_type(stop))
       { // If the search range is very short, tightfind_midpoint might skip the
-	// entry we are loking for. In this case, we can afford a linear
-	// search
-	return linear_search(in,start,stop,key,flags);
+        // entry we are loking for. In this case, we can afford a linear
+        // search
+        return linear_search(in,start,stop,key,flags);
       }
 
     // perform binary search
@@ -286,32 +286,32 @@ bool debug=true;
     id_type tmpid = foo>>FLAGBITS;
     if (tmpid == key)
       {
-	flags  = foo%256;
-	flags &= FLAGMASK;
+        flags  = foo%256;
+        flags &= FLAGMASK;
 #if DEBUG_TIGHTFIND
-	if (debug) std::cerr << "found entry for " << key << std::endl;
+        if (debug) std::cerr << "found entry for " << key << std::endl;
 #endif
-	return true; // done, found
+        return true; // done, found
       }
     else if (tmpid > key)
       { // look in the lower half
 #if DEBUG_TIGHTFIND
-	if (debug) std::cerr << foo << " > " << key << std::endl;
+        if (debug) std::cerr << foo << " > " << key << std::endl;
 #endif
-	return tightfind(in,start,curpos,key,flags);
+        return tightfind(in,start,curpos,key,flags);
       }
     else
       { // look in the upper half
-	while (static_cast<filepos_type>(in.tellg()) < stop
-	       && in.rdbuf()->in_avail() > 0 // is that still necessary???
-	       && in.peek() >= 128)
-	  in.get(); // skip associated value
-	if (in.rdbuf()->in_avail() == 0 || in.tellg() == std::ios::pos_type(stop))
-	  return false;
+        while (static_cast<filepos_type>(in.tellg()) < stop
+               && in.rdbuf()->in_avail() > 0 // is that still necessary???
+               && in.peek() >= 128)
+          in.get(); // skip associated value
+        if (in.rdbuf()->in_avail() == 0 || in.tellg() == std::ios::pos_type(stop))
+          return false;
 #if DEBUG_TIGHTFIND
-	if (debug) std::cerr << foo << " < " << key << std::endl;
+        if (debug) std::cerr << foo << " < " << key << std::endl;
 #endif
-	return tightfind(in,in.tellg(),stop,key,flags);
+        return tightfind(in,in.tellg(),stop,key,flags);
       }
   }
 
@@ -319,7 +319,7 @@ bool debug=true;
   char const*
   tightfind(char const* const start,
             char const* const stop,
-	    id_type key,
+            id_type key,
             unsigned char& flags)
   {
     // returns true if the value is found
@@ -335,19 +335,19 @@ bool debug=true;
     id_type tmpId = foo>>FLAGBITS;
     if (tmpId == key)
       {
-	flags  = foo%256;
-	flags &= FLAGMASK;
+        flags  = foo%256;
+        flags &= FLAGMASK;
         return after;
       }
     else if (tmpId > key)
       { // look in the lower half
-	return tightfind(start,p,key,flags);
+        return tightfind(start,p,key,flags);
       }
     else
       { // look in the upper half
         while (*after<0 && ++after < stop);
         if (after == stop) return NULL;
-	return tightfind(after,stop,key,flags);
+        return tightfind(after,stop,key,flags);
       }
   }
 
@@ -370,19 +370,19 @@ bool debug=true;
       return after;
     else if (foo > key)
       { // look in the lower half
-	return tightfind_noflags(start,p,key);
+        return tightfind_noflags(start,p,key);
       }
     else
       { // look in the upper half
         while (*after<0 && ++after < stop);
         if (after == stop) return NULL;
-	return tightfind_noflags(after,stop,key);
+        return tightfind_noflags(after,stop,key);
       }
   }
 
   bool
   linear_search_noflags(std::istream& in, filepos_type start,
-                filepos_type stop, id_type key)
+                        filepos_type stop, id_type key)
   { // performs a linear search in the range
     std::ios::pos_type mystop = stop;
 
@@ -390,11 +390,11 @@ bool debug=true;
     id_type foo;
     for(foo = tightread(in,stop); foo < key; foo = tightread(in,stop))
       {
-	// skip the value associated with key /foo/
-	while (in.tellg() < mystop && in.peek() >= 128)
+        // skip the value associated with key /foo/
+        while (in.tellg() < mystop && in.peek() >= 128)
           in.get();
-	if (in.tellg() == mystop)
-	  return false; // not found
+        if (in.tellg() == mystop)
+          return false; // not found
       }
     assert(in.tellg() < mystop);
     return (foo==key);
@@ -418,7 +418,7 @@ bool debug=true;
 
     if (stop > start + granularity)
       if (!tightfind_midpoint(in,start,stop))
-	return false; // something went wrong (empty index)
+        return false; // something went wrong (empty index)
 
     // If the search range is very short, tightfind_midpoint might skip the
     // entry we are loking for. In this case, we can afford a linear
@@ -438,13 +438,13 @@ bool debug=true;
     else // search second half
       {
         std::ios::pos_type mystop = stop;
-	while (in.tellg() < mystop
-	       && in.rdbuf()->in_avail() > 0 // is that still necessary???
-	       && in.peek() >= 128)
-	  in.get(); // skip associated value
-	if (in.rdbuf()->in_avail() == 0 || in.tellg() == mystop)
-	  return false;
-	return tightfind_noflags(in,in.tellg(),stop,key);
+        while (in.tellg() < mystop
+               && in.rdbuf()->in_avail() > 0 // is that still necessary???
+               && in.peek() >= 128)
+          in.get(); // skip associated value
+        if (in.rdbuf()->in_avail() == 0 || in.tellg() == mystop)
+          return false;
+        return tightfind_noflags(in,in.tellg(),stop,key);
       }
   }
 
@@ -455,22 +455,22 @@ bool debug=true;
     short int foo = (data%32768);
     if (flag)
       {
-	foo += 32768; // set first bit
-	while (data >= 32768) // = 2^15
-	  {
-	    out.write(reinterpret_cast<char*>(&foo),2);
-	    data >>= 15;
-	    foo = (data%32768)+32768;
-	  }
+        foo += 32768; // set first bit
+        while (data >= 32768) // = 2^15
+          {
+            out.write(reinterpret_cast<char*>(&foo),2);
+            data >>= 15;
+            foo = (data%32768)+32768;
+          }
       }
     else
       {
-	while (data >= 32768) // = 2^15
-	  {
-	    out.write(reinterpret_cast<char*>(&foo),2);
-	    data >>= 15;
-	    foo = data%32768;
-	  }
+        while (data >= 32768) // = 2^15
+          {
+            out.write(reinterpret_cast<char*>(&foo),2);
+            data >>= 15;
+            foo = data%32768;
+          }
       }
     out.write(reinterpret_cast<char*>(&foo),2);
   }
