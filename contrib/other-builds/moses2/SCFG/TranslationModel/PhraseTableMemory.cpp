@@ -52,7 +52,7 @@ void PhraseTableMemory::Load(System &system)
 			//strcpy(target->properties, toks[6].c_str());
 		}
 
-		system.featureFunctions.EvaluateInIsolation(systemPool, system, *source, *target);
+		//system.featureFunctions.EvaluateInIsolation(systemPool, system, *source, *target);
 		//m_root.AddRule(*source, target);
 	}
 	m_root.SortAndPrune(m_tableLimit, systemPool, system);
