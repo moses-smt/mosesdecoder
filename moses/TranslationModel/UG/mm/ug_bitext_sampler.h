@@ -76,6 +76,7 @@ BitextSampler : public Moses::reference_counter
 
   size_t consider_sample(TokenPosition const& p);
   size_t perform_random_sampling();
+  size_t perform_random_sampling_with_replacement();
   size_t perform_full_phrase_extraction();
 
   int check_sample_distribution(uint64_t const& sid, uint64_t const& offset);
@@ -101,13 +102,13 @@ public:
   bool done() const;
 
 
-// Ranked sampling sorts all samples by score and then considers the
-// top-ranked candidates for phrase extraction.
-
-//namespace bitext {
+  // Ranked sampling sorts all samples by score and then considers the
+  // top-ranked candidates for phrase extraction.
+  
+  // namespace bitext {
 private:
 
-// the original ranked sampling
+  // the original ranked sampling
   size_t
   perform_ranked_sampling()
   {
@@ -498,6 +499,9 @@ BitextSampler<Token>::
 perform_random_sampling()
 {
   if (m_next == m_stop) return m_ctr;
+  if (!m_bias && m_num_occurrences > 100 * m_samples)
+    perform_random_sampling_with_replacement();
+    
   m_bias_total = 0;
   sapt::tsa::ArrayEntry I(m_next);
   if (m_bias)
@@ -521,7 +525,8 @@ perform_random_sampling()
 #if 0
       size_t options_total  = std::max(m_stats->raw_cnt, m_ctr);
       size_t threshold = ((m_bias && m_bias_total > 0 && m_method != ranked_sampling)
-                          ? round((*m_bias)[I.sid]/m_bias_total * options_total * m_samples) // w/ bias
+                          ? round((*m_bias)[I.sid]/m_bias_total 
+                                  * options_total * m_samples) // w/ bias
                           : m_samples); // no bias
 
       std::cerr << "[" << m_ctr << "/ " << m_stats->raw_cnt << ": " << m_rnd_float << "] " 
@@ -534,6 +539,27 @@ perform_random_sampling()
     }
   return m_ctr;
 }
+
+// Uniform sampling 
+template<typename Token>
+size_t
+BitextSampler<Token>::
+perform_random_sampling_with_replacement()
+{
+  if (m_next == m_stop) return m_ctr;
+  char const* startRange = m_next; 
+  char const* endRange   = m_stop;
+  sapt::tsa::ArrayEntry I;
+  while (m_stats->good < m_samples)
+    {
+      char const* p = startRange + size_t((endRange-startRange) * (m_rnd()/(m_rnd.max()+1.)));
+      m_root->readEntry(m_root->adjustPosition(p,startRange),I);
+      ++m_ctr;
+      consider_sample(I);
+    }
+  return m_ctr;
+}
+
 
 template<typename Token>
 size_t
