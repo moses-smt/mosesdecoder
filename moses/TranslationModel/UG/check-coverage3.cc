@@ -1,6 +1,4 @@
-// #include "mmsapt.h"
-// #include "moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"
-// #include "moses/TranslationTask.h"
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
 #include <boost/tokenizer.hpp>
@@ -33,7 +31,7 @@ string ifile;
 struct mycmp 
 {
   bool operator() (pair<string,uint32_t> const& a, 
-		   pair<string,uint32_t> const& b) const
+                   pair<string,uint32_t> const& b) const
   {
     return a.second > b.second;
   }
@@ -99,79 +97,80 @@ int main(int argc, char* argv[])
       vector<id_type> snt;
       B->V1->fillIdSeq(line,snt);
       for (size_t i = 0; i < snt.size(); ++i)
-	{
-	  bitext_t::iter m(B->I1.get());
-	  for (size_t k = i; k < snt.size() && m.extend(snt[k]); ++k);
-	  for (size_t num_occurrences = 0; m.size(); m.up())
-	    {
-	      if (size_t(m.ca()) == num_occurrences) continue;
-	      num_occurrences = m.ca();
-	      SPTR<SamplingBias const> zilch;
-	      BitextSampler<Token> s(B, m, zilch, 1000, 1000, 
-				     sapt::random_sampling);
-	      s();
-	      if (s.stats()->trg.size() == 0) continue;
-	      sapt::pstats::indoc_map_t::const_iterator d
-		= s.stats()->indoc.find(docid);
-	      size_t indoccnt = d != s.stats()->indoc.end() ? d->second : 0;
-	      cout << m.str(B->V1.get()) << " (" 
-		   << s.stats()->trg.size() << " entries; " 
-		   << indoccnt << "/" << s.stats()->good 
-		   << " samples in domain; " << num_occurrences
-		   << " occ.)" << endl;
-	      vector<PhrasePair<Token> > ppairs;
-	      PhrasePair<Token>::SortDescendingByJointCount sorter;
-	      expand(m,*B,*s.stats(),ppairs,NULL);
-	      sort(ppairs.begin(),ppairs.end(),sorter);
-	      boost::format fmt("%4d/%d/%d |%s| (%4.2f : %4.2f)"); 
-	      size_t ctr = 0;
-	      bool skipped_some = false;
-	      BOOST_FOREACH(PhrasePair<Token>& ppair, ppairs)
-		{
-		  if (++ctr > topN && ppair.indoc.find(docid) == ppair.indoc.end())
-		    {
-		      skipped_some = true;
-		      continue;
-		    }
-		  if (skipped_some) 
-		    {
-		      cout << string(17,' ') << "..." << endl;
-		      skipped_some = false;
-		    }
-		  // if (ppair.joint * 100 < ppair.good1) break;
-		  ppair.good2 = ppair.raw2 * float(ppair.good1)/ppair.raw1;
-		  ppair.good2 = max(ppair.good2, ppair.joint);
+        {
+          bitext_t::iter m(B->I1.get());
+          for (size_t k = i; k < snt.size() && m.extend(snt[k]); ++k);
+          for (size_t num_occurrences = 0; m.size(); m.up())
+            {
+              if (size_t(m.ca()) == num_occurrences) continue;
+              num_occurrences = m.ca();
+              // num_occurrences = m.rawCnt();
+              SPTR<SamplingBias const> zilch;
+              BitextSampler<Token> s(B, m, zilch, 1000, 1000, 
+                                     sapt::random_sampling);
+              s();
+              if (s.stats()->trg.size() == 0) continue;
+              sapt::pstats::indoc_map_t::const_iterator d
+                = s.stats()->indoc.find(docid);
+              size_t indoccnt = d != s.stats()->indoc.end() ? d->second : 0;
+              cout << m.str(B->V1.get()) << " (" 
+                   << s.stats()->trg.size() << " entries; " 
+                   << indoccnt << "/" << s.stats()->good 
+                   << " samples in domain; " << num_occurrences
+                   << " occ.)" << endl;
+              vector<PhrasePair<Token> > ppairs;
+              PhrasePair<Token>::SortDescendingByJointCount sorter;
+              expand(m,*B,*s.stats(),ppairs,NULL);
+              sort(ppairs.begin(),ppairs.end(),sorter);
+              boost::format fmt("%4d/%d/%d |%s| (%4.2f : %4.2f)"); 
+              size_t ctr = 0;
+              bool skipped_some = false;
+              BOOST_FOREACH(PhrasePair<Token>& ppair, ppairs)
+                {
+                  if (++ctr > topN && ppair.indoc.find(docid) == ppair.indoc.end())
+                    {
+                      skipped_some = true;
+                      continue;
+                    }
+                  if (skipped_some) 
+                    {
+                      cout << string(17,' ') << "..." << endl;
+                      skipped_some = false;
+                    }
+                  // if (ppair.joint * 100 < ppair.good1) break;
+                  ppair.good2 = ppair.raw2 * float(ppair.good1)/ppair.raw1;
+                  ppair.good2 = max(ppair.good2, ppair.joint);
 
 #if 1
-		  cout << "\t" 
-		       << (fmt % ppair.joint % ppair.good1 % ppair.good2
-			   % B->T2->pid2str(B->V2.get(),ppair.p2)
-			   % (float(ppair.joint)/ppair.good1)
-			   % (float(ppair.joint)/ppair.good2)
-			   ) << "\n";
-		  print_evidence_list(*B, ppair.indoc);
-		  cout << endl;
+                  cout << "\t" 
+                       << (fmt % ppair.joint % ppair.good1 % ppair.good2
+                           % B->T2->pid2str(B->V2.get(),ppair.p2)
+                           % (float(ppair.joint)/ppair.good1)
+                           % (float(ppair.joint)/ppair.good2)
+                           ) << "\n";
+                  print_evidence_list(*B, ppair.indoc);
+                  cout << endl;
 #else
-		  cout << "\t" 
-		       << (fmt % ppair.joint % ppair.good1 % ppair.good2
-			   % B->T2->pid2str(B->V2.get(),ppair.p2)
-			   % (float(ppair.joint)/ppair.good1)
-			   % (float(ppair.joint)/ppair.good2)
-			   ) << " [";
-		  typedef std::map<uint32_t, uint32_t>::const_iterator iter;
-		  for (iter d = ppair.indoc.begin(); d != ppair.indoc.end(); ++d)
-		    {
-		      if (d != ppair.indoc.begin()) cout << "; ";
-		      cout << (boost::format("%s: %d") % B->docid2name(d->first)
-			       % d->second) ;
-		    }
-		  cout << "]" << endl;
+                  cout << "\t" 
+                       << (fmt % ppair.joint % ppair.good1 % ppair.good2
+                           % B->T2->pid2str(B->V2.get(),ppair.p2)
+                           % (float(ppair.joint)/ppair.good1)
+                           % (float(ppair.joint)/ppair.good2)
+                           ) << " [";
+                  typedef std::map<uint32_t, uint32_t>::const_iterator iter;
+                  for (iter d = ppair.indoc.begin(); d != ppair.indoc.end(); ++d)
+                    {
+                      if (d != ppair.indoc.begin()) cout << "; ";
+                      cout << (boost::format("%s: %d") % B->docid2name(d->first)
+                               % d->second) ;
+                    }
+                  cout << "]" << endl;
 
 #endif
 
-		}
-	    }
-	}
+                }
+            }
+        }
     }
 }
 
@@ -214,7 +213,7 @@ interpret_args(int ac, char* av[])
   if (vm.count("help"))
     {
       std::cout << "\nusage:\n\t" << av[0]
-           << " [options] <model file stem> <L1> <L2> <input file>" << std::endl;
+                << " [options] <model file stem> <L1> <L2> <input file>" << std::endl;
       std::cout << o << std::endl;
       exit(0);
     }
