@@ -1,4 +1,4 @@
-// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 // (c) 2007-2009 Ulrich Germann. All rights reserved.
 #ifndef _ug_im_tsa_h
 #define _ug_im_tsa_h
@@ -426,12 +426,12 @@ namespace sapt
     size_t n = 0;
     BOOST_FOREACH(id_type sid, newsids)
       {
-	assert(sid < crp->size());
-  	for (size_t o = 0; o < (*crp)[sid].size(); ++o, ++n)
-  	  { nidx[n].offset = o; nidx[n].sid  = sid; }
+        assert(sid < crp->size());
+        for (size_t o = 0; o < (*crp)[sid].size(); ++o, ++n)
+          { nidx[n].offset = o; nidx[n].sid  = sid; }
       }
     sort(nidx.begin(),nidx.end(),sorter);
-
+    
     // create the new suffix array
     this->numTokens = newToks + prior.sufa.size();
     this->sufa.resize(this->numTokens);
@@ -497,15 +497,15 @@ namespace sapt
     assert(this->sufa.size() == this->index.back());
     BOOST_FOREACH(cpos const& x, this->sufa)
       {
-	assert(x.sid < this->corpusSize);
-	assert(x.offset < this->corpus->sntLen(x.sid));
+        assert(x.sid < this->corpusSize);
+        assert(x.offset < this->corpus->sntLen(x.sid));
       }
     for (size_t i = 1; i < index.size(); ++i)
       {
-	assert(index[i-1] <= index[i]);
-	assert(index[i] <= sufa.size());
-	for (size_t k = index[i-1]; k < index[i]; ++k)
-	  assert(this->corpus->getToken(sufa[k])->id() == i-1);
+        assert(index[i-1] <= index[i]);
+        assert(index[i] <= sufa.size());
+        for (size_t k = index[i-1]; k < index[i]; ++k)
+          assert(this->corpus->getToken(sufa[k])->id() == i-1);
       }
     assert(index[0] == 0);
     assert(this->startArray == reinterpret_cast<char const*>(&(*this->sufa.begin())));
