@@ -21,7 +21,7 @@ using namespace boost;
 typedef sapt::L2R_Token<sapt::SimpleWordId> Token;
 typedef mmBitext<Token> bitext_t;
 
-size_t topN;
+size_t topN,sample_size;
 string docname;
 string reference_file;
 string domain_name;
@@ -106,7 +106,7 @@ int main(int argc, char* argv[])
               num_occurrences = m.ca();
               // num_occurrences = m.rawCnt();
               SPTR<SamplingBias const> zilch;
-              BitextSampler<Token> s(B, m, zilch, 1000, 1000, 
+              BitextSampler<Token> s(B, m, zilch, sample_size, sample_size, 
                                      sapt::random_sampling);
               s();
               if (s.stats()->trg.size() == 0) continue;
@@ -182,8 +182,10 @@ interpret_args(int ac, char* av[])
   o.add_options()
 
     ("help,h",  "print this message")
-    ("top,n", po::value<size_t>(&topN)->default_value(5),
+    ("top,t", po::value<size_t>(&topN)->default_value(5),
      "max. number of entries to show")
+    ("sample,N", po::value<size_t>(&sample_size)->default_value(1000),
+     "sample size")
     ("domain,D", po::value<string>(&domain_name),
      "domain name (when reading from stdin)")
     ("reference,r", po::value<string>(&reference_file),
