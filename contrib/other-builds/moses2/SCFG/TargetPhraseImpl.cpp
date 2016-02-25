@@ -6,7 +6,7 @@
  */
 
 #include <stdlib.h>
-#include "TargetPhrase.h"
+#include "TargetPhraseImpl.h"
 #include "../Scores.h"
 #include "../System.h"
 #include "../MemPool.h"
