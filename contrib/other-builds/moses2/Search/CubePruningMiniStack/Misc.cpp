@@ -25,7 +25,7 @@ QueueItem *QueueItem::Create(QueueItem *currItem,
 		CubeEdge &edge,
 		size_t hypoIndex,
 		size_t tpIndex,
-		std::deque<QueueItem*> &queueItemRecycler)
+		std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > &queueItemRecycler)
 {
 	QueueItem *ret;
 	if (currItem) {
@@ -117,7 +117,7 @@ CubeEdge::SetSeenPosition(const size_t x, const size_t y, SeenPositions &seenPos
 void CubeEdge::CreateFirst(Manager &mgr,
 		Queue &queue,
 		SeenPositions &seenPositions,
-		std::deque<QueueItem*> &queueItemRecycler)
+		std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > &queueItemRecycler)
 {
 	assert(hypos.size());
 	assert(tps.GetSize());
@@ -132,7 +132,7 @@ void CubeEdge::CreateNext(Manager &mgr,
 		QueueItem *item,
 		Queue &queue,
 		SeenPositions &seenPositions,
-		std::deque<QueueItem*> &queueItemRecycler)
+		std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > &queueItemRecycler)
 {
     size_t hypoIndex = item->hypoIndex;
 	size_t tpIndex = item->tpIndex;

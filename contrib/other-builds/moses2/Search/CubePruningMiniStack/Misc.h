@@ -38,7 +38,7 @@ public:
 			CubeEdge &edge,
 			size_t hypoIndex,
 			size_t tpIndex,
-			std::deque<QueueItem*> &queueItemRecycler);
+			std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > &queueItemRecycler);
 	QueueItem(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex);
 
 	void Init(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex);
@@ -94,12 +94,12 @@ public:
   void CreateFirst(Manager &mgr,
 		  Queue &queue,
 		  SeenPositions &seenPositions,
-		  std::deque<QueueItem*> &queueItemRecycler);
+		  std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > &queueItemRecycler);
   void CreateNext(Manager &mgr,
 		  QueueItem *item,
 		  Queue &queue,
 		  SeenPositions &seenPositions,
-		  std::deque<QueueItem*> &queueItemRecycler);
+		  std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > &queueItemRecycler);
 
 protected:
 

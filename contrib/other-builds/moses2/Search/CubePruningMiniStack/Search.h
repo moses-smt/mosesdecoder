@@ -44,7 +44,7 @@ protected:
 	typedef std::vector<CubeEdge*, MemPoolAllocator<CubeEdge*> > CubeEdges;
 	std::vector<CubeEdges*> m_cubeEdges;
 
-	std::deque<QueueItem*> m_queueItemRecycler;
+	std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > m_queueItemRecycler;
 
 	// CUBE PRUNING
 	// decoding

@@ -34,6 +34,9 @@ Search::Search(Manager &mgr)
 		std::vector<QueueItem*, MemPoolAllocator<QueueItem*> >(MemPoolAllocator<QueueItem*>(mgr.GetPool())) )
 
 ,m_seenPositions(MemPoolAllocator<CubeEdge::SeenPositionItem>(mgr.GetPool()))
+
+,m_queueItemRecycler(MemPoolAllocator<QueueItem*>(mgr.GetPool()))
+
 {
 }
 
