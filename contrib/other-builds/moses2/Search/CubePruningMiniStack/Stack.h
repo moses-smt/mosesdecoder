@@ -29,7 +29,8 @@ class MiniStack
 public:
 	typedef boost::unordered_set<const Hypothesis*,
 			  UnorderedComparer<Hypothesis>,
-			  UnorderedComparer<Hypothesis>
+			  UnorderedComparer<Hypothesis>,
+			  MemPoolAllocator<const Hypothesis*>
 			   > _HCType;
 
 	MiniStack(const Manager &mgr);

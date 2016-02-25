@@ -20,7 +20,7 @@ namespace Moses2
 namespace NSCubePruningMiniStack
 {
 MiniStack::MiniStack(const Manager &mgr)
-:m_coll()
+:m_coll(MemPoolAllocator<const Hypothesis*>(mgr.GetPool()))
 ,m_sortedHypos(NULL)
 {}
 
