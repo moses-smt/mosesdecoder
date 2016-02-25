@@ -15,7 +15,7 @@ namespace Moses2
 
 class TargetPhrases {
 	friend std::ostream& operator<<(std::ostream &, const TargetPhrases &);
-	typedef Vector<const TargetPhrase*> Coll;
+	typedef Array<const TargetPhrase*> Coll;
 public:
   typedef Coll::iterator iterator;
   typedef Coll::const_iterator const_iterator;
@@ -27,7 +27,7 @@ public:
 	return m_coll.end();
   }
 
-	TargetPhrases(MemPool &pool, size_t reserve);
+	TargetPhrases(MemPool &pool, size_t size);
 	//TargetPhrases(MemPool &pool, const System &system, const TargetPhrases &copy);
 	virtual ~TargetPhrases();
 

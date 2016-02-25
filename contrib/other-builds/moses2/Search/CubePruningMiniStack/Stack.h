@@ -22,7 +22,7 @@ class Manager;
 
 namespace NSCubePruningMiniStack
 {
-typedef Vector<const Hypothesis*>  Hypotheses;
+typedef Array<const Hypothesis*>  Hypotheses;
 
 class MiniStack
 {

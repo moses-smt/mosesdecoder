@@ -52,7 +52,7 @@ class Bitmap
 {
   friend std::ostream& operator<<(std::ostream& out, const Bitmap& bitmap);
 private:
-  Vector<char> m_bitmap; //! Ticks of words in sentence that have been done.
+  Array<char> m_bitmap; //! Ticks of words in sentence that have been done.
   size_t m_firstGap; //! Cached position of first gap, or NOT_FOUND.
   size_t m_numWordsCovered;
 

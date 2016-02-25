@@ -59,7 +59,7 @@ Hypotheses &MiniStack::GetSortedAndPruneHypos(const Manager &mgr) const
   if (m_sortedHypos == NULL) {
     // create sortedHypos first
     MemPool &pool = mgr.GetPool();
-	m_sortedHypos = new (pool.Allocate< Vector<const Hypothesis*> >()) Vector<const Hypothesis*>(pool, m_coll.size());
+	m_sortedHypos = new (pool.Allocate< Array<const Hypothesis*> >()) Array<const Hypothesis*>(pool, m_coll.size());
 
 	  size_t ind = 0;
 	  BOOST_FOREACH(const Hypothesis *hypo, m_coll) {

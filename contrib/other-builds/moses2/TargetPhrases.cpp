@@ -13,8 +13,8 @@ using namespace std;
 namespace Moses2
 {
 
-TargetPhrases::TargetPhrases(MemPool &pool, size_t reserve)
-:m_coll(pool, reserve)
+TargetPhrases::TargetPhrases(MemPool &pool, size_t size)
+:m_coll(pool, size)
 ,m_currInd(0)
 {
 }

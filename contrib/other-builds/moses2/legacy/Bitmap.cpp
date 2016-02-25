@@ -46,7 +46,7 @@ void Bitmap::Init(const std::vector<bool>& initializer)
   m_numWordsCovered = std::count(m_bitmap.begin(), m_bitmap.end(), true);
 
   // Find the first gap, and cache it.
-  Vector<char>::const_iterator first_gap = std::find(
+  Array<char>::const_iterator first_gap = std::find(
 		m_bitmap.begin(), m_bitmap.end(), false);
   m_firstGap = (
 				 (first_gap == m_bitmap.end()) ?
@@ -66,7 +66,7 @@ void Bitmap::Init(const Bitmap &copy, const Range &range)
 // for unordered_set in stack
 size_t Bitmap::hash() const
 {
-  size_t ret = boost::hash_value(m_bitmap);
+  size_t ret = m_bitmap.hash();
   return ret;
 }
 
