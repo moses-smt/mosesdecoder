@@ -124,7 +124,7 @@ void MiniStack::Clear()
 Stack::Stack(const Manager &mgr)
 :m_mgr(mgr)
 ,m_coll(MemPoolAllocator< std::pair<HypoCoverage, MiniStack*> >(mgr.GetPool()))
-,m_miniStackRecycler()
+,m_miniStackRecycler(MemPoolAllocator<MiniStack*>(mgr.GetPool()))
 {
 }
 

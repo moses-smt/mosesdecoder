@@ -94,7 +94,7 @@ protected:
 	const Manager &m_mgr;
 	Coll m_coll;
 
-	std::deque<MiniStack*> m_miniStackRecycler;
+	std::deque<MiniStack*, MemPoolAllocator<MiniStack*> > m_miniStackRecycler;
 
 
 };
