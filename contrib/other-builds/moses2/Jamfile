@@ -95,8 +95,6 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
     SCFG/TargetPhrase.cpp
     SCFG/Word.cpp
 
-    SCFG/TranslationModel/PhraseTableMemory.cpp
-
     deps ;
 
 exe moses2 : Main.cpp moses2_lib ;

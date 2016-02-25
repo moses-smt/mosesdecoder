@@ -10,7 +10,9 @@ using namespace std;
 
 namespace Moses2
 {
+namespace SCFG
+{
 
-
+}
 }
 
