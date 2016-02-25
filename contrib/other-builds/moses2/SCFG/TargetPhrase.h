@@ -1,5 +1,5 @@
 /*
- * TargetPhrase.h
+ * TargetPhraseImpl.h
  *
  *  Created on: 23 Oct 2015
  *      Author: hieu
@@ -24,18 +24,16 @@ class PhraseTable;
 namespace SCFG
 {
 
-class TargetPhrase : public TPBase, public PhraseImplTemplate<Word>
+class TargetPhraseImpl : public Moses2::TargetPhrase, public PhraseImplTemplate<Word>
 {
 	  friend std::ostream& operator<<(std::ostream &, const TargetPhrase &);
 public:
-  mutable void **ffData;
-  SCORE *scoreProperties;
 
-  static TargetPhrase *CreateFromString(MemPool &pool, const PhraseTable &pt, const System &system, const std::string &str);
-  TargetPhrase(MemPool &pool, const PhraseTable &pt, const System &system, size_t size);
-  //TargetPhrase(MemPool &pool, const System &system, const TargetPhrase &copy);
+  static TargetPhraseImpl *CreateFromString(MemPool &pool, const PhraseTable &pt, const System &system, const std::string &str);
+  TargetPhraseImpl(MemPool &pool, const PhraseTable &pt, const System &system, size_t size);
+  //TargetPhraseImpl(MemPool &pool, const System &system, const TargetPhraseImpl &copy);
 
-  virtual ~TargetPhrase();
+  virtual ~TargetPhraseImpl();
 
   const Word& operator[](size_t pos) const
   {	return m_words[pos]; }
@@ -59,18 +57,6 @@ public:
 protected:
 };
 
-//////////////////////////////////////////
-struct CompareFutureScore {
-  bool operator() (const TargetPhrase *a, const TargetPhrase *b) const
-  {
-	  return a->GetFutureScore() > b->GetFutureScore();
-  }
-
-  bool operator() (const TargetPhrase &a, const TargetPhrase &b) const
-  {
-	  return a.GetFutureScore() > b.GetFutureScore();
-  }
-};
 
 }
 

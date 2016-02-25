@@ -197,7 +197,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(
 		  const char *&offset) const
 {
 	TargetPhraseInfo *tpInfo = (TargetPhraseInfo*) offset;
-    TargetPhrase *tp = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, *this, system, tpInfo->numWords);
+    TargetPhraseImpl *tp = new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, *this, system, tpInfo->numWords);
 
 	offset += sizeof(TargetPhraseInfo);
 

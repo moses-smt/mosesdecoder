@@ -12,6 +12,7 @@
 #include <iostream>
 #include "Word.h"
 #include "MemPool.h"
+#include "TypeDef.h"
 #include "legacy/FactorCollection.h"
 
 namespace Moses2
@@ -40,12 +41,14 @@ public:
 
 };
 ////////////////////////////////////////////////////////////////////////
-class TPBase : public Phrase
+class TargetPhrase : public Phrase
 {
 public:
   const PhraseTable &pt;
+  mutable void **ffData;
+  SCORE *scoreProperties;
 
-  TPBase(MemPool &pool, const PhraseTable &pt, const System &system);
+  TargetPhrase(MemPool &pool, const PhraseTable &pt, const System &system);
 
   Scores &GetScores()
   { return *m_scores; }
@@ -59,10 +62,24 @@ public:
   { m_estimatedScore = value; }
 
   SCORE *GetScoresProperty(int propertyInd) const;
+
 protected:
 	Scores *m_scores;
 	SCORE m_estimatedScore;
 
+};
+
+//////////////////////////////////////////
+struct CompareFutureScore {
+  bool operator() (const TargetPhrase *a, const TargetPhrase *b) const
+  {
+	  return a->GetFutureScore() > b->GetFutureScore();
+  }
+
+  bool operator() (const TargetPhrase &a, const TargetPhrase &b) const
+  {
+	  return a.GetFutureScore() > b.GetFutureScore();
+  }
 };
 
 ////////////////////////////////////////////////////////////////////////

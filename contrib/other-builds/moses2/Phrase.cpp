@@ -77,14 +77,20 @@ std::ostream& operator<<(std::ostream &out, const Phrase &obj)
 }
 
 ////////////////////////////////////////////////////////////////////////
-TPBase::TPBase(MemPool &pool, const PhraseTable &pt, const System &system)
+TargetPhrase::TargetPhrase(MemPool &pool, const PhraseTable &pt, const System &system)
 :pt(pt)
+,scoreProperties(NULL)
 {
 	m_scores = new (pool.Allocate<Scores>()) Scores(system, pool, system.featureFunctions.GetNumScores());
 }
 
-SCORE TPBase::GetFutureScore() const
+SCORE TargetPhrase::GetFutureScore() const
 { return m_scores->GetTotalScore() + m_estimatedScore; }
 
+SCORE *TargetPhrase::GetScoresProperty(int propertyInd) const
+{
+	return scoreProperties ? scoreProperties + propertyInd : NULL;
 }
+
+} // namespace
 

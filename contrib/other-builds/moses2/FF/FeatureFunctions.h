@@ -62,9 +62,10 @@ public:
 			  const Phrase &source, TargetPhrase &targetPhrase) const;
     void EvaluateAfterTablePruning(MemPool &pool, const TargetPhrases &tps, const Phrase &sourcePhrase) const;
 
+    /*
     void EvaluateInIsolation(MemPool &pool, const System &system,
 			  const Phrase &source, SCFG::TargetPhrase &targetPhrase) const;
-
+	*/
 protected:
 	  std::vector<const FeatureFunction*> m_featureFunctions;
 	  std::vector<const StatefulFeatureFunction*> m_statefulFeatureFunctions;

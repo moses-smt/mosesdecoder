@@ -196,7 +196,7 @@ void FeatureFunctions::EvaluateAfterTablePruning(MemPool &pool, const TargetPhra
   }
 
 }
-
+/*
 void
 FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
 		  const Phrase &source, SCFG::TargetPhrase &targetPhrase) const
@@ -210,6 +210,6 @@ FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
 
   //targetPhrase.SetEstimatedScore(estimatedScore);
 }
-
+*/
 }
 

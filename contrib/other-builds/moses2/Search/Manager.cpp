@@ -53,7 +53,7 @@ void Manager::Init()
 	m_bitmaps = new Bitmaps(GetPool());
 
 	const PhraseTable &firstPt = *system.featureFunctions.m_phraseTables[0];
-	m_initPhrase = new (GetPool().Allocate<TargetPhrase>()) TargetPhrase(GetPool(), firstPt, system, 0);
+	m_initPhrase = new (GetPool().Allocate<TargetPhraseImpl>()) TargetPhraseImpl(GetPool(), firstPt, system, 0);
 
 	// create input phrase obj
 	FactorCollection &vocab = system.GetVocab();

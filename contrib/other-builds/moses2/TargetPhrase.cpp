@@ -1,5 +1,5 @@
 /*
- * TargetPhrase.cpp
+ * TargetPhraseImpl.cpp
  *
  *  Created on: 23 Oct 2015
  *      Author: hieu
@@ -17,22 +17,21 @@ using namespace std;
 namespace Moses2
 {
 
-TargetPhrase *TargetPhrase::CreateFromString(MemPool &pool, const PhraseTable &pt, const System &system, const std::string &str)
+TargetPhraseImpl *TargetPhraseImpl::CreateFromString(MemPool &pool, const PhraseTable &pt, const System &system, const std::string &str)
 {
 	FactorCollection &vocab = system.GetVocab();
 
 	vector<string> toks = Tokenize(str);
 	size_t size = toks.size();
-	TargetPhrase *ret = new (pool.Allocate<TargetPhrase>()) TargetPhrase(pool, pt, system, size);
+	TargetPhraseImpl *ret = new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, pt, system, size);
 	ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks);
 
 	return ret;
 }
 
-TargetPhrase::TargetPhrase(MemPool &pool, const PhraseTable &pt, const System &system, size_t size)
-:TPBase(pool, pt, system)
+TargetPhraseImpl::TargetPhraseImpl(MemPool &pool, const PhraseTable &pt, const System &system, size_t size)
+:TargetPhrase(pool, pt, system)
 ,PhraseImplTemplate(pool, size)
-,scoreProperties(NULL)
 {
 	m_scores = new (pool.Allocate<Scores>()) Scores(system, pool, system.featureFunctions.GetNumScores());
 
@@ -40,33 +39,15 @@ TargetPhrase::TargetPhrase(MemPool &pool, const PhraseTable &pt, const System &s
 	ffData = new (pool.Allocate<void *>(numWithPtData)) void *[numWithPtData];
 }
 
-/*
-TargetPhrase::TargetPhrase(MemPool &pool, const System &system, const TargetPhrase &copy)
-:PhraseImpl(pool, copy)
-,scoreProperties(NULL)
-{
-	// scores
-	m_estimatedScore = copy.m_estimatedScore;
-	m_scores = new (pool.Allocate<Scores>()) Scores(system, pool, system.featureFunctions.GetNumScores(), copy.GetScores());
-
-	size_t numWithPtData = system.featureFunctions.GetWithPhraseTableInd().size();
-	ffData = new (pool.Allocate<void *>(numWithPtData)) void *[numWithPtData];
-}
-*/
-
-TargetPhrase::~TargetPhrase() {
+TargetPhraseImpl::~TargetPhraseImpl() {
 	// TODO Auto-generated destructor stub
 }
 
-std::ostream& operator<<(std::ostream &out, const TargetPhrase &obj)
+std::ostream& operator<<(std::ostream &out, const TargetPhraseImpl &obj)
 {
 	out << (const Phrase&) obj << " SCORES:" << obj.GetScores();
 	return out;
 }
 
-SCORE *TargetPhrase::GetScoresProperty(int propertyInd) const
-{
-	return scoreProperties ? scoreProperties + propertyInd : NULL;
-}
 
 }
