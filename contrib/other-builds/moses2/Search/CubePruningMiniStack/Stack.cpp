@@ -129,7 +129,17 @@ Stack::Stack(const Manager &mgr)
 }
 
 Stack::~Stack() {
-	// TODO Auto-generated destructor stub
+	BOOST_FOREACH(const Coll::value_type &val, m_coll) {
+		const MiniStack *miniStack = val.second;
+		delete miniStack;
+	}
+
+	while (!m_miniStackRecycler.empty()) {
+		MiniStack *miniStack = m_miniStackRecycler.back();
+		m_miniStackRecycler.pop_back();
+		delete miniStack;
+
+	}
 }
 
 void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
@@ -177,7 +187,7 @@ MiniStack &Stack::GetMiniStack(const HypoCoverage &key)
 	Coll::iterator iter = m_coll.find(key);
 	if (iter == m_coll.end()) {
 		if (m_miniStackRecycler.empty()) {
-			ret = new (m_mgr.GetPool().Allocate<MiniStack>()) MiniStack(m_mgr);
+			ret = new MiniStack(m_mgr);
 		}
 		else {
 			ret = m_miniStackRecycler.back();
