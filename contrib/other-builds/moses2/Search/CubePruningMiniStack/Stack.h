@@ -67,6 +67,7 @@ public:
   typedef boost::unordered_map<HypoCoverage, MiniStack*
 		  ,boost::hash<HypoCoverage>
 		  ,std::equal_to<HypoCoverage>
+  	  	  ,MemPoolAllocator< std::pair<HypoCoverage, MiniStack*> >
   	  	  > Coll;
 
 
