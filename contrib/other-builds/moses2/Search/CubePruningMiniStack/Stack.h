@@ -64,10 +64,10 @@ public:
   typedef std::pair<const Bitmap*, size_t> HypoCoverage;
 		  // bitmap and current endPos of hypos
 
-  typedef boost::unordered_map<HypoCoverage, MiniStack*
-		  ,boost::hash<HypoCoverage>
-		  ,std::equal_to<HypoCoverage>
-  	  	  ,MemPoolAllocator< std::pair<HypoCoverage, MiniStack*> >
+  typedef boost::unordered_map<HypoCoverage, MiniStack*,
+		  boost::hash<HypoCoverage>,
+		  std::equal_to<HypoCoverage>,
+  	  	  MemPoolAllocator< std::pair<HypoCoverage, MiniStack*> >
   	  	  > Coll;
 
 
