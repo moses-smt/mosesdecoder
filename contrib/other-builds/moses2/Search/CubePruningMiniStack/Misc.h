@@ -74,7 +74,8 @@ public:
 	typedef std::pair<const CubeEdge*, int> SeenPositionItem;
 	typedef boost::unordered_set<SeenPositionItem,
 			boost::hash<SeenPositionItem>,
-			std::equal_to<SeenPositionItem> > SeenPositions;
+			std::equal_to<SeenPositionItem>,
+			MemPoolAllocator<SeenPositionItem> > SeenPositions;
 
 	const Hypotheses &hypos;
 	const InputPath &path;
