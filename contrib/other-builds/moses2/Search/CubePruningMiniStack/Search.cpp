@@ -37,6 +37,10 @@ Search::Search(Manager &mgr)
 
 Search::~Search()
 {
+	for (size_t i = 0; i < m_cubeEdges.size(); ++i) {
+		CubeEdges *edges = m_cubeEdges[i];
+		delete edges;
+	}
 }
 
 void Search::Decode()
@@ -44,7 +48,7 @@ void Search::Decode()
 	// init cue edges
 	m_cubeEdges.resize(mgr.GetInput().GetSize() + 1);
 	for (size_t i = 0; i < m_cubeEdges.size(); ++i) {
-		m_cubeEdges[i] = new (mgr.GetPool().Allocate<CubeEdges>()) CubeEdges();
+		m_cubeEdges[i] = new CubeEdges();
 	}
 
 	const Bitmap &initBitmap = mgr.GetBitmaps().GetInitialBitmap();
