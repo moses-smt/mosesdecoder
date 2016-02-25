@@ -28,6 +28,7 @@ namespace NSCubePruningMiniStack
 Search::Search(Manager &mgr)
 :Moses2::Search(mgr)
 ,m_stack(mgr)
+,m_cubeEdgeAlloc(mgr.GetPool())
 
 ,m_queue(QueueItemOrderer(),
 		std::vector<QueueItem*, MemPoolAllocator<QueueItem*> >(MemPoolAllocator<QueueItem*>(mgr.GetPool())) )
@@ -38,10 +39,6 @@ Search::Search(Manager &mgr)
 
 Search::~Search()
 {
-	for (size_t i = 0; i < m_cubeEdges.size(); ++i) {
-		CubeEdges *edges = m_cubeEdges[i];
-		delete edges;
-	}
 }
 
 void Search::Decode()
@@ -49,7 +46,7 @@ void Search::Decode()
 	// init cue edges
 	m_cubeEdges.resize(mgr.GetInput().GetSize() + 1);
 	for (size_t i = 0; i < m_cubeEdges.size(); ++i) {
-		m_cubeEdges[i] = new CubeEdges();
+		m_cubeEdges[i] = new (mgr.GetPool().Allocate<CubeEdges>()) CubeEdges(m_cubeEdgeAlloc);
 	}
 
 	const Bitmap &initBitmap = mgr.GetBitmaps().GetInitialBitmap();
