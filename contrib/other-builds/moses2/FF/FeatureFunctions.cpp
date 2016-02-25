@@ -24,7 +24,7 @@
 #include "../LM/LanguageModel.h"
 //#include "../LM/LanguageModelDALM.h"
 #include "../LM/KENLM.h"
-#include "../SCFG/TargetPhrase.h"
+#include "../SCFG/TargetPhraseImpl.h"
 #include "util/exception.hh"
 
 using namespace std;
