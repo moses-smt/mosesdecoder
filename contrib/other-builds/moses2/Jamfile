@@ -12,7 +12,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
    Scores.cpp 
    SubPhrase.cpp
    System.cpp 
-   TargetPhrase.cpp 
+   TargetPhraseImpl.cpp 
    TargetPhrases.cpp
    TranslationTask.cpp
    Vector.cpp

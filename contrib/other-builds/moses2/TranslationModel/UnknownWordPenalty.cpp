@@ -10,6 +10,7 @@
 #include "../InputPath.h"
 #include "../Scores.h"
 #include "../Search/Manager.h"
+#include "../TargetPhraseImpl.h"
 
 namespace Moses2
 {

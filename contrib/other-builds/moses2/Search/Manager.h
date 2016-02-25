@@ -12,7 +12,7 @@
 #include <string>
 #include <deque>
 #include "../InputPaths.h"
-#include "../TargetPhrase.h"
+#include "../Phrase.h"
 #include "../MemPool.h"
 #include "../Recycler.h"
 #include "../EstimatedScores.h"

@@ -8,10 +8,10 @@
 #pragma once
 #include <vector>
 #include "Vector.h"
-#include "TargetPhrase.h"
 
 namespace Moses2
 {
+class TargetPhrase;
 
 class TargetPhrases {
 	friend std::ostream& operator<<(std::ostream &, const TargetPhrases &);

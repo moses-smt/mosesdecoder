@@ -6,7 +6,7 @@
  */
 #include <vector>
 #include "LanguageModel.h"
-#include "../TargetPhrase.h"
+#include "../Phrase.h"
 #include "../System.h"
 #include "../Search/Manager.h"
 #include "../Search/Hypothesis.h"

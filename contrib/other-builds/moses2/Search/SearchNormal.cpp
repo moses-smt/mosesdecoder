@@ -12,7 +12,7 @@
 #include "Manager.h"
 #include "../InputPaths.h"
 #include "../TargetPhrases.h"
-#include "../TargetPhrase.h"
+#include "../Phrase.h"
 #include "../System.h"
 #include "../Sentence.h"
 

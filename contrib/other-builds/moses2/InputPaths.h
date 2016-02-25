@@ -18,6 +18,7 @@ namespace Moses2
 
 class PhraseImpl;
 class System;
+class Manager;
 
 class InputPaths {
 	typedef std::vector<InputPath*> Coll;

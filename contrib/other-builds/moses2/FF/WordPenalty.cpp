@@ -8,7 +8,7 @@
 #include "WordPenalty.h"
 #include "../TypeDef.h"
 #include "../Scores.h"
-#include "../TargetPhrase.h"
+#include "../Phrase.h"
 
 namespace Moses2
 {

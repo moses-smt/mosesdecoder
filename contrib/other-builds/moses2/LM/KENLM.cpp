@@ -7,7 +7,7 @@
 #include <sstream>
 #include <vector>
 #include "KENLM.h"
-#include "../TargetPhrase.h"
+#include "../Phrase.h"
 #include "../Scores.h"
 #include "../System.h"
 #include "../Search/Hypothesis.h"

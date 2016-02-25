@@ -50,8 +50,6 @@ public:
 	return ret;
   }
 
-  SCORE *GetScoresProperty(int propertyInd) const;
-
   //mutable void *chartState;
 
 protected:
