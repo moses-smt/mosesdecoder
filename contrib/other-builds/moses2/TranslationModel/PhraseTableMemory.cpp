@@ -25,8 +25,8 @@ namespace Moses2
 {
 
 PhraseTableMemory::Node::Node()
-:m_unsortedTPS(NULL)
-,m_targetPhrases(NULL)
+:m_targetPhrases(NULL)
+,m_unsortedTPS(NULL)
 {}
 
 PhraseTableMemory::Node::~Node()
