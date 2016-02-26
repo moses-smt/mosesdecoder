@@ -236,19 +236,6 @@ void Hypothesis::EvaluateWhenApplied(const StatefulFeatureFunction &sfff)
 
 }
 
-void Hypothesis::EvaluateWhenAppliedNonBatch()
-{
-  const std::vector<const StatefulFeatureFunction*>  &sfffs = GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
-  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
-	  size_t statefulInd = sfff->GetStatefulInd();
-	  const FFState *prevState = m_prevHypo->GetState(statefulInd);
-	  FFState *thisState = m_ffStates[statefulInd];
-	  assert(prevState);
-	  sfff->EvaluateWhenAppliedNonBatch(GetManager(), *this, *prevState, *m_scores, *thisState);
-  }
-  //cerr << *this << endl;
-}
-
 /** recursive - pos is relative from start of sentence */
 const Word &Hypothesis::GetWord(size_t pos) const {
   const Hypothesis *hypo = this;

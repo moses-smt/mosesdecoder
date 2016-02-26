@@ -41,6 +41,8 @@ public:
 	  size_t hash(size_t seed = 0) const;
 	  bool operator==(const HypothesisBase &other) const;
 
+	  virtual void EvaluateWhenApplied() = 0;
+
 
 protected:
 	  Manager *m_mgr;
@@ -96,7 +98,6 @@ public:
 
   void EvaluateWhenApplied();
   void EvaluateWhenApplied(const StatefulFeatureFunction &sfff);
-  void EvaluateWhenAppliedNonBatch();
 
   const Hypothesis* GetPrevHypo() const
   { return m_prevHypo; }
