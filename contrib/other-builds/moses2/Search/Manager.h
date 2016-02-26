@@ -30,7 +30,17 @@ class Hypothesis;
 class Sentence;
 class OutputCollector;
 
-class Manager {
+class ManagerBase
+{
+public:
+	virtual void Decode() = 0;
+	virtual ~ManagerBase() {}
+
+};
+
+
+class Manager : public ManagerBase
+{
 public:
 	const System &system;
 	const TranslationTask &task;

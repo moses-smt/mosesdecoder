@@ -6,6 +6,7 @@ namespace Moses2
 {
 
 class System;
+class ManagerBase;
 class Manager;
 
 class TranslationTask : public Task
@@ -17,7 +18,7 @@ public:
 	virtual void Run();
 
 protected:
-	Manager *m_mgr;
+	ManagerBase *m_mgr;
 };
 
 }

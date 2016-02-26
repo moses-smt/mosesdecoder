@@ -80,6 +80,7 @@ void System::LoadWeights()
 
   weights.Init(featureFunctions);
   BOOST_FOREACH(const std::string &line, *vec) {
+	  cerr << "line=" << line << endl;
 	  weights.CreateFromString(featureFunctions, line);
   }
 }

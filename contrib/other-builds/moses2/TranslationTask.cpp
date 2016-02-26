@@ -1,4 +1,5 @@
 #include "TranslationTask.h"
+#include "System.h"
 #include "Search/Manager.h"
 #include "Search/Hypothesis.h"
 
@@ -9,7 +10,12 @@ namespace Moses2
 
 TranslationTask::TranslationTask(System &system, const std::string &line, long translationId)
 {
-	m_mgr = new Manager(system, *this, line, translationId);
+	if (system.searchAlgorithm == CYKPlus) {
+
+	}
+	else {
+		m_mgr = new Manager(system, *this, line, translationId);
+	}
 }
 
 TranslationTask::~TranslationTask()
