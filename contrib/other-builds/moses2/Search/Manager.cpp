@@ -41,6 +41,13 @@ void ManagerBase::InitPools()
 	m_systemPool = &system.GetSystemPool();
 }
 
+void ManagerBase::ParseInput()
+{
+	FactorCollection &vocab = system.GetVocab();
+
+	m_input = Sentence::CreateFromString(GetPool(), vocab, system, m_inputStr, m_translationId);
+}
+
 /////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Manager::Manager(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId)
 :ManagerBase(sys, task, inputStr, translationId)
@@ -59,6 +66,7 @@ void Manager::Init()
 {
 	// init pools etc
 	InitPools();
+	ParseInput();
 
 	m_hypoRecycle = &system.GetHypoRecycler();
 	m_bitmaps = new Bitmaps(GetPool());
@@ -66,10 +74,6 @@ void Manager::Init()
 	const PhraseTable &firstPt = *system.featureFunctions.m_phraseTables[0];
 	m_initPhrase = new (GetPool().Allocate<TargetPhraseImpl>()) TargetPhraseImpl(GetPool(), firstPt, system, 0);
 
-	// create input phrase obj
-	FactorCollection &vocab = system.GetVocab();
-
-	m_input = Sentence::CreateFromString(GetPool(), vocab, system, m_inputStr, m_translationId);
 	m_inputPaths.Init(*m_input, *this);
 
 	const std::vector<const PhraseTable*> &pts = system.mappings;

@@ -40,13 +40,24 @@ public:
 	virtual void Decode() = 0;
 	virtual ~ManagerBase() {}
 
+	MemPool &GetPool() const
+	{ return *m_pool; }
+
+	MemPool &GetSystemPool() const
+	{ return *m_systemPool; }
+
+	const Sentence &GetInput() const
+	{ return *m_input; }
+
 protected:
     std::string m_inputStr;
     long m_translationId;
+	Sentence *m_input;
 
 	mutable MemPool *m_pool, *m_systemPool;
 
 	void InitPools();
+	void ParseInput();
 
 };
 
@@ -60,20 +71,11 @@ public:
 
 	virtual ~Manager();
 
-	MemPool &GetPool() const
-	{ return *m_pool; }
-
-	MemPool &GetSystemPool() const
-	{ return *m_systemPool; }
-
 	Recycler<Hypothesis*> &GetHypoRecycle() const
 	{ return *m_hypoRecycle; }
 
 	Bitmaps &GetBitmaps()
 	{ return *m_bitmaps; }
-
-	const Sentence &GetInput() const
-	{ return *m_input; }
 
 	const EstimatedScores &GetEstimatedScores() const
 	{ return *m_estimatedScores; }
@@ -91,7 +93,6 @@ public:
 protected:
 	mutable Recycler<Hypothesis*> *m_hypoRecycle;
 
-	Sentence *m_input;
 	InputPaths m_inputPaths;
 	Bitmaps *m_bitmaps;
 	EstimatedScores *m_estimatedScores;
