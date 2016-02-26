@@ -47,7 +47,6 @@ void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 		  const Hypothesis *&hypoExisting2 = const_cast<const Hypothesis *&>(hypoExisting1);
 		  hypoExisting2 = hypo;
 
-		  //hypoExisting->Prefetch();
 		  Hypothesis *hypoToBeDeleted = const_cast<Hypothesis*>(hypoExisting);
 		  hypoRecycle.Recycle(hypoToBeDeleted);
 	  }

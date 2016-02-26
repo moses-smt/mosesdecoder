@@ -40,18 +40,6 @@ Hypothesis *Hypothesis::Create(MemPool &pool, Manager &mgr)
 	return ret;
 }
 
-void Hypothesis::Prefetch() const
-{
-  //__builtin_prefetch(hypo);
-  __builtin_prefetch(m_ffStates);
-  __builtin_prefetch(m_ffStates[0]);
-  __builtin_prefetch(m_ffStates[1]);
-  __builtin_prefetch(m_ffStates[2]);
-  __builtin_prefetch(m_scores);
-  __builtin_prefetch(&m_estimatedScore);
-  __builtin_prefetch(&m_currTargetWordsRange);
-}
-
 Hypothesis::Hypothesis(MemPool &pool, const System &system)
 :m_currTargetWordsRange()
 {

@@ -18,9 +18,12 @@ namespace SCFG
 
 Manager::Manager(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId)
 :ManagerBase(sys, task, inputStr, translationId)
-{}
+{
 
-Manager::~Manager() {
+}
+
+Manager::~Manager()
+{
 
 }
 

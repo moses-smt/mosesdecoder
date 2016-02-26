@@ -95,7 +95,6 @@ public:
   const Word &GetWord(size_t pos) const;
 
   void Swap(Hypothesis &other);
-  void Prefetch() const;
 protected:
   Manager *m_mgr;
   const TargetPhrase *m_targetPhrase;

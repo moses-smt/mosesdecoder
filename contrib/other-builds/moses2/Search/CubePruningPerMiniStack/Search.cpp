@@ -94,8 +94,6 @@ void Search::Decode(NSCubePruningMiniStack::MiniStack &miniStack)
 
 	m_seenPositions.clear();
 
-	//Prefetch(stackInd);
-
 	// add top hypo from every edge into queue
 	CubeEdges &edges = *m_cubeEdges[&miniStack];
 
@@ -112,16 +110,6 @@ void Search::Decode(NSCubePruningMiniStack::MiniStack &miniStack)
 		m_queue.pop();
 
 		CubeEdge *edge = item->edge;
-
-		// prefetching
-		/*
-		Hypothesis::Prefetch(mgr); // next hypo in recycler
-		edge.Prefetch(mgr, item, m_queue, m_seenPositions); //next hypos of current item
-
-		QueueItem *itemNext = m_queue.top();
-		CubeEdge &edgeNext = itemNext->edge;
-		edgeNext.Prefetch(mgr, itemNext, m_queue, m_seenPositions); //next hypos of NEXT item
-		*/
 
 		// add hypo to stack
 		Hypothesis *hypo = item->hypo;

@@ -91,8 +91,6 @@ void Search::Decode(size_t stackInd)
 
 	m_seenPositions.clear();
 
-	//Prefetch(stackInd);
-
 	// add top hypo from every edge into queue
 	CubeEdges &edges = *m_cubeEdges[stackInd];
 
@@ -120,16 +118,6 @@ void Search::Decode(size_t stackInd)
 		m_queue.pop();
 
 		CubeEdge *edge = item->edge;
-
-		// prefetching
-		/*
-		Hypothesis::Prefetch(mgr); // next hypo in recycler
-		edge.Prefetch(mgr, item, m_queue, m_seenPositions); //next hypos of current item
-
-		QueueItem *itemNext = m_queue.top();
-		CubeEdge &edgeNext = itemNext->edge;
-		edgeNext.Prefetch(mgr, itemNext, m_queue, m_seenPositions); //next hypos of NEXT item
-		*/
 
 		// add hypo to stack
 		Hypothesis *hypo = item->hypo;
@@ -225,34 +213,6 @@ const Hypothesis *Search::GetBestHypothesis() const
 		best = sortedHypos[0];
 	}
 	return best;
-}
-
-void Search::Prefetch(size_t stackInd)
-{
-	CubeEdges &edges = *m_cubeEdges[stackInd];
-
-	BOOST_FOREACH(CubeEdge *edge, edges) {
-		 __builtin_prefetch(edge);
-
-		 BOOST_FOREACH(const Hypothesis *hypo, edge->hypos) {
-			 __builtin_prefetch(hypo);
-
-			 const TargetPhrase &tp = hypo->GetTargetPhrase();
-			 __builtin_prefetch(&tp);
-
-		 }
-
-		 BOOST_FOREACH(const TargetPhrase *tp, edge->tps) {
-			 __builtin_prefetch(tp);
-
-			 size_t size = tp->GetSize();
-			 for (size_t i = 0; i < size; ++i) {
-				 const Word &word = (*tp)[i];
-				 __builtin_prefetch(&word);
-			 }
-		 }
-
-	}
 }
 
 }
