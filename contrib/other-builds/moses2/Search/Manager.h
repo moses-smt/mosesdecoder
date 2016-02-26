@@ -72,7 +72,7 @@ public:
 	virtual ~Manager();
 
 	Recycler<Hypothesis*> &GetHypoRecycle() const
-	{ return *m_hypoRecycle; }
+	{ return m_hypoRecycle; }
 
 	Bitmaps &GetBitmaps()
 	{ return *m_bitmaps; }
@@ -89,7 +89,7 @@ public:
 	void Decode();
 
 protected:
-	mutable Recycler<Hypothesis*> *m_hypoRecycle;
+	mutable Recycler<Hypothesis*> m_hypoRecycle;
 
 	InputPaths m_inputPaths;
 	Bitmaps *m_bitmaps;

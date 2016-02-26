@@ -72,7 +72,6 @@ void Manager::Init()
 	InitPools();
 	ParseInput();
 
-	m_hypoRecycle = &system.GetHypoRecycler();
 	m_bitmaps = new Bitmaps(GetPool());
 
 	const PhraseTable &firstPt = *system.featureFunctions.m_phraseTables[0];
