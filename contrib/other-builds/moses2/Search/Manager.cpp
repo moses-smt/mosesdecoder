@@ -131,7 +131,6 @@ void Manager::CalcFutureScore()
 		const Range &range = path->range;
 		SCORE bestScore = -numeric_limits<SCORE>::infinity();
 
-		const TargetPhrases **allTps = path->targetPhrases;
   	    size_t numPt = system.mappings.size();
   	    for (size_t i = 0; i < numPt; ++i) {
  	      const TargetPhrases *tps = path->targetPhrases[i];

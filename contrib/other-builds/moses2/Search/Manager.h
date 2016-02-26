@@ -88,8 +88,6 @@ public:
 
 	void Decode();
 
-    void OutputBest() const;
-
 protected:
 	mutable Recycler<Hypothesis*> *m_hypoRecycle;
 
@@ -102,8 +100,9 @@ protected:
 
 	// must be run in same thread as Decode()
 	void Init();
-
 	void CalcFutureScore();
+    void OutputBest() const;
+
 };
 
 }
