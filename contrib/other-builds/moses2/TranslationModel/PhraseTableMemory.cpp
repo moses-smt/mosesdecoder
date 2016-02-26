@@ -16,6 +16,9 @@
 #include "../InputPaths.h"
 #include "../legacy/InputFileStream.h"
 
+#include "../SCFG/PhraseImpl.h"
+#include "../SCFG/TargetPhraseImpl.h"
+
 using namespace std;
 
 namespace Moses2
@@ -30,12 +33,12 @@ PhraseTableMemory::Node::~Node()
 {
 }
 
-void PhraseTableMemory::Node::AddRule(PhraseImpl &source, TargetPhrase *target)
+void PhraseTableMemory::Node::AddRule(Phrase &source, TargetPhrase *target)
 {
 	AddRule(source, target, 0);
 }
 
-PhraseTableMemory::Node &PhraseTableMemory::Node::AddRule(PhraseImpl &source, TargetPhrase *target, size_t pos)
+PhraseTableMemory::Node &PhraseTableMemory::Node::AddRule(Phrase &source, TargetPhrase *target, size_t pos)
 {
 	if (pos == source.GetSize()) {
 		if (m_unsortedTPS == NULL) {
@@ -127,10 +130,32 @@ void PhraseTableMemory::Load(System &system)
 		assert(toks.size() >= 3);
 		//cerr << "line=" << line << endl;
 
-		PhraseImpl *source = PhraseImpl::CreateFromString(tmpSourcePool, vocab, system, toks[0]);
-		//cerr << "created soure" << endl;
-		TargetPhrase *target = TargetPhraseImpl::CreateFromString(systemPool, *this, system, toks[1]);
-		//cerr << "created target" << endl;
+		Phrase *source;
+		TargetPhrase *target;
+
+		switch (system.searchAlgorithm) {
+		case Normal:
+		case CubePruning:
+		case CubePruningPerMiniStack:
+		case CubePruningPerBitmap:
+		case CubePruningCardinalStack:
+		case CubePruningBitmapStack:
+		case CubePruningMiniStack:
+			source = PhraseImpl::CreateFromString(tmpSourcePool, vocab, system, toks[0]);
+			//cerr << "created soure" << endl;
+			target = TargetPhraseImpl::CreateFromString(systemPool, *this, system, toks[1]);
+			//cerr << "created target" << endl;
+			break;
+		case CYKPlus:
+			source = SCFG::PhraseImpl::CreateFromString(tmpSourcePool, vocab, system, toks[0]);
+			//cerr << "created soure" << endl;
+			target = SCFG::TargetPhraseImpl::CreateFromString(systemPool, *this, system, toks[1]);
+			//cerr << "created target" << endl;
+			break;
+		default:
+			abort();
+		}
+
 		target->GetScores().CreateFromString(toks[2], *this, system, true);
 		//cerr << "created scores" << endl;
 
