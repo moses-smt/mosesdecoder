@@ -14,7 +14,7 @@
 #include "../legacy/InputFileStream.h"
 #include "../legacy/ProbingPT/probing_hash_utils.hh"
 #include "../FF/FeatureFunctions.h"
-#include "../Search/Manager.h"
+#include "../PhraseBased/Manager.h"
 #include "../legacy/FactorCollection.h"
 #include "../legacy/ProbingPT/quering.hh"
 #include "../legacy/Util2.h"

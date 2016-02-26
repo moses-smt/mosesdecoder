@@ -26,7 +26,33 @@ class StatefulFeatureFunction;
 class InputType;
 class InputPath;
 
-class Hypothesis {
+class HypothesisBase
+{
+public:
+	  inline Manager &GetManager() const
+	  { return *m_mgr; }
+
+	  const Scores &GetScores() const
+	  { return *m_scores; }
+
+	  const FFState *GetState(size_t ind) const
+	  { return m_ffStates[ind]; }
+
+	  size_t hash(size_t seed = 0) const;
+	  bool operator==(const HypothesisBase &other) const;
+
+
+protected:
+	  Manager *m_mgr;
+	  Scores *m_scores;
+	  FFState **m_ffStates;
+
+	  HypothesisBase(MemPool &pool, const System &system);
+};
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+class Hypothesis : public HypothesisBase
+{
 	  friend std::ostream& operator<<(std::ostream &, const Hypothesis &);
 
 	  Hypothesis(MemPool &pool, const System &system);
@@ -48,9 +74,6 @@ public:
   size_t hash() const;
   bool operator==(const Hypothesis &other) const;
 
-  inline Manager &GetManager() const
-  { return *m_mgr; }
-
   inline const Bitmap &GetBitmap() const
   { return *m_sourceCompleted; }
 
@@ -61,17 +84,11 @@ public:
     return m_currTargetWordsRange;
   }
 
-  const Scores &GetScores() const
-  { return *m_scores; }
-
   SCORE GetFutureScore() const
   { return GetScores().GetTotalScore() + m_estimatedScore; }
 
   const TargetPhrase &GetTargetPhrase() const
   { return *m_targetPhrase; }
-
-  const FFState *GetState(size_t ind) const
-  { return m_ffStates[ind]; }
 
   void OutputToStream(std::ostream &out) const;
 
@@ -96,14 +113,11 @@ public:
 
   void Swap(Hypothesis &other);
 protected:
-  Manager *m_mgr;
   const TargetPhrase *m_targetPhrase;
   const Bitmap *m_sourceCompleted;
   const InputPath *m_path;
   const Hypothesis *m_prevHypo;
 
-  FFState **m_ffStates;
-  Scores *m_scores;
   SCORE m_estimatedScore;
   Range m_currTargetWordsRange;
 };

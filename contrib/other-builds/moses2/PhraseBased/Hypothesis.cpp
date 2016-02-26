@@ -23,25 +23,7 @@ namespace Moses2
 
 //size_t g_numHypos = 0;
 
-Hypothesis *Hypothesis::Create(MemPool &pool, Manager &mgr)
-{
-//	++g_numHypos;
-	Hypothesis *ret;
-
-	Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycle();
-	ret = recycler.Get();
-	if (ret) {
-		// got new hypo from recycler. Do nothing
-	}
-	else {
-		ret = new (pool.Allocate<Hypothesis>()) Hypothesis(pool, mgr.system);
-		recycler.Keep(ret);
-	}
-	return ret;
-}
-
-Hypothesis::Hypothesis(MemPool &pool, const System &system)
-:m_currTargetWordsRange()
+HypothesisBase::HypothesisBase(MemPool &pool, const System &system)
 {
 	m_scores = new (pool.Allocate<Scores>()) Scores(system, pool, system.featureFunctions.GetNumScores());
 
@@ -55,6 +37,61 @@ Hypothesis::Hypothesis(MemPool &pool, const System &system)
     	FFState *state = sfff->BlankState(pool);
     	m_ffStates[statefulInd] = state;
     }
+}
+
+size_t HypothesisBase::hash(size_t seed) const
+{
+  size_t numStatefulFFs = GetManager().system.featureFunctions.GetStatefulFeatureFunctions().size();
+
+  // states
+  for (size_t i = 0; i < numStatefulFFs; ++i) {
+	const FFState *state = m_ffStates[i];
+	size_t hash = state->hash();
+	boost::hash_combine(seed, hash);
+  }
+  return seed;
+
+}
+
+bool HypothesisBase::operator==(const HypothesisBase &other) const
+{
+  size_t numStatefulFFs = GetManager().system.featureFunctions.GetStatefulFeatureFunctions().size();
+
+  // states
+  for (size_t i = 0; i < numStatefulFFs; ++i) {
+	const FFState &thisState = *m_ffStates[i];
+	const FFState &otherState = *other.m_ffStates[i];
+	if (thisState != otherState) {
+	  return false;
+	}
+  }
+  return true;
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Hypothesis *Hypothesis::Create(MemPool &pool, Manager &mgr)
+{
+//	++g_numHypos;
+	Hypothesis *ret;
+
+	Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycle();
+	ret = recycler.Get();
+	if (ret) {
+		// got new hypo from recycler. Do nothing
+	}
+	else {
+		ret = new (pool.Allocate<Hypothesis>()) Hypothesis(pool, mgr.system);
+		//cerr << "Hypothesis=" << sizeof(Hypothesis) << " " << ret << endl;
+		recycler.Keep(ret);
+	}
+	return ret;
+}
+
+Hypothesis::Hypothesis(MemPool &pool, const System &system)
+:HypothesisBase(pool, system)
+,m_currTargetWordsRange()
+{
 }
 
 Hypothesis::~Hypothesis() {
@@ -100,40 +137,22 @@ void Hypothesis::Init(Manager &mgr, const Hypothesis &prevHypo,
 
 size_t Hypothesis::hash() const
 {
-  size_t numStatefulFFs = GetManager().system.featureFunctions.GetStatefulFeatureFunctions().size();
-  size_t seed;
-
   // coverage
-  seed = (size_t) m_sourceCompleted;
+  size_t seed = (size_t) m_sourceCompleted;
 
-  // states
-  for (size_t i = 0; i < numStatefulFFs; ++i) {
-	const FFState *state = m_ffStates[i];
-	size_t hash = state->hash();
-	boost::hash_combine(seed, hash);
-  }
+  seed = HypothesisBase::hash(seed);
   return seed;
-
 }
 
 bool Hypothesis::operator==(const Hypothesis &other) const
 {
-	size_t numStatefulFFs = GetManager().system.featureFunctions.GetStatefulFeatureFunctions().size();
   // coverage
   if (m_sourceCompleted != other.m_sourceCompleted) {
 	return false;
- }
-
-  // states
-  for (size_t i = 0; i < numStatefulFFs; ++i) {
-	const FFState &thisState = *m_ffStates[i];
-	const FFState &otherState = *other.m_ffStates[i];
-	if (thisState != otherState) {
-	  return false;
-	}
   }
-  return true;
 
+  bool ret = HypothesisBase::operator ==(other);
+  return ret;
 }
 
 void Hypothesis::OutputToStream(std::ostream &out) const

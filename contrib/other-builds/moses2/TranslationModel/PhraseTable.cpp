@@ -10,7 +10,7 @@
 #include "../InputPaths.h"
 #include "../legacy/Util2.h"
 #include "../TypeDef.h"
-#include "../Search/Manager.h"
+#include "../PhraseBased/Manager.h"
 
 using namespace std;
 

@@ -6,8 +6,8 @@
  */
 #include <sstream>
 #include "SkeletonStatefulFF.h"
-#include "../Search/Manager.h"
-#include "../Search/Hypothesis.h"
+#include "../PhraseBased/Manager.h"
+#include "../PhraseBased/Hypothesis.h"
 
 using namespace std;
 

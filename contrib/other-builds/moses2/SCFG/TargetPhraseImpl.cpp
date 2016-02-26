@@ -10,7 +10,7 @@
 #include "../Scores.h"
 #include "../System.h"
 #include "../MemPool.h"
-#include "../Search/Manager.h"
+#include "../PhraseBased/Manager.h"
 
 using namespace std;
 

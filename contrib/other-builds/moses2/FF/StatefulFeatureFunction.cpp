@@ -11,7 +11,7 @@
 
 #include <boost/foreach.hpp>
 #include "StatefulFeatureFunction.h"
-#include "../Search/Hypothesis.h"
+#include "../PhraseBased/Hypothesis.h"
 
 namespace Moses2
 {

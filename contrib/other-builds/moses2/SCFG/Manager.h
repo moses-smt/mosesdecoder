@@ -11,7 +11,7 @@
 #include <cstddef>
 #include <string>
 #include <deque>
-#include "../Search/Manager.h"
+#include "../ManagerBase.h"
 
 namespace Moses2
 {

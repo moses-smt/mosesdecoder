@@ -1,7 +1,6 @@
 #include "TranslationTask.h"
 #include "System.h"
-#include "Search/Manager.h"
-#include "Search/Hypothesis.h"
+#include "PhraseBased/Manager.h"
 
 using namespace std;
 

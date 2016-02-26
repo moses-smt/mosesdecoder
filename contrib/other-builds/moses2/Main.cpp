@@ -5,7 +5,6 @@
 #include "Phrase.h"
 #include "TranslationTask.h"
 #include "MemPool.h"
-#include "Search/Manager.h"
 #include "legacy/InputFileStream.h"
 #include "legacy/Parameter.h"
 #include "legacy/ThreadPool.h"

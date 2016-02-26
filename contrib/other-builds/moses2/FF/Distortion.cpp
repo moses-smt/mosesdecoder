@@ -6,8 +6,8 @@
  */
 #include <sstream>
 #include "Distortion.h"
-#include "../Search/Hypothesis.h"
-#include "../Search/Manager.h"
+#include "../PhraseBased/Hypothesis.h"
+#include "../PhraseBased/Manager.h"
 #include "../legacy/Range.h"
 #include "../legacy/Bitmap.h"
 
