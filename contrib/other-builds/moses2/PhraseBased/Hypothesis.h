@@ -92,15 +92,7 @@ protected:
   Range m_currTargetWordsRange;
 };
 
-
-class HypothesisFutureScoreOrderer
-{
-public:
-  bool operator()(const Hypothesis* a, const Hypothesis* b) const {
-    return a->GetFutureScore() > b->GetFutureScore();
-  }
-};
-
+////////////////////////////////////////////////////////////////////////////////////
 class HypothesisTargetPhraseOrderer
 {
 public:

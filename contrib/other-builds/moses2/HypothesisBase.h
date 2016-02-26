@@ -32,6 +32,7 @@ public:
 	  size_t hash(size_t seed = 0) const;
 	  bool operator==(const HypothesisBase &other) const;
 
+	  virtual SCORE GetFutureScore() const = 0;
 	  virtual void EvaluateWhenApplied() = 0;
 
 
@@ -41,6 +42,15 @@ protected:
 	  FFState **m_ffStates;
 
 	  HypothesisBase(MemPool &pool, const System &system);
+};
+
+////////////////////////////////////////////////////////////////////////////////////
+class HypothesisFutureScoreOrderer
+{
+public:
+  bool operator()(const HypothesisBase* a, const HypothesisBase* b) const {
+    return a->GetFutureScore() > b->GetFutureScore();
+  }
 };
 
 
