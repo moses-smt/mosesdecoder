@@ -28,12 +28,22 @@ using namespace std;
 
 namespace Moses2
 {
-
-Manager::Manager(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId)
+ManagerBase::ManagerBase(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId)
 :system(sys)
 ,task(task)
 ,m_inputStr(inputStr)
 ,m_translationId(translationId)
+{}
+
+void ManagerBase::InitPools()
+{
+	m_pool = &system.GetManagerPool();
+	m_systemPool = &system.GetSystemPool();
+}
+
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
+Manager::Manager(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId)
+:ManagerBase(sys, task, inputStr, translationId)
 {}
 
 Manager::~Manager() {
@@ -48,8 +58,8 @@ Manager::~Manager() {
 void Manager::Init()
 {
 	// init pools etc
-	m_pool = &system.GetManagerPool();
-	m_systemPool = &system.GetSystemPool();
+	InitPools();
+
 	m_hypoRecycle = &system.GetHypoRecycler();
 	m_bitmaps = new Bitmaps(GetPool());
 

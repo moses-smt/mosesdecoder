@@ -33,17 +33,28 @@ class OutputCollector;
 class ManagerBase
 {
 public:
+	const System &system;
+	const TranslationTask &task;
+
+	ManagerBase(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId);
 	virtual void Decode() = 0;
 	virtual ~ManagerBase() {}
+
+protected:
+    std::string m_inputStr;
+    long m_translationId;
+
+	mutable MemPool *m_pool, *m_systemPool;
+
+	void InitPools();
 
 };
 
 
+/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class Manager : public ManagerBase
 {
 public:
-	const System &system;
-	const TranslationTask &task;
 
 	Manager(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId);
 
@@ -78,11 +89,8 @@ public:
     void OutputBest() const;
 
 protected:
-	mutable MemPool *m_pool, *m_systemPool;
 	mutable Recycler<Hypothesis*> *m_hypoRecycle;
 
-    std::string m_inputStr;
-    long m_translationId;
 	Sentence *m_input;
 	InputPaths m_inputPaths;
 	Bitmaps *m_bitmaps;
