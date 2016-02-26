@@ -37,8 +37,8 @@ public:
 	const TranslationTask &task;
 
 	ManagerBase(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId);
+	virtual ~ManagerBase();
 	virtual void Decode() = 0;
-	virtual ~ManagerBase() {}
 
 	MemPool &GetPool() const
 	{ return *m_pool; }

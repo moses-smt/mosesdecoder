@@ -35,6 +35,11 @@ ManagerBase::ManagerBase(System &sys, const TranslationTask &task, const std::st
 ,m_translationId(translationId)
 {}
 
+ManagerBase::~ManagerBase()
+{
+	GetPool().Reset();
+}
+
 void ManagerBase::InitPools()
 {
 	m_pool = &system.GetManagerPool();
@@ -58,7 +63,6 @@ Manager::~Manager() {
 	delete m_search;
 	delete m_bitmaps;
 
-	GetPool().Reset();
 	GetHypoRecycle().Clear();
 }
 

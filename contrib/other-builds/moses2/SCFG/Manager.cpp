@@ -27,6 +27,10 @@ Manager::~Manager() {
 
 void Manager::Decode()
 {
+	// init pools etc
+	InitPools();
+	ParseInput();
+
 }
 
 }
