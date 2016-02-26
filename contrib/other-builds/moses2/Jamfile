@@ -5,6 +5,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
  	 InputPath.cpp 
  	 InputPaths.cpp
    InputType.cpp
+   ManagerBase.cpp
  	 MemPool.cpp
    Phrase.cpp 
    PhraseImpl.cpp 
@@ -35,33 +36,34 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
  	 	TranslationModel/PhraseTableMemory.cpp 
  	 	TranslationModel/ProbingPT.cpp 
  	 	TranslationModel/UnknownWordPenalty.cpp 
-   	Search/ArcLists.cpp
-		Search/Hypothesis.cpp 
- 	 	Search/Manager.cpp 
- 	 	Search/Search.cpp
- 	 	Search/SearchNormal.cpp
- 	 	Search/Stack.cpp 
- 	 	Search/Stacks.cpp 
+   	
+		PhraseBased/ArcLists.cpp
+		PhraseBased/Hypothesis.cpp 
+ 	 	PhraseBased/Manager.cpp 
+ 	 	PhraseBased/Search.cpp
+ 	 	PhraseBased/SearchNormal.cpp
+ 	 	PhraseBased/Stack.cpp 
+ 	 	PhraseBased/Stacks.cpp 
 
-		Search/CubePruningMiniStack/Misc.cpp
- 	 	Search/CubePruningMiniStack/Search.cpp
- 	 	Search/CubePruningMiniStack/Stack.cpp 
+		PhraseBased/CubePruningMiniStack/Misc.cpp
+ 	 	PhraseBased/CubePruningMiniStack/Search.cpp
+ 	 	PhraseBased/CubePruningMiniStack/Stack.cpp 
 
- 	 	Search/CubePruningCardinalStack/Misc.cpp
- 	 	Search/CubePruningCardinalStack/Search.cpp
- 	 	Search/CubePruningCardinalStack/Stack.cpp
+ 	 	PhraseBased/CubePruningCardinalStack/Misc.cpp
+ 	 	PhraseBased/CubePruningCardinalStack/Search.cpp
+ 	 	PhraseBased/CubePruningCardinalStack/Stack.cpp
 
- 	 	Search/CubePruningBitmapStack/Misc.cpp
- 	 	Search/CubePruningBitmapStack/Search.cpp
- 	 	Search/CubePruningBitmapStack/Stack.cpp
+ 	 	PhraseBased/CubePruningBitmapStack/Misc.cpp
+ 	 	PhraseBased/CubePruningBitmapStack/Search.cpp
+ 	 	PhraseBased/CubePruningBitmapStack/Stack.cpp
 
- 	 	Search/CubePruningPerBitmap/Misc.cpp
- 	 	Search/CubePruningPerBitmap/Search.cpp
- 	 	Search/CubePruningPerBitmap/Stacks.cpp
+ 	 	PhraseBased/CubePruningPerBitmap/Misc.cpp
+ 	 	PhraseBased/CubePruningPerBitmap/Search.cpp
+ 	 	PhraseBased/CubePruningPerBitmap/Stacks.cpp
 
- 	 	Search/CubePruningPerMiniStack/Misc.cpp
- 	 	Search/CubePruningPerMiniStack/Search.cpp
- 	 	Search/CubePruningPerMiniStack/Stacks.cpp
+ 	 	PhraseBased/CubePruningPerMiniStack/Misc.cpp
+ 	 	PhraseBased/CubePruningPerMiniStack/Search.cpp
+ 	 	PhraseBased/CubePruningPerMiniStack/Stacks.cpp
 
 		legacy/Bitmap.cpp
 		legacy/Bitmaps.cpp

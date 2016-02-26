@@ -11,6 +11,7 @@
 #include <cstddef>
 #include <string>
 #include <deque>
+#include "../ManagerBase.h"
 #include "../InputPaths.h"
 #include "../Phrase.h"
 #include "../MemPool.h"
@@ -30,39 +31,6 @@ class Hypothesis;
 class Sentence;
 class OutputCollector;
 
-class ManagerBase
-{
-public:
-	const System &system;
-	const TranslationTask &task;
-
-	ManagerBase(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId);
-	virtual ~ManagerBase();
-	virtual void Decode() = 0;
-
-	MemPool &GetPool() const
-	{ return *m_pool; }
-
-	MemPool &GetSystemPool() const
-	{ return *m_systemPool; }
-
-	const Sentence &GetInput() const
-	{ return *m_input; }
-
-protected:
-    std::string m_inputStr;
-    long m_translationId;
-	Sentence *m_input;
-
-	mutable MemPool *m_pool, *m_systemPool;
-
-	void InitPools();
-	void ParseInput();
-
-};
-
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class Manager : public ManagerBase
 {
 public:
