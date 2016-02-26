@@ -10,10 +10,12 @@
 #include "Manager.h"
 #include "Normal/Search.h"
 #include "CubePruningMiniStack/Search.h"
+/*
 #include "CubePruningPerMiniStack/Search.h"
 #include "CubePruningPerBitmap/Search.h"
 #include "CubePruningCardinalStack/Search.h"
 #include "CubePruningBitmapStack/Search.h"
+*/
 #include "../System.h"
 #include "../TargetPhrases.h"
 #include "../Phrase.h"
@@ -99,7 +101,8 @@ void Manager::Init()
 	case CubePruningMiniStack:
 		m_search = new NSCubePruningMiniStack::Search(*this);
 		break;
-	case CubePruningPerMiniStack:
+/*
+ 	case CubePruningPerMiniStack:
 		m_search = new NSCubePruningPerMiniStack::Search(*this);
 		break;
 	case CubePruningPerBitmap:
@@ -111,6 +114,7 @@ void Manager::Init()
 	case CubePruningBitmapStack:
 		m_search = new NSCubePruningBitmapStack::Search(*this);
 		break;
+*/
 	default:
 		cerr << "Unknown search algorithm" << endl;
 		abort();
