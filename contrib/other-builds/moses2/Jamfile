@@ -41,9 +41,10 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
 		PhraseBased/Hypothesis.cpp 
  	 	PhraseBased/Manager.cpp 
  	 	PhraseBased/Search.cpp
- 	 	PhraseBased/SearchNormal.cpp
- 	 	PhraseBased/Stack.cpp 
- 	 	PhraseBased/Stacks.cpp 
+ 	 	
+		PhraseBased/Normal/Search.cpp
+ 	 	PhraseBased/Normal/Stack.cpp 
+ 	 	PhraseBased/Normal/Stacks.cpp 
 
 		PhraseBased/CubePruningMiniStack/Misc.cpp
  	 	PhraseBased/CubePruningMiniStack/Search.cpp

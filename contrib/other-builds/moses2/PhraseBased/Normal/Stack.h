@@ -8,10 +8,10 @@
 
 #include <boost/unordered_set.hpp>
 #include <deque>
-#include "Hypothesis.h"
-#include "../TypeDef.h"
-#include "../Recycler.h"
-#include "../legacy/Util2.h"
+#include "../Hypothesis.h"
+#include "../../TypeDef.h"
+#include "../../Recycler.h"
+#include "../../legacy/Util2.h"
 
 namespace Moses2
 {

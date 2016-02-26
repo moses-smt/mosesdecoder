@@ -9,7 +9,7 @@
 
 #include <vector>
 #include "Stack.h"
-#include "../Recycler.h"
+#include "../../Recycler.h"
 
 namespace Moses2
 {

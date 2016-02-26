@@ -8,11 +8,11 @@
 #ifndef SEARCHNORMAL_H_
 #define SEARCHNORMAL_H_
 #include <vector>
-#include "../legacy/Range.h"
-#include "../legacy/Bitmap.h"
-#include "../TypeDef.h"
-#include "ArcLists.h"
-#include "Search.h"
+#include "../../legacy/Range.h"
+#include "../../legacy/Bitmap.h"
+#include "../../TypeDef.h"
+#include "../ArcLists.h"
+#include "../Search.h"
 #include "Stacks.h"
 
 namespace Moses2

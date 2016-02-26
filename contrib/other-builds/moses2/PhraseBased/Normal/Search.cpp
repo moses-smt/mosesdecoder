@@ -5,16 +5,16 @@
  *      Author: hieu
  */
 
+#include "Search.h"
 #include <algorithm>
 #include <boost/foreach.hpp>
-#include "SearchNormal.h"
 #include "Stack.h"
-#include "Manager.h"
-#include "../InputPaths.h"
-#include "../TargetPhrases.h"
-#include "../Phrase.h"
-#include "../System.h"
-#include "../Sentence.h"
+#include "../Manager.h"
+#include "../../InputPaths.h"
+#include "../../TargetPhrases.h"
+#include "../../Phrase.h"
+#include "../../System.h"
+#include "../../Sentence.h"
 
 using namespace std;
 

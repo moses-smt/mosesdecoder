@@ -8,7 +8,7 @@
 #include <vector>
 #include <sstream>
 #include "Manager.h"
-#include "SearchNormal.h"
+#include "Normal/Search.h"
 #include "CubePruningMiniStack/Search.h"
 #include "CubePruningPerMiniStack/Search.h"
 #include "CubePruningPerBitmap/Search.h"
