@@ -90,9 +90,9 @@ namespace sapt
     char const* m = a+int(ratio*(z-a));
     if (m > a)
       {
-	while (m > a && *m <  0) --m;
-	while (m > a && *m >= 0) --m;
-	if (*m < 0) ++m;
+        while (m > a && *m <  0) --m;
+        while (m > a && *m >= 0) --m;
+        if (*m < 0) ++m;
       }
     assert(*m >= 0);
     return m;

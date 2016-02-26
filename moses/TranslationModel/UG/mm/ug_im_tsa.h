@@ -454,27 +454,27 @@ namespace sapt
   	    this->index[i] = k - this->sufa.begin();
   	    if (++i < prior.index.size() && prior.index[i-1] < prior.index[i])
   	      {
-  		k = copy(prior.sufa.begin() + prior.index[i-1],
-  			 prior.sufa.begin() + prior.index[i], k);
+            k = copy(prior.sufa.begin() + prior.index[i-1],
+                     prior.sufa.begin() + prior.index[i], k);
   	      }
   	  }
-	this->index[i] = k - this->sufa.begin();
+    this->index[i] = k - this->sufa.begin();
   	if (++i < prior.index.size() && prior.index[i] > prior.index[i-1])
   	  {
   	    size_t j = prior.index[i-1];
   	    while (j < prior.index[i] && n < nidx.size()
-  		   && crp->getToken(nidx[n])->id() < i)
+               && crp->getToken(nidx[n])->id() < i)
   	      {
-  		assert(k < this->sufa.end());
-  		if (sorter(prior.sufa[j],nidx[n]))
-  		  *k++ = prior.sufa[j++];
-  		else
-  		  *k++ = nidx[n++];
+            assert(k < this->sufa.end());
+            if (sorter(prior.sufa[j],nidx[n]))
+              *k++ = prior.sufa[j++];
+            else
+              *k++ = nidx[n++];
   	      }
   	    while (j < prior.index[i])
   	      {
-  		assert(k < this->sufa.end());
-  		*k++ = prior.sufa[j++];
+            assert(k < this->sufa.end());
+            *k++ = prior.sufa[j++];
   	      }
   	  }
   	while (n < nidx.size() && this->corpus->getToken(nidx[n])->id() < i)
@@ -487,10 +487,10 @@ namespace sapt
     this->index[i] = k - this->sufa.begin();
     while (++i < this->index.size())
       {
-  	if (i < prior.index.size() && prior.index[i-1] < prior.index[i])
-  	  k = copy(prior.sufa.begin() + prior.index[i-1],
-  		   prior.sufa.begin() + prior.index[i], k);
-  	this->index[i] = k - this->sufa.begin();
+        if (i < prior.index.size() && prior.index[i-1] < prior.index[i])
+          k = copy(prior.sufa.begin() + prior.index[i-1],
+                   prior.sufa.begin() + prior.index[i], k);
+        this->index[i] = k - this->sufa.begin();
       }
 #if 0
     // sanity checks
@@ -512,7 +512,7 @@ namespace sapt
     assert(this->endArray == reinterpret_cast<char const*>(&(*this->sufa.end())));
 #endif
   }
-
+  
 }
 
 #endif
