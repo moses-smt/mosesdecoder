@@ -13,46 +13,15 @@
 #include "../Scores.h"
 #include "../Phrase.h"
 #include "../InputPath.h"
+#include "../HypothesisBase.h"
 #include "../legacy/Range.h"
 
 namespace Moses2
 {
-
 class Manager;
-class PhraseImpl;
-class TargetPhrase;
-class Scores;
-class StatefulFeatureFunction;
 class InputType;
-class InputPath;
+class StatefulFeatureFunction;
 
-class HypothesisBase
-{
-public:
-	  inline Manager &GetManager() const
-	  { return *m_mgr; }
-
-	  const Scores &GetScores() const
-	  { return *m_scores; }
-
-	  const FFState *GetState(size_t ind) const
-	  { return m_ffStates[ind]; }
-
-	  size_t hash(size_t seed = 0) const;
-	  bool operator==(const HypothesisBase &other) const;
-
-	  virtual void EvaluateWhenApplied() = 0;
-
-
-protected:
-	  Manager *m_mgr;
-	  Scores *m_scores;
-	  FFState **m_ffStates;
-
-	  HypothesisBase(MemPool &pool, const System &system);
-};
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////
 class Hypothesis : public HypothesisBase
 {
 	  friend std::ostream& operator<<(std::ostream &, const Hypothesis &);
