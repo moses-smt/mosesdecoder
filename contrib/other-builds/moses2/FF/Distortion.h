@@ -23,7 +23,7 @@ public:
 
   virtual FFState* BlankState(MemPool &pool) const;
   virtual void EmptyHypothesisState(FFState &state,
-		  const Manager &mgr,
+		  const ManagerBase &mgr,
 		  const InputType &input,
 		  const Hypothesis &hypo) const;
 
@@ -38,20 +38,11 @@ public:
   virtual void EvaluateWhenApplied(const std::deque<Hypothesis*> &hypos) const
   {}
 
-  virtual void EvaluateWhenApplied(const Manager &mgr,
+  virtual void EvaluateWhenApplied(const ManagerBase &mgr,
     const Hypothesis &hypo,
     const FFState &prevState,
     Scores &scores,
 	FFState &state) const;
-
-  virtual void EvaluateWhenAppliedNonBatch(const Manager &mgr,
-    const Hypothesis &hypo,
-    const FFState &prevState,
-    Scores &scores,
-	FFState &state) const
-  {
-	  EvaluateWhenApplied(mgr, hypo, prevState, scores, state);
-  }
 
 protected:
   SCORE CalculateDistortionScore(const Range &prev, const Range &curr, const int FirstGap) const;

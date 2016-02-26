@@ -16,8 +16,6 @@
 #include "MemPool.h"
 #include "FF/StatefulFeatureFunction.h"
 
-#include "PhraseBased/Manager.h"
-
 using namespace std;
 
 namespace Moses2

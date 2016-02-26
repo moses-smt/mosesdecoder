@@ -21,7 +21,7 @@ class PhraseImpl;
 class TargetPhrase;
 class TargetPhrases;
 class Scores;
-class Manager;
+class ManagerBase;
 class MemPool;
 
 	namespace SCFG

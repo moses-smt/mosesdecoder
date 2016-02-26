@@ -132,7 +132,7 @@ FFState* LanguageModel::BlankState(MemPool &pool) const
 }
 
 void LanguageModel::EmptyHypothesisState(FFState &state,
-		const Manager &mgr,
+		const ManagerBase &mgr,
 		const InputType &input,
 		const Hypothesis &hypo) const
 {
@@ -181,7 +181,7 @@ LanguageModel::EvaluateInIsolation(MemPool &pool,
 	}
 }
 
-void LanguageModel::EvaluateWhenApplied(const Manager &mgr,
+void LanguageModel::EvaluateWhenApplied(const ManagerBase &mgr,
   const Hypothesis &hypo,
   const FFState &prevState,
   Scores &scores,

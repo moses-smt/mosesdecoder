@@ -208,7 +208,7 @@ FFState* LanguageModelDALM::BlankState(MemPool &pool) const
 }
 
 void LanguageModelDALM::EmptyHypothesisState(FFState &state,
-		const Manager &mgr,
+		const ManagerBase &mgr,
 		const InputType &input,
 		const Hypothesis &hypo) const
 {
@@ -226,7 +226,7 @@ void LanguageModelDALM::EmptyHypothesisState(FFState &state,
 
  }
 
-void LanguageModelDALM::EvaluateWhenApplied(const Manager &mgr,
+void LanguageModelDALM::EvaluateWhenApplied(const ManagerBase &mgr,
 const Hypothesis &hypo,
 const FFState &prevState,
 Scores &scores,

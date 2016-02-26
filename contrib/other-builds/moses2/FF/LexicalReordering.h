@@ -32,7 +32,7 @@ public:
 
   virtual FFState* BlankState(MemPool &pool) const;
   virtual void EmptyHypothesisState(FFState &state,
-		  const Manager &mgr,
+		  const ManagerBase &mgr,
 		  const InputType &input,
 		  const Hypothesis &hypo) const;
 
@@ -49,7 +49,7 @@ public:
 		  const TargetPhrases &tps,
 		  const Phrase &sourcePhrase) const;
 
-  virtual void EvaluateWhenApplied(const Manager &mgr,
+  virtual void EvaluateWhenApplied(const ManagerBase &mgr,
 	const Hypothesis &hypo,
 	const FFState &prevState,
 	Scores &scores,

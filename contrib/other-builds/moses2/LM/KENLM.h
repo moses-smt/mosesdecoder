@@ -32,7 +32,7 @@ public:
 
   //! return the state associated with the empty hypothesis for a given sentence
   virtual void EmptyHypothesisState(FFState &state,
-		  const Manager &mgr,
+		  const ManagerBase &mgr,
 		  const InputType &input,
 		  const Hypothesis &hypo) const;
 
@@ -44,22 +44,11 @@ public:
 		  Scores &scores,
 		  SCORE *estimatedScore) const;
 
-  virtual void EvaluateWhenApplied(const Manager &mgr,
+  virtual void EvaluateWhenApplied(const ManagerBase &mgr,
 	const Hypothesis &hypo,
 	const FFState &prevState,
 	Scores &scores,
 	FFState &state) const;
-
-  /*
-  virtual void EvaluateWhenAppliedNonBatch(const Manager &mgr,
-    const Hypothesis &hypo,
-    const FFState &prevState,
-    Scores &scores,
-	FFState &state) const
-  {
-	  EvaluateWhenApplied(mgr, hypo, prevState, scores, state);
-  }
-  */
 
   void SetParameter(const std::string& key, const std::string& value);
 

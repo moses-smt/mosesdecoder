@@ -58,7 +58,7 @@ FFState* SkeletonStatefulFF::BlankState(MemPool &pool) const
 }
 
 void SkeletonStatefulFF::EmptyHypothesisState(FFState &state,
-		const Manager &mgr,
+		const ManagerBase &mgr,
 		const InputType &input,
 		const Hypothesis &hypo) const
 {
@@ -76,7 +76,7 @@ SkeletonStatefulFF::EvaluateInIsolation(MemPool &pool,
 {
 }
 
-void SkeletonStatefulFF::EvaluateWhenApplied(const Manager &mgr,
+void SkeletonStatefulFF::EvaluateWhenApplied(const ManagerBase &mgr,
   const Hypothesis &hypo,
   const FFState &prevState,
   Scores &scores,

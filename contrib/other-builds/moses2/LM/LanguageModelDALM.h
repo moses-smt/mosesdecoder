@@ -37,7 +37,7 @@ public:
 
     virtual FFState* BlankState(MemPool &pool) const;
     virtual void EmptyHypothesisState(FFState &state,
-    		const Manager &mgr,
+    		const ManagerBase &mgr,
 			const InputType &input,
 			const Hypothesis &hypo) const;
 
@@ -48,7 +48,7 @@ public:
 	          Scores &scores,
 			  SCORE *estimatedScore) const;
 
-	  virtual void EvaluateWhenApplied(const Manager &mgr,
+	  virtual void EvaluateWhenApplied(const ManagerBase &mgr,
 	    const Hypothesis &hypo,
 	    const FFState &prevState,
 	    Scores &scores,

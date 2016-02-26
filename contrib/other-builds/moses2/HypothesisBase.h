@@ -15,13 +15,12 @@ namespace Moses2
 {
 
 class ManagerBase;
-class Manager;
 class Scores;
 
 class HypothesisBase
 {
 public:
-	  inline Manager &GetManager() const
+	  inline ManagerBase &GetManager() const
 	  { return *m_mgr; }
 
 	  const Scores &GetScores() const
@@ -37,7 +36,7 @@ public:
 
 
 protected:
-	  Manager *m_mgr;
+	  ManagerBase *m_mgr;
 	  Scores *m_scores;
 	  FFState **m_ffStates;
 

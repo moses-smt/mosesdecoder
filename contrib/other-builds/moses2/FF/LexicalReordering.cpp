@@ -132,7 +132,7 @@ FFState* LexicalReordering::BlankState(MemPool &pool) const
 }
 
 void LexicalReordering::EmptyHypothesisState(FFState &state,
-		const Manager &mgr,
+		const ManagerBase &mgr,
 		const InputType &input,
 		const Hypothesis &hypo) const
 {
@@ -200,7 +200,7 @@ void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
   }
 }
 
-void LexicalReordering::EvaluateWhenApplied(const Manager &mgr,
+void LexicalReordering::EvaluateWhenApplied(const ManagerBase &mgr,
   const Hypothesis &hypo,
   const FFState &prevState,
   Scores &scores,

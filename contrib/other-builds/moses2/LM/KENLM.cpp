@@ -127,7 +127,7 @@ FFState* KENLM::BlankState(MemPool &pool) const
 
 //! return the state associated with the empty hypothesis for a given sentence
 void KENLM::EmptyHypothesisState(FFState &state,
-		const Manager &mgr,
+		const ManagerBase &mgr,
 		const InputType &input,
 		const Hypothesis &hypo) const
 {
@@ -171,7 +171,7 @@ KENLM::EvaluateInIsolation(MemPool &pool,
   }
 }
 
-void KENLM::EvaluateWhenApplied(const Manager &mgr,
+void KENLM::EvaluateWhenApplied(const ManagerBase &mgr,
   const Hypothesis &hypo,
   const FFState &prevState,
   Scores &scores,

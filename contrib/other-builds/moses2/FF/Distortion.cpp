@@ -68,7 +68,7 @@ FFState* Distortion::BlankState(MemPool &pool) const
 }
 
 void Distortion::EmptyHypothesisState(FFState &state,
-		const Manager &mgr,
+		const ManagerBase &mgr,
 		const InputType &input,
 		const Hypothesis &hypo) const
 {
@@ -99,7 +99,7 @@ Distortion::EvaluateInIsolation(MemPool &pool,
 {
 }
 
-void Distortion::EvaluateWhenApplied(const Manager &mgr,
+void Distortion::EvaluateWhenApplied(const ManagerBase &mgr,
   const Hypothesis &hypo,
   const FFState &prevState,
   Scores &scores,
