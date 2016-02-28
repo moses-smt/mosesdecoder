@@ -14,7 +14,6 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
    Scores.cpp 
    SubPhrase.cpp
    System.cpp 
-   TargetPhraseImpl.cpp 
    TargetPhrases.cpp
    TranslationTask.cpp
    Vector.cpp
@@ -42,6 +41,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
 		PhraseBased/Hypothesis.cpp 
  	 	PhraseBased/Manager.cpp 
  	 	PhraseBased/Search.cpp
+		PhraseBased/TargetPhraseImpl.cpp 
  	 	
 		PhraseBased/Normal/Search.cpp
  	 	PhraseBased/Normal/Stack.cpp 

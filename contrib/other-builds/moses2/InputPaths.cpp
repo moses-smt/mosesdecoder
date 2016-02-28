@@ -6,7 +6,7 @@
  */
 #include <iostream>
 #include "InputPaths.h"
-#include "PhraseImpl.h"
+#include "PhraseBased/PhraseImpl.h"
 #include "System.h"
 #include "legacy/Range.h"
 #include "PhraseBased/Manager.h"

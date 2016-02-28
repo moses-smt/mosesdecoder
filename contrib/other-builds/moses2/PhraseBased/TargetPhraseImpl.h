@@ -8,11 +8,11 @@
 #pragma once
 
 #include <iostream>
-#include "Phrase.h"
-#include "PhraseImplTemplate.h"
-#include "MemPool.h"
-#include "Word.h"
-#include "SubPhrase.h"
+#include "../Phrase.h"
+#include "../PhraseImplTemplate.h"
+#include "../MemPool.h"
+#include "../Word.h"
+#include "../SubPhrase.h"
 
 namespace Moses2
 {

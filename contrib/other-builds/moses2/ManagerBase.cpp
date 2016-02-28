@@ -12,12 +12,11 @@
 #include "System.h"
 #include "TargetPhrases.h"
 #include "Phrase.h"
-#include "TargetPhraseImpl.h"
 #include "InputPaths.h"
 #include "InputPath.h"
-#include "Sentence.h"
 #include "TranslationModel/PhraseTable.h"
 #include "legacy/Range.h"
+#include "PhraseBased/Sentence.h"
 
 using namespace std;
 

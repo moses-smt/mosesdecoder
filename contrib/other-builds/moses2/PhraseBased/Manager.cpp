@@ -8,6 +8,7 @@
 #include <vector>
 #include <sstream>
 #include "Manager.h"
+#include "TargetPhraseImpl.h"
 #include "Normal/Search.h"
 #include "CubePruningMiniStack/Search.h"
 /*
@@ -19,7 +20,6 @@
 #include "../System.h"
 #include "../TargetPhrases.h"
 #include "../Phrase.h"
-#include "../TargetPhraseImpl.h"
 #include "../InputPaths.h"
 #include "../InputPath.h"
 #include "../Sentence.h"

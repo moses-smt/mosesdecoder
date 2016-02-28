@@ -10,10 +10,10 @@
 #include <deque>
 #include "Hypothesis.h"
 #include "Manager.h"
+#include "Sentence.h"
 #include "../InputPath.h"
 #include "../System.h"
 #include "../Scores.h"
-#include "../Sentence.h"
 #include "../FF/StatefulFeatureFunction.h"
 
 using namespace std;

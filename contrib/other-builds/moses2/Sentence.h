@@ -4,9 +4,8 @@
  *  Created on: 14 Dec 2015
  *      Author: hieu
  */
+#pragma once
 
-#ifndef SENTENCE_H_
-#define SENTENCE_H_
 #include <string>
 #include "InputType.h"
 #include "PhraseImpl.h"
@@ -31,4 +30,3 @@ public:
 
 } /* namespace Moses2 */
 
-#endif /* SENTENCE_H_ */

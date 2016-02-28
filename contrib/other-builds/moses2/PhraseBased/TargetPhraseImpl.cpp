@@ -7,10 +7,10 @@
 
 #include <stdlib.h>
 #include "TargetPhraseImpl.h"
-#include "Scores.h"
-#include "System.h"
-#include "MemPool.h"
-#include "PhraseBased/Manager.h"
+#include "../Scores.h"
+#include "../System.h"
+#include "../MemPool.h"
+#include "Manager.h"
 
 using namespace std;
 
