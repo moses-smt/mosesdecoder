@@ -4,19 +4,18 @@
  *  Created on: 23 Oct 2015
  *      Author: hieu
  */
-#include <contrib/other-builds/moses2/ManagerBase.h>
-
 #include <boost/foreach.hpp>
 #include <vector>
 #include <sstream>
 #include "System.h"
+#include "ManagerBase.h"
 #include "TargetPhrases.h"
 #include "Phrase.h"
 #include "InputPaths.h"
 #include "InputPath.h"
 #include "TranslationModel/PhraseTable.h"
 #include "legacy/Range.h"
-#include "PhraseBased/Sentence.h"
+#include "Sentence.h"
 
 using namespace std;
 

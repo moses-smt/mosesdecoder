@@ -10,7 +10,7 @@
 #include <deque>
 #include "Hypothesis.h"
 #include "Manager.h"
-#include "Sentence.h"
+#include "../Sentence.h"
 #include "../InputPath.h"
 #include "../System.h"
 #include "../Scores.h"

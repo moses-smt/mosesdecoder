@@ -9,7 +9,7 @@
 #include "LexicalReordering.h"
 #include "../TranslationModel/PhraseTable.h"
 #include "../System.h"
-#include "../PhraseBased/PhraseImpl.h"
+#include "../PhraseImpl.h"
 #include "../PhraseBased/Manager.h"
 #include "../PhraseBased/Hypothesis.h"
 #include "../legacy/InputFileStream.h"
