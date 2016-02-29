@@ -19,6 +19,7 @@ namespace Moses2
 {
 
 class Manager;
+class HypothesisBase;
 
 namespace NSCubePruningMiniStack
 {
@@ -27,10 +28,10 @@ typedef Array<const Hypothesis*>  Hypotheses;
 class MiniStack
 {
 public:
-	typedef boost::unordered_set<const Hypothesis*,
-			  UnorderedComparer<Hypothesis>,
-			  UnorderedComparer<Hypothesis>,
-			  MemPoolAllocator<const Hypothesis*>
+	typedef boost::unordered_set<const HypothesisBase*,
+			  UnorderedComparer<HypothesisBase>,
+			  UnorderedComparer<HypothesisBase>,
+			  MemPoolAllocator<const HypothesisBase*>
 			   > _HCType;
 
 	MiniStack(const Manager &mgr);

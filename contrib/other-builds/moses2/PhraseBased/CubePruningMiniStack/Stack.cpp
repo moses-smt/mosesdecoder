@@ -34,14 +34,14 @@ StackAdd MiniStack::Add(const Hypothesis *hypo)
 	return StackAdd(true, NULL);
   }
   else {
-	  const Hypothesis *hypoExisting = *addRet.first;
-	  if (hypo->GetScores().GetTotalScore() > hypoExisting->GetScores().GetTotalScore()) {
+	  const HypothesisBase *hypoExisting = *addRet.first;
+	  if (hypo->GetFutureScore() > hypoExisting->GetFutureScore()) {
 		  // incoming hypo is better than the one we have
-		  const Hypothesis *const &hypoExisting1 = *addRet.first;
-		  const Hypothesis *&hypoExisting2 = const_cast<const Hypothesis *&>(hypoExisting1);
+		  const HypothesisBase *const &hypoExisting1 = *addRet.first;
+		  const HypothesisBase *&hypoExisting2 = const_cast<const HypothesisBase *&>(hypoExisting1);
 		  hypoExisting2 = hypo;
 
-		  return StackAdd(true, const_cast<Hypothesis*>(hypoExisting));
+		  return StackAdd(true, const_cast<HypothesisBase*>(hypoExisting));
 	  }
 	  else {
 		  // already storing the best hypo. discard incoming hypo
@@ -60,8 +60,8 @@ Hypotheses &MiniStack::GetSortedAndPruneHypos(const Manager &mgr) const
 	m_sortedHypos = new (pool.Allocate< Array<const Hypothesis*> >()) Array<const Hypothesis*>(pool, m_coll.size());
 
 	  size_t ind = 0;
-	  BOOST_FOREACH(const Hypothesis *hypo, m_coll) {
-		  (*m_sortedHypos)[ind] = hypo;
+	  BOOST_FOREACH(const HypothesisBase *hypo, m_coll) {
+		  (*m_sortedHypos)[ind] = static_cast<const Hypothesis*>(hypo);
 		  ++ind;
 	  }
 
@@ -155,7 +155,11 @@ std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
   std::vector<const Hypothesis*> ret;
   BOOST_FOREACH(const Coll::value_type &val, m_coll) {
 		const MiniStack::_HCType &hypos = val.second->GetColl();
-		ret.insert(ret.end(), hypos.begin(), hypos.end());
+
+		ret.reserve(ret.size() + hypos.size());
+		BOOST_FOREACH(const HypothesisBase *hypo, hypos) {
+			ret.push_back(static_cast<const Hypothesis*>(hypo));
+		}
   }
 
   std::vector<const Hypothesis*>::iterator iterMiddle;

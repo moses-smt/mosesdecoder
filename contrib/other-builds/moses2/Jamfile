@@ -3,6 +3,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
  lib moses2_lib :
    EstimatedScores.cpp
    HypothesisBase.cpp
+#   HypothesisColl.cpp
    InputPath.cpp 
    InputPaths.cpp
    InputType.cpp

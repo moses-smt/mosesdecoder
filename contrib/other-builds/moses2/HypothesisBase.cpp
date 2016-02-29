@@ -39,6 +39,11 @@ HypothesisBase::HypothesisBase(MemPool &pool, const System &system)
     }
 }
 
+size_t HypothesisBase::hash() const
+{
+	return hash(0);
+}
+
 size_t HypothesisBase::hash(size_t seed) const
 {
   size_t numStatefulFFs = GetManager().system.featureFunctions.GetStatefulFeatureFunctions().size();

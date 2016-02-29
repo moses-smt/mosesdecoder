@@ -20,6 +20,8 @@ class Scores;
 class HypothesisBase
 {
 public:
+	  virtual ~HypothesisBase() {}
+
 	  inline ManagerBase &GetManager() const
 	  { return *m_mgr; }
 
@@ -29,8 +31,9 @@ public:
 	  const FFState *GetState(size_t ind) const
 	  { return m_ffStates[ind]; }
 
-	  size_t hash(size_t seed = 0) const;
-	  bool operator==(const HypothesisBase &other) const;
+	  virtual size_t hash() const;
+	  virtual size_t hash(size_t seed) const;
+	  virtual bool operator==(const HypothesisBase &other) const;
 
 	  virtual SCORE GetFutureScore() const = 0;
 	  virtual void EvaluateWhenApplied() = 0;

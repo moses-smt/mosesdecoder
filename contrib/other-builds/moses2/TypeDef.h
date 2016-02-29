@@ -12,7 +12,7 @@
 namespace Moses2
 {
 
-class Hypothesis;
+class HypothesisBase;
 
 #define NOT_FOUND 			std::numeric_limits<size_t>::max()
 const size_t DEFAULT_MAX_PHRASE_LENGTH = 20;
@@ -58,11 +58,11 @@ class StackAdd
 {
 public:
 	bool added;
-	Hypothesis *toBeDeleted;
+	HypothesisBase *toBeDeleted;
 
 	StackAdd() {}
 	StackAdd(bool vadded,
-			Hypothesis *vtoBeDeleted)
+			HypothesisBase *vtoBeDeleted)
 	:added(vadded)
 	,toBeDeleted(vtoBeDeleted)
 	{
