@@ -28,6 +28,7 @@ class SearchNormal;
 class Search;
 class Sentence;
 class OutputCollector;
+class HypothesisBase;
 
 class ManagerBase
 {
@@ -45,6 +46,11 @@ public:
 	MemPool &GetSystemPool() const
 	{ return *m_systemPool; }
 
+	Recycler<HypothesisBase*> &GetHypoRecycle() const
+	{
+		return *m_hypoRecycle;
+	}
+
 	const Sentence &GetInput() const
 	{ return *m_input; }
 
@@ -54,6 +60,7 @@ protected:
 	Sentence *m_input;
 
 	mutable MemPool *m_pool, *m_systemPool;
+	mutable Recycler<HypothesisBase*> *m_hypoRecycle;
 
 	void InitPools();
 	void ParseInput();

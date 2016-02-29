@@ -31,12 +31,14 @@ ManagerBase::ManagerBase(System &sys, const TranslationTask &task, const std::st
 ManagerBase::~ManagerBase()
 {
 	GetPool().Reset();
+	GetHypoRecycle().Clear();
 }
 
 void ManagerBase::InitPools()
 {
 	m_pool = &system.GetManagerPool();
 	m_systemPool = &system.GetSystemPool();
+	m_hypoRecycle = &system.GetHypoRecycler();
 }
 
 void ManagerBase::ParseInput()
@@ -45,7 +47,6 @@ void ManagerBase::ParseInput()
 
 	m_input = Sentence::CreateFromString(GetPool(), vocab, system, m_inputStr, m_translationId);
 }
-
 
 
 }

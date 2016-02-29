@@ -28,7 +28,6 @@ class PhraseImpl;
 class SearchNormal;
 class Search;
 class Hypothesis;
-class HypothesisBase;
 class Sentence;
 class OutputCollector;
 
@@ -39,9 +38,6 @@ public:
 	Manager(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId);
 
 	virtual ~Manager();
-
-	Recycler<HypothesisBase*> &GetHypoRecycle() const
-	{ return *m_hypoRecycle; }
 
 	Bitmaps &GetBitmaps()
 	{ return *m_bitmaps; }
@@ -58,7 +54,6 @@ public:
 	void Decode();
 
 protected:
-	mutable Recycler<HypothesisBase*> *m_hypoRecycle;
 
 	InputPaths m_inputPaths;
 	Bitmaps *m_bitmaps;

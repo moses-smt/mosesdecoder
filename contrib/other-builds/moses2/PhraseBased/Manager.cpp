@@ -30,32 +30,6 @@ using namespace std;
 
 namespace Moses2
 {
-ManagerBase::ManagerBase(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId)
-:system(sys)
-,task(task)
-,m_inputStr(inputStr)
-,m_translationId(translationId)
-{}
-
-ManagerBase::~ManagerBase()
-{
-	GetPool().Reset();
-}
-
-void ManagerBase::InitPools()
-{
-	m_pool = &system.GetManagerPool();
-	m_systemPool = &system.GetSystemPool();
-}
-
-void ManagerBase::ParseInput()
-{
-	FactorCollection &vocab = system.GetVocab();
-
-	m_input = Sentence::CreateFromString(GetPool(), vocab, system, m_inputStr, m_translationId);
-}
-
-/////////////////////////////////////////////////////////////////////////////////////////////////////////////
 Manager::Manager(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId)
 :ManagerBase(sys, task, inputStr, translationId)
 {}
@@ -64,8 +38,6 @@ Manager::~Manager() {
 
 	delete m_search;
 	delete m_bitmaps;
-
-	GetHypoRecycle().Clear();
 }
 
 void Manager::Init()
@@ -74,7 +46,6 @@ void Manager::Init()
 	InitPools();
 	ParseInput();
 
-	m_hypoRecycle = &system.GetHypoRecycler();
 	m_bitmaps = new Bitmaps(GetPool());
 
 	const PhraseTable &firstPt = *system.featureFunctions.m_phraseTables[0];
