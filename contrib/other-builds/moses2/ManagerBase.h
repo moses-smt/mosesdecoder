@@ -26,7 +26,6 @@ class TranslationTask;
 class PhraseImpl;
 class SearchNormal;
 class Search;
-class Hypothesis;
 class Sentence;
 class OutputCollector;
 

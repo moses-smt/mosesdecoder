@@ -174,11 +174,6 @@ Recycler<Hypothesis*> &System::GetHypoRecycler() const
 	return GetThreadSpecificObj(m_hypoRecycler);
 }
 
-ObjectPoolContiguous<Hypothesis*> &System::GetBatchForEval() const
-{
-  return GetThreadSpecificObj(m_batchForEval);
-}
-
 
 
 }
