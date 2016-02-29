@@ -5,8 +5,7 @@
  *      Author: hieu
  */
 
-#ifndef INPUTPATHS_H_
-#define INPUTPATHS_H_
+#pragma once
 
 #include <vector>
 #include "InputPath.h"
@@ -20,12 +19,12 @@ class Sentence;
 class System;
 class Manager;
 
-class InputPaths {
+class InputPathsBase
+{
 	typedef std::vector<InputPath*> Coll;
 public:
-	InputPaths() {}
-	void Init(const Sentence &input, const Manager &mgr);
-	virtual ~InputPaths();
+	InputPathsBase() {}
+	virtual ~InputPathsBase();
 
   //! iterators
   typedef Coll::iterator iterator;
@@ -45,19 +44,29 @@ public:
 	return m_inputPaths.end();
   }
 
-  const InputPath &GetBlank() const
-  { return *m_blank; }
+  virtual void Init(const Sentence &input, const Manager &mgr) = 0;
 
   const Matrix<InputPath*> &GetMatrix() const
   { return *m_matrix; }
 
 protected:
 	Coll m_inputPaths;
-	InputPath *m_blank;
 	Matrix<InputPath*> *m_matrix;
+};
+
+class InputPaths : public InputPathsBase
+{
+public:
+	  void Init(const Sentence &input, const Manager &mgr);
+
+	  const InputPath &GetBlank() const
+	  { return *m_blank; }
+
+protected:
+		InputPath *m_blank;
+
 };
 
 }
 
 
-#endif /* INPUTPATHS_H_ */

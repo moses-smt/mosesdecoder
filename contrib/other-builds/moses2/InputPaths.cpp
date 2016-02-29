@@ -16,10 +16,11 @@ using namespace std;
 namespace Moses2
 {
 
-InputPaths::~InputPaths()
+InputPathsBase::~InputPathsBase()
 {
 }
 
+//////////////////////////////////////////////////////////////////////////
 void InputPaths::Init(const Sentence &input, const Manager &mgr)
 {
   MemPool &pool = mgr.GetPool();
