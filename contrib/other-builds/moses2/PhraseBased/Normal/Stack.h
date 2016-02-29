@@ -10,40 +10,19 @@
 #include <deque>
 #include "../Hypothesis.h"
 #include "../../TypeDef.h"
-#include "../../Recycler.h"
+#include "../../HypothesisColl.h"
 #include "../../legacy/Util2.h"
 
 namespace Moses2
 {
 
-class Stack {
-protected:
-  typedef boost::unordered_set<const Hypothesis*, UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis> > _HCType;
-	  _HCType m_hypos;
+class Stack : public HypothesisColl
+{
 public:
-  typedef _HCType::iterator iterator;
-  typedef _HCType::const_iterator const_iterator;
-  //! iterators
-  const_iterator begin() const {
-	return m_hypos.begin();
-  }
-  const_iterator end() const {
-	return m_hypos.end();
-  }
-
-	Stack();
+	Stack(const Manager &mgr);
 	virtual ~Stack();
 
-
-	size_t GetSize() const
-	{ return m_hypos.size(); }
-
-	void Add(const Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle);
-
-	std::vector<const Hypothesis*> GetBestHyposAndPrune(size_t num, Recycler<HypothesisBase*> &recycler) const;
-	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
 protected:
-	StackAdd Add(const Hypothesis *hypo);
 
 
 };

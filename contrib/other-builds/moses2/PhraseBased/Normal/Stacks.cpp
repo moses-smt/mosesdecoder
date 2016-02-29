@@ -23,11 +23,11 @@ Stacks::~Stacks() {
 	}
 }
 
-void Stacks::Init(size_t numStacks)
+void Stacks::Init(const Manager &mgr, size_t numStacks)
 {
 	m_stacks.resize(numStacks);
 	for (size_t i = 0; i < m_stacks.size(); ++i) {
-		m_stacks[i] = new Stack();
+		m_stacks[i] = new Stack(mgr);
 	}
 }
 
@@ -48,11 +48,14 @@ std::ostream& operator<<(std::ostream &out, const Stacks &obj)
 
 void Stacks::Add(const Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle)
 {
-	size_t numWordsCovered = hypo->GetBitmap().GetNumWordsCovered();
-	//cerr << "numWordsCovered=" << numWordsCovered << endl;
-	Stack &stack = *m_stacks[numWordsCovered];
-	stack.Add(hypo, hypoRecycle);
+  size_t numWordsCovered = hypo->GetBitmap().GetNumWordsCovered();
+  //cerr << "numWordsCovered=" << numWordsCovered << endl;
+  Stack &stack = *m_stacks[numWordsCovered];
+  StackAdd added = stack.Add(hypo);
 
+  if (added.toBeDeleted) {
+	hypoRecycle.Recycle(added.toBeDeleted);
+  }
 }
 
 }

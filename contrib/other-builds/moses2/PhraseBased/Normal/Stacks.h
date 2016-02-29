@@ -13,6 +13,7 @@
 
 namespace Moses2
 {
+class Manager;
 
 class Stacks {
 	  friend std::ostream& operator<<(std::ostream &, const Stacks &);
@@ -20,7 +21,7 @@ public:
 	Stacks();
 	virtual ~Stacks();
 
-	void Init(size_t numStacks);
+	void Init(const Manager &mgr, size_t numStacks);
 
 	size_t GetSize() const
 	{ return m_stacks.size(); }

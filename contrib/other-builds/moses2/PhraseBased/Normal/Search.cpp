@@ -35,7 +35,7 @@ SearchNormal::~SearchNormal() {
 void SearchNormal::Decode()
 {
 	// init stacks
-	m_stacks.Init(mgr.GetInput().GetSize() + 1);
+	m_stacks.Init(mgr, mgr.GetInput().GetSize() + 1);
 
 	const Bitmap &initBitmap = mgr.GetBitmaps().GetInitialBitmap();
 	Hypothesis *initHypo = Hypothesis::Create(mgr.GetSystemPool(), mgr);
@@ -64,13 +64,13 @@ void SearchNormal::Decode(size_t stackInd)
 	  return;
   }
 
-  std::vector<const Hypothesis*> hypos = stack.GetBestHyposAndPrune(mgr.system.stackSize, mgr.GetHypoRecycle());
+  std::vector<const HypothesisBase*> hypos = stack.GetBestHyposAndPrune(mgr.system.stackSize, mgr.GetHypoRecycle());
 
 	const InputPaths &paths = mgr.GetInputPaths();
 
 	BOOST_FOREACH(const InputPath *path, paths) {
-	  BOOST_FOREACH(const Hypothesis *hypo, hypos) {
-			Extend(*hypo, *path);
+	  BOOST_FOREACH(const HypothesisBase *hypo, hypos) {
+			Extend(*static_cast<const Hypothesis*>(hypo), *path);
 	  }
 	}
 }
@@ -132,11 +132,11 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 const Hypothesis *SearchNormal::GetBestHypothesis() const
 {
 	const Stack &lastStack = m_stacks.Back();
-	std::vector<const Hypothesis*> sortedHypos = lastStack.GetBestHypos(1);
+	std::vector<const HypothesisBase*> sortedHypos = lastStack.GetBestHypos(1);
 
 	const Hypothesis *best = NULL;
 	if (sortedHypos.size()) {
-		best = sortedHypos[0];
+		best = static_cast<const Hypothesis*>(sortedHypos[0]);
 	}
 	return best;
 }
