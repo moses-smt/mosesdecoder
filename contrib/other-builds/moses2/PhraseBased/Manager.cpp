@@ -9,6 +9,7 @@
 #include <sstream>
 #include "Manager.h"
 #include "TargetPhraseImpl.h"
+#include "InputPath.h"
 #include "Normal/Search.h"
 #include "CubePruningMiniStack/Search.h"
 /*
@@ -21,7 +22,6 @@
 #include "../TargetPhrases.h"
 #include "../Phrase.h"
 #include "../InputPaths.h"
-#include "../InputPath.h"
 #include "../Sentence.h"
 #include "../TranslationModel/PhraseTable.h"
 #include "../legacy/Range.h"
@@ -106,13 +106,13 @@ void Manager::CalcFutureScore()
 	m_estimatedScores->InitTriangle(-numeric_limits<SCORE>::infinity());
 
     // walk all the translation options and record the cheapest option for each span
-	BOOST_FOREACH(const InputPath *path, m_inputPaths) {
+	BOOST_FOREACH(const InputPathBase *path, m_inputPaths) {
 		const Range &range = path->range;
 		SCORE bestScore = -numeric_limits<SCORE>::infinity();
 
   	    size_t numPt = system.mappings.size();
   	    for (size_t i = 0; i < numPt; ++i) {
- 	      const TargetPhrases *tps = path->targetPhrases[i];
+ 	      const TargetPhrases *tps = static_cast<const InputPath*>(path)->targetPhrases[i];
      	  if (tps) {
      		 BOOST_FOREACH(const TargetPhrase *tp, *tps) {
      			SCORE score = tp->GetFutureScore();

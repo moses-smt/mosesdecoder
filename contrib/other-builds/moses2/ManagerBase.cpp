@@ -12,7 +12,7 @@
 #include "TargetPhrases.h"
 #include "Phrase.h"
 #include "InputPaths.h"
-#include "InputPath.h"
+#include "InputPathBase.h"
 #include "TranslationModel/PhraseTable.h"
 #include "legacy/Range.h"
 #include "Sentence.h"

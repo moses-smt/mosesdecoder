@@ -8,7 +8,7 @@
 #pragma once
 
 #include <vector>
-#include "InputPath.h"
+#include "PhraseBased/InputPath.h"
 #include "MemPool.h"
 #include "legacy/Matrix.h"
 

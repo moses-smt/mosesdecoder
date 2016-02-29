@@ -12,7 +12,7 @@
 #include "../legacy/Bitmap.h"
 #include "../Scores.h"
 #include "../Phrase.h"
-#include "../InputPath.h"
+#include "../InputPathBase.h"
 #include "../HypothesisBase.h"
 #include "../legacy/Range.h"
 
@@ -34,10 +34,10 @@ public:
   virtual ~Hypothesis();
 
   // initial, empty hypo
-  void Init(Manager &mgr, const InputPath &path, const TargetPhrase &tp, const Bitmap &bitmap);
+  void Init(Manager &mgr, const InputPathBase &path, const TargetPhrase &tp, const Bitmap &bitmap);
 
   void Init(Manager &mgr, const Hypothesis &prevHypo,
-  	    const InputPath &path,
+  	    const InputPathBase &path,
   		const TargetPhrase &tp,
   		const Bitmap &bitmap,
 		SCORE estimatedScore);
@@ -48,7 +48,7 @@ public:
   inline const Bitmap &GetBitmap() const
   { return *m_sourceCompleted; }
 
-  inline const InputPath &GetInputPath() const
+  inline const InputPathBase &GetInputPath() const
   { return *m_path; }
 
   inline const Range &GetCurrTargetWordsRange() const {
@@ -85,7 +85,7 @@ public:
 protected:
   const TargetPhrase *m_targetPhrase;
   const Bitmap *m_sourceCompleted;
-  const InputPath *m_path;
+  const InputPathBase *m_path;
   const Hypothesis *m_prevHypo;
 
   SCORE m_estimatedScore;

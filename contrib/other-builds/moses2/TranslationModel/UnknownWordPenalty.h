@@ -5,8 +5,7 @@
  *      Author: hieu
  */
 
-#ifndef UNKNOWNWORDPENALTY_H_
-#define UNKNOWNWORDPENALTY_H_
+#pragma once
 
 #include "PhraseTable.h"
 
@@ -32,4 +31,4 @@ public:
 
 }
 
-#endif /* UNKNOWNWORDPENALTY_H_ */
+

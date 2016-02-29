@@ -7,10 +7,10 @@
 #include <boost/foreach.hpp>
 #include "UnknownWordPenalty.h"
 #include "../System.h"
-#include "../InputPath.h"
 #include "../Scores.h"
 #include "../PhraseBased/Manager.h"
 #include "../PhraseBased/TargetPhraseImpl.h"
+#include "../PhraseBased/InputPath.h"
 
 namespace Moses2
 {

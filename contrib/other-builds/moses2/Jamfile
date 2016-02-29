@@ -4,7 +4,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
    EstimatedScores.cpp
    HypothesisBase.cpp
    HypothesisColl.cpp
-   InputPath.cpp 
+   InputPathBase.cpp 
    InputPaths.cpp
    InputType.cpp
    ManagerBase.cpp
@@ -40,7 +40,8 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
    	
 		PhraseBased/ArcLists.cpp
 		PhraseBased/Hypothesis.cpp 
- 	 	PhraseBased/Manager.cpp 
+ 	 	PhraseBased/InputPath.cpp
+		PhraseBased/Manager.cpp 
  	 	PhraseBased/Search.cpp
 		PhraseBased/TargetPhraseImpl.cpp 
  	 	

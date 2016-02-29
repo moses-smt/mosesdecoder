@@ -11,7 +11,7 @@
 #include "Hypothesis.h"
 #include "Manager.h"
 #include "../Sentence.h"
-#include "../InputPath.h"
+#include "../InputPathBase.h"
 #include "../System.h"
 #include "../Scores.h"
 #include "../FF/StatefulFeatureFunction.h"
@@ -48,7 +48,7 @@ Hypothesis::~Hypothesis() {
 	// TODO Auto-generated destructor stub
 }
 
-void Hypothesis::Init(Manager &mgr, const InputPath &path, const TargetPhrase &tp, const Bitmap &bitmap)
+void Hypothesis::Init(Manager &mgr, const InputPathBase &path, const TargetPhrase &tp, const Bitmap &bitmap)
 {
 	m_mgr = &mgr;
 	m_targetPhrase = &tp;
@@ -64,7 +64,7 @@ void Hypothesis::Init(Manager &mgr, const InputPath &path, const TargetPhrase &t
 }
 
 void Hypothesis::Init(Manager &mgr, const Hypothesis &prevHypo,
-		const InputPath &path,
+		const InputPathBase &path,
 		const TargetPhrase &tp,
 		const Bitmap &bitmap,
 		SCORE estimatedScore)

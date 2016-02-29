@@ -10,7 +10,7 @@
 #include "../Manager.h"
 #include "../Hypothesis.h"
 #include "../../InputPaths.h"
-#include "../../InputPath.h"
+#include "../../InputPathBase.h"
 #include "../../System.h"
 #include "../../Sentence.h"
 #include "../../TranslationTask.h"
