@@ -66,8 +66,11 @@ System::System(const Parameter &paramsArg)
 
 	featureFunctions.Create();
 	LoadWeights();
+	cerr << "START featureFunctions.Load()" << endl;
 	featureFunctions.Load();
+	cerr << "START LoadMappings()" << endl;
 	LoadMappings();
+	cerr << "END LoadMappings()" << endl;
 }
 
 System::~System() {

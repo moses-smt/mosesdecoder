@@ -40,17 +40,20 @@ int main(int argc, char** argv)
 
 	istream &inStream = GetInputStream(params);
 
-	cerr << "system.numThreads=" << system.numThreads << endl;
+	//cerr << "system.numThreads=" << system.numThreads << endl;
 	Moses2::Timer timer;
 	timer.start();
 
 	Moses2::ThreadPool pool(system.numThreads, system.cpuAffinityOffset, system.cpuAffinityOffsetIncr);
+	//cerr << "CREATED POOL" << endl;
 
 	long translationId = 0;
 	string line;
 	while (getline(inStream, line)) {
+		//cerr << "line=" << line << endl;
 	    boost::shared_ptr<Moses2::TranslationTask> task(new Moses2::TranslationTask(system, line, translationId));
 
+		//cerr << "START pool.Submit()" << endl;
 		pool.Submit(task);
 		//task->Run();
 		++translationId;
