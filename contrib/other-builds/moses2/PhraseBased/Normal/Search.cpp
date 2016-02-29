@@ -10,7 +10,7 @@
 #include <boost/foreach.hpp>
 #include "Stack.h"
 #include "../Manager.h"
-#include "../../InputPaths.h"
+#include "../../InputPathsBase.h"
 #include "../../TargetPhrases.h"
 #include "../../Phrase.h"
 #include "../../System.h"

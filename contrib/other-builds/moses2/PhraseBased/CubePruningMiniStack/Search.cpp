@@ -9,7 +9,7 @@
 #include "Stack.h"
 #include "../Manager.h"
 #include "../Hypothesis.h"
-#include "../../InputPaths.h"
+#include "../../InputPathsBase.h"
 #include "../../InputPathBase.h"
 #include "../../System.h"
 #include "../../Sentence.h"

@@ -5,7 +5,7 @@
  *      Author: hieu
  */
 #include <iostream>
-#include "InputPaths.h"
+#include "InputPathsBase.h"
 #include "Sentence.h"
 #include "System.h"
 #include "legacy/Range.h"

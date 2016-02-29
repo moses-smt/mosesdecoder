@@ -7,7 +7,7 @@
 #include <boost/foreach.hpp>
 #include <queue>
 #include "PhraseTable.h"
-#include "../InputPaths.h"
+#include "../InputPathsBase.h"
 #include "../legacy/Util2.h"
 #include "../TypeDef.h"
 #include "../PhraseBased/Manager.h"

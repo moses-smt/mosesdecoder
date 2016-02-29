@@ -5,8 +5,7 @@
  *      Author: hieu
  */
 
-#ifndef FF_TRANSLATIONMODEL_PROBINGPT_H_
-#define FF_TRANSLATIONMODEL_PROBINGPT_H_
+#pragma once
 
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/thread/tss.hpp>
@@ -89,4 +88,3 @@ protected:
 
 }
 
-#endif /* FF_TRANSLATIONMODEL_PROBINGPT_H_ */

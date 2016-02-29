@@ -12,7 +12,7 @@
 #include <string>
 #include <deque>
 #include "../ManagerBase.h"
-#include "../InputPaths.h"
+#include "../InputPathsBase.h"
 #include "../Phrase.h"
 #include "../MemPool.h"
 #include "../Recycler.h"

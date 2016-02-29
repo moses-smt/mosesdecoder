@@ -5,7 +5,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
    HypothesisBase.cpp
    HypothesisColl.cpp
    InputPathBase.cpp 
-   InputPaths.cpp
+   InputPathsBase.cpp
    InputType.cpp
    ManagerBase.cpp
    MemPool.cpp
