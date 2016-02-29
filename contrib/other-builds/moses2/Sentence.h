@@ -22,7 +22,8 @@ public:
 		  FactorCollection &vocab,
 		  const System &system,
 		  const std::string &str,
-		  long translationId);
+		  long translationId,
+		  bool addBOSEOS);
 
   Sentence(long translationId, MemPool &pool, size_t size);
   virtual ~Sentence();

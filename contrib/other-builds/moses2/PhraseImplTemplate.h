@@ -55,7 +55,7 @@ protected:
 	return m_words[pos];
   }
 
-  void CreateFromString(FactorCollection &vocab, const System &system, const std::vector<std::string> &toks)
+  void CreateFromString(FactorCollection &vocab, const System &system, const std::vector<std::string> &toks, bool addBOSEOS = false)
   {
 	for (size_t i = 0; i < m_size; ++i) {
 		WORD &word = (*this)[i];

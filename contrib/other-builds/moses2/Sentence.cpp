@@ -31,15 +31,23 @@ Sentence *Sentence::CreateFromString(MemPool &pool,
 		FactorCollection &vocab,
 		const System &system,
 		const std::string &str,
-		long translationId)
+		long translationId,
+		bool addBOSEOS)
 {
 	vector<string> toks = Tokenize(str);
 	size_t size = toks.size();
+
+	/*
+	if (addBOSEOS) {
+		size += 2;
+	}
+    */
+
 	Sentence *ret;
 
 	ret = new (pool.Allocate<Sentence>()) Sentence(translationId, pool, size);
 
-	ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks);
+	ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks, addBOSEOS);
 
 
 	return ret;

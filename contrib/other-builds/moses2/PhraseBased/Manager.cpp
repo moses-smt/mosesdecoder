@@ -44,7 +44,7 @@ void Manager::Init()
 {
 	// init pools etc
 	InitPools();
-	ParseInput();
+	ParseInput(false);
 
 	m_bitmaps = new Bitmaps(GetPool());
 

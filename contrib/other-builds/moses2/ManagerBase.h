@@ -63,7 +63,7 @@ protected:
 	mutable Recycler<HypothesisBase*> *m_hypoRecycle;
 
 	void InitPools();
-	void ParseInput();
+	void ParseInput(bool addBOSEOS);
 
 };
 

@@ -12,6 +12,7 @@
 #include <string>
 #include <deque>
 #include "../ManagerBase.h"
+#include "Stacks.h"
 
 namespace Moses2
 {
@@ -28,6 +29,7 @@ public:
 	void Decode();
 
 protected:
+	Stacks m_stacks;
 };
 
 }

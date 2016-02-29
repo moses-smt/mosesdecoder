@@ -98,6 +98,8 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
 
     SCFG/Manager.cpp
     SCFG/PhraseImpl.cpp
+    SCFG/Stack.cpp
+    SCFG/Stacks.cpp
     SCFG/TargetPhraseImpl.cpp
     SCFG/Word.cpp
 

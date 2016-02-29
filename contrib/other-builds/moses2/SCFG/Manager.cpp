@@ -8,6 +8,7 @@
 #include <vector>
 #include <sstream>
 #include "Manager.h"
+#include "../Sentence.h"
 
 using namespace std;
 
@@ -32,8 +33,9 @@ void Manager::Decode()
 {
 	// init pools etc
 	InitPools();
-	ParseInput();
+	ParseInput(true);
 
+	m_stacks.Init(*this, GetInput().GetSize() + 1);
 }
 
 }
