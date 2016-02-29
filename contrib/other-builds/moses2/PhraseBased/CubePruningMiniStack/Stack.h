@@ -13,6 +13,7 @@
 #include "../../Vector.h"
 #include "../../MemPool.h"
 #include "../../Recycler.h"
+#include "../../HypothesisColl.h"
 #include "../../legacy/Util2.h"
 
 namespace Moses2
@@ -23,40 +24,7 @@ class HypothesisBase;
 
 namespace NSCubePruningMiniStack
 {
-typedef Array<const HypothesisBase*>  Hypotheses;
 
-class MiniStack
-{
-public:
-	typedef boost::unordered_set<const HypothesisBase*,
-			  UnorderedComparer<HypothesisBase>,
-			  UnorderedComparer<HypothesisBase>,
-			  MemPoolAllocator<const HypothesisBase*>
-			   > _HCType;
-
-	MiniStack(const Manager &mgr);
-
-	StackAdd Add(const Hypothesis *hypo);
-
-	_HCType &GetColl()
-	{ return m_coll; }
-
-	const _HCType &GetColl() const
-	{ return m_coll; }
-
-	void Clear();
-
-	Hypotheses &GetSortedAndPruneHypos(const Manager &mgr) const;
-
-protected:
-	_HCType m_coll;
-	mutable Hypotheses *m_sortedHypos;
-
-	void SortAndPruneHypos(const Manager &mgr) const;
-
-};
-
-/////////////////////////////////////////////
 class Stack {
 protected:
 
@@ -65,10 +33,10 @@ public:
   typedef std::pair<const Bitmap*, size_t> HypoCoverage;
 		  // bitmap and current endPos of hypos
 
-  typedef boost::unordered_map<HypoCoverage, MiniStack*,
+  typedef boost::unordered_map<HypoCoverage, Moses2::HypothesisColl*,
 		  boost::hash<HypoCoverage>,
 		  std::equal_to<HypoCoverage>,
-  	  	  MemPoolAllocator< std::pair<HypoCoverage, MiniStack*> >
+  	  	  MemPoolAllocator< std::pair<HypoCoverage, Moses2::HypothesisColl*> >
   	  	  > Coll;
 
 
@@ -84,7 +52,7 @@ public:
 
 	void Add(const Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle);
 
-	MiniStack &GetMiniStack(const HypoCoverage &key);
+	Moses2::HypothesisColl &GetMiniStack(const HypoCoverage &key);
 
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
 	void Clear();
@@ -95,7 +63,7 @@ protected:
 	const Manager &m_mgr;
 	Coll m_coll;
 
-	std::deque<MiniStack*, MemPoolAllocator<MiniStack*> > m_miniStackRecycler;
+	std::deque<Moses2::HypothesisColl*, MemPoolAllocator<Moses2::HypothesisColl*> > m_miniStackRecycler;
 
 
 };
