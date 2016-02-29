@@ -23,7 +23,7 @@ class HypothesisBase;
 
 namespace NSCubePruningMiniStack
 {
-typedef Array<const Hypothesis*>  Hypotheses;
+typedef Array<const HypothesisBase*>  Hypotheses;
 
 class MiniStack
 {

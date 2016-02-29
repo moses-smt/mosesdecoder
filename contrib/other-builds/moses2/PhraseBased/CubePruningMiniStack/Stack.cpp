@@ -57,7 +57,7 @@ Hypotheses &MiniStack::GetSortedAndPruneHypos(const Manager &mgr) const
   if (m_sortedHypos == NULL) {
     // create sortedHypos first
     MemPool &pool = mgr.GetPool();
-	m_sortedHypos = new (pool.Allocate< Array<const Hypothesis*> >()) Array<const Hypothesis*>(pool, m_coll.size());
+	m_sortedHypos = new (pool.Allocate<Hypotheses>()) Hypotheses(pool, m_coll.size());
 
 	  size_t ind = 0;
 	  BOOST_FOREACH(const HypothesisBase *hypo, m_coll) {
@@ -95,7 +95,7 @@ void MiniStack::SortAndPruneHypos(const Manager &mgr) const
   // prune
   if (stackSize && m_sortedHypos->size() > stackSize) {
 	  for (size_t i = stackSize; i < m_sortedHypos->size(); ++i) {
-		  Hypothesis *hypo = const_cast<Hypothesis*>((*m_sortedHypos)[i]);
+		  HypothesisBase *hypo = const_cast<HypothesisBase*>((*m_sortedHypos)[i]);
 		  recycler.Recycle(hypo);
 	  }
 	  m_sortedHypos->resize(stackSize);

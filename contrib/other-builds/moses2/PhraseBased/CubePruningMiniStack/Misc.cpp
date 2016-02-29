@@ -66,7 +66,7 @@ void QueueItem::Init(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIn
 
 void QueueItem::CreateHypothesis(Manager &mgr)
 {
-	const Hypothesis *prevHypo = edge->hypos[hypoIndex];
+	const Hypothesis *prevHypo = static_cast<const Hypothesis*>(edge->hypos[hypoIndex]);
 	const TargetPhrase &tp = edge->tps[tpIndex];
 
 	//cerr << "hypoIndex=" << hypoIndex << endl;
