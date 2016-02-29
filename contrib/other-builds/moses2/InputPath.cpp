@@ -10,15 +10,21 @@
 
 namespace Moses2
 {
+InputPathBase::InputPathBase(MemPool &pool, const SubPhrase &subPhrase, const Range &range, size_t numPt, const InputPathBase *prefixPath)
+:subPhrase(subPhrase)
+,range(range)
+,prefixPath(prefixPath)
+{
 
+}
+
+/////////////////////////////////////////////////////////////////////////////////////
 InputPath::InputPath(MemPool &pool,
 		const SubPhrase &subPhrase,
 		const Range &range,
 		size_t numPt,
 		const InputPath *prefixPath)
-:subPhrase(subPhrase)
-,range(range)
-,prefixPath(prefixPath)
+:InputPathBase(pool, subPhrase, range, numPt, prefixPath)
 ,m_isUsed(false)
 {
   targetPhrases = pool.Allocate<const TargetPhrases*>(numPt);

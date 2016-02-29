@@ -18,12 +18,20 @@ namespace Moses2
 
 class PhraseTable;
 
-class InputPath {
-	  friend std::ostream& operator<<(std::ostream &, const InputPath &);
+class InputPathBase {
 public:
-	const InputPath *prefixPath;
+	const InputPathBase *prefixPath;
 	SubPhrase subPhrase;
 	Range range;
+
+	InputPathBase(MemPool &pool, const SubPhrase &subPhrase, const Range &range, size_t numPt, const InputPathBase *prefixPath);
+
+};
+
+class InputPath : public InputPathBase
+{
+	  friend std::ostream& operator<<(std::ostream &, const InputPath &);
+public:
 	const TargetPhrases** targetPhrases;
 
 	InputPath(MemPool &pool, const SubPhrase &subPhrase, const Range &range, size_t numPt, const InputPath *prefixPath);

@@ -45,8 +45,6 @@ public:
 	return m_inputPaths.end();
   }
 
-  void DeleteUnusedPaths();
-
   const InputPath &GetBlank() const
   { return *m_blank; }
 

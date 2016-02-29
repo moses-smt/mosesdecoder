@@ -60,19 +60,5 @@ void InputPaths::Init(const PhraseImpl &input, const Manager &mgr)
 
 }
 
-void InputPaths::DeleteUnusedPaths()
-{
-	size_t ind = 0;
-	while (ind < m_inputPaths.size()) {
-		const InputPath *path = m_inputPaths[ind];
-		if (!path->IsUsed()) {
-			m_inputPaths.erase(m_inputPaths.begin() + ind);
-		}
-		else {
-			++ind;
-		}
-	}
-}
-
 }
 
