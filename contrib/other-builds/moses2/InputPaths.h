@@ -16,7 +16,7 @@
 namespace Moses2
 {
 
-class PhraseImpl;
+class Sentence;
 class System;
 class Manager;
 
@@ -24,7 +24,7 @@ class InputPaths {
 	typedef std::vector<InputPath*> Coll;
 public:
 	InputPaths() {}
-	void Init(const PhraseImpl &input, const Manager &mgr);
+	void Init(const Sentence &input, const Manager &mgr);
 	virtual ~InputPaths();
 
   //! iterators

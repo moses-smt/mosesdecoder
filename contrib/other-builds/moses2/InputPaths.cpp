@@ -6,7 +6,7 @@
  */
 #include <iostream>
 #include "InputPaths.h"
-#include "PhraseImpl.h"
+#include "Sentence.h"
 #include "System.h"
 #include "legacy/Range.h"
 #include "PhraseBased/Manager.h"
@@ -20,7 +20,7 @@ InputPaths::~InputPaths()
 {
 }
 
-void InputPaths::Init(const PhraseImpl &input, const Manager &mgr)
+void InputPaths::Init(const Sentence &input, const Manager &mgr)
 {
   MemPool &pool = mgr.GetPool();
   size_t numPt = mgr.system.mappings.size();

@@ -11,7 +11,6 @@
 #include <cstddef>
 #include <string>
 #include <deque>
-#include "InputPaths.h"
 #include "Phrase.h"
 #include "MemPool.h"
 #include "Recycler.h"
