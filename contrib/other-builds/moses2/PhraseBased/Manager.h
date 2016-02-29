@@ -12,12 +12,12 @@
 #include <string>
 #include <deque>
 #include "../ManagerBase.h"
-#include "../InputPathsBase.h"
 #include "../Phrase.h"
 #include "../MemPool.h"
 #include "../Recycler.h"
 #include "../EstimatedScores.h"
 #include "../legacy/Bitmaps.h"
+#include "InputPaths.h"
 
 namespace Moses2
 {

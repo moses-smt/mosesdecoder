@@ -54,19 +54,6 @@ protected:
 	Matrix<InputPath*> *m_matrix;
 };
 
-class InputPaths : public InputPathsBase
-{
-public:
-	  void Init(const Sentence &input, const Manager &mgr);
-
-	  const InputPath &GetBlank() const
-	  { return *m_blank; }
-
-protected:
-		InputPath *m_blank;
-
-};
-
 }
 
 
