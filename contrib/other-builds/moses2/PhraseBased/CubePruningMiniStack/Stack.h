@@ -81,7 +81,7 @@ public:
 	const Coll &GetColl() const
 	{ return m_coll; }
 
-	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
+	void Add(const Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle);
 
 	MiniStack &GetMiniStack(const HypoCoverage &key);
 

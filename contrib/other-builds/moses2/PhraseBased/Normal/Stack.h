@@ -38,9 +38,9 @@ public:
 	size_t GetSize() const
 	{ return m_hypos.size(); }
 
-	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
+	void Add(const Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle);
 
-	std::vector<const Hypothesis*> GetBestHyposAndPrune(size_t num, Recycler<Hypothesis*> &recycler) const;
+	std::vector<const Hypothesis*> GetBestHyposAndPrune(size_t num, Recycler<HypothesisBase*> &recycler) const;
 	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
 protected:
 	StackAdd Add(const Hypothesis *hypo);

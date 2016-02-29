@@ -74,7 +74,7 @@ void Search::Decode()
 
 void Search::Decode(size_t stackInd)
 {
-	Recycler<Hypothesis*> &hypoRecycler  = mgr.GetHypoRecycle();
+	Recycler<HypothesisBase*> &hypoRecycler  = mgr.GetHypoRecycle();
 
 	// reuse queue from previous stack. Clear it first
 	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > &container = Container(m_queue);

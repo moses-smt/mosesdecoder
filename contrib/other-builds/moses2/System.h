@@ -30,7 +30,7 @@ namespace Moses2
 class FeatureFunction;
 class StatefulFeatureFunction;
 class PhraseTable;
-class Hypothesis;
+class HypothesisBase;
 
 class System {
 public:
@@ -67,14 +67,14 @@ public:
 	MemPool &GetManagerPool() const;
 	FactorCollection &GetVocab() const;
 
-	Recycler<Hypothesis*> &GetHypoRecycler() const;
+	Recycler<HypothesisBase*> &GetHypoRecycler() const;
 
 protected:
   mutable FactorCollection m_vocab;
   mutable boost::thread_specific_ptr<MemPool> m_managerPool;
   mutable boost::thread_specific_ptr<MemPool> m_systemPool;
 
-  mutable boost::thread_specific_ptr< Recycler<Hypothesis*> > m_hypoRecycler;
+  mutable boost::thread_specific_ptr< Recycler<HypothesisBase*> > m_hypoRecycler;
 
   void LoadWeights();
   void LoadMappings();

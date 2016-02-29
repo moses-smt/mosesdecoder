@@ -28,6 +28,7 @@ class PhraseImpl;
 class SearchNormal;
 class Search;
 class Hypothesis;
+class HypothesisBase;
 class Sentence;
 class OutputCollector;
 
@@ -39,7 +40,7 @@ public:
 
 	virtual ~Manager();
 
-	Recycler<Hypothesis*> &GetHypoRecycle() const
+	Recycler<HypothesisBase*> &GetHypoRecycle() const
 	{ return *m_hypoRecycle; }
 
 	Bitmaps &GetBitmaps()
@@ -57,7 +58,7 @@ public:
 	void Decode();
 
 protected:
-	mutable Recycler<Hypothesis*> *m_hypoRecycle;
+	mutable Recycler<HypothesisBase*> *m_hypoRecycle;
 
 	InputPaths m_inputPaths;
 	Bitmaps *m_bitmaps;

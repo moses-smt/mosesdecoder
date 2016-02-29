@@ -93,18 +93,9 @@
 							</tool>
 						</toolChain>
 					</folderInfo>
-					<folderInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1097293041.337384280" name="/" resourcePath="defer">
-						<toolChain id="cdt.managedbuild.toolchain.gnu.cross.exe.debug.1629072476" name="Cross GCC" superClass="cdt.managedbuild.toolchain.gnu.cross.exe.debug" unusedChildren="">
-							<tool id="cdt.managedbuild.tool.gnu.cross.c.compiler.913460624" name="Cross GCC Compiler" superClass="cdt.managedbuild.tool.gnu.cross.c.compiler.1430831084"/>
-							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.compiler.2009657762" name="Cross G++ Compiler" superClass="cdt.managedbuild.tool.gnu.cross.cpp.compiler.1686613508"/>
-							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1050606413" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker.1439481930"/>
-							<tool id="cdt.managedbuild.tool.gnu.cross.cpp.linker.1017699267" name="Cross G++ Linker" superClass="cdt.managedbuild.tool.gnu.cross.cpp.linker.351063004"/>
-							<tool id="cdt.managedbuild.tool.gnu.cross.archiver.1834709584" name="Cross GCC Archiver" superClass="cdt.managedbuild.tool.gnu.cross.archiver.1028669671"/>
-							<tool id="cdt.managedbuild.tool.gnu.cross.assembler.319604431" name="Cross GCC Assembler" superClass="cdt.managedbuild.tool.gnu.cross.assembler.917359146"/>
-						</toolChain>
-					</folderInfo>
+					<fileInfo id="cdt.managedbuild.config.gnu.cross.exe.debug.1097293041.1123771618" name="HypothesisColl.h" rcbsApplicability="disable" resourcePath="HypothesisColl.h" toolsToInvoke=""/>
 					<sourceEntries>
-						<entry excluding="defer|Main.cpp|CreateProbingPT2.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="HypothesisColl.h|HypothesisColl.cpp|defer|Main.cpp|CreateProbingPT2.cpp" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>

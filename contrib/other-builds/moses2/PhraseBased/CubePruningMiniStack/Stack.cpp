@@ -74,7 +74,7 @@ Hypotheses &MiniStack::GetSortedAndPruneHypos(const Manager &mgr) const
 void MiniStack::SortAndPruneHypos(const Manager &mgr) const
 {
   size_t stackSize = mgr.system.stackSize;
-  Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycle();
+  Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
 
   /*
   cerr << "UNSORTED hypos:" << endl;
@@ -140,7 +140,7 @@ Stack::~Stack() {
 	}
 }
 
-void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
+void Stack::Add(const Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle)
 {
   HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
   StackAdd added = GetMiniStack(key).Add(hypo);
