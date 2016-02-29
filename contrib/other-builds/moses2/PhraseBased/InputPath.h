@@ -5,8 +5,8 @@
  *      Author: hieu
  */
 
-#ifndef INPUTPATH_H_
-#define INPUTPATH_H_
+#pragma once
+
 #include <iostream>
 #include <vector>
 #include "../InputPathBase.h"
@@ -35,4 +35,3 @@ protected:
 
 }
 
-#endif /* INPUTPATH_H_ */
