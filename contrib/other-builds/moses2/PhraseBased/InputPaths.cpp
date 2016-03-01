@@ -16,7 +16,7 @@ using namespace std;
 namespace Moses2
 {
 
-void InputPaths::Init(const Sentence &input, const Manager &mgr)
+void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
 {
   MemPool &pool = mgr.GetPool();
   size_t numPt = mgr.system.mappings.size();

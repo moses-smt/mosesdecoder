@@ -18,12 +18,11 @@ namespace Moses2
 
 class Sentence;
 class System;
-class Manager;
 
 class InputPaths : public InputPathsBase
 {
 public:
-	  void Init(const Sentence &input, const Manager &mgr);
+	  void Init(const Sentence &input, const ManagerBase &mgr);
 
 	  const InputPath &GetBlank() const
 	  { return *m_blank; }

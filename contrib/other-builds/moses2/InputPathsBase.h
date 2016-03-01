@@ -17,7 +17,7 @@ namespace Moses2
 
 class Sentence;
 class System;
-class Manager;
+class ManagerBase;
 
 class InputPathsBase
 {
@@ -44,7 +44,7 @@ public:
 	return m_inputPaths.end();
   }
 
-  virtual void Init(const Sentence &input, const Manager &mgr) = 0;
+  virtual void Init(const Sentence &input, const ManagerBase &mgr) = 0;
 
   const Matrix<InputPath*> &GetMatrix() const
   { return *m_matrix; }
