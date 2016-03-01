@@ -32,15 +32,15 @@ Manager::~Manager()
 void Manager::Decode()
 {
 	// init pools etc
-	//cerr << "START InitPools()" << endl;
+	cerr << "START InitPools()" << endl;
 	InitPools();
-	//cerr << "START ParseInput()" << endl;
+	cerr << "START ParseInput()" << endl;
 	ParseInput(true);
 
 	size_t size = GetInput().GetSize();
-	//cerr << "size=" << size << endl;
+	cerr << "size=" << size << endl;
 	m_stacks.Init(*this, size);
-	//cerr << "CREATED m_stacks" << endl;
+	cerr << "CREATED m_stacks" << endl;
 
 	for (int startPos = size; startPos >= 0; --startPos) {
 		for (int endPos = startPos + 1; endPos < size + 1; ++endPos) {

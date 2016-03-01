@@ -98,6 +98,8 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
     legacy/CompactPT/MurmurHash3.cpp
     legacy/CompactPT/ThrowingFwrite.cpp
 
+    SCFG/InputPath.cpp
+    SCFG/InputPaths.cpp
     SCFG/Manager.cpp
     SCFG/PhraseImpl.cpp
     SCFG/Stack.cpp
