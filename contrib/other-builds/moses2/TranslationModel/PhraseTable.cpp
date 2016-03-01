@@ -54,7 +54,9 @@ void PhraseTable::SetParameter(const std::string& key, const std::string& value)
 
 void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 {
-  BOOST_FOREACH(InputPath *path, inputPaths) {
+  BOOST_FOREACH(InputPathBase *pathBase, inputPaths) {
+	InputPath *path = static_cast<InputPath*>(pathBase);
+
     const SubPhrase &phrase = path->subPhrase;
 
 	TargetPhrases *tpsPtr = tpsPtr = Lookup(mgr, mgr.GetPool(), *path);

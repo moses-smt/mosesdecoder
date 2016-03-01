@@ -27,7 +27,8 @@ UnknownWordPenalty::~UnknownWordPenalty() {
 
 void UnknownWordPenalty::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 {
-  BOOST_FOREACH(InputPath *path, inputPaths) {
+  BOOST_FOREACH(InputPathBase *pathBase, inputPaths) {
+	  InputPath *path = static_cast<InputPath*>(pathBase);
 	  const SubPhrase &phrase = path->subPhrase;
 
 	TargetPhrases *tpsPtr;

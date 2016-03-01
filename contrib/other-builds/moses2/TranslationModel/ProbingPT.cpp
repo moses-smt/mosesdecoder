@@ -91,7 +91,8 @@ void ProbingPT::Load(System &system)
 
 void ProbingPT::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 {
-  BOOST_FOREACH(InputPath *path, inputPaths) {
+  BOOST_FOREACH(InputPathBase *pathBase, inputPaths) {
+	InputPath *path = static_cast<InputPath*>(pathBase);
 	TargetPhrases *tpsPtr;
 	tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
 	path->AddTargetPhrases(*this, tpsPtr);

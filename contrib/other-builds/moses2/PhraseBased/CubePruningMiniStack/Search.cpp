@@ -155,7 +155,7 @@ void Search::PostDecode(size_t stackInd)
   MemPool &pool = mgr.GetPool();
 
   const InputPaths &paths = mgr.GetInputPaths();
-  const Matrix<InputPath*> &pathMatrix = paths.GetMatrix();
+  const Matrix<InputPathBase*> &pathMatrix = paths.GetMatrix();
   size_t inputSize = pathMatrix.GetRows();
   size_t numPaths = pathMatrix.GetCols();
 
@@ -168,7 +168,7 @@ void Search::PostDecode(size_t stackInd)
 	  // create edges to next hypos from existing hypos
 	  for (size_t startPos = firstGap; startPos < inputSize; ++startPos) {
 		  for (size_t pathInd = 0; pathInd < numPaths; ++pathInd) {
-			  const InputPath *path = pathMatrix.GetValue(startPos, pathInd);
+			  const InputPath *path = static_cast<const InputPath*>(pathMatrix.GetValue(startPos, pathInd));
 
 		  		if (path == NULL) {
 		  			break;

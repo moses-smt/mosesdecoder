@@ -20,7 +20,7 @@ class InputPath : public InputPathBase
 public:
 	const TargetPhrases** targetPhrases;
 
-	InputPath(MemPool &pool, const SubPhrase &subPhrase, const Range &range, size_t numPt, const InputPath *prefixPath);
+	InputPath(MemPool &pool, const SubPhrase &subPhrase, const Range &range, size_t numPt, const InputPathBase *prefixPath);
 	virtual ~InputPath();
 
 	void AddTargetPhrases(const PhraseTable &pt, const TargetPhrases *tps);

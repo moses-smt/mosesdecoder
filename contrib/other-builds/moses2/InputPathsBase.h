@@ -8,7 +8,6 @@
 #pragma once
 
 #include <vector>
-#include "PhraseBased/InputPath.h"
 #include "MemPool.h"
 #include "legacy/Matrix.h"
 
@@ -18,10 +17,11 @@ namespace Moses2
 class Sentence;
 class System;
 class ManagerBase;
+class InputPathBase;
 
 class InputPathsBase
 {
-	typedef std::vector<InputPath*> Coll;
+	typedef std::vector<InputPathBase*> Coll;
 public:
 	InputPathsBase() {}
 	virtual ~InputPathsBase();
@@ -46,12 +46,12 @@ public:
 
   virtual void Init(const Sentence &input, const ManagerBase &mgr) = 0;
 
-  const Matrix<InputPath*> &GetMatrix() const
+  const Matrix<InputPathBase*> &GetMatrix() const
   { return *m_matrix; }
 
 protected:
 	Coll m_inputPaths;
-	Matrix<InputPath*> *m_matrix;
+	Matrix<InputPathBase*> *m_matrix;
 };
 
 }
