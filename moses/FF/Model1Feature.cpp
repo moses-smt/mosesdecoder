@@ -140,6 +140,7 @@ float Model1LexicalTable::GetProbability(const Factor* wordS, const Factor* word
 
 Model1Feature::Model1Feature(const std::string &line)
   : StatelessFeatureFunction(1, line)
+  , m_skipTargetPunctuation(false)
   , m_is_syntax(false)
 {
   VERBOSE(1, "Initializing feature " << GetScoreProducerDescription() << " ...");
@@ -155,6 +156,8 @@ void Model1Feature::SetParameter(const std::string& key, const std::string& valu
     m_fileNameVcbS = value;
   } else if (key == "target-vocabulary") {
     m_fileNameVcbT = value;
+  } else if (key == "skip-target-punctuation") {
+    m_skipTargetPunctuation = Scan<bool>(value);
   } else {
     StatelessFeatureFunction::SetParameter(key, value);
   }
@@ -181,12 +184,14 @@ void Model1Feature::Load(AllOptions::ptr const& opts)
   UTIL_THROW_IF2(m_emptyWord==NULL, GetScoreProducerDescription()
                  << ": Factor for GIZA empty word does not exist.");
 
-  const std::string punctuation = ",;.:!?";
-  for (size_t i=0; i<punctuation.size(); ++i) {
-    const std::string punct = punctuation.substr(i,1);
-    FactorCollection &factorCollection = FactorCollection::Instance();
-    const Factor* punctFactor = factorCollection.AddFactor(punct,false);  
-    std::pair<std::set<const Factor*>::iterator,bool> inserted = m_punctuation.insert(punctFactor);
+  if (m_skipTargetPunctuation) {
+    const std::string punctuation = ",;.:!?";
+    for (size_t i=0; i<punctuation.size(); ++i) {
+      const std::string punct = punctuation.substr(i,1);
+      FactorCollection &factorCollection = FactorCollection::Instance();
+      const Factor* punctFactor = factorCollection.AddFactor(punct,false);
+      std::pair<std::set<const Factor*>::iterator,bool> inserted = m_punctuation.insert(punctFactor);
+    }
   }
 }
 
@@ -203,9 +208,11 @@ void Model1Feature::EvaluateWithSourceContext(const InputType &input
 
   for (size_t posT=0; posT<targetPhrase.GetSize(); ++posT) {
     const Word &wordT = targetPhrase.GetWord(posT);
-    std::set<const Factor*>::const_iterator foundPunctuation = m_punctuation.find(wordT[0]);
-    if (foundPunctuation != m_punctuation.end()) {
-      continue;
+    if (m_skipTargetPunctuation) {
+      std::set<const Factor*>::const_iterator foundPunctuation = m_punctuation.find(wordT[0]);
+      if (foundPunctuation != m_punctuation.end()) {
+        continue;
+      }
     }
     if ( !wordT.IsNonTerminal() ) {
       float thisWordProb = m_model1.GetProbability(m_emptyWord,wordT[0]); // probability conditioned on empty word

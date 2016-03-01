@@ -99,6 +99,7 @@ private:
   std::string m_fileNameModel1;
   Model1LexicalTable m_model1;
   const Factor* m_emptyWord;
+  bool m_skipTargetPunctuation;
   std::set<const Factor*> m_punctuation;
   bool m_is_syntax;
 
