@@ -22,7 +22,9 @@ InputPath::InputPath(MemPool &pool,
 :InputPathBase(pool, subPhrase, range, numPt, prefixPath)
 {
   m_scfgPaths = pool.Allocate<SCFGPaths>(numPt);
+  for (size_t i = 0; i < numPt; ++i) {
 
+  }
 }
 
 InputPath::~InputPath() {

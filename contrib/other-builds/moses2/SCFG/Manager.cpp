@@ -39,16 +39,27 @@ void Manager::Decode()
 
 	size_t size = GetInput().GetSize();
 	cerr << "size=" << size << endl;
+
+	m_inputPaths.Init(GetInput(), *this);
+	cerr << "CREATED m_inputPaths" << endl;
+
 	m_stacks.Init(*this, size);
 	cerr << "CREATED m_stacks" << endl;
 
 	for (int startPos = size; startPos >= 0; --startPos) {
+		InitActiveChart(startPos);
+
 		for (int endPos = startPos + 1; endPos < size + 1; ++endPos) {
 			SubPhrase sub = m_input->GetSubPhrase(startPos, endPos - 1);
 			cerr << "sub=" << sub << endl;
 
 		}
 	}
+}
+
+void Manager::InitActiveChart(size_t pos)
+{
+
 }
 
 }

@@ -33,7 +33,7 @@ void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
 
   // create normal paths of subphrases through the sentence
   for (size_t startPos = 0; startPos < size; ++startPos) {
-	const InputPathBase *prefixPath = NULL;
+	const InputPath *prefixPath = NULL;
 
     for (size_t phaseSize = 1; phaseSize <= maxLength; ++phaseSize) {
 	  size_t endPos = startPos + phaseSize - 1;
@@ -48,7 +48,7 @@ void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
 	  InputPath *path = new (pool.Allocate<InputPath>()) InputPath(pool, subPhrase, range, numPt, prefixPath);
 	  m_inputPaths.push_back(path);
 
-	  prefixPath = m_inputPaths.back();
+	  prefixPath = path;
 
 	  m_matrix->SetValue(startPos, phaseSize - 1, path);
 	}

@@ -14,7 +14,7 @@ InputPath::InputPath(MemPool &pool,
 		const SubPhrase &subPhrase,
 		const Range &range,
 		size_t numPt,
-		const InputPathBase *prefixPath)
+		const InputPath *prefixPath)
 :InputPathBase(pool, subPhrase, range, numPt, prefixPath)
 ,m_isUsed(false)
 {

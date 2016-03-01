@@ -22,7 +22,7 @@ namespace SCFG
 class InputPaths : public InputPathsBase
 {
 public:
-	  void Init(const Sentence &input, const ManagerBase &mgr) {}
+	  void Init(const Sentence &input, const ManagerBase &mgr);
 
 
 protected:

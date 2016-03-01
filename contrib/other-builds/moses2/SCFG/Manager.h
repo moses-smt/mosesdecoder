@@ -13,6 +13,7 @@
 #include <deque>
 #include "../ManagerBase.h"
 #include "Stacks.h"
+#include "InputPaths.h"
 
 namespace Moses2
 {
@@ -30,6 +31,9 @@ public:
 
 protected:
 	Stacks m_stacks;
+	InputPaths m_inputPaths;
+
+	void InitActiveChart(size_t pos);
 };
 
 }
