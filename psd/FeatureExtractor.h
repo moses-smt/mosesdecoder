@@ -32,6 +32,7 @@ class ExtractorConfig
     inline bool GetSourceIndicator() const { return m_sourceIndicator; }
     inline bool GetTargetIndicator() const { return m_targetIndicator; }
     inline bool GetSyntaxParent() const { return m_syntaxParent; }
+    inline bool GetConstSpan() const { return m_constSpan; }
     inline bool GetPaired() const         { return m_paired; }
     inline bool GetBagOfWords() const     { return m_bagOfWords; }
     inline bool GetMostFrequent() const   { return m_mostFrequent; }
@@ -55,7 +56,7 @@ class ExtractorConfig
     // read from configuration
     bool m_paired, m_bagOfWords, m_sourceExternal,
          m_sourceInternal, m_targetInternal,
-         m_syntaxParent, m_mostFrequent,
+         m_syntaxParent, m_constSpan, m_mostFrequent,
          m_binnedScores, m_sourceIndicator, m_targetIndicator, m_sourceTopic,
          m_sourceTargetIndicatorSyntax, m_sourceTargetIndicatorInternal, m_sourceTargetIndicatorBoW,
          m_sourceTargetIndicatorPaired, m_sourceTargetIndicatorContext, m_sourceTargetIndicatorMostFrequent,
@@ -161,6 +162,8 @@ private:
   void GenerateInternalFeaturesChart(const std::vector<std::string> &span, FeatureConsumer *fc, AlignmentType a);
   void GenerateLhsSyntaxFeatures(const std::vector<std::string> &syntaxLabels, const std::string parent,
                               const std::string span, FeatureConsumer *fc);
+  void GenerateReducedSyntaxFeatures(const std::vector<std::string> &syntaxLabels, const std::string parent,
+                                const std::string span, FeatureConsumer *fc);
   //Generate syntax features for each non-terminal
   void GenerateRhsSyntaxFeatures(const std::vector<std::vector<std::string> > &syntaxLabelsPerNonTerm, const std::vector<std::string> parents,
                                 const std::vector<std::string> spans, FeatureConsumer *fc);

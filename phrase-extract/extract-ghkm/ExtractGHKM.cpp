@@ -656,16 +656,16 @@ void ExtractGHKM::WritePsdAnnot(
 
 			  //find alignment where align.first == i and take align.second
 
-			  //For features on the source side, we want the source non-terms to be completely undecorated
-			  ruleSource+="[X][X]";
-			  ruleSource+= " ";
-			  ntCounter++;
-
-			  //FB: uncomment for standarad ghkm format [X][NT]
-			  //ruleSource+="["+sourceRHS[i].GetValue()+"]";
-			  //ruleSource+="["+targetRHS[targetIndex].GetValue()+"]";
+			  //FB: uncomment for ghkm format that is undecorated on the source side
+			  //ruleSource+="[X][X]";
 			  //ruleSource+= " ";
 			  //ntCounter++;
+
+			  //FB: uncomment for standarad ghkm format [X][NT]
+			  ruleSource+="["+sourceRHS[i].GetValue()+"]";
+			  ruleSource+="["+targetRHS[targetIndex].GetValue()+"]";
+			  ruleSource+= " ";
+			  ntCounter++;
 		  }
 		  else
 		  {

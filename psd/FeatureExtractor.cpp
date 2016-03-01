@@ -188,6 +188,7 @@ void FeatureExtractor::GenerateFeaturesChart(FeatureConsumer *fc,
   if (m_config->GetSourceIndicator()) GenerateIndicatorFeature(sourceForms, fc);
   if (m_config->GetBagOfWords()) GenerateBagOfWordsFeatures(context, spanStart, spanEnd, FACTOR_FORM, fc);
   if (m_config->GetSyntaxParent()) GenerateLhsSyntaxFeatures(syntaxLabels,parent,span,fc);
+  if (m_config->GetConstSpan()) GenerateReducedSyntaxFeatures(syntaxLabels,parent,span,fc);
 
   vector<ChartTranslation>::const_iterator transIt = translations.begin();
   vector<float>::iterator lossIt = losses.begin();
@@ -261,6 +262,7 @@ void ExtractorConfig::Load(const string &configFile)
   m_windowSize      = pTree.get<size_t>("features.window-size", 0);
   m_scoreBins = Scan<long double>(Tokenize(pTree.get<string>("features.score-bins", ""), ","));
   m_syntaxParent = pTree.get<bool>("features.syntax-parent", false);
+  m_constSpan =pTree.get<bool>("features.reduced-syntax", false);
 
   m_factors = Scan<size_t>(Tokenize(pTree.get<string>("features.factors", ""), ","));
   m_scoreIndexes = Scan<size_t>(Tokenize(pTree.get<string>("features.scores", ""), ","));
@@ -295,6 +297,7 @@ void ExtractorConfig::LoadLocal(const string &configFile)
   m_windowSize      = pTree.get<size_t>("features.window-size", 0);
   m_scoreBins = Scan<long double>(Tokenize(pTree.get<string>("features.score-bins", ""), ","));
   m_syntaxParent = false;
+  m_constSpan = false;
 
   m_factors = Scan<size_t>(Tokenize(pTree.get<string>("features.factors", ""), ","));
   m_scoreIndexes = Scan<size_t>(Tokenize(pTree.get<string>("features.scores", ""), ","));
@@ -693,6 +696,55 @@ void FeatureExtractor::GenerateLhsSyntaxFeatures(const std::vector<std::string> 
      }
   }
 }
+
+//Labels of lhs syntactic constituents
+void FeatureExtractor::GenerateReducedSyntaxFeatures(const std::vector<std::string> &syntaxLabel,
+                                           const std::string parent, const std::string span,
+                                           FeatureConsumer *fc)
+{
+  string noTag = "NOTAG";
+  string newSpan;
+  int spanInt = atoi(span.c_str());
+
+
+  //FB: make span buckets
+  if(spanInt < 4) //let short spans as are
+	  newSpan = span;
+  else if(spanInt < 7)
+	  newSpan = "4";
+  else if(spanInt < 13)
+	  newSpan = "5";
+  else if(spanInt < 24)
+	  newSpan = "6";
+  else if(spanInt < 39)
+	  newSpan = "7";
+  else
+	  newSpan = "8";
+
+  fc->AddFeature("span^" + newSpan);
+
+
+  //if several labels in vector repeats parent
+  vector<string>::const_iterator it;
+  for (it = syntaxLabel.begin(); it != syntaxLabel.end(); it++) {
+     //cerr << "I am a syntax label : " << *it << endl;
+
+     fc->AddFeature("con^" + *it);
+     fc->AddFeature("con^" + *it + "^span^" + newSpan);
+     if( !(*it).compare(noTag) )
+     {
+         //cerr << "I am a notag, here is my parent : " << parent << endl;
+         fc->AddFeature("inc^" + parent);
+     }
+     else
+     {
+         //cerr << "I am a const, here is my parent : " << parent << endl;
+         fc->AddFeature("cmp");
+         fc->AddFeature("ins^" + parent);
+     }
+  }
+}
+
 
 //Generate syntax labels for each non-terminal on the rhs of each rule
 //Generated features for each non-terminal :

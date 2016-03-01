@@ -80,15 +80,6 @@ void ContextFeature::Evaluate(const InputType &input
 	            //get source side of rule
 	            CHECK(tp.GetRuleSource() != NULL);
 
-	            std::cout << "Source side of rule :" << std::endl;
-	            //FB : display complete rule for debugging
-	            for(int i=0; i< tp.GetRuleSource()->GetSize();i++)
-	            {
-	            	std::cout << tp.GetRuleSource()->GetWord(i) << " ";
-	            }
-
-	            std::cout << std::endl;
-
 	            //FB : also look at the non-terms in the target !!!
 	            //rewrite non-terminals non source side with "[][]"
 	            //Generate non-term representation
@@ -125,7 +116,7 @@ void ContextFeature::Evaluate(const InputType &input
 	            sourceSide += " ";
 	            sourceSide += parentNonTerm;
 
-	            VERBOSE(0, "New source side : " << sourceSide << std::endl);
+	            VERBOSE(2, "New source side : " << sourceSide << std::endl);
 
 	            int wordCounter = 0;
 
@@ -184,7 +175,7 @@ void ContextFeature::Evaluate(const InputType &input
 	            //targetRepresentation += parentNonTerm; //was for hiero
 	            targetRepresentation += "["+tp.GetTargetLHS().GetString(srcFactors,0)+"]";
 
-	            VERBOSE(0, "STRINGS PUT IN RULE MAP : " << sourceSide << "::" << targetRepresentation << endl);
+	            VERBOSE(1, "STRINGS PUT IN RULE MAP : " << sourceSide << "::" << targetRepresentation << endl);
 
 	            ruleMap.AddRule(sourceSide,targetRepresentation);
 	            targetRepMap.insert(std::make_pair(targetRepresentation,*itr_targets));
@@ -292,10 +283,10 @@ ChartTranslation ContextFeature::GetPSDTranslation(const string targetRep, const
   ChartTranslation psdOpt;
 
   // phrase ID
-   VERBOSE(2, "LOOKED UP TARGET REP : " << targetRep << endl);
+   VERBOSE(1, "LOOKED UP TARGET REP : " << targetRep << endl);
    CHECK(m_ruleIndex.left.find(targetRep) != m_ruleIndex.left.end());
    psdOpt.m_index = m_ruleIndex.left.find(targetRep)->second;
-   VERBOSE(2, "FOUND INDEX : " << m_ruleIndex.left.find(targetRep)->second << endl);
+   VERBOSE(1, "FOUND INDEX : " << m_ruleIndex.left.find(targetRep)->second << endl);
 
   //alignment between terminals and non-terminals
   // alignment between terminals
@@ -319,7 +310,7 @@ ChartTranslation ContextFeature::GetPSDTranslation(const string targetRep, const
   {
 	  VERBOSE(1, "Second Element of align " << nonTermIt->second << std::endl);
 	  size_t index = nonTermIt->second;
-	  std::cerr << "INDEX:" << index << std::endl;
+	  //std::cerr << "INDEX:" << index << std::endl;
 	  nonTermIndex = std::make_pair(index,nonTermCounter);
 	  nonTermVec.push_back(nonTermIndex);
 	  nonTermCounter++;
@@ -386,6 +377,7 @@ vector<ScoreComponentCollection> ContextFeature::ScoreRules(
                                                                         map<string,boost::shared_ptr<ChartTranslationOption> > * targetMap
                                                                       ) const
 {
+	VERBOSE(1, "Scoring rules for source : " << sourceSide << endl);
 	VERBOSE(1, "Scoring rules for target Representation : " << targetRepresentations->size() << endl);
 
     vector<ScoreComponentCollection> scores;
