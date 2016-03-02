@@ -4,7 +4,7 @@
 #include <map>
 #include <limits>
 
-#include "moses/FF/StatelessFeatureFunction.h"
+#include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/PP/CountsPhraseProperty.h"
 #include "moses/TranslationOptionList.h"
 #include "moses/TranslationOption.h"
@@ -104,11 +104,11 @@ typedef ThreadLocalByFeatureStorage<Discriminative::Classifier, Discriminative::
 
 typedef ThreadLocalByFeatureStorage<VWTargetSentence> TLSTargetSentence;
 
-class VW : public StatelessFeatureFunction, public TLSTargetSentence
+class VW : public StatefulFeatureFunction, public TLSTargetSentence
 {
 public:
   VW(const std::string &line)
-    : StatelessFeatureFunction(1, line)
+    : StatefulFeatureFunction(1, line)
     , TLSTargetSentence(this)
     , m_train(false) {
     ReadParameters();
@@ -151,6 +151,25 @@ public:
                                  , ScoreComponentCollection &scoreBreakdown
                                  , ScoreComponentCollection *estimatedFutureScore = NULL) const {
   }
+
+  FFState* EvaluateWhenApplied(
+    const Hypothesis& cur_hypo,
+    const FFState* prev_state,
+    ScoreComponentCollection* accumulator) const
+  { 
+    return new DummyState();
+  }
+  
+
+  virtual FFState* EvaluateWhenApplied(
+    const ChartHypothesis&,
+    int,
+    ScoreComponentCollection* accumulator) const
+  { 
+    throw new std::logic_error("hiearchical/syntax not supported"); 
+  }
+
+  const FFState* EmptyHypothesisState(const InputType &input) const { return new DummyState(); }
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
       , const TranslationOptionList &translationOptionList) const {
@@ -302,7 +321,7 @@ public:
         UTIL_THROW2("Unknown loss type:" << value);
       }
     } else {
-      StatelessFeatureFunction::SetParameter(key, value);
+      StatefulFeatureFunction::SetParameter(key, value);
     }
   }
 
