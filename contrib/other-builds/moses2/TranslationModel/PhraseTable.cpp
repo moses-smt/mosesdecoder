@@ -52,7 +52,7 @@ void PhraseTable::SetParameter(const std::string& key, const std::string& value)
   }
 }
 
-void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
+void PhraseTable::Lookup(const Manager &mgr, InputPathsBase &inputPaths) const
 {
   BOOST_FOREACH(InputPathBase *pathBase, inputPaths) {
 	InputPath *path = static_cast<InputPath*>(pathBase);
@@ -75,7 +75,7 @@ void PhraseTable::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 
 }
 
-TargetPhrases *PhraseTable::Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const
+TargetPhrases *PhraseTable::Lookup(const Manager &mgr, MemPool &pool, InputPathBase &inputPath) const
 {
   UTIL_THROW2("Not implemented");
 }

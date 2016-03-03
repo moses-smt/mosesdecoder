@@ -11,7 +11,7 @@
 #include "ManagerBase.h"
 #include "TargetPhrases.h"
 #include "Phrase.h"
-#include "InputPaths.h"
+#include "InputPathsBase.h"
 #include "InputPathBase.h"
 #include "TranslationModel/PhraseTable.h"
 #include "legacy/Range.h"

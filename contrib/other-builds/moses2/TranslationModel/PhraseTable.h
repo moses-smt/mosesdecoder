@@ -16,8 +16,8 @@ namespace Moses2
 {
 
 class System;
-class InputPaths;
-class InputPath;
+class InputPathsBase;
+class InputPathBase;
 class Manager;
 
 ////////////////////////////////////////////////////////////////////////
@@ -28,8 +28,8 @@ public:
 	virtual ~PhraseTable();
 
 	virtual void SetParameter(const std::string& key, const std::string& value);
-	virtual void Lookup(const Manager &mgr, InputPaths &inputPaths) const;
-	virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const;
+	virtual void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
+	virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool, InputPathBase &inputPath) const;
 
 	void SetPtInd(size_t ind)
 	{ m_ptInd = ind; }

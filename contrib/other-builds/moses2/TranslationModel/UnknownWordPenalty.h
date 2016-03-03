@@ -18,8 +18,8 @@ public:
 	UnknownWordPenalty(size_t startInd, const std::string &line);
 	virtual ~UnknownWordPenalty();
 
-  void Lookup(const Manager &mgr, InputPaths &inputPaths) const;
-  virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const;
+  void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
+  virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool, InputPathBase &inputPath) const;
 
 	  virtual void
 	  EvaluateInIsolation(const System &system,

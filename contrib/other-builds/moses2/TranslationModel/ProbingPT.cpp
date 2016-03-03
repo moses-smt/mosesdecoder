@@ -89,7 +89,7 @@ void ProbingPT::Load(System &system)
   CreateCache(system);
 }
 
-void ProbingPT::Lookup(const Manager &mgr, InputPaths &inputPaths) const
+void ProbingPT::Lookup(const Manager &mgr, InputPathsBase &inputPaths) const
 {
   BOOST_FOREACH(InputPathBase *pathBase, inputPaths) {
 	InputPath *path = static_cast<InputPath*>(pathBase);
@@ -101,7 +101,7 @@ void ProbingPT::Lookup(const Manager &mgr, InputPaths &inputPaths) const
 
 TargetPhrases* ProbingPT::Lookup(const Manager &mgr,
 		MemPool &pool,
-		InputPath &inputPath) const
+		InputPathBase &inputPath) const
 {
 	/*
 	if (inputPath.prefixPath && inputPath.prefixPath->GetTargetPhrases(*this) == NULL) {

@@ -10,11 +10,13 @@
 #include "PhraseTableMemory.h"
 #include "../PhraseImpl.h"
 #include "../Phrase.h"
-#include "../PhraseBased/TargetPhraseImpl.h"
 #include "../System.h"
 #include "../Scores.h"
-#include "../InputPaths.h"
+#include "../InputPathsBase.h"
 #include "../legacy/InputFileStream.h"
+
+#include "../PhraseBased/InputPath.h"
+#include "../PhraseBased/TargetPhraseImpl.h"
 
 #include "../SCFG/PhraseImpl.h"
 #include "../SCFG/TargetPhraseImpl.h"
@@ -172,7 +174,7 @@ void PhraseTableMemory::Load(System &system)
 	m_root.SortAndPrune(m_tableLimit, systemPool, system);
 }
 
-TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const
+TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool, InputPathBase &inputPath) const
 {
 	const SubPhrase &phrase = inputPath.subPhrase;
 	TargetPhrases *tps = m_root.Find(phrase);

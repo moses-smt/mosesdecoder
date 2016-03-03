@@ -25,7 +25,7 @@ UnknownWordPenalty::~UnknownWordPenalty() {
 	// TODO Auto-generated destructor stub
 }
 
-void UnknownWordPenalty::Lookup(const Manager &mgr, InputPaths &inputPaths) const
+void UnknownWordPenalty::Lookup(const Manager &mgr, InputPathsBase &inputPaths) const
 {
   BOOST_FOREACH(InputPathBase *pathBase, inputPaths) {
 	  InputPath *path = static_cast<InputPath*>(pathBase);
@@ -38,7 +38,7 @@ void UnknownWordPenalty::Lookup(const Manager &mgr, InputPaths &inputPaths) cons
 
 }
 
-TargetPhrases *UnknownWordPenalty::Lookup(const Manager &mgr, MemPool &pool, InputPath &inputPath) const
+TargetPhrases *UnknownWordPenalty::Lookup(const Manager &mgr, MemPool &pool, InputPathBase &inputPath) const
 {
 	const System &system = mgr.system;
 
@@ -52,7 +52,7 @@ TargetPhrases *UnknownWordPenalty::Lookup(const Manager &mgr, MemPool &pool, Inp
 
 	// any other pt translate this?
     size_t numPt = mgr.system.mappings.size();
-	const TargetPhrases **allTPS = inputPath.targetPhrases;
+	const TargetPhrases **allTPS = static_cast<InputPath&>(inputPath).targetPhrases;
 	for (size_t i = 0; i < numPt; ++i) {
 		const TargetPhrases *otherTps = allTPS[i];
 
