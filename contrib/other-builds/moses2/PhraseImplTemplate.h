@@ -51,7 +51,7 @@ protected:
   size_t m_size;
   WORD *m_words;
 
-  Word& operator[](size_t pos) {
+  WORD& operator[](size_t pos) {
 	return m_words[pos];
   }
 
