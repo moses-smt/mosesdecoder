@@ -114,8 +114,6 @@ public:
 protected:
   std::vector<FactorType> m_sourceFactors, m_targetFactors;
 
-  static const std::string BOS_STRING, EOS_STRING;
-
   void UpdateRegister() {
     for(std::vector<std::string>::const_iterator it = m_usedBy.begin();
         it != m_usedBy.end(); it++) {

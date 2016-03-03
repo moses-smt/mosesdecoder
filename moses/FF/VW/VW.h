@@ -313,14 +313,6 @@ public:
     }
   }
 
-  void EvaluateWhenApplied(const Hypothesis& hypo,
-                           ScoreComponentCollection* accumulator) const {
-  }
-
-  void EvaluateWhenApplied(const ChartHypothesis &hypo,
-                           ScoreComponentCollection* accumulator) const {
-  }
-
   void SetParameter(const std::string& key, const std::string& value) {
     if (key == "train") {
       m_train = Scan<bool>(value);

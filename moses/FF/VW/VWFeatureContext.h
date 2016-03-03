@@ -3,6 +3,7 @@
 #include <string>
 #include "VWFeatureBase.h"
 #include "moses/InputType.h"
+#include "moses/TypeDef.h"
 
 namespace Moses
 {
@@ -54,7 +55,7 @@ protected:
       posFromEnd -= hypo->GetCurrTargetPhrase().GetSize();
       hypo = hypo->GetPrevHypo();
       if (! hypo)
-        return BOS_STRING; // translation is not long enough
+        return BOS_; // translation is not long enough
     }
 
     const Phrase &phrase = hypo->GetCurrTargetPhrase();
