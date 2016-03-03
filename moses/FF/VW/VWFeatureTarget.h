@@ -17,7 +17,7 @@ class VWFeatureTarget : public VWFeatureBase
 {
 public:
   VWFeatureTarget(const std::string &line)
-    : VWFeatureBase(line, false) {
+    : VWFeatureBase(line, vwft_target) {
   }
 
   // Gets its pure virtual functions from VWFeatureBase

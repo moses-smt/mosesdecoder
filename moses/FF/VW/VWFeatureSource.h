@@ -19,7 +19,7 @@ class VWFeatureSource : public VWFeatureBase
 {
 public:
   VWFeatureSource(const std::string &line)
-    : VWFeatureBase(line, true) {
+    : VWFeatureBase(line, vwft_source) {
   }
 
   // Gets its pure virtual functions from VWFeatureBase

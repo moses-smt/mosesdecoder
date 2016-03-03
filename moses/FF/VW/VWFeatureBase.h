@@ -12,11 +12,17 @@
 namespace Moses
 {
 
+enum VWFeatureType { 
+  vwft_source,
+  vwft_target,
+  vwft_targetContext
+};
+
 class VWFeatureBase : public StatelessFeatureFunction
 {
 public:
-  VWFeatureBase(const std::string &line, bool isSource = true)
-    : StatelessFeatureFunction(0, line), m_usedBy(1, "VW0"), m_isSource(isSource) {
+  VWFeatureBase(const std::string &line, VWFeatureType featureType = vwft_source)
+    : StatelessFeatureFunction(0, line), m_usedBy(1, "VW0"), m_featureType(featureType) {
     // defaults
     m_sourceFactors.push_back(0);
     m_targetFactors.push_back(0);
@@ -71,6 +77,12 @@ public:
     return s_sourceFeatures[name];
   }
 
+  // Return only target-context classifier features
+  static const std::vector<VWFeatureBase*>& GetTargetContextFeatures(std::string name = "VW0") {
+    // don't throw an exception when there are no target-context features, this feature type is not mandatory
+    return s_targetContextFeatures[name];
+  }
+
   // Return only target-dependent classifier features
   static const std::vector<VWFeatureBase*>& GetTargetFeatures(std::string name = "VW0") {
     UTIL_THROW_IF2(s_targetFeatures.count(name) == 0, "No target features registered for parent classifier: " + name);
@@ -99,8 +111,10 @@ protected:
     for(std::vector<std::string>::const_iterator it = m_usedBy.begin();
         it != m_usedBy.end(); it++) {
       s_features[*it].push_back(this);
-      if(m_isSource)
+      if(m_featureType == vwft_source) 
         s_sourceFeatures[*it].push_back(this);
+      else if (m_featureType == vwft_targetContext)
+        s_targetContextFeatures[*it].push_back(this);
       else
         s_targetFeatures[*it].push_back(this);
     }
@@ -113,9 +127,10 @@ private:
   }
 
   std::vector<std::string> m_usedBy;
-  bool m_isSource;
+  VWFeatureType m_featureType;
   static std::map<std::string, std::vector<VWFeatureBase*> > s_features;
   static std::map<std::string, std::vector<VWFeatureBase*> > s_sourceFeatures;
+  static std::map<std::string, std::vector<VWFeatureBase*> > s_targetContextFeatures;
   static std::map<std::string, std::vector<VWFeatureBase*> > s_targetFeatures;
 };
 
