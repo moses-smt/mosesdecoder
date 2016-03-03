@@ -39,7 +39,7 @@ void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
 		  break;
 	  }
 
-	  SubPhrase subPhrase = input.GetSubPhrase(startPos, endPos);
+	  SubPhrase subPhrase = input.GetSubPhrase(startPos, phaseSize);
 	  Range range(startPos, endPos);
 
 	  InputPath *path = new (pool.Allocate<InputPath>()) InputPath(pool, subPhrase, range, numPt, prefixPath);

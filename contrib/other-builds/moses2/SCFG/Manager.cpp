@@ -53,7 +53,7 @@ void Manager::Decode()
 		InitActiveChart(startPos);
 
 		for (int endPos = startPos + 1; endPos < size + 1; ++endPos) {
-			SubPhrase sub = m_input->GetSubPhrase(startPos, endPos - 1);
+			SubPhrase sub = m_input->GetSubPhrase(startPos, endPos - startPos);
 			cerr << "sub=" << sub << endl;
 
 		}

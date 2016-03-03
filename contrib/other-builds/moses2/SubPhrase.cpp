@@ -10,10 +10,10 @@ using namespace std;
 
 namespace Moses2
 {
-SubPhrase::SubPhrase(const Phrase &origPhrase, size_t start, size_t end)
+SubPhrase::SubPhrase(const Phrase &origPhrase, size_t start, size_t size)
 :m_origPhrase(&origPhrase)
 ,m_start(start)
-,m_end(end)
+,m_size(size)
 {
 }
 
@@ -32,9 +32,9 @@ std::ostream& operator<<(std::ostream &out, const SubPhrase &obj)
 	return out;
 }
 
-SubPhrase SubPhrase::GetSubPhrase(size_t start, size_t end) const
+SubPhrase SubPhrase::GetSubPhrase(size_t start, size_t size) const
 {
-	SubPhrase ret(*m_origPhrase, m_start + start, m_start + end);
+	SubPhrase ret(*m_origPhrase, m_start + start, m_size);
 	return ret;
 }
 
