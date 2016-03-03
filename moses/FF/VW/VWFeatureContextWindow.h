@@ -19,10 +19,10 @@ public:
     VWFeatureBase::UpdateRegister();
   }
 
-  virtual void operator()(const Hypothesis &hypo
-                          , std::vector<StringPiece> &features) const {
+  virtual void operator()(const Phrase &phrase
+                          , std::vector<std::string> &features) const {
     for (size_t i = 0; i < m_size; i++)
-      features.push_back("tcwin^-" + SPrint(i + 1) + "^" + GetWord(&hypo, i));
+      features.push_back("tcwin^-" + SPrint(i + 1) + "^" + GetWord(phrase, i));
   }
 
   virtual void SetParameter(const std::string& key, const std::string& value) {

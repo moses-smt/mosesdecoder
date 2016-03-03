@@ -108,8 +108,8 @@ public:
   // evaluated during decoding. For efficiency, features are not fed directly into
   // the classifier object but instead output in the vector "features" and managed
   // separately in VW.h.
-  virtual void operator()(const Hypothesis &hypo
-                          , std::vector<StringPiece> &features) const = 0;
+  virtual void operator()(const Phrase &phrase
+                          , std::vector<std::string> &features) const = 0;
 
 protected:
   std::vector<FactorType> m_sourceFactors, m_targetFactors;

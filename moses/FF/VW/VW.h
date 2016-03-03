@@ -184,6 +184,9 @@ public:
     const std::vector<VWFeatureBase*>& sourceFeatures =
       VWFeatureBase::GetSourceFeatures(GetScoreProducerDescription());
 
+    const std::vector<VWFeatureBase*>& contextFeatures =
+      VWFeatureBase::GetTargetContextFeatures(GetScoreProducerDescription());
+
     const std::vector<VWFeatureBase*>& targetFeatures =
       VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription());
 
@@ -197,52 +200,78 @@ public:
 
       // find which topts are correct
       std::vector<bool> correct(translationOptionList.size());
-      for (size_t i = 0; i < translationOptionList.size(); i++)
-        correct[i] = IsCorrectTranslationOption(* translationOptionList.Get(i));
+      std::vector<int> startsAt(translationOptionList.size());
+      std::set<int> uncoveredStartingPositions;
+
+      for (size_t i = 0; i < translationOptionList.size(); i++) {
+        std::pair<bool, int> isCorrect = IsCorrectTranslationOption(* translationOptionList.Get(i));
+        correct[i] = isCorrect.first;
+        startsAt[i] = isCorrect.second;
+        if (isCorrect.first) {
+          uncoveredStartingPositions.insert(isCorrect.second);
+        }
+      }
 
       // optionally update translation options using leave-one-out
       std::vector<bool> keep = (m_leaveOneOut.size() > 0)
                                ? LeaveOneOut(translationOptionList, correct)
                                : std::vector<bool>(translationOptionList.size(), true);
 
-      // check whether we (still) have some correct translation
-      int firstCorrect = -1;
-      for (size_t i = 0; i < translationOptionList.size(); i++) {
-        if (keep[i] && correct[i]) {
-          firstCorrect = i;
-          break;
+      while (! uncoveredStartingPositions.empty()) {
+        int currentStart = *uncoveredStartingPositions.begin();
+        uncoveredStartingPositions.erase(uncoveredStartingPositions.begin());
+
+        // check whether we (still) have some correct translation
+        int firstCorrect = -1;
+        for (size_t i = 0; i < translationOptionList.size(); i++) {
+          if (keep[i] && correct[i] && startsAt[i] == currentStart) {
+            firstCorrect = i;
+            break;
+          }
         }
-      }
 
-      // do not train if there are no positive examples
-      if (firstCorrect == -1) {
-        VERBOSE(2, "VW :: skipping topt collection, no correct translation for span\n");
-        return;
-      }
-
-      // the first correct topt can be used by some loss functions
-      const TargetPhrase &correctPhrase = translationOptionList.Get(firstCorrect)->GetTargetPhrase();
-
-      // extract source side features
-      for(size_t i = 0; i < sourceFeatures.size(); ++i)
-        (*sourceFeatures[i])(input, inputPath, sourceRange, classifier);
-
-      // go over topts, extract target side features and train the classifier
-      for (size_t toptIdx = 0; toptIdx < translationOptionList.size(); toptIdx++) {
-
-        // this topt was discarded by leaving one out
-        if (! keep[toptIdx])
+        // do not train if there are no positive examples
+        if (firstCorrect == -1) {
+          VERBOSE(2, "VW :: skipping topt collection, no correct translation for span at current tgt start position\n");
           continue;
+        }
 
-        // extract target-side features for each topt
-        const TargetPhrase &targetPhrase = translationOptionList.Get(toptIdx)->GetTargetPhrase();
-        for(size_t i = 0; i < targetFeatures.size(); ++i)
-          (*targetFeatures[i])(input, inputPath, targetPhrase, classifier);
+        // the first correct topt can be used by some loss functions
+        const TargetPhrase &correctPhrase = translationOptionList.Get(firstCorrect)->GetTargetPhrase();
 
-        float loss = (*m_trainingLoss)(targetPhrase, correctPhrase, correct[toptIdx]);
+        // extract source side features
+        for(size_t i = 0; i < sourceFeatures.size(); ++i)
+          (*sourceFeatures[i])(input, inputPath, sourceRange, classifier);
 
-        // train classifier on current example
-        classifier.Train(MakeTargetLabel(targetPhrase), loss);
+        const Phrase *targetSent = GetStored()->m_sentence;
+        Phrase targetContext = targetSent->GetSubString(Range(0, currentStart - 1));
+
+        // extract target-context features
+        std::vector<std::string> contextExtractedFeatures;
+        for(size_t i = 0; i < contextFeatures.size(); ++i)
+          (*contextFeatures[i])(targetContext, contextExtractedFeatures);
+
+        for (size_t i = 0; i < contextExtractedFeatures.size(); i++)
+          classifier.AddLabelIndependentFeature(contextExtractedFeatures[i]);
+
+        // go over topts, extract target side features and train the classifier
+        for (size_t toptIdx = 0; toptIdx < translationOptionList.size(); toptIdx++) {
+
+          // this topt was discarded by leaving one out
+          if (! keep[toptIdx])
+            continue;
+
+          // extract target-side features for each topt
+          const TargetPhrase &targetPhrase = translationOptionList.Get(toptIdx)->GetTargetPhrase();
+          for(size_t i = 0; i < targetFeatures.size(); ++i)
+            (*targetFeatures[i])(input, inputPath, targetPhrase, classifier);
+
+          bool isCorrect = correct[toptIdx] && startsAt[toptIdx] == currentStart;
+          float loss = (*m_trainingLoss)(targetPhrase, correctPhrase, isCorrect);
+
+          // train classifier on current example
+          classifier.Train(MakeTargetLabel(targetPhrase), loss);
+        }
       }
     } else {
       //
@@ -366,7 +395,7 @@ private:
     return VW_DUMMY_LABEL;
   }
 
-  bool IsCorrectTranslationOption(const TranslationOption &topt) const {
+  std::pair<bool, int> IsCorrectTranslationOption(const TranslationOption &topt) const {
 
     //std::cerr << topt.GetSourceWordsRange() << std::endl;
 
@@ -390,7 +419,7 @@ private:
     }
     // there was no alignment
     if(targetEnd == -1)
-      return false;
+      return std::make_pair(false, -1);
 
     //std::cerr << "Shorter: " << targetStart << " " << targetEnd << std::endl;
 
@@ -412,11 +441,11 @@ private:
 
     // if target phrase is shorter than inner span return false
     if(tphrase.GetSize() < targetEnd - targetStart + 1)
-      return false;
+      return std::make_pair(false, -1);
 
     // if target phrase is longer than outer span return false
     if(tphrase.GetSize() > targetEnd2 - targetStart2 + 1)
-      return false;
+      return std::make_pair(false, -1);
 
     // for each possible starting point
     for(int tempStart = targetStart2; tempStart <= targetStart; tempStart++) {
@@ -431,11 +460,11 @@ private:
       // return true if there was a match
       if(found) {
         //std::cerr << "Found" << std::endl;
-        return true;
+        return std::make_pair(true, tempStart);
       }
     }
 
-    return false;
+    return std::make_pair(false, -1);
   }
 
   std::vector<bool> LeaveOneOut(const TranslationOptionList &topts, const std::vector<bool> &correct) const {

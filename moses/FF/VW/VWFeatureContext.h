@@ -60,6 +60,10 @@ protected:
     const Phrase &phrase = hypo->GetCurrTargetPhrase();
     return phrase.GetWord(phrase.GetSize() - posFromEnd - 1).GetString(m_targetFactors, false);
   }
+
+  inline std::string GetWord(const Phrase &phrase, size_t posFromEnd) const {
+    return phrase.GetWord(phrase.GetSize() - posFromEnd - 1).GetString(m_targetFactors, false);
+  }
 };
 
 }
