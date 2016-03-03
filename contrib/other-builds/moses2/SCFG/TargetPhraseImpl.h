@@ -26,7 +26,7 @@ namespace SCFG
 
 class TargetPhraseImpl : public Moses2::TargetPhrase, public PhraseImplTemplate<SCFG::Word>
 {
-	  friend std::ostream& operator<<(std::ostream &, const TargetPhrase &);
+	  friend std::ostream& operator<<(std::ostream &, const TargetPhraseImpl &);
 public:
   SCFG::Word lhs;
 

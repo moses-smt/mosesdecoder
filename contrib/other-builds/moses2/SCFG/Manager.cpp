@@ -67,7 +67,9 @@ void Manager::InitActiveChart(size_t pos)
 
 	for (size_t i = 0; i < numPt; ++i) {
 		const PhraseTable &pt = *system.mappings[i];
+		cerr << "START InitActiveChart" << endl;
 		pt.InitActiveChart(path);
+		cerr << "FINISHED InitActiveChart" << endl;
 	}
 }
 

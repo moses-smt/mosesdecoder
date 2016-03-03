@@ -160,7 +160,7 @@ void PhraseTableMemory::Load(System &system)
 		}
 
 		target->GetScores().CreateFromString(toks[2], *this, system, true);
-		//cerr << "created scores" << endl;
+		//cerr << "created scores:" << *target << endl;
 
 		// properties
 		if (toks.size() == 7) {
@@ -169,6 +169,7 @@ void PhraseTableMemory::Load(System &system)
 		}
 
 		system.featureFunctions.EvaluateInIsolation(systemPool, system, *source, *target);
+		//cerr << "EvaluateInIsolation:" << *target << endl;
 		m_root.AddRule(*source, target);
 	}
 
@@ -185,10 +186,14 @@ TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool, Inpu
 void PhraseTableMemory::InitActiveChart(SCFG::InputPath &path) const
 {
 	size_t ptInd = GetPtInd();
+	cerr << "BEFORE GetActiveChart" << endl;
 	SCFG::ActiveChart &chart = path.GetActiveChart(ptInd);
+	cerr << "AFTER GetActiveChart" << endl;
 	SCFG::ActiveChartEntry *chartEntry = new SCFG::ActiveChartEntry(&m_root);
 
+	cerr << "BEFORE push_back" << endl;
 	chart.entries.push_back(chartEntry);
+	cerr << "AFTER push_back" << endl;
 
 }
 

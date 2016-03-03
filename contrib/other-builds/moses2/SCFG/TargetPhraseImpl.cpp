@@ -25,17 +25,17 @@ TargetPhraseImpl *TargetPhraseImpl::CreateFromString(MemPool &pool, const Phrase
 	FactorCollection &vocab = system.GetVocab();
 
 	vector<string> toks = Tokenize(str);
-	size_t size = toks.size();
+	size_t size = toks.size() - 1;
 	TargetPhraseImpl *ret = new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, pt, system, size);
 
-	for (size_t i = 0; i < size - 1; ++i) {
+	for (size_t i = 0; i < size; ++i) {
 		SCFG::Word &word = (*ret)[i];
 		word.CreateFromString(vocab, system, toks[i], true);
 	}
 
 	// lhs
 	ret->lhs.CreateFromString(vocab, system, toks.back(), false);
-
+	//cerr << "ret=" << *ret << endl;
 	return ret;
 }
 

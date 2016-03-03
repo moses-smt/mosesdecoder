@@ -43,6 +43,8 @@ public:
 ////////////////////////////////////////////////////////////////////////
 class TargetPhrase : public Phrase
 {
+  friend std::ostream& operator<<(std::ostream &, const TargetPhrase &);
+
 public:
   const PhraseTable &pt;
   mutable void **ffData;

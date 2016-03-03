@@ -92,5 +92,12 @@ SCORE *TargetPhrase::GetScoresProperty(int propertyInd) const
 	return scoreProperties ? scoreProperties + propertyInd : NULL;
 }
 
+std::ostream& operator<<(std::ostream &out, const TargetPhrase &obj)
+{
+	out << (const Phrase&) obj << " SCORES:" << obj.GetScores();
+	return out;
+}
+
+
 } // namespace
 
