@@ -43,6 +43,8 @@ public:
 	virtual void Load(System &system);
 	virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool, InputPathBase &inputPath) const;
 
+	virtual void InitActiveChart(SCFG::InputPath &path) const;
+
 protected:
 	Node m_root;
 };

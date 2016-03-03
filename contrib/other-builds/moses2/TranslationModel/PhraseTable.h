@@ -20,6 +20,11 @@ class InputPathsBase;
 class InputPathBase;
 class Manager;
 
+namespace SCFG
+{
+class InputPath;
+}
+
 ////////////////////////////////////////////////////////////////////////
 class PhraseTable : public StatelessFeatureFunction
 {
@@ -45,6 +50,9 @@ public:
 			  SCORE *estimatedScore) const;
 
 	  virtual void CleanUpAfterSentenceProcessing();
+
+    // scfg
+	virtual void InitActiveChart(SCFG::InputPath &path) const;
 
 protected:
   std::string m_path;

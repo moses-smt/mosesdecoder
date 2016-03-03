@@ -20,6 +20,7 @@
 
 #include "../SCFG/PhraseImpl.h"
 #include "../SCFG/TargetPhraseImpl.h"
+#include "../SCFG/InputPath.h"
 
 using namespace std;
 
@@ -179,6 +180,16 @@ TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool, Inpu
 	const SubPhrase &phrase = inputPath.subPhrase;
 	TargetPhrases *tps = m_root.Find(phrase);
 	return tps;
+}
+
+void PhraseTableMemory::InitActiveChart(SCFG::InputPath &path) const
+{
+	size_t ptInd = GetPtInd();
+	SCFG::ActiveChart &chart = path.GetActiveChart(ptInd);
+	SCFG::ActiveChartEntry *chartEntry = new SCFG::ActiveChartEntry(&m_root);
+
+	chart.entries.push_back(chartEntry);
+
 }
 
 }

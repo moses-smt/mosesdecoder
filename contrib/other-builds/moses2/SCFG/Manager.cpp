@@ -8,7 +8,10 @@
 #include <vector>
 #include <sstream>
 #include "Manager.h"
+#include "InputPath.h"
 #include "../Sentence.h"
+#include "../System.h"
+#include "../TranslationModel/PhraseTable.h"
 
 using namespace std;
 
@@ -59,7 +62,13 @@ void Manager::Decode()
 
 void Manager::InitActiveChart(size_t pos)
 {
+	InputPath &path = static_cast<InputPath&>(m_inputPaths.GetInputPath(pos, pos));
+    size_t numPt = system.mappings.size();
 
+	for (size_t i = 0; i < numPt; ++i) {
+		const PhraseTable &pt = *system.mappings[i];
+		pt.InitActiveChart(path);
+	}
 }
 
 }

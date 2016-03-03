@@ -15,18 +15,24 @@ namespace Moses2
 {
 namespace SCFG
 {
-class SCFGPath
+class ActiveChartEntry
 {
 public:
-	//Phrase ruleSource;
+	const void *data;
+
+	ActiveChartEntry(const void *vdata)
+	:data(vdata)
+	{}
 };
 
-class SCFGPaths
+////////////////////////////////////////////////////////////////////////////
+class ActiveChart
 {
 public:
-	//Phrase ruleSource;
+	std::vector<ActiveChartEntry*> entries;
 };
 
+////////////////////////////////////////////////////////////////////////////
 class InputPath : public InputPathBase
 {
 	  friend std::ostream& operator<<(std::ostream &, const InputPath &);
@@ -34,9 +40,11 @@ public:
 	InputPath(MemPool &pool, const SubPhrase &subPhrase, const Range &range, size_t numPt, const InputPath *prefixPath);
 	virtual ~InputPath();
 
+	ActiveChart &GetActiveChart(size_t ptInd)
+	{ return m_activeChart[ptInd]; }
 
 protected:
-	SCFGPaths *m_scfgPaths;
+	ActiveChart *m_activeChart;
 };
 
 }

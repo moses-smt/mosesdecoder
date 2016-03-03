@@ -49,6 +49,15 @@ public:
   const Matrix<InputPathBase*> &GetMatrix() const
   { return *m_matrix; }
 
+  /** Get a future cost score for a span */
+  inline const InputPathBase &GetInputPath(size_t row, size_t col) const {
+    return *m_matrix->GetValue(row, col);
+  }
+
+  inline InputPathBase &GetInputPath(size_t row, size_t col) {
+    return *m_matrix->GetValue(row, col);
+  }
+
 protected:
 	Coll m_inputPaths;
 	Matrix<InputPathBase*> *m_matrix;

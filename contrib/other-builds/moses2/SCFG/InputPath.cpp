@@ -21,9 +21,10 @@ InputPath::InputPath(MemPool &pool,
 		const InputPath *prefixPath)
 :InputPathBase(pool, subPhrase, range, numPt, prefixPath)
 {
-  m_scfgPaths = pool.Allocate<SCFGPaths>(numPt);
+  m_activeChart = pool.Allocate<ActiveChart>(numPt);
   for (size_t i = 0; i < numPt; ++i) {
-
+	  ActiveChart &memAddr = m_activeChart[i];
+	  ActiveChart *obj =new (&memAddr) ActiveChart();
   }
 }
 
