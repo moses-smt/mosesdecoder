@@ -157,6 +157,33 @@ public:
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const
   { 
+    /*
+     * Phrase context = makeContextPhrase(hypo);
+     * vector<string> extractedFeatures;
+     * for (f : contextfeatures) {
+     *   f(context, extractedFeatures);
+     * }
+     *
+     * state = makeState(phrase);
+     *
+     * contextFeaturesCache[state] = extractedFeatures;
+     * //TODO forget caches after each input sentence!
+     *
+     * spanStart = cur_hypo.GetTranslationOption().GetStartPos();
+     * spanEnd   = cur_hypo.GetTranslationOption().GetEndPos();
+     *
+     * topts = cur_hypo.GetManager().GetSntTranslationOptions().GetTranslationOptionList(spanStart, spanEnd);
+     *
+     * for (topt : topts) {
+     *   vector<int> &tgtFeatures = getTargetFeatures(topt.phrase.hash());
+     *   get an ezexample, add hashes of features for target context, add namespace+features for current topts, get dot product
+     *   normalize();
+     * }
+     *
+     * cacheKey = makeKey(state, spanStart, spanEnd);
+     * targetScoresCache[cacheKey] = vwscores
+     */
+
     return new DummyState();
   }
   
