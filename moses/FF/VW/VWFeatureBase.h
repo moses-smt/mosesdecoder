@@ -8,7 +8,6 @@
 #include "moses/TranslationTask.h"
 #include "moses/Util.h"
 #include "moses/FF/StatelessFeatureFunction.h"
-#include "moses/FF/FFState.h"
 
 namespace Moses
 {
@@ -109,11 +108,13 @@ public:
   // evaluated during decoding. For efficiency, features are not fed directly into
   // the classifier object but instead output in the vector "features" and managed
   // separately in VW.h.
-  virtual FFState *operator()(const Hypothesis &hypo
-                              , std::vector<StringPiece> &features) const = 0;
+  virtual void operator()(const Hypothesis &hypo
+                          , std::vector<StringPiece> &features) const = 0;
 
 protected:
   std::vector<FactorType> m_sourceFactors, m_targetFactors;
+
+  static const std::string BOS_STRING, EOS_STRING;
 
   void UpdateRegister() {
     for(std::vector<std::string>::const_iterator it = m_usedBy.begin();

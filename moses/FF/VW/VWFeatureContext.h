@@ -41,8 +41,24 @@ public:
   }
 
 protected:
-  inline std::string GetWord(const InputType &input, size_t pos) const {
-    return input.GetWord(pos).GetString(m_sourceFactors, false);
+  // Get word with the correct subset of factors as string. Because we're target
+  // context features, we look at a limited number of words to the left of the
+  // current translation. posFromEnd is interpreted like this:
+  // 0 = last word of the hypothesis
+  // 1 = next to last word
+  // ...etc.
+  //
+  // We may have to go through more than one hypothesis when the context is long.
+  inline std::string GetWord(const Hypothesis *hypo, size_t posFromEnd) const {
+    while (hypo->GetCurrTargetPhrase().GetSize() <= posFromEnd) {
+      posFromEnd -= hypo->GetCurrTargetPhrase().GetSize();
+      hypo = hypo->GetPrevHypo();
+      if (! hypo)
+        return BOS_STRING; // translation is not long enough
+    }
+
+    const Phrase &phrase = hypo->GetCurrTargetPhrase();
+    return phrase.GetWord(phrase.GetSize() - posFromEnd - 1).GetString(m_targetFactors, false);
   }
 };
 

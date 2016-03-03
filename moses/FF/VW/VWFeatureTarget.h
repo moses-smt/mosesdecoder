@@ -28,9 +28,8 @@ public:
                           , Discriminative::Classifier &classifier) const {
   }
 
-  virtual FFState *operator()(const Hypothesis &hypo
-                              , std::vector<StringPiece> &features) const {
-    return NULL;
+  virtual void operator()(const Hypothesis &hypo
+                          , std::vector<StringPiece> &features) const {
   }
 
   virtual void SetParameter(const std::string& key, const std::string& value) {
