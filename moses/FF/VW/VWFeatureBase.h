@@ -8,6 +8,7 @@
 #include "moses/TranslationTask.h"
 #include "moses/Util.h"
 #include "moses/FF/StatelessFeatureFunction.h"
+#include "moses/FF/FFState.h"
 
 namespace Moses
 {
@@ -103,6 +104,13 @@ public:
                           , const InputPath &inputPath
                           , const TargetPhrase &targetPhrase
                           , Discriminative::Classifier &classifier) const = 0;
+
+  // Overload to process target-context dependent features, these features are
+  // evaluated during decoding. For efficiency, features are not fed directly into
+  // the classifier object but instead output in the vector "features" and managed
+  // separately in VW.h.
+  virtual FFState *operator()(const Hypothesis &hypo
+                              , std::vector<StringPiece> &features) const = 0;
 
 protected:
   std::vector<FactorType> m_sourceFactors, m_targetFactors;

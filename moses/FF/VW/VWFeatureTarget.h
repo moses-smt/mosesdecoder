@@ -28,6 +28,11 @@ public:
                           , Discriminative::Classifier &classifier) const {
   }
 
+  virtual FFState *operator()(const Hypothesis &hypo
+                              , std::vector<StringPiece> &features) const {
+    return NULL;
+  }
+
   virtual void SetParameter(const std::string& key, const std::string& value) {
     VWFeatureBase::SetParameter(key, value);
   }

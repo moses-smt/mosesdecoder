@@ -12,14 +12,14 @@ namespace Moses
 // names specified by the used-by=name1,name2,... parameter.
 //
 // The classifier gets a full list by calling
-// VWFeatureBase::GetSourceFeatures(GetScoreProducerDescription())
+// VWFeatureBase::GetTargetContextFeatures(GetScoreProducerDescription())
 
 
-class VWFeatureSource : public VWFeatureBase
+class VWFeatureContext : public VWFeatureBase
 {
 public:
-  VWFeatureSource(const std::string &line)
-    : VWFeatureBase(line, vwft_source) {
+  VWFeatureContext(const std::string &line)
+    : VWFeatureBase(line, vwft_targetContext) {
   }
 
   // Gets its pure virtual functions from VWFeatureBase
@@ -30,9 +30,10 @@ public:
                           , Discriminative::Classifier &classifier) const {
   }
 
-  virtual FFState *operator()(const Hypothesis &hypo
-                              , std::vector<StringPiece> &features) const {
-    return NULL;
+  virtual void operator()(const InputType &input
+                          , const InputPath &inputPath
+                          , const Range &sourceRange
+                          , Discriminative::Classifier &classifier) const {
   }
 
   virtual void SetParameter(const std::string& key, const std::string& value) {
