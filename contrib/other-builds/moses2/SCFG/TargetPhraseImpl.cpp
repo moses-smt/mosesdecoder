@@ -21,12 +21,20 @@ namespace SCFG
 
 TargetPhraseImpl *TargetPhraseImpl::CreateFromString(MemPool &pool, const PhraseTable &pt, const System &system, const std::string &str)
 {
+	//cerr << "str=" << str << endl;
 	FactorCollection &vocab = system.GetVocab();
 
 	vector<string> toks = Tokenize(str);
 	size_t size = toks.size();
 	TargetPhraseImpl *ret = new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, pt, system, size);
-	ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks);
+
+	for (size_t i = 0; i < size - 1; ++i) {
+		SCFG::Word &word = (*ret)[i];
+		word.CreateFromString(vocab, system, toks[i], true);
+	}
+
+	// lhs
+	ret->lhs.CreateFromString(vocab, system, toks.back(), false);
 
 	return ret;
 }

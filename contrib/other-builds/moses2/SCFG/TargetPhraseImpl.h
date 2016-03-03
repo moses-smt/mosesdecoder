@@ -11,7 +11,7 @@
 #include "../Phrase.h"
 #include "../PhraseImplTemplate.h"
 #include "../MemPool.h"
-#include "../Word.h"
+#include "Word.h"
 #include "../SubPhrase.h"
 
 namespace Moses2
@@ -24,10 +24,11 @@ class PhraseTable;
 namespace SCFG
 {
 
-class TargetPhraseImpl : public Moses2::TargetPhrase, public PhraseImplTemplate<Word>
+class TargetPhraseImpl : public Moses2::TargetPhrase, public PhraseImplTemplate<SCFG::Word>
 {
 	  friend std::ostream& operator<<(std::ostream &, const TargetPhrase &);
 public:
+  SCFG::Word lhs;
 
   static TargetPhraseImpl *CreateFromString(MemPool &pool, const PhraseTable &pt, const System &system, const std::string &str);
   TargetPhraseImpl(MemPool &pool, const PhraseTable &pt, const System &system, size_t size);
