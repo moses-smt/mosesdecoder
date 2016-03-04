@@ -36,7 +36,7 @@ CXXFLAGS += -DKENLM_MAX_ORDER=5
 CXXFLAGS += -DWITH_THREADS
 CXXFLAGS += -DNO_MOSES
 CXXFLAGS += -I$(dir ${MOSES_ROOT})mmt-only
-CXXFLAGS += -I${MOSES_ROOT} -I. -I${MOSES_ROOT}/opt/include 
+CXXFLAGS += -I${MOSES_ROOT} -I. -I${MOSES_ROOT}/opt/include -I${MOSES_ROOT}/opt/include/eigen3
 
 ifeq ($(variant),debug)
 CXXFLAGS += -ggdb -O0
