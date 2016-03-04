@@ -211,7 +211,9 @@ namespace sapt
     getCounts(char const* p, char const* const q,
 	      count_type& sids, count_type& raw) const = 0;
 
-    tsa::ArrayEntry& readEntry(char const* p, tsa::ArrayEntry& I) const;
+    virtual
+    tsa::ArrayEntry& 
+    readEntry(char const* p, tsa::ArrayEntry& I) const;
 
     size_t
     getCorpusSize() const;
