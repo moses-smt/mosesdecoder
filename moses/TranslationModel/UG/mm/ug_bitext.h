@@ -131,6 +131,7 @@ namespace sapt
     // caches for unbiased sampling; biased sampling uses the caches that
     // are stored locally on the translation task
 
+    bool m_transpose_alignment_matrix;
   public:
     SPTR<Ttrack<char> >  Tx; // word alignments
     SPTR<Ttrack<Token> > T1; // token track
@@ -174,6 +175,7 @@ namespace sapt
            Ttrack<char>*  const tx,
            TokenIndex*    const v1, TokenIndex*    const v2,
            TSA<Token>*    const i1, TSA<Token>*    const i2,
+           bool const transpose_amatrix,
            size_t const max_sample=1000,
            size_t const xnum_workers=16);
   public:
@@ -341,6 +343,7 @@ namespace sapt
     , m_pstats_cache_threshold(PSTATS_CACHE_THRESHOLD)
     , m_cache1(new pstats::cache_t)
     , m_cache2(new pstats::cache_t)
+    , m_transpose_alignment_matrix(false)
   { }
 
   template<typename Token>
@@ -352,6 +355,7 @@ namespace sapt
          TokenIndex*    const v2,
          TSA<Token>* const i1,
          TSA<Token>* const i2,
+         bool const transpose_amatrix,
          size_t const max_sample,
          size_t const xnum_workers)
     : m_num_workers(xnum_workers)
@@ -359,6 +363,7 @@ namespace sapt
     , m_pstats_cache_threshold(PSTATS_CACHE_THRESHOLD)
     , m_cache1(new pstats::cache_t)
     , m_cache2(new pstats::cache_t)
+    , m_transpose_alignment_matrix(transpose_amatrix)
     , Tx(tx), T1(t1), T2(t2), V1(v1), V2(v2), I1(i1), I2(i2)
   { }
 
@@ -445,7 +450,7 @@ namespace sapt
     char const* x = Tx->sntEnd(sid);
     while (p < x)
       {
-        if (flip) 
+        if (m_transpose_alignment_matrix ? !flip : flip) 
           { 
             p = binread(p,trg); 
             assert(p<x); 
