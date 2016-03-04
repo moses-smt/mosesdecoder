@@ -129,9 +129,9 @@ namespace sapt
   {
     if (sid >= this->numSent)
       {
-	std::cerr << "Fatal error: requested sentence #"
-		  << sid <<" is beyond corpus size ("
-		  << this->numSent <<")" << std::endl;
+        std::cerr << "Fatal error: requested sentence #"
+                  << sid <<" is beyond corpus size ("
+                  << this->numSent <<")" << std::endl;
       }
     assert(sid < this->numSent);
     return data+index[sid];
@@ -169,15 +169,15 @@ namespace sapt
   {
     if (access(fname.c_str(),F_OK))
       {
-	std::ostringstream msg;
+        std::ostringstream msg;
         msg << "mmTtrack<>::open: File '" << fname << "' does not exist.";
         throw std::runtime_error(msg.str().c_str());
       }
     file.open(fname);
     if (!file.is_open())
       {
-	std::cerr << "Error opening file " << fname << std::endl;
-	assert(0);
+        std::cerr << "Error opening file " << fname << std::endl;
+        assert(0);
       }
     tpt::filepos_type idxOffset;
     char const* p = file.data();
@@ -218,13 +218,13 @@ namespace sapt
     tpt::numwrite(out,id_type(0));      // place holder for index size
     tpt::numwrite(out,id_type(0));      // place holder for token count
   }
-
+  
   template<typename TKN>
   void
   mmTtrack<TKN>::
   write_index_and_finalize(std::ostream& out,
-			   std::vector<id_type>const& idx,
-			   id_type tokenCount) const
+                           std::vector<id_type>const& idx,
+                           id_type tokenCount) const
   {
     id_type       idxSize = idx.size();
     tpt::filepos_type idxStart = out.tellp();
@@ -235,7 +235,7 @@ namespace sapt
     tpt::numwrite(out,idxSize-1);
     tpt::numwrite(out,tokenCount);
   }
-
+  
   template<typename TKN>
   id_type
   mmTtrack<TKN>::
