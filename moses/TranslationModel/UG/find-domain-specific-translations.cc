@@ -99,7 +99,7 @@ process(bitext_t::iter& m)
 	  float expected = p * trials;
 	  if (round(expected) == succ || succ < 3) continue;
 	  float p0 = (expected < succ 
-		      ? cdf(complement(binomial(trials, p), succ))
+		      ? cdf(complement(binomial(trials, p), succ - 1))
 		      : cdf(binomial(trials, p), succ));
 	  if (p0 > .05) continue;
 	  if (!printed) 
@@ -114,7 +114,8 @@ process(bitext_t::iter& m)
 	       << setw(8) << succ << "   " << (succ < expected ? "- " : "+ ")
 	       << (boost::format("%-30s") 
 		   % B->T2->pid2str(B->V2.get(),ppair.p2)) << " ("
-	       << B->docid2name(e.first) << "; p0 = " << p0 << ")" << endl;
+	       << B->docid2name(e.first) << "; p0 = " << p0 << "; t = "
+	       << p << ")" << endl;
 	}
     }
   if (printed) cout << endl;
