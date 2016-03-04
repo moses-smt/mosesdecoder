@@ -62,6 +62,7 @@ void Manager::Decode()
 
 void Manager::InitActiveChart(size_t pos)
 {
+	/*
 	InputPath &path = static_cast<InputPath&>(m_inputPaths.GetInputPath(pos, pos));
     size_t numPt = system.mappings.size();
 
@@ -71,6 +72,7 @@ void Manager::InitActiveChart(size_t pos)
 		pt.InitActiveChart(path);
 		cerr << "FINISHED InitActiveChart" << endl;
 	}
+	*/
 }
 
 }

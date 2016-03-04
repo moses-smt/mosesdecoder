@@ -25,7 +25,7 @@ void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
   size_t size = input.GetSize();
   size_t maxLength = min(size, mgr.system.maxPhraseLength);
 
-  m_matrix = new (pool.Allocate< Matrix<InputPathBase*> >()) Matrix<InputPathBase*>(pool, size, maxLength);
+  m_matrix = new (pool.Allocate< Matrix<InputPath*> >()) Matrix<InputPath*>(pool, size, maxLength);
   m_matrix->Init(NULL);
 
   // create normal paths of subphrases through the sentence

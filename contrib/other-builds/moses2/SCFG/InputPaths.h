@@ -9,6 +9,7 @@
 
 #include <vector>
 #include "../InputPathsBase.h"
+#include "../legacy/Matrix.h"
 
 namespace Moses2
 {
@@ -18,14 +19,18 @@ class System;
 
 namespace SCFG
 {
+class InputPath;
 
 class InputPaths : public InputPathsBase
 {
 public:
-	  void Init(const Sentence &input, const ManagerBase &mgr);
+  void Init(const Sentence &input, const ManagerBase &mgr);
 
+  const Matrix<InputPath*> &GetMatrix() const
+  { return *m_matrix; }
 
 protected:
+  Matrix<InputPath*> *m_matrix;
 
 };
 

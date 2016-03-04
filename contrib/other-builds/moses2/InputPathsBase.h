@@ -9,7 +9,6 @@
 
 #include <vector>
 #include "MemPool.h"
-#include "legacy/Matrix.h"
 
 namespace Moses2
 {
@@ -46,21 +45,8 @@ public:
 
   virtual void Init(const Sentence &input, const ManagerBase &mgr) = 0;
 
-  const Matrix<InputPathBase*> &GetMatrix() const
-  { return *m_matrix; }
-
-  /** Get a future cost score for a span */
-  inline const InputPathBase &GetInputPath(size_t row, size_t col) const {
-    return *m_matrix->GetValue(row, col);
-  }
-
-  inline InputPathBase &GetInputPath(size_t row, size_t col) {
-    return *m_matrix->GetValue(row, col);
-  }
-
 protected:
 	Coll m_inputPaths;
-	Matrix<InputPathBase*> *m_matrix;
 };
 
 }
