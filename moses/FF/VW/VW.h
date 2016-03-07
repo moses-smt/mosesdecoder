@@ -103,6 +103,23 @@ struct VWTargetSentence {
   std::vector<Constraint> m_sourceConstraints, m_targetConstraints;
 };
 
+/**
+ * VW state.
+ */
+struct VWState : public FFState {
+  virtual size_t hash() const {
+    return hash_value(phrase);
+  }
+
+  virtual bool operator==(const FFState& o) const {
+    const VWState &other = static_cast<const VWState &>(o);
+    return phrase == other.phrase;
+  }
+
+  Phrase phrase;
+};
+
+
 typedef ThreadLocalByFeatureStorage<Discriminative::Classifier, Discriminative::ClassifierFactory &> TLSClassifier;
 
 typedef ThreadLocalByFeatureStorage<VWTargetSentence> TLSTargetSentence;
@@ -190,10 +207,7 @@ public:
     size_t spanEnd   = curHypo.GetTranslationOption().GetEndPos();
 
     // compute our current key
-    size_t cacheKey = 0;
-    boost::hash_combine(cacheKey, prevState);
-    boost::hash_combine(cacheKey, spanStart);
-    boost::hash_combine(cacheKey, spanEnd);
+    size_t cacheKey = MakeCacheKey(prevState, spanStart, spanEnd);
 
     boost::unordered_map<size_t, FloatHashMap> &computedStateExtensions 
       = *m_tlsComputedStateExtensions->GetStored();
@@ -618,6 +632,14 @@ private:
     }
 
     return keepOpt;
+  }
+
+  inline size_t MakeCacheKey(const FFState *prevState, size_t spanStart, size_t spanEnd) {
+    size_t key = 0;
+    boost::hash_combine(key, prevState);
+    boost::hash_combine(key, spanStart);
+    boost::hash_combine(key, spanEnd);
+    return key;
   }
 
   bool m_train; // false means predict
