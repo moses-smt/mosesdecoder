@@ -206,7 +206,7 @@ public:
 
     size_t maxContextSize = VWFeatureBase::GetMaximumContextSize(GetScoreProducerDescription());
 
-    if (targetFeatures.empty()) {
+    if (contextFeatures.empty()) {
       // no target context features => we already evaluated everything in
       // EvaluateTranslationOptionListWithSourceContext(). Nothing to do now,
       // no state information to track.
@@ -272,7 +272,11 @@ public:
         size_t toptHash = hash_value(*topt);
         toptScores[toptHash] = losses[toptIdx];
       }
-    } 
+
+      //std::cerr << "VW :: cache miss\n";
+    } else {
+      //std::cerr << "VW :: cache hit\n";
+    }
 
     // now our cache is guaranteed to contain the required score, simply look it up
     std::vector<float> newScores(m_numScoreComponents);
@@ -351,7 +355,7 @@ public:
     size_t maxContextSize = VWFeatureBase::GetMaximumContextSize(GetScoreProducerDescription());
 
     // only use stateful score computation when needed
-    bool haveTargetContextFeatures = ! targetFeatures.empty();
+    bool haveTargetContextFeatures = ! contextFeatures.empty();
 
     const Range &sourceRange = translationOptionList.Get(0)->GetSourceWordsRange();
 
