@@ -272,6 +272,8 @@ public:
 
         const Phrase *targetSent = GetStored()->m_sentence;
         Phrase targetContext = targetSent->GetSubString(Range(0, currentStart - 1));
+        // TODO prepend a sufficient number of BOS_ symbols, otherwise tgt context features
+        // will look out of range
 
         // extract target-context features
         std::vector<std::string> contextExtractedFeatures;
