@@ -18,7 +18,6 @@ public:
   }
 
   void operator()(const InputType &input
-                  , const InputPath &inputPath
                   , const Range &sourceRange
                   , Discriminative::Classifier &classifier) const {
     for (size_t i = 0; i < input.GetSize(); i++) {

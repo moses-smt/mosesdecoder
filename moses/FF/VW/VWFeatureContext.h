@@ -26,13 +26,11 @@ public:
   // Gets its pure virtual functions from VWFeatureBase
 
   virtual void operator()(const InputType &input
-                          , const InputPath &inputPath
                           , const TargetPhrase &targetPhrase
                           , Discriminative::Classifier &classifier) const {
   }
 
   virtual void operator()(const InputType &input
-                          , const InputPath &inputPath
                           , const Range &sourceRange
                           , Discriminative::Classifier &classifier) const {
   }

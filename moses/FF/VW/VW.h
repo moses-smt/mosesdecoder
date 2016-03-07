@@ -16,6 +16,8 @@
 #include "moses/StaticData.h"
 #include "moses/Phrase.h"
 #include "moses/AlignmentInfo.h"
+#include "moses/Word.h"
+#include "moses/FactorCollection.h"
 
 #include "Normalizer.h"
 #include "Classifier.h"
@@ -104,7 +106,7 @@ struct VWTargetSentence {
 };
 
 /**
- * VW state.
+ * VW state, used in decoding (when target context is enabled).
  */
 struct VWState : public FFState {
   virtual size_t hash() const {
@@ -134,7 +136,8 @@ public:
   VW(const std::string &line)
     : StatefulFeatureFunction(1, line)
     , TLSTargetSentence(this)
-    , m_train(false) {
+    , m_train(false)
+    , m_sentenceStartWord(Word()) {
     ReadParameters();
     Discriminative::ClassifierFactory *classifierFactory = m_train
         ? new Discriminative::ClassifierFactory(m_modelPath)
@@ -154,6 +157,11 @@ public:
       VERBOSE(1, "VW :: Using basic 1/0 loss calculation in training.\n");
       m_trainingLoss = (TrainingLoss *) new TrainingLossBasic();
     }
+
+    // create a virtual beginning-of-sentence word with all factors replaced by <S>
+    const Factor *bosFactor = FactorCollection::Instance().AddFactor(BOS_);
+    for (size_t i = 0; i < MAX_NUM_FACTORS; i++)
+      m_sentenceStartWord.SetFactor(i, bosFactor);
   }
 
   virtual ~VW() {
@@ -196,17 +204,18 @@ public:
     const std::vector<VWFeatureBase*>& targetFeatures =
       VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription());
 
-    size_t maxContextSize = GetMaximumContextSize(GetScoreProducerDescription());
+    size_t maxContextSize = VWFeatureBase::GetMaximumContextSize(GetScoreProducerDescription());
 
     if (targetFeatures.empty()) {
       // no target context features => we already evaluated everything in
       // EvaluateTranslationOptionListWithSourceContext(). Nothing to do now,
       // no state information to track.
-      return new DummyState();
+      return new VWState();
     }
 
     size_t spanStart = curHypo.GetTranslationOption().GetStartPos();
     size_t spanEnd   = curHypo.GetTranslationOption().GetEndPos();
+    const Range &sourceRange = curHypo.GetTranslationOption().GetSourceWordsRange();
 
     // compute our current key
     size_t cacheKey = MakeCacheKey(prevState, spanStart, spanEnd);
@@ -218,6 +227,51 @@ public:
       // we have not computed this set of translation options yet
       const TranslationOptionList *topts = 
         curHypo.GetManager().getSntTranslationOptions()->GetTranslationOptionList(spanStart, spanEnd);
+
+      const InputType& input = curHypo.GetManager().GetSource();
+
+      Discriminative::Classifier &classifier = *m_tlsClassifier->GetStored();
+
+      // XXX this is a naive implementation, fix this!
+
+      // extract source side features
+      for(size_t i = 0; i < sourceFeatures.size(); ++i)
+        (*sourceFeatures[i])(input, sourceRange, classifier);
+
+      // extract target context features
+      const Phrase &targetContext = static_cast<const VWState *>(prevState)->phrase;
+
+      std::vector<std::string> contextExtractedFeatures;
+      for(size_t i = 0; i < contextFeatures.size(); ++i)
+        (*contextFeatures[i])(targetContext, contextExtractedFeatures);
+
+      for (size_t i = 0; i < contextExtractedFeatures.size(); i++)
+        classifier.AddLabelIndependentFeature(contextExtractedFeatures[i]);
+
+      std::vector<float> losses(topts->size());
+
+      for (size_t toptIdx = 0; toptIdx < topts->size(); toptIdx++) {
+        const TranslationOption *topt = topts->Get(toptIdx);
+        const TargetPhrase &targetPhrase = topt->GetTargetPhrase();
+
+        // extract target-side features for each topt
+        for(size_t i = 0; i < targetFeatures.size(); ++i)
+          (*targetFeatures[i])(input, targetPhrase, classifier);
+
+        // get classifier score
+        losses[toptIdx] = classifier.Predict(MakeTargetLabel(targetPhrase));
+      }
+
+      // normalize classifier scores to get a probability distribution
+      (*m_normalizer)(losses);
+
+      // fill our cache with the results
+      FloatHashMap &toptScores = computedStateExtensions[cacheKey];
+      for (size_t toptIdx = 0; toptIdx < topts->size(); toptIdx++) {
+        const TranslationOption *topt = topts->Get(toptIdx);
+        size_t toptHash = hash_value(*topt);
+        toptScores[toptHash] = losses[toptIdx];
+      }
     } 
 
     // now our cache is guaranteed to contain the required score, simply look it up
@@ -266,7 +320,14 @@ public:
     throw new std::logic_error("hiearchical/syntax not supported"); 
   }
 
-  const FFState* EmptyHypothesisState(const InputType &input) const { return new DummyState(); }
+  const FFState* EmptyHypothesisState(const InputType &input) const {
+    size_t maxContextSize = VWFeatureBase::GetMaximumContextSize(GetScoreProducerDescription());
+    VWState *initial = new VWState();
+    for (size_t i = 0; i < maxContextSize; i++)
+      initial->phrase.AddWord(m_sentenceStartWord);
+      
+    return initial;
+  }
 
   virtual void EvaluateTranslationOptionListWithSourceContext(const InputType &input
       , const TranslationOptionList &translationOptionList) const {
@@ -291,7 +352,6 @@ public:
     bool haveTargetContextFeatures = ! targetFeatures.empty();
 
     const Range &sourceRange = translationOptionList.Get(0)->GetSourceWordsRange();
-    const InputPath  &inputPath   = translationOptionList.Get(0)->GetInputPath();
 
     if (m_train) {
       //
@@ -341,7 +401,7 @@ public:
 
         // extract source side features
         for(size_t i = 0; i < sourceFeatures.size(); ++i)
-          (*sourceFeatures[i])(input, inputPath, sourceRange, classifier);
+          (*sourceFeatures[i])(input, sourceRange, classifier);
 
         const Phrase *targetSent = GetStored()->m_sentence;
         Phrase targetContext = targetSent->GetSubString(Range(0, currentStart - 1));
@@ -366,7 +426,7 @@ public:
           // extract target-side features for each topt
           const TargetPhrase &targetPhrase = translationOptionList.Get(toptIdx)->GetTargetPhrase();
           for(size_t i = 0; i < targetFeatures.size(); ++i)
-            (*targetFeatures[i])(input, inputPath, targetPhrase, classifier);
+            (*targetFeatures[i])(input, targetPhrase, classifier);
 
           bool isCorrect = correct[toptIdx] && startsAt[toptIdx] == currentStart;
           float loss = (*m_trainingLoss)(targetPhrase, correctPhrase, isCorrect);
@@ -384,7 +444,7 @@ public:
 
       // extract source side features
       for(size_t i = 0; i < sourceFeatures.size(); ++i)
-        (*sourceFeatures[i])(input, inputPath, sourceRange, classifier);
+        (*sourceFeatures[i])(input, sourceRange, classifier);
 
       for (size_t toptIdx = 0; toptIdx < translationOptionList.size(); toptIdx++) {
         const TranslationOption *topt = translationOptionList.Get(toptIdx);
@@ -392,7 +452,7 @@ public:
 
         // extract target-side features for each topt
         for(size_t i = 0; i < targetFeatures.size(); ++i)
-          (*targetFeatures[i])(input, inputPath, targetPhrase, classifier);
+          (*targetFeatures[i])(input, targetPhrase, classifier);
 
         // get classifier score
         losses[toptIdx] = classifier.Predict(MakeTargetLabel(targetPhrase));
@@ -647,6 +707,8 @@ private:
   bool m_train; // false means predict
   std::string m_modelPath;
   std::string m_vwOptions;
+
+  Word m_sentenceStartWord;
 
   // calculator of training loss
   TrainingLoss *m_trainingLoss = NULL;

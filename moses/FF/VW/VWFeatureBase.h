@@ -97,7 +97,6 @@ public:
   // Overload to process source-dependent data, create features once for every
   // source sentence word range.
   virtual void operator()(const InputType &input
-                          , const InputPath &inputPath
                           , const Range &sourceRange
                           , Discriminative::Classifier &classifier) const = 0;
 
@@ -105,7 +104,6 @@ public:
   // every target phrase. One source word range will have at leat one target
   // phrase, but may have more.
   virtual void operator()(const InputType &input
-                          , const InputPath &inputPath
                           , const TargetPhrase &targetPhrase
                           , Discriminative::Classifier &classifier) const = 0;
 

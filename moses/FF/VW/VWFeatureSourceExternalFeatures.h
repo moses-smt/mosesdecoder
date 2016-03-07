@@ -23,7 +23,6 @@ public:
   }
 
   void operator()(const InputType &input
-                  , const InputPath &inputPath
                   , const Range &sourceRange
                   , Discriminative::Classifier &classifier) const {
     const Features& features = *m_tls.GetStored();

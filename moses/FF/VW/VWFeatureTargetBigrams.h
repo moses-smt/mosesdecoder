@@ -17,7 +17,6 @@ public:
   }
 
   void operator()(const InputType &input
-                  , const InputPath &inputPath
                   , const TargetPhrase &targetPhrase
                   , Discriminative::Classifier &classifier) const {
     for (size_t i = 1; i < targetPhrase.GetSize(); i++) {

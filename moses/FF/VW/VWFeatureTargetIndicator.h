@@ -17,7 +17,6 @@ public:
   }
 
   void operator()(const InputType &input
-                  , const InputPath &inputPath
                   , const TargetPhrase &targetPhrase
                   , Discriminative::Classifier &classifier) const {
     classifier.AddLabelDependentFeature("tind^" + targetPhrase.GetStringRep(m_targetFactors));

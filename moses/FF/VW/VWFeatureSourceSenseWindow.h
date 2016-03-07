@@ -51,7 +51,6 @@ public:
   }
 
   void operator()(const InputType &input
-                  , const InputPath &inputPath
                   , const Range &sourceRange
                   , Discriminative::Classifier &classifier) const {
     int begin = sourceRange.GetStartPos();
