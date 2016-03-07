@@ -348,6 +348,8 @@ public:
     const std::vector<VWFeatureBase*>& targetFeatures =
       VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription());
 
+    size_t maxContextSize = VWFeatureBase::GetMaximumContextSize(GetScoreProducerDescription());
+
     // only use stateful score computation when needed
     bool haveTargetContextFeatures = ! targetFeatures.empty();
 
@@ -403,10 +405,13 @@ public:
         for(size_t i = 0; i < sourceFeatures.size(); ++i)
           (*sourceFeatures[i])(input, sourceRange, classifier);
 
+        // build target-side context
+        Phrase targetContext;
+        for (size_t i = 0; i < maxContextSize; i++)
+          targetContext.AddWord(m_sentenceStartWord);
+
         const Phrase *targetSent = GetStored()->m_sentence;
-        Phrase targetContext = targetSent->GetSubString(Range(0, currentStart - 1));
-        // TODO prepend a sufficient number of BOS_ symbols, otherwise tgt context features
-        // will look out of range
+        targetContext.Append(targetSent->GetSubString(Range(0, currentStart - 1)));
 
         // extract target-context features
         std::vector<std::string> contextExtractedFeatures;
