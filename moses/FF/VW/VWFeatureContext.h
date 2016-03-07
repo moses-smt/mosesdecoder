@@ -50,20 +50,6 @@ protected:
   // 0 = last word of the hypothesis
   // 1 = next to last word
   // ...etc.
-  //
-  // We may have to go through more than one hypothesis when the context is long.
-  inline std::string GetWord(const Hypothesis *hypo, size_t posFromEnd) const {
-    while (hypo->GetCurrTargetPhrase().GetSize() <= posFromEnd) {
-      posFromEnd -= hypo->GetCurrTargetPhrase().GetSize();
-      hypo = hypo->GetPrevHypo();
-      if (! hypo)
-        return BOS_; // translation is not long enough
-    }
-
-    const Phrase &phrase = hypo->GetCurrTargetPhrase();
-    return phrase.GetWord(phrase.GetSize() - posFromEnd - 1).GetString(m_targetFactors, false);
-  }
-
   inline std::string GetWord(const Phrase &phrase, size_t posFromEnd) const {
     return phrase.GetWord(phrase.GetSize() - posFromEnd - 1).GetString(m_targetFactors, false);
   }
