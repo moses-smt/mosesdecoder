@@ -159,11 +159,36 @@ public:
                                  , ScoreComponentCollection *estimatedFutureScore = NULL) const {
   }
 
-  FFState* EvaluateWhenApplied(
+  virtual FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const
   { 
+    VERBOSE(2, "VW :: Evaluating translation options\n");
+
+    // which feature functions do we use (on the source and target side)
+    const std::vector<VWFeatureBase*>& sourceFeatures =
+      VWFeatureBase::GetSourceFeatures(GetScoreProducerDescription());
+
+    const std::vector<VWFeatureBase*>& contextFeatures =
+      VWFeatureBase::GetTargetContextFeatures(GetScoreProducerDescription());
+
+    const std::vector<VWFeatureBase*>& targetFeatures =
+      VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription());
+
+    if (targetFeatures.empty()) {
+      // no target context features => we already evaluated everything in
+      // EvaluateTranslationOptionListWithSourceContext(). Nothing to do now,
+      // no state information to track.
+      return new DummyState();
+    }
+
+    size_t spanStart = cur_hypo.GetTranslationOption().GetStartPos();
+    size_t spanEnd   = cur_hypo.GetTranslationOption().GetEndPos();
+    const TranslationOptionList *topts = 
+      cur_hypo.GetManager().getSntTranslationOptions()->GetTranslationOptionList(spanStart, spanEnd);
+
+
     /*
      * Phrase context = makeContextPhrase(hypo);
      * vector<string> extractedFeatures;
@@ -205,7 +230,7 @@ public:
 
   const FFState* EmptyHypothesisState(const InputType &input) const { return new DummyState(); }
 
-  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+  virtual void EvaluateTranslationOptionListWithSourceContext(const InputType &input
       , const TranslationOptionList &translationOptionList) const {
     Discriminative::Classifier &classifier = *m_tlsClassifier->GetStored();
 
@@ -357,8 +382,6 @@ public:
           size_t toptHash = hash_value(*topt);
           float futureScore = rawLosses[toptIdx];
           m_tlsFutureScores->GetStored()->insert(std::make_pair(toptHash, futureScore));
-
-
         }
       }
     }
