@@ -89,6 +89,11 @@ public:
     return s_targetFeatures[name];
   }
 
+  // Required length context (maximum context size of defined target-context features)
+  static size_t GetMaximumContextSize(std::string name = "VW0") {
+    return s_targetContextLength[name]; // 0 by default
+  }
+
   // Overload to process source-dependent data, create features once for every
   // source sentence word range.
   virtual void operator()(const InputType &input
@@ -118,12 +123,15 @@ protected:
     for(std::vector<std::string>::const_iterator it = m_usedBy.begin();
         it != m_usedBy.end(); it++) {
       s_features[*it].push_back(this);
-      if(m_featureType == vwft_source) 
+
+      if(m_featureType == vwft_source) {
         s_sourceFeatures[*it].push_back(this);
-      else if (m_featureType == vwft_targetContext)
+      } else if (m_featureType == vwft_targetContext) {
         s_targetContextFeatures[*it].push_back(this);
-      else
+        UpdateContextSize(*it);
+      } else {
         s_targetFeatures[*it].push_back(this);
+      }
     }
   }
 
@@ -133,12 +141,16 @@ private:
     Tokenize(m_usedBy, usedBy, ",");
   }
 
+  void UpdateContextSize(const std::string &usedBy);
+
   std::vector<std::string> m_usedBy;
   VWFeatureType m_featureType;
   static std::map<std::string, std::vector<VWFeatureBase*> > s_features;
   static std::map<std::string, std::vector<VWFeatureBase*> > s_sourceFeatures;
   static std::map<std::string, std::vector<VWFeatureBase*> > s_targetContextFeatures;
   static std::map<std::string, std::vector<VWFeatureBase*> > s_targetFeatures;
+
+  static std::map<std::string, size_t> s_targetContextLength;
 };
 
 }

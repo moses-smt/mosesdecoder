@@ -19,8 +19,8 @@ namespace Moses
 class VWFeatureContext : public VWFeatureBase
 {
 public:
-  VWFeatureContext(const std::string &line)
-    : VWFeatureBase(line, vwft_targetContext) {
+  VWFeatureContext(const std::string &line, size_t contextSize)
+    : VWFeatureBase(line, vwft_targetContext), m_contextSize(contextSize) {
   }
 
   // Gets its pure virtual functions from VWFeatureBase
@@ -39,6 +39,10 @@ public:
 
   virtual void SetParameter(const std::string& key, const std::string& value) {
     VWFeatureBase::SetParameter(key, value);
+  }
+
+  size_t GetContextSize() {
+    return m_contextSize;
   }
 
 protected:
@@ -65,6 +69,9 @@ protected:
   inline std::string GetWord(const Phrase &phrase, size_t posFromEnd) const {
     return phrase.GetWord(phrase.GetSize() - posFromEnd - 1).GetString(m_targetFactors, false);
   }
+
+  // required context size
+  size_t m_contextSize;
 };
 
 }

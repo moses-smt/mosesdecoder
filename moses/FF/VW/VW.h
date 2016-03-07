@@ -196,6 +196,8 @@ public:
     const std::vector<VWFeatureBase*>& targetFeatures =
       VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription());
 
+    size_t maxContextSize = GetMaximumContextSize(GetScoreProducerDescription());
+
     if (targetFeatures.empty()) {
       // no target context features => we already evaluated everything in
       // EvaluateTranslationOptionListWithSourceContext(). Nothing to do now,
@@ -634,7 +636,7 @@ private:
     return keepOpt;
   }
 
-  inline size_t MakeCacheKey(const FFState *prevState, size_t spanStart, size_t spanEnd) {
+  inline size_t MakeCacheKey(const FFState *prevState, size_t spanStart, size_t spanEnd) const {
     size_t key = 0;
     boost::hash_combine(key, prevState);
     boost::hash_combine(key, spanStart);
