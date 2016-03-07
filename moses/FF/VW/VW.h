@@ -110,15 +110,15 @@ struct VWTargetSentence {
  */
 struct VWState : public FFState {
   virtual size_t hash() const {
-    return hash_value(phrase);
+    return hash_value(m_phrase);
   }
 
   virtual bool operator==(const FFState& o) const {
     const VWState &other = static_cast<const VWState &>(o);
-    return phrase == other.phrase;
+    return m_phrase == other.m_phrase;
   }
 
-  Phrase phrase;
+  Phrase m_phrase;
 };
 
 
@@ -239,7 +239,7 @@ public:
         (*sourceFeatures[i])(input, sourceRange, classifier);
 
       // extract target context features
-      const Phrase &targetContext = static_cast<const VWState *>(prevState)->phrase;
+      const Phrase &targetContext = static_cast<const VWState *>(prevState)->m_phrase;
 
       std::vector<std::string> contextExtractedFeatures;
       for(size_t i = 0; i < contextFeatures.size(); ++i)
@@ -308,7 +308,7 @@ public:
      * targetScoresCache[cacheKey] = vwscores
      */
 
-    return new DummyState();
+    return UpdateState(prevState, curHypo);
   }
   
 
@@ -324,7 +324,7 @@ public:
     size_t maxContextSize = VWFeatureBase::GetMaximumContextSize(GetScoreProducerDescription());
     VWState *initial = new VWState();
     for (size_t i = 0; i < maxContextSize; i++)
-      initial->phrase.AddWord(m_sentenceStartWord);
+      initial->m_phrase.AddWord(m_sentenceStartWord);
       
     return initial;
   }
@@ -702,6 +702,26 @@ private:
     boost::hash_combine(key, spanStart);
     boost::hash_combine(key, spanEnd);
     return key;
+  }
+
+  // shift words in our state, add words from current hypothesis
+  VWState *UpdateState(const FFState *prevState, const Hypothesis &curHypo) const {
+    // copy phrase from previous state
+    Phrase phrase = static_cast<const VWState *>(prevState)->m_phrase;
+    size_t contextSize = phrase.GetSize(); // identical to VWFeatureBase::GetMaximumContextSize()
+    
+    // add words from current hypothesis
+    phrase.Append(curHypo.GetCurrTargetPhrase());
+
+    // get a slice of appropriate length
+    Range range(phrase.GetSize() - contextSize, phrase.GetSize() - 1);
+    phrase = phrase.GetSubString(range);
+
+    // build the new state
+    VWState *out = new VWState();
+    out->m_phrase = phrase;
+
+    return out;
   }
 
   bool m_train; // false means predict
