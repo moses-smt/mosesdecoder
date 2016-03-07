@@ -4,6 +4,8 @@
 #include <map>
 #include <limits>
 
+#include <boost/unordered_map.hpp>
+
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/PP/CountsPhraseProperty.h"
 #include "moses/TranslationOptionList.h"
@@ -104,6 +106,9 @@ typedef ThreadLocalByFeatureStorage<Discriminative::Classifier, Discriminative::
 
 typedef ThreadLocalByFeatureStorage<VWTargetSentence> TLSTargetSentence;
 
+typedef boost::unordered_map<size_t, float> FloatHashMap;
+typedef ThreadLocalByFeatureStorage<FloatHashMap> TLSFloatHashMap;
+
 class VW : public StatefulFeatureFunction, public TLSTargetSentence
 {
 public:
@@ -117,6 +122,8 @@ public:
         : new Discriminative::ClassifierFactory(m_modelPath, m_vwOptions);
 
     m_tlsClassifier = new TLSClassifier(this, *classifierFactory);
+
+    m_tlsFutureScores = new TLSFloatHashMap(this);
 
     if (! m_normalizer) {
       VERBOSE(1, "VW :: No loss function specified, assuming logistic loss.\n");
@@ -216,6 +223,9 @@ public:
 
     const std::vector<VWFeatureBase*>& targetFeatures =
       VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription());
+
+    // only use stateful score computation when needed
+    bool haveTargetContextFeatures = ! targetFeatures.empty();
 
     const Range &sourceRange = translationOptionList.Get(0)->GetSourceWordsRange();
     const InputPath  &inputPath   = translationOptionList.Get(0)->GetInputPath();
@@ -326,18 +336,30 @@ public:
       }
 
       // normalize classifier scores to get a probability distribution
+      std::vector<float> rawLosses = losses;
       (*m_normalizer)(losses);
 
       // update scores of topts
       for (size_t toptIdx = 0; toptIdx < translationOptionList.size(); toptIdx++) {
         TranslationOption *topt = *(translationOptionList.begin() + toptIdx);
-        std::vector<float> newScores(m_numScoreComponents);
-        newScores[0] = FloorScore(TransformScore(losses[toptIdx]));
+        if (! haveTargetContextFeatures) {
+          // no target context features; evaluate the FF now
+          std::vector<float> newScores(m_numScoreComponents);
+          newScores[0] = FloorScore(TransformScore(losses[toptIdx]));
 
-        ScoreComponentCollection &scoreBreakDown = topt->GetScoreBreakdown();
-        scoreBreakDown.PlusEquals(this, newScores);
+          ScoreComponentCollection &scoreBreakDown = topt->GetScoreBreakdown();
+          scoreBreakDown.PlusEquals(this, newScores);
 
-        topt->UpdateScore();
+          topt->UpdateScore();
+        } else {
+          // we have target context features => this is just a partial score,
+          // do not add it to the score component collection
+          size_t toptHash = hash_value(*topt);
+          float futureScore = rawLosses[toptIdx];
+          m_tlsFutureScores->GetStored()->insert(std::make_pair(toptHash, futureScore));
+
+
+        }
       }
     }
   }
@@ -405,6 +427,9 @@ public:
     targetSent.Clear();
     targetSent.m_sentence = target;
     targetSent.m_alignment = alignment;
+
+    FloatHashMap &futureScores = *m_tlsFutureScores->GetStored();
+    futureScores.clear(); // do not keep future cost estimates across sentences!
 
     // pre-compute max- and min- aligned points for faster translation option checking
     targetSent.SetConstraints(source.GetSize());
@@ -559,6 +584,8 @@ private:
 
   Discriminative::Normalizer *m_normalizer = NULL;
   TLSClassifier *m_tlsClassifier;
+
+  TLSFloatHashMap *m_tlsFutureScores;
 };
 
 }
