@@ -415,7 +415,8 @@ public:
           targetContext.AddWord(m_sentenceStartWord);
 
         const Phrase *targetSent = GetStored()->m_sentence;
-        targetContext.Append(targetSent->GetSubString(Range(0, currentStart - 1)));
+        if (currentStart > 0)
+          targetContext.Append(targetSent->GetSubString(Range(0, currentStart - 1)));
 
         // extract target-context features
         std::vector<std::string> contextExtractedFeatures;
