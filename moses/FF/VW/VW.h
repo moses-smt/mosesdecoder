@@ -121,6 +121,11 @@ struct VWState : public FFState {
   Phrase m_phrase;
 };
 
+// how to print a VW state
+std::ostream &operator<<(std::ostream &out, const VWState &state) {
+  out << state.m_phrase;
+  return out;
+}
 
 typedef ThreadLocalByFeatureStorage<Discriminative::Classifier, Discriminative::ClassifierFactory &> TLSClassifier;
 
@@ -270,18 +275,19 @@ public:
       for (size_t toptIdx = 0; toptIdx < topts->size(); toptIdx++) {
         const TranslationOption *topt = topts->Get(toptIdx);
         size_t toptHash = hash_value(*topt);
-        toptScores[toptHash] = losses[toptIdx];
+        toptScores[toptHash] = FloorScore(TransformScore(losses[toptIdx]));
       }
 
-      //std::cerr << "VW :: cache miss\n";
+      VERBOSE(3, "VW :: cache miss\n");
     } else {
-      //std::cerr << "VW :: cache hit\n";
+      VERBOSE(3, "VW :: cache hit\n");
     }
 
     // now our cache is guaranteed to contain the required score, simply look it up
     std::vector<float> newScores(m_numScoreComponents);
     size_t toptHash = hash_value(curHypo.GetTranslationOption());
     newScores[0] = computedStateExtensions[cacheKey][toptHash];
+    VERBOSE(3, "VW :: adding score: " << newScores[0] << "\n");
     accumulator->PlusEquals(this, newScores);
 
 
@@ -716,12 +722,18 @@ private:
 
   // shift words in our state, add words from current hypothesis
   VWState *UpdateState(const FFState *prevState, const Hypothesis &curHypo) const {
+    const VWState *prevVWState = static_cast<const VWState *>(prevState);
+
+    VERBOSE(3, "VW :: updating state\n>> previous state: " << *prevVWState << "\n");
+
     // copy phrase from previous state
-    Phrase phrase = static_cast<const VWState *>(prevState)->m_phrase;
+    Phrase phrase = prevVWState->m_phrase;
     size_t contextSize = phrase.GetSize(); // identical to VWFeatureBase::GetMaximumContextSize()
     
     // add words from current hypothesis
     phrase.Append(curHypo.GetCurrTargetPhrase());
+
+    VERBOSE(3, ">> current hypo: " << curHypo.GetCurrTargetPhrase() << "\n");
 
     // get a slice of appropriate length
     Range range(phrase.GetSize() - contextSize, phrase.GetSize() - 1);
@@ -730,6 +742,8 @@ private:
     // build the new state
     VWState *out = new VWState();
     out->m_phrase = phrase;
+
+    VERBOSE(3, ">> updated state: " << *out << "\n");
 
     return out;
   }
