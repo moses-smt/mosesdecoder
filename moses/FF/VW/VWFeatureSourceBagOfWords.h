@@ -19,9 +19,10 @@ public:
 
   void operator()(const InputType &input
                   , const Range &sourceRange
-                  , Discriminative::Classifier &classifier) const {
+                  , Discriminative::Classifier &classifier
+                  , Discriminative::FeatureVector &outFeatures) const {
     for (size_t i = 0; i < input.GetSize(); i++) {
-      classifier.AddLabelIndependentFeature("bow^" + GetWord(input, i));
+      outFeatures.push_back(classifier.AddLabelIndependentFeature("bow^" + GetWord(input, i)));
     }
   }
 

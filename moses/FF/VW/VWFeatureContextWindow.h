@@ -20,9 +20,10 @@ public:
   }
 
   virtual void operator()(const Phrase &phrase
-                          , std::vector<std::string> &features) const {
+                          , Discriminative::Classifier &classifier
+                          , Discriminative::FeatureVector &outFeatures) const {
     for (size_t i = 0; i < m_contextSize; i++)
-      features.push_back("tcwin^-" + SPrint(i + 1) + "^" + GetWord(phrase, i));
+      outFeatures.push_back(classifier.AddLabelIndependentFeature("tcwin^-" + SPrint(i + 1) + "^" + GetWord(phrase, i)));
   }
 
   virtual void SetParameter(const std::string& key, const std::string& value) {

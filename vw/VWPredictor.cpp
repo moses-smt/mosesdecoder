@@ -36,7 +36,7 @@ VWPredictor::~VWPredictor()
     VW::finish(*m_VWInstance);
 }
 
-FeatureIDType VWPredictor::AddLabelIndependentFeature(const StringPiece &name, float value)
+FeatureType VWPredictor::AddLabelIndependentFeature(const StringPiece &name, float value)
 {
   // label-independent features are kept in a different feature namespace ('s' = source)
 
@@ -51,7 +51,7 @@ FeatureIDType VWPredictor::AddLabelIndependentFeature(const StringPiece &name, f
   return AddFeature(name, value); // namespace 's' is set up, add the feature
 }
 
-FeatureIDType VWPredictor::AddLabelDependentFeature(const StringPiece &name, float value)
+FeatureType VWPredictor::AddLabelDependentFeature(const StringPiece &name, float value)
 {
   // VW does not use the label directly, instead, we do a Cartesian product between source and target feature
   // namespaces, where the source namespace ('s') contains label-independent features and the target
@@ -82,10 +82,10 @@ float VWPredictor::Predict(const StringPiece &label)
   return loss;
 }
 
-FeatureIDType VWPredictor::AddFeature(const StringPiece &name, float value)
+FeatureType VWPredictor::AddFeature(const StringPiece &name, float value)
 {
   if (DEBUG) std::cerr << "VW :: Adding feature: " << EscapeSpecialChars(name.as_string()) << ":" << value << "\n";
-  return m_ex->addf(EscapeSpecialChars(name.as_string()), value);
+  return std::make_pair(m_ex->addf(EscapeSpecialChars(name.as_string()), value), value);
 }
 
 } // namespace Discriminative

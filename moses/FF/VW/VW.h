@@ -131,8 +131,7 @@ typedef ThreadLocalByFeatureStorage<Discriminative::Classifier, Discriminative::
 
 typedef ThreadLocalByFeatureStorage<VWTargetSentence> TLSTargetSentence;
 
-typedef std::vector<std::pair<Discriminative::FeatureIDType, float> > FeatureVector;
-typedef boost::unordered_map<size_t, FeatureVector> FeatureVectorMap;
+typedef boost::unordered_map<size_t, Discriminative::FeatureVector> FeatureVectorMap;
 typedef ThreadLocalByFeatureStorage<FeatureVectorMap> TLSFeatureVectorMap;
 
 typedef boost::unordered_map<size_t, float> FloatHashMap;
@@ -244,20 +243,19 @@ public:
       Discriminative::Classifier &classifier = *m_tlsClassifier->GetStored();
 
       // XXX this is a naive implementation, fix this!
+      
+      // TODO remove this! this is here just so that things compile for now
+      Discriminative::FeatureVector dummyVector;
 
       // extract source side features
       for(size_t i = 0; i < sourceFeatures.size(); ++i)
-        (*sourceFeatures[i])(input, sourceRange, classifier);
+        (*sourceFeatures[i])(input, sourceRange, classifier, dummyVector);
 
       // extract target context features
       const Phrase &targetContext = static_cast<const VWState *>(prevState)->m_phrase;
 
-      std::vector<std::string> contextExtractedFeatures;
       for(size_t i = 0; i < contextFeatures.size(); ++i)
-        (*contextFeatures[i])(targetContext, contextExtractedFeatures);
-
-      for (size_t i = 0; i < contextExtractedFeatures.size(); i++)
-        classifier.AddLabelIndependentFeature(contextExtractedFeatures[i]);
+        (*contextFeatures[i])(targetContext, classifier, dummyVector);
 
       std::vector<float> losses(topts->size());
 
@@ -267,7 +265,7 @@ public:
 
         // extract target-side features for each topt
         for(size_t i = 0; i < targetFeatures.size(); ++i)
-          (*targetFeatures[i])(input, targetPhrase, classifier);
+          (*targetFeatures[i])(input, targetPhrase, classifier, dummyVector);
 
         // get classifier score
         losses[toptIdx] = classifier.Predict(MakeTargetLabel(targetPhrase));
@@ -295,33 +293,6 @@ public:
     newScores[0] = computedStateExtensions[cacheKey][toptHash];
     VERBOSE(3, "VW :: adding score: " << newScores[0] << "\n");
     accumulator->PlusEquals(this, newScores);
-
-    /*
-     * Phrase context = makeContextPhrase(hypo);
-     * vector<string> extractedFeatures;
-     * for (f : contextfeatures) {
-     *   f(context, extractedFeatures);
-     * }
-     *
-     * state = makeState(phrase);
-     *
-     * contextFeaturesCache[state] = extractedFeatures;
-     * //TODO forget caches after each input sentence!
-     *
-     * spanStart = cur_hypo.GetTranslationOption().GetStartPos();
-     * spanEnd   = cur_hypo.GetTranslationOption().GetEndPos();
-     *
-     * topts = cur_hypo.GetManager().GetSntTranslationOptions().GetTranslationOptionList(spanStart, spanEnd);
-     *
-     * for (topt : topts) {
-     *   vector<int> &tgtFeatures = getTargetFeatures(topt.phrase.hash());
-     *   get an ezexample, add hashes of features for target context, add namespace+features for current topts, get dot product
-     *   normalize();
-     * }
-     *
-     * cacheKey = makeKey(state, spanStart, spanEnd);
-     * targetScoresCache[cacheKey] = vwscores
-     */
 
     return UpdateState(prevState, curHypo);
   }
@@ -416,9 +387,13 @@ public:
         // the first correct topt can be used by some loss functions
         const TargetPhrase &correctPhrase = translationOptionList.Get(firstCorrect)->GetTargetPhrase();
 
+        // feature extraction *at prediction time* outputs feature hashes which can be cached;
+        // this is training time, simply store everything in this dummyVector
+        Discriminative::FeatureVector dummyVector;
+
         // extract source side features
         for(size_t i = 0; i < sourceFeatures.size(); ++i)
-          (*sourceFeatures[i])(input, sourceRange, classifier);
+          (*sourceFeatures[i])(input, sourceRange, classifier, dummyVector);
 
         // build target-side context
         Phrase targetContext;
@@ -430,12 +405,8 @@ public:
           targetContext.Append(targetSent->GetSubString(Range(0, currentStart - 1)));
 
         // extract target-context features
-        std::vector<std::string> contextExtractedFeatures;
         for(size_t i = 0; i < contextFeatures.size(); ++i)
-          (*contextFeatures[i])(targetContext, contextExtractedFeatures);
-
-        for (size_t i = 0; i < contextExtractedFeatures.size(); i++)
-          classifier.AddLabelIndependentFeature(contextExtractedFeatures[i]);
+          (*contextFeatures[i])(targetContext, classifier, dummyVector);
 
         // go over topts, extract target side features and train the classifier
         for (size_t toptIdx = 0; toptIdx < translationOptionList.size(); toptIdx++) {
@@ -447,7 +418,7 @@ public:
           // extract target-side features for each topt
           const TargetPhrase &targetPhrase = translationOptionList.Get(toptIdx)->GetTargetPhrase();
           for(size_t i = 0; i < targetFeatures.size(); ++i)
-            (*targetFeatures[i])(input, targetPhrase, classifier);
+            (*targetFeatures[i])(input, targetPhrase, classifier, dummyVector);
 
           bool isCorrect = correct[toptIdx] && startsAt[toptIdx] == currentStart;
           float loss = (*m_trainingLoss)(targetPhrase, correctPhrase, isCorrect);
@@ -463,17 +434,26 @@ public:
 
       std::vector<float> losses(translationOptionList.size());
 
+      Discriminative::FeatureVector outFeaturesSourceNamespace;
+
       // extract source side features
       for(size_t i = 0; i < sourceFeatures.size(); ++i)
-        (*sourceFeatures[i])(input, sourceRange, classifier);
+        (*sourceFeatures[i])(input, sourceRange, classifier, outFeaturesSourceNamespace);
 
       for (size_t toptIdx = 0; toptIdx < translationOptionList.size(); toptIdx++) {
         const TranslationOption *topt = translationOptionList.Get(toptIdx);
         const TargetPhrase &targetPhrase = topt->GetTargetPhrase();
+        Discriminative::FeatureVector outFeaturesTargetNamespace;
 
         // extract target-side features for each topt
         for(size_t i = 0; i < targetFeatures.size(); ++i)
-          (*targetFeatures[i])(input, targetPhrase, classifier);
+          (*targetFeatures[i])(input, targetPhrase, classifier, outFeaturesTargetNamespace);
+
+        // cache the extracted target features (i.e. features associated with given topt)
+        // for future use at decoding time
+        size_t toptHash = hash_value(*topt);
+        m_tlsTranslationOptionFeatures->GetStored()->insert(
+            std::make_pair(toptHash, outFeaturesTargetNamespace));
 
         // get classifier score
         losses[toptIdx] = classifier.Predict(MakeTargetLabel(targetPhrase));

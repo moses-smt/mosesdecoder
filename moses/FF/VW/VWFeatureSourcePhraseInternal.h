@@ -21,12 +21,13 @@ public:
 
   void operator()(const InputType &input
                   , const Range &sourceRange
-                  , Discriminative::Classifier &classifier) const {
+                  , Discriminative::Classifier &classifier
+                  , Discriminative::FeatureVector &outFeatures) const {
     size_t begin = sourceRange.GetStartPos();
     size_t end   = sourceRange.GetEndPos() + 1;
 
     while (begin < end) {
-      classifier.AddLabelIndependentFeature("sin^" + GetWord(input, begin++));
+      outFeatures.push_back(classifier.AddLabelIndependentFeature("sin^" + GetWord(input, begin++)));
     }
   }
 

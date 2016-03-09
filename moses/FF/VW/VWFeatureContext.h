@@ -27,12 +27,14 @@ public:
 
   virtual void operator()(const InputType &input
                           , const TargetPhrase &targetPhrase
-                          , Discriminative::Classifier &classifier) const {
+                          , Discriminative::Classifier &classifier
+                          , Discriminative::FeatureVector &outFeatures) const {
   }
 
   virtual void operator()(const InputType &input
                           , const Range &sourceRange
-                          , Discriminative::Classifier &classifier) const {
+                          , Discriminative::Classifier &classifier
+                          , Discriminative::FeatureVector &outFeatures) const {
   }
 
   virtual void SetParameter(const std::string& key, const std::string& value) {

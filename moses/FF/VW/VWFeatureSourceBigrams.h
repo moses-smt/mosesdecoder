@@ -19,9 +19,10 @@ public:
 
   void operator()(const InputType &input
                   , const Range &sourceRange
-                  , Discriminative::Classifier &classifier) const {
+                  , Discriminative::Classifier &classifier
+                  , Discriminative::FeatureVector &outFeatures) const {
     for (size_t i = 1; i < input.GetSize(); i++) {
-      classifier.AddLabelIndependentFeature("bigram^" + GetWord(input, i - 1) + "^" + GetWord(input, i));
+      outFeatures.push_back(classifier.AddLabelIndependentFeature("bigram^" + GetWord(input, i - 1) + "^" + GetWord(input, i)));
     }
   }
 

@@ -98,21 +98,24 @@ public:
   // source sentence word range.
   virtual void operator()(const InputType &input
                           , const Range &sourceRange
-                          , Discriminative::Classifier &classifier) const = 0;
+                          , Discriminative::Classifier &classifier
+                          , Discriminative::FeatureVector &outFeatures) const = 0;
 
   // Overload to process target-dependent features, create features once for
   // every target phrase. One source word range will have at leat one target
   // phrase, but may have more.
   virtual void operator()(const InputType &input
                           , const TargetPhrase &targetPhrase
-                          , Discriminative::Classifier &classifier) const = 0;
+                          , Discriminative::Classifier &classifier
+                          , Discriminative::FeatureVector &outFeatures) const = 0;
 
   // Overload to process target-context dependent features, these features are
   // evaluated during decoding. For efficiency, features are not fed directly into
   // the classifier object but instead output in the vector "features" and managed
   // separately in VW.h.
   virtual void operator()(const Phrase &phrase
-                          , std::vector<std::string> &features) const = 0;
+                          , Discriminative::Classifier &classifier
+                          , Discriminative::FeatureVector &outFeatures) const = 0;
 
 protected:
   std::vector<FactorType> m_sourceFactors, m_targetFactors;
