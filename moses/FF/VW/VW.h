@@ -131,6 +131,10 @@ typedef ThreadLocalByFeatureStorage<Discriminative::Classifier, Discriminative::
 
 typedef ThreadLocalByFeatureStorage<VWTargetSentence> TLSTargetSentence;
 
+typedef std::vector<std::pair<Discriminative::FeatureIDType, float> > FeatureVector;
+typedef boost::unordered_map<size_t, FeatureVector> FeatureVectorMap;
+typedef ThreadLocalByFeatureStorage<FeatureVectorMap> TLSFeatureVectorMap;
+
 typedef boost::unordered_map<size_t, float> FloatHashMap;
 typedef ThreadLocalByFeatureStorage<FloatHashMap> TLSFloatHashMap;
 typedef ThreadLocalByFeatureStorage<boost::unordered_map<size_t, FloatHashMap> > TLSStateExtensions;
@@ -152,6 +156,8 @@ public:
 
     m_tlsFutureScores = new TLSFloatHashMap(this);
     m_tlsComputedStateExtensions = new TLSStateExtensions(this);
+    m_tlsTranslationOptionFeatures = new TLSFeatureVectorMap(this);
+    m_tlsTargetContextFeatures = new TLSFeatureVectorMap(this);
 
     if (! m_normalizer) {
       VERBOSE(1, "VW :: No loss function specified, assuming logistic loss.\n");
@@ -289,7 +295,6 @@ public:
     newScores[0] = computedStateExtensions[cacheKey][toptHash];
     VERBOSE(3, "VW :: adding score: " << newScores[0] << "\n");
     accumulator->PlusEquals(this, newScores);
-
 
     /*
      * Phrase context = makeContextPhrase(hypo);
@@ -765,6 +770,7 @@ private:
 
   TLSFloatHashMap *m_tlsFutureScores;
   TLSStateExtensions *m_tlsComputedStateExtensions;
+  TLSFeatureVectorMap *m_tlsTranslationOptionFeatures, *m_tlsTargetContextFeatures;
 };
 
 }

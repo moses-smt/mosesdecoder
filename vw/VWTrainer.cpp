@@ -25,7 +25,7 @@ VWTrainer::~VWTrainer()
   close(m_bfos);
 }
 
-void VWTrainer::AddLabelIndependentFeature(const StringPiece &name, float value)
+FeatureIDType VWTrainer::AddLabelIndependentFeature(const StringPiece &name, float value)
 {
   if (m_isFirstSource) {
     if (m_isFirstExample) {
@@ -43,9 +43,11 @@ void VWTrainer::AddLabelIndependentFeature(const StringPiece &name, float value)
   }
 
   AddFeature(name, value);
+
+  return 0; // we don't hash features
 }
 
-void VWTrainer::AddLabelDependentFeature(const StringPiece &name, float value)
+FeatureIDType VWTrainer::AddLabelDependentFeature(const StringPiece &name, float value)
 {
   if (m_isFirstTarget) {
     m_isFirstTarget = false;
@@ -56,6 +58,8 @@ void VWTrainer::AddLabelDependentFeature(const StringPiece &name, float value)
   }
 
   AddFeature(name, value);
+
+  return 0; // we don't hash features
 }
 
 void VWTrainer::Train(const StringPiece &label, float loss)
