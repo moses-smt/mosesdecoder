@@ -149,7 +149,7 @@ protected:
 
 class SelPrefState : public TreeState{
 public:
-	SelPrefState(TreePointer tree, size_t hash)
+	SelPrefState(TreePointer tree, uint64_t hash)
 		: TreeState(tree)
 		, m_depRelHash(hash)
 	{}

@@ -8,6 +8,7 @@
 #include "moses/PP/TreeStructurePhraseProperty.h"
 #include "InternalTree.h"
 #include "moses/Util.h"
+#include "util/murmur_hash.hh"
 
 #include <string>
 #include <unordered_map>
@@ -599,8 +600,12 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 
 		// Compute hash for current hypothesis
 		//std::hash<vector<vector<string>>> hash_fn;
-		size_t depRelHash = 0;
-		boost::hash_combine(depRelHash, depRelTuples);
+		uint64_t depRelHash = 0;
+		for (auto &tuple : depRelTuples){
+			string acc = accumulate( tuple.begin(), tuple.end(), string("") );
+			depRelHash += util::MurmurHash64A(acc.c_str(),acc.size());
+		}
+		//boost::hash_combine(depRelHash, depRelTuples);
 		//cout << "Hash value: " << depRelHash << endl;
 
 		// Compute feature function scores
