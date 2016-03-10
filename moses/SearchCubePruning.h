@@ -81,6 +81,9 @@ protected:
 
   void CacheForNeural(Collector& collector);
   
+  void ProcessStackForNeuro(HypothesisStackCubePruning*& stack);
+
+  
   //void CreateForwardTodos2(HypothesisStackCubePruning &stack);
   //! create a back pointer to this bitmap, with edge that has this words range translation
   //void CreateForwardTodos2(const WordsBitmap &bitmap, const WordsRange &range, BitmapContainer &bitmapContainer);

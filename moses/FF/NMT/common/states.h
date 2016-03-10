@@ -59,6 +59,7 @@ class States {
       if(append > States_.Rows())
         States_.Resize(append, In.Cols());
       mblas::CopyRows(States_, In, rowPairs);
+      //std::cerr << "States: " << In.Rows() << " " << freeRows_.size() << " -> " << States_.Rows() << std::endl;
     }
       
     std::string ToString(size_t rowNo) {

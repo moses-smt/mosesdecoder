@@ -126,8 +126,8 @@ void SearchCubePruning::Decode()
     // BOOST_FOREACH(HypothesisStack* hstack, m_hypoStackColl) {
     if (this->out_of_time()) return;
 
-    HypothesisStackCubePruning &sourceHypoColl
-    = *static_cast<HypothesisStackCubePruning*>(*iterStack);
+    HypothesisStackCubePruning* sourceHypoColl
+    = static_cast<HypothesisStackCubePruning*>(*iterStack);
 
     // priority queue which has a single entry for each bitmap
     // container, sorted by score of top hyp
@@ -135,7 +135,7 @@ void SearchCubePruning::Decode()
         BitmapContainerOrderer > BCQueue;
 
     _BMType::const_iterator bmIter;
-    const _BMType &accessor = sourceHypoColl.GetBitmapAccessor();
+    const _BMType &accessor = sourceHypoColl->GetBitmapAccessor();
 
     for(bmIter = accessor.begin(); bmIter != accessor.end(); ++bmIter) {
       // build the first hypotheses
@@ -180,9 +180,13 @@ void SearchCubePruning::Decode()
     IFVERBOSE(2) {
       m_manager.GetSentenceStats().StartTimeStack();
     }
-    sourceHypoColl.PruneToSize(m_options.search.stack_size);
+    sourceHypoColl->PruneToSize(m_options.search.stack_size);
+    ProcessStackForNeuro(sourceHypoColl);
+    
     VERBOSE(3,std::endl);
-    sourceHypoColl.CleanupArcList();
+    sourceHypoColl->CleanupArcList();
+    
+    
     IFVERBOSE(2) {
       m_manager.GetSentenceStats().StopTimeStack();
     }
@@ -191,7 +195,7 @@ void SearchCubePruning::Decode()
       m_manager.GetSentenceStats().StartTimeSetupCubes();
     }
     
-    CreateForwardTodos(sourceHypoColl, 0);
+    CreateForwardTodos(*sourceHypoColl, 0);
   
     IFVERBOSE(2) {
       m_manager.GetSentenceStats().StopTimeSetupCubes();
@@ -200,6 +204,27 @@ void SearchCubePruning::Decode()
     stackNo++;
   }
 }
+
+void SearchCubePruning::ProcessStackForNeuro(HypothesisStackCubePruning*& stack) {
+  HypothesisStackCubePruning::iterator h;
+  std::vector<Hypothesis*> temp;
+  for (h = stack->begin(); h != stack->end(); ++h) {
+    temp.push_back(*h);
+    //stack->Detach(h);
+  }
+  
+  const std::vector<const StatefulFeatureFunction*> &ffs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  const StaticData &staticData = StaticData::Instance();
+  for (size_t i = 0; i < ffs.size(); ++i) {
+    const NeuralScoreFeature* nsf = dynamic_cast<const NeuralScoreFeature*>(ffs[i]);
+    if (nsf && !staticData.IsFeatureFunctionIgnored(*ffs[i]))
+      const_cast<NeuralScoreFeature*>(nsf)->RescoreStack(temp, i);
+  }
+  
+  //for(int i = 0; i < temp.size(); i++)
+  //  stack->AddPrune(temp[i]);
+}
+
 
 void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack, FunctorCube* functor)
 {
@@ -231,11 +256,11 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack, Fu
       WordsRange applyRange(startPos, startPos);
       if (CheckDistortion(bitmap, applyRange)) {
         // apply range
-        {
-          CollectorCube collector(this);
-          collector(bitmap, applyRange, bitmapContainer);
-          CacheForNeural(collector);
-        }
+        //{
+        //  CollectorCube collector(this);
+        //  collector(bitmap, applyRange, bitmapContainer);
+        //  CacheForNeural(collector);
+        //}
         {
           ExpanderCube expander(this);
           expander(bitmap, applyRange, bitmapContainer);
@@ -252,11 +277,11 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack, Fu
         WordsRange applyRange(startPos, endPos);
         if (CheckDistortion(bitmap, applyRange)) {
           // apply range
-          {
-            CollectorCube collector(this);
-            collector(bitmap, applyRange, bitmapContainer);
-            CacheForNeural(collector);
-          }
+          //{
+          //  CollectorCube collector(this);
+          //  collector(bitmap, applyRange, bitmapContainer);
+          //  CacheForNeural(collector);
+          //}
           {
             ExpanderCube expander(this);
             expander(bitmap, applyRange, bitmapContainer);

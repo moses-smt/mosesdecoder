@@ -47,8 +47,9 @@ public:
   void CleanUpAfterSentenceProcessing(ttasksptr const& ttask);
     
   void RescoreStack(std::vector<Hypothesis*>& hyps, size_t index);
+  void RescoreStackBatch(std::vector<Hypothesis*>& hyps, size_t index);
   void ProcessStack(Collector& collector, size_t index);
-
+  
   void BatchProcess(
       const std::vector<std::string>& nextWords,
       const std::vector<std::string>& lastWords,

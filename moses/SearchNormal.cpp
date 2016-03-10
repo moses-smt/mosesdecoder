@@ -80,14 +80,8 @@ void SearchNormal::ProcessStackForNeuro(HypothesisStackNormal*& stack) {
   std::vector<Hypothesis*> temp;
   for (h = stack->begin(); h != stack->end(); ++h) {
     temp.push_back(*h);
-    stack->Detach(h);
+    //stack->Detach(h);
   }
-  delete stack;
-  
-  stack = new HypothesisStackNormal(m_manager);
-  stack->SetMaxHypoStackSize(this->m_options.search.stack_size,
-                             this->m_options.search.stack_diversity);
-  stack->SetBeamWidth(this->m_options.search.beam_width);
   
   const std::vector<const StatefulFeatureFunction*> &ffs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   const StaticData &staticData = StaticData::Instance();
@@ -97,8 +91,8 @@ void SearchNormal::ProcessStackForNeuro(HypothesisStackNormal*& stack) {
       const_cast<NeuralScoreFeature*>(nsf)->RescoreStack(temp, i);
   }
   
-  for(int i = 0; i < temp.size(); i++)
-    stack->AddPrune(temp[i]);
+  //for(int i = 0; i < temp.size(); i++)
+    //stack->AddPrune(temp[i]);
 }
 
 bool
@@ -143,9 +137,9 @@ void SearchNormal::Decode()
 
   // go through each stack
   BOOST_FOREACH(HypothesisStack* hstack, m_hypoStackColl) {
-    CollectorNormal collector(this);
-    if (!ProcessOneStack(hstack, &collector)) return;
-    CacheForNeural(collector);
+    //CollectorNormal collector(this);
+    //if (!ProcessOneStack(hstack, &collector)) return;
+    //CacheForNeural(collector);
 
     ExpanderNormal expander(this);
     if (!ProcessOneStack(hstack, &expander)) return;

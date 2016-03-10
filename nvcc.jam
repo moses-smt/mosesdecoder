@@ -10,5 +10,5 @@ toolset.flags nvcc.compile INCLUDES <include> ;
 
 actions compile
 {
-    "/usr/local/cuda/bin/nvcc" -I"$(INCLUDES)" -std=c++11 -O3 -o $(<) -c $(>)
+    "/usr/local/cuda/bin/nvcc" -I"$(INCLUDES)" -std=c++11 -O0 -g -o $(<) -c $(>)
 }

@@ -44,14 +44,12 @@ size_t NMT::GetDevices(size_t maxDevices) {
 }
 
 void NMT::SetDevice() {
-  std::cerr << "Setting device " << w_->GetDevice() << std::endl;
   cudaSetDevice(w_->GetDevice());
   CublasHandler::StaticHandle();
 }
 
 
 size_t NMT::GetDevice() {
-  std::cerr << "Returning device " << w_->GetDevice() << std::endl;
   return w_->GetDevice();
 }
 
@@ -71,6 +69,10 @@ boost::shared_ptr<Weights> NMT::NewModel(const std::string& path, size_t device)
 boost::shared_ptr<Vocab> NMT::NewVocab(const std::string& path) {
   boost::shared_ptr<Vocab> vocab(new Vocab(path));
   return vocab;
+}
+
+size_t NMT::TargetVocab(const std::string& str) {
+  return (*trg_)[str];
 }
 
 void NMT::CalcSourceContext(const std::vector<std::string>& s) {  
@@ -108,6 +110,55 @@ void NMT::FilterTargetVocab(const std::set<std::string>& filter) {
   // eol
   numericFilter.push_back(numericFilter.size());
   decoder_->Filter(numericFilter);
+}
+
+void NMT::BatchSteps(const Batches& batches, LastWords& lastWords,
+                     Scores& probsOut, Scores& unksOut, StateInfos& stateInfos,
+                     bool firstWord) {
+  Matrix& sourceContext = *boost::static_pointer_cast<Matrix>(SourceContext_);
+  
+  Matrix prevEmbeddings;
+  Matrix nextEmbeddings;
+  Matrix prevStates;
+  Matrix probs;
+  Matrix alignedSourceContext;
+  Matrix nextStates;
+  
+  if(firstWord) {
+    decoder_->EmptyEmbedding(prevEmbeddings, lastWords.size());
+  }
+  else {
+    // Not the first word
+    decoder_->Lookup(prevEmbeddings, lastWords);
+  }
+    
+  states_->ConstructStates(prevStates, stateInfos);
+    
+  for(auto& batch : batches) {
+    decoder_->Lookup(nextEmbeddings, batch);
+    decoder_->GetProbs(probs, alignedSourceContext,
+                       prevStates, prevEmbeddings, sourceContext);  
+      
+    decoder_->GetNextState(nextStates, nextEmbeddings,
+                           prevStates, alignedSourceContext);
+ 
+    StateInfos tempStates;
+    states_->SaveStates(tempStates, nextStates);
+ 
+    for(size_t i = 0; i < batch.size(); ++i) {
+      if(batch[i] != 0) {
+        float p = probs(i, filteredId_[batch[i]]);
+        probsOut[i] += log(p);
+        stateInfos[i] = tempStates[i];
+      }
+      if(batch[i] == 1) {
+        unksOut[i]++;
+      }
+    }
+        
+    Swap(nextStates, prevStates);
+    Swap(nextEmbeddings, prevEmbeddings);
+  }
 }
 
 void NMT::OnePhrase(

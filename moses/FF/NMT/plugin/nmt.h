@@ -15,6 +15,13 @@ class States;
 class StateInfo;
 typedef boost::shared_ptr<StateInfo> StateInfoPtr;
 
+typedef std::vector<size_t> Batch;
+typedef std::vector<Batch> Batches;
+typedef std::vector<StateInfoPtr> StateInfos;
+typedef std::vector<float> Scores;
+typedef std::vector<size_t> LastWords;
+
+
 class NMT {
   public:
     NMT(const boost::shared_ptr<Weights> model,
@@ -45,6 +52,12 @@ class NMT {
     
     void FilterTargetVocab(const std::set<std::string>& filter);
     
+    size_t TargetVocab(const std::string& str);
+    
+    void BatchSteps(const Batches& batches, LastWords& lastWords,
+                    Scores& probs, Scores& unks, StateInfos& stateInfos,
+                    bool firstWord);
+  
     void OnePhrase(
       const std::vector<std::string>& phrase,
       const std::string& lastWord,
