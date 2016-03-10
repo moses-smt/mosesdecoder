@@ -62,6 +62,16 @@ FeatureType VWTrainer::AddLabelDependentFeature(const StringPiece &name, float v
   return std::make_pair(0, value); // we don't hash features
 }
 
+void VWTrainer::AddLabelIndependentFeatureVector(const FeatureVector &features)
+{
+  throw logic_error("VW trainer does not support feature IDs.");
+}
+
+void VWTrainer::AddLabelDependentFeatureVector(const FeatureVector &features)
+{
+  throw logic_error("VW trainer does not support feature IDs.");
+}
+
 void VWTrainer::Train(const StringPiece &label, float loss)
 {
   m_outputBuffer.push_front(label.as_string() + ":" + SPrint(loss));

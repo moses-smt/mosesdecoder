@@ -244,31 +244,45 @@ public:
 
       // XXX this is a naive implementation, fix this!
       
-      // TODO remove this! this is here just so that things compile for now
-      Discriminative::FeatureVector dummyVector;
-
-      // extract source side features
-      for(size_t i = 0; i < sourceFeatures.size(); ++i)
-        (*sourceFeatures[i])(input, sourceRange, classifier, dummyVector);
-
       // extract target context features
       const Phrase &targetContext = static_cast<const VWState *>(prevState)->m_phrase;
+      size_t contextHash = hash_value(targetContext);
 
-      for(size_t i = 0; i < contextFeatures.size(); ++i)
-        (*contextFeatures[i])(targetContext, classifier, dummyVector);
+      FeatureVectorMap &contextFeaturesCache = *m_tlsTargetContextFeatures->GetStored();
+
+      FeatureVectorMap::const_iterator contextIt = contextFeaturesCache.find(contextHash);
+      if (contextIt == contextFeaturesCache.end()) {
+        // we have not extracted features for this context yet
+
+        Discriminative::FeatureVector contextVector;
+        for(size_t i = 0; i < contextFeatures.size(); ++i)
+          (*contextFeatures[i])(targetContext, classifier, contextVector);
+
+        contextFeaturesCache[contextHash] = contextVector;
+      } else {
+        // context already in cache, simply put feature IDs in the classifier object
+        classifier.AddLabelIndependentFeatureVector(contextIt->second);
+      }
 
       std::vector<float> losses(topts->size());
 
       for (size_t toptIdx = 0; toptIdx < topts->size(); toptIdx++) {
         const TranslationOption *topt = topts->Get(toptIdx);
         const TargetPhrase &targetPhrase = topt->GetTargetPhrase();
+        size_t toptHash = hash_value(*topt);
 
-        // extract target-side features for each topt
-        for(size_t i = 0; i < targetFeatures.size(); ++i)
-          (*targetFeatures[i])(input, targetPhrase, classifier, dummyVector);
+        // start with pre-computed source-context-only VW scores
+        losses[toptIdx] = m_tlsFutureScores->GetStored()->find(toptHash)->second;
 
-        // get classifier score
-        losses[toptIdx] = classifier.Predict(MakeTargetLabel(targetPhrase));
+        // add all features associated with this translation option
+        // (pre-compted when evaluated with source context)
+        const Discriminative::FeatureVector &targetFeatureVector =
+          m_tlsTranslationOptionFeatures->GetStored()->find(toptHash)->second;
+
+        classifier.AddLabelDependentFeatureVector(targetFeatureVector);
+
+        // add classifier score with context+target features only to the total loss
+        losses[toptIdx] += classifier.Predict(MakeTargetLabel(targetPhrase));
       }
 
       // normalize classifier scores to get a probability distribution

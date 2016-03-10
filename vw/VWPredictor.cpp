@@ -66,6 +66,36 @@ FeatureType VWPredictor::AddLabelDependentFeature(const StringPiece &name, float
   return AddFeature(name, value);
 }
 
+void VWPredictor::AddLabelIndependentFeatureVector(const FeatureVector &features)
+{
+  if (m_isFirstSource) {
+    // the first feature of a new example => create the source namespace for
+    // label-independent features to live in
+    m_isFirstSource = false;
+    m_ex->finish();
+    m_ex->addns('s');
+    if (DEBUG) std::cerr << "VW :: Setting source namespace\n";
+  }
+
+  // add each feature index using this "low level" call to VW
+  for (FeatureVector::const_iterator it = features.begin(); it != features.end(); it++)
+    m_ex->addf(it->first, it->second);
+}
+
+void VWPredictor::AddLabelDependentFeatureVector(const FeatureVector &features)
+{
+  if (m_isFirstTarget) {
+    // the first target-side feature => create namespace 't'
+    m_isFirstTarget = false;
+    m_ex->addns('t');
+    if (DEBUG) std::cerr << "VW :: Setting target namespace\n";
+  }
+
+  // add each feature index using this "low level" call to VW
+  for (FeatureVector::const_iterator it = features.begin(); it != features.end(); it++)
+    m_ex->addf(it->first, it->second);
+}
+
 void VWPredictor::Train(const StringPiece &label, float loss)
 {
   throw logic_error("Trying to train during prediction!");

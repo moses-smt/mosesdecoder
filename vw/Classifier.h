@@ -44,6 +44,16 @@ public:
   virtual FeatureType AddLabelDependentFeature(const StringPiece &name, float value) = 0;
 
   /**
+   * Efficient addition of features when their IDs are already computed.
+   */
+  virtual void AddLabelIndependentFeatureVector(const FeatureVector &features) = 0;
+
+  /**
+   * Efficient addition of features when their IDs are already computed.
+   */
+  virtual void AddLabelDependentFeatureVector(const FeatureVector &features) = 0;
+
+  /**
    * Train using current example. Use loss to distinguish positive and negative training examples.
    * Throws away current label-dependent features (so that features for another label/class can now be set).
    */
@@ -99,6 +109,8 @@ public:
 
   virtual FeatureType AddLabelIndependentFeature(const StringPiece &name, float value);
   virtual FeatureType AddLabelDependentFeature(const StringPiece &name, float value);
+  virtual void AddLabelIndependentFeatureVector(const FeatureVector &features);
+  virtual void AddLabelDependentFeatureVector(const FeatureVector &features);
   virtual void Train(const StringPiece &label, float loss);
   virtual float Predict(const StringPiece &label);
 
@@ -125,6 +137,8 @@ public:
 
   virtual FeatureType AddLabelIndependentFeature(const StringPiece &name, float value);
   virtual FeatureType AddLabelDependentFeature(const StringPiece &name, float value);
+  virtual void AddLabelIndependentFeatureVector(const FeatureVector &features);
+  virtual void AddLabelDependentFeatureVector(const FeatureVector &features);
   virtual void Train(const StringPiece &label, float loss);
   virtual float Predict(const StringPiece &label);
 
