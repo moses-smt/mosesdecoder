@@ -242,8 +242,6 @@ public:
 
       Discriminative::Classifier &classifier = *m_tlsClassifier->GetStored();
 
-      // XXX this is a naive implementation, fix this!
-      
       // extract target context features
       const Phrase &targetContext = static_cast<const VWState *>(prevState)->m_phrase;
       size_t contextHash = hash_value(targetContext);
@@ -259,9 +257,11 @@ public:
           (*contextFeatures[i])(targetContext, classifier, contextVector);
 
         contextFeaturesCache[contextHash] = contextVector;
+        VERBOSE(3, "VW :: context cache miss\n");
       } else {
         // context already in cache, simply put feature IDs in the classifier object
         classifier.AddLabelIndependentFeatureVector(contextIt->second);
+        VERBOSE(3, "VW :: context cache hit\n");
       }
 
       std::vector<float> losses(topts->size());
@@ -275,7 +275,7 @@ public:
         losses[toptIdx] = m_tlsFutureScores->GetStored()->find(toptHash)->second;
 
         // add all features associated with this translation option
-        // (pre-compted when evaluated with source context)
+        // (pre-computed when evaluated with source context)
         const Discriminative::FeatureVector &targetFeatureVector =
           m_tlsTranslationOptionFeatures->GetStored()->find(toptHash)->second;
 
@@ -569,6 +569,13 @@ public:
 
     // invalidate our caches after each sentence
     m_tlsComputedStateExtensions->GetStored()->clear();
+
+    // it's not certain that we should clear these caches; we do it
+    // because they shouldn't be allowed to grow indefinitely large but
+    // target contexts and translation options will have identical features
+    // the next time we extract them...
+    m_tlsTargetContextFeatures->GetStored()->clear();
+    m_tlsTranslationOptionFeatures->GetStored()->clear();
 
     // pre-compute max- and min- aligned points for faster translation option checking
     targetSent.SetConstraints(source.GetSize());
