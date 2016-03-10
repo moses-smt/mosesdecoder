@@ -100,6 +100,10 @@ template <class Value> class HashedSearch {
       return ret;
     }
 
+    UnigramPointer PrefetchUnigram(WordIndex word) const {
+      unigram_.Prefetch(word);
+    }
+
     MiddlePointer Unpack(uint64_t extend_pointer, unsigned char extend_length, Node &node) const {
       node = extend_pointer;
       return MiddlePointer(middle_[extend_length - 2].MustFind(extend_pointer)->value);
@@ -116,6 +120,10 @@ template <class Value> class HashedSearch {
       MiddlePointer ret(found->value);
       independent_left = ret.IndependentLeft();
       return ret;
+    }
+
+    void PrefetchMiddle(unsigned char order_minus_2, WordIndex word, Node &node) const {
+      __builtin_prefetch(middle_[order_minus_2].Ideal(CombineWordHash(node, word)), 0, 0); // TODO: hash does not need to be recomputed
     }
 
     LongestPointer LookupLongest(WordIndex word, const Node &node) const {
@@ -162,6 +170,10 @@ template <class Value> class HashedSearch {
           assert(index < count_);
 #endif
           return unigram_[index];
+        }
+        
+        void Prefetch(WordIndex index) const {
+          __builtin_prefetch(unigram_ + index, 0, 0);
         }
 
         typename Value::Weights &Unknown() { return unigram_[0]; }
