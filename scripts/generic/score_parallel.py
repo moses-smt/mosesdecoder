@@ -472,6 +472,7 @@ def compose_score_command(extract_file, context_file, half_file,
         command += [
             '&&',
             find_first_executable(['bzcat']),
+            half_file,
             '|',
             quote(args.flexibility_score),
             quote(context_file),
