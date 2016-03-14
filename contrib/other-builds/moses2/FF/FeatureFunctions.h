@@ -11,6 +11,7 @@
 #include <vector>
 #include <string>
 #include "../legacy/Parameter.h"
+#include "FeatureRegistry.h"
 
 namespace Moses2
 {
@@ -27,10 +28,10 @@ class TargetPhrase;
 class TargetPhrases;
 class Scores;
 
-	namespace SCFG
-	{
-		class TargetPhrase;
-	}
+namespace SCFG
+{
+	class TargetPhrase;
+}
 
 class FeatureFunctions {
 public:
@@ -76,6 +77,7 @@ protected:
 
 	FeatureFunction *Create(const std::string &line);
 
+	FeatureRegistry m_registry;
 };
 
 }

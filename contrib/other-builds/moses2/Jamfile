@@ -23,6 +23,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
    FF/Distortion.cpp
    FF/FeatureFunction.cpp 
    FF/FeatureFunctions.cpp 
+   FF/FeatureRegistry.cpp
     FF/LexicalReordering.cpp
     FF/PhrasePenalty.cpp
     FF/SkeletonStatefulFF.cpp

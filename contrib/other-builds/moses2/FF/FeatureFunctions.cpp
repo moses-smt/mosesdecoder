@@ -31,13 +31,11 @@ using namespace std;
 
 namespace Moses2
 {
-
 FeatureFunctions::FeatureFunctions(System &system)
 :m_system(system)
 ,m_ffStartInd(0)
 {
-	// TODO Auto-generated constructor stub
-
+	m_registry.PrintFF();
 }
 
 FeatureFunctions::~FeatureFunctions() {
