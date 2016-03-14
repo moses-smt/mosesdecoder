@@ -42,38 +42,6 @@ FeatureFunctions::~FeatureFunctions() {
 	RemoveAllInColl(m_featureFunctions);
 }
 
-void FeatureFunctions::Create()
-{
-  const Parameter &params = m_system.params;
-
-  const PARAM_VEC *ffParams = params.GetParam("feature");
-  UTIL_THROW_IF2(ffParams == NULL, "Must have [feature] section");
-
-  BOOST_FOREACH(const std::string &line, *ffParams) {
-	  cerr << "line=" << line << endl;
-	  FeatureFunction *ff = Create(line);
-
-	  m_featureFunctions.push_back(ff);
-
-	  StatefulFeatureFunction *sfff = dynamic_cast<StatefulFeatureFunction*>(ff);
-	  if (sfff) {
-		  sfff->SetStatefulInd(m_statefulFeatureFunctions.size());
-		  m_statefulFeatureFunctions.push_back(sfff);
-	  }
-
-	  if (ff->HasPhraseTableInd()) {
-		  ff->SetPhraseTableInd(m_withPhraseTableInd.size());
-		  m_withPhraseTableInd.push_back(ff);
-	  }
-
-	  PhraseTable *pt = dynamic_cast<PhraseTable*>(ff);
-	  if (pt) {
-		  pt->SetPtInd(m_phraseTables.size());
-		  m_phraseTables.push_back(pt);
-	  }
-  }
-}
-
 void FeatureFunctions::Load()
 {
   // load, everything but pts
@@ -100,46 +68,47 @@ void FeatureFunctions::Load()
   }
 }
 
+void FeatureFunctions::Create()
+{
+  const Parameter &params = m_system.params;
+
+  const PARAM_VEC *ffParams = params.GetParam("feature");
+  UTIL_THROW_IF2(ffParams == NULL, "Must have [feature] section");
+
+  BOOST_FOREACH(const std::string &line, *ffParams) {
+	  cerr << "line=" << line << endl;
+	  FeatureFunction *ff = Create(line);
+	  cerr << "ff=" << ff->GetName() << endl;
+
+	  m_featureFunctions.push_back(ff);
+
+	  StatefulFeatureFunction *sfff = dynamic_cast<StatefulFeatureFunction*>(ff);
+	  if (sfff) {
+		  sfff->SetStatefulInd(m_statefulFeatureFunctions.size());
+		  m_statefulFeatureFunctions.push_back(sfff);
+	  }
+
+	  if (ff->HasPhraseTableInd()) {
+		  ff->SetPhraseTableInd(m_withPhraseTableInd.size());
+		  m_withPhraseTableInd.push_back(ff);
+	  }
+
+	  PhraseTable *pt = dynamic_cast<PhraseTable*>(ff);
+	  if (pt) {
+		  pt->SetPtInd(m_phraseTables.size());
+		  m_phraseTables.push_back(pt);
+	  }
+  }
+}
+
 FeatureFunction *FeatureFunctions::Create(const std::string &line)
 {
 	vector<string> toks = Tokenize(line);
 
-	FeatureFunction *ret;
-	if (toks[0] == "PhraseDictionaryMemory") {
-		ret = new PhraseTableMemory(m_ffStartInd, line);
+	FeatureFunction *ret = m_registry.Construct(m_ffStartInd, toks[0], line);
+	if (ret == NULL) {
+		cerr << "NADDA:" << line << endl;
 	}
-	else if (toks[0] == "ProbingPT") {
-		ret = new Moses2::ProbingPT(m_ffStartInd, line);
-	}
-	else if (toks[0] == "UnknownWordPenalty") {
-		ret = new UnknownWordPenalty(m_ffStartInd, line);
-	}
-	else if (toks[0] == "WordPenalty") {
-		ret = new WordPenalty(m_ffStartInd, line);
-	}
-	else if (toks[0] == "Distortion") {
-		ret = new Distortion(m_ffStartInd, line);
-	}
-	else if (toks[0] == "LanguageModel") {
-		ret = new LanguageModel(m_ffStartInd, line);
-	}
-	else if (toks[0] == "LanguageModelDALM") {
-	  //ret = new LanguageModelDALM(m_ffStartInd, line);
-	}
-	else if (toks[0] == "KENLM") {
-		ret = new KENLM(m_ffStartInd, line);
-	}
-	else if (toks[0] == "PhrasePenalty") {
-		ret = new PhrasePenalty(m_ffStartInd, line);
-	}
-	else if (toks[0] == "LexicalReordering") {
-		ret = new LexicalReordering(m_ffStartInd, line);
-	}
-	else {
-		//ret = new SkeletonStatefulFF(m_ffStartInd, line);
-		ret = new SkeletonStatelessFF(m_ffStartInd, line);
-	}
-
 	m_ffStartInd += ret->GetNumScores();
 
 	return ret;

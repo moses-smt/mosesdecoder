@@ -56,6 +56,20 @@ void FeatureRegistry::Add(const std::string &name, FeatureFactory *factory)
   }
 }
 
+FeatureFunction *FeatureRegistry::Construct(size_t startInd, const std::string &name, const std::string &line)
+{
+  Map::iterator i = registry_.find(name);
+  if (i == registry_.end()) {
+	  cerr << "Feature name " << name << " is not registered.";
+	  abort();
+  }
+  FeatureFactory *fact = i->second.get();
+  cerr << "fact=" << fact << endl;
+  FeatureFunction *ff = fact->Create(startInd, line);
+  cerr << "ff=" << ff << endl;
+  return ff;
+}
+
 void FeatureRegistry::PrintFF() const
 {
   std::vector<std::string> ffs;

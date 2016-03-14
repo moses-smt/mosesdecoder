@@ -4,6 +4,7 @@
 
 namespace Moses2
 {
+class FeatureFunction;
 
 ////////////////////////////////////////////////////////////////////
 class FeatureFactory
@@ -11,30 +12,20 @@ class FeatureFactory
 public:
   virtual ~FeatureFactory() {}
 
-  virtual void Create(size_t startInd, const std::string &line) = 0;
+  virtual FeatureFunction *Create(size_t startInd, const std::string &line) = 0;
 
 protected:
-  template <class F> static void DefaultSetup(F *feature);
-
   FeatureFactory() {}
 };
-
-template <class F>
-void
-FeatureFactory
-::DefaultSetup(F *feature)
-{
-
-}
 
 ////////////////////////////////////////////////////////////////////
 template <class F>
 class DefaultFeatureFactory : public FeatureFactory
 {
 public:
-  void Create(size_t startInd, const std::string &line) {
-    DefaultSetup(new F(startInd, line));
-  }
+	FeatureFunction *Create(size_t startInd, const std::string &line) {
+		return new F(startInd, line);
+	}
 };
 
 ////////////////////////////////////////////////////////////////////
@@ -45,7 +36,7 @@ public:
 
   ~FeatureRegistry();
 
-  void Construct(const std::string &name, const std::string &line);
+  FeatureFunction *Construct(size_t startInd, const std::string &name, const std::string &line);
   void PrintFF() const;
 
 private:
