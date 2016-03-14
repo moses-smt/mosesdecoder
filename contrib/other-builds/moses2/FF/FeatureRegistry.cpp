@@ -19,7 +19,27 @@ using namespace std;
 
 namespace Moses2
 {
+template <class F>
+class DefaultFeatureFactory : public FeatureFactory
+{
+public:
+	FeatureFunction *Create(size_t startInd, const std::string &line) {
+		return new F(startInd, line);
+	}
+};
 
+////////////////////////////////////////////////////////////////////
+
+/*
+class KenFactory : public FeatureFactory
+{
+public:
+  void Create(size_t startInd, const std::string &line) {
+    //ConstructKenLM(line);
+  }
+};
+*/
+////////////////////////////////////////////////////////////////////
 FeatureRegistry::FeatureRegistry()
 {
   // Feature with same name as class
