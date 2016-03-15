@@ -6,13 +6,17 @@
  */
 
 #include "Stacks.h"
+#include "../Manager.h"
+#include "../../System.h"
 
 using namespace std;
 
 namespace Moses2
 {
 
-Stacks::Stacks() {
+Stacks::Stacks(const Manager &mgr)
+:m_mgr(mgr)
+{
 	// TODO Auto-generated constructor stub
 
 }
@@ -46,15 +50,24 @@ std::ostream& operator<<(std::ostream &out, const Stacks &obj)
   return out;
 }
 
-void Stacks::Add(const Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle)
+void Stacks::Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle)
 {
   size_t numWordsCovered = hypo->GetBitmap().GetNumWordsCovered();
   //cerr << "numWordsCovered=" << numWordsCovered << endl;
   Stack &stack = *m_stacks[numWordsCovered];
   StackAdd added = stack.Add(hypo);
 
-  if (added.toBeDeleted) {
-	hypoRecycle.Recycle(added.toBeDeleted);
+  size_t nbestSize = m_mgr.system.nbestSize;
+  if (nbestSize) {
+
+  }
+  else {
+	if (!added.added) {
+		hypoRecycle.Recycle(hypo);
+	}
+	else if (added.other) {
+		hypoRecycle.Recycle(added.other);
+	}
   }
 }
 

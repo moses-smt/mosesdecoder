@@ -23,6 +23,7 @@ namespace Moses2
 
 SearchNormal::SearchNormal(Manager &mgr)
 :Search(mgr)
+,m_stacks(mgr)
 {
 	// TODO Auto-generated constructor stub
 

@@ -18,7 +18,7 @@ class Manager;
 class Stacks {
 	  friend std::ostream& operator<<(std::ostream &, const Stacks &);
 public:
-	Stacks();
+	Stacks(const Manager &mgr);
 	virtual ~Stacks();
 
 	void Init(const Manager &mgr, size_t numStacks);
@@ -37,9 +37,10 @@ public:
     	m_stacks[ind] = NULL;
     }
 
-	void Add(const Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle);
+	void Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle);
 
 protected:
+	const Manager &m_mgr;
 	std::vector<Stack*> m_stacks;
 };
 

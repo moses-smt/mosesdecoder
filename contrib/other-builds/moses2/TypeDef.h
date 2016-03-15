@@ -58,13 +58,13 @@ class StackAdd
 {
 public:
 	bool added;
-	HypothesisBase *toBeDeleted;
+	HypothesisBase *other;
 
 	StackAdd() {}
 	StackAdd(bool vadded,
-			HypothesisBase *vtoBeDeleted)
+			HypothesisBase *vOther)
 	:added(vadded)
-	,toBeDeleted(vtoBeDeleted)
+	,other(vOther)
 	{
 	}
 };

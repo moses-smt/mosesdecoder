@@ -50,7 +50,7 @@ public:
 	const Coll &GetColl() const
 	{ return m_coll; }
 
-	void Add(const Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle);
+	void Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle);
 
 	Moses2::HypothesisColl &GetMiniStack(const HypoCoverage &key);
 

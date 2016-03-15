@@ -18,6 +18,7 @@
 #include "../EstimatedScores.h"
 #include "../legacy/Bitmaps.h"
 #include "InputPaths.h"
+#include "ArcLists.h"
 
 namespace Moses2
 {
@@ -34,6 +35,7 @@ class OutputCollector;
 class Manager : public ManagerBase
 {
 public:
+	ArcLists arcLists;
 
 	Manager(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId);
 
