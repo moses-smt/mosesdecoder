@@ -74,14 +74,6 @@ private:
 
 /////////////////////////////////////////////////////////////////
 template <class Model>
-KENLM<Model>::KENLM(size_t startInd, const std::string &line)
-:StatefulFeatureFunction(startInd, line)
-,m_load_method(util::POPULATE_OR_READ)
-{
-	ReadParameters();
-}
-
-template <class Model>
 KENLM<Model>::KENLM(size_t startInd, const std::string &line, const std::string &file, FactorType factorType, util::LoadMethod load_method)
   :StatefulFeatureFunction(startInd, line)
   ,m_path(file)

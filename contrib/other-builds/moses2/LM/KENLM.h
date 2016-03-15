@@ -27,7 +27,6 @@ template <class Model>
 class KENLM : public StatefulFeatureFunction
 {
 public:
-  KENLM(size_t startInd, const std::string &line);
   KENLM(size_t startInd, const std::string &line, const std::string &file, FactorType factorType, util::LoadMethod load_method);
 
   virtual ~KENLM();
