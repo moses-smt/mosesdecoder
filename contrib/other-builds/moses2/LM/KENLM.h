@@ -20,10 +20,16 @@ namespace Moses2
 
 class Word;
 
+FeatureFunction *ConstructKenLM(size_t startInd, const std::string &lineOrig);
+FeatureFunction *ConstructKenLM(size_t startInd, const std::string &line, const std::string &file, FactorType factorType, util::LoadMethod load_method);
+
+template <class Model>
 class KENLM : public StatefulFeatureFunction
 {
 public:
   KENLM(size_t startInd, const std::string &line);
+  KENLM(size_t startInd, const std::string &line, const std::string &file, FactorType factorType, util::LoadMethod load_method);
+
   virtual ~KENLM();
 
   virtual void Load(System &system);
@@ -50,16 +56,13 @@ public:
 	Scores &scores,
 	FFState &state) const;
 
-  void SetParameter(const std::string& key, const std::string& value);
-
 protected:
   std::string m_path;
   FactorType m_factorType;
-  bool m_lazy;
+  util::LoadMethod m_load_method;
   const Factor *m_bos;
   const Factor *m_eos;
 
-  typedef lm::ngram::ProbingModel Model;
   boost::shared_ptr<Model> m_ngram;
 
   void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const;

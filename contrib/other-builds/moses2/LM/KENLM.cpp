@@ -14,6 +14,9 @@
 #include "../PhraseBased/Manager.h"
 #include "lm/state.hh"
 #include "lm/left.hh"
+#include "util/exception.hh"
+#include "util/tokenize_piece.hh"
+#include "util/string_stream.hh"
 #include "../legacy/FactorCollection.h"
 
 using namespace std;
@@ -70,19 +73,32 @@ private:
 };
 
 /////////////////////////////////////////////////////////////////
-KENLM::KENLM(size_t startInd, const std::string &line)
+template <class Model>
+KENLM<Model>::KENLM(size_t startInd, const std::string &line)
 :StatefulFeatureFunction(startInd, line)
-,m_lazy(false)
+,m_load_method(util::POPULATE_OR_READ)
 {
 	ReadParameters();
 }
 
-KENLM::~KENLM()
+template <class Model>
+KENLM<Model>::KENLM(size_t startInd, const std::string &line, const std::string &file, FactorType factorType, util::LoadMethod load_method)
+  :StatefulFeatureFunction(startInd, line)
+  ,m_path(file)
+  ,m_factorType(factorType)
+  ,m_load_method(load_method)
+{
+  ReadParameters();
+}
+
+template <class Model>
+KENLM<Model>::~KENLM()
 {
 	// TODO Auto-generated destructor stub
 }
 
-void KENLM::Load(System &system)
+template <class Model>
+void KENLM<Model>::Load(System &system)
 {
   FactorCollection &fc = system.GetVocab();
 
@@ -95,38 +111,21 @@ void KENLM::Load(System &system)
   FactorCollection &collection = system.GetVocab();
   MappingBuilder builder(collection, system, m_lmIdLookup);
   config.enumerate_vocab = &builder;
-  config.load_method = m_lazy ? util::LAZY : util::POPULATE_OR_READ;
+  config.load_method = m_load_method;
 
   m_ngram.reset(new Model(m_path.c_str(), config));
 }
 
-void KENLM::SetParameter(const std::string& key, const std::string& value)
-{
-  if (key == "path") {
-	  m_path = value;
-  }
-  else if (key == "factor") {
-	  m_factorType = Scan<FactorType>(value);
-  }
-  else if (key == "lazyken") {
-	  m_lazy = Scan<bool>(value);
-  }
-  else if (key == "order") {
-	  // don't need to store it
-  }
-  else {
-	  StatefulFeatureFunction::SetParameter(key, value);
-  }
-}
-
-FFState* KENLM::BlankState(MemPool &pool) const
+template <class Model>
+FFState* KENLM<Model>::BlankState(MemPool &pool) const
 {
   KenLMState *ret = new (pool.Allocate<KenLMState>()) KenLMState();
   return ret;
 }
 
 //! return the state associated with the empty hypothesis for a given sentence
-void KENLM::EmptyHypothesisState(FFState &state,
+template <class Model>
+void KENLM<Model>::EmptyHypothesisState(FFState &state,
 		const ManagerBase &mgr,
 		const InputType &input,
 		const Hypothesis &hypo) const
@@ -135,8 +134,8 @@ void KENLM::EmptyHypothesisState(FFState &state,
   stateCast.state = m_ngram->BeginSentenceState();
 }
 
-void
-KENLM::EvaluateInIsolation(MemPool &pool,
+template <class Model>
+void KENLM<Model>::EvaluateInIsolation(MemPool &pool,
 		const System &system,
 		const Phrase &source,
 		const TargetPhrase &targetPhrase,
@@ -171,7 +170,8 @@ KENLM::EvaluateInIsolation(MemPool &pool,
   }
 }
 
-void KENLM::EvaluateWhenApplied(const ManagerBase &mgr,
+template <class Model>
+void KENLM<Model>::EvaluateWhenApplied(const ManagerBase &mgr,
   const Hypothesis &hypo,
   const FFState &prevState,
   Scores &scores,
@@ -232,7 +232,8 @@ void KENLM::EvaluateWhenApplied(const ManagerBase &mgr,
   }
 }
 
-void KENLM::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const
+template <class Model>
+void KENLM<Model>::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const
 {
 	  fullScore = 0;
 	  ngramScore = 0;
@@ -274,7 +275,8 @@ void KENLM::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore,
 }
 
 // Convert last words of hypothesis into vocab ids, returning an end pointer.
-lm::WordIndex *KENLM::LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const {
+template <class Model>
+lm::WordIndex *KENLM<Model>::LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const {
   lm::WordIndex *index = indices;
   lm::WordIndex *end = indices + m_ngram->Order() - 1;
   int position = hypo.GetCurrTargetWordsRange().GetEndPos();
@@ -285,6 +287,96 @@ lm::WordIndex *KENLM::LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) co
       return index + 1;
     }
     *index = TranslateID(hypo.GetWord(position));
+  }
+}
+
+///////////////////////////////////////////////////////////////////////////
+
+/* Instantiate LanguageModelKen here.  Tells the compiler to generate code
+ * for the instantiations' non-inline member functions in this file.
+ * Otherwise, depending on the compiler, those functions may not be present
+ * at link time.
+ */
+template class KENLM<lm::ngram::ProbingModel>;
+template class KENLM<lm::ngram::RestProbingModel>;
+template class KENLM<lm::ngram::TrieModel>;
+template class KENLM<lm::ngram::ArrayTrieModel>;
+template class KENLM<lm::ngram::QuantTrieModel>;
+template class KENLM<lm::ngram::QuantArrayTrieModel>;
+
+
+FeatureFunction *ConstructKenLM(size_t startInd, const std::string &lineOrig)
+{
+  FactorType factorType = 0;
+  string filePath;
+  util::LoadMethod load_method = util::POPULATE_OR_READ;
+
+  util::TokenIter<util::SingleCharacter, true> argument(lineOrig, ' ');
+  ++argument; // KENLM
+
+  util::StringStream line;
+  line << "KENLM";
+
+  for (; argument; ++argument) {
+	const char *equals = std::find(argument->data(), argument->data() + argument->size(), '=');
+	UTIL_THROW_IF2(equals == argument->data() + argument->size(),
+				   "Expected = in KenLM argument " << *argument);
+	StringPiece name(argument->data(), equals - argument->data());
+	StringPiece value(equals + 1, argument->data() + argument->size() - equals - 1);
+	if (name == "factor") {
+	  factorType = boost::lexical_cast<FactorType>(value);
+	} else if (name == "order") {
+	  // Ignored
+	} else if (name == "path") {
+	  filePath.assign(value.data(), value.size());
+	} else if (name == "lazyken") {
+	  // deprecated: use load instead.
+	  load_method = boost::lexical_cast<bool>(value) ? util::LAZY : util::POPULATE_OR_READ;
+	} else if (name == "load") {
+	  if (value == "lazy") {
+		load_method = util::LAZY;
+	  } else if (value == "populate_or_lazy") {
+		load_method = util::POPULATE_OR_LAZY;
+	  } else if (value == "populate_or_read" || value == "populate") {
+		load_method = util::POPULATE_OR_READ;
+	  } else if (value == "read") {
+		load_method = util::READ;
+	  } else if (value == "parallel_read") {
+		load_method = util::PARALLEL_READ;
+	  } else {
+		UTIL_THROW2("Unknown KenLM load method " << value);
+	  }
+	} else {
+	  // pass to base class to interpret
+	  line << " " << name << "=" << value;
+	}
+  }
+
+  return ConstructKenLM(startInd, line.str(), filePath, factorType, load_method);
+}
+
+FeatureFunction *ConstructKenLM(size_t startInd, const std::string &line, const std::string &file, FactorType factorType, util::LoadMethod load_method)
+{
+  lm::ngram::ModelType model_type;
+  if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
+    switch(model_type) {
+    case lm::ngram::PROBING:
+      return new KENLM<lm::ngram::ProbingModel>(startInd, line, file, factorType, load_method);
+    case lm::ngram::REST_PROBING:
+      return new KENLM<lm::ngram::RestProbingModel>(startInd, line, file, factorType, load_method);
+    case lm::ngram::TRIE:
+      return new KENLM<lm::ngram::TrieModel>(startInd, line, file, factorType, load_method);
+    case lm::ngram::QUANT_TRIE:
+      return new KENLM<lm::ngram::QuantTrieModel>(startInd, line, file, factorType, load_method);
+    case lm::ngram::ARRAY_TRIE:
+      return new KENLM<lm::ngram::ArrayTrieModel>(startInd, line, file, factorType, load_method);
+    case lm::ngram::QUANT_ARRAY_TRIE:
+      return new KENLM<lm::ngram::QuantArrayTrieModel>(startInd, line, file, factorType, load_method);
+    default:
+      UTIL_THROW2("Unrecognized kenlm model type " << model_type);
+    }
+  } else {
+    return new KENLM<lm::ngram::ProbingModel>(startInd, line, file, factorType, load_method);
   }
 }
 

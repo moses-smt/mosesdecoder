@@ -29,16 +29,14 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////
-
-/*
 class KenFactory : public FeatureFactory
 {
 public:
-  void Create(size_t startInd, const std::string &line) {
-    //ConstructKenLM(line);
+  FeatureFunction *Create(size_t startInd, const std::string &line) {
+    ConstructKenLM(startInd, line);
   }
 };
-*/
+
 ////////////////////////////////////////////////////////////////////
 FeatureRegistry::FeatureRegistry()
 {
@@ -51,7 +49,9 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(ProbingPT);
   MOSES_FNAME(UnknownWordPenalty);
 
-  MOSES_FNAME(KENLM);
+  //MOSES_FNAME2("KENLM", KENLM<lm::ngram::ProbingModel>);
+  Add("KENLM", new KenFactory());
+
   MOSES_FNAME(LanguageModel);
 
   MOSES_FNAME(Distortion);
