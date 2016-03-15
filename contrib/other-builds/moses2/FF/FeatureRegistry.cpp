@@ -84,9 +84,7 @@ FeatureFunction *FeatureRegistry::Construct(size_t startInd, const std::string &
 	  abort();
   }
   FeatureFactory *fact = i->second.get();
-  cerr << "fact=" << fact << endl;
   FeatureFunction *ff = fact->Create(startInd, line);
-  cerr << "ff=" << ff << endl;
   return ff;
 }
 

@@ -35,7 +35,7 @@ FeatureFunctions::FeatureFunctions(System &system)
 :m_system(system)
 ,m_ffStartInd(0)
 {
-	m_registry.PrintFF();
+	//m_registry.PrintFF();
 }
 
 FeatureFunctions::~FeatureFunctions() {
@@ -78,7 +78,6 @@ void FeatureFunctions::Create()
   BOOST_FOREACH(const std::string &line, *ffParams) {
 	  cerr << "line=" << line << endl;
 	  FeatureFunction *ff = Create(line);
-	  cerr << "ff=" << ff->GetName() << endl;
 
 	  m_featureFunctions.push_back(ff);
 
