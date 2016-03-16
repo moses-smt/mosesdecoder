@@ -18,6 +18,7 @@ class Stack;
 class Hypothesis;
 class Bitmap;
 class Range;
+class TrellisPaths;
 
 class Search {
 public:
@@ -26,6 +27,8 @@ public:
 
 	virtual void Decode() = 0;
 	virtual const Hypothesis *GetBestHypothesis() const = 0;
+
+	virtual void AddInitialTrellisPaths(TrellisPaths &paths) const;
 
 protected:
 	Manager &mgr;

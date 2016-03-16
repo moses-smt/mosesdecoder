@@ -10,6 +10,8 @@
 #include "Manager.h"
 #include "TargetPhraseImpl.h"
 #include "InputPath.h"
+#include "TrellisPaths.h"
+
 #include "Normal/Search.h"
 #include "CubePruningMiniStack/Search.h"
 /*
@@ -97,6 +99,10 @@ void Manager::Decode()
 	Init();
 	m_search->Decode();
 	OutputBest();
+
+	if (system.nbestSize) {
+		OutputNBest();
+	}
 }
 
 void Manager::CalcFutureScore()
@@ -178,6 +184,14 @@ void Manager::OutputBest() const
 
 	system.bestCollector.Write(m_input->GetTranslationId(), out.str());
 	//cerr << endl;
+}
+
+void Manager::OutputNBest()
+{
+	arcLists.Sort();
+
+	TrellisPaths paths;
+
 
 
 }

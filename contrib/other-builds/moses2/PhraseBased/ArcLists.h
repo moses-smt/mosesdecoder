@@ -23,6 +23,7 @@ public:
 	virtual ~ArcLists();
 
 	void AddArc(bool added, const HypothesisBase *currHypo,const HypothesisBase *otherHypo);
+	void Sort();
 
 protected:
 	typedef boost::unordered_map<const HypothesisBase*, ArcList*> Coll;

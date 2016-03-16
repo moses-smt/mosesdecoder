@@ -38,7 +38,9 @@ public:
     FeatureFunctions featureFunctions;
     Weights weights;
     std::vector<const PhraseTable*> mappings;
+
     mutable OutputCollector bestCollector;
+    mutable OutputCollector nbestCollector;
 
     // moses.ini params
     size_t stackSize;

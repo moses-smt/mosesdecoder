@@ -5,9 +5,11 @@
  *      Author: hieu
  */
 #include <iostream>
+#include <algorithm>
 #include <boost/foreach.hpp>
 #include "ArcLists.h"
 #include "util/exception.hh"
+#include "../HypothesisBase.h"
 
 using namespace std;
 
@@ -69,6 +71,15 @@ ArcList *ArcLists::GetAndDetachArcList(const HypothesisBase *hypo)
 	m_coll.erase(iter);
 
 	return arcList;
+}
+
+void ArcLists::Sort()
+{
+  BOOST_FOREACH(Coll::value_type &collPair, m_coll) {
+	  ArcList &list = *collPair.second;
+	  std::sort(list.begin(), list.end(), HypothesisFutureScoreOrderer() );
+
+  }
 }
 
 }

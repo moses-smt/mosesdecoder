@@ -68,6 +68,7 @@ protected:
 	void Init();
 	void CalcFutureScore();
     void OutputBest() const;
+    void OutputNBest();
 
 };
 
