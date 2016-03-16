@@ -21,6 +21,7 @@ namespace Moses2
 
 class Manager;
 class HypothesisBase;
+class ArcLists;
 
 namespace NSCubePruningMiniStack
 {
@@ -50,7 +51,7 @@ public:
 	const Coll &GetColl() const
 	{ return m_coll; }
 
-	void Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle);
+	void Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle, ArcLists &arcLists);
 
 	Moses2::HypothesisColl &GetMiniStack(const HypoCoverage &key);
 

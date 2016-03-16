@@ -26,7 +26,7 @@ ArcLists::~ArcLists() {
   }
 }
 
-void ArcLists::AddArc(bool added, const Hypothesis *currHypo,const Hypothesis *otherHypo)
+void ArcLists::AddArc(bool added, const HypothesisBase *currHypo,const HypothesisBase *otherHypo)
 {
 	//cerr << added << " " << currHypo << " " << otherHypo << endl;
 	if (added) {
@@ -52,7 +52,7 @@ void ArcLists::AddArc(bool added, const Hypothesis *currHypo,const Hypothesis *o
 	}
 }
 
-ArcList *ArcLists::GetArcList(const Hypothesis *hypo)
+ArcList *ArcLists::GetArcList(const HypothesisBase *hypo)
 {
 	Coll::iterator iter = m_coll.find(hypo);
 	UTIL_THROW_IF2(iter == m_coll.end(), "Can't find arc list");
@@ -60,7 +60,7 @@ ArcList *ArcLists::GetArcList(const Hypothesis *hypo)
 	return arcList;
 }
 
-ArcList *ArcLists::GetAndDetachArcList(const Hypothesis *hypo)
+ArcList *ArcLists::GetAndDetachArcList(const HypothesisBase *hypo)
 {
 	Coll::iterator iter = m_coll.find(hypo);
 	UTIL_THROW_IF2(iter == m_coll.end(), "Can't find arc list");

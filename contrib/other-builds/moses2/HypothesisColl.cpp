@@ -27,18 +27,18 @@ StackAdd HypothesisColl::Add(const HypothesisBase *hypo)
 	return StackAdd(true, NULL);
   }
   else {
-	  const HypothesisBase *hypoExisting = *addRet.first;
+	  HypothesisBase *hypoExisting = const_cast<HypothesisBase*>(*addRet.first);
 	  if (hypo->GetFutureScore() > hypoExisting->GetFutureScore()) {
 		  // incoming hypo is better than the one we have
 		  const HypothesisBase *const &hypoExisting1 = *addRet.first;
 		  const HypothesisBase *&hypoExisting2 = const_cast<const HypothesisBase *&>(hypoExisting1);
 		  hypoExisting2 = hypo;
 
-		  return StackAdd(true, const_cast<HypothesisBase*>(hypoExisting));
+		  return StackAdd(true, hypoExisting);
 	  }
 	  else {
 		  // already storing the best hypo. discard incoming hypo
-		  return StackAdd(false, const_cast<HypothesisBase*>(hypo));
+		  return StackAdd(false, hypoExisting);
 	  }
   }
 

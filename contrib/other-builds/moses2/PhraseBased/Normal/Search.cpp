@@ -43,7 +43,7 @@ void SearchNormal::Decode()
 	initHypo->Init(mgr, mgr.GetInputPaths().GetBlank(), mgr.GetInitPhrase(), initBitmap);
 	initHypo->EmptyHypothesisState(mgr.GetInput());
 
-	m_stacks.Add(initHypo, mgr.GetHypoRecycle());
+	m_stacks.Add(initHypo, mgr.GetHypoRecycle(), mgr.arcLists);
 
 	for (size_t stackInd = 0; stackInd < m_stacks.GetSize(); ++stackInd) {
 		Decode(stackInd);
@@ -123,7 +123,7 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 	newHypo->Init(mgr, hypo, path, tp, newBitmap, estimatedScore);
 	newHypo->EvaluateWhenApplied();
 
-	m_stacks.Add(newHypo, mgr.GetHypoRecycle());
+	m_stacks.Add(newHypo, mgr.GetHypoRecycle(), mgr.arcLists);
 
 	//m_arcLists.AddArc(stackAdded.added, newHypo, stackAdded.other);
 	//stack.Prune(mgr.GetHypoRecycle(), mgr.system.stackSize, mgr.system.stackSize * 2);

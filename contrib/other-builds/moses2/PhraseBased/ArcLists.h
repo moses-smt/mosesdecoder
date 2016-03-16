@@ -13,23 +13,23 @@
 namespace Moses2
 {
 
-class Hypothesis;
+class HypothesisBase;
 
-typedef std::vector<const Hypothesis*> ArcList;
+typedef std::vector<const HypothesisBase*> ArcList;
 
 class ArcLists {
 public:
 	ArcLists();
 	virtual ~ArcLists();
 
-	void AddArc(bool added, const Hypothesis *currHypo,const Hypothesis *otherHypo);
+	void AddArc(bool added, const HypothesisBase *currHypo,const HypothesisBase *otherHypo);
 
 protected:
-	typedef boost::unordered_map<const Hypothesis*, ArcList*> Coll;
+	typedef boost::unordered_map<const HypothesisBase*, ArcList*> Coll;
 	Coll m_coll;
 
-	ArcList *GetArcList(const Hypothesis *hypo);
-	ArcList *GetAndDetachArcList(const Hypothesis *hypo);
+	ArcList *GetArcList(const HypothesisBase *hypo);
+	ArcList *GetAndDetachArcList(const HypothesisBase *hypo);
 
 };
 

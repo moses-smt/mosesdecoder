@@ -57,7 +57,7 @@ void Search::Decode()
 	initHypo->Init(mgr, mgr.GetInputPaths().GetBlank(), mgr.GetInitPhrase(), initBitmap);
 	initHypo->EmptyHypothesisState(mgr.GetInput());
 
-	m_stack.Add(initHypo, mgr.GetHypoRecycle());
+	m_stack.Add(initHypo, mgr.GetHypoRecycle(), mgr.arcLists);
 	PostDecode(0);
 
 	for (size_t stackInd = 1; stackInd < mgr.GetInput().GetSize() + 1; ++stackInd) {
@@ -127,7 +127,7 @@ void Search::Decode(size_t stackInd)
 		}
 
 		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
-		m_stack.Add(hypo, hypoRecycler);
+		m_stack.Add(hypo, hypoRecycler, mgr.arcLists);
 
 		edge->CreateNext(mgr, item, m_queue, m_seenPositions, m_queueItemRecycler);
 
@@ -144,7 +144,7 @@ void Search::Decode(size_t stackInd)
 				// add hypo to stack
 				Hypothesis *hypo = item->hypo;
 				//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
-				m_stack.Add(hypo, mgr.GetHypoRecycle());
+				m_stack.Add(hypo, hypoRecycler, mgr.arcLists);
 			}
 		}
 	}

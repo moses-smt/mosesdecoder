@@ -40,14 +40,14 @@ Stack::~Stack() {
 	}
 }
 
-void Stack::Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle)
+void Stack::Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle, ArcLists &arcLists)
 {
   HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
   StackAdd added = GetMiniStack(key).Add(hypo);
 
   size_t nbestSize = m_mgr.system.nbestSize;
   if (nbestSize) {
-
+	  arcLists.AddArc(added.added, hypo, added.other);
   }
   else {
 	if (!added.added) {

@@ -50,7 +50,7 @@ std::ostream& operator<<(std::ostream &out, const Stacks &obj)
   return out;
 }
 
-void Stacks::Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle)
+void Stacks::Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle, ArcLists &arcLists)
 {
   size_t numWordsCovered = hypo->GetBitmap().GetNumWordsCovered();
   //cerr << "numWordsCovered=" << numWordsCovered << endl;
@@ -59,7 +59,7 @@ void Stacks::Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle)
 
   size_t nbestSize = m_mgr.system.nbestSize;
   if (nbestSize) {
-
+	  arcLists.AddArc(added.added, hypo, added.other);
   }
   else {
 	if (!added.added) {

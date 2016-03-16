@@ -14,6 +14,7 @@
 namespace Moses2
 {
 class Manager;
+class ArcLists;
 
 class Stacks {
 	  friend std::ostream& operator<<(std::ostream &, const Stacks &);
@@ -37,7 +38,7 @@ public:
     	m_stacks[ind] = NULL;
     }
 
-	void Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle);
+	void Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle, ArcLists &arcLists);
 
 protected:
 	const Manager &m_mgr;
