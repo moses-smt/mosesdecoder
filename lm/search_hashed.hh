@@ -111,6 +111,10 @@ template <class Value> class HashedSearch {
 
     MiddlePointer LookupMiddle(unsigned char order_minus_2, WordIndex word, Node &node, bool &independent_left, uint64_t &extend_pointer) const {
       node = CombineWordHash(node, word);
+      return LookupMiddleFromNode(order_minus_2, node, independent_left, extend_pointer);
+    }
+    
+    MiddlePointer LookupMiddleFromNode(unsigned char order_minus_2, Node node, bool &independent_left, uint64_t &extend_pointer) const {
       typename Middle::ConstIterator found;
       if (!middle_[order_minus_2].Find(node, found)) {
         independent_left = true;
@@ -120,18 +124,31 @@ template <class Value> class HashedSearch {
       MiddlePointer ret(found->value);
       independent_left = ret.IndependentLeft();
       return ret;
+
     }
 
     void PrefetchMiddle(unsigned char order_minus_2, WordIndex word, Node &node) const {
-      __builtin_prefetch(middle_[order_minus_2].Ideal(CombineWordHash(node, word)), 0, 0); // TODO: hash does not need to be recomputed
+      node = CombineWordHash(node, word);
+      __builtin_prefetch(middle_[order_minus_2].Ideal(node), 0, 0); 
     }
 
     LongestPointer LookupLongest(WordIndex word, const Node &node) const {
       // Sign bit is always on because longest n-grams do not extend left.
+      return LookupLongestFromNode(CombineWordHash(node, word));
+    }
+
+    LongestPointer LookupLongestFromNode(const Node &node) const {
       typename Longest::ConstIterator found;
-      if (!longest_.Find(CombineWordHash(node, word), found)) return LongestPointer();
+      if (!longest_.Find(node, found)) return LongestPointer();
       return LongestPointer(found->value.prob);
     }
+
+
+    void PrefetchLongest(WordIndex word, Node &node) const {
+      node = CombineWordHash(node, word);
+      __builtin_prefetch(longest_.Ideal(node), 0, 0); 
+    }
+
 
     // Generate a node without necessarily checking that it actually exists.
     // Optionally return false if it's know to not exist.
