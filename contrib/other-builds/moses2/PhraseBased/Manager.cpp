@@ -195,17 +195,20 @@ void Manager::OutputNBest()
 	m_search->AddInitialTrellisPaths(contenders);
 	cerr << "END AddInitialTrellisPaths" << endl;
 
+	long transId = m_input->GetTranslationId();
+
 	stringstream out;
 	size_t bestInd = 0;
 	while (bestInd < system.nbestSize && contenders.GetSize()) {
 		cerr << "bestInd=" << bestInd << endl;
 	    TrellisPath *path = contenders.pop();
 
+	    out << transId << " ||| ";
 		path->OutputToStream(out, system);
 		out << "\n";
 		++bestInd;
 	}
-	system.GetNBestCollector().Write(m_input->GetTranslationId(), out.str());
+	system.GetNBestCollector().Write(transId, out.str());
 
 }
 

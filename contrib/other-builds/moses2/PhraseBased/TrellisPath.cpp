@@ -62,7 +62,8 @@ void TrellisPath::OutputToStream(std::ostream &out, const System &system) const
 		const TrellishNode *node = nodes[i];
 		const Hypothesis *hypo = static_cast<const Hypothesis*>(node->arcList[node->ind]);
 		//cerr << "hypo=" << hypo << " " << *hypo << endl;
-		out << hypo->GetTargetPhrase();
+		hypo->GetTargetPhrase().OutputToStream(out);
+		out << " ";
 	}
 	out << "||| ";
 

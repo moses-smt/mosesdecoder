@@ -76,6 +76,18 @@ std::ostream& operator<<(std::ostream &out, const Phrase &obj)
 	return out;
 }
 
+void Phrase::OutputToStream(std::ostream &out) const
+{
+	size_t size = GetSize();
+	if (size) {
+		out << (*this)[0];
+		for (size_t i = 1; i < size; ++i) {
+			const Word &word = (*this)[i];
+			out << " " << word;
+		}
+	}
+}
+
 ////////////////////////////////////////////////////////////////////////
 TargetPhrase::TargetPhrase(MemPool &pool, const PhraseTable &pt, const System &system)
 :pt(pt)
