@@ -22,6 +22,23 @@ public:
   TrellisPaths();
   virtual ~TrellisPaths();
 
+  size_t GetSize() const {
+    return m_collection.size();
+  }
+
+  //! add a new entry into collection
+  void Add(TrellisPath *trellisPath) {
+    m_collection.insert(trellisPath);
+  }
+
+  TrellisPath *pop() {
+    TrellisPath *top = *m_collection.begin();
+
+    // Detach
+    m_collection.erase(m_collection.begin());
+    return top;
+  }
+
 protected:
   typedef std::multiset<TrellisPath*, CompareTrellisPathCollection> CollectionType;
   CollectionType m_collection;

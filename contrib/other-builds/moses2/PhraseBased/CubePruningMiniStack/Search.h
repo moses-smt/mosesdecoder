@@ -32,6 +32,8 @@ public:
 	virtual void Decode();
 	const Hypothesis *GetBestHypothesis() const;
 
+	void AddInitialTrellisPaths(TrellisPaths &paths) const;
+
 protected:
 	Stack m_stack;
 

@@ -247,6 +247,11 @@ std::ostream& operator<<(std::ostream &out, const Scores &obj)
 	return out;
 }
 
+void Scores::OutputToStream(std::ostream &out, const System &system) const
+{
+	Debug(out, system);
+}
+
 // static functions to work out estimated scores
 SCORE Scores::CalcWeightedScore(const System &system,
 		const FeatureFunction &featureFunction,

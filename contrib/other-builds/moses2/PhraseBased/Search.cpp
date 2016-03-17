@@ -105,11 +105,6 @@ bool Search::CanExtend(const Bitmap &hypoBitmap, size_t hypoRangeEndPos, const R
     return true;
 }
 
-void Search::AddInitialTrellisPaths(TrellisPaths &paths) const
-{
-
-}
-
 }
 
 

@@ -11,14 +11,19 @@
 
 namespace Moses2 {
 
+class Scores;
+class Hypothesis;
+class System;
 
 class TrellishNode
 {
+  friend std::ostream& operator<<(std::ostream &, const TrellishNode &);
+
 public:
-	ArcList &arcList;
+	const ArcList &arcList;
 	size_t ind;
 
-	TrellishNode(ArcList &varcList, size_t vind)
+	TrellishNode(const ArcList &varcList, size_t vind)
 	:arcList(varcList)
 	,ind(vind)
 	{}
@@ -29,10 +34,19 @@ public:
 	std::vector<const TrellishNode *> nodes;
 
 	TrellisPath();
+	TrellisPath(const Hypothesis *hypo, const ArcLists &arcLists);
 	virtual ~TrellisPath();
 
+	const Scores &GetScores() const
+	{ return *m_scores; }
 	SCORE GetFutureScore() const;
+
+	void OutputToStream(std::ostream &out, const System &system) const;
+
 protected:
+	const Scores *m_scores;
+
+	void AddNodes(const Hypothesis *hypo, const ArcLists &arcLists);
 };
 
 } /* namespace Moses2 */

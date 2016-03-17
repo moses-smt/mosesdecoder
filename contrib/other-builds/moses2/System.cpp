@@ -54,7 +54,7 @@ System::System(const Parameter &paramsArg)
     section = params.GetParam("n-best-list");
     if (section) {
       if (section->size() >= 2) {
-        outputFilePath = section->at(0);
+    	nBestPath = section->at(0);
         nbestSize = Scan<size_t>( section->at(1) );
         onlyDistinct = (section->size()>2 && section->at(2)=="distinct");
       } else {
@@ -62,6 +62,11 @@ System::System(const Parameter &paramsArg)
       }
     } else {
     	nbestSize = 0;
+    }
+
+    // output collectors
+    if (nbestSize) {
+    	m_nbestCollector = new OutputCollector(nBestPath);
     }
 
 	featureFunctions.Create();

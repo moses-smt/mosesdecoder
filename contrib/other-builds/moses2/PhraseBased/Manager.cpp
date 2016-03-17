@@ -190,9 +190,22 @@ void Manager::OutputNBest()
 {
 	arcLists.Sort();
 
-	TrellisPaths paths;
+	TrellisPaths contenders;
+	cerr << "START AddInitialTrellisPaths" << endl;
+	m_search->AddInitialTrellisPaths(contenders);
+	cerr << "END AddInitialTrellisPaths" << endl;
 
+	stringstream out;
+	size_t bestInd = 0;
+	while (bestInd < system.nbestSize && contenders.GetSize()) {
+		cerr << "bestInd=" << bestInd << endl;
+	    TrellisPath *path = contenders.pop();
 
+		path->OutputToStream(out, system);
+		out << "\n";
+		++bestInd;
+	}
+	system.GetNBestCollector().Write(m_input->GetTranslationId(), out.str());
 
 }
 

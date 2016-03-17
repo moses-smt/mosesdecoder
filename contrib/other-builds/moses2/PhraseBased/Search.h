@@ -28,7 +28,7 @@ public:
 	virtual void Decode() = 0;
 	virtual const Hypothesis *GetBestHypothesis() const = 0;
 
-	virtual void AddInitialTrellisPaths(TrellisPaths &paths) const;
+	virtual void AddInitialTrellisPaths(TrellisPaths &paths) const = 0;
 
 protected:
 	Manager &mgr;

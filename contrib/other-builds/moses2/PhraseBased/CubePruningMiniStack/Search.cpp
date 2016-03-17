@@ -9,6 +9,8 @@
 #include "Stack.h"
 #include "../Manager.h"
 #include "../Hypothesis.h"
+#include "../TrellisPath.h"
+#include "../TrellisPaths.h"
 #include "../../InputPathsBase.h"
 #include "../../InputPathBase.h"
 #include "../../System.h"
@@ -214,6 +216,20 @@ const Hypothesis *Search::GetBestHypothesis() const
 	}
 	return best;
 }
+
+void Search::AddInitialTrellisPaths(TrellisPaths &paths) const
+{
+  const Stack::Coll &coll = m_stack.GetColl();
+  BOOST_FOREACH(const Stack::Coll::value_type &val, coll) {
+	  const Moses2::HypothesisColl &hypos = *val.second;
+	  BOOST_FOREACH(const HypothesisBase *hypoBase, hypos) {
+		  const Hypothesis *hypo = static_cast<const Hypothesis*>(hypoBase);
+		  TrellisPath *path = new TrellisPath(hypo, mgr.arcLists);
+		  paths.Add(path);
+	  }
+  }
+}
+
 
 }
 

@@ -142,5 +142,11 @@ const Hypothesis *SearchNormal::GetBestHypothesis() const
 	return best;
 }
 
+void SearchNormal::AddInitialTrellisPaths(TrellisPaths &paths) const
+{
+	cerr << "Not yet implemented";
+	abort();
+}
+
 }
 

@@ -71,6 +71,8 @@ public:
 
   void Debug(std::ostream &out, const System &system) const;
 
+  void OutputToStream(std::ostream &out, const System &system) const;
+
   // static functions to work out estimated scores
   static SCORE CalcWeightedScore(const System &system,
   		const FeatureFunction &featureFunction,

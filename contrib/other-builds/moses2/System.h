@@ -40,7 +40,6 @@ public:
     std::vector<const PhraseTable*> mappings;
 
     mutable OutputCollector bestCollector;
-    mutable OutputCollector nbestCollector;
 
     // moses.ini params
     size_t stackSize;
@@ -53,7 +52,6 @@ public:
     size_t  cubePruningDiversity;
     bool cubePruningLazyScoring;
 
-    std::string outputFilePath;
     size_t nbestSize;
     bool onlyDistinct;
 
@@ -71,12 +69,19 @@ public:
 
 	Recycler<HypothesisBase*> &GetHypoRecycler() const;
 
+	OutputCollector &GetNBestCollector() const
+	{ return *m_nbestCollector; }
+
 protected:
   mutable FactorCollection m_vocab;
   mutable boost::thread_specific_ptr<MemPool> m_managerPool;
   mutable boost::thread_specific_ptr<MemPool> m_systemPool;
 
   mutable boost::thread_specific_ptr< Recycler<HypothesisBase*> > m_hypoRecycler;
+
+  mutable OutputCollector *m_nbestCollector;
+
+  std::string nBestPath;
 
   void LoadWeights();
   void LoadMappings();

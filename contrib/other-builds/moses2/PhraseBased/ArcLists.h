@@ -4,9 +4,7 @@
  *  Created on: 26 Oct 2015
  *      Author: hieu
  */
-
-#ifndef ARCLISTS_H_
-#define ARCLISTS_H_
+#pragma once
 #include <vector>
 #include <boost/unordered_map.hpp>
 
@@ -25,6 +23,8 @@ public:
 	void AddArc(bool added, const HypothesisBase *currHypo,const HypothesisBase *otherHypo);
 	void Sort();
 
+	const ArcList *GetArcList(const HypothesisBase *hypo) const;
+
 protected:
 	typedef boost::unordered_map<const HypothesisBase*, ArcList*> Coll;
 	Coll m_coll;
@@ -36,4 +36,3 @@ protected:
 
 }
 
-#endif /* ARCLISTS_H_ */
