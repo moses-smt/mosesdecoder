@@ -132,7 +132,7 @@ FFState* DistortionScoreProducer::EvaluateWhenApplied(
   ScoreComponentCollection* out) const
 {
   const DistortionState* prev = static_cast<const DistortionState*>(prev_state);
-  bool subordinateConjunction = prev->inSubordinateConjunction; 
+  bool subordinateConjunction = prev->inSubordinateConjunction;
 
   if (m_useSparse) {
     int jumpFromPos = prev->range.GetEndPos()+1;
