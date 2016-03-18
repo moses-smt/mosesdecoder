@@ -89,9 +89,14 @@ template <class Value> class NGramAutomaton {
     };
     typedef NGramTask Task;
 
+    struct Construct {
+      unsigned short order;
+      detail::HashedSearch<Value> *search;
+    };
+
     enum State {DONE, PREFETCH_UNIGRAM, GET_UNIGRAM, GET_MIDDLE, GET_LONGEST};
 
-    NGramAutomaton(detail::HashedSearch<Value> &search, unsigned short order) : state_(0), search_(search), middle_(0), order_(order) {}
+    explicit NGramAutomaton(Construct construct) : state_(0), search_(*construct.search), middle_(0), order_(construct.order) {}
 
     Signal Poke() {
       switch(state_) {
