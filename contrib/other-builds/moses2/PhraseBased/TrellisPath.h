@@ -21,23 +21,23 @@ class TrellishNode
   friend std::ostream& operator<<(std::ostream &, const TrellishNode &);
 
 public:
-	const ArcList &arcList;
+	const ArcList *arcList;
 	size_t ind;
 
 	TrellishNode(const ArcList &varcList, size_t vind)
-	:arcList(varcList)
+	:arcList(&varcList)
 	,ind(vind)
 	{}
 };
 
 class TrellisPath {
 public:
-	std::vector<const TrellishNode *> nodes;
-	  int prevEdgeChanged;
-	  /**< the last node that was wiggled to create this path
+	std::vector<TrellishNode> nodes;
+	int prevEdgeChanged;
+
+	/**< the last node that was wiggled to create this path
 	     , or NOT_FOUND if this path is the best trans so consist of only hypos
 	  */
-
 	TrellisPath(const Hypothesis *hypo, const ArcLists &arcLists);
 
 	/** create path from another path, deviate at edgeIndex by using arc instead,

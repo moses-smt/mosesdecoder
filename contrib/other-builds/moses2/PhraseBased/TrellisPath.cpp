@@ -15,7 +15,7 @@ namespace Moses2 {
 
 std::ostream& operator<<(std::ostream &out, const TrellishNode &node)
 {
-	out << "arcList=" << node.arcList.size() << " " << node.ind;
+	out << "arcList=" << node.arcList->size() << " " << node.ind;
 	return out;
 }
 
@@ -49,7 +49,7 @@ void TrellisPath::AddNodes(const Hypothesis *hypo, const ArcLists &arcLists)
 		//cerr << *hypo << endl;
 		const ArcList *list = arcLists.GetArcList(hypo);
 		assert(list);
-		TrellishNode *node = new TrellishNode(*list, 0);
+		TrellishNode node(*list, 0);
 		nodes.push_back(node);
 
 		// add prev hypos
@@ -62,8 +62,8 @@ void TrellisPath::OutputToStream(std::ostream &out, const System &system) const
 {
 	//cerr << "path=" << this << " " << nodes.size() << endl;
 	for (int i = nodes.size() - 1; i >= 0; --i) {
-		const TrellishNode *node = nodes[i];
-		const Hypothesis *hypo = static_cast<const Hypothesis*>(node->arcList[node->ind]);
+		const TrellishNode &node = nodes[i];
+		const Hypothesis *hypo = static_cast<const Hypothesis*>((*node.arcList)[node.ind]);
 		//cerr << "hypo=" << hypo << " " << *hypo << endl;
 		hypo->GetTargetPhrase().OutputToStream(out);
 		out << " ";
@@ -78,9 +78,9 @@ void TrellisPath::CreateDeviantPaths(TrellisPaths &paths) const
   const size_t sizePath = nodes.size();
 
   for (size_t currEdge = prevEdgeChanged + 1 ; currEdge < sizePath ; currEdge++) {
-	const TrellishNode &node = *nodes[currEdge];
+	const TrellishNode &node = nodes[currEdge];
     assert(node.ind == 0);
-	const ArcList &arcList = node.arcList;
+	const ArcList &arcList = *node.arcList;
 
 	for (size_t i = 1; i < arcList.size(); ++i) {
 	      const Hypothesis *arcReplace = static_cast<const Hypothesis *>(arcList[i]);
