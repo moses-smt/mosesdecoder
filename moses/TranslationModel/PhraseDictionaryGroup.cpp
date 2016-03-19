@@ -30,17 +30,17 @@ namespace Moses
 {
 
 PhraseDictionaryGroup::PhraseDictionaryGroup(const string &line) :
-      PhraseDictionary(line, true),
-      m_numModels(0),
-      m_totalModelScores(0),
-      m_phraseCounts(false),
-      m_wordCounts(false),
-      m_modelBitmapCounts(false),
-      m_restrict(false),
-      m_haveDefaultScores(false),
-      m_defaultAverageOthers(false),
-      m_scoresPerModel(0),
-      m_haveMmsaptLrFunc(false)
+  PhraseDictionary(line, true),
+  m_numModels(0),
+  m_totalModelScores(0),
+  m_phraseCounts(false),
+  m_wordCounts(false),
+  m_modelBitmapCounts(false),
+  m_restrict(false),
+  m_haveDefaultScores(false),
+  m_defaultAverageOthers(false),
+  m_scoresPerModel(0),
+  m_haveMmsaptLrFunc(false)
 {
   ReadParameters();
 }
@@ -92,12 +92,12 @@ void PhraseDictionaryGroup::Load(AllOptions::ptr const& opts)
           m_scoresPerModel = nScores;
         } else if (m_defaultAverageOthers) {
           UTIL_THROW_IF2(nScores != m_scoresPerModel,
-              m_description << ": member models must have the same number of scores when using default-average-others");
+                         m_description << ": member models must have the same number of scores when using default-average-others");
         }
       }
     }
     UTIL_THROW_IF2(!pdFound,
-        m_description << ": could not find member phrase table " << pdName);
+                   m_description << ": could not find member phrase table " << pdName);
   }
   m_totalModelScores = numScoreComponents;
 
@@ -112,7 +112,7 @@ void PhraseDictionaryGroup::Load(AllOptions::ptr const& opts)
     numScoreComponents += (pow(2, m_numModels) - 1);
   }
   UTIL_THROW_IF2(numScoreComponents != m_numScoreComponents,
-      m_description << ": feature count mismatch: specify \"num-features=" << numScoreComponents << "\" and supply " << numScoreComponents << " weights");
+                 m_description << ": feature count mismatch: specify \"num-features=" << numScoreComponents << "\" and supply " << numScoreComponents << " weights");
 
 #ifdef PT_UG
   // Locate mmsapt lexical reordering functions if specified
@@ -128,7 +128,7 @@ void PhraseDictionaryGroup::Load(AllOptions::ptr const& opts)
   // Determine "zero" scores for features
   if (m_haveDefaultScores) {
     UTIL_THROW_IF2(m_defaultScores.size() != m_numScoreComponents,
-        m_description << ": number of specified default scores is unequal to number of member model scores");
+                   m_description << ": number of specified default scores is unequal to number of member model scores");
   } else {
     // Default is all 0 (as opposed to e.g. -99 or similar to approximate log(0)
     // or a smoothed "not in model" score)
@@ -137,8 +137,8 @@ void PhraseDictionaryGroup::Load(AllOptions::ptr const& opts)
 }
 
 void PhraseDictionaryGroup::GetTargetPhraseCollectionBatch(
-    const ttasksptr& ttask,
-    const InputPathList& inputPathQueue) const
+  const ttasksptr& ttask,
+  const InputPathList& inputPathQueue) const
 {
   // For each member phrase table, add translation options to input paths
   // (Run each phrase table lookup normally)
@@ -165,16 +165,16 @@ void PhraseDictionaryGroup::GetTargetPhraseCollectionBatch(
       // "Pop" target phrases for this source from current table
       const PhraseDictionary& pd = *m_memberPDs[i];
       TargetPhraseCollection::shared_ptr targets = inputPath->GetTargetPhrases(
-          pd);
+            pd);
       inputPath->SetTargetPhrases(pd, TargetPhraseCollection::shared_ptr(),
-      NULL);
+                                  NULL);
 
       // For each target phrase for this <source, table>
       if (targets != NULL) {
         BOOST_FOREACH(const TargetPhrase* targetPhrase, *targets) {
 
           vector<float> scores =
-              targetPhrase->GetScoreBreakdown().GetScoresForProducer(&pd);
+            targetPhrase->GetScoreBreakdown().GetScoresForProducer(&pd);
 
           // Phrase not in collection -> add if unrestricted or first model
           PhraseMap::iterator iter = phraseMap.find(targetPhrase);
@@ -195,7 +195,7 @@ void PhraseDictionaryGroup::GetTargetPhraseCollectionBatch(
             // Add phrase entry
             phraseList.push_back(phrase);
             phraseMap[targetPhrase] = PDGroupPhrase(phrase, m_defaultScores,
-                m_numModels);
+                                                    m_numModels);
           } else {
             // For existing phrases: merge extra scores (such as lr-func scores for mmsapt)
             TargetPhrase* phrase = iter->second.m_targetPhrase;
@@ -205,8 +205,8 @@ void PhraseDictionaryGroup::GetTargetPhraseCollectionBatch(
           }
           // Don't repeat lookup if phrase already found
           PDGroupPhrase& pdgPhrase =
-              (iter == phraseMap.end()) ?
-                  phraseMap.find(targetPhrase)->second : iter->second;
+            (iter == phraseMap.end()) ?
+            phraseMap.find(targetPhrase)->second : iter->second;
 
           // Copy scores from this model
           for (size_t j = 0; j < pd.GetNumScoreComponents(); ++j) {
@@ -346,23 +346,23 @@ void PhraseDictionaryGroup::GetTargetPhraseCollectionBatch(
 }
 
 ChartRuleLookupManager* PhraseDictionaryGroup::CreateRuleLookupManager(
-    const ChartParser &,
-    const ChartCellCollectionBase&,
-    size_t)
+  const ChartParser &,
+  const ChartCellCollectionBase&,
+  size_t)
 {
   UTIL_THROW(util::Exception, "Phrase table used in chart decoder");
 }
 
 // copied from PhraseDictionaryCompact; free memory allocated to TargetPhraseCollection (and each TargetPhrase) at end of sentence
 void PhraseDictionaryGroup::CacheForCleanup(
-    TargetPhraseCollection::shared_ptr tpc)
+  TargetPhraseCollection::shared_ptr tpc)
 {
   PhraseCache &ref = GetPhraseCache();
   ref.push_back(tpc);
 }
 
 void PhraseDictionaryGroup::CleanUpAfterSentenceProcessing(
-    const InputType &source)
+  const InputType &source)
 {
   GetPhraseCache().clear();
   CleanUpComponentModels(source);
