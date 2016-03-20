@@ -55,6 +55,7 @@ LexicalReordering::LexicalReordering(size_t startInd, const std::string &line)
 :StatefulFeatureFunction(startInd, line)
 ,m_compactModel(NULL)
 ,m_coll(NULL)
+,m_blank(NULL)
 ,m_propertyInd(-1)
 {
 	ReadParameters();
@@ -65,6 +66,7 @@ LexicalReordering::~LexicalReordering()
 {
 	delete m_compactModel;
 	delete m_coll;
+	delete m_blank;
 }
 
 void LexicalReordering::Load(System &system)

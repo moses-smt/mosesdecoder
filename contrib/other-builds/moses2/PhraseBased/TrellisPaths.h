@@ -6,7 +6,8 @@
  */
 #pragma once
 
-#include <set>
+#include <vector>
+#include <queue>
 #include "TrellisPath.h"
 
 namespace Moses2 {
@@ -22,25 +23,23 @@ public:
   TrellisPaths();
   virtual ~TrellisPaths();
 
-  size_t GetSize() const {
-    return m_collection.size();
+  bool empty() const {
+    return m_collection.empty();
   }
 
   //! add a new entry into collection
-  void Add(TrellisPath *trellisPath) {
-    m_collection.insert(trellisPath);
-  }
+  void Add(TrellisPath *trellisPath);
 
-  TrellisPath *pop() {
-    TrellisPath *top = *m_collection.begin();
+  TrellisPath *Get() {
+    TrellisPath *top = m_collection.top();
 
     // Detach
-    m_collection.erase(m_collection.begin());
+    m_collection.pop();
     return top;
   }
 
 protected:
-  typedef std::multiset<TrellisPath*, CompareTrellisPathCollection> CollectionType;
+  typedef std::priority_queue<TrellisPath*, std::vector<TrellisPath*>, CompareTrellisPathCollection> CollectionType;
   CollectionType m_collection;
 };
 

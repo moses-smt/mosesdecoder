@@ -113,19 +113,19 @@ void TrellisPath::CreateDeviantPaths(TrellisPaths &paths,
 {
   const size_t sizePath = nodes.size();
 
-  cerr << "prevEdgeChanged=" << prevEdgeChanged << endl;
+  //cerr << "prevEdgeChanged=" << prevEdgeChanged << endl;
   for (size_t currEdge = prevEdgeChanged + 1 ; currEdge < sizePath ; currEdge++) {
 	TrellishNode newNode = nodes[currEdge];
     assert(newNode.ind == 0);
 	const ArcList &arcList = *newNode.arcList;
 
-    cerr << "arcList=" << arcList.size() << endl;
+    //cerr << "arcList=" << arcList.size() << endl;
 	for (size_t i = 1; i < arcList.size(); ++i) {
-		cerr << "i=" << i << endl;
+		//cerr << "i=" << i << endl;
 		newNode.ind = i;
 
 		TrellisPath *deviantPath = new TrellisPath(*this, currEdge, newNode, arcLists, pool, system);
-		cerr << "deviantPath=" << deviantPath << endl;
+		//cerr << "deviantPath=" << deviantPath << endl;
 		paths.Add(deviantPath);
 	}
   }

@@ -200,9 +200,9 @@ void Manager::OutputNBest()
 	// MAIN LOOP
 	stringstream out;
 	size_t bestInd = 0;
-	while (bestInd < system.nbestSize && contenders.GetSize()) {
+	while (bestInd < system.nbestSize && !contenders.empty()) {
 		//cerr << "bestInd=" << bestInd << endl;
-	    TrellisPath *path = contenders.pop();
+	    TrellisPath *path = contenders.Get();
 
 	    out << transId << " ||| ";
 		path->OutputToStream(out, system);
@@ -210,6 +210,8 @@ void Manager::OutputNBest()
 
 		// create next paths
 	    path->CreateDeviantPaths(contenders, arcLists, GetPool(), system);
+
+	    delete path;
 
 		++bestInd;
 	}

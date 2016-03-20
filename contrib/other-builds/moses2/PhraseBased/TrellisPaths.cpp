@@ -6,6 +6,7 @@
  */
 
 #include "TrellisPaths.h"
+#include "../legacy/Util2.h"
 
 namespace Moses2 {
 
@@ -15,7 +16,15 @@ TrellisPaths::TrellisPaths() {
 }
 
 TrellisPaths::~TrellisPaths() {
-	// TODO Auto-generated destructor stub
+	while (!empty()) {
+		TrellisPath *path = Get();
+		delete path;
+	}
+}
+
+void TrellisPaths::Add(TrellisPath *trellisPath)
+{
+  m_collection.push(trellisPath);
 }
 
 } /* namespace Moses2 */
