@@ -29,6 +29,9 @@ public:
 	:arcList(&varcList)
 	,ind(vind)
 	{}
+
+	const HypothesisBase *GetHypo() const
+	{ return (*arcList)[ind]; }
 };
 
 class TrellisPath {

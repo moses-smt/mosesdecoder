@@ -46,8 +46,7 @@ TrellisPath::TrellisPath(const TrellisPath &origPath,
   nodes.push_back(newNode);
 
   // rest of path comes from following best path backwards
-  const ArcList &arcList = *newNode.arcList;
-  const Hypothesis *arc = static_cast<const Hypothesis*>(arcList[newNode.ind]);
+  const Hypothesis *arc = static_cast<const Hypothesis*>(newNode.GetHypo());
 
   const Hypothesis *prevHypo = arc->GetPrevHypo();
   while (prevHypo != NULL) {
@@ -58,6 +57,9 @@ TrellisPath::TrellisPath(const TrellisPath &origPath,
 
     prevHypo = prevHypo->GetPrevHypo();
   }
+
+  const TrellisNode &origNode = origPath.nodes[edgeIndex];
+  const HypothesisBase *origHypo = origNode.GetHypo();
 
   CalcScores(origPath.GetScores(), pool, system);
 }
