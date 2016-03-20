@@ -17,15 +17,15 @@ class Hypothesis;
 class System;
 class TrellisPaths;
 
-class TrellishNode
+class TrellisNode
 {
-  friend std::ostream& operator<<(std::ostream &, const TrellishNode &);
+  friend std::ostream& operator<<(std::ostream &, const TrellisNode &);
 
 public:
 	const ArcList *arcList;
 	size_t ind;
 
-	TrellishNode(const ArcList &varcList, size_t vind)
+	TrellisNode(const ArcList &varcList, size_t vind)
 	:arcList(&varcList)
 	,ind(vind)
 	{}
@@ -33,7 +33,7 @@ public:
 
 class TrellisPath {
 public:
-	std::vector<TrellishNode> nodes;
+	std::vector<TrellisNode> nodes;
 	int prevEdgeChanged;
 
 	/**< the last node that was wiggled to create this path
@@ -46,7 +46,7 @@ public:
 	*/
 	TrellisPath(const TrellisPath &origPath,
 			size_t edgeIndex,
-			const TrellishNode &newNode,
+			const TrellisNode &newNode,
 			const ArcLists &arcLists,
 			MemPool &pool,
 			const System &system);

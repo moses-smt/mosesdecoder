@@ -14,7 +14,7 @@ namespace Moses2 {
 
 struct CompareTrellisPathCollection {
   bool operator()(const TrellisPath* pathA, const TrellisPath* pathB) const {
-    return (pathA->GetFutureScore() > pathB->GetFutureScore());
+    return (pathA->GetFutureScore() < pathB->GetFutureScore());
   }
 };
 

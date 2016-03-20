@@ -14,7 +14,7 @@ using namespace std;
 
 namespace Moses2 {
 
-std::ostream& operator<<(std::ostream &out, const TrellishNode &node)
+std::ostream& operator<<(std::ostream &out, const TrellisNode &node)
 {
 	out << "arcList=" << node.arcList->size() << " " << node.ind;
 	return out;
@@ -30,7 +30,7 @@ TrellisPath::TrellisPath(const Hypothesis *hypo, const ArcLists &arcLists)
 
 TrellisPath::TrellisPath(const TrellisPath &origPath,
 		size_t edgeIndex,
-		const TrellishNode &newNode,
+		const TrellisNode &newNode,
 		const ArcLists &arcLists,
 		MemPool &pool,
 		const System &system)
@@ -53,7 +53,7 @@ TrellisPath::TrellisPath(const TrellisPath &origPath,
   while (prevHypo != NULL) {
 	const ArcList *arcList = arcLists.GetArcList(prevHypo);
 	assert(arcList);
-	TrellishNode node(*arcList, 0);
+	TrellisNode node(*arcList, 0);
     nodes.push_back(node);
 
     prevHypo = prevHypo->GetPrevHypo();
@@ -71,28 +71,11 @@ SCORE TrellisPath::GetFutureScore() const
 	return m_scores->GetTotalScore();
 }
 
-void TrellisPath::AddNodes(const Hypothesis *hypo, const ArcLists &arcLists)
-{
-	if (hypo) {
-		// add this hypo
-		//cerr << "hypo=" << hypo << " " << flush;
-		//cerr << *hypo << endl;
-		const ArcList *list = arcLists.GetArcList(hypo);
-		assert(list);
-		TrellishNode node(*list, 0);
-		nodes.push_back(node);
-
-		// add prev hypos
-		const Hypothesis *prev = hypo->GetPrevHypo();
-		AddNodes(prev, arcLists);
-}
-}
-
 void TrellisPath::OutputToStream(std::ostream &out, const System &system) const
 {
 	//cerr << "path=" << this << " " << nodes.size() << endl;
 	for (int i = nodes.size() - 1; i >= 0; --i) {
-		const TrellishNode &node = nodes[i];
+		const TrellisNode &node = nodes[i];
 		const Hypothesis *hypo = static_cast<const Hypothesis*>((*node.arcList)[node.ind]);
 		//cerr << "hypo=" << hypo << " " << *hypo << endl;
 		hypo->GetTargetPhrase().OutputToStream(out);
@@ -115,7 +98,7 @@ void TrellisPath::CreateDeviantPaths(TrellisPaths &paths,
 
   //cerr << "prevEdgeChanged=" << prevEdgeChanged << endl;
   for (size_t currEdge = prevEdgeChanged + 1 ; currEdge < sizePath ; currEdge++) {
-	TrellishNode newNode = nodes[currEdge];
+	TrellisNode newNode = nodes[currEdge];
     assert(newNode.ind == 0);
 	const ArcList &arcList = *newNode.arcList;
 
@@ -139,6 +122,23 @@ void TrellisPath::CalcScores(const Scores &origScores, MemPool &pool, const Syst
 					system.featureFunctions.GetNumScores(),
 					origScores);
 	m_scores = scores;
+}
+
+void TrellisPath::AddNodes(const Hypothesis *hypo, const ArcLists &arcLists)
+{
+	if (hypo) {
+		// add this hypo
+		//cerr << "hypo=" << hypo << " " << flush;
+		//cerr << *hypo << endl;
+		const ArcList *list = arcLists.GetArcList(hypo);
+		assert(list);
+		TrellisNode node(*list, 0);
+		nodes.push_back(node);
+
+		// add prev hypos
+		const Hypothesis *prev = hypo->GetPrevHypo();
+		AddNodes(prev, arcLists);
+	}
 }
 
 } /* namespace Moses2 */
