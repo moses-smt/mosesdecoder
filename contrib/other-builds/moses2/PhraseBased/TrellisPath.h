@@ -61,6 +61,7 @@ public:
 	SCORE GetFutureScore() const;
 
 	void OutputToStream(std::ostream &out, const System &system) const;
+	std::string ToString() const;
 
   //! create a set of next best paths by wiggling 1 of the node at a time.
   void CreateDeviantPaths(TrellisPaths &paths,

@@ -190,6 +190,8 @@ void Manager::OutputNBest()
 {
 	arcLists.Sort();
 
+	set<string> distinctHypos;
+
 	TrellisPaths contenders;
 	//cerr << "START AddInitialTrellisPaths" << endl;
 	m_search->AddInitialTrellisPaths(contenders);

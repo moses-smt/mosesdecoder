@@ -5,6 +5,7 @@
  *      Author: hieu
  */
 #include <cassert>
+#include <sstream>
 #include "TrellisPath.h"
 #include "TrellisPaths.h"
 #include "Hypothesis.h"
@@ -80,20 +81,27 @@ SCORE TrellisPath::GetFutureScore() const
 
 void TrellisPath::OutputToStream(std::ostream &out, const System &system) const
 {
-	//cerr << "path=" << this << " " << nodes.size() << endl;
-	for (int i = nodes.size() - 1; i >= 0; --i) {
-		const TrellisNode &node = nodes[i];
-		const Hypothesis *hypo = static_cast<const Hypothesis*>((*node.arcList)[node.ind]);
-		//cerr << "hypo=" << hypo << " " << *hypo << endl;
-		hypo->GetTargetPhrase().OutputToStream(out);
-		out << " ";
-	}
+	out << ToString();
 	out << "||| ";
 
 	GetScores().OutputBreakdownToStream(out, system);
 	out << "||| ";
 
 	out << GetScores().GetTotalScore();
+}
+
+std::string TrellisPath::ToString() const
+{
+	//cerr << "path=" << this << " " << nodes.size() << endl;
+	std::stringstream out;
+	for (int i = nodes.size() - 1; i >= 0; --i) {
+		const TrellisNode &node = nodes[i];
+		const Hypothesis *hypo = static_cast<const Hypothesis*>(node.GetHypo());
+		//cerr << "hypo=" << hypo << " " << *hypo << endl;
+		hypo->GetTargetPhrase().OutputToStream(out);
+		out << " ";
+	}
+	return out.str();
 }
 
 void TrellisPath::CreateDeviantPaths(TrellisPaths &paths,
