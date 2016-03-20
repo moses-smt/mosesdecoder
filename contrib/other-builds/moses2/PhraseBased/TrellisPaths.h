@@ -42,7 +42,6 @@ public:
 protected:
   typedef std::multiset<TrellisPath*, CompareTrellisPathCollection> CollectionType;
   CollectionType m_collection;
-
 };
 
 } /* namespace Moses2 */

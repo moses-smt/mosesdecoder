@@ -209,7 +209,7 @@ void Manager::OutputNBest()
 		out << "\n";
 
 		// create next paths
-	    path->CreateDeviantPaths(contenders);
+	    path->CreateDeviantPaths(contenders, arcLists, GetPool(), system);
 
 		++bestInd;
 	}
