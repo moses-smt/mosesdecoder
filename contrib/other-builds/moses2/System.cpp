@@ -78,7 +78,9 @@ System::System(const Parameter &paramsArg)
 	cerr << "END LoadMappings()" << endl;
 }
 
-System::~System() {
+System::~System()
+{
+	delete m_nbestCollector;
 }
 
 void System::LoadWeights()
