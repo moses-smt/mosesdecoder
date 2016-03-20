@@ -56,7 +56,7 @@ System::System(const Parameter &paramsArg)
       if (section->size() >= 2) {
     	nBestPath = section->at(0);
         nbestSize = Scan<size_t>( section->at(1) );
-        onlyDistinct = (section->size()>2 && section->at(2)=="distinct");
+        distinctNBest = (section->size()>2 && section->at(2)=="distinct");
       } else {
         throw "wrong format for switch -n-best-list file size [disinct]";
       }

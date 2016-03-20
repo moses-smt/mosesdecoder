@@ -53,7 +53,7 @@ public:
     bool cubePruningLazyScoring;
 
     size_t nbestSize;
-    bool onlyDistinct;
+    bool distinctNBest;
 
     bool outputHypoScore;
     int reportSegmentation;

@@ -206,9 +206,22 @@ void Manager::OutputNBest()
 		//cerr << "bestInd=" << bestInd << endl;
 	    TrellisPath *path = contenders.Get();
 
-	    out << transId << " ||| ";
-		path->OutputToStream(out, system);
-		out << "\n";
+	    bool ok = false;
+	    if (system.distinctNBest) {
+	    	string tgtPhrase = path->ToString();
+	    	if (distinctHypos.insert(tgtPhrase).second) {
+	    	      ok = true;
+	    	}
+	    }
+	    else {
+	    	ok = true;
+	    }
+
+	    if (ok) {
+			out << transId << " ||| ";
+			path->OutputToStream(out, system);
+			out << "\n";
+	    }
 
 		// create next paths
 	    path->CreateDeviantPaths(contenders, arcLists, GetPool(), system);

@@ -28,6 +28,7 @@ class Phrase
 {
 	  friend std::ostream& operator<<(std::ostream &, const Phrase &);
 public:
+  virtual ~Phrase() {}
   virtual const Word& operator[](size_t pos) const = 0;
   virtual size_t GetSize() const = 0;
   virtual size_t hash() const;
