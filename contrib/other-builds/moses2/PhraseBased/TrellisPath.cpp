@@ -100,7 +100,10 @@ void TrellisPath::OutputToStream(std::ostream &out, const System &system) const
 	}
 	out << "||| ";
 
-	GetScores().OutputToStream(out, system);
+	GetScores().OutputBreakdownToStream(out, system);
+	out << "||| ";
+
+	out << GetScores().GetTotalScore();
 }
 
 void TrellisPath::CreateDeviantPaths(TrellisPaths &paths,
@@ -130,7 +133,11 @@ void TrellisPath::CreateDeviantPaths(TrellisPaths &paths,
 
 void TrellisPath::CalcScores(const Scores &origScores, MemPool &pool, const System &system)
 {
-	Scores *scores = new (pool.Allocate<Scores>()) Scores(system, pool, system.featureFunctions.GetNumScores());
+	Scores *scores = new (pool.Allocate<Scores>())
+			Scores(system,
+					pool,
+					system.featureFunctions.GetNumScores(),
+					origScores);
 	m_scores = scores;
 }
 

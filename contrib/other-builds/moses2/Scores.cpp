@@ -247,9 +247,15 @@ std::ostream& operator<<(std::ostream &out, const Scores &obj)
 	return out;
 }
 
-void Scores::OutputToStream(std::ostream &out, const System &system) const
+void Scores::OutputBreakdownToStream(std::ostream &out, const System &system) const
 {
-	Debug(out, system);
+  assert(system.nbestSize);
+  BOOST_FOREACH(const FeatureFunction *ff, system.featureFunctions.GetFeatureFunctions()) {
+	  out << ff->GetName() << "= ";
+	  for (size_t i = ff->GetStartInd(); i < (ff->GetStartInd() + ff->GetNumScores()); ++i) {
+		out << m_scores[i] << " ";
+	  }
+  }
 }
 
 // static functions to work out estimated scores
