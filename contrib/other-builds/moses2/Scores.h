@@ -61,6 +61,9 @@ public:
   void PlusEquals(const System &system,
 		  const Scores &scores);
 
+  void MinusEquals(const System &system,
+		  const Scores &scores);
+
   void Assign(const System &system,
 		  const FeatureFunction &featureFunction,
 		  const SCORE &score);

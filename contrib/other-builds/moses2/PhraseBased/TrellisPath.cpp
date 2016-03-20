@@ -60,8 +60,13 @@ TrellisPath::TrellisPath(const TrellisPath &origPath,
 
   const TrellisNode &origNode = origPath.nodes[edgeIndex];
   const HypothesisBase *origHypo = origNode.GetHypo();
+  const HypothesisBase *newHypo = newNode.GetHypo();
 
-  CalcScores(origPath.GetScores(), pool, system);
+  CalcScores(origPath.GetScores(),
+		  origHypo->GetScores(),
+		  newHypo->GetScores(),
+		  pool,
+		  system);
 }
 
 TrellisPath::~TrellisPath() {
@@ -116,13 +121,20 @@ void TrellisPath::CreateDeviantPaths(TrellisPaths &paths,
   }
 }
 
-void TrellisPath::CalcScores(const Scores &origScores, MemPool &pool, const System &system)
+void TrellisPath::CalcScores(const Scores &origScores,
+		  const Scores &origHypoScores,
+		  const Scores &newHypoScores,
+		  MemPool &pool,
+		  const System &system)
 {
 	Scores *scores = new (pool.Allocate<Scores>())
 			Scores(system,
 					pool,
 					system.featureFunctions.GetNumScores(),
 					origScores);
+	scores->PlusEquals(system, newHypoScores);
+	scores->MinusEquals(system, origHypoScores);
+
 	m_scores = scores;
 }
 

@@ -72,7 +72,11 @@ protected:
   const Scores *m_scores;
 
   void AddNodes(const Hypothesis *hypo, const ArcLists &arcLists);
-  void CalcScores(const Scores &origScores, MemPool &pool, const System &system);
+  void CalcScores(const Scores &origScores,
+		  const Scores &origHypoScores,
+		  const Scores &newHypoScores,
+		  MemPool &pool,
+		  const System &system);
 };
 
 } /* namespace Moses2 */

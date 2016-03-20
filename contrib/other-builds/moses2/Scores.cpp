@@ -163,7 +163,17 @@ void Scores::PlusEquals(const System &system, const Scores &other)
 		}
 	}
 	m_total += other.m_total;
+}
 
+void Scores::MinusEquals(const System &system, const Scores &other)
+{
+	size_t numScores = system.featureFunctions.GetNumScores();
+	if (system.nbestSize) {
+		for (size_t i = 0; i < numScores; ++i) {
+			m_scores[i] -= other.m_scores[i];
+		}
+	}
+	m_total -= other.m_total;
 }
 
 void Scores::Assign(const System &system,
