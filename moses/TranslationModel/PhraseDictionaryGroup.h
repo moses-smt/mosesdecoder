@@ -39,20 +39,23 @@
 namespace Moses
 {
 
-struct PDGroupPhrase {
+struct PDGroupPhrase
+{
   TargetPhrase* m_targetPhrase;
   std::vector<float> m_scores;
   boost::dynamic_bitset<> m_seenBy;
 
   PDGroupPhrase() :
-    m_targetPhrase(NULL) {
+      m_targetPhrase(NULL)
+  {
   }
 
   PDGroupPhrase(
-    TargetPhrase* targetPhrase,
-    const std::vector<float>& scores,
-    const size_t nModels) :
-    m_targetPhrase(targetPhrase), m_scores(scores), m_seenBy(nModels) {
+      TargetPhrase* targetPhrase,
+      const std::vector<float>& scores,
+      const size_t nModels) :
+      m_targetPhrase(targetPhrase), m_scores(scores), m_seenBy(nModels)
+  {
   }
 };
 
@@ -73,12 +76,12 @@ public:
   void CleanUpComponentModels(const InputType& source);
   // functions below override the base class
   void GetTargetPhraseCollectionBatch(
-    const ttasksptr& ttask,
-    const InputPathList &inputPathQueue) const;
+      const ttasksptr& ttask,
+      const InputPathList &inputPathQueue) const;
   ChartRuleLookupManager* CreateRuleLookupManager(
-    const ChartParser&,
-    const ChartCellCollectionBase&,
-    std::size_t);
+      const ChartParser&,
+      const ChartCellCollectionBase&,
+      std::size_t);
   void SetParameter(const std::string& key, const std::string& value);
 
 protected:
@@ -107,7 +110,7 @@ protected:
   // pointers to pointers since member mmsapts may not load these until later
   std::vector<LexicalReordering**> m_mmsaptLrFuncs;
   typedef boost::unordered_map<const TargetPhrase*, PDGroupPhrase,
-          UnorderedComparer<Phrase>, UnorderedComparer<Phrase> > PhraseMap;
+      UnorderedComparer<Phrase>, UnorderedComparer<Phrase> > PhraseMap;
 
   typedef std::vector<TargetPhraseCollection::shared_ptr> PhraseCache;
 #ifdef WITH_THREADS
@@ -118,13 +121,14 @@ protected:
 #endif
   SentenceCache m_sentenceCache;
 
-  PhraseCache& GetPhraseCache() {
+  PhraseCache& GetPhraseCache()
+  {
 #ifdef WITH_THREADS
     {
       // first try read-only lock
       boost::shared_lock<boost::shared_mutex> read_lock(m_lock_cache);
       SentenceCache::iterator i = m_sentenceCache.find(
-        boost::this_thread::get_id());
+          boost::this_thread::get_id());
       if (i != m_sentenceCache.end())
         return i->second;
     }
