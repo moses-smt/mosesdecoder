@@ -39,24 +39,17 @@
 namespace Moses
 {
 
-struct PDGroupPhrase
-{
+struct PDGroupPhrase {
   TargetPhrase* m_targetPhrase;
   std::vector<float> m_scores;
   boost::dynamic_bitset<> m_seenBy;
 
-  PDGroupPhrase() :
-      m_targetPhrase(NULL)
-  {
-  }
+  PDGroupPhrase() : m_targetPhrase(NULL) { }
 
-  PDGroupPhrase(
-      TargetPhrase* targetPhrase,
-      const std::vector<float>& scores,
-      const size_t nModels) :
-      m_targetPhrase(targetPhrase), m_scores(scores), m_seenBy(nModels)
-  {
-  }
+  PDGroupPhrase(TargetPhrase* targetPhrase, const std::vector<float>& scores, const size_t nModels)
+    : m_targetPhrase(targetPhrase),
+      m_scores(scores),
+      m_seenBy(nModels) { }
 };
 
 /** Combines multiple phrase tables into a single interface.  Each member phrase
@@ -71,17 +64,24 @@ class PhraseDictionaryGroup: public PhraseDictionary
 public:
   PhraseDictionaryGroup(const std::string& line);
   void Load(AllOptions::ptr const& opts);
-  void CacheForCleanup(TargetPhraseCollection::shared_ptr tpc);
+  TargetPhraseCollection::shared_ptr
+  CreateTargetPhraseCollection(const ttasksptr& ttask,
+                               const Phrase& src) const;
+  std::vector<std::vector<float> > getWeights(size_t numWeights,
+      bool normalize) const;
+  void CacheForCleanup(TargetPhraseCollection::shared_ptr  tpc);
   void CleanUpAfterSentenceProcessing(const InputType& source);
   void CleanUpComponentModels(const InputType& source);
   // functions below override the base class
-  void GetTargetPhraseCollectionBatch(
-      const ttasksptr& ttask,
-      const InputPathList &inputPathQueue) const;
-  ChartRuleLookupManager* CreateRuleLookupManager(
-      const ChartParser&,
-      const ChartCellCollectionBase&,
-      std::size_t);
+  void GetTargetPhraseCollectionBatch(const ttasksptr& ttask,
+                                      const InputPathList &inputPathQueue) const;
+  TargetPhraseCollection::shared_ptr  GetTargetPhraseCollectionLEGACY(
+    const Phrase& src) const;
+  TargetPhraseCollection::shared_ptr  GetTargetPhraseCollectionLEGACY(
+    const ttasksptr& ttask, const Phrase& src) const;
+  void InitializeForInput(ttasksptr const& ttask);
+  ChartRuleLookupManager* CreateRuleLookupManager(const ChartParser&,
+      const ChartCellCollectionBase&, std::size_t);
   void SetParameter(const std::string& key, const std::string& value);
 
 protected:
@@ -109,10 +109,8 @@ protected:
   bool m_haveMmsaptLrFunc;
   // pointers to pointers since member mmsapts may not load these until later
   std::vector<LexicalReordering**> m_mmsaptLrFuncs;
-  typedef boost::unordered_map<const TargetPhrase*, PDGroupPhrase,
-      UnorderedComparer<Phrase>, UnorderedComparer<Phrase> > PhraseMap;
 
-  typedef std::vector<TargetPhraseCollection::shared_ptr> PhraseCache;
+  typedef std::vector<TargetPhraseCollection::shared_ptr > PhraseCache;
 #ifdef WITH_THREADS
   boost::shared_mutex m_lock_cache;
   typedef std::map<boost::thread::id, PhraseCache> SentenceCache;
@@ -121,14 +119,13 @@ protected:
 #endif
   SentenceCache m_sentenceCache;
 
-  PhraseCache& GetPhraseCache()
-  {
+  PhraseCache& GetPhraseCache() {
 #ifdef WITH_THREADS
     {
       // first try read-only lock
       boost::shared_lock<boost::shared_mutex> read_lock(m_lock_cache);
       SentenceCache::iterator i = m_sentenceCache.find(
-          boost::this_thread::get_id());
+        boost::this_thread::get_id());
       if (i != m_sentenceCache.end())
         return i->second;
     }
