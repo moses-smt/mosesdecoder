@@ -60,6 +60,7 @@ protected:
   FactorList m_FactorsF;
   FactorList m_FactorsE;
   FactorList m_FactorsC;
+  bool m_phraseBased;
 
   virtual void
   EvaluateAfterTablePruning(MemPool &pool,
@@ -102,8 +103,16 @@ protected:
 
   const Values *GetValues(const Phrase &source, const Phrase &target) const;
 
+  // phrase-based lex ro
+  void EvaluateWhenAppliedPB(const ManagerBase &mgr,
+	const Hypothesis &hypo,
+	const FFState &prevState,
+	Scores &scores,
+	FFState &state) const;
+
   size_t  GetOrientation(Range const& cur) const;
   size_t  GetOrientation(Range const& prev, Range const& cur) const;
+
 
 };
 

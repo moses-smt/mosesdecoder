@@ -54,9 +54,10 @@ struct LexicalReorderingState : public FFState
 LexicalReordering::LexicalReordering(size_t startInd, const std::string &line)
 :StatefulFeatureFunction(startInd, line)
 ,m_compactModel(NULL)
-,m_coll(NULL)
 ,m_blank(NULL)
 ,m_propertyInd(-1)
+,m_coll(NULL)
+,m_phraseBased(true)
 {
 	ReadParameters();
 	assert(m_numScores == 6);
@@ -112,7 +113,17 @@ void LexicalReordering::SetParameter(const std::string& key, const std::string& 
 	  m_path = value;
   }
   else if (key == "type") {
-	  // ignore. only do 1 type
+	  if (value == "msd-bidirectional-fe" ||
+		  value == "wbe-msd-bidirectional-fe-allff") {
+		  m_phraseBased = true;
+	  }
+	  else if (value == "hier-mslr-birectional-fe") {
+		  m_phraseBased = false;
+	  }
+	  else {
+		  cerr << "Unsupported lex ro type";
+		  abort();
+	  }
   }
   else if (key == "input-factor") {
 	  m_FactorsF = Tokenize<FactorType>(value);
@@ -208,6 +219,21 @@ void LexicalReordering::EvaluateWhenApplied(const ManagerBase &mgr,
   Scores &scores,
   FFState &state) const
 {
+	if (m_phraseBased) {
+		EvaluateWhenAppliedPB(mgr, hypo, prevState, scores, state);
+	}
+	else {
+		// hier
+
+	}
+}
+
+void LexicalReordering::EvaluateWhenAppliedPB(const ManagerBase &mgr,
+  const Hypothesis &hypo,
+  const FFState &prevState,
+  Scores &scores,
+  FFState &state) const
+{
   const LexicalReorderingState &prevStateCast = static_cast<const LexicalReorderingState&>(prevState);
   LexicalReorderingState &stateCast = static_cast<LexicalReorderingState&>(state);
 
@@ -259,6 +285,7 @@ const LexicalReordering::Values *LexicalReordering::GetValues(const Phrase &sour
 	}
 }
 
+// Phrase-based type //////////////////////
 size_t LexicalReordering::GetOrientation(Range const& cur) const
 {
   return (cur.GetStartPos() == 0) ? 0 : 2;
@@ -279,5 +306,8 @@ size_t LexicalReordering::GetOrientation(Range const& prev, Range const& cur) co
 	  return 2;
   }
 }
+
+// hiero type //////////////////////////////
+
 
 } /* namespace Moses2 */
