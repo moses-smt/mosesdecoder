@@ -58,7 +58,14 @@ public:
 
   void Write(const std::string& fname) const {
     std::ofstream out(fname.c_str());
+    // Little-known fact: ofstream tracks failures but does not, by default,
+    // report them.  You have to tell it to, or check for errors yourself.
+    out.exceptions(std::ifstream::failbit | std::ifstream::badbit);
     Write(out);
+    // Make sure the file is flushed, so that any errors are reported.  If we
+    // flush implicitly in the destructor, it won't be able to throw
+    // exceptions.
+    out.close();
   }
   void Write(std::ostream& out) const {
     for(int i=data.size()-1; i>=0; --i)
