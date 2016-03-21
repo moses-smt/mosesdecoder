@@ -56,11 +56,6 @@ void FeatureFunction::ParseLine(const std::string &line)
       m_args.push_back(args);
     }
   }
-
-  // name
-  if (m_name == "") {
-	  m_name = SPrint(nameStub) + SPrint(0);
-  }
 }
 
 void FeatureFunction::ReadParameters()

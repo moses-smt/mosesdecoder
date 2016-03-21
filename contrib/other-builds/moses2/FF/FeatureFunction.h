@@ -43,6 +43,8 @@ public:
 	{ return m_numScores; }
 	const std::string &GetName() const
 	{ return m_name; }
+	void SetName(const std::string &val)
+	{ m_name = val; }
 
 	virtual size_t HasPhraseTableInd() const
 	{ return false; }

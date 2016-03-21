@@ -104,11 +104,31 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 {
 	vector<string> toks = Tokenize(line);
 
-	FeatureFunction *ret = m_registry.Construct(m_ffStartInd, toks[0], line);
-	UTIL_THROW_IF2(ret == NULL, "Feature function not created");
-	m_ffStartInd += ret->GetNumScores();
+	FeatureFunction *ff = m_registry.Construct(m_ffStartInd, toks[0], line);
+	UTIL_THROW_IF2(ff == NULL, "Feature function not created");
 
-	return ret;
+	  // name
+	  if (ff->GetName() == "") {
+		  ff->SetName(GetDefaultName(toks[0]));
+	  }
+
+	m_ffStartInd += ff->GetNumScores();
+
+	return ff;
+}
+
+std::string FeatureFunctions::GetDefaultName(const std::string &stub)
+{
+	size_t ind;
+	boost::unordered_map<std::string, size_t>::iterator iter = m_defaultNames.find(stub);
+	if (iter == m_defaultNames.end()) {
+		m_defaultNames[stub] = 0;
+		ind = 0;
+	}
+	else {
+		ind = ++(iter->second);
+	}
+	return stub + SPrint(ind);
 }
 
 const FeatureFunction *FeatureFunctions::FindFeatureFunction(const std::string &name) const

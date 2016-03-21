@@ -71,11 +71,12 @@ protected:
 	  std::vector<const FeatureFunction*> m_featureFunctions;
 	  std::vector<const StatefulFeatureFunction*> m_statefulFeatureFunctions;
 	  std::vector<const FeatureFunction*> m_withPhraseTableInd;
-
+	  boost::unordered_map<std::string, size_t> m_defaultNames;
 	  System &m_system;
 	  size_t m_ffStartInd;
 
 	FeatureFunction *Create(const std::string &line);
+	std::string GetDefaultName(const std::string &stub);
 
 	FeatureRegistry m_registry;
 };
