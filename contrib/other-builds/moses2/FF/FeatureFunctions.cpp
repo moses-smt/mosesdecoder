@@ -105,9 +105,7 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 	vector<string> toks = Tokenize(line);
 
 	FeatureFunction *ret = m_registry.Construct(m_ffStartInd, toks[0], line);
-	if (ret == NULL) {
-		cerr << "NADDA:" << line << endl;
-	}
+	UTIL_THROW_IF2(ret == NULL, "Feature function not created");
 	m_ffStartInd += ret->GetNumScores();
 
 	return ret;

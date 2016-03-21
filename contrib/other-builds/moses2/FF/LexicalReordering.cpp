@@ -224,7 +224,7 @@ void LexicalReordering::EvaluateWhenApplied(const ManagerBase &mgr,
 	}
 	else {
 		// hier
-
+		EvaluateWhenAppliedHier(mgr, hypo, prevState, scores, state);
 	}
 }
 
@@ -308,6 +308,13 @@ size_t LexicalReordering::GetOrientation(Range const& prev, Range const& cur) co
 }
 
 // hiero type //////////////////////////////
+void LexicalReordering::EvaluateWhenAppliedHier(const ManagerBase &mgr,
+  const Hypothesis &hypo,
+  const FFState &prevState,
+  Scores &scores,
+  FFState &state) const
+{
 
+}
 
 } /* namespace Moses2 */
