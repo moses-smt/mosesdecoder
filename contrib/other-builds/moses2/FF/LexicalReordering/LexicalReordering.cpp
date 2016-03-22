@@ -8,6 +8,7 @@
 #include <boost/foreach.hpp>
 #include "LexicalReordering.h"
 #include "PhraseBasedReorderingState.h"
+#include "BidirectionalReorderingState.h"
 #include "../../TranslationModel/PhraseTable.h"
 #include "../../System.h"
 #include "../../PhraseImpl.h"
@@ -113,7 +114,14 @@ void LexicalReordering::SetParameter(const std::string& key, const std::string& 
 
 FFState* LexicalReordering::BlankState(MemPool &pool) const
 {
-  return new (pool.Allocate<PhraseBasedReorderingState>()) PhraseBasedReorderingState();
+  FFState *ret;
+  if (m_phraseBased) {
+    ret = new (pool.Allocate<PhraseBasedReorderingState>()) PhraseBasedReorderingState();
+  }
+  else {
+    ret = new (pool.Allocate<BidirectionalReorderingState>()) BidirectionalReorderingState();
+  }
+  return ret;
 }
 
 void LexicalReordering::EmptyHypothesisState(FFState &state,
@@ -121,9 +129,15 @@ void LexicalReordering::EmptyHypothesisState(FFState &state,
 		const InputType &input,
 		const Hypothesis &hypo) const
 {
+  if (m_phraseBased) {
 	PhraseBasedReorderingState &stateCast = static_cast<PhraseBasedReorderingState&>(state);
 	stateCast.path = &hypo.GetInputPath();
 	stateCast.targetPhrase = &hypo.GetTargetPhrase();
+  }
+  else {
+    BidirectionalReorderingState &stateCast = static_cast<BidirectionalReorderingState&>(state);
+
+  }
 }
 
 void LexicalReordering::EvaluateInIsolation(MemPool &pool,

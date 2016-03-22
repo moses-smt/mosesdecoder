@@ -36,4 +36,14 @@ bool BidirectionalReorderingState::operator==(const FFState& o) const
   return ret;
 }
 
+void BidirectionalReorderingState::Expand(const System &system,
+		  const LexicalReordering &ff,
+		  const Hypothesis &hypo,
+		  size_t phraseTableInd,
+		  Scores &scores,
+		  FFState &state) const
+{
+
+}
+
 } /* namespace Moses2 */
