@@ -348,6 +348,9 @@ sub tokenize
     $text =~ s/^ //g;
     $text =~ s/ $//g;
 
+    # .' at end of sentence is missed
+    $text =~ s/\.\' ?$/ . ' /;
+
     # restore protected
     for (my $i = 0; $i < scalar(@protected); ++$i) {
       my $subst = sprintf("THISISPROTECTED%.3d", $i);

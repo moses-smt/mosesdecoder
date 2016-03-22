@@ -175,7 +175,7 @@ void FVector::resize(size_t newsize)
 
 void FVector::clear()
 {
-  m_coreFeatures.resize(0);
+  m_coreFeatures.resize(m_coreFeatures.size(), 0);
   m_features.clear();
 }
 
