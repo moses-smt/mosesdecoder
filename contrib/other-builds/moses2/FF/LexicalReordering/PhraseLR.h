@@ -12,9 +12,12 @@
 namespace Moses2 {
 
 class TargetPhrase;
+class LexicalReordering;
+class Hypothesis;
 
-struct LexicalReorderingState : public FFState
+class LexicalReorderingState : public FFState
 {
+public:
   const InputPathBase *path;
   const TargetPhrase *targetPhrase;
 
@@ -22,7 +25,6 @@ struct LexicalReorderingState : public FFState
   {
 	  // uninitialised
   }
-
 
   size_t hash() const {
 	// compare range address. All ranges are created in InputPathBase
@@ -38,6 +40,17 @@ struct LexicalReorderingState : public FFState
   {
 	  return "";
   }
+
+  void Expand(const System &system,
+		  const LexicalReordering &ff,
+		  const Hypothesis &hypo,
+		  size_t phraseTableInd,
+		  Scores &scores,
+		  FFState &state) const;
+
+protected:
+  size_t  GetOrientation(Range const& cur) const;
+  size_t  GetOrientation(Range const& prev, Range const& cur) const;
 
 };
 

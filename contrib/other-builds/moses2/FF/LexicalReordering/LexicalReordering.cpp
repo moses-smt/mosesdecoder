@@ -192,7 +192,8 @@ void LexicalReordering::EvaluateWhenApplied(const ManagerBase &mgr,
   FFState &state) const
 {
 	if (m_phraseBased) {
-		EvaluateWhenAppliedPB(mgr, hypo, prevState, scores, state);
+	  const LexicalReorderingState &prevStateCast = static_cast<const LexicalReorderingState&>(prevState);
+	  prevStateCast.Expand(mgr.system, *this, hypo, m_PhraseTableInd, scores, state);
 	}
 	else {
 		// hier
@@ -255,28 +256,6 @@ const LexicalReordering::Values *LexicalReordering::GetValues(const Phrase &sour
 	else {
 		return &iter->second;
 	}
-}
-
-// Phrase-based type //////////////////////
-size_t LexicalReordering::GetOrientation(Range const& cur) const
-{
-  return (cur.GetStartPos() == 0) ? 0 : 2;
-}
-
-size_t LexicalReordering::GetOrientation(Range const& prev, Range const& cur) const
-{
-  if (cur.GetStartPos() == prev.GetEndPos() + 1) {
-	  // monotone
-	  return 0;
-  }
-  else if (prev.GetStartPos() ==  cur.GetEndPos() + 1) {
-	  // swap
-	  return 1;
-  }
-  else {
-	  // discontinuous
-	  return 2;
-  }
 }
 
 // hiero type //////////////////////////////

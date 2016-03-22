@@ -32,6 +32,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
     FF/WordPenalty.cpp
     
     FF/LexicalReordering/LexicalReordering.cpp
+    FF/LexicalReordering/PhraseLR.cpp
 
  #   LM/LanguageModelDALM.cpp
     LM/LanguageModel.cpp
