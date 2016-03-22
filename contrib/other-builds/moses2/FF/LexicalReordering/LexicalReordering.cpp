@@ -191,14 +191,8 @@ void LexicalReordering::EvaluateWhenApplied(const ManagerBase &mgr,
   Scores &scores,
   FFState &state) const
 {
-	if (m_phraseBased) {
-	  const PhraseBasedReorderingState &prevStateCast = static_cast<const PhraseBasedReorderingState&>(prevState);
-	  prevStateCast.Expand(mgr.system, *this, hypo, m_PhraseTableInd, scores, state);
-	}
-	else {
-		// hier
-		EvaluateWhenAppliedHier(mgr, hypo, prevState, scores, state);
-	}
+  const LRState &prevStateCast = static_cast<const LRState&>(prevState);
+  prevStateCast.Expand(mgr.system, *this, hypo, m_PhraseTableInd, scores, state);
 }
 
 void LexicalReordering::EvaluateWhenAppliedPB(const ManagerBase &mgr,

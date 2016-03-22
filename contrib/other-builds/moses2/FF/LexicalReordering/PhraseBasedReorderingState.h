@@ -15,7 +15,19 @@ class TargetPhrase;
 class LexicalReordering;
 class Hypothesis;
 
-class PhraseBasedReorderingState : public FFState
+class LRState : public FFState
+{
+public:
+  virtual void Expand(const System &system,
+			  const LexicalReordering &ff,
+			  const Hypothesis &hypo,
+			  size_t phraseTableInd,
+			  Scores &scores,
+			  FFState &state) const = 0;
+
+};
+
+class PhraseBasedReorderingState : public LRState
 {
 public:
   const InputPathBase *path;
