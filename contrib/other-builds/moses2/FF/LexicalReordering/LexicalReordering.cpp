@@ -195,50 +195,6 @@ void LexicalReordering::EvaluateWhenApplied(const ManagerBase &mgr,
   prevStateCast.Expand(mgr.system, *this, hypo, m_PhraseTableInd, scores, state);
 }
 
-void LexicalReordering::EvaluateWhenAppliedPB(const ManagerBase &mgr,
-  const Hypothesis &hypo,
-  const FFState &prevState,
-  Scores &scores,
-  FFState &state) const
-{
-  const PhraseBasedReorderingState &prevStateCast = static_cast<const PhraseBasedReorderingState&>(prevState);
-  PhraseBasedReorderingState &stateCast = static_cast<PhraseBasedReorderingState&>(state);
-
-  const Range &currRange = hypo.GetInputPath().range;
-  stateCast.path = &hypo.GetInputPath();
-  stateCast.targetPhrase = &hypo.GetTargetPhrase();
-
-  // calc orientation
-  size_t orientation;
-  const Range *prevRange = &prevStateCast.path->range;
-  assert(prevRange);
-  if (prevRange->GetStartPos() == NOT_FOUND) {
-	  orientation = GetOrientation(currRange);
-  }
-  else {
-	  orientation = GetOrientation(*prevRange, currRange);
-  }
-
-  // backwards
-  const TargetPhrase &target = hypo.GetTargetPhrase();
-
-  const SCORE *values = (const SCORE *) target.ffData[m_PhraseTableInd];
-  if (values) {
-	  scores.PlusEquals(mgr.system, *this, values[orientation], orientation);
-  }
-
-  // forwards
-  if (prevRange->GetStartPos() != NOT_FOUND) {
-	  const TargetPhrase &prevTarget = *prevStateCast.targetPhrase;
-	  const SCORE *prevValues = (const SCORE *) prevTarget.ffData[m_PhraseTableInd];
-
-	  if (prevValues) {
-		  scores.PlusEquals(mgr.system, *this, prevValues[orientation + 3], orientation + 3);
-	  }
-  }
-
-}
-
 const LexicalReordering::Values *LexicalReordering::GetValues(const Phrase &source, const Phrase &target) const
 {
 	Key key(&source, &target);
@@ -250,16 +206,6 @@ const LexicalReordering::Values *LexicalReordering::GetValues(const Phrase &sour
 	else {
 		return &iter->second;
 	}
-}
-
-// hiero type //////////////////////////////
-void LexicalReordering::EvaluateWhenAppliedHier(const ManagerBase &mgr,
-  const Hypothesis &hypo,
-  const FFState &prevState,
-  Scores &scores,
-  FFState &state) const
-{
-
 }
 
 } /* namespace Moses2 */

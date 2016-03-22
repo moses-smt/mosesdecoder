@@ -422,6 +422,8 @@ HReorderingBackwardState::
 Expand(const TranslationOption& topt, const InputType& input,
        ScoreComponentCollection*  scores) const
 {
+  std::cerr << "HReorderingBackwardState" << std::endl;
+
   HReorderingBackwardState* nextState;
   nextState = new HReorderingBackwardState(this, topt, m_reoStack);
   Range swrange = topt.GetSourceWordsRange();
@@ -492,6 +494,8 @@ HReorderingForwardState::
 Expand(TranslationOption const& topt, InputType const& input,
        ScoreComponentCollection* scores) const
 {
+	  std::cerr << "HReorderingForwardState" << std::endl;
+
   const Range cur = topt.GetSourceWordsRange();
   // keep track of the current coverage ourselves so we don't need the hypothesis
   Bitmap cov(m_coverage, cur);

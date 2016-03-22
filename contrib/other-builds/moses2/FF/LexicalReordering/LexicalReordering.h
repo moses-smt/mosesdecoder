@@ -102,23 +102,6 @@ protected:
   Coll *m_coll;
 
   const Values *GetValues(const Phrase &source, const Phrase &target) const;
-
-  // phrase-based model
-  void EvaluateWhenAppliedPB(const ManagerBase &mgr,
-	const Hypothesis &hypo,
-	const FFState &prevState,
-	Scores &scores,
-	FFState &state) const;
-
-  size_t  GetOrientation(Range const& cur) const;
-  size_t  GetOrientation(Range const& prev, Range const& cur) const;
-
-  // hier model
-  void EvaluateWhenAppliedHier(const ManagerBase &mgr,
-	const Hypothesis &hypo,
-	const FFState &prevState,
-	Scores &scores,
-	FFState &state) const;
 };
 
 } /* namespace Moses2 */
