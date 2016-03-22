@@ -7,7 +7,7 @@
 
 #include <boost/foreach.hpp>
 #include "LexicalReordering.h"
-#include "PhraseLR.h"
+#include "PhraseBasedReorderingState.h"
 #include "../../TranslationModel/PhraseTable.h"
 #include "../../System.h"
 #include "../../PhraseImpl.h"
@@ -113,7 +113,7 @@ void LexicalReordering::SetParameter(const std::string& key, const std::string& 
 
 FFState* LexicalReordering::BlankState(MemPool &pool) const
 {
-  return new (pool.Allocate<LexicalReorderingState>()) LexicalReorderingState();
+  return new (pool.Allocate<PhraseBasedReorderingState>()) PhraseBasedReorderingState();
 }
 
 void LexicalReordering::EmptyHypothesisState(FFState &state,
@@ -121,7 +121,7 @@ void LexicalReordering::EmptyHypothesisState(FFState &state,
 		const InputType &input,
 		const Hypothesis &hypo) const
 {
-	LexicalReorderingState &stateCast = static_cast<LexicalReorderingState&>(state);
+	PhraseBasedReorderingState &stateCast = static_cast<PhraseBasedReorderingState&>(state);
 	stateCast.path = &hypo.GetInputPath();
 	stateCast.targetPhrase = &hypo.GetTargetPhrase();
 }
@@ -192,7 +192,7 @@ void LexicalReordering::EvaluateWhenApplied(const ManagerBase &mgr,
   FFState &state) const
 {
 	if (m_phraseBased) {
-	  const LexicalReorderingState &prevStateCast = static_cast<const LexicalReorderingState&>(prevState);
+	  const PhraseBasedReorderingState &prevStateCast = static_cast<const PhraseBasedReorderingState&>(prevState);
 	  prevStateCast.Expand(mgr.system, *this, hypo, m_PhraseTableInd, scores, state);
 	}
 	else {
@@ -207,8 +207,8 @@ void LexicalReordering::EvaluateWhenAppliedPB(const ManagerBase &mgr,
   Scores &scores,
   FFState &state) const
 {
-  const LexicalReorderingState &prevStateCast = static_cast<const LexicalReorderingState&>(prevState);
-  LexicalReorderingState &stateCast = static_cast<LexicalReorderingState&>(state);
+  const PhraseBasedReorderingState &prevStateCast = static_cast<const PhraseBasedReorderingState&>(prevState);
+  PhraseBasedReorderingState &stateCast = static_cast<PhraseBasedReorderingState&>(state);
 
   const Range &currRange = hypo.GetInputPath().range;
   stateCast.path = &hypo.GetInputPath();

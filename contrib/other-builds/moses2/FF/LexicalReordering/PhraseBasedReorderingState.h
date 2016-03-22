@@ -15,13 +15,13 @@ class TargetPhrase;
 class LexicalReordering;
 class Hypothesis;
 
-class LexicalReorderingState : public FFState
+class PhraseBasedReorderingState : public FFState
 {
 public:
   const InputPathBase *path;
   const TargetPhrase *targetPhrase;
 
-  LexicalReorderingState()
+  PhraseBasedReorderingState()
   {
 	  // uninitialised
   }
@@ -32,7 +32,7 @@ public:
   }
   virtual bool operator==(const FFState& other) const {
 	// compare range address. All ranges are created in InputPathBase
-    const LexicalReorderingState &stateCast = static_cast<const LexicalReorderingState&>(other);
+    const PhraseBasedReorderingState &stateCast = static_cast<const PhraseBasedReorderingState&>(other);
     return &path->range == &stateCast.path->range;
   }
 

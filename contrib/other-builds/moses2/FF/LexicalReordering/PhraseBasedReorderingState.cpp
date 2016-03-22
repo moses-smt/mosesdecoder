@@ -5,21 +5,21 @@
  *      Author: hieu
  */
 
-#include "PhraseLR.h"
+#include "PhraseBasedReorderingState.h"
 #include "LexicalReordering.h"
 #include "../../PhraseBased/Hypothesis.h"
 
 namespace Moses2 {
 
-void LexicalReorderingState::Expand(const System &system,
+void PhraseBasedReorderingState::Expand(const System &system,
 		const LexicalReordering &ff,
 		const Hypothesis &hypo,
 		size_t phraseTableInd,
 		Scores &scores,
 		FFState &state) const
 {
-  const LexicalReorderingState &prevStateCast = static_cast<const LexicalReorderingState&>(*this);
-  LexicalReorderingState &stateCast = static_cast<LexicalReorderingState&>(state);
+  const PhraseBasedReorderingState &prevStateCast = static_cast<const PhraseBasedReorderingState&>(*this);
+  PhraseBasedReorderingState &stateCast = static_cast<PhraseBasedReorderingState&>(state);
 
   const Range &currRange = hypo.GetInputPath().range;
   stateCast.path = &hypo.GetInputPath();
@@ -55,12 +55,12 @@ void LexicalReorderingState::Expand(const System &system,
   }
 }
 
-size_t LexicalReorderingState::GetOrientation(Range const& cur) const
+size_t PhraseBasedReorderingState::GetOrientation(Range const& cur) const
 {
   return (cur.GetStartPos() == 0) ? 0 : 2;
 }
 
-size_t LexicalReorderingState::GetOrientation(Range const& prev, Range const& cur) const
+size_t PhraseBasedReorderingState::GetOrientation(Range const& prev, Range const& cur) const
 {
   if (cur.GetStartPos() == prev.GetEndPos() + 1) {
 	  // monotone
