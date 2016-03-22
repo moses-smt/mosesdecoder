@@ -7,13 +7,13 @@
 #include "../LM/KENLM.h"
 #include "../LM/LanguageModel.h"
 
-#include "../FF/Distortion.h"
-#include "../FF/LexicalReordering.h"
-#include "../FF/PhrasePenalty.h"
-#include "../FF/WordPenalty.h"
+#include "Distortion.h"
+#include "LexicalReordering/LexicalReordering.h"
+#include "PhrasePenalty.h"
+#include "WordPenalty.h"
 
-#include "../FF/SkeletonStatefulFF.h"
-#include "../FF/SkeletonStatelessFF.h"
+#include "SkeletonStatefulFF.h"
+#include "SkeletonStatelessFF.h"
 
 using namespace std;
 

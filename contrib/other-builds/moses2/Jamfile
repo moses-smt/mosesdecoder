@@ -24,13 +24,15 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
    FF/FeatureFunction.cpp 
    FF/FeatureFunctions.cpp 
    FF/FeatureRegistry.cpp
-    FF/LexicalReordering.cpp
     FF/PhrasePenalty.cpp
     FF/SkeletonStatefulFF.cpp
     FF/SkeletonStatelessFF.cpp
     FF/StatefulFeatureFunction.cpp
     FF/StatelessFeatureFunction.cpp
     FF/WordPenalty.cpp
+    
+    FF/LexicalReordering/LexicalReordering.cpp
+
  #   LM/LanguageModelDALM.cpp
     LM/LanguageModel.cpp
     LM/KENLM.cpp

@@ -7,14 +7,14 @@
 
 #include <boost/foreach.hpp>
 #include "LexicalReordering.h"
-#include "../TranslationModel/PhraseTable.h"
-#include "../System.h"
-#include "../PhraseImpl.h"
-#include "../PhraseBased/Manager.h"
-#include "../PhraseBased/Hypothesis.h"
-#include "../legacy/InputFileStream.h"
-#include "../legacy/Util2.h"
-#include "../legacy/CompactPT/LexicalReorderingTableCompact.h"
+#include "../../TranslationModel/PhraseTable.h"
+#include "../../System.h"
+#include "../../PhraseImpl.h"
+#include "../../PhraseBased/Manager.h"
+#include "../../PhraseBased/Hypothesis.h"
+#include "../../legacy/InputFileStream.h"
+#include "../../legacy/Util2.h"
+#include "../../legacy/CompactPT/LexicalReorderingTableCompact.h"
 
 using namespace std;
 

@@ -8,10 +8,10 @@
 #pragma once
 #include <vector>
 #include <boost/unordered_map.hpp>
-#include "StatefulFeatureFunction.h"
-#include "../TypeDef.h"
-#include "../Phrase.h"
-#include "../legacy/Range.h"
+#include "../StatefulFeatureFunction.h"
+#include "../../TypeDef.h"
+#include "../../Phrase.h"
+#include "../../legacy/Range.h"
 
 namespace Moses2 {
 
