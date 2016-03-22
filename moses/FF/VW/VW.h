@@ -211,9 +211,6 @@ public:
     const std::vector<VWFeatureBase*>& contextFeatures =
       VWFeatureBase::GetTargetContextFeatures(GetScoreProducerDescription());
 
-    const std::vector<VWFeatureBase*>& targetFeatures =
-      VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription());
-
     size_t maxContextSize = VWFeatureBase::GetMaximumContextSize(GetScoreProducerDescription());
 
     if (contextFeatures.empty()) {
