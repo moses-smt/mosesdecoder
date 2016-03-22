@@ -492,8 +492,17 @@ public:
         } else {
           // we have target context features => this is just a partial score,
           // do not add it to the score component collection
+          // subtract the score contribution of target-only features, otherwise it would
+          // be included twice
           size_t toptHash = hash_value(*topt);
+          Discriminative::FeatureVector emptySource;
+          const Discriminative::FeatureVector &targetFeatureVector =
+            m_tlsTranslationOptionFeatures->GetStored()->find(toptHash)->second;
+
+          classifier.AddLabelIndependentFeatureVector(emptySource);
+          classifier.AddLabelDependentFeatureVector(targetFeatureVector);
           float futureScore = rawLosses[toptIdx];
+          futureScore -= classifier.Predict(VW_DUMMY_LABEL);
           m_tlsFutureScores->GetStored()->insert(std::make_pair(toptHash, futureScore));
         }
       }
@@ -534,6 +543,19 @@ public:
   }
 
   virtual void InitializeForInput(ttasksptr const& ttask) {
+    // do not keep future cost estimates across sentences!
+    m_tlsFutureScores->GetStored()->clear();
+
+    // invalidate our caches after each sentence
+    m_tlsComputedStateExtensions->GetStored()->clear();
+
+    // it's not certain that we should clear these caches; we do it
+    // because they shouldn't be allowed to grow indefinitely large but
+    // target contexts and translation options will have identical features
+    // the next time we extract them...
+    m_tlsTargetContextFeatures->GetStored()->clear();
+    m_tlsTranslationOptionFeatures->GetStored()->clear();
+
     InputType const& source = *(ttask->GetSource().get());
     // tabbed sentence is assumed only in training
     if (! m_train)
@@ -563,19 +585,6 @@ public:
     targetSent.Clear();
     targetSent.m_sentence = target;
     targetSent.m_alignment = alignment;
-
-    // do not keep future cost estimates across sentences!
-    m_tlsFutureScores->GetStored()->clear();
-
-    // invalidate our caches after each sentence
-    m_tlsComputedStateExtensions->GetStored()->clear();
-
-    // it's not certain that we should clear these caches; we do it
-    // because they shouldn't be allowed to grow indefinitely large but
-    // target contexts and translation options will have identical features
-    // the next time we extract them...
-    m_tlsTargetContextFeatures->GetStored()->clear();
-    m_tlsTranslationOptionFeatures->GetStored()->clear();
 
     // pre-compute max- and min- aligned points for faster translation option checking
     targetSent.SetConstraints(source.GetSize());
