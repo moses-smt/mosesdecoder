@@ -6,26 +6,12 @@
  */
 
 #pragma once
-#include "../../legacy/FFState.h"
+#include "LRState.h"
 #include "../../InputPathBase.h"
 
 namespace Moses2 {
 
 class TargetPhrase;
-class LexicalReordering;
-class Hypothesis;
-
-class LRState : public FFState
-{
-public:
-  virtual void Expand(const System &system,
-			  const LexicalReordering &ff,
-			  const Hypothesis &hypo,
-			  size_t phraseTableInd,
-			  Scores &scores,
-			  FFState &state) const = 0;
-
-};
 
 class PhraseBasedReorderingState : public LRState
 {
