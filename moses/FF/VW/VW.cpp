@@ -77,14 +77,8 @@ FFState* VW::EvaluateWhenApplied(
 { 
   VERBOSE(2, "VW :: Evaluating translation options\n");
 
-  // which feature functions do we use (on the source and target side)
-  const std::vector<VWFeatureBase*>& sourceFeatures =
-    VWFeatureBase::GetSourceFeatures(GetScoreProducerDescription());
-
   const std::vector<VWFeatureBase*>& contextFeatures =
     VWFeatureBase::GetTargetContextFeatures(GetScoreProducerDescription());
-
-  size_t maxContextSize = VWFeatureBase::GetMaximumContextSize(GetScoreProducerDescription());
 
   if (contextFeatures.empty()) {
     // no target context features => we already evaluated everything in
@@ -95,7 +89,6 @@ FFState* VW::EvaluateWhenApplied(
 
   size_t spanStart = curHypo.GetTranslationOption().GetStartPos();
   size_t spanEnd   = curHypo.GetTranslationOption().GetEndPos();
-  const Range &sourceRange = curHypo.GetTranslationOption().GetSourceWordsRange();
 
   // compute our current key
   size_t cacheKey = MakeCacheKey(prevState, spanStart, spanEnd);
