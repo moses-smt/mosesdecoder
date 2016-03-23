@@ -102,7 +102,7 @@ public:
                           , Discriminative::FeatureVector &outFeatures) const = 0;
 
   // Overload to process target-dependent features, create features once for
-  // every target phrase. One source word range will have at leat one target
+  // every target phrase. One source word range will have at least one target
   // phrase, but may have more.
   virtual void operator()(const InputType &input
                           , const TargetPhrase &targetPhrase
@@ -113,7 +113,9 @@ public:
   // evaluated during decoding. For efficiency, features are not fed directly into
   // the classifier object but instead output in the vector "features" and managed
   // separately in VW.h.
-  virtual void operator()(const Phrase &phrase
+  virtual void operator()(const InputType &input
+                          , const Phrase &contextPhrase
+                          , const AlignmentInfo &alignmentInfo
                           , Discriminative::Classifier &classifier
                           , Discriminative::FeatureVector &outFeatures) const = 0;
 

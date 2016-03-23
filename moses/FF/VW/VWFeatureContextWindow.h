@@ -19,11 +19,13 @@ public:
     VWFeatureBase::UpdateRegister();
   }
 
-  virtual void operator()(const Phrase &phrase
+  virtual void operator()(const InputType &input
+                          , const Phrase &contextPhrase
+                          , const AlignmentInfo &alignmentInfo
                           , Discriminative::Classifier &classifier
                           , Discriminative::FeatureVector &outFeatures) const {
     for (size_t i = 0; i < m_contextSize; i++)
-      outFeatures.push_back(classifier.AddLabelIndependentFeature("tcwin^-" + SPrint(i + 1) + "^" + GetWord(phrase, i)));
+      outFeatures.push_back(classifier.AddLabelIndependentFeature("tcwin^-" + SPrint(i + 1) + "^" + GetWord(contextPhrase, i)));
   }
 
   virtual void SetParameter(const std::string& key, const std::string& value) {

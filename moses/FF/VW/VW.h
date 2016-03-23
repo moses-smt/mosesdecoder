@@ -250,8 +250,9 @@ public:
         // we have not extracted features for this context yet
 
         Discriminative::FeatureVector contextVector;
+        AlignmentInfo alignInfo("");
         for(size_t i = 0; i < contextFeatures.size(); ++i)
-          (*contextFeatures[i])(targetContext, classifier, contextVector);
+          (*contextFeatures[i])(input, targetContext, alignInfo, classifier, contextVector);
 
         contextFeaturesCache[contextHash] = contextVector;
         VERBOSE(3, "VW :: context cache miss\n");
@@ -416,8 +417,9 @@ public:
           targetContext.Append(targetSent->GetSubString(Range(0, currentStart - 1)));
 
         // extract target-context features
+        AlignmentInfo alignInfo("");
         for(size_t i = 0; i < contextFeatures.size(); ++i)
-          (*contextFeatures[i])(targetContext, classifier, dummyVector);
+          (*contextFeatures[i])(input, targetContext, alignInfo, classifier, dummyVector);
 
         // go over topts, extract target side features and train the classifier
         for (size_t toptIdx = 0; toptIdx < translationOptionList.size(); toptIdx++) {

@@ -30,7 +30,9 @@ public:
                           , Discriminative::FeatureVector &outFeatures) const {
   }
 
-  virtual void operator()(const Phrase &phrase
+  virtual void operator()(const InputType &input
+                          , const Phrase &contextPhrase
+                          , const AlignmentInfo &alignmentInfo
                           , Discriminative::Classifier &classifier
                           , Discriminative::FeatureVector &outFeatures) const {
   }
