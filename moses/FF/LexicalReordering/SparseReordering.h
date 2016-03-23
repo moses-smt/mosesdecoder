@@ -19,7 +19,7 @@
 
 #include "moses/FeatureVector.h"
 #include "moses/ScoreComponentCollection.h"
-#include "LexicalReorderingState.h"
+#include "LRState.h"
 
 /**
  Configuration of sparse reordering:
