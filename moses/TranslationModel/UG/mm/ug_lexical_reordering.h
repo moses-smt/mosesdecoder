@@ -5,7 +5,7 @@
 #include <vector>
 
 #ifndef NO_MOSES
-#include "moses/FF/LexicalReordering/LexicalReorderingState.h"
+#include "moses/FF/LexicalReordering/LRState.h"
 #endif
 
 namespace sapt {
