@@ -37,7 +37,7 @@ class EstimatedScores : public Matrix<float>
 
 public:
   EstimatedScores(MemPool &pool, size_t size)
-  :Matrix(pool, size, size)
+  :Matrix<float>(pool, size, size)
   {}
 
   ~EstimatedScores(); // not implemented
