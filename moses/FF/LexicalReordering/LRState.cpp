@@ -2,6 +2,7 @@
 #include <vector>
 #include <string>
 
+#include "LRState.h"
 #include "moses/FF/FFState.h"
 #include "moses/Hypothesis.h"
 #include "moses/Range.h"
@@ -9,7 +10,6 @@
 #include "moses/Util.h"
 
 #include "LexicalReordering.h"
-#include "LexicalReorderingState.h"
 
 namespace Moses
 {

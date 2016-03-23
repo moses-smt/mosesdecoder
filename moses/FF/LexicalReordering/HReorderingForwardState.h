@@ -1,6 +1,6 @@
 #pragma once
 
-#include "LexicalReorderingState.h"
+#include "LRState.h"
 #include "moses/Range.h"
 #include "moses/Bitmap.h"
 

@@ -5,7 +5,7 @@
 #include "moses/FF/FFState.h"
 #include "moses/TranslationOptionList.h"
 #include "LexicalReordering.h"
-#include "LexicalReorderingState.h"
+#include "LRState.h"
 #include "moses/StaticData.h"
 #include "moses/Util.h"
 #include "moses/InputPath.h"

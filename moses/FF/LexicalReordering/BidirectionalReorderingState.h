@@ -1,5 +1,5 @@
 #pragma once
-#include "LexicalReorderingState.h"
+#include "LRState.h"
 
 namespace Moses
 {

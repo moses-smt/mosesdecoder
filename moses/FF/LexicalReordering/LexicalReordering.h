@@ -14,7 +14,7 @@
 #include "moses/FF/StatefulFeatureFunction.h"
 #include "util/exception.hh"
 
-#include "LexicalReorderingState.h"
+#include "LRState.h"
 #include "LexicalReorderingTable.h"
 #include "SparseReordering.h"
 
