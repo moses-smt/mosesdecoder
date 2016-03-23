@@ -11,14 +11,41 @@ namespace Moses {
 /**
  * VW state, used in decoding (when target context is enabled).
  */
-struct VWState : public FFState {
-  virtual size_t hash() const;
+class VWState : public FFState {
+public:
+  // empty state, used only when VWState is ignored
+  VWState(); 
+
+  // used for construction of the initial VW state
+  VWState(const Phrase &phrase, size_t spanStart, size_t spanEnd);
+
+  // continue from previous VW state with a new hypothesis
+  VWState(const VWState &prevState, const Hypothesis &curHypo);
+
   virtual bool operator==(const FFState& o) const;
 
-  // shift words in our state, add words from current hypothesis
-  static VWState *UpdateState(const FFState *prevState, const Hypothesis &curHypo);
+  inline virtual size_t hash() const {
+    return m_hash;
+  }
+
+  inline const Phrase &GetPhrase() const {
+    return m_phrase;
+  }
+
+  inline size_t GetSpanStart() const {
+    return m_spanStart;
+  }
+
+  inline size_t GetSpanEnd() const {
+    return m_spanEnd;
+  }
+
+private:
+  void ComputeHash();
 
   Phrase m_phrase;
+  size_t m_spanStart, m_spanEnd;
+  size_t m_hash;
 };
 
 // how to print a VW state

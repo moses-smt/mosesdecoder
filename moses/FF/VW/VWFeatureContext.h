@@ -1,9 +1,11 @@
 #pragma once
 
 #include <string>
+#include <boost/foreach.hpp>
 #include "VWFeatureBase.h"
 #include "moses/InputType.h"
 #include "moses/TypeDef.h"
+#include "moses/Word.h"
 
 namespace Moses
 {
@@ -54,6 +56,26 @@ protected:
   // ...etc.
   inline std::string GetWord(const Phrase &phrase, size_t posFromEnd) const {
     return phrase.GetWord(phrase.GetSize() - posFromEnd - 1).GetString(m_targetFactors, false);
+  }
+
+  // some target-context feature functions also look at the source
+  inline std::string GetSourceWord(const InputType &input, size_t pos) const {
+    return input.GetWord(pos).GetString(m_sourceFactors, false);
+  }
+
+  // get source words aligned to a particular context word
+  std::vector<std::string> GetAlignedSourceWords(const Phrase &contextPhrase
+                                          , const InputType &input
+                                          , const AlignmentInfo &alignInfo
+                                          , size_t posFromEnd) const {
+    size_t idx = contextPhrase.GetSize() - posFromEnd - 1;
+    std::set<size_t> alignedToTarget = alignInfo.GetAlignmentsForTarget(idx);
+    std::vector<std::string> out;
+    out.reserve(alignedToTarget.size());
+    BOOST_FOREACH(size_t srcIdx, alignedToTarget) {
+      out.push_back(GetSourceWord(input, srcIdx));
+    }
+    return out;
   }
 
   // required context size

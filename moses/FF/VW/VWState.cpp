@@ -6,25 +6,25 @@
 #include "moses/Util.h"
 #include "moses/TypeDef.h"
 #include "moses/StaticData.h"
+#include "moses/TranslationOption.h"
+#include <boost/functional/hash.hpp>
 
 namespace Moses {
 
-size_t VWState::hash() const {
-  return hash_value(m_phrase);
+VWState::VWState() : m_spanStart(0), m_spanEnd(0) {
+  ComputeHash();
 }
 
-bool VWState::operator==(const FFState& o) const {
-  const VWState &other = static_cast<const VWState &>(o);
-  return m_phrase == other.m_phrase;
+VWState::VWState(const Phrase &phrase, size_t spanStart, size_t spanEnd) 
+  : m_phrase(phrase), m_spanStart(spanStart), m_spanEnd(spanEnd) {
+  ComputeHash();
 }
 
-VWState *VWState::UpdateState(const FFState *prevState, const Hypothesis &curHypo) {
-  const VWState *prevVWState = static_cast<const VWState *>(prevState);
-
-  VERBOSE(3, "VW :: updating state\n>> previous state: " << *prevVWState << "\n");
+VWState::VWState(const VWState &prevState, const Hypothesis &curHypo) {
+  VERBOSE(3, "VW :: updating state\n>> previous state: " << prevState << "\n");
 
   // copy phrase from previous state
-  Phrase phrase = prevVWState->m_phrase;
+  Phrase phrase = prevState.GetPhrase();
   size_t contextSize = phrase.GetSize(); // identical to VWFeatureBase::GetMaximumContextSize()
   
   // add words from current hypothesis
@@ -34,19 +34,36 @@ VWState *VWState::UpdateState(const FFState *prevState, const Hypothesis &curHyp
 
   // get a slice of appropriate length
   Range range(phrase.GetSize() - contextSize, phrase.GetSize() - 1);
-  phrase = phrase.GetSubString(range);
+  m_phrase = phrase.GetSubString(range);
 
-  // build the new state
-  VWState *out = new VWState();
-  out->m_phrase = phrase;
+  // set current span start/end
+  m_spanStart = curHypo.GetTranslationOption().GetStartPos();
+  m_spanEnd   = curHypo.GetTranslationOption().GetEndPos();
 
-  VERBOSE(3, ">> updated state: " << *out << "\n");
+  // compute our hash
+  ComputeHash();
 
-  return out;
+  VERBOSE(3, ">> updated state: " << *this << "\n");
+}
+
+bool VWState::operator==(const FFState& o) const {
+  const VWState &other = static_cast<const VWState &>(o);
+
+  return m_phrase == other.GetPhrase()
+    && m_spanStart == other.GetSpanStart()
+    && m_spanEnd == other.GetSpanEnd();
+}
+
+void VWState::ComputeHash() {
+  m_hash = 0;
+
+  boost::hash_combine(m_hash, m_phrase);
+  boost::hash_combine(m_hash, m_spanStart);
+  boost::hash_combine(m_hash, m_spanEnd);
 }
 
 std::ostream &operator<<(std::ostream &out, const VWState &state) {
-  out << state.m_phrase;
+  out << state.GetPhrase() << "::" << state.GetSpanStart() << "-" << state.GetSpanEnd();
   return out;
 }
 

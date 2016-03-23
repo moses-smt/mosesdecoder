@@ -77,6 +77,8 @@ FFState* VW::EvaluateWhenApplied(
 { 
   VERBOSE(2, "VW :: Evaluating translation options\n");
 
+  const VWState& prevVWState = *static_cast<const VWState *>(prevState);
+
   const std::vector<VWFeatureBase*>& contextFeatures =
     VWFeatureBase::GetTargetContextFeatures(GetScoreProducerDescription());
 
@@ -106,12 +108,11 @@ FFState* VW::EvaluateWhenApplied(
     Discriminative::Classifier &classifier = *m_tlsClassifier->GetStored();
 
     // extract target context features
-    const Phrase &targetContext = static_cast<const VWState *>(prevState)->m_phrase;
-    size_t contextHash = hash_value(targetContext);
+    const Phrase &targetContext = prevVWState.GetPhrase();
 
     FeatureVectorMap &contextFeaturesCache = *m_tlsTargetContextFeatures->GetStored();
 
-    FeatureVectorMap::const_iterator contextIt = contextFeaturesCache.find(contextHash);
+    FeatureVectorMap::const_iterator contextIt = contextFeaturesCache.find(cacheKey);
     if (contextIt == contextFeaturesCache.end()) {
       // we have not extracted features for this context yet
 
@@ -120,7 +121,7 @@ FFState* VW::EvaluateWhenApplied(
       for(size_t i = 0; i < contextFeatures.size(); ++i)
         (*contextFeatures[i])(input, targetContext, alignInfo, classifier, contextVector);
 
-      contextFeaturesCache[contextHash] = contextVector;
+      contextFeaturesCache[cacheKey] = contextVector;
       VERBOSE(3, "VW :: context cache miss\n");
     } else {
       // context already in cache, simply put feature IDs in the classifier object
@@ -172,16 +173,16 @@ FFState* VW::EvaluateWhenApplied(
   VERBOSE(3, "VW :: adding score: " << newScores[0] << "\n");
   accumulator->PlusEquals(this, newScores);
 
-  return VWState::UpdateState(prevState, curHypo);
+  return new VWState(prevVWState, curHypo);
 }
 
 const FFState* VW::EmptyHypothesisState(const InputType &input) const {
   size_t maxContextSize = VWFeatureBase::GetMaximumContextSize(GetScoreProducerDescription());
-  VWState *initial = new VWState();
+  Phrase initialPhrase;
   for (size_t i = 0; i < maxContextSize; i++)
-    initial->m_phrase.AddWord(m_sentenceStartWord);
+    initialPhrase.AddWord(m_sentenceStartWord);
     
-  return initial;
+  return new VWState(initialPhrase, 0, 0);
 }
 
 void VW::EvaluateTranslationOptionListWithSourceContext(const InputType &input
@@ -270,13 +271,13 @@ void VW::EvaluateTranslationOptionListWithSourceContext(const InputType &input
         targetContext.AddWord(m_sentenceStartWord);
 
       const Phrase *targetSent = GetStored()->m_sentence;
+      const AlignmentInfo *alignInfo = GetStored()->m_alignment;
       if (currentStart > 0)
         targetContext.Append(targetSent->GetSubString(Range(0, currentStart - 1)));
 
       // extract target-context features
-      AlignmentInfo alignInfo("");
       for(size_t i = 0; i < contextFeatures.size(); ++i)
-        (*contextFeatures[i])(input, targetContext, alignInfo, classifier, dummyVector);
+        (*contextFeatures[i])(input, targetContext, *alignInfo, classifier, dummyVector);
 
       // go over topts, extract target side features and train the classifier
       for (size_t toptIdx = 0; toptIdx < translationOptionList.size(); toptIdx++) {
