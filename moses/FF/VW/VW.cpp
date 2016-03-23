@@ -108,20 +108,21 @@ FFState* VW::EvaluateWhenApplied(
     Discriminative::Classifier &classifier = *m_tlsClassifier->GetStored();
 
     // extract target context features
-    const Phrase &targetContext = prevVWState.GetPhrase();
+    size_t contextHash = prevVWState.hash();
 
     FeatureVectorMap &contextFeaturesCache = *m_tlsTargetContextFeatures->GetStored();
 
-    FeatureVectorMap::const_iterator contextIt = contextFeaturesCache.find(cacheKey);
+    FeatureVectorMap::const_iterator contextIt = contextFeaturesCache.find(contextHash);
     if (contextIt == contextFeaturesCache.end()) {
       // we have not extracted features for this context yet
 
+      const Phrase &targetContext = prevVWState.GetPhrase();
       Discriminative::FeatureVector contextVector;
       AlignmentInfo alignInfo("");
       for(size_t i = 0; i < contextFeatures.size(); ++i)
         (*contextFeatures[i])(input, targetContext, alignInfo, classifier, contextVector);
 
-      contextFeaturesCache[cacheKey] = contextVector;
+      contextFeaturesCache[contextHash] = contextVector;
       VERBOSE(3, "VW :: context cache miss\n");
     } else {
       // context already in cache, simply put feature IDs in the classifier object
