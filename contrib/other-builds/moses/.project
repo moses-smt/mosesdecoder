@@ -2546,6 +2546,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/SyntaxOptions.h</locationURI>
 		</link>
 		<link>
+			<name>FF/LexicalReordering/BidirectionalReorderingState.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/BidirectionalReorderingState.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/BidirectionalReorderingState.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/BidirectionalReorderingState.h</locationURI>
+		</link>
+		<link>
 			<name>FF/LexicalReordering/HReorderingBackwardState.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/HReorderingBackwardState.cpp</locationURI>
