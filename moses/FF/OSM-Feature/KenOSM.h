@@ -27,18 +27,18 @@ public:
   KenOSM(const std::string& file)
     : m_kenlm(new KenModel(file.c_str())) {}
 
-  virtual float Score(const lm::ngram::State &in_state,
+  float Score(const lm::ngram::State &in_state,
                       const std::string& word,
                       lm::ngram::State &out_state) const {
     return m_kenlm->Score(in_state, m_kenlm->GetVocabulary().Index(word),
                           out_state);
   }
 
-  virtual const lm::ngram::State &BeginSentenceState() const {
+  const lm::ngram::State &BeginSentenceState() const {
     return m_kenlm->BeginSentenceState();
   }
 
-  virtual const lm::ngram::State &NullContextState() const {
+  const lm::ngram::State &NullContextState() const {
     return m_kenlm->NullContextState();
   }
 
