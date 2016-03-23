@@ -4,7 +4,7 @@
 #include "ug_typedefs.h"
 #include "ug_bitext_pstats.h"
 #ifndef NO_MOSES
-#include "moses/FF/LexicalReordering/LexicalReorderingState.h"
+#include "moses/FF/LexicalReordering/LRState.h"
 #endif
 #include "boost/format.hpp"
 #include "tpt_tokenindex.h"
