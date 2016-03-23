@@ -119,7 +119,9 @@ FFState* LexicalReordering::BlankState(MemPool &pool) const
     ret = new (pool.Allocate<PhraseBasedReorderingState>()) PhraseBasedReorderingState();
   }
   else {
-    ret = new (pool.Allocate<BidirectionalReorderingState>()) BidirectionalReorderingState();
+    BidirectionalReorderingState *biState = new (pool.Allocate<BidirectionalReorderingState>()) BidirectionalReorderingState();
+
+    ret = biState;
   }
   return ret;
 }

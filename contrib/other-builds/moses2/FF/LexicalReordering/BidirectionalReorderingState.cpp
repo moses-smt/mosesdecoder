@@ -6,12 +6,18 @@
  */
 #include <boost/functional/hash_fwd.hpp>
 #include "BidirectionalReorderingState.h"
+#include "HReorderingBackwardState.h"
+#include "HReorderingForwardState.h"
 
 namespace Moses2 {
 
-BidirectionalReorderingState::BidirectionalReorderingState() {
-	// TODO Auto-generated constructor stub
+BidirectionalReorderingState::BidirectionalReorderingState()
+{
+	HReorderingBackwardState *backward = new HReorderingBackwardState();
+	m_backward = backward;
 
+	HReorderingForwardState *forward = new HReorderingForwardState();
+	m_forward = forward;
 }
 
 BidirectionalReorderingState::~BidirectionalReorderingState() {
