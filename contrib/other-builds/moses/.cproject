@@ -11,11 +11,11 @@
 					</externalSetting>
 				</externalSettings>
 				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
@@ -74,7 +74,7 @@
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.871386239" name="LDHT.h" rcbsApplicability="disable" resourcePath="LM/LDHT.h" toolsToInvoke=""/>
 					<fileInfo id="cdt.managedbuild.config.gnu.exe.debug.1846963597.1761300858" name="ParallelBackoff.h" rcbsApplicability="disable" resourcePath="LM/ParallelBackoff.h" toolsToInvoke=""/>
 					<sourceEntries>
-                        <entry excluding="TranslationModel/UG/ptable-lookup.cc|TranslationModel/UG/ptable-lookup-corpus.cc|TranslationModel/UG/mm/test-http-client.cc|TranslationModel/UG/ptable-describe-features.cc|TranslationModel/UG/count-ptable-features.cc|TranslationModel/UG/try-align2.cc|TranslationModel/UG/try-align.cc|TranslationModel/UG/spe-check-coverage3.cc|TranslationModel/UG/spe-check-coverage2.cc|TranslationModel/UG/spe-check-coverage.cc|TranslationModel/UG/sim-pe.cc|TranslationModel/UG/generic/stringdist|TranslationModel/UG/mm/test-dynamic-im-tsa.cc|TranslationModel/UG/mm/mtt.count.cc|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|LM/bilingual-lm|LM/MaxEntSRI.h|LM/MaxEntSRI.cpp|LM/BilingualLM.h|LM/BilingualLM.cpp|LM/Rand.h|LM/Rand.cpp|LM/LDHT.h|LM/LDHT.cpp|LM/ORLM.h|LM/ORLM.cpp|LM/NeuralLMWrapper.h|LM/NeuralLMWrapper.cpp|LM/SRI.h|LM/SRI.cpp|LM/IRST.h|LM/IRST.cpp|LM/DALMWrapper.h|LM/DALMWrapper.cpp|LM/oxlm|TranslationModel/UG/util" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
+						<entry excluding="TranslationModel/UG/ptable-lookup.cc|TranslationModel/UG/ptable-lookup-corpus.cc|TranslationModel/UG/mm/test-http-client.cc|TranslationModel/UG/ptable-describe-features.cc|TranslationModel/UG/count-ptable-features.cc|TranslationModel/UG/try-align2.cc|TranslationModel/UG/try-align.cc|TranslationModel/UG/spe-check-coverage3.cc|TranslationModel/UG/spe-check-coverage2.cc|TranslationModel/UG/spe-check-coverage.cc|TranslationModel/UG/sim-pe.cc|TranslationModel/UG/generic/stringdist|TranslationModel/UG/mm/test-dynamic-im-tsa.cc|TranslationModel/UG/mm/mtt.count.cc|LM/ParallelBackoff.h|LM/ParallelBackoff.cpp|LM/bilingual-lm|LM/MaxEntSRI.h|LM/MaxEntSRI.cpp|LM/BilingualLM.h|LM/BilingualLM.cpp|LM/Rand.h|LM/Rand.cpp|LM/LDHT.h|LM/LDHT.cpp|LM/ORLM.h|LM/ORLM.cpp|LM/NeuralLMWrapper.h|LM/NeuralLMWrapper.cpp|LM/SRI.h|LM/SRI.cpp|LM/IRST.h|LM/IRST.cpp|LM/DALMWrapper.h|LM/DALMWrapper.cpp|LM/oxlm|TranslationModel/UG/util" flags="VALUE_WORKSPACE_PATH|RESOLVED" kind="sourcePath" name=""/>
 					</sourceEntries>
 				</configuration>
 			</storageModule>
@@ -84,12 +84,12 @@
 			<storageModule buildSystemId="org.eclipse.cdt.managedbuilder.core.configurationDataProvider" id="cdt.managedbuild.config.gnu.exe.release.1911984684" moduleId="org.eclipse.cdt.core.settings" name="Release">
 				<externalSettings/>
 				<extensions>
+					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 					<extension id="org.eclipse.cdt.core.GmakeErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.CWDLocator" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GCCErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GASErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
 					<extension id="org.eclipse.cdt.core.GLDErrorParser" point="org.eclipse.cdt.core.ErrorParser"/>
-					<extension id="org.eclipse.cdt.core.ELF" point="org.eclipse.cdt.core.BinaryParser"/>
 				</extensions>
 			</storageModule>
 			<storageModule moduleId="cdtBuildSystem" version="4.0.0">
