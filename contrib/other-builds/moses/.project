@@ -2596,6 +2596,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/LexicalReorderingTable.h</locationURI>
 		</link>
 		<link>
+			<name>FF/LexicalReordering/PhraseBasedReorderingState.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/PhraseBasedReorderingState.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/LexicalReordering/PhraseBasedReorderingState.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/PhraseBasedReorderingState.h</locationURI>
+		</link>
+		<link>
 			<name>FF/LexicalReordering/ReorderingStack.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/LexicalReordering/ReorderingStack.cpp</locationURI>
