@@ -40,13 +40,24 @@ typedef ThreadLocalByFeatureStorage<Discriminative::Classifier, Discriminative::
 // current target sentence, used in VW training (vwtrainer), not in decoding (prediction time)
 typedef ThreadLocalByFeatureStorage<VWTargetSentence> TLSTargetSentence;
 
+// hash table of feature vectors
 typedef boost::unordered_map<size_t, Discriminative::FeatureVector> FeatureVectorMap;
+
+// thread-specific feature vector hash
 typedef ThreadLocalByFeatureStorage<FeatureVectorMap> TLSFeatureVectorMap;
 
+// hash table of partial scores
 typedef boost::unordered_map<size_t, float> FloatHashMap;
+
+// thread-specific score hash table, used for caching
 typedef ThreadLocalByFeatureStorage<FloatHashMap> TLSFloatHashMap;
+
+// thread-specific hash tablei for caching full classifier outputs
 typedef ThreadLocalByFeatureStorage<boost::unordered_map<size_t, FloatHashMap> > TLSStateExtensions;
 
+/*
+ * VW feature function. A discriminative classifier with source and target context features.
+ */
 class VW : public StatefulFeatureFunction, public TLSTargetSentence
 {
 public:
@@ -108,6 +119,8 @@ private:
 
   std::pair<bool, int> IsCorrectTranslationOption(const TranslationOption &topt) const;
 
+  // at training time, optionally discount occurrences of phrase pairs from the current sentence, helps prevent
+  // over-fitting
   std::vector<bool> LeaveOneOut(const TranslationOptionList &topts, const std::vector<bool> &correct) const;
 
   bool m_train; // false means predict
