@@ -347,7 +347,8 @@ int main(int argc, char* argv[])
 
     SentenceAlignmentWithSyntax sentence
     (targetLabelCollection, sourceLabelCollection,
-     targetTopLabelCollection, sourceTopLabelCollection, options);
+     targetTopLabelCollection, sourceTopLabelCollection,
+     options.targetSyntax, options.sourceSyntax);
     //az: output src, tgt, and alingment line
     if (options.onlyOutputSpanInfo) {
       cout << "LOG: SRC: " << sourceString << endl;

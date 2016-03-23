@@ -18,8 +18,6 @@
  ***********************************************************************/
 
 #pragma once
-#ifndef RULEEXTRACTIONOPTIONS_H_INCLUDED_
-#define RULEEXTRACTIONOPTIONS_H_INCLUDED_
 
 namespace MosesTraining
 {
@@ -95,4 +93,3 @@ public:
 
 }
 
-#endif

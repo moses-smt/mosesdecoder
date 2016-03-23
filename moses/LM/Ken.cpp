@@ -69,63 +69,6 @@ struct KenLMState : public FFState {
 
 };
 
-///*
-// * An implementation of single factor LM using Ken's code.
-// */
-//template <class Model> class LanguageModelKen : public LanguageModel
-//{
-//public:
-//  LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, bool lazy);
-//
-//  const FFState *EmptyHypothesisState(const InputType &/*input*/) const {
-//    KenLMState *ret = new KenLMState();
-//    ret->state = m_ngram->BeginSentenceState();
-//    return ret;
-//  }
-//
-//  void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
-//
-//  FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
-//
-//  FFState *EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
-//
-//  void IncrementalCallback(Incremental::Manager &manager) const {
-//    manager.LMCallback(*m_ngram, m_lmIdLookup);
-//  }
-//
-//  bool IsUseable(const FactorMask &mask) const;
-//private:
-//  LanguageModelKen(const LanguageModelKen<Model> &copy_from);
-//
-//  lm::WordIndex TranslateID(const Word &word) const {
-//    std::size_t factor = word.GetFactor(m_factorType)->GetId();
-//    return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
-//  }
-//
-//  // Convert last words of hypothesis into vocab ids, returning an end pointer.
-//  lm::WordIndex *LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const {
-//    lm::WordIndex *index = indices;
-//    lm::WordIndex *end = indices + m_ngram->Order() - 1;
-//    int position = hypo.GetCurrTargetWordsRange().GetEndPos();
-//    for (; ; ++index, --position) {
-//      if (index == end) return index;
-//      if (position == -1) {
-//        *index = m_ngram->GetVocabulary().BeginSentence();
-//        return index + 1;
-//      }
-//      *index = TranslateID(hypo.GetWord(position));
-//    }
-//  }
-//
-//  boost::shared_ptr<Model> m_ngram;
-//
-//  std::vector<lm::WordIndex> m_lmIdLookup;
-//
-//  FactorType m_factorType;
-//
-//  const Factor *m_beginSentenceFactor;
-//};
-
 class MappingBuilder : public lm::EnumerateVocab
 {
 public:
@@ -148,7 +91,7 @@ private:
 
 } // namespace
 
-template <class Model> void LanguageModelKen<Model>::LoadModel(const std::string &file, bool lazy)
+template <class Model> void LanguageModelKen<Model>::LoadModel(const std::string &file, util::LoadMethod load_method)
 {
   m_lmIdLookup.clear();
 
@@ -161,18 +104,18 @@ template <class Model> void LanguageModelKen<Model>::LoadModel(const std::string
   FactorCollection &collection = FactorCollection::Instance();
   MappingBuilder builder(collection, m_lmIdLookup);
   config.enumerate_vocab = &builder;
-  config.load_method = lazy ? util::LAZY : util::POPULATE_OR_READ;
+  config.load_method = load_method;
 
   m_ngram.reset(new Model(file.c_str(), config));
 }
 
-template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
+template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, util::LoadMethod load_method)
   :LanguageModel(line)
   ,m_factorType(factorType)
   ,m_beginSentenceFactor(FactorCollection::Instance().AddFactor(BOS_))
 {
   ReadParameters();
-  LoadModel(file, lazy);
+  LoadModel(file, load_method);
 }
 
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const LanguageModelKen<Model> &copy_from)
@@ -480,7 +423,7 @@ LanguageModel *ConstructKenLM(const std::string &lineOrig)
 {
   FactorType factorType = 0;
   string filePath;
-  bool lazy = false;
+  util::LoadMethod load_method = util::POPULATE_OR_READ;
 
   util::TokenIter<util::SingleCharacter, true> argument(lineOrig, ' ');
   ++argument; // KENLM
@@ -501,38 +444,53 @@ LanguageModel *ConstructKenLM(const std::string &lineOrig)
     } else if (name == "path") {
       filePath.assign(value.data(), value.size());
     } else if (name == "lazyken") {
-      lazy = boost::lexical_cast<bool>(value);
+      // deprecated: use load instead.
+      load_method = boost::lexical_cast<bool>(value) ? util::LAZY : util::POPULATE_OR_READ;
+    } else if (name == "load") {
+      if (value == "lazy") {
+        load_method = util::LAZY;
+      } else if (value == "populate_or_lazy") {
+        load_method = util::POPULATE_OR_LAZY;
+      } else if (value == "populate_or_read" || value == "populate") {
+        load_method = util::POPULATE_OR_READ;
+      } else if (value == "read") {
+        load_method = util::READ;
+      } else if (value == "parallel_read") {
+        load_method = util::PARALLEL_READ;
+      } else {
+        UTIL_THROW2("Unknown KenLM load method " << value);
+      }
     } else {
       // pass to base class to interpret
       line << " " << name << "=" << value;
     }
   }
 
-  return ConstructKenLM(line.str(), filePath, factorType, lazy);
+  return ConstructKenLM(line.str(), filePath, factorType, load_method);
 }
 
-LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
+LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, FactorType factorType, util::LoadMethod load_method)
 {
   lm::ngram::ModelType model_type;
   if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
     switch(model_type) {
     case lm::ngram::PROBING:
-      return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, lazy);
+      return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, load_method);
     case lm::ngram::REST_PROBING:
-      return new LanguageModelKen<lm::ngram::RestProbingModel>(line, file, factorType, lazy);
+      return new LanguageModelKen<lm::ngram::RestProbingModel>(line, file, factorType, load_method);
     case lm::ngram::TRIE:
-      return new LanguageModelKen<lm::ngram::TrieModel>(line, file, factorType, lazy);
+      return new LanguageModelKen<lm::ngram::TrieModel>(line, file, factorType, load_method);
     case lm::ngram::QUANT_TRIE:
-      return new LanguageModelKen<lm::ngram::QuantTrieModel>(line, file, factorType, lazy);
+      return new LanguageModelKen<lm::ngram::QuantTrieModel>(line, file, factorType, load_method);
     case lm::ngram::ARRAY_TRIE:
-      return new LanguageModelKen<lm::ngram::ArrayTrieModel>(line, file, factorType, lazy);
+      return new LanguageModelKen<lm::ngram::ArrayTrieModel>(line, file, factorType, load_method);
     case lm::ngram::QUANT_ARRAY_TRIE:
-      return new LanguageModelKen<lm::ngram::QuantArrayTrieModel>(line, file, factorType, lazy);
+      return new LanguageModelKen<lm::ngram::QuantArrayTrieModel>(line, file, factorType, load_method);
     default:
       UTIL_THROW2("Unrecognized kenlm model type " << model_type);
     }
   } else {
-    return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, lazy);
+    return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, load_method);
   }
 }
 

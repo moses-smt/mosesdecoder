@@ -42,6 +42,7 @@
 #include "moses/FF/ControlRecombination.h"
 #include "moses/FF/ConstrainedDecoding.h"
 #include "moses/FF/SoftSourceSyntacticConstraintsFeature.h"
+#include "moses/FF/TargetConstituentAdjacencyFeature.h"
 #include "moses/FF/TargetPreferencesFeature.h"
 #include "moses/FF/CoveredReferenceFeature.h"
 #include "moses/FF/TreeStructureFeature.h"
@@ -264,6 +265,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(CoveredReferenceFeature);
   MOSES_FNAME(SourceGHKMTreeInputMatchFeature);
   MOSES_FNAME(SoftSourceSyntacticConstraintsFeature);
+  MOSES_FNAME(TargetConstituentAdjacencyFeature);
   MOSES_FNAME(TargetPreferencesFeature);
   MOSES_FNAME(TreeStructureFeature);
   MOSES_FNAME(SoftMatchingFeature);

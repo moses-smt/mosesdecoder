@@ -140,6 +140,8 @@ float Model1LexicalTable::GetProbability(const Factor* wordS, const Factor* word
 
 Model1Feature::Model1Feature(const std::string &line)
   : StatelessFeatureFunction(1, line)
+  , m_skipTargetPunctuation(false)
+  , m_is_syntax(false)
 {
   VERBOSE(1, "Initializing feature " << GetScoreProducerDescription() << " ...");
   ReadParameters();
@@ -150,10 +152,12 @@ void Model1Feature::SetParameter(const std::string& key, const std::string& valu
 {
   if (key == "path") {
     m_fileNameModel1 = value;
-  } else if (key == "sourceVocabulary") {
+  } else if (key == "source-vocabulary") {
     m_fileNameVcbS = value;
-  } else if (key == "targetVocabulary") {
+  } else if (key == "target-vocabulary") {
     m_fileNameVcbT = value;
+  } else if (key == "skip-target-punctuation") {
+    m_skipTargetPunctuation = Scan<bool>(value);
   } else {
     StatelessFeatureFunction::SetParameter(key, value);
   }
@@ -162,6 +166,8 @@ void Model1Feature::SetParameter(const std::string& key, const std::string& valu
 void Model1Feature::Load(AllOptions::ptr const& opts)
 {
   m_options = opts;
+  m_is_syntax = is_syntax(opts->search.algo);
+
   FEATUREVERBOSE(2, GetScoreProducerDescription() << ": Loading source vocabulary from file " << m_fileNameVcbS << " ...");
   Model1Vocabulary vcbS;
   vcbS.Load(m_fileNameVcbS);
@@ -177,6 +183,16 @@ void Model1Feature::Load(AllOptions::ptr const& opts)
   m_emptyWord = factorCollection.GetFactor(Model1Vocabulary::GIZANULL,false);
   UTIL_THROW_IF2(m_emptyWord==NULL, GetScoreProducerDescription()
                  << ": Factor for GIZA empty word does not exist.");
+
+  if (m_skipTargetPunctuation) {
+    const std::string punctuation = ",;.:!?";
+    for (size_t i=0; i<punctuation.size(); ++i) {
+      const std::string punct = punctuation.substr(i,1);
+      FactorCollection &factorCollection = FactorCollection::Instance();
+      const Factor* punctFactor = factorCollection.AddFactor(punct,false);
+      std::pair<std::set<const Factor*>::iterator,bool> inserted = m_punctuation.insert(punctFactor);
+    }
+  }
 }
 
 void Model1Feature::EvaluateWithSourceContext(const InputType &input
@@ -192,6 +208,12 @@ void Model1Feature::EvaluateWithSourceContext(const InputType &input
 
   for (size_t posT=0; posT<targetPhrase.GetSize(); ++posT) {
     const Word &wordT = targetPhrase.GetWord(posT);
+    if (m_skipTargetPunctuation) {
+      std::set<const Factor*>::const_iterator foundPunctuation = m_punctuation.find(wordT[0]);
+      if (foundPunctuation != m_punctuation.end()) {
+        continue;
+      }
+    }
     if ( !wordT.IsNonTerminal() ) {
       float thisWordProb = m_model1.GetProbability(m_emptyWord,wordT[0]); // probability conditioned on empty word
 
@@ -213,7 +235,7 @@ void Model1Feature::EvaluateWithSourceContext(const InputType &input
       }
 
       if (!foundInCache) {
-        for (size_t posS=1; posS<sentence.GetSize()-1; ++posS) { // ignore <s> and </s>
+        for (size_t posS=(m_is_syntax?1:0); posS<(m_is_syntax?sentence.GetSize()-1:sentence.GetSize()); ++posS) { // ignore <s> and </s>
           const Word &wordS = sentence.GetWord(posS);
           float modelProb = m_model1.GetProbability(wordS[0],wordT[0]);
           FEATUREVERBOSE(4, "p( " << wordT << " | " << wordS << " ) = " << modelProb << std::endl);

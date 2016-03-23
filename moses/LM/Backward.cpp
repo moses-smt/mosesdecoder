@@ -40,7 +40,8 @@ namespace Moses
 {
 
 /** Constructs a new backward language model. */
-template <class Model> BackwardLanguageModel<Model>::BackwardLanguageModel(const std::string &line, const std::string &file, FactorType factorType, bool lazy) : LanguageModelKen<Model>(line,file,factorType,lazy)
+// TODO(lane): load_method instead of lazy bool
+template <class Model> BackwardLanguageModel<Model>::BackwardLanguageModel(const std::string &line, const std::string &file, FactorType factorType, bool lazy) : LanguageModelKen<Model>(line,file,factorType, lazy ? util::LAZY : util::POPULATE_OR_READ)
 {
   //
   // This space intentionally left blank
