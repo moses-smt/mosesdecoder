@@ -16,6 +16,7 @@
 namespace Moses2 {
 
 class LexicalReorderingTableCompact;
+class LRModel;
 
 class LexicalReordering : public StatefulFeatureFunction
 {
@@ -60,7 +61,8 @@ protected:
   FactorList m_FactorsF;
   FactorList m_FactorsE;
   FactorList m_FactorsC;
-  bool m_phraseBased;
+
+  LRModel *m_lrModel;
 
   virtual void
   EvaluateAfterTablePruning(MemPool &pool,

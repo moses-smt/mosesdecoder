@@ -7,6 +7,7 @@
 
 #include <boost/foreach.hpp>
 #include "LexicalReordering.h"
+#include "LRModel.h"
 #include "PhraseBasedReorderingState.h"
 #include "BidirectionalReorderingState.h"
 #include "../../TranslationModel/PhraseTable.h"
@@ -30,10 +31,11 @@ LexicalReordering::LexicalReordering(size_t startInd, const std::string &line)
 ,m_blank(NULL)
 ,m_propertyInd(-1)
 ,m_coll(NULL)
-,m_phraseBased(true)
+,m_lrModel(NULL)
 {
 	ReadParameters();
-	assert(m_numScores == 6);
+	assert(m_lrModel);
+	//assert(m_numScores == 6);
 }
 
 LexicalReordering::~LexicalReordering()
@@ -41,6 +43,7 @@ LexicalReordering::~LexicalReordering()
 	delete m_compactModel;
 	delete m_coll;
 	delete m_blank;
+	delete m_lrModel;
 }
 
 void LexicalReordering::Load(System &system)
@@ -80,22 +83,23 @@ void LexicalReordering::Load(System &system)
   }
 }
 
+#include "util/exception.hh"
+
 void LexicalReordering::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "path") {
 	  m_path = value;
   }
   else if (key == "type") {
-	  if (value == "msd-bidirectional-fe" ||
-		  value == "wbe-msd-bidirectional-fe-allff") {
-		  m_phraseBased = true;
-	  }
-	  else if (value == "hier-mslr-birectional-fe") {
-		  m_phraseBased = false;
+	  m_lrModel = new LRModel(value);
+	  if (m_lrModel->IsPhraseBased()) {
+		  UTIL_THROW_IF2(value != "msd-bidirectional-fe"
+				  && value != "wbe-msd-bidirectional-fe-allff",
+				  "Lex RO type not supported");
 	  }
 	  else {
-		  cerr << "Unsupported lex ro type";
-		  abort();
+		  UTIL_THROW_IF2(value != "hier-mslr-birectional-fe",
+				  "Lex RO type not supported");
 	  }
   }
   else if (key == "input-factor") {
@@ -115,7 +119,7 @@ void LexicalReordering::SetParameter(const std::string& key, const std::string& 
 FFState* LexicalReordering::BlankState(MemPool &pool) const
 {
   FFState *ret;
-  if (m_phraseBased) {
+  if (m_lrModel->IsPhraseBased()) {
     ret = new (pool.Allocate<PhraseBasedReorderingState>()) PhraseBasedReorderingState();
   }
   else {
@@ -131,7 +135,7 @@ void LexicalReordering::EmptyHypothesisState(FFState &state,
 		const InputType &input,
 		const Hypothesis &hypo) const
 {
-  if (m_phraseBased) {
+  if (m_lrModel->IsPhraseBased()) {
 	PhraseBasedReorderingState &stateCast = static_cast<PhraseBasedReorderingState&>(state);
 	stateCast.path = &hypo.GetInputPath();
 	stateCast.targetPhrase = &hypo.GetTargetPhrase();
