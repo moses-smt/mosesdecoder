@@ -28,6 +28,12 @@
 #include "TrainingLoss.h"
 #include "VWTargetSentence.h"
 
+/*
+ * VW classifier feature. See vw/README.md for further information.
+ *
+ * TODO: say which paper to cite.
+ */
+
 namespace Moses
 {
 
@@ -83,6 +89,31 @@ public:
                                  , ScoreComponentCollection *estimatedFutureScore = NULL) const {
   }
 
+  // This behavior of this method depends on whether it's called during VW
+  // training (feature extraction) by vwtrainer or during decoding (prediction
+  // time) by Moses.
+  //
+  // When predicting, it evaluates all translation options with the VW model;
+  // if no target-context features are defined, this is the final score and it
+  // is added directly to the TranslationOption score. If there are target
+  // context features, the score is a partial score and it is only stored in
+  // cache; the final score is computed based on target context in
+  // EvaluateWhenApplied().
+  //
+  // This method is also used in training by vwtrainer in which case features
+  // are written to a file, no classifier predictions take place. Target-side
+  // context is constant at training time (we know the true target sentence),
+  // so target-context features are extracted here as well.
+  virtual void EvaluateTranslationOptionListWithSourceContext(const InputType &input 
+      , const TranslationOptionList &translationOptionList) const;
+
+  // Evaluate VW during decoding. This is only used at prediction time (not in training).
+  // When no target-context features are defined, VW predictions were already fully calculated
+  // in EvaluateTranslationOptionListWithSourceContext() and the scores were added to the model.
+  // If there are target-context features, we compute the context-dependent part of the 
+  // classifier score and combine it with the source-context only partial score which was computed
+  // in EvaluateTranslationOptionListWithSourceContext(). Various caches are used to make this
+  // method more efficient.
   virtual FFState* EvaluateWhenApplied(
     const Hypothesis& curHypo,
     const FFState* prevState,
@@ -95,18 +126,18 @@ public:
     throw new std::logic_error("hiearchical/syntax not supported"); 
   }
 
+  // Initial VW state; contains unaligned BOS symbols.
   const FFState* EmptyHypothesisState(const InputType &input) const; 
-
-  virtual void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const;
 
   void SetParameter(const std::string& key, const std::string& value);
 
+  // At prediction time, this clears our caches. At training time, we load the next sentence, its 
+  // translation and word alignment.
   virtual void InitializeForInput(ttasksptr const& ttask);
 
 private:
   inline std::string MakeTargetLabel(const TargetPhrase &targetPhrase) const {
-    return VW_DUMMY_LABEL;
+    return VW_DUMMY_LABEL; // VW does not care about class labels in our setting (--csoaa_ldf mc).
   }
 
   inline size_t MakeCacheKey(const FFState *prevState, size_t spanStart, size_t spanEnd) const {
@@ -117,16 +148,20 @@ private:
     return key;
   }
 
+  // At training time, determine whether a translation option is correct for the current target sentence
+  // based on word alignment. This is a bit complicated because we need to handle various corner-cases
+  // where some word(s) on phrase borders are unaligned.
   std::pair<bool, int> IsCorrectTranslationOption(const TranslationOption &topt) const;
 
-  // at training time, optionally discount occurrences of phrase pairs from the current sentence, helps prevent
-  // over-fitting
+  // At training time, optionally discount occurrences of phrase pairs from the current sentence, helps prevent
+  // over-fitting.
   std::vector<bool> LeaveOneOut(const TranslationOptionList &topts, const std::vector<bool> &correct) const;
 
   bool m_train; // false means predict
-  std::string m_modelPath;
-  std::string m_vwOptions;
+  std::string m_modelPath; // path to the VW model file; at training time, this is where extracted features are stored
+  std::string m_vwOptions; // options for Vowpal Wabbit
 
+  // BOS token, all factors
   Word m_sentenceStartWord;
 
   // calculator of training loss
@@ -135,9 +170,13 @@ private:
   // optionally contains feature name of a phrase table where we recompute scores with leaving one out
   std::string m_leaveOneOut;
 
+  // normalizer, typically this means softmax
   Discriminative::Normalizer *m_normalizer = NULL;
+  
+  // thread-specific classifier instance
   TLSClassifier *m_tlsClassifier;
 
+  // caches for partial scores and feature vectors
   TLSFloatHashMap *m_tlsFutureScores;
   TLSStateExtensions *m_tlsComputedStateExtensions;
   TLSFeatureVectorMap *m_tlsTranslationOptionFeatures, *m_tlsTargetContextFeatures;
