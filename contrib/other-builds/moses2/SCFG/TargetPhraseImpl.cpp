@@ -41,7 +41,7 @@ TargetPhraseImpl *TargetPhraseImpl::CreateFromString(MemPool &pool, const Phrase
 
 TargetPhraseImpl::TargetPhraseImpl(MemPool &pool, const PhraseTable &pt, const System &system, size_t size)
 :TargetPhrase(pool, pt, system)
-,PhraseImplTemplate(pool, size)
+,PhraseImplTemplate<SCFG::Word>(pool, size)
 {
 	m_scores = new (pool.Allocate<Scores>()) Scores(system, pool, system.featureFunctions.GetNumScores());
 
