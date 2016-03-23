@@ -353,19 +353,20 @@ void VW::EvaluateTranslationOptionListWithSourceContext(const InputType &input
 
         topt->UpdateScore();
       } else {
-        // we have target context features => this is just a partial score,
-        // do not add it to the score component collection
-        // subtract the score contribution of target-only features, otherwise it would
-        // be included twice
+        // We have target context features => this is just a partial score,
+        // do not add it to the score component collection.
         size_t toptHash = hash_value(*topt);
+        
+        // Subtract the score contribution of target-only features, otherwise it would
+        // be included twice.
         Discriminative::FeatureVector emptySource;
         const Discriminative::FeatureVector &targetFeatureVector =
           m_tlsTranslationOptionFeatures->GetStored()->find(toptHash)->second;
-
         classifier.AddLabelIndependentFeatureVector(emptySource);
         classifier.AddLabelDependentFeatureVector(targetFeatureVector);
-        float futureScore = rawLosses[toptIdx];
-        futureScore -= classifier.Predict(VW_DUMMY_LABEL);
+        float targetOnlyLoss = classifier.Predict(VW_DUMMY_LABEL);
+
+        float futureScore = rawLosses[toptIdx] - targetOnlyLoss;
         m_tlsFutureScores->GetStored()->insert(std::make_pair(toptHash, futureScore));
       }
     }
