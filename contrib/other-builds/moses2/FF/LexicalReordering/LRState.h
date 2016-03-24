@@ -1,5 +1,6 @@
 #pragma once
 #include "../../legacy/FFState.h"
+#include "LRModel.h"
 
 namespace Moses2 {
 
@@ -17,6 +18,8 @@ public:
 			  size_t phraseTableInd,
 			  Scores &scores,
 			  FFState &state) const = 0;
+protected:
+  LRModel::Direction m_direction;
 
 };
 

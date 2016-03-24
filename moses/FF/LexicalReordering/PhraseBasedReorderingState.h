@@ -27,11 +27,6 @@ public:
   LRState*
   Expand(const TranslationOption& topt,const InputType& input,
          ScoreComponentCollection*  scores) const;
-
-  ReorderingType GetOrientationTypeMSD(Range currRange) const;
-  ReorderingType GetOrientationTypeMSLR(Range currRange) const;
-  ReorderingType GetOrientationTypeMonotonic(Range currRange) const;
-  ReorderingType GetOrientationTypeLeftRight(Range currRange) const;
 };
 
 }

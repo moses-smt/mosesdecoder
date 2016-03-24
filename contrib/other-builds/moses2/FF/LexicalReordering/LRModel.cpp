@@ -7,6 +7,8 @@
 
 #include "LRModel.h"
 #include "../../legacy/Util2.h"
+#include "../../legacy/Range.h"
+#include "util/exception.hh"
 
 namespace Moses2 {
 
@@ -79,6 +81,32 @@ LRModel::LRModel(const std::string &modelType)
 
 LRModel::~LRModel() {
 	// TODO Auto-generated destructor stub
+}
+
+/// return orientation for the first phrase
+LRModel::ReorderingType
+LRModel::
+GetOrientation(Range const& cur) const
+{
+  UTIL_THROW_IF2(m_modelType == None, "Reordering Model Type is None");
+  return ((m_modelType == LeftRight) ? R :
+          (cur.GetStartPos() == 0) ? M  :
+          (m_modelType == MSD)     ? D  :
+          (m_modelType == MSLR)    ? DR : NM);
+}
+
+LRModel::ReorderingType
+LRModel::
+GetOrientation(Range const& prev, Range const& cur) const
+{
+  UTIL_THROW_IF2(m_modelType == None, "No reordering model type specified");
+  return ((m_modelType == LeftRight)
+          ? prev.GetEndPos() <= cur.GetStartPos() ? R : L
+        : (cur.GetStartPos() == prev.GetEndPos() + 1) ? M
+          : (m_modelType == Monotonic) ? NM
+          : (prev.GetStartPos() ==  cur.GetEndPos() + 1) ? S
+          : (m_modelType == MSD) ? D
+          : (cur.GetStartPos() > prev.GetEndPos()) ? DR : DL);
 }
 
 } /* namespace Moses2 */

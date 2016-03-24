@@ -9,11 +9,26 @@
 
 namespace Moses2 {
 
+class Range;
+
 class LRModel {
 public:
-	  enum ModelType { Monotonic, MSD, MSLR, LeftRight, None };
-	  enum Direction { Forward, Backward, Bidirectional };
-	  enum Condition { F, E, FE };
+  enum ModelType { Monotonic, MSD, MSLR, LeftRight, None };
+  enum Direction { Forward, Backward, Bidirectional };
+  enum Condition { F, E, FE };
+
+  enum ReorderingType {
+	M    = 0, // monotonic
+	NM   = 1, // non-monotonic
+	S    = 1, // swap
+	D    = 2, // discontinuous
+	DL   = 2, // discontinuous, left
+	DR   = 3, // discontinuous, right
+	R    = 0, // right
+	L    = 1, // left
+	MAX  = 3, // largest possible
+	NONE = 4  // largest possible
+  };
 
 	LRModel(const std::string &modelType);
 	virtual ~LRModel();
@@ -45,6 +60,12 @@ protected:
   ModelType m_modelType;
   Direction m_direction;
   Condition m_condition;
+
+  ReorderingType // for first phrase in phrase-based
+  GetOrientation(Range const& cur) const;
+
+  ReorderingType // for non-first phrases in phrase-based
+  GetOrientation(Range const& prev, Range const& cur) const;
 
 };
 
