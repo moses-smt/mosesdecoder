@@ -8,8 +8,10 @@
 #include "LRModel.h"
 #include "../../legacy/Util2.h"
 #include "../../legacy/Range.h"
-#include "../../InputType.h"
+#include "../../Sentence.h"
 #include "util/exception.hh"
+#include "PhraseBasedReorderingState.h"
+#include "BidirectionalReorderingState.h"
 
 namespace Moses2 {
 
@@ -84,6 +86,14 @@ LRModel::~LRModel() {
 	// TODO Auto-generated destructor stub
 }
 
+size_t
+LRModel::
+GetNumberOfTypes() const
+{
+  return ((m_modelType == MSD)  ? 3 :
+          (m_modelType == MSLR) ? 4 : 2);
+}
+
 /// return orientation for the first phrase
 LRModel::ReorderingType
 LRModel::
@@ -112,10 +122,33 @@ GetOrientation(Range const& prev, Range const& cur) const
 
 LRState *
 LRModel::
-CreateLRState(const InputType &input) const
+CreateLRState(const Sentence &input) const
 {
   LRState *bwd = NULL, *fwd = NULL;
   size_t offset = 0;
+
+  switch(m_direction) {
+  case Backward:
+  case Bidirectional:
+    if (m_phraseBased) {
+      bwd = new PhraseBasedReorderingState(*this, Backward, offset);
+    }
+    else {
+      //bwd = new HReorderingBackwardState(*this, offset);
+    }
+    offset += m_collapseScores ? 1 : GetNumberOfTypes();
+    if (m_direction == Backward) return bwd; // else fall through
+  case Forward:
+    if (m_phraseBased) {
+      fwd = new PhraseBasedReorderingState(*this, Forward, offset);
+    }
+    else {
+      //fwd = new HReorderingForwardState(*this, input.GetSize(), offset);
+    }
+    offset += m_collapseScores ? 1 : GetNumberOfTypes();
+    if (m_direction == Forward) return fwd;
+  }
+  return new BidirectionalReorderingState(*this, bwd, fwd, 0);
 
 }
 

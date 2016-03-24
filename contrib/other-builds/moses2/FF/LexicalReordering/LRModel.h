@@ -9,7 +9,7 @@
 
 namespace Moses2 {
 
-class InputType;
+class Sentence;
 class Range;
 class LRState;
 
@@ -55,8 +55,10 @@ public:
 	    return m_collapseScores;
 	  }
 
+	  size_t GetNumberOfTypes() const;
+
 	  LRState*
-	  CreateLRState(const InputType &input) const;
+	  CreateLRState(const Sentence &input) const;
 
 protected:
 

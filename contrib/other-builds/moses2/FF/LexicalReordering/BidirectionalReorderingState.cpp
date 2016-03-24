@@ -6,22 +6,19 @@
  */
 #include <boost/functional/hash_fwd.hpp>
 #include "BidirectionalReorderingState.h"
-#include "HReorderingBackwardState.h"
-#include "HReorderingForwardState.h"
 
 namespace Moses2 {
 
-BidirectionalReorderingState::BidirectionalReorderingState(const LRModel &config,
-		LRModel::Direction dir,
-		size_t offset)
-:LRState(config, dir, offset)
-{
-	HReorderingBackwardState *backward = new HReorderingBackwardState(config, LRModel::Backward, offset);
-	m_backward = backward;
-
-	HReorderingForwardState *forward = new HReorderingForwardState(config, LRModel::Forward, offset);
-	m_forward = forward;
-}
+BidirectionalReorderingState::BidirectionalReorderingState(
+		const LRModel &config,
+        const LRState *bw,
+        const LRState *fw, size_t offset)
+: LRState(config,
+          LRModel::Bidirectional,
+          offset)
+, m_backward(bw)
+, m_forward(fw)
+{}
 
 BidirectionalReorderingState::~BidirectionalReorderingState() {
 	// TODO Auto-generated destructor stub
