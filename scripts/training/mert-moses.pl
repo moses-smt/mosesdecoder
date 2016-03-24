@@ -1404,6 +1404,10 @@ sub get_featlist_from_moses {
     $cmd .= "$___DECODER $___DECODER_FLAGS -config $configfn";
     $cmd .= " -inputtype $___INPUTTYPE" if defined($___INPUTTYPE);
     $cmd .= " -show-weights";
+    if (defined $___USE_MULTI_MOSES) {
+      # Pass moses command through multi-moses script to handle threads properly
+      $cmd = "$___MULTI_MOSES $cmd";
+    }
     print STDERR "Executing: $cmd\n";
     &submit_or_exec($cmd, $featlistfn, "/dev/null", 1);
   }
