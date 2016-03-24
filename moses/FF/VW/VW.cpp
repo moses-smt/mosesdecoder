@@ -15,6 +15,7 @@
 #include "moses/StaticData.h"
 #include "moses/Phrase.h"
 #include "moses/AlignmentInfo.h"
+#include "moses/AlignmentInfoCollection.h"
 #include "moses/Word.h"
 #include "moses/FactorCollection.h"
 
@@ -118,9 +119,9 @@ FFState* VW::EvaluateWhenApplied(
 
       const Phrase &targetContext = prevVWState.GetPhrase();
       Discriminative::FeatureVector contextVector;
-      AlignmentInfo alignInfo("");
+      const AlignmentInfo *alignInfo = TransformAlignmentInfo(curHypo, targetContext.GetSize());
       for(size_t i = 0; i < contextFeatures.size(); ++i)
-        (*contextFeatures[i])(input, targetContext, alignInfo, classifier, contextVector);
+        (*contextFeatures[i])(input, targetContext, *alignInfo, classifier, contextVector);
 
       contextFeaturesCache[contextHash] = contextVector;
       VERBOSE(3, "VW :: context cache miss\n");
@@ -447,6 +448,35 @@ void VW::InitializeForInput(ttasksptr const& ttask) {
 
   // pre-compute max- and min- aligned points for faster translation option checking
   targetSent.SetConstraints(source.GetSize());
+}
+
+/*************************************************************************************
+ * private methods
+ ************************************************************************************/
+
+const AlignmentInfo *VW::TransformAlignmentInfo(const Hypothesis &curHypo, size_t contextSize) const {
+  std::set<std::pair<size_t, size_t> > alignmentPoints;
+  const Hypothesis *contextHypo = curHypo.GetPrevHypo();
+  int idxInContext = contextSize - 1;
+  int processedWordsInHypo = 0;
+  while (idxInContext >= 0 && contextHypo) {
+    int idxInHypo = contextHypo->GetCurrTargetLength() - 1 - processedWordsInHypo;
+    if (idxInHypo >= 0) {
+      const AlignmentInfo &hypoAlign = contextHypo->GetCurrTargetPhrase().GetAlignTerm();
+      std::set<size_t> alignedToTgt = hypoAlign.GetAlignmentsForTarget(idxInHypo);
+      size_t srcOffset = contextHypo->GetCurrSourceWordsRange().GetStartPos();
+      BOOST_FOREACH(size_t srcIdx, alignedToTgt) {
+        alignmentPoints.insert(std::make_pair(srcOffset + srcIdx, idxInContext));
+      }
+      processedWordsInHypo++;
+      idxInContext--;
+    } else {
+      processedWordsInHypo = 0;
+      contextHypo = contextHypo->GetPrevHypo();
+    }
+  }
+
+  return AlignmentInfoCollection::Instance().Add(alignmentPoints);
 }
 
 std::pair<bool, int> VW::IsCorrectTranslationOption(const TranslationOption &topt) const {

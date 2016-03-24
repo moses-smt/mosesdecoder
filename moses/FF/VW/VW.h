@@ -148,6 +148,11 @@ private:
     return key;
   }
 
+  // used in decoding to transform the global word alignment information into
+  // context-phrase internal alignment information (i.e., with target indices correspoding
+  // to positions in contextPhrase)
+  const AlignmentInfo *TransformAlignmentInfo(const Hypothesis &curHypo, size_t contextSize) const;
+
   // At training time, determine whether a translation option is correct for the current target sentence
   // based on word alignment. This is a bit complicated because we need to handle various corner-cases
   // where some word(s) on phrase borders are unaligned.
