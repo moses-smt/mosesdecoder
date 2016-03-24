@@ -8,6 +8,7 @@
 #include "LRModel.h"
 #include "../../legacy/Util2.h"
 #include "../../legacy/Range.h"
+#include "../../InputType.h"
 #include "util/exception.hh"
 
 namespace Moses2 {
@@ -107,6 +108,15 @@ GetOrientation(Range const& prev, Range const& cur) const
           : (prev.GetStartPos() ==  cur.GetEndPos() + 1) ? S
           : (m_modelType == MSD) ? D
           : (cur.GetStartPos() > prev.GetEndPos()) ? DR : DL);
+}
+
+LRState *
+LRModel::
+CreateLRState(const InputType &input) const
+{
+  LRState *bwd = NULL, *fwd = NULL;
+  size_t offset = 0;
+
 }
 
 } /* namespace Moses2 */

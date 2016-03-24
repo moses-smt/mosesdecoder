@@ -9,7 +9,9 @@
 
 namespace Moses2 {
 
+class InputType;
 class Range;
+class LRState;
 
 class LRModel {
 public:
@@ -52,6 +54,9 @@ public:
 	  CollapseScores() const {
 	    return m_collapseScores;
 	  }
+
+	  LRState*
+	  CreateLRState(const InputType &input) const;
 
 protected:
 

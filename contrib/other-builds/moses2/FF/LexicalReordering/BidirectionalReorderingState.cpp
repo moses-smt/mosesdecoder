@@ -12,13 +12,14 @@
 namespace Moses2 {
 
 BidirectionalReorderingState::BidirectionalReorderingState(const LRModel &config,
-		LRModel::Direction dir)
-:LRState(config, dir)
+		LRModel::Direction dir,
+		size_t offset)
+:LRState(config, dir, offset)
 {
-	HReorderingBackwardState *backward = new HReorderingBackwardState(config, LRModel::Backward);
+	HReorderingBackwardState *backward = new HReorderingBackwardState(config, LRModel::Backward, offset);
 	m_backward = backward;
 
-	HReorderingForwardState *forward = new HReorderingForwardState(config, LRModel::Forward);
+	HReorderingForwardState *forward = new HReorderingForwardState(config, LRModel::Forward, offset);
 	m_forward = forward;
 }
 

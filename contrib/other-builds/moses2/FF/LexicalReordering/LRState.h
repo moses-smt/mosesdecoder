@@ -13,7 +13,8 @@ class LRState : public FFState
 {
 public:
   LRState(const LRModel &config,
-		  LRModel::Direction dir);
+		  LRModel::Direction dir,
+		  size_t offset);
 
   virtual void Expand(const System &system,
 			  const LexicalReordering &ff,
@@ -24,6 +25,7 @@ public:
 protected:
   const LRModel& m_configuration;
   LRModel::Direction m_direction;
+  size_t m_offset;
 
 };
 

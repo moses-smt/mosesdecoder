@@ -19,7 +19,9 @@ public:
   const InputPathBase *path;
   const TargetPhrase *targetPhrase;
 
-  PhraseBasedReorderingState(const LRModel &config, LRModel::Direction dir);
+  PhraseBasedReorderingState(const LRModel &config,
+		  LRModel::Direction dir,
+		  size_t offset);
 
   size_t hash() const {
 	// compare range address. All ranges are created in InputPathBase

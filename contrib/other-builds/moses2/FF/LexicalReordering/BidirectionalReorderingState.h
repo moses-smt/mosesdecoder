@@ -13,7 +13,8 @@ class BidirectionalReorderingState: public LRState
 {
 public:
   BidirectionalReorderingState(const LRModel &config,
-		  LRModel::Direction dir);
+		  LRModel::Direction dir,
+			size_t offset);
 
   virtual ~BidirectionalReorderingState();
 

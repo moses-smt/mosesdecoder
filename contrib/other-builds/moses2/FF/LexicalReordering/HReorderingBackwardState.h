@@ -13,7 +13,8 @@ class HReorderingBackwardState : public LRState
 {
 public:
   HReorderingBackwardState(const LRModel &config,
-		  LRModel::Direction dir);
+		  LRModel::Direction dir,
+			size_t offset);
   virtual ~HReorderingBackwardState();
 
   size_t hash() const;
