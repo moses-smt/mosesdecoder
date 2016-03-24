@@ -15,8 +15,8 @@ VWState::VWState() : m_spanStart(0), m_spanEnd(0) {
   ComputeHash();
 }
 
-VWState::VWState(const Phrase &phrase, size_t spanStart, size_t spanEnd) 
-  : m_phrase(phrase), m_spanStart(spanStart), m_spanEnd(spanEnd) {
+VWState::VWState(const Phrase &phrase) 
+  : m_phrase(phrase), m_spanStart(0), m_spanEnd(0) {
   ComputeHash();
 }
 

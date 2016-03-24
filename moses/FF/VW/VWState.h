@@ -17,7 +17,7 @@ public:
   VWState(); 
 
   // used for construction of the initial VW state
-  VWState(const Phrase &phrase, size_t spanStart, size_t spanEnd);
+  VWState(const Phrase &phrase);
 
   // continue from previous VW state with a new hypothesis
   VWState(const VWState &prevState, const Hypothesis &curHypo);

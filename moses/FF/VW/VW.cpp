@@ -183,7 +183,7 @@ const FFState* VW::EmptyHypothesisState(const InputType &input) const {
   for (size_t i = 0; i < maxContextSize; i++)
     initialPhrase.AddWord(m_sentenceStartWord);
     
-  return new VWState(initialPhrase, 0, 0);
+  return new VWState(initialPhrase);
 }
 
 void VW::EvaluateTranslationOptionListWithSourceContext(const InputType &input
