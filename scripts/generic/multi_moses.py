@@ -232,7 +232,7 @@ def main(argv):
     if show_weights:
         sys.stdout.write(subprocess.check_output(cmd))
         sys.stdout.flush()
-        sys.exit(0)
+        return
 
     # Check inputs
     if not (len(cmd) > 0 and moses_ini):
