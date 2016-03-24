@@ -12,7 +12,8 @@ class Scores;
 class LRState : public FFState
 {
 public:
-  LRState(LRModel::Direction dir);
+  LRState(const LRModel &config,
+		  LRModel::Direction dir);
 
   virtual void Expand(const System &system,
 			  const LexicalReordering &ff,
@@ -21,6 +22,7 @@ public:
 			  Scores &scores,
 			  FFState &state) const = 0;
 protected:
+  const LRModel& m_configuration;
   LRModel::Direction m_direction;
 
 };

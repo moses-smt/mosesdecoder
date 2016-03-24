@@ -9,8 +9,9 @@
 
 namespace Moses2 {
 
-HReorderingBackwardState::HReorderingBackwardState(LRModel::Direction dir)
-:LRState(dir)
+HReorderingBackwardState::HReorderingBackwardState(const LRModel &config,
+		LRModel::Direction dir)
+:LRState(config, dir)
 {
 	// TODO Auto-generated constructor stub
 

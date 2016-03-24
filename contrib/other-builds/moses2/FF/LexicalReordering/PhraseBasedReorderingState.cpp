@@ -11,6 +11,12 @@
 
 namespace Moses2 {
 
+PhraseBasedReorderingState::PhraseBasedReorderingState(const LRModel &config, LRModel::Direction dir)
+:LRState(config, dir)
+{
+	  // uninitialised
+}
+
 void PhraseBasedReorderingState::Expand(const System &system,
 		const LexicalReordering &ff,
 		const Hypothesis &hypo,
