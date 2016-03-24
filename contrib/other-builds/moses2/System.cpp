@@ -23,8 +23,9 @@ namespace Moses2
 System::System(const Parameter &paramsArg)
 :params(paramsArg)
 ,featureFunctions(*this)
-,m_nbestCollector(NULL)
 {
+	bestCollector.reset(new OutputCollector());
+
 	ini_performance_options();
 	params.SetParameter(stackSize, "stack", DEFAULT_MAX_HYPOSTACK_SIZE);
     params.SetParameter(maxDistortion, "distortion-limit", -1);
@@ -66,7 +67,7 @@ System::System(const Parameter &paramsArg)
 
     // output collectors
     if (nbestSize) {
-    	m_nbestCollector = new OutputCollector(nBestPath);
+    	nbestCollector.reset(new OutputCollector(nBestPath));
     }
 
 	featureFunctions.Create();
@@ -80,7 +81,6 @@ System::System(const Parameter &paramsArg)
 
 System::~System()
 {
-	delete m_nbestCollector;
 }
 
 void System::LoadWeights()

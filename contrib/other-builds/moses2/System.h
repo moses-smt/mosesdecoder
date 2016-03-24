@@ -10,6 +10,7 @@
 #include <deque>
 #include <boost/thread/tss.hpp>
 #include <boost/pool/object_pool.hpp>
+#include <boost/shared_ptr.hpp>
 #include "FF/FeatureFunctions.h"
 #include "Weights.h"
 #include "MemPool.h"
@@ -39,7 +40,7 @@ public:
     Weights weights;
     std::vector<const PhraseTable*> mappings;
 
-    mutable OutputCollector bestCollector;
+    mutable boost::shared_ptr<OutputCollector> bestCollector, nbestCollector;
 
     // moses.ini params
     size_t stackSize;
@@ -69,17 +70,12 @@ public:
 
 	Recycler<HypothesisBase*> &GetHypoRecycler() const;
 
-	OutputCollector &GetNBestCollector() const
-	{ return *m_nbestCollector; }
-
 protected:
   mutable FactorCollection m_vocab;
   mutable boost::thread_specific_ptr<MemPool> m_managerPool;
   mutable boost::thread_specific_ptr<MemPool> m_systemPool;
 
   mutable boost::thread_specific_ptr< Recycler<HypothesisBase*> > m_hypoRecycler;
-
-  mutable OutputCollector *m_nbestCollector;
 
   std::string nBestPath;
 

@@ -182,7 +182,7 @@ void Manager::OutputBest() const
 	}
 	out << "\n";
 
-	system.bestCollector.Write(m_input->GetTranslationId(), out.str());
+	system.bestCollector->Write(m_input->GetTranslationId(), out.str());
 	//cerr << endl;
 }
 
@@ -230,7 +230,7 @@ void Manager::OutputNBest()
 
 		++bestInd;
 	}
-	system.GetNBestCollector().Write(transId, out.str());
+	system.nbestCollector->Write(transId, out.str());
 
 }
 
