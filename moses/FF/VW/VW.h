@@ -153,6 +153,10 @@ private:
   // to positions in contextPhrase)
   const AlignmentInfo *TransformAlignmentInfo(const Hypothesis &curHypo, size_t contextSize) const;
 
+  // used during training to extract relevant alignment points from the full sentence alignment
+  // and shift them by target context size
+  AlignmentInfo TransformAlignmentInfo(const AlignmentInfo &alignInfo, size_t contextSize, int currentStart) const;
+
   // At training time, determine whether a translation option is correct for the current target sentence
   // based on word alignment. This is a bit complicated because we need to handle various corner-cases
   // where some word(s) on phrase borders are unaligned.

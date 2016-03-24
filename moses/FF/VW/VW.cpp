@@ -273,13 +273,16 @@ void VW::EvaluateTranslationOptionListWithSourceContext(const InputType &input
         targetContext.AddWord(m_sentenceStartWord);
 
       const Phrase *targetSent = GetStored()->m_sentence;
-      const AlignmentInfo *alignInfo = GetStored()->m_alignment;
+
+      // word alignment info shifted by context size
+      AlignmentInfo contextAlignment = TransformAlignmentInfo(*GetStored()->m_alignment, maxContextSize, currentStart);
+
       if (currentStart > 0)
         targetContext.Append(targetSent->GetSubString(Range(0, currentStart - 1)));
 
       // extract target-context features
       for(size_t i = 0; i < contextFeatures.size(); ++i)
-        (*contextFeatures[i])(input, targetContext, *alignInfo, classifier, dummyVector);
+        (*contextFeatures[i])(input, targetContext, contextAlignment, classifier, dummyVector);
 
       // go over topts, extract target side features and train the classifier
       for (size_t toptIdx = 0; toptIdx < translationOptionList.size(); toptIdx++) {
@@ -477,6 +480,17 @@ const AlignmentInfo *VW::TransformAlignmentInfo(const Hypothesis &curHypo, size_
   }
 
   return AlignmentInfoCollection::Instance().Add(alignmentPoints);
+}
+
+AlignmentInfo VW::TransformAlignmentInfo(const AlignmentInfo &alignInfo, size_t contextSize, int currentStart) const {
+  std::set<std::pair<size_t, size_t> > alignmentPoints;
+  for (int i = std::max(0, currentStart - (int)contextSize); i < currentStart; i++) {
+    std::set<size_t> alignedToTgt = alignInfo.GetAlignmentsForTarget(i);
+    BOOST_FOREACH(size_t srcIdx, alignedToTgt) {
+      alignmentPoints.insert(std::make_pair(srcIdx, i + contextSize));
+    }
+  }
+  return AlignmentInfo(alignmentPoints);
 }
 
 std::pair<bool, int> VW::IsCorrectTranslationOption(const TranslationOption &topt) const {
