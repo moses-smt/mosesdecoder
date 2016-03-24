@@ -27,10 +27,10 @@ public:
     : m_kenlm(file, config) {}
 
   float Score(const lm::ngram::State &in_state,
-                      StringPiece word,
-                      lm::ngram::State &out_state) const {
+              StringPiece word,
+              lm::ngram::State &out_state) const {
     return m_kenlm.Score(in_state, m_kenlm.GetVocabulary().Index(word),
-                          out_state);
+                         out_state);
   }
 
   const lm::ngram::State &BeginSentenceState() const {
