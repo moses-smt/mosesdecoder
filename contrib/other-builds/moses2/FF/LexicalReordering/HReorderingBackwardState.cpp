@@ -9,7 +9,9 @@
 
 namespace Moses2 {
 
-HReorderingBackwardState::HReorderingBackwardState() {
+HReorderingBackwardState::HReorderingBackwardState(LRModel::Direction dir)
+:LRState(dir)
+{
 	// TODO Auto-generated constructor stub
 
 }

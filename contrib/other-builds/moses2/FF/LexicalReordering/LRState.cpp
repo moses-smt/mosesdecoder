@@ -8,6 +8,10 @@
 
 namespace Moses2 {
 
+LRState::LRState(LRModel::Direction dir)
+:m_direction(dir)
+{
+}
 
 }
 

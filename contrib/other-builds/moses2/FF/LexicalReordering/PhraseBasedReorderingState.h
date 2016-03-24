@@ -19,7 +19,8 @@ public:
   const InputPathBase *path;
   const TargetPhrase *targetPhrase;
 
-  PhraseBasedReorderingState()
+  PhraseBasedReorderingState(LRModel::Direction dir)
+  :LRState(dir)
   {
 	  // uninitialised
   }

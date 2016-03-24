@@ -33,6 +33,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
     
     FF/LexicalReordering/LexicalReordering.cpp
     FF/LexicalReordering/LRModel.cpp
+    FF/LexicalReordering/LRState.cpp
     FF/LexicalReordering/PhraseBasedReorderingState.cpp
     FF/LexicalReordering/BidirectionalReorderingState.cpp
     FF/LexicalReordering/HReorderingBackwardState.cpp

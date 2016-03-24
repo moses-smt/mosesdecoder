@@ -11,12 +11,13 @@
 
 namespace Moses2 {
 
-BidirectionalReorderingState::BidirectionalReorderingState()
+BidirectionalReorderingState::BidirectionalReorderingState(LRModel::Direction dir)
+:LRState(dir)
 {
-	HReorderingBackwardState *backward = new HReorderingBackwardState();
+	HReorderingBackwardState *backward = new HReorderingBackwardState(LRModel::Backward);
 	m_backward = backward;
 
-	HReorderingForwardState *forward = new HReorderingForwardState();
+	HReorderingForwardState *forward = new HReorderingForwardState(LRModel::Forward);
 	m_forward = forward;
 }
 

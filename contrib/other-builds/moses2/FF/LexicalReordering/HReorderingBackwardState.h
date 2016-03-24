@@ -12,7 +12,7 @@ namespace Moses2 {
 class HReorderingBackwardState : public LRState
 {
 public:
-  HReorderingBackwardState();
+  HReorderingBackwardState(LRModel::Direction dir);
   virtual ~HReorderingBackwardState();
 
   size_t hash() const;

@@ -12,7 +12,7 @@ namespace Moses2 {
 class BidirectionalReorderingState: public LRState
 {
 public:
-  BidirectionalReorderingState();
+  BidirectionalReorderingState(LRModel::Direction dir);
 
   virtual ~BidirectionalReorderingState();
 
