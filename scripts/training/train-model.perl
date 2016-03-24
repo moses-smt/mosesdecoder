@@ -2299,9 +2299,9 @@ sub create_ini {
       } elsif ($type == 1) {
         $type = "IRSTLM";
       } elsif ($type == 8) {
-        $type = "KENLM lazyken=0";
+        $type = "KENLM";
       } elsif ($type == 9) {
-        $type = "KENLM lazyken=1";
+        $type = "KENLM load=lazy";
       } else {
         die "Unknown numeric LM type given: $type";
       }
