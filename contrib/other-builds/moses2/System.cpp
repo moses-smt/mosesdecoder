@@ -23,7 +23,7 @@ namespace Moses2
 System::System(const Parameter &paramsArg)
 :params(paramsArg)
 ,featureFunctions(*this)
-
+,m_nbestCollector(NULL)
 {
 	ini_performance_options();
 	params.SetParameter(stackSize, "stack", DEFAULT_MAX_HYPOSTACK_SIZE);
