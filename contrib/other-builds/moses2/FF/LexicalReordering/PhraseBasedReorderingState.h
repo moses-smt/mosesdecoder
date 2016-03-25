@@ -15,6 +15,7 @@ class PhraseBasedReorderingState : public LRState
 {
 public:
   const InputPathBase *prevPath;
+  bool m_first;
 
   PhraseBasedReorderingState(const LRModel &config,
 		  LRModel::Direction dir,
@@ -36,8 +37,6 @@ public:
 		  FFState &state) const;
 
 protected:
-  size_t  GetOrientation(Range const& cur) const;
-  size_t  GetOrientation(Range const& prev, Range const& cur) const;
 
 };
 

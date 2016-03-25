@@ -52,37 +52,16 @@ void PhraseBasedReorderingState::Expand(const System &system,
 		FFState &state) const
 {
 	  // const LRModel::ModelType modelType = m_configuration.GetModelType();
-/*
+
 	  if ((m_direction != LRModel::Forward) || !m_first) {
 	    LRModel const& lrmodel = m_configuration;
-	    Range const cur = topt.GetSourceWordsRange();
+	    Range const &cur = hypo.GetInputPath().range;
 	    LRModel::ReorderingType reoType = (m_first ? lrmodel.GetOrientation(cur)
-	                                       : lrmodel.GetOrientation(m_prevRange,cur));
-	    CopyScores(scores, topt, input, reoType);
+	                                       : lrmodel.GetOrientation(prevPath->range, cur));
+	    //CopyScores(scores, topt, input, reoType);
 	  }
-	  return new PhraseBasedReorderingState(this, topt);
-*/
-}
+//	  return new PhraseBasedReorderingState(this, topt);
 
-size_t PhraseBasedReorderingState::GetOrientation(Range const& cur) const
-{
-  return (cur.GetStartPos() == 0) ? 0 : 2;
-}
-
-size_t PhraseBasedReorderingState::GetOrientation(Range const& prev, Range const& cur) const
-{
-  if (cur.GetStartPos() == prev.GetEndPos() + 1) {
-	  // monotone
-	  return 0;
-  }
-  else if (prev.GetStartPos() ==  cur.GetEndPos() + 1) {
-	  // swap
-	  return 1;
-  }
-  else {
-	  // discontinuous
-	  return 2;
-  }
 }
 
 } /* namespace Moses2 */

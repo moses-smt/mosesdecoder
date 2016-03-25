@@ -65,6 +65,12 @@ public:
 	  LRState*
 	  CreateLRState() const;
 
+	  ReorderingType // for first phrase in phrase-based
+	  GetOrientation(Range const& cur) const;
+
+	  ReorderingType // for non-first phrases in phrase-based
+	  GetOrientation(Range const& prev, Range const& cur) const;
+
 protected:
 
   ModelType m_modelType;
@@ -73,13 +79,6 @@ protected:
   Direction m_direction;
   Condition m_condition;
   LexicalReordering *m_scoreProducer;
-
-
-  ReorderingType // for first phrase in phrase-based
-  GetOrientation(Range const& cur) const;
-
-  ReorderingType // for non-first phrases in phrase-based
-  GetOrientation(Range const& prev, Range const& cur) const;
 
 };
 
