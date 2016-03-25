@@ -21,6 +21,10 @@ public:
 		  LRModel::Direction dir,
 		  size_t offset);
 
+  void Init(const PhraseBasedReorderingState *prev,
+		  const TargetPhrase &topt,
+		  const InputPathBase &path);
+
   size_t hash() const;
   virtual bool operator==(const FFState& other) const;
 

@@ -20,6 +20,17 @@ PhraseBasedReorderingState::PhraseBasedReorderingState(
 	  // uninitialised
 }
 
+
+void PhraseBasedReorderingState::Init(
+		const PhraseBasedReorderingState *prev,
+        const TargetPhrase &topt,
+		const InputPathBase &path)
+{
+  prevTP = &topt;
+  prevPath = &path;
+  m_first = false;
+}
+
 size_t PhraseBasedReorderingState::hash() const {
 	  size_t ret;
 	  ret = hash_value(prevPath->range);
@@ -51,17 +62,16 @@ void PhraseBasedReorderingState::Expand(const System &system,
 		Scores &scores,
 		FFState &state) const
 {
-	  // const LRModel::ModelType modelType = m_configuration.GetModelType();
+  if ((m_direction != LRModel::Forward) || !m_first) {
+	LRModel const& lrmodel = m_configuration;
+	Range const &cur = hypo.GetInputPath().range;
+	LRModel::ReorderingType reoType = (m_first ? lrmodel.GetOrientation(cur)
+									   : lrmodel.GetOrientation(prevPath->range, cur));
+	CopyScores(system, scores, hypo.GetTargetPhrase(), reoType);
+  }
 
-	  if ((m_direction != LRModel::Forward) || !m_first) {
-	    LRModel const& lrmodel = m_configuration;
-	    Range const &cur = hypo.GetInputPath().range;
-	    LRModel::ReorderingType reoType = (m_first ? lrmodel.GetOrientation(cur)
-	                                       : lrmodel.GetOrientation(prevPath->range, cur));
-	    //CopyScores(scores, topt, input, reoType);
-	  }
-//	  return new PhraseBasedReorderingState(this, topt);
-
+  PhraseBasedReorderingState &stateCast = static_cast<PhraseBasedReorderingState&>(state);
+  stateCast.Init(this, hypo.GetTargetPhrase(), hypo.GetInputPath());
 }
 
 } /* namespace Moses2 */

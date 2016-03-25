@@ -9,10 +9,12 @@ class Hypothesis;
 class System;
 class Scores;
 class TargetPhrase;
+class InputType;
 
 class LRState : public FFState
 {
 public:
+  typedef LRModel::ReorderingType ReorderingType;
   const TargetPhrase *prevTP;
 
   LRState(const LRModel &config,
@@ -25,6 +27,12 @@ public:
 			  size_t phraseTableInd,
 			  Scores &scores,
 			  FFState &state) const = 0;
+
+  void CopyScores(const System &system,
+		  Scores &accum,
+          const TargetPhrase &topt,
+          ReorderingType reoType) const;
+
 protected:
   const LRModel& m_configuration;
   LRModel::Direction m_direction;
