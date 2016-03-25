@@ -218,7 +218,7 @@ void Manager::OutputNBest()
 	    }
 
 	    if (ok) {
-			out << transId << " ||| ";
+			out << transId << " |||";
 			path->OutputToStream(out, system);
 			out << "\n";
 	    }
