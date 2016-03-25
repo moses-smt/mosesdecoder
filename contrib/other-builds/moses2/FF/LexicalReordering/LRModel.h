@@ -9,7 +9,6 @@
 
 namespace Moses2 {
 
-class Sentence;
 class Range;
 class LRState;
 
@@ -58,7 +57,7 @@ public:
 	  size_t GetNumberOfTypes() const;
 
 	  LRState*
-	  CreateLRState(const Sentence &input) const;
+	  CreateLRState() const;
 
 protected:
 

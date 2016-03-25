@@ -8,7 +8,6 @@
 #include "LRModel.h"
 #include "../../legacy/Util2.h"
 #include "../../legacy/Range.h"
-#include "../../Sentence.h"
 #include "util/exception.hh"
 #include "PhraseBasedReorderingState.h"
 #include "BidirectionalReorderingState.h"
@@ -122,7 +121,7 @@ GetOrientation(Range const& prev, Range const& cur) const
 
 LRState *
 LRModel::
-CreateLRState(const Sentence &input) const
+CreateLRState() const
 {
   LRState *bwd = NULL, *fwd = NULL;
   size_t offset = 0;
