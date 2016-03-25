@@ -62,7 +62,7 @@ protected:
   FactorList m_FactorsE;
   FactorList m_FactorsC;
 
-  LRModel *m_lrModel;
+  LRModel *m_configuration;
 
   virtual void
   EvaluateAfterTablePruning(MemPool &pool,

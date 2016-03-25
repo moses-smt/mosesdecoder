@@ -32,10 +32,10 @@ LexicalReordering::LexicalReordering(size_t startInd, const std::string &line)
 ,m_blank(NULL)
 ,m_propertyInd(-1)
 ,m_coll(NULL)
-,m_lrModel(NULL)
+,m_configuration(NULL)
 {
 	ReadParameters();
-	assert(m_lrModel);
+	assert(m_configuration);
 	//assert(m_numScores == 6);
 }
 
@@ -44,7 +44,7 @@ LexicalReordering::~LexicalReordering()
 	delete m_compactModel;
 	delete m_coll;
 	delete m_blank;
-	delete m_lrModel;
+	delete m_configuration;
 }
 
 void LexicalReordering::Load(System &system)
@@ -90,8 +90,8 @@ void LexicalReordering::SetParameter(const std::string& key, const std::string& 
 	  m_path = value;
   }
   else if (key == "type") {
-	  m_lrModel = new LRModel(value, *this);
-	  if (m_lrModel->IsPhraseBased()) {
+	  m_configuration = new LRModel(value, *this);
+	  if (m_configuration->IsPhraseBased()) {
 		  UTIL_THROW_IF2(value != "msd-bidirectional-fe"
 				  && value != "wbe-msd-bidirectional-fe-allff",
 				  "Lex RO type not supported");
@@ -117,7 +117,7 @@ void LexicalReordering::SetParameter(const std::string& key, const std::string& 
 
 FFState* LexicalReordering::BlankState(MemPool &pool) const
 {
-  FFState *ret = m_lrModel->CreateLRState();
+  FFState *ret = m_configuration->CreateLRState();
   return ret;
 }
 
@@ -126,7 +126,7 @@ void LexicalReordering::EmptyHypothesisState(FFState &state,
 		const InputType &input,
 		const Hypothesis &hypo) const
 {
-  if (m_lrModel->IsPhraseBased()) {
+  if (m_configuration->IsPhraseBased()) {
 	PhraseBasedReorderingState &stateCast = static_cast<PhraseBasedReorderingState&>(state);
 	stateCast.Init(NULL, hypo.GetTargetPhrase(), hypo.GetInputPath(), true);
   }
