@@ -20,6 +20,8 @@ PhraseBasedReorderingState::PhraseBasedReorderingState(
 :LRState(config, dir, offset)
 {
 	  // uninitialised
+	prevPath = NULL;
+	prevTP = NULL;
 }
 
 
@@ -35,7 +37,7 @@ void PhraseBasedReorderingState::Init(
 }
 
 size_t PhraseBasedReorderingState::hash() const {
-  cerr << "prevPath=" << prevPath << endl;
+  cerr << "prevPath=" << this << " " << prevPath << endl;
   size_t ret;
   ret = hash_value(prevPath->range);
   boost::hash_combine(ret, m_direction);

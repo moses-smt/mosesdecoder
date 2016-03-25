@@ -36,6 +36,9 @@ void BidirectionalReorderingState::Init(const LRState *prev,
 	if (m_backward) {
 		m_backward->Init(prev, topt, path, first);
 	}
+	if (m_forward) {
+		m_forward->Init(prev, topt, path, first);
+	}
 }
 
 std::string BidirectionalReorderingState::ToString() const
@@ -72,7 +75,9 @@ void BidirectionalReorderingState::Expand(const System &system,
 		  Scores &scores,
 		  FFState &state) const
 {
-	cerr << "BidirectionalReorderingState::Expand" << endl;
+  BidirectionalReorderingState &stateCast = static_cast<BidirectionalReorderingState&>(state);
+  m_backward->Expand(system, ff, hypo, phraseTableInd, scores, *stateCast.m_backward);
+  m_forward->Expand(system, ff, hypo, phraseTableInd, scores, *stateCast.m_forward);
 }
 
 } /* namespace Moses2 */
