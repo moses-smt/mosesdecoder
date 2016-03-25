@@ -24,11 +24,12 @@ PhraseBasedReorderingState::PhraseBasedReorderingState(
 void PhraseBasedReorderingState::Init(
 		const PhraseBasedReorderingState *prev,
         const TargetPhrase &topt,
-		const InputPathBase &path)
+		const InputPathBase &path,
+		bool first)
 {
   prevTP = &topt;
   prevPath = &path;
-  m_first = false;
+  m_first = first;
 }
 
 size_t PhraseBasedReorderingState::hash() const {
@@ -71,7 +72,7 @@ void PhraseBasedReorderingState::Expand(const System &system,
   }
 
   PhraseBasedReorderingState &stateCast = static_cast<PhraseBasedReorderingState&>(state);
-  stateCast.Init(this, hypo.GetTargetPhrase(), hypo.GetInputPath());
+  stateCast.Init(this, hypo.GetTargetPhrase(), hypo.GetInputPath(), false);
 }
 
 } /* namespace Moses2 */

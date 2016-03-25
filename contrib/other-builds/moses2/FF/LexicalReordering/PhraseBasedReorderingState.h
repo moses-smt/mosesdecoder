@@ -23,7 +23,8 @@ public:
 
   void Init(const PhraseBasedReorderingState *prev,
 		  const TargetPhrase &topt,
-		  const InputPathBase &path);
+		  const InputPathBase &path,
+		  bool first);
 
   size_t hash() const;
   virtual bool operator==(const FFState& other) const;

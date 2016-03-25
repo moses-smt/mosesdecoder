@@ -6,6 +6,7 @@
  */
 
 #include <boost/foreach.hpp>
+#include "util/exception.hh"
 #include "LexicalReordering.h"
 #include "LRModel.h"
 #include "PhraseBasedReorderingState.h"
@@ -83,8 +84,6 @@ void LexicalReordering::Load(System &system)
   }
 }
 
-#include "util/exception.hh"
-
 void LexicalReordering::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "path") {
@@ -129,8 +128,7 @@ void LexicalReordering::EmptyHypothesisState(FFState &state,
 {
   if (m_lrModel->IsPhraseBased()) {
 	PhraseBasedReorderingState &stateCast = static_cast<PhraseBasedReorderingState&>(state);
-	stateCast.prevPath = &hypo.GetInputPath();
-	stateCast.prevTP = &hypo.GetTargetPhrase();
+	stateCast.Init(NULL, hypo.GetTargetPhrase(), hypo.GetInputPath(), true);
   }
   else {
     BidirectionalReorderingState &stateCast = static_cast<BidirectionalReorderingState&>(state);
