@@ -5,24 +5,30 @@
  *      Author: hieu
  */
 #pragma once
-#include "PhraseBasedReorderingState.h"
+#include "LRState.h"
 
 namespace Moses2 {
 
 class BidirectionalReorderingState: public LRState
 {
 public:
-  BidirectionalReorderingState(const LRModel &config,
-          const LRState *bw,
-          const LRState *fw, size_t offset);
+  BidirectionalReorderingState(
+		  const LRModel &config,
+          LRState *bw,
+          LRState *fw,
+		  size_t offset);
 
   virtual ~BidirectionalReorderingState();
+
+  void Init(const LRState *prev,
+		  const TargetPhrase &topt,
+		  const InputPathBase &path,
+		  bool first);
 
   size_t hash() const;
   virtual bool operator==(const FFState& other) const;
 
-  virtual std::string ToString() const
-  { return ""; }
+  virtual std::string ToString() const;
 
   void Expand(const System &system,
 		  const LexicalReordering &ff,
@@ -32,8 +38,8 @@ public:
 		  FFState &state) const;
 
 protected:
-  const LRState *m_backward;
-  const LRState *m_forward;
+  LRState *m_backward;
+  LRState *m_forward;
 
 };
 

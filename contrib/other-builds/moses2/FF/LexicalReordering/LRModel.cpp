@@ -12,6 +12,8 @@
 #include "PhraseBasedReorderingState.h"
 #include "BidirectionalReorderingState.h"
 
+using namespace std;
+
 namespace Moses2 {
 
 LRModel::LRModel(const std::string &modelType, LexicalReordering &ff)
@@ -132,6 +134,7 @@ CreateLRState() const
   case Bidirectional:
     if (m_phraseBased) {
       bwd = new PhraseBasedReorderingState(*this, Backward, offset);
+      cerr << "bwd=" << bwd << bwd->ToString() << endl;
     }
     else {
       //bwd = new HReorderingBackwardState(*this, offset);
@@ -141,6 +144,7 @@ CreateLRState() const
   case Forward:
     if (m_phraseBased) {
       fwd = new PhraseBasedReorderingState(*this, Forward, offset);
+      cerr << "fwd=" << fwd << fwd->ToString() << endl;
     }
     else {
       //fwd = new HReorderingForwardState(*this, input.GetSize(), offset);
@@ -148,8 +152,10 @@ CreateLRState() const
     offset += m_collapseScores ? 1 : GetNumberOfTypes();
     if (m_direction == Forward) return fwd;
   }
-  return new BidirectionalReorderingState(*this, bwd, fwd, 0);
 
+  BidirectionalReorderingState *ret = new BidirectionalReorderingState(*this, bwd, fwd, 0);
+  cerr << "ret=" << ret->ToString() << endl;
+  return ret;
 }
 
 } /* namespace Moses2 */

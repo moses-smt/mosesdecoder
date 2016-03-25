@@ -6,13 +6,17 @@
  */
 #include <boost/functional/hash_fwd.hpp>
 #include "BidirectionalReorderingState.h"
+#include "../../legacy/Util2.h"
+
+using namespace std;
 
 namespace Moses2 {
 
 BidirectionalReorderingState::BidirectionalReorderingState(
 		const LRModel &config,
-        const LRState *bw,
-        const LRState *fw, size_t offset)
+        LRState *bw,
+        LRState *fw,
+		size_t offset)
 : LRState(config,
           LRModel::Bidirectional,
           offset)
@@ -24,10 +28,31 @@ BidirectionalReorderingState::~BidirectionalReorderingState() {
 	// TODO Auto-generated destructor stub
 }
 
+void BidirectionalReorderingState::Init(const LRState *prev,
+		  const TargetPhrase &topt,
+		  const InputPathBase &path,
+		  bool first)
+{
+	if (m_backward) {
+		m_backward->Init(prev, topt, path, first);
+	}
+}
+
+std::string BidirectionalReorderingState::ToString() const
+{ return "BidirectionalReorderingState "
+		+ SPrint(this) + " "
+		+ SPrint(m_backward) + " "
+		+ SPrint(m_forward);
+}
+
 size_t BidirectionalReorderingState::hash() const
 {
+  cerr << "hashing " << *this << endl;
+  cerr << "BEFORE hash " << m_backward->ToString() << endl;
   size_t ret = m_backward->hash();
+  cerr << "HH1" << endl;
   boost::hash_combine(ret, m_forward->hash());
+  cerr << "ret=" << ret << endl;
   return ret;
 }
 
@@ -49,7 +74,7 @@ void BidirectionalReorderingState::Expand(const System &system,
 		  Scores &scores,
 		  FFState &state) const
 {
-
+	cerr << "BidirectionalReorderingState::Expand" << endl;
 }
 
 } /* namespace Moses2 */

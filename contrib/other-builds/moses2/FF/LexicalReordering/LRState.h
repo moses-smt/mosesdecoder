@@ -10,6 +10,7 @@ class System;
 class Scores;
 class TargetPhrase;
 class InputType;
+class InputPathBase;
 
 class LRState : public FFState
 {
@@ -20,6 +21,11 @@ public:
   LRState(const LRModel &config,
 		  LRModel::Direction dir,
 		  size_t offset);
+
+  virtual void Init(const LRState *prev,
+		  const TargetPhrase &topt,
+		  const InputPathBase &path,
+		  bool first) = 0;
 
   virtual void Expand(const System &system,
 			  const LexicalReordering &ff,

@@ -21,7 +21,7 @@ public:
 		  LRModel::Direction dir,
 		  size_t offset);
 
-  void Init(const PhraseBasedReorderingState *prev,
+  void Init(const LRState *prev,
 		  const TargetPhrase &topt,
 		  const InputPathBase &path,
 		  bool first);
@@ -31,7 +31,7 @@ public:
 
   virtual std::string ToString() const
   {
-	  return "";
+	  return "PhraseBasedReorderingState";
   }
 
   void Expand(const System &system,

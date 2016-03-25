@@ -58,8 +58,11 @@ void Search::Decode()
 	Hypothesis *initHypo = Hypothesis::Create(mgr.GetSystemPool(), mgr);
 	initHypo->Init(mgr, mgr.GetInputPaths().GetBlank(), mgr.GetInitPhrase(), initBitmap);
 	initHypo->EmptyHypothesisState(mgr.GetInput());
+	cerr << "initHypo=" << *initHypo << endl;
 
+	cerr << "BEFORE Add" << endl;
 	m_stack.Add(initHypo, mgr.GetHypoRecycle(), mgr.arcLists);
+	cerr << "AFTER Add" << endl;
 	PostDecode(0);
 
 	for (size_t stackInd = 1; stackInd < mgr.GetInput().GetSize() + 1; ++stackInd) {

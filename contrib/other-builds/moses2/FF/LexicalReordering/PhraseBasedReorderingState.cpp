@@ -9,6 +9,8 @@
 #include "LexicalReordering.h"
 #include "../../PhraseBased/Hypothesis.h"
 
+using namespace std;
+
 namespace Moses2 {
 
 PhraseBasedReorderingState::PhraseBasedReorderingState(
@@ -22,7 +24,7 @@ PhraseBasedReorderingState::PhraseBasedReorderingState(
 
 
 void PhraseBasedReorderingState::Init(
-		const PhraseBasedReorderingState *prev,
+		const LRState *prev,
         const TargetPhrase &topt,
 		const InputPathBase &path,
 		bool first)
@@ -33,11 +35,12 @@ void PhraseBasedReorderingState::Init(
 }
 
 size_t PhraseBasedReorderingState::hash() const {
-	  size_t ret;
-	  ret = hash_value(prevPath->range);
-	  boost::hash_combine(ret, m_direction);
+  cerr << "prevPath=" << prevPath << endl;
+  size_t ret;
+  ret = hash_value(prevPath->range);
+  boost::hash_combine(ret, m_direction);
 
-	  return ret;
+  return ret;
 }
 
 bool PhraseBasedReorderingState::operator==(const FFState& o) const {
