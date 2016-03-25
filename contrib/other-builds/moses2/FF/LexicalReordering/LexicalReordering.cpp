@@ -43,7 +43,6 @@ LexicalReordering::~LexicalReordering()
 {
 	delete m_compactModel;
 	delete m_coll;
-	delete m_blank;
 	delete m_configuration;
 }
 
@@ -117,7 +116,7 @@ void LexicalReordering::SetParameter(const std::string& key, const std::string& 
 
 FFState* LexicalReordering::BlankState(MemPool &pool) const
 {
-  FFState *ret = m_configuration->CreateLRState();
+  FFState *ret = m_configuration->CreateLRState(pool);
   return ret;
 }
 

@@ -9,6 +9,7 @@
 
 namespace Moses2 {
 
+class MemPool;
 class Range;
 class LRState;
 class LexicalReordering;
@@ -62,8 +63,7 @@ public:
 	    return m_scoreProducer;
 	  }
 
-	  LRState*
-	  CreateLRState() const;
+	  LRState *CreateLRState(MemPool &pool) const;
 
 	  ReorderingType // for first phrase in phrase-based
 	  GetOrientation(Range const& cur) const;

@@ -8,6 +8,7 @@
 #include "LRModel.h"
 #include "../../legacy/Util2.h"
 #include "../../legacy/Range.h"
+#include "../../MemPool.h"
 #include "util/exception.hh"
 #include "PhraseBasedReorderingState.h"
 #include "BidirectionalReorderingState.h"
@@ -122,9 +123,7 @@ GetOrientation(Range const& prev, Range const& cur) const
           : (cur.GetStartPos() > prev.GetEndPos()) ? DR : DL);
 }
 
-LRState *
-LRModel::
-CreateLRState() const
+LRState *LRModel::CreateLRState(MemPool &pool) const
 {
   LRState *bwd = NULL, *fwd = NULL;
   size_t offset = 0;
@@ -133,7 +132,7 @@ CreateLRState() const
   case Backward:
   case Bidirectional:
     if (m_phraseBased) {
-      bwd = new PhraseBasedReorderingState(*this, Backward, offset);
+      bwd = new (pool.Allocate<PhraseBasedReorderingState>()) PhraseBasedReorderingState(*this, Backward, offset);
       //cerr << "bwd=" << bwd << bwd->ToString() << endl;
     }
     else {
@@ -143,7 +142,7 @@ CreateLRState() const
     if (m_direction == Backward) return bwd; // else fall through
   case Forward:
     if (m_phraseBased) {
-      fwd = new PhraseBasedReorderingState(*this, Forward, offset);
+      fwd = new (pool.Allocate<PhraseBasedReorderingState>()) PhraseBasedReorderingState(*this, Forward, offset);
       //cerr << "fwd=" << fwd << fwd->ToString() << endl;
     }
     else {
@@ -153,7 +152,7 @@ CreateLRState() const
     if (m_direction == Forward) return fwd;
   }
 
-  BidirectionalReorderingState *ret = new BidirectionalReorderingState(*this, bwd, fwd, 0);
+  BidirectionalReorderingState *ret = new (pool.Allocate<BidirectionalReorderingState>()) BidirectionalReorderingState(*this, bwd, fwd, 0);
   return ret;
 }
 
