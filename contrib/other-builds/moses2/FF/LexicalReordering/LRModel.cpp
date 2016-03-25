@@ -14,11 +14,12 @@
 
 namespace Moses2 {
 
-LRModel::LRModel(const std::string &modelType)
+LRModel::LRModel(const std::string &modelType, LexicalReordering &ff)
 : m_modelType(None)
 , m_phraseBased(true)
 , m_collapseScores(false)
 , m_direction(Backward)
+, m_scoreProducer(&ff)
 {
   std::vector<std::string> config = Tokenize(modelType, "-");
 

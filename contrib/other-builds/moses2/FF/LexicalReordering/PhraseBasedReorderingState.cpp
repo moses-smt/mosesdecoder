@@ -34,8 +34,8 @@ bool PhraseBasedReorderingState::operator==(const FFState& o) const {
 	  const PhraseBasedReorderingState &other = static_cast<const PhraseBasedReorderingState&>(o);
 	  if (prevPath->range == other.prevPath->range) {
 	    if (m_direction == LRModel::Forward) {
-	      //int compareScore = ComparePrevScores(other.m_prevOption);
-	      //return compareScore == 0;
+	      int compareScore = ComparePrevScores(other.prevTP);
+	      return compareScore == 0;
 	    } else {
 	      return true;
 	    }
@@ -51,41 +51,17 @@ void PhraseBasedReorderingState::Expand(const System &system,
 		Scores &scores,
 		FFState &state) const
 {
-  const PhraseBasedReorderingState &prevStateCast = static_cast<const PhraseBasedReorderingState&>(*this);
-  PhraseBasedReorderingState &stateCast = static_cast<PhraseBasedReorderingState&>(state);
-
-  const Range &currRange = hypo.GetInputPath().range;
-  stateCast.prevPath = &hypo.GetInputPath();
-  stateCast.prevTP = &hypo.GetTargetPhrase();
-
-  // calc orientation
-  size_t orientation;
-  const Range *prevRange = &prevStateCast.prevPath->range;
-  assert(prevRange);
-  if (prevRange->GetStartPos() == NOT_FOUND) {
-	  orientation = GetOrientation(currRange);
-  }
-  else {
-	  orientation = GetOrientation(*prevRange, currRange);
-  }
-
-  // backwards
-  const TargetPhrase &target = hypo.GetTargetPhrase();
-
-  const SCORE *values = (const SCORE *) target.ffData[phraseTableInd];
-  if (values) {
-	  scores.PlusEquals(system, ff, values[orientation], orientation);
-  }
-
-  // forwards
-  if (prevRange->GetStartPos() != NOT_FOUND) {
-	  const TargetPhrase &prevTarget = *prevStateCast.prevTP;
-	  const SCORE *prevValues = (const SCORE *) prevTarget.ffData[phraseTableInd];
-
-	  if (prevValues) {
-		  scores.PlusEquals(system, ff, prevValues[orientation + 3], orientation + 3);
+	  // const LRModel::ModelType modelType = m_configuration.GetModelType();
+/*
+	  if ((m_direction != LRModel::Forward) || !m_first) {
+	    LRModel const& lrmodel = m_configuration;
+	    Range const cur = topt.GetSourceWordsRange();
+	    LRModel::ReorderingType reoType = (m_first ? lrmodel.GetOrientation(cur)
+	                                       : lrmodel.GetOrientation(m_prevRange,cur));
+	    CopyScores(scores, topt, input, reoType);
 	  }
-  }
+	  return new PhraseBasedReorderingState(this, topt);
+*/
 }
 
 size_t PhraseBasedReorderingState::GetOrientation(Range const& cur) const

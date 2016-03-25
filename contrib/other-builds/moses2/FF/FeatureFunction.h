@@ -50,6 +50,8 @@ public:
 	{ return false; }
 	void SetPhraseTableInd(size_t ind)
 	{ m_PhraseTableInd = ind; }
+	size_t GetPhraseTableInd() const
+	{ return m_PhraseTableInd; }
 
 	  // may have more factors than actually need, but not guaranteed.
 	  // For SCFG decoding, the source contains non-terminals, NOT the raw

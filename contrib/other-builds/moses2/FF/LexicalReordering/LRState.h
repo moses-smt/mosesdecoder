@@ -29,6 +29,10 @@ protected:
   const LRModel& m_configuration;
   LRModel::Direction m_direction;
   size_t m_offset;
+
+  int
+  ComparePrevScores(const TargetPhrase *other) const;
+
 };
 
 }

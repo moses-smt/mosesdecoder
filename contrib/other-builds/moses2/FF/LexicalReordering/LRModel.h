@@ -11,6 +11,7 @@ namespace Moses2 {
 
 class Range;
 class LRState;
+class LexicalReordering;
 
 class LRModel {
 public:
@@ -31,7 +32,7 @@ public:
 	NONE = 4  // largest possible
   };
 
-	LRModel(const std::string &modelType);
+	LRModel(const std::string &modelType, LexicalReordering &ff);
 	virtual ~LRModel();
 
 	  ModelType GetModelType() const {
@@ -56,16 +57,23 @@ public:
 
 	  size_t GetNumberOfTypes() const;
 
+	  LexicalReordering*
+	  GetScoreProducer() const {
+	    return m_scoreProducer;
+	  }
+
 	  LRState*
 	  CreateLRState() const;
 
 protected:
 
+  ModelType m_modelType;
   bool m_phraseBased;
   bool m_collapseScores;
-  ModelType m_modelType;
   Direction m_direction;
   Condition m_condition;
+  LexicalReordering *m_scoreProducer;
+
 
   ReorderingType // for first phrase in phrase-based
   GetOrientation(Range const& cur) const;

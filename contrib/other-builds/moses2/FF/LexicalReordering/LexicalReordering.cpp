@@ -91,7 +91,7 @@ void LexicalReordering::SetParameter(const std::string& key, const std::string& 
 	  m_path = value;
   }
   else if (key == "type") {
-	  m_lrModel = new LRModel(value);
+	  m_lrModel = new LRModel(value, *this);
 	  if (m_lrModel->IsPhraseBased()) {
 		  UTIL_THROW_IF2(value != "msd-bidirectional-fe"
 				  && value != "wbe-msd-bidirectional-fe-allff",
