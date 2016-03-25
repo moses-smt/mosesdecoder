@@ -38,7 +38,7 @@ void PhraseBasedReorderingState::Init(
 
 size_t PhraseBasedReorderingState::hash() const {
   size_t ret;
-  ret = hash_value(prevPath->range);
+  ret = (size_t) &prevPath->range;
   boost::hash_combine(ret, m_direction);
 
   return ret;
@@ -48,7 +48,7 @@ bool PhraseBasedReorderingState::operator==(const FFState& o) const {
 	  if (&o == this) return true;
 
 	  const PhraseBasedReorderingState &other = static_cast<const PhraseBasedReorderingState&>(o);
-	  if (prevPath->range == other.prevPath->range) {
+	  if (&prevPath->range == &other.prevPath->range) {
 	    if (m_direction == LRModel::Forward) {
 	      int compareScore = ComparePrevScores(other.prevTP);
 	      return compareScore == 0;
