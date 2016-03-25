@@ -134,7 +134,7 @@ CreateLRState() const
   case Bidirectional:
     if (m_phraseBased) {
       bwd = new PhraseBasedReorderingState(*this, Backward, offset);
-      cerr << "bwd=" << bwd << bwd->ToString() << endl;
+      //cerr << "bwd=" << bwd << bwd->ToString() << endl;
     }
     else {
       //bwd = new HReorderingBackwardState(*this, offset);
@@ -144,7 +144,7 @@ CreateLRState() const
   case Forward:
     if (m_phraseBased) {
       fwd = new PhraseBasedReorderingState(*this, Forward, offset);
-      cerr << "fwd=" << fwd << fwd->ToString() << endl;
+      //cerr << "fwd=" << fwd << fwd->ToString() << endl;
     }
     else {
       //fwd = new HReorderingForwardState(*this, input.GetSize(), offset);

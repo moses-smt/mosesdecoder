@@ -47,11 +47,9 @@ std::string BidirectionalReorderingState::ToString() const
 
 size_t BidirectionalReorderingState::hash() const
 {
-  cerr << "hashing " << *this << endl;
-  cerr << "BEFORE hash " << m_backward->ToString() << endl;
   size_t ret = m_backward->hash();
-  cerr << "HH1" << endl;
   boost::hash_combine(ret, m_forward->hash());
+
   cerr << "ret=" << ret << endl;
   return ret;
 }
