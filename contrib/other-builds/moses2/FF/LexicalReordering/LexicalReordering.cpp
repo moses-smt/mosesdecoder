@@ -129,8 +129,8 @@ void LexicalReordering::EmptyHypothesisState(FFState &state,
 {
   if (m_lrModel->IsPhraseBased()) {
 	PhraseBasedReorderingState &stateCast = static_cast<PhraseBasedReorderingState&>(state);
-	stateCast.path = &hypo.GetInputPath();
-	stateCast.targetPhrase = &hypo.GetTargetPhrase();
+	stateCast.prevPath = &hypo.GetInputPath();
+	stateCast.prevTP = &hypo.GetTargetPhrase();
   }
   else {
     BidirectionalReorderingState &stateCast = static_cast<BidirectionalReorderingState&>(state);

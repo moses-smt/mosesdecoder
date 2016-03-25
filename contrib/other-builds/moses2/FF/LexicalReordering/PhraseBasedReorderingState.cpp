@@ -20,6 +20,30 @@ PhraseBasedReorderingState::PhraseBasedReorderingState(
 	  // uninitialised
 }
 
+size_t PhraseBasedReorderingState::hash() const {
+	  size_t ret;
+	  ret = hash_value(prevPath->range);
+	  boost::hash_combine(ret, m_direction);
+
+	  return ret;
+}
+
+bool PhraseBasedReorderingState::operator==(const FFState& o) const {
+	  if (&o == this) return true;
+
+	  const PhraseBasedReorderingState &other = static_cast<const PhraseBasedReorderingState&>(o);
+	  if (prevPath->range == other.prevPath->range) {
+	    if (m_direction == LRModel::Forward) {
+	      //int compareScore = ComparePrevScores(other.m_prevOption);
+	      //return compareScore == 0;
+	    } else {
+	      return true;
+	    }
+	  } else {
+	    return false;
+	  }
+}
+
 void PhraseBasedReorderingState::Expand(const System &system,
 		const LexicalReordering &ff,
 		const Hypothesis &hypo,
@@ -31,12 +55,12 @@ void PhraseBasedReorderingState::Expand(const System &system,
   PhraseBasedReorderingState &stateCast = static_cast<PhraseBasedReorderingState&>(state);
 
   const Range &currRange = hypo.GetInputPath().range;
-  stateCast.path = &hypo.GetInputPath();
-  stateCast.targetPhrase = &hypo.GetTargetPhrase();
+  stateCast.prevPath = &hypo.GetInputPath();
+  stateCast.prevTP = &hypo.GetTargetPhrase();
 
   // calc orientation
   size_t orientation;
-  const Range *prevRange = &prevStateCast.path->range;
+  const Range *prevRange = &prevStateCast.prevPath->range;
   assert(prevRange);
   if (prevRange->GetStartPos() == NOT_FOUND) {
 	  orientation = GetOrientation(currRange);
@@ -55,7 +79,7 @@ void PhraseBasedReorderingState::Expand(const System &system,
 
   // forwards
   if (prevRange->GetStartPos() != NOT_FOUND) {
-	  const TargetPhrase &prevTarget = *prevStateCast.targetPhrase;
+	  const TargetPhrase &prevTarget = *prevStateCast.prevTP;
 	  const SCORE *prevValues = (const SCORE *) prevTarget.ffData[phraseTableInd];
 
 	  if (prevValues) {

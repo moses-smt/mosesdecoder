@@ -11,27 +11,17 @@
 
 namespace Moses2 {
 
-class TargetPhrase;
-
 class PhraseBasedReorderingState : public LRState
 {
 public:
-  const InputPathBase *path;
-  const TargetPhrase *targetPhrase;
+  const InputPathBase *prevPath;
 
   PhraseBasedReorderingState(const LRModel &config,
 		  LRModel::Direction dir,
 		  size_t offset);
 
-  size_t hash() const {
-	// compare range address. All ranges are created in InputPathBase
-    return (size_t) &path->range;
-  }
-  virtual bool operator==(const FFState& other) const {
-	// compare range address. All ranges are created in InputPathBase
-    const PhraseBasedReorderingState &stateCast = static_cast<const PhraseBasedReorderingState&>(other);
-    return &path->range == &stateCast.path->range;
-  }
+  size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
   virtual std::string ToString() const
   {
