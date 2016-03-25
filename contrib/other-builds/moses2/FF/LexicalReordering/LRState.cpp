@@ -8,6 +8,8 @@
 #include "LexicalReordering.h"
 #include "../../Scores.h"
 
+using namespace std;
+
 namespace Moses2 {
 
 class InputType;
@@ -44,8 +46,7 @@ ComparePrevScores(const TargetPhrase *other) const
   return 0;
 }
 
-void
-LRState::CopyScores(const System &system,
+void LRState::CopyScores(const System &system,
 		Scores &accum,
         const TargetPhrase &topt,
         ReorderingType reoType) const
@@ -62,8 +63,10 @@ LRState::CopyScores(const System &system,
   size_t phraseTableInd = producer->GetPhraseTableInd();
   const SCORE *cached = (const SCORE*) relevantOpt->ffData[phraseTableInd]; //producer->
 
-  // The approach here is bizarre! Why create a whole vector and do
-  // vector addition (acumm->PlusEquals) to update a single value? - UG
+  if (cached == NULL) {
+    return;
+  }
+
   size_t off_remote = m_offset + reoType;
   size_t off_local  = m_configuration.CollapseScores() ? m_offset : off_remote;
 

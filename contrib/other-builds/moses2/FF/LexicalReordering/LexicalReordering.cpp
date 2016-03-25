@@ -117,9 +117,7 @@ void LexicalReordering::SetParameter(const std::string& key, const std::string& 
 
 FFState* LexicalReordering::BlankState(MemPool &pool) const
 {
-  cerr << "BEFORE CreateLRState" << endl;
   FFState *ret = m_configuration->CreateLRState();
-  cerr << "AFTER CreateLRState" << endl;
   return ret;
 }
 
@@ -128,17 +126,8 @@ void LexicalReordering::EmptyHypothesisState(FFState &state,
 		const InputType &input,
 		const Hypothesis &hypo) const
 {
-  cerr << "START EmptyHypothesisState" << endl;
-  if (m_configuration->IsPhraseBased()) {
-    BidirectionalReorderingState &stateCast = static_cast<BidirectionalReorderingState&>(state);
-    cerr << "BEFORE Init" << endl;
-	stateCast.Init(NULL, hypo.GetTargetPhrase(), hypo.GetInputPath(), true);
-    cerr << "AFTER Init" << endl;
-  }
-  else {
-    cerr << "BEFORE BidirectionalReorderingState" << endl;
-    BidirectionalReorderingState &stateCast = static_cast<BidirectionalReorderingState&>(state);
-  }
+  BidirectionalReorderingState &stateCast = static_cast<BidirectionalReorderingState&>(state);
+  stateCast.Init(NULL, hypo.GetTargetPhrase(), hypo.GetInputPath(), true);
 }
 
 void LexicalReordering::EvaluateInIsolation(MemPool &pool,
@@ -207,9 +196,7 @@ void LexicalReordering::EvaluateWhenApplied(const ManagerBase &mgr,
   FFState &state) const
 {
   const LRState &prevStateCast = static_cast<const LRState&>(prevState);
-  cerr << "BEFORE Expand" << endl;
   prevStateCast.Expand(mgr.system, *this, hypo, m_PhraseTableInd, scores, state);
-  cerr << "AFTER Expand" << endl;
 }
 
 const LexicalReordering::Values *LexicalReordering::GetValues(const Phrase &source, const Phrase &target) const

@@ -53,7 +53,6 @@ size_t BidirectionalReorderingState::hash() const
   size_t ret = m_backward->hash();
   boost::hash_combine(ret, m_forward->hash());
 
-  cerr << "ret=" << ret << endl;
   return ret;
 }
 

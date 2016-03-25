@@ -37,7 +37,6 @@ void PhraseBasedReorderingState::Init(
 }
 
 size_t PhraseBasedReorderingState::hash() const {
-  cerr << "prevPath=" << this << " " << prevPath << endl;
   size_t ret;
   ret = hash_value(prevPath->range);
   boost::hash_combine(ret, m_direction);
@@ -69,11 +68,11 @@ void PhraseBasedReorderingState::Expand(const System &system,
 		FFState &state) const
 {
   if ((m_direction != LRModel::Forward) || !m_first) {
-	LRModel const& lrmodel = m_configuration;
-	Range const &cur = hypo.GetInputPath().range;
-	LRModel::ReorderingType reoType = (m_first ? lrmodel.GetOrientation(cur)
-									   : lrmodel.GetOrientation(prevPath->range, cur));
-	CopyScores(system, scores, hypo.GetTargetPhrase(), reoType);
+    LRModel const& lrmodel = m_configuration;
+    Range const &cur = hypo.GetInputPath().range;
+    LRModel::ReorderingType reoType = (m_first ? lrmodel.GetOrientation(cur)
+                       : lrmodel.GetOrientation(prevPath->range, cur));
+    CopyScores(system, scores, hypo.GetTargetPhrase(), reoType);
   }
 
   PhraseBasedReorderingState &stateCast = static_cast<PhraseBasedReorderingState&>(state);

@@ -154,7 +154,6 @@ CreateLRState() const
   }
 
   BidirectionalReorderingState *ret = new BidirectionalReorderingState(*this, bwd, fwd, 0);
-  cerr << "ret=" << ret->ToString() << endl;
   return ret;
 }
 
