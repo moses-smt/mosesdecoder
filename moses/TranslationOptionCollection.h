@@ -72,6 +72,7 @@ protected:
   const size_t m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span */
   const float m_translationOptionThreshold; /*< threshold for translation options with regard to best option for input span */
   size_t m_max_phrase_length;
+  size_t max_partial_trans_opt;
   std::vector<const Phrase*> m_unksrcs;
   InputPathList m_inputPathQueue;
 

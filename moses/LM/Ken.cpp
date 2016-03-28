@@ -1,4 +1,4 @@
-// $Id$
+// $Id$\
 
 /***********************************************************************
 Moses - factored phrase-based language decoder
@@ -93,6 +93,8 @@ private:
 
 template <class Model> void LanguageModelKen<Model>::LoadModel(const std::string &file, util::LoadMethod load_method)
 {
+  m_lmIdLookup.clear();
+
   lm::ngram::Config config;
   if(this->m_verbosity >= 1) {
     config.messages = &std::cerr;
@@ -105,13 +107,12 @@ template <class Model> void LanguageModelKen<Model>::LoadModel(const std::string
   config.load_method = load_method;
 
   m_ngram.reset(new Model(file.c_str(), config));
-
-  m_beginSentenceFactor = collection.AddFactor(BOS_);
 }
 
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, util::LoadMethod load_method)
   :LanguageModel(line)
   ,m_factorType(factorType)
+  ,m_beginSentenceFactor(FactorCollection::Instance().AddFactor(BOS_))
 {
   ReadParameters();
   LoadModel(file, load_method);

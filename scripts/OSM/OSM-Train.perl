@@ -112,8 +112,8 @@ else {
 
 		`mkdir $OUT_DIR/TUNE`;
 
-		`cp $TUNE.$INP_EXT --reduced $OUT_DIR/TUNE/tune.$INP_EXT`;
-		`cp $TUNE.$OP_EXT --reduced $OUT_DIR/TUNE/tune.$OP_EXT`;
+		`cp $TUNE.$INP_EXT $OUT_DIR/TUNE/tune.$INP_EXT`;
+		`cp $TUNE.$OP_EXT $OUT_DIR/TUNE/tune.$OP_EXT`;
 
 		 create_interpolated_model("");
      	}

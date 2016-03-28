@@ -1015,9 +1015,7 @@ ConvertWeightArgsLM()
                            + "order="  + modelToks[2] + " " // order
                            + "num-features=" + SPrint(numFF) + " ";
       if (lmType == 9) {
-        featureLine += "lazyken=1 ";
-      } else if (lmType == 8) {
-        featureLine += "lazyken=0 ";
+        featureLine += "load=lazy ";
       }
 
       if(oovWeights.size() > lmIndex)

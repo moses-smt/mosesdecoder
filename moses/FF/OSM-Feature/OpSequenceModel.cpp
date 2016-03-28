@@ -27,7 +27,7 @@ OpSequenceModel::~OpSequenceModel()
 void OpSequenceModel :: readLanguageModel(const char *lmFile)
 {
   string unkOp = "_TRANS_SLF_";
-  OSM = ConstructOSMLM(m_lmPath);
+  OSM = ConstructOSMLM(m_lmPath.c_str());
 
   State startState = OSM->NullContextState();
   State endState;
@@ -200,7 +200,7 @@ FFState* OpSequenceModel::EvaluateWhenApplied(
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
-  UTIL_THROW2("Chart decoding not support by UTIL_THROW2");
+  UTIL_THROW2("Chart decoding not support by OpSequenceModel");
 
 }
 

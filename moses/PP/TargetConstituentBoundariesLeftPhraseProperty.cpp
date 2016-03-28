@@ -1,3 +1,4 @@
+#include <set>
 #include "moses/PP/TargetConstituentBoundariesLeftPhraseProperty.h"
 #include "moses/FactorCollection.h"
 #include "moses/Util.h"
