@@ -8,6 +8,7 @@
 #include "LRModel.h"
 #include "../../legacy/Util2.h"
 #include "../../legacy/Range.h"
+#include "../../legacy/Bitmap.h"
 #include "../../MemPool.h"
 #include "util/exception.hh"
 #include "PhraseBasedReorderingState.h"
@@ -18,6 +19,24 @@
 using namespace std;
 
 namespace Moses2 {
+
+bool
+IsMonotonicStep(Range  const& prev, // words range of last source phrase
+                Range  const& cur,  // words range of current source phrase
+                Bitmap const& cov)  // coverage bitmap
+{
+  size_t e = prev.GetEndPos() + 1;
+  size_t s = cur.GetStartPos();
+  return (s == e || (s >= e && !cov.GetValue(e)));
+}
+
+bool
+IsSwap(Range const& prev, Range const& cur, Bitmap const& cov)
+{
+  size_t s = prev.GetStartPos();
+  size_t e = cur.GetEndPos();
+  return (e+1 == s || (e < s && !cov.GetValue(s-1)));
+}
 
 LRModel::LRModel(const std::string &modelType, LexicalReordering &ff)
 : m_modelType(None)
@@ -170,6 +189,20 @@ LRState *LRModel::CreateLRState(MemPool &pool) const
 
   BidirectionalReorderingState *ret = new (pool.Allocate<BidirectionalReorderingState>()) BidirectionalReorderingState(*this, bwd, fwd, 0);
   return ret;
+}
+
+LRModel::ReorderingType
+LRModel::
+GetOrientation(Range const& prev, Range const& cur,
+               Bitmap const& cov) const
+{
+  return ((m_modelType == LeftRight)
+          ? cur.GetStartPos() > prev.GetEndPos() ? R : L
+        : IsMonotonicStep(prev,cur,cov) ? M
+          : (m_modelType == Monotonic) ? NM
+          : IsSwap(prev,cur,cov) ? S
+          : (m_modelType == MSD) ? D
+          : cur.GetStartPos() > prev.GetEndPos() ? DR : DL);
 }
 
 } /* namespace Moses2 */

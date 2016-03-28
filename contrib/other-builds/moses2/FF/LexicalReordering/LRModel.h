@@ -11,6 +11,7 @@ namespace Moses2 {
 
 class MemPool;
 class Range;
+class Bitmap;
 class LRState;
 class LexicalReordering;
 
@@ -70,6 +71,10 @@ public:
 
 	  ReorderingType // for non-first phrases in phrase-based
 	  GetOrientation(Range const& prev, Range const& cur) const;
+
+	  ReorderingType // for HReorderingForwardState
+	  GetOrientation(Range const& prev, Range const& cur,
+	                 Bitmap const& cov) const;
 
 	  ReorderingType // for HReorderingBackwarddState
 	  GetOrientation(int const reoDistance) const;

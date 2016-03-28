@@ -8,6 +8,7 @@
 #include "HReorderingForwardState.h"
 #include "../../InputPathBase.h"
 #include "../../PhraseBased/Manager.h"
+#include "../../PhraseBased/Hypothesis.h"
 
 namespace Moses2 {
 
@@ -76,17 +77,20 @@ void HReorderingForwardState::Expand(const ManagerBase &mgr,
 		  Scores &scores,
 		  FFState &state) const
 {
-  /*
   const Range &cur = hypo.GetInputPath().range;
   // keep track of the current coverage ourselves so we don't need the hypothesis
-  Bitmap cov(m_coverage, cur);
+  Manager &mgrCast = const_cast<Manager&>(static_cast<const Manager&>(mgr));
+  Bitmaps &bms = mgrCast.GetBitmaps();
+  const Bitmap &cov = bms.GetBitmap(*m_coverage, cur);
+
   if (!m_first) {
     LRModel::ReorderingType reoType;
-    reoType = m_configuration.GetOrientation(m_prevRange,cur,cov);
-    CopyScores(scores, topt, input, reoType);
+    reoType = m_configuration.GetOrientation(prevPath->range, cur, cov);
+    CopyScores(mgr.system, scores, hypo.GetTargetPhrase(), reoType);
   }
-  return new HReorderingForwardState(this, topt);
-  */
+
+  HReorderingForwardState &stateCast = static_cast<HReorderingForwardState&>(state);
+  stateCast.Init(this, hypo.GetTargetPhrase(), hypo.GetInputPath(), false, &cov);
 }
 
 } /* namespace Moses2 */
