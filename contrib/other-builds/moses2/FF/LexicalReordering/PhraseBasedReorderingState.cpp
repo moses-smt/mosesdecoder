@@ -8,6 +8,7 @@
 #include "PhraseBasedReorderingState.h"
 #include "LexicalReordering.h"
 #include "../../PhraseBased/Hypothesis.h"
+#include "../../InputPathBase.h"
 
 using namespace std;
 
@@ -24,12 +25,12 @@ PhraseBasedReorderingState::PhraseBasedReorderingState(
 	prevTP = NULL;
 }
 
-
 void PhraseBasedReorderingState::Init(
 		const LRState *prev,
         const TargetPhrase &topt,
 		const InputPathBase &path,
-		bool first)
+		bool first,
+		const Bitmap *coverage)
 {
   prevTP = &topt;
   prevPath = &path;
@@ -76,7 +77,7 @@ void PhraseBasedReorderingState::Expand(const System &system,
   }
 
   PhraseBasedReorderingState &stateCast = static_cast<PhraseBasedReorderingState&>(state);
-  stateCast.Init(this, hypo.GetTargetPhrase(), hypo.GetInputPath(), false);
+  stateCast.Init(this, hypo.GetTargetPhrase(), hypo.GetInputPath(), false, NULL);
 }
 
 } /* namespace Moses2 */

@@ -126,7 +126,7 @@ void LexicalReordering::EmptyHypothesisState(FFState &state,
 		const Hypothesis &hypo) const
 {
   BidirectionalReorderingState &stateCast = static_cast<BidirectionalReorderingState&>(state);
-  stateCast.Init(NULL, hypo.GetTargetPhrase(), hypo.GetInputPath(), true);
+  stateCast.Init(NULL, hypo.GetTargetPhrase(), hypo.GetInputPath(), true, &hypo.GetBitmap());
 }
 
 void LexicalReordering::EvaluateInIsolation(MemPool &pool,

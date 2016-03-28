@@ -162,7 +162,7 @@ LRState *LRModel::CreateLRState(MemPool &pool) const
       //cerr << "fwd=" << fwd << fwd->ToString() << endl;
     }
     else {
-      //fwd = new HReorderingForwardState(*this, input.GetSize(), offset);
+      fwd = new HReorderingForwardState(*this, offset);
     }
     offset += m_collapseScores ? 1 : GetNumberOfTypes();
     if (m_direction == Forward) return fwd;

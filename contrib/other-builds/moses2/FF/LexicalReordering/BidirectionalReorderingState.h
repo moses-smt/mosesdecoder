@@ -23,7 +23,8 @@ public:
   void Init(const LRState *prev,
 		  const TargetPhrase &topt,
 		  const InputPathBase &path,
-		  bool first);
+		  bool first,
+		  const Bitmap *coverage);
 
   size_t hash() const;
   virtual bool operator==(const FFState& other) const;

@@ -8,14 +8,24 @@
 #include "LRState.h"
 
 namespace Moses2 {
+class Range;
+class Bitmap;
+class InputPathBase;
 
 class HReorderingForwardState : public LRState
 {
 public:
-  HReorderingForwardState(const LRModel &config,
-		  LRModel::Direction dir,
-			size_t offset);
+  HReorderingForwardState(
+      const LRModel &config,
+      size_t offset);
   virtual ~HReorderingForwardState();
+
+  void Init(
+      const LRState *prev,
+          const TargetPhrase &topt,
+      const InputPathBase &path,
+      bool first,
+      const Bitmap *coverage);
 
   size_t hash() const;
   virtual bool operator==(const FFState& other) const;
@@ -26,6 +36,12 @@ public:
 		  size_t phraseTableInd,
 		  Scores &scores,
 		  FFState &state) const;
+
+protected:
+  bool m_first;
+  //const Range &m_prevRange;
+  const InputPathBase *prevPath;
+  const Bitmap *m_coverage;
 
 };
 

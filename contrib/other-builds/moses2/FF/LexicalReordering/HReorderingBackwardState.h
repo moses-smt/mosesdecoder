@@ -22,7 +22,8 @@ public:
   virtual void Init(const LRState *prev,
       const TargetPhrase &topt,
       const InputPathBase &path,
-      bool first);
+      bool first,
+      const Bitmap *coverage);
 
   virtual ~HReorderingBackwardState();
 

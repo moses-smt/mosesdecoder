@@ -31,13 +31,14 @@ BidirectionalReorderingState::~BidirectionalReorderingState() {
 void BidirectionalReorderingState::Init(const LRState *prev,
 		  const TargetPhrase &topt,
 		  const InputPathBase &path,
-		  bool first)
+		  bool first,
+		  const Bitmap *coverage)
 {
 	if (m_backward) {
-		m_backward->Init(prev, topt, path, first);
+		m_backward->Init(prev, topt, path, first, coverage);
 	}
 	if (m_forward) {
-		m_forward->Init(prev, topt, path, first);
+		m_forward->Init(prev, topt, path, first, coverage);
 	}
 }
 

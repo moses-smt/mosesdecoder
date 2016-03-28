@@ -8,6 +8,7 @@ class LexicalReordering;
 class Hypothesis;
 class System;
 class Scores;
+class Bitmap;
 class TargetPhrase;
 class InputType;
 class InputPathBase;
@@ -25,7 +26,8 @@ public:
   virtual void Init(const LRState *prev,
 		  const TargetPhrase &topt,
 		  const InputPathBase &path,
-		  bool first) = 0;
+		  bool first,
+		  const Bitmap *coverage) = 0;
 
   virtual void Expand(const System &system,
 			  const LexicalReordering &ff,

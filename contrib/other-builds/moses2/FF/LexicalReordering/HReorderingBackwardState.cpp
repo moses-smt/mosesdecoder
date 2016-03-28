@@ -25,7 +25,8 @@ HReorderingBackwardState::~HReorderingBackwardState() {
 void HReorderingBackwardState::Init(const LRState *prev,
     const TargetPhrase &topt,
     const InputPathBase &path,
-    bool first)
+    bool first,
+    const Bitmap *coverage)
 {
   prevTP = &topt;
 }
@@ -57,7 +58,7 @@ void HReorderingBackwardState::Expand(const System &system,
 		  FFState &state) const
 {
   HReorderingBackwardState &nextState = static_cast<HReorderingBackwardState&>(state);
-  nextState.Init(this, hypo.GetTargetPhrase(), hypo.GetInputPath(), false);
+  nextState.Init(this, hypo.GetTargetPhrase(), hypo.GetInputPath(), false, NULL);
   nextState.reoStack = reoStack;
 
   const Range &swrange = hypo.GetInputPath().range;
