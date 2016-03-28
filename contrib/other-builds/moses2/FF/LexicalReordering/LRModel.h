@@ -71,6 +71,9 @@ public:
 	  ReorderingType // for non-first phrases in phrase-based
 	  GetOrientation(Range const& prev, Range const& cur) const;
 
+	  ReorderingType // for HReorderingBackwarddState
+	  GetOrientation(int const reoDistance) const;
+
 protected:
 
   ModelType m_modelType;

@@ -6,15 +6,24 @@
  */
 #pragma once
 #include "LRState.h"
+#include "ReorderingStack.h"
 
 namespace Moses2 {
 
 class HReorderingBackwardState : public LRState
 {
+private:
+  ReorderingStack reoStack;
+
 public:
   HReorderingBackwardState(const LRModel &config,
-		  LRModel::Direction dir,
 			size_t offset);
+
+  virtual void Init(const LRState *prev,
+      const TargetPhrase &topt,
+      const InputPathBase &path,
+      bool first);
+
   virtual ~HReorderingBackwardState();
 
   size_t hash() const;

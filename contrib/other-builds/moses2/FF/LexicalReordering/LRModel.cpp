@@ -12,6 +12,8 @@
 #include "util/exception.hh"
 #include "PhraseBasedReorderingState.h"
 #include "BidirectionalReorderingState.h"
+#include "HReorderingBackwardState.h"
+#include "HReorderingForwardState.h"
 
 using namespace std;
 
@@ -123,6 +125,20 @@ GetOrientation(Range const& prev, Range const& cur) const
           : (cur.GetStartPos() > prev.GetEndPos()) ? DR : DL);
 }
 
+LRModel::ReorderingType
+LRModel::
+GetOrientation(int const reoDistance) const
+{
+  // this one is for HierarchicalReorderingBackwardState
+  return ((m_modelType == LeftRight)
+          ? (reoDistance >= 1) ? R : L
+        : (reoDistance == 1) ? M
+          : (m_modelType == Monotonic) ? NM
+          : (reoDistance == -1)  ? S
+          : (m_modelType == MSD) ? D
+          : (reoDistance  >  1) ? DR : DL);
+}
+
 LRState *LRModel::CreateLRState(MemPool &pool) const
 {
   LRState *bwd = NULL, *fwd = NULL;
@@ -136,7 +152,7 @@ LRState *LRModel::CreateLRState(MemPool &pool) const
       //cerr << "bwd=" << bwd << bwd->ToString() << endl;
     }
     else {
-      //bwd = new HReorderingBackwardState(*this, offset);
+      bwd = new HReorderingBackwardState(*this, offset);
     }
     offset += m_collapseScores ? 1 : GetNumberOfTypes();
     if (m_direction == Backward) return bwd; // else fall through

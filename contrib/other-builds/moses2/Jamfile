@@ -31,11 +31,14 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
     FF/StatelessFeatureFunction.cpp
     FF/WordPenalty.cpp
     
+    FF/LexicalReordering/BidirectionalReorderingState.cpp
+    FF/LexicalReordering/HReorderingBackwardState.cpp
+    FF/LexicalReordering/HReorderingForwardState.cpp
     FF/LexicalReordering/LexicalReordering.cpp
     FF/LexicalReordering/LRModel.cpp
     FF/LexicalReordering/LRState.cpp
     FF/LexicalReordering/PhraseBasedReorderingState.cpp
-    FF/LexicalReordering/BidirectionalReorderingState.cpp
+    FF/LexicalReordering/ReorderingStack.cpp
 
  #   LM/LanguageModelDALM.cpp
     LM/LanguageModel.cpp
