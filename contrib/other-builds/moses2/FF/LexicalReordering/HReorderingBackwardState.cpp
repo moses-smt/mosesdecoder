@@ -7,6 +7,7 @@
 
 #include "HReorderingBackwardState.h"
 #include "../../PhraseBased/Hypothesis.h"
+#include "../../PhraseBased/Manager.h"
 
 namespace Moses2 {
 
@@ -50,7 +51,7 @@ std::string HReorderingBackwardState::ToString() const
   return "HReorderingBackwardState";
 }
 
-void HReorderingBackwardState::Expand(const System &system,
+void HReorderingBackwardState::Expand(const ManagerBase &mgr,
 		  const LexicalReordering &ff,
 		  const Hypothesis &hypo,
 		  size_t phraseTableInd,
@@ -64,7 +65,7 @@ void HReorderingBackwardState::Expand(const System &system,
   const Range &swrange = hypo.GetInputPath().range;
   int reoDistance = nextState.reoStack.ShiftReduce(swrange);
   ReorderingType reoType = m_configuration.GetOrientation(reoDistance);
-  CopyScores(system, scores, hypo.GetTargetPhrase(), reoType);
+  CopyScores(mgr.system, scores, hypo.GetTargetPhrase(), reoType);
 }
 
 } /* namespace Moses2 */

@@ -195,7 +195,7 @@ void LexicalReordering::EvaluateWhenApplied(const ManagerBase &mgr,
   FFState &state) const
 {
   const LRState &prevStateCast = static_cast<const LRState&>(prevState);
-  prevStateCast.Expand(mgr.system, *this, hypo, m_PhraseTableInd, scores, state);
+  prevStateCast.Expand(mgr, *this, hypo, m_PhraseTableInd, scores, state);
 }
 
 const LexicalReordering::Values *LexicalReordering::GetValues(const Phrase &source, const Phrase &target) const

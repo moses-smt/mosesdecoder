@@ -9,6 +9,7 @@ class Hypothesis;
 class System;
 class Scores;
 class Bitmap;
+class ManagerBase;
 class TargetPhrase;
 class InputType;
 class InputPathBase;
@@ -29,7 +30,7 @@ public:
 		  bool first,
 		  const Bitmap *coverage) = 0;
 
-  virtual void Expand(const System &system,
+  virtual void Expand(const ManagerBase &mgr,
 			  const LexicalReordering &ff,
 			  const Hypothesis &hypo,
 			  size_t phraseTableInd,

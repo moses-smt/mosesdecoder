@@ -7,6 +7,7 @@
 
 #include "HReorderingForwardState.h"
 #include "../../InputPathBase.h"
+#include "../../PhraseBased/Manager.h"
 
 namespace Moses2 {
 
@@ -68,14 +69,24 @@ std::string HReorderingForwardState::ToString() const
   return "HReorderingForwardState";
 }
 
-void HReorderingForwardState::Expand(const System &system,
+void HReorderingForwardState::Expand(const ManagerBase &mgr,
 		  const LexicalReordering &ff,
 		  const Hypothesis &hypo,
 		  size_t phraseTableInd,
 		  Scores &scores,
 		  FFState &state) const
 {
-
+  /*
+  const Range &cur = hypo.GetInputPath().range;
+  // keep track of the current coverage ourselves so we don't need the hypothesis
+  Bitmap cov(m_coverage, cur);
+  if (!m_first) {
+    LRModel::ReorderingType reoType;
+    reoType = m_configuration.GetOrientation(m_prevRange,cur,cov);
+    CopyScores(scores, topt, input, reoType);
+  }
+  return new HReorderingForwardState(this, topt);
+  */
 }
 
 } /* namespace Moses2 */

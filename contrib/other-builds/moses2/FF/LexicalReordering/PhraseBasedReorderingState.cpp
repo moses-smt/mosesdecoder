@@ -9,6 +9,7 @@
 #include "LexicalReordering.h"
 #include "../../PhraseBased/Hypothesis.h"
 #include "../../InputPathBase.h"
+#include "../../PhraseBased/Manager.h"
 
 using namespace std;
 
@@ -61,7 +62,7 @@ bool PhraseBasedReorderingState::operator==(const FFState& o) const {
 	  }
 }
 
-void PhraseBasedReorderingState::Expand(const System &system,
+void PhraseBasedReorderingState::Expand(const ManagerBase &mgr,
 		const LexicalReordering &ff,
 		const Hypothesis &hypo,
 		size_t phraseTableInd,
@@ -73,7 +74,7 @@ void PhraseBasedReorderingState::Expand(const System &system,
     Range const &cur = hypo.GetInputPath().range;
     LRModel::ReorderingType reoType = (m_first ? lrmodel.GetOrientation(cur)
                        : lrmodel.GetOrientation(prevPath->range, cur));
-    CopyScores(system, scores, hypo.GetTargetPhrase(), reoType);
+    CopyScores(mgr.system, scores, hypo.GetTargetPhrase(), reoType);
   }
 
   PhraseBasedReorderingState &stateCast = static_cast<PhraseBasedReorderingState&>(state);

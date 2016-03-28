@@ -31,7 +31,7 @@ public:
 
   virtual std::string ToString() const;
 
-  void Expand(const System &system,
+  void Expand(const ManagerBase &mgr,
 		  const LexicalReordering &ff,
 		  const Hypothesis &hypo,
 		  size_t phraseTableInd,

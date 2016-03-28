@@ -7,6 +7,7 @@
 #include <boost/functional/hash_fwd.hpp>
 #include "BidirectionalReorderingState.h"
 #include "../../legacy/Util2.h"
+#include "../../PhraseBased/Manager.h"
 
 using namespace std;
 
@@ -68,7 +69,7 @@ bool BidirectionalReorderingState::operator==(const FFState& o) const
   return ret;
 }
 
-void BidirectionalReorderingState::Expand(const System &system,
+void BidirectionalReorderingState::Expand(const ManagerBase &mgr,
 		  const LexicalReordering &ff,
 		  const Hypothesis &hypo,
 		  size_t phraseTableInd,
@@ -76,8 +77,8 @@ void BidirectionalReorderingState::Expand(const System &system,
 		  FFState &state) const
 {
   BidirectionalReorderingState &stateCast = static_cast<BidirectionalReorderingState&>(state);
-  m_backward->Expand(system, ff, hypo, phraseTableInd, scores, *stateCast.m_backward);
-  m_forward->Expand(system, ff, hypo, phraseTableInd, scores, *stateCast.m_forward);
+  m_backward->Expand(mgr, ff, hypo, phraseTableInd, scores, *stateCast.m_backward);
+  m_forward->Expand(mgr, ff, hypo, phraseTableInd, scores, *stateCast.m_forward);
 }
 
 } /* namespace Moses2 */
