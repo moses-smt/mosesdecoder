@@ -187,6 +187,7 @@ LRState *LRModel::CreateLRState(MemPool &pool) const
     if (m_direction == Forward) return fwd;
   }
 
+  //cerr << "LRStates:" << *bwd << endl << *fwd << endl;
   BidirectionalReorderingState *ret = new (pool.Allocate<BidirectionalReorderingState>()) BidirectionalReorderingState(*this, bwd, fwd, 0);
   return ret;
 }

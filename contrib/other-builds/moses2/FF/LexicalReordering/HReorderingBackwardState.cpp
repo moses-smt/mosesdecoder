@@ -48,7 +48,7 @@ bool HReorderingBackwardState::operator==(const FFState& o) const
 
 std::string HReorderingBackwardState::ToString() const
 {
-  return "HReorderingBackwardState";
+  return "HReorderingBackwardState "  + SPrint(m_offset);
 }
 
 void HReorderingBackwardState::Expand(const ManagerBase &mgr,

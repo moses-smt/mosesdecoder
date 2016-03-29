@@ -42,9 +42,7 @@ void HReorderingForwardState::Init(
 size_t HReorderingForwardState::hash() const
 {
   size_t ret;
-  ret = (size_t) &prevPath->range;
-  boost::hash_combine(ret, m_direction);
-
+  ret = hash_value(prevPath->range);
   return ret;
 }
 
@@ -52,22 +50,18 @@ bool HReorderingForwardState::operator==(const FFState& o) const
 {
   if (&o == this) return true;
 
-  const HReorderingForwardState &other = static_cast<const HReorderingForwardState&>(o);
-  if (&prevPath->range == &other.prevPath->range) {
-    if (m_direction == LRModel::Forward) {
-      int compareScore = ComparePrevScores(other.prevTP);
-      return compareScore == 0;
-    } else {
-      return true;
-    }
-  } else {
-    return false;
-  }
+  HReorderingForwardState const& other
+  = static_cast<HReorderingForwardState const&>(o);
+
+  int compareScores = ((prevPath->range == other.prevPath->range)
+                       ? ComparePrevScores(other.prevTP)
+                       : (prevPath->range < other.prevPath->range) ? -1 : 1);
+  return compareScores == 0;
 }
 
 std::string HReorderingForwardState::ToString() const
 {
-  return "HReorderingForwardState";
+  return "HReorderingForwardState "  + SPrint(m_offset);
 }
 
 void HReorderingForwardState::Expand(const ManagerBase &mgr,

@@ -110,6 +110,7 @@ void Hypothesis::OutputToStream(std::ostream &out) const
   if (m_prevHypo) {
 	  m_prevHypo->OutputToStream(out);
   }
+  //cerr << *this << endl;
 
   if (GetTargetPhrase().GetSize()) {
 	  const Phrase &phrase = GetTargetPhrase();
@@ -129,7 +130,7 @@ void Hypothesis::OutputToStream(std::ostream &out) const
 		  out << m_path->range.GetStartPos() << "-" << m_path->range.GetEndPos() << ",";
 
 		  // score breakdown
-		  m_scores->Debug(out, m_mgr->system);
+		  m_scores->OutputBreakdownToStream(out, m_mgr->system);
 
 		  out << "| ";
 	  }
