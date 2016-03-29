@@ -10,6 +10,8 @@
 #include <boost/foreach.hpp>
 #include "Stack.h"
 #include "../Manager.h"
+#include "../TrellisPath.h"
+#include "../TrellisPaths.h"
 #include "../../InputPathsBase.h"
 #include "../../TargetPhrases.h"
 #include "../../Phrase.h"
@@ -144,8 +146,12 @@ const Hypothesis *SearchNormal::GetBestHypothesis() const
 
 void SearchNormal::AddInitialTrellisPaths(TrellisPaths &paths) const
 {
-	cerr << "Not yet implemented";
-	abort();
+  const Stack &lastStack = m_stacks.Back();
+    BOOST_FOREACH(const HypothesisBase *hypoBase, lastStack) {
+      const Hypothesis *hypo = static_cast<const Hypothesis*>(hypoBase);
+      TrellisPath *path = new TrellisPath(hypo, mgr.arcLists);
+      paths.Add(path);
+  }
 }
 
 }
