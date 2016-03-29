@@ -90,15 +90,6 @@ void LexicalReordering::SetParameter(const std::string& key, const std::string& 
   }
   else if (key == "type") {
 	  m_configuration = new LRModel(value, *this);
-	  if (m_configuration->IsPhraseBased()) {
-		  UTIL_THROW_IF2(value != "msd-bidirectional-fe"
-				  && value != "wbe-msd-bidirectional-fe-allff",
-				  "Lex RO type not supported");
-	  }
-	  else {
-		  UTIL_THROW_IF2(value != "hier-mslr-birectional-fe",
-				  "Lex RO type not supported");
-	  }
   }
   else if (key == "input-factor") {
 	  m_FactorsF = Tokenize<FactorType>(value);
