@@ -143,39 +143,42 @@ void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
 		const Phrase &sourcePhrase) const
 {
   if (m_propertyInd >= 0) {
-	  SCORE *scoreArr = targetPhrase.GetScoresProperty(m_propertyInd);
-	  targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
+    SCORE *scoreArr = targetPhrase.GetScoresProperty(m_propertyInd);
+    targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
   }
   else if (m_compactModel) {
-	  // using external compact binary model
-	  const Values values = m_compactModel->GetScore(sourcePhrase, targetPhrase, *m_blank);
-	  if (values.size()) {
-		assert(values.size() == 6);
-		SCORE *scoreArr = pool.Allocate<SCORE>(6);
-		for (size_t i = 0; i < 6; ++i) {
-			scoreArr[i] = values[i];
-		}
-		targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
-	  }
-	  else {
-		targetPhrase.ffData[m_PhraseTableInd] = NULL;
-	  }
+    // using external compact binary model
+    const Values values = m_compactModel->GetScore(sourcePhrase, targetPhrase, *m_blank);
+    if (values.size()) {
+      assert(values.size() == m_numScores);
+
+      SCORE *scoreArr = pool.Allocate<SCORE>(m_numScores);
+      for (size_t i = 0; i < m_numScores; ++i) {
+        scoreArr[i] = values[i];
+      }
+      targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
+    }
+    else {
+      targetPhrase.ffData[m_PhraseTableInd] = NULL;
+    }
   }
   else if (m_coll) {
-	  // using external memory model
+    // using external memory model
 
-	  // cache data in target phrase
-	  const Values *values = GetValues(sourcePhrase, targetPhrase);
-	  if (values) {
-		SCORE *scoreArr = pool.Allocate<SCORE>(6);
-		for (size_t i = 0; i < 6; ++i) {
-			scoreArr[i] = (*values)[i];
-		}
-		targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
-	  }
-	  else {
-		targetPhrase.ffData[m_PhraseTableInd] = NULL;
-	  }
+    // cache data in target phrase
+    const Values *values = GetValues(sourcePhrase, targetPhrase);
+    assert(values->size() == m_numScores);
+
+    if (values) {
+      SCORE *scoreArr = pool.Allocate<SCORE>(m_numScores);
+      for (size_t i = 0; i < m_numScores; ++i) {
+        scoreArr[i] = (*values)[i];
+      }
+      targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
+    }
+    else {
+      targetPhrase.ffData[m_PhraseTableInd] = NULL;
+    }
   }
 }
 
