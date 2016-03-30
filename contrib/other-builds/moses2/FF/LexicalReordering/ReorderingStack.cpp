@@ -9,6 +9,11 @@
 
 namespace Moses2
 {
+void ReorderingStack::Init()
+{
+  m_stack.clear();
+}
+
 size_t ReorderingStack::hash() const
 {
   std::size_t ret = boost::hash_range(m_stack.begin(), m_stack.end());

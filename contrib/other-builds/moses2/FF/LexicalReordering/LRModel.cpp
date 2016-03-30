@@ -171,7 +171,7 @@ LRState *LRModel::CreateLRState(MemPool &pool) const
       //cerr << "bwd=" << bwd << bwd->ToString() << endl;
     }
     else {
-      bwd = new HReorderingBackwardState(*this, offset);
+      bwd = new (pool.Allocate<HReorderingBackwardState>()) HReorderingBackwardState(*this, offset);
     }
     offset += m_collapseScores ? 1 : GetNumberOfTypes();
     if (m_direction == Backward) return bwd; // else fall through
@@ -181,7 +181,7 @@ LRState *LRModel::CreateLRState(MemPool &pool) const
       //cerr << "fwd=" << fwd << fwd->ToString() << endl;
     }
     else {
-      fwd = new HReorderingForwardState(*this, offset);
+      fwd = new (pool.Allocate<HReorderingForwardState>()) HReorderingForwardState(*this, offset);
     }
     offset += m_collapseScores ? 1 : GetNumberOfTypes();
     if (m_direction == Forward) return fwd;

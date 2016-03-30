@@ -30,6 +30,7 @@ public:
   size_t hash() const;
   bool operator==(const ReorderingStack& other) const;
 
+  void Init();
   int ShiftReduce(Range input_span);
 
 private:

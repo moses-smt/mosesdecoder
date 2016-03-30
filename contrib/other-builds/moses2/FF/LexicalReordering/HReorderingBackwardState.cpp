@@ -30,6 +30,7 @@ void HReorderingBackwardState::Init(const LRState *prev,
     const Bitmap *coverage)
 {
   prevTP = &topt;
+  reoStack.Init();
 }
 
 size_t HReorderingBackwardState::hash() const
