@@ -27,7 +27,7 @@ bool ReorderingStack::operator==(const ReorderingStack& o) const
 }
 
 // Method to push (shift element into the stack and reduce if reqd)
-int ReorderingStack::ShiftReduce(Range input_span)
+int ReorderingStack::ShiftReduce(const Range &input_span)
 {
   int distance;  // value to return: the initial distance between this and previous span
 

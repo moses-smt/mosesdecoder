@@ -31,7 +31,7 @@ public:
   bool operator==(const ReorderingStack& other) const;
 
   void Init();
-  int ShiftReduce(Range input_span);
+  int ShiftReduce(const Range &input_span);
 
 private:
   void Reduce(Range input_span);
