@@ -16,7 +16,9 @@ private:
   ReorderingStack reoStack;
 
 public:
-  HReorderingBackwardState(const LRModel &config,
+  HReorderingBackwardState(
+      MemPool &pool,
+      const LRModel &config,
 			size_t offset);
 
   virtual void Init(const LRState *prev,

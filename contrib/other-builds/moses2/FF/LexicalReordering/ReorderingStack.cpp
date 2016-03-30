@@ -4,11 +4,18 @@
  ** Date: Jan 26, 2010
 */
 
-#include "ReorderingStack.h"
 #include <vector>
+#include "ReorderingStack.h"
+#include "../../MemPool.h"
 
 namespace Moses2
 {
+ReorderingStack::ReorderingStack(MemPool &pool)
+:m_stack(pool)
+{
+
+}
+
 void ReorderingStack::Init()
 {
   m_stack.clear();

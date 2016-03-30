@@ -11,9 +11,12 @@
 
 namespace Moses2 {
 
-HReorderingBackwardState::HReorderingBackwardState(const LRModel &config,
+HReorderingBackwardState::HReorderingBackwardState(
+    MemPool &pool,
+    const LRModel &config,
 		size_t offset)
 :LRState(config, LRModel::Backward, offset)
+,reoStack(pool)
 {
 	// TODO Auto-generated constructor stub
 

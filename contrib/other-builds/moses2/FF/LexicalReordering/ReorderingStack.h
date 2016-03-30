@@ -13,19 +13,20 @@
 //#include "TypeDef.h"
 //#include "Util.h"
 #include "../../legacy/Range.h"
+#include "../../Vector.h"
 
 namespace Moses2
 {
+class MemPool;
 
-/** @todo what is this?
- */
 class ReorderingStack
 {
 private:
 
-  std::vector<Range> m_stack;
+  Vector<Range> m_stack;
 
 public:
+  ReorderingStack(MemPool &pool);
 
   size_t hash() const;
   bool operator==(const ReorderingStack& other) const;
