@@ -88,8 +88,7 @@ void Hypothesis::Init(Manager &mgr, const Hypothesis &prevHypo,
 size_t Hypothesis::hash() const
 {
   // coverage
-  size_t seed = (size_t) m_sourceCompleted;
-
+  size_t seed = m_sourceCompleted->hash();
   seed = HypothesisBase::hash(seed);
   return seed;
 }
@@ -97,8 +96,8 @@ size_t Hypothesis::hash() const
 bool Hypothesis::operator==(const Hypothesis &other) const
 {
   // coverage
-  if (m_sourceCompleted != other.m_sourceCompleted) {
-	return false;
+  if (*m_sourceCompleted != *other.m_sourceCompleted) {
+    return false;
   }
 
   bool ret = HypothesisBase::operator ==(other);
