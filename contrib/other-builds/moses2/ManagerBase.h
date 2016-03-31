@@ -15,6 +15,7 @@
 #include "MemPool.h"
 #include "Recycler.h"
 #include "EstimatedScores.h"
+#include "ArcLists.h"
 #include "legacy/Bitmaps.h"
 
 namespace Moses2
@@ -34,6 +35,7 @@ class ManagerBase
 public:
 	const System &system;
 	const TranslationTask &task;
+  ArcLists arcLists;
 
 	ManagerBase(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId);
 	virtual ~ManagerBase();

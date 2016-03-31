@@ -16,7 +16,6 @@
 #include "../MemPool.h"
 #include "../Recycler.h"
 #include "../EstimatedScores.h"
-#include "../ArcLists.h"
 #include "../legacy/Bitmaps.h"
 #include "InputPaths.h"
 
@@ -35,8 +34,6 @@ class OutputCollector;
 class Manager : public ManagerBase
 {
 public:
-	ArcLists arcLists;
-
 	Manager(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId);
 
 	virtual ~Manager();
