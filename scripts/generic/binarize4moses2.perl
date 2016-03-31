@@ -6,6 +6,8 @@ use Getopt::Long;
 use File::Basename;
 use FindBin qw($RealBin);
 
+sub systemCheck($);
+
 my $mosesDir = "$RealBin/../..";
 my $ptPath;
 my $lexRoPath;
@@ -31,14 +33,28 @@ my $tempPath = dirname($outPath)  ."/tmp.$$";
 `mkdir -p $tempPath`;
 
 $cmd = "gzip -dc $ptPath |  $mosesDir/contrib/sigtest-filter/filter-pt -n $pruneNum | gzip -c > $tempPath/pt.gz";
-system($cmd);
+systemCheck($cmd);
 
 $cmd = "$mosesDir/bin/processLexicalTableMin  -in $lexRoPath -out $tempPath/lex-ro -T . -threads all";
-system($cmd);
+systemCheck($cmd);
 
-$cmd = "$mosesDir/bin/addLexROtoPT pt.gz $tempPath/lex-ro.minlexr  | gzip -c > $tempPath/pt.withLexRO.gz";
-system($cmd);
+$cmd = "$mosesDir/bin/addLexROtoPT $tempPath/pt.gz $tempPath/lex-ro.minlexr  | gzip -c > $tempPath/pt.withLexRO.gz";
+systemCheck($cmd);
 
 $cmd = "$mosesDir/bin/CreateProbingPT2 --num-lex-scores $numLexScores --log-prob --input-pt $tempPath/pt.withLexRO.gz --output-dir $outPath";
-system($cmd);
+systemCheck($cmd);
 
+exit(0);
+
+#####################################################
+sub systemCheck($)
+{
+  my $cmd = shift;
+  print STDERR "Executing: $cmd\n";
+  
+  my $retVal = system($cmd);
+  if ($retVal != 0)
+  {
+    exit(1);
+  }
+}
