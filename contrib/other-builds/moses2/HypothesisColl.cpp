@@ -45,7 +45,7 @@ StackAdd HypothesisColl::Add(const HypothesisBase *hypo)
   assert(false);
 }
 
-Hypotheses &HypothesisColl::GetSortedAndPruneHypos(const ManagerBase &mgr) const
+Hypotheses &HypothesisColl::GetSortedAndPruneHypos(const ManagerBase &mgr, ArcLists &arcLists) const
 {
   if (m_sortedHypos == NULL) {
     // create sortedHypos first
@@ -58,13 +58,13 @@ Hypotheses &HypothesisColl::GetSortedAndPruneHypos(const ManagerBase &mgr) const
 		  ++ind;
 	  }
 
-    SortAndPruneHypos(mgr);
+    SortAndPruneHypos(mgr, arcLists);
   }
 
   return *m_sortedHypos;
 }
 
-void HypothesisColl::SortAndPruneHypos(const ManagerBase &mgr) const
+void HypothesisColl::SortAndPruneHypos(const ManagerBase &mgr, ArcLists &arcLists) const
 {
   size_t stackSize = mgr.system.stackSize;
   Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
@@ -90,6 +90,11 @@ void HypothesisColl::SortAndPruneHypos(const ManagerBase &mgr) const
 	  for (size_t i = stackSize; i < m_sortedHypos->size(); ++i) {
 		  HypothesisBase *hypo = const_cast<HypothesisBase*>((*m_sortedHypos)[i]);
 		  recycler.Recycle(hypo);
+
+		  // delete from arclist
+		  if (mgr.system.nbestSize) {
+		    arcLists.Delete(hypo);
+		  }
 	  }
 	  m_sortedHypos->resize(stackSize);
   }

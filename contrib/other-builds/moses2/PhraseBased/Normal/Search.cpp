@@ -67,7 +67,7 @@ void SearchNormal::Decode(size_t stackInd)
 	  return;
   }
 
-  Hypotheses &hypos = stack.GetSortedAndPruneHypos(mgr);
+  Hypotheses &hypos = stack.GetSortedAndPruneHypos(mgr, mgr.arcLists);
 
 	const InputPaths &paths = mgr.GetInputPaths();
 
@@ -135,7 +135,7 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 const Hypothesis *SearchNormal::GetBestHypothesis() const
 {
 	const Stack &lastStack = m_stacks.Back();
-	const Hypotheses &sortedHypos = lastStack.GetSortedAndPruneHypos(mgr);
+	const Hypotheses &sortedHypos = lastStack.GetSortedAndPruneHypos(mgr, mgr.arcLists);
 
 	const Hypothesis *best = NULL;
 	if (sortedHypos.size()) {

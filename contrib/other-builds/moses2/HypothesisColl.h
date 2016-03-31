@@ -14,6 +14,7 @@
 namespace Moses2 {
 
 class ManagerBase;
+class ArcLists;
 
 typedef Array<const HypothesisBase*>  Hypotheses;
 
@@ -51,13 +52,13 @@ public:
 
 	void Clear();
 
-	Hypotheses &GetSortedAndPruneHypos(const ManagerBase &mgr) const;
+	Hypotheses &GetSortedAndPruneHypos(const ManagerBase &mgr, ArcLists &arcLists) const;
 
 protected:
 	_HCType m_coll;
 	mutable Hypotheses *m_sortedHypos;
 
-	void SortAndPruneHypos(const ManagerBase &mgr) const;
+	void SortAndPruneHypos(const ManagerBase &mgr, ArcLists &arcLists) const;
 
 };
 
