@@ -7,7 +7,7 @@
 #pragma once
 #include <vector>
 #include "../TypeDef.h"
-#include "ArcLists.h"
+#include "../ArcLists.h"
 
 namespace Moses2 {
 

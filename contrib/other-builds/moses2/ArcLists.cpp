@@ -8,8 +8,8 @@
 #include <algorithm>
 #include <boost/foreach.hpp>
 #include "ArcLists.h"
+#include "HypothesisBase.h"
 #include "util/exception.hh"
-#include "../HypothesisBase.h"
 
 using namespace std;
 

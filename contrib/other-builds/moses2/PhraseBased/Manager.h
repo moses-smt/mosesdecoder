@@ -16,9 +16,9 @@
 #include "../MemPool.h"
 #include "../Recycler.h"
 #include "../EstimatedScores.h"
+#include "../ArcLists.h"
 #include "../legacy/Bitmaps.h"
 #include "InputPaths.h"
-#include "ArcLists.h"
 
 namespace Moses2
 {

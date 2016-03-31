@@ -1,6 +1,7 @@
 alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem ../../../moses/TranslationModel/CompactPT//cmph ../../../moses//moses ;
 
  lib moses2_lib :
+   ArcLists.cpp
    EstimatedScores.cpp
    HypothesisBase.cpp
    HypothesisColl.cpp
@@ -48,7 +49,6 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
  	 	TranslationModel/ProbingPT.cpp 
  	 	TranslationModel/UnknownWordPenalty.cpp 
    	
-		PhraseBased/ArcLists.cpp
 		PhraseBased/Hypothesis.cpp 
  	 	PhraseBased/InputPath.cpp
  	 	PhraseBased/InputPaths.cpp
