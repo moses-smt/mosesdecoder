@@ -20,8 +20,9 @@ public:
 	ArcLists();
 	virtual ~ArcLists();
 
-	void AddArc(bool added, const HypothesisBase *currHypo,const HypothesisBase *otherHypo);
+	void AddArc(bool added, const HypothesisBase *currHypo, const HypothesisBase *otherHypo);
 	void Sort();
+	void Delete(const HypothesisBase *hypo);
 
 	const ArcList *GetArcList(const HypothesisBase *hypo) const;
 

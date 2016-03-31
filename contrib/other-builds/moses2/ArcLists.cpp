@@ -88,8 +88,17 @@ void ArcLists::Sort()
   BOOST_FOREACH(Coll::value_type &collPair, m_coll) {
 	  ArcList &list = *collPair.second;
 	  std::sort(list.begin(), list.end(), HypothesisFutureScoreOrderer() );
-
   }
+}
+
+void ArcLists::Delete(const HypothesisBase *hypo)
+{
+  Coll::iterator iter = m_coll.find(hypo);
+  UTIL_THROW_IF2(iter == m_coll.end(), "Can't find arc list");
+  ArcList *arcList = iter->second;
+
+  m_coll.erase(iter);
+  delete arcList;
 }
 
 }
