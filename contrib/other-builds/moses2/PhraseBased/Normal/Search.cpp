@@ -67,7 +67,7 @@ void SearchNormal::Decode(size_t stackInd)
 	  return;
   }
 
-  std::vector<const HypothesisBase*> hypos = stack.GetBestHyposAndPrune(mgr.system.stackSize, mgr.GetHypoRecycle());
+  Hypotheses &hypos = stack.GetSortedAndPruneHypos(mgr);
 
 	const InputPaths &paths = mgr.GetInputPaths();
 
@@ -135,7 +135,7 @@ void SearchNormal::Extend(const Hypothesis &hypo,
 const Hypothesis *SearchNormal::GetBestHypothesis() const
 {
 	const Stack &lastStack = m_stacks.Back();
-	std::vector<const HypothesisBase*> sortedHypos = lastStack.GetBestHypos(1);
+	const Hypotheses &sortedHypos = lastStack.GetSortedAndPruneHypos(mgr);
 
 	const Hypothesis *best = NULL;
 	if (sortedHypos.size()) {

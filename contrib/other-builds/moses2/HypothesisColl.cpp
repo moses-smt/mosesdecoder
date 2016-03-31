@@ -50,7 +50,7 @@ Hypotheses &HypothesisColl::GetSortedAndPruneHypos(const ManagerBase &mgr) const
   if (m_sortedHypos == NULL) {
     // create sortedHypos first
     MemPool &pool = mgr.GetPool();
-	m_sortedHypos = new (pool.Allocate<Hypotheses>()) Hypotheses(pool, m_coll.size());
+    m_sortedHypos = new (pool.Allocate<Hypotheses>()) Hypotheses(pool, m_coll.size());
 
 	  size_t ind = 0;
 	  BOOST_FOREACH(const HypothesisBase *hypo, m_coll) {
@@ -110,35 +110,5 @@ void HypothesisColl::Clear()
 	m_sortedHypos = NULL;
 	m_coll.clear();
 }
-
-std::vector<const HypothesisBase*> HypothesisColl::GetBestHyposAndPrune(size_t num, Recycler<HypothesisBase*> &recycler) const
-{
-  std::vector<const HypothesisBase*> ret = GetBestHypos(num);
-  if (num && ret.size() > num) {
-         for (size_t i = num; i < ret.size(); ++i) {
-        	 HypothesisBase *hypo = const_cast<HypothesisBase*>(ret[i]);
-             recycler.Recycle(hypo);
-         }
-         ret.resize(num);
-  }
-  return ret;
-}
-
-std::vector<const HypothesisBase*> HypothesisColl::GetBestHypos(size_t num) const
-{
-  std::vector<const HypothesisBase*> ret(m_coll.begin(), m_coll.end());
-
-  std::vector<const HypothesisBase*>::iterator iterMiddle;
-  iterMiddle = (num == 0 || ret.size() < num)
-                          ? ret.end()
-                          : ret.begin()+num;
-
-  std::partial_sort(ret.begin(), iterMiddle, ret.end(),
-                 HypothesisFutureScoreOrderer());
-
-  return ret;
-}
-
-
 
 } /* namespace Moses2 */

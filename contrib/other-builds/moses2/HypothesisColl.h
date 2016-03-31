@@ -53,10 +53,6 @@ public:
 
 	Hypotheses &GetSortedAndPruneHypos(const ManagerBase &mgr) const;
 
-	// for normal pb decoding
-	std::vector<const HypothesisBase*> GetBestHyposAndPrune(size_t num, Recycler<HypothesisBase*> &recycler) const;
-	std::vector<const HypothesisBase*> GetBestHypos(size_t num) const;
-
 protected:
 	_HCType m_coll;
 	mutable Hypotheses *m_sortedHypos;
