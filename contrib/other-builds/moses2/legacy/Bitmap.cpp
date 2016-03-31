@@ -66,16 +66,13 @@ void Bitmap::Init(const Bitmap &copy, const Range &range)
 // for unordered_set in stack
 size_t Bitmap::hash() const
 {
-  size_t ret;
-  ret = (size_t) this;
-  //ret = m_bitmap.hash();
+  size_t ret = m_bitmap.hash();
   return ret;
 }
 
 bool Bitmap::operator==(const Bitmap& other) const
 {
-  return this == &other;
-  //return m_bitmap == other.m_bitmap;
+  return m_bitmap == other.m_bitmap;
 }
 
 // friend
