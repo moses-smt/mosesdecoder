@@ -14,13 +14,14 @@ namespace Moses2
 namespace SCFG
 {
 
-class Word : public Moses2::Word
+class Word: public Moses2::Word
 {
-	  friend std::ostream& operator<<(std::ostream &, const Word &);
+  friend std::ostream& operator<<(std::ostream &, const Word &);
 public:
-	  bool isNonTerminal;
+  bool isNonTerminal;
 
-	  void CreateFromString(FactorCollection &vocab, const System &system, const std::string &str, bool doubleNT);
+  void CreateFromString(FactorCollection &vocab, const System &system,
+      const std::string &str, bool doubleNT);
 
 protected:
 };

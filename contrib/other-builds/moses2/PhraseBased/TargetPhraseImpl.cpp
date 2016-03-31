@@ -17,37 +17,41 @@ using namespace std;
 namespace Moses2
 {
 
-TargetPhraseImpl *TargetPhraseImpl::CreateFromString(MemPool &pool, const PhraseTable &pt, const System &system, const std::string &str)
+TargetPhraseImpl *TargetPhraseImpl::CreateFromString(MemPool &pool,
+    const PhraseTable &pt, const System &system, const std::string &str)
 {
-	FactorCollection &vocab = system.GetVocab();
+  FactorCollection &vocab = system.GetVocab();
 
-	vector<string> toks = Tokenize(str);
-	size_t size = toks.size();
-	TargetPhraseImpl *ret = new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, pt, system, size);
-	ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks);
+  vector<string> toks = Tokenize(str);
+  size_t size = toks.size();
+  TargetPhraseImpl *ret =
+      new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, pt, system,
+          size);
+  ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks);
 
-	return ret;
+  return ret;
 }
 
-TargetPhraseImpl::TargetPhraseImpl(MemPool &pool, const PhraseTable &pt, const System &system, size_t size)
-:TargetPhrase(pool, pt, system)
-,PhraseImplTemplate<Word>(pool, size)
+TargetPhraseImpl::TargetPhraseImpl(MemPool &pool, const PhraseTable &pt,
+    const System &system, size_t size) :
+    TargetPhrase(pool, pt, system), PhraseImplTemplate<Word>(pool, size)
 {
-	m_scores = new (pool.Allocate<Scores>()) Scores(system, pool, system.featureFunctions.GetNumScores());
+  m_scores = new (pool.Allocate<Scores>()) Scores(system, pool,
+      system.featureFunctions.GetNumScores());
 
-	size_t numWithPtData = system.featureFunctions.GetWithPhraseTableInd().size();
-	ffData = new (pool.Allocate<void *>(numWithPtData)) void *[numWithPtData];
+  size_t numWithPtData = system.featureFunctions.GetWithPhraseTableInd().size();
+  ffData = new (pool.Allocate<void *>(numWithPtData)) void *[numWithPtData];
 }
 
-TargetPhraseImpl::~TargetPhraseImpl() {
-	// TODO Auto-generated destructor stub
+TargetPhraseImpl::~TargetPhraseImpl()
+{
+  // TODO Auto-generated destructor stub
 }
 
 std::ostream& operator<<(std::ostream &out, const TargetPhraseImpl &obj)
 {
-	out << (const Phrase&) obj << " SCORES:" << obj.GetScores();
-	return out;
+  out << (const Phrase&) obj << " SCORES:" << obj.GetScores();
+  return out;
 }
-
 
 }

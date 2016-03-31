@@ -23,59 +23,60 @@
 
 namespace Moses2
 {
-	namespace NSCubePruning
-	{
-		class Stack;
-	}
+namespace NSCubePruning
+{
+class Stack;
+}
 
 class FeatureFunction;
 class StatefulFeatureFunction;
 class PhraseTable;
 class HypothesisBase;
 
-class System {
+class System
+{
 public:
-    const Parameter &params;
-    FeatureFunctions featureFunctions;
-    Weights weights;
-    std::vector<const PhraseTable*> mappings;
+  const Parameter &params;
+  FeatureFunctions featureFunctions;
+  Weights weights;
+  std::vector<const PhraseTable*> mappings;
 
-    mutable boost::shared_ptr<OutputCollector> bestCollector, nbestCollector;
+  mutable boost::shared_ptr<OutputCollector> bestCollector, nbestCollector;
 
-    // moses.ini params
-    size_t stackSize;
-    int maxDistortion;
-    size_t maxPhraseLength;
-    int numThreads;
+  // moses.ini params
+  size_t stackSize;
+  int maxDistortion;
+  size_t maxPhraseLength;
+  int numThreads;
 
-    SearchAlgorithm searchAlgorithm;
-    size_t popLimit;
-    size_t  cubePruningDiversity;
-    bool cubePruningLazyScoring;
+  SearchAlgorithm searchAlgorithm;
+  size_t popLimit;
+  size_t cubePruningDiversity;
+  bool cubePruningLazyScoring;
 
-    size_t nbestSize;
-    bool distinctNBest;
+  size_t nbestSize;
+  bool distinctNBest;
 
-    bool outputHypoScore;
-    int reportSegmentation;
-    int cpuAffinityOffset;
-    int cpuAffinityOffsetIncr;
+  bool outputHypoScore;
+  int reportSegmentation;
+  int cpuAffinityOffset;
+  int cpuAffinityOffsetIncr;
 
-	System(const Parameter &paramsArg);
-	virtual ~System();
+  System(const Parameter &paramsArg);
+  virtual ~System();
 
-	MemPool &GetSystemPool() const;
-	MemPool &GetManagerPool() const;
-	FactorCollection &GetVocab() const;
+  MemPool &GetSystemPool() const;
+  MemPool &GetManagerPool() const;
+  FactorCollection &GetVocab() const;
 
-	Recycler<HypothesisBase*> &GetHypoRecycler() const;
+  Recycler<HypothesisBase*> &GetHypoRecycler() const;
 
 protected:
   mutable FactorCollection m_vocab;
   mutable boost::thread_specific_ptr<MemPool> m_managerPool;
   mutable boost::thread_specific_ptr<MemPool> m_systemPool;
 
-  mutable boost::thread_specific_ptr< Recycler<HypothesisBase*> > m_hypoRecycler;
+  mutable boost::thread_specific_ptr<Recycler<HypothesisBase*> > m_hypoRecycler;
 
   std::string nBestPath;
 

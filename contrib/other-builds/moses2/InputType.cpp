@@ -7,10 +7,12 @@
 
 #include "InputType.h"
 
-namespace Moses2 {
+namespace Moses2
+{
 
-InputType::~InputType() {
-	// TODO Auto-generated destructor stub
+InputType::~InputType()
+{
+  // TODO Auto-generated destructor stub
 }
 
 } /* namespace Moses2 */

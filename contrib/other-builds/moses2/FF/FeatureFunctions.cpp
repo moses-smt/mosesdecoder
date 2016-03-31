@@ -31,41 +31,41 @@ using namespace std;
 
 namespace Moses2
 {
-FeatureFunctions::FeatureFunctions(System &system)
-:m_system(system)
-,m_ffStartInd(0)
+FeatureFunctions::FeatureFunctions(System &system) :
+    m_system(system), m_ffStartInd(0)
 {
-	//m_registry.PrintFF();
+  //m_registry.PrintFF();
 }
 
-FeatureFunctions::~FeatureFunctions() {
-	RemoveAllInColl(m_featureFunctions);
+FeatureFunctions::~FeatureFunctions()
+{
+  RemoveAllInColl(m_featureFunctions);
 }
 
 void FeatureFunctions::Load()
 {
   // load, everything but pts
-  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
-	  FeatureFunction *nonConstFF = const_cast<FeatureFunction*>(ff);
-	  PhraseTable *pt = dynamic_cast<PhraseTable*>(nonConstFF);
+  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions){
+  FeatureFunction *nonConstFF = const_cast<FeatureFunction*>(ff);
+  PhraseTable *pt = dynamic_cast<PhraseTable*>(nonConstFF);
 
-	  if (pt) {
-		  // do nothing. load pt last
-	  }
-	  else {
-		  cerr << "Loading " << nonConstFF->GetName() << endl;
-		  nonConstFF->Load(m_system);
-		  cerr << "Finished loading " << nonConstFF->GetName() << endl;
-	  }
+  if (pt) {
+    // do nothing. load pt last
   }
+  else {
+    cerr << "Loading " << nonConstFF->GetName() << endl;
+    nonConstFF->Load(m_system);
+    cerr << "Finished loading " << nonConstFF->GetName() << endl;
+  }
+}
 
-  // load pt
-  BOOST_FOREACH(const PhraseTable *pt, m_phraseTables) {
-	  PhraseTable *nonConstPT = const_cast<PhraseTable*>(pt);
-	  cerr << "Loading " << nonConstPT->GetName() << endl;
-	  nonConstPT->Load(m_system);
-	  cerr << "Finished loading " << nonConstPT->GetName() << endl;
-  }
+// load pt
+BOOST_FOREACH(const PhraseTable *pt, m_phraseTables) {
+  PhraseTable *nonConstPT = const_cast<PhraseTable*>(pt);
+  cerr << "Loading " << nonConstPT->GetName() << endl;
+  nonConstPT->Load(m_system);
+  cerr << "Finished loading " << nonConstPT->GetName() << endl;
+}
 }
 
 void FeatureFunctions::Create()
@@ -75,125 +75,129 @@ void FeatureFunctions::Create()
   const PARAM_VEC *ffParams = params.GetParam("feature");
   UTIL_THROW_IF2(ffParams == NULL, "Must have [feature] section");
 
-  BOOST_FOREACH(const std::string &line, *ffParams) {
-	  cerr << "line=" << line << endl;
-	  FeatureFunction *ff = Create(line);
+  BOOST_FOREACH(const std::string &line, *ffParams){
+  cerr << "line=" << line << endl;
+  FeatureFunction *ff = Create(line);
 
-	  m_featureFunctions.push_back(ff);
+  m_featureFunctions.push_back(ff);
 
-	  StatefulFeatureFunction *sfff = dynamic_cast<StatefulFeatureFunction*>(ff);
-	  if (sfff) {
-		  sfff->SetStatefulInd(m_statefulFeatureFunctions.size());
-		  m_statefulFeatureFunctions.push_back(sfff);
-	  }
-
-	  if (ff->HasPhraseTableInd()) {
-		  ff->SetPhraseTableInd(m_withPhraseTableInd.size());
-		  m_withPhraseTableInd.push_back(ff);
-	  }
-
-	  PhraseTable *pt = dynamic_cast<PhraseTable*>(ff);
-	  if (pt) {
-		  pt->SetPtInd(m_phraseTables.size());
-		  m_phraseTables.push_back(pt);
-	  }
+  StatefulFeatureFunction *sfff = dynamic_cast<StatefulFeatureFunction*>(ff);
+  if (sfff) {
+    sfff->SetStatefulInd(m_statefulFeatureFunctions.size());
+    m_statefulFeatureFunctions.push_back(sfff);
   }
+
+  if (ff->HasPhraseTableInd()) {
+    ff->SetPhraseTableInd(m_withPhraseTableInd.size());
+    m_withPhraseTableInd.push_back(ff);
+  }
+
+  PhraseTable *pt = dynamic_cast<PhraseTable*>(ff);
+  if (pt) {
+    pt->SetPtInd(m_phraseTables.size());
+    m_phraseTables.push_back(pt);
+  }
+}
 }
 
 FeatureFunction *FeatureFunctions::Create(const std::string &line)
 {
-	vector<string> toks = Tokenize(line);
+  vector<string> toks = Tokenize(line);
 
-	FeatureFunction *ff = m_registry.Construct(m_ffStartInd, toks[0], line);
-	UTIL_THROW_IF2(ff == NULL, "Feature function not created");
+  FeatureFunction *ff = m_registry.Construct(m_ffStartInd, toks[0], line);
+  UTIL_THROW_IF2(ff == NULL, "Feature function not created");
 
-	  // name
-	  if (ff->GetName() == "") {
-		  ff->SetName(GetDefaultName(toks[0]));
-	  }
+  // name
+  if (ff->GetName() == "") {
+    ff->SetName(GetDefaultName(toks[0]));
+  }
 
-	m_ffStartInd += ff->GetNumScores();
+  m_ffStartInd += ff->GetNumScores();
 
-	return ff;
+  return ff;
 }
 
 std::string FeatureFunctions::GetDefaultName(const std::string &stub)
 {
-	size_t ind;
-	boost::unordered_map<std::string, size_t>::iterator iter = m_defaultNames.find(stub);
-	if (iter == m_defaultNames.end()) {
-		m_defaultNames[stub] = 0;
-		ind = 0;
-	}
-	else {
-		ind = ++(iter->second);
-	}
-	return stub + SPrint(ind);
-}
-
-const FeatureFunction *FeatureFunctions::FindFeatureFunction(const std::string &name) const
-{
-  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
-	  if (ff->GetName() == name) {
-		  return ff;
-	  }
+  size_t ind;
+  boost::unordered_map<std::string, size_t>::iterator iter =
+      m_defaultNames.find(stub);
+  if (iter == m_defaultNames.end()) {
+    m_defaultNames[stub] = 0;
+    ind = 0;
   }
-  return NULL;
+  else {
+    ind = ++(iter->second);
+  }
+  return stub + SPrint(ind);
 }
 
-const PhraseTable *FeatureFunctions::GetPhraseTablesExcludeUnknownWordPenalty(size_t ptInd)
+const FeatureFunction *FeatureFunctions::FindFeatureFunction(
+    const std::string &name) const
 {
-	// assume only 1 unk wp
-	std::vector<const PhraseTable*> tmpVec(m_phraseTables);
-	std::vector<const PhraseTable*>::iterator iter;
-	for (iter = tmpVec.begin(); iter != tmpVec.end(); ++iter) {
-		const PhraseTable *pt = *iter;
-		  const UnknownWordPenalty *unkWP = dynamic_cast<const UnknownWordPenalty *>(pt);
-		  if (unkWP) {
-			  tmpVec.erase(iter);
-			  break;
-		  }
-	}
-
-	const PhraseTable *pt = tmpVec[ptInd];
-	return pt;
+  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions){
+  if (ff->GetName() == name) {
+    return ff;
+  }
+}
+return NULL;
 }
 
-void
-FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
-		  const Phrase &source, TargetPhrase &targetPhrase) const
+const PhraseTable *FeatureFunctions::GetPhraseTablesExcludeUnknownWordPenalty(
+    size_t ptInd)
+{
+  // assume only 1 unk wp
+  std::vector<const PhraseTable*> tmpVec(m_phraseTables);
+  std::vector<const PhraseTable*>::iterator iter;
+  for (iter = tmpVec.begin(); iter != tmpVec.end(); ++iter) {
+    const PhraseTable *pt = *iter;
+    const UnknownWordPenalty *unkWP =
+        dynamic_cast<const UnknownWordPenalty *>(pt);
+    if (unkWP) {
+      tmpVec.erase(iter);
+      break;
+    }
+  }
+
+  const PhraseTable *pt = tmpVec[ptInd];
+  return pt;
+}
+
+void FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
+    const Phrase &source, TargetPhrase &targetPhrase) const
 {
   SCORE estimatedScore = 0;
 
-  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
-	  Scores& scores = targetPhrase.GetScores();
-	  ff->EvaluateInIsolation(pool, system, source, targetPhrase, scores, &estimatedScore);
-  }
+  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions){
+  Scores& scores = targetPhrase.GetScores();
+  ff->EvaluateInIsolation(pool, system, source, targetPhrase, scores, &estimatedScore);
+}
 
   targetPhrase.SetEstimatedScore(estimatedScore);
 }
 
-void FeatureFunctions::EvaluateAfterTablePruning(MemPool &pool, const TargetPhrases &tps, const Phrase &sourcePhrase) const
+void FeatureFunctions::EvaluateAfterTablePruning(MemPool &pool,
+    const TargetPhrases &tps, const Phrase &sourcePhrase) const
 {
-  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
-	  ff->EvaluateAfterTablePruning(pool, tps, sourcePhrase);
-  }
+  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions){
+  ff->EvaluateAfterTablePruning(pool, tps, sourcePhrase);
+}
 
 }
 /*
-void
-FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
-		  const Phrase &source, SCFG::TargetPhrase &targetPhrase) const
-{
-  SCORE estimatedScore = 0;
+ void
+ FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
+ const Phrase &source, SCFG::TargetPhrase &targetPhrase) const
+ {
+ SCORE estimatedScore = 0;
 
-  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
-	  Scores& scores = targetPhrase.GetScores();
-	  ff->EvaluateInIsolation(pool, system, source, targetPhrase, scores, &estimatedScore);
-  }
+ BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
+ Scores& scores = targetPhrase.GetScores();
+ ff->EvaluateInIsolation(pool, system, source, targetPhrase, scores, &estimatedScore);
+ }
 
-  //targetPhrase.SetEstimatedScore(estimatedScore);
-}
-*/
+ //targetPhrase.SetEstimatedScore(estimatedScore);
+ }
+ */
 }
 

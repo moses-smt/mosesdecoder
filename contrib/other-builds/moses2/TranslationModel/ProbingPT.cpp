@@ -24,10 +24,10 @@ using namespace std;
 namespace Moses2
 {
 
-ProbingPT::ProbingPT(size_t startInd, const std::string &line)
-:PhraseTable(startInd, line)
+ProbingPT::ProbingPT(size_t startInd, const std::string &line) :
+    PhraseTable(startInd, line)
 {
-	  ReadParameters();
+  ReadParameters();
 }
 
 ProbingPT::~ProbingPT()
@@ -44,34 +44,36 @@ void ProbingPT::Load(System &system)
   FactorCollection &vocab = system.GetVocab();
 
   // source vocab
-  const std::map<uint64_t, std::string> &sourceVocab = m_engine->getSourceVocab();
+  const std::map<uint64_t, std::string> &sourceVocab =
+      m_engine->getSourceVocab();
   std::map<uint64_t, std::string>::const_iterator iterSource;
-  for (iterSource = sourceVocab.begin(); iterSource != sourceVocab.end(); ++iterSource) {
-	const string &wordStr = iterSource->second;
-	const Factor *factor = vocab.AddFactor(wordStr, system);
+  for (iterSource = sourceVocab.begin(); iterSource != sourceVocab.end();
+      ++iterSource) {
+    const string &wordStr = iterSource->second;
+    const Factor *factor = vocab.AddFactor(wordStr, system);
 
-	uint64_t probingId = iterSource->first;
-	size_t factorId = factor->GetId();
+    uint64_t probingId = iterSource->first;
+    size_t factorId = factor->GetId();
 
-	if (factorId >= m_sourceVocab.size()) {
-		m_sourceVocab.resize(factorId + 1, m_unkId);
-	}
-	m_sourceVocab[factorId] = probingId;
+    if (factorId >= m_sourceVocab.size()) {
+      m_sourceVocab.resize(factorId + 1, m_unkId);
+    }
+    m_sourceVocab[factorId] = probingId;
   }
 
   // target vocab
   InputFileStream targetVocabStrme(m_path + "/TargetVocab.dat");
   string line;
   while (getline(targetVocabStrme, line)) {
-	  vector<string> toks = Tokenize(line, "\t");
-	  assert(toks.size());
-  	  const Factor *factor = vocab.AddFactor(toks[0], system);
-  	  uint32_t probingId = Scan<uint32_t>(toks[1]);
+    vector<string> toks = Tokenize(line, "\t");
+    assert(toks.size());
+    const Factor *factor = vocab.AddFactor(toks[0], system);
+    uint32_t probingId = Scan<uint32_t>(toks[1]);
 
-  	  if (probingId >= m_targetVocab.size()) {
-  		m_targetVocab.resize(probingId + 1, NULL);
-  	  }
-  	  m_targetVocab[probingId] = factor;
+    if (probingId >= m_targetVocab.size()) {
+      m_targetVocab.resize(probingId + 1, NULL);
+    }
+    m_targetVocab[probingId] = factor;
   }
 
   // memory mapped file to tps
@@ -91,50 +93,51 @@ void ProbingPT::Load(System &system)
 
 void ProbingPT::Lookup(const Manager &mgr, InputPathsBase &inputPaths) const
 {
-  BOOST_FOREACH(InputPathBase *pathBase, inputPaths) {
-	InputPath *path = static_cast<InputPath*>(pathBase);
-	TargetPhrases *tpsPtr;
-	tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
-	path->AddTargetPhrases(*this, tpsPtr);
-  }
+  BOOST_FOREACH(InputPathBase *pathBase, inputPaths){
+  InputPath *path = static_cast<InputPath*>(pathBase);
+  TargetPhrases *tpsPtr;
+  tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
+  path->AddTargetPhrases(*this, tpsPtr);
+}
 }
 
-TargetPhrases* ProbingPT::Lookup(const Manager &mgr,
-		MemPool &pool,
-		InputPathBase &inputPath) const
+TargetPhrases* ProbingPT::Lookup(const Manager &mgr, MemPool &pool,
+    InputPathBase &inputPath) const
 {
-	/*
-	if (inputPath.prefixPath && inputPath.prefixPath->GetTargetPhrases(*this) == NULL) {
-		// assume all paths have prefixes, except rules with 1 word source
-		return NULL;
-	}
-	else {
-		const Phrase &sourcePhrase = inputPath.subPhrase;
-		std::pair<TargetPhrases*, uint64_t> tpsAndKey = CreateTargetPhrase(pool, mgr.system, sourcePhrase);
-		return tpsAndKey.first;
-	}
-	*/
-	const Phrase &sourcePhrase = inputPath.subPhrase;
+  /*
+   if (inputPath.prefixPath && inputPath.prefixPath->GetTargetPhrases(*this) == NULL) {
+   // assume all paths have prefixes, except rules with 1 word source
+   return NULL;
+   }
+   else {
+   const Phrase &sourcePhrase = inputPath.subPhrase;
+   std::pair<TargetPhrases*, uint64_t> tpsAndKey = CreateTargetPhrase(pool, mgr.system, sourcePhrase);
+   return tpsAndKey.first;
+   }
+   */
+  const Phrase &sourcePhrase = inputPath.subPhrase;
 
-	// get hash for source phrase
-	std::pair<bool, uint64_t> keyStruct = GetSourceProbingId(sourcePhrase);
-	if (!keyStruct.first) {
-	  return NULL;
-	}
+  // get hash for source phrase
+  std::pair<bool, uint64_t> keyStruct = GetSourceProbingId(sourcePhrase);
+  if (!keyStruct.first) {
+    return NULL;
+  }
 
-	// check in cache
-	Cache::const_iterator iter = m_cache.find(keyStruct.second);
-	if (iter != m_cache.end()) {
-		TargetPhrases *tps = iter->second;
-		return tps;
-	}
+  // check in cache
+  Cache::const_iterator iter = m_cache.find(keyStruct.second);
+  if (iter != m_cache.end()) {
+    TargetPhrases *tps = iter->second;
+    return tps;
+  }
 
-	// query pt
-	TargetPhrases *tps = CreateTargetPhrase(pool, mgr.system, sourcePhrase, keyStruct.second);
-	return tps;
+  // query pt
+  TargetPhrases *tps = CreateTargetPhrase(pool, mgr.system, sourcePhrase,
+      keyStruct.second);
+  return tps;
 }
 
-std::pair<bool, uint64_t> ProbingPT::GetSourceProbingId(const Phrase &sourcePhrase) const
+std::pair<bool, uint64_t> ProbingPT::GetSourceProbingId(
+    const Phrase &sourcePhrase) const
 {
   std::pair<bool, uint64_t> ret;
 
@@ -145,22 +148,19 @@ std::pair<bool, uint64_t> ProbingPT::GetSourceProbingId(const Phrase &sourcePhra
   uint64_t probingSource[sourceSize];
   ConvertToProbingSourcePhrase(sourcePhrase, ret.first, probingSource);
   if (!ret.first) {
-	// source phrase contains a word unknown in the pt.
-	// We know immediately there's no translation for it
+    // source phrase contains a word unknown in the pt.
+    // We know immediately there's no translation for it
   }
   else {
-	  ret.second = m_engine->getKey(probingSource, sourceSize);
+    ret.second = m_engine->getKey(probingSource, sourceSize);
   }
 
   return ret;
 
 }
 
-TargetPhrases *ProbingPT::CreateTargetPhrase(
-		  MemPool &pool,
-		  const System &system,
-		  const Phrase &sourcePhrase,
-		  uint64_t key) const
+TargetPhrases *ProbingPT::CreateTargetPhrase(MemPool &pool,
+    const System &system, const Phrase &sourcePhrase, uint64_t key) const
 {
   TargetPhrases *tps = NULL;
 
@@ -169,84 +169,84 @@ TargetPhrases *ProbingPT::CreateTargetPhrase(
   query_result = m_engine->query(key);
 
   if (query_result.first) {
-	  const char *offset = data + query_result.second;
-	  uint64_t *numTP = (uint64_t*) offset;
+    const char *offset = data + query_result.second;
+    uint64_t *numTP = (uint64_t*) offset;
 
-	  tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, *numTP);
+    tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, *numTP);
 
-	  offset += sizeof(uint64_t);
-	  for (size_t i = 0; i < *numTP; ++i) {
-		  TargetPhrase *tp = CreateTargetPhrase(pool, system, offset);
-		  assert(tp);
-		  const FeatureFunctions &ffs = system.featureFunctions;
-		  ffs.EvaluateInIsolation(pool, system, sourcePhrase, *tp);
+    offset += sizeof(uint64_t);
+    for (size_t i = 0; i < *numTP; ++i) {
+      TargetPhrase *tp = CreateTargetPhrase(pool, system, offset);
+      assert(tp);
+      const FeatureFunctions &ffs = system.featureFunctions;
+      ffs.EvaluateInIsolation(pool, system, sourcePhrase, *tp);
 
-		  tps->AddTargetPhrase(*tp);
+      tps->AddTargetPhrase(*tp);
 
-	  }
+    }
 
-	  tps->SortAndPrune(m_tableLimit);
-	  system.featureFunctions.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
-	  //cerr << *tps << endl;
+    tps->SortAndPrune(m_tableLimit);
+    system.featureFunctions.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
+    //cerr << *tps << endl;
   }
 
   return tps;
 }
 
-TargetPhrase *ProbingPT::CreateTargetPhrase(
-		  MemPool &pool,
-		  const System &system,
-		  const char *&offset) const
+TargetPhrase *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system,
+    const char *&offset) const
 {
-	TargetPhraseInfo *tpInfo = (TargetPhraseInfo*) offset;
-    TargetPhraseImpl *tp = new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, *this, system, tpInfo->numWords);
+  TargetPhraseInfo *tpInfo = (TargetPhraseInfo*) offset;
+  TargetPhraseImpl *tp =
+      new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, *this,
+          system, tpInfo->numWords);
 
-	offset += sizeof(TargetPhraseInfo);
+  offset += sizeof(TargetPhraseInfo);
 
-	// scores
-	SCORE *scores = (SCORE*) offset;
+  // scores
+  SCORE *scores = (SCORE*) offset;
 
   size_t totalNumScores = m_engine->num_scores + m_engine->num_lex_scores;
 
   if (m_engine->logProb) {
-	    // set pt score for rule
-	    tp->GetScores().PlusEquals(system, *this, scores);
+    // set pt score for rule
+    tp->GetScores().PlusEquals(system, *this, scores);
 
-	    // save scores for other FF, eg. lex RO. Just give the offset
-	    if (m_engine->num_lex_scores) {
-		  tp->scoreProperties = scores + m_engine->num_scores;
-	    }
+    // save scores for other FF, eg. lex RO. Just give the offset
+    if (m_engine->num_lex_scores) {
+      tp->scoreProperties = scores + m_engine->num_scores;
+    }
   }
   else {
-	  // log score 1st
-	  SCORE logScores[totalNumScores];
-	  for (size_t i = 0; i < totalNumScores; ++i) {
-		  logScores[i] = FloorScore(TransformScore(scores[i]));
-	  }
+    // log score 1st
+    SCORE logScores[totalNumScores];
+    for (size_t i = 0; i < totalNumScores; ++i) {
+      logScores[i] = FloorScore(TransformScore(scores[i]));
+    }
 
-      // set pt score for rule
-	  tp->GetScores().PlusEquals(system, *this, logScores);
+    // set pt score for rule
+    tp->GetScores().PlusEquals(system, *this, logScores);
 
-      // save scores for other FF, eg. lex RO.
-	  tp->scoreProperties = pool.Allocate<SCORE>(m_engine->num_lex_scores);
-	  for (size_t i = 0; i < m_engine->num_lex_scores; ++i) {
-		  tp->scoreProperties[i] = logScores[i + m_engine->num_scores];
-	  }
+    // save scores for other FF, eg. lex RO.
+    tp->scoreProperties = pool.Allocate<SCORE>(m_engine->num_lex_scores);
+    for (size_t i = 0; i < m_engine->num_lex_scores; ++i) {
+      tp->scoreProperties[i] = logScores[i + m_engine->num_scores];
+    }
   }
 
   offset += sizeof(SCORE) * totalNumScores;
 
   // words
   for (size_t i = 0; i < tpInfo->numWords; ++i) {
-	  uint32_t *probingId = (uint32_t*) offset;
+    uint32_t *probingId = (uint32_t*) offset;
 
-	  const Factor *factor = GetTargetFactor(*probingId);
-	  assert(factor);
+    const Factor *factor = GetTargetFactor(*probingId);
+    assert(factor);
 
-	  Word &word = (*tp)[i];
-	  word[0] = factor;
+    Word &word = (*tp)[i];
+    word[0] = factor;
 
-	  offset += sizeof(uint32_t);
+    offset += sizeof(uint32_t);
   }
 
   // properties TODO
@@ -254,7 +254,8 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(
   return tp;
 }
 
-void ProbingPT::ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok, uint64_t probingSource[]) const
+void ProbingPT::ConvertToProbingSourcePhrase(const Phrase &sourcePhrase,
+    bool &ok, uint64_t probingSource[]) const
 {
 
   size_t size = sourcePhrase.GetSize();
@@ -264,7 +265,8 @@ void ProbingPT::ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &o
     if (probingId == m_unkId) {
       ok = false;
       return;
-    } else {
+    }
+    else {
       probingSource[i] = probingId;
     }
   }
@@ -274,39 +276,40 @@ void ProbingPT::ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &o
 
 void ProbingPT::CreateCache(System &system)
 {
-	if (m_maxCacheSize == 0) {
-		return;
-	}
+  if (m_maxCacheSize == 0) {
+    return;
+  }
 
-	string filePath = m_path + "/cache";
-	InputFileStream strme(filePath);
+  string filePath = m_path + "/cache";
+  InputFileStream strme(filePath);
 
-	string line;
-	getline(strme, line);
-	//float totalCount = Scan<float>(line);
+  string line;
+  getline(strme, line);
+  //float totalCount = Scan<float>(line);
 
-	MemPool &pool = system.GetSystemPool();
-	FactorCollection &vocab = system.GetVocab();
+  MemPool &pool = system.GetSystemPool();
+  FactorCollection &vocab = system.GetVocab();
 
-	size_t lineCount = 0;
-	while (getline(strme, line) && lineCount < m_maxCacheSize) {
-		vector<string> toks = Tokenize(line, "\t");
-		assert(toks.size() == 2);
-		PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system, toks[1]);
+  size_t lineCount = 0;
+  while (getline(strme, line) && lineCount < m_maxCacheSize) {
+    vector<string> toks = Tokenize(line, "\t");
+    assert(toks.size() == 2);
+    PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system,
+        toks[1]);
 
-		std::pair<bool, uint64_t> retStruct = GetSourceProbingId(*sourcePhrase);
-		if (!retStruct.first) {
-		  return;
-		}
+    std::pair<bool, uint64_t> retStruct = GetSourceProbingId(*sourcePhrase);
+    if (!retStruct.first) {
+      return;
+    }
 
-		TargetPhrases *tps = CreateTargetPhrase(pool, system, *sourcePhrase, retStruct.second);
-		assert(tps);
+    TargetPhrases *tps = CreateTargetPhrase(pool, system, *sourcePhrase,
+        retStruct.second);
+    assert(tps);
 
-		m_cache[retStruct.second] = tps;
+    m_cache[retStruct.second] = tps;
 
-		++lineCount;
-	}
-
+    ++lineCount;
+  }
 
 }
 

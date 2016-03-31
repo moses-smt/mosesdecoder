@@ -16,12 +16,13 @@ QueryEngine::QueryEngine(const char * filepath)
 
   //Read config file
   std::string line;
-  std::ifstream config ((basepath + "/config").c_str());
+  std::ifstream config((basepath + "/config").c_str());
   //Check API version:
   getline(config, line);
   int version = atoi(line.c_str());
   if (version != API_VERSION) {
-    std::cerr << "The ProbingPT API has changed. " << version << "!=" << API_VERSION << " Please rebinarize your phrase tables." << std::endl;
+    std::cerr << "The ProbingPT API has changed. " << version << "!="
+        << API_VERSION << " Please rebinarize your phrase tables." << std::endl;
     exit(EXIT_FAILURE);
   }
   //Get tablesize.
@@ -61,19 +62,19 @@ uint64_t QueryEngine::getKey(uint64_t source_phrase[], size_t size) const
   //uint64_t key = util::MurmurHashNative(&source_phrase[0], source_phrase.size());
   uint64_t key = 0;
   for (size_t i = 0; i < size; i++) {
-	key += (source_phrase[i] << i);
+    key += (source_phrase[i] << i);
   }
   return key;
 }
 
 std::pair<bool, uint64_t> QueryEngine::query(uint64_t key)
 {
-	std::pair<bool, uint64_t> ret;
+  std::pair<bool, uint64_t> ret;
 
   const Entry * entry;
   ret.first = table.Find(key, entry);
   if (ret.first) {
-	  ret.second = entry->value;
+    ret.second = entry->value;
   }
   return ret;
 }

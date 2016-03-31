@@ -17,44 +17,40 @@
 namespace Moses2
 {
 
-void createProbingPT(
-		const std::string &phrasetable_path,
-		const std::string &basepath,
-        int num_scores,
-		int num_lex_scores,
-		bool log_prob,
-		int max_cache_size);
+void createProbingPT(const std::string &phrasetable_path,
+    const std::string &basepath, int num_scores, int num_lex_scores,
+    bool log_prob, int max_cache_size);
 
 size_t countUniqueSource(const std::string &path);
 
 class CacheItem
 {
 public:
-	std::string source;
-	float count;
-	CacheItem(const std::string &source, float count)
-	:source(source)
-	,count(count)
-	{}
+  std::string source;
+  float count;
+  CacheItem(const std::string &source, float count) :
+      source(source), count(count)
+  {
+  }
 
-	bool operator<(const CacheItem &other) const
-	{
-	  return count > other.count;
-	}
+  bool operator<(const CacheItem &other) const
+  {
+    return count > other.count;
+  }
 };
 
 class CacheItemOrderer
 {
 public:
-  bool operator()(const CacheItem* a, const CacheItem* b) const {
+  bool operator()(const CacheItem* a, const CacheItem* b) const
+  {
     return (*a) < (*b);
   }
 };
 
-void serialize_cache(std::priority_queue<CacheItem*, std::vector<CacheItem*>, CacheItemOrderer> &cache,
-		const std::string &path,
-		float totalSourceCount);
+void serialize_cache(
+    std::priority_queue<CacheItem*, std::vector<CacheItem*>, CacheItemOrderer> &cache,
+    const std::string &path, float totalSourceCount);
 
 }
-
 

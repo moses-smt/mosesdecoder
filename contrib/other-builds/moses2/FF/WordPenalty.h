@@ -13,19 +13,16 @@
 namespace Moses2
 {
 
-class WordPenalty  : public StatelessFeatureFunction
+class WordPenalty: public StatelessFeatureFunction
 {
 public:
-	WordPenalty(size_t startInd, const std::string &line);
-	virtual ~WordPenalty();
+  WordPenalty(size_t startInd, const std::string &line);
+  virtual ~WordPenalty();
 
-	  virtual void
-	  EvaluateInIsolation(MemPool &pool,
-			  const System &system,
-			  const Phrase &source,
-			  const TargetPhrase &targetPhrase,
-			  Scores &scores,
-			  SCORE *estimatedScore) const;
+  virtual void
+  EvaluateInIsolation(MemPool &pool, const System &system, const Phrase &source,
+      const TargetPhrase &targetPhrase, Scores &scores,
+      SCORE *estimatedScore) const;
 
 };
 

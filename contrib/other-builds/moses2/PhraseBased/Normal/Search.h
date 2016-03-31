@@ -23,36 +23,29 @@ class TargetPhrases;
 class TargetPhrase;
 class Stacks;
 
-class SearchNormal : public Search
+class SearchNormal: public Search
 {
 public:
-	SearchNormal(Manager &mgr);
-	virtual ~SearchNormal();
+  SearchNormal(Manager &mgr);
+  virtual ~SearchNormal();
 
-	virtual void Decode();
-	const Hypothesis *GetBestHypothesis() const;
+  virtual void Decode();
+  const Hypothesis *GetBestHypothesis() const;
 
-	void AddInitialTrellisPaths(TrellisPaths &paths) const;
+  void AddInitialTrellisPaths(TrellisPaths &paths) const;
 
 protected:
-    Stacks m_stacks;
+  Stacks m_stacks;
 
-	void Decode(size_t stackInd);
-	void Extend(const Hypothesis &hypo, const InputPath &path);
-	void Extend(const Hypothesis &hypo,
-			const TargetPhrases &tps,
-			const InputPath &path,
-			const Bitmap &newBitmap,
-			SCORE estimatedScore);
-	void Extend(const Hypothesis &hypo,
-			const TargetPhrase &tp,
-			const InputPath &path,
-			const Bitmap &newBitmap,
-			SCORE estimatedScore);
+  void Decode(size_t stackInd);
+  void Extend(const Hypothesis &hypo, const InputPath &path);
+  void Extend(const Hypothesis &hypo, const TargetPhrases &tps,
+      const InputPath &path, const Bitmap &newBitmap, SCORE estimatedScore);
+  void Extend(const Hypothesis &hypo, const TargetPhrase &tp,
+      const InputPath &path, const Bitmap &newBitmap, SCORE estimatedScore);
 
 };
 
 }
-
 
 #endif /* SEARCHNORMAL_H_ */

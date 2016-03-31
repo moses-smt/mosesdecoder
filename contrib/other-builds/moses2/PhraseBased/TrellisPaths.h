@@ -10,27 +10,33 @@
 #include <queue>
 #include "TrellisPath.h"
 
-namespace Moses2 {
+namespace Moses2
+{
 
-struct CompareTrellisPathCollection {
-  bool operator()(const TrellisPath* pathA, const TrellisPath* pathB) const {
+struct CompareTrellisPathCollection
+{
+  bool operator()(const TrellisPath* pathA, const TrellisPath* pathB) const
+  {
     return (pathA->GetFutureScore() < pathB->GetFutureScore());
   }
 };
 
-class TrellisPaths {
+class TrellisPaths
+{
 public:
   TrellisPaths();
   virtual ~TrellisPaths();
 
-  bool empty() const {
+  bool empty() const
+  {
     return m_collection.empty();
   }
 
   //! add a new entry into collection
   void Add(TrellisPath *trellisPath);
 
-  TrellisPath *Get() {
+  TrellisPath *Get()
+  {
     TrellisPath *top = m_collection.top();
 
     // Detach
@@ -39,7 +45,8 @@ public:
   }
 
 protected:
-  typedef std::priority_queue<TrellisPath*, std::vector<TrellisPath*>, CompareTrellisPathCollection> CollectionType;
+  typedef std::priority_queue<TrellisPath*, std::vector<TrellisPath*>,
+      CompareTrellisPathCollection> CollectionType;
   CollectionType m_collection;
 };
 

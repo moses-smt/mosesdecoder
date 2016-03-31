@@ -9,16 +9,16 @@ class System;
 class ManagerBase;
 class Manager;
 
-class TranslationTask : public Task
+class TranslationTask: public Task
 {
 public:
 
-	TranslationTask(System &system, const std::string &line, long translationId);
-	virtual ~TranslationTask();
-	virtual void Run();
+  TranslationTask(System &system, const std::string &line, long translationId);
+  virtual ~TranslationTask();
+  virtual void Run();
 
 protected:
-	ManagerBase *m_mgr;
+  ManagerBase *m_mgr;
 };
 
 }

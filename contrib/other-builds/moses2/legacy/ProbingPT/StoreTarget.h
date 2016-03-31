@@ -11,18 +11,20 @@
 #include <inttypes.h>
 #include <boost/unordered_map.hpp>
 
-namespace Moses2 {
+namespace Moses2
+{
 
 class line_text;
 class target_text;
 
-class StoreTarget {
+class StoreTarget
+{
 public:
-	StoreTarget(const std::string &basepath);
-	virtual ~StoreTarget();
+  StoreTarget(const std::string &basepath);
+  virtual ~StoreTarget();
 
-	uint64_t Save();
-	void Append(const line_text &line, bool log_prob);
+  uint64_t Save();
+  void Append(const line_text &line, bool log_prob);
 protected:
   std::string m_basePath;
   std::fstream m_fileTargetColl;
@@ -35,7 +37,8 @@ protected:
   uint16_t GetAlignId(const std::vector<unsigned char> &align);
   void Save(const target_text &rule);
 
-  void AppendLexRO(std::string &prop, std::vector<float> &retvector, bool log_prob) const;
+  void AppendLexRO(std::string &prop, std::vector<float> &retvector,
+      bool log_prob) const;
 
 };
 

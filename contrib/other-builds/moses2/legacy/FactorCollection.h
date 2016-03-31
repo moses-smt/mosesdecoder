@@ -1,23 +1,23 @@
 // $Id$
 
 /***********************************************************************
-Moses - factored phrase-based language decoder
-Copyright (C) 2006 University of Edinburgh
+ Moses - factored phrase-based language decoder
+ Copyright (C) 2006 University of Edinburgh
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-***********************************************************************/
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ ***********************************************************************/
 
 #pragma once
 
@@ -52,7 +52,8 @@ class System;
  * FactorFriend's public copy constructor and everybody else sees Factor's
  * private copy constructor.
  */
-struct FactorFriend {
+struct FactorFriend
+{
   Factor in;
 };
 
@@ -69,13 +70,20 @@ class FactorCollection
   friend std::ostream& operator<<(std::ostream&, const FactorCollection&);
   friend class System;
 
-  struct HashFactor : public std::unary_function<const FactorFriend &, std::size_t> {
-    std::size_t operator()(const FactorFriend &factor) const {
-      return util::MurmurHashNative(factor.in.m_string.data(), factor.in.m_string.size());
+  struct HashFactor: public std::unary_function<const FactorFriend &,
+      std::size_t>
+  {
+    std::size_t operator()(const FactorFriend &factor) const
+    {
+      return util::MurmurHashNative(factor.in.m_string.data(),
+          factor.in.m_string.size());
     }
   };
-  struct EqualsFactor : public std::binary_function<const FactorFriend &, const FactorFriend &, bool> {
-    bool operator()(const FactorFriend &left, const FactorFriend &right) const {
+  struct EqualsFactor: public std::binary_function<const FactorFriend &,
+      const FactorFriend &, bool>
+  {
+    bool operator()(const FactorFriend &left, const FactorFriend &right) const
+    {
       return left.in.GetString() == right.in.GetString();
     }
   };
@@ -94,24 +102,27 @@ class FactorCollection
   size_t m_factorId; /**< unique, contiguous ids, starting from moses_MaxNumNonterminals, for each terminal factor */
 
   //! constructor. only the 1 static variable can be created
-  FactorCollection()
-    : m_factorIdNonTerminal(0)
-    , m_factorId(moses_MaxNumNonterminals) {
+  FactorCollection() :
+      m_factorIdNonTerminal(0), m_factorId(moses_MaxNumNonterminals)
+  {
   }
 
 public:
   ~FactorCollection();
 
   /** returns a factor with the same direction, factorType and factorString.
-  *	If a factor already exist in the collection, return the existing factor, if not create a new 1
-  */
-  const Factor *AddFactor(const StringPiece &factorString, const System &system, bool isNonTerminal = false);
+   *	If a factor already exist in the collection, return the existing factor, if not create a new 1
+   */
+  const Factor *AddFactor(const StringPiece &factorString, const System &system,
+      bool isNonTerminal = false);
 
-  size_t GetNumNonTerminals() {
+  size_t GetNumNonTerminals()
+  {
     return m_factorIdNonTerminal;
   }
 
-  const Factor *GetFactor(const StringPiece &factorString, bool isNonTerminal = false);
+  const Factor *GetFactor(const StringPiece &factorString, bool isNonTerminal =
+      false);
 
 };
 

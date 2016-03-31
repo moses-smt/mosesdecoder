@@ -11,23 +11,22 @@
 namespace Moses2
 {
 
-SkeletonStatelessFF::SkeletonStatelessFF(size_t startInd, const std::string &line)
-:StatelessFeatureFunction(startInd, line)
+SkeletonStatelessFF::SkeletonStatelessFF(size_t startInd,
+    const std::string &line) :
+    StatelessFeatureFunction(startInd, line)
 {
-	ReadParameters();
+  ReadParameters();
 }
 
-SkeletonStatelessFF::~SkeletonStatelessFF() {
-	// TODO Auto-generated destructor stub
+SkeletonStatelessFF::~SkeletonStatelessFF()
+{
+  // TODO Auto-generated destructor stub
 }
 
-void
-SkeletonStatelessFF::EvaluateInIsolation(MemPool &pool,
-		const System &system,
-		const Phrase &source,
-		const TargetPhrase &targetPhrase,
-		Scores &scores,
-		SCORE *estimatedScore) const
+void SkeletonStatelessFF::EvaluateInIsolation(MemPool &pool,
+    const System &system, const Phrase &source,
+    const TargetPhrase &targetPhrase, Scores &scores,
+    SCORE *estimatedScore) const
 {
 
 }

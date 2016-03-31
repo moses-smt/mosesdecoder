@@ -16,14 +16,13 @@
 namespace Moses2
 {
 
-class Stack : public HypothesisColl
+class Stack: public HypothesisColl
 {
 public:
-	Stack(const Manager &mgr);
-	virtual ~Stack();
+  Stack(const Manager &mgr);
+  virtual ~Stack();
 
 protected:
-
 
 };
 

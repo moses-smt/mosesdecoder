@@ -1,23 +1,23 @@
 // $Id$
 // vim:tabstop=2
 /***********************************************************************
-Moses - factored phrase-based language decoder
-Copyright (C) 2006 University of Edinburgh
+ Moses - factored phrase-based language decoder
+ Copyright (C) 2006 University of Edinburgh
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-***********************************************************************/
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ ***********************************************************************/
 
 #ifndef moses_BlockHashIndex_h
 #define moses_BlockHashIndex_h
@@ -75,18 +75,22 @@ private:
   ThreadPool m_threadPool;
   boost::mutex m_mutex;
 
-  template <typename Keys>
-  class HashTask : public Task
+  template<typename Keys>
+  class HashTask: public Task
   {
   public:
-    HashTask(int id, BlockHashIndex& hash, Keys& keys)
-      : m_id(id), m_hash(hash), m_keys(new Keys(keys)) {}
+    HashTask(int id, BlockHashIndex& hash, Keys& keys) :
+        m_id(id), m_hash(hash), m_keys(new Keys(keys))
+    {
+    }
 
-    virtual void Run() {
+    virtual void Run()
+    {
       m_hash.CalcHash(m_id, *m_keys);
     }
 
-    virtual ~HashTask() {
+    virtual ~HashTask()
+    {
       delete m_keys;
     }
 
@@ -103,7 +107,7 @@ private:
 public:
 #ifdef WITH_THREADS
   BlockHashIndex(size_t orderBits, size_t fingerPrintBits,
-                 size_t threadsNum = 2);
+      size_t threadsNum = 2);
 #else
   BlockHashIndex(size_t orderBits, size_t fingerPrintBits);
 #endif
@@ -141,13 +145,15 @@ public:
 
   void KeepNLastRanges(float ratio = 0.1, float tolerance = 0.1);
 
-  template <typename Keys>
-  void AddRange(Keys &keys) {
+  template<typename Keys>
+  void AddRange(Keys &keys)
+  {
     size_t current = m_landmarks.size();
 
-    if(m_landmarks.size() && m_landmarks.back().str() >= keys[0]) {
+    if (m_landmarks.size() && m_landmarks.back().str() >= keys[0]) {
       util::StringStream strme;
-      strme << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort\n";
+      strme
+          << "ERROR: Input file does not appear to be sorted with  LC_ALL=C sort\n";
       strme << "1: " << m_landmarks.back().str() << "\n";
       strme << "2: " << keys[0] << "\n";
       UTIL_THROW2(strme.str());
@@ -156,23 +162,24 @@ public:
     m_landmarks.push_back(keys[0]);
     m_size += keys.size();
 
-    if(keys.size() == 1) {
+    if (keys.size() == 1) {
       // add dummy key to avoid null hash
       keys.push_back("###DUMMY_KEY###");
     }
 
 #ifdef WITH_THREADS
 
-    boost::shared_ptr<HashTask<Keys> >
-    ht(new HashTask<Keys>(current, *this, keys));
+    boost::shared_ptr<HashTask<Keys> > ht(
+        new HashTask<Keys>(current, *this, keys));
     m_threadPool.Submit(ht);
 #else
     CalcHash(current, keys);
 #endif
   }
 
-  template <typename Keys>
-  void CalcHash(size_t current, Keys &keys) {
+  template<typename Keys>
+  void CalcHash(size_t current, Keys &keys)
+  {
 #ifdef HAVE_CMPH
     void* source = vectorAdapter(keys);
     CalcHash(current, source);

@@ -31,41 +31,50 @@ class Hypothesis;
 class Sentence;
 class OutputCollector;
 
-class Manager : public ManagerBase
+class Manager: public ManagerBase
 {
 public:
-	Manager(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId);
+  Manager(System &sys, const TranslationTask &task, const std::string &inputStr,
+      long translationId);
 
-	virtual ~Manager();
+  virtual ~Manager();
 
-	Bitmaps &GetBitmaps()
-	{ return *m_bitmaps; }
+  Bitmaps &GetBitmaps()
+  {
+    return *m_bitmaps;
+  }
 
-	const EstimatedScores &GetEstimatedScores() const
-	{ return *m_estimatedScores; }
+  const EstimatedScores &GetEstimatedScores() const
+  {
+    return *m_estimatedScores;
+  }
 
-	const InputPaths &GetInputPaths() const
-	{ return m_inputPaths; }
+  const InputPaths &GetInputPaths() const
+  {
+    return m_inputPaths;
+  }
 
-	const TargetPhrase &GetInitPhrase() const
-	{ return *m_initPhrase; }
+  const TargetPhrase &GetInitPhrase() const
+  {
+    return *m_initPhrase;
+  }
 
-	void Decode();
+  void Decode();
 
 protected:
 
-	InputPaths m_inputPaths;
-	Bitmaps *m_bitmaps;
-	EstimatedScores *m_estimatedScores;
-	TargetPhrase *m_initPhrase;
+  InputPaths m_inputPaths;
+  Bitmaps *m_bitmaps;
+  EstimatedScores *m_estimatedScores;
+  TargetPhrase *m_initPhrase;
 
-	Search *m_search;
+  Search *m_search;
 
-	// must be run in same thread as Decode()
-	void Init();
-	void CalcFutureScore();
-    void OutputBest() const;
-    void OutputNBest();
+  // must be run in same thread as Decode()
+  void Init();
+  void CalcFutureScore();
+  void OutputBest() const;
+  void OutputNBest();
 
 };
 

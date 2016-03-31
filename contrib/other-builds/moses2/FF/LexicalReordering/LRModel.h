@@ -7,7 +7,8 @@
 #pragma once
 #include <string>
 
-namespace Moses2 {
+namespace Moses2
+{
 
 class MemPool;
 class Range;
@@ -15,69 +16,83 @@ class Bitmap;
 class LRState;
 class LexicalReordering;
 
-class LRModel {
+class LRModel
+{
 public:
-  enum ModelType { Monotonic, MSD, MSLR, LeftRight, None };
-  enum Direction { Forward, Backward, Bidirectional };
-  enum Condition { F, E, FE };
-
-  enum ReorderingType {
-	M    = 0, // monotonic
-	NM   = 1, // non-monotonic
-	S    = 1, // swap
-	D    = 2, // discontinuous
-	DL   = 2, // discontinuous, left
-	DR   = 3, // discontinuous, right
-	R    = 0, // right
-	L    = 1, // left
-	MAX  = 3, // largest possible
-	NONE = 4  // largest possible
+  enum ModelType
+  {
+    Monotonic, MSD, MSLR, LeftRight, None
+  };
+  enum Direction
+  {
+    Forward, Backward, Bidirectional
+  };
+  enum Condition
+  {
+    F, E, FE
   };
 
-	LRModel(const std::string &modelType, LexicalReordering &ff);
-	virtual ~LRModel();
+  enum ReorderingType
+  {
+    M = 0, // monotonic
+    NM = 1, // non-monotonic
+    S = 1, // swap
+    D = 2, // discontinuous
+    DL = 2, // discontinuous, left
+    DR = 3, // discontinuous, right
+    R = 0, // right
+    L = 1, // left
+    MAX = 3, // largest possible
+    NONE = 4  // largest possible
+  };
 
-	  ModelType GetModelType() const {
-	    return m_modelType;
-	  }
-	  Direction GetDirection() const {
-	    return m_direction;
-	  }
-	  Condition GetCondition() const {
-	    return m_condition;
-	  }
+  LRModel(const std::string &modelType, LexicalReordering &ff);
+  virtual ~LRModel();
 
-	  bool
-	  IsPhraseBased()  const {
-	    return m_phraseBased;
-	  }
+  ModelType GetModelType() const
+  {
+    return m_modelType;
+  }
+  Direction GetDirection() const
+  {
+    return m_direction;
+  }
+  Condition GetCondition() const
+  {
+    return m_condition;
+  }
 
-	  bool
-	  CollapseScores() const {
-	    return m_collapseScores;
-	  }
+  bool IsPhraseBased() const
+  {
+    return m_phraseBased;
+  }
 
-	  size_t GetNumberOfTypes() const;
+  bool CollapseScores() const
+  {
+    return m_collapseScores;
+  }
 
-	  LexicalReordering*
-	  GetScoreProducer() const {
-	    return m_scoreProducer;
-	  }
+  size_t GetNumberOfTypes() const;
 
-	  LRState *CreateLRState(MemPool &pool) const;
+  LexicalReordering*
+  GetScoreProducer() const
+  {
+    return m_scoreProducer;
+  }
 
-	  ReorderingType // for first phrase in phrase-based
-	  GetOrientation(Range const& cur) const;
+  LRState *CreateLRState(MemPool &pool) const;
 
-	  ReorderingType // for non-first phrases in phrase-based
-	  GetOrientation(Range const& prev, Range const& cur) const;
+  ReorderingType // for first phrase in phrase-based
+  GetOrientation(Range const& cur) const;
 
-	  ReorderingType // for HReorderingForwardState
-	  GetOrientation(Range const& prev, Range const& cur,
-	                 Bitmap const& cov) const;
+  ReorderingType // for non-first phrases in phrase-based
+  GetOrientation(Range const& prev, Range const& cur) const;
 
-	  ReorderingType // for HReorderingBackwarddState
-	  GetOrientation(int const reoDistance) const;
+  ReorderingType // for HReorderingForwardState
+  GetOrientation(Range const& prev, Range const& cur, Bitmap const& cov) const;
+
+  ReorderingType // for HReorderingBackwarddState
+  GetOrientation(int const reoDistance) const;
 
 protected:
 

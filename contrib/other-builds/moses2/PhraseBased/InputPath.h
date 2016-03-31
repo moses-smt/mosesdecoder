@@ -14,23 +14,26 @@
 namespace Moses2
 {
 
-class InputPath : public InputPathBase
+class InputPath: public InputPathBase
 {
-	  friend std::ostream& operator<<(std::ostream &, const InputPath &);
+  friend std::ostream& operator<<(std::ostream &, const InputPath &);
 public:
-	const TargetPhrases** targetPhrases;
+  const TargetPhrases** targetPhrases;
 
-	InputPath(MemPool &pool, const SubPhrase &subPhrase, const Range &range, size_t numPt, const InputPath *prefixPath);
-	virtual ~InputPath();
+  InputPath(MemPool &pool, const SubPhrase &subPhrase, const Range &range,
+      size_t numPt, const InputPath *prefixPath);
+  virtual ~InputPath();
 
-	void AddTargetPhrases(const PhraseTable &pt, const TargetPhrases *tps);
-	const TargetPhrases *GetTargetPhrases(const PhraseTable &pt) const;
+  void AddTargetPhrases(const PhraseTable &pt, const TargetPhrases *tps);
+  const TargetPhrases *GetTargetPhrases(const PhraseTable &pt) const;
 
-	inline bool IsUsed() const
-	{ return m_isUsed; }
+  inline bool IsUsed() const
+  {
+    return m_isUsed;
+  }
 
 protected:
-	bool m_isUsed;
+  bool m_isUsed;
 };
 
 }

@@ -16,43 +16,46 @@
 namespace Moses2
 {
 
-StatefulFeatureFunction::StatefulFeatureFunction(size_t startInd, const std::string &line)
-:FeatureFunction(startInd, line)
+StatefulFeatureFunction::StatefulFeatureFunction(size_t startInd,
+    const std::string &line) :
+    FeatureFunction(startInd, line)
 {
 }
 
-StatefulFeatureFunction::~StatefulFeatureFunction() {
-	// TODO Auto-generated destructor stub
+StatefulFeatureFunction::~StatefulFeatureFunction()
+{
+  // TODO Auto-generated destructor stub
 }
 
-void StatefulFeatureFunction::EvaluateWhenApplied(const ObjectPoolContiguous<Hypothesis*> &hypos) const
+void StatefulFeatureFunction::EvaluateWhenApplied(
+    const ObjectPoolContiguous<Hypothesis*> &hypos) const
 {
 #ifdef __linux
   /*
-	pthread_t handle;
-	handle = pthread_self();
+   pthread_t handle;
+   handle = pthread_self();
 
-    int s;
-    cpu_set_t cpusetOrig, cpuset;
-    s = pthread_getaffinity_np(handle, sizeof(cpu_set_t), &cpusetOrig);
+   int s;
+   cpu_set_t cpusetOrig, cpuset;
+   s = pthread_getaffinity_np(handle, sizeof(cpu_set_t), &cpusetOrig);
 
-    CPU_ZERO(&cpuset);
+   CPU_ZERO(&cpuset);
 
-    int core = handle % 8;
-    core += 24;
-    CPU_SET(core, &cpuset);
+   int core = handle % 8;
+   core += 24;
+   CPU_SET(core, &cpuset);
 
-    s = pthread_setaffinity_np(handle, sizeof(cpu_set_t), &cpuset);
-*/
+   s = pthread_setaffinity_np(handle, sizeof(cpu_set_t), &cpuset);
+   */
 #endif
 
-	for (size_t i = 0; i < hypos.GetSize(); ++i) {
-		Hypothesis *hypo = hypos[i];
-		 hypo->EvaluateWhenApplied(*this);
-	 }
+  for (size_t i = 0; i < hypos.GetSize(); ++i) {
+    Hypothesis *hypo = hypos[i];
+    hypo->EvaluateWhenApplied(*this);
+  }
 
 #ifdef __linux
-	//    s = pthread_setaffinity_np(handle, sizeof(cpu_set_t), &cpusetOrig);
+  //    s = pthread_setaffinity_np(handle, sizeof(cpu_set_t), &cpusetOrig);
 #endif
 }
 

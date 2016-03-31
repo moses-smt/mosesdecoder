@@ -20,6 +20,5 @@ InputPathsBase::~InputPathsBase()
 {
 }
 
-
 }
 

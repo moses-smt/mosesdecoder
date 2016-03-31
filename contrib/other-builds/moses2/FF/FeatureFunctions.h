@@ -30,55 +30,65 @@ class Scores;
 
 namespace SCFG
 {
-	class TargetPhrase;
+class TargetPhrase;
 }
 
-class FeatureFunctions {
+class FeatureFunctions
+{
 public:
-    std::vector<const PhraseTable*> m_phraseTables;
+  std::vector<const PhraseTable*> m_phraseTables;
 
-    FeatureFunctions(System &system);
-	virtual ~FeatureFunctions();
+  FeatureFunctions(System &system);
+  virtual ~FeatureFunctions();
 
-	const std::vector<const FeatureFunction*> &GetFeatureFunctions() const
-	{ return m_featureFunctions; }
+  const std::vector<const FeatureFunction*> &GetFeatureFunctions() const
+  {
+    return m_featureFunctions;
+  }
 
-	const std::vector<const StatefulFeatureFunction*> &GetStatefulFeatureFunctions() const
-	{ return m_statefulFeatureFunctions; }
+  const std::vector<const StatefulFeatureFunction*> &GetStatefulFeatureFunctions() const
+  {
+    return m_statefulFeatureFunctions;
+  }
 
-	const std::vector<const FeatureFunction*> &GetWithPhraseTableInd() const
-	{ return m_withPhraseTableInd; }
+  const std::vector<const FeatureFunction*> &GetWithPhraseTableInd() const
+  {
+    return m_withPhraseTableInd;
+  }
 
-	size_t GetNumScores() const
-	{ return m_ffStartInd; }
+  size_t GetNumScores() const
+  {
+    return m_ffStartInd;
+  }
 
-	void Create();
-    void Load();
+  void Create();
+  void Load();
 
-    const FeatureFunction *FindFeatureFunction(const std::string &name) const;
-    const PhraseTable *GetPhraseTablesExcludeUnknownWordPenalty(size_t ptInd);
+  const FeatureFunction *FindFeatureFunction(const std::string &name) const;
+  const PhraseTable *GetPhraseTablesExcludeUnknownWordPenalty(size_t ptInd);
 
-    // the pool here must be the system pool if the rule was loaded during load, or the mgr pool if it was loaded on demand
-    void EvaluateInIsolation(MemPool &pool, const System &system,
-			  const Phrase &source, TargetPhrase &targetPhrase) const;
-    void EvaluateAfterTablePruning(MemPool &pool, const TargetPhrases &tps, const Phrase &sourcePhrase) const;
+  // the pool here must be the system pool if the rule was loaded during load, or the mgr pool if it was loaded on demand
+  void EvaluateInIsolation(MemPool &pool, const System &system,
+      const Phrase &source, TargetPhrase &targetPhrase) const;
+  void EvaluateAfterTablePruning(MemPool &pool, const TargetPhrases &tps,
+      const Phrase &sourcePhrase) const;
 
-    /*
-    void EvaluateInIsolation(MemPool &pool, const System &system,
-			  const Phrase &source, SCFG::TargetPhrase &targetPhrase) const;
-	*/
+  /*
+   void EvaluateInIsolation(MemPool &pool, const System &system,
+   const Phrase &source, SCFG::TargetPhrase &targetPhrase) const;
+   */
 protected:
-	  std::vector<const FeatureFunction*> m_featureFunctions;
-	  std::vector<const StatefulFeatureFunction*> m_statefulFeatureFunctions;
-	  std::vector<const FeatureFunction*> m_withPhraseTableInd;
-	  boost::unordered_map<std::string, size_t> m_defaultNames;
-	  System &m_system;
-	  size_t m_ffStartInd;
+  std::vector<const FeatureFunction*> m_featureFunctions;
+  std::vector<const StatefulFeatureFunction*> m_statefulFeatureFunctions;
+  std::vector<const FeatureFunction*> m_withPhraseTableInd;
+  boost::unordered_map<std::string, size_t> m_defaultNames;
+  System &m_system;
+  size_t m_ffStartInd;
 
-	FeatureFunction *Create(const std::string &line);
-	std::string GetDefaultName(const std::string &stub);
+  FeatureFunction *Create(const std::string &line);
+  std::string GetDefaultName(const std::string &stub);
 
-	FeatureRegistry m_registry;
+  FeatureRegistry m_registry;
 };
 
 }

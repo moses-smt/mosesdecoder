@@ -7,8 +7,8 @@ using namespace std;
 namespace Moses2
 {
 
-Bitmaps::Bitmaps(MemPool &pool)
-:m_pool(pool)
+Bitmaps::Bitmaps(MemPool &pool) :
+    m_pool(pool)
 {
 }
 
@@ -16,7 +16,8 @@ Bitmaps::~Bitmaps()
 {
 }
 
-void Bitmaps::Init(size_t inputSize, const std::vector<bool> &initSourceCompleted)
+void Bitmaps::Init(size_t inputSize,
+    const std::vector<bool> &initSourceCompleted)
 {
   m_initBitmap = new (m_pool.Allocate<Bitmap>()) Bitmap(m_pool, inputSize);
   m_initBitmap->Init(initSourceCompleted);
@@ -30,8 +31,8 @@ const Bitmap &Bitmaps::GetNextBitmap(const Bitmap &bm, const Range &range)
     newBM = new (m_pool.Allocate<Bitmap>()) Bitmap(m_pool, bm.GetSize());
   }
   else {
-	newBM = m_recycler.top();
-	m_recycler.pop();
+    newBM = m_recycler.top();
+    m_recycler.pop();
   }
 
   newBM->Init(bm, range);
@@ -40,8 +41,9 @@ const Bitmap &Bitmaps::GetNextBitmap(const Bitmap &bm, const Range &range)
   if (iter == m_coll.end()) {
     m_coll[newBM] = NextBitmaps();
     return *newBM;
-  } else {
-	m_recycler.push(newBM);
+  }
+  else {
+    m_recycler.push(newBM);
 
     return *iter->first;
   }
@@ -59,7 +61,8 @@ const Bitmap &Bitmaps::GetBitmap(const Bitmap &bm, const Range &range)
     // not seen the link yet.
     newBM = &GetNextBitmap(bm, range);
     next[&range] = newBM;
-  } else {
+  }
+  else {
     // link exist
     //std::cerr << "link exists" << endl;
     newBM = iterNext->second;

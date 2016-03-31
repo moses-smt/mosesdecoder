@@ -2,7 +2,7 @@
  * ReorderingStack.cpp
  ** Author: Ankit K. Srivastava
  ** Date: Jan 26, 2010
-*/
+ */
 
 #include <vector>
 #include "ReorderingStack.h"
@@ -10,8 +10,8 @@
 
 namespace Moses2
 {
-ReorderingStack::ReorderingStack(MemPool &pool)
-:m_stack(pool)
+ReorderingStack::ReorderingStack(MemPool &pool) :
+    m_stack(pool)
 {
 
 }
@@ -36,10 +36,10 @@ bool ReorderingStack::operator==(const ReorderingStack& o) const
 // Method to push (shift element into the stack and reduce if reqd)
 int ReorderingStack::ShiftReduce(const Range &input_span)
 {
-  int distance;  // value to return: the initial distance between this and previous span
+  int distance; // value to return: the initial distance between this and previous span
 
   // stack is empty
-  if(m_stack.empty()) {
+  if (m_stack.empty()) {
     m_stack.push_back(input_span);
     return input_span.GetStartPos() + 1; // - (-1)
   }
@@ -48,21 +48,24 @@ int ReorderingStack::ShiftReduce(const Range &input_span)
   Range prev_span = m_stack.back(); //access last element added
 
   //calculate the distance we are returning
-  if(input_span.GetStartPos() > prev_span.GetStartPos()) {
+  if (input_span.GetStartPos() > prev_span.GetStartPos()) {
     distance = input_span.GetStartPos() - prev_span.GetEndPos();
-  } else {
+  }
+  else {
     distance = input_span.GetEndPos() - prev_span.GetStartPos();
   }
 
-  if(distance == 1) { //monotone
+  if (distance == 1) { //monotone
     m_stack.pop_back();
     Range new_span(prev_span.GetStartPos(), input_span.GetEndPos());
     Reduce(new_span);
-  } else if(distance == -1) { //swap
+  }
+  else if (distance == -1) { //swap
     m_stack.pop_back();
     Range new_span(input_span.GetStartPos(), prev_span.GetEndPos());
     Reduce(new_span);
-  } else {      // discontinuous
+  }
+  else {      // discontinuous
     m_stack.push_back(input_span);
   }
 
@@ -78,16 +81,18 @@ void ReorderingStack::Reduce(Range current)
 
     Range previous = m_stack.back();
 
-    if(current.GetStartPos() - previous.GetEndPos() == 1) { //mono&merge
+    if (current.GetStartPos() - previous.GetEndPos() == 1) { //mono&merge
       m_stack.pop_back();
       Range t(previous.GetStartPos(), current.GetEndPos());
       current = t;
-    } else if(previous.GetStartPos() - current.GetEndPos() == 1) { //swap&merge
+    }
+    else if (previous.GetStartPos() - current.GetEndPos() == 1) { //swap&merge
       m_stack.pop_back();
       Range t(current.GetStartPos(), previous.GetEndPos());
       current = t;
-    } else { // discontinuous, no more merging
-      cont_loop=false;
+    }
+    else { // discontinuous, no more merging
+      cont_loop = false;
     }
   } // finished reducing, exit
 

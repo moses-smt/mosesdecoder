@@ -19,20 +19,22 @@ using namespace std;
 
 namespace Moses2
 {
-template <class F>
-class DefaultFeatureFactory : public FeatureFactory
+template<class F>
+class DefaultFeatureFactory: public FeatureFactory
 {
 public:
-	FeatureFunction *Create(size_t startInd, const std::string &line) {
-		return new F(startInd, line);
-	}
+  FeatureFunction *Create(size_t startInd, const std::string &line)
+  {
+    return new F(startInd, line);
+  }
 };
 
 ////////////////////////////////////////////////////////////////////
-class KenFactory : public FeatureFactory
+class KenFactory: public FeatureFactory
 {
 public:
-  FeatureFunction *Create(size_t startInd, const std::string &line) {
+  FeatureFunction *Create(size_t startInd, const std::string &line)
+  {
     ConstructKenLM(startInd, line);
   }
 };
@@ -41,9 +43,9 @@ public:
 FeatureRegistry::FeatureRegistry()
 {
   // Feature with same name as class
-  #define MOSES_FNAME(name) Add(#name, new DefaultFeatureFactory< name >());
+#define MOSES_FNAME(name) Add(#name, new DefaultFeatureFactory< name >());
   // Feature with different name than class.
-  #define MOSES_FNAME2(name, type) Add(name, new DefaultFeatureFactory< type >());
+#define MOSES_FNAME2(name, type) Add(name, new DefaultFeatureFactory< type >());
 
   MOSES_FNAME2("PhraseDictionaryMemory", PhraseTableMemory);
   MOSES_FNAME(ProbingPT);
@@ -69,19 +71,21 @@ FeatureRegistry::~FeatureRegistry()
 
 void FeatureRegistry::Add(const std::string &name, FeatureFactory *factory)
 {
-  std::pair<std::string, boost::shared_ptr<FeatureFactory> > to_ins(name, boost::shared_ptr<FeatureFactory>(factory));
+  std::pair<std::string, boost::shared_ptr<FeatureFactory> > to_ins(name,
+      boost::shared_ptr<FeatureFactory>(factory));
   if (!registry_.insert(to_ins).second) {
-	  cerr << "Duplicate feature name " << name << endl;
-	  abort();
+    cerr << "Duplicate feature name " << name << endl;
+    abort();
   }
 }
 
-FeatureFunction *FeatureRegistry::Construct(size_t startInd, const std::string &name, const std::string &line)
+FeatureFunction *FeatureRegistry::Construct(size_t startInd,
+    const std::string &name, const std::string &line)
 {
   Map::iterator i = registry_.find(name);
   if (i == registry_.end()) {
-	  cerr << "Feature name " << name << " is not registered.";
-	  abort();
+    cerr << "Feature name " << name << " is not registered.";
+    abort();
   }
   FeatureFactory *fact = i->second.get();
   FeatureFunction *ff = fact->Create(startInd, line);

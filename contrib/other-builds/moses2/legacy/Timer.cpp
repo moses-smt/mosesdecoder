@@ -7,11 +7,10 @@
 namespace Moses2
 {
 
-Timer::Timer()
-: running(false)
-,stopped(false)
+Timer::Timer() :
+    running(false), stopped(false)
 {
-	start_time = 0;
+  start_time = 0;
 }
 
 /***
@@ -37,7 +36,7 @@ void Timer::start(const char* msg)
 {
   // Print an optional message, something like "Starting timer t";
   if (msg) {
-	  std::cerr <<  msg << std::endl;
+    std::cerr << msg << std::endl;
   }
 
   // Return immediately if the timer is already running
@@ -47,7 +46,8 @@ void Timer::start(const char* msg)
   if (stopped) {
     start_time = util::WallTime() - (stop_time - start_time);
     stopped = false;
-  } else {
+  }
+  else {
     start_time = util::WallTime();
     running = true;
   }
@@ -61,7 +61,7 @@ void Timer::stop(const char* msg)
 {
   // Print an optional message, something like "Stopping timer t";
   if (msg) {
-	  std::cerr << msg << std::endl;
+    std::cerr << msg << std::endl;
   }
 
   // Return immediately if the timer is not running
@@ -81,7 +81,7 @@ void Timer::check(const char* msg)
 {
   // Print an optional message, something like "Checking timer t";
   if (msg) {
-	  std::cerr << msg << " : ";
+    std::cerr << msg << " : ";
   }
 
 //  VERBOSE(1, "[" << std::setiosflags(std::ios::fixed) << std::setprecision(2) << (running ? elapsed_time() : 0) << "] seconds\n");

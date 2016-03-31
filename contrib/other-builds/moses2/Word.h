@@ -15,38 +15,42 @@
 namespace Moses2
 {
 
-class Word {
-	  friend std::ostream& operator<<(std::ostream &, const Word &);
+class Word
+{
+  friend std::ostream& operator<<(std::ostream &, const Word &);
 public:
   Word();
   Word(const Word &copy);
 
   virtual ~Word();
 
-  void CreateFromString(FactorCollection &vocab, const System &system, const std::string &str);
+  void CreateFromString(FactorCollection &vocab, const System &system,
+      const std::string &str);
 
   size_t hash() const;
   int Compare(const Word &compare) const;
 
   bool operator==(const Word &compare) const
   {
-	int cmp = Compare(compare);
-	return cmp == 0;
+    int cmp = Compare(compare);
+    return cmp == 0;
   }
 
   bool operator!=(const Word &compare) const
   {
-	return !( (*this) == compare );
+    return !((*this) == compare);
   }
 
   bool operator<(const Word &compare) const;
 
-  const Factor* operator[](size_t ind) const {
-	return m_factors[ind];
+  const Factor* operator[](size_t ind) const
+  {
+    return m_factors[ind];
   }
 
-  const Factor*& operator[](size_t ind) {
-	return m_factors[ind];
+  const Factor*& operator[](size_t ind)
+  {
+    return m_factors[ind];
   }
 
   std::string GetString(const FactorList &factorTypes) const;

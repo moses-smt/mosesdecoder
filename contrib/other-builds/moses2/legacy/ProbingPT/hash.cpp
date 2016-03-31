@@ -17,7 +17,7 @@ std::vector<uint64_t> getVocabIDs(const StringPiece &textin)
 
   util::TokenIter<util::SingleCharacter> it(textin, util::SingleCharacter(' '));
 
-  while(it) {
+  while (it) {
     output.push_back(getHash(*it));
     it++;
   }
@@ -32,7 +32,5 @@ uint64_t getVocabID(const std::string &candidate)
   return key;
 }
 
-
 }
-
 

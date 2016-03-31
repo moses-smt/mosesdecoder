@@ -10,7 +10,6 @@
 #include "../legacy/Util2.h"
 #include "../legacy/Factor.h"
 
-
 namespace DALM
 {
 class Logger;
@@ -26,40 +25,34 @@ typedef unsigned int VocabId;
 namespace Moses2
 {
 
-class LanguageModelDALM : public StatefulFeatureFunction
+class LanguageModelDALM: public StatefulFeatureFunction
 {
 public:
-	LanguageModelDALM(size_t startInd, const std::string &line);
-	virtual ~LanguageModelDALM();
+  LanguageModelDALM(size_t startInd, const std::string &line);
+  virtual ~LanguageModelDALM();
 
-	virtual void Load(System &system);
-	virtual void SetParameter(const std::string& key, const std::string& value);
+  virtual void Load(System &system);
+  virtual void SetParameter(const std::string& key, const std::string& value);
 
-    virtual FFState* BlankState(MemPool &pool) const;
-    virtual void EmptyHypothesisState(FFState &state,
-    		const ManagerBase &mgr,
-			const InputType &input,
-			const Hypothesis &hypo) const;
+  virtual FFState* BlankState(MemPool &pool) const;
+  virtual void EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
+      const InputType &input, const Hypothesis &hypo) const;
 
-	  virtual void
-	  EvaluateInIsolation(MemPool &pool,
-			  const System &system,
-			  const Phrase &source, const TargetPhrase &targetPhrase,
-	          Scores &scores,
-			  SCORE *estimatedScore) const;
+  virtual void
+  EvaluateInIsolation(MemPool &pool, const System &system, const Phrase &source,
+      const TargetPhrase &targetPhrase, Scores &scores,
+      SCORE *estimatedScore) const;
 
-	  virtual void EvaluateWhenApplied(const ManagerBase &mgr,
-	    const Hypothesis &hypo,
-	    const FFState &prevState,
-	    Scores &scores,
-		FFState &state) const;
+  virtual void EvaluateWhenApplied(const ManagerBase &mgr,
+      const Hypothesis &hypo, const FFState &prevState, Scores &scores,
+      FFState &state) const;
 
 protected:
   FactorType m_factorType;
 
-  std::string	m_filePath;
-  size_t			m_nGramOrder; //! max n-gram length contained in this LM
-  size_t			m_ContextSize;
+  std::string m_filePath;
+  size_t m_nGramOrder; //! max n-gram length contained in this LM
+  size_t m_ContextSize;
 
   DALM::Logger *m_logger;
   DALM::Vocabulary *m_vocab;

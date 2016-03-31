@@ -20,35 +20,40 @@ class InputPathBase;
 
 class InputPathsBase
 {
-	typedef std::vector<InputPathBase*> Coll;
+  typedef std::vector<InputPathBase*> Coll;
 public:
-	InputPathsBase() {}
-	virtual ~InputPathsBase();
+  InputPathsBase()
+  {
+  }
+  virtual ~InputPathsBase();
 
   //! iterators
   typedef Coll::iterator iterator;
   typedef Coll::const_iterator const_iterator;
 
-  const_iterator begin() const {
-	return m_inputPaths.begin();
+  const_iterator begin() const
+  {
+    return m_inputPaths.begin();
   }
-  const_iterator end() const {
-	return m_inputPaths.end();
+  const_iterator end() const
+  {
+    return m_inputPaths.end();
   }
 
-  iterator begin() {
-	return m_inputPaths.begin();
+  iterator begin()
+  {
+    return m_inputPaths.begin();
   }
-  iterator end() {
-	return m_inputPaths.end();
+  iterator end()
+  {
+    return m_inputPaths.end();
   }
 
   virtual void Init(const Sentence &input, const ManagerBase &mgr) = 0;
 
 protected:
-	Coll m_inputPaths;
+  Coll m_inputPaths;
 };
 
 }
-
 

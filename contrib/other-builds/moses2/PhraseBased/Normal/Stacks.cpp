@@ -14,43 +14,45 @@ using namespace std;
 namespace Moses2
 {
 
-Stacks::Stacks(const Manager &mgr)
-:m_mgr(mgr)
+Stacks::Stacks(const Manager &mgr) :
+    m_mgr(mgr)
 {
-	// TODO Auto-generated constructor stub
+  // TODO Auto-generated constructor stub
 
 }
 
-Stacks::~Stacks() {
-	for (size_t i = 0; i < m_stacks.size(); ++i) {
-		delete m_stacks[i];
-	}
+Stacks::~Stacks()
+{
+  for (size_t i = 0; i < m_stacks.size(); ++i) {
+    delete m_stacks[i];
+  }
 }
 
 void Stacks::Init(const Manager &mgr, size_t numStacks)
 {
-	m_stacks.resize(numStacks);
-	for (size_t i = 0; i < m_stacks.size(); ++i) {
-		m_stacks[i] = new Stack(mgr);
-	}
+  m_stacks.resize(numStacks);
+  for (size_t i = 0; i < m_stacks.size(); ++i) {
+    m_stacks[i] = new Stack(mgr);
+  }
 }
 
 std::ostream& operator<<(std::ostream &out, const Stacks &obj)
 {
   for (size_t i = 0; i < obj.GetSize(); ++i) {
-	  const Stack *stack = obj.m_stacks[i];
-	  if (stack) {
-		  out << stack->GetSize() << " ";
-	  }
-	  else {
-		  out << "N ";
-	  }
+    const Stack *stack = obj.m_stacks[i];
+    if (stack) {
+      out << stack->GetSize() << " ";
+    }
+    else {
+      out << "N ";
+    }
   }
 
   return out;
 }
 
-void Stacks::Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle, ArcLists &arcLists)
+void Stacks::Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
+    ArcLists &arcLists)
 {
   size_t numWordsCovered = hypo->GetBitmap().GetNumWordsCovered();
   //cerr << "numWordsCovered=" << numWordsCovered << endl;
@@ -59,15 +61,15 @@ void Stacks::Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle, ArcLi
 
   size_t nbestSize = m_mgr.system.nbestSize;
   if (nbestSize) {
-	  arcLists.AddArc(added.added, hypo, added.other);
+    arcLists.AddArc(added.added, hypo, added.other);
   }
   else {
-	if (!added.added) {
-		hypoRecycle.Recycle(hypo);
-	}
-	else if (added.other) {
-		hypoRecycle.Recycle(added.other);
-	}
+    if (!added.added) {
+      hypoRecycle.Recycle(hypo);
+    }
+    else if (added.other) {
+      hypoRecycle.Recycle(added.other);
+    }
   }
 }
 

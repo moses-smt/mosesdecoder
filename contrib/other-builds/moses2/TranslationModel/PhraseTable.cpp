@@ -18,16 +18,16 @@ namespace Moses2
 {
 
 ////////////////////////////////////////////////////////////////////////////
-PhraseTable::PhraseTable(size_t startInd, const std::string &line)
-:StatelessFeatureFunction(startInd, line)
-,m_tableLimit(20) // default
-,m_maxCacheSize(DEFAULT_MAX_TRANS_OPT_CACHE_SIZE)
+PhraseTable::PhraseTable(size_t startInd, const std::string &line) :
+    StatelessFeatureFunction(startInd, line), m_tableLimit(20) // default
+        , m_maxCacheSize(DEFAULT_MAX_TRANS_OPT_CACHE_SIZE)
 {
-	ReadParameters();
+  ReadParameters();
 }
 
-PhraseTable::~PhraseTable() {
-	// TODO Auto-generated destructor stub
+PhraseTable::~PhraseTable()
+{
+  // TODO Auto-generated destructor stub
 }
 
 void PhraseTable::SetParameter(const std::string& key, const std::string& value)
@@ -36,7 +36,7 @@ void PhraseTable::SetParameter(const std::string& key, const std::string& value)
     m_maxCacheSize = Scan<size_t>(value);
   }
   else if (key == "path") {
-	  m_path = value;
+    m_path = value;
   }
   else if (key == "input-factor") {
 
@@ -45,48 +45,45 @@ void PhraseTable::SetParameter(const std::string& key, const std::string& value)
 
   }
   else if (key == "table-limit") {
-	  m_tableLimit = Scan<size_t>(value);
+    m_tableLimit = Scan<size_t>(value);
   }
   else {
-	  StatelessFeatureFunction::SetParameter(key, value);
+    StatelessFeatureFunction::SetParameter(key, value);
   }
 }
 
 void PhraseTable::Lookup(const Manager &mgr, InputPathsBase &inputPaths) const
 {
-  BOOST_FOREACH(InputPathBase *pathBase, inputPaths) {
-	InputPath *path = static_cast<InputPath*>(pathBase);
+  BOOST_FOREACH(InputPathBase *pathBase, inputPaths){
+  InputPath *path = static_cast<InputPath*>(pathBase);
 
-    const SubPhrase &phrase = path->subPhrase;
+  const SubPhrase &phrase = path->subPhrase;
 
-	TargetPhrases *tpsPtr = tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
+  TargetPhrases *tpsPtr = tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
 
-	/*
-	cerr << "path=" << path.GetRange() << " ";
-	cerr << "tps=" << tps << " ";
-	if (tps.get()) {
-		cerr << tps.get()->GetSize();
-	}
-	cerr << endl;
-	*/
+  /*
+   cerr << "path=" << path.GetRange() << " ";
+   cerr << "tps=" << tps << " ";
+   if (tps.get()) {
+   cerr << tps.get()->GetSize();
+   }
+   cerr << endl;
+   */
 
-	path->AddTargetPhrases(*this, tpsPtr);
-  }
+  path->AddTargetPhrases(*this, tpsPtr);
+}
 
 }
 
-TargetPhrases *PhraseTable::Lookup(const Manager &mgr, MemPool &pool, InputPathBase &inputPath) const
+TargetPhrases *PhraseTable::Lookup(const Manager &mgr, MemPool &pool,
+    InputPathBase &inputPath) const
 {
   UTIL_THROW2("Not implemented");
 }
 
-void
-PhraseTable::EvaluateInIsolation(MemPool &pool,
-		const System &system,
-		const Phrase &source,
-		const TargetPhrase &targetPhrase,
-		Scores &scores,
-		SCORE *estimatedScore) const
+void PhraseTable::EvaluateInIsolation(MemPool &pool, const System &system,
+    const Phrase &source, const TargetPhrase &targetPhrase, Scores &scores,
+    SCORE *estimatedScore) const
 {
 }
 
@@ -96,7 +93,7 @@ void PhraseTable::CleanUpAfterSentenceProcessing()
 
 void PhraseTable::InitActiveChart(SCFG::InputPath &path) const
 {
-	  UTIL_THROW2("Not implemented");
+  UTIL_THROW2("Not implemented");
 }
 
 }

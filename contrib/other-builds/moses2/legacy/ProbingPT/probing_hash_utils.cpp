@@ -16,7 +16,7 @@ char * readTable(const char * filename, size_t size)
     exit(EXIT_FAILURE);
   }
 
-  map = (char *)mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
+  map = (char *) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
 
   if (map == MAP_FAILED) {
     close(fd);
@@ -27,11 +27,10 @@ char * readTable(const char * filename, size_t size)
   return map;
 }
 
-
 void serialize_table(char *mem, size_t size, const std::string &filename)
 {
-  std::ofstream os (filename.c_str(), std::ios::binary);
-  os.write((const char*)&mem[0], size);
+  std::ofstream os(filename.c_str(), std::ios::binary);
+  os.write((const char*) &mem[0], size);
   os.close();
 
 }

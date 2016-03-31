@@ -26,33 +26,35 @@ class InputPath;
 }
 
 ////////////////////////////////////////////////////////////////////////
-class PhraseTable : public StatelessFeatureFunction
+class PhraseTable: public StatelessFeatureFunction
 {
 public:
-	PhraseTable(size_t startInd, const std::string &line);
-	virtual ~PhraseTable();
+  PhraseTable(size_t startInd, const std::string &line);
+  virtual ~PhraseTable();
 
-	virtual void SetParameter(const std::string& key, const std::string& value);
-	virtual void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
-	virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool, InputPathBase &inputPath) const;
+  virtual void SetParameter(const std::string& key, const std::string& value);
+  virtual void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
+  virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
+      InputPathBase &inputPath) const;
 
-	void SetPtInd(size_t ind)
-	{ m_ptInd = ind; }
-	size_t GetPtInd() const
-	{ return m_ptInd; }
+  void SetPtInd(size_t ind)
+  {
+    m_ptInd = ind;
+  }
+  size_t GetPtInd() const
+  {
+    return m_ptInd;
+  }
 
-	  virtual void
-	  EvaluateInIsolation(MemPool &pool,
-			  const System &system,
-			  const Phrase &source,
-			  const TargetPhrase &targetPhrase,
-			  Scores &scores,
-			  SCORE *estimatedScore) const;
+  virtual void
+  EvaluateInIsolation(MemPool &pool, const System &system, const Phrase &source,
+      const TargetPhrase &targetPhrase, Scores &scores,
+      SCORE *estimatedScore) const;
 
-	  virtual void CleanUpAfterSentenceProcessing();
+  virtual void CleanUpAfterSentenceProcessing();
 
-    // scfg
-	virtual void InitActiveChart(SCFG::InputPath &path) const;
+  // scfg
+  virtual void InitActiveChart(SCFG::InputPath &path) const;
 
 protected:
   std::string m_path;
@@ -64,8 +66,8 @@ protected:
 
   struct CacheCollEntry2
   {
-	  TargetPhrases *tpsPtr;
-	  clock_t clock;
+    TargetPhrases *tpsPtr;
+    clock_t clock;
   };
 
 };

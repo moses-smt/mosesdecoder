@@ -14,76 +14,73 @@ using namespace std;
 namespace Moses2
 {
 
-class SkeletonState : public FFState
+class SkeletonState: public FFState
 {
 public:
   int targetLen;
 
   SkeletonState()
   {
-	  // uninitialised
+    // uninitialised
   }
 
-  virtual size_t hash() const {
+  virtual size_t hash() const
+  {
     return (size_t) targetLen;
   }
-  virtual bool operator==(const FFState& o) const {
+  virtual bool operator==(const FFState& o) const
+  {
     const SkeletonState& other = static_cast<const SkeletonState&>(o);
     return targetLen == other.targetLen;
   }
 
   virtual std::string ToString() const
   {
-	  stringstream sb;
-	  sb << targetLen;
-	  return sb.str();
+    stringstream sb;
+    sb << targetLen;
+    return sb.str();
   }
 
 };
 
 ////////////////////////////////////////////////////////////////////////////////////////
-SkeletonStatefulFF::SkeletonStatefulFF(size_t startInd, const std::string &line)
-:StatefulFeatureFunction(startInd, line)
+SkeletonStatefulFF::SkeletonStatefulFF(size_t startInd, const std::string &line) :
+    StatefulFeatureFunction(startInd, line)
 {
-	ReadParameters();
+  ReadParameters();
 }
 
-SkeletonStatefulFF::~SkeletonStatefulFF() {
-	// TODO Auto-generated destructor stub
+SkeletonStatefulFF::~SkeletonStatefulFF()
+{
+  // TODO Auto-generated destructor stub
 }
 
 FFState* SkeletonStatefulFF::BlankState(MemPool &pool) const
 {
-    return new (pool.Allocate<SkeletonState>()) SkeletonState();
+  return new (pool.Allocate<SkeletonState>()) SkeletonState();
 }
 
 void SkeletonStatefulFF::EmptyHypothesisState(FFState &state,
-		const ManagerBase &mgr,
-		const InputType &input,
-		const Hypothesis &hypo) const
+    const ManagerBase &mgr, const InputType &input,
+    const Hypothesis &hypo) const
 {
-	SkeletonState &stateCast = static_cast<SkeletonState&>(state);
-	stateCast.targetLen = 0;
+  SkeletonState &stateCast = static_cast<SkeletonState&>(state);
+  stateCast.targetLen = 0;
 }
 
-void
-SkeletonStatefulFF::EvaluateInIsolation(MemPool &pool,
-		const System &system,
-		const Phrase &source,
-		const TargetPhrase &targetPhrase,
-		Scores &scores,
-		SCORE *estimatedScore) const
+void SkeletonStatefulFF::EvaluateInIsolation(MemPool &pool,
+    const System &system, const Phrase &source,
+    const TargetPhrase &targetPhrase, Scores &scores,
+    SCORE *estimatedScore) const
 {
 }
 
 void SkeletonStatefulFF::EvaluateWhenApplied(const ManagerBase &mgr,
-  const Hypothesis &hypo,
-  const FFState &prevState,
-  Scores &scores,
-  FFState &state) const
+    const Hypothesis &hypo, const FFState &prevState, Scores &scores,
+    FFState &state) const
 {
-	SkeletonState &stateCast = static_cast<SkeletonState&>(state);
-	stateCast.targetLen = hypo.GetTargetPhrase().GetSize();
+  SkeletonState &stateCast = static_cast<SkeletonState&>(state);
+  stateCast.targetLen = hypo.GetTargetPhrase().GetSize();
 }
 
 }

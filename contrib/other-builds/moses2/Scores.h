@@ -19,58 +19,51 @@ class FeatureFunction;
 class FeatureFunctions;
 class System;
 
-class Scores {
-	  friend std::ostream& operator<<(std::ostream &, const Scores &);
+class Scores
+{
+  friend std::ostream& operator<<(std::ostream &, const Scores &);
 public:
   Scores(const System &system, MemPool &pool, size_t numScores);
-  Scores(const System &system, MemPool &pool, size_t numScores, const Scores &origScores);
+  Scores(const System &system, MemPool &pool, size_t numScores,
+      const Scores &origScores);
 
   virtual ~Scores();
 
   SCORE GetTotalScore() const
-  { return m_total; }
+  {
+    return m_total;
+  }
 
   void Reset(const System &system);
 
   void CreateFromString(const std::string &str,
-		  const FeatureFunction &featureFunction,
-		  const System &system,
-		  bool transformScores);
+      const FeatureFunction &featureFunction, const System &system,
+      bool transformScores);
 
-  void PlusEquals(const System &system,
-		  const FeatureFunction &featureFunction,
-		  const SCORE &score);
+  void PlusEquals(const System &system, const FeatureFunction &featureFunction,
+      const SCORE &score);
 
-  void PlusEquals(const System &system,
-		  const FeatureFunction &featureFunction,
-		  const SCORE &score,
-		  size_t offset);
+  void PlusEquals(const System &system, const FeatureFunction &featureFunction,
+      const SCORE &score, size_t offset);
 
-  void PlusEquals(const System &system,
-		  const FeatureFunction &featureFunction,
-		  const std::vector<SCORE> &scores);
+  void PlusEquals(const System &system, const FeatureFunction &featureFunction,
+      const std::vector<SCORE> &scores);
 
-  void PlusEquals(const System &system,
-		  const FeatureFunction &featureFunction,
-		  const Vector<SCORE> &scores);
+  void PlusEquals(const System &system, const FeatureFunction &featureFunction,
+      const Vector<SCORE> &scores);
 
-  void PlusEquals(const System &system,
-  		const FeatureFunction &featureFunction,
-  		SCORE scores[]);
+  void PlusEquals(const System &system, const FeatureFunction &featureFunction,
+      SCORE scores[]);
 
-  void PlusEquals(const System &system,
-		  const Scores &scores);
+  void PlusEquals(const System &system, const Scores &scores);
 
-  void MinusEquals(const System &system,
-		  const Scores &scores);
+  void MinusEquals(const System &system, const Scores &scores);
 
-  void Assign(const System &system,
-		  const FeatureFunction &featureFunction,
-		  const SCORE &score);
+  void Assign(const System &system, const FeatureFunction &featureFunction,
+      const SCORE &score);
 
-  void Assign(const System &system,
-		  const FeatureFunction &featureFunction,
-		  const std::vector<SCORE> &scores);
+  void Assign(const System &system, const FeatureFunction &featureFunction,
+      const std::vector<SCORE> &scores);
 
   void Debug(std::ostream &out, const System &system) const;
 
@@ -78,16 +71,14 @@ public:
 
   // static functions to work out estimated scores
   static SCORE CalcWeightedScore(const System &system,
-  		const FeatureFunction &featureFunction,
-  		SCORE scores[]);
+      const FeatureFunction &featureFunction, SCORE scores[]);
 
   static SCORE CalcWeightedScore(const System &system,
-  		const FeatureFunction &featureFunction,
-  		SCORE score);
+      const FeatureFunction &featureFunction, SCORE score);
 
 protected:
-	SCORE *m_scores;
-	SCORE m_total;
+  SCORE *m_scores;
+  SCORE m_total;
 };
 
 }

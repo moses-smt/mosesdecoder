@@ -7,35 +7,27 @@
 #pragma once
 #include "LRState.h"
 
-namespace Moses2 {
+namespace Moses2
+{
 class Range;
 class Bitmap;
 class InputPathBase;
 
-class HReorderingForwardState : public LRState
+class HReorderingForwardState: public LRState
 {
 public:
-  HReorderingForwardState(
-      const LRModel &config,
-      size_t offset);
+  HReorderingForwardState(const LRModel &config, size_t offset);
   virtual ~HReorderingForwardState();
 
-  void Init(
-      const LRState *prev,
-          const TargetPhrase &topt,
-      const InputPathBase &path,
-      bool first,
-      const Bitmap *coverage);
+  void Init(const LRState *prev, const TargetPhrase &topt,
+      const InputPathBase &path, bool first, const Bitmap *coverage);
 
   size_t hash() const;
   virtual bool operator==(const FFState& other) const;
   virtual std::string ToString() const;
-  void Expand(const ManagerBase &mgr,
-		  const LexicalReordering &ff,
-		  const Hypothesis &hypo,
-		  size_t phraseTableInd,
-		  Scores &scores,
-		  FFState &state) const;
+  void Expand(const ManagerBase &mgr, const LexicalReordering &ff,
+      const Hypothesis &hypo, size_t phraseTableInd, Scores &scores,
+      FFState &state) const;
 
 protected:
   bool m_first;

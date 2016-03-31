@@ -12,19 +12,16 @@
 namespace Moses2
 {
 
-class SkeletonStatelessFF : public StatelessFeatureFunction
+class SkeletonStatelessFF: public StatelessFeatureFunction
 {
 public:
-	SkeletonStatelessFF(size_t startInd, const std::string &line);
-	virtual ~SkeletonStatelessFF();
+  SkeletonStatelessFF(size_t startInd, const std::string &line);
+  virtual ~SkeletonStatelessFF();
 
-	  virtual void
-	  EvaluateInIsolation(MemPool &pool,
-			  const System &system,
-			  const Phrase &source,
-			  const TargetPhrase &targetPhrase,
-			  Scores &scores,
-			  SCORE *estimatedScore) const;
+  virtual void
+  EvaluateInIsolation(MemPool &pool, const System &system, const Phrase &source,
+      const TargetPhrase &targetPhrase, Scores &scores,
+      SCORE *estimatedScore) const;
 
 };
 

@@ -22,11 +22,11 @@ class Manager;
 class InputType;
 class StatefulFeatureFunction;
 
-class Hypothesis : public HypothesisBase
+class Hypothesis: public HypothesisBase
 {
-	  friend std::ostream& operator<<(std::ostream &, const Hypothesis &);
+  friend std::ostream& operator<<(std::ostream &, const Hypothesis &);
 
-	  Hypothesis(MemPool &pool, const System &system);
+  Hypothesis(MemPool &pool, const System &system);
 
 public:
 
@@ -34,32 +34,39 @@ public:
   virtual ~Hypothesis();
 
   // initial, empty hypo
-  void Init(Manager &mgr, const InputPathBase &path, const TargetPhrase &tp, const Bitmap &bitmap);
+  void Init(Manager &mgr, const InputPathBase &path, const TargetPhrase &tp,
+      const Bitmap &bitmap);
 
-  void Init(Manager &mgr, const Hypothesis &prevHypo,
-  	    const InputPathBase &path,
-  		const TargetPhrase &tp,
-  		const Bitmap &bitmap,
-		SCORE estimatedScore);
+  void Init(Manager &mgr, const Hypothesis &prevHypo, const InputPathBase &path,
+      const TargetPhrase &tp, const Bitmap &bitmap, SCORE estimatedScore);
 
   size_t hash() const;
   bool operator==(const Hypothesis &other) const;
 
   inline const Bitmap &GetBitmap() const
-  { return *m_sourceCompleted; }
+  {
+    return *m_sourceCompleted;
+  }
 
   inline const InputPathBase &GetInputPath() const
-  { return *m_path; }
+  {
+    return *m_path;
+  }
 
-  inline const Range &GetCurrTargetWordsRange() const {
+  inline const Range &GetCurrTargetWordsRange() const
+  {
     return m_currTargetWordsRange;
   }
 
   SCORE GetFutureScore() const
-  { return GetScores().GetTotalScore() + m_estimatedScore; }
+  {
+    return GetScores().GetTotalScore() + m_estimatedScore;
+  }
 
   const TargetPhrase &GetTargetPhrase() const
-  { return *m_targetPhrase; }
+  {
+    return *m_targetPhrase;
+  }
 
   void OutputToStream(std::ostream &out) const;
 
@@ -69,12 +76,15 @@ public:
   void EvaluateWhenApplied(const StatefulFeatureFunction &sfff);
 
   const Hypothesis* GetPrevHypo() const
-  { return m_prevHypo; }
+  {
+    return m_prevHypo;
+  }
 
   /** curr - pos is relative from CURRENT hypothesis's starting index
    * (ie, start of sentence would be some negative number, which is
    * not allowed- USE WITH CAUTION) */
-  inline const Word &GetCurrWord(size_t pos) const {
+  inline const Word &GetCurrWord(size_t pos) const
+  {
     return GetTargetPhrase()[pos];
   }
 
@@ -96,14 +106,15 @@ protected:
 class HypothesisTargetPhraseOrderer
 {
 public:
-  bool operator()(const Hypothesis* a, const Hypothesis* b) const {
-	PhraseOrdererLexical phraseCmp;
-	bool ret = phraseCmp(a->GetTargetPhrase(), b->GetTargetPhrase());
-	/*
-	std::cerr << (const Phrase&) a->GetTargetPhrase() << " ||| "
-			<< (const Phrase&) b->GetTargetPhrase() << " ||| "
-			<< ret << std::endl;
-	*/
+  bool operator()(const Hypothesis* a, const Hypothesis* b) const
+  {
+    PhraseOrdererLexical phraseCmp;
+    bool ret = phraseCmp(a->GetTargetPhrase(), b->GetTargetPhrase());
+    /*
+     std::cerr << (const Phrase&) a->GetTargetPhrase() << " ||| "
+     << (const Phrase&) b->GetTargetPhrase() << " ||| "
+     << ret << std::endl;
+     */
     return ret;
   }
 };

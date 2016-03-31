@@ -16,17 +16,17 @@ using namespace std;
 namespace Moses2
 {
 
-Stack::Stack(const Manager &mgr)
-:HypothesisColl(mgr)
+Stack::Stack(const Manager &mgr) :
+    HypothesisColl(mgr)
 {
-	// TODO Auto-generated constructor stub
+  // TODO Auto-generated constructor stub
 
 }
 
-Stack::~Stack() {
-	// TODO Auto-generated destructor stub
+Stack::~Stack()
+{
+  // TODO Auto-generated destructor stub
 }
 
 }
-
 

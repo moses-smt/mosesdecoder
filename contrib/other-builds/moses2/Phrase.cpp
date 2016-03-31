@@ -18,12 +18,12 @@ namespace Moses2
 
 size_t Phrase::hash() const
 {
-  size_t  seed = 0;
+  size_t seed = 0;
 
   for (size_t i = 0; i < GetSize(); ++i) {
-	  const Word &word = (*this)[i];
-	  size_t wordHash = word.hash();
-	  boost::hash_combine(seed, wordHash);
+    const Word &word = (*this)[i];
+    size_t wordHash = word.hash();
+    boost::hash_combine(seed, wordHash);
   }
 
   return seed;
@@ -32,15 +32,15 @@ size_t Phrase::hash() const
 bool Phrase::operator==(const Phrase &compare) const
 {
   if (GetSize() != compare.GetSize()) {
-	  return false;
+    return false;
   }
 
   for (size_t i = 0; i < GetSize(); ++i) {
-	  const Word &word = (*this)[i];
-	  const Word &otherWord = compare[i];
-	  if (word != otherWord) {
-		  return false;
-	  }
+    const Word &word = (*this)[i];
+    const Word &otherWord = compare[i];
+    if (word != otherWord) {
+      return false;
+    }
   }
 
   return true;
@@ -48,68 +48,70 @@ bool Phrase::operator==(const Phrase &compare) const
 
 std::string Phrase::GetString(const FactorList &factorTypes) const
 {
-	if (GetSize() == 0) {
-		return "";
-	}
+  if (GetSize() == 0) {
+    return "";
+  }
 
-	std::stringstream ret;
+  std::stringstream ret;
 
-	const Word &word = (*this)[0];
-	ret << word.GetString(factorTypes);
-	for (size_t i = 1; i < GetSize(); ++i) {
-		const Word &word = (*this)[i];
-		ret << " " << word.GetString(factorTypes);
-	}
-	return ret.str();
+  const Word &word = (*this)[0];
+  ret << word.GetString(factorTypes);
+  for (size_t i = 1; i < GetSize(); ++i) {
+    const Word &word = (*this)[i];
+    ret << " " << word.GetString(factorTypes);
+  }
+  return ret.str();
 
 }
 
 std::ostream& operator<<(std::ostream &out, const Phrase &obj)
 {
-	if (obj.GetSize()) {
-		out << obj[0];
-		for (size_t i = 1; i < obj.GetSize(); ++i) {
-			const Word &word = obj[i];
-			out << " " << word;
-		}
-	}
-	return out;
+  if (obj.GetSize()) {
+    out << obj[0];
+    for (size_t i = 1; i < obj.GetSize(); ++i) {
+      const Word &word = obj[i];
+      out << " " << word;
+    }
+  }
+  return out;
 }
 
 void Phrase::OutputToStream(std::ostream &out) const
 {
-	size_t size = GetSize();
-	if (size) {
-		out << (*this)[0];
-		for (size_t i = 1; i < size; ++i) {
-			const Word &word = (*this)[i];
-			out << " " << word;
-		}
-	}
+  size_t size = GetSize();
+  if (size) {
+    out << (*this)[0];
+    for (size_t i = 1; i < size; ++i) {
+      const Word &word = (*this)[i];
+      out << " " << word;
+    }
+  }
 }
 
 ////////////////////////////////////////////////////////////////////////
-TargetPhrase::TargetPhrase(MemPool &pool, const PhraseTable &pt, const System &system)
-:pt(pt)
-,scoreProperties(NULL)
+TargetPhrase::TargetPhrase(MemPool &pool, const PhraseTable &pt,
+    const System &system) :
+    pt(pt), scoreProperties(NULL)
 {
-	m_scores = new (pool.Allocate<Scores>()) Scores(system, pool, system.featureFunctions.GetNumScores());
+  m_scores = new (pool.Allocate<Scores>()) Scores(system, pool,
+      system.featureFunctions.GetNumScores());
 }
 
 SCORE TargetPhrase::GetFutureScore() const
-{ return m_scores->GetTotalScore() + m_estimatedScore; }
+{
+  return m_scores->GetTotalScore() + m_estimatedScore;
+}
 
 SCORE *TargetPhrase::GetScoresProperty(int propertyInd) const
 {
-	return scoreProperties ? scoreProperties + propertyInd : NULL;
+  return scoreProperties ? scoreProperties + propertyInd : NULL;
 }
 
 std::ostream& operator<<(std::ostream &out, const TargetPhrase &obj)
 {
-	out << (const Phrase&) obj << " SCORES:" << obj.GetScores();
-	return out;
+  out << (const Phrase&) obj << " SCORES:" << obj.GetScores();
+  return out;
 }
-
 
 } // namespace
 

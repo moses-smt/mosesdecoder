@@ -36,7 +36,7 @@ namespace Moses2
  * ".gz".  Or, writes to stdout instead of a file when given a filename
  * consisting of just a dash ("-").
  */
-class OutputFileStream : public boost::iostreams::filtering_ostream
+class OutputFileStream: public boost::iostreams::filtering_ostream
 {
 private:
   /** File that needs flushing & closing when we close this stream.

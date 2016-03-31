@@ -8,23 +8,26 @@
 #ifndef INPUTTYPE_H_
 #define INPUTTYPE_H_
 
-namespace Moses2 {
+namespace Moses2
+{
 
-class InputType {
+class InputType
+{
 public:
-	InputType(long translationId)
-	:m_translationId(translationId)
-    {}
+  InputType(long translationId) :
+      m_translationId(translationId)
+  {
+  }
 
-	virtual ~InputType();
+  virtual ~InputType();
 
-	  long GetTranslationId() const {
-		return m_translationId;
-	  }
+  long GetTranslationId() const
+  {
+    return m_translationId;
+  }
 
 protected:
   long m_translationId; 	//< contiguous Id
-
 
 };
 

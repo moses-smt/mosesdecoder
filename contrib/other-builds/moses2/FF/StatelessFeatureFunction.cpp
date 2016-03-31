@@ -10,15 +10,17 @@
 namespace Moses2
 {
 
-StatelessFeatureFunction::StatelessFeatureFunction(size_t startInd, const std::string &line)
-:FeatureFunction(startInd, line)
+StatelessFeatureFunction::StatelessFeatureFunction(size_t startInd,
+    const std::string &line) :
+    FeatureFunction(startInd, line)
 {
-	// TODO Auto-generated constructor stub
+  // TODO Auto-generated constructor stub
 
 }
 
-StatelessFeatureFunction::~StatelessFeatureFunction() {
-	// TODO Auto-generated destructor stub
+StatelessFeatureFunction::~StatelessFeatureFunction()
+{
+  // TODO Auto-generated destructor stub
 }
 
 }

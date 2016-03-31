@@ -24,38 +24,46 @@ class PhraseTable;
 namespace SCFG
 {
 
-class TargetPhraseImpl : public Moses2::TargetPhrase, public PhraseImplTemplate<SCFG::Word>
+class TargetPhraseImpl: public Moses2::TargetPhrase, public PhraseImplTemplate<
+    SCFG::Word>
 {
-	  friend std::ostream& operator<<(std::ostream &, const TargetPhraseImpl &);
+  friend std::ostream& operator<<(std::ostream &, const TargetPhraseImpl &);
 public:
   SCFG::Word lhs;
 
-  static TargetPhraseImpl *CreateFromString(MemPool &pool, const PhraseTable &pt, const System &system, const std::string &str);
-  TargetPhraseImpl(MemPool &pool, const PhraseTable &pt, const System &system, size_t size);
+  static TargetPhraseImpl *CreateFromString(MemPool &pool,
+      const PhraseTable &pt, const System &system, const std::string &str);
+  TargetPhraseImpl(MemPool &pool, const PhraseTable &pt, const System &system,
+      size_t size);
   //TargetPhraseImpl(MemPool &pool, const System &system, const TargetPhraseImpl &copy);
 
   virtual ~TargetPhraseImpl();
 
   const Word& operator[](size_t pos) const
-  {	return m_words[pos]; }
+  {
+    return m_words[pos];
+  }
 
   Word& operator[](size_t pos)
-  {	return m_words[pos]; }
+  {
+    return m_words[pos];
+  }
 
   size_t GetSize() const
-  { return m_size; }
+  {
+    return m_size;
+  }
 
   SubPhrase GetSubPhrase(size_t start, size_t size) const
   {
-	SubPhrase ret(*this, start, size);
-	return ret;
+    SubPhrase ret(*this, start, size);
+    return ret;
   }
 
   //mutable void *chartState;
 
 protected:
 };
-
 
 }
 

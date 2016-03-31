@@ -18,48 +18,46 @@ namespace Moses2
 class Hypothesis;
 class InputType;
 
-class StatefulFeatureFunction : public FeatureFunction
+class StatefulFeatureFunction: public FeatureFunction
 {
 public:
-	StatefulFeatureFunction(size_t startInd, const std::string &line);
-	virtual ~StatefulFeatureFunction();
+  StatefulFeatureFunction(size_t startInd, const std::string &line);
+  virtual ~StatefulFeatureFunction();
 
-	void SetStatefulInd(size_t ind)
-	{ m_statefulInd = ind; }
-	size_t GetStatefulInd() const
-	{ return m_statefulInd; }
+  void SetStatefulInd(size_t ind)
+  {
+    m_statefulInd = ind;
+  }
+  size_t GetStatefulInd() const
+  {
+    return m_statefulInd;
+  }
 
-	  //! return uninitialise state
-	  virtual FFState* BlankState(MemPool &pool) const = 0;
+  //! return uninitialise state
+  virtual FFState* BlankState(MemPool &pool) const = 0;
 
-	  //! return the state associated with the empty hypothesis for a given sentence
-	  virtual void EmptyHypothesisState(FFState &state,
-			  const ManagerBase &mgr,
-			  const InputType &input,
-			  const Hypothesis &hypo) const = 0;
+  //! return the state associated with the empty hypothesis for a given sentence
+  virtual void EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
+      const InputType &input, const Hypothesis &hypo) const = 0;
 
-	  virtual void EvaluateWhenApplied(const ObjectPoolContiguous<Hypothesis*> &hypos) const;
+  virtual void EvaluateWhenApplied(
+      const ObjectPoolContiguous<Hypothesis*> &hypos) const;
 
-	  virtual void EvaluateWhenApplied(const ManagerBase &mgr,
-	    const Hypothesis &hypo,
-	    const FFState &prevState,
-	    Scores &scores,
-		FFState &state) const = 0;
+  virtual void EvaluateWhenApplied(const ManagerBase &mgr,
+      const Hypothesis &hypo, const FFState &prevState, Scores &scores,
+      FFState &state) const = 0;
 
-	  virtual void EvaluateWhenAppliedNonBatch(const ManagerBase &mgr,
-	    const Hypothesis &hypo,
-	    const FFState &prevState,
-	    Scores &scores,
-		FFState &state) const
-	  { }
+  virtual void EvaluateWhenAppliedNonBatch(const ManagerBase &mgr,
+      const Hypothesis &hypo, const FFState &prevState, Scores &scores,
+      FFState &state) const
+  {
+  }
 
 protected:
-	  size_t m_statefulInd;
-
+  size_t m_statefulInd;
 
 };
 
 }
-
 
 #endif /* STATEFULFEATUREFUNCTION_H_ */

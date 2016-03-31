@@ -13,31 +13,24 @@
 namespace Moses2
 {
 
-class SkeletonStatefulFF : public StatefulFeatureFunction
+class SkeletonStatefulFF: public StatefulFeatureFunction
 {
 public:
-	SkeletonStatefulFF(size_t startInd, const std::string &line);
-	virtual ~SkeletonStatefulFF();
+  SkeletonStatefulFF(size_t startInd, const std::string &line);
+  virtual ~SkeletonStatefulFF();
 
   virtual FFState* BlankState(MemPool &pool) const;
-  virtual void EmptyHypothesisState(FFState &state,
-		  const ManagerBase &mgr,
-		  const InputType &input,
-		  const Hypothesis &hypo) const;
+  virtual void EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
+      const InputType &input, const Hypothesis &hypo) const;
 
   virtual void
-  EvaluateInIsolation(MemPool &pool,
-		  const System &system,
-		  const Phrase &source,
-		  const TargetPhrase &targetPhrase,
-		  Scores &scores,
-		  SCORE *estimatedScore) const;
+  EvaluateInIsolation(MemPool &pool, const System &system, const Phrase &source,
+      const TargetPhrase &targetPhrase, Scores &scores,
+      SCORE *estimatedScore) const;
 
   virtual void EvaluateWhenApplied(const ManagerBase &mgr,
-    const Hypothesis &hypo,
-    const FFState &prevState,
-    Scores &scores,
-	FFState &state) const;
+      const Hypothesis &hypo, const FFState &prevState, Scores &scores,
+      FFState &state) const;
 
 };
 

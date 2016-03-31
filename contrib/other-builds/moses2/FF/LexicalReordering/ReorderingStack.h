@@ -38,5 +38,4 @@ private:
   void Reduce(Range input_span);
 };
 
-
 }

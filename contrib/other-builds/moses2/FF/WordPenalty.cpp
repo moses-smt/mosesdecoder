@@ -13,28 +13,24 @@
 namespace Moses2
 {
 
-WordPenalty::WordPenalty(size_t startInd, const std::string &line)
-:StatelessFeatureFunction(startInd, line)
+WordPenalty::WordPenalty(size_t startInd, const std::string &line) :
+    StatelessFeatureFunction(startInd, line)
 {
-	ReadParameters();
+  ReadParameters();
 }
 
-WordPenalty::~WordPenalty() {
-	// TODO Auto-generated destructor stub
+WordPenalty::~WordPenalty()
+{
+  // TODO Auto-generated destructor stub
 }
 
-void
-WordPenalty::EvaluateInIsolation(MemPool &pool,
-		const System &system,
-		const Phrase &source,
-		const TargetPhrase &targetPhrase,
-		Scores &scores,
-		SCORE *estimatedScore) const
+void WordPenalty::EvaluateInIsolation(MemPool &pool, const System &system,
+    const Phrase &source, const TargetPhrase &targetPhrase, Scores &scores,
+    SCORE *estimatedScore) const
 {
-  SCORE score = - (SCORE) targetPhrase.GetSize();
+  SCORE score = -(SCORE) targetPhrase.GetSize();
   scores.PlusEquals(system, *this, score);
 }
 
 }
-
 

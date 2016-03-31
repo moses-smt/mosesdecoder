@@ -6,6 +6,5 @@ namespace Moses2
 namespace SCFG
 {
 
-
 }
 }

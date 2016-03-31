@@ -21,13 +21,15 @@ namespace SCFG
 {
 class InputPath;
 
-class InputPaths : public InputPathsBase
+class InputPaths: public InputPathsBase
 {
 public:
   void Init(const Sentence &input, const ManagerBase &mgr);
 
   const Matrix<InputPath*> &GetMatrix() const
-  { return *m_matrix; }
+  {
+    return *m_matrix;
+  }
 
 protected:
   Matrix<InputPath*> *m_matrix;

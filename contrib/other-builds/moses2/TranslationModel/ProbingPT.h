@@ -24,7 +24,7 @@ class MemPool;
 class System;
 class RecycleData;
 
-class ProbingPT : public PhraseTable
+class ProbingPT: public PhraseTable
 {
 public:
   ProbingPT(size_t startInd, const std::string &line);
@@ -43,38 +43,35 @@ protected:
   boost::iostreams::mapped_file_source file;
   const char *data;
 
-  mutable boost::thread_specific_ptr< std::deque<target_text*> > m_recycler;
+  mutable boost::thread_specific_ptr<std::deque<target_text*> > m_recycler;
 
-  TargetPhrases *Lookup(const Manager &mgr,
-		  MemPool &pool,
-		  InputPathBase &inputPath) const;
-  TargetPhrases *CreateTargetPhrase(MemPool &pool,
-		  const System &system,
-		  const Phrase &sourcePhrase,
-		  uint64_t key) const;
-  TargetPhrase *CreateTargetPhrase(
-  		  MemPool &pool,
-  		  const System &system,
-		  const char *&offset) const;
+  TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
+      InputPathBase &inputPath) const;
+  TargetPhrases *CreateTargetPhrase(MemPool &pool, const System &system,
+      const Phrase &sourcePhrase, uint64_t key) const;
+  TargetPhrase *CreateTargetPhrase(MemPool &pool, const System &system,
+      const char *&offset) const;
 
-  void ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok, uint64_t probingSource[]) const;
+  void ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok,
+      uint64_t probingSource[]) const;
 
   inline const Factor *GetTargetFactor(uint32_t probingId) const
   {
-	  if (probingId >= m_targetVocab.size()) {
-		  return NULL;
-	  }
-	  return m_targetVocab[probingId];
+    if (probingId >= m_targetVocab.size()) {
+      return NULL;
+    }
+    return m_targetVocab[probingId];
   }
 
-  std::pair<bool, uint64_t> GetSourceProbingId(const Phrase &sourcePhrase) const;
+  std::pair<bool, uint64_t> GetSourceProbingId(
+      const Phrase &sourcePhrase) const;
   inline uint64_t GetSourceProbingId(const Factor *factor) const
   {
-	  size_t factorId = factor->GetId();
-	  if (factorId >= m_sourceVocab.size()) {
-		  return m_unkId;
-	  }
-	  return m_sourceVocab[factorId];
+    size_t factorId = factor->GetId();
+    if (factorId >= m_sourceVocab.size()) {
+      return m_unkId;
+    }
+    return m_sourceVocab[factorId];
 
   }
 

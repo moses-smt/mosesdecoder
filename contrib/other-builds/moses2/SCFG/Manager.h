@@ -21,19 +21,20 @@ namespace Moses2
 namespace SCFG
 {
 
-class Manager : public Moses2::ManagerBase
+class Manager: public Moses2::ManagerBase
 {
 public:
-	Manager(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId);
+  Manager(System &sys, const TranslationTask &task, const std::string &inputStr,
+      long translationId);
 
-	virtual ~Manager();
-	void Decode();
+  virtual ~Manager();
+  void Decode();
 
 protected:
-	Stacks m_stacks;
-	InputPaths m_inputPaths;
+  Stacks m_stacks;
+  InputPaths m_inputPaths;
 
-	void InitActiveChart(size_t pos);
+  void InitActiveChart(size_t pos);
 };
 
 }

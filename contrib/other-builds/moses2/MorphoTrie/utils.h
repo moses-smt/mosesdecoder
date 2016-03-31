@@ -12,18 +12,18 @@ using namespace std;
 namespace Moses2
 {
 
-inline void ParseLineByChar(string& line, char c, vector<string>& substrings) {
-    size_t i = 0;
-    size_t j = line.find(c);
+inline void ParseLineByChar(string& line, char c, vector<string>& substrings)
+{
+  size_t i = 0;
+  size_t j = line.find(c);
 
-    while (j != string::npos) {
-        substrings.push_back(line.substr(i, j-i));
-        i = ++j;
-        j = line.find(c, j);
+  while (j != string::npos) {
+    substrings.push_back(line.substr(i, j - i));
+    i = ++j;
+    j = line.find(c, j);
 
-        if (j == string::npos)
-            substrings.push_back(line.substr(i, line.length()));
-    }
+    if (j == string::npos) substrings.push_back(line.substr(i, line.length()));
+  }
 }
 
 }

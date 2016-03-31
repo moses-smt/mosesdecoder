@@ -11,6 +11,5 @@ using namespace std;
 namespace Moses2
 {
 
-
 }
 

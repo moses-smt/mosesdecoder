@@ -15,15 +15,12 @@ namespace Moses2
 class FactorCollection;
 class System;
 
-class Sentence : public InputType, public PhraseImpl
+class Sentence: public InputType, public PhraseImpl
 {
 public:
-  static Sentence *CreateFromString(MemPool &pool,
-		  FactorCollection &vocab,
-		  const System &system,
-		  const std::string &str,
-		  long translationId,
-		  bool addBOSEOS);
+  static Sentence *CreateFromString(MemPool &pool, FactorCollection &vocab,
+      const System &system, const std::string &str, long translationId,
+      bool addBOSEOS);
 
   Sentence(long translationId, MemPool &pool, size_t size);
   virtual ~Sentence();

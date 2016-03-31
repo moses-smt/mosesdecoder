@@ -27,12 +27,13 @@ public:
   int num_lex_scores;
   bool logProb;
 
-  QueryEngine (const char *);
+  QueryEngine(const char *);
   ~QueryEngine();
 
   std::pair<bool, uint64_t> query(uint64_t key);
 
-  const std::map<uint64_t, std::string> &getSourceVocab() const {
+  const std::map<uint64_t, std::string> &getSourceVocab() const
+  {
     return source_vocabids;
   }
 
@@ -41,5 +42,4 @@ public:
 };
 
 }
-
 

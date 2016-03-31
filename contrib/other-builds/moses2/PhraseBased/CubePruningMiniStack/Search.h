@@ -23,35 +23,35 @@ class TargetPhrases;
 namespace NSCubePruningMiniStack
 {
 
-class Search : public Moses2::Search
+class Search: public Moses2::Search
 {
 public:
-	Search(Manager &mgr);
-	virtual ~Search();
+  Search(Manager &mgr);
+  virtual ~Search();
 
-	virtual void Decode();
-	const Hypothesis *GetBestHypothesis() const;
+  virtual void Decode();
+  const Hypothesis *GetBestHypothesis() const;
 
-	void AddInitialTrellisPaths(TrellisPaths &paths) const;
+  void AddInitialTrellisPaths(TrellisPaths &paths) const;
 
 protected:
-	Stack m_stack;
+  Stack m_stack;
 
-	CubeEdge::Queue m_queue;
-	CubeEdge::SeenPositions m_seenPositions;
+  CubeEdge::Queue m_queue;
+  CubeEdge::SeenPositions m_seenPositions;
 
-	// CUBE PRUNING VARIABLES
-	// setup
-	MemPoolAllocator<CubeEdge*> m_cubeEdgeAlloc;
-	typedef std::vector<CubeEdge*, MemPoolAllocator<CubeEdge*> > CubeEdges;
-	std::vector<CubeEdges*> m_cubeEdges;
+  // CUBE PRUNING VARIABLES
+  // setup
+  MemPoolAllocator<CubeEdge*> m_cubeEdgeAlloc;
+  typedef std::vector<CubeEdge*, MemPoolAllocator<CubeEdge*> > CubeEdges;
+  std::vector<CubeEdges*> m_cubeEdges;
 
-	std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > m_queueItemRecycler;
+  std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > m_queueItemRecycler;
 
-	// CUBE PRUNING
-	// decoding
-	void Decode(size_t stackInd);
-	void PostDecode(size_t stackInd);
+  // CUBE PRUNING
+  // decoding
+  void Decode(size_t stackInd);
+  void PostDecode(size_t stackInd);
 };
 
 }

@@ -18,33 +18,37 @@ namespace SCFG
 class ActiveChartEntry
 {
 public:
-	const void *data;
+  const void *data;
 
-	ActiveChartEntry(const void *vdata)
-	:data(vdata)
-	{}
+  ActiveChartEntry(const void *vdata) :
+      data(vdata)
+  {
+  }
 };
 
 ////////////////////////////////////////////////////////////////////////////
 class ActiveChart
 {
 public:
-	std::vector<ActiveChartEntry*> entries;
+  std::vector<ActiveChartEntry*> entries;
 };
 
 ////////////////////////////////////////////////////////////////////////////
-class InputPath : public InputPathBase
+class InputPath: public InputPathBase
 {
-	  friend std::ostream& operator<<(std::ostream &, const InputPath &);
+  friend std::ostream& operator<<(std::ostream &, const InputPath &);
 public:
-	InputPath(MemPool &pool, const SubPhrase &subPhrase, const Range &range, size_t numPt, const InputPath *prefixPath);
-	virtual ~InputPath();
+  InputPath(MemPool &pool, const SubPhrase &subPhrase, const Range &range,
+      size_t numPt, const InputPath *prefixPath);
+  virtual ~InputPath();
 
-	ActiveChart &GetActiveChart(size_t ptInd)
-	{ return m_activeChart[ptInd]; }
+  ActiveChart &GetActiveChart(size_t ptInd)
+  {
+    return m_activeChart[ptInd];
+  }
 
 protected:
-	ActiveChart *m_activeChart;
+  ActiveChart *m_activeChart;
 };
 
 }

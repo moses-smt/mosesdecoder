@@ -2,23 +2,23 @@
 // vim:tabstop=2
 
 /***********************************************************************
-Moses - factored phrase-based language decoder
-Copyright (C) 2006 University of Edinburgh
+ Moses - factored phrase-based language decoder
+ Copyright (C) 2006 University of Edinburgh
 
-This library is free software; you can redistribute it and/or
-modify it under the terms of the GNU Lesser General Public
-License as published by the Free Software Foundation; either
-version 2.1 of the License, or (at your option) any later version.
+ This library is free software; you can redistribute it and/or
+ modify it under the terms of the GNU Lesser General Public
+ License as published by the Free Software Foundation; either
+ version 2.1 of the License, or (at your option) any later version.
 
-This library is distributed in the hope that it will be useful,
-but WITHOUT ANY WARRANTY; without even the implied warranty of
-MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
-Lesser General Public License for more details.
+ This library is distributed in the hope that it will be useful,
+ but WITHOUT ANY WARRANTY; without even the implied warranty of
+ MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+ Lesser General Public License for more details.
 
-You should have received a copy of the GNU Lesser General Public
-License along with this library; if not, write to the Free Software
-Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
-***********************************************************************/
+ You should have received a copy of the GNU Lesser General Public
+ License along with this library; if not, write to the Free Software
+ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
+ ***********************************************************************/
 
 #include <string>
 #include <iostream>
@@ -34,18 +34,18 @@ namespace Moses2
  * /param bitmap coverage bitmap
  */
 
-float EstimatedScores::CalcEstimatedScore( Bitmap const &bitmap ) const
+float EstimatedScores::CalcEstimatedScore(Bitmap const &bitmap) const
 {
-  const size_t notInGap= numeric_limits<size_t>::max();
+  const size_t notInGap = numeric_limits<size_t>::max();
   size_t startGap = notInGap;
   float estimatedScore = 0.0f;
-  for(size_t currPos = 0 ; currPos < bitmap.GetSize() ; currPos++) {
+  for (size_t currPos = 0; currPos < bitmap.GetSize(); currPos++) {
     // start of a new gap?
-    if(bitmap.GetValue(currPos) == false && startGap == notInGap) {
+    if (bitmap.GetValue(currPos) == false && startGap == notInGap) {
       startGap = currPos;
     }
     // end of a gap?
-    else if(bitmap.GetValue(currPos) == true && startGap != notInGap) {
+    else if (bitmap.GetValue(currPos) == true && startGap != notInGap) {
       estimatedScore += GetValue(startGap, currPos - 1);
       startGap = notInGap;
     }
@@ -73,42 +73,45 @@ float EstimatedScores::CalcEstimatedScore( Bitmap const &bitmap ) const
  * /param endPos end of the span that is added to the coverage
  */
 
-float EstimatedScores::CalcEstimatedScore( Bitmap const &bitmap, size_t startPos, size_t endPos ) const
+float EstimatedScores::CalcEstimatedScore(Bitmap const &bitmap, size_t startPos,
+    size_t endPos) const
 {
-  const size_t notInGap= numeric_limits<size_t>::max();
+  const size_t notInGap = numeric_limits<size_t>::max();
   float estimatedScore = 0.0f;
   size_t startGap = bitmap.GetFirstGapPos();
   if (startGap == NOT_FOUND) return estimatedScore; // everything filled
 
   // start loop at first gap
-  size_t startLoop = startGap+1;
+  size_t startLoop = startGap + 1;
   if (startPos == startGap) { // unless covered by phrase
     startGap = notInGap;
-    startLoop = endPos+1; // -> postpone start
+    startLoop = endPos + 1; // -> postpone start
   }
 
   size_t lastCovered = bitmap.GetLastPos();
   if (endPos > lastCovered || lastCovered == NOT_FOUND) lastCovered = endPos;
 
-  for(size_t currPos = startLoop; currPos <= lastCovered ; currPos++) {
+  for (size_t currPos = startLoop; currPos <= lastCovered; currPos++) {
     // start of a new gap?
-    if(startGap == notInGap && bitmap.GetValue(currPos) == false && (currPos < startPos || currPos > endPos)) {
+    if (startGap == notInGap && bitmap.GetValue(currPos) == false
+        && (currPos < startPos || currPos > endPos)) {
       startGap = currPos;
     }
     // end of a gap?
-    else if(startGap != notInGap && (bitmap.GetValue(currPos) == true || (startPos <= currPos && currPos <= endPos))) {
+    else if (startGap != notInGap
+        && (bitmap.GetValue(currPos) == true
+            || (startPos <= currPos && currPos <= endPos))) {
       estimatedScore += GetValue(startGap, currPos - 1);
       startGap = notInGap;
     }
   }
   // coverage ending with gap?
   if (lastCovered != bitmap.GetSize() - 1) {
-    estimatedScore += GetValue(lastCovered+1, bitmap.GetSize() - 1);
+    estimatedScore += GetValue(lastCovered + 1, bitmap.GetSize() - 1);
   }
 
   return estimatedScore;
 }
 
 }
-
 

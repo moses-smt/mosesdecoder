@@ -19,57 +19,59 @@ namespace Moses2
 
 Weights::Weights()
 {
-	// TODO Auto-generated constructor stub
+  // TODO Auto-generated constructor stub
 
 }
 
-Weights::~Weights() {
-	// TODO Auto-generated destructor stub
+Weights::~Weights()
+{
+  // TODO Auto-generated destructor stub
 }
 
 void Weights::Init(const FeatureFunctions &ffs)
 {
-	size_t totalNumScores = ffs.GetNumScores();
-	//cerr << "totalNumScores=" << totalNumScores << endl;
-	m_weights.resize(totalNumScores, 1);
+  size_t totalNumScores = ffs.GetNumScores();
+  //cerr << "totalNumScores=" << totalNumScores << endl;
+  m_weights.resize(totalNumScores, 1);
 }
 
 void Weights::Debug(std::ostream &out, const FeatureFunctions &ffs) const
 {
-	size_t numScores = ffs.GetNumScores();
-	for (size_t i = 0; i < numScores; ++i) {
-		out << m_weights[i] << " ";
-	}
+  size_t numScores = ffs.GetNumScores();
+  for (size_t i = 0; i < numScores; ++i) {
+    out << m_weights[i] << " ";
+  }
 
 }
 
 std::ostream& operator<<(std::ostream &out, const Weights &obj)
 {
 
-	return out;
+  return out;
 }
 
-void Weights::CreateFromString(const FeatureFunctions &ffs, const std::string &line)
+void Weights::CreateFromString(const FeatureFunctions &ffs,
+    const std::string &line)
 {
-	std::vector<std::string> toks = Tokenize(line);
-	assert(toks.size());
+  std::vector<std::string> toks = Tokenize(line);
+  assert(toks.size());
 
-	string ffName = toks[0];
-	assert(ffName[ffName.size() - 1] == '=');
+  string ffName = toks[0];
+  assert(ffName[ffName.size() - 1] == '=');
 
-	ffName = ffName.substr(0, ffName.size() - 1);
-	//cerr << "ffName=" << ffName << endl;
+  ffName = ffName.substr(0, ffName.size() - 1);
+  //cerr << "ffName=" << ffName << endl;
 
-	const FeatureFunction *ff = ffs.FindFeatureFunction(ffName);
-	assert(ff);
-	size_t startInd = ff->GetStartInd();
-	size_t numScores = ff->GetNumScores();
-	assert(numScores == toks.size() -1);
+  const FeatureFunction *ff = ffs.FindFeatureFunction(ffName);
+  assert(ff);
+  size_t startInd = ff->GetStartInd();
+  size_t numScores = ff->GetNumScores();
+  assert(numScores == toks.size() - 1);
 
-	for (size_t i = 0; i < numScores; ++i) {
-		SCORE score = Scan<SCORE>(toks[i+1]);
-		m_weights[i + startInd] = score;
-	}
+  for (size_t i = 0; i < numScores; ++i) {
+    SCORE score = Scan<SCORE>(toks[i + 1]);
+    m_weights[i + startInd] = score;
+  }
 }
 
 }

@@ -10,42 +10,40 @@
 
 namespace Moses2
 {
-InputPath::InputPath(MemPool &pool,
-		const SubPhrase &subPhrase,
-		const Range &range,
-		size_t numPt,
-		const InputPath *prefixPath)
-:InputPathBase(pool, subPhrase, range, numPt, prefixPath)
-,m_isUsed(false)
+InputPath::InputPath(MemPool &pool, const SubPhrase &subPhrase,
+    const Range &range, size_t numPt, const InputPath *prefixPath) :
+    InputPathBase(pool, subPhrase, range, numPt, prefixPath), m_isUsed(false)
 {
   targetPhrases = pool.Allocate<const TargetPhrases*>(numPt);
   Init<const TargetPhrases*>(targetPhrases, numPt, NULL);
 }
 
-InputPath::~InputPath() {
-	// TODO Auto-generated destructor stub
+InputPath::~InputPath()
+{
+  // TODO Auto-generated destructor stub
 }
 
-void InputPath::AddTargetPhrases(const PhraseTable &pt, const TargetPhrases *tps)
+void InputPath::AddTargetPhrases(const PhraseTable &pt,
+    const TargetPhrases *tps)
 {
-	size_t ptInd = pt.GetPtInd();
-	targetPhrases[ptInd] = tps;
+  size_t ptInd = pt.GetPtInd();
+  targetPhrases[ptInd] = tps;
 
-	if (tps && tps->GetSize()) {
-		m_isUsed = true;
-	}
+  if (tps && tps->GetSize()) {
+    m_isUsed = true;
+  }
 }
 
 const TargetPhrases *InputPath::GetTargetPhrases(const PhraseTable &pt) const
 {
-	size_t ptInd = pt.GetPtInd();
-	return targetPhrases[ptInd];
+  size_t ptInd = pt.GetPtInd();
+  return targetPhrases[ptInd];
 }
 
 std::ostream& operator<<(std::ostream &out, const InputPath &obj)
 {
-	out << obj.range << " " << obj.subPhrase;
-	return out;
+  out << obj.range << " " << obj.subPhrase;
+  return out;
 }
 
 }

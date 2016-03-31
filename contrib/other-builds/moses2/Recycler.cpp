@@ -7,7 +7,7 @@
 
 #include "Recycler.h"
 
-namespace Moses2 {
-
+namespace Moses2
+{
 
 } /* namespace Moses2 */

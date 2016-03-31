@@ -20,35 +20,38 @@ class Bitmap;
 class Range;
 class TrellisPaths;
 
-class Search {
+class Search
+{
 public:
-	Search(Manager &mgr);
-	virtual ~Search();
+  Search(Manager &mgr);
+  virtual ~Search();
 
-	virtual void Decode() = 0;
-	virtual const Hypothesis *GetBestHypothesis() const = 0;
+  virtual void Decode() = 0;
+  virtual const Hypothesis *GetBestHypothesis() const = 0;
 
-	virtual void AddInitialTrellisPaths(TrellisPaths &paths) const = 0;
+  virtual void AddInitialTrellisPaths(TrellisPaths &paths) const = 0;
 
 protected:
-	Manager &mgr;
-	//ArcLists m_arcLists;
+  Manager &mgr;
+  //ArcLists m_arcLists;
 
-	bool CanExtend(const Bitmap &hypoBitmap, size_t hypoRangeEndPos, const Range &pathRange);
+  bool CanExtend(const Bitmap &hypoBitmap, size_t hypoRangeEndPos,
+      const Range &pathRange);
 
-	inline int ComputeDistortionDistance(size_t prevEndPos, size_t currStartPos) const
-	{
-	  int dist = 0;
-	  if (prevEndPos == NOT_FOUND) {
-	    dist = currStartPos;
-	  } else {
-	    dist = (int)prevEndPos - (int)currStartPos + 1 ;
-	  }
-	  return abs(dist);
-	}
+  inline int ComputeDistortionDistance(size_t prevEndPos,
+      size_t currStartPos) const
+  {
+    int dist = 0;
+    if (prevEndPos == NOT_FOUND) {
+      dist = currStartPos;
+    }
+    else {
+      dist = (int)prevEndPos - (int)currStartPos + 1;
+    }
+    return abs(dist);
+  }
 
 };
 
 }
-
 

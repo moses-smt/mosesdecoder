@@ -4,7 +4,7 @@
 namespace Moses2
 {
 
-class SubPhrase : public Phrase
+class SubPhrase: public Phrase
 {
   friend std::ostream& operator<<(std::ostream &, const SubPhrase &);
 public:
@@ -12,7 +12,9 @@ public:
   virtual const Word& operator[](size_t pos) const;
 
   virtual size_t GetSize() const
-  { return m_size; }
+  {
+    return m_size;
+  }
 
   SubPhrase GetSubPhrase(size_t start, size_t size) const;
 

@@ -22,30 +22,38 @@ class Manager;
 class System;
 class PhraseTable;
 
-class TargetPhraseImpl : public TargetPhrase, public PhraseImplTemplate<Word>
+class TargetPhraseImpl: public TargetPhrase, public PhraseImplTemplate<Word>
 {
-	  friend std::ostream& operator<<(std::ostream &, const TargetPhraseImpl &);
+  friend std::ostream& operator<<(std::ostream &, const TargetPhraseImpl &);
 public:
 
-  static TargetPhraseImpl *CreateFromString(MemPool &pool, const PhraseTable &pt, const System &system, const std::string &str);
-  TargetPhraseImpl(MemPool &pool, const PhraseTable &pt, const System &system, size_t size);
+  static TargetPhraseImpl *CreateFromString(MemPool &pool,
+      const PhraseTable &pt, const System &system, const std::string &str);
+  TargetPhraseImpl(MemPool &pool, const PhraseTable &pt, const System &system,
+      size_t size);
   //TargetPhraseImpl(MemPool &pool, const System &system, const TargetPhraseImpl &copy);
 
   virtual ~TargetPhraseImpl();
 
   const Word& operator[](size_t pos) const
-  {	return m_words[pos]; }
+  {
+    return m_words[pos];
+  }
 
   Word& operator[](size_t pos)
-  {	return m_words[pos]; }
+  {
+    return m_words[pos];
+  }
 
   size_t GetSize() const
-  { return m_size; }
+  {
+    return m_size;
+  }
 
   SubPhrase GetSubPhrase(size_t start, size_t end) const
   {
-	SubPhrase ret(*this, start, end);
-	return ret;
+    SubPhrase ret(*this, start, end);
+    return ret;
   }
 
   //mutable void *chartState;

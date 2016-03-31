@@ -20,36 +20,42 @@ template<typename T>
 class UnorderedComparer
 {
 public:
-  size_t operator()(const T& obj) const {
+  size_t operator()(const T& obj) const
+  {
     return obj.hash();
   }
 
-  bool operator()(const T& a, const T& b) const {
+  bool operator()(const T& a, const T& b) const
+  {
     return a == b;
   }
 
-  size_t operator()(const T* obj) const {
+  size_t operator()(const T* obj) const
+  {
     return obj->hash();
   }
 
-  bool operator()(const T* a, const T* b) const {
+  bool operator()(const T* a, const T* b) const
+  {
     return (*a) == (*b);
   }
 
 };
 
 template<typename T>
-void Init(T arr[], size_t size, const T &val) {
-	for (size_t i = 0; i < size; ++i) {
-		arr[i] = val;
-	}
+void Init(T arr[], size_t size, const T &val)
+{
+  for (size_t i = 0; i < size; ++i) {
+    arr[i] = val;
+  }
 }
 
 //! delete white spaces at beginning and end of string
-inline std::string Trim(const std::string& str, const std::string dropChars = " \t\n\r")
+inline std::string Trim(const std::string& str, const std::string dropChars =
+    " \t\n\r")
 {
   std::string res = str;
-  res.erase(str.find_last_not_of(dropChars)+1);
+  res.erase(str.find_last_not_of(dropChars) + 1);
   return res.erase(0, res.find_first_not_of(dropChars));
 }
 
@@ -89,28 +95,28 @@ inline SearchAlgorithm Scan<SearchAlgorithm>(const std::string &input)
 
 //! convert vectors of string to vectors of type T variables
 template<typename T>
-inline std::vector<T> Scan(const std::vector< std::string > &input)
+inline std::vector<T> Scan(const std::vector<std::string> &input)
 {
   std::vector<T> output(input.size());
-  for (size_t i = 0 ; i < input.size() ; i++) {
-    output[i] = Scan<T>( input[i] );
+  for (size_t i = 0; i < input.size(); i++) {
+    output[i] = Scan<T>(input[i]);
   }
   return output;
 }
 
 //! speeded up version of above
 template<typename T>
-inline void Scan(std::vector<T> &output, const std::vector< std::string > &input)
+inline void Scan(std::vector<T> &output, const std::vector<std::string> &input)
 {
   output.resize(input.size());
-  for (size_t i = 0 ; i < input.size() ; i++) {
-    output[i] = Scan<T>( input[i] );
+  for (size_t i = 0; i < input.size(); i++) {
+    output[i] = Scan<T>(input[i]);
   }
 }
 
 /** tokenise input string to vector of string. each element has been separated by a character in the delimiters argument.
-		The separator can only be 1 character long. The default delimiters are space or tab
-*/
+ The separator can only be 1 character long. The default delimiters are space or tab
+ */
 inline std::vector<std::string> Tokenize(const std::string& str,
     const std::string& delimiters = " \t")
 {
@@ -118,7 +124,7 @@ inline std::vector<std::string> Tokenize(const std::string& str,
   // Skip delimiters at beginning.
   std::string::size_type lastPos = str.find_first_not_of(delimiters, 0);
   // Find first "non-delimiter".
-  std::string::size_type pos     = str.find_first_of(delimiters, lastPos);
+  std::string::size_type pos = str.find_first_of(delimiters, lastPos);
 
   while (std::string::npos != pos || std::string::npos != lastPos) {
     // Found a token, add it to the vector.
@@ -134,27 +140,28 @@ inline std::vector<std::string> Tokenize(const std::string& str,
 
 //! tokenise input string to vector of type T
 template<typename T>
-inline std::vector<T> Tokenize( const std::string &input
-                                , const std::string& delimiters = " \t")
+inline std::vector<T> Tokenize(const std::string &input,
+    const std::string& delimiters = " \t")
 {
   std::vector<std::string> stringVector = Tokenize(input, delimiters);
-  return Scan<T>( stringVector );
+  return Scan<T>(stringVector);
 }
 
 /** only split of the first delimiter. Used by class FeatureFunction for parse key=value pair.
  * Value may have = character
-*/
+ */
 inline std::vector<std::string> TokenizeFirstOnly(const std::string& str,
     const std::string& delimiters = " \t")
 {
   std::vector<std::string> tokens;
-  std::string::size_type pos     = str.find_first_of(delimiters);
+  std::string::size_type pos = str.find_first_of(delimiters);
 
   if (std::string::npos != pos) {
     // Found a token, add it to the vector.
     tokens.push_back(str.substr(0, pos));
-    tokens.push_back(str.substr(pos + 1, str.size() - pos  - 1));
-  } else {
+    tokens.push_back(str.substr(pos + 1, str.size() - pos - 1));
+  }
+  else {
     tokens.push_back(str);
   }
 
@@ -162,14 +169,13 @@ inline std::vector<std::string> TokenizeFirstOnly(const std::string& str,
 }
 
 inline std::vector<std::string> TokenizeMultiCharSeparator(
-  const std::string& str,
-  const std::string& separator)
+    const std::string& str, const std::string& separator)
 {
   std::vector<std::string> tokens;
 
   size_t pos = 0;
   // Find first "non-delimiter".
-  std::string::size_type nextPos     = str.find(separator, pos);
+  std::string::size_type nextPos = str.find(separator, pos);
 
   while (nextPos != std::string::npos) {
     // Found a token, add it to the vector.
@@ -177,7 +183,7 @@ inline std::vector<std::string> TokenizeMultiCharSeparator(
     // Skip delimiters.  Note the "not_of"
     pos = nextPos + separator.size();
     // Find next "non-delimiter"
-    nextPos	= str.find(separator, pos);
+    nextPos = str.find(separator, pos);
   }
   tokens.push_back(str.substr(pos, nextPos - pos));
 
@@ -185,13 +191,12 @@ inline std::vector<std::string> TokenizeMultiCharSeparator(
 }
 
 // speeded up version of above
-inline void TokenizeMultiCharSeparator(std::vector<std::string> &output
-                                       ,const std::string& str
-                                       ,const std::string& separator)
+inline void TokenizeMultiCharSeparator(std::vector<std::string> &output,
+    const std::string& str, const std::string& separator)
 {
   size_t pos = 0;
   // Find first "non-delimiter".
-  std::string::size_type nextPos     = str.find(separator, pos);
+  std::string::size_type nextPos = str.find(separator, pos);
 
   while (nextPos != std::string::npos) {
     // Found a token, add it to the vector.
@@ -199,7 +204,7 @@ inline void TokenizeMultiCharSeparator(std::vector<std::string> &output
     // Skip delimiters.  Note the "not_of"
     pos = nextPos + separator.size();
     // Find next "non-delimiter"
-    nextPos	= str.find(separator, pos);
+    nextPos = str.find(separator, pos);
   }
   output.push_back(Trim(str.substr(pos, nextPos - pos)));
 }
@@ -228,7 +233,7 @@ inline float TransformScore(float prob)
 //! make sure score doesn't fall below LOWEST_SCORE
 inline float FloorScore(float logScore)
 {
-  return (std::max)(logScore , LOWEST_SCORE);
+  return (std::max)(logScore, LOWEST_SCORE);
 }
 
 inline float UntransformLMScore(float logNScore)
@@ -239,8 +244,8 @@ inline float UntransformLMScore(float logNScore)
 
 inline bool FileExists(const std::string& filePath)
 {
-	  std::ifstream ifs(filePath.c_str());
-	  return !ifs.fail();
+  std::ifstream ifs(filePath.c_str());
+  return !ifs.fail();
 }
 
 const std::string ToLower(const std::string& str);
@@ -249,27 +254,29 @@ const std::string ToLower(const std::string& str);
 template<class COLL>
 void RemoveAllInColl(COLL &coll)
 {
-  for (typename COLL::const_iterator iter = coll.begin() ; iter != coll.end() ; ++iter) {
+  for (typename COLL::const_iterator iter = coll.begin(); iter != coll.end();
+      ++iter) {
     delete (*iter);
   }
   coll.clear();
 }
 
 template<typename T>
-void Swap(T &a, T &b) {
+void Swap(T &a, T &b)
+{
   T &c = a;
   a = b;
   b = c;
 }
 
-template <typename T>
+template<typename T>
 T &GetThreadSpecificObj(boost::thread_specific_ptr<T> &coll)
 {
   T *obj;
   obj = coll.get();
   if (obj == NULL) {
     obj = new T;
-	coll.reset(obj);
+    coll.reset(obj);
   }
   assert(obj);
   return *obj;
@@ -277,14 +284,17 @@ T &GetThreadSpecificObj(boost::thread_specific_ptr<T> &coll)
 }
 
 // grab the underlying contain of priority queue
-template <class T, class S, class C>
-    S& Container(std::priority_queue<T, S, C>& q) {
-        struct HackedQueue : private std::priority_queue<T, S, C> {
-            static S& Container(std::priority_queue<T, S, C>& q) {
-                return q.*&HackedQueue::c;
-            }
-        };
-    return HackedQueue::Container(q);
+template<class T, class S, class C>
+S& Container(std::priority_queue<T, S, C>& q)
+{
+  struct HackedQueue: private std::priority_queue<T, S, C>
+  {
+    static S& Container(std::priority_queue<T, S, C>& q)
+    {
+      return q.*&HackedQueue::c;
+    }
+  };
+  return HackedQueue::Container(q);
 }
 
 }

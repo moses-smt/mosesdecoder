@@ -13,12 +13,13 @@
 #include "../../Phrase.h"
 #include "../../legacy/Range.h"
 
-namespace Moses2 {
+namespace Moses2
+{
 
 class LexicalReorderingTableCompact;
 class LRModel;
 
-class LexicalReordering : public StatefulFeatureFunction
+class LexicalReordering: public StatefulFeatureFunction
 {
 public:
   LexicalReordering(size_t startInd, const std::string &line);
@@ -29,32 +30,26 @@ public:
   virtual void SetParameter(const std::string& key, const std::string& value);
 
   virtual size_t HasPhraseTableInd() const
-  { return true; }
+  {
+    return true;
+  }
 
   virtual FFState* BlankState(MemPool &pool) const;
-  virtual void EmptyHypothesisState(FFState &state,
-		  const ManagerBase &mgr,
-		  const InputType &input,
-		  const Hypothesis &hypo) const;
+  virtual void EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
+      const InputType &input, const Hypothesis &hypo) const;
 
   virtual void
-  EvaluateInIsolation(MemPool &pool,
-		  const System &system,
-		  const Phrase &source,
-		  const TargetPhrase &targetPhrase,
-		  Scores &scores,
-		  SCORE *estimatedScore) const;
+  EvaluateInIsolation(MemPool &pool, const System &system, const Phrase &source,
+      const TargetPhrase &targetPhrase, Scores &scores,
+      SCORE *estimatedScore) const;
 
   virtual void
-  EvaluateAfterTablePruning(MemPool &pool,
-		  const TargetPhrases &tps,
-		  const Phrase &sourcePhrase) const;
+  EvaluateAfterTablePruning(MemPool &pool, const TargetPhrases &tps,
+      const Phrase &sourcePhrase) const;
 
   virtual void EvaluateWhenApplied(const ManagerBase &mgr,
-	const Hypothesis &hypo,
-	const FFState &prevState,
-	Scores &scores,
-	FFState &state) const;
+      const Hypothesis &hypo, const FFState &prevState, Scores &scores,
+      FFState &state) const;
 
 protected:
   std::string m_path;
@@ -65,9 +60,8 @@ protected:
   LRModel *m_configuration;
 
   virtual void
-  EvaluateAfterTablePruning(MemPool &pool,
-		  const TargetPhrase &targetPhrase,
-		  const Phrase &sourcePhrase) const;
+  EvaluateAfterTablePruning(MemPool &pool, const TargetPhrase &targetPhrase,
+      const Phrase &sourcePhrase) const;
 
   // PROPERTY IN PT
   int m_propertyInd;
@@ -82,21 +76,23 @@ protected:
 
   struct KeyComparer
   {
-	  size_t operator()(const Key &obj) const {
-		  size_t  seed = obj.first->hash();
-		  boost::hash_combine(seed, obj.second->hash());
-		  return seed;
-	  }
+    size_t operator()(const Key &obj) const
+    {
+      size_t seed = obj.first->hash();
+      boost::hash_combine(seed, obj.second->hash());
+      return seed;
+    }
 
-	  bool operator()(const Key& a, const Key& b) const {
-		if ((*a.first) != (*b.first)) {
-			return false;
-		}
-		if ((*a.second) != (*b.second)) {
-			return false;
-		}
-	    return true;
-	  }
+    bool operator()(const Key& a, const Key& b) const
+    {
+      if ((*a.first) != (*b.first)) {
+        return false;
+      }
+      if ((*a.second) != (*b.second)) {
+        return false;
+      }
+      return true;
+    }
 
   };
 

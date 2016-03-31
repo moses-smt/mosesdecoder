@@ -33,41 +33,47 @@ class HypothesisBase;
 class ManagerBase
 {
 public:
-	const System &system;
-	const TranslationTask &task;
+  const System &system;
+  const TranslationTask &task;
   ArcLists arcLists;
 
-	ManagerBase(System &sys, const TranslationTask &task, const std::string &inputStr, long translationId);
-	virtual ~ManagerBase();
-	virtual void Decode() = 0;
+  ManagerBase(System &sys, const TranslationTask &task,
+      const std::string &inputStr, long translationId);
+  virtual ~ManagerBase();
+  virtual void Decode() = 0;
 
-	MemPool &GetPool() const
-	{ return *m_pool; }
+  MemPool &GetPool() const
+  {
+    return *m_pool;
+  }
 
-	MemPool &GetSystemPool() const
-	{ return *m_systemPool; }
+  MemPool &GetSystemPool() const
+  {
+    return *m_systemPool;
+  }
 
-	Recycler<HypothesisBase*> &GetHypoRecycle() const
-	{
-		return *m_hypoRecycle;
-	}
+  Recycler<HypothesisBase*> &GetHypoRecycle() const
+  {
+    return *m_hypoRecycle;
+  }
 
-	const Sentence &GetInput() const
-	{ return *m_input; }
+  const Sentence &GetInput() const
+  {
+    return *m_input;
+  }
 
 protected:
-    std::string m_inputStr;
-    long m_translationId;
-	Sentence *m_input;
+  std::string m_inputStr;
+  long m_translationId;
+  Sentence *m_input;
 
-	mutable MemPool *m_pool, *m_systemPool;
-	mutable Recycler<HypothesisBase*> *m_hypoRecycle;
+  mutable MemPool *m_pool, *m_systemPool;
+  mutable Recycler<HypothesisBase*> *m_hypoRecycle;
 
-	void InitPools();
-	void ParseInput(bool addBOSEOS);
+  void InitPools();
+  void ParseInput(bool addBOSEOS);
 
 };
-
 
 }
 

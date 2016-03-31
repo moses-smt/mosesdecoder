@@ -12,23 +12,22 @@
 namespace Moses2
 {
 
-class UnknownWordPenalty : public PhraseTable
+class UnknownWordPenalty: public PhraseTable
 {
 public:
-	UnknownWordPenalty(size_t startInd, const std::string &line);
-	virtual ~UnknownWordPenalty();
+  UnknownWordPenalty(size_t startInd, const std::string &line);
+  virtual ~UnknownWordPenalty();
 
   void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
-  virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool, InputPathBase &inputPath) const;
+  virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
+      InputPathBase &inputPath) const;
 
-	  virtual void
-	  EvaluateInIsolation(const System &system,
-			  const Phrase &source, const TargetPhrase &targetPhrase,
-			  Scores &scores,
-			  SCORE *estimatedScore) const;
+  virtual void
+  EvaluateInIsolation(const System &system, const Phrase &source,
+      const TargetPhrase &targetPhrase, Scores &scores,
+      SCORE *estimatedScore) const;
 
 };
 
 }
-
 

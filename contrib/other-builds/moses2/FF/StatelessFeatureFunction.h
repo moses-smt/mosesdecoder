@@ -13,11 +13,11 @@
 namespace Moses2
 {
 
-class StatelessFeatureFunction : public FeatureFunction
+class StatelessFeatureFunction: public FeatureFunction
 {
 public:
-	StatelessFeatureFunction(size_t startInd, const std::string &line);
-	virtual ~StatelessFeatureFunction();
+  StatelessFeatureFunction(size_t startInd, const std::string &line);
+  virtual ~StatelessFeatureFunction();
 };
 
 }

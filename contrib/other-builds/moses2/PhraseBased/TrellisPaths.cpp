@@ -8,18 +8,21 @@
 #include "TrellisPaths.h"
 #include "../legacy/Util2.h"
 
-namespace Moses2 {
+namespace Moses2
+{
 
-TrellisPaths::TrellisPaths() {
-	// TODO Auto-generated constructor stub
+TrellisPaths::TrellisPaths()
+{
+  // TODO Auto-generated constructor stub
 
 }
 
-TrellisPaths::~TrellisPaths() {
-	while (!empty()) {
-		TrellisPath *path = Get();
-		delete path;
-	}
+TrellisPaths::~TrellisPaths()
+{
+  while (!empty()) {
+    TrellisPath *path = Get();
+    delete path;
+  }
 }
 
 void TrellisPaths::Add(TrellisPath *trellisPath)

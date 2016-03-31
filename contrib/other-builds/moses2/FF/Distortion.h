@@ -15,37 +15,32 @@
 namespace Moses2
 {
 
-class Distortion : public StatefulFeatureFunction
+class Distortion: public StatefulFeatureFunction
 {
 public:
-	Distortion(size_t startInd, const std::string &line);
-	virtual ~Distortion();
+  Distortion(size_t startInd, const std::string &line);
+  virtual ~Distortion();
 
   virtual FFState* BlankState(MemPool &pool) const;
-  virtual void EmptyHypothesisState(FFState &state,
-		  const ManagerBase &mgr,
-		  const InputType &input,
-		  const Hypothesis &hypo) const;
+  virtual void EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
+      const InputType &input, const Hypothesis &hypo) const;
 
   virtual void
-  EvaluateInIsolation(MemPool &pool,
-		  const System &system,
-		  const Phrase &source,
-		  const TargetPhrase &targetPhrase,
-		  Scores &scores,
-		  SCORE *estimatedScore) const;
+  EvaluateInIsolation(MemPool &pool, const System &system, const Phrase &source,
+      const TargetPhrase &targetPhrase, Scores &scores,
+      SCORE *estimatedScore) const;
 
   virtual void EvaluateWhenApplied(const std::deque<Hypothesis*> &hypos) const
-  {}
+  {
+  }
 
   virtual void EvaluateWhenApplied(const ManagerBase &mgr,
-    const Hypothesis &hypo,
-    const FFState &prevState,
-    Scores &scores,
-	FFState &state) const;
+      const Hypothesis &hypo, const FFState &prevState, Scores &scores,
+      FFState &state) const;
 
 protected:
-  SCORE CalculateDistortionScore(const Range &prev, const Range &curr, const int FirstGap) const;
+  SCORE CalculateDistortionScore(const Range &prev, const Range &curr,
+      const int FirstGap) const;
 
   int ComputeDistortionDistance(const Range& prev, const Range& current) const;
 

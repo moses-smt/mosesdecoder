@@ -26,51 +26,51 @@ class ArcLists;
 namespace NSCubePruningMiniStack
 {
 
-class Stack {
+class Stack
+{
 protected:
-
 
 public:
   typedef std::pair<const Bitmap*, size_t> HypoCoverage;
-		  // bitmap and current endPos of hypos
+  // bitmap and current endPos of hypos
 
   typedef boost::unordered_map<HypoCoverage, Moses2::HypothesisColl*,
-		  boost::hash<HypoCoverage>,
-		  std::equal_to<HypoCoverage>,
-  	  	  MemPoolAllocator< std::pair<HypoCoverage, Moses2::HypothesisColl*> >
-  	  	  > Coll;
+      boost::hash<HypoCoverage>, std::equal_to<HypoCoverage>,
+      MemPoolAllocator<std::pair<HypoCoverage, Moses2::HypothesisColl*> > > Coll;
 
+  Stack(const Manager &mgr);
+  virtual ~Stack();
 
-	Stack(const Manager &mgr);
-	virtual ~Stack();
+  size_t GetHypoSize() const;
 
-	size_t GetHypoSize() const;
+  Coll &GetColl()
+  {
+    return m_coll;
+  }
+  const Coll &GetColl() const
+  {
+    return m_coll;
+  }
 
-	Coll &GetColl()
-	{ return m_coll; }
-	const Coll &GetColl() const
-	{ return m_coll; }
+  void Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
+      ArcLists &arcLists);
 
-	void Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle, ArcLists &arcLists);
+  Moses2::HypothesisColl &GetMiniStack(const HypoCoverage &key);
 
-	Moses2::HypothesisColl &GetMiniStack(const HypoCoverage &key);
+  std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
+  void Clear();
 
-	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
-	void Clear();
-
-	void DebugCounts();
+  void DebugCounts();
 
 protected:
-	const Manager &m_mgr;
-	Coll m_coll;
+  const Manager &m_mgr;
+  Coll m_coll;
 
-	std::deque<Moses2::HypothesisColl*, MemPoolAllocator<Moses2::HypothesisColl*> > m_miniStackRecycler;
-
+  std::deque<Moses2::HypothesisColl*, MemPoolAllocator<Moses2::HypothesisColl*> > m_miniStackRecycler;
 
 };
 
 }
 
 }
-
 

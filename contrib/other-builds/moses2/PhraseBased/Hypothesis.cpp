@@ -23,66 +23,67 @@ namespace Moses2
 Hypothesis *Hypothesis::Create(MemPool &pool, Manager &mgr)
 {
 //	++g_numHypos;
-	Hypothesis *ret;
+  Hypothesis *ret;
 
-	Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
-	ret = static_cast<Hypothesis*>(recycler.Get());
-	if (ret) {
-		// got new hypo from recycler. Do nothing
-	}
-	else {
-		ret = new (pool.Allocate<Hypothesis>()) Hypothesis(pool, mgr.system);
-		//cerr << "Hypothesis=" << sizeof(Hypothesis) << " " << ret << endl;
-		recycler.Keep(ret);
-	}
-	return ret;
+  Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
+  ret = static_cast<Hypothesis*>(recycler.Get());
+  if (ret) {
+    // got new hypo from recycler. Do nothing
+  }
+  else {
+    ret = new (pool.Allocate<Hypothesis>()) Hypothesis(pool, mgr.system);
+    //cerr << "Hypothesis=" << sizeof(Hypothesis) << " " << ret << endl;
+    recycler.Keep(ret);
+  }
+  return ret;
 }
 
-Hypothesis::Hypothesis(MemPool &pool, const System &system)
-:HypothesisBase(pool, system)
-,m_currTargetWordsRange()
+Hypothesis::Hypothesis(MemPool &pool, const System &system) :
+    HypothesisBase(pool, system), m_currTargetWordsRange()
 {
 }
 
-Hypothesis::~Hypothesis() {
-	// TODO Auto-generated destructor stub
+Hypothesis::~Hypothesis()
+{
+  // TODO Auto-generated destructor stub
 }
 
-void Hypothesis::Init(Manager &mgr, const InputPathBase &path, const TargetPhrase &tp, const Bitmap &bitmap)
+void Hypothesis::Init(Manager &mgr, const InputPathBase &path,
+    const TargetPhrase &tp, const Bitmap &bitmap)
 {
-	m_mgr = &mgr;
-	m_targetPhrase = &tp;
-	m_sourceCompleted = &bitmap;
-	m_path = &path;
-	m_prevHypo = NULL;
+  m_mgr = &mgr;
+  m_targetPhrase = &tp;
+  m_sourceCompleted = &bitmap;
+  m_path = &path;
+  m_prevHypo = NULL;
 
-	m_currTargetWordsRange.SetStartPos(NOT_FOUND);
-	m_currTargetWordsRange.SetEndPos(NOT_FOUND);
+  m_currTargetWordsRange.SetStartPos(NOT_FOUND);
+  m_currTargetWordsRange.SetEndPos(NOT_FOUND);
 
-	m_estimatedScore = 0;
-	m_scores->Reset(mgr.system);
+  m_estimatedScore = 0;
+  m_scores->Reset(mgr.system);
 }
 
 void Hypothesis::Init(Manager &mgr, const Hypothesis &prevHypo,
-		const InputPathBase &path,
-		const TargetPhrase &tp,
-		const Bitmap &bitmap,
-		SCORE estimatedScore)
+    const InputPathBase &path, const TargetPhrase &tp, const Bitmap &bitmap,
+    SCORE estimatedScore)
 {
-	m_mgr = &mgr;
-	m_targetPhrase = &tp;
-	m_sourceCompleted = &bitmap;
-	m_path = &path;
-	m_prevHypo = &prevHypo;
+  m_mgr = &mgr;
+  m_targetPhrase = &tp;
+  m_sourceCompleted = &bitmap;
+  m_path = &path;
+  m_prevHypo = &prevHypo;
 
-	m_currTargetWordsRange.SetStartPos(prevHypo.m_currTargetWordsRange.GetEndPos() + 1);
-	m_currTargetWordsRange.SetEndPos(prevHypo.m_currTargetWordsRange.GetEndPos() + tp.GetSize());
+  m_currTargetWordsRange.SetStartPos(
+      prevHypo.m_currTargetWordsRange.GetEndPos() + 1);
+  m_currTargetWordsRange.SetEndPos(
+      prevHypo.m_currTargetWordsRange.GetEndPos() + tp.GetSize());
 
-	m_estimatedScore = estimatedScore;
+  m_estimatedScore = estimatedScore;
 
-	m_scores->Reset(mgr.system);
-	m_scores->PlusEquals(mgr.system, prevHypo.GetScores());
-	m_scores->PlusEquals(mgr.system, GetTargetPhrase().GetScores());
+  m_scores->Reset(mgr.system);
+  m_scores->PlusEquals(mgr.system, prevHypo.GetScores());
+  m_scores->PlusEquals(mgr.system, GetTargetPhrase().GetScores());
 }
 
 size_t Hypothesis::hash() const
@@ -98,7 +99,7 @@ bool Hypothesis::operator==(const Hypothesis &other) const
 {
   // coverage
   if (m_sourceCompleted != other.m_sourceCompleted) {
-	return false;
+    return false;
   }
 
   bool ret = HypothesisBase::operator ==(other);
@@ -108,87 +109,92 @@ bool Hypothesis::operator==(const Hypothesis &other) const
 void Hypothesis::OutputToStream(std::ostream &out) const
 {
   if (m_prevHypo) {
-	  m_prevHypo->OutputToStream(out);
+    m_prevHypo->OutputToStream(out);
   }
   //cerr << *this << endl;
 
   if (GetTargetPhrase().GetSize()) {
-	  const Phrase &phrase = GetTargetPhrase();
-	  out << phrase << " ";
+    const Phrase &phrase = GetTargetPhrase();
+    out << phrase << " ";
   }
 
   if (m_path->range.GetStartPos() != NOT_FOUND) {
-	  if (m_mgr->system.reportSegmentation == 1) {
-		  // just report phrase segmentation
-		  out << "|"  << m_path->range.GetStartPos() << "-" << m_path->range.GetEndPos() << "| ";
-	  }
-	  else if (m_mgr->system.reportSegmentation == 2) {
-		  // more detailed info about every segment
-		  out << "|";
+    if (m_mgr->system.reportSegmentation == 1) {
+      // just report phrase segmentation
+      out << "|" << m_path->range.GetStartPos() << "-" << m_path->range.GetEndPos() << "| ";
+    }
+    else if (m_mgr->system.reportSegmentation == 2) {
+      // more detailed info about every segment
+      out << "|";
 
-		  // phrase segmentation
-		  out << m_path->range.GetStartPos() << "-" << m_path->range.GetEndPos() << ",";
+      // phrase segmentation
+      out << m_path->range.GetStartPos() << "-" << m_path->range.GetEndPos() << ",";
 
-		  // score breakdown
-		  m_scores->OutputBreakdownToStream(out, m_mgr->system);
+      // score breakdown
+      m_scores->OutputBreakdownToStream(out, m_mgr->system);
 
-		  out << "| ";
-	  }
+      out << "| ";
+    }
   }
 }
 
 std::ostream& operator<<(std::ostream &out, const Hypothesis &obj)
 {
-	// coverage
-	out << obj.GetBitmap() << " " << obj.GetInputPath().range << " ";
+  // coverage
+  out << obj.GetBitmap() << " " << obj.GetInputPath().range << " ";
 
-	// states
-	const std::vector<const StatefulFeatureFunction*> &sfffs = obj.GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
-	size_t numStatefulFFs = sfffs.size();
-	for (size_t i = 0; i < numStatefulFFs; ++i) {
-		const FFState &state = *obj.GetState(i);
-		out << "(" << state << ") ";
-	}
+  // states
+  const std::vector<const StatefulFeatureFunction*> &sfffs =
+      obj.GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
+  size_t numStatefulFFs = sfffs.size();
+  for (size_t i = 0; i < numStatefulFFs; ++i) {
+    const FFState &state = *obj.GetState(i);
+    out << "(" << state << ") ";
+  }
 
-	// string
-	obj.OutputToStream(out);
-	out << " ";
-	out << "fc=" << obj.GetFutureScore() << " ";
-	obj.GetScores().Debug(out, obj.GetManager().system);
-	return out;
+  // string
+  obj.OutputToStream(out);
+  out << " ";
+  out << "fc=" << obj.GetFutureScore() << " ";
+  obj.GetScores().Debug(out, obj.GetManager().system);
+  return out;
 }
 
 void Hypothesis::EmptyHypothesisState(const InputType &input)
 {
-	const std::vector<const StatefulFeatureFunction*>  &sfffs = GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
-	  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
-		  size_t statefulInd = sfff->GetStatefulInd();
-		  FFState *state = m_ffStates[statefulInd];
-		  sfff->EmptyHypothesisState(*state, GetManager(), input, *this);
-	  }
+  const std::vector<const StatefulFeatureFunction*> &sfffs =
+      GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
+  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs){
+  size_t statefulInd = sfff->GetStatefulInd();
+  FFState *state = m_ffStates[statefulInd];
+  sfff->EmptyHypothesisState(*state, GetManager(), input, *this);
+}
 }
 
 void Hypothesis::EvaluateWhenApplied()
 {
-  const std::vector<const StatefulFeatureFunction*>  &sfffs = GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
-  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
-	  EvaluateWhenApplied(*sfff);
-  }
-  //cerr << *this << endl;
+  const std::vector<const StatefulFeatureFunction*> &sfffs =
+      GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
+  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs){
+  EvaluateWhenApplied(*sfff);
+}
+//cerr << *this << endl;
 }
 
 void Hypothesis::EvaluateWhenApplied(const StatefulFeatureFunction &sfff)
 {
-	  size_t statefulInd = sfff.GetStatefulInd();
-	  const FFState *prevState = m_prevHypo->GetState(statefulInd);
-	  FFState *thisState = m_ffStates[statefulInd];
-	  assert(prevState);
-	  sfff.EvaluateWhenApplied(GetManager(), *this, *prevState, *m_scores, *thisState);
+  size_t statefulInd = sfff.GetStatefulInd();
+  const FFState *prevState = m_prevHypo->GetState(statefulInd);
+  FFState *thisState = m_ffStates[statefulInd];
+  assert(prevState);
+  sfff.EvaluateWhenApplied(GetManager(), *this, *prevState, *m_scores,
+      *thisState);
 
 }
 
 /** recursive - pos is relative from start of sentence */
-const Word &Hypothesis::GetWord(size_t pos) const {
+const Word &Hypothesis::GetWord(size_t pos) const
+{
   const Hypothesis *hypo = this;
   while (pos < hypo->GetCurrTargetWordsRange().GetStartPos()) {
     hypo = hypo->GetPrevHypo();
@@ -199,15 +205,15 @@ const Word &Hypothesis::GetWord(size_t pos) const {
 
 void Hypothesis::Swap(Hypothesis &other)
 {
-	/*
-	Swap(m_targetPhrase, other.m_targetPhrase);
-	Swap(m_sourceCompleted, other.m_sourceCompleted);
-	Swap(m_range, other.m_range);
-	Swap(m_prevHypo, other.m_prevHypo);
-	Swap(m_ffStates, other.m_ffStates);
-	Swap(m_estimatedScore, other.m_estimatedScore);
-	Swap(m_currTargetWordsRange, other.m_currTargetWordsRange);
-	*/
+  /*
+   Swap(m_targetPhrase, other.m_targetPhrase);
+   Swap(m_sourceCompleted, other.m_sourceCompleted);
+   Swap(m_range, other.m_range);
+   Swap(m_prevHypo, other.m_prevHypo);
+   Swap(m_ffStates, other.m_ffStates);
+   Swap(m_estimatedScore, other.m_estimatedScore);
+   Swap(m_currTargetWordsRange, other.m_currTargetWordsRange);
+   */
 }
 
 }

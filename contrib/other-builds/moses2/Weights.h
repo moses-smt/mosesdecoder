@@ -17,15 +17,17 @@ namespace Moses2
 
 class FeatureFunctions;
 
-class Weights {
-	  friend std::ostream& operator<<(std::ostream &, const Weights &);
+class Weights
+{
+  friend std::ostream& operator<<(std::ostream &, const Weights &);
 public:
   Weights();
   virtual ~Weights();
   void Init(const FeatureFunctions &ffs);
 
-  SCORE operator[](size_t ind) const {
-	return m_weights[ind];
+  SCORE operator[](size_t ind) const
+  {
+    return m_weights[ind];
   }
 
   void Debug(std::ostream &out, const FeatureFunctions &ffs) const;
@@ -37,6 +39,5 @@ protected:
 };
 
 }
-
 
 #endif /* WEIGHTS_H_ */

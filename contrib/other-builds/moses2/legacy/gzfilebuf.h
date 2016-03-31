@@ -12,38 +12,43 @@ namespace Moses2
 /** wrapper around gzip input stream. Unknown parentage
  *  @todo replace with boost version - output stream already uses it
  */
-class gzfilebuf : public std::streambuf
+class gzfilebuf: public std::streambuf
 {
 public:
-  gzfilebuf(const char *filename) {
+  gzfilebuf(const char *filename)
+  {
     _gzf = gzopen(filename, "rb");
-    if (!_gzf)
-      throw std::runtime_error("Could not open " + std::string(filename) + ".");
-    setg (_buff+sizeof(int),     // beginning of putback area
-          _buff+sizeof(int),     // read position
-          _buff+sizeof(int));    // end position
+    if (!_gzf) throw std::runtime_error(
+        "Could not open " + std::string(filename) + ".");
+    setg(_buff + sizeof(int),     // beginning of putback area
+    _buff + sizeof(int),     // read position
+    _buff + sizeof(int));    // end position
   }
-  ~gzfilebuf() {
+  ~gzfilebuf()
+  {
     gzclose(_gzf);
   }
 protected:
-  virtual int_type overflow (int_type /* c */) {
+  virtual int_type overflow(int_type /* c */)
+  {
     throw;
   }
 
   // write multiple characters
-  virtual
-  std::streamsize xsputn (const char* /* s */,
-                          std::streamsize /* num */) {
+  virtual std::streamsize xsputn(const char* /* s */, std::streamsize /* num */)
+  {
     throw;
   }
 
-  virtual std::streampos seekpos ( std::streampos /* sp */, std::ios_base::openmode /* which = std::ios_base::in | std::ios_base::out */ ) {
+  virtual std::streampos seekpos(std::streampos /* sp */,
+      std::ios_base::openmode /* which = std::ios_base::in | std::ios_base::out */)
+  {
     throw;
   }
 
   //read one character
-  virtual int_type underflow () {
+  virtual int_type underflow()
+  {
     // is read position before end of _buff?
     if (gptr() < egptr()) {
       return traits_type::to_int_type(*gptr());
@@ -61,28 +66,28 @@ protected:
     /* copy up to four characters previously read into
      * the putback _buff (area of first four characters)
      */
-    std::memmove (_buff+(sizeof(int)-numPutback), gptr()-numPutback,
-                  numPutback);
+    std::memmove(_buff + (sizeof(int) - numPutback), gptr() - numPutback,
+        numPutback);
 
     // read new characters
-    int num = gzread(_gzf, _buff+sizeof(int), _buffsize-sizeof(int));
+    int num = gzread(_gzf, _buff + sizeof(int), _buffsize - sizeof(int));
     if (num <= 0) {
       // ERROR or EOF
       return EOF;
     }
 
     // reset _buff pointers
-    setg (_buff+(sizeof(int)-numPutback),   // beginning of putback area
-          _buff+sizeof(int),                // read position
-          _buff+sizeof(int)+num);           // end of buffer
+    setg(_buff + (sizeof(int) - numPutback),   // beginning of putback area
+    _buff + sizeof(int),                // read position
+    _buff + sizeof(int) + num);           // end of buffer
 
     // return next character
     return traits_type::to_int_type(*gptr());
   }
 
-  std::streamsize xsgetn (char* s,
-                          std::streamsize num) {
-    return gzread(_gzf,s,num);
+  std::streamsize xsgetn(char* s, std::streamsize num)
+  {
+    return gzread(_gzf, s, num);
   }
 
 private:
