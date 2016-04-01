@@ -666,16 +666,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/ReorderingConstraint.h</locationURI>
 		</link>
 		<link>
-			<name>ReportingOptions.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ReportingOptions.cpp</locationURI>
-		</link>
-		<link>
-			<name>ReportingOptions.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/ReportingOptions.h</locationURI>
-		</link>
-		<link>
 			<name>RuleCube.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/RuleCube.cpp</locationURI>
