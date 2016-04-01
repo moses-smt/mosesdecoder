@@ -6,6 +6,7 @@
 #include "Phrase.h"
 #include "TranslationTask.h"
 #include "MemPool.h"
+#include "Server.h"
 #include "legacy/InputFileStream.h"
 #include "legacy/Parameter.h"
 #include "legacy/ThreadPool.h"
@@ -32,11 +33,25 @@ int main(int argc, char** argv)
 	Moses2::ThreadPool pool(system.numThreads, system.cpuAffinityOffset, system.cpuAffinityOffsetIncr);
 	//cerr << "CREATED POOL" << endl;
 
-	batch_run(params, system, pool);
+  if (params.GetParam("server")) {
+    std::cerr << "RUN SERVER" << std::endl;
+    run_as_server();
+  }
+  else {
+    std::cerr << "RUN BATCH" << std::endl;
+    batch_run(params, system, pool);
+  }
 
 	cerr << "Decoding took " << timer.get_elapsed_time() << endl;
 //	cerr << "g_numHypos=" << g_numHypos << endl;
 	cerr << "Finished" << endl;
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////
+void run_as_server()
+{
+  Moses2::Server server;
+  server.run(); // actually: don't return. see Server::run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
