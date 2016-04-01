@@ -109,6 +109,7 @@ lib moses :
   FF/*.cpp
   FF/bilingual-lm/*.cpp
   FF/OSM-Feature/*.cpp
+  FF/Dsg-Feature/*.cpp
   FF/LexicalReordering/*.cpp
   PP/*.cpp
 : #exceptions
