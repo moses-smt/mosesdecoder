@@ -120,6 +120,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
     SCFG/Word.cpp
 
 	server/Server.cpp
+	server/Translator.cpp
 	
     deps ;
 

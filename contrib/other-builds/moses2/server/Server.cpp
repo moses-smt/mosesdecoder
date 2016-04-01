@@ -6,6 +6,7 @@
  */
 #include <iostream>
 #include "Server.h"
+#include "Translator.h"
 #include "../System.h"
 
 using namespace std;
@@ -14,8 +15,9 @@ namespace Moses2
 {
 
 Server::Server()
+:m_translator(new Translator())
 {
-
+  m_registry.addMethod("translate", m_translator);
 }
 
 Server::~Server()

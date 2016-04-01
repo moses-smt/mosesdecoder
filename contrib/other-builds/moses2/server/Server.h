@@ -25,6 +25,8 @@ public:
 protected:
   std::string m_pidfile;
   xmlrpc_c::registry m_registry;
+  xmlrpc_c::methodPtr const m_translator;
+
 };
 
 } /* namespace Moses2 */
