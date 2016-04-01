@@ -1,6 +1,7 @@
 #include <iostream>
 #include <memory>
 #include <boost/pool/pool_alloc.hpp>
+#include "Main.h"
 #include "System.h"
 #include "Phrase.h"
 #include "TranslationTask.h"
@@ -14,20 +15,6 @@ using namespace std;
 
 //extern size_t g_numHypos;
 
-istream &GetInputStream(Moses2::Parameter &params)
-{
-	const Moses2::PARAM_VEC *vec = params.GetParam("input-file");
-	if (vec && vec->size()) {
-		Moses2::InputFileStream *stream = new Moses2::InputFileStream(vec->at(0));
-		return *stream;
-	}
-	else {
-		return cin;
-	}
-}
-
-void Temp();
-
 int main(int argc, char** argv)
 {
 	cerr << "Starting..." << endl;
@@ -38,8 +25,6 @@ int main(int argc, char** argv)
 	params.LoadParam(argc, argv);
 	Moses2::System system(params);
 
-	istream &inStream = GetInputStream(params);
-
 	//cerr << "system.numThreads=" << system.numThreads << endl;
 	Moses2::Timer timer;
 	timer.start();
@@ -47,24 +32,7 @@ int main(int argc, char** argv)
 	Moses2::ThreadPool pool(system.numThreads, system.cpuAffinityOffset, system.cpuAffinityOffsetIncr);
 	//cerr << "CREATED POOL" << endl;
 
-	long translationId = 0;
-	string line;
-	while (getline(inStream, line)) {
-		//cerr << "line=" << line << endl;
-	    boost::shared_ptr<Moses2::TranslationTask> task(new Moses2::TranslationTask(system, line, translationId));
-
-		//cerr << "START pool.Submit()" << endl;
-		pool.Submit(task);
-		//task->Run();
-		++translationId;
-	}
-
-	pool.Stop(true);
-
-	if (&inStream != &cin) {
-		delete &inStream;
-	}
-
+	batch_run(params, system, pool);
 
 	cerr << "Decoding took " << timer.get_elapsed_time() << endl;
 //	cerr << "g_numHypos=" << g_numHypos << endl;
@@ -72,7 +40,43 @@ int main(int argc, char** argv)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
+istream &GetInputStream(Moses2::Parameter &params)
+{
+  const Moses2::PARAM_VEC *vec = params.GetParam("input-file");
+  if (vec && vec->size()) {
+    Moses2::InputFileStream *stream = new Moses2::InputFileStream(vec->at(0));
+    return *stream;
+  }
+  else {
+    return cin;
+  }
+}
 
+////////////////////////////////////////////////////////////////////////////////////////////////
+void batch_run(Moses2::Parameter &params, Moses2::System &system, Moses2::ThreadPool &pool)
+{
+  istream &inStream = GetInputStream(params);
+
+  long translationId = 0;
+  string line;
+  while (getline(inStream, line)) {
+    //cerr << "line=" << line << endl;
+      boost::shared_ptr<Moses2::TranslationTask> task(new Moses2::TranslationTask(system, line, translationId));
+
+    //cerr << "START pool.Submit()" << endl;
+    pool.Submit(task);
+    //task->Run();
+    ++translationId;
+  }
+
+  pool.Stop(true);
+
+  if (&inStream != &cin) {
+    delete &inStream;
+  }
+
+}
+////////////////////////////////////////////////////////////////////////////////////////////////
 void Temp()
 {
 	Moses2::MemPool pool;
