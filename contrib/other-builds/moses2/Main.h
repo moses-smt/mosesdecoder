@@ -15,7 +15,7 @@ class ThreadPool;
 
 std::istream &GetInputStream(Moses2::Parameter &params);
 void batch_run(Moses2::Parameter &params, Moses2::System &system, Moses2::ThreadPool &pool);
-void run_as_server();
+void run_as_server(Moses2::System &system);
 
 void Temp();
 

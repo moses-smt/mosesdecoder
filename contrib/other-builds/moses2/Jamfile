@@ -13,7 +13,6 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
    Phrase.cpp 
    PhraseImpl.cpp 
    Sentence.cpp
-   Server.cpp
    Scores.cpp 
    SubPhrase.cpp
    System.cpp 
@@ -120,6 +119,8 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
     SCFG/TargetPhraseImpl.cpp
     SCFG/Word.cpp
 
+	server/Server.cpp
+	
     deps ;
 
 exe moses2 : Main.cpp moses2_lib ;

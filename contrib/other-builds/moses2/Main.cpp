@@ -35,7 +35,7 @@ int main(int argc, char** argv)
 
   if (params.GetParam("server")) {
     std::cerr << "RUN SERVER" << std::endl;
-    run_as_server();
+    run_as_server(system);
   }
   else {
     std::cerr << "RUN BATCH" << std::endl;
@@ -48,10 +48,10 @@ int main(int argc, char** argv)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-void run_as_server()
+void run_as_server(Moses2::System &system)
 {
   Moses2::Server server;
-  server.run(); // actually: don't return. see Server::run()
+  server.run(system); // actually: don't return. see Server::run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

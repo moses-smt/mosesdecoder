@@ -62,6 +62,16 @@ public:
   int cpuAffinityOffset;
   int cpuAffinityOffsetIncr;
 
+  // server
+  int port;              // this is for the abyss server
+  std::string logfile;   // this is for the abyss server
+  int maxConn;           // this is for the abyss server
+  int maxConnBacklog;    // this is for the abyss server
+  int keepaliveTimeout;  // this is for the abyss server
+  int keepaliveMaxConn;  // this is for the abyss server
+  int timeout;           // this is for the abyss server
+  bool is_serial;
+
   System(const Parameter &paramsArg);
   virtual ~System();
 
