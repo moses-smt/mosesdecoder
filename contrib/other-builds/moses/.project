@@ -51,16 +51,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/AlignmentInfoTest.cpp</locationURI>
 		</link>
 		<link>
-			<name>AllOptions.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/AllOptions.cpp</locationURI>
-		</link>
-		<link>
-			<name>AllOptions.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/AllOptions.h</locationURI>
-		</link>
-		<link>
 			<name>BaseManager.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/BaseManager.cpp</locationURI>
@@ -851,16 +841,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/SearchNormal.h</locationURI>
 		</link>
 		<link>
-			<name>SearchOptions.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/SearchOptions.cpp</locationURI>
-		</link>
-		<link>
-			<name>SearchOptions.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/SearchOptions.h</locationURI>
-		</link>
-		<link>
 			<name>Sentence.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/Sentence.cpp</locationURI>
@@ -1199,6 +1179,11 @@
 			<name>rule.proto</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/rule.proto</locationURI>
+		</link>
+		<link>
+			<name>server</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>FF/BleuScoreFeature.cpp</name>
@@ -2544,6 +2529,86 @@
 			<name>parameters/SyntaxOptions.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/parameters/SyntaxOptions.h</locationURI>
+		</link>
+		<link>
+			<name>server/CloseSession.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/server/CloseSession.cpp</locationURI>
+		</link>
+		<link>
+			<name>server/CloseSession.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/server/CloseSession.h</locationURI>
+		</link>
+		<link>
+			<name>server/Hypothesis_4server.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/server/Hypothesis_4server.cpp</locationURI>
+		</link>
+		<link>
+			<name>server/Optimizer.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/server/Optimizer.cpp</locationURI>
+		</link>
+		<link>
+			<name>server/Optimizer.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/server/Optimizer.h</locationURI>
+		</link>
+		<link>
+			<name>server/PackScores.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/server/PackScores.cpp</locationURI>
+		</link>
+		<link>
+			<name>server/PackScores.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/server/PackScores.h</locationURI>
+		</link>
+		<link>
+			<name>server/Server.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/server/Server.cpp</locationURI>
+		</link>
+		<link>
+			<name>server/Server.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/server/Server.h</locationURI>
+		</link>
+		<link>
+			<name>server/Session.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/server/Session.h</locationURI>
+		</link>
+		<link>
+			<name>server/TranslationRequest.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/server/TranslationRequest.cpp</locationURI>
+		</link>
+		<link>
+			<name>server/TranslationRequest.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/server/TranslationRequest.h</locationURI>
+		</link>
+		<link>
+			<name>server/Translator.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/server/Translator.cpp</locationURI>
+		</link>
+		<link>
+			<name>server/Translator.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/server/Translator.h</locationURI>
+		</link>
+		<link>
+			<name>server/Updater.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/server/Updater.cpp</locationURI>
+		</link>
+		<link>
+			<name>server/Updater.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/server/Updater.h</locationURI>
 		</link>
 		<link>
 			<name>FF/LexicalReordering/BidirectionalReorderingState.cpp</name>
