@@ -324,7 +324,7 @@ namespace Moses
 	    //  (2)Comment the below if you want delayed scoring
 	    if ( isPrefix (currFVec.back())){  // this will delay scoring of prefix in prefix-ending phrases until the next hypothesis arrives
 
-	      pscore = ptrDsgLM.Score(temp,desegmented,currState);
+	      //pscore = ptrDsgLM.Score(temp,desegmented,currState); NEW
 
 	      // enable the 3 lines below with (1) and disable lines below it
 	      //opProb = opProb + pscore - delta; //NEW
@@ -343,7 +343,7 @@ namespace Moses
 	      lmProb = lmProb + pscore - delta; //NEW
 	      delta=pscore;
 	      currState=temp;
-	    }
+	      }
 	    else{
 	      boost::replace_all(words[i], "-LRB-", "("); //NEW CHECK
 	      boost::replace_all(words[i], "-RRB-", ")"); //NEW CHECK
@@ -352,7 +352,7 @@ namespace Moses
 	      lmProb = lmProb + pscore - delta; //NEW
 	      delta=pscore; //NEW
 	      currState=temp;
-	    }}//*/
+	    }   }//*/
 
 	  m_buffer.push_back(words.back());
 	  //gap=words.back();
