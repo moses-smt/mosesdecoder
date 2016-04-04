@@ -71,6 +71,12 @@ protected:
       if (m_targetFactors.size() != 1)
         UTIL_THROW2("You can only use factor-positions when a single target-side factor is defined.");
       const std::string &fullFactor = word.GetFactor(m_targetFactors[0])->GetString().as_string();
+
+      // corner cases: at sentence beginning/end, we don't have the correct factors set up
+      // similarly for UNK
+      if (fullFactor == BOS_ || fullFactor == EOS_ || fullFactor == UNKNOWN_FACTOR)
+        return fullFactor;
+
       std::string subFactor(m_factorPositions.size(), 'x'); // initialize string with correct size and placeholder chars
       for (size_t i = 0; i < m_factorPositions.size(); i++)
         subFactor[i] = fullFactor[m_factorPositions[i]];
