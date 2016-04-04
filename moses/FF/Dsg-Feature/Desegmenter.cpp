@@ -1,10 +1,9 @@
-#include <iostream>     // std::cout
-#include <fstream>      // std::ifstream
+#include <fstream>
+#include <iostream>
 #include<string>
 #include<sstream>
 #include<vector>
 #include<map>
-
 #include "Desegmenter.h"
 #include <boost/algorithm/string/replace.hpp>
 
@@ -14,7 +13,7 @@ namespace Moses
 {
 void Desegmenter::Load(const string filename){
 
-	std::ifstream myFile(filename.c_str() );//, std::ifstream::in);
+	std::ifstream myFile(filename.c_str() );
 	if (myFile.is_open()){
 		cerr << "Desegmentation File open successful." << endl;
 		string line;
@@ -34,16 +33,12 @@ void Desegmenter::Load(const string filename){
 }
 
 
-
-
 vector<string> Desegmenter::Search(string myKey){
 	multimap<string, string>::const_iterator  mmiPairFound = mmDesegTable.find(myKey);
 	vector<string> result;
 	if (mmiPairFound != mmDesegTable.end()){
-		size_t nNumPairsInMap = mmDesegTable.count(myKey);
-		
-		for (size_t nValuesCounter = 0; nValuesCounter < nNumPairsInMap; ++nValuesCounter){
-			
+		size_t nNumPairsInMap = mmDesegTable.count(myKey);		
+		for (size_t nValuesCounter = 0; nValuesCounter < nNumPairsInMap; ++nValuesCounter){			
 			if (mmiPairFound != mmDesegTable.end())	{
 				result.push_back(mmiPairFound->second);
 			}
@@ -59,9 +54,11 @@ vector<string> Desegmenter::Search(string myKey){
 	}
 }
 
+
 string Desegmenter::ApplyRules(string & segToken){
+
 	string desegToken=segToken;
-	
+  if (!simple){
 	boost::replace_all(desegToken, "l+ All", "ll");
 	boost::replace_all(desegToken, "l+ Al", "ll"); 
 	boost::replace_all(desegToken, "y+ y ", "y"); 
@@ -74,60 +71,16 @@ string Desegmenter::ApplyRules(string & segToken){
 	boost::replace_all(desegToken, "An +lA", "Em");
 	boost::replace_all(desegToken, "-LRB-", "(");
 	boost::replace_all(desegToken, "-RRB-", ")");
-	boost::replace_all(desegToken, "+ +", "");
+	}
 	
+    boost::replace_all(desegToken, "+ +", "");	
 	boost::replace_all(desegToken, "+ ", "");
 	boost::replace_all(desegToken, " +", "");
 	
 	return desegToken;
 }
 
-
 Desegmenter::~Desegmenter()
 {}
-
-
-
-/*
-void Completer::Load(const string filename){
-
-	std::ifstream myFile(filename.c_str() );
-	if (myFile.is_open()){
-		cerr << "Completer File open successful." << endl;
-		string line;
-		while (getline(myFile, line)){
-			stringstream ss(line);
-			string token;
-			vector<string> myline;
-			while (getline(ss, token, '\t')){
-				myline.push_back(token);
-			}
-			mmDetok.insert(pair<string, string>(myline[0], myline[1] ));
-		}
-		myFile.close();
-	}
-	else
-		cerr << "open() failed: check if Desegmentation file is in right folder" << endl;
-	//return mmDetok;
-}
-
-string Completer::Search(string myKey){
-	
-	//unordered_multimap<string, string>::const_iterator  mmiPairFound = mmDetok.find(myKey);
-	map<string, string>::const_iterator  mi = mmDetok.find(myKey);
-	//vector<string> result;
-	string result="";
-	if (mi != mmDetok.end()){
-		result=mi->second;		
-		return result;
-	}
-	else{
-		return result;
-	}
-}
-
-Completer::~Completer()
-{}
-*/
 
 }

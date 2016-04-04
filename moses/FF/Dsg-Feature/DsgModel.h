@@ -18,10 +18,10 @@ namespace Moses
   public:
 
     DsgLM * DSGM;
-    Desegmenter* desegT; //MSAL
+    Desegmenter* desegT; 
     int tFactor;// Target Factor ...
-    int order; //MSAL
-    int numFeatures;   // Number of features used an be 1 (unsegmented LM)or 4 (with 3 contiguity features)
+    int order; 
+    int numFeatures;   // Number of features used an be 1 (unsegmented LM)or 5 (with 3 contiguity features and 1 UnsegWP)
     bool optimistic;
 
     DesegModel(const std::string &line);
@@ -57,6 +57,7 @@ namespace Moses
     typedef std::vector<float> Scores;
     std::string m_lmPath;
     std::string m_desegPath;
+    bool m_simple; //desegmentation scheme; if 1 then use simple, else use rule and backoff to simple
   };
 
 

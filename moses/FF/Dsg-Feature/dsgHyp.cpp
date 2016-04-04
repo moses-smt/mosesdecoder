@@ -2,9 +2,9 @@
 #include <sstream>
 #include <boost/algorithm/string.hpp>
 #include <algorithm>
-#include <cstdlib> //NEW
-#include <math.h> //NEW
-#include <map>  //NEW
+#include <cstdlib> 
+#include <math.h> 
+#include <map>  
 
 
 using namespace std;
@@ -19,25 +19,22 @@ namespace Moses
 
   void dsgState::saveState( std::vector<std::string> danglingTok, std::vector<int> srcSpans,float deltaValue)
   {
-    //gap.clear();
     buffer = danglingTok;
     span=srcSpans;
-    delta=deltaValue;//NEW
+    delta=deltaValue;
   }
 
 
-  size_t dsgState::hash() const  //CHECKKKKKKKKKK
+  size_t dsgState::hash() const
   {
 
     size_t ret = 0;
     boost::hash_combine(ret, lmState);
 
     /*size_t ret = delta;
-
   boost::hash_combine(ret, buffer);
   boost::hash_combine(ret, span);
   boost::hash_combine(ret, lmState.length);
-
   return ret;*/
   }
 
@@ -48,22 +45,14 @@ namespace Moses
     if (lmState < other.lmState) return false;
     if (lmState == other.lmState) return true;
     return false;
-
-    /*if (buffer.size()!=other.buffer.size()){return false;}
-  if (span.size()!=other.span.size()){return false;};
-  if (delta!=other.delta){return false;}
-  if (lmState.length!=other.lmState.length){return false;}
-  //if (lmState == other.lmState) {return true;}
-  return true;*/
-
   }
 
+  // ----------------------------------------
+  
   std::string dsgState :: getName() const
   {
     return "done";
   }
-
-  //////////////////////////////////////////////////
 
   dsgHypothesis :: dsgHypothesis()
   {
@@ -73,7 +62,6 @@ namespace Moses
     discontig2 = 0;
     UnsegWP = 0;
     m_buffer.clear();//="";
-    //delta=0.0;
   }
 
   void dsgHypothesis :: setState(const FFState* prev_state)
@@ -90,14 +78,13 @@ namespace Moses
   {
     dsgState * statePtr = new dsgState(lmState);
     statePtr->saveState(m_buffer, m_span, delta);
-    //statePtr->saveState(gap,span,0.0);
     return statePtr;
   }
 
   void dsgHypothesis :: populateScores(vector <float> & scores , const int numFeatures)
   {
     scores.clear();
-    scores.push_back(lmProb); //TODAY
+    scores.push_back(lmProb);
 
     if (numFeatures == 1)
       return;
@@ -155,7 +142,7 @@ namespace Moses
     std::vector<std::string> chain;
     std::vector<int> chain_ids;
     std::vector<std::string> allchains;
-    chain_ids=m_span;//MSAL
+    chain_ids=m_span;
 
     if (!m_buffer.empty() && !isolation){// if evaluate in isolation is called, then do not add buffer content
       for (int i = 0; i < m_buffer.size(); i++){   // initialize chain with the content of the buffer
@@ -171,7 +158,7 @@ namespace Moses
 	if (sourcePosSet.empty()==false){
 	  for (std::set<size_t>::iterator it(sourcePosSet.begin());it != sourcePosSet.end(); it++) {
 	    int cur=*it;
-	    chain_ids.push_back(cur+sourceOffset); //MSAL
+	    chain_ids.push_back(cur+sourceOffset); 
 	  }
 	}
       }
@@ -194,16 +181,10 @@ namespace Moses
 	if (sourcePosSet.empty()==false){
 	  for (std::set<size_t>::iterator it(sourcePosSet.begin());it != sourcePosSet.end(); it++) {
 	    int cur=*it;
-	    chain_ids.push_back(cur+sourceOffset); //MSAL
+	    chain_ids.push_back(cur+sourceOffset); 
 	  }
 	}
-	/*else {
-	  //chain_ids.push_back(sourceOffset);
-	  //std::cout  << sourceOffset <<" $ ";
-	  //chain_ids.push_back({});
-	  std::cout  << "NONE $ ";
-	  }*/
-	//chain_ids.push_back(i+sourceOffset);//MSAL
+
       }
 
     }
@@ -232,20 +213,7 @@ namespace Moses
     UnsegWP=0;
 
     currFVec = m_buffer;
-
-    /*
-      std::cout << "GAP: ";
-      for (int j=0 ; j< m_buffer.size();j++){cout << "   " << m_buffer[j];}
-      std::cout << endl;
-      std::cout << "Phrase: ";
-      for (int j=0 ; j< m_curr_phr.size();j++){cout << "   " << m_curr_phr[j];}
-      std::cout << endl; */
-
     currFVec.insert( currFVec.end(), m_curr_phr.begin(), m_curr_phr.end() );
-
-    //std::cout << "First: ";
-    //for (int j=0 ; j< currFVec.size();j++){cout << "   " << currFVec[j];}
-    //std::cout << endl;
 
     int vecSize=currFVec.size();
 
@@ -255,7 +223,6 @@ namespace Moses
     if (currFVec.size()>0  && isSuffix (currFVec.front())) {
       UnsegWP-=0.5;}
 
-
     /* //Dropping prefix-end and suffix-start
        while  (currFVec.size()>0 && isPrefix (currFVec.back())){
        currFVec.pop_back(); //drop prefix appearing at end of phrase
@@ -264,7 +231,6 @@ namespace Moses
        while (currFVec.size()>0 && isSuffix (currFVec.front())){
        currFVec.erase (currFVec.begin()); //drop suffix appearning at start of a phrase
        } */
-
 
     vector<vector<int> > chain_ids;
     words = grouper(currFVec,chain_ids,0,align,1);
@@ -282,7 +248,6 @@ namespace Moses
 	lmProb += ptrDsgLM.Score(temp,words[i],currState);
       }
     }
-    //opProb=TransformLMScore(opProb);
     lmState = currState;
   }
 
@@ -310,60 +275,45 @@ namespace Moses
     words = grouper(currFVec,all_chain_ids,sourceOffset,align,0);
 
     for (int i = 0; i < words.size(); i++) {
-      temp = currState; //NEW ADDED
+      temp = currState; 
 
       if (i==words.size()-1){
 	if (completePhraseSuffixEnd){   //i.e if phrase ends with suffix, which marks an end of a word
 	  m_buffer.clear();// ="";
-	  m_span.clear();// ={};//MSAL
-	  //delta=0.0; //Dont enable this, wrong
+	  m_span.clear();// ={};
 	}
 	else if (!isCompleted) {  // not end of sentence( or final hypothesis), and probably the last token is not a complete word
 	  m_buffer.clear();
 	  if (optimistic == 1){
-	    //  (2)Comment the below if you want delayed scoring
 	    if ( isPrefix (currFVec.back())){  // this will delay scoring of prefix in prefix-ending phrases until the next hypothesis arrives
-
-	      //pscore = ptrDsgLM.Score(temp,desegmented,currState); NEW
-
-	      // enable the 3 lines below with (1) and disable lines below it
-	      //opProb = opProb + pscore - delta; //NEW
-	      //delta=pscore;
-	      //currState=temp;
-
+	      //pscore = ptrDsgLM.Score(temp,desegmented,currState); 
 	      lmProb -= delta;
 	      delta = 0.0;
-	    }//*/
+	    }
 
-	     //Comments these else statements below with (2) if you want to delay prefix-end scoring
-	    else if (words[i].find(" ")!=std::string::npos){ //NEW
-	      desegmented=desegT.Search(words[i])[0];     //NEW
+	    else if (words[i].find(" ")!=std::string::npos){ 
+	      desegmented=desegT.Search(words[i])[0];     
 	      pscore=ptrDsgLM.Score(temp,desegmented,currState);
-	      //opProb += pscore-delta;
-	      lmProb = lmProb + pscore - delta; //NEW
+	      lmProb = lmProb + pscore - delta; 
 	      delta=pscore;
 	      currState=temp;
 	      }
 	    else{
-	      boost::replace_all(words[i], "-LRB-", "("); //NEW CHECK
-	      boost::replace_all(words[i], "-RRB-", ")"); //NEW CHECK
+	      boost::replace_all(words[i], "-LRB-", "("); 
+	      boost::replace_all(words[i], "-RRB-", ")"); 
 	      pscore=ptrDsgLM.Score(temp,words[i],currState);
-	      //opProb += pscore-delta; //NEW
-	      lmProb = lmProb + pscore - delta; //NEW
-	      delta=pscore; //NEW
+	      lmProb = lmProb + pscore - delta; 
+	      delta=pscore; 
 	      currState=temp;
-	    }   }//*/
+	    }   }
 
 	  m_buffer.push_back(words.back());
-	  //gap=words.back();
-	  m_span=all_chain_ids.back();//MSAL
-	  //opProb=TransformLMScore(opProb);
-	  //lmState = currState;
+	  m_span=all_chain_ids.back();
 	  break;
 	}
       }
 
-      //temp = currState; NEW COMMENTED
+      //temp = currState;
       if (words[i].find(" ")!=std::string::npos){
 	UnsegWP+=1;
 	desegmented=desegT.Search(words[i])[0];
@@ -375,16 +325,11 @@ namespace Moses
 	    int mynext=*next;
 	    if (std::abs(cur - mynext)>= 3) {
 	      dsc.push_back(3);
-	      //discontig2+=1;
-	      //break;
 	    }
 	    else if (std::abs(cur - mynext)== 2){
-	      //discontig1+=1;
 	      dsc.push_back(2);
-	      //break;
 	    }
 	    else if (std::abs(cur - mynext)<= 1){
-	      //discontig0+=1;
 	      dsc.push_back(1);
 	    }
 	  }
@@ -397,7 +342,6 @@ namespace Moses
 	  discontig0 += 1;
 	}
 
-	//opProb += ptrDsgLM.Score(temp,ptrDsgLM.GetVocabulary().Index(desegmented),currState);
 	lmProb += ptrDsgLM.Score(temp,desegmented,currState);
       }
       else{
@@ -412,7 +356,6 @@ namespace Moses
       temp = currState;
       lmProb = lmProb + ptrDsgLM.ScoreEndSentence(temp,currState) - delta;
     }
-    //opProb=TransformLMScore(opProb);
     lmState = currState;
   }
 

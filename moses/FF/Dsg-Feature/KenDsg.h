@@ -2,7 +2,6 @@
 
 #include <string>
 #include "lm/model.hh"
-//#include <boost/shared_ptr.hpp>
 
 namespace Moses
 {
@@ -50,7 +49,6 @@ template <class KenModel>
 
 
  private:
-  //  boost::shared_ptr<KenModel> m_kenlm;
   KenModel m_kenlm;
 };
 

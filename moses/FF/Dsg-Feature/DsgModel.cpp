@@ -28,23 +28,23 @@ namespace Moses
   void DesegModel :: readLanguageModel(const char *lmFile)
   {
     DSGM = ConstructDsgLM(m_lmPath.c_str());
-    State startState = DSGM->NullContextState(); // MSAL
-    desegT=new Desegmenter(m_desegPath);// Desegmentation Table
+    State startState = DSGM->NullContextState(); 
+    desegT=new Desegmenter(m_desegPath,m_simple);// Desegmentation Table
   }
 
 
   void DesegModel::Load(AllOptions::ptr const& opts)
   {
-    m_options = opts; //ADDED
+    m_options = opts;
     readLanguageModel(m_lmPath.c_str());
   }
 
 
 
   void DesegModel:: EvaluateInIsolation(const Phrase &source
-					, const TargetPhrase &targetPhrase
-					, ScoreComponentCollection &scoreBreakdown
-					, ScoreComponentCollection &estimatedScores) const
+          , const TargetPhrase &targetPhrase
+          , ScoreComponentCollection &scoreBreakdown
+          , ScoreComponentCollection &estimatedScores) const
   {
 
     dsgHypothesis obj;
@@ -62,16 +62,14 @@ namespace Moses
     obj.calculateDsgProbinIsol(*DSGM,*desegT,align);
     obj.populateScores(scores,numFeatures);
     estimatedScores.PlusEquals(this, scores);
-
   }
 
 
   FFState* DesegModel::EvaluateWhenApplied(
-					   const Hypothesis& cur_hypo,
-					   const FFState* prev_state,
-					   ScoreComponentCollection* accumulator) const
+             const Hypothesis& cur_hypo,
+             const FFState* prev_state,
+             ScoreComponentCollection* accumulator) const
   {
-
     const TargetPhrase &target = cur_hypo.GetCurrTargetPhrase();
     const Range &src_rng =cur_hypo.GetCurrSourceWordsRange();
     const AlignmentInfo &align = cur_hypo.GetCurrTargetPhrase().GetAlignTerm();
@@ -97,12 +95,11 @@ namespace Moses
   }
 
   FFState* DesegModel::EvaluateWhenApplied(
-					   const ChartHypothesis& /* cur_hypo */,
-					   int /* featureID - used to index the state in the previous hypotheses */,
-					   ScoreComponentCollection* accumulator) const
+             const ChartHypothesis& /* cur_hypo */,
+             int /* featureID - used to index the state in the previous hypotheses */,
+             ScoreComponentCollection* accumulator) const
   {
     UTIL_THROW2("Chart decoding not support by UTIL_THROW2");
-
   }
 
   const FFState* DesegModel::EmptyHypothesisState(const InputType &input) const
@@ -110,7 +107,6 @@ namespace Moses
     VERBOSE(3,"DesegModel::EmptyHypothesisState()" << endl);
     State startState = DSGM->BeginSentenceState();
     dsgState ss= dsgState(startState);
-    /////ss.setDelta(0.0);
     return new dsgState(ss);
   }
 
@@ -134,11 +130,16 @@ namespace Moses
       tFactor = Scan<int>(value);
     } else if (key == "optimistic") {
       if (value == "n")
-	optimistic = 0;
+      optimistic = 0;
       else
-	optimistic = 1;
+      optimistic = 1;
     } else if (key == "deseg-path") {
-      m_desegPath = value;
+      m_desegPath = Scan<int>(value);
+    } else if (key == "deseg-scheme") {
+      if(value == "s")
+        m_simple = 1;
+      else
+        m_simple = 0;
     } else if (key == "order") {
       order = Scan<int>(value);
     } else {

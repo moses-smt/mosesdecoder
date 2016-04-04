@@ -19,8 +19,7 @@ namespace Moses
   public:
 
     dsgState(const lm::ngram::State & val);
-    //int Compare(const FFState& other) const;
-    virtual bool operator==(const FFState& other) const; //CHECK
+    virtual bool operator==(const FFState& other) const;
     void saveState( std::vector<std::string>  bufferVal,std::vector<int> spanVal, float deltaValue);
 
     std::vector<std::string> getBuffer() const {
@@ -35,11 +34,11 @@ namespace Moses
       return lmState;
     }
 
-    float getDelta() const {  //NEW
+    float getDelta() const {  
       return delta;
     }
 
-    void setDelta(double val1 ) { //NEWWWW
+    void setDelta(double val1 ) { 
       delta = val1;
     }
 
@@ -72,7 +71,7 @@ class dsgHypothesis
   int discontig0;
   int discontig1;
   int discontig2;
-  double UnsegWP;
+  double UnsegWP; //Word Penalty score based on count of words
 
  public:
 
@@ -81,11 +80,11 @@ class dsgHypothesis
   void calculateDsgProb(DsgLM& ptrDsgLM, Desegmenter &, bool isCompleted, const AlignmentInfo &align, int  sourceOffset, bool optimistic);
   void calculateDsgProbinIsol(DsgLM& ptrDsgLM, Desegmenter &, const AlignmentInfo &align);
 
-  void setPhrases(std::vector<std::string> & val1 ) {//MSAL
+  void setPhrases(std::vector<std::string> & val1 ) {
     m_curr_phr = val1;
   }
 
-  void setDelta(double val1 ) { //NEW
+  void setDelta(double val1 ) { 
     delta = val1;
   }
 
