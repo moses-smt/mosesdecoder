@@ -35,11 +35,7 @@ public:
   }
 
   virtual void SetParameter(const std::string& key, const std::string& value) {
-    if (key == "size") {
-      m_contextSize = Scan<size_t>(value);
-    } else {
-      VWFeatureContext::SetParameter(key, value);
-    }
+    VWFeatureContext::SetParameter(key, value);
   }
 
 private:

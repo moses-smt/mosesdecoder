@@ -8,10 +8,10 @@
 namespace Moses
 {
 
-class VWFeatureContextWindow : public VWFeatureContext
+class VWFeatureContextBigrams : public VWFeatureContext
 {
 public:
-  VWFeatureContextWindow(const std::string &line)
+  VWFeatureContextBigrams(const std::string &line)
     : VWFeatureContext(line, DEFAULT_WINDOW_SIZE) {
     ReadParameters();
 
@@ -24,8 +24,9 @@ public:
                           , const AlignmentInfo &alignmentInfo
                           , Discriminative::Classifier &classifier
                           , Discriminative::FeatureVector &outFeatures) const {
-    for (size_t i = 0; i < m_contextSize; i++)
-      outFeatures.push_back(classifier.AddLabelIndependentFeature("tcwin^-" + SPrint(i + 1) + "^" + GetWord(contextPhrase, i)));
+    for (size_t i = 1; i < m_contextSize; i++)
+      outFeatures.push_back(classifier.AddLabelIndependentFeature("tcbigram^-" + SPrint(i + 1) 
+            + "^" + GetWord(contextPhrase, i - 1) + "^" + GetWord(contextPhrase, i)));
   }
 
   virtual void SetParameter(const std::string& key, const std::string& value) {

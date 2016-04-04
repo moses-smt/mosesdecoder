@@ -40,7 +40,16 @@ public:
   }
 
   virtual void SetParameter(const std::string& key, const std::string& value) {
-    VWFeatureBase::SetParameter(key, value);
+    if (key == "size") {
+      m_contextSize = Scan<size_t>(value);
+    } else if (key == "factor-positions") {
+      // factor positions: assuming a factor such as positional morphological tag, use this 
+      // option to select only certain positions; this assumes that only a single
+      // target-side factor is defined
+      Tokenize<size_t>(m_factorPositions, value, ",");
+    } else {
+      VWFeatureBase::SetParameter(key, value);
+    }
   }
 
   size_t GetContextSize() {
@@ -55,7 +64,19 @@ protected:
   // 1 = next to last word
   // ...etc.
   inline std::string GetWord(const Phrase &phrase, size_t posFromEnd) const {
-    return phrase.GetWord(phrase.GetSize() - posFromEnd - 1).GetString(m_targetFactors, false);
+    const Word &word = phrase.GetWord(phrase.GetSize() - posFromEnd - 1);
+    if (m_factorPositions.empty()) {
+      return word.GetString(m_targetFactors, false);
+    } else {
+      if (m_targetFactors.size() != 1)
+        UTIL_THROW2("You can only use factor-positions when a single target-side factor is defined.");
+      const std::string &fullFactor = word.GetFactor(m_targetFactors[0])->GetString().as_string();
+      std::string subFactor(m_factorPositions.size(), 'x'); // initialize string with correct size and placeholder chars
+      for (size_t i = 0; i < m_factorPositions.size(); i++)
+        subFactor[i] = fullFactor[m_factorPositions[i]];
+
+      return subFactor;
+    }
   }
 
   // some target-context feature functions also look at the source
@@ -80,6 +101,10 @@ protected:
 
   // required context size
   size_t m_contextSize;
+
+  // factor positions: assuming a factor such as positional morphological tag, use this 
+  // option to select only certain positions
+  std::vector<size_t> m_factorPositions;
 };
 
 }
