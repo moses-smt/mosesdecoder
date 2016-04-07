@@ -1,6 +1,7 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 #pragma once
 #include <string>
+#include <limits>
 #include "OptionsBaseClass.h"
 #include "../TypeDef.h"
 

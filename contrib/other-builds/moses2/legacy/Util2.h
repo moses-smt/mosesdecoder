@@ -12,6 +12,7 @@
 #include <cmath>
 #include <stdlib.h>
 #include "../TypeDef.h"
+#include "util/exception.hh"
 
 namespace Moses2
 {
@@ -92,6 +93,34 @@ inline SearchAlgorithm Scan<SearchAlgorithm>(const std::string &input)
 {
   return (SearchAlgorithm) Scan<size_t>(input);
 }
+
+template<>
+  inline XmlInputType Scan<XmlInputType>(const std::string &input)
+  {
+    XmlInputType ret;
+    if (input=="exclusive") ret = XmlExclusive;
+    else if (input=="inclusive") ret = XmlInclusive;
+    else if (input=="constraint") ret = XmlConstraint;
+    else if (input=="ignore") ret = XmlIgnore;
+    else if (input=="pass-through") ret = XmlPassThrough;
+    else {
+      UTIL_THROW2("Unknown XML input type");
+    }
+
+    return ret;
+  }
+
+template<>
+  inline InputTypeEnum Scan<InputTypeEnum>(const std::string &input)
+  {
+    return (InputTypeEnum) Scan<size_t>(input);
+  }
+
+template<>
+  inline WordAlignmentSort Scan<WordAlignmentSort>(const std::string &input)
+  {
+    return (WordAlignmentSort) Scan<size_t>(input);
+  }
 
 //! convert vectors of string to vectors of type T variables
 template<typename T>
