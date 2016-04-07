@@ -27,35 +27,14 @@ System::System(const Parameter &paramsArg) :
 
   bestCollector.reset(new OutputCollector());
 
-  ini_performance_options();
   params.SetParameter(cpuAffinityOffset, "cpu-affinity-offset", 0);
   params.SetParameter(cpuAffinityOffsetIncr, "cpu-affinity-increment", 1);
 
-  reportSegmentation = (params.GetParam("report-segmentation-enriched") ? 2 :
-                        params.GetParam("report-segmentation") ? 1 : 0);
-
-  params.SetParameter(outputHypoScore, "output-hypo-score", false);
-
   const PARAM_VEC *section;
 
-  section = params.GetParam("n-best-list");
-  if (section) {
-    if (section->size() >= 2) {
-      nBestPath = section->at(0);
-      nbestSize = Scan<size_t>(section->at(1));
-      distinctNBest = (section->size() > 2 && section->at(2) == "distinct");
-    }
-    else {
-      throw "wrong format for switch -n-best-list file size [disinct]";
-    }
-  }
-  else {
-    nbestSize = 0;
-  }
-
   // output collectors
-  if (nbestSize) {
-    nbestCollector.reset(new OutputCollector(nBestPath));
+  if (options.nbest.nbest_size) {
+    nbestCollector.reset(new OutputCollector(options.nbest.output_file_path));
   }
 
   featureFunctions.Create();
@@ -122,46 +101,6 @@ MemPool &System::GetManagerPool() const
 {
   MemPool &ret = GetThreadSpecificObj(m_managerPool);
   return ret;
-}
-
-void System::ini_performance_options()
-{
-  const PARAM_VEC *paramsVec;
-  // m_parameter->SetParameter<size_t>(m_timeout_threshold, "time-out", -1);
-  // m_timeout = (GetTimeoutThreshold() == (size_t)-1) ? false : true;
-
-  numThreads = 1;
-  paramsVec = params.GetParam("threads");
-  if (paramsVec && paramsVec->size()) {
-    if (paramsVec->at(0) == "all") {
-#ifdef WITH_THREADS
-      numThreads = boost::thread::hardware_concurrency();
-      if (!numThreads) {
-        std::cerr
-            << "-threads all specified but Boost doesn't know how many cores there are";
-        throw;
-      }
-#else
-      std::cerr << "-threads all specified but moses not built with thread support";
-      return false;
-#endif
-    }
-    else {
-      numThreads = Scan<int>(paramsVec->at(0));
-      if (numThreads < 1) {
-        std::cerr << "Specify at least one thread.";
-        throw;
-      }
-#ifndef WITH_THREADS
-      if (numThreads > 1) {
-        std::cerr << "Error: Thread count of " << params->at(0)
-        << " but moses not built with thread support";
-        throw
-      }
-#endif
-    }
-  }
-  return;
 }
 
 FactorCollection &System::GetVocab() const

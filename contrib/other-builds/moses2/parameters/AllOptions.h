@@ -12,6 +12,7 @@
 #include "LMBR_Options.h"
 #include "ReportingOptions.h"
 #include "OOVHandlingOptions.h"
+#include "ServerOptions.h"
 //#include "SyntaxOptions.h"
 #include <boost/shared_ptr.hpp>
 
@@ -31,6 +32,7 @@ namespace Moses2
     LMBR_Options            lmbr;
     ReportingOptions      output; 
     OOVHandlingOptions       unk;
+    ServerOptions       server;
     //SyntaxOptions         syntax;
     bool mira;
     bool use_legacy_pt;

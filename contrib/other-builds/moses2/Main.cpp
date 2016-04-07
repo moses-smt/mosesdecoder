@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 	Moses2::Timer timer;
 	timer.start();
 
-	Moses2::ThreadPool pool(system.numThreads, system.cpuAffinityOffset, system.cpuAffinityOffsetIncr);
+	Moses2::ThreadPool pool(system.options.server.numThreads, system.cpuAffinityOffset, system.cpuAffinityOffsetIncr);
 	//cerr << "CREATED POOL" << endl;
 
   if (params.GetParam("server")) {

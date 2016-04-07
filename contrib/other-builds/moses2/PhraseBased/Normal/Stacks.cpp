@@ -59,7 +59,7 @@ void Stacks::Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
   Stack &stack = *m_stacks[numWordsCovered];
   StackAdd added = stack.Add(hypo);
 
-  size_t nbestSize = m_mgr.system.nbestSize;
+  size_t nbestSize = m_mgr.system.options.nbest.nbest_size;
   if (nbestSize) {
     arcLists.AddArc(added.added, hypo, added.other);
   }

@@ -30,6 +30,7 @@ namespace Moses2
     if (!lmbr.init(param))       return false;
     if (!output.init(param))     return false;
     if (!unk.init(param))        return false;
+    if (!server.init(param))     return false;
     //if (!syntax.init(param))     return false;
 
     param.SetParameter(mira, "mira", false);
@@ -99,6 +100,7 @@ namespace Moses2
     if (!lmbr.update(param))       return false;
     if (!output.update(param))     return false;
     if (!unk.update(param))        return false;
+    if (!server.update(param))     return false;
     //if (!syntax.update(param))     return false;
     return sanity_check();
   }

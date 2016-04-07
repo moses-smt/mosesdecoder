@@ -98,7 +98,7 @@ void HypothesisColl::SortAndPruneHypos(const ManagerBase &mgr,
       recycler.Recycle(hypo);
 
       // delete from arclist
-      if (mgr.system.nbestSize) {
+      if (mgr.system.options.nbest.nbest_size) {
         arcLists.Delete(hypo);
       }
     }

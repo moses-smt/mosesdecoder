@@ -104,7 +104,7 @@ void Manager::Decode()
   m_search->Decode();
   OutputBest();
 
-  if (system.nbestSize) {
+  if (system.options.nbest.nbest_size) {
     OutputNBest();
   }
 }
@@ -173,7 +173,7 @@ void Manager::OutputBest() const
   stringstream out;
   const Hypothesis *bestHypo = m_search->GetBestHypothesis();
   if (bestHypo) {
-    if (system.outputHypoScore) {
+    if (system.options.output.ReportHypoScore) {
       out << bestHypo->GetScores().GetTotalScore() << " ";
     }
 
@@ -181,7 +181,7 @@ void Manager::OutputBest() const
     //cerr << "BEST TRANSLATION: " << *bestHypo;
   }
   else {
-    if (system.outputHypoScore) {
+    if (system.options.output.ReportHypoScore) {
       out << "0 ";
     }
     //cerr << "NO TRANSLATION " << m_input->GetTranslationId() << endl;
@@ -208,12 +208,12 @@ void Manager::OutputNBest()
   // MAIN LOOP
   stringstream out;
   size_t bestInd = 0;
-  while (bestInd < system.nbestSize && !contenders.empty()) {
+  while (bestInd < system.options.nbest.nbest_size && !contenders.empty()) {
     //cerr << "bestInd=" << bestInd << endl;
     TrellisPath *path = contenders.Get();
 
     bool ok = false;
-    if (system.distinctNBest) {
+    if (system.options.nbest.only_distinct) {
       string tgtPhrase = path->ToString();
       if (distinctHypos.insert(tgtPhrase).second) {
         ok = true;

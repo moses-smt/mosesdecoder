@@ -46,13 +46,6 @@ public:
   mutable boost::shared_ptr<OutputCollector> bestCollector, nbestCollector;
 
   // moses.ini params
-  int numThreads;
-
-  size_t nbestSize;
-  bool distinctNBest;
-
-  bool outputHypoScore;
-  int reportSegmentation;
   int cpuAffinityOffset;
   int cpuAffinityOffsetIncr;
 
@@ -82,12 +75,8 @@ protected:
 
   mutable boost::thread_specific_ptr<Recycler<HypothesisBase*> > m_hypoRecycler;
 
-  std::string nBestPath;
-
   void LoadWeights();
   void LoadMappings();
-
-  void ini_performance_options();
 };
 
 }
