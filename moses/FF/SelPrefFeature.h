@@ -45,7 +45,7 @@ public:
 
   float GetWBScore(std::vector<std::string>& depRel, std::shared_ptr<lm::ngram::Model> WBmodel) const;
 
-  float GetMIScore(std::vector<std::string>& depRel,
+  std::pair<float, float> GetMIScore(std::vector<std::string>& depRel,
 		  std::shared_ptr<std::map<std::vector<std::string>, std::vector<float>>> MIModel) const;
 
   void EvaluateInIsolation(const Phrase &source
@@ -131,6 +131,8 @@ protected:
 
   // If the rule table is binarized then unbinarize each hypothesis before extracting the head words
   bool m_unbinarize;
+  // If the MI model contains the inverse SelPref score and we want to use it set this flag to true
+  bool m_inverse;
 
   // todo: initalize
   std::shared_ptr<std::unordered_map<std::string, std::string>> m_lemmaMap;

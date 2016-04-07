@@ -56,6 +56,7 @@ SCORE: -5.016 -19304.324
 	, m_unbinarize(false)
 	, m_lemmaMap(nullptr)
 	, m_w2cMap(nullptr)
+	, m_inverse(false)
    {
 
 	ReadParameters();
@@ -80,6 +81,9 @@ void SelPrefFeature::SetParameter(const std::string& key, const std::string& val
 	} else if(key == "counter"){
 		if(value == "false")
 			m_counter = false;
+	} else if(key == "inverse"){
+		if(value == "true")
+			m_inverse = true;
 	}
 
 /*	else{
@@ -136,7 +140,8 @@ void SelPrefFeature::ReadMIModel(string MIModelFile, shared_ptr<map<vector<strin
 			// rel head dep
 			vector<string> subcat = {tokens[0], tokens[1], tokens[2]};
 			scores.push_back(std::atof(tokens[3].c_str()));
-			//scores.push_back(std::atof(tokens[4].c_str()));
+			if(m_inverse && tokens.size() == 5)
+				scores.push_back(std::atof(tokens[4].c_str()));
 			MIModel->insert(pair<vector<string>, vector<float>> (subcat,scores));
 			tokens.clear();
 			scores.clear();
@@ -549,16 +554,16 @@ float SelPrefFeature::GetWBScore(vector<string>& depRel, shared_ptr<lm::ngram::M
 	  return score;
 }
 
-float SelPrefFeature::GetMIScore(vector<string>& depRel, shared_ptr<map<vector<string>, vector<float>>> MIModel) const{
+pair<float, float> SelPrefFeature::GetMIScore(vector<string>& depRel, shared_ptr<map<vector<string>, vector<float>>> MIModel) const{
 	if ((MIModel == m_MIModelMain and m_allowedLabelsMain.find(depRel[0]) == m_allowedLabelsMain.end())
 			 || (MIModel == m_MIModelPrep and depRel[0].find("prep") != 0))
-			return 0.0;
+		return {0.0, 0.0};
 	auto it_MI = MIModel->find(depRel);
 	if(it_MI != MIModel->end())
-		return it_MI->second[0];
+		return {it_MI->second[0], it_MI->second[1]};
 		// inverse score available as well
 		// return it_MI->second[1];
-	return 0.0;
+	return {0.0, 0.0};
 }
 
 FFState* SelPrefFeature::EvaluateWhenApplied(
@@ -605,7 +610,7 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 
 		// Compute feature function scores
 		float tuplesCounter = depRelTuples.size()*1.0;
-		float scoreWB = 0.0, scoreMI = 0.0, scoreWBPrep = 0.0, scoreMIPrep = 0.0;
+		float scoreWB = 0.0, scoreMI = 0.0, scoreWBPrep = 0.0, scoreMIPrep = 0.0, scoreMIInverse = 0.0, scoreMIPrepInverse = 0.0 ;
 		// How to initialize it???
 		DepRelCache &localCacheDepRel = GetCacheDepRel();
 		for (auto tuple: depRelTuples){
@@ -615,9 +620,12 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 				scoreWB += cachedScores[1];
 				scoreMIPrep += cachedScores[2];
 				scoreWBPrep += cachedScores[3];
+				scoreMIInverse += cachedScores[4];
+				scoreMIPrepInverse += cachedScores[5];
 			}
 			else{
-				float currentWBScore = 0.0, currentMIScore = 0.0, currentWBPrepScore = 0.0, currentMIPrepScore = 0.0;
+				float currentWBScore = 0.0, currentMIScore = 0.0, currentWBPrepScore = 0.0, currentMIPrepScore = 0.0,
+						currentMIInverseScore = 0.0, currentMIPrepInverseScore = 0.0;
 
 				if(m_modelFileARPA != ""){
 					currentWBScore = GetWBScore(tuple, m_WBmodelMain);
@@ -625,8 +633,11 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 				}
 
 				if (m_MIModelFile != ""){
-					currentMIScore = GetMIScore(tuple, m_MIModelMain);
+					pair<float, float> score = GetMIScore(tuple, m_MIModelMain);
+					currentMIScore = score.first;
+					currentMIInverseScore = score.second;
 					scoreMI += currentMIScore;
+					scoreMIInverse += currentMIInverseScore;
 				}
 
 				if(m_modelFileARPAPrep != ""){
@@ -635,10 +646,14 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 				}
 
 				if (m_MIModelFilePrep != ""){
-					currentMIPrepScore = GetMIScore(tuple, m_MIModelPrep);
+					pair<float, float> score = GetMIScore(tuple, m_MIModelPrep);
+					currentMIPrepScore = score.first;
+					currentMIPrepInverseScore = score.second;
 					scoreMIPrep += currentMIPrepScore;
+					scoreMIPrepInverse += currentMIPrepInverseScore;
 				}
-				localCacheDepRel[tuple] = {currentMIScore, currentWBScore, currentMIPrepScore, currentWBPrepScore};
+				localCacheDepRel[tuple] = {currentMIScore, currentWBScore, currentMIPrepScore, currentWBPrepScore,
+						currentMIInverseScore, currentMIPrepInverseScore};
 			}
 	/*		for (auto &elem: tuple)
 				cout << elem << " ";
@@ -671,12 +686,18 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 		vector<float> scores = {};
 		if(m_counter == true)
 			scores.push_back(tuplesCounter);
-		if(m_MIModelFile != "")
+		if(m_MIModelFile != ""){
 			scores.push_back(scoreMI);
+			if(m_inverse)
+				scores.push_back(scoreMIInverse);
+		}
 		if(m_modelFileARPA != "")
 			scores.push_back(scoreWB);
-		if(m_MIModelFilePrep != "")
+		if(m_MIModelFilePrep != ""){
 			scores.push_back(scoreMIPrep);
+			if(m_inverse)
+				scores.push_back(scoreMIPrepInverse);
+		}
 		if(m_modelFileARPAPrep != "")
 			scores.push_back(scoreWBPrep);
 		accumulator->PlusEquals(this,scores);
