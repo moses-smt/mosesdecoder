@@ -39,11 +39,11 @@ bool Search::CanExtend(const Bitmap &hypoBitmap, size_t hypoRangeEndPos,
     return false;
   }
 
-  if (mgr.system.maxDistortion >= 0) {
+  if (mgr.system.options.reordering.max_distortion >= 0) {
     // distortion limit
     int distortion = ComputeDistortionDistance(hypoRangeEndPos,
         pathRange.GetStartPos());
-    if (distortion > mgr.system.maxDistortion) {
+    if (distortion > mgr.system.options.reordering.max_distortion) {
       //cerr << " NO" << endl;
       return false;
     }
@@ -97,7 +97,7 @@ bool Search::CanExtend(const Bitmap &hypoBitmap, size_t hypoRangeEndPos,
     Range bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
 
     if (ComputeDistortionDistance(pathRange.GetEndPos(),
-        bestNextExtension.GetStartPos()) > mgr.system.maxDistortion) {
+        bestNextExtension.GetStartPos()) > mgr.system.options.reordering.max_distortion) {
       //cerr << " NO" << endl;
       return false;
     }

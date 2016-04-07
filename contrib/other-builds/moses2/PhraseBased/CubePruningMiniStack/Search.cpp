@@ -118,7 +118,7 @@ void Search::Decode(size_t stackInd)
  */
 
   size_t pops = 0;
-  while (!m_queue.empty() && pops < mgr.system.popLimit) {
+  while (!m_queue.empty() && pops < mgr.system.options.cube.pop_limit) {
     // get best hypo from queue, add to stack
     //cerr << "queue=" << queue.size() << endl;
     QueueItem *item = m_queue.top();
@@ -129,7 +129,7 @@ void Search::Decode(size_t stackInd)
     // add hypo to stack
     Hypothesis *hypo = item->hypo;
 
-    if (mgr.system.cubePruningLazyScoring) {
+    if (mgr.system.options.cube.lazy_scoring) {
       hypo->EvaluateWhenApplied();
     }
 
@@ -142,7 +142,7 @@ void Search::Decode(size_t stackInd)
   }
 
   // create hypo from every edge. Increase diversity
-  if (mgr.system.cubePruningDiversity) {
+  if (mgr.system.options.cube.diversity) {
     while (!m_queue.empty()) {
       QueueItem *item = m_queue.top();
       m_queue.pop();

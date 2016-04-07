@@ -77,7 +77,7 @@ void QueueItem::CreateHypothesis(Manager &mgr)
   hypo->Init(mgr, *prevHypo, edge->path, tp, edge->newBitmap,
       edge->estimatedScore);
 
-  if (!mgr.system.cubePruningLazyScoring) {
+  if (!mgr.system.options.cube.lazy_scoring) {
     hypo->EvaluateWhenApplied();
   }
 }

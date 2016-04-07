@@ -70,7 +70,7 @@ void Manager::Init()
 
   m_bitmaps->Init(m_input->GetSize(), vector<bool>(0));
 
-  switch (system.searchAlgorithm) {
+  switch (system.options.search.algo) {
   case Normal:
     m_search = new SearchNormal(*this);
     break;

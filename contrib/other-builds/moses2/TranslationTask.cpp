@@ -11,7 +11,7 @@ namespace Moses2
 TranslationTask::TranslationTask(System &system, const std::string &line,
     long translationId)
 {
-  if (system.searchAlgorithm == CYKPlus) {
+  if (system.options.search.algo == CYKPlus) {
     m_mgr = new SCFG::Manager(system, *this, line, translationId);
   }
   else {

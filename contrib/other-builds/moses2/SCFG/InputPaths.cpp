@@ -23,7 +23,7 @@ void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
   MemPool &pool = mgr.GetPool();
   size_t numPt = mgr.system.mappings.size();
   size_t size = input.GetSize();
-  size_t maxLength = min(size, mgr.system.maxPhraseLength);
+  size_t maxLength = min(size, mgr.system.options.search.max_phrase_length);
 
   m_matrix = new (pool.Allocate<Matrix<InputPath*> >()) Matrix<InputPath*>(pool,
       size, maxLength);

@@ -23,21 +23,11 @@ namespace Moses2
 System::System(const Parameter &paramsArg) :
     params(paramsArg), featureFunctions(*this)
 {
+  options.init(paramsArg);
+
   bestCollector.reset(new OutputCollector());
 
   ini_performance_options();
-  params.SetParameter(stackSize, "stack", DEFAULT_MAX_HYPOSTACK_SIZE);
-  params.SetParameter(maxDistortion, "distortion-limit", -1);
-  params.SetParameter(maxPhraseLength, "max-phrase-length",
-      DEFAULT_MAX_PHRASE_LENGTH);
-  params.SetParameter(searchAlgorithm, "search-algorithm", Normal);
-  params.SetParameter(popLimit, "cube-pruning-pop-limit",
-      DEFAULT_CUBE_PRUNING_POP_LIMIT);
-  params.SetParameter(cubePruningDiversity, "cube-pruning-diversity",
-      (size_t) 0);
-  params.SetParameter(cubePruningLazyScoring, "cube-pruning-lazy-scoring",
-      false);
-
   params.SetParameter(cpuAffinityOffset, "cpu-affinity-offset", 0);
   params.SetParameter(cpuAffinityOffsetIncr, "cpu-affinity-increment", 1);
 

@@ -20,6 +20,7 @@
 #include "TypeDef.h"
 #include "legacy/Bitmaps.h"
 #include "legacy/OutputCollector.h"
+#include "parameters/AllOptions.h"
 
 namespace Moses2
 {
@@ -37,6 +38,7 @@ class System
 {
 public:
   const Parameter &params;
+  AllOptions options;
   FeatureFunctions featureFunctions;
   Weights weights;
   std::vector<const PhraseTable*> mappings;
@@ -44,15 +46,7 @@ public:
   mutable boost::shared_ptr<OutputCollector> bestCollector, nbestCollector;
 
   // moses.ini params
-  size_t stackSize;
-  int maxDistortion;
-  size_t maxPhraseLength;
   int numThreads;
-
-  SearchAlgorithm searchAlgorithm;
-  size_t popLimit;
-  size_t cubePruningDiversity;
-  bool cubePruningLazyScoring;
 
   size_t nbestSize;
   bool distinctNBest;

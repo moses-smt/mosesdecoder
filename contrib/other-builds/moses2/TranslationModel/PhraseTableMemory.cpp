@@ -140,7 +140,7 @@ void PhraseTableMemory::Load(System &system)
     Phrase *source;
     TargetPhrase *target;
 
-    switch (system.searchAlgorithm) {
+    switch (system.options.search.algo) {
     case Normal:
     case CubePruning:
     case CubePruningPerMiniStack:

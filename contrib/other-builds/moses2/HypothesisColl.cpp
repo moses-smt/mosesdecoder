@@ -72,7 +72,7 @@ Hypotheses &HypothesisColl::GetSortedAndPruneHypos(const ManagerBase &mgr,
 void HypothesisColl::SortAndPruneHypos(const ManagerBase &mgr,
     ArcLists &arcLists) const
 {
-  size_t stackSize = mgr.system.stackSize;
+  size_t stackSize = mgr.system.options.search.stack_size;
   Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
 
   /*
