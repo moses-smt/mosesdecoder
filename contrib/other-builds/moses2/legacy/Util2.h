@@ -297,5 +297,7 @@ S& Container(std::priority_queue<T, S, C>& q)
   return HackedQueue::Container(q);
 }
 
+#define HERE __FILE__ << ":" << __LINE__
+
 }
 

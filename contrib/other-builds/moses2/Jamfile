@@ -49,6 +49,21 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
  	 	TranslationModel/ProbingPT.cpp 
  	 	TranslationModel/UnknownWordPenalty.cpp 
    	
+   	parameters/AllOptions.cpp
+   	parameters/BookkeepingOptions.cpp
+   	parameters/ContextParameters.cpp
+   	parameters/CubePruningOptions.cpp
+   	parameters/InputOptions.cpp
+   	parameters/LMBR_Options.cpp
+   	parameters/MBR_Options.cpp
+   	parameters/NBestOptions.cpp
+   	parameters/OOVHandlingOptions.cpp
+   	parameters/OptionsBaseClass.cpp
+   	parameters/ReorderingOptions.cpp
+   	parameters/ReportingOptions.cpp
+   	parameters/SearchOptions.cpp
+   	parameters/ServerOptions.cpp
+   	
 		PhraseBased/Hypothesis.cpp 
  	 	PhraseBased/InputPath.cpp
  	 	PhraseBased/InputPaths.cpp
