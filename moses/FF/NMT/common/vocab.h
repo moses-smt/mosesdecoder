@@ -15,8 +15,8 @@ class Vocab {
             str2id_[line] = c++;
             id2str_.push_back(line);
         }
-        str2id_["</s>"] = c;
-        id2str_.push_back("</s>");
+        //str2id_["</s>"] = c;
+        //id2str_.push_back("</s>");
     }
 
     size_t operator[](const std::string& word) const {

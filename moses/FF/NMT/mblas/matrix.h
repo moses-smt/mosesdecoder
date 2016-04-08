@@ -333,6 +333,41 @@ Matrix& Assemble(Matrix& Out,
   return Out;
 }
 
+__global__ void gSlice(float* out, const float* in,
+                       size_t n, size_t dim,
+                       size_t rows, size_t cols) {
+  for(int bid = 0; bid < rows; bid += gridDim.x) {
+    int j = bid + blockIdx.x;
+    if(j < rows) {
+      float* rowOut = out + j * dim;
+      const float* rowIn = in + j * cols + n * dim;
+      
+      for(int tid = 0; tid < dim; tid += blockDim.x) {
+        int i = tid + threadIdx.x;
+        if(i < dim)
+          rowOut[i] = rowIn[i];
+      }
+    }
+  }
+}
+
+Matrix& Slice(Matrix& Out,
+              const Matrix& In,
+              size_t n, size_t dim) {
+  
+  Out.Resize(In.Rows(), dim);
+  
+  float* d_out = Out.data();
+  const float* d_in = In.data();
+  
+  int threads = std::min(MAX_THREADS, (int)dim);
+  int blocks = std::min(MAX_BLOCKS, (int)In.Rows());
+  gSlice<<<blocks, threads>>>(d_out, d_in, n, dim, In.Rows(), In.Cols());
+  cudaStreamSynchronize(0);
+  return Out;
+}
+
+
 Matrix& Prod(Matrix& C, const Matrix& A, const Matrix& B,
              bool transA = false, bool transB = false) {
   Matrix::value_type alpha = 1.0;

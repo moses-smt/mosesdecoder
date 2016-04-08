@@ -1,6 +1,8 @@
 import sys
 import cPickle
+import operator
 
 d = cPickle.load(open(sys.argv[1], 'r'))
-for w in d:
-    print d[w]
+sorted_d = sorted(d.items(), key=operator.itemgetter(1))
+for p in sorted_d:
+    print p[0]

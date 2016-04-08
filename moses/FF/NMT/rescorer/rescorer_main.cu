@@ -9,7 +9,6 @@
 #include "nbest.h"
 #include "vocab.h"
 #include "rescorer.h"
-#include "model.h"
 
 void ProgramOptions(int argc, char *argv[],
     std::string& modelPath,

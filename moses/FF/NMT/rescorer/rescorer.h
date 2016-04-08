@@ -4,9 +4,7 @@
 #include <string>
 #include <vector>
 
-#include "model.h"
-#include "encoder.h"
-#include "decoder.h"
+#include "bahdanau.h"
 #include "vocab.h"
 #include "utils.h"
 #include "states.h"

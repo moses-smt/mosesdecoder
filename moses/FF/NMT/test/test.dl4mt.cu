@@ -6,10 +6,8 @@
 #include <boost/algorithm/string.hpp>
 
 #include "mblas/matrix.h"
-#include "bahdanau.h"
+#include "dl4mt.h"
 #include "vocab.h"
-
-#include "states.h"
 
 using namespace mblas;
 
@@ -27,19 +25,21 @@ int main(int argc, char** argv) {
   cudaSetDevice(device);
   
   std::string source = "thank you .";
-  std::string target = "vielen dank .";
-  //std::string source = "you know , one of the intense pleasures of travel and one of the delights of ethnographic research is the opportunity to live amongst those who have not forgotten the old ways , who still feel their past in the wind , touch it in stones polished by rain , taste it in the bitter leaves of plants .";
-  //std::string target = "wissen sie , eine der intensiven freuden des reisens und eine der freuden der ethnografischen forschung ist die chance zu leben unter jenen , die die alten wege nicht vergessen haben , die immer noch ihre vergangenheit im wind spüren , berühren sie in steine poliert durch regen , schmecken sie in den bitteren blätter der pflanzen .";
+  std::string target = "vielen Dank .";
   
   std::cerr << "Loading model" << std::endl;
-  Weights weights("/home/marcinj/Badania/best_nmt/search_model.npz", device);
-  Vocab svcb("/home/marcinj/Badania/best_nmt/vocab/en_de.en.txt");
-  Vocab tvcb("/home/marcinj/Badania/best_nmt/vocab/en_de.de.txt");
+  Weights weights("testmodel/model.npz", device);
+  
+  Vocab svcb("testmodel/vocab.en.txt");
+  Vocab tvcb("testmodel/vocab.de.txt");
   
   std::cerr << "Creating encoder" << std::endl;
   Encoder encoder(weights);
+  
+  /*
   std::cerr << "Creating decoder" << std::endl;
   Decoder decoder(weights);
+  */
   
   std::vector<std::string> sourceSplit;
   boost::split(sourceSplit, source, boost::is_any_of(" "),
@@ -66,10 +66,11 @@ int main(int argc, char** argv) {
   tWordsBatch.push_back(Batch(bs, tvcb["</s>"]));
   std::cerr << tvcb["</s>"] << std::endl;
 
-
   mblas::Matrix SourceContext;
   encoder.GetContext(sWords, SourceContext);
+  mblas::debug1(SourceContext);
 
+  /*
   mblas::Matrix PrevState;
   mblas::Matrix PrevEmbedding;
 
@@ -83,8 +84,6 @@ int main(int argc, char** argv) {
   boost::timer::auto_cpu_timer timer;
   size_t batchSize = tWordsBatch[0].size();
 
-  States states;
-  
   for(size_t i = 0; i < 1; ++i) {
     decoder.EmptyState(PrevState, SourceContext, batchSize);
     decoder.EmptyEmbedding(PrevEmbedding, batchSize);
@@ -113,4 +112,6 @@ int main(int argc, char** argv) {
     std::cout << std::endl;
     std::cerr << sum << std::endl;
   }
+  
+  */
 }

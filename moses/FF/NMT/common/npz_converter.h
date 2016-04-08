@@ -40,7 +40,8 @@ class NpzConverter {
   public:
     NpzConverter(const std::string& file)
       : model_(cnpy::npz_load(file)),
-        destructed_(false) {}
+        destructed_(false) {
+      }
     
     ~NpzConverter() {
       if(!destructed_)
@@ -59,6 +60,9 @@ class NpzConverter {
         NpyMatrixWrapper np(it->second);
         matrix.Resize(np.size1(), np.size2());
         lib::copy(np.data(), np.data() + np.size(), matrix.begin());
+      }
+      else {
+        std::cerr << "Missing " << key << std::endl; 
       }
       return std::move(matrix);
     }

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mblas/matrix.h"
-#include "common/model.h"
+#include "bahdanau/model.h"
  
 class Decoder {
   private:
@@ -62,6 +62,7 @@ class Decoder {
           Broadcast(_1 + _2, S_, w_.B_); // Broadcasting row-wise
           Prod(Temp1_, Element(_1 * _2, R_, PrevState), w_.U_);
           Prod(Temp2_, Context, w_.C_);
+          
           Element(Tanh(_1 + _2 + _3), S_, Temp1_, Temp2_);
           
           Element((1.0 - _1) * _2 + _1 * _3,

@@ -1,7 +1,7 @@
 #pragma once
 
 #include "mblas/matrix.h"
-#include "common/model.h"
+#include "dl4mt/model.h"
  
 class Encoder {
   private:
@@ -15,8 +15,6 @@ class Encoder {
         void Lookup(mblas::Matrix& Row, size_t i) {
           using namespace mblas;
           CopyRow(Row, w_.E_, i);
-          Element(_1 + _2,
-                  Row, w_.EB_);
         }
       
       private:
@@ -31,7 +29,7 @@ class Encoder {
         
         void InitializeState(size_t batchSize = 1) {
           State_.Clear();
-          State_.Resize(batchSize, 1000, 0.0);
+          State_.Resize(batchSize, 1024, 0.0);
         }
         
         void GetNextState(mblas::Matrix& State,
@@ -39,22 +37,30 @@ class Encoder {
                           const mblas::Matrix& PrevState) {
           using namespace mblas;
     
-          Prod(Za_, Embd, w_.Wz_);
-          Prod(Temp_, PrevState, w_.Uz_);
-          Element(Logit(_1 + _2), Za_, Temp_);
-            
-          Prod(Ra_, Embd, w_.Wr_);
-          Prod(Temp_, PrevState, w_.Ur_);
-          Element(Logit(_1 + _2), Ra_, Temp_);    
-        
-          Prod(Ha_, Embd, w_.W_);
-          Prod(Temp_, Element(_1 * _2, Ra_, PrevState), w_.U_);
-          Element(_1 + _2, Ha_, w_.B_); // Broadcasting row-wise
-          Element(Tanh(_1 + _2), Ha_, Temp_);
+          const size_t cols = 1024;
+    
+          // @TODO: Launch streams to performs GEMMs in parallel
+          // @TODO: Join matrices and perform single GEMM --------
+          Prod(RU_, Embd, w_.W_);
+          Prod(H_,  Embd, w_.Wx_);
+          // -----------------------------------------------------
           
-          Element((1.0 - _1) * _2 + _1 * _3, Za_, PrevState, Ha_);
+          // @TODO: Join matrices and perform single GEMM --------
+          Prod(Temp1_, PrevState, w_.U_);
+          Prod(Temp2_, PrevState, w_.Ux_);        
+          // -----------------------------------------------------
           
-          Swap(State, Za_);
+          // @TODO: Organize into one kernel ---------------------
+          Element(_1 + _2, RU_, w_.B_); // Broadcasting row-wise
+          Element(Logit(_1 + _2), RU_, Temp1_);
+          Slice(R_, RU_, 0, cols);
+          Slice(U_, RU_, 1, cols);
+          Element(_1 + _2, H_, w_.Bx_); // Broadcasting row-wise
+          Element(Tanh(_1 + _2 * _3), H_, R_, Temp2_);
+          Element((1.0 - _1) * _2 + _1 * _3, U_, H_, PrevState);
+          // -----------------------------------------------------
+          
+          Swap(State, U_);
         }
         
         template <class It>
@@ -67,7 +73,7 @@ class Encoder {
           while(it != end) {
             GetNextState(State_, *it++, State_);
             if(invert)
-              mblas::PasteRow(Context, State_, n - i - 1, 1000);
+              mblas::PasteRow(Context, State_, n - i - 1, 1024);
             else
               mblas::PasteRow(Context, State_, i, 0);
             ++i;
@@ -79,10 +85,12 @@ class Encoder {
         const Weights& w_;
         
         // reused to avoid allocation
-        mblas::Matrix Za_;
-        mblas::Matrix Ra_;
-        mblas::Matrix Ha_;
-        mblas::Matrix Temp_;
+        mblas::Matrix RU_;
+        mblas::Matrix R_;
+        mblas::Matrix U_;
+        mblas::Matrix H_;
+        mblas::Matrix Temp1_;
+        mblas::Matrix Temp2_;
         mblas::Matrix State_;
     };
     
@@ -97,7 +105,7 @@ class Encoder {
                     mblas::Matrix& Context) {
       std::vector<mblas::Matrix> embeddedWords;
       
-      Context.Resize(words.size(), 2000);
+      Context.Resize(words.size(), 2048);
       for(auto& w : words) {
         embeddedWords.emplace_back();
         embeddings_.Lookup(embeddedWords.back(), w);

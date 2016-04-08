@@ -116,14 +116,14 @@ void NMT::BatchSteps(const Batches& batches, LastWords& lastWords,
                      Scores& probsOut, Scores& unksOut, StateInfos& stateInfos,
                      bool firstWord) {
   Matrix& sourceContext = *boost::static_pointer_cast<Matrix>(SourceContext_);
-  
+
   Matrix prevEmbeddings;
   Matrix nextEmbeddings;
   Matrix prevStates;
   Matrix probs;
   Matrix alignedSourceContext;
   Matrix nextStates;
-  
+
   if(firstWord) {
     decoder_->EmptyEmbedding(prevEmbeddings, lastWords.size());
   }
@@ -131,20 +131,20 @@ void NMT::BatchSteps(const Batches& batches, LastWords& lastWords,
     // Not the first word
     decoder_->Lookup(prevEmbeddings, lastWords);
   }
-    
+
   states_->ConstructStates(prevStates, stateInfos);
-    
+
   for(auto& batch : batches) {
     decoder_->Lookup(nextEmbeddings, batch);
     decoder_->GetProbs(probs, alignedSourceContext,
-                       prevStates, prevEmbeddings, sourceContext);  
-      
+                       prevStates, prevEmbeddings, sourceContext);
+
     decoder_->GetNextState(nextStates, nextEmbeddings,
                            prevStates, alignedSourceContext);
- 
+
     StateInfos tempStates;
     states_->SaveStates(tempStates, nextStates);
- 
+
     for(size_t i = 0; i < batch.size(); ++i) {
       if(batch[i] != 0) {
         float p = probs(i, filteredId_[batch[i]]);
@@ -155,7 +155,6 @@ void NMT::BatchSteps(const Batches& batches, LastWords& lastWords,
         unksOut[i]++;
       }
     }
-        
     Swap(nextStates, prevStates);
     Swap(nextEmbeddings, prevEmbeddings);
   }
