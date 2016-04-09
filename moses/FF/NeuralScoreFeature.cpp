@@ -119,15 +119,15 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
 
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
   : StatefulFeatureFunction(2, line), m_batchSize(1000), m_stateLength(5),
-    m_factor(0), m_maxDevices(1), m_filteredSoftmax(false),
+    m_factor(0), m_devices(1, 0), m_filteredSoftmax(false),
     m_mode("precalculate"), m_threadId(0)
 {
   ReadParameters();
   
-  size_t devices = NMT::GetDevices(m_maxDevices);
-  std::cerr << devices << std::endl;
-  for(size_t device = 0; device < devices; ++device)
-    m_models.push_back(NMT::NewModel(m_modelPath, device));
+  for(size_t i = 0; i < m_devices.size(); ++i) {
+    std::cerr << "Setting device " << m_devices[i] << std::endl;
+    m_models.push_back(NMT::NewModel(m_modelPath, m_devices[i]));
+  }
   
   m_sourceVocab = NMT::NewVocab(m_sourceVocabPath);
   m_targetVocab = NMT::NewVocab(m_targetVocabPath);
@@ -484,7 +484,9 @@ void NeuralScoreFeature::SetParameter(const std::string& key, const std::string&
   } else if (key == "mode") {
     m_mode = value;
   } else if (key == "devices") {
-    m_maxDevices = Scan<size_t>(value);
+    std::vector<std::string> devices = Tokenize(value,",");;
+    for(size_t i = 0; i < devices.size(); ++i)
+      m_devices.push_back(Scan<size_t>(devices[i]));
   } else if (key == "batch-size") {
     m_batchSize = Scan<size_t>(value);
   } else if (key == "source-vocab") {

@@ -39,7 +39,8 @@ class Encoder {
     
           const size_t cols = 1024;
     
-          // @TODO: Launch streams to performs GEMMs in parallel
+          // @TODO: Optimization
+          // @TODO: Launch streams to perform GEMMs in parallel
           // @TODO: Join matrices and perform single GEMM --------
           Prod(RU_, Embd, w_.W_);
           Prod(H_,  Embd, w_.Wx_);
