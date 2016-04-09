@@ -92,7 +92,7 @@ private:
   size_t m_batchSize;
   size_t m_stateLength;
   size_t m_factor;
-  std::vector<size_t> m_devices;
+  size_t m_maxDevices;
   bool m_filteredSoftmax;
   std::string m_mode;
   

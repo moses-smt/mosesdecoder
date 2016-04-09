@@ -32,6 +32,9 @@ public:
   : m_state(state),
     m_lastWord("") {}
 
+NeuralScoreState()
+  : m_lastWord("") {}
+
   std::string ToString() const {
     std::stringstream ss;
     for(size_t i = 0; i < m_lastContext.size(); ++i) {
@@ -119,15 +122,15 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
 
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
   : StatefulFeatureFunction(2, line), m_batchSize(1000), m_stateLength(5),
-    m_factor(0), m_devices(1, 0), m_filteredSoftmax(false),
+    m_factor(0), m_maxDevices(1), m_filteredSoftmax(false),
     m_mode("precalculate"), m_threadId(0)
 {
   ReadParameters();
   
-  for(size_t i = 0; i < m_devices.size(); ++i) {
-    std::cerr << "Setting device " << m_devices[i] << std::endl;
-    m_models.push_back(NMT::NewModel(m_modelPath, m_devices[i]));
-  }
+  size_t devices = NMT::GetDevices(m_maxDevices);
+  std::cerr << devices << std::endl;
+  for(size_t device = 0; device < devices; ++device)
+    m_models.push_back(NMT::NewModel(m_modelPath, device));
   
   m_sourceVocab = NMT::NewVocab(m_sourceVocabPath);
   m_targetVocab = NMT::NewVocab(m_targetVocabPath);
@@ -216,7 +219,9 @@ void NeuralScoreFeature::RescoreStackBatch(std::vector<Hypothesis*>& hyps, size_
     accumulator.PlusEquals(this, scores);
     hyps[i]->Recalc();
     
+    const NeuralScoreState* temp = static_cast<const NeuralScoreState*>(hyps[i]->GetFFState(index));
     hyps[i]->SetFFState(index, nState);
+    delete temp;
   }
 }
 
@@ -484,9 +489,7 @@ void NeuralScoreFeature::SetParameter(const std::string& key, const std::string&
   } else if (key == "mode") {
     m_mode = value;
   } else if (key == "devices") {
-    std::vector<std::string> devices = Tokenize(value,",");;
-    for(size_t i = 0; i < devices.size(); ++i)
-      m_devices.push_back(Scan<size_t>(devices[i]));
+    m_maxDevices = Scan<size_t>(value);
   } else if (key == "batch-size") {
     m_batchSize = Scan<size_t>(value);
   } else if (key == "source-vocab") {

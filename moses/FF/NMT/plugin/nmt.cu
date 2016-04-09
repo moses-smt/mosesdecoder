@@ -6,9 +6,7 @@
 
 #include "nmt.h"
 #include "mblas/matrix.h"
-#include "common/model.h"
-#include "common/encoder.h"
-#include "common/decoder.h"
+#include "bahdanau.h"
 #include "common/vocab.h"
 #include "common/states.h"
 
