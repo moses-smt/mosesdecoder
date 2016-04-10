@@ -13,16 +13,21 @@
 namespace Moses2
 {
 class System;
+class ServerOptions;
 
 class Server
 {
 public:
-  Server();
+  Server(ServerOptions &server_options);
   virtual ~Server();
 
   void run(System &system);
 
+  ServerOptions const&
+  options() const;
+
 protected:
+  ServerOptions &m_server_options;
   std::string m_pidfile;
   xmlrpc_c::registry m_registry;
   xmlrpc_c::methodPtr const m_translator;

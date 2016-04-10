@@ -8,21 +8,23 @@
 #include "Server.h"
 #include "Translator.h"
 #include "../System.h"
+#include "../parameters/ServerOptions.h"
 
 using namespace std;
 
 namespace Moses2
 {
 
-Server::Server()
-:m_translator(new Translator())
+Server::Server(ServerOptions &server_options)
+:m_server_options(server_options)
+,m_translator(new Translator(*this))
 {
   m_registry.addMethod("translate", m_translator);
 }
 
 Server::~Server()
 {
-  // TODO Auto-generated destructor stub
+  unlink(m_pidfile.c_str());
 }
 
 void Server::run(System &system)
@@ -30,23 +32,23 @@ void Server::run(System &system)
   xmlrpc_c::serverAbyss myAbyssServer
     (xmlrpc_c::serverAbyss::constrOpt()
      .registryP(&m_registry)
-     .portNumber(system.port) // TCP port on which to listen
-     .logFileName(system.logfile)
+     .portNumber(m_server_options.port) // TCP port on which to listen
+     .logFileName(m_server_options.logfile)
      .allowOrigin("*")
-     .maxConn(system.maxConn)
-     .maxConnBacklog(system.maxConnBacklog)
-     .keepaliveTimeout(system.keepaliveTimeout)
-     .keepaliveMaxConn(system.keepaliveMaxConn)
-     .timeout(system.timeout)
+     .maxConn(m_server_options.maxConn)
+     .maxConnBacklog(m_server_options.maxConnBacklog)
+     .keepaliveTimeout(m_server_options.keepaliveTimeout)
+     .keepaliveMaxConn(m_server_options.keepaliveMaxConn)
+     .timeout(m_server_options.timeout)
      );
   std::ostringstream pidfilename;
-  pidfilename << "/tmp/moses-server." << system.port << ".pid";
+  pidfilename << "/tmp/moses-server." << m_server_options.port << ".pid";
   m_pidfile = pidfilename.str();
   std::ofstream pidfile(m_pidfile.c_str());
   pidfile << getpid() << std::endl;
   pidfile.close();
-  cerr << "Listening on port " << system.port << std::endl;
-  if (system.is_serial)
+  cerr << "Listening on port " << m_server_options.port << std::endl;
+  if (m_server_options.is_serial)
     {
       cerr << "Running server in serial mode." << std::endl;
       while(true) myAbyssServer.runOnce();
@@ -56,5 +58,11 @@ void Server::run(System &system)
   std::cerr << "xmlrpc_c::serverAbyss.run() returned but it should not."
             << std::endl;
 }
+
+ServerOptions const&Server::options() const
+{
+  return m_server_options;
+}
+
 
 } /* namespace Moses2 */
