@@ -108,18 +108,18 @@ struct Weights {
   
   struct DecAlignment {
     DecAlignment(const NpzConverter& model)
-    : Va_(model("decoder_U_att", true)),
-      Wa_(model["decoder_W_comb_att"]),
-      Ba_(model("decoder_b_att", true)),
-      Ua_(model["decoder_Wc_att"]),
-      Ca_(model["decoder_c_tt"]) // scalar?
+    : V_(model("decoder_U_att", true)),
+      W_(model["decoder_W_comb_att"]),
+      B_(model("decoder_b_att", true)),
+      U_(model["decoder_Wc_att"]),
+      C_(model["decoder_c_tt"]) // scalar?
     {}
           
-    const mblas::Matrix Va_;
-    const mblas::Matrix Wa_;
-    const mblas::Matrix Ba_;
-    const mblas::Matrix Ua_;
-    const mblas::Matrix Ca_;
+    const mblas::Matrix V_;
+    const mblas::Matrix W_;
+    const mblas::Matrix B_;
+    const mblas::Matrix U_;
+    const mblas::Matrix C_;
   };
   
   struct DecSoftmax {

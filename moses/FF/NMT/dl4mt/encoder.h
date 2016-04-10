@@ -52,11 +52,11 @@ class Encoder {
           // -----------------------------------------------------
           
           // @TODO: Organize into one kernel ---------------------
-          Element(_1 + _2, RU_, w_.B_); // Broadcasting row-wise
+          Broadcast(_1 + _2, RU_, w_.B_); // Broadcasting row-wise
           Element(Logit(_1 + _2), RU_, Temp1_);
           Slice(R_, RU_, 0, cols);
           Slice(U_, RU_, 1, cols);
-          Element(_1 + _2, H_, w_.Bx_); // Broadcasting row-wise
+          Broadcast(_1 + _2, H_, w_.Bx_); // Broadcasting row-wise
           Element(Tanh(_1 + _2 * _3), H_, R_, Temp2_);
           Element((1.0 - _1) * _2 + _1 * _3, U_, H_, PrevState);
           // -----------------------------------------------------

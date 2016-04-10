@@ -35,12 +35,10 @@ int main(int argc, char** argv) {
   
   std::cerr << "Creating encoder" << std::endl;
   Encoder encoder(weights);
-  
-  /*
+
   std::cerr << "Creating decoder" << std::endl;
   Decoder decoder(weights);
-  */
-  
+    
   std::vector<std::string> sourceSplit;
   boost::split(sourceSplit, source, boost::is_any_of(" "),
                boost::token_compress_on);
@@ -59,7 +57,7 @@ int main(int argc, char** argv) {
                boost::token_compress_on);
     
   std::cerr << "Target: " << std::endl;
-  size_t bs = 1000;
+  size_t bs = 3;
   std::vector<std::vector<size_t>> tWordsBatch(targetSplit.size());
   std::transform(targetSplit.begin(), targetSplit.end(), tWordsBatch.begin(),
                  [&](const std::string& w) { std::cerr << tvcb[w] << ", "; return Batch(bs, tvcb[w]); });
@@ -70,15 +68,12 @@ int main(int argc, char** argv) {
   encoder.GetContext(sWords, SourceContext);
   mblas::debug1(SourceContext);
 
-  /*
-  mblas::Matrix PrevState;
-  mblas::Matrix PrevEmbedding;
+
+  mblas::Matrix PrevState, HiddenState, State;
+  mblas::Matrix Embedding;
 
   mblas::Matrix AlignedSourceContext;
   mblas::Matrix Probs;
-
-  mblas::Matrix State;
-  mblas::Matrix Embedding;
 
   std::cerr << "Testing" << std::endl;
   boost::timer::auto_cpu_timer timer;
@@ -86,13 +81,21 @@ int main(int argc, char** argv) {
 
   for(size_t i = 0; i < 1; ++i) {
     decoder.EmptyState(PrevState, SourceContext, batchSize);
-    decoder.EmptyEmbedding(PrevEmbedding, batchSize);
+    decoder.EmptyEmbedding(Embedding, batchSize);
+    
+    mblas::debug1(PrevState);
+    mblas::debug1(Embedding);
     
     float sum = 0;
-    for(auto w : tWordsBatch) {      
-      decoder.GetProbs(Probs, AlignedSourceContext,
-                       PrevState, PrevEmbedding, SourceContext);
-
+    for(auto w : tWordsBatch) {
+      decoder.GetHiddenState(HiddenState, PrevState, Embedding);
+      decoder.GetAlignedSourceContext(AlignedSourceContext, HiddenState, SourceContext);
+      decoder.GetNextState(State, HiddenState, AlignedSourceContext);
+      
+      mblas::debug1(State);
+      
+      decoder.GetProbs(Probs, State, Embedding, AlignedSourceContext);
+      
       for(size_t i = 0; i < 1; ++i) {
         float p = Probs(i, w[i]);
         std:: cerr << log(p) << " ";
@@ -101,17 +104,11 @@ int main(int argc, char** argv) {
         }
       }
       std::cerr << std::endl;
-
+      
       decoder.Lookup(Embedding, w);
-      decoder.GetNextState(State, Embedding,
-                           PrevState, AlignedSourceContext);
-
-      mblas::Swap(State, PrevState);
-      mblas::Swap(Embedding, PrevEmbedding);
+      mblas::Swap(PrevState, State);
     }
     std::cout << std::endl;
     std::cerr << sum << std::endl;
   }
-  
-  */
 }

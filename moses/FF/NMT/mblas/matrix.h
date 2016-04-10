@@ -203,6 +203,20 @@ Matrix& Swap(Matrix& Out, Matrix& In) {
   return Out;
 }
 
+Matrix& Mean(Matrix& Out, const Matrix& In) {
+  size_t m = In.Rows();
+  size_t n = In.Cols();
+  
+  Out.Resize(1, n, 0.f);
+  Matrix Ones(1, m, 1.f);
+  
+  float alpha = 1.0 / m;
+  float beta  = 0.0;
+  cublasSgemv(CublasHandler::GetHandle(), CUBLAS_OP_N, n, m, &alpha, In.data(), n,
+              Ones.data(), 1, &beta, Out.data(), 1);
+  return Out;
+}
+
 Matrix& Transpose(Matrix& Out, const Matrix& In) {
   size_t m = In.Rows();
   size_t n = In.Cols();
