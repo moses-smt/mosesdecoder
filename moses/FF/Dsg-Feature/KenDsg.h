@@ -8,7 +8,7 @@ namespace Moses
 
 class KenDsgBase
 {
- public:
+public:
   virtual ~KenDsgBase() {}
 
   virtual float Score(const lm::ngram::State&, StringPiece,
@@ -22,17 +22,17 @@ class KenDsgBase
 };
 
 template <class KenModel>
-  class KenDsg : public KenDsgBase
+class KenDsg : public KenDsgBase
 {
- public:
+public:
   KenDsg(const char *file, const lm::ngram::Config &config)
     : m_kenlm(file, config) {}
 
   float Score(const lm::ngram::State &in_state,
-	      StringPiece word,
-	      lm::ngram::State &out_state) const {
+              StringPiece word,
+              lm::ngram::State &out_state) const {
     return m_kenlm.Score(in_state, m_kenlm.GetVocabulary().Index(word),
-			 out_state);
+                         out_state);
   }
 
   const lm::ngram::State &BeginSentenceState() const {
@@ -48,13 +48,13 @@ template <class KenModel>
   }
 
 
- private:
+private:
   KenModel m_kenlm;
 };
 
- typedef KenDsgBase DsgLM;
+typedef KenDsgBase DsgLM;
 
- DsgLM* ConstructDsgLM(const char *file);
+DsgLM* ConstructDsgLM(const char *file);
 
 
 } // namespace
