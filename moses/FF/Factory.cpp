@@ -39,6 +39,7 @@
 #include "moses/FF/InputFeature.h"
 #include "moses/FF/PhrasePenalty.h"
 #include "moses/FF/OSM-Feature/OpSequenceModel.h"
+#include "moses/FF/Dsg-Feature/DsgModel.h"
 #include "moses/FF/ControlRecombination.h"
 #include "moses/FF/ConstrainedDecoding.h"
 #include "moses/FF/SoftSourceSyntacticConstraintsFeature.h"
@@ -258,6 +259,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME2("WordPenalty", WordPenaltyProducer);
   MOSES_FNAME(InputFeature);
   MOSES_FNAME(OpSequenceModel);
+  MOSES_FNAME(DesegModel);
   MOSES_FNAME(PhrasePenalty);
   MOSES_FNAME2("UnknownWordPenalty", UnknownWordPenaltyProducer);
   MOSES_FNAME(ControlRecombination);
