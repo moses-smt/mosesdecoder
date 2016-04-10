@@ -50,7 +50,7 @@ int main(int argc, char** argv)
 ////////////////////////////////////////////////////////////////////////////////////////////////
 void run_as_server(Moses2::System &system)
 {
-  Moses2::Server server(system.options.server);
+  Moses2::Server server(system.options.server, system);
   server.run(system); // actually: don't return. see Server::run()
 }
 

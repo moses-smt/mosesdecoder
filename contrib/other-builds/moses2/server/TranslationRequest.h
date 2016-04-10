@@ -26,6 +26,7 @@ TranslationRequest : public virtual TranslationTask
 {
 protected:
   std::map<std::string, xmlrpc_c::value> m_retData;
+  Translator* m_translator;
 
   TranslationRequest(xmlrpc_c::paramList const& paramList,
                      boost::condition_variable& cond,
@@ -41,7 +42,10 @@ public:
   create(Translator* translator,
 	 xmlrpc_c::paramList const& paramList,
          boost::condition_variable& cond,
-         boost::mutex& mut);
+         boost::mutex& mut,
+         System &system,
+        const std::string &line,
+        long translationId);
 
 
   virtual bool

@@ -14,11 +14,13 @@
 namespace Moses2
 {
 class Server;
+class System;
+class Manager;
 
 class Translator : public xmlrpc_c::method
 {
 public:
-  Translator(Server& server);
+  Translator(Server& server, System &system);
   virtual ~Translator();
 
   void execute(xmlrpc_c::paramList const& paramList,
@@ -27,6 +29,7 @@ public:
 protected:
   Server& m_server;
   Moses2::ThreadPool m_threadPool;
+  System &m_system;
 };
 
 } /* namespace Moses2 */

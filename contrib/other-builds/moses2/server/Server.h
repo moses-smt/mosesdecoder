@@ -14,11 +14,12 @@ namespace Moses2
 {
 class System;
 class ServerOptions;
+class Manager;
 
 class Server
 {
 public:
-  Server(ServerOptions &server_options);
+  Server(ServerOptions &server_options, System &system);
   virtual ~Server();
 
   void run(System &system);

@@ -15,9 +15,9 @@ using namespace std;
 namespace Moses2
 {
 
-Server::Server(ServerOptions &server_options)
+Server::Server(ServerOptions &server_options, System &system)
 :m_server_options(server_options)
-,m_translator(new Translator(*this))
+,m_translator(new Translator(*this, system))
 {
   m_registry.addMethod("translate", m_translator);
 }

@@ -13,9 +13,10 @@
 namespace Moses2
 {
 
-Translator::Translator(Server& server)
+Translator::Translator(Server& server, System &system)
 : m_server(server),
-  m_threadPool(server.options().numThreads)
+  m_threadPool(server.options().numThreads),
+  m_system(system)
 {
   // signature and help strings are documentation -- the client
   // can query this information with a system.methodSignature and
@@ -30,12 +31,15 @@ Translator::~Translator()
 }
 
 void Translator::execute(xmlrpc_c::paramList const& paramList,
- xmlrpc_c::value *   const  retvalP)
+    xmlrpc_c::value *const  retvalP)
 {
+  std::string line = "JJJJ";
+  long translationId = 3543;
+
   boost::condition_variable cond;
   boost::mutex mut;
   boost::shared_ptr<TranslationRequest> task;
-  task = TranslationRequest::create(this, paramList,cond,mut);
+  task = TranslationRequest::create(this, paramList,cond,mut, m_system, line, translationId);
   m_threadPool.Submit(task);
   boost::unique_lock<boost::mutex> lock(mut);
   while (!task->IsDone())
