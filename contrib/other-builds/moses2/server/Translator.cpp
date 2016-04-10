@@ -6,6 +6,7 @@
  */
 #include <boost/shared_ptr.hpp>
 #include "Translator.h"
+#include "TranslationRequest.h"
 #include "Server.h"
 #include "../parameters/ServerOptions.h"
 
@@ -31,7 +32,6 @@ Translator::~Translator()
 void Translator::execute(xmlrpc_c::paramList const& paramList,
  xmlrpc_c::value *   const  retvalP)
 {
-  /*
   boost::condition_variable cond;
   boost::mutex mut;
   boost::shared_ptr<TranslationRequest> task;
@@ -41,7 +41,6 @@ void Translator::execute(xmlrpc_c::paramList const& paramList,
   while (!task->IsDone())
     cond.wait(lock);
   *retvalP = xmlrpc_c::value_struct(task->GetRetData());
-  */
 }
 
 } /* namespace Moses2 */

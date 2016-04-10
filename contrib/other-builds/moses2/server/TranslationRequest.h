@@ -24,18 +24,6 @@ class Manager;
 class
 TranslationRequest : public virtual TranslationTask
 {
-  void
-  parse_request();
-
-  void
-  parse_request(std::map<std::string, xmlrpc_c::value> const& req);
-
-  virtual void
-  run_chart_decoder();
-
-  virtual void
-  run_phrase_decoder();
-
 protected:
   std::map<std::string, xmlrpc_c::value> m_retData;
 
