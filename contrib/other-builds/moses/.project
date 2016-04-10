@@ -1156,6 +1156,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DistortionScoreProducer.h</locationURI>
 		</link>
 		<link>
+			<name>FF/Dsg-Feature</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>FF/DynamicCacheBasedLanguageModel.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DynamicCacheBasedLanguageModel.cpp</locationURI>
@@ -2499,6 +2504,46 @@
 			<name>server/Updater.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/server/Updater.h</locationURI>
+		</link>
+		<link>
+			<name>FF/Dsg-Feature/Desegmenter.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/Dsg-Feature/Desegmenter.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/Dsg-Feature/Desegmenter.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/Dsg-Feature/Desegmenter.h</locationURI>
+		</link>
+		<link>
+			<name>FF/Dsg-Feature/DsgModel.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/Dsg-Feature/DsgModel.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/Dsg-Feature/DsgModel.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/Dsg-Feature/DsgModel.h</locationURI>
+		</link>
+		<link>
+			<name>FF/Dsg-Feature/KenDsg.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/Dsg-Feature/KenDsg.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/Dsg-Feature/KenDsg.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/Dsg-Feature/KenDsg.h</locationURI>
+		</link>
+		<link>
+			<name>FF/Dsg-Feature/dsgHyp.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/Dsg-Feature/dsgHyp.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/Dsg-Feature/dsgHyp.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/Dsg-Feature/dsgHyp.h</locationURI>
 		</link>
 		<link>
 			<name>FF/LexicalReordering/BidirectionalReorderingState.cpp</name>
