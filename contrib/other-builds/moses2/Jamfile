@@ -136,6 +136,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
 
 	server/Server.cpp
 	server/Translator.cpp
+	server/TranslationRequest.cpp
 	
     deps ;
 
