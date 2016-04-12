@@ -15,6 +15,7 @@
 #include <stack>
 #include <boost/algorithm/string.hpp>
 #include <fstream>
+#include <stdio.h>
 
 #include <boost/regex.hpp>
 
@@ -57,6 +58,7 @@ SCORE: -5.016 -19304.324
 	, m_lemmaMap(nullptr)
 	, m_w2cMap(nullptr)
 	, m_inverse(false)
+	, m_binned(false)
    {
 
 	ReadParameters();
@@ -70,8 +72,7 @@ void SelPrefFeature::SetParameter(const std::string& key, const std::string& val
 	} else if (key == "w2cFile") {
 		m_w2cFile = value;
 	} else if (key == "unbinarize"){
-		if (value == "true")
-			m_unbinarize = true;
+		m_unbinarize = Scan<bool>(value);
 	} else if(key=="MIModelFile"){
 		m_MIModelFile = value;
 	} else if(key=="MIModelFilePrep"){
@@ -79,13 +80,14 @@ void SelPrefFeature::SetParameter(const std::string& key, const std::string& val
 	} else if(key=="modelFileARPAPrep"){
 		m_modelFileARPAPrep = value;
 	} else if(key == "counter"){
-		if(value == "false")
-			m_counter = false;
+		m_counter = Scan<bool>(value);
 	} else if(key == "inverse"){
-		if(value == "true")
-			m_inverse = true;
+		m_inverse = Scan<bool>(value);
+	} else if(key == "binned"){
+		m_binned = Scan<bool>(value);
+	} else if (key == "tuneable") {
+	    m_tuneable = Scan<bool>(value);
 	}
-
 /*	else{
 		StatefulFeatureFunction::SetParameter(key,value);
 	}
@@ -140,7 +142,7 @@ void SelPrefFeature::ReadMIModel(string MIModelFile, shared_ptr<map<vector<strin
 			// rel head dep
 			vector<string> subcat = {tokens[0], tokens[1], tokens[2]};
 			scores.push_back(std::atof(tokens[3].c_str()));
-			if(m_inverse && tokens.size() == 5)
+			if((m_inverse || m_binned) && tokens.size() == 5)
 				scores.push_back(std::atof(tokens[4].c_str()));
 			MIModel->insert(pair<vector<string>, vector<float>> (subcat,scores));
 			tokens.clear();
@@ -566,6 +568,7 @@ pair<float, float> SelPrefFeature::GetMIScore(vector<string>& depRel, shared_ptr
 	return {0.0, 0.0};
 }
 
+
 FFState* SelPrefFeature::EvaluateWhenApplied(
   const ChartHypothesis&  cur_hypo,
   int  featureID /*- used to index the state in the previous hypotheses */,
@@ -613,48 +616,81 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 		float scoreWB = 0.0, scoreMI = 0.0, scoreWBPrep = 0.0, scoreMIPrep = 0.0, scoreMIInverse = 0.0, scoreMIPrepInverse = 0.0 ;
 		// How to initialize it???
 		DepRelCache &localCacheDepRel = GetCacheDepRel();
+		string base_name;
+		if(m_w2cMap == nullptr)
+			base_name = "L_";
+		else
+			base_name = "C_";
 		for (auto tuple: depRelTuples){
-			if (localCacheDepRel.find(tuple) != localCacheDepRel.end()){
-				vector<float> cachedScores = localCacheDepRel[tuple];
-				scoreMI += cachedScores[0];
-				scoreWB += cachedScores[1];
-				scoreMIPrep += cachedScores[2];
-				scoreWBPrep += cachedScores[3];
-				scoreMIInverse += cachedScores[4];
-				scoreMIPrepInverse += cachedScores[5];
+			if(m_binned){
+				if (m_MIModelFile != ""){
+					//<z-score, percentile>
+					pair<float, float> score = GetMIScore(tuple, m_MIModelMain);
+					if(score.second!=0.0){
+						stringstream feature_name;
+						feature_name<<base_name<<"Main_"<<int(score.second);
+						//Add sparse features
+						// Increment counter feature for corresponding percentile
+						accumulator->PlusEquals(this,feature_name.str(),1);
+					}
+
+				}
+				if (m_MIModelFilePrep != ""){
+					//<z-score, percentile>
+					pair<float, float> score = GetMIScore(tuple, m_MIModelPrep);
+					if(score.second!=0.0){
+						stringstream feature_name;
+						feature_name<<base_name<<"Prep_"<<int(score.second);
+						accumulator->PlusEquals(this,feature_name.str(),1);
+					}
+				}
+
 			}
 			else{
-				float currentWBScore = 0.0, currentMIScore = 0.0, currentWBPrepScore = 0.0, currentMIPrepScore = 0.0,
-						currentMIInverseScore = 0.0, currentMIPrepInverseScore = 0.0;
 
-				if(m_modelFileARPA != ""){
-					currentWBScore = GetWBScore(tuple, m_WBmodelMain);
-					scoreWB += currentWBScore;
+				if (localCacheDepRel.find(tuple) != localCacheDepRel.end()){
+					vector<float> cachedScores = localCacheDepRel[tuple];
+					scoreMI += cachedScores[0];
+					scoreWB += cachedScores[1];
+					scoreMIPrep += cachedScores[2];
+					scoreWBPrep += cachedScores[3];
+					scoreMIInverse += cachedScores[4];
+					scoreMIPrepInverse += cachedScores[5];
 				}
+				else{
+					float currentWBScore = 0.0, currentMIScore = 0.0, currentWBPrepScore = 0.0, currentMIPrepScore = 0.0,
+							currentMIInverseScore = 0.0, currentMIPrepInverseScore = 0.0;
 
-				if (m_MIModelFile != ""){
-					pair<float, float> score = GetMIScore(tuple, m_MIModelMain);
-					currentMIScore = score.first;
-					currentMIInverseScore = score.second;
-					scoreMI += currentMIScore;
-					scoreMIInverse += currentMIInverseScore;
-				}
+					if(m_modelFileARPA != ""){
+						currentWBScore = GetWBScore(tuple, m_WBmodelMain);
+						scoreWB += currentWBScore;
+					}
 
-				if(m_modelFileARPAPrep != ""){
-					currentWBPrepScore = GetWBScore(tuple, m_WBmodelPrep);
-					scoreWBPrep += currentWBPrepScore;
-				}
+					if (m_MIModelFile != ""){
+						pair<float, float> score = GetMIScore(tuple, m_MIModelMain);
+						currentMIScore = score.first;
+						currentMIInverseScore = score.second;
+						scoreMI += currentMIScore;
+						scoreMIInverse += currentMIInverseScore;
+					}
 
-				if (m_MIModelFilePrep != ""){
-					pair<float, float> score = GetMIScore(tuple, m_MIModelPrep);
-					currentMIPrepScore = score.first;
-					currentMIPrepInverseScore = score.second;
-					scoreMIPrep += currentMIPrepScore;
-					scoreMIPrepInverse += currentMIPrepInverseScore;
+					if(m_modelFileARPAPrep != ""){
+						currentWBPrepScore = GetWBScore(tuple, m_WBmodelPrep);
+						scoreWBPrep += currentWBPrepScore;
+					}
+
+					if (m_MIModelFilePrep != ""){
+						pair<float, float> score = GetMIScore(tuple, m_MIModelPrep);
+						currentMIPrepScore = score.first;
+						currentMIPrepInverseScore = score.second;
+						scoreMIPrep += currentMIPrepScore;
+						scoreMIPrepInverse += currentMIPrepInverseScore;
+					}
+					localCacheDepRel[tuple] = {currentMIScore, currentWBScore, currentMIPrepScore, currentWBPrepScore,
+							currentMIInverseScore, currentMIPrepInverseScore};
 				}
-				localCacheDepRel[tuple] = {currentMIScore, currentWBScore, currentMIPrepScore, currentWBPrepScore,
-						currentMIInverseScore, currentMIPrepInverseScore};
 			}
+
 	/*		for (auto &elem: tuple)
 				cout << elem << " ";
 			cout <<endl;
@@ -682,26 +718,26 @@ FFState* SelPrefFeature::EvaluateWhenApplied(
 
 		//if(*tree == "[sent [root [VB] [^root [dobj] [^root [prep [IN in]] [^root [prep] [punct [. .]]]]]]]")
 		//	exit(0);
-
-		vector<float> scores = {};
-		if(m_counter == true)
-			scores.push_back(tuplesCounter);
-		if(m_MIModelFile != ""){
-			scores.push_back(scoreMI);
-			if(m_inverse)
-				scores.push_back(scoreMIInverse);
+		if(m_binned == false){
+			vector<float> scores = {};
+			if(m_counter == true)
+				scores.push_back(tuplesCounter);
+			if(m_MIModelFile != ""){
+				scores.push_back(scoreMI);
+				if(m_inverse)
+					scores.push_back(scoreMIInverse);
+			}
+			if(m_modelFileARPA != "")
+				scores.push_back(scoreWB);
+			if(m_MIModelFilePrep != ""){
+				scores.push_back(scoreMIPrep);
+				if(m_inverse)
+					scores.push_back(scoreMIPrepInverse);
+			}
+			if(m_modelFileARPAPrep != "")
+				scores.push_back(scoreWBPrep);
+			accumulator->PlusEquals(this,scores);
 		}
-		if(m_modelFileARPA != "")
-			scores.push_back(scoreWB);
-		if(m_MIModelFilePrep != ""){
-			scores.push_back(scoreMIPrep);
-			if(m_inverse)
-				scores.push_back(scoreMIPrepInverse);
-		}
-		if(m_modelFileARPAPrep != "")
-			scores.push_back(scoreWBPrep);
-		accumulator->PlusEquals(this,scores);
-
 
 		return new SelPrefState(mytree, depRelHash);
 	}

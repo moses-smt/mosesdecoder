@@ -133,6 +133,8 @@ protected:
   bool m_unbinarize;
   // If the MI model contains the inverse SelPref score and we want to use it set this flag to true
   bool m_inverse;
+  // If the scores will be binned (to percentiles)
+  bool m_binned;
 
   // todo: initalize
   std::shared_ptr<std::unordered_map<std::string, std::string>> m_lemmaMap;
