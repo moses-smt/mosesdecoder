@@ -1,6 +1,7 @@
 #include <boost/foreach.hpp>
 #include "TranslationRequest.h"
 #include "../ManagerBase.h"
+#include "../System.h"
 
 using namespace std;
 
@@ -60,6 +61,11 @@ TranslationRequest::
 run_phrase_decoder()
 {
   m_mgr->Decode();
+
+  string out;
+
+  out = m_mgr->OutputBest();
+  m_mgr->system.bestCollector->Write(m_mgr->m_translationId, out);
 
   /*
   Manager manager(this->self());
