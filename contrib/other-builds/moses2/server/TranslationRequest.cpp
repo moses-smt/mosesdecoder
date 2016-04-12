@@ -43,41 +43,31 @@ void
 TranslationRequest::
 Run()
 {
-  cerr << "Run A" << endl;
   run_phrase_decoder();
-  cerr << "Run B" << endl;
 
   {
     boost::lock_guard<boost::mutex> lock(m_mutex);
     m_done = true;
   }
   m_cond.notify_one();
-  cerr << "Run C" << endl;
 
 }
 
 void
-TranslationRequest::
-run_phrase_decoder()
+TranslationRequest::run_phrase_decoder()
 {
   m_mgr->Decode();
 
   string out;
-
   out = m_mgr->OutputBest();
-  m_mgr->system.bestCollector->Write(m_mgr->m_translationId, out);
+  m_retData["text"] = xmlrpc_c::value_string(out);
+}
 
-  /*
-  Manager manager(this->self());
-  manager.Decode();
-  pack_hypothesis(manager, manager.GetBestHypothesis(), "text", m_retData);
-  if (m_session_id)
-    m_retData["session-id"] = xmlrpc_c::value_int(m_session_id);
+void TranslationRequest::pack_hypothesis(const Manager& manager, Hypothesis const* h,
+    std::string const& key,
+                std::map<std::string, xmlrpc_c::value> & dest) const
+{
 
-  if (m_withGraphInfo) insertGraphInfo(manager,m_retData);
-  if (m_withTopts) insertTranslationOptions(manager,m_retData);
-  if (m_options->nbest.nbest_size) outputNBest(manager, m_retData);
-  */
 }
 
 }

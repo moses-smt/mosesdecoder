@@ -41,6 +41,11 @@ protected:
   virtual void
   run_phrase_decoder();
 
+  void
+  pack_hypothesis(const Manager& manager, Hypothesis const* h,
+      std::string const& key,
+                  std::map<std::string, xmlrpc_c::value> & dest) const;
+
 public:
 
   static
