@@ -18,31 +18,34 @@ struct Weights {
     const mblas::Matrix E_;
   };
   
-  struct EncForwardRnn {
-    EncForwardRnn(const NpzConverter& model) 
-    : Wx_(model["encoder_Wx"]),
-      W_(model["encoder_W"]),  
-      U_(model["encoder_U"]),
-      Ux_(model["encoder_Ux"]),
+  struct EncForwardGRU {
+    EncForwardGRU(const NpzConverter& model) 
+    : W_(model["encoder_W"]),  
       B_(model("encoder_b", true)),
-      Bx_(model("encoder_bx", true))
+      U_(model["encoder_U"]),
+      Wx_(model["encoder_Wx"]),
+      Bx1_(model("encoder_bx", true)),
+      Bx2_(Bx1_.Rows(), Bx1_.Cols(), 0.0),
+      Ux_(model["encoder_Ux"])
     { }
     
     const mblas::Matrix W_;
     const mblas::Matrix B_;
     const mblas::Matrix U_;
     const mblas::Matrix Wx_;
-    const mblas::Matrix Bx_;
+    const mblas::Matrix Bx1_;
+    const mblas::Matrix Bx2_;
     const mblas::Matrix Ux_;
   };
   
-  struct EncBackwardRnn {
-    EncBackwardRnn(const NpzConverter& model) 
+  struct EncBackwardGRU {
+    EncBackwardGRU(const NpzConverter& model) 
     : W_(model["encoder_r_W"]),  
       B_(model("encoder_r_b", true)),
       U_(model["encoder_r_U"]),
       Wx_(model["encoder_r_Wx"]),
-      Bx_(model("encoder_r_bx", true)),
+      Bx1_(model("encoder_r_bx", true)),
+      Bx2_(Bx1_.Rows(), Bx1_.Cols(), 0.0),
       Ux_(model["encoder_r_Ux"])
     {}
     
@@ -50,7 +53,8 @@ struct Weights {
     const mblas::Matrix B_;
     const mblas::Matrix U_;
     const mblas::Matrix Wx_;
-    const mblas::Matrix Bx_;
+    const mblas::Matrix Bx1_;
+    const mblas::Matrix Bx2_;
     const mblas::Matrix Ux_;
   };
   
@@ -64,46 +68,54 @@ struct Weights {
     const mblas::Matrix E_;
   };
 
-  struct DecRnn {
-    DecRnn(const NpzConverter& model)
+  struct DecInit {
+    DecInit(const NpzConverter& model)
     : Wi_(model["ff_state_W"]),
-      Bi_(model("ff_state_b", true)),
+      Bi_(model("ff_state_b", true))
+    {}
+    
+    const mblas::Matrix Wi_;
+    const mblas::Matrix Bi_;
+  };
   
-      // s_m
-  
-      W_(model["decoder_W"]),
+  struct DecGRU1 {
+    DecGRU1(const NpzConverter& model)
+    : W_(model["decoder_W"]),
       B_(model("decoder_b", true)),
       U_(model["decoder_U"]),      
       Wx_(model["decoder_Wx"]),
-      Bx_(model("decoder_bx", true)),
-      Ux_(model["decoder_Ux"]),
-
-      // s_i
-      
-      Wp_(model["decoder_Wc"]),
-      Bp_(model("decoder_b_nl", true)),
-      Up_(model["decoder_U_nl"]),      
-      Wpx_(model["decoder_Wcx"]),
-      Bpx_(model("decoder_bx_nl", true)),
-      Upx_(model["decoder_Ux_nl"])
+      Bx1_(model("decoder_bx", true)),
+      Bx2_(Bx1_.Rows(), Bx1_.Cols(), 0.0),
+      Ux_(model["decoder_Ux"])
     {}
-          
-    const mblas::Matrix Wi_;
-    const mblas::Matrix Bi_;
     
     const mblas::Matrix W_;
     const mblas::Matrix B_;
     const mblas::Matrix U_;
     const mblas::Matrix Wx_;
-    const mblas::Matrix Bx_;
+    const mblas::Matrix Bx1_;
+    const mblas::Matrix Bx2_;
     const mblas::Matrix Ux_;
-
-    const mblas::Matrix Wp_;
-    const mblas::Matrix Bp_;
-    const mblas::Matrix Up_;
-    const mblas::Matrix Wpx_;
-    const mblas::Matrix Bpx_;
-    const mblas::Matrix Upx_;
+  };
+  
+  struct DecGRU2 {
+    DecGRU2(const NpzConverter& model)
+    : W_(model["decoder_Wc"]),
+      B_(model("decoder_b_nl", true)),
+      U_(model["decoder_U_nl"]),      
+      Wx_(model["decoder_Wcx"]),
+      Bx2_(model("decoder_bx_nl", true)),
+      Bx1_(Bx2_.Rows(), Bx2_.Cols(), 0.0),
+      Ux_(model["decoder_Ux_nl"])
+    {}
+          
+    const mblas::Matrix W_;
+    const mblas::Matrix B_;
+    const mblas::Matrix U_;
+    const mblas::Matrix Wx_;
+    const mblas::Matrix Bx2_;
+    const mblas::Matrix Bx1_;
+    const mblas::Matrix Ux_;
   };
   
   struct DecAlignment {
@@ -150,10 +162,12 @@ struct Weights {
   
   Weights(const NpzConverter& model, size_t device = 0)
   : encEmbeddings_(model),
-    encForwardRnn_(model),
-    encBackwardRnn_(model),
+    encForwardGRU_(model),
+    encBackwardGRU_(model),
     decEmbeddings_(model),
-    decRnn_(model),
+    decInit_(model),
+    decGru1_(model),
+    decGru2_(model),
     decAlignment_(model),
     decSoftmax_(model),
     device_(device)
@@ -165,9 +179,11 @@ struct Weights {
   
   const EncEmbeddings encEmbeddings_;
   const DecEmbeddings decEmbeddings_;
-  const EncForwardRnn encForwardRnn_;
-  const EncBackwardRnn encBackwardRnn_;
-  const DecRnn decRnn_;
+  const EncForwardGRU encForwardGRU_;
+  const EncBackwardGRU encBackwardGRU_;
+  const DecInit decInit_;
+  const DecGRU1 decGru1_;
+  const DecGRU2 decGru2_;
   const DecAlignment decAlignment_;
   const DecSoftmax decSoftmax_;
   

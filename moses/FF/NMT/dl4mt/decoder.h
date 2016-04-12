@@ -2,6 +2,7 @@
 
 #include "mblas/matrix.h"
 #include "dl4mt/model.h"
+#include "dl4mt/gru.h"
  
 class Decoder {
   private:
@@ -25,11 +26,11 @@ class Decoder {
         const Weights& w_;
     };
     
-    template <class Weights>
-    class RNN {
+    template <class Weights1, class Weights2>
+    class RNNHidden {
       public:
-        RNN(const Weights& model)
-        : w_(model) {}          
+        RNNHidden(const Weights1& initModel, const Weights2& gruModel)
+        : w_(initModel), gru_(gruModel) {}          
         
         void InitializeState(mblas::Matrix& State,
                              const mblas::Matrix& SourceContext,
@@ -44,98 +45,60 @@ class Decoder {
           Broadcast(Tanh(_1 + _2), State, w_.Bi_);
         }
         
-        void GetHiddenState(mblas::Matrix& State,
-                            const mblas::Matrix& PrevState,
-                            const mblas::Matrix& Embd) {
-          using namespace mblas;
-          
-          const size_t cols = PrevState.Cols();
-          
-          // @TODO: Optimization
-          // @TODO: Launch streams to perform GEMMs in parallel
-          // @TODO: Join matrices and perform single GEMM --------
-          Prod(RU_, Embd, w_.W_);
-          Prod(H_,  Embd, w_.Wx_);
-          // -----------------------------------------------------
-          
-          // @TODO: Join matrices and perform single GEMM --------
-          Prod(Temp1_, PrevState, w_.U_);
-          Prod(Temp2_, PrevState, w_.Ux_);        
-          // -----------------------------------------------------
-          
-          // @TODO: Organize into one kernel ---------------------
-          Broadcast(_1 + _2, RU_, w_.B_); // Broadcasting row-wise
-          Element(Logit(_1 + _2), RU_, Temp1_);
-          Slice(R_, RU_, 0, cols);
-          Slice(U_, RU_, 1, cols);
-          Broadcast(_1 + _2, H_, w_.Bx_); // Broadcasting row-wise
-          Element(Tanh(_1 + _2 * _3), H_, R_, Temp2_);
-          Element((1.0 - _1) * _2 + _1 * _3, U_, H_, PrevState);
-          // -----------------------------------------------------
-          
-          Swap(State, U_);
-        }
-        
-        void GetNextState(mblas::Matrix& State,
-                          const mblas::Matrix& HiddenState,
-                          const mblas::Matrix& AlignedSourceContext) {
-          using namespace mblas;
-          size_t cols = 1024;
-    
-          // @TODO: Optimization
-          // @TODO: Launch streams to perform GEMMs in parallel
-          // @TODO: Join matrices and perform single GEMM --------
-          Prod(RU_, AlignedSourceContext, w_.Wp_);
-          Prod(H_,  AlignedSourceContext, w_.Wpx_);
-          // -----------------------------------------------------
-          
-          // @TODO: Join matrices and perform single GEMM --------
-          Prod(Temp1_, HiddenState, w_.Up_);
-          Prod(Temp2_, HiddenState, w_.Upx_);        
-          // -----------------------------------------------------
-          
-          // @TODO: Organize into one kernel ---------------------
-          Broadcast(_1 + _2, RU_, w_.Bp_); // Broadcasting row-wise
-          Element(Logit(_1 + _2), RU_, Temp1_);
-          Slice(R_, RU_, 0, cols);
-          Slice(U_, RU_, 1, cols);
-          Broadcast(_1 + _2, Temp2_, w_.Bpx_); // Broadcasting row-wise,
-                                               // bias in different place!
-          Element(Tanh(_1 + _2 * _3), H_, R_, Temp2_);
-          Element((1.0 - _1) * _2 + _1 * _3, U_, H_, HiddenState);
-          // -----------------------------------------------------
-          
-          Swap(State, U_);
+        void GetNextState(mblas::Matrix& NextState,
+                          const mblas::Matrix& State,
+                          const mblas::Matrix& Context) {
+          gru_.GetNextState(NextState, State, Context);
         }
         
       private:
-        // Model matrices
-        const Weights& w_;
+        const Weights1& w_;
+        const GRU<Weights2> gru_;
         
-        // reused to avoid allocation
-        mblas::Matrix RU_;
-        mblas::Matrix R_;
-        mblas::Matrix U_;
-        mblas::Matrix H_;
         mblas::Matrix Temp1_;
         mblas::Matrix Temp2_;
     };
     
     template <class Weights>
+    class RNNFinal {
+      public:
+        RNNFinal(const Weights& model)
+        : gru_(model) {}          
+        
+        void GetNextState(mblas::Matrix& NextState,
+                          const mblas::Matrix& State,
+                          const mblas::Matrix& Context) {
+          gru_.GetNextState(NextState, State, Context);
+        }
+        
+      private:
+        const GRU<Weights> gru_;
+    };
+        
+    template <class Weights>
     class Alignment {
       public:
         Alignment(const Weights& model)
         : w_(model)
-        {}
+        {
+          for(int i = 0; i < 2; ++i) {
+            cudaStreamCreate(&s_[i]);
+            cublasCreate(&h_[i]);
+            cublasSetStream(h_[i], s_[i]);            
+          }
+        }
           
         void GetAlignedSourceContext(mblas::Matrix& AlignedSourceContext,
                                      const mblas::Matrix& HiddenState,
                                      const mblas::Matrix& SourceContext) {
           using namespace mblas;  
           
-          Prod(Temp1_, SourceContext, w_.U_);
-          Prod(Temp2_, HiddenState, w_.W_);
-          Broadcast(_1 + _2, Temp2_, w_.B_);
+          Prod(h_[0], Temp1_, SourceContext, w_.U_);
+          Prod(h_[1], Temp2_, HiddenState, w_.W_);
+          Broadcast(_1 + _2, Temp2_, w_.B_, s_[1]);
+          
+          cudaDeviceSynchronize();
+          
           Broadcast(Tanh(_1 + _2), Temp1_, Temp2_);
           
           Prod(A_, w_.V_, Temp1_, false, true);
@@ -152,6 +115,9 @@ class Decoder {
       private:
         const Weights& w_;
         
+        cublasHandle_t h_[2];
+        cudaStream_t s_[2];
+        
         mblas::Matrix Temp1_;
         mblas::Matrix Temp2_;
         mblas::Matrix A_;
@@ -165,7 +131,13 @@ class Decoder {
       public:
         Softmax(const Weights& model)
         : w_(model), filtered_(false)
-        {}
+        {
+          for(int i = 0; i < 3; ++i) {
+            cudaStreamCreate(&s_[i]);
+            cublasCreate(&h_[i]);
+            cublasSetStream(h_[i], s_[i]);            
+          }
+        }
           
         void GetProbs(mblas::Matrix& Probs,
                   const mblas::Matrix& State,
@@ -173,11 +145,20 @@ class Decoder {
                   const mblas::Matrix& AlignedSourceContext) {
           using namespace mblas;
           
-          Broadcast(_1 + _2, Prod(T1_, State, w_.W1_), w_.B1_);
-          Broadcast(_1 + _2, Prod(T2_, Embedding, w_.W2_), w_.B2_);
-          Broadcast(_1 + _2, Prod(T3_, AlignedSourceContext, w_.W3_), w_.B3_);
+          Prod(h_[0], T1_, State, w_.W1_);
+          Prod(h_[1], T2_, Embedding, w_.W2_);
+          Prod(h_[2], T3_, AlignedSourceContext, w_.W3_);
+          
+          Broadcast(_1 + _2, T1_, w_.B1_, s_[0]);
+          Broadcast(_1 + _2, T2_, w_.B2_, s_[1]);
+          Broadcast(_1 + _2, T3_, w_.B3_, s_[2]);
+      
+          cudaDeviceSynchronize();
+      
           Element(Tanh(_1 + _2 + _3), T1_, T2_, T3_);
-          Broadcast(_1 + _2, Prod(Probs, T1_, w_.W4_), w_.B4_);
+          
+          Prod(Probs, T1_, w_.W4_);
+          Broadcast(_1 + _2, Probs, w_.B4_);
           mblas::Softmax(Probs);
         }
     
@@ -201,6 +182,9 @@ class Decoder {
       private:        
         const Weights& w_;
         
+        cublasHandle_t h_[3];
+        cudaStream_t s_[3];
+        
         bool filtered_;
         mblas::Matrix FilteredWo_;
         mblas::Matrix FilteredWoB_;
@@ -213,14 +197,30 @@ class Decoder {
   public:
     Decoder(const Weights& model)
     : embeddings_(model.decEmbeddings_),
-      rnn_(model.decRnn_), alignment_(model.decAlignment_),
+      rnn1_(model.decInit_, model.decGru1_),
+      rnn2_(model.decGru2_),
+      alignment_(model.decAlignment_),
       softmax_(model.decSoftmax_)
     {}
+    
+    void MakeStep(mblas::Matrix& NextState,
+                  mblas::Matrix& NextEmbeddings,
+                  mblas::Matrix& Probs,
+                  const std::vector<size_t>& batch,
+                  const mblas::Matrix& State,
+                  const mblas::Matrix& Embeddings,
+                  const mblas::Matrix& SourceContext) {
+      GetHiddenState(HiddenState_, State, Embeddings);
+      GetAlignedSourceContext(AlignedSourceContext_, HiddenState_, SourceContext);
+      GetNextState(NextState, HiddenState_, AlignedSourceContext_);
+      GetProbs(Probs, NextState, Embeddings, AlignedSourceContext_);
+      Lookup(NextEmbeddings, batch);
+    }
     
     void EmptyState(mblas::Matrix& State,
                     const mblas::Matrix& SourceContext,
                     size_t batchSize = 1) {
-      rnn_.InitializeState(State, SourceContext, batchSize);
+      rnn1_.InitializeState(State, SourceContext, batchSize);
     }
     
     void EmptyEmbedding(mblas::Matrix& Embedding,
@@ -228,6 +228,8 @@ class Decoder {
       Embedding.Clear();
       Embedding.Resize(batchSize, embeddings_.GetDim(), 0);
     }
+    
+    private:
     
     void Lookup(mblas::Matrix& Embedding,
                 const std::vector<size_t>& w) {
@@ -237,7 +239,7 @@ class Decoder {
     void GetHiddenState(mblas::Matrix& HiddenState,
                         const mblas::Matrix& PrevState,
                         const mblas::Matrix& Embedding) {
-      rnn_.GetHiddenState(HiddenState, PrevState, Embedding);
+      rnn1_.GetNextState(HiddenState, PrevState, Embedding);
     }
     
     void GetAlignedSourceContext(mblas::Matrix& AlignedSourceContext,
@@ -249,7 +251,7 @@ class Decoder {
     void GetNextState(mblas::Matrix& State,
                       const mblas::Matrix& HiddenState,
                       const mblas::Matrix& AlignedSourceContext) {
-      rnn_.GetNextState(State, HiddenState, AlignedSourceContext);
+      rnn2_.GetNextState(State, HiddenState, AlignedSourceContext);
     }
     
     
@@ -262,8 +264,12 @@ class Decoder {
     
     
   private:
+    mblas::Matrix HiddenState_;
+    mblas::Matrix AlignedSourceContext_;  
+    
     Embeddings<Weights::DecEmbeddings> embeddings_;
-    RNN<Weights::DecRnn> rnn_;
+    RNNHidden<Weights::DecInit, Weights::DecGRU1> rnn1_;
+    RNNFinal<Weights::DecGRU2> rnn2_;
     Alignment<Weights::DecAlignment> alignment_;
     Softmax<Weights::DecSoftmax> softmax_;
 };

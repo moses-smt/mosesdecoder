@@ -2,6 +2,7 @@
 
 #include "mblas/matrix.h"
 #include "dl4mt/model.h"
+#include "dl4mt/gru.h"
  
 class Encoder {
   private:
@@ -25,43 +26,17 @@ class Encoder {
     class RNN {
       public:
         RNN(const Weights& model)
-        : w_(model) {}
+        : gru_(model) {}
         
         void InitializeState(size_t batchSize = 1) {
           State_.Clear();
           State_.Resize(batchSize, 1024, 0.0);
         }
         
-        void GetNextState(mblas::Matrix& State,
-                          const mblas::Matrix& Embd,
-                          const mblas::Matrix& PrevState) {
-          using namespace mblas;
-    
-          const size_t cols = 1024;
-    
-          // @TODO: Optimization
-          // @TODO: Launch streams to perform GEMMs in parallel
-          // @TODO: Join matrices and perform single GEMM --------
-          Prod(RU_, Embd, w_.W_);
-          Prod(H_,  Embd, w_.Wx_);
-          // -----------------------------------------------------
-          
-          // @TODO: Join matrices and perform single GEMM --------
-          Prod(Temp1_, PrevState, w_.U_);
-          Prod(Temp2_, PrevState, w_.Ux_);        
-          // -----------------------------------------------------
-          
-          // @TODO: Organize into one kernel ---------------------
-          Broadcast(_1 + _2, RU_, w_.B_); // Broadcasting row-wise
-          Element(Logit(_1 + _2), RU_, Temp1_);
-          Slice(R_, RU_, 0, cols);
-          Slice(U_, RU_, 1, cols);
-          Broadcast(_1 + _2, H_, w_.Bx_); // Broadcasting row-wise
-          Element(Tanh(_1 + _2 * _3), H_, R_, Temp2_);
-          Element((1.0 - _1) * _2 + _1 * _3, U_, H_, PrevState);
-          // -----------------------------------------------------
-          
-          Swap(State, U_);
+        void GetNextState(mblas::Matrix& NextState,
+                          const mblas::Matrix& State,
+                          const mblas::Matrix& Embd) {
+          gru_.GetNextState(NextState, State, Embd);
         }
         
         template <class It>
@@ -72,7 +47,7 @@ class Encoder {
           size_t n = std::distance(it, end);
           size_t i = 0;
           while(it != end) {
-            GetNextState(State_, *it++, State_);
+            GetNextState(State_, State_, *it++);
             if(invert)
               mblas::PasteRow(Context, State_, n - i - 1, 1024);
             else
@@ -83,23 +58,16 @@ class Encoder {
         
       private:
         // Model matrices
-        const Weights& w_;
+        const GRU<Weights> gru_;
         
-        // reused to avoid allocation
-        mblas::Matrix RU_;
-        mblas::Matrix R_;
-        mblas::Matrix U_;
-        mblas::Matrix H_;
-        mblas::Matrix Temp1_;
-        mblas::Matrix Temp2_;
         mblas::Matrix State_;
     };
     
   public:
     Encoder(const Weights& model)
     : embeddings_(model.encEmbeddings_),
-      forwardRnn_(model.encForwardRnn_),
-      backwardRnn_(model.encBackwardRnn_)
+      forwardRnn_(model.encForwardGRU_),
+      backwardRnn_(model.encBackwardGRU_)
     {}
     
     void GetContext(const std::vector<size_t>& words,
@@ -112,16 +80,16 @@ class Encoder {
         embeddings_.Lookup(embeddedWords.back(), w);
       }
       
-      forwardRnn_.GetContext(embeddedWords.begin(),
-                             embeddedWords.end(),
+      forwardRnn_.GetContext(embeddedWords.cbegin(),
+                             embeddedWords.cend(),
                              Context, false);
-      backwardRnn_.GetContext(embeddedWords.rbegin(),
-                              embeddedWords.rend(),
+      backwardRnn_.GetContext(embeddedWords.crbegin(),
+                              embeddedWords.crend(),
                               Context, true);
     }
     
   private:
     Embeddings<Weights::EncEmbeddings> embeddings_;
-    RNN<Weights::EncForwardRnn> forwardRnn_;
-    RNN<Weights::EncBackwardRnn> backwardRnn_;
+    RNN<Weights::EncForwardGRU> forwardRnn_;
+    RNN<Weights::EncBackwardGRU> backwardRnn_;
 };

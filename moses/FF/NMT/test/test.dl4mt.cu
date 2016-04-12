@@ -57,7 +57,8 @@ int main(int argc, char** argv) {
                boost::token_compress_on);
     
   std::cerr << "Target: " << std::endl;
-  size_t bs = 3;
+  size_t bs = 1000;
+  
   std::vector<std::vector<size_t>> tWordsBatch(targetSplit.size());
   std::transform(targetSplit.begin(), targetSplit.end(), tWordsBatch.begin(),
                  [&](const std::string& w) { std::cerr << tvcb[w] << ", "; return Batch(bs, tvcb[w]); });
@@ -66,13 +67,9 @@ int main(int argc, char** argv) {
 
   mblas::Matrix SourceContext;
   encoder.GetContext(sWords, SourceContext);
-  mblas::debug1(SourceContext);
 
-
-  mblas::Matrix PrevState, HiddenState, State;
-  mblas::Matrix Embedding;
-
-  mblas::Matrix AlignedSourceContext;
+  mblas::Matrix State, NextState;
+  mblas::Matrix Embeddings, NextEmbeddings;
   mblas::Matrix Probs;
 
   std::cerr << "Testing" << std::endl;
@@ -80,35 +77,24 @@ int main(int argc, char** argv) {
   size_t batchSize = tWordsBatch[0].size();
 
   for(size_t i = 0; i < 1; ++i) {
-    decoder.EmptyState(PrevState, SourceContext, batchSize);
-    decoder.EmptyEmbedding(Embedding, batchSize);
-    
-    mblas::debug1(PrevState);
-    mblas::debug1(Embedding);
+    decoder.EmptyState(State, SourceContext, batchSize);
+    decoder.EmptyEmbedding(Embeddings, batchSize);
     
     float sum = 0;
-    for(auto w : tWordsBatch) {
-      decoder.GetHiddenState(HiddenState, PrevState, Embedding);
-      decoder.GetAlignedSourceContext(AlignedSourceContext, HiddenState, SourceContext);
-      decoder.GetNextState(State, HiddenState, AlignedSourceContext);
-      
-      mblas::debug1(State);
-      
-      decoder.GetProbs(Probs, State, Embedding, AlignedSourceContext);
+    for(auto batch : tWordsBatch) {
+      decoder.MakeStep(NextState, NextEmbeddings, Probs,
+                       batch, State, Embeddings, SourceContext);
       
       for(size_t i = 0; i < 1; ++i) {
-        float p = Probs(i, w[i]);
-        std:: cerr << log(p) << " ";
+        float p = Probs(i, batch[i]);
         if(i == 0) {
           sum += log(p);
         }
       }
-      std::cerr << std::endl;
       
-      decoder.Lookup(Embedding, w);
-      mblas::Swap(PrevState, State);
+      mblas::Swap(Embeddings, NextEmbeddings);
+      mblas::Swap(State, NextState);
     }
-    std::cout << std::endl;
-    std::cerr << sum << std::endl;
+    std::cerr << i << " " << sum << std::endl;
   }
 }

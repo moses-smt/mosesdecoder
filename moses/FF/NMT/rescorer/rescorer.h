@@ -4,12 +4,11 @@
 #include <string>
 #include <vector>
 
-#include "bahdanau.h"
+#include "dl4mt.h"
 #include "vocab.h"
 #include "utils.h"
 #include "states.h"
 #include "nbest.h"
-
 
 class Rescorer {
   public:
@@ -56,8 +55,8 @@ class Rescorer {
       std::vector<float> scores(batch[0].size(), 0.0f);
       size_t lengthIndex = 0;
       for (auto& w : batch) {
-        decoder_->GetProbs(Probs_, AlignedSourceContext_,
-                        PrevState_, PrevEmbedding_, SourceContext_);
+        decoder_->MakeStep(State_, Embedding_, Probs_,
+                           w, PrevState_, PrevEmbedding_, SourceContext_);
 
         for (size_t j = 0; j < w.size(); ++j) {
           if (batch[lengthIndex][j]) {
@@ -65,10 +64,6 @@ class Rescorer {
             scores[j] += log(p);
           }
         }
-
-        decoder_->Lookup(Embedding_, w);
-        decoder_->GetNextState(State_, Embedding_,
-                            PrevState_, AlignedSourceContext_);
 
         mblas::Swap(State_, PrevState_);
         mblas::Swap(Embedding_, PrevEmbedding_);
@@ -83,14 +78,11 @@ class Rescorer {
     std::shared_ptr<Encoder> encoder_;
     std::shared_ptr<Decoder> decoder_;
     const std::string& featureName_;
+
     mblas::Matrix SourceContext_;
     mblas::Matrix PrevState_;
     mblas::Matrix PrevEmbedding_;
-
-    mblas::Matrix AlignedSourceContext_;
     mblas::Matrix Probs_;
-
     mblas::Matrix State_;
     mblas::Matrix Embedding_;
-
 };

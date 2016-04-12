@@ -1,10 +1,15 @@
 #include <iostream>
 #include <string>
 #include <memory>
+#include <iomanip>
 
 #include <boost/program_options/options_description.hpp>
 #include <boost/program_options/parsers.hpp>
 #include <boost/program_options/variables_map.hpp>
+#include <boost/timer/timer.hpp>
+#include <boost/chrono/duration.hpp>
+
+typedef boost::chrono::duration<double> sec;
 
 #include "nbest.h"
 #include "vocab.h"
@@ -84,12 +89,16 @@ int main(int argc, char* argv[]) {
   std::cerr << "Creating rescorer..." << std::endl;
   std::shared_ptr<Rescorer> rescorer(new Rescorer(weights, nbest, fname));
 
+  boost::timer::cpu_timer timer;
+  std::cerr << std::fixed << std::setprecision(2);
   std::cerr << "Rescoring..." << std::endl;
   for (size_t i = 0; i < nbest->size(); ++i) {
     rescorer->Score(i);
     std::cerr << ".";
-    if((i + 1) % 50 == 0)
-        std::cerr << "[" << i + 1 << "]" << std::endl;
+    if((i + 1) % 50 == 0) {
+        sec seconds = boost::chrono::nanoseconds(timer.elapsed().user);
+        std::cerr << "[" << i + 1 << " / " << seconds.count() << " s = " << (i+1)/seconds.count() << " sent. per s]" << std::endl;
+    }
   }
 
   return 0;

@@ -195,6 +195,33 @@ class Decoder {
       softmax_(model.decSoftmax_)
     {}
     
+    void EmptyState(mblas::Matrix& State, const mblas::Matrix& SourceContext,
+                    size_t batchSize = 1) {
+      State.Resize(batchSize, 1000);
+      rnn_.InitializeState(State, SourceContext, batchSize);
+    }
+    
+    void EmptyEmbedding(mblas::Matrix& Embedding, size_t batchSize = 1) {
+      Embedding.Clear();
+      Embedding.Resize(batchSize, 620, 0);
+    }
+    
+    void MakeStep(mblas::Matrix& NextState,
+                  mblas::Matrix& NextEmbeddings,
+                  mblas::Matrix& Probs,
+                  const std::vector<size_t>& batch,
+                  const mblas::Matrix& State,
+                  const mblas::Matrix& Embeddings,
+                  const mblas::Matrix& SourceContext) {
+      GetProbs(Probs, AlignedSourceContext_,
+               State, Embeddings, SourceContext);
+      Lookup(NextEmbeddings, batch);
+      GetNextState(NextState, NextEmbeddings,
+                   State, AlignedSourceContext_);
+    }
+    
+  private:
+    
     void Filter(const std::vector<size_t>& ids) {
       softmax_.Filter(ids);
     }
@@ -206,17 +233,6 @@ class Decoder {
                   const mblas::Matrix& SourceContext) {
       alignment_.GetContext(AlignedSourceContext, SourceContext, PrevState);
       softmax_.GetProbs(Probs, PrevState, PrevEmbedding, AlignedSourceContext);
-    }
-    
-    void EmptyState(mblas::Matrix& State, const mblas::Matrix& SourceContext,
-                    size_t batchSize = 1) {
-      State.Resize(batchSize, 1000);
-      rnn_.InitializeState(State, SourceContext, batchSize);
-    }
-    
-    void EmptyEmbedding(mblas::Matrix& Embedding, size_t batchSize = 1) {
-      Embedding.Clear();
-      Embedding.Resize(batchSize, 620, 0);
     }
     
     void Lookup(mblas::Matrix& Embedding, const std::vector<size_t>& w) {
@@ -231,6 +247,8 @@ class Decoder {
     }
     
   private:
+    mblas::Matrix AlignedSourceContext_; 
+    
     Embeddings<Weights::DecEmbeddings> embeddings_;
     RNN<Weights::DecRnn> rnn_;
     Alignment<Weights::DecAlignment> alignment_;

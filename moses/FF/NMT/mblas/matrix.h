@@ -381,8 +381,7 @@ Matrix& Slice(Matrix& Out,
   return Out;
 }
 
-
-Matrix& Prod(Matrix& C, const Matrix& A, const Matrix& B,
+Matrix& Prod(cublasHandle_t handle, Matrix& C, const Matrix& A, const Matrix& B,
              bool transA = false, bool transB = false) {
   Matrix::value_type alpha = 1.0;
   Matrix::value_type beta = 0.0;
@@ -409,18 +408,15 @@ Matrix& Prod(Matrix& C, const Matrix& A, const Matrix& B,
   cublasOperation_t opA = transA ? CUBLAS_OP_T : CUBLAS_OP_N;
   cublasOperation_t opB = transB ? CUBLAS_OP_T : CUBLAS_OP_N;
 
-  cublasSgemm(CublasHandler::GetHandle(), opB, opA,
+  cublasSgemm(handle, opB, opA,
               n, m, k, &alpha, B.data(), ldb, A.data(), lda, &beta, C.data(), ldc);
-  
-//#else
-//  CBLAS_TRANSPOSE opA = transA ? CblasTrans : CblasNoTrans;
-//  CBLAS_TRANSPOSE opB = transB ? CblasTrans : CblasNoTrans;
-//
-//  cblas_sgemm(CblasColMajor, opB, opA,
-//              n, m, k, alpha, B.data(), ldb, A.data(), lda, beta, C.data(), ldc);
-//#endif
-
   return C;
+}
+
+Matrix& Prod(Matrix& C, const Matrix& A, const Matrix& B,
+             bool transA = false, bool transB = false) {
+ 
+ return Prod(CublasHandler::GetHandle(), C, A, B, transA, transB);
 }
 
 __global__ void gSoftMax(float* softMaxP, size_t rows, size_t cols) {
@@ -488,7 +484,7 @@ __global__ void gBroadcast(Functor functor,
 }
 
 template <class Functor>
-Matrix& Broadcast(Functor functor, Matrix& Out, const Matrix& In) {
+Matrix& Broadcast(Functor functor, Matrix& Out, const Matrix& In, cudaStream_t stream = 0) {
   size_t rows1 = Out.Rows();
   size_t rows2 = In.Rows();
   
@@ -503,9 +499,9 @@ Matrix& Broadcast(Functor functor, Matrix& Out, const Matrix& In) {
   
   int blocks  = std::min(MAX_BLOCKS, (int)rows);
   int threads = std::min(MAX_THREADS, (int)cols);
-  gBroadcast<<<blocks, threads>>>(functor, d_out, d_in1, d_in2,
-                                  rows, rows1, cols);
-  cudaStreamSynchronize(0);
+  gBroadcast<<<blocks, threads, 0, stream>>>(functor, d_out, d_in1, d_in2,
+                                             rows, rows1, cols);
+  cudaStreamSynchronize(stream);
   Swap(Out, Temp);
   return Out;
 }
