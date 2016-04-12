@@ -63,6 +63,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
    	parameters/ReportingOptions.cpp
    	parameters/SearchOptions.cpp
    	parameters/ServerOptions.cpp
+   	parameters/SyntaxOptions.cpp
    	
 		PhraseBased/Hypothesis.cpp 
  	 	PhraseBased/InputPath.cpp

@@ -13,7 +13,7 @@
 #include "ReportingOptions.h"
 #include "OOVHandlingOptions.h"
 #include "ServerOptions.h"
-//#include "SyntaxOptions.h"
+#include "SyntaxOptions.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Moses2
@@ -33,7 +33,7 @@ namespace Moses2
     ReportingOptions      output; 
     OOVHandlingOptions       unk;
     ServerOptions       server;
-    //SyntaxOptions         syntax;
+    SyntaxOptions         syntax;
     bool mira;
     bool use_legacy_pt;
     // StackOptions      stack;

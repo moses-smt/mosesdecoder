@@ -31,7 +31,7 @@ namespace Moses2
     if (!output.init(param))     return false;
     if (!unk.init(param))        return false;
     if (!server.init(param))     return false;
-    //if (!syntax.init(param))     return false;
+    if (!syntax.init(param))     return false;
 
     param.SetParameter(mira, "mira", false);
 

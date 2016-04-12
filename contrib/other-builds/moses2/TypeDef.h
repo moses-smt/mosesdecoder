@@ -90,6 +90,13 @@ enum S2TParsingAlgorithm {
   Scope3
 };
 
+enum SourceLabelOverlap {
+  SourceLabelOverlapAdd = 0,
+  SourceLabelOverlapReplace = 1,
+  SourceLabelOverlapDiscard = 2
+};
+
+
 /////////////////////////
 // MOSES2 only
 
