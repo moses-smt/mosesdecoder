@@ -27,6 +27,12 @@ TranslationTask::~TranslationTask()
 void TranslationTask::Run()
 {
   m_mgr->Decode();
+  m_mgr->OutputBest();
+
+  if (m_mgr->system.options.nbest.nbest_size) {
+    m_mgr->OutputNBest();
+  }
+
 }
 
 }

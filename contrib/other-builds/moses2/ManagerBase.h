@@ -41,6 +41,8 @@ public:
       const std::string &inputStr, long translationId);
   virtual ~ManagerBase();
   virtual void Decode() = 0;
+  virtual std::string OutputBest() const = 0;
+  virtual std::string OutputNBest() = 0;
 
   MemPool &GetPool() const
   {

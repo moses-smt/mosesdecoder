@@ -36,7 +36,7 @@ Manager::Manager(System &sys, const TranslationTask &task,
     const std::string &inputStr, long translationId) :
     ManagerBase(sys, task, inputStr, translationId)
 {
-  cerr << translationId << " inputStr=" << inputStr << endl;
+  //cerr << translationId << " inputStr=" << inputStr << endl;
 }
 
 Manager::~Manager()
@@ -103,11 +103,6 @@ void Manager::Decode()
 {
   Init();
   m_search->Decode();
-  OutputBest();
-
-  if (system.options.nbest.nbest_size) {
-    OutputNBest();
-  }
 }
 
 void Manager::CalcFutureScore()

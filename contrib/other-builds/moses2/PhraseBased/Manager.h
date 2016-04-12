@@ -60,6 +60,8 @@ public:
   }
 
   void Decode();
+  std::string OutputBest() const;
+  std::string OutputNBest();
 
 protected:
 
@@ -73,8 +75,6 @@ protected:
   // must be run in same thread as Decode()
   void Init();
   void CalcFutureScore();
-  std::string OutputBest() const;
-  std::string OutputNBest();
 
 };
 

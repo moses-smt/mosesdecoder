@@ -29,6 +29,8 @@ public:
 
   virtual ~Manager();
   void Decode();
+  std::string OutputBest() const {}
+  std::string OutputNBest() {}
 
 protected:
   Stacks m_stacks;
