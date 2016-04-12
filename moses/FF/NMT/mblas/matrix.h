@@ -48,6 +48,11 @@ class TMatrix : public BaseMatrix {
       return data_[i * cols_ + j];
     }
 
+    void Set(size_t i, size_t j, float value)  {
+      data_[i * cols_ + j] = value;
+    }
+
+    
     size_t Rows() const {
       return rows_;
     }

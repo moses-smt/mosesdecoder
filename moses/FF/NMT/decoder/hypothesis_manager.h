@@ -57,7 +57,7 @@ class HypothesisManager {
       size_t state = completedHypotheses_[bestHypoId].GetPrevStateIndex();
 
       while (state > 0) {
-        bestSentence.push_back(hypotheses_[state].GetWord());
+            bestSentence.push_back(hypotheses_[state].GetWord());
         state = hypotheses_[state].GetPrevStateIndex();
       }
 

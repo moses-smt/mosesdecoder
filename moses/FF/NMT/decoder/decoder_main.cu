@@ -18,12 +18,15 @@ void ProgramOptions(int argc, char *argv[],
     std::string& modelPath,
     std::string& svPath,
     std::string& tvPath,
+    size_t& beamsize,
     size_t& device) {
   bool help = false;
 
   namespace po = boost::program_options;
   po::options_description cmdline_options("Allowed options");
   cmdline_options.add_options()
+    ("beamsize,b", po::value(&beamsize)->default_value(10),
+     "Beam size")
     ("device,d", po::value(&device)->default_value(0),
      "CUDA Device")
     ("model,m", po::value(&modelPath)->required(),
@@ -58,7 +61,8 @@ void ProgramOptions(int argc, char *argv[],
 int main(int argc, char* argv[]) {
   std::string modelPath, srcVocabPath, trgVocabPath;
   size_t device = 0;
-  ProgramOptions(argc, argv, modelPath, srcVocabPath, trgVocabPath, device);
+  size_t beamsize = 10;
+  ProgramOptions(argc, argv, modelPath, srcVocabPath, trgVocabPath, beamsize, device);
   std::cerr << "Using device GPU" << device << std::endl;;
   cudaSetDevice(device);
   std::cerr << "Loading model... ";
@@ -67,7 +71,7 @@ int main(int argc, char* argv[]) {
   std::shared_ptr<Vocab> trgVocab(new Vocab(trgVocabPath));
   std::cerr << "done." << std::endl;
 
-  NMTDecoder decoder(model, srcVocab, trgVocab);
+  NMTDecoder decoder(model, srcVocab, trgVocab, beamsize);
 
   std::cerr << "Start translating...\n";
 
@@ -77,7 +81,13 @@ int main(int argc, char* argv[]) {
   boost::timer::cpu_timer timer;
   while(std::getline(std::cin, line)) {
     auto result = decoder.translate(line);
-    for (auto it = result.rbegin(); it != result.rend(); ++it) std::cout << (*trgVocab)[*it] << " ";
+    for (auto it = result.rbegin(); it != result.rend(); ++it) {
+      std::string word = (*trgVocab)[*it];
+      if(it != result.rbegin())
+        std::cout << " ";
+      if(word != "</s>")
+        std::cout << word;
+    }
     std::cout << std::endl;
   }
   std::cerr << timer.format() << std::endl;

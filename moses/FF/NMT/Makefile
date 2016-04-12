@@ -17,7 +17,7 @@ test_cuda: $(SOURCESCU) $(HEADERS)
 	nvcc --use_fast_math -O3 -Icommon -I. -std=c++11 $(SOURCESCU) -arch=sm_35 -lineinfo -lboost_system -lboost_timer -lcudart -lcublas -o $@
 
 ndec: $(NDEC_HEADERS) $(NDEC_SOURCES)
-	nvcc --use_fast_math -O3 -Icommon -I. -std=c++11 $(NDEC_SOURCES) -arch=sm_35 -lboost_program_options -lineinfo -lboost_system -lboost_timer -lcudart -lcublas -o $@
+	nvcc --use_fast_math -O2 -g -Icommon -I. -std=c++11 $(NDEC_SOURCES) -arch=sm_35 -lboost_program_options -lineinfo -lboost_system -lboost_timer -lcudart -lcublas -o $@
 
 test_dl4mt: $(DL4MTCU) $(DL4MTHEADERS)
 	nvcc --use_fast_math -O3 -Icommon -I. -std=c++11 $(DL4MTCU) -arch=sm_35 -lineinfo -lboost_system -lboost_timer -lcudart -lcublas -o $@

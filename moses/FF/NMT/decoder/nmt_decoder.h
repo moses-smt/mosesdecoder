@@ -4,6 +4,7 @@
 #include <memory>
 #include <algorithm>
 #include <functional>
+#include <numeric>
 
 #include <thrust/functional.h>
 #include <thrust/device_vector.h>
@@ -47,7 +48,8 @@ class NMTDecoder {
      prepareDecoder();
 
      size_t batchSize = beamSize_;
-     Costs_.Resize(1,1);
+     Costs_.Clear();
+     Costs_.Resize(batchSize, 1, 0.0);
      HypothesisManager hypoManager(batchSize, (*trgVocab_)["</s>"]);
 
      mblas::Matrix Probs;
@@ -56,22 +58,45 @@ class NMTDecoder {
        std::vector<size_t> bestWordIndices, bestWordHyps;
        decoder_->GetProbs(Probs, AlignedSourceContext_,
                           PrevState_, PrevEmbedding_, SourceContext_);
-
+       
+       // Przeniesione tutaj. moze decoder powinien to robic.
+       Element(Log(_1), Probs);
+     
+       // Brzydkie, ale GH tez to ma, troche pomaga przy wiekszym
+       // BeamSize, ale jeszcze gdzies jest problem. 
+       if(len < sourceSentenceLength * 0.5) {
+          size_t eol = (*trgVocab_)["</s>"];
+          for(size_t i = 0; i < Probs.Rows(); ++i) {
+            Probs.Set(i, eol, std::numeric_limits<float>::lowest());
+          }
+       }
+       
        auto bestHypos = GetBestExtensions(Probs, batchSize);
        hypoManager.AddHypotheses(bestHypos);
 
+       size_t cidx = 0;
+       std::vector<size_t> costIndeces;
        for (auto& best: bestHypos) {
          if (best.GetWord() != (*trgVocab_)["</s>"]) {
            bestWordIndices.push_back(best.GetWord());
            bestWordHyps.push_back(best.GetPrevStateIndex());
+           costIndeces.push_back(cidx);
          } else {
+           //std::cerr << "Finshed at " << Costs_(0, cidx) << std::endl;
            --batchSize;
          }
+         cidx++;
        }
 
-       if (batchSize <= 0) break;
-       Costs_.Resize(1, batchSize);
-
+       if (batchSize <= 0)
+         break;
+       
+       // Zrobic warunkowo
+       mblas::Matrix CostsTemp;
+       mblas::Assemble(CostsTemp, Costs_, costIndeces);
+       mblas::Swap(Costs_, CostsTemp);
+       //mblas::debug1(Costs_);
+       
        decoder_->Lookup(Embedding_, bestWordIndices);
        Assemble(BestState_, PrevState_, bestWordHyps);
        decoder_->GetNextState(State_, Embedding_,
@@ -98,8 +123,9 @@ class NMTDecoder {
      Hypotheses hypos;
 
      // One kernel. Na pewno nie dwa razy transpose wielkiej macierzy, batchsize * vocab
-     Element(Log(_1), Probs);
+     Costs_.Reshape(1, batchSize);
      Broadcast(_1 + _2, Transpose(Probs), Costs_);
+     Costs_.Reshape(batchSize, 1);
      Transpose(Probs);
 
      size_t probSize = Probs.Cols() * Probs.Rows();
@@ -111,7 +137,6 @@ class NMTDecoder {
      // OK, to pewnie uzywa thrust::copy? Sprawdzić
      thrust::host_vector<int> bestKeys(keys.end() - batchSize, keys.end());
 
-     Costs_.Resize(batchSize, 1);
      HypothesisManager hypoManager(batchSize, (*trgVocab_)["</s>"]);
 
      // za pomoca thrust::copy zrobic dwie kopie, jedno do Costs, jedna do wektora na cpu, w drugim kroku uzyc cpu
