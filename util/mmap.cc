@@ -173,8 +173,10 @@ bool TryHuge(std::size_t size, uint8_t alignment_bits, bool populate, util::scop
   // Second try: manually configured hugetlb pages exist, but kernel too old to
   // pick size or not available.  This might pick the wrong size huge pages,
   // but the sysadmin must have made them available in the first place.
+#ifdef MAP_HUGETLB
   if (AnonymousMap(size, MAP_HUGETLB, populate, to))
     return true;
+#endif
 
   // Third try: align to a multiple of the huge page size by overallocating.
   // I feel bad about doing this, but it's also how posix_memalign is

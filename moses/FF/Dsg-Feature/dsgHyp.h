@@ -14,53 +14,53 @@
 namespace Moses
 {
 
-  class dsgState : public FFState
-  {
-  public:
+class dsgState : public FFState
+{
+public:
 
-    dsgState(const lm::ngram::State & val);
-    virtual bool operator==(const FFState& other) const;
-    void saveState( std::vector<std::string>  bufferVal,std::vector<int> spanVal, float deltaValue);
+  dsgState(const lm::ngram::State & val);
+  virtual bool operator==(const FFState& other) const;
+  void saveState( std::vector<std::string>  bufferVal,std::vector<int> spanVal, float deltaValue);
 
-    std::vector<std::string> getBuffer() const {
-      return buffer;
-    }
+  std::vector<std::string> getBuffer() const {
+    return buffer;
+  }
 
-    std::vector<int> getSpan() const {
-      return span;
-    }
+  std::vector<int> getSpan() const {
+    return span;
+  }
 
-    lm::ngram::State getLMState() const {
-      return lmState;
-    }
+  lm::ngram::State getLMState() const {
+    return lmState;
+  }
 
-    float getDelta() const {  
-      return delta;
-    }
+  float getDelta() const {
+    return delta;
+  }
 
-    void setDelta(double val1 ) { 
-      delta = val1;
-    }
+  void setDelta(double val1 ) {
+    delta = val1;
+  }
 
-    void print() const;
-    std::string getName() const;
+  void print() const;
+  std::string getName() const;
 
-    virtual size_t hash() const;
+  virtual size_t hash() const;
 
 
-  protected:
-    std::vector<std::string> buffer;
-    std::vector<int> span;
-    lm::ngram::State lmState;
-    double delta; //NEW
-  };
+protected:
+  std::vector<std::string> buffer;
+  std::vector<int> span;
+  lm::ngram::State lmState;
+  double delta; //NEW
+};
 
 
 
 class dsgHypothesis
 {
 
- private:
+private:
   std::vector<std::string> m_buffer;// maintains dangling affix from previous hypothesis
   std::vector<int> m_span;// maintains source alignment for dangling affix from previous hypothesis
   lm::ngram::State lmState; // KenLM's Model State ...
@@ -73,7 +73,7 @@ class dsgHypothesis
   int discontig2;
   double UnsegWP; //Word Penalty score based on count of words
 
- public:
+public:
 
   dsgHypothesis();
   ~dsgHypothesis() {};
@@ -84,7 +84,7 @@ class dsgHypothesis
     m_curr_phr = val1;
   }
 
-  void setDelta(double val1 ) { 
+  void setDelta(double val1 ) {
     delta = val1;
   }
 
