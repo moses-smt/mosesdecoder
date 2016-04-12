@@ -27,10 +27,16 @@ TranslationTask::~TranslationTask()
 void TranslationTask::Run()
 {
   m_mgr->Decode();
-  m_mgr->OutputBest();
+
+  string out;
+
+  out = m_mgr->OutputBest();
+  m_mgr->system.bestCollector->Write(m_mgr->m_translationId, out);
 
   if (m_mgr->system.options.nbest.nbest_size) {
-    m_mgr->OutputNBest();
+    out = m_mgr->OutputNBest();
+    m_mgr->system.nbestCollector->Write(m_mgr->m_translationId, out);
+
   }
 
 }

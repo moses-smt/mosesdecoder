@@ -184,7 +184,6 @@ std::string Manager::OutputBest() const
   }
   out << "\n";
 
-  system.bestCollector->Write(m_input->GetTranslationId(), out.str());
   return out.str();
   //cerr << endl;
 }
@@ -233,7 +232,7 @@ std::string Manager::OutputNBest()
 
     ++bestInd;
   }
-  system.nbestCollector->Write(transId, out.str());
+
   return out.str();
 }
 

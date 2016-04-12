@@ -36,6 +36,7 @@ public:
   const System &system;
   const TranslationTask &task;
   ArcLists arcLists;
+  long m_translationId;
 
   ManagerBase(System &sys, const TranslationTask &task,
       const std::string &inputStr, long translationId);
@@ -66,7 +67,6 @@ public:
 
 protected:
   std::string m_inputStr;
-  long m_translationId;
   Sentence *m_input;
 
   mutable MemPool *m_pool, *m_systemPool;
