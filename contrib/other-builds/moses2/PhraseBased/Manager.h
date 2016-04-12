@@ -73,8 +73,8 @@ protected:
   // must be run in same thread as Decode()
   void Init();
   void CalcFutureScore();
-  void OutputBest() const;
-  void OutputNBest();
+  std::string OutputBest() const;
+  std::string OutputNBest();
 
 };
 

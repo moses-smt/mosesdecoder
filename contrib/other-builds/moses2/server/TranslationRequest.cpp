@@ -1,5 +1,6 @@
 #include <boost/foreach.hpp>
 #include "TranslationRequest.h"
+#include "../ManagerBase.h"
 
 using namespace std;
 
@@ -13,6 +14,9 @@ TranslationRequest(xmlrpc_c::paramList const& paramList,
                    const std::string &line,
                    long translationId)
 :TranslationTask(system, line, translationId)
+,m_cond(cond)
+,m_mutex(mut)
+,m_done(false)
 {
 
 }
@@ -38,7 +42,36 @@ void
 TranslationRequest::
 Run()
 {
+  cerr << "Run A" << endl;
+  run_phrase_decoder();
+  cerr << "Run B" << endl;
+
+  {
+    boost::lock_guard<boost::mutex> lock(m_mutex);
+    m_done = true;
+  }
+  m_cond.notify_one();
+  cerr << "Run C" << endl;
+
 }
 
+void
+TranslationRequest::
+run_phrase_decoder()
+{
+  m_mgr->Decode();
+
+  /*
+  Manager manager(this->self());
+  manager.Decode();
+  pack_hypothesis(manager, manager.GetBestHypothesis(), "text", m_retData);
+  if (m_session_id)
+    m_retData["session-id"] = xmlrpc_c::value_int(m_session_id);
+
+  if (m_withGraphInfo) insertGraphInfo(manager,m_retData);
+  if (m_withTopts) insertTranslationOptions(manager,m_retData);
+  if (m_options->nbest.nbest_size) outputNBest(manager, m_retData);
+  */
+}
 
 }

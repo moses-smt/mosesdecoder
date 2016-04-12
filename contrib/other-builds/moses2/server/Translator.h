@@ -6,6 +6,7 @@
  */
 
 #pragma once
+#include <boost/thread/shared_mutex.hpp>
 #include <xmlrpc-c/base.hpp>
 #include <xmlrpc-c/registry.hpp>
 #include <xmlrpc-c/server_abyss.hpp>
@@ -30,6 +31,9 @@ protected:
   Server& m_server;
   Moses2::ThreadPool m_threadPool;
   System &m_system;
+  long m_translationId;
+  boost::shared_mutex m_accessLock;
+
 };
 
 } /* namespace Moses2 */

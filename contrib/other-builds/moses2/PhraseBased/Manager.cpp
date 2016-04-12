@@ -36,6 +36,7 @@ Manager::Manager(System &sys, const TranslationTask &task,
     const std::string &inputStr, long translationId) :
     ManagerBase(sys, task, inputStr, translationId)
 {
+  cerr << translationId << " inputStr=" << inputStr << endl;
 }
 
 Manager::~Manager()
@@ -168,7 +169,7 @@ void Manager::CalcFutureScore()
   //cerr << *m_estimatedScores << endl;
 }
 
-void Manager::OutputBest() const
+std::string Manager::OutputBest() const
 {
   stringstream out;
   const Hypothesis *bestHypo = m_search->GetBestHypothesis();
@@ -189,10 +190,11 @@ void Manager::OutputBest() const
   out << "\n";
 
   system.bestCollector->Write(m_input->GetTranslationId(), out.str());
+  return out.str();
   //cerr << endl;
 }
 
-void Manager::OutputNBest()
+std::string Manager::OutputNBest()
 {
   arcLists.Sort();
 
@@ -237,7 +239,7 @@ void Manager::OutputNBest()
     ++bestInd;
   }
   system.nbestCollector->Write(transId, out.str());
-
+  return out.str();
 }
 
 }

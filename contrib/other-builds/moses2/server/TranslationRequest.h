@@ -28,12 +28,18 @@ protected:
   std::map<std::string, xmlrpc_c::value> m_retData;
   Translator* m_translator;
 
+  boost::condition_variable& m_cond;
+  boost::mutex& m_mutex;
+  bool m_done;
+
   TranslationRequest(xmlrpc_c::paramList const& paramList,
                      boost::condition_variable& cond,
                      boost::mutex& mut,
                      System &system,
                      const std::string &line,
                      long translationId);
+  virtual void
+  run_phrase_decoder();
 
 public:
 
@@ -55,7 +61,7 @@ public:
 
   bool
   IsDone() const {
-    return true;
+    return m_done;
   }
 
   std::map<std::string, xmlrpc_c::value> const&
