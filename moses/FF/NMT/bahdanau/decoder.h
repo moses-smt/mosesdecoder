@@ -220,7 +220,7 @@ class Decoder {
                    State, AlignedSourceContext_);
     }
     
-  private:
+  //private:
     
     void Filter(const std::vector<size_t>& ids) {
       softmax_.Filter(ids);

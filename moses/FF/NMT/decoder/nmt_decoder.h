@@ -32,7 +32,7 @@ class NMTDecoder {
        std::shared_ptr<Weights> model,
        std::shared_ptr<Vocab> srcVocab,
        std::shared_ptr<Vocab> trgVocab,
-       const size_t beamSize=50)
+       const size_t beamSize=1)
        : model_(model),
          srcVocab_(srcVocab),
          trgVocab_(trgVocab),
@@ -50,12 +50,14 @@ class NMTDecoder {
      Costs_.Resize(1,1);
      HypothesisManager hypoManager(batchSize, (*trgVocab_)["</s>"]);
 
+     mblas::Matrix Probs;
+
      for(size_t len = 0; len < 3 * sourceSentenceLength; ++len) {
        std::vector<size_t> bestWordIndices, bestWordHyps;
-       decoder_->GetProbs(Probs_, AlignedSourceContext_,
+       decoder_->GetProbs(Probs, AlignedSourceContext_,
                           PrevState_, PrevEmbedding_, SourceContext_);
 
-       auto bestHypos = GetBestExtensions(batchSize);
+       auto bestHypos = GetBestExtensions(Probs, batchSize);
        hypoManager.AddHypotheses(bestHypos);
 
        for (auto& best: bestHypos) {
@@ -81,6 +83,7 @@ class NMTDecoder {
 
      return hypoManager.GetBestTranslation();
    }
+
  private:
    size_t prepareSourceSentence(std::string& sentence) {
      Trim(sentence);
@@ -91,25 +94,32 @@ class NMTDecoder {
      return encoded_tokens.size();
    }
 
-   Hypotheses GetBestExtensions(size_t batchSize) {
+   Hypotheses GetBestExtensions(mblas::Matrix& Probs, size_t batchSize) {
      Hypotheses hypos;
-     Element(Log(_1), Probs_);
-     Broadcast(_1 + _2, Transpose(Probs_), Costs_);
-     Transpose(Probs_);
-     size_t kk = Probs_.Cols() * Probs_.Rows();
-     thrust::device_vector<int> keys(kk);
+
+     // One kernel. Na pewno nie dwa razy transpose wielkiej macierzy, batchsize * vocab
+     Element(Log(_1), Probs);
+     Broadcast(_1 + _2, Transpose(Probs), Costs_);
+     Transpose(Probs);
+
+     size_t probSize = Probs.Cols() * Probs.Rows();
+     thrust::device_vector<int> keys(probSize);
      thrust::sequence(keys.begin(), keys.end());
-     thrust::sort_by_key(Probs_.begin(), Probs_.end(), keys.begin());
+
+     // warto sortować w odwrotnej kolejnosci, zaoszczedzi kombinacje ponizej
+     thrust::sort_by_key(Probs.begin(), Probs.end(), keys.begin());
+     // OK, to pewnie uzywa thrust::copy? Sprawdzić
      thrust::host_vector<int> bestKeys(keys.end() - batchSize, keys.end());
-     std::vector<float> bestCosts(batchSize);
 
-     Costs_.Resize(batchSize, 1 );
+     Costs_.Resize(batchSize, 1);
      HypothesisManager hypoManager(batchSize, (*trgVocab_)["</s>"]);
-     for (size_t i = 0; i < bestKeys.size(); ++i) {
-       Costs_.GetVec()[i] = Probs_.GetVec()[kk - batchSize + i];
 
-       hypos.emplace_back(bestKeys[i] % Probs_.Cols(), bestKeys[i] / Probs_.Cols(), Probs_.GetVec()[kk - batchSize + i]);
+     // za pomoca thrust::copy zrobic dwie kopie, jedno do Costs, jedna do wektora na cpu, w drugim kroku uzyc cpu
+     for (size_t i = 0; i < bestKeys.size(); ++i) {
+       Costs_.GetVec()[i] = Probs.GetVec()[probSize - batchSize + i];
+       hypos.emplace_back(bestKeys[i] % Probs.Cols(), bestKeys[i] / Probs.Cols(), Probs.GetVec()[probSize - batchSize + i]);
      }
+
      return hypos;
 
    }
@@ -133,7 +143,6 @@ class NMTDecoder {
     mblas::Matrix Costs_;
 
     mblas::Matrix AlignedSourceContext_;
-    mblas::Matrix Probs_;
 
     mblas::Matrix State_;
     mblas::Matrix Embedding_;
