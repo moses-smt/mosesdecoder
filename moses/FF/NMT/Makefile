@@ -13,10 +13,16 @@ DL2MTHEADERS = dl4mt.h common/states.h common/npz_converter.h common/vocab.h mbl
 NDEC_HEADERS = decoder/hypothesis_manager.h decoder/hypothesis.h decoder/nmt_decoder.h decoder/result.h
 NDEC_SOURCES = decoder/decoder_main.cu common/utils.cu cnpy/cnpy.cpp
 
+NDEC_HEADERS2 = 
+NDEC_SOURCES2 = decoder2/decoder_main.cu cnpy/cnpy.cpp
+
 test_cuda: $(SOURCESCU) $(HEADERS)
 	nvcc --use_fast_math -O3 -Icommon -I. -std=c++11 $(SOURCESCU) -arch=sm_35 -lineinfo -lboost_system -lboost_timer -lcudart -lcublas -o $@
 
 ndec: $(NDEC_HEADERS) $(NDEC_SOURCES)
+	nvcc --use_fast_math -O2 -g -Icommon -I. -std=c++11 $(NDEC_SOURCES) -arch=sm_35 -lboost_program_options -lineinfo -lboost_system -lboost_timer -lcudart -lcublas -o $@
+
+ndec_dl4mt: $(NDEC_HEADERS2) $(NDEC_SOURCES2)
 	nvcc --use_fast_math -O2 -g -Icommon -I. -std=c++11 $(NDEC_SOURCES) -arch=sm_35 -lboost_program_options -lineinfo -lboost_system -lboost_timer -lcudart -lcublas -o $@
 
 test_dl4mt: $(DL4MTCU) $(DL4MTHEADERS)

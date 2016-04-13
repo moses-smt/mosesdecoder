@@ -512,6 +512,20 @@ Matrix& Broadcast(Functor functor, Matrix& Out, const Matrix& In, cudaStream_t s
 }
 
 template <class Functor>
+Matrix& BroadcastColumn(Functor functor, Matrix& Out, const Matrix& In, cudaStream_t stream = 0) {
+  // @TODO: Make this efficient with special kernel!
+  Matrix InTemp;
+  Copy(InTemp, In);
+  Transpose(InTemp);
+  
+  Transpose(Out);
+  Broadcast(functor, Out, InTemp, stream);
+  Transpose(Out);
+  return Out;
+}
+
+
+template <class Functor>
 __global__ void gElement(Functor functor, float* out,
                          size_t rows, size_t cols) {
   for(int bid = 0; bid < rows; bid += gridDim.x) {

@@ -31,7 +31,7 @@ void ProgramOptions(int argc, char *argv[],
   cmdline_options.add_options()
     ("device,d", po::value(&device)->default_value(0),
      "CUDA Device")
-    ("batch,b", po::value(&maxBatchSize)->default_value(1000),
+    ("batch,b", po::value(&maxBatchSize)->default_value(80),
      "Max batch size")
     ("model,m", po::value(&modelPath)->required(),
      "Path to a model")

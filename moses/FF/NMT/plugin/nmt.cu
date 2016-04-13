@@ -6,7 +6,7 @@
 
 #include "nmt.h"
 #include "mblas/matrix.h"
-#include "bahdanau.h"
+#include "dl4mt.h"
 #include "common/vocab.h"
 #include "common/states.h"
 
@@ -119,7 +119,6 @@ void NMT::BatchSteps(const Batches& batches, LastWords& lastWords,
   Matrix nextEmbeddings;
   Matrix prevStates;
   Matrix probs;
-  Matrix alignedSourceContext;
   Matrix nextStates;
 
   if(firstWord) {
@@ -133,12 +132,8 @@ void NMT::BatchSteps(const Batches& batches, LastWords& lastWords,
   states_->ConstructStates(prevStates, stateInfos);
 
   for(auto& batch : batches) {
-    decoder_->Lookup(nextEmbeddings, batch);
-    decoder_->GetProbs(probs, alignedSourceContext,
-                       prevStates, prevEmbeddings, sourceContext);
-
-    decoder_->GetNextState(nextStates, nextEmbeddings,
-                           prevStates, alignedSourceContext);
+    decoder_->MakeStep(nextStates, nextEmbeddings, probs,
+                       batch, prevStates, prevEmbeddings, sourceContext);
 
     StateInfos tempStates;
     states_->SaveStates(tempStates, nextStates);
@@ -190,18 +185,14 @@ void NMT::OnePhrase(
   for(auto& w : phrase) {
     size_t id = (*trg_)[w];
     std::vector<size_t> nextIds = { id };
-    decoder_->Lookup(nextEmbeddings, nextIds);
     if(id == 1)
       unks++;
     
-    decoder_->GetProbs(probs, alignedSourceContext,
-                       prevStates, prevEmbeddings, sourceContext);  
+    decoder_->MakeStep(nextStates, nextEmbeddings, probs,
+                       nextIds, prevStates, prevEmbeddings, sourceContext);
     
     float p = probs(0, filteredId_[id]);
     prob += log(p);
-      
-    decoder_->GetNextState(nextStates, nextEmbeddings,
-                           prevStates, alignedSourceContext);
     
     Swap(nextStates, prevStates);
     Swap(nextEmbeddings, prevEmbeddings);
@@ -240,7 +231,18 @@ void NMT::MakeStep(
   std::vector<size_t> nextIds(nextWords.size());
   std::transform(nextWords.begin(), nextWords.end(), nextIds.begin(),
                  [&](const std::string& w) { return (*trg_)[w]; });
-  decoder_->Lookup(nextEmbeddings, nextIds);
+  
+  Matrix prevStates;
+  states_->ConstructStates(prevStates, inputStates);
+
+  Matrix probs;
+  Matrix nextStates;
+  
+  decoder_->MakeStep(nextStates, nextEmbeddings, probs,
+                     nextIds, prevStates, lastEmbeddings, sourceContext);
+  
+  states_->SaveStates(outputStates, nextStates);
+  
   for(auto id : nextIds) {
     if(id != 1)
       unks.push_back(true);
@@ -248,23 +250,10 @@ void NMT::MakeStep(
       unks.push_back(false);
   }
   
-  Matrix prevStates;
-  states_->ConstructStates(prevStates, inputStates);
-
-  Matrix probs;
-  Matrix alignedSourceContext;
-  decoder_->GetProbs(probs, alignedSourceContext,
-                     prevStates, lastEmbeddings, sourceContext);  
-  
   for(size_t i = 0; i < nextIds.size(); ++i) {
     float p = probs(i, filteredId_[nextIds[i]]);
     //float p = probs(i, nextIds[i]);
     logProbs.push_back(log(p));
   }
-                    
-  Matrix nextStates;
-  decoder_->GetNextState(nextStates, nextEmbeddings,
-                        prevStates, alignedSourceContext);
-  states_->SaveStates(outputStates, nextStates);
   
 }

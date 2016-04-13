@@ -82,9 +82,9 @@ int main(int argc, char** argv) {
     
     float sum = 0;
     for(auto batch : tWordsBatch) {
-      decoder.MakeStep(NextState, NextEmbeddings, Probs,
-                       batch, State, Embeddings, SourceContext);
-      
+      decoder.MakeStep(NextState, Probs,
+                       State, Embeddings, SourceContext);
+      decoder.Lookup(NextEmbeddings, batch);
       for(size_t i = 0; i < 1; ++i) {
         float p = Probs(i, batch[i]);
         if(i == 0) {

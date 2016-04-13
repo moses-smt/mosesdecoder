@@ -162,21 +162,7 @@ class Decoder {
           mblas::Softmax(Probs);
         }
     
-        
         void Filter(const std::vector<size_t>& ids) {
-          using namespace mblas;
-          
-          //Matrix TempWo;
-          //Transpose(TempWo, w_.Wo_);
-          //Assemble(FilteredWo_, TempWo, ids);
-          //Transpose(FilteredWo_);
-          //
-          //Matrix TempWoB;
-          //Transpose(TempWoB, w_.WoB_);
-          //Assemble(FilteredWoB_, TempWoB, ids);
-          //Transpose(FilteredWoB_);
-          
-          filtered_ = true;
         }
        
       private:        
@@ -204,9 +190,7 @@ class Decoder {
     {}
     
     void MakeStep(mblas::Matrix& NextState,
-                  mblas::Matrix& NextEmbeddings,
                   mblas::Matrix& Probs,
-                  const std::vector<size_t>& batch,
                   const mblas::Matrix& State,
                   const mblas::Matrix& Embeddings,
                   const mblas::Matrix& SourceContext) {
@@ -214,7 +198,6 @@ class Decoder {
       GetAlignedSourceContext(AlignedSourceContext_, HiddenState_, SourceContext);
       GetNextState(NextState, HiddenState_, AlignedSourceContext_);
       GetProbs(Probs, NextState, Embeddings, AlignedSourceContext_);
-      Lookup(NextEmbeddings, batch);
     }
     
     void EmptyState(mblas::Matrix& State,
@@ -229,12 +212,17 @@ class Decoder {
       Embedding.Resize(batchSize, embeddings_.GetDim(), 0);
     }
     
-    private:
-    
     void Lookup(mblas::Matrix& Embedding,
                 const std::vector<size_t>& w) {
       embeddings_.Lookup(Embedding, w);
     }
+    
+    void Filter(const std::vector<size_t>& ids) {
+    
+    }
+      
+    
+    //private:
     
     void GetHiddenState(mblas::Matrix& HiddenState,
                         const mblas::Matrix& PrevState,
