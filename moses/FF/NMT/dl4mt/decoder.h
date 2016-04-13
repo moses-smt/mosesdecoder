@@ -40,9 +40,9 @@ class Decoder {
           Mean(Temp1_, SourceContext);
           Temp2_.Clear();
           Temp2_.Resize(batchSize, SourceContext.Cols(), 0.0);
-          Broadcast(_1 + _2, Temp2_, Temp1_);
+          BroadcastVec(_1 + _2, Temp2_, Temp1_);
           Prod(State, Temp2_, w_.Wi_);
-          Broadcast(Tanh(_1 + _2), State, w_.Bi_);
+          BroadcastVec(Tanh(_1 + _2), State, w_.Bi_);
         }
         
         void GetNextState(mblas::Matrix& NextState,
@@ -95,7 +95,7 @@ class Decoder {
           
           Prod(h_[0], Temp1_, SourceContext, w_.U_);
           Prod(h_[1], Temp2_, HiddenState, w_.W_);
-          Broadcast(_1 + _2, Temp2_, w_.B_, s_[1]);
+          BroadcastVec(_1 + _2, Temp2_, w_.B_, s_[1]);
           
           cudaDeviceSynchronize();
           
@@ -149,16 +149,16 @@ class Decoder {
           Prod(h_[1], T2_, Embedding, w_.W2_);
           Prod(h_[2], T3_, AlignedSourceContext, w_.W3_);
           
-          Broadcast(_1 + _2, T1_, w_.B1_, s_[0]);
-          Broadcast(_1 + _2, T2_, w_.B2_, s_[1]);
-          Broadcast(_1 + _2, T3_, w_.B3_, s_[2]);
+          BroadcastVec(_1 + _2, T1_, w_.B1_, s_[0]);
+          BroadcastVec(_1 + _2, T2_, w_.B2_, s_[1]);
+          BroadcastVec(_1 + _2, T3_, w_.B3_, s_[2]);
       
           cudaDeviceSynchronize();
       
           Element(Tanh(_1 + _2 + _3), T1_, T2_, T3_);
           
           Prod(Probs, T1_, w_.W4_);
-          Broadcast(_1 + _2, Probs, w_.B4_);
+          BroadcastVec(_1 + _2, Probs, w_.B4_);
           mblas::Softmax(Probs);
         }
     

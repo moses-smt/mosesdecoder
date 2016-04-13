@@ -2,6 +2,7 @@
 #include <iostream>
 #include <fstream>
 #include <algorithm>
+#include <limits> 
 #include <boost/timer/timer.hpp>
 #include <boost/algorithm/string.hpp>
 
@@ -18,12 +19,11 @@
 #include "dl4mt.h"
 #include "vocab.h"
 
-#include "states.h"
-
 using namespace mblas;
 
 typedef std::tuple<size_t, size_t, float> Hypothesis;
 typedef std::vector<Hypothesis> Beam;
+typedef std::vector<Beam> History;
 
 void BestHyps(Beam& bestHyps, const Beam& prevHyps, mblas::Matrix& Probs, const size_t beamSize) {
   mblas::Matrix Costs(Probs.Rows(), 1);
@@ -31,14 +31,13 @@ void BestHyps(Beam& bestHyps, const Beam& prevHyps, mblas::Matrix& Probs, const 
   for(const Hypothesis& h : prevHyps)
     vCosts.push_back(std::get<2>(h));
   thrust::copy(vCosts.begin(), vCosts.end(), Costs.begin());
-  //mblas::debug1(Costs);
   
-  mblas::BroadcastColumn(Log(_1) + _2, Probs, Costs);
+  mblas::BroadcastVecColumn(Log(_1) + _2, Probs, Costs);
   
   thrust::device_vector<unsigned> keys(Probs.size());
   thrust::sequence(keys.begin(), keys.end());
   
-  // Tutaj przydalaby sie funkcja typu partition_n zamiast pelnego sort
+  // Here it would be nice to have a partition instead of full sort
   thrust::sort_by_key(Probs.begin(), Probs.end(), keys.begin(), thrust::greater<float>());
   
   thrust::host_vector<unsigned> bestKeys(beamSize);
@@ -50,9 +49,46 @@ void BestHyps(Beam& bestHyps, const Beam& prevHyps, mblas::Matrix& Probs, const 
     size_t wordIndex = bestKeys[i] % Probs.Cols();
     size_t hypIndex  = bestKeys[i] / Probs.Cols();
     float  cost = bestCosts[i];
-    //std::cerr << wordIndex << " " << hypIndex << " " << cost << std::endl;
     bestHyps.emplace_back(wordIndex, hypIndex, cost);  
   }
+}
+
+void FindBest(const History& history, const Vocab& vcb) {
+  std::vector<size_t> targetWords;
+  
+  size_t best = 0;
+  size_t beamSize = 0;
+  float bestCost = std::numeric_limits<float>::lowest();
+      
+  for(auto b = history.rbegin(); b != history.rend(); b++) {
+    if(b->size() > beamSize) {
+      beamSize = b->size();
+      for(size_t i = 0; i < beamSize; ++i) {
+        if(b == history.rbegin() || std::get<0>((*b)[i]) == vcb["</s>"]) {
+          if(std::get<2>((*b)[i]) > bestCost) {
+            best = i;
+            bestCost = std::get<2>((*b)[i]);
+            targetWords.clear();
+          }
+        }
+      }
+    }
+    
+    auto& bestHyp = (*b)[best];
+    targetWords.push_back(std::get<0>(bestHyp));
+    best = std::get<1>(bestHyp);
+  }
+
+  std::reverse(targetWords.begin(), targetWords.end());
+  for(size_t i = 0; i < targetWords.size(); ++i) {
+    if(vcb[targetWords[i]] != "</s>") {
+      if(i > 0) {
+        std::cout << " ";
+      }
+      std::cout << vcb[targetWords[i]];
+    }
+  }
+  std::cout << std::endl;
 }
 
 int main(int argc, char** argv) {
@@ -65,7 +101,6 @@ int main(int argc, char** argv) {
       device = 2;
   }
   
-  std::cerr << device << std::endl;
   cudaSetDevice(device);
   
   Weights weights("testmodel/model.npz", device);
@@ -81,7 +116,7 @@ int main(int argc, char** argv) {
   mblas::Matrix State, NextState, BeamState;
   mblas::Matrix Embeddings, NextEmbeddings;
   mblas::Matrix Probs;
-    
+
   std::string source;
   boost::timer::auto_cpu_timer timer;
   
@@ -98,12 +133,12 @@ int main(int argc, char** argv) {
     mblas::Matrix SourceContext;
     encoder.GetContext(sourceWords, SourceContext);
   
-    size_t beamSize = 10;
+    size_t beamSize = 5;
     
     decoder.EmptyState(State, SourceContext, 1);
     decoder.EmptyEmbedding(Embeddings, 1);
     
-    std::vector<Beam> history;
+    History history;
     
     Beam prevHyps;
     prevHyps.emplace_back(0, 0, 0.0);
@@ -113,42 +148,32 @@ int main(int argc, char** argv) {
       
       Beam hyps;
       BestHyps(hyps, prevHyps, Probs, beamSize);
+      history.push_back(hyps);
       
-      std::vector<size_t> nextWords(hyps.size());
-      std::transform(hyps.begin(), hyps.end(), nextWords.begin(),
-                     [](Hypothesis& h) { return std::get<0>(h); });
-      decoder.Lookup(NextEmbeddings, nextWords);
+      Beam survivors;
+      std::vector<size_t> beamWords;
+      std::vector<size_t> beamStateIds;
+      for(auto& h : hyps) {
+        if(std::get<0>(h) != tvcb["</s>"]) {
+          survivors.push_back(h);
+          beamWords.push_back(std::get<0>(h));
+          beamStateIds.push_back(std::get<1>(h));
+        }
+      }
+      beamSize = survivors.size();
       
-      std::vector<size_t> beamStateIds(hyps.size());
-      std::transform(hyps.begin(), hyps.end(), beamStateIds.begin(),
-                     [](Hypothesis& h) { return std::get<1>(h); });
+      if(beamSize == 0)
+        break;
+      
+      decoder.Lookup(NextEmbeddings, beamWords);
       mblas::Assemble(BeamState, NextState, beamStateIds);
       
       mblas::Swap(Embeddings, NextEmbeddings);
       mblas::Swap(State, BeamState);
+      prevHyps.swap(survivors);
       
-      history.push_back(hyps);
-      prevHyps.swap(hyps);
-      
-    } while(std::get<0>(prevHyps[0]) != tvcb["</s>"] && history.size() < sourceWords.size() * 3);
+    } while(history.size() < sourceWords.size() * 3);
     
-    std::vector<size_t> targetWords;
-    size_t best = 0;
-    for(auto b = history.rbegin(); b != history.rend(); b++) {
-      auto& bestHyp = (*b)[best];
-      targetWords.push_back(std::get<0>(bestHyp));
-      best = std::get<1>(bestHyp);
-    }
-    
-    std::reverse(targetWords.begin(), targetWords.end());
-    for(size_t i = 0; i < targetWords.size(); ++i) {
-      if(tvcb[targetWords[i]] != "</s>") {
-        if(i > 0) {
-          std::cout << " ";
-        }
-        std::cout << tvcb[targetWords[i]];
-      }
-    }
-    std::cout << std::endl;
+    FindBest(history, tvcb);
   }
 }
