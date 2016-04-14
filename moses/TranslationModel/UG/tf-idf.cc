@@ -34,11 +34,12 @@ boost::shared_ptr<bitext_t> B(new bitext_t);
 size_t numdocs=0;
 
 void 
-process(TSA<Token> const* idx, TokenIndex const* V)
+process(TSA<Token> const* idx, TokenIndex const* V, std::string const& idf_outfile)
 {
+  ofstream idf_out(idf_outfile.c_str());
   bitext_t::iter m(idx);
-  m.extend(1);
-  while (m.over())
+  m.down();
+  do
     {
       map<size_t,float> tf;
       tsa::ArrayEntry I(m.lower_bound(-1));
@@ -46,20 +47,19 @@ process(TSA<Token> const* idx, TokenIndex const* V)
 	m.root->readEntry(I.next,I);
 	++tf[B->sid2did(I.sid)];
       } while (I.next != m.upper_bound(-1));
-      if (tf.size() == numdocs) continue;
       size_t df = tf.size();
-      float idf = log(numdocs) - log(tf.size()); 
+      float idf = log(numdocs) - log(tf.size());
+      idf_out.write(reinterpret_cast<char*>(&idf),sizeof(float));
 
       cout << m.getToken(0)->id() << " " << m.str(V) << " " << idf;
       for (size_t i = 0; i < numdocs; ++i)
 	{
 	  map<size_t,float>::const_iterator x = tf.find(i);
-	  cout << (boost::format(" %6.2f") 
-		   % ((x == tf.end() ? 0.0 : 1 + log(x->second)) * idf));
+	  cout << " " << ((x == tf.end() ? 0.0 : 1 + log(x->second)) * idf);
 	}
       cout << endl;
-    }
-
+    } while (m.over());
+  idf_out.close();
 }
 
 int main(int argc, char* argv[])
@@ -67,8 +67,8 @@ int main(int argc, char* argv[])
   interpret_args(argc,argv);
   B->open(bname, L1, L2);
   numdocs = B->sid2did()->back() + 1;
-  process(B->I1.get(), B->V1.get());
-  process(B->I2.get(), B->V2.get());
+  process(B->I1.get(), B->V1.get(), bname + L1 + ".idf");
+  process(B->I2.get(), B->V2.get(), bname + L2 + ".idf");
 }
 
 void

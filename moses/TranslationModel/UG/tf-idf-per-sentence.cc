@@ -33,25 +33,41 @@ string ifile;
 void interpret_args(int ac, char* av[]);
 boost::shared_ptr<bitext_t> B(new bitext_t);
 size_t numdocs=0;
-size_t minocc=5;
+size_t minocc=25;
+
 void 
-process(TSA<Token> const* idx, TokenIndex const* V)
+process(TSA<Token> const* idx, TokenIndex const* V, ostream& wcnt)
 {
   bitext_t::iter m(idx);
   m.down();
   do
     {
+      size_t wid = m.getToken(-1)->id();
+      cerr << wid << " " << (*V)[wid] << ": "; 
       if (m.getToken(-1)->id() > 2 && m.ca() < minocc) break;
       boost::dynamic_bitset<uint64_t> check(m.root->getCorpus()->size());
+      vector<ushort> tf(m.root->getCorpus()->size(),0);
       tsa::ArrayEntry I(m.lower_bound(-1));
+      size_t ctr = 0;
       do {
 	m.root->readEntry(I.next,I);
-	check.set(I.sid);
+	++tf[I.sid]; 
+        check.set(I.sid);
+        ++ctr;
       } while (I.next != m.upper_bound(-1));
+
+      cerr << ctr << " occurrences in "
+           << check.count() << "/" << check.size() 
+           << " sentences " << endl;
+
+      float idf = log(check.size()) - log(check.count());
+      wcnt << setw(8) << wid << " " << (*V)[wid] << " " 
+           << ctr << " " << check.count() << " " << idf << endl;
+
       size_t i = check.find_first();
-      cout << i << ":" << "1";
+      cout << i << ":" << (1 + log(tf[i])) * idf;
       for (i = check.find_next(i); i < check.size(); i = check.find_next(i))
-	cout << " " << i << ":" << "1";
+        cout << " " << i << ":" << (1 + log(tf[i])) * idf;
       cout << endl;
     } while (m.over());
 }
@@ -60,8 +76,11 @@ int main(int argc, char* argv[])
 {
   interpret_args(argc,argv);
   B->open(bname, L1, L2);
-  process(B->I1.get(), B->V1.get());
-  process(B->I2.get(), B->V2.get());
+  cerr << "Ready to go ..." << endl;
+  ofstream df1((bname+L1+".wcnt").c_str());
+  ofstream df2((bname+L2+".wcnt").c_str());
+  process(B->I1.get(), B->V1.get(), df1);
+  process(B->I2.get(), B->V2.get(), df2);
 }
 
 void

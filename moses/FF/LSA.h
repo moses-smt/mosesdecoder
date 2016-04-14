@@ -55,10 +55,10 @@ class LsaTermMatcher{
 public:
   LsaTermMatcher() : m_model(NULL) {};
 
-  LsaTermMatcher(LsaModel const* model, 
-                 boost::unordered_map<uint32_t, uint32_t> const& wordcounts);
+  void init(LsaModel const* model, 
+            boost::unordered_map<uint32_t, uint32_t> const& wordcounts);
 
-  LsaTermMatcher(LsaModel const* model, std::vector<std::string> const& doc);
+  void init(LsaModel const* model, std::vector<std::string> const& doc);
 
   float operator()(uint32_t const id) const;
 };

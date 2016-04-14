@@ -29,28 +29,10 @@ void interpret_args(int ac, char* av[]);
 
 string bname, L1, L2, umatrix, smatrix;
 size_t minocc=5;
-bool raw;
 boost::shared_ptr<bitext_t> B(new bitext_t);
 
 ifstream U;
 vector<float> Srt; 
-
-void 
-dump_raw_term_vectors(uint64_t const vsize, string const& ofname)
-{
-  string line; float f;
-  uint32_t numdims = Srt.size();
-  ofstream out(ofname.c_str());
-  out.write(reinterpret_cast<char const*>(&vsize), sizeof(vsize));
-  out.write(reinterpret_cast<char const*>(&numdims), sizeof(numdims));
-  for (size_t id = 0; id < vsize; ++id)
-    {
-      getline(U,line);
-      istringstream buf(line);
-      while (buf >> f)
-        out.write(reinterpret_cast<char const*>(&f), sizeof(float));
-    }
-}
 
 void 
 dump_term_vectors(uint64_t const vsize, string const& ofname)
@@ -116,16 +98,10 @@ int main(int argc, char* argv[])
     }
   
   U.open(umatrix.c_str());
-  if (raw)
-    {
-      dump_term_vectors(vsize1, bname + L1 + ".T");
-      dump_term_vectors(vsize2, bname + L2 + ".T");
-    }
-  else
-    {
-      dump_term_vectors(vsize1, bname + L1 + ".term-vectors");
-      dump_term_vectors(vsize2, bname + L2 + ".term-vectors");
-    }
+  
+  dump_term_vectors(vsize1, bname + L1 + ".term-vectors");
+  dump_term_vectors(vsize2, bname + L2 + ".term-vectors");
+  
 }
 
 void
@@ -135,9 +111,7 @@ interpret_args(int ac, char* av[])
   po::options_description o("Options");
   o.add_options()
     ("help,h",  "print this message")
-    ("min-occurrences,m",po::value<size_t>(&minocc)->default_value(5),
-     "occurrence threshold for terms")
-    ("raw,r",po::bool_switch(&raw),"use raw values")
+
     ;
 
   po::options_description h("Hidden Options");

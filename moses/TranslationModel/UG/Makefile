@@ -117,6 +117,7 @@ skip += ug_splice_arglist.cc
 # objects from elsewhere in the moses tree that are needed
 extra  = ${MOSES_ROOT}/util/exception.cc 
 extra += ${MOSES_ROOT}/util/integer_to_string.cc
+extra += ${MOSES_ROOT}/moses/FF/LSA.cpp
 
 $(foreach f,$(skip),$(eval broken+=$(shell find -name $f)))
 broken += $(wildcard ./mm/stashed/*)

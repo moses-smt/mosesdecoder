@@ -109,19 +109,21 @@ adapt(std::vector<std::string> const& document, float* dest) const
   adapt(wcnt,dest);
 }
 
+void
 LsaTermMatcher::
-LsaTermMatcher(LsaModel const* model, 
-               boost::unordered_map<uint32_t, uint32_t> const& wordcounts)
-  : m_model(model)
+init(LsaModel const* model, 
+     boost::unordered_map<uint32_t, uint32_t> const& wordcounts)
 {
+  m_model = model;
   m_document_vector.resize(model->cols());
   model->adapt(wordcounts, &m_document_vector[0]);
 }
 
+void
 LsaTermMatcher::
-LsaTermMatcher(LsaModel const* model, std::vector<std::string> const& doc)
-  : m_model(model)
+init(LsaModel const* model, std::vector<std::string> const& doc)
 {
+  m_model = model;
   m_document_vector.resize(model->cols());
   model->adapt(doc, &m_document_vector[0]);
 }
