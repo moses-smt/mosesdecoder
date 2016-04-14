@@ -99,5 +99,9 @@ void UnknownWordPenalty::EvaluateInIsolation(const System &system,
 
 }
 
+void UnknownWordPenalty::InitActiveChart(SCFG::InputPath &path) const
+{
+}
+
 }
 

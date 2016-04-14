@@ -27,6 +27,8 @@ public:
       const TargetPhrase &targetPhrase, Scores &scores,
       SCORE *estimatedScore) const;
 
+  virtual void InitActiveChart(SCFG::InputPath &path) const;
+
 };
 
 }

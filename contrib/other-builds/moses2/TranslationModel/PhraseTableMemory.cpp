@@ -196,15 +196,10 @@ TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool,
 void PhraseTableMemory::InitActiveChart(SCFG::InputPath &path) const
 {
   size_t ptInd = GetPtInd();
-  cerr << "BEFORE GetActiveChart" << endl;
   SCFG::ActiveChart &chart = path.GetActiveChart(ptInd);
-  cerr << "AFTER GetActiveChart" << endl;
   SCFG::ActiveChartEntry *chartEntry = new SCFG::ActiveChartEntry(&m_root);
 
-  cerr << "BEFORE push_back" << endl;
   chart.entries.push_back(chartEntry);
-  cerr << "AFTER push_back" << endl;
-
 }
 
 }

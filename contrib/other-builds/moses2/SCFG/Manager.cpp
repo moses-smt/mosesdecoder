@@ -49,7 +49,7 @@ void Manager::Decode()
   m_stacks.Init(*this, size);
   cerr << "CREATED m_stacks" << endl;
 
-  for (int startPos = size; startPos >= 0; --startPos) {
+  for (int startPos = size - 1; startPos >= 0; --startPos) {
     InitActiveChart(startPos);
 
     for (int endPos = startPos + 1; endPos < size + 1; ++endPos) {
@@ -62,17 +62,19 @@ void Manager::Decode()
 
 void Manager::InitActiveChart(size_t pos)
 {
-  /*
-   InputPath &path = static_cast<InputPath&>(m_inputPaths.GetInputPath(pos, pos));
+
+   InputPath &path = static_cast<InputPath&>(*m_inputPaths.GetMatrix().GetValue(pos, 0));
+   cerr << "pos=" << pos << " path=" << path << endl;
    size_t numPt = system.mappings.size();
+   cerr << "numPt=" << numPt << endl;
 
    for (size_t i = 0; i < numPt; ++i) {
-   const PhraseTable &pt = *system.mappings[i];
-   cerr << "START InitActiveChart" << endl;
-   pt.InitActiveChart(path);
-   cerr << "FINISHED InitActiveChart" << endl;
+     const PhraseTable &pt = *system.mappings[i];
+     cerr << "START InitActiveChart" << endl;
+     pt.InitActiveChart(path);
+     cerr << "FINISHED InitActiveChart" << endl;
    }
-   */
+
 }
 
 }

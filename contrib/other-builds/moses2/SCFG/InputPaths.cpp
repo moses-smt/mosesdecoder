@@ -25,14 +25,24 @@ void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
   size_t size = input.GetSize();
   size_t maxLength = min(size, mgr.system.options.search.max_phrase_length);
 
-  m_matrix = new (pool.Allocate<Matrix<InputPath*> >()) Matrix<InputPath*>(pool,
+  m_matrix = new (pool.Allocate< Matrix<SCFG::InputPath*> >()) Matrix<SCFG::InputPath*>(pool,
       size, maxLength);
   m_matrix->Init(NULL);
 
-  // create normal paths of subphrases through the sentence
   for (size_t startPos = 0; startPos < size; ++startPos) {
-    const InputPath *prefixPath = NULL;
+    // create path for 0 length string
+    Range range(startPos, startPos - 1);
+    SubPhrase subPhrase = input.GetSubPhrase(startPos, 0);
 
+    SCFG::InputPath *path = new (pool.Allocate<SCFG::InputPath>()) SCFG::InputPath(pool,
+        subPhrase, range, numPt, NULL);
+    cerr << startPos << " "
+        << " path=" << *path << endl;
+    m_inputPaths.push_back(path);
+    m_matrix->SetValue(startPos, 0, path);
+
+    // create normal paths of subphrases through the sentence
+    const SCFG::InputPath *prefixPath = path;
     for (size_t phaseSize = 1; phaseSize <= maxLength; ++phaseSize) {
       size_t endPos = startPos + phaseSize - 1;
 
@@ -43,13 +53,15 @@ void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
       SubPhrase subPhrase = input.GetSubPhrase(startPos, phaseSize);
       Range range(startPos, endPos);
 
-      InputPath *path = new (pool.Allocate<InputPath>()) InputPath(pool,
+      SCFG::InputPath *path = new (pool.Allocate<SCFG::InputPath>()) SCFG::InputPath(pool,
           subPhrase, range, numPt, prefixPath);
+      cerr << startPos << " " << (phaseSize - 1)
+          << " path=" << *path << endl;
       m_inputPaths.push_back(path);
 
       prefixPath = path;
 
-      m_matrix->SetValue(startPos, phaseSize - 1, path);
+      m_matrix->SetValue(startPos, phaseSize, path);
     }
   }
 
