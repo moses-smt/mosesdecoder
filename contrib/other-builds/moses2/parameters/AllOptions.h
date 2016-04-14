@@ -1,6 +1,7 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 #pragma once
 #include <string>
+#include <boost/shared_ptr.hpp>
 #include "OptionsBaseClass.h"
 #include "SearchOptions.h"
 #include "CubePruningOptions.h"
@@ -14,7 +15,6 @@
 #include "OOVHandlingOptions.h"
 #include "ServerOptions.h"
 //#include "SyntaxOptions.h"
-#include <boost/shared_ptr.hpp>
 
 namespace Moses2
 {
