@@ -1388,7 +1388,7 @@ sub word_align {
 
    #build arguments for symal
     my($__symal_a)="";
-    $__symal_a="union" if $___ALIGNMENT eq 'union';
+    $__symal_a="union" if $___ALIGNMENT=~ /union/;
     $__symal_a="intersect" if $___ALIGNMENT=~ /intersect/;
     $__symal_a="grow" if $___ALIGNMENT=~ /grow/;
     $__symal_a="srctotgt" if $___ALIGNMENT=~ /srctotgt/;
