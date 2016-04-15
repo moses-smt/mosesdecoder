@@ -58,9 +58,18 @@ protected:
   void CreateFromString(FactorCollection &vocab, const System &system,
       const std::vector<std::string> &toks, bool addBOSEOS = false)
   {
-    for (size_t i = 0; i < m_size; ++i) {
-      WORD &word = (*this)[i];
+    size_t startPos = 0;
+    if (addBOSEOS) {
+      startPos = 1;
+
+      m_words[0].CreateFromString(vocab, system, "<s>");
+      m_words[m_size-1].CreateFromString(vocab, system, "</s>");
+    }
+
+    for (size_t i = 0; i < toks.size(); ++i) {
+      WORD &word = (*this)[startPos];
       word.CreateFromString(vocab, system, toks[i]);
+      ++startPos;
     }
   }
 };

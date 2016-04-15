@@ -33,11 +33,9 @@ Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
   vector<string> toks = Tokenize(str);
   size_t size = toks.size();
 
-  /*
    if (addBOSEOS) {
-   size += 2;
+     size += 2;
    }
-   */
 
   Sentence *ret;
 
