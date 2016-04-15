@@ -53,22 +53,23 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../boost/lib64&quot;"/>
 								</option>
 								<option id="gnu.cpp.link.option.libs.1087215166" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="xmlrpc_xmltok"/>
+									<listOptionValue builtIn="false" value="xmlrpc_xmlparse"/>
+									<listOptionValue builtIn="false" value="xmlrpc_util++"/>
+									<listOptionValue builtIn="false" value="xmlrpc_util"/>
+									<listOptionValue builtIn="false" value="xmlrpc_server_abyss++"/>
+									<listOptionValue builtIn="false" value="xmlrpc_server_abyss"/>
+									<listOptionValue builtIn="false" value="xmlrpc_server++"/>
+									<listOptionValue builtIn="false" value="xmlrpc_server"/>
+									<listOptionValue builtIn="false" value="xmlrpc_abyss"/>
+									<listOptionValue builtIn="false" value="xmlrpc++"/>
+									<listOptionValue builtIn="false" value="xmlrpc"/>
 									<listOptionValue builtIn="false" value="moses"/>
 									<listOptionValue builtIn="false" value="cmph"/>
 									<listOptionValue builtIn="false" value="search"/>
 									<listOptionValue builtIn="false" value="OnDiskPt"/>
 									<listOptionValue builtIn="false" value="lm"/>
 									<listOptionValue builtIn="false" value="util"/>
-									<listOptionValue builtIn="false" value="xmlrpc_server_abyss++"/>
-									<listOptionValue builtIn="false" value="xmlrpc_server++"/>
-									<listOptionValue builtIn="false" value="xmlrpc_server_abyss"/>
-									<listOptionValue builtIn="false" value="xmlrpc_server"/>
-									<listOptionValue builtIn="false" value="xmlrpc_abyss"/>
-									<listOptionValue builtIn="false" value="xmlrpc++ "/>
-									<listOptionValue builtIn="false" value="xmlrpc"/>
-									<listOptionValue builtIn="false" value="xmlrpc_util"/>
-									<listOptionValue builtIn="false" value="xmlrpc_xmlparse"/>
-									<listOptionValue builtIn="false" value="xmlrpc_xmltok"/>
 									<listOptionValue builtIn="false" value="pthread"/>
 									<listOptionValue builtIn="false" value="boost_serialization"/>
 									<listOptionValue builtIn="false" value="boost_iostreams"/>

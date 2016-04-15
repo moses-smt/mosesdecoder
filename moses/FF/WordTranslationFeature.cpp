@@ -111,8 +111,7 @@ void WordTranslationFeature::Load(AllOptions::ptr const& opts)
     }
 
     inFileSource.close();
-  } else if (!m_filePathSource.empty() || !m_filePathTarget.empty()) {
-    return;
+  } else {
     // restricted source word vocabulary
     ifstream inFileSource(m_filePathSource.c_str());
     UTIL_THROW_IF2(!inFileSource, "could not open file " << m_filePathSource);

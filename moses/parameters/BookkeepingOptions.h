@@ -1,4 +1,5 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
+#pragma once
 #include "moses/Parameter.h"
 #include "OptionsBaseClass.h"
 
