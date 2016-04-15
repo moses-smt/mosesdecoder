@@ -10,6 +10,7 @@
 #include "../Manager.h"
 #include "../../MemPool.h"
 #include "../../System.h"
+#include "../../PhraseBased/TargetPhrases.h"
 
 using namespace std;
 

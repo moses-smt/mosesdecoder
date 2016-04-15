@@ -9,7 +9,6 @@
 #include <sstream>
 #include "System.h"
 #include "ManagerBase.h"
-#include "TargetPhrases.h"
 #include "Phrase.h"
 #include "InputPathsBase.h"
 #include "InputPathBase.h"

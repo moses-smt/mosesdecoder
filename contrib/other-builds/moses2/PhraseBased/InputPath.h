@@ -13,6 +13,7 @@
 
 namespace Moses2
 {
+class TargetPhrases;
 
 class InputPath: public InputPathBase
 {

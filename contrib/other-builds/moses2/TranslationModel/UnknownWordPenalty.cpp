@@ -11,6 +11,7 @@
 #include "../PhraseBased/Manager.h"
 #include "../PhraseBased/TargetPhraseImpl.h"
 #include "../PhraseBased/InputPath.h"
+#include "../PhraseBased/TargetPhrases.h"
 #include "../SCFG/InputPath.h"
 
 using namespace std;

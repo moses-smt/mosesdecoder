@@ -10,7 +10,6 @@
 #include <iostream>
 #include <vector>
 #include "SubPhrase.h"
-#include "TargetPhrases.h"
 #include "legacy/Range.h"
 
 namespace Moses2

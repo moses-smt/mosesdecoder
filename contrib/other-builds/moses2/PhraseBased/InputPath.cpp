@@ -6,6 +6,7 @@
  */
 #include <boost/foreach.hpp>
 #include "InputPath.h"
+#include "TargetPhrases.h"
 #include "../TranslationModel/PhraseTable.h"
 
 namespace Moses2

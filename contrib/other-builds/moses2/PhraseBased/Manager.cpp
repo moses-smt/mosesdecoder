@@ -21,12 +21,12 @@
  #include "CubePruningBitmapStack/Search.h"
  */
 #include "../System.h"
-#include "../TargetPhrases.h"
 #include "../Phrase.h"
 #include "../InputPathsBase.h"
 #include "../Sentence.h"
 #include "../TranslationModel/PhraseTable.h"
 #include "../legacy/Range.h"
+#include "../PhraseBased/TargetPhrases.h"
 
 using namespace std;
 

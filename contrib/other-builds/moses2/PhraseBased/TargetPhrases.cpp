@@ -7,7 +7,7 @@
 #include <cassert>
 #include <boost/foreach.hpp>
 #include "TargetPhrases.h"
-#include "Phrase.h"
+#include "../Phrase.h"
 
 using namespace std;
 

@@ -15,6 +15,7 @@
 #include "../FF/FeatureFunctions.h"
 #include "../PhraseBased/TargetPhraseImpl.h"
 #include "../PhraseBased/Manager.h"
+#include "../PhraseBased/TargetPhrases.h"
 #include "../legacy/FactorCollection.h"
 #include "../legacy/ProbingPT/quering.hh"
 #include "../legacy/Util2.h"

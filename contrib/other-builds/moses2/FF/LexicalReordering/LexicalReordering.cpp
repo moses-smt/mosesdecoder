@@ -19,6 +19,7 @@
 #include "../../legacy/InputFileStream.h"
 #include "../../legacy/Util2.h"
 #include "../../legacy/CompactPT/LexicalReorderingTableCompact.h"
+#include "../../PhraseBased/TargetPhrases.h"
 
 using namespace std;
 

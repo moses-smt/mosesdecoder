@@ -24,8 +24,10 @@ InputPath::InputPath(MemPool &pool, const SubPhrase &subPhrase,
     ActiveChart *obj = new (&memAddr) ActiveChart();
   }
 
+  /*
   targetPhrases = pool.Allocate<const TargetPhrases*>(numPt);
   Init<const TargetPhrases*>(targetPhrases, numPt, NULL);
+  */
 }
 
 InputPath::~InputPath()

@@ -17,6 +17,7 @@
 #include "../../Sentence.h"
 #include "../../TranslationTask.h"
 #include "../../legacy/Util2.h"
+#include "../../PhraseBased/TargetPhrases.h"
 
 using namespace std;
 

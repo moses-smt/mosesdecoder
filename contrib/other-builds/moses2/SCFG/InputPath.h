@@ -15,6 +15,8 @@ namespace Moses2
 {
 namespace SCFG
 {
+class TargetPhrases;
+
 class ActiveChartEntry
 {
 public:

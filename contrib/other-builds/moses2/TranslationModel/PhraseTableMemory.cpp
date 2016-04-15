@@ -17,6 +17,7 @@
 
 #include "../PhraseBased/InputPath.h"
 #include "../PhraseBased/TargetPhraseImpl.h"
+#include "../PhraseBased/TargetPhrases.h"
 
 #include "../SCFG/PhraseImpl.h"
 #include "../SCFG/TargetPhraseImpl.h"

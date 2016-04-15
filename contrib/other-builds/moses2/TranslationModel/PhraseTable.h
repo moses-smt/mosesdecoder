@@ -7,7 +7,6 @@
 #pragma once
 #include <string>
 #include <boost/unordered_map.hpp>
-#include "../TargetPhrases.h"
 #include "../Word.h"
 #include "../FF/StatelessFeatureFunction.h"
 #include "../legacy/Util2.h"
@@ -19,6 +18,7 @@ class System;
 class InputPathsBase;
 class InputPathBase;
 class Manager;
+class TargetPhrases;
 
 namespace SCFG
 {
