@@ -31,7 +31,7 @@ BUILD_DIR = $(CWD)/opt/build/${URL}
 # you can also specify specific prefixes for different packages:
 XMLRPC_PREFIX ?= ${PREFIX}
 CMPH_PREFIX   ?= ${PREFIX}
-IRSTLM_PREFIX ?= ${PREFIX}
+IRSTLM_PREFIX ?= ${PREFIX}/irstlm-5.80.08
 BOOST_PREFIX  ?= ${PREFIX}
 
 # currently, the full enchilada means xmlrpc-c, cmph, irstlm, boost

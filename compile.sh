@@ -4,5 +4,5 @@
 
 set -e -o pipefail
 opt=$(pwd)/opt
-./bjam --with-irstlm=$opt --with-boost=$opt --with-cmph=$opt --with-xmlrpc-c=$opt --with-mm --with-probing-pt -j$(getconf _NPROCESSORS_ONLN) $@
+./bjam --with-irstlm=$opt/irstlm-5.80.08 --with-boost=$opt --with-cmph=$opt --with-xmlrpc-c=$opt --with-mm --with-probing-pt -j$(getconf _NPROCESSORS_ONLN) $@
 
