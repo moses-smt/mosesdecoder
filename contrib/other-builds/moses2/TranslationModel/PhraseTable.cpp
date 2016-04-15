@@ -91,7 +91,13 @@ void PhraseTable::CleanUpAfterSentenceProcessing()
 {
 }
 
+// scfg
 void PhraseTable::InitActiveChart(SCFG::InputPath &path) const
+{
+  UTIL_THROW2("Not implemented");
+}
+
+void PhraseTable::Lookup(SCFG::InputPath &path) const
 {
   UTIL_THROW2("Not implemented");
 }

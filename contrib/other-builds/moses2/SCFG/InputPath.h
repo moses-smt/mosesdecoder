@@ -38,6 +38,8 @@ class InputPath: public InputPathBase
 {
   friend std::ostream& operator<<(std::ostream &, const InputPath &);
 public:
+  const TargetPhrases** targetPhrases;
+
   InputPath(MemPool &pool, const SubPhrase &subPhrase, const Range &range,
       size_t numPt, const InputPath *prefixPath);
   virtual ~InputPath();

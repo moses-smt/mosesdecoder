@@ -55,7 +55,7 @@ void Manager::Decode()
     for (int endPos = startPos + 1; endPos < size + 1; ++endPos) {
       SubPhrase sub = m_input->GetSubPhrase(startPos, endPos - startPos);
       cerr << "sub=" << sub << endl;
-
+      Decode(startPos, endPos);
     }
   }
 }
@@ -63,7 +63,7 @@ void Manager::Decode()
 void Manager::InitActiveChart(size_t pos)
 {
 
-   InputPath &path = static_cast<InputPath&>(*m_inputPaths.GetMatrix().GetValue(pos, 0));
+   InputPath &path = *m_inputPaths.GetMatrix().GetValue(pos, 0);
    cerr << "pos=" << pos << " path=" << path << endl;
    size_t numPt = system.mappings.size();
    cerr << "numPt=" << numPt << endl;
@@ -74,7 +74,19 @@ void Manager::InitActiveChart(size_t pos)
      pt.InitActiveChart(path);
      cerr << "FINISHED InitActiveChart" << endl;
    }
+}
 
+void Manager::Decode(size_t startPos, size_t endPos)
+{
+  InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, endPos - startPos);
+
+  size_t numPt = system.mappings.size();
+  cerr << "numPt=" << numPt << endl;
+
+  for (size_t i = 0; i < numPt; ++i) {
+    const PhraseTable &pt = *system.mappings[i];
+    pt.Lookup(path);
+  }
 }
 
 }

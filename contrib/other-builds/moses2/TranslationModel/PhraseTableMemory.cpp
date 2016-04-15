@@ -202,5 +202,16 @@ void PhraseTableMemory::InitActiveChart(SCFG::InputPath &path) const
   chart.entries.push_back(chartEntry);
 }
 
+void PhraseTableMemory::Lookup(SCFG::InputPath &path) const
+{
+  // terminal
+  const Word &lastWord = path.subPhrase.Back();
+  cerr << "PhraseTableMemory lastWord=" << lastWord << endl;
+
+  const SCFG::InputPath &prefixPath = static_cast<const SCFG::InputPath &>(*path.prefixPath);
+
+
+}
+
 }
 

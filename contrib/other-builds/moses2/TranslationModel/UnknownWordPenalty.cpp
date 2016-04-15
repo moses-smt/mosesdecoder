@@ -11,6 +11,9 @@
 #include "../PhraseBased/Manager.h"
 #include "../PhraseBased/TargetPhraseImpl.h"
 #include "../PhraseBased/InputPath.h"
+#include "../SCFG/InputPath.h"
+
+using namespace std;
 
 namespace Moses2
 {
@@ -103,5 +106,11 @@ void UnknownWordPenalty::InitActiveChart(SCFG::InputPath &path) const
 {
 }
 
+void UnknownWordPenalty::Lookup(SCFG::InputPath &path) const
+{
+  // terminal
+  const Word &lastWord = path.subPhrase.Back();
+  cerr << "UnknownWordPenalty lastWord=" << lastWord << endl;
+}
 }
 

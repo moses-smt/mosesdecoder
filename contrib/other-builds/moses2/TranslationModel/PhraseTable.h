@@ -55,6 +55,7 @@ public:
 
   // scfg
   virtual void InitActiveChart(SCFG::InputPath &path) const;
+  virtual void Lookup(SCFG::InputPath &path) const;
 
 protected:
   std::string m_path;
