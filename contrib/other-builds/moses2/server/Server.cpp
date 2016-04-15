@@ -5,9 +5,9 @@
  *      Author: hieu
  */
 #include <iostream>
+#include "../System.h"
 #include "Server.h"
 #include "Translator.h"
-#include "../System.h"
 #include "../parameters/ServerOptions.h"
 
 using namespace std;

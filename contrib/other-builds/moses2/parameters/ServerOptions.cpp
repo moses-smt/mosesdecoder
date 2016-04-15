@@ -1,8 +1,8 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 #include <boost/foreach.hpp>
 #include <string>
-#include "ServerOptions.h"
 #include "../legacy/Parameter.h"
+#include "ServerOptions.h"
 #include "../legacy/Util2.h"
 #include "util/exception.hh"
 

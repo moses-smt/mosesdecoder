@@ -1,6 +1,6 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
-#include "AllOptions.h"
 #include "../legacy/Parameter.h"
+#include "AllOptions.h"
 
 namespace Moses2
 {
