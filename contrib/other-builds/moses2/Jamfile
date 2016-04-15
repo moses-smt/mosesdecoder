@@ -133,6 +133,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
     SCFG/Stack.cpp
     SCFG/Stacks.cpp
     SCFG/TargetPhraseImpl.cpp
+    SCFG/TargetPhrases.cpp
     SCFG/Word.cpp
 
 	server/Server.cpp

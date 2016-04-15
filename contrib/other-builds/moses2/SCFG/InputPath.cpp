@@ -6,6 +6,7 @@
  */
 #include <boost/foreach.hpp>
 #include "InputPath.h"
+#include "TargetPhrases.h"
 #include "../TranslationModel/PhraseTable.h"
 #include "../MemPool.h"
 
@@ -24,10 +25,11 @@ InputPath::InputPath(MemPool &pool, const SubPhrase &subPhrase,
     ActiveChart *obj = new (&memAddr) ActiveChart();
   }
 
-  /*
-  targetPhrases = pool.Allocate<const TargetPhrases*>(numPt);
-  Init<const TargetPhrases*>(targetPhrases, numPt, NULL);
-  */
+  targetPhrases = pool.Allocate<SCFG::TargetPhrases>(numPt);
+
+  for (size_t i = 0; i < numPt; ++i) {
+    SCFG::TargetPhrases *tps = new (&targetPhrases[i]) SCFG::TargetPhrases();
+  }
 }
 
 InputPath::~InputPath()
