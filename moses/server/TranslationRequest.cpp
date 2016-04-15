@@ -235,6 +235,10 @@ check(std::map<std::string, xmlrpc_c::value> const& param,
 {
   std::map<std::string, xmlrpc_c::value>::const_iterator m = param.find(key);
   if(m == param.end()) return false;
+
+  if (m->second.type() == xmlrpc_c::value::TYPE_BOOLEAN)
+    return xmlrpc_c::value_boolean(m->second);
+
   std::string val = string(xmlrpc_c::value_string(m->second));
   if(val == "true" || val == "True" || val == "TRUE" || val == "1") return true;
   return false;
