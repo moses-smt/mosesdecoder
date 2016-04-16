@@ -198,7 +198,7 @@ void PhraseTableMemory::InitActiveChart(SCFG::InputPath &path) const
 {
   size_t ptInd = GetPtInd();
   SCFG::ActiveChart &chart = path.GetActiveChart(ptInd);
-  SCFG::ActiveChartEntry *chartEntry = new SCFG::ActiveChartEntry(&m_root);
+  ActiveChartEntryMem *chartEntry = new ActiveChartEntryMem(&m_root);
 
   chart.entries.push_back(chartEntry);
 }

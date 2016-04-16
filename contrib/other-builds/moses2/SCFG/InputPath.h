@@ -22,12 +22,8 @@ class TargetPhraseImpl;
 class ActiveChartEntry
 {
 public:
-  const void *data;
-
-  ActiveChartEntry(const void *vdata) :
-      data(vdata)
-  {
-  }
+  ActiveChartEntry()
+  { }
 };
 
 ////////////////////////////////////////////////////////////////////////////

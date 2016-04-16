@@ -8,6 +8,7 @@
 
 #include "PhraseTable.h"
 #include "../legacy/Util2.h"
+#include "../SCFG/InputPath.h"
 
 namespace Moses2
 {
@@ -37,6 +38,16 @@ class PhraseTableMemory: public PhraseTable
 
   };
 //////////////////////////////////////
+  class ActiveChartEntryMem : public SCFG::ActiveChartEntry
+  {
+    const Node *node;
+  public:
+    ActiveChartEntryMem(const Node *vnode)
+    :node(vnode)
+    {}
+  };
+
+  //////////////////////////////////////
 public:
   PhraseTableMemory(size_t startInd, const std::string &line);
   virtual ~PhraseTableMemory();
