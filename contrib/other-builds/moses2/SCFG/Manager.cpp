@@ -40,22 +40,22 @@ void Manager::Decode()
   //cerr << "START ParseInput()" << endl;
   ParseInput(true);
 
-  size_t size = GetInput().GetSize();
+  size_t inputSize = GetInput().GetSize();
   //cerr << "size=" << size << endl;
 
   m_inputPaths.Init(GetInput(), *this);
   //cerr << "CREATED m_inputPaths" << endl;
 
-  m_stacks.Init(*this, size);
+  m_stacks.Init(*this, inputSize);
   //cerr << "CREATED m_stacks" << endl;
 
-  for (int startPos = size - 1; startPos >= 0; --startPos) {
+  for (int startPos = inputSize - 1; startPos >= 0; --startPos) {
     InitActiveChart(startPos);
 
-    for (int endPos = startPos + 1; endPos < size + 1; ++endPos) {
-      SubPhrase sub = m_input->GetSubPhrase(startPos, endPos - startPos);
+    for (int phraseSize = 1; phraseSize < (inputSize - startPos + 1); ++phraseSize) {
+      SubPhrase sub = m_input->GetSubPhrase(startPos, phraseSize);
       //cerr << "sub=" << sub << endl;
-      Decode(startPos, endPos);
+      Decode(startPos, phraseSize);
     }
   }
 }
@@ -76,9 +76,10 @@ void Manager::InitActiveChart(size_t pos)
    }
 }
 
-void Manager::Decode(size_t startPos, size_t endPos)
+void Manager::Decode(size_t startPos, size_t size)
 {
-  InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, endPos - startPos);
+  InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, size);
+  cerr << "path=" << path << endl;
 
   size_t numPt = system.mappings.size();
   //cerr << "numPt=" << numPt << endl;
@@ -90,7 +91,7 @@ void Manager::Decode(size_t startPos, size_t endPos)
 
   size_t tpsNum = path.targetPhrases.GetSize();
   if (tpsNum) {
-    cerr << tpsNum << " " << path << endl;
+    //cerr << tpsNum << " " << path << endl;
   }
 }
 

@@ -22,6 +22,7 @@
 #include "../SCFG/PhraseImpl.h"
 #include "../SCFG/TargetPhraseImpl.h"
 #include "../SCFG/InputPath.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -148,7 +149,7 @@ void PhraseTableMemory::Load(System &system)
     }
     toks.clear();
     TokenizeMultiCharSeparator(toks, line, "|||");
-    assert(toks.size() >= 3);
+    UTIL_THROW_IF2(toks.size() < 3, "Wrong format");
     //cerr << "line=" << line << endl;
 
     Phrase *source;
@@ -223,23 +224,29 @@ void PhraseTableMemory::Lookup(MemPool &pool, const System &system, SCFG::InputP
   // terminal
   const Word &lastWord = path.subPhrase.Back();
   //cerr << "PhraseTableMemory lastWord=" << lastWord << endl;
+  //cerr << "path=" << path << endl;
 
   const SCFG::InputPath *prefixPath = static_cast<const SCFG::InputPath*>(path.prefixPath);
-  assert(prefixPath);
+  UTIL_THROW_IF2(prefixPath == NULL, "prefixPath == NULL");
 
   BOOST_FOREACH(const SCFG::ActiveChartEntry *entry, prefixPath->GetActiveChart(ptInd).entries) {
     const ActiveChartEntryMem *entryCast = static_cast<const ActiveChartEntryMem*>(entry);
     const Node *node = entryCast->node;
+    UTIL_THROW_IF2(node == NULL, "node == NULL");
     const Node *nextNode = node->Find(lastWord);
 
-    // new entries
-    SCFG::ActiveChart &chart = path.GetActiveChart(ptInd);
-    ActiveChartEntryMem *chartEntry = new ActiveChartEntryMem(nextNode);
+    if (nextNode) {
+      // new entries
+      SCFG::ActiveChart &chart = path.GetActiveChart(ptInd);
+      ActiveChartEntryMem *chartEntry = new ActiveChartEntryMem(nextNode);
 
-    chart.entries.push_back(chartEntry);
+      chart.entries.push_back(chartEntry);
 
-    // look up lhs and find tps
+      // there are some rules
+      if (nextNode->m_targetPhrases) {
 
+      }
+    }
   }
 
 }

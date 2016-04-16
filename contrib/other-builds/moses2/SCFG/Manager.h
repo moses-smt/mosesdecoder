@@ -37,7 +37,7 @@ protected:
   InputPaths m_inputPaths;
 
   void InitActiveChart(size_t pos);
-  void Decode(size_t startPos, size_t endPos);
+  void Decode(size_t startPos, size_t size);
 };
 
 }

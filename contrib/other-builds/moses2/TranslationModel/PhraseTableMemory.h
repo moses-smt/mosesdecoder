@@ -19,6 +19,8 @@ class PhraseTableMemory: public PhraseTable
   class Node
   {
   public:
+    TargetPhrases *m_targetPhrases;
+
     Node();
     ~Node();
     void AddRule(Phrase &source, TargetPhrase *target);
@@ -31,7 +33,6 @@ class PhraseTableMemory: public PhraseTable
     typedef boost::unordered_map<Word, Node, UnorderedComparer<Word>,
         UnorderedComparer<Word> > Children;
     Children m_children;
-    TargetPhrases *m_targetPhrases;
     Phrase *m_source;
     std::vector<TargetPhrase*> *m_unsortedTPS;
 
