@@ -207,7 +207,7 @@ void PhraseTableMemory::Lookup(MemPool &pool, const System &system, SCFG::InputP
 {
   // terminal
   const Word &lastWord = path.subPhrase.Back();
-  cerr << "PhraseTableMemory lastWord=" << lastWord << endl;
+  //cerr << "PhraseTableMemory lastWord=" << lastWord << endl;
 
   const SCFG::InputPath &prefixPath = static_cast<const SCFG::InputPath &>(*path.prefixPath);
 

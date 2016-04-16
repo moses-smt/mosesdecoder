@@ -112,11 +112,11 @@ void UnknownWordPenalty::Lookup(MemPool &pool, const System &system, SCFG::Input
 {
   // terminal
   const Word &lastWord = path.subPhrase.Back();
-  cerr << "UnknownWordPenalty lastWord=" << lastWord << endl;
+  //cerr << "UnknownWordPenalty lastWord=" << lastWord << endl;
 
   if (path.range.GetNumWordsCovered() == 1) {
     const Factor *factor = lastWord[0];
-    SCFG::TargetPhraseImpl *tp = new SCFG::TargetPhraseImpl(pool, *this, system, 1);
+    SCFG::TargetPhraseImpl *tp = new (pool.Allocate<SCFG::TargetPhraseImpl>(1)) SCFG::TargetPhraseImpl(pool, *this, system, 1);
     Word &word = (*tp)[0];
     word[0] = system.GetVocab().AddFactor(factor->GetString(), system, false);
 

@@ -36,8 +36,8 @@ void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
 
     SCFG::InputPath *path = new (pool.Allocate<SCFG::InputPath>()) SCFG::InputPath(pool,
         subPhrase, range, numPt, NULL);
-    cerr << startPos << " "
-        << " path=" << *path << endl;
+    //cerr << startPos << " "
+    //    << " path=" << *path << endl;
     m_inputPaths.push_back(path);
     m_matrix->SetValue(startPos, 0, path);
 
@@ -55,8 +55,8 @@ void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
 
       SCFG::InputPath *path = new (pool.Allocate<SCFG::InputPath>()) SCFG::InputPath(pool,
           subPhrase, range, numPt, prefixPath);
-      cerr << startPos << " " << (phaseSize - 1)
-          << " path=" << *path << endl;
+      //cerr << startPos << " " << (phaseSize - 1)
+      //    << " path=" << *path << endl;
       m_inputPaths.push_back(path);
 
       prefixPath = path;
