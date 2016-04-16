@@ -46,7 +46,7 @@ public:
       InputPathBase &inputPath) const;
 
   virtual void InitActiveChart(SCFG::InputPath &path) const;
-  void Lookup(SCFG::InputPath &path) const;
+  void Lookup(MemPool &pool, const System &system, SCFG::InputPath &path) const;
 
 protected:
   Node m_root;

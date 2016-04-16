@@ -203,7 +203,7 @@ void PhraseTableMemory::InitActiveChart(SCFG::InputPath &path) const
   chart.entries.push_back(chartEntry);
 }
 
-void PhraseTableMemory::Lookup(SCFG::InputPath &path) const
+void PhraseTableMemory::Lookup(MemPool &pool, const System &system, SCFG::InputPath &path) const
 {
   // terminal
   const Word &lastWord = path.subPhrase.Back();

@@ -24,12 +24,6 @@ InputPath::InputPath(MemPool &pool, const SubPhrase &subPhrase,
     ActiveChart &memAddr = m_activeChart[i];
     ActiveChart *obj = new (&memAddr) ActiveChart();
   }
-
-  targetPhrases = pool.Allocate<SCFG::TargetPhrases>(numPt);
-
-  for (size_t i = 0; i < numPt; ++i) {
-    SCFG::TargetPhrases *tps = new (&targetPhrases[i]) SCFG::TargetPhrases();
-  }
 }
 
 InputPath::~InputPath()
@@ -41,6 +35,11 @@ std::ostream& operator<<(std::ostream &out, const InputPath &obj)
 {
   out << obj.range << " " << obj.subPhrase;
   return out;
+}
+
+void InputPath::AddTargetPhrase(const PhraseTable &pt, const SCFG::TargetPhraseImpl *tp)
+{
+  targetPhrases.AddTargetPhrase(*tp);
 }
 
 }

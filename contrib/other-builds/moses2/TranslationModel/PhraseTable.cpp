@@ -97,7 +97,7 @@ void PhraseTable::InitActiveChart(SCFG::InputPath &path) const
   UTIL_THROW2("Not implemented");
 }
 
-void PhraseTable::Lookup(SCFG::InputPath &path) const
+void PhraseTable::Lookup(MemPool &pool, const System &system, SCFG::InputPath &path) const
 {
   UTIL_THROW2("Not implemented");
 }

@@ -10,12 +10,14 @@
 #include <iostream>
 #include <vector>
 #include "../InputPathBase.h"
+#include "TargetPhrases.h"
 
 namespace Moses2
 {
 namespace SCFG
 {
 class TargetPhrases;
+class TargetPhraseImpl;
 
 class ActiveChartEntry
 {
@@ -40,7 +42,7 @@ class InputPath: public InputPathBase
 {
   friend std::ostream& operator<<(std::ostream &, const InputPath &);
 public:
-  SCFG::TargetPhrases* targetPhrases;
+  SCFG::TargetPhrases targetPhrases;
 
   InputPath(MemPool &pool, const SubPhrase &subPhrase, const Range &range,
       size_t numPt, const InputPath *prefixPath);
@@ -50,6 +52,8 @@ public:
   {
     return m_activeChart[ptInd];
   }
+
+  void AddTargetPhrase(const PhraseTable &pt, const SCFG::TargetPhraseImpl *tp);
 
 protected:
   ActiveChart *m_activeChart;

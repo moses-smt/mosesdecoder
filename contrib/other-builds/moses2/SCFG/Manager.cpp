@@ -85,7 +85,7 @@ void Manager::Decode(size_t startPos, size_t endPos)
 
   for (size_t i = 0; i < numPt; ++i) {
     const PhraseTable &pt = *system.mappings[i];
-    pt.Lookup(path);
+    pt.Lookup(GetPool(), system, path);
   }
 }
 

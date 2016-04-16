@@ -13,6 +13,7 @@
 #include "../PhraseBased/InputPath.h"
 #include "../PhraseBased/TargetPhrases.h"
 #include "../SCFG/InputPath.h"
+#include "../SCFG/TargetPhraseImpl.h"
 
 using namespace std;
 
@@ -107,11 +108,22 @@ void UnknownWordPenalty::InitActiveChart(SCFG::InputPath &path) const
 {
 }
 
-void UnknownWordPenalty::Lookup(SCFG::InputPath &path) const
+void UnknownWordPenalty::Lookup(MemPool &pool, const System &system, SCFG::InputPath &path) const
 {
   // terminal
   const Word &lastWord = path.subPhrase.Back();
   cerr << "UnknownWordPenalty lastWord=" << lastWord << endl;
+
+  if (path.range.GetNumWordsCovered() == 1) {
+    const Factor *factor = lastWord[0];
+    SCFG::TargetPhraseImpl *tp = new SCFG::TargetPhraseImpl(pool, *this, system, 1);
+    Word &word = (*tp)[0];
+    word[0] = system.GetVocab().AddFactor(factor->GetString(), system, false);
+
+    tp->lhs[0] = system.GetVocab().AddFactor("[X]", system, true);
+
+    path.AddTargetPhrase(*this, tp);
+  }
 }
 }
 
