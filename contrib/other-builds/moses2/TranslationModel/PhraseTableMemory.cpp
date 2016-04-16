@@ -244,7 +244,12 @@ void PhraseTableMemory::Lookup(MemPool &pool, const System &system, SCFG::InputP
 
       // there are some rules
       if (nextNode->m_targetPhrases) {
-
+        TargetPhrases::const_iterator iter;
+        for (iter = nextNode->m_targetPhrases->begin(); iter != nextNode->m_targetPhrases->end(); ++iter) {
+          const TargetPhrase *tp = *iter;
+          const SCFG::TargetPhraseImpl *tpCast = static_cast<const SCFG::TargetPhraseImpl*>(tp);
+          path.AddTargetPhrase(*this, tpCast);
+        }
       }
     }
   }
