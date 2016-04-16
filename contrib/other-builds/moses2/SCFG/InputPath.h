@@ -44,10 +44,10 @@ public:
       size_t numPt, const InputPath *prefixPath);
   virtual ~InputPath();
 
+  const ActiveChart &GetActiveChart(size_t ptInd) const
+  { return m_activeChart[ptInd]; }
   ActiveChart &GetActiveChart(size_t ptInd)
-  {
-    return m_activeChart[ptInd];
-  }
+  { return m_activeChart[ptInd]; }
 
   void AddTargetPhrase(const PhraseTable &pt, const SCFG::TargetPhraseImpl *tp);
 

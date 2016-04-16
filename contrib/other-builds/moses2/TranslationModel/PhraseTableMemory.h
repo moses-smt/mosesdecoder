@@ -23,6 +23,7 @@ class PhraseTableMemory: public PhraseTable
     ~Node();
     void AddRule(Phrase &source, TargetPhrase *target);
     TargetPhrases *Find(const Phrase &source, size_t pos = 0) const;
+    const PhraseTableMemory::Node *Find(const Word &word) const;
 
     void SortAndPrune(size_t tableLimit, MemPool &pool, System &system);
 
@@ -40,8 +41,9 @@ class PhraseTableMemory: public PhraseTable
 //////////////////////////////////////
   class ActiveChartEntryMem : public SCFG::ActiveChartEntry
   {
-    const Node *node;
   public:
+    const Node *node;
+
     ActiveChartEntryMem(const Node *vnode)
     :node(vnode)
     {}

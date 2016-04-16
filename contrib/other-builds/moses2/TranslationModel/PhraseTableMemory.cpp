@@ -82,6 +82,19 @@ TargetPhrases *PhraseTableMemory::Node::Find(const Phrase &source,
   }
 }
 
+const PhraseTableMemory::Node *PhraseTableMemory::Node::Find(const Word &word) const
+{
+  Children::const_iterator iter = m_children.find(word);
+  if (iter == m_children.end()) {
+    return NULL;
+  }
+  else {
+    const Node &child = iter->second;
+    return &child;
+  }
+
+}
+
 void PhraseTableMemory::Node::SortAndPrune(size_t tableLimit, MemPool &pool,
     System &system)
 {
@@ -205,12 +218,29 @@ void PhraseTableMemory::InitActiveChart(SCFG::InputPath &path) const
 
 void PhraseTableMemory::Lookup(MemPool &pool, const System &system, SCFG::InputPath &path) const
 {
+  size_t ptInd = GetPtInd();
+
   // terminal
   const Word &lastWord = path.subPhrase.Back();
   //cerr << "PhraseTableMemory lastWord=" << lastWord << endl;
 
-  const SCFG::InputPath &prefixPath = static_cast<const SCFG::InputPath &>(*path.prefixPath);
+  const SCFG::InputPath *prefixPath = static_cast<const SCFG::InputPath*>(path.prefixPath);
+  assert(prefixPath);
 
+  BOOST_FOREACH(const SCFG::ActiveChartEntry *entry, prefixPath->GetActiveChart(ptInd).entries) {
+    const ActiveChartEntryMem *entryCast = static_cast<const ActiveChartEntryMem*>(entry);
+    const Node *node = entryCast->node;
+    const Node *nextNode = node->Find(lastWord);
+
+    // new entries
+    SCFG::ActiveChart &chart = path.GetActiveChart(ptInd);
+    ActiveChartEntryMem *chartEntry = new ActiveChartEntryMem(nextNode);
+
+    chart.entries.push_back(chartEntry);
+
+    // look up lhs and find tps
+
+  }
 
 }
 
