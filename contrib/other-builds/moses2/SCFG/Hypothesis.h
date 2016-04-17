@@ -22,6 +22,11 @@ public:
   virtual SCORE GetFutureScore() const;
   virtual void EvaluateWhenApplied();
 
+  const TargetPhrase &GetTargetPhrase() const
+  {
+    return *m_targetPhrase;
+  }
+
 protected:
   const SCFG::TargetPhrase *m_targetPhrase;
   const InputPathBase *m_path;
