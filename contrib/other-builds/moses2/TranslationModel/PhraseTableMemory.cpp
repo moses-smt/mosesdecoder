@@ -14,6 +14,7 @@
 #include "../Scores.h"
 #include "../InputPathsBase.h"
 #include "../legacy/InputFileStream.h"
+#include "util/exception.hh"
 
 #include "../PhraseBased/InputPath.h"
 #include "../PhraseBased/TargetPhraseImpl.h"
@@ -22,7 +23,9 @@
 #include "../SCFG/PhraseImpl.h"
 #include "../SCFG/TargetPhraseImpl.h"
 #include "../SCFG/InputPath.h"
-#include "util/exception.hh"
+#include "../SCFG/Stack.h"
+#include "../SCFG/Stacks.h"
+
 
 using namespace std;
 
@@ -231,32 +234,7 @@ void PhraseTableMemory::Lookup(MemPool &pool,
 
   const SCFG::InputPath *prefixPath = static_cast<const SCFG::InputPath*>(path.prefixPath);
   UTIL_THROW_IF2(prefixPath == NULL, "prefixPath == NULL");
-
-  BOOST_FOREACH(const SCFG::ActiveChartEntry *entry, prefixPath->GetActiveChart(ptInd).entries) {
-    const ActiveChartEntryMem *entryCast = static_cast<const ActiveChartEntryMem*>(entry);
-    const Node *node = entryCast->node;
-    UTIL_THROW_IF2(node == NULL, "node == NULL");
-    const Node *nextNode = node->Find(lastWord);
-
-    if (nextNode) {
-      // new entries
-      SCFG::ActiveChart &chart = path.GetActiveChart(ptInd);
-      ActiveChartEntryMem *chartEntry = new ActiveChartEntryMem(nextNode);
-
-      chart.entries.push_back(chartEntry);
-
-      // there are some rules
-      const TargetPhrases *tps = nextNode->GetTargetPhrases();
-      if (tps) {
-        TargetPhrases::const_iterator iter;
-        for (iter = tps->begin(); iter != tps->end(); ++iter) {
-          const TargetPhrase *tp = *iter;
-          const SCFG::TargetPhraseImpl *tpCast = static_cast<const SCFG::TargetPhraseImpl*>(tp);
-          path.AddTargetPhrase(*this, tpCast);
-        }
-      }
-    }
-  }
+  LookupGivenPrefixPath(*prefixPath, lastWord, path);
 
   // NON-TERMINAL
   //const SCFG::InputPath *prefixPath = static_cast<const SCFG::InputPath*>(path.prefixPath);
@@ -267,7 +245,64 @@ void PhraseTableMemory::Lookup(MemPool &pool,
     size_t startPos = prefixRange.GetEndPos() + 1;
     size_t ntSize = endPos - startPos + 1;
 
+    const SCFG::Stack &ntStack = stacks.GetStack(startPos, ntSize);
+    const SCFG::Stack::Coll &coll = ntStack.GetColl();
+    BOOST_FOREACH (const SCFG::Stack::Coll::value_type &valPair, coll) {
+      const SCFG::Word &ntSought = valPair.first;
+
+
+    }
+
     prefixPath = static_cast<const SCFG::InputPath*>(prefixPath->prefixPath);
+  }
+}
+
+void PhraseTableMemory::LookupGivenPrefixPath(const SCFG::InputPath &prefixPath,
+    const Word &wordSought,
+    SCFG::InputPath &path) const
+{
+  size_t ptInd = GetPtInd();
+
+  BOOST_FOREACH(const SCFG::ActiveChartEntry *entry, prefixPath.GetActiveChart(ptInd).entries) {
+    const ActiveChartEntryMem *entryCast = static_cast<const ActiveChartEntryMem*>(entry);
+    const Node *node = entryCast->node;
+    UTIL_THROW_IF2(node == NULL, "node == NULL");
+
+    LookupGivenNode(*node, wordSought, path);
+  }
+}
+
+void PhraseTableMemory::LookupGivenNode(const Node &node,
+    const Word &wordSought,
+    SCFG::InputPath &path) const
+{
+  size_t ptInd = GetPtInd();
+
+  const Node *nextNode = node.Find(wordSought);
+
+  if (nextNode) {
+    // new entries
+    SCFG::ActiveChart &chart = path.GetActiveChart(ptInd);
+    ActiveChartEntryMem *chartEntry = new ActiveChartEntryMem(nextNode);
+
+    chart.entries.push_back(chartEntry);
+
+    // there are some rules
+    AddTargetPhrasesToPath(*nextNode, path);
+  }
+
+}
+
+void PhraseTableMemory::AddTargetPhrasesToPath(const PhraseTableMemory::Node &node, SCFG::InputPath &path) const
+{
+  const TargetPhrases *tps = node.GetTargetPhrases();
+  if (tps) {
+    TargetPhrases::const_iterator iter;
+    for (iter = tps->begin(); iter != tps->end(); ++iter) {
+      const TargetPhrase *tp = *iter;
+      const SCFG::TargetPhraseImpl *tpCast = static_cast<const SCFG::TargetPhraseImpl*>(tp);
+      path.AddTargetPhrase(*this, tpCast);
+    }
   }
 
 }

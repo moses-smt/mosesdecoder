@@ -15,6 +15,9 @@ class Stacks
 public:
   void Init(SCFG::Manager &mgr, size_t size);
 
+  const Stack &GetStack(size_t startPos, size_t size) const
+  { return *m_cells[startPos][size - 1]; }
+
   Stack &GetStack(size_t startPos, size_t size)
   { return *m_cells[startPos][size - 1]; }
 

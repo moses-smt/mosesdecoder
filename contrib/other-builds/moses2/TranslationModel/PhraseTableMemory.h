@@ -70,6 +70,14 @@ public:
 
 protected:
   Node m_root;
+
+  void LookupGivenPrefixPath(const SCFG::InputPath &prefixPath,
+      const Word &wordSought,
+      SCFG::InputPath &path) const;
+  void LookupGivenNode(const Node &node,
+      const Word &wordSought,
+      SCFG::InputPath &path) const;
+  void AddTargetPhrasesToPath(const Node &node, SCFG::InputPath &path) const;
 };
 
 }
