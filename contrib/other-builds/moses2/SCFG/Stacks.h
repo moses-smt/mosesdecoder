@@ -15,6 +15,9 @@ class Stacks
 public:
   void Init(SCFG::Manager &mgr, size_t size);
 
+  Stack &GetStack(size_t startPos, size_t size)
+  { return *m_cells[startPos][size - 1]; }
+
 protected:
   std::vector<std::vector<Stack*> > m_cells;
 

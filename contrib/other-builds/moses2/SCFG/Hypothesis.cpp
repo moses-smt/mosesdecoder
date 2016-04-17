@@ -15,7 +15,6 @@ void Hypothesis::Init(SCFG::Manager &mgr, const InputPathBase &path, const SCFG:
 {
   m_mgr = &mgr;
   m_targetPhrase = &tp;
-
 }
 
 SCORE Hypothesis::GetFutureScore() const

@@ -4,7 +4,7 @@
  *  Created on: 23 Oct 2015
  *      Author: hieu
  */
-
+#include <boost/functional/hash.hpp>
 #include "Word.h"
 #include "../legacy/Util2.h"
 
@@ -46,6 +46,13 @@ void Word::CreateFromString(FactorCollection &vocab, const System &system,
     const Factor *factor = vocab.AddFactor(tok, system, false);
     m_factors[i] = factor;
   }
+}
+
+size_t Word::hash() const
+{
+  size_t ret = Moses2::Word::hash();
+  boost::hash_combine(ret, isNonTerminal);
+  return ret;
 }
 
 }

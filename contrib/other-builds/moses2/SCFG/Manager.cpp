@@ -100,13 +100,19 @@ void Manager::Lookup(size_t startPos, size_t size)
 void Manager::Decode(size_t startPos, size_t size)
 {
   InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, size);
+  Stack &stack = m_stacks.GetStack(startPos, size);
+
+  Recycler<HypothesisBase*> &hypoRecycler = GetHypoRecycle();
+
   SCFG::TargetPhrases &tps = path.targetPhrases;
 
   SCFG::TargetPhrases::const_iterator iter;
   for (iter = tps.begin(); iter != tps.end(); ++iter) {
     const SCFG::TargetPhraseImpl &tp = **iter;
     SCFG::Hypothesis *hypo = new SCFG::Hypothesis(GetPool(), system);
-    //hypo->
+    hypo->Init(*this, path, tp);
+
+    stack.Add(hypo, hypoRecycler, arcLists);
   }
 }
 
