@@ -9,6 +9,7 @@
 #include <sstream>
 #include "Manager.h"
 #include "InputPath.h"
+#include "Hypothesis.h"
 #include "../Sentence.h"
 #include "../System.h"
 #include "../TranslationModel/PhraseTable.h"
@@ -55,6 +56,7 @@ void Manager::Decode()
     for (int phraseSize = 1; phraseSize < (inputSize - startPos + 1); ++phraseSize) {
       SubPhrase sub = m_input->GetSubPhrase(startPos, phraseSize);
       //cerr << "sub=" << sub << endl;
+      Lookup(startPos, phraseSize);
       Decode(startPos, phraseSize);
     }
   }
@@ -76,7 +78,7 @@ void Manager::InitActiveChart(size_t pos)
    }
 }
 
-void Manager::Decode(size_t startPos, size_t size)
+void Manager::Lookup(size_t startPos, size_t size)
 {
   InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, size);
   cerr << "path=" << path << endl;
@@ -92,6 +94,19 @@ void Manager::Decode(size_t startPos, size_t size)
   size_t tpsNum = path.targetPhrases.GetSize();
   if (tpsNum) {
     //cerr << tpsNum << " " << path << endl;
+  }
+}
+
+void Manager::Decode(size_t startPos, size_t size)
+{
+  InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, size);
+  SCFG::TargetPhrases &tps = path.targetPhrases;
+
+  SCFG::TargetPhrases::const_iterator iter;
+  for (iter = tps.begin(); iter != tps.end(); ++iter) {
+    const SCFG::TargetPhraseImpl &tp = **iter;
+    SCFG::Hypothesis *hypo = new SCFG::Hypothesis(GetPool(), system);
+    //hypo->
   }
 }
 
