@@ -89,6 +89,12 @@ template<>
 bool Scan<bool>(const std::string &input);
 
 template<>
+inline S2TParsingAlgorithm Scan<S2TParsingAlgorithm>(const std::string &input)
+{
+  return (S2TParsingAlgorithm) Scan<size_t>(input);
+}
+
+template<>
 inline SearchAlgorithm Scan<SearchAlgorithm>(const std::string &input)
 {
   return (SearchAlgorithm) Scan<size_t>(input);
