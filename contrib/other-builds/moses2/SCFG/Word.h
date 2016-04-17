@@ -34,7 +34,7 @@ public:
 protected:
 };
 
-size_t hash_value(const SCFG::Word &word)
+inline size_t hash_value(const SCFG::Word &word)
 { return word.hash(); }
 
 }
