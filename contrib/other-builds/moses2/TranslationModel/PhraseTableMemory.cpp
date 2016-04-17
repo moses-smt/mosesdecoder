@@ -247,10 +247,11 @@ void PhraseTableMemory::Lookup(MemPool &pool,
 
     const SCFG::Stack &ntStack = stacks.GetStack(startPos, ntSize);
     const SCFG::Stack::Coll &coll = ntStack.GetColl();
+
     BOOST_FOREACH (const SCFG::Stack::Coll::value_type &valPair, coll) {
       const SCFG::Word &ntSought = valPair.first;
 
-
+      LookupGivenPrefixPath(*prefixPath, ntSought, path);
     }
 
     prefixPath = static_cast<const SCFG::InputPath*>(prefixPath->prefixPath);
