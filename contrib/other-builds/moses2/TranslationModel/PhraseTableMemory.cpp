@@ -225,8 +225,6 @@ void PhraseTableMemory::Lookup(MemPool &pool,
     const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
-  size_t ptInd = GetPtInd();
-
   // TERMINAL
   const Word &lastWord = path.subPhrase.Back();
   //cerr << "PhraseTableMemory lastWord=" << lastWord << endl;
@@ -241,7 +239,7 @@ void PhraseTableMemory::Lookup(MemPool &pool,
   size_t endPos = path.range.GetEndPos();
   while (prefixPath) {
     const Range &prefixRange = prefixPath->range;
-    cerr << "prefixRange=" << prefixRange << endl;
+    //cerr << "prefixRange=" << prefixRange << endl;
     size_t startPos = prefixRange.GetEndPos() + 1;
     size_t ntSize = endPos - startPos + 1;
 

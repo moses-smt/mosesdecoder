@@ -21,6 +21,8 @@ public:
   Stack &GetStack(size_t startPos, size_t size)
   { return *m_cells[startPos][size - 1]; }
 
+  void OutputStacks() const;
+
 protected:
   std::vector<std::vector<Stack*> > m_cells;
 

@@ -1,3 +1,4 @@
+#include <boost/foreach.hpp>
 #include "Stacks.h"
 #include "Hypothesis.h"
 #include "TargetPhraseImpl.h"
@@ -37,6 +38,16 @@ Moses2::HypothesisColl &Stack::GetMiniStack(const SCFG::Word &key)
     ret = iter->second;
   }
   return *ret;
+}
+
+size_t Stack::GetSize() const
+{
+  size_t ret = 0;
+  BOOST_FOREACH (const Coll::value_type &valPair, m_coll) {
+    Moses2::HypothesisColl &hypos = *valPair.second;
+    ret += hypos.GetSize();
+  }
+  return ret;
 }
 
 }

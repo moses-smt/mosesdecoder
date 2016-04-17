@@ -60,11 +60,12 @@ void Manager::Decode()
       Decode(startPos, phraseSize);
     }
   }
+
+  m_stacks.OutputStacks();
 }
 
 void Manager::InitActiveChart(size_t pos)
 {
-
    InputPath &path = *m_inputPaths.GetMatrix().GetValue(pos, 0);
    //cerr << "pos=" << pos << " path=" << path << endl;
    size_t numPt = system.mappings.size();
@@ -93,7 +94,7 @@ void Manager::Lookup(size_t startPos, size_t size)
 
   size_t tpsNum = path.targetPhrases.GetSize();
   if (tpsNum) {
-    //cerr << tpsNum << " " << path << endl;
+    cerr << tpsNum << " " << path << endl;
   }
 }
 

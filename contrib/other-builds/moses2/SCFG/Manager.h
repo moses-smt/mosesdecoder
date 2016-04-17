@@ -39,6 +39,7 @@ protected:
   void InitActiveChart(size_t pos);
   void Lookup(size_t startPos, size_t size);
   void Decode(size_t startPos, size_t size);
+
 };
 
 }

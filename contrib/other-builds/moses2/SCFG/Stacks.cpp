@@ -1,9 +1,10 @@
 #include "Stacks.h"
 #include "Stack.h"
 
+using namespace std;
+
 namespace Moses2
 {
-
 namespace SCFG
 {
 
@@ -17,6 +18,28 @@ void Stacks::Init(SCFG::Manager &mgr, size_t size)
       inner.push_back(new Stack(mgr));
     }
   }
+}
+
+void Stacks::OutputStacks() const
+{
+  size_t size = m_cells.size();
+
+  for (size_t startPos = 0; startPos < size; ++startPos) {
+    cerr.width(3);
+    cerr << startPos << " ";
+  }
+  cerr << endl;
+  for (size_t width = 1; width <= size; width++) {
+    for( size_t space = 0; space < width-1; space++ ) {
+      cerr << "  ";
+    }
+    for (size_t startPos = 0; startPos <= size-width; ++startPos) {
+      cerr.width(3);
+      cerr << GetStack(startPos, width).GetSize() << " ";
+    }
+    cerr << endl;
+  }
+
 }
 
 }

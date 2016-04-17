@@ -30,6 +30,8 @@ public:
     return m_coll;
   }
 
+  size_t GetSize() const;
+
   void Add(SCFG::Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
       ArcLists &arcLists);
 
