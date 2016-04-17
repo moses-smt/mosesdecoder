@@ -221,7 +221,7 @@ void PhraseTableMemory::Lookup(MemPool &pool, const System &system, SCFG::InputP
 {
   size_t ptInd = GetPtInd();
 
-  // terminal
+  // TERMINAL
   const Word &lastWord = path.subPhrase.Back();
   //cerr << "PhraseTableMemory lastWord=" << lastWord << endl;
   //cerr << "path=" << path << endl;
@@ -243,15 +243,24 @@ void PhraseTableMemory::Lookup(MemPool &pool, const System &system, SCFG::InputP
       chart.entries.push_back(chartEntry);
 
       // there are some rules
-      if (nextNode->m_targetPhrases) {
+      const TargetPhrases *tps = nextNode->GetTargetPhrases();
+      if (tps) {
         TargetPhrases::const_iterator iter;
-        for (iter = nextNode->m_targetPhrases->begin(); iter != nextNode->m_targetPhrases->end(); ++iter) {
+        for (iter = tps->begin(); iter != tps->end(); ++iter) {
           const TargetPhrase *tp = *iter;
           const SCFG::TargetPhraseImpl *tpCast = static_cast<const SCFG::TargetPhraseImpl*>(tp);
           path.AddTargetPhrase(*this, tpCast);
         }
       }
     }
+  }
+
+  // NON-TERMINAL
+  //const SCFG::InputPath *prefixPath = static_cast<const SCFG::InputPath*>(path.prefixPath);
+  while (prefixPath) {
+
+
+    prefixPath = static_cast<const SCFG::InputPath*>(prefixPath->prefixPath);
   }
 
 }
