@@ -23,6 +23,7 @@ class TargetPhrases;
 namespace SCFG
 {
 class InputPath;
+class Stacks;
 }
 
 ////////////////////////////////////////////////////////////////////////
@@ -55,7 +56,10 @@ public:
 
   // scfg
   virtual void InitActiveChart(SCFG::InputPath &path) const;
-  virtual void Lookup(MemPool &pool, const System &system, SCFG::InputPath &path) const;
+  virtual void Lookup(MemPool &pool,
+      const System &system,
+      const SCFG::Stacks &stacks,
+      SCFG::InputPath &path) const;
 
 protected:
   std::string m_path;

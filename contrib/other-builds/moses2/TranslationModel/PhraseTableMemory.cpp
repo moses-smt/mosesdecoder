@@ -217,7 +217,10 @@ void PhraseTableMemory::InitActiveChart(SCFG::InputPath &path) const
   chart.entries.push_back(chartEntry);
 }
 
-void PhraseTableMemory::Lookup(MemPool &pool, const System &system, SCFG::InputPath &path) const
+void PhraseTableMemory::Lookup(MemPool &pool,
+    const System &system,
+    const SCFG::Stacks &stacks,
+    SCFG::InputPath &path) const
 {
   size_t ptInd = GetPtInd();
 
@@ -257,8 +260,12 @@ void PhraseTableMemory::Lookup(MemPool &pool, const System &system, SCFG::InputP
 
   // NON-TERMINAL
   //const SCFG::InputPath *prefixPath = static_cast<const SCFG::InputPath*>(path.prefixPath);
+  size_t endPos = path.range.GetEndPos();
   while (prefixPath) {
-
+    const Range &prefixRange = prefixPath->range;
+    cerr << "prefixRange=" << prefixRange << endl;
+    size_t startPos = prefixRange.GetEndPos() + 1;
+    size_t ntSize = endPos - startPos + 1;
 
     prefixPath = static_cast<const SCFG::InputPath*>(prefixPath->prefixPath);
   }

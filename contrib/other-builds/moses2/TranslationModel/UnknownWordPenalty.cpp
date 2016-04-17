@@ -108,7 +108,10 @@ void UnknownWordPenalty::InitActiveChart(SCFG::InputPath &path) const
 {
 }
 
-void UnknownWordPenalty::Lookup(MemPool &pool, const System &system, SCFG::InputPath &path) const
+void UnknownWordPenalty::Lookup(MemPool &pool,
+    const System &system,
+    const SCFG::Stacks &stacks,
+    SCFG::InputPath &path) const
 {
   // terminal
   const Word &lastWord = path.subPhrase.Back();
