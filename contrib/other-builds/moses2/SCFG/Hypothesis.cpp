@@ -11,7 +11,7 @@ Hypothesis::Hypothesis(MemPool &pool, const System &system)
 
 }
 
-void Hypothesis::Init(SCFG::Manager &mgr, const InputPathBase &path, const SCFG::TargetPhrase &tp)
+void Hypothesis::Init(SCFG::Manager &mgr, const InputPathBase &path, const SCFG::TargetPhraseImpl &tp)
 {
   m_mgr = &mgr;
   m_targetPhrase = &tp;

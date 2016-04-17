@@ -13,7 +13,7 @@ namespace SCFG
 class Stacks
 {
 public:
-  void Init(Moses2::ManagerBase &mgr, size_t size);
+  void Init(SCFG::Manager &mgr, size_t size);
 
 protected:
   std::vector<std::vector<Stack*> > m_cells;
