@@ -59,7 +59,7 @@ public:
   virtual void Lookup(MemPool &pool,
       const System &system,
       const SCFG::Stacks &stacks,
-      SCFG::InputPath &path) const;
+      SCFG::InputPath &path) const = 0;
 
 protected:
   std::string m_path;

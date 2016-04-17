@@ -314,5 +314,13 @@ void ProbingPT::CreateCache(System &system)
 
 }
 
+void ProbingPT::Lookup(MemPool &pool,
+    const System &system,
+    const SCFG::Stacks &stacks,
+    SCFG::InputPath &path) const
+{
+  UTIL_THROW2("Not implemented");
+}
+
 }
 

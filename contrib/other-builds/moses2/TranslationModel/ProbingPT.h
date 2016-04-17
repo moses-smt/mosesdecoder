@@ -33,6 +33,11 @@ public:
 
   void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
 
+  virtual void Lookup(MemPool &pool,
+      const System &system,
+      const SCFG::Stacks &stacks,
+      SCFG::InputPath &path) const;
+
 protected:
   std::vector<uint64_t> m_sourceVocab; // factor id -> pt id
   std::vector<const Factor*> m_targetVocab; // pt id -> factor*
