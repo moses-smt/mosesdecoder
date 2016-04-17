@@ -95,6 +95,12 @@ inline S2TParsingAlgorithm Scan<S2TParsingAlgorithm>(const std::string &input)
 }
 
 template<>
+inline SourceLabelOverlap Scan<SourceLabelOverlap>(const std::string &input)
+{
+  return (SourceLabelOverlap) Scan<size_t>(input);
+}
+
+template<>
 inline SearchAlgorithm Scan<SearchAlgorithm>(const std::string &input)
 {
   return (SearchAlgorithm) Scan<size_t>(input);
