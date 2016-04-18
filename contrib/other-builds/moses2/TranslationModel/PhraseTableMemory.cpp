@@ -177,12 +177,16 @@ void PhraseTableMemory::Load(System &system)
       source = SCFG::PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
           toks[0]);
       //cerr << "created soure" << endl;
-      target = SCFG::TargetPhraseImpl::CreateFromString(systemPool, *this,
+      SCFG::TargetPhraseImpl *targetSCFG;
+      targetSCFG = SCFG::TargetPhraseImpl::CreateFromString(systemPool, *this,
           system, toks[1]);
+      targetSCFG->SetAlignmentInfo(toks[3]);
+      target = targetSCFG;
       //cerr << "created target" << endl;
       break;
     default:
       abort();
+      break;
     }
 
     target->GetScores().CreateFromString(toks[2], *this, system, true);

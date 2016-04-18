@@ -11,6 +11,7 @@
 #include "../System.h"
 #include "../MemPool.h"
 #include "../PhraseBased/Manager.h"
+#include "../AlignmentInfoCollection.h"
 
 using namespace std;
 
@@ -42,9 +43,15 @@ TargetPhraseImpl *TargetPhraseImpl::CreateFromString(MemPool &pool,
   return ret;
 }
 
-TargetPhraseImpl::TargetPhraseImpl(MemPool &pool, const PhraseTable &pt,
-    const System &system, size_t size) :
-    TargetPhrase(pool, pt, system), PhraseImplTemplate<SCFG::Word>(pool, size)
+TargetPhraseImpl::TargetPhraseImpl(MemPool &pool,
+    const PhraseTable &pt,
+    const System &system,
+    size_t size)
+:TargetPhrase(pool, pt, system)
+,PhraseImplTemplate<SCFG::Word>(pool, size)
+,m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+,m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+
 {
   m_scores = new (pool.Allocate<Scores>()) Scores(system, pool,
       system.featureFunctions.GetNumScores());
@@ -60,6 +67,34 @@ std::ostream& operator<<(std::ostream &out, const TargetPhraseImpl &obj)
 {
   out << (const Phrase&) obj << " SCORES:" << obj.GetScores();
   return out;
+}
+
+void TargetPhraseImpl::SetAlignmentInfo(const std::string &alignString)
+{
+  AlignmentInfo::CollType alignTerm, alignNonTerm;
+
+  vector<string> toks = Tokenize(alignString);
+  for (size_t i = 0; i < toks.size(); ++i) {
+    vector<size_t> alignPair = Tokenize<size_t>(toks[i], "-");
+    UTIL_THROW_IF2(alignPair.size() != 2, "Wrong alignment format");
+
+    size_t sourcePos = alignPair[0];
+    size_t targetPos = alignPair[1];
+
+    if ((*this)[targetPos].isNonTerminal) {
+      alignNonTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
+    } else {
+      alignTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
+    }
+  }
+
+  SetAlignTerm(alignTerm);
+  SetAlignNonTerm(alignNonTerm);
+  //    cerr << "TargetPhrase::SetAlignmentInfo(const StringPiece &alignString) this:|" << *this << "|\n";
+
+  //cerr << "alignTerm=" << alignTerm.size() << endl;
+  //cerr << "alignNonTerm=" << alignNonTerm.size() << endl;
+
 }
 
 }

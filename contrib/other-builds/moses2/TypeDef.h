@@ -96,7 +96,6 @@ enum SourceLabelOverlap {
   SourceLabelOverlapDiscard = 2
 };
 
-
 /////////////////////////
 // MOSES2 only
 
