@@ -113,7 +113,8 @@ void Manager::Decode(size_t startPos, size_t size)
     SCFG::Hypothesis *hypo = new SCFG::Hypothesis(GetPool(), system);
     hypo->Init(*this, path, tp);
 
-    stack.Add(hypo, hypoRecycler, arcLists);
+    StackAdd added = stack.Add(hypo, hypoRecycler, arcLists);
+    cerr << "added=" << added.added << " " << (const Phrase&) tp << endl;
   }
 }
 

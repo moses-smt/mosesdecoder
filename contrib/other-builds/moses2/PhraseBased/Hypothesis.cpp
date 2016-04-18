@@ -176,8 +176,8 @@ void Hypothesis::EvaluateWhenApplied()
   const std::vector<const StatefulFeatureFunction*> &sfffs =
       GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
   BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs){
-  EvaluateWhenApplied(*sfff);
-}
+    EvaluateWhenApplied(*sfff);
+  }
 //cerr << *this << endl;
 }
 

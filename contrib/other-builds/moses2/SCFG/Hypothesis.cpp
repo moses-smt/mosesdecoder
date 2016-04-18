@@ -1,5 +1,9 @@
+#include <boost/foreach.hpp>
 #include "Hypothesis.h"
 #include "Manager.h"
+#include "../System.h"
+#include "../Scores.h"
+#include "../FF/StatefulFeatureFunction.h"
 
 namespace Moses2
 {
@@ -19,11 +23,17 @@ void Hypothesis::Init(SCFG::Manager &mgr, const InputPathBase &path, const SCFG:
 
 SCORE Hypothesis::GetFutureScore() const
 {
-
+  return GetScores().GetTotalScore();
 }
 
 void Hypothesis::EvaluateWhenApplied()
 {
+  const std::vector<const StatefulFeatureFunction*> &sfffs =
+      GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
+  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs){
+    //EvaluateWhenApplied(*sfff);
+  }
+//cerr << *this << endl;
 
 }
 

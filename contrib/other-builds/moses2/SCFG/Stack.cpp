@@ -15,14 +15,14 @@ Stack::Stack(const Manager &mgr)
 {
 }
 
-void Stack::Add(SCFG::Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
+StackAdd Stack::Add(SCFG::Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
     ArcLists &arcLists)
 {
   const SCFG::TargetPhraseImpl &tp = hypo->GetTargetPhrase();
   const SCFG::Word &lhs = tp.lhs;
   HypothesisColl &coll = GetMiniStack(lhs);
   StackAdd added = coll.Add(hypo);
-
+  return added;
 }
 
 Moses2::HypothesisColl &Stack::GetMiniStack(const SCFG::Word &key)
