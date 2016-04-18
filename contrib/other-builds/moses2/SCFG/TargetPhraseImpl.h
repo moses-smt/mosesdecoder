@@ -71,6 +71,13 @@ public:
     m_alignTerm = AlignmentInfoCollection::Instance().Add(coll);
   }
 
+  const AlignmentInfo &GetAlignTerm() const {
+    return *m_alignTerm;
+  }
+  const AlignmentInfo &GetAlignNonTerm() const {
+    return *m_alignNonTerm;
+  }
+
   // ALNREP = alignment representation,
   // see AlignmentInfo constructors for supported representations
   template<typename ALNREP>

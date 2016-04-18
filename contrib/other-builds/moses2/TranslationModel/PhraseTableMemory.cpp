@@ -304,6 +304,7 @@ void PhraseTableMemory::AddTargetPhrasesToPath(const PhraseTableMemory::Node &no
     for (iter = tps->begin(); iter != tps->end(); ++iter) {
       const TargetPhrase *tp = *iter;
       const SCFG::TargetPhraseImpl *tpCast = static_cast<const SCFG::TargetPhraseImpl*>(tp);
+      cerr << "tpCast=" << *tpCast << endl;
       path.AddTargetPhrase(*this, tpCast);
     }
   }
