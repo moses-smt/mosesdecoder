@@ -39,7 +39,7 @@ std::ostream& operator<<(std::ostream &out, const InputPath &obj)
 
 void InputPath::AddTargetPhrase(const PhraseTable &pt, const SCFG::TargetPhraseImpl *tp)
 {
-  targetPhrases.AddTargetPhrase(*tp);
+  //targetPhrases.AddTargetPhrase(*tp);
 }
 
 }

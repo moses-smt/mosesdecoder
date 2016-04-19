@@ -92,10 +92,12 @@ void Manager::Lookup(size_t startPos, size_t size)
     pt.Lookup(GetPool(), system, m_stacks, path);
   }
 
+  /*
   size_t tpsNum = path.targetPhrases.GetSize();
   if (tpsNum) {
     cerr << tpsNum << " " << path << endl;
   }
+  */
 }
 
 void Manager::Decode(size_t startPos, size_t size)
@@ -105,6 +107,7 @@ void Manager::Decode(size_t startPos, size_t size)
 
   Recycler<HypothesisBase*> &hypoRecycler = GetHypoRecycle();
 
+  /*
   SCFG::TargetPhrases &tps = path.targetPhrases;
 
   SCFG::TargetPhrases::const_iterator iter;
@@ -116,6 +119,7 @@ void Manager::Decode(size_t startPos, size_t size)
     StackAdd added = stack.Add(hypo, hypoRecycler, arcLists);
     cerr << "added=" << added.added << " " << (const Phrase&) tp << endl;
   }
+  */
 }
 
 }

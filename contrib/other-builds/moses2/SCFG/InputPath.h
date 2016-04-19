@@ -9,6 +9,7 @@
 
 #include <iostream>
 #include <vector>
+#include <boost/unordered_map.hpp>
 #include "../InputPathBase.h"
 #include "TargetPhrases.h"
 
@@ -19,6 +20,19 @@ namespace SCFG
 class TargetPhrases;
 class TargetPhraseImpl;
 
+////////////////////////////////////////////////////////////////////////////
+//! The range covered by each symbol in the source
+//! Terminals will cover only 1 word, NT can cover multiple words
+class SymbolBind
+{
+public:
+  typedef std::pair<Range, bool> Element;
+    // range, isNT
+  std::vector<Element> coll;
+
+};
+
+////////////////////////////////////////////////////////////////////////////
 class ActiveChartEntry
 {
 public:
@@ -38,7 +52,7 @@ class InputPath: public InputPathBase
 {
   friend std::ostream& operator<<(std::ostream &, const InputPath &);
 public:
-  SCFG::TargetPhrases targetPhrases;
+  boost::unordered_map<SymbolBind, SCFG::TargetPhrases> targetPhrases;
 
   InputPath(MemPool &pool, const SubPhrase &subPhrase, const Range &range,
       size_t numPt, const InputPath *prefixPath);
