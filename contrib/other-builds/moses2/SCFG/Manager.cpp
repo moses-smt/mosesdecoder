@@ -102,6 +102,8 @@ void Manager::Lookup(size_t startPos, size_t size)
 
 void Manager::Decode(size_t startPos, size_t size)
 {
+  //cerr << "size=" << size << " " << startPos << endl;
+
   InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, size);
   Stack &stack = m_stacks.GetStack(startPos, size);
 
@@ -109,20 +111,21 @@ void Manager::Decode(size_t startPos, size_t size)
 
   boost::unordered_map<SCFG::SymbolBind, SCFG::TargetPhrases>::const_iterator iterOuter;
   for (iterOuter = path.targetPhrases.begin(); iterOuter != path.targetPhrases.end(); ++iterOuter) {
+    const SCFG::SymbolBind &symbolBind = iterOuter->first;
+
     const SCFG::TargetPhrases &tps = iterOuter->second;
+    //cerr << "symbolBind=" << symbolBind << " " << tps.GetSize() << endl;
 
     SCFG::TargetPhrases::const_iterator iter;
     for (iter = tps.begin(); iter != tps.end(); ++iter) {
       const SCFG::TargetPhraseImpl &tp = **iter;
       SCFG::Hypothesis *hypo = new SCFG::Hypothesis(GetPool(), system);
-      hypo->Init(*this, path, tp);
+      hypo->Init(*this, path, symbolBind, tp);
 
       StackAdd added = stack.Add(hypo, hypoRecycler, arcLists);
-      cerr << "added=" << added.added << " " << (const Phrase&) tp << endl;
+      //cerr << "added=" << added.added << " " << (const Phrase&) tp << endl;
     }
-
   }
-
 }
 
 }

@@ -25,8 +25,13 @@ public:
 
   bool operator==(const SCFG::Word &compare) const
   {
-    int cmp = Compare(compare);
-    return cmp == 0;
+    int cmp = Word::Compare(compare);
+    if (cmp == 0 && isNonTerminal == compare.isNonTerminal) {
+      return true;
+    }
+    else {
+      return false;
+    }
   }
 
   size_t hash() const;

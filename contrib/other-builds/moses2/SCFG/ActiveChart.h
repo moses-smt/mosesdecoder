@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include <iostream>
 #include <boost/functional/hash/hash.hpp>
 #include "../legacy/Range.h"
 
@@ -15,6 +16,8 @@ class InputPath;
 //! Terminals will cover only 1 word, NT can cover multiple words
 class SymbolBind
 {
+  friend std::ostream& operator<<(std::ostream &, const SymbolBind &);
+
 public:
   typedef std::pair<const Range*, bool> Element;
     // range, isNT

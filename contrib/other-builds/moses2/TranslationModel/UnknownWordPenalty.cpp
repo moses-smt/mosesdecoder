@@ -126,7 +126,7 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
     Word &word = (*tp)[0];
     word[0] = system.GetVocab().AddFactor(factor->GetString(), system, false);
 
-    tp->lhs[0] = system.GetVocab().AddFactor("[X]", system, true);
+    tp->lhs[0] = system.GetVocab().AddFactor("X", system, true);
 
     size_t endPos = path.range.GetEndPos();
     const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(endPos, 1);

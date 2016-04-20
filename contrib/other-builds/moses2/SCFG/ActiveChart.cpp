@@ -1,3 +1,4 @@
+#include <boost/foreach.hpp>
 #include "ActiveChart.h"
 #include "InputPath.h"
 
@@ -13,6 +14,14 @@ ActiveChartEntry::ActiveChartEntry(const SCFG::InputPath *subPhrasePath, bool is
   }
 }
 
+std::ostream& operator<<(std::ostream &out, const SymbolBind &obj)
+{
+  BOOST_FOREACH(const SymbolBind::Element &ele, obj.coll) {
+    out << *ele.first << " " << ele.second << " ";
+  }
+
+  return out;
+}
 
 }
 }
