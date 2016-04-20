@@ -36,7 +36,7 @@ public:
 
 };
 
-size_t hash_value(const SymbolBind &obj)
+inline size_t hash_value(const SymbolBind &obj)
 {
   return boost::hash_value(obj.coll);
 }
