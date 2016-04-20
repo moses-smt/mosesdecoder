@@ -128,7 +128,13 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
 
     tp->lhs[0] = system.GetVocab().AddFactor("[X]", system, true);
 
-    path.AddTargetPhrase(*this, tp);
+    size_t endPos = path.range.GetEndPos();
+    const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(endPos, 1);
+
+    SCFG::SymbolBind symbolBind;
+    symbolBind.Add(subPhrasePath.range, false);
+
+    path.AddTargetPhrase(*this, symbolBind, tp);
   }
 }
 }

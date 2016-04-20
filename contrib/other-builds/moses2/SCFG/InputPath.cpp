@@ -38,9 +38,11 @@ std::ostream& operator<<(std::ostream &out, const InputPath &obj)
   return out;
 }
 
-void InputPath::AddTargetPhrase(const PhraseTable &pt, const SCFG::TargetPhraseImpl *tp)
+void InputPath::AddTargetPhrase(const PhraseTable &pt,
+    const SCFG::SymbolBind &symbolBind,
+    const SCFG::TargetPhraseImpl *tp)
 {
-  //targetPhrases.AddTargetPhrase(*tp);
+  targetPhrases[symbolBind].AddTargetPhrase(*tp);
 }
 
 }

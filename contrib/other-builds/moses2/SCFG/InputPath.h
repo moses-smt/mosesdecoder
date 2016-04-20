@@ -37,7 +37,9 @@ public:
   ActiveChart &GetActiveChart(size_t ptInd)
   { return m_activeChart[ptInd]; }
 
-  void AddTargetPhrase(const PhraseTable &pt, const SCFG::TargetPhraseImpl *tp);
+  void AddTargetPhrase(const PhraseTable &pt,
+      const SCFG::SymbolBind &symbolBind,
+      const SCFG::TargetPhraseImpl *tp);
 
 protected:
   ActiveChart *m_activeChart;

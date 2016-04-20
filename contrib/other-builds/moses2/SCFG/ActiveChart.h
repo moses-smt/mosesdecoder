@@ -1,10 +1,13 @@
 #pragma once
 #include <vector>
+#include <boost/functional/hash/hash.hpp>
+#include "../legacy/Range.h"
 
 namespace Moses2
 {
 namespace SCFG
 {
+
 class InputPath;
 
 ////////////////////////////////////////////////////////////////////////////
@@ -13,21 +16,35 @@ class InputPath;
 class SymbolBind
 {
 public:
-  typedef std::pair<Range, bool> Element;
+  typedef std::pair<const Range*, bool> Element;
     // range, isNT
   std::vector<Element> coll;
 
+  void Add(const Range &range, bool isNT)
+  {
+    Element ele(&range, isNT);
+    coll.push_back(ele);
+  }
+
+  bool operator==(const SymbolBind &compare) const
+  {
+    return coll == compare.coll;
+  }
+
 };
+
+size_t hash_value(const SymbolBind &obj)
+{
+  return boost::hash_value(obj.coll);
+}
 
 ////////////////////////////////////////////////////////////////////////////
 class ActiveChartEntry
 {
 public:
-  const SCFG::InputPath *subPhrasePath;
+  SymbolBind symbolBinds;
 
-  ActiveChartEntry(const SCFG::InputPath *vSubPhrasePath)
-  :subPhrasePath(vSubPhrasePath)
-  { }
+  ActiveChartEntry(const SCFG::InputPath *subPhrasePath, bool isNT);
 
 protected:
 };
