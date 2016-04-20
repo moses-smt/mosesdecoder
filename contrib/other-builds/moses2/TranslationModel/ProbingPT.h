@@ -34,7 +34,7 @@ public:
   void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
 
   virtual void Lookup(MemPool &pool,
-      const System &system,
+      const SCFG::Manager &mgr,
       const SCFG::Stacks &stacks,
       SCFG::InputPath &path) const;
 

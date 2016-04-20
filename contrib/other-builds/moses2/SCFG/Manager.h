@@ -32,6 +32,9 @@ public:
   std::string OutputBest() const {}
   std::string OutputNBest() {}
 
+  const InputPaths &GetInputPaths() const
+  { return m_inputPaths; }
+
 protected:
   Stacks m_stacks;
   InputPaths m_inputPaths;

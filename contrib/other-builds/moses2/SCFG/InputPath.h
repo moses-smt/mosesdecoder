@@ -19,6 +19,7 @@ namespace SCFG
 {
 class TargetPhrases;
 class TargetPhraseImpl;
+class InputPath;
 
 ////////////////////////////////////////////////////////////////////////////
 //! The range covered by each symbol in the source
@@ -36,8 +37,13 @@ public:
 class ActiveChartEntry
 {
 public:
-  ActiveChartEntry()
+  const SCFG::InputPath *subPhrasePath;
+
+  ActiveChartEntry(const SCFG::InputPath *vSubPhrasePath)
+  :subPhrasePath(vSubPhrasePath)
   { }
+
+protected:
 };
 
 ////////////////////////////////////////////////////////////////////////////

@@ -29,7 +29,7 @@ public:
 
   virtual void InitActiveChart(SCFG::InputPath &path) const;
   void Lookup(MemPool &pool,
-      const System &system,
+      const SCFG::Manager &mgr,
       const SCFG::Stacks &stacks,
       SCFG::InputPath &path) const;
 

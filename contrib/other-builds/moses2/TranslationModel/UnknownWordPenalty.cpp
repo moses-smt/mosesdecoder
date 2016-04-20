@@ -14,6 +14,7 @@
 #include "../PhraseBased/TargetPhrases.h"
 #include "../SCFG/InputPath.h"
 #include "../SCFG/TargetPhraseImpl.h"
+#include "../SCFG/Manager.h"
 
 using namespace std;
 
@@ -109,10 +110,12 @@ void UnknownWordPenalty::InitActiveChart(SCFG::InputPath &path) const
 }
 
 void UnknownWordPenalty::Lookup(MemPool &pool,
-    const System &system,
+    const SCFG::Manager &mgr,
     const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
+  const System &system = mgr.system;
+
   // terminal
   const Word &lastWord = path.subPhrase.Back();
   //cerr << "UnknownWordPenalty lastWord=" << lastWord << endl;

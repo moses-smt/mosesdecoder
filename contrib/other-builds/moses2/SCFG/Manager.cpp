@@ -89,7 +89,7 @@ void Manager::Lookup(size_t startPos, size_t size)
 
   for (size_t i = 0; i < numPt; ++i) {
     const PhraseTable &pt = *system.mappings[i];
-    pt.Lookup(GetPool(), system, m_stacks, path);
+    pt.Lookup(GetPool(), *this, m_stacks, path);
   }
 
   /*
