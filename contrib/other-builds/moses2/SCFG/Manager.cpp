@@ -107,19 +107,22 @@ void Manager::Decode(size_t startPos, size_t size)
 
   Recycler<HypothesisBase*> &hypoRecycler = GetHypoRecycle();
 
-  /*
-  SCFG::TargetPhrases &tps = path.targetPhrases;
+  boost::unordered_map<SCFG::SymbolBind, SCFG::TargetPhrases>::const_iterator iterOuter;
+  for (iterOuter = path.targetPhrases.begin(); iterOuter != path.targetPhrases.end(); ++iterOuter) {
+    const SCFG::TargetPhrases &tps = iterOuter->second;
 
-  SCFG::TargetPhrases::const_iterator iter;
-  for (iter = tps.begin(); iter != tps.end(); ++iter) {
-    const SCFG::TargetPhraseImpl &tp = **iter;
-    SCFG::Hypothesis *hypo = new SCFG::Hypothesis(GetPool(), system);
-    hypo->Init(*this, path, tp);
+    SCFG::TargetPhrases::const_iterator iter;
+    for (iter = tps.begin(); iter != tps.end(); ++iter) {
+      const SCFG::TargetPhraseImpl &tp = **iter;
+      SCFG::Hypothesis *hypo = new SCFG::Hypothesis(GetPool(), system);
+      hypo->Init(*this, path, tp);
 
-    StackAdd added = stack.Add(hypo, hypoRecycler, arcLists);
-    cerr << "added=" << added.added << " " << (const Phrase&) tp << endl;
+      StackAdd added = stack.Add(hypo, hypoRecycler, arcLists);
+      cerr << "added=" << added.added << " " << (const Phrase&) tp << endl;
+    }
+
   }
-  */
+
 }
 
 }
