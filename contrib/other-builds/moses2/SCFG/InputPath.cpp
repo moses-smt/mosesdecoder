@@ -7,6 +7,7 @@
 #include <boost/foreach.hpp>
 #include "InputPath.h"
 #include "TargetPhrases.h"
+#include "ActiveChart.h"
 #include "../TranslationModel/PhraseTable.h"
 #include "../MemPool.h"
 

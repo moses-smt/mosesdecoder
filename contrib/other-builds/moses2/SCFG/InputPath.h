@@ -8,10 +8,10 @@
 #pragma once
 
 #include <iostream>
-#include <vector>
 #include <boost/unordered_map.hpp>
 #include "../InputPathBase.h"
 #include "TargetPhrases.h"
+#include "ActiveChart.h"
 
 namespace Moses2
 {
@@ -19,39 +19,7 @@ namespace SCFG
 {
 class TargetPhrases;
 class TargetPhraseImpl;
-class InputPath;
 
-////////////////////////////////////////////////////////////////////////////
-//! The range covered by each symbol in the source
-//! Terminals will cover only 1 word, NT can cover multiple words
-class SymbolBind
-{
-public:
-  typedef std::pair<Range, bool> Element;
-    // range, isNT
-  std::vector<Element> coll;
-
-};
-
-////////////////////////////////////////////////////////////////////////////
-class ActiveChartEntry
-{
-public:
-  const SCFG::InputPath *subPhrasePath;
-
-  ActiveChartEntry(const SCFG::InputPath *vSubPhrasePath)
-  :subPhrasePath(vSubPhrasePath)
-  { }
-
-protected:
-};
-
-////////////////////////////////////////////////////////////////////////////
-class ActiveChart
-{
-public:
-  std::vector<ActiveChartEntry*> entries;
-};
 
 ////////////////////////////////////////////////////////////////////////////
 class InputPath: public InputPathBase
