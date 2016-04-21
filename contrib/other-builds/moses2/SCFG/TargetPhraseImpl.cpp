@@ -34,11 +34,11 @@ TargetPhraseImpl *TargetPhraseImpl::CreateFromString(MemPool &pool,
 
   for (size_t i = 0; i < size; ++i) {
     SCFG::Word &word = (*ret)[i];
-    word.CreateFromString(vocab, system, toks[i], true);
+    word.CreateFromString(vocab, system, toks[i]);
   }
 
   // lhs
-  ret->lhs.CreateFromString(vocab, system, toks.back(), false);
+  ret->lhs.CreateFromString(vocab, system, toks.back());
   //cerr << "ret=" << *ret << endl;
   return ret;
 }
@@ -63,10 +63,14 @@ TargetPhraseImpl::~TargetPhraseImpl()
   // TODO Auto-generated destructor stub
 }
 
-std::ostream& operator<<(std::ostream &out, const TargetPhraseImpl &obj)
+std::ostream& operator<<(std::ostream &out, const SCFG::TargetPhraseImpl &obj)
 {
-  out << obj.lhs << " -> " << (const Phrase&) obj
-      << " SCORES:" << obj.GetScores()
+  out << obj.lhs << " -> ";
+  for (size_t i = 0; i < obj.GetSize(); ++i) {
+    const SCFG::Word &word = obj[i];
+    out << word << " ";
+  }
+  out << " SCORES:" << obj.GetScores()
       << " ALIGN:" << obj.GetAlignTerm() << " " << obj.GetAlignNonTerm();
   return out;
 }

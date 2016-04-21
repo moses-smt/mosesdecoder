@@ -34,8 +34,8 @@ public:
 
   const ActiveChart &GetActiveChart(size_t ptInd) const
   { return m_activeChart[ptInd]; }
-  ActiveChart &GetActiveChart(size_t ptInd)
-  { return m_activeChart[ptInd]; }
+
+  void AddActiveChartEntry(size_t ptInd, ActiveChartEntry *chartEntry);
 
   void AddTargetPhrase(const PhraseTable &pt,
       const SCFG::SymbolBind &symbolBind,

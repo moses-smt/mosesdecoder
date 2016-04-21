@@ -183,7 +183,7 @@ void PhraseTableMemory::Load(System &system)
           system, toks[1]);
       targetSCFG->SetAlignmentInfo(toks[3]);
       target = targetSCFG;
-      //cerr << "created target" << endl;
+      cerr << "created target " << *targetSCFG << endl;
       break;
     default:
       abort();
@@ -219,10 +219,8 @@ TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool,
 void PhraseTableMemory::InitActiveChart(SCFG::InputPath &path) const
 {
   size_t ptInd = GetPtInd();
-  SCFG::ActiveChart &chart = path.GetActiveChart(ptInd);
   ActiveChartEntryMem *chartEntry = new ActiveChartEntryMem(NULL, false, &m_root);
-
-  chart.entries.push_back(chartEntry);
+  path.AddActiveChartEntry(ptInd, chartEntry);
 }
 
 void PhraseTableMemory::Lookup(MemPool &pool,
@@ -246,7 +244,7 @@ void PhraseTableMemory::Lookup(MemPool &pool,
   //const SCFG::InputPath *prefixPath = static_cast<const SCFG::InputPath*>(path.prefixPath);
   while (prefixPath) {
     const Range &prefixRange = prefixPath->range;
-    cerr << "prefixRange=" << prefixRange << endl;
+    //cerr << "prefixRange=" << prefixRange << endl;
     size_t startPos = prefixRange.GetEndPos() + 1;
     size_t ntSize = endPos - startPos + 1;
     const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(startPos, ntSize);
@@ -272,7 +270,7 @@ void PhraseTableMemory::LookupGivenPrefixPath(const SCFG::InputPath &prefixPath,
 {
   size_t ptInd = GetPtInd();
 
-  cerr << "entries=" << prefixPath.GetActiveChart(ptInd).entries.size() << endl;
+  cerr << "prefixPath=" << prefixPath.range << " " << prefixPath.GetActiveChart(ptInd).entries.size() << endl;
 
   BOOST_FOREACH(const SCFG::ActiveChartEntry *entry, prefixPath.GetActiveChart(ptInd).entries) {
     const ActiveChartEntryMem *entryCast = static_cast<const ActiveChartEntryMem*>(entry);
@@ -296,11 +294,10 @@ void PhraseTableMemory::LookupGivenNode(const Node &node,
 
   if (nextNode) {
     // new entries
-    SCFG::ActiveChart &chart = path.GetActiveChart(ptInd);
     ActiveChartEntryMem *chartEntry = new ActiveChartEntryMem(&subPhrasePath, isNT, nextNode);
-    const SCFG::SymbolBind &symbolBind = chartEntry->symbolBinds;
+    path.AddActiveChartEntry(ptInd, chartEntry);
 
-    chart.entries.push_back(chartEntry);
+    const SCFG::SymbolBind &symbolBind = chartEntry->symbolBinds;
 
     // there are some rules
     AddTargetPhrasesToPath(*nextNode, symbolBind, path);

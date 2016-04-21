@@ -11,6 +11,8 @@
 #include "../TranslationModel/PhraseTable.h"
 #include "../MemPool.h"
 
+using namespace std;
+
 namespace Moses2
 {
 namespace SCFG
@@ -43,6 +45,13 @@ void InputPath::AddTargetPhrase(const PhraseTable &pt,
     const SCFG::TargetPhraseImpl *tp)
 {
   targetPhrases[symbolBind].AddTargetPhrase(*tp);
+}
+
+void InputPath::AddActiveChartEntry(size_t ptInd, ActiveChartEntry *chartEntry)
+{
+  cerr << "added " << range << " " << ptInd << endl;
+  ActiveChart &activeChart = m_activeChart[ptInd];
+  activeChart.entries.push_back(chartEntry);
 }
 
 }

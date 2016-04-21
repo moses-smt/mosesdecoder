@@ -23,11 +23,8 @@ PhraseImpl *PhraseImpl::CreateFromString(MemPool &pool, FactorCollection &vocab,
 
   for (size_t i = 0; i < size; ++i) {
     SCFG::Word &word = (*ret)[i];
-    word.CreateFromString(vocab, system, toks[i], true);
+    word.CreateFromString(vocab, system, toks[i]);
   }
-
-  // lhs
-  ret->lhs.CreateFromString(vocab, system, toks.back(), false);
 
   return ret;
 }

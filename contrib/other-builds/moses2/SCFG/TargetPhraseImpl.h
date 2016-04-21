@@ -28,7 +28,7 @@ namespace SCFG
 
 class TargetPhraseImpl: public Moses2::TargetPhrase, public PhraseImplTemplate<SCFG::Word>
 {
-  friend std::ostream& operator<<(std::ostream &, const TargetPhraseImpl &);
+  friend std::ostream& operator<<(std::ostream &, const SCFG::TargetPhraseImpl &);
 public:
   SCFG::Word lhs;
   const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
@@ -89,7 +89,6 @@ public:
   void SetAlignmentInfo(const std::string &alignString);
 
   //mutable void *chartState;
-
 protected:
 };
 

@@ -14,16 +14,19 @@ namespace Moses2
 {
 namespace SCFG
 {
-void Word::CreateFromString(FactorCollection &vocab, const System &system,
-    const std::string &str, bool doubleNT)
+void Word::CreateFromString(FactorCollection &vocab,
+    const System &system,
+    const std::string &str)
 {
   vector<string> toks;
 
   if (str[0] == '[' && str[str.size() - 1] == ']') {
     isNonTerminal = true;
 
+    size_t startPos = str.find("[", 1);
+    bool doubleNT = startPos != string::npos;
+
     if (doubleNT) {
-      size_t startPos = str.find("[", 1);
       assert(startPos != string::npos);
       string str2 = str.substr(startPos + 1, str.size() - startPos - 2);
       toks = Tokenize(str2, "|");

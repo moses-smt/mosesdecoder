@@ -20,8 +20,9 @@ class Word: public Moses2::Word
 public:
   bool isNonTerminal;
 
-  void CreateFromString(FactorCollection &vocab, const System &system,
-      const std::string &str, bool doubleNT);
+  void CreateFromString(FactorCollection &vocab,
+      const System &system,
+      const std::string &str);
 
   bool operator==(const SCFG::Word &compare) const
   {

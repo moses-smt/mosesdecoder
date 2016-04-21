@@ -11,8 +11,6 @@ namespace SCFG
 class PhraseImpl: public Phrase, public PhraseImplTemplate<SCFG::Word>
 {
 public:
-  SCFG::Word lhs;
-
   static PhraseImpl *CreateFromString(MemPool &pool, FactorCollection &vocab,
       const System &system, const std::string &str);
 
