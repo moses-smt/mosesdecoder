@@ -81,11 +81,6 @@ class Decoder {
         Alignment(const Weights& model)
         : w_(model)
         {
-          for(int i = 0; i < 2; ++i) {
-            cudaStreamCreate(&s_[i]);
-            cublasCreate(&h_[i]);
-            cublasSetStream(h_[i], s_[i]);            
-          }
         }
           
         void GetAlignedSourceContext(mblas::Matrix& AlignedSourceContext,
@@ -93,9 +88,9 @@ class Decoder {
                                      const mblas::Matrix& SourceContext) {
           using namespace mblas;  
           
-          Prod(h_[0], Temp1_, SourceContext, w_.U_);
-          Prod(h_[1], Temp2_, HiddenState, w_.W_);
-          BroadcastVec(_1 + _2, Temp2_, w_.B_, s_[1]);
+          Prod(Temp1_, SourceContext, w_.U_);
+          Prod(Temp2_, HiddenState, w_.W_);
+          BroadcastVec(_1 + _2, Temp2_, w_.B_);
           
           cudaDeviceSynchronize();
           
@@ -115,9 +110,6 @@ class Decoder {
       private:
         const Weights& w_;
         
-        cublasHandle_t h_[2];
-        cudaStream_t s_[2];
-        
         mblas::Matrix Temp1_;
         mblas::Matrix Temp2_;
         mblas::Matrix A_;
@@ -132,11 +124,6 @@ class Decoder {
         Softmax(const Weights& model)
         : w_(model), filtered_(false)
         {
-          for(int i = 0; i < 3; ++i) {
-            cudaStreamCreate(&s_[i]);
-            cublasCreate(&h_[i]);
-            cublasSetStream(h_[i], s_[i]);            
-          }
         }
           
         void GetProbs(mblas::Matrix& Probs,
@@ -145,13 +132,13 @@ class Decoder {
                   const mblas::Matrix& AlignedSourceContext) {
           using namespace mblas;
           
-          Prod(h_[0], T1_, State, w_.W1_);
-          Prod(h_[1], T2_, Embedding, w_.W2_);
-          Prod(h_[2], T3_, AlignedSourceContext, w_.W3_);
+          Prod(T1_, State, w_.W1_);
+          Prod(T2_, Embedding, w_.W2_);
+          Prod(T3_, AlignedSourceContext, w_.W3_);
           
-          BroadcastVec(_1 + _2, T1_, w_.B1_, s_[0]);
-          BroadcastVec(_1 + _2, T2_, w_.B2_, s_[1]);
-          BroadcastVec(_1 + _2, T3_, w_.B3_, s_[2]);
+          BroadcastVec(_1 + _2, T1_, w_.B1_);
+          BroadcastVec(_1 + _2, T2_, w_.B2_);
+          BroadcastVec(_1 + _2, T3_, w_.B3_);
       
           cudaDeviceSynchronize();
       
@@ -167,9 +154,6 @@ class Decoder {
        
       private:        
         const Weights& w_;
-        
-        cublasHandle_t h_[3];
-        cudaStream_t s_[3];
         
         bool filtered_;
         mblas::Matrix FilteredWo_;

@@ -15,16 +15,15 @@ class Vocab {
             str2id_[line] = c++;
             id2str_.push_back(line);
         }
-        //str2id_["</s>"] = c;
-        //id2str_.push_back("</s>");
     }
 
     size_t operator[](const std::string& word) const {
         auto it = str2id_.find(word);
         if(it != str2id_.end())
             return it->second;
-        else
+        else {
             return 1;
+        }
     }
 
     inline std::vector<size_t> Encode(const std::vector<std::string>& sentence, bool addEOS=false) const {
@@ -33,7 +32,7 @@ class Vocab {
         indexes.push_back((*this)[word]);
       }
       if (addEOS) {
-        indexes.push_back((*this)["</s>"]);
+        indexes.push_back((*this)["eos"]);
       }
       return indexes;
     }

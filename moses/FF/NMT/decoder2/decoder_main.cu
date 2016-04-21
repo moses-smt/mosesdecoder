@@ -37,8 +37,9 @@ void BestHyps(Beam& bestHyps, const Beam& prevHyps, mblas::Matrix& Probs, const 
   thrust::device_vector<unsigned> keys(Probs.size());
   thrust::sequence(keys.begin(), keys.end());
   
-  // Here it would be nice to have a partition instead of full sort
-  thrust::sort_by_key(Probs.begin(), Probs.end(), keys.begin(), thrust::greater<float>());
+  // Here it would be nice to have a partial sort instead of full sort
+  thrust::sort_by_key(Probs.begin(), Probs.end(),
+                      keys.begin(), thrust::greater<float>());
   
   thrust::host_vector<unsigned> bestKeys(beamSize);
   thrust::copy_n(keys.begin(), beamSize, bestKeys.begin());
@@ -133,7 +134,7 @@ int main(int argc, char** argv) {
     mblas::Matrix SourceContext;
     encoder.GetContext(sourceWords, SourceContext);
   
-    size_t beamSize = 5;
+    size_t beamSize = 12;
     
     decoder.EmptyState(State, SourceContext, 1);
     decoder.EmptyEmbedding(Embeddings, 1);

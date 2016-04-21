@@ -106,7 +106,7 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
   const Sentence& sentence = static_cast<const Sentence&>(input);
   
   if(m_filteredSoftmax) {
-    m_targetWords->insert("</s>");
+    m_targetWords->insert("eos");
     m_targetWords->insert("UNK");
     m_nmt->FilterTargetVocab(*m_targetWords);
   }
@@ -186,7 +186,7 @@ void NeuralScoreFeature::RescoreStackBatch(std::vector<Hypothesis*>& hyps, size_
       batches[j][i] = m_nmt->TargetVocab(tp.GetWord(j).GetString(m_factor).as_string());
     }
     if(complete)
-      batches[tp.GetSize()][i] = m_nmt->TargetVocab("</s>");
+      batches[tp.GetSize()][i] = m_nmt->TargetVocab("eos");
     
     if(hyps[i]->GetId() == 0)
       return;
@@ -272,7 +272,7 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
           (*m_pbl)[prefix.size() - 1][prefix][hypId] = Payload();
         }
         if(total - covered == to.GetSize()) {
-          prefix.push_back("</s>");
+          prefix.push_back("eos");
           if(m_pbl->size() < prefix.size())
             m_pbl->resize(prefix.size());
   
@@ -421,7 +421,7 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
     phrase.push_back(word);
   }
   if(cur_hypo.IsSourceCompleted()) {
-    phrase.push_back("</s>");
+    phrase.push_back("eos");
   }
   
   float prob = 0;

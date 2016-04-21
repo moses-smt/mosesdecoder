@@ -10,7 +10,6 @@
 #include "common/vocab.h"
 #include "common/states.h"
 
-
 using namespace mblas;
 
 NMT::NMT(const boost::shared_ptr<Weights> model,
@@ -77,7 +76,7 @@ void NMT::CalcSourceContext(const std::vector<std::string>& s) {
   std::vector<size_t> words(s.size());
   std::transform(s.begin(), s.end(), words.begin(),
                  [&](const std::string& w) { return (*src_)[w]; });
-  words.push_back((*src_)["</s>"]);
+  words.push_back((*src_)["eos"]);
   
   SourceContext_.reset(new Matrix());
   Matrix& SC = *boost::static_pointer_cast<Matrix>(SourceContext_);
@@ -132,15 +131,15 @@ void NMT::BatchSteps(const Batches& batches, LastWords& lastWords,
   states_->ConstructStates(prevStates, stateInfos);
 
   for(auto& batch : batches) {
-    decoder_->MakeStep(nextStates, nextEmbeddings, probs,
-                       batch, prevStates, prevEmbeddings, sourceContext);
-
+    decoder_->MakeStep(nextStates, probs,
+                       prevStates, prevEmbeddings, sourceContext);
+    decoder_->Lookup(nextEmbeddings, batch);
     StateInfos tempStates;
     states_->SaveStates(tempStates, nextStates);
 
     for(size_t i = 0; i < batch.size(); ++i) {
       if(batch[i] != 0) {
-        float p = probs(i, filteredId_[batch[i]]);
+        float p = probs(i, batch[i]);
         probsOut[i] += log(p);
         stateInfos[i] = tempStates[i];
       }
@@ -188,9 +187,9 @@ void NMT::OnePhrase(
     if(id == 1)
       unks++;
     
-    decoder_->MakeStep(nextStates, nextEmbeddings, probs,
-                       nextIds, prevStates, prevEmbeddings, sourceContext);
-    
+    decoder_->MakeStep(nextStates, probs,
+                       prevStates, prevEmbeddings, sourceContext);
+    decoder_->Lookup(nextEmbeddings, nextIds);
     float p = probs(0, filteredId_[id]);
     prob += log(p);
     
@@ -238,9 +237,9 @@ void NMT::MakeStep(
   Matrix probs;
   Matrix nextStates;
   
-  decoder_->MakeStep(nextStates, nextEmbeddings, probs,
-                     nextIds, prevStates, lastEmbeddings, sourceContext);
-  
+  decoder_->MakeStep(nextStates, probs,
+                     prevStates, lastEmbeddings, sourceContext);
+  decoder_->Lookup(nextEmbeddings, nextIds);
   states_->SaveStates(outputStates, nextStates);
   
   for(auto id : nextIds) {
