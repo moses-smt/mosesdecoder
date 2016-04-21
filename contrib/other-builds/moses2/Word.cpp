@@ -71,11 +71,11 @@ bool Word::operator<(const Word &compare) const
   return (cmp < 0);
 }
 
-std::ostream& operator<<(std::ostream &out, const Word &obj)
+void Word::Debug(std::ostream &out) const
 {
   bool outputAlready = false;
   for (size_t i = 0; i < MAX_NUM_FACTORS; ++i) {
-    const Factor *factor = obj.m_factors[i];
+    const Factor *factor = m_factors[i];
     if (factor) {
       if (outputAlready) {
         out << "|";
@@ -84,6 +84,11 @@ std::ostream& operator<<(std::ostream &out, const Word &obj)
       outputAlready = true;
     }
   }
+}
+
+std::ostream& operator<<(std::ostream &out, const Word &obj)
+{
+  obj.Debug(out);
   return out;
 }
 

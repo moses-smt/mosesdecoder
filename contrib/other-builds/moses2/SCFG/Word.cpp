@@ -58,17 +58,15 @@ size_t Word::hash() const
   return ret;
 }
 
-std::ostream& operator<<(std::ostream &out, const SCFG::Word &obj)
+void Word::Debug(std::ostream &out) const
 {
-  if (obj.isNonTerminal) {
+  if (isNonTerminal) {
     out << "[";
   }
-  out << (const Moses2::Word&) obj;
-  if (obj.isNonTerminal) {
+  Moses2::Word::Debug(out);
+  if (isNonTerminal) {
       out << "]";
   }
-
-  return out;
 }
 
 }

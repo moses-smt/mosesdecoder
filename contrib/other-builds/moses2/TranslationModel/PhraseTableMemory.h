@@ -19,6 +19,8 @@ class PhraseTableMemory: public PhraseTable
   class Node
   {
   public:
+    typedef boost::unordered_map<Word, Node, UnorderedComparer<Word>,
+        UnorderedComparer<Word> > Children;
 
     Node();
     ~Node();
@@ -31,9 +33,10 @@ class PhraseTableMemory: public PhraseTable
 
     void SortAndPrune(size_t tableLimit, MemPool &pool, System &system);
 
+    const Children &GetChildren() const
+    { return m_children; }
+
   protected:
-    typedef boost::unordered_map<Word, Node, UnorderedComparer<Word>,
-        UnorderedComparer<Word> > Children;
     Children m_children;
     TargetPhrases *m_targetPhrases;
     Phrase *m_source;

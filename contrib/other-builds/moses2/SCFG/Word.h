@@ -16,7 +16,6 @@ namespace SCFG
 
 class Word: public Moses2::Word
 {
-  friend std::ostream& operator<<(std::ostream &, const Word &);
 public:
   bool isNonTerminal;
 
@@ -36,6 +35,7 @@ public:
   }
 
   size_t hash() const;
+  virtual void Debug(std::ostream &out) const;
 
 protected:
 };

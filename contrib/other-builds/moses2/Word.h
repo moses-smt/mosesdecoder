@@ -53,6 +53,8 @@ public:
     return m_factors[ind];
   }
 
+  virtual void Debug(std::ostream &out) const;
+
   std::string GetString(const FactorList &factorTypes) const;
 protected:
   const Factor *m_factors[MAX_NUM_FACTORS];

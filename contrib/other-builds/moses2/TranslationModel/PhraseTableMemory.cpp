@@ -206,6 +206,13 @@ void PhraseTableMemory::Load(System &system)
   }
 
   m_root.SortAndPrune(m_tableLimit, systemPool, system);
+  cerr << "root=" << &m_root << endl;
+
+  BOOST_FOREACH(const Node::Children::value_type &valPair, m_root.GetChildren()) {
+    const Word &word = valPair.first;
+    cerr << word << " ";
+  }
+  cerr << endl;
 }
 
 TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool,
@@ -254,7 +261,7 @@ void PhraseTableMemory::Lookup(MemPool &pool,
 
     BOOST_FOREACH (const SCFG::Stack::Coll::value_type &valPair, coll) {
       const SCFG::Word &ntSought = valPair.first;
-      cerr << "ntSought=" << ntSought << ntSought.isNonTerminal << endl;
+      //cerr << "ntSought=" << ntSought << ntSought.isNonTerminal << endl;
       LookupGivenPrefixPath(*prefixPath, ntSought, subPhrasePath, true, path);
     }
 
@@ -289,8 +296,8 @@ void PhraseTableMemory::LookupGivenNode(const Node &node,
     SCFG::InputPath &path) const
 {
   size_t ptInd = GetPtInd();
-
   const Node *nextNode = node.Find(wordSought);
+  cerr << "wordSought=" << wordSought << " " << nextNode << endl;
 
   if (nextNode) {
     // new entries
