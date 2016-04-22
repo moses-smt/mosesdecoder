@@ -6,45 +6,17 @@
  */
 #pragma once
 
-#include "PhraseTable.h"
-#include "../legacy/Util2.h"
-#include "../SCFG/InputPath.h"
+#include "../PhraseTable.h"
+#include "../../legacy/Util2.h"
+#include "../../SCFG/InputPath.h"
+#include "Node.h"
 
 namespace Moses2
 {
+class Node;
 
 class PhraseTableMemory: public PhraseTable
 {
-//////////////////////////////////////
-  class Node
-  {
-  public:
-    typedef boost::unordered_map<Word, Node, UnorderedComparer<Word>,
-        UnorderedComparer<Word> > Children;
-
-    Node();
-    ~Node();
-    void AddRule(Phrase &source, TargetPhrase *target);
-    TargetPhrases *Find(const Phrase &source, size_t pos = 0) const;
-    const Node *Find(const Word &word) const;
-
-    const TargetPhrases *GetTargetPhrases() const
-    { return m_targetPhrases; }
-
-    void SortAndPrune(size_t tableLimit, MemPool &pool, System &system);
-
-    const Children &GetChildren() const
-    { return m_children; }
-
-  protected:
-    Children m_children;
-    TargetPhrases *m_targetPhrases;
-    Phrase *m_source;
-    std::vector<TargetPhrase*> *m_unsortedTPS;
-
-    Node &AddRule(Phrase &source, TargetPhrase *target, size_t pos);
-
-  };
 //////////////////////////////////////
   class ActiveChartEntryMem : public SCFG::ActiveChartEntry
   {

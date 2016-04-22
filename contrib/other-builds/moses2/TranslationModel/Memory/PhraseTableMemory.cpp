@@ -8,24 +8,25 @@
 #include <cassert>
 #include <boost/foreach.hpp>
 #include "PhraseTableMemory.h"
-#include "../PhraseImpl.h"
-#include "../Phrase.h"
-#include "../System.h"
-#include "../Scores.h"
-#include "../InputPathsBase.h"
-#include "../legacy/InputFileStream.h"
+#include "Node.h"
+#include "../../PhraseImpl.h"
+#include "../../Phrase.h"
+#include "../../System.h"
+#include "../../Scores.h"
+#include "../../InputPathsBase.h"
+#include "../../legacy/InputFileStream.h"
 #include "util/exception.hh"
 
-#include "../PhraseBased/InputPath.h"
-#include "../PhraseBased/TargetPhraseImpl.h"
-#include "../PhraseBased/TargetPhrases.h"
+#include "../../PhraseBased/InputPath.h"
+#include "../../PhraseBased/TargetPhraseImpl.h"
+#include "../../PhraseBased/TargetPhrases.h"
 
-#include "../SCFG/PhraseImpl.h"
-#include "../SCFG/TargetPhraseImpl.h"
-#include "../SCFG/InputPath.h"
-#include "../SCFG/Stack.h"
-#include "../SCFG/Stacks.h"
-#include "../SCFG/Manager.h"
+#include "../../SCFG/PhraseImpl.h"
+#include "../../SCFG/TargetPhraseImpl.h"
+#include "../../SCFG/InputPath.h"
+#include "../../SCFG/Stack.h"
+#include "../../SCFG/Stacks.h"
+#include "../../SCFG/Manager.h"
 
 
 using namespace std;
@@ -33,96 +34,6 @@ using namespace std;
 namespace Moses2
 {
 
-PhraseTableMemory::Node::Node() :
-    m_targetPhrases(NULL), m_unsortedTPS(NULL)
-{
-}
-
-PhraseTableMemory::Node::~Node()
-{
-}
-
-void PhraseTableMemory::Node::AddRule(Phrase &source, TargetPhrase *target)
-{
-  AddRule(source, target, 0);
-}
-
-PhraseTableMemory::Node &PhraseTableMemory::Node::AddRule(Phrase &source,
-    TargetPhrase *target, size_t pos)
-{
-  if (pos == source.GetSize()) {
-    if (m_unsortedTPS == NULL) {
-      m_unsortedTPS = new std::vector<TargetPhrase*>();
-      m_source = &source;
-    }
-
-    m_unsortedTPS->push_back(target);
-    return *this;
-  }
-  else {
-    const Word &word = source[pos];
-    Node &child = m_children[word];
-    return child.AddRule(source, target, pos + 1);
-  }
-}
-
-TargetPhrases *PhraseTableMemory::Node::Find(const Phrase &source,
-    size_t pos) const
-{
-  assert(source.GetSize());
-  if (pos == source.GetSize()) {
-    return m_targetPhrases;
-  }
-  else {
-    const Word &word = source[pos];
-    //cerr << "word=" << word << endl;
-    Children::const_iterator iter = m_children.find(word);
-    if (iter == m_children.end()) {
-      return NULL;
-    }
-    else {
-      const Node &child = iter->second;
-      return child.Find(source, pos + 1);
-    }
-  }
-}
-
-const PhraseTableMemory::Node *PhraseTableMemory::Node::Find(const Word &word) const
-{
-  Children::const_iterator iter = m_children.find(word);
-  if (iter == m_children.end()) {
-    return NULL;
-  }
-  else {
-    const Node &child = iter->second;
-    return &child;
-  }
-
-}
-
-void PhraseTableMemory::Node::SortAndPrune(size_t tableLimit, MemPool &pool,
-    System &system)
-{
-  BOOST_FOREACH(Children::value_type &val, m_children){
-  Node &child = val.second;
-  child.SortAndPrune(tableLimit, pool, system);
-}
-
-// prune target phrases in this node
-if (m_unsortedTPS) {
-  m_targetPhrases = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, m_unsortedTPS->size());
-
-  for (size_t i = 0; i < m_unsortedTPS->size(); ++i) {
-    TargetPhrase *tp = (*m_unsortedTPS)[i];
-    m_targetPhrases->AddTargetPhrase(*tp);
-  }
-
-  m_targetPhrases->SortAndPrune(tableLimit);
-  system.featureFunctions.EvaluateAfterTablePruning(system.GetSystemPool(), *m_targetPhrases, *m_source);
-
-  delete m_unsortedTPS;
-}
-}
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -312,7 +223,7 @@ void PhraseTableMemory::LookupGivenNode(const Node &node,
 
 }
 
-void PhraseTableMemory::AddTargetPhrasesToPath(const PhraseTableMemory::Node &node,
+void PhraseTableMemory::AddTargetPhrasesToPath(const Node &node,
     const SCFG::SymbolBind &symbolBind,
     SCFG::InputPath &path) const
 {

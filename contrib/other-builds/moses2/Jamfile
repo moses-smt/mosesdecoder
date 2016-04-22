@@ -46,9 +46,9 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
     LM/LanguageModel.cpp
     LM/KENLM.cpp
  	 	TranslationModel/PhraseTable.cpp 
- 	 	TranslationModel/PhraseTableMemory.cpp 
  	 	TranslationModel/ProbingPT.cpp 
  	 	TranslationModel/UnknownWordPenalty.cpp 
+    TranslationModel/Memory/PhraseTableMemory.cpp 
    	
    	parameters/AllOptions.cpp
    	parameters/BookkeepingOptions.cpp
