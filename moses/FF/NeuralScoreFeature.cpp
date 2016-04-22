@@ -121,7 +121,7 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
 }
 
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
-  : StatefulFeatureFunction(2, line), m_batchSize(1000), m_stateLength(5),
+  : StatefulFeatureFunction(1, line), m_batchSize(1000), m_stateLength(5),
     m_factor(0), m_maxDevices(1), m_filteredSoftmax(false),
     m_mode("precalculate"), m_threadId(0)
 {
@@ -211,9 +211,9 @@ void NeuralScoreFeature::RescoreStackBatch(std::vector<Hypothesis*>& hyps, size_
     
     NeuralScoreState* nState = new NeuralScoreState(stateInfos[i], prevState->GetContext(), phrase);
     
-    Scores scores(2);
+    Scores scores(1);
     scores[0] = probs[i];
-    scores[1] = unks[i];
+    //scores[1] = unks[i];
     
     ScoreComponentCollection& accumulator = hyps[i]->GetCurrScoreBreakdown();
     accumulator.PlusEquals(this, scores);
