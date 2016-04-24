@@ -50,6 +50,7 @@ PhraseTableMemory::~PhraseTableMemory()
 void PhraseTableMemory::Load(System &system)
 {
   FactorCollection &vocab = system.GetVocab();
+  IsPb(system);
 
   MemPool &systemPool = system.GetSystemPool();
   MemPool tmpSourcePool;
@@ -69,22 +70,15 @@ void PhraseTableMemory::Load(System &system)
     Phrase *source;
     TargetPhrase *target;
 
-    switch (system.options.search.algo) {
-    case Normal:
-    case CubePruning:
-    case CubePruningPerMiniStack:
-    case CubePruningPerBitmap:
-    case CubePruningCardinalStack:
-    case CubePruningBitmapStack:
-    case CubePruningMiniStack:
+    if (m_isPb) {
       source = PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
           toks[0]);
       //cerr << "created soure" << endl;
       target = TargetPhraseImpl::CreateFromString(systemPool, *this, system,
           toks[1]);
       //cerr << "created target" << endl;
-      break;
-    case CYKPlus:
+    }
+    else {
       source = SCFG::PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
           toks[0]);
       //cerr << "created soure" << endl;
@@ -94,10 +88,6 @@ void PhraseTableMemory::Load(System &system)
       targetSCFG->SetAlignmentInfo(toks[3]);
       target = targetSCFG;
       cerr << "created target " << *targetSCFG << endl;
-      break;
-    default:
-      abort();
-      break;
     }
 
     target->GetScores().CreateFromString(toks[2], *this, system, true);
@@ -123,6 +113,27 @@ void PhraseTableMemory::Load(System &system)
     cerr << word << " ";
   }
   cerr << endl;
+}
+
+void PhraseTableMemory::IsPb(const System &system)
+{
+  switch (system.options.search.algo) {
+  case Normal:
+  case CubePruning:
+  case CubePruningPerMiniStack:
+  case CubePruningPerBitmap:
+  case CubePruningCardinalStack:
+  case CubePruningBitmapStack:
+  case CubePruningMiniStack:
+    m_isPb = true;
+    break;
+  case CYKPlus:
+    m_isPb = false;
+    break;
+  default:
+    abort();
+    break;
+  }
 }
 
 TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool,
