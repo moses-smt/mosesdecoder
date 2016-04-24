@@ -18,7 +18,7 @@
 #include "PhrasePenalty.h"
 #include "Distortion.h"
 #include "LexicalReordering/LexicalReordering.h"
-#include "../TranslationModel/PhraseTableMemory.h"
+#include "../TranslationModel/Memory/PhraseTableMemory.h"
 #include "../TranslationModel/ProbingPT.h"
 #include "../TranslationModel/UnknownWordPenalty.h"
 #include "../LM/LanguageModel.h"

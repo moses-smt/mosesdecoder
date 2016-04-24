@@ -14,6 +14,9 @@ namespace Moses2
 {
 class System;
 
+namespace PtMem
+{
+
 class Node
 {
 public:
@@ -121,5 +124,6 @@ protected:
 };
 
 
+}
 } // namespace
 

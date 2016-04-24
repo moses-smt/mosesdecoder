@@ -13,7 +13,6 @@
 
 namespace Moses2
 {
-class Node;
 
 class PhraseTableMemory: public PhraseTable
 {
@@ -21,9 +20,9 @@ class PhraseTableMemory: public PhraseTable
   class ActiveChartEntryMem : public SCFG::ActiveChartEntry
   {
   public:
-    const Node *node;
+    const PtMem::Node *node;
 
-    ActiveChartEntryMem(const SCFG::InputPath *subPhrasePath, bool isNT, const Node *vnode)
+    ActiveChartEntryMem(const SCFG::InputPath *subPhrasePath, bool isNT, const PtMem::Node *vnode)
     :ActiveChartEntry(subPhrasePath, isNT)
     ,node(vnode)
     {}
@@ -45,19 +44,19 @@ public:
       SCFG::InputPath &path) const;
 
 protected:
-  Node m_root;
+  PtMem::Node m_root;
 
   void LookupGivenPrefixPath(const SCFG::InputPath &prefixPath,
       const Word &wordSought,
       const SCFG::InputPath &subPhrasePath,
       bool isNT,
       SCFG::InputPath &path) const;
-  void LookupGivenNode(const Node &node,
+  void LookupGivenNode(const PtMem::Node &node,
       const Word &wordSought,
       const SCFG::InputPath &subPhrasePath,
       bool isNT,
       SCFG::InputPath &path) const;
-  void AddTargetPhrasesToPath(const Node &node,
+  void AddTargetPhrasesToPath(const PtMem::Node &node,
       const SCFG::SymbolBind &symbolBind,
       SCFG::InputPath &path) const;
 };

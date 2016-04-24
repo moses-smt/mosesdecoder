@@ -1,6 +1,6 @@
 #include "FeatureRegistry.h"
 
-#include "../TranslationModel/PhraseTableMemory.h"
+#include "../TranslationModel/Memory/PhraseTableMemory.h"
 #include "../TranslationModel/ProbingPT.h"
 #include "../TranslationModel/UnknownWordPenalty.h"
 
