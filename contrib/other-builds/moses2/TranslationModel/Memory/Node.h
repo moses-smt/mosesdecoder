@@ -17,11 +17,12 @@ class System;
 namespace PtMem
 {
 
+template<class WORD>
 class Node
 {
 public:
-  typedef boost::unordered_map<Word, Node, UnorderedComparer<Word>,
-      UnorderedComparer<Word> > Children;
+  typedef boost::unordered_map<WORD, Node, UnorderedComparer<WORD>,
+      UnorderedComparer<WORD> > Children;
 
   Node()
   :m_targetPhrases(NULL)
@@ -43,9 +44,9 @@ public:
       return m_targetPhrases;
     }
     else {
-      const Word &word = source[pos];
+      const WORD &word = source[pos];
       //cerr << "word=" << word << endl;
-      Children::const_iterator iter = m_children.find(word);
+      typename Children::const_iterator iter = m_children.find(word);
       if (iter == m_children.end()) {
         return NULL;
       }
@@ -56,9 +57,9 @@ public:
     }
   }
 
-  const Node *Find(const Word &word) const
+  const Node *Find(const WORD &word) const
   {
-    Children::const_iterator iter = m_children.find(word);
+    typename Children::const_iterator iter = m_children.find(word);
     if (iter == m_children.end()) {
       return NULL;
     }
@@ -73,7 +74,7 @@ public:
 
   void SortAndPrune(size_t tableLimit, MemPool &pool, System &system)
   {
-    BOOST_FOREACH(Children::value_type &val, m_children){
+    BOOST_FOREACH(typename Children::value_type &val, m_children){
       Node &child = val.second;
       child.SortAndPrune(tableLimit, pool, system);
     }
@@ -115,7 +116,7 @@ protected:
       return *this;
     }
     else {
-      const Word &word = source[pos];
+      const WORD &word = source[pos];
       Node &child = m_children[word];
       return child.AddRule(source, target, pos + 1);
     }

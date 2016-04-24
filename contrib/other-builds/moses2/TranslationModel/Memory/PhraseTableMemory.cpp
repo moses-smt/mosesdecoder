@@ -118,7 +118,7 @@ void PhraseTableMemory::Load(System &system)
   m_root.SortAndPrune(m_tableLimit, systemPool, system);
   cerr << "root=" << &m_root << endl;
 
-  BOOST_FOREACH(const PtMem::Node::Children::value_type &valPair, m_root.GetChildren()) {
+  BOOST_FOREACH(const PtMem::Node<Word>::Children::value_type &valPair, m_root.GetChildren()) {
     const Word &word = valPair.first;
     cerr << word << " ";
   }
@@ -191,7 +191,7 @@ void PhraseTableMemory::LookupGivenPrefixPath(const SCFG::InputPath &prefixPath,
 
   BOOST_FOREACH(const SCFG::ActiveChartEntry *entry, prefixPath.GetActiveChart(ptInd).entries) {
     const ActiveChartEntryMem *entryCast = static_cast<const ActiveChartEntryMem*>(entry);
-    const PtMem::Node *node = entryCast->node;
+    const PtMem::Node<Word> *node = entryCast->node;
     UTIL_THROW_IF2(node == NULL, "node == NULL");
     cerr << "node=" << node << endl;
 
@@ -199,14 +199,14 @@ void PhraseTableMemory::LookupGivenPrefixPath(const SCFG::InputPath &prefixPath,
   }
 }
 
-void PhraseTableMemory::LookupGivenNode(const PtMem::Node &node,
+void PhraseTableMemory::LookupGivenNode(const PtMem::Node<Word> &node,
     const Word &wordSought,
     const SCFG::InputPath &subPhrasePath,
     bool isNT,
     SCFG::InputPath &path) const
 {
   size_t ptInd = GetPtInd();
-  const PtMem::Node *nextNode = node.Find(wordSought);
+  const PtMem::Node<Word> *nextNode = node.Find(wordSought);
   cerr << "wordSought=" << wordSought << " " << nextNode << endl;
 
   if (nextNode) {
@@ -222,7 +222,7 @@ void PhraseTableMemory::LookupGivenNode(const PtMem::Node &node,
 
 }
 
-void PhraseTableMemory::AddTargetPhrasesToPath(const PtMem::Node &node,
+void PhraseTableMemory::AddTargetPhrasesToPath(const PtMem::Node<Word> &node,
     const SCFG::SymbolBind &symbolBind,
     SCFG::InputPath &path) const
 {

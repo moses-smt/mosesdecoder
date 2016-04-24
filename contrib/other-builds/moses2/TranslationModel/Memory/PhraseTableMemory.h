@@ -20,9 +20,9 @@ class PhraseTableMemory: public PhraseTable
   class ActiveChartEntryMem : public SCFG::ActiveChartEntry
   {
   public:
-    const PtMem::Node *node;
+    const PtMem::Node<Word> *node;
 
-    ActiveChartEntryMem(const SCFG::InputPath *subPhrasePath, bool isNT, const PtMem::Node *vnode)
+    ActiveChartEntryMem(const SCFG::InputPath *subPhrasePath, bool isNT, const PtMem::Node<Word> *vnode)
     :ActiveChartEntry(subPhrasePath, isNT)
     ,node(vnode)
     {}
@@ -44,19 +44,19 @@ public:
       SCFG::InputPath &path) const;
 
 protected:
-  PtMem::Node m_root;
+  PtMem::Node<Word>  m_root;
 
   void LookupGivenPrefixPath(const SCFG::InputPath &prefixPath,
       const Word &wordSought,
       const SCFG::InputPath &subPhrasePath,
       bool isNT,
       SCFG::InputPath &path) const;
-  void LookupGivenNode(const PtMem::Node &node,
+  void LookupGivenNode(const PtMem::Node<Word>  &node,
       const Word &wordSought,
       const SCFG::InputPath &subPhrasePath,
       bool isNT,
       SCFG::InputPath &path) const;
-  void AddTargetPhrasesToPath(const PtMem::Node &node,
+  void AddTargetPhrasesToPath(const PtMem::Node<Word> &node,
       const SCFG::SymbolBind &symbolBind,
       SCFG::InputPath &path) const;
 };
