@@ -33,8 +33,7 @@ public:
   }
   virtual const Word& operator[](size_t pos) const = 0;
   virtual size_t GetSize() const = 0;
-  virtual const Word& Front() const
-  { return (*this)[0]; }
+
   virtual const Word& Back() const
   { return (*this)[GetSize() - 1]; }
 

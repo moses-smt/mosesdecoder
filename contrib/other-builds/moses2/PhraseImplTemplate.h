@@ -42,18 +42,17 @@ public:
   }
 
   size_t GetSize() const
-  {
-    return m_size;
-  }
+  { return m_size; }
+
+  WORD& operator[](size_t pos)
+  { return m_words[pos]; }
+
+  const WORD& operator[](size_t pos) const
+  { return m_words[pos]; }
 
 protected:
   size_t m_size;
   WORD *m_words;
-
-  WORD& operator[](size_t pos)
-  {
-    return m_words[pos];
-  }
 
   void CreateFromString(FactorCollection &vocab, const System &system,
       const std::vector<std::string> &toks, bool addBOSEOS = false)
