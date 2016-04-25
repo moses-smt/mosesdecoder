@@ -37,18 +37,87 @@ public:
   virtual const Word& Back() const
   { return (*this)[GetSize() - 1]; }
 
-  virtual size_t hash() const;
-  virtual bool operator==(const Phrase &compare) const;
+  virtual size_t hash() const
+  {
+    size_t seed = 0;
+
+    for (size_t i = 0; i < GetSize(); ++i) {
+      const Word &word = (*this)[i];
+      size_t wordHash = word.hash();
+      boost::hash_combine(seed, wordHash);
+    }
+
+    return seed;
+  }
+
+  virtual bool operator==(const Phrase &compare) const
+  {
+    if (GetSize() != compare.GetSize()) {
+      return false;
+    }
+
+    for (size_t i = 0; i < GetSize(); ++i) {
+      const Word &word = (*this)[i];
+      const Word &otherWord = compare[i];
+      if (word != otherWord) {
+        return false;
+      }
+    }
+
+    return true;
+  }
+
   virtual bool operator!=(const Phrase &compare) const
   {
     return !((*this) == compare);
   }
-  virtual std::string GetString(const FactorList &factorTypes) const;
+
+  virtual std::string GetString(const FactorList &factorTypes) const
+  {
+    if (GetSize() == 0) {
+      return "";
+    }
+
+    std::stringstream ret;
+
+    const Word &word = (*this)[0];
+    ret << word.GetString(factorTypes);
+    for (size_t i = 1; i < GetSize(); ++i) {
+      const Word &word = (*this)[i];
+      ret << " " << word.GetString(factorTypes);
+    }
+    return ret.str();
+  }
+
   virtual SubPhrase GetSubPhrase(size_t start, size_t size) const = 0;
 
-  virtual void OutputToStream(std::ostream &out) const;
+  virtual void OutputToStream(std::ostream &out) const
+  {
+    size_t size = GetSize();
+    if (size) {
+      out << (*this)[0];
+      for (size_t i = 1; i < size; ++i) {
+        const Word &word = (*this)[i];
+        out << " " << word;
+      }
+    }
+  }
 
 };
+
+////////////////////////////////////////////////////////////////////////
+inline std::ostream& operator<<(std::ostream &out, const Phrase &obj)
+{
+  if (obj.GetSize()) {
+    out << obj[0];
+    for (size_t i = 1; i < obj.GetSize(); ++i) {
+      const Word &word = obj[i];
+      out << " " << word;
+    }
+  }
+  return out;
+}
+
 ////////////////////////////////////////////////////////////////////////
 class TargetPhrase: public Phrase
 {
