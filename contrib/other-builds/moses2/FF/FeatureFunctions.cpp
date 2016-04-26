@@ -164,7 +164,7 @@ const PhraseTable *FeatureFunctions::GetPhraseTablesExcludeUnknownWordPenalty(
 }
 
 void FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
-    const Phrase &source, TargetPhrase &targetPhrase) const
+    const Phrase<Moses2::Word> &source, TargetPhrase &targetPhrase) const
 {
   SCORE estimatedScore = 0;
 
@@ -177,27 +177,13 @@ void FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
 }
 
 void FeatureFunctions::EvaluateAfterTablePruning(MemPool &pool,
-    const TargetPhrases &tps, const Phrase &sourcePhrase) const
+    const TargetPhrases &tps, const Phrase<Moses2::Word> &sourcePhrase) const
 {
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions){
   ff->EvaluateAfterTablePruning(pool, tps, sourcePhrase);
 }
 
 }
-/*
- void
- FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
- const Phrase &source, SCFG::TargetPhrase &targetPhrase) const
- {
- SCORE estimatedScore = 0;
 
- BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
- Scores& scores = targetPhrase.GetScores();
- ff->EvaluateInIsolation(pool, system, source, targetPhrase, scores, &estimatedScore);
- }
-
- //targetPhrase.SetEstimatedScore(estimatedScore);
- }
- */
 }
 

@@ -108,7 +108,7 @@ class HypothesisTargetPhraseOrderer
 public:
   bool operator()(const Hypothesis* a, const Hypothesis* b) const
   {
-    PhraseOrdererLexical phraseCmp;
+    PhraseOrdererLexical<Moses2::Word> phraseCmp;
     bool ret = phraseCmp(a->GetTargetPhrase(), b->GetTargetPhrase());
     /*
      std::cerr << (const Phrase&) a->GetTargetPhrase() << " ||| "

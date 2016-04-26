@@ -38,7 +38,7 @@ SCORE *TargetPhrase::GetScoresProperty(int propertyInd) const
 
 std::ostream& operator<<(std::ostream &out, const TargetPhrase &obj)
 {
-  out << (const Phrase&) obj << " SCORES:" << obj.GetScores();
+  out << (const Phrase<Word> &) obj << " SCORES:" << obj.GetScores();
   return out;
 }
 

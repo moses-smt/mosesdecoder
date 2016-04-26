@@ -25,7 +25,7 @@ WordPenalty::~WordPenalty()
 }
 
 void WordPenalty::EvaluateInIsolation(MemPool &pool, const System &system,
-    const Phrase &source, const TargetPhrase &targetPhrase, Scores &scores,
+    const Phrase<Moses2::Word> &source, const TargetPhrase &targetPhrase, Scores &scores,
     SCORE *estimatedScore) const
 {
   SCORE score = -(SCORE) targetPhrase.GetSize();

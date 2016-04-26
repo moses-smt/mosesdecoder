@@ -14,6 +14,7 @@
 #include "../InputPathBase.h"
 #include "../System.h"
 #include "../Scores.h"
+#include "../Phrase.h"
 #include "../FF/StatefulFeatureFunction.h"
 
 using namespace std;
@@ -114,7 +115,7 @@ void Hypothesis::OutputToStream(std::ostream &out) const
   //cerr << *this << endl;
 
   if (GetTargetPhrase().GetSize()) {
-    const Phrase &phrase = GetTargetPhrase();
+    const Phrase<Moses2::Word> &phrase = GetTargetPhrase();
     out << phrase << " ";
   }
 

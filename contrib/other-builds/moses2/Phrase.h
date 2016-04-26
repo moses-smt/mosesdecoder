@@ -24,6 +24,7 @@ class PhraseTable;
 class MemPool;
 class System;
 
+template<typename WORD>
 class Phrase
 {
   friend std::ostream& operator<<(std::ostream &, const Phrase &);
@@ -106,20 +107,33 @@ public:
 };
 
 ////////////////////////////////////////////////////////////////////////
-inline std::ostream& operator<<(std::ostream &out, const Phrase &obj)
+inline std::ostream& operator<<(std::ostream &out, const Phrase<Moses2::Word> &obj)
 {
   if (obj.GetSize()) {
     out << obj[0];
     for (size_t i = 1; i < obj.GetSize(); ++i) {
-      const Word &word = obj[i];
+      const Moses2::Word &word = obj[i];
       out << " " << word;
     }
   }
   return out;
 }
-
+/*
+template<typename WORD>
+inline std::ostream& operator<<(std::ostream &out, const Phrase<WORD> &obj)
+{
+  if (obj.GetSize()) {
+    out << obj[0];
+    for (size_t i = 1; i < obj.GetSize(); ++i) {
+      const WORD &word = obj[i];
+      out << " " << word;
+    }
+  }
+  return out;
+}
+*/
 ////////////////////////////////////////////////////////////////////////
-class TargetPhrase: public Phrase
+class TargetPhrase: public Phrase<Word>
 {
   friend std::ostream& operator<<(std::ostream &, const TargetPhrase &);
 
@@ -170,10 +184,11 @@ struct CompareFutureScore
 };
 
 ////////////////////////////////////////////////////////////////////////
+template<typename WORD>
 class PhraseOrdererLexical
 {
 public:
-  bool operator()(const Phrase &a, const Phrase &b) const
+  bool operator()(const Phrase<WORD> &a, const Phrase<WORD> &b) const
   {
     size_t minSize = std::min(a.GetSize(), b.GetSize());
     for (size_t i = 0; i < minSize; ++i) {

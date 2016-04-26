@@ -13,11 +13,11 @@
 #include <deque>
 #include "PhraseTable.h"
 #include "../Vector.h"
+#include "../Phrase.h"
 
 namespace Moses2
 {
 
-class Phrase;
 class QueryEngine;
 class target_text;
 class MemPool;
@@ -53,11 +53,11 @@ protected:
   TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
       InputPathBase &inputPath) const;
   TargetPhrases *CreateTargetPhrase(MemPool &pool, const System &system,
-      const Phrase &sourcePhrase, uint64_t key) const;
+      const Phrase<Moses2::Word> &sourcePhrase, uint64_t key) const;
   TargetPhrase *CreateTargetPhrase(MemPool &pool, const System &system,
       const char *&offset) const;
 
-  void ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok,
+  void ConvertToProbingSourcePhrase(const Phrase<Moses2::Word> &sourcePhrase, bool &ok,
       uint64_t probingSource[]) const;
 
   inline const Factor *GetTargetFactor(uint32_t probingId) const
@@ -69,7 +69,8 @@ protected:
   }
 
   std::pair<bool, uint64_t> GetSourceProbingId(
-      const Phrase &sourcePhrase) const;
+      const Phrase<Moses2::Word> &sourcePhrase) const;
+
   inline uint64_t GetSourceProbingId(const Factor *factor) const
   {
     size_t factorId = factor->GetId();

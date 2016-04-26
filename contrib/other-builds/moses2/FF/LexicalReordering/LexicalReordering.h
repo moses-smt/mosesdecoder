@@ -39,13 +39,13 @@ public:
       const InputType &input, const Hypothesis &hypo) const;
 
   virtual void
-  EvaluateInIsolation(MemPool &pool, const System &system, const Phrase &source,
+  EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<Moses2::Word> &source,
       const TargetPhrase &targetPhrase, Scores &scores,
       SCORE *estimatedScore) const;
 
   virtual void
   EvaluateAfterTablePruning(MemPool &pool, const TargetPhrases &tps,
-      const Phrase &sourcePhrase) const;
+      const Phrase<Moses2::Word> &sourcePhrase) const;
 
   virtual void EvaluateWhenApplied(const ManagerBase &mgr,
       const Hypothesis &hypo, const FFState &prevState, Scores &scores,
@@ -61,17 +61,17 @@ protected:
 
   virtual void
   EvaluateAfterTablePruning(MemPool &pool, const TargetPhrase &targetPhrase,
-      const Phrase &sourcePhrase) const;
+      const Phrase<Moses2::Word> &sourcePhrase) const;
 
   // PROPERTY IN PT
   int m_propertyInd;
 
   // COMPACT MODEL
   LexicalReorderingTableCompact *m_compactModel;
-  Phrase *m_blank;
+  Phrase<Moses2::Word> *m_blank;
 
   // MEMORY MODEL
-  typedef std::pair<const Phrase*, const Phrase*> Key;
+  typedef std::pair<const Phrase<Moses2::Word>*, const Phrase<Moses2::Word>* > Key;
   typedef std::vector<SCORE> Values;
 
   struct KeyComparer
@@ -99,7 +99,7 @@ protected:
   typedef boost::unordered_map<Key, Values, KeyComparer, KeyComparer> Coll;
   Coll *m_coll;
 
-  const Values *GetValues(const Phrase &source, const Phrase &target) const;
+  const Values *GetValues(const Phrase<Moses2::Word> &source, const Phrase<Moses2::Word> &target) const;
 };
 
 } /* namespace Moses2 */

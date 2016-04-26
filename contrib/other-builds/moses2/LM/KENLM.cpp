@@ -130,7 +130,7 @@ void KENLM<Model>::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
 
 template<class Model>
 void KENLM<Model>::EvaluateInIsolation(MemPool &pool, const System &system,
-    const Phrase &source, const TargetPhrase &targetPhrase, Scores &scores,
+    const Phrase<Moses2::Word> &source, const TargetPhrase &targetPhrase, Scores &scores,
     SCORE *estimatedScore) const
 {
   // contains factors used by this LM
@@ -231,7 +231,7 @@ void KENLM<Model>::EvaluateWhenApplied(const ManagerBase &mgr,
 }
 
 template<class Model>
-void KENLM<Model>::CalcScore(const Phrase &phrase, float &fullScore,
+void KENLM<Model>::CalcScore(const Phrase<Moses2::Word> &phrase, float &fullScore,
     float &ngramScore, std::size_t &oovCount) const
 {
   fullScore = 0;

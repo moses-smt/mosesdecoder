@@ -58,8 +58,8 @@ LexicalReorderingTableCompact::~LexicalReorderingTableCompact()
     delete m_scoreTrees[i];
 }
 
-std::vector<float> LexicalReorderingTableCompact::GetScore(const Phrase& f,
-    const Phrase& e, const Phrase& c)
+std::vector<float> LexicalReorderingTableCompact::GetScore(const Phrase<Moses2::Word>& f,
+    const Phrase<Moses2::Word>& e, const Phrase<Moses2::Word>& c)
 {
   std::string key;
   std::vector<float> scores;
@@ -89,8 +89,8 @@ std::vector<float> LexicalReorderingTableCompact::GetScore(const Phrase& f,
   return std::vector<float>();
 }
 
-std::string LexicalReorderingTableCompact::MakeKey(const Phrase& f,
-    const Phrase& e, const Phrase& c) const
+std::string LexicalReorderingTableCompact::MakeKey(const Phrase<Moses2::Word>& f,
+    const Phrase<Moses2::Word>& e, const Phrase<Moses2::Word>& c) const
 {
   return MakeKey(Trim(f.GetString(m_FactorsF)), Trim(e.GetString(m_FactorsE)),
       Trim(c.GetString(m_FactorsC)));

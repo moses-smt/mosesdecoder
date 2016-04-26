@@ -8,7 +8,7 @@ namespace Moses2
 namespace SCFG
 {
 
-class PhraseImpl: public Phrase, public PhraseImplTemplate<SCFG::Word>
+class PhraseImpl: public Phrase<SCFG::Word>, public PhraseImplTemplate<SCFG::Word>
 {
 public:
   static PhraseImpl *CreateFromString(MemPool &pool, FactorCollection &vocab,
@@ -36,8 +36,8 @@ public:
 
   SubPhrase GetSubPhrase(size_t start, size_t size) const
   {
-    SubPhrase ret(*this, start, size);
-    return ret;
+    //SubPhrase ret(*this, start, size);
+    //return ret;
   }
 
 };

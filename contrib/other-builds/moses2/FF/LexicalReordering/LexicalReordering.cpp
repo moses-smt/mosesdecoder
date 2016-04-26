@@ -124,13 +124,13 @@ void LexicalReordering::EmptyHypothesisState(FFState &state,
 }
 
 void LexicalReordering::EvaluateInIsolation(MemPool &pool, const System &system,
-    const Phrase &source, const TargetPhrase &targetPhrase, Scores &scores,
+    const Phrase<Moses2::Word> &source, const TargetPhrase &targetPhrase, Scores &scores,
     SCORE *estimatedScore) const
 {
 }
 
 void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
-    const TargetPhrases &tps, const Phrase &sourcePhrase) const
+    const TargetPhrases &tps, const Phrase<Moses2::Word> &sourcePhrase) const
 {
   BOOST_FOREACH(const TargetPhrase *tp, tps){
   EvaluateAfterTablePruning(pool, *tp, sourcePhrase);
@@ -138,7 +138,7 @@ void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
 }
 
 void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
-    const TargetPhrase &targetPhrase, const Phrase &sourcePhrase) const
+    const TargetPhrase &targetPhrase, const Phrase<Moses2::Word> &sourcePhrase) const
 {
   if (m_propertyInd >= 0) {
     SCORE *scoreArr = targetPhrase.GetScoresProperty(m_propertyInd);
@@ -190,7 +190,7 @@ void LexicalReordering::EvaluateWhenApplied(const ManagerBase &mgr,
 }
 
 const LexicalReordering::Values *LexicalReordering::GetValues(
-    const Phrase &source, const Phrase &target) const
+    const Phrase<Moses2::Word> &source, const Phrase<Moses2::Word> &target) const
 {
   Key key(&source, &target);
   Coll::const_iterator iter;

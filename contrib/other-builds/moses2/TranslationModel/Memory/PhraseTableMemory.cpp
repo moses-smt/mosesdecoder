@@ -67,7 +67,7 @@ void PhraseTableMemory::Load(System &system)
     UTIL_THROW_IF2(toks.size() < 3, "Wrong format");
     //cerr << "line=" << line << endl;
 
-    Phrase *source;
+    Phrase<Moses2::Word> *source;
     TargetPhrase *target;
 
     if (m_isPb) {
@@ -79,8 +79,8 @@ void PhraseTableMemory::Load(System &system)
       //cerr << "created target" << endl;
     }
     else {
-      source = SCFG::PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
-          toks[0]);
+      //source = SCFG::PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
+      //    toks[0]);
       //cerr << "created soure" << endl;
       SCFG::TargetPhraseImpl *targetSCFG;
       targetSCFG = SCFG::TargetPhraseImpl::CreateFromString(systemPool, *this,

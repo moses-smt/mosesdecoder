@@ -5,7 +5,7 @@
 namespace Moses2
 {
 
-class PhraseImpl: public Phrase, public PhraseImplTemplate<Word>
+class PhraseImpl: public Phrase<Word>, public PhraseImplTemplate<Word>
 {
 public:
   static PhraseImpl *CreateFromString(MemPool &pool, FactorCollection &vocab,

@@ -43,7 +43,7 @@ public:
       const InputType &input, const Hypothesis &hypo) const;
 
   virtual void
-  EvaluateInIsolation(MemPool &pool, const System &system, const Phrase &source,
+  EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<Moses2::Word> &source,
       const TargetPhrase &targetPhrase, Scores &scores,
       SCORE *estimatedScore) const;
 
@@ -60,7 +60,7 @@ protected:
 
   boost::shared_ptr<Model> m_ngram;
 
-  void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore,
+  void CalcScore(const Phrase<Moses2::Word> &phrase, float &fullScore, float &ngramScore,
       std::size_t &oovCount) const;
 
   inline lm::WordIndex TranslateID(const Word &word) const

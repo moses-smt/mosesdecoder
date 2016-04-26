@@ -26,11 +26,10 @@
 #include "CanonicalHuffman.h"
 #include "StringVector.h"
 #include "../../TypeDef.h"
-//#include "../../Phrase.h"
+#include "../../Phrase.h"
 
 namespace Moses2
 {
-class Phrase;
 
 //! additional types
 class LexicalReorderingTable
@@ -49,7 +48,7 @@ public:
 public:
 
   virtual std::vector<float>
-  GetScore(const Phrase& f, const Phrase& e, const Phrase& c) = 0;
+  GetScore(const Phrase<Moses2::Word>& f, const Phrase<Moses2::Word>& e, const Phrase<Moses2::Word>& c) = 0;
 
   virtual
   void InitializeForInput()
@@ -59,7 +58,7 @@ public:
   ;
 
   virtual
-  void InitializeForInputPhrase(const Phrase&)
+  void InitializeForInputPhrase(const Phrase<Moses2::Word>&)
   {
   }
 
@@ -108,7 +107,7 @@ private:
   StringVector<unsigned char, unsigned long, MmapAllocator> m_scoresMapped;
   StringVector<unsigned char, unsigned long, std::allocator> m_scoresMemory;
 
-  std::string MakeKey(const Phrase& f, const Phrase& e, const Phrase& c) const;
+  std::string MakeKey(const Phrase<Moses2::Word>& f, const Phrase<Moses2::Word>& e, const Phrase<Moses2::Word>& c) const;
   std::string MakeKey(const std::string& f, const std::string& e,
       const std::string& c) const;
 
@@ -126,7 +125,7 @@ public:
   ~LexicalReorderingTableCompact();
 
   virtual std::vector<float>
-  GetScore(const Phrase& f, const Phrase& e, const Phrase& c);
+  GetScore(const Phrase<Moses2::Word>& f, const Phrase<Moses2::Word>& e, const Phrase<Moses2::Word>& c);
 
   static LexicalReorderingTable*
   CheckAndLoad(const std::string& filePath,

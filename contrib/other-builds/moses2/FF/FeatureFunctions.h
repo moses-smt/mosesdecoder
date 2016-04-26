@@ -12,6 +12,7 @@
 #include <string>
 #include "../legacy/Parameter.h"
 #include "FeatureRegistry.h"
+#include "../Phrase.h"
 
 namespace Moses2
 {
@@ -22,7 +23,6 @@ class StatefulFeatureFunction;
 class PhraseTable;
 class Manager;
 class MemPool;
-class Phrase;
 class PhraseImpl;
 class TargetPhrase;
 class TargetPhrases;
@@ -69,14 +69,10 @@ public:
 
   // the pool here must be the system pool if the rule was loaded during load, or the mgr pool if it was loaded on demand
   void EvaluateInIsolation(MemPool &pool, const System &system,
-      const Phrase &source, TargetPhrase &targetPhrase) const;
+      const Phrase<Moses2::Word> &source, TargetPhrase &targetPhrase) const;
   void EvaluateAfterTablePruning(MemPool &pool, const TargetPhrases &tps,
-      const Phrase &sourcePhrase) const;
+      const Phrase<Moses2::Word> &sourcePhrase) const;
 
-  /*
-   void EvaluateInIsolation(MemPool &pool, const System &system,
-   const Phrase &source, SCFG::TargetPhrase &targetPhrase) const;
-   */
 protected:
   std::vector<const FeatureFunction*> m_featureFunctions;
   std::vector<const StatefulFeatureFunction*> m_statefulFeatureFunctions;

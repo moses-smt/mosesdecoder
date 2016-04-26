@@ -23,7 +23,7 @@ public:
       InputPathBase &inputPath) const;
 
   virtual void
-  EvaluateInIsolation(const System &system, const Phrase &source,
+  EvaluateInIsolation(const System &system, const Phrase<Moses2::Word> &source,
       const TargetPhrase &targetPhrase, Scores &scores,
       SCORE *estimatedScore) const;
 

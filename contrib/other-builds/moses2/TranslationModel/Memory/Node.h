@@ -9,6 +9,7 @@
 #include <boost/foreach.hpp>
 #include "../../PhraseBased/TargetPhrases.h"
 #include "../../System.h"
+#include "../../Phrase.h"
 
 namespace Moses2
 {
@@ -32,12 +33,12 @@ public:
   ~Node()
   {}
 
-  void AddRule(Phrase &source, TargetPhrase *target)
+  void AddRule(Phrase<WORD> &source, TargetPhrase *target)
   {
     AddRule(source, target, 0);
   }
 
-  TargetPhrases *Find(const Phrase &source, size_t pos = 0) const
+  TargetPhrases *Find(const Phrase<WORD> &source, size_t pos = 0) const
   {
     assert(source.GetSize());
     if (pos == source.GetSize()) {
@@ -101,10 +102,10 @@ public:
 protected:
   Children m_children;
   TargetPhrases *m_targetPhrases;
-  Phrase *m_source;
+  Phrase<WORD> *m_source;
   std::vector<TargetPhrase*> *m_unsortedTPS;
 
-  Node &AddRule(Phrase &source, TargetPhrase *target, size_t pos)
+  Node &AddRule(Phrase<WORD> &source, TargetPhrase *target, size_t pos)
   {
     if (pos == source.GetSize()) {
       if (m_unsortedTPS == NULL) {

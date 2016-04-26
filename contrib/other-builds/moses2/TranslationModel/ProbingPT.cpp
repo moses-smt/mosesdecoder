@@ -116,7 +116,7 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr, MemPool &pool,
    return tpsAndKey.first;
    }
    */
-  const Phrase &sourcePhrase = inputPath.subPhrase;
+  const Phrase<Moses2::Word> &sourcePhrase = inputPath.subPhrase;
 
   // get hash for source phrase
   std::pair<bool, uint64_t> keyStruct = GetSourceProbingId(sourcePhrase);
@@ -138,7 +138,7 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr, MemPool &pool,
 }
 
 std::pair<bool, uint64_t> ProbingPT::GetSourceProbingId(
-    const Phrase &sourcePhrase) const
+    const Phrase<Moses2::Word> &sourcePhrase) const
 {
   std::pair<bool, uint64_t> ret;
 
@@ -161,7 +161,7 @@ std::pair<bool, uint64_t> ProbingPT::GetSourceProbingId(
 }
 
 TargetPhrases *ProbingPT::CreateTargetPhrase(MemPool &pool,
-    const System &system, const Phrase &sourcePhrase, uint64_t key) const
+    const System &system, const Phrase<Moses2::Word> &sourcePhrase, uint64_t key) const
 {
   TargetPhrases *tps = NULL;
 
@@ -255,7 +255,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system,
   return tp;
 }
 
-void ProbingPT::ConvertToProbingSourcePhrase(const Phrase &sourcePhrase,
+void ProbingPT::ConvertToProbingSourcePhrase(const Phrase<Moses2::Word> &sourcePhrase,
     bool &ok, uint64_t probingSource[]) const
 {
 

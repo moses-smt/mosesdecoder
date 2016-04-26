@@ -50,7 +50,7 @@ TargetPhraseImpl::~TargetPhraseImpl()
 
 std::ostream& operator<<(std::ostream &out, const TargetPhraseImpl &obj)
 {
-  out << (const Phrase&) obj << " SCORES:" << obj.GetScores();
+  out << (const Phrase<Moses2::Word>&) obj << " SCORES:" << obj.GetScores();
   return out;
 }
 

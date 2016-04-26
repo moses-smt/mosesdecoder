@@ -11,12 +11,12 @@
 #include <string>
 #include <vector>
 #include "../TypeDef.h"
+#include "../Phrase.h"
 
 namespace Moses2
 {
 
 class System;
-class Phrase;
 class PhraseImpl;
 class TargetPhrase;
 class TargetPhrases;
@@ -73,7 +73,7 @@ public:
   // For SCFG decoding, the source contains non-terminals, NOT the raw
   // source from the input sentence
   virtual void
-  EvaluateInIsolation(MemPool &pool, const System &system, const Phrase &source,
+  EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<Moses2::Word> &source,
       const TargetPhrase &targetPhrase, Scores &scores,
       SCORE *estimatedScore) const = 0;
 
@@ -86,7 +86,7 @@ public:
    */
 
   virtual void EvaluateAfterTablePruning(MemPool &pool,
-      const TargetPhrases &tps, const Phrase &sourcePhrase) const
+      const TargetPhrases &tps, const Phrase<Moses2::Word> &sourcePhrase) const
   {
   }
 
