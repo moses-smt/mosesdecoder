@@ -25,6 +25,8 @@ System::System(const Parameter &paramsArg) :
 {
   options.init(paramsArg);
 
+  IsPb();
+
   bestCollector.reset(new OutputCollector());
 
   params.SetParameter(cpuAffinityOffset, "cpu-affinity-offset", 0);
@@ -111,6 +113,27 @@ FactorCollection &System::GetVocab() const
 Recycler<HypothesisBase*> &System::GetHypoRecycler() const
 {
   return GetThreadSpecificObj(m_hypoRecycler);
+}
+
+void System::IsPb()
+{
+  switch (options.search.algo) {
+  case Normal:
+  case CubePruning:
+  case CubePruningPerMiniStack:
+  case CubePruningPerBitmap:
+  case CubePruningCardinalStack:
+  case CubePruningBitmapStack:
+  case CubePruningMiniStack:
+    isPb = true;
+    break;
+  case CYKPlus:
+    isPb = false;
+    break;
+  default:
+    abort();
+    break;
+  }
 }
 
 }

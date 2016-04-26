@@ -42,6 +42,7 @@ public:
   FeatureFunctions featureFunctions;
   Weights weights;
   std::vector<const PhraseTable*> mappings;
+  bool isPb;
 
   mutable boost::shared_ptr<OutputCollector> bestCollector, nbestCollector;
 
@@ -67,6 +68,9 @@ protected:
 
   void LoadWeights();
   void LoadMappings();
+
+  void IsPb();
+
 };
 
 }

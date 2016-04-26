@@ -50,7 +50,6 @@ PhraseTableMemory::~PhraseTableMemory()
 void PhraseTableMemory::Load(System &system)
 {
   FactorCollection &vocab = system.GetVocab();
-  IsPb(system);
 
   MemPool &systemPool = system.GetSystemPool();
   MemPool tmpSourcePool;
@@ -70,7 +69,7 @@ void PhraseTableMemory::Load(System &system)
     Phrase<Moses2::Word> *source;
     TargetPhrase<Moses2::Word> *target;
 
-    if (m_isPb) {
+    if (system.isPb) {
       source = PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
           toks[0]);
       //cerr << "created soure" << endl;
@@ -113,27 +112,6 @@ void PhraseTableMemory::Load(System &system)
     cerr << word << " ";
   }
   cerr << endl;
-}
-
-void PhraseTableMemory::IsPb(const System &system)
-{
-  switch (system.options.search.algo) {
-  case Normal:
-  case CubePruning:
-  case CubePruningPerMiniStack:
-  case CubePruningPerBitmap:
-  case CubePruningCardinalStack:
-  case CubePruningBitmapStack:
-  case CubePruningMiniStack:
-    m_isPb = true;
-    break;
-  case CYKPlus:
-    m_isPb = false;
-    break;
-  default:
-    abort();
-    break;
-  }
 }
 
 TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool,

@@ -44,10 +44,7 @@ public:
       SCFG::InputPath &path) const;
 
 protected:
-  bool m_isPb;
   PtMem::Node<Word>  m_root;
-
-  void IsPb(const System &system);
 
   void LookupGivenPrefixPath(const SCFG::InputPath &prefixPath,
       const Word &wordSought,
