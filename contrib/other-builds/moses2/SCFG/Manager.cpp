@@ -54,7 +54,7 @@ void Manager::Decode()
     InitActiveChart(startPos);
 
     for (int phraseSize = 1; phraseSize < (inputSize - startPos + 1); ++phraseSize) {
-      SubPhrase sub = m_input->GetSubPhrase(startPos, phraseSize);
+      SubPhrase<Moses2::Word> sub = m_input->GetSubPhrase(startPos, phraseSize);
       //cerr << "sub=" << sub << endl;
       Lookup(startPos, phraseSize);
       Decode(startPos, phraseSize);

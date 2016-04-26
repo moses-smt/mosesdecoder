@@ -27,9 +27,9 @@ class InputPath: public InputPathBase
   friend std::ostream& operator<<(std::ostream &, const InputPath &);
 public:
   boost::unordered_map<SymbolBind, SCFG::TargetPhrases> targetPhrases;
-  SubPhrase subPhrase;
+  SubPhrase<Moses2::Word> subPhrase;
 
-  InputPath(MemPool &pool, const SubPhrase &subPhrase, const Range &range,
+  InputPath(MemPool &pool, const SubPhrase<Moses2::Word> &subPhrase, const Range &range,
       size_t numPt, const InputPath *prefixPath);
   virtual ~InputPath();
 

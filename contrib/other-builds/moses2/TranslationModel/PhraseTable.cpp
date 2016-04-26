@@ -57,7 +57,7 @@ void PhraseTable::Lookup(const Manager &mgr, InputPathsBase &inputPaths) const
   BOOST_FOREACH(InputPathBase *pathBase, inputPaths){
     InputPath *path = static_cast<InputPath*>(pathBase);
 
-    const SubPhrase &phrase = path->subPhrase;
+    const SubPhrase<Moses2::Word> &phrase = path->subPhrase;
 
     TargetPhrases *tpsPtr = tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
 

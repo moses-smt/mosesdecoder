@@ -18,7 +18,7 @@ namespace Moses2
 namespace SCFG
 {
 
-InputPath::InputPath(MemPool &pool, const SubPhrase &subPhrase,
+InputPath::InputPath(MemPool &pool, const SubPhrase<Moses2::Word> &subPhrase,
     const Range &range, size_t numPt, const InputPath *prefixPath)
 :InputPathBase(pool, range, numPt, prefixPath)
 ,subPhrase(subPhrase)

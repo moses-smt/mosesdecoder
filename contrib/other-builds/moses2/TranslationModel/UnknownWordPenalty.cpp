@@ -37,7 +37,7 @@ void UnknownWordPenalty::Lookup(const Manager &mgr,
 {
   BOOST_FOREACH(InputPathBase *pathBase, inputPaths){
   InputPath *path = static_cast<InputPath*>(pathBase);
-  const SubPhrase &phrase = path->subPhrase;
+  const SubPhrase<Moses2::Word> &phrase = path->subPhrase;
 
   TargetPhrases *tpsPtr;
   tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
@@ -71,7 +71,7 @@ TargetPhrases *UnknownWordPenalty::Lookup(const Manager &mgr, MemPool &pool,
     }
   }
 
-  const SubPhrase &source = inputPath.subPhrase;
+  const SubPhrase<Moses2::Word> &source = inputPath.subPhrase;
   const Word &sourceWord = source[0];
   const Factor *factor = sourceWord[0];
 

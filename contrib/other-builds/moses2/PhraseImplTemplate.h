@@ -14,6 +14,7 @@
 
 namespace Moses2
 {
+template<typename WORD>
 class SubPhrase;
 
 template<typename WORD>

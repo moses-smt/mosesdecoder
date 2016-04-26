@@ -32,7 +32,7 @@ void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
   for (size_t startPos = 0; startPos < size; ++startPos) {
     // create path for 0 length string
     Range range(startPos, startPos - 1);
-    SubPhrase subPhrase = input.GetSubPhrase(startPos, 0);
+    SubPhrase<Moses2::Word> subPhrase = input.GetSubPhrase(startPos, 0);
 
     SCFG::InputPath *path = new (pool.Allocate<SCFG::InputPath>()) SCFG::InputPath(pool,
         subPhrase, range, numPt, NULL);
@@ -50,7 +50,7 @@ void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
         break;
       }
 
-      SubPhrase subPhrase = input.GetSubPhrase(startPos, phaseSize);
+      SubPhrase<Moses2::Word> subPhrase = input.GetSubPhrase(startPos, phaseSize);
       Range range(startPos, endPos);
 
       SCFG::InputPath *path = new (pool.Allocate<SCFG::InputPath>()) SCFG::InputPath(pool,

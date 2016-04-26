@@ -18,7 +18,9 @@
 namespace Moses2
 {
 
+template<typename WORD>
 class SubPhrase;
+
 class Scores;
 class PhraseTable;
 class MemPool;
@@ -90,7 +92,7 @@ public:
     return ret.str();
   }
 
-  virtual SubPhrase GetSubPhrase(size_t start, size_t size) const = 0;
+  virtual SubPhrase<WORD> GetSubPhrase(size_t start, size_t size) const = 0;
 
   virtual void OutputToStream(std::ostream &out) const
   {

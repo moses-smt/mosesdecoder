@@ -29,7 +29,7 @@ void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
 
   // create blank path for initial hypo
   Range range(NOT_FOUND, NOT_FOUND);
-  SubPhrase subPhrase = input.GetSubPhrase(NOT_FOUND, NOT_FOUND);
+  SubPhrase<Moses2::Word> subPhrase = input.GetSubPhrase(NOT_FOUND, NOT_FOUND);
   m_blank = new (pool.Allocate<InputPath>()) InputPath(pool, subPhrase, range,
       numPt, NULL);
 
@@ -44,7 +44,7 @@ void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
         break;
       }
 
-      SubPhrase subPhrase = input.GetSubPhrase(startPos, phaseSize);
+      SubPhrase<Moses2::Word> subPhrase = input.GetSubPhrase(startPos, phaseSize);
       Range range(startPos, endPos);
 
       InputPath *path = new (pool.Allocate<InputPath>()) InputPath(pool,

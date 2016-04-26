@@ -34,10 +34,10 @@ public:
     return m_size;
   }
 
-  SubPhrase GetSubPhrase(size_t start, size_t size) const
+  SubPhrase<SCFG::Word> GetSubPhrase(size_t start, size_t size) const
   {
-    //SubPhrase ret(*this, start, size);
-    //return ret;
+    SubPhrase<SCFG::Word> ret(*this, start, size);
+    return ret;
   }
 
 };

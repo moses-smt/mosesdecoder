@@ -67,7 +67,7 @@ std::vector<float> LexicalReorderingTableCompact::GetScore(const Phrase<Moses2::
   if (0 == c.GetSize()) key = MakeKey(f, e, c);
   else {
     for (size_t i = 0; i <= c.GetSize(); ++i) {
-      SubPhrase sub_c = c.GetSubPhrase(i, c.GetSize() - i);
+      SubPhrase<Moses2::Word> sub_c = c.GetSubPhrase(i, c.GetSize() - i);
       key = MakeKey(f, e, sub_c);
     }
   }

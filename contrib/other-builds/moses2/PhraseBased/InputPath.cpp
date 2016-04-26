@@ -11,7 +11,7 @@
 
 namespace Moses2
 {
-InputPath::InputPath(MemPool &pool, const SubPhrase &subPhrase,
+InputPath::InputPath(MemPool &pool, const SubPhrase<Moses2::Word> &subPhrase,
     const Range &range, size_t numPt, const InputPath *prefixPath)
 :InputPathBase(pool, range, numPt, prefixPath), m_isUsed(false)
 ,subPhrase(subPhrase)

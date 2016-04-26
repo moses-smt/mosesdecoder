@@ -4,17 +4,18 @@
 namespace Moses2
 {
 
-class SubPhrase: public Phrase<Word>
+template<typename WORD>
+class SubPhrase: public Phrase<WORD>
 {
   friend std::ostream& operator<<(std::ostream &, const SubPhrase &);
 public:
-  SubPhrase(const Phrase<Word> &origPhrase, size_t start, size_t size)
+  SubPhrase(const Phrase<WORD> &origPhrase, size_t start, size_t size)
   :m_origPhrase(&origPhrase)
   ,m_start(start)
   ,m_size(size)
   {}
 
-  virtual const Word& operator[](size_t pos) const
+  virtual const WORD& operator[](size_t pos) const
   {  return (*m_origPhrase)[pos + m_start]; }
 
   virtual size_t GetSize() const
@@ -27,12 +28,12 @@ public:
   }
 
 protected:
-  const Phrase *m_origPhrase;
+  const Phrase<WORD> *m_origPhrase;
   size_t m_start, m_size;
 };
 
 ///////////////////////////////////////////////////////
-std::ostream& operator<<(std::ostream &out, const SubPhrase &obj)
+std::ostream& operator<<(std::ostream &out, const SubPhrase<Moses2::Word> &obj)
 {
   if (obj.GetSize()) {
     out << obj[0];
@@ -43,6 +44,19 @@ std::ostream& operator<<(std::ostream &out, const SubPhrase &obj)
   }
   return out;
 }
-
+/*
+template<typename WORD>
+std::ostream& operator<<(std::ostream &out, const SubPhrase<WORD> &obj)
+{
+  if (obj.GetSize()) {
+    out << obj[0];
+    for (size_t i = 1; i < obj.GetSize(); ++i) {
+      const WORD &word = obj[i];
+      out << " " << word;
+    }
+  }
+  return out;
+}
+*/
 }
 
