@@ -32,10 +32,10 @@ public:
   virtual ~Phrase()
   {
   }
-  virtual const Word& operator[](size_t pos) const = 0;
+  virtual const WORD& operator[](size_t pos) const = 0;
   virtual size_t GetSize() const = 0;
 
-  virtual const Word& Back() const
+  virtual const WORD& Back() const
   { return (*this)[GetSize() - 1]; }
 
   virtual size_t hash() const
@@ -43,7 +43,7 @@ public:
     size_t seed = 0;
 
     for (size_t i = 0; i < GetSize(); ++i) {
-      const Word &word = (*this)[i];
+      const WORD &word = (*this)[i];
       size_t wordHash = word.hash();
       boost::hash_combine(seed, wordHash);
     }
@@ -58,8 +58,8 @@ public:
     }
 
     for (size_t i = 0; i < GetSize(); ++i) {
-      const Word &word = (*this)[i];
-      const Word &otherWord = compare[i];
+      const WORD &word = (*this)[i];
+      const WORD &otherWord = compare[i];
       if (word != otherWord) {
         return false;
       }
@@ -81,10 +81,10 @@ public:
 
     std::stringstream ret;
 
-    const Word &word = (*this)[0];
+    const WORD &word = (*this)[0];
     ret << word.GetString(factorTypes);
     for (size_t i = 1; i < GetSize(); ++i) {
-      const Word &word = (*this)[i];
+      const WORD &word = (*this)[i];
       ret << " " << word.GetString(factorTypes);
     }
     return ret.str();
@@ -98,7 +98,7 @@ public:
     if (size) {
       out << (*this)[0];
       for (size_t i = 1; i < size; ++i) {
-        const Word &word = (*this)[i];
+        const WORD &word = (*this)[i];
         out << " " << word;
       }
     }
