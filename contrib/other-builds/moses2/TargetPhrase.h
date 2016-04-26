@@ -14,7 +14,7 @@ namespace Moses2
 {
 
 template<typename WORD>
-class TargetPhrase: public Phrase<Word>
+class TargetPhrase: public Phrase<WORD>
 {
   friend std::ostream& operator<<(std::ostream &, const TargetPhrase &);
 

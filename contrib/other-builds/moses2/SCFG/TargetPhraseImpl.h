@@ -58,9 +58,9 @@ public:
     return m_size;
   }
 
-  SubPhrase<Moses2::Word> GetSubPhrase(size_t start, size_t size) const
+  SubPhrase<SCFG::Word> GetSubPhrase(size_t start, size_t size) const
   {
-    SubPhrase<Moses2::Word> ret(*this, start, size);
+    SubPhrase<SCFG::Word> ret(*this, start, size);
     return ret;
   }
 
