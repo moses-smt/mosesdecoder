@@ -137,7 +137,7 @@ void PhraseTableMemory::IsPb(const System &system)
 }
 
 TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool,
-    InputPathBase &inputPath) const
+    InputPath &inputPath) const
 {
   const SubPhrase &phrase = inputPath.subPhrase;
   TargetPhrases *tps = m_root.Find(phrase);

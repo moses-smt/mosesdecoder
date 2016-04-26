@@ -19,8 +19,9 @@ namespace SCFG
 {
 
 InputPath::InputPath(MemPool &pool, const SubPhrase &subPhrase,
-    const Range &range, size_t numPt, const InputPath *prefixPath) :
-    InputPathBase(pool, subPhrase, range, numPt, prefixPath)
+    const Range &range, size_t numPt, const InputPath *prefixPath)
+:InputPathBase(pool, range, numPt, prefixPath)
+,subPhrase(subPhrase)
 {
   m_activeChart = pool.Allocate<ActiveChart>(numPt);
   for (size_t i = 0; i < numPt; ++i) {

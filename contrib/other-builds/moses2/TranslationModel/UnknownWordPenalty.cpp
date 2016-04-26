@@ -47,7 +47,7 @@ void UnknownWordPenalty::Lookup(const Manager &mgr,
 }
 
 TargetPhrases *UnknownWordPenalty::Lookup(const Manager &mgr, MemPool &pool,
-    InputPathBase &inputPath) const
+    InputPath &inputPath) const
 {
   const System &system = mgr.system;
 

@@ -7,10 +7,10 @@
 #include <boost/foreach.hpp>
 #include <queue>
 #include "PhraseTable.h"
-#include "../InputPathsBase.h"
 #include "../legacy/Util2.h"
 #include "../TypeDef.h"
 #include "../PhraseBased/Manager.h"
+#include "../PhraseBased/InputPath.h"
 
 using namespace std;
 
@@ -76,7 +76,7 @@ void PhraseTable::Lookup(const Manager &mgr, InputPathsBase &inputPaths) const
 }
 
 TargetPhrases *PhraseTable::Lookup(const Manager &mgr, MemPool &pool,
-    InputPathBase &inputPath) const
+    InputPath &inputPath) const
 {
   UTIL_THROW2("Not implemented");
 }

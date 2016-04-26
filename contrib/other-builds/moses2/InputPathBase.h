@@ -21,10 +21,9 @@ class InputPathBase
 {
 public:
   const InputPathBase *prefixPath;
-  SubPhrase subPhrase;
   Range range;
 
-  InputPathBase(MemPool &pool, const SubPhrase &subPhrase, const Range &range,
+  InputPathBase(MemPool &pool, const Range &range,
       size_t numPt, const InputPathBase *prefixPath);
 
 };

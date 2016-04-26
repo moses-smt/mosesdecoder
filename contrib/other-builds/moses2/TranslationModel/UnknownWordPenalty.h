@@ -20,7 +20,7 @@ public:
 
   void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
   virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
-      InputPathBase &inputPath) const;
+      InputPath &inputPath) const;
 
   virtual void
   EvaluateInIsolation(const System &system, const Phrase<Moses2::Word> &source,

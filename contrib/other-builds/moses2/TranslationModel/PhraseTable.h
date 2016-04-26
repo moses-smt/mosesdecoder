@@ -16,7 +16,7 @@ namespace Moses2
 
 class System;
 class InputPathsBase;
-class InputPathBase;
+class InputPath;
 class Manager;
 class TargetPhrases;
 
@@ -37,7 +37,7 @@ public:
   virtual void SetParameter(const std::string& key, const std::string& value);
   virtual void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
   virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
-      InputPathBase &inputPath) const;
+      InputPath &inputPath) const;
 
   void SetPtInd(size_t ind)
   {

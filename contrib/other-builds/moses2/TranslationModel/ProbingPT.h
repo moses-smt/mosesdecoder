@@ -51,7 +51,7 @@ protected:
   mutable boost::thread_specific_ptr<std::deque<target_text*> > m_recycler;
 
   TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
-      InputPathBase &inputPath) const;
+      InputPath &inputPath) const;
   TargetPhrases *CreateTargetPhrase(MemPool &pool, const System &system,
       const Phrase<Moses2::Word> &sourcePhrase, uint64_t key) const;
   TargetPhrase<Moses2::Word> *CreateTargetPhrase(MemPool &pool, const System &system,

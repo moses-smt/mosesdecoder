@@ -103,7 +103,7 @@ void ProbingPT::Lookup(const Manager &mgr, InputPathsBase &inputPaths) const
 }
 
 TargetPhrases* ProbingPT::Lookup(const Manager &mgr, MemPool &pool,
-    InputPathBase &inputPath) const
+    InputPath &inputPath) const
 {
   /*
    if (inputPath.prefixPath && inputPath.prefixPath->GetTargetPhrases(*this) == NULL) {
