@@ -13,6 +13,7 @@
 #include <deque>
 #include "../ManagerBase.h"
 #include "../Phrase.h"
+#include "../TargetPhrase.h"
 #include "../MemPool.h"
 #include "../Recycler.h"
 #include "../EstimatedScores.h"

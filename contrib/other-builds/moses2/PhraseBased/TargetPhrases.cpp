@@ -8,6 +8,7 @@
 #include <boost/foreach.hpp>
 #include "TargetPhrases.h"
 #include "../Phrase.h"
+#include "../TargetPhrase.h"
 
 using namespace std;
 

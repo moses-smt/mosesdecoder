@@ -10,6 +10,7 @@
 #include <iostream>
 #include "../Phrase.h"
 #include "../PhraseImplTemplate.h"
+#include "../TargetPhrase.h"
 #include "../MemPool.h"
 #include "../SubPhrase.h"
 #include "../AlignmentInfoCollection.h"

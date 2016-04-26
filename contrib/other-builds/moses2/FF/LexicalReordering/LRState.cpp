@@ -7,6 +7,7 @@
 #include "LRState.h"
 #include "LexicalReordering.h"
 #include "../../Scores.h"
+#include "../../TargetPhrase.h"
 
 using namespace std;
 

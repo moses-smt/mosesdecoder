@@ -9,6 +9,7 @@
 #include "../TypeDef.h"
 #include "../Scores.h"
 #include "../Phrase.h"
+#include "../TargetPhrase.h"
 
 namespace Moses2
 {

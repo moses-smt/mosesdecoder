@@ -12,6 +12,7 @@
 #include "../legacy/Bitmap.h"
 #include "../Scores.h"
 #include "../Phrase.h"
+#include "../TargetPhrase.h"
 #include "../InputPathBase.h"
 #include "../HypothesisBase.h"
 #include "../legacy/Range.h"
