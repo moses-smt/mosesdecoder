@@ -33,7 +33,7 @@ protected:
 };
 
 ///////////////////////////////////////////////////////
-std::ostream& operator<<(std::ostream &out, const SubPhrase<Moses2::Word> &obj)
+inline std::ostream& operator<<(std::ostream &out, const SubPhrase<Moses2::Word> &obj)
 {
   if (obj.GetSize()) {
     out << obj[0];

@@ -53,12 +53,19 @@ protected:
 };
 
 ///////////////////////////////////////////////////////////////////////
+inline std::ostream& operator<<(std::ostream &out, const TargetPhrase<Moses2::Word> &obj)
+{
+  out << (const Phrase<Moses2::Word> &) obj << " SCORES:" << obj.GetScores();
+  return out;
+}
+/*
 template<typename WORD>
-inline std::ostream& operator<<(std::ostream &out, const TargetPhrase<WORD> &obj)
+std::ostream& operator<<(std::ostream &out, const TargetPhrase<WORD> &obj)
 {
   out << (const Phrase<WORD> &) obj << " SCORES:" << obj.GetScores();
   return out;
 }
+*/
 
 ///////////////////////////////////////////////////////////////////////
 template<typename WORD>
