@@ -35,11 +35,11 @@ public:
   virtual ~Hypothesis();
 
   // initial, empty hypo
-  void Init(Manager &mgr, const InputPathBase &path, const TargetPhrase &tp,
+  void Init(Manager &mgr, const InputPathBase &path, const TargetPhrase<Moses2::Word> &tp,
       const Bitmap &bitmap);
 
   void Init(Manager &mgr, const Hypothesis &prevHypo, const InputPathBase &path,
-      const TargetPhrase &tp, const Bitmap &bitmap, SCORE estimatedScore);
+      const TargetPhrase<Moses2::Word> &tp, const Bitmap &bitmap, SCORE estimatedScore);
 
   size_t hash() const;
   bool operator==(const Hypothesis &other) const;
@@ -64,7 +64,7 @@ public:
     return GetScores().GetTotalScore() + m_estimatedScore;
   }
 
-  const TargetPhrase &GetTargetPhrase() const
+  const TargetPhrase<Moses2::Word> &GetTargetPhrase() const
   {
     return *m_targetPhrase;
   }
@@ -94,7 +94,7 @@ public:
 
   void Swap(Hypothesis &other);
 protected:
-  const TargetPhrase *m_targetPhrase;
+  const TargetPhrase<Moses2::Word> *m_targetPhrase;
   const Bitmap *m_sourceCompleted;
   const InputPathBase *m_path;
   const Hypothesis *m_prevHypo;

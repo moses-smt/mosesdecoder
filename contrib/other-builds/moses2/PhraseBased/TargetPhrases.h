@@ -11,12 +11,15 @@
 
 namespace Moses2
 {
+template<typename WORD>
 class TargetPhrase;
+
+class Word;
 
 class TargetPhrases
 {
   friend std::ostream& operator<<(std::ostream &, const TargetPhrases &);
-  typedef Array<const TargetPhrase*> Coll;
+  typedef Array<const TargetPhrase<Moses2::Word>*> Coll;
 public:
   typedef Coll::iterator iterator;
   typedef Coll::const_iterator const_iterator;
@@ -34,7 +37,7 @@ public:
   //TargetPhrases(MemPool &pool, const System &system, const TargetPhrases &copy);
   virtual ~TargetPhrases();
 
-  void AddTargetPhrase(const TargetPhrase &targetPhrase)
+  void AddTargetPhrase(const TargetPhrase<Moses2::Word> &targetPhrase)
   {
     m_coll[m_currInd++] = &targetPhrase;
   }
@@ -44,7 +47,7 @@ public:
     return m_coll.size();
   }
 
-  const TargetPhrase& operator[](size_t ind) const
+  const TargetPhrase<Moses2::Word>& operator[](size_t ind) const
   {
     return *m_coll[ind];
   }

@@ -21,7 +21,7 @@ LRState::LRState(const LRModel &config, LRModel::Direction dir, size_t offset) :
 {
 }
 
-int LRState::ComparePrevScores(const TargetPhrase *other) const
+int LRState::ComparePrevScores(const TargetPhrase<Moses2::Word> *other) const
 {
   LexicalReordering* producer = m_configuration.GetScoreProducer();
   size_t phraseTableInd = producer->GetPhraseTableInd();
@@ -43,14 +43,14 @@ int LRState::ComparePrevScores(const TargetPhrase *other) const
 }
 
 void LRState::CopyScores(const System &system, Scores &accum,
-    const TargetPhrase &topt, ReorderingType reoType) const
+    const TargetPhrase<Moses2::Word> &topt, ReorderingType reoType) const
 {
   // don't call this on a bidirectional object
   UTIL_THROW_IF2(
       m_direction != LRModel::Backward && m_direction != LRModel::Forward,
       "Unknown direction: " << m_direction);
 
-  TargetPhrase const* relevantOpt = (
+  TargetPhrase<Moses2::Word> const* relevantOpt = (
       (m_direction == LRModel::Backward) ? &topt : prevTP);
 
   LexicalReordering* producer = m_configuration.GetScoreProducer();

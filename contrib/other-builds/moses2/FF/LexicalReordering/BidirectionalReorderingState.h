@@ -18,7 +18,7 @@ public:
 
   virtual ~BidirectionalReorderingState();
 
-  void Init(const LRState *prev, const TargetPhrase &topt,
+  void Init(const LRState *prev, const TargetPhrase<Moses2::Word> &topt,
       const InputPathBase &path, bool first, const Bitmap *coverage);
 
   size_t hash() const;

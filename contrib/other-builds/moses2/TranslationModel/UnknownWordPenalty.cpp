@@ -99,7 +99,7 @@ TargetPhrases *UnknownWordPenalty::Lookup(const Manager &mgr, MemPool &pool,
 }
 
 void UnknownWordPenalty::EvaluateInIsolation(const System &system,
-    const Phrase<Moses2::Word> &source, const TargetPhrase &targetPhrase, Scores &scores,
+    const Phrase<Moses2::Word> &source, const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
     SCORE *estimatedScore) const
 {
 

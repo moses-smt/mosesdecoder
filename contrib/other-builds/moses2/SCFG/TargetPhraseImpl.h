@@ -27,7 +27,7 @@ class AlignmentInfo;
 namespace SCFG
 {
 
-class TargetPhraseImpl: public Moses2::TargetPhrase, public PhraseImplTemplate<SCFG::Word>
+class TargetPhraseImpl: public Moses2::TargetPhrase<SCFG::Word>, public PhraseImplTemplate<SCFG::Word>
 {
   friend std::ostream& operator<<(std::ostream &, const SCFG::TargetPhraseImpl &);
 public:

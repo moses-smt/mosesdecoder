@@ -19,7 +19,7 @@ public:
   HReorderingForwardState(const LRModel &config, size_t offset);
   virtual ~HReorderingForwardState();
 
-  void Init(const LRState *prev, const TargetPhrase &topt,
+  void Init(const LRState *prev, const TargetPhrase<Moses2::Word> &topt,
       const InputPathBase &path, bool first, const Bitmap *coverage);
 
   size_t hash() const;

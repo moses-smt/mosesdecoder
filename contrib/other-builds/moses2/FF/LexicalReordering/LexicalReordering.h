@@ -40,7 +40,7 @@ public:
 
   virtual void
   EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<Moses2::Word> &source,
-      const TargetPhrase &targetPhrase, Scores &scores,
+      const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
       SCORE *estimatedScore) const;
 
   virtual void
@@ -60,7 +60,7 @@ protected:
   LRModel *m_configuration;
 
   virtual void
-  EvaluateAfterTablePruning(MemPool &pool, const TargetPhrase &targetPhrase,
+  EvaluateAfterTablePruning(MemPool &pool, const TargetPhrase<Moses2::Word> &targetPhrase,
       const Phrase<Moses2::Word> &sourcePhrase) const;
 
   // PROPERTY IN PT

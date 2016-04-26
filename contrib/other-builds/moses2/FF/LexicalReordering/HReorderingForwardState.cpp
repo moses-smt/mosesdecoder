@@ -27,7 +27,7 @@ HReorderingForwardState::~HReorderingForwardState()
 }
 
 void HReorderingForwardState::Init(const LRState *prev,
-    const TargetPhrase &topt, const InputPathBase &path, bool first,
+    const TargetPhrase<Moses2::Word> &topt, const InputPathBase &path, bool first,
     const Bitmap *coverage)
 {
   prevTP = &topt;

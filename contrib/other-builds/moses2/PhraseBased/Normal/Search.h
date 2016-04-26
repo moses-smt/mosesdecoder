@@ -16,11 +16,12 @@
 
 namespace Moses2
 {
+template<typename WORD>
+class TargetPhrase;
 
 class Hypothesis;
 class InputPath;
 class TargetPhrases;
-class TargetPhrase;
 class Stacks;
 
 class SearchNormal: public Search
@@ -41,7 +42,7 @@ protected:
   void Extend(const Hypothesis &hypo, const InputPath &path);
   void Extend(const Hypothesis &hypo, const TargetPhrases &tps,
       const InputPath &path, const Bitmap &newBitmap, SCORE estimatedScore);
-  void Extend(const Hypothesis &hypo, const TargetPhrase &tp,
+  void Extend(const Hypothesis &hypo, const TargetPhrase<Moses2::Word> &tp,
       const InputPath &path, const Bitmap &newBitmap, SCORE estimatedScore);
 
 };

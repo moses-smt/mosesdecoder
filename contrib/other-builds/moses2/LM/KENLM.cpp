@@ -130,7 +130,7 @@ void KENLM<Model>::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
 
 template<class Model>
 void KENLM<Model>::EvaluateInIsolation(MemPool &pool, const System &system,
-    const Phrase<Moses2::Word> &source, const TargetPhrase &targetPhrase, Scores &scores,
+    const Phrase<Moses2::Word> &source, const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
     SCORE *estimatedScore) const
 {
   // contains factors used by this LM

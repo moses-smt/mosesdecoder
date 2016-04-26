@@ -33,7 +33,7 @@ public:
   ~Node()
   {}
 
-  void AddRule(Phrase<WORD> &source, TargetPhrase *target)
+  void AddRule(Phrase<WORD> &source, TargetPhrase<Moses2::Word> *target)
   {
     AddRule(source, target, 0);
   }
@@ -85,7 +85,7 @@ public:
       m_targetPhrases = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, m_unsortedTPS->size());
 
       for (size_t i = 0; i < m_unsortedTPS->size(); ++i) {
-        TargetPhrase *tp = (*m_unsortedTPS)[i];
+        TargetPhrase<Moses2::Word> *tp = (*m_unsortedTPS)[i];
         m_targetPhrases->AddTargetPhrase(*tp);
       }
 
@@ -103,13 +103,13 @@ protected:
   Children m_children;
   TargetPhrases *m_targetPhrases;
   Phrase<WORD> *m_source;
-  std::vector<TargetPhrase*> *m_unsortedTPS;
+  std::vector<TargetPhrase<Moses2::Word>*> *m_unsortedTPS;
 
-  Node &AddRule(Phrase<WORD> &source, TargetPhrase *target, size_t pos)
+  Node &AddRule(Phrase<WORD> &source, TargetPhrase<Moses2::Word> *target, size_t pos)
   {
     if (pos == source.GetSize()) {
       if (m_unsortedTPS == NULL) {
-        m_unsortedTPS = new std::vector<TargetPhrase*>();
+        m_unsortedTPS = new std::vector<TargetPhrase<Moses2::Word>*>();
         m_source = &source;
       }
 

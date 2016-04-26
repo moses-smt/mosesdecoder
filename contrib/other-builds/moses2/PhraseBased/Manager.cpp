@@ -122,7 +122,7 @@ void Manager::CalcFutureScore()
   for (size_t i = 0; i < numPt; ++i) {
     const TargetPhrases *tps = static_cast<const InputPath*>(path)->targetPhrases[i];
     if (tps) {
-      BOOST_FOREACH(const TargetPhrase *tp, *tps) {
+      BOOST_FOREACH(const TargetPhrase<Moses2::Word> *tp, *tps) {
         SCORE score = tp->GetFutureScore();
         if (score > bestScore) {
           bestScore = score;

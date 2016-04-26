@@ -142,7 +142,7 @@ void LanguageModel::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
 }
 
 void LanguageModel::EvaluateInIsolation(MemPool &pool, const System &system,
-    const Phrase<Moses2::Word> &source, const TargetPhrase &targetPhrase, Scores &scores,
+    const Phrase<Moses2::Word> &source, const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
     SCORE *estimatedScore) const
 {
   if (targetPhrase.GetSize() == 0) {
@@ -193,7 +193,7 @@ void LanguageModel::EvaluateWhenApplied(const ManagerBase &mgr,
 
   SCORE score = 0;
   std::pair<SCORE, void*> fromScoring;
-  const TargetPhrase &tp = hypo.GetTargetPhrase();
+  const TargetPhrase<Moses2::Word> &tp = hypo.GetTargetPhrase();
   for (size_t i = 0; i < tp.GetSize(); ++i) {
     const Word &word = tp[i];
     const Factor *factor = word[m_factorType];

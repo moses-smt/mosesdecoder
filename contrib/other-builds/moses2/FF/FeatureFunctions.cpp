@@ -164,7 +164,7 @@ const PhraseTable *FeatureFunctions::GetPhraseTablesExcludeUnknownWordPenalty(
 }
 
 void FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
-    const Phrase<Moses2::Word> &source, TargetPhrase &targetPhrase) const
+    const Phrase<Moses2::Word> &source, TargetPhrase<Moses2::Word> &targetPhrase) const
 {
   SCORE estimatedScore = 0;
 

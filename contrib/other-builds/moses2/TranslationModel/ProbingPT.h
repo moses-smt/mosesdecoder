@@ -54,7 +54,7 @@ protected:
       InputPathBase &inputPath) const;
   TargetPhrases *CreateTargetPhrase(MemPool &pool, const System &system,
       const Phrase<Moses2::Word> &sourcePhrase, uint64_t key) const;
-  TargetPhrase *CreateTargetPhrase(MemPool &pool, const System &system,
+  TargetPhrase<Moses2::Word> *CreateTargetPhrase(MemPool &pool, const System &system,
       const char *&offset) const;
 
   void ConvertToProbingSourcePhrase(const Phrase<Moses2::Word> &sourcePhrase, bool &ok,

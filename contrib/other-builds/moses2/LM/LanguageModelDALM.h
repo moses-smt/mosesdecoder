@@ -40,7 +40,7 @@ public:
 
   virtual void
   EvaluateInIsolation(MemPool &pool, const System &system, const Phrase &source,
-      const TargetPhrase &targetPhrase, Scores &scores,
+      const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
       SCORE *estimatedScore) const;
 
   virtual void EvaluateWhenApplied(const ManagerBase &mgr,

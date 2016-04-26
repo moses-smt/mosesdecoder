@@ -40,7 +40,7 @@ TargetPhrases::~TargetPhrases()
 
 std::ostream& operator<<(std::ostream &out, const TargetPhrases &obj)
 {
-  BOOST_FOREACH(const TargetPhrase *tp, obj){
+  BOOST_FOREACH(const TargetPhrase<Moses2::Word> *tp, obj){
   out << *tp << endl;
 }
 
@@ -55,7 +55,7 @@ void TargetPhrases::SortAndPrune(size_t tableLimit)
           m_coll.end() : m_coll.begin() + tableLimit;
 
   std::partial_sort(m_coll.begin(), iterMiddle, m_coll.end(),
-      CompareFutureScore());
+      CompareFutureScore<Word>());
 
   if (tableLimit && m_coll.size() > tableLimit) {
     m_coll.resize(tableLimit);

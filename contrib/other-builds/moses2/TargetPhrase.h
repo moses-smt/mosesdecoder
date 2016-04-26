@@ -13,6 +13,7 @@
 namespace Moses2
 {
 
+template<typename WORD>
 class TargetPhrase: public Phrase<Word>
 {
   friend std::ostream& operator<<(std::ostream &, const TargetPhrase &);
@@ -52,21 +53,23 @@ protected:
 };
 
 ///////////////////////////////////////////////////////////////////////
-inline std::ostream& operator<<(std::ostream &out, const TargetPhrase &obj)
+template<typename WORD>
+inline std::ostream& operator<<(std::ostream &out, const TargetPhrase<WORD> &obj)
 {
-  out << (const Phrase<Word> &) obj << " SCORES:" << obj.GetScores();
+  out << (const Phrase<WORD> &) obj << " SCORES:" << obj.GetScores();
   return out;
 }
 
 ///////////////////////////////////////////////////////////////////////
+template<typename WORD>
 struct CompareFutureScore
 {
-  bool operator()(const TargetPhrase *a, const TargetPhrase *b) const
+  bool operator()(const TargetPhrase<WORD> *a, const TargetPhrase<WORD> *b) const
   {
     return a->GetFutureScore() > b->GetFutureScore();
   }
 
-  bool operator()(const TargetPhrase &a, const TargetPhrase &b) const
+  bool operator()(const TargetPhrase<WORD> &a, const TargetPhrase<WORD> &b) const
   {
     return a.GetFutureScore() > b.GetFutureScore();
   }

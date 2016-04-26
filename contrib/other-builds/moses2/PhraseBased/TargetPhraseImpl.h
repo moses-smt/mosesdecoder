@@ -23,7 +23,7 @@ class Manager;
 class System;
 class PhraseTable;
 
-class TargetPhraseImpl: public TargetPhrase, public PhraseImplTemplate<Word>
+class TargetPhraseImpl: public TargetPhrase<Moses2::Word>, public PhraseImplTemplate<Word>
 {
   friend std::ostream& operator<<(std::ostream &, const TargetPhraseImpl &);
 public:

@@ -19,7 +19,7 @@ private:
 public:
   HReorderingBackwardState(MemPool &pool, const LRModel &config, size_t offset);
 
-  virtual void Init(const LRState *prev, const TargetPhrase &topt,
+  virtual void Init(const LRState *prev, const TargetPhrase<Moses2::Word> &topt,
       const InputPathBase &path, bool first, const Bitmap *coverage);
 
   virtual ~HReorderingBackwardState();

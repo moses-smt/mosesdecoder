@@ -16,6 +16,8 @@
 
 namespace Moses2
 {
+template<typename WORD>
+class TargetPhrase;
 
 class System;
 class FeatureFunction;
@@ -24,7 +26,6 @@ class PhraseTable;
 class Manager;
 class MemPool;
 class PhraseImpl;
-class TargetPhrase;
 class TargetPhrases;
 class Scores;
 
@@ -69,7 +70,7 @@ public:
 
   // the pool here must be the system pool if the rule was loaded during load, or the mgr pool if it was loaded on demand
   void EvaluateInIsolation(MemPool &pool, const System &system,
-      const Phrase<Moses2::Word> &source, TargetPhrase &targetPhrase) const;
+      const Phrase<Moses2::Word> &source, TargetPhrase<Moses2::Word> &targetPhrase) const;
   void EvaluateAfterTablePruning(MemPool &pool, const TargetPhrases &tps,
       const Phrase<Moses2::Word> &sourcePhrase) const;
 

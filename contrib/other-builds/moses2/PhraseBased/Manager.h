@@ -55,7 +55,7 @@ public:
     return m_inputPaths;
   }
 
-  const TargetPhrase &GetInitPhrase() const
+  const TargetPhrase<Moses2::Word> &GetInitPhrase() const
   {
     return *m_initPhrase;
   }
@@ -69,7 +69,7 @@ protected:
   InputPaths m_inputPaths;
   Bitmaps *m_bitmaps;
   EstimatedScores *m_estimatedScores;
-  TargetPhrase *m_initPhrase;
+  TargetPhrase<Moses2::Word> *m_initPhrase;
 
   Search *m_search;
 

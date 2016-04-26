@@ -15,10 +15,11 @@
 
 namespace Moses2
 {
+template<typename WORD>
+class TargetPhrase;
 
 class System;
 class PhraseImpl;
-class TargetPhrase;
 class TargetPhrases;
 class Scores;
 class ManagerBase;
@@ -74,7 +75,7 @@ public:
   // source from the input sentence
   virtual void
   EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<Moses2::Word> &source,
-      const TargetPhrase &targetPhrase, Scores &scores,
+      const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
       SCORE *estimatedScore) const = 0;
 
   /*
