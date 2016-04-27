@@ -49,8 +49,10 @@ Search::~Search()
 
 void Search::Decode()
 {
+  const Sentence &sentence = static_cast<const Sentence&>(mgr.GetInput());
+
   // init cue edges
-  m_cubeEdges.resize(mgr.GetInput().GetSize() + 1);
+  m_cubeEdges.resize(sentence.GetSize() + 1);
   for (size_t i = 0; i < m_cubeEdges.size(); ++i) {
     m_cubeEdges[i] = new (mgr.GetPool().Allocate<CubeEdges>()) CubeEdges(
         m_cubeEdgeAlloc);
@@ -66,7 +68,7 @@ void Search::Decode()
   m_stack.Add(initHypo, mgr.GetHypoRecycle(), mgr.arcLists);
   PostDecode(0);
 
-  for (size_t stackInd = 1; stackInd < mgr.GetInput().GetSize() + 1;
+  for (size_t stackInd = 1; stackInd < sentence.GetSize() + 1;
       ++stackInd) {
     //cerr << "stackInd=" << stackInd << endl;
     m_stack.Clear();

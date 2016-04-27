@@ -21,22 +21,16 @@ class Sentence: public InputType, public PhraseImpl
 {
 public:
   static Sentence *CreateFromString(MemPool &pool, FactorCollection &vocab,
-      const System &system, const std::string &str, long translationId,
-      bool addBOSEOS)
+      const System &system, const std::string &str, long translationId)
   {
     std::vector<std::string> toks = Tokenize(str);
     size_t size = toks.size();
-
-     if (addBOSEOS) {
-       size += 2;
-     }
 
     Sentence *ret;
 
     ret = new (pool.Allocate<Sentence>()) Sentence(translationId, pool, size);
 
-    ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks,
-        addBOSEOS);
+    ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks, false);
 
     return ret;
   }

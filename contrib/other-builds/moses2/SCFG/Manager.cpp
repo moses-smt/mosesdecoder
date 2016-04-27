@@ -10,6 +10,7 @@
 #include "Manager.h"
 #include "InputPath.h"
 #include "Hypothesis.h"
+//#include "Sentence.h"
 #include "../PhraseBased/Sentence.h"
 #include "../System.h"
 #include "../TranslationModel/PhraseTable.h"
@@ -39,12 +40,18 @@ void Manager::Decode()
   //cerr << "START InitPools()" << endl;
   InitPools();
   //cerr << "START ParseInput()" << endl;
-  ParseInput(true);
 
-  size_t inputSize = GetInput().GetSize();
+  FactorCollection &vocab = system.GetVocab();
+  m_input = Sentence::CreateFromString(GetPool(), vocab, system, m_inputStr,
+      m_translationId);
+
+
+  const Sentence &sentence = static_cast<const Sentence&>(GetInput());
+
+  size_t inputSize = sentence.GetSize();
   //cerr << "size=" << size << endl;
 
-  m_inputPaths.Init(GetInput(), *this);
+  m_inputPaths.Init(sentence, *this);
   //cerr << "CREATED m_inputPaths" << endl;
 
   m_stacks.Init(*this, inputSize);
@@ -54,7 +61,7 @@ void Manager::Decode()
     InitActiveChart(startPos);
 
     for (int phraseSize = 1; phraseSize < (inputSize - startPos + 1); ++phraseSize) {
-      SubPhrase<Moses2::Word> sub = m_input->GetSubPhrase(startPos, phraseSize);
+      SubPhrase<Moses2::Word> sub = sentence.GetSubPhrase(startPos, phraseSize);
       //cerr << "sub=" << sub << endl;
       Lookup(startPos, phraseSize);
       Decode(startPos, phraseSize);

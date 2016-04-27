@@ -26,7 +26,7 @@ class TranslationTask;
 class PhraseImpl;
 class SearchNormal;
 class Search;
-class Sentence;
+class InputType;
 class OutputCollector;
 class HypothesisBase;
 
@@ -60,20 +60,19 @@ public:
     return *m_hypoRecycle;
   }
 
-  const Sentence &GetInput() const
+  const InputType &GetInput() const
   {
     return *m_input;
   }
 
 protected:
   std::string m_inputStr;
-  Sentence *m_input;
+  InputType *m_input;
 
   mutable MemPool *m_pool, *m_systemPool;
   mutable Recycler<HypothesisBase*> *m_hypoRecycle;
 
   void InitPools();
-  void ParseInput(bool addBOSEOS);
 
 };
 

@@ -40,13 +40,5 @@ void ManagerBase::InitPools()
   m_hypoRecycle = &system.GetHypoRecycler();
 }
 
-void ManagerBase::ParseInput(bool addBOSEOS)
-{
-  FactorCollection &vocab = system.GetVocab();
-
-  m_input = Sentence::CreateFromString(GetPool(), vocab, system, m_inputStr,
-      m_translationId, addBOSEOS);
-}
-
 }
 

@@ -50,7 +50,10 @@ void Manager::Init()
 {
   // init pools etc
   InitPools();
-  ParseInput(false);
+
+  FactorCollection &vocab = system.GetVocab();
+  m_input = Moses2::Sentence::CreateFromString(GetPool(), vocab, system, m_inputStr,
+      m_translationId);
 
   m_bitmaps = new Bitmaps(GetPool());
 
@@ -58,7 +61,9 @@ void Manager::Init()
   m_initPhrase = new (GetPool().Allocate<TargetPhraseImpl>()) TargetPhraseImpl(
       GetPool(), firstPt, system, 0);
 
-  m_inputPaths.Init(*m_input, *this);
+  const Sentence &sentence = static_cast<const Sentence&>(GetInput());
+
+  m_inputPaths.Init(sentence, *this);
 
   const std::vector<const PhraseTable*> &pts = system.mappings;
   for (size_t i = 0; i < pts.size(); ++i) {
@@ -69,7 +74,7 @@ void Manager::Init()
   //m_inputPaths.DeleteUnusedPaths();
   CalcFutureScore();
 
-  m_bitmaps->Init(m_input->GetSize(), vector<bool>(0));
+  m_bitmaps->Init(sentence.GetSize(), vector<bool>(0));
 
   switch (system.options.search.algo) {
   case Normal:
@@ -107,7 +112,8 @@ void Manager::Decode()
 
 void Manager::CalcFutureScore()
 {
-  size_t size = m_input->GetSize();
+  const Sentence &sentence = static_cast<const Sentence&>(GetInput());
+  size_t size = sentence.GetSize();
   m_estimatedScores =
       new (GetPool().Allocate<EstimatedScores>()) EstimatedScores(GetPool(),
           size);

@@ -38,7 +38,8 @@ SearchNormal::~SearchNormal()
 void SearchNormal::Decode()
 {
   // init stacks
-  m_stacks.Init(mgr, mgr.GetInput().GetSize() + 1);
+  const Sentence &sentence = static_cast<const Sentence&>(mgr.GetInput());
+  m_stacks.Init(mgr, sentence.GetSize() + 1);
 
   const Bitmap &initBitmap = mgr.GetBitmaps().GetInitialBitmap();
   Hypothesis *initHypo = Hypothesis::Create(mgr.GetSystemPool(), mgr);
