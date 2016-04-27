@@ -15,7 +15,7 @@ namespace Moses2
 Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
     const System &system, const std::string &str, long translationId)
 {
-  cerr << "PB Sentence" << endl;
+  //cerr << "PB Sentence" << endl;
   std::vector<std::string> toks = Tokenize(str);
   size_t size = toks.size();
 
