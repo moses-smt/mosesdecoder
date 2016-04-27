@@ -16,13 +16,16 @@ namespace Moses2
 
 class PhraseTableMemory: public PhraseTable
 {
+  typedef PtMem::Node<Word> PBNODE;
+  typedef PtMem::Node<SCFG::Word> SCFGNODE;
+
 //////////////////////////////////////
   class ActiveChartEntryMem : public SCFG::ActiveChartEntry
   {
   public:
-    const PtMem::Node<Word> *node;
+    const PhraseTableMemory::SCFGNODE *node;
 
-    ActiveChartEntryMem(const SCFG::InputPath *subPhrasePath, bool isNT, const PtMem::Node<Word> *vnode)
+    ActiveChartEntryMem(const SCFG::InputPath *subPhrasePath, bool isNT, const PhraseTableMemory::SCFGNODE *vnode)
     :ActiveChartEntry(subPhrasePath, isNT)
     ,node(vnode)
     {}
@@ -44,20 +47,20 @@ public:
       SCFG::InputPath &path) const;
 
 protected:
-  PtMem::Node<Word>  m_rootPb;
-  PtMem::Node<SCFG::Word>  m_rootSCFG;
+  PBNODE    m_rootPb;
+  SCFGNODE  m_rootSCFG;
 
   void LookupGivenPrefixPath(const SCFG::InputPath &prefixPath,
-      const Word &wordSought,
+      const SCFG::Word &wordSought,
       const SCFG::InputPath &subPhrasePath,
       bool isNT,
       SCFG::InputPath &path) const;
-  void LookupGivenNode(const PtMem::Node<Word>  &node,
-      const Word &wordSought,
+  void LookupGivenNode(const SCFGNODE  &node,
+      const SCFG::Word &wordSought,
       const SCFG::InputPath &subPhrasePath,
       bool isNT,
       SCFG::InputPath &path) const;
-  void AddTargetPhrasesToPath(const PtMem::Node<Word> &node,
+  void AddTargetPhrasesToPath(const SCFGNODE &node,
       const SCFG::SymbolBind &symbolBind,
       SCFG::InputPath &path) const;
 };

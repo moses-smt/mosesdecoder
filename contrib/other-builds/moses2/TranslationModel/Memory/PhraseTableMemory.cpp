@@ -134,7 +134,7 @@ TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool,
 void PhraseTableMemory::InitActiveChart(SCFG::InputPath &path) const
 {
   size_t ptInd = GetPtInd();
-  ActiveChartEntryMem *chartEntry = new ActiveChartEntryMem(NULL, false, &m_rootPb);
+  ActiveChartEntryMem *chartEntry = new ActiveChartEntryMem(NULL, false, &m_rootSCFG);
   path.AddActiveChartEntry(ptInd, chartEntry);
 }
 
@@ -146,7 +146,7 @@ void PhraseTableMemory::Lookup(MemPool &pool,
   size_t endPos = path.range.GetEndPos();
 
   // TERMINAL
-  const Word &lastWord = path.subPhrase.Back();
+  const SCFG::Word &lastWord = path.subPhrase.Back();
   //cerr << "PhraseTableMemory lastWord=" << lastWord << endl;
   //cerr << "path=" << path << endl;
   const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(endPos, 1);
@@ -178,7 +178,7 @@ void PhraseTableMemory::Lookup(MemPool &pool,
 }
 
 void PhraseTableMemory::LookupGivenPrefixPath(const SCFG::InputPath &prefixPath,
-    const Word &wordSought,
+    const SCFG::Word &wordSought,
     const SCFG::InputPath &subPhrasePath,
     bool isNT,
     SCFG::InputPath &path) const
@@ -189,7 +189,7 @@ void PhraseTableMemory::LookupGivenPrefixPath(const SCFG::InputPath &prefixPath,
 
   BOOST_FOREACH(const SCFG::ActiveChartEntry *entry, prefixPath.GetActiveChart(ptInd).entries) {
     const ActiveChartEntryMem *entryCast = static_cast<const ActiveChartEntryMem*>(entry);
-    const PtMem::Node<Word> *node = entryCast->node;
+    const SCFGNODE *node = entryCast->node;
     UTIL_THROW_IF2(node == NULL, "node == NULL");
     cerr << "node=" << node << endl;
 
@@ -197,14 +197,14 @@ void PhraseTableMemory::LookupGivenPrefixPath(const SCFG::InputPath &prefixPath,
   }
 }
 
-void PhraseTableMemory::LookupGivenNode(const PtMem::Node<Word> &node,
-    const Word &wordSought,
+void PhraseTableMemory::LookupGivenNode(const SCFGNODE &node,
+    const SCFG::Word &wordSought,
     const SCFG::InputPath &subPhrasePath,
     bool isNT,
     SCFG::InputPath &path) const
 {
   size_t ptInd = GetPtInd();
-  const PtMem::Node<Word> *nextNode = node.Find(wordSought);
+  const SCFGNODE *nextNode = node.Find(wordSought);
   cerr << "wordSought=" << wordSought << " " << nextNode << endl;
 
   if (nextNode) {
@@ -220,7 +220,7 @@ void PhraseTableMemory::LookupGivenNode(const PtMem::Node<Word> &node,
 
 }
 
-void PhraseTableMemory::AddTargetPhrasesToPath(const PtMem::Node<Word> &node,
+void PhraseTableMemory::AddTargetPhrasesToPath(const SCFGNODE &node,
     const SCFG::SymbolBind &symbolBind,
     SCFG::InputPath &path) const
 {
