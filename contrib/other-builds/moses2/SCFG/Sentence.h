@@ -24,20 +24,7 @@ class Sentence: public InputType, public PhraseImpl
 {
 public:
   static Sentence *CreateFromString(MemPool &pool, FactorCollection &vocab,
-      const System &system, const std::string &str, long translationId)
-  {
-    std::vector<std::string> toks = Tokenize(str);
-    size_t size = toks.size();
-    size += 2;
-
-    Sentence *ret;
-
-    ret = new (pool.Allocate<Sentence>()) Sentence(translationId, pool, size);
-
-    ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks, true);
-
-    return ret;
-  }
+      const System &system, const std::string &str, long translationId);
 
   Sentence(long translationId, MemPool &pool, size_t size)
   :InputType(translationId)

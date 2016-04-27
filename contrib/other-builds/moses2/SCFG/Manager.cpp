@@ -11,7 +11,7 @@
 #include "InputPath.h"
 #include "Hypothesis.h"
 //#include "Sentence.h"
-#include "../PhraseBased/Sentence.h"
+#include "Sentence.h"
 #include "../System.h"
 #include "../TranslationModel/PhraseTable.h"
 
@@ -61,7 +61,7 @@ void Manager::Decode()
     InitActiveChart(startPos);
 
     for (int phraseSize = 1; phraseSize < (inputSize - startPos + 1); ++phraseSize) {
-      SubPhrase<Moses2::Word> sub = sentence.GetSubPhrase(startPos, phraseSize);
+      SubPhrase<SCFG::Word> sub = sentence.GetSubPhrase(startPos, phraseSize);
       //cerr << "sub=" << sub << endl;
       Lookup(startPos, phraseSize);
       Decode(startPos, phraseSize);
