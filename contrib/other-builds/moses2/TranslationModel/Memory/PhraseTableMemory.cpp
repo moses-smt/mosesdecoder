@@ -113,9 +113,14 @@ void PhraseTableMemory::Load(System &system)
     }
   }
 
-  m_rootPb.SortAndPrune(m_tableLimit, systemPool, system);
-  cerr << "root=" << &m_rootPb << endl;
-
+  if (system.isPb) {
+    m_rootPb.SortAndPrune(m_tableLimit, systemPool, system);
+    cerr << "root=" << &m_rootPb << endl;
+  }
+  else {
+    m_rootSCFG.SortAndPrune(m_tableLimit, systemPool, system);
+    cerr << "root=" << &m_rootPb << endl;
+  }
   /*
   BOOST_FOREACH(const PtMem::Node<Word>::Children::value_type &valPair, m_rootPb.GetChildren()) {
     const Word &word = valPair.first;

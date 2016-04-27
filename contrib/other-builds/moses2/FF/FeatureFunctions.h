@@ -5,8 +5,7 @@
  *      Author: hieu
  */
 
-#ifndef FEATUREFUNCTIONS_H_
-#define FEATUREFUNCTIONS_H_
+#pragma once
 
 #include <vector>
 #include <string>
@@ -32,6 +31,8 @@ class Scores;
 namespace SCFG
 {
 class TargetPhrase;
+class TargetPhrases;
+class Word;
 }
 
 class FeatureFunctions
@@ -71,8 +72,11 @@ public:
   // the pool here must be the system pool if the rule was loaded during load, or the mgr pool if it was loaded on demand
   void EvaluateInIsolation(MemPool &pool, const System &system,
       const Phrase<Moses2::Word> &source, TargetPhrase<Moses2::Word> &targetPhrase) const;
+
   void EvaluateAfterTablePruning(MemPool &pool, const TargetPhrases &tps,
       const Phrase<Moses2::Word> &sourcePhrase) const;
+  void EvaluateAfterTablePruning(MemPool &pool, const SCFG::TargetPhrases &tps,
+      const Phrase<SCFG::Word> &sourcePhrase) const;
 
 protected:
   std::vector<const FeatureFunction*> m_featureFunctions;
@@ -90,4 +94,3 @@ protected:
 
 }
 
-#endif /* FEATUREFUNCTIONS_H_ */

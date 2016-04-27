@@ -28,6 +28,8 @@ class MemPool;
 namespace SCFG
 {
 class TargetPhrase;
+class TargetPhrases;
+class Word;
 }
 
 class FeatureFunction
@@ -88,6 +90,11 @@ public:
 
   virtual void EvaluateAfterTablePruning(MemPool &pool,
       const TargetPhrases &tps, const Phrase<Moses2::Word> &sourcePhrase) const
+  {
+  }
+
+  virtual void EvaluateAfterTablePruning(MemPool &pool,
+      const SCFG::TargetPhrases &tps, const Phrase<SCFG::Word> &sourcePhrase) const
   {
   }
 

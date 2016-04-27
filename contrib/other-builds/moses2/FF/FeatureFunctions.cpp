@@ -26,6 +26,7 @@
 #include "../LM/KENLM.h"
 #include "../SCFG/TargetPhraseImpl.h"
 #include "util/exception.hh"
+#include "../SCFG/Word.h"
 
 using namespace std;
 
@@ -179,10 +180,17 @@ void FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
 void FeatureFunctions::EvaluateAfterTablePruning(MemPool &pool,
     const TargetPhrases &tps, const Phrase<Moses2::Word> &sourcePhrase) const
 {
-  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions){
-  ff->EvaluateAfterTablePruning(pool, tps, sourcePhrase);
+  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
+    ff->EvaluateAfterTablePruning(pool, tps, sourcePhrase);
+  }
 }
 
+void FeatureFunctions::EvaluateAfterTablePruning(MemPool &pool, const SCFG::TargetPhrases &tps,
+    const Phrase<SCFG::Word> &sourcePhrase) const
+{
+  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
+    ff->EvaluateAfterTablePruning(pool, tps, sourcePhrase);
+  }
 }
 
 }

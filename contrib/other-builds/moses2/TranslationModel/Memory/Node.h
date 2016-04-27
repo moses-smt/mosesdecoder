@@ -18,7 +18,7 @@ class System;
 namespace PtMem
 {
 
-template<class WORD, class SP, class TP>
+template<class WORD, class SP, class TP, class TPS>
 class Node
 {
 public:
@@ -38,7 +38,7 @@ public:
     AddRule(source, target, 0);
   }
 
-  TargetPhrases *Find(const Phrase<WORD> &source, size_t pos = 0) const
+  TargetPhrases *Find(const SP &source, size_t pos = 0) const
   {
     assert(source.GetSize());
     if (pos == source.GetSize()) {
@@ -70,7 +70,7 @@ public:
     }
   }
 
-  const TargetPhrases *GetTargetPhrases() const
+  const TPS *GetTargetPhrases() const
   { return m_targetPhrases; }
 
   void SortAndPrune(size_t tableLimit, MemPool &pool, System &system)
@@ -82,10 +82,10 @@ public:
 
     // prune target phrases in this node
     if (m_unsortedTPS) {
-      m_targetPhrases = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, m_unsortedTPS->size());
+      m_targetPhrases = new (pool.Allocate<TPS>()) TPS(pool, m_unsortedTPS->size());
 
       for (size_t i = 0; i < m_unsortedTPS->size(); ++i) {
-        TargetPhrase<Moses2::Word> *tp = (*m_unsortedTPS)[i];
+        TP *tp = (*m_unsortedTPS)[i];
         m_targetPhrases->AddTargetPhrase(*tp);
       }
 
@@ -101,15 +101,15 @@ public:
 
 protected:
   Children m_children;
-  TargetPhrases *m_targetPhrases;
+  TPS *m_targetPhrases;
   Phrase<WORD> *m_source;
-  std::vector<TargetPhrase<WORD>*> *m_unsortedTPS;
+  std::vector<TP*> *m_unsortedTPS;
 
   Node &AddRule(SP &source, TP *target, size_t pos)
   {
     if (pos == source.GetSize()) {
       if (m_unsortedTPS == NULL) {
-        m_unsortedTPS = new std::vector<TargetPhrase<WORD>*>();
+        m_unsortedTPS = new std::vector<TP*>();
         m_source = &source;
       }
 

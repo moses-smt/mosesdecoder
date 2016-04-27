@@ -11,6 +11,8 @@
 
 namespace Moses2
 {
+class MemPool;
+
 namespace SCFG
 {
 class TargetPhraseImpl;
@@ -32,7 +34,8 @@ public:
     return m_coll.end();
   }
 
-  TargetPhrases();
+  TargetPhrases() {} // required by map obj in InputPath
+  TargetPhrases(MemPool &pool, size_t size);
   virtual ~TargetPhrases();
 
   size_t GetSize() const
@@ -42,6 +45,8 @@ public:
   {
     m_coll.push_back(&targetPhrase);
   }
+
+  void SortAndPrune(size_t tableLimit);
 
 protected:
   Coll m_coll;
