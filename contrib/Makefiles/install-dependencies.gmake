@@ -56,7 +56,7 @@ sourceforge = http://downloads.sourceforge.net/project
 nproc := $(shell getconf _NPROCESSORS_ONLN)
 sfget  = mkdir -p '${TMP}' && cd '${TMP}' && wget -qO- ${URL} | tar xz 
 configure-make-install  = cd '$1' && ./configure --prefix='${PREFIX}' 
-configure-make-install += && make -j$(getconf _NPROCESSORS_ONLN) && make install
+configure-make-install += && make -j${nproc} && make install
 
 # XMLRPC-C for moses server
 xmlrpc: URL=$(sourceforge)/xmlrpc-c/Xmlrpc-c%20Super%20Stable/1.33.17/xmlrpc-c-1.33.17.tgz
