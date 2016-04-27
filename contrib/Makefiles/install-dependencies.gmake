@@ -87,7 +87,7 @@ irstlm: | $(call safepath,$(IRSTLM_PREFIX)/bin/build-lm.sh)
 $(call safepath,$(IRSTLM_PREFIX)/bin/build-lm.sh):
 	$(sfget)
 	cd $$(find '${TMP}' -name trunk) && ./regenerate-makefiles.sh \
-	&& ./configure --prefix='${PREFIX}' && make -j${shell getconf _NPROCESSORS_ONLN} && make install -j$(shell getconf _NPROCESSORS_ONLN)
+	&& ./configure --prefix='${PREFIX}' && make -j${nproc} && make install -j${nproc}
 	rm -rf ${TMP}
 
 # boost 
@@ -97,5 +97,5 @@ boost: PREFIX=${BOOST_PREFIX}
 boost: | $(call safepath,${BOOST_PREFIX}/include/boost)
 $(call safepath,${BOOST_PREFIX}/include/boost):
 	$(sfget)
-	cd '${TMP}/boost_1_59_0' && ./bootstrap.sh && ./b2 --prefix=${PREFIX} -j$(shell getconf _NPROCESSORS_ONLN) install
+	cd '${TMP}/boost_1_59_0' && ./bootstrap.sh && ./b2 --prefix=${PREFIX} -j${nproc} install
 	rm -rf ${TMP}
