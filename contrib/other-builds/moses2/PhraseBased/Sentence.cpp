@@ -6,8 +6,6 @@
  */
 
 #include "Sentence.h"
-#include "MemPool.h"
-#include "legacy/Util2.h"
 
 using namespace std;
 

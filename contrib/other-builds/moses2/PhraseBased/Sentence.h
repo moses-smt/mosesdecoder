@@ -7,10 +7,10 @@
 #pragma once
 
 #include <string>
-#include "InputType.h"
-#include "PhraseBased/PhraseImpl.h"
-#include "MemPool.h"
-#include "legacy/Util2.h"
+#include "PhraseImpl.h"
+#include "../InputType.h"
+#include "../MemPool.h"
+#include "../legacy/Util2.h"
 
 namespace Moses2
 {

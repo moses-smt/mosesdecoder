@@ -11,6 +11,7 @@
 #include "TargetPhraseImpl.h"
 #include "InputPath.h"
 #include "TrellisPaths.h"
+#include "Sentence.h"
 
 #include "Normal/Search.h"
 #include "CubePruningMiniStack/Search.h"
@@ -23,7 +24,6 @@
 #include "../System.h"
 #include "../Phrase.h"
 #include "../InputPathsBase.h"
-#include "../Sentence.h"
 #include "../TranslationModel/PhraseTable.h"
 #include "../legacy/Range.h"
 #include "../PhraseBased/TargetPhrases.h"

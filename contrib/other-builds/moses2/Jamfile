@@ -13,7 +13,6 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
    ManagerBase.cpp
    MemPool.cpp
    Phrase.cpp 
-   Sentence.cpp
    Scores.cpp 
    SubPhrase.cpp
    System.cpp 
@@ -73,6 +72,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
     PhraseBased/PhraseImpl.cpp 
 	  PhraseBased/TargetPhrases.cpp
  	 	PhraseBased/Search.cpp
+    PhraseBased/Sentence.cpp
 		PhraseBased/TargetPhraseImpl.cpp 
  	 	PhraseBased/TrellisPath.cpp
  	 	PhraseBased/TrellisPaths.cpp

@@ -10,7 +10,7 @@
 #include "Manager.h"
 #include "InputPath.h"
 #include "Hypothesis.h"
-#include "../Sentence.h"
+#include "../PhraseBased/Sentence.h"
 #include "../System.h"
 #include "../TranslationModel/PhraseTable.h"
 

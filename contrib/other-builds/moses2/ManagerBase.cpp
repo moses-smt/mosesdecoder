@@ -14,7 +14,7 @@
 #include "InputPathBase.h"
 #include "TranslationModel/PhraseTable.h"
 #include "legacy/Range.h"
-#include "Sentence.h"
+#include "PhraseBased/Sentence.h"
 
 using namespace std;
 

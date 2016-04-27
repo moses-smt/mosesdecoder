@@ -12,10 +12,10 @@
 #include "../Manager.h"
 #include "../TrellisPath.h"
 #include "../TrellisPaths.h"
+#include "../Sentence.h"
 #include "../../InputPathsBase.h"
 #include "../../Phrase.h"
 #include "../../System.h"
-#include "../../Sentence.h"
 #include "../../PhraseBased/TargetPhrases.h"
 
 using namespace std;

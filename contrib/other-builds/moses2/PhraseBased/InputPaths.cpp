@@ -6,10 +6,10 @@
  */
 #include <iostream>
 #include "../InputPathsBase.h"
-#include "../Sentence.h"
 #include "../System.h"
 #include "../legacy/Range.h"
 #include "Manager.h"
+#include "Sentence.h"
 
 using namespace std;
 
