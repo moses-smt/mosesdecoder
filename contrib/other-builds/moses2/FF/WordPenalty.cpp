@@ -10,6 +10,7 @@
 #include "../Scores.h"
 #include "../Phrase.h"
 #include "../TargetPhrase.h"
+#include "../SCFG/Word.h"
 
 namespace Moses2
 {
@@ -37,6 +38,14 @@ void WordPenalty::EvaluateInIsolation(MemPool &pool, const System &system, const
     const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
     SCORE *estimatedScore) const
 {
+  size_t count = 0;
+  for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
+    const SCFG::Word &word = targetPhrase[i];
+    if (!word.isNonTerminal) {
+      ++count;
+    }
+  }
+  scores.PlusEquals(system, *this, -(SCORE) count);
 }
 
 }

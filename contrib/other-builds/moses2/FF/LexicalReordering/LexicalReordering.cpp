@@ -133,7 +133,7 @@ void LexicalReordering::EvaluateInIsolation(MemPool &pool, const System &system,
     const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
     SCORE *estimatedScore) const
 {
-
+  UTIL_THROW2("Don't use with SCFG models");
 }
 
 
