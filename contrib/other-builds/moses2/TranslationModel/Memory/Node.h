@@ -38,7 +38,7 @@ public:
     AddRule(source, target, 0);
   }
 
-  TargetPhrases *Find(const SP &source, size_t pos = 0) const
+  TPS *Find(const SP &source, size_t pos = 0) const
   {
     assert(source.GetSize());
     if (pos == source.GetSize()) {
