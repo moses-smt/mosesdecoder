@@ -66,14 +66,11 @@ void PhraseTableMemory::Load(System &system)
     UTIL_THROW_IF2(toks.size() < 3, "Wrong format");
     //cerr << "line=" << line << endl;
 
-    Phrase<Moses2::Word> *source;
-    TargetPhrase<Moses2::Word> *target;
-
     if (system.isPb) {
-      source = PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
+      PhraseImpl *source = PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
           toks[0]);
       //cerr << "created soure" << endl;
-      target = TargetPhraseImpl::CreateFromString(systemPool, *this, system,
+      TargetPhraseImpl *target = TargetPhraseImpl::CreateFromString(systemPool, *this, system,
           toks[1]);
       //cerr << "created target" << endl;
       target->GetScores().CreateFromString(toks[2], *this, system, true);
@@ -92,15 +89,13 @@ void PhraseTableMemory::Load(System &system)
 
     }
     else {
-      //source = SCFG::PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
-      //    toks[0]);
+      SCFG::PhraseImpl *source = SCFG::PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
+          toks[0]);
       //cerr << "created soure" << endl;
-      SCFG::TargetPhraseImpl *targetSCFG;
-      targetSCFG = SCFG::TargetPhraseImpl::CreateFromString(systemPool, *this,
+      SCFG::TargetPhraseImpl *target = SCFG::TargetPhraseImpl::CreateFromString(systemPool, *this,
           system, toks[1]);
-      targetSCFG->SetAlignmentInfo(toks[3]);
-      //target = targetSCFG;
-      cerr << "created target " << *targetSCFG << endl;
+      target->SetAlignmentInfo(toks[3]);
+      cerr << "created target " << *target << endl;
 
       target->GetScores().CreateFromString(toks[2], *this, system, true);
       //cerr << "created scores:" << *target << endl;
@@ -111,8 +106,8 @@ void PhraseTableMemory::Load(System &system)
         //strcpy(target->properties, toks[6].c_str());
       }
 
-      system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
-          *target);
+      //system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
+      //    *target);
       //cerr << "EvaluateInIsolation:" << *target << endl;
       //m_rootSCFG.AddRule(*source, target);
     }
