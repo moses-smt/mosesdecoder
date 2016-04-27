@@ -18,7 +18,7 @@ template<typename WORD>
 class SubPhrase;
 
 template<typename WORD>
-class PhraseImplTemplate
+class PhraseImplTemplate : public Phrase<WORD>
 {
 public:
   PhraseImplTemplate(MemPool &pool, size_t size) :
@@ -50,6 +50,12 @@ public:
 
   const WORD& operator[](size_t pos) const
   { return m_words[pos]; }
+
+  SubPhrase<WORD> GetSubPhrase(size_t start, size_t size) const
+  {
+    SubPhrase<WORD> ret(*this, start, size);
+    return ret;
+  }
 
 protected:
   size_t m_size;

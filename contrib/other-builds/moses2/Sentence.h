@@ -8,7 +8,7 @@
 
 #include <string>
 #include "InputType.h"
-#include "PhraseImpl.h"
+#include "PhraseBased/PhraseImpl.h"
 #include "MemPool.h"
 #include "legacy/Util2.h"
 

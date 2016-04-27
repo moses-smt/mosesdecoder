@@ -34,7 +34,7 @@ TargetPhraseImpl *TargetPhraseImpl::CreateFromString(MemPool &pool,
 
 TargetPhraseImpl::TargetPhraseImpl(MemPool &pool, const PhraseTable &pt,
     const System &system, size_t size) :
-    TargetPhrase(pool, pt, system), PhraseImplTemplate<Word>(pool, size)
+    TargetPhrase(pool, pt, system, size)
 {
   m_scores = new (pool.Allocate<Scores>()) Scores(system, pool,
       system.featureFunctions.GetNumScores());

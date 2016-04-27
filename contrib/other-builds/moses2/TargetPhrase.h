@@ -6,7 +6,7 @@
  */
 
 #pragma once
-#include "Phrase.h"
+#include "PhraseImplTemplate.h"
 #include "System.h"
 #include "Scores.h"
 
@@ -14,7 +14,7 @@ namespace Moses2
 {
 
 template<typename WORD>
-class TargetPhrase: public Phrase<WORD>
+class TargetPhrase: public PhraseImplTemplate<WORD>
 {
   friend std::ostream& operator<<(std::ostream &, const TargetPhrase &);
 
@@ -23,8 +23,9 @@ public:
   mutable void **ffData;
   SCORE *scoreProperties;
 
-  TargetPhrase(MemPool &pool, const PhraseTable &pt, const System &system)
-  : pt(pt)
+  TargetPhrase(MemPool &pool, const PhraseTable &pt, const System &system, size_t size)
+  : PhraseImplTemplate<WORD>(pool, size)
+  , pt(pt)
   , scoreProperties(NULL)
   {
     m_scores = new (pool.Allocate<Scores>()) Scores(system, pool,

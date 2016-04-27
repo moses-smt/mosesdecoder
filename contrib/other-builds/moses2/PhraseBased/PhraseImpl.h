@@ -1,11 +1,11 @@
 #pragma once
-#include "PhraseImplTemplate.h"
-#include "SubPhrase.h"
+#include "../PhraseImplTemplate.h"
+#include "../SubPhrase.h"
 
 namespace Moses2
 {
 
-class PhraseImpl: public Phrase<Word>, public PhraseImplTemplate<Word>
+class PhraseImpl: public PhraseImplTemplate<Word>
 {
 public:
   static PhraseImpl *CreateFromString(MemPool &pool, FactorCollection &vocab,
@@ -24,27 +24,6 @@ public:
   PhraseImpl(MemPool &pool, size_t size) :
       PhraseImplTemplate<Word>(pool, size)
   {
-  }
-
-  const Word& operator[](size_t pos) const
-  {
-    return m_words[pos];
-  }
-
-  Word& operator[](size_t pos)
-  {
-    return m_words[pos];
-  }
-
-  size_t GetSize() const
-  {
-    return m_size;
-  }
-
-  SubPhrase<Moses2::Word> GetSubPhrase(size_t start, size_t size) const
-  {
-    SubPhrase<Moses2::Word> ret(*this, start, size);
-    return ret;
   }
 
 };

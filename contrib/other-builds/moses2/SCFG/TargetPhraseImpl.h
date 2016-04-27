@@ -27,7 +27,7 @@ class AlignmentInfo;
 namespace SCFG
 {
 
-class TargetPhraseImpl: public Moses2::TargetPhrase<SCFG::Word>, public PhraseImplTemplate<SCFG::Word>
+class TargetPhraseImpl: public Moses2::TargetPhrase<SCFG::Word>
 {
   friend std::ostream& operator<<(std::ostream &, const SCFG::TargetPhraseImpl &);
 public:
@@ -42,27 +42,6 @@ public:
   //TargetPhraseImpl(MemPool &pool, const System &system, const TargetPhraseImpl &copy);
 
   virtual ~TargetPhraseImpl();
-
-  const Word& operator[](size_t pos) const
-  {
-    return m_words[pos];
-  }
-
-  Word& operator[](size_t pos)
-  {
-    return m_words[pos];
-  }
-
-  size_t GetSize() const
-  {
-    return m_size;
-  }
-
-  SubPhrase<SCFG::Word> GetSubPhrase(size_t start, size_t size) const
-  {
-    SubPhrase<SCFG::Word> ret(*this, start, size);
-    return ret;
-  }
 
   // ALNREP = alignment representation,
   // see AlignmentInfo constructors for supported representations

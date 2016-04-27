@@ -23,7 +23,7 @@ class Manager;
 class System;
 class PhraseTable;
 
-class TargetPhraseImpl: public TargetPhrase<Moses2::Word>, public PhraseImplTemplate<Word>
+class TargetPhraseImpl: public TargetPhrase<Moses2::Word>
 {
   friend std::ostream& operator<<(std::ostream &, const TargetPhraseImpl &);
 public:
@@ -35,27 +35,6 @@ public:
   //TargetPhraseImpl(MemPool &pool, const System &system, const TargetPhraseImpl &copy);
 
   virtual ~TargetPhraseImpl();
-
-  const Word& operator[](size_t pos) const
-  {
-    return m_words[pos];
-  }
-
-  Word& operator[](size_t pos)
-  {
-    return m_words[pos];
-  }
-
-  size_t GetSize() const
-  {
-    return m_size;
-  }
-
-  SubPhrase<Moses2::Word> GetSubPhrase(size_t start, size_t end) const
-  {
-    SubPhrase<Moses2::Word> ret(*this, start, end);
-    return ret;
-  }
 
   //mutable void *chartState;
 
