@@ -18,11 +18,12 @@ namespace Moses2
 {
 namespace SCFG
 {
-void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
+void InputPaths::Init(const InputType &input, const ManagerBase &mgr)
 {
+  const Sentence &sentence = static_cast<const Sentence&>(input);
   MemPool &pool = mgr.GetPool();
   size_t numPt = mgr.system.mappings.size();
-  size_t size = input.GetSize();
+  size_t size = sentence.GetSize();
   size_t maxLength = min(size, mgr.system.options.search.max_phrase_length) + 1;
 
   m_matrix = new (pool.Allocate< Matrix<SCFG::InputPath*> >()) Matrix<SCFG::InputPath*>(pool,
@@ -32,7 +33,7 @@ void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
   for (size_t startPos = 0; startPos < size; ++startPos) {
     // create path for 0 length string
     Range range(startPos, startPos - 1);
-    SubPhrase<Moses2::Word> subPhrase = input.GetSubPhrase(startPos, 0);
+    SubPhrase<Moses2::Word> subPhrase = sentence.GetSubPhrase(startPos, 0);
 
     SCFG::InputPath *path = new (pool.Allocate<SCFG::InputPath>()) SCFG::InputPath(pool,
         subPhrase, range, numPt, NULL);
@@ -50,7 +51,7 @@ void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
         break;
       }
 
-      SubPhrase<Moses2::Word> subPhrase = input.GetSubPhrase(startPos, phaseSize);
+      SubPhrase<Moses2::Word> subPhrase = sentence.GetSubPhrase(startPos, phaseSize);
       Range range(startPos, endPos);
 
       SCFG::InputPath *path = new (pool.Allocate<SCFG::InputPath>()) SCFG::InputPath(pool,

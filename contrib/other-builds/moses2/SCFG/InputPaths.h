@@ -24,7 +24,7 @@ class InputPath;
 class InputPaths: public InputPathsBase
 {
 public:
-  void Init(const Sentence &input, const ManagerBase &mgr);
+  void Init(const InputType &input, const ManagerBase &mgr);
 
   const Matrix<InputPath*> &GetMatrix() const
   {

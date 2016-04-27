@@ -13,7 +13,7 @@
 namespace Moses2
 {
 
-class Sentence;
+class InputType;
 class System;
 class ManagerBase;
 class InputPathBase;
@@ -49,7 +49,7 @@ public:
     return m_inputPaths.end();
   }
 
-  virtual void Init(const Sentence &input, const ManagerBase &mgr) = 0;
+  virtual void Init(const InputType &input, const ManagerBase &mgr) = 0;
 
 protected:
   Coll m_inputPaths;

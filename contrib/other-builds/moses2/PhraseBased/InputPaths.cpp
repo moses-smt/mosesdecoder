@@ -16,11 +16,13 @@ using namespace std;
 namespace Moses2
 {
 
-void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
+void InputPaths::Init(const InputType &input, const ManagerBase &mgr)
 {
+  const Sentence &sentence = static_cast<const Sentence&>(input);
+
   MemPool &pool = mgr.GetPool();
   size_t numPt = mgr.system.mappings.size();
-  size_t size = input.GetSize();
+  size_t size = sentence.GetSize();
   size_t maxLength = min(size, mgr.system.options.search.max_phrase_length);
 
   m_matrix = new (pool.Allocate<Matrix<InputPath*> >()) Matrix<InputPath*>(pool,
@@ -29,7 +31,7 @@ void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
 
   // create blank path for initial hypo
   Range range(NOT_FOUND, NOT_FOUND);
-  SubPhrase<Moses2::Word> subPhrase = input.GetSubPhrase(NOT_FOUND, NOT_FOUND);
+  SubPhrase<Moses2::Word> subPhrase = sentence.GetSubPhrase(NOT_FOUND, NOT_FOUND);
   m_blank = new (pool.Allocate<InputPath>()) InputPath(pool, subPhrase, range,
       numPt, NULL);
 
@@ -44,7 +46,7 @@ void InputPaths::Init(const Sentence &input, const ManagerBase &mgr)
         break;
       }
 
-      SubPhrase<Moses2::Word> subPhrase = input.GetSubPhrase(startPos, phaseSize);
+      SubPhrase<Moses2::Word> subPhrase = sentence.GetSubPhrase(startPos, phaseSize);
       Range range(startPos, endPos);
 
       InputPath *path = new (pool.Allocate<InputPath>()) InputPath(pool,
