@@ -14,6 +14,7 @@
 #include "MemPool.h"
 #include "TypeDef.h"
 #include "legacy/FactorCollection.h"
+#include "SCFG/Word.h"
 
 namespace Moses2
 {
@@ -120,20 +121,18 @@ inline std::ostream& operator<<(std::ostream &out, const Phrase<Moses2::Word> &o
   }
   return out;
 }
-/*
-template<typename WORD>
-inline std::ostream& operator<<(std::ostream &out, const Phrase<WORD> &obj)
+
+inline std::ostream& operator<<(std::ostream &out, const Phrase<SCFG::Word> &obj)
 {
   if (obj.GetSize()) {
     out << obj[0];
     for (size_t i = 1; i < obj.GetSize(); ++i) {
-      const WORD &word = obj[i];
+      const SCFG::Word &word = obj[i];
       out << " " << word;
     }
   }
   return out;
 }
-*/
 
 ////////////////////////////////////////////////////////////////////////
 template<typename WORD>

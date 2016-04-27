@@ -95,7 +95,7 @@ void PhraseTableMemory::Load(System &system)
       SCFG::TargetPhraseImpl *target = SCFG::TargetPhraseImpl::CreateFromString(systemPool, *this,
           system, toks[1]);
       target->SetAlignmentInfo(toks[3]);
-      cerr << "created target " << *target << endl;
+      //cerr << "created target " << *target << " source=" << *source << endl;
 
       target->GetScores().CreateFromString(toks[2], *this, system, true);
       //cerr << "created scores:" << *target << endl;
