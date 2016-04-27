@@ -33,5 +33,11 @@ void WordPenalty::EvaluateInIsolation(MemPool &pool, const System &system,
   scores.PlusEquals(system, *this, score);
 }
 
+void WordPenalty::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
+    const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
+    SCORE *estimatedScore) const
+{
+}
+
 }
 

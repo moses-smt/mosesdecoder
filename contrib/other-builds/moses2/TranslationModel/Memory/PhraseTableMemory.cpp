@@ -106,10 +106,10 @@ void PhraseTableMemory::Load(System &system)
         //strcpy(target->properties, toks[6].c_str());
       }
 
-      //system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
-      //    *target);
+      system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
+          *target);
       //cerr << "EvaluateInIsolation:" << *target << endl;
-      //m_rootSCFG.AddRule(*source, target);
+      m_rootSCFG.AddRule(*source, target);
     }
   }
 

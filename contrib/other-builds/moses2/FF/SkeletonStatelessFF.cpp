@@ -28,7 +28,12 @@ void SkeletonStatelessFF::EvaluateInIsolation(MemPool &pool,
     const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
     SCORE *estimatedScore) const
 {
+}
 
+void SkeletonStatelessFF::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
+    const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
+    SCORE *estimatedScore) const
+{
 }
 
 }

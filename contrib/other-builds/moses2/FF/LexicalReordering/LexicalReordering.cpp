@@ -129,6 +129,14 @@ void LexicalReordering::EvaluateInIsolation(MemPool &pool, const System &system,
 {
 }
 
+void LexicalReordering::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
+    const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
+    SCORE *estimatedScore) const
+{
+
+}
+
+
 void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
     const TargetPhrases &tps, const Phrase<Moses2::Word> &sourcePhrase) const
 {

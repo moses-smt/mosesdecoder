@@ -164,6 +164,13 @@ void KENLM<Model>::EvaluateInIsolation(MemPool &pool, const System &system,
 }
 
 template<class Model>
+void KENLM<Model>::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
+    const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
+    SCORE *estimatedScore) const
+{
+}
+
+template<class Model>
 void KENLM<Model>::EvaluateWhenApplied(const ManagerBase &mgr,
     const Hypothesis &hypo, const FFState &prevState, Scores &scores,
     FFState &state) const

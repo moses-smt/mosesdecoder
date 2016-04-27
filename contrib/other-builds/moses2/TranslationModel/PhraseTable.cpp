@@ -87,6 +87,14 @@ void PhraseTable::EvaluateInIsolation(MemPool &pool, const System &system,
 {
 }
 
+void PhraseTable::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
+    const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
+    SCORE *estimatedScore) const
+{
+
+}
+
+
 void PhraseTable::CleanUpAfterSentenceProcessing()
 {
 }

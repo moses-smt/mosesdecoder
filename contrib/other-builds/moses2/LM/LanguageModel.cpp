@@ -177,6 +177,12 @@ void LanguageModel::EvaluateInIsolation(MemPool &pool, const System &system,
   }
 }
 
+void LanguageModel::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
+    const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
+    SCORE *estimatedScore) const
+{
+}
+
 void LanguageModel::EvaluateWhenApplied(const ManagerBase &mgr,
     const Hypothesis &hypo, const FFState &prevState, Scores &scores,
     FFState &state) const

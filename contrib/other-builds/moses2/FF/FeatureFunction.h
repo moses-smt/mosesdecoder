@@ -73,21 +73,19 @@ public:
   }
 
   // may have more factors than actually need, but not guaranteed.
-  // For SCFG decoding, the source contains non-terminals, NOT the raw
-  // source from the input sentence
   virtual void
   EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<Moses2::Word> &source,
       const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
       SCORE *estimatedScore) const = 0;
 
-  /*
-   virtual void
-   EvaluateInIsolation(MemPool &pool, const System &system,
-   const Phrase &source, const SCFG::TargetPhrase &targetPhrase,
-   Scores &scores,
-   SCORE *estimatedScore) const {}
-   */
+  // For SCFG decoding, the source can contain non-terminals, NOT the raw
+  // source from the input sentence
+  virtual void
+  EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
+      const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
+      SCORE *estimatedScore) const = 0;
 
+  // used by lexicalised reordering model to add scores to tp data structures
   virtual void EvaluateAfterTablePruning(MemPool &pool,
       const TargetPhrases &tps, const Phrase<Moses2::Word> &sourcePhrase) const
   {
