@@ -101,13 +101,13 @@ void PhraseTableMemory::Load(System &system)
     system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
         *target);
     //cerr << "EvaluateInIsolation:" << *target << endl;
-    m_root.AddRule(*source, target);
+    m_rootPb.AddRule(*source, target);
   }
 
-  m_root.SortAndPrune(m_tableLimit, systemPool, system);
-  cerr << "root=" << &m_root << endl;
+  m_rootPb.SortAndPrune(m_tableLimit, systemPool, system);
+  cerr << "root=" << &m_rootPb << endl;
 
-  BOOST_FOREACH(const PtMem::Node<Word>::Children::value_type &valPair, m_root.GetChildren()) {
+  BOOST_FOREACH(const PtMem::Node<Word>::Children::value_type &valPair, m_rootPb.GetChildren()) {
     const Word &word = valPair.first;
     cerr << word << " ";
   }
@@ -118,14 +118,14 @@ TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool,
     InputPath &inputPath) const
 {
   const SubPhrase<Moses2::Word> &phrase = inputPath.subPhrase;
-  TargetPhrases *tps = m_root.Find(phrase);
+  TargetPhrases *tps = m_rootPb.Find(phrase);
   return tps;
 }
 
 void PhraseTableMemory::InitActiveChart(SCFG::InputPath &path) const
 {
   size_t ptInd = GetPtInd();
-  ActiveChartEntryMem *chartEntry = new ActiveChartEntryMem(NULL, false, &m_root);
+  ActiveChartEntryMem *chartEntry = new ActiveChartEntryMem(NULL, false, &m_rootPb);
   path.AddActiveChartEntry(ptInd, chartEntry);
 }
 

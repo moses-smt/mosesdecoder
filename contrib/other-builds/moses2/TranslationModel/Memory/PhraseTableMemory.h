@@ -44,7 +44,8 @@ public:
       SCFG::InputPath &path) const;
 
 protected:
-  PtMem::Node<Word>  m_root;
+  PtMem::Node<Word>  m_rootPb;
+  PtMem::Node<SCFG::Word>  m_rootSCFG;
 
   void LookupGivenPrefixPath(const SCFG::InputPath &prefixPath,
       const Word &wordSought,

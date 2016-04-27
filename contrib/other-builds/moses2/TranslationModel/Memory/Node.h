@@ -103,13 +103,13 @@ protected:
   Children m_children;
   TargetPhrases *m_targetPhrases;
   Phrase<WORD> *m_source;
-  std::vector<TargetPhrase<Moses2::Word>*> *m_unsortedTPS;
+  std::vector<TargetPhrase<WORD>*> *m_unsortedTPS;
 
-  Node &AddRule(Phrase<WORD> &source, TargetPhrase<Moses2::Word> *target, size_t pos)
+  Node &AddRule(Phrase<WORD> &source, TargetPhrase<WORD> *target, size_t pos)
   {
     if (pos == source.GetSize()) {
       if (m_unsortedTPS == NULL) {
-        m_unsortedTPS = new std::vector<TargetPhrase<Moses2::Word>*>();
+        m_unsortedTPS = new std::vector<TargetPhrase<WORD>*>();
         m_source = &source;
       }
 
