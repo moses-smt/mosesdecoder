@@ -135,6 +135,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
     SCFG/InputPaths.cpp
     SCFG/Manager.cpp
     SCFG/PhraseImpl.cpp
+    SCFG/Sentence.cpp
     SCFG/Stack.cpp
     SCFG/Stacks.cpp
     SCFG/TargetPhraseImpl.cpp
