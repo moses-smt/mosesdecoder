@@ -116,11 +116,13 @@ void PhraseTableMemory::Load(System &system)
   m_rootPb.SortAndPrune(m_tableLimit, systemPool, system);
   cerr << "root=" << &m_rootPb << endl;
 
+  /*
   BOOST_FOREACH(const PtMem::Node<Word>::Children::value_type &valPair, m_rootPb.GetChildren()) {
     const Word &word = valPair.first;
     cerr << word << " ";
   }
   cerr << endl;
+  */
 }
 
 TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool,

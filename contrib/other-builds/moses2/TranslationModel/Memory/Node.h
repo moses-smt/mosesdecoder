@@ -18,7 +18,7 @@ class System;
 namespace PtMem
 {
 
-template<class WORD>
+template<class WORD, class SP, class TP>
 class Node
 {
 public:
@@ -33,7 +33,7 @@ public:
   ~Node()
   {}
 
-  void AddRule(Phrase<WORD> &source, TargetPhrase<Moses2::Word> *target)
+  void AddRule(SP &source, TP *target)
   {
     AddRule(source, target, 0);
   }
@@ -105,7 +105,7 @@ protected:
   Phrase<WORD> *m_source;
   std::vector<TargetPhrase<WORD>*> *m_unsortedTPS;
 
-  Node &AddRule(Phrase<WORD> &source, TargetPhrase<WORD> *target, size_t pos)
+  Node &AddRule(SP &source, TP *target, size_t pos)
   {
     if (pos == source.GetSize()) {
       if (m_unsortedTPS == NULL) {

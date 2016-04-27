@@ -10,14 +10,18 @@
 #include "../../legacy/Util2.h"
 #include "../../SCFG/InputPath.h"
 #include "Node.h"
+#include "../../PhraseBased/PhraseImpl.h"
+#include "../../PhraseBased/TargetPhraseImpl.h"
+#include "../../SCFG/PhraseImpl.h"
+#include "../../SCFG/TargetPhraseImpl.h"
 
 namespace Moses2
 {
 
 class PhraseTableMemory: public PhraseTable
 {
-  typedef PtMem::Node<Word> PBNODE;
-  typedef PtMem::Node<SCFG::Word> SCFGNODE;
+  typedef PtMem::Node<Word, PhraseImpl, TargetPhraseImpl> PBNODE;
+  typedef PtMem::Node<SCFG::Word, SCFG::PhraseImpl, SCFG::TargetPhraseImpl> SCFGNODE;
 
 //////////////////////////////////////
   class ActiveChartEntryMem : public SCFG::ActiveChartEntry
