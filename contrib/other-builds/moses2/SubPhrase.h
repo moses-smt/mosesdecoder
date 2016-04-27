@@ -1,5 +1,7 @@
 #pragma once
 #include "Phrase.h"
+#include "Word.h"
+#include "SCFG/Word.h"
 
 namespace Moses2
 {
@@ -44,19 +46,18 @@ inline std::ostream& operator<<(std::ostream &out, const SubPhrase<Moses2::Word>
   }
   return out;
 }
-/*
-template<typename WORD>
-std::ostream& operator<<(std::ostream &out, const SubPhrase<WORD> &obj)
+
+inline std::ostream& operator<<(std::ostream &out, const SubPhrase<SCFG::Word> &obj)
 {
   if (obj.GetSize()) {
     out << obj[0];
     for (size_t i = 1; i < obj.GetSize(); ++i) {
-      const WORD &word = obj[i];
+      const SCFG::Word &word = obj[i];
       out << " " << word;
     }
   }
   return out;
 }
-*/
+
 }
 

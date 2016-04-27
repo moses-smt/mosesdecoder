@@ -6,11 +6,12 @@
  */
 #include <iostream>
 #include "InputPaths.h"
-#include "../PhraseBased/Sentence.h"
+#include "Sentence.h"
 #include "../System.h"
 #include "../legacy/Range.h"
 #include "Manager.h"
 #include "InputPath.h"
+#include "Word.h"
 
 using namespace std;
 
@@ -33,7 +34,7 @@ void InputPaths::Init(const InputType &input, const ManagerBase &mgr)
   for (size_t startPos = 0; startPos < size; ++startPos) {
     // create path for 0 length string
     Range range(startPos, startPos - 1);
-    SubPhrase<Moses2::Word> subPhrase = sentence.GetSubPhrase(startPos, 0);
+    SubPhrase<SCFG::Word> subPhrase = sentence.GetSubPhrase(startPos, 0);
 
     SCFG::InputPath *path = new (pool.Allocate<SCFG::InputPath>()) SCFG::InputPath(pool,
         subPhrase, range, numPt, NULL);
@@ -51,7 +52,7 @@ void InputPaths::Init(const InputType &input, const ManagerBase &mgr)
         break;
       }
 
-      SubPhrase<Moses2::Word> subPhrase = sentence.GetSubPhrase(startPos, phaseSize);
+      SubPhrase<SCFG::Word> subPhrase = sentence.GetSubPhrase(startPos, phaseSize);
       Range range(startPos, endPos);
 
       SCFG::InputPath *path = new (pool.Allocate<SCFG::InputPath>()) SCFG::InputPath(pool,

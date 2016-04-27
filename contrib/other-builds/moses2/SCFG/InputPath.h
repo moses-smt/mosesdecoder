@@ -12,6 +12,7 @@
 #include "../InputPathBase.h"
 #include "TargetPhrases.h"
 #include "ActiveChart.h"
+#include "Word.h"
 
 namespace Moses2
 {
@@ -27,9 +28,9 @@ class InputPath: public InputPathBase
   friend std::ostream& operator<<(std::ostream &, const InputPath &);
 public:
   boost::unordered_map<SymbolBind, SCFG::TargetPhrases> targetPhrases;
-  SubPhrase<Moses2::Word> subPhrase;
+  SubPhrase<SCFG::Word> subPhrase;
 
-  InputPath(MemPool &pool, const SubPhrase<Moses2::Word> &subPhrase, const Range &range,
+  InputPath(MemPool &pool, const SubPhrase<SCFG::Word> &subPhrase, const Range &range,
       size_t numPt, const InputPath *prefixPath);
   virtual ~InputPath();
 
