@@ -231,18 +231,15 @@ void PhraseTableMemory::AddTargetPhrasesToPath(const SCFGNODE &node,
     const SCFG::SymbolBind &symbolBind,
     SCFG::InputPath &path) const
 {
-  /*
-  const TargetPhrases *tps = node.GetTargetPhrases();
+  const SCFG::TargetPhrases *tps = node.GetTargetPhrases();
   if (tps) {
-    TargetPhrases::const_iterator iter;
+    SCFG::TargetPhrases::const_iterator iter;
     for (iter = tps->begin(); iter != tps->end(); ++iter) {
-      const TargetPhrase<Moses2::Word> *tp = *iter;
-      const SCFG::TargetPhraseImpl *tpCast = static_cast<const SCFG::TargetPhraseImpl*>(tp);
-      cerr << "tpCast=" << *tpCast << endl;
-      path.AddTargetPhrase(*this, symbolBind, tpCast);
+      const SCFG::TargetPhraseImpl *tp = *iter;
+      cerr << "tpCast=" << *tp << endl;
+      path.AddTargetPhrase(*this, symbolBind, tp);
     }
   }
-  */
 }
 
 }
