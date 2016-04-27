@@ -53,8 +53,8 @@ public:
       SCFG::InputPath &path) const;
 
 protected:
-  PBNODE    m_rootPb;
-  SCFGNODE  m_rootSCFG;
+  PBNODE    *m_rootPb;
+  SCFGNODE  *m_rootSCFG;
 
   void LookupGivenPrefixPath(const SCFG::InputPath &prefixPath,
       const SCFG::Word &wordSought,

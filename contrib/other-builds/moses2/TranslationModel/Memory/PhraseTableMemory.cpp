@@ -36,23 +36,33 @@ namespace Moses2
 
 ////////////////////////////////////////////////////////////////////////
 
-PhraseTableMemory::PhraseTableMemory(size_t startInd, const std::string &line) :
-    PhraseTable(startInd, line)
+PhraseTableMemory::PhraseTableMemory(size_t startInd, const std::string &line)
+:PhraseTable(startInd, line)
+,m_rootPb(NULL)
+,m_rootSCFG(NULL)
 {
   ReadParameters();
 }
 
 PhraseTableMemory::~PhraseTableMemory()
 {
-  // TODO Auto-generated destructor stub
+  delete m_rootPb;
+  delete m_rootSCFG;
 }
 
 void PhraseTableMemory::Load(System &system)
 {
   FactorCollection &vocab = system.GetVocab();
-
   MemPool &systemPool = system.GetSystemPool();
   MemPool tmpSourcePool;
+
+  if (system.isPb) {
+    m_rootPb = new PBNODE();
+  }
+  else {
+    m_rootSCFG = new SCFGNODE();
+  }
+
   vector<string> toks;
   size_t lineNum = 0;
   InputFileStream strme(m_path);
@@ -85,7 +95,7 @@ void PhraseTableMemory::Load(System &system)
       system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
           *target);
       //cerr << "EvaluateInIsolation:" << *target << endl;
-      m_rootPb.AddRule(*source, target);
+      m_rootPb->AddRule(*source, target);
 
     }
     else {
@@ -109,16 +119,16 @@ void PhraseTableMemory::Load(System &system)
       system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
           *target);
       //cerr << "EvaluateInIsolation:" << *target << endl;
-      m_rootSCFG.AddRule(*source, target);
+      m_rootSCFG->AddRule(*source, target);
     }
   }
 
   if (system.isPb) {
-    m_rootPb.SortAndPrune(m_tableLimit, systemPool, system);
+    m_rootPb->SortAndPrune(m_tableLimit, systemPool, system);
     cerr << "root=" << &m_rootPb << endl;
   }
   else {
-    m_rootSCFG.SortAndPrune(m_tableLimit, systemPool, system);
+    m_rootSCFG->SortAndPrune(m_tableLimit, systemPool, system);
     cerr << "root=" << &m_rootPb << endl;
   }
   /*
@@ -134,14 +144,14 @@ TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool,
     InputPath &inputPath) const
 {
   const SubPhrase<Moses2::Word> &phrase = inputPath.subPhrase;
-  TargetPhrases *tps = m_rootPb.Find(phrase);
+  TargetPhrases *tps = m_rootPb->Find(phrase);
   return tps;
 }
 
 void PhraseTableMemory::InitActiveChart(SCFG::InputPath &path) const
 {
   size_t ptInd = GetPtInd();
-  ActiveChartEntryMem *chartEntry = new ActiveChartEntryMem(NULL, false, &m_rootSCFG);
+  ActiveChartEntryMem *chartEntry = new ActiveChartEntryMem(NULL, false, m_rootSCFG);
   path.AddActiveChartEntry(ptInd, chartEntry);
 }
 
