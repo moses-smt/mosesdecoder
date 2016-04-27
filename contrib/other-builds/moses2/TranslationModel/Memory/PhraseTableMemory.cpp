@@ -76,6 +76,20 @@ void PhraseTableMemory::Load(System &system)
       target = TargetPhraseImpl::CreateFromString(systemPool, *this, system,
           toks[1]);
       //cerr << "created target" << endl;
+      target->GetScores().CreateFromString(toks[2], *this, system, true);
+      //cerr << "created scores:" << *target << endl;
+
+      // properties
+      if (toks.size() == 7) {
+        //target->properties = (char*) system.systemPool.Allocate(toks[6].size() + 1);
+        //strcpy(target->properties, toks[6].c_str());
+      }
+
+      system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
+          *target);
+      //cerr << "EvaluateInIsolation:" << *target << endl;
+      m_rootPb.AddRule(*source, target);
+
     }
     else {
       //source = SCFG::PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
@@ -87,21 +101,21 @@ void PhraseTableMemory::Load(System &system)
       targetSCFG->SetAlignmentInfo(toks[3]);
       //target = targetSCFG;
       cerr << "created target " << *targetSCFG << endl;
+
+      target->GetScores().CreateFromString(toks[2], *this, system, true);
+      //cerr << "created scores:" << *target << endl;
+
+      // properties
+      if (toks.size() == 7) {
+        //target->properties = (char*) system.systemPool.Allocate(toks[6].size() + 1);
+        //strcpy(target->properties, toks[6].c_str());
+      }
+
+      system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
+          *target);
+      //cerr << "EvaluateInIsolation:" << *target << endl;
+      //m_rootSCFG.AddRule(*source, target);
     }
-
-    target->GetScores().CreateFromString(toks[2], *this, system, true);
-    //cerr << "created scores:" << *target << endl;
-
-    // properties
-    if (toks.size() == 7) {
-      //target->properties = (char*) system.systemPool.Allocate(toks[6].size() + 1);
-      //strcpy(target->properties, toks[6].c_str());
-    }
-
-    system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
-        *target);
-    //cerr << "EvaluateInIsolation:" << *target << endl;
-    m_rootPb.AddRule(*source, target);
   }
 
   m_rootPb.SortAndPrune(m_tableLimit, systemPool, system);
