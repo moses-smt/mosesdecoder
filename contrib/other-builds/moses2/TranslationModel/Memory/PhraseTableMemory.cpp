@@ -162,6 +162,9 @@ void PhraseTableMemory::Lookup(MemPool &pool,
 {
   size_t endPos = path.range.GetEndPos();
 
+  //NON-TERMINAL for prefix path
+
+
   // TERMINAL
   const SCFG::Word &lastWord = path.subPhrase.Back();
   cerr << "lastWord=" << lastWord << endl;
@@ -205,7 +208,7 @@ void PhraseTableMemory::LookupGivenPrefixPath(const SCFG::InputPath &prefixPath,
 {
   size_t ptInd = GetPtInd();
 
-  //cerr << "prefixPath=" << prefixPath.range << " " << prefixPath.GetActiveChart(ptInd).entries.size() << endl;
+  cerr << "prefixPath=" << &prefixPath << " " << subPhrasePath.prefixPath << endl;
 
   BOOST_FOREACH(const SCFG::ActiveChartEntry *entry, prefixPath.GetActiveChart(ptInd).entries) {
     const ActiveChartEntryMem *entryCast = static_cast<const ActiveChartEntryMem*>(entry);

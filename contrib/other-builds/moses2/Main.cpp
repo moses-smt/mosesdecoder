@@ -20,6 +20,8 @@ int main(int argc, char** argv)
 {
 	cerr << "Starting..." << endl;
 
+  Moses2::Timer timer;
+  timer.start();
 	//Temp();
 
 	Moses2::Parameter params;
@@ -27,8 +29,6 @@ int main(int argc, char** argv)
 	Moses2::System system(params);
 
 	//cerr << "system.numThreads=" << system.numThreads << endl;
-	Moses2::Timer timer;
-	timer.start();
 
 	Moses2::ThreadPool pool(system.options.server.numThreads, system.cpuAffinityOffset, system.cpuAffinityOffsetIncr);
 	//cerr << "CREATED POOL" << endl;
