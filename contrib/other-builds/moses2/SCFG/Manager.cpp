@@ -62,10 +62,14 @@ void Manager::Decode()
 
     for (int phraseSize = 1; phraseSize < (inputSize - startPos + 1); ++phraseSize) {
       SubPhrase<SCFG::Word> sub = sentence.GetSubPhrase(startPos, phraseSize);
-      //cerr << "sub=" << sub << endl;
-      Lookup(startPos, phraseSize);
-      Decode(startPos, phraseSize);
-      LookupUnary(startPos, phraseSize);
+      InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, phraseSize);
+      cerr << endl << "path=" << path << endl;
+
+      Stack &stack = m_stacks.GetStack(startPos, phraseSize);
+
+      Lookup(path);
+      Decode(path, stack);
+      LookupUnary(path);
     }
   }
 
@@ -87,11 +91,8 @@ void Manager::InitActiveChart(size_t pos)
    }
 }
 
-void Manager::Lookup(size_t startPos, size_t size)
+void Manager::Lookup(InputPath &path)
 {
-  InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, size);
-  cerr << endl << "path=" << path << endl;
-
   size_t numPt = system.mappings.size();
   //cerr << "numPt=" << numPt << endl;
 
@@ -108,11 +109,8 @@ void Manager::Lookup(size_t startPos, size_t size)
   */
 }
 
-void Manager::LookupUnary(size_t startPos, size_t size)
+void Manager::LookupUnary(InputPath &path)
 {
-  InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, size);
-  //cerr << endl << "path=" << path << endl;
-
   size_t numPt = system.mappings.size();
   //cerr << "numPt=" << numPt << endl;
 
@@ -129,13 +127,8 @@ void Manager::LookupUnary(size_t startPos, size_t size)
   */
 }
 
-void Manager::Decode(size_t startPos, size_t size)
+void Manager::Decode(InputPath &path, Stack &stack)
 {
-  //cerr << "size=" << size << " " << startPos << endl;
-
-  InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, size);
-  Stack &stack = m_stacks.GetStack(startPos, size);
-
   Recycler<HypothesisBase*> &hypoRecycler = GetHypoRecycle();
 
   boost::unordered_map<SCFG::SymbolBind, SCFG::TargetPhrases>::const_iterator iterOuter;
