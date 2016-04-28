@@ -67,6 +67,14 @@ protected:
       const SCFG::InputPath &subPhrasePath,
       bool isNT,
       SCFG::InputPath &path) const;
+
+  void LookupNT(
+      SCFG::InputPath &path,
+      const SCFG::InputPath &subPhrasePath,
+      const SCFG::InputPath &prevPath,
+      const SCFG::Stacks &stacks) const;
+
+
   void AddTargetPhrasesToPath(const SCFGNODE &node,
       const SCFG::SymbolBind &symbolBind,
       SCFG::InputPath &path) const;

@@ -165,11 +165,6 @@ void PhraseTableMemory::Lookup(MemPool &pool,
   prevPath = static_cast<const SCFG::InputPath*>(path.prefixPath);
   UTIL_THROW_IF2(prevPath == NULL, "prefixPath == NULL");
 
-  //NON-TERMINAL for prefix path
-  if (prevPath->range.GetNumWordsCovered()) {
-
-  }
-
   // TERMINAL
   const SCFG::Word &lastWord = path.subPhrase.Back();
 
@@ -190,21 +185,40 @@ void PhraseTableMemory::Lookup(MemPool &pool,
     size_t ntSize = endPos - startPos + 1;
     const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(startPos, ntSize);
 
-    const SCFG::Stack &ntStack = stacks.GetStack(startPos, ntSize);
-    const SCFG::Stack::Coll &coll = ntStack.GetColl();
-
-    cerr << " subPhrasePath=" << subPhrasePath
-        << " prevPath=" << prevPath << " " << *prevPath
-        << " stack=" << coll.size() << endl;
-
-    BOOST_FOREACH (const SCFG::Stack::Coll::value_type &valPair, coll) {
-      const SCFG::Word &ntSought = valPair.first;
-      //cerr << "ntSought=" << ntSought << ntSought.isNonTerminal << endl;
-      LookupGivenPath(path, *prevPath, ntSought, subPhrasePath, true);
-    }
+    LookupNT(path, subPhrasePath, *prevPath, stacks);
 
     prevPath = static_cast<const SCFG::InputPath*>(prevPath->prefixPath);
   }
+}
+
+void PhraseTableMemory::LookupNT(
+    SCFG::InputPath &path,
+    const SCFG::InputPath &subPhrasePath,
+    const SCFG::InputPath &prevPath,
+    const SCFG::Stacks &stacks) const
+{
+  size_t endPos = path.range.GetEndPos();
+
+  const Range &prevRange = prevPath.range;
+  //cerr << "prevRange=" << prevRange << endl;
+
+  size_t startPos = prevRange.GetEndPos() + 1;
+  size_t ntSize = endPos - startPos + 1;
+
+  const SCFG::Stack &ntStack = stacks.GetStack(startPos, ntSize);
+  const SCFG::Stack::Coll &coll = ntStack.GetColl();
+
+  cerr << " subPhrasePath=" << subPhrasePath
+      << " prevPath=" << prevPath << " " << prevPath
+      << " stack=" << coll.size() << endl;
+
+  BOOST_FOREACH (const SCFG::Stack::Coll::value_type &valPair, coll) {
+    const SCFG::Word &ntSought = valPair.first;
+    //cerr << "ntSought=" << ntSought << ntSought.isNonTerminal << endl;
+    LookupGivenPath(path, prevPath, ntSought, subPhrasePath, true);
+  }
+
+
 }
 
 void PhraseTableMemory::LookupGivenPath(
