@@ -89,7 +89,7 @@ void Manager::InitActiveChart(size_t pos)
 void Manager::Lookup(size_t startPos, size_t size)
 {
   InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, size);
-  cerr << "path=" << path << endl;
+  cerr << endl << "path=" << path << endl;
 
   size_t numPt = system.mappings.size();
   //cerr << "numPt=" << numPt << endl;

@@ -22,7 +22,7 @@ StackAdd Stack::Add(SCFG::Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecyc
 {
   const SCFG::TargetPhraseImpl &tp = hypo->GetTargetPhrase();
   const SCFG::Word &lhs = tp.lhs;
-  cerr << "lhs=" << lhs << endl;
+  //cerr << "lhs=" << lhs << endl;
 
   HypothesisColl &coll = GetMiniStack(lhs);
   StackAdd added = coll.Add(hypo);
