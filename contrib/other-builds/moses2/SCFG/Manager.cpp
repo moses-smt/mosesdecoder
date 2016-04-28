@@ -70,6 +70,8 @@ void Manager::Decode()
       Lookup(path);
       Decode(path, stack);
       LookupUnary(path);
+
+      cerr << "#rules=" << path.GetNumRules() << endl;
     }
   }
 

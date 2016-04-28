@@ -26,7 +26,7 @@ InputPath::InputPath(MemPool &pool, const SubPhrase<SCFG::Word> &subPhrase,
   m_activeChart = pool.Allocate<ActiveChart>(numPt);
   for (size_t i = 0; i < numPt; ++i) {
     ActiveChart &memAddr = m_activeChart[i];
-    ActiveChart *obj = new (&memAddr) ActiveChart();
+    new (&memAddr) ActiveChart();
   }
 }
 
@@ -53,6 +53,16 @@ void InputPath::AddActiveChartEntry(size_t ptInd, ActiveChartEntry *chartEntry)
   //cerr << "added " << range << " " << ptInd << endl;
   ActiveChart &activeChart = m_activeChart[ptInd];
   activeChart.entries.push_back(chartEntry);
+}
+
+size_t InputPath::GetNumRules() const
+{
+  size_t ret = 0;
+  BOOST_FOREACH(const Coll::value_type &valPair, targetPhrases) {
+    const SCFG::TargetPhrases &tps = valPair.second;
+    ret += tps.GetSize();
+  }
+  return ret;
 }
 
 }
