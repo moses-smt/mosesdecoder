@@ -56,11 +56,12 @@ protected:
   PBNODE    *m_rootPb;
   SCFGNODE  *m_rootSCFG;
 
-  void LookupGivenPrefixPath(const SCFG::InputPath &prefixPath,
+  void LookupGivenPath(
+      SCFG::InputPath &path,
+      const SCFG::InputPath &prevPath,
       const SCFG::Word &wordSought,
       const SCFG::InputPath &subPhrasePath,
-      bool isNT,
-      SCFG::InputPath &path) const;
+      bool isNT) const;
   void LookupGivenNode(const SCFGNODE  &node,
       const SCFG::Word &wordSought,
       const SCFG::InputPath &subPhrasePath,
