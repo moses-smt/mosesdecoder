@@ -322,5 +322,13 @@ void ProbingPT::Lookup(MemPool &pool,
   UTIL_THROW2("Not implemented");
 }
 
+void ProbingPT::LookupUnary(MemPool &pool,
+    const SCFG::Manager &mgr,
+    const SCFG::Stacks &stacks,
+    SCFG::InputPath &path) const
+{
+
+}
+
 }
 

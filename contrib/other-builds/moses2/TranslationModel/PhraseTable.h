@@ -62,7 +62,13 @@ public:
 
   // scfg
   virtual void InitActiveChart(SCFG::InputPath &path) const;
+
   virtual void Lookup(MemPool &pool,
+      const SCFG::Manager &mgr,
+      const SCFG::Stacks &stacks,
+      SCFG::InputPath &path) const = 0;
+
+  virtual void LookupUnary(MemPool &pool,
       const SCFG::Manager &mgr,
       const SCFG::Stacks &stacks,
       SCFG::InputPath &path) const = 0;

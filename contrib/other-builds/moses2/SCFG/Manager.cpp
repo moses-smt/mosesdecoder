@@ -65,6 +65,7 @@ void Manager::Decode()
       //cerr << "sub=" << sub << endl;
       Lookup(startPos, phraseSize);
       Decode(startPos, phraseSize);
+      LookupUnary(startPos, phraseSize);
     }
   }
 
@@ -97,6 +98,27 @@ void Manager::Lookup(size_t startPos, size_t size)
   for (size_t i = 0; i < numPt; ++i) {
     const PhraseTable &pt = *system.mappings[i];
     pt.Lookup(GetPool(), *this, m_stacks, path);
+  }
+
+  /*
+  size_t tpsNum = path.targetPhrases.GetSize();
+  if (tpsNum) {
+    cerr << tpsNum << " " << path << endl;
+  }
+  */
+}
+
+void Manager::LookupUnary(size_t startPos, size_t size)
+{
+  InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, size);
+  //cerr << endl << "path=" << path << endl;
+
+  size_t numPt = system.mappings.size();
+  //cerr << "numPt=" << numPt << endl;
+
+  for (size_t i = 0; i < numPt; ++i) {
+    const PhraseTable &pt = *system.mappings[i];
+    pt.LookupUnary(GetPool(), *this, m_stacks, path);
   }
 
   /*

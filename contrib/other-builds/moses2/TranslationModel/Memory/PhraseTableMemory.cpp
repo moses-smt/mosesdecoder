@@ -160,6 +160,8 @@ void PhraseTableMemory::Lookup(MemPool &pool,
     const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
+  cerr << "Lookup" << endl;
+
   size_t endPos = path.range.GetEndPos();
   const SCFG::InputPath *prevPath;
   prevPath = static_cast<const SCFG::InputPath*>(path.prefixPath);
@@ -171,7 +173,6 @@ void PhraseTableMemory::Lookup(MemPool &pool,
   //cerr << "PhraseTableMemory lastWord=" << lastWord << endl;
   //cerr << "path=" << path << endl;
   const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(endPos, 1);
-
 
   LookupGivenPath(path, *prevPath, lastWord, subPhrasePath, false);
 
@@ -191,6 +192,22 @@ void PhraseTableMemory::Lookup(MemPool &pool,
   }
 }
 
+void PhraseTableMemory::LookupUnary(MemPool &pool,
+    const SCFG::Manager &mgr,
+    const SCFG::Stacks &stacks,
+    SCFG::InputPath &path) const
+{
+  cerr << "LookupUnary" << endl;
+  size_t activeEntriesBefore = path.GetActiveChart(GetPtInd()).entries.size();
+
+  size_t startPos = path.range.GetStartPos();
+  const SCFG::InputPath *prevPath = mgr.GetInputPaths().GetMatrix().GetValue(startPos, 0);
+  LookupNT(path, path, *prevPath, stacks);
+
+  size_t activeEntriesAfter = path.GetActiveChart(GetPtInd()).entries.size();
+  cerr << "activeEntries " << (activeEntriesAfter - activeEntriesBefore)  << endl;
+}
+
 void PhraseTableMemory::LookupNT(
     SCFG::InputPath &path,
     const SCFG::InputPath &subPhrasePath,
@@ -208,8 +225,8 @@ void PhraseTableMemory::LookupNT(
   const SCFG::Stack &ntStack = stacks.GetStack(startPos, ntSize);
   const SCFG::Stack::Coll &coll = ntStack.GetColl();
 
-  cerr << " subPhrasePath=" << subPhrasePath
-      << " prevPath=" << prevPath << " " << prevPath
+  cerr << "   LookupNT subPhrasePath=" << subPhrasePath
+      << " prevPath=" << &prevPath << " " << prevPath
       << " stack=" << coll.size() << endl;
 
   BOOST_FOREACH (const SCFG::Stack::Coll::value_type &valPair, coll) {
@@ -264,7 +281,6 @@ void PhraseTableMemory::LookupGivenNode(const SCFGNODE &node,
     // there are some rules
     AddTargetPhrasesToPath(*nextNode, symbolBind, path);
   }
-
 }
 
 void PhraseTableMemory::AddTargetPhrasesToPath(const SCFGNODE &node,

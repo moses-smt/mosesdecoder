@@ -28,7 +28,13 @@ public:
       SCORE *estimatedScore) const;
 
   virtual void InitActiveChart(SCFG::InputPath &path) const;
+
   void Lookup(MemPool &pool,
+      const SCFG::Manager &mgr,
+      const SCFG::Stacks &stacks,
+      SCFG::InputPath &path) const;
+
+  void LookupUnary(MemPool &pool,
       const SCFG::Manager &mgr,
       const SCFG::Stacks &stacks,
       SCFG::InputPath &path) const;

@@ -138,5 +138,14 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
     path.AddTargetPhrase(*this, symbolBind, tp);
   }
 }
+
+void UnknownWordPenalty::LookupUnary(MemPool &pool,
+    const SCFG::Manager &mgr,
+    const SCFG::Stacks &stacks,
+    SCFG::InputPath &path) const
+{
+
+}
+
 }
 

@@ -52,6 +52,11 @@ public:
       const SCFG::Stacks &stacks,
       SCFG::InputPath &path) const;
 
+  void LookupUnary(MemPool &pool,
+      const SCFG::Manager &mgr,
+      const SCFG::Stacks &stacks,
+      SCFG::InputPath &path) const;
+
 protected:
   PBNODE    *m_rootPb;
   SCFGNODE  *m_rootSCFG;
