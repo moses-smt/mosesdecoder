@@ -18,6 +18,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
    System.cpp 
    TargetPhrase.cpp
    TranslationTask.cpp
+   TypeDef.cpp
    Vector.cpp
    Weights.cpp 
    Word.cpp 
