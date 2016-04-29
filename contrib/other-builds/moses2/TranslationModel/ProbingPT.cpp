@@ -51,7 +51,7 @@ void ProbingPT::Load(System &system)
   for (iterSource = sourceVocab.begin(); iterSource != sourceVocab.end();
       ++iterSource) {
     const string &wordStr = iterSource->second;
-    const Factor *factor = vocab.AddFactor(wordStr, system);
+    const Factor *factor = vocab.AddFactor(wordStr, system, false);
 
     uint64_t probingId = iterSource->first;
     size_t factorId = factor->GetId();
@@ -68,7 +68,7 @@ void ProbingPT::Load(System &system)
   while (getline(targetVocabStrme, line)) {
     vector<string> toks = Tokenize(line, "\t");
     assert(toks.size());
-    const Factor *factor = vocab.AddFactor(toks[0], system);
+    const Factor *factor = vocab.AddFactor(toks[0], system, false);
     uint32_t probingId = Scan<uint32_t>(toks[1]);
 
     if (probingId >= m_targetVocab.size()) {

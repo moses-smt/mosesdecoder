@@ -114,7 +114,7 @@ public:
    *	If a factor already exist in the collection, return the existing factor, if not create a new 1
    */
   const Factor *AddFactor(const StringPiece &factorString, const System &system,
-      bool isNonTerminal = false);
+      bool isNonTerminal);
 
   size_t GetNumNonTerminals()
   {

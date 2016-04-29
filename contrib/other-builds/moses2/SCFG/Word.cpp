@@ -14,6 +14,12 @@ namespace Moses2
 {
 namespace SCFG
 {
+Word::Word(const Word &copy)
+:Moses2::Word(copy)
+,isNonTerminal(copy.isNonTerminal)
+{
+}
+
 void Word::CreateFromString(FactorCollection &vocab,
     const System &system,
     const std::string &str)
@@ -46,7 +52,7 @@ void Word::CreateFromString(FactorCollection &vocab,
     const string &tok = toks[i];
     //cerr << "tok=" << tok << endl;
 
-    const Factor *factor = vocab.AddFactor(tok, system, false);
+    const Factor *factor = vocab.AddFactor(tok, system, isNonTerminal);
     m_factors[i] = factor;
   }
 }

@@ -19,6 +19,9 @@ class Word: public Moses2::Word
 public:
   bool isNonTerminal;
 
+  Word() {}
+  Word(const Word &copy);
+
   void CreateFromString(FactorCollection &vocab,
       const System &system,
       const std::string &str);

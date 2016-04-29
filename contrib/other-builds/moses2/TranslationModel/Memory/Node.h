@@ -99,6 +99,12 @@ public:
   const Children &GetChildren() const
   { return m_children; }
 
+  void Debug() const {
+    BOOST_FOREACH(const typename Children::value_type &valPair, m_children) {
+      const WORD &word = valPair.first;
+      std::cerr << word << "(" << word.hash() << ") ";
+    }
+  }
 protected:
   Children m_children;
   TPS *m_targetPhrases;
@@ -119,6 +125,8 @@ protected:
     else {
       const WORD &word = source[pos];
       Node &child = m_children[word];
+      std::cerr << "added " << word << " " << &child << " from " << this << std::endl;
+
       return child.AddRule(source, target, pos + 1);
     }
   }

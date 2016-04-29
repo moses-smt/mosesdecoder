@@ -75,6 +75,7 @@ void PhraseTableMemory::Load(System &system)
     TokenizeMultiCharSeparator(toks, line, "|||");
     UTIL_THROW_IF2(toks.size() < 3, "Wrong format");
     //cerr << "line=" << line << endl;
+    //cerr << "system.isPb=" << system.isPb << endl;
 
     if (system.isPb) {
       PhraseImpl *source = PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
@@ -101,7 +102,7 @@ void PhraseTableMemory::Load(System &system)
     else {
       SCFG::PhraseImpl *source = SCFG::PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
           toks[0]);
-      //cerr << "created soure" << endl;
+      //cerr << "created source:" << *source << endl;
       SCFG::TargetPhraseImpl *target = SCFG::TargetPhraseImpl::CreateFromString(systemPool, *this,
           system, toks[1]);
       target->SetAlignmentInfo(toks[3]);
@@ -273,7 +274,17 @@ void PhraseTableMemory::LookupGivenNode(const SCFGNODE &node,
 {
   size_t ptInd = GetPtInd();
   const SCFGNODE *nextNode = node.Find(wordSought);
-  cerr << "    nextNode=" << nextNode << endl;
+
+  cerr << "    finding " << wordSought
+      << " from " << &node
+      << " found " << nextNode << endl;
+
+  if (nextNode == NULL) {
+    cerr << "      " << wordSought << "(" << wordSought.hash() << ")"
+        << " node contains:";
+    node.Debug();
+    cerr << endl;
+  }
 
   if (nextNode) {
     // new entries
