@@ -161,7 +161,7 @@ void PhraseTableMemory::Lookup(MemPool &pool,
     const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
-  cerr << "Lookup" << endl;
+  //cerr << "Lookup" << endl;
 
   size_t endPos = path.range.GetEndPos();
   const SCFG::InputPath *prevPath;
@@ -198,15 +198,15 @@ void PhraseTableMemory::LookupUnary(MemPool &pool,
     const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
-  cerr << "LookupUnary" << endl;
-  size_t activeEntriesBefore = path.GetActiveChart(GetPtInd()).entries.size();
+  //cerr << "LookupUnary" << endl;
+  //size_t activeEntriesBefore = path.GetActiveChart(GetPtInd()).entries.size();
 
   size_t startPos = path.range.GetStartPos();
   const SCFG::InputPath *prevPath = mgr.GetInputPaths().GetMatrix().GetValue(startPos, 0);
   LookupNT(path, path, *prevPath, stacks);
 
-  size_t activeEntriesAfter = path.GetActiveChart(GetPtInd()).entries.size();
-  cerr << "  activeEntries " << (activeEntriesAfter - activeEntriesBefore)  << endl;
+  //size_t activeEntriesAfter = path.GetActiveChart(GetPtInd()).entries.size();
+  //cerr << "  activeEntries " << (activeEntriesAfter - activeEntriesBefore)  << endl;
 }
 
 void PhraseTableMemory::LookupNT(
@@ -250,17 +250,18 @@ void PhraseTableMemory::LookupGivenPath(
 {
   size_t ptInd = GetPtInd();
 
-  //cerr << "prevPath=" << &prevPath << " " << subPhrasePath.prevPath << endl;
+  /*
   cerr << "  wordSought=" << wordSought
       << " prevPath=" << &prevPath << " " << prevPath
       << " subPhrasePath=" << &subPhrasePath << " " << subPhrasePath
       << endl;
+  */
 
   BOOST_FOREACH(const SCFG::ActiveChartEntry *entry, prevPath.GetActiveChart(ptInd).entries) {
     const ActiveChartEntryMem *entryCast = static_cast<const ActiveChartEntryMem*>(entry);
     const SCFGNODE *node = entryCast->node;
     UTIL_THROW_IF2(node == NULL, "node == NULL");
-    cerr << "    entry=" << entry;
+    //cerr << "    entry=" << entry;
 
     LookupGivenNode(*node, wordSought, subPhrasePath, isNT, path);
   }
@@ -275,6 +276,7 @@ void PhraseTableMemory::LookupGivenNode(const SCFGNODE &node,
   size_t ptInd = GetPtInd();
   const SCFGNODE *nextNode = node.Find(wordSought);
 
+  /*
   cerr << "    finding " << wordSought
       << " from " << &node
       << " found " << nextNode << endl;
@@ -285,6 +287,7 @@ void PhraseTableMemory::LookupGivenNode(const SCFGNODE &node,
     node.Debug();
     cerr << endl;
   }
+  */
 
   if (nextNode) {
     // new entries

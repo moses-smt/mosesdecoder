@@ -63,7 +63,7 @@ void Manager::Decode()
     for (int phraseSize = 1; phraseSize < (inputSize - startPos + 1); ++phraseSize) {
       SubPhrase<SCFG::Word> sub = sentence.GetSubPhrase(startPos, phraseSize);
       InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, phraseSize);
-      cerr << endl << "path=" << path << endl;
+      //cerr << endl << "path=" << path << endl;
 
       Stack &stack = m_stacks.GetStack(startPos, phraseSize);
 
@@ -71,7 +71,7 @@ void Manager::Decode()
       Decode(path, stack);
       LookupUnary(path);
 
-      cerr << "#rules=" << path.GetNumRules() << endl;
+      //cerr << "#rules=" << path.GetNumRules() << endl;
     }
   }
 
