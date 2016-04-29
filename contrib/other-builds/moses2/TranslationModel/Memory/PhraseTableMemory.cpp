@@ -270,6 +270,7 @@ void PhraseTableMemory::LookupGivenNode(const SCFGNODE &node,
 {
   size_t ptInd = GetPtInd();
   const SCFGNODE *nextNode = node.Find(wordSought);
+  cerr << " nextNode=" << nextNode << " ";
 
   if (nextNode) {
     // new entries
