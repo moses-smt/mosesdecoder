@@ -50,7 +50,7 @@ void InputPath::AddTargetPhrase(const PhraseTable &pt,
 
 void InputPath::AddActiveChartEntry(size_t ptInd, ActiveChartEntry *chartEntry)
 {
-  //cerr << "added " << range << " " << ptInd << endl;
+  cerr << "      added " << chartEntry << " " << range << " " << ptInd << endl;
   ActiveChart &activeChart = m_activeChart[ptInd];
   activeChart.entries.push_back(chartEntry);
 }

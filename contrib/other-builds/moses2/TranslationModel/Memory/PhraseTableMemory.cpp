@@ -205,7 +205,7 @@ void PhraseTableMemory::LookupUnary(MemPool &pool,
   LookupNT(path, path, *prevPath, stacks);
 
   size_t activeEntriesAfter = path.GetActiveChart(GetPtInd()).entries.size();
-  cerr << "activeEntries " << (activeEntriesAfter - activeEntriesBefore)  << endl;
+  cerr << "  activeEntries " << (activeEntriesAfter - activeEntriesBefore)  << endl;
 }
 
 void PhraseTableMemory::LookupNT(
@@ -225,9 +225,11 @@ void PhraseTableMemory::LookupNT(
   const SCFG::Stack &ntStack = stacks.GetStack(startPos, ntSize);
   const SCFG::Stack::Coll &coll = ntStack.GetColl();
 
-  cerr << "   LookupNT subPhrasePath=" << subPhrasePath
+  /*
+  cerr << "    LookupNT subPhrasePath=" << subPhrasePath
       << " prevPath=" << &prevPath << " " << prevPath
       << " stack=" << coll.size() << endl;
+  */
 
   BOOST_FOREACH (const SCFG::Stack::Coll::value_type &valPair, coll) {
     const SCFG::Word &ntSought = valPair.first;
@@ -248,15 +250,16 @@ void PhraseTableMemory::LookupGivenPath(
   size_t ptInd = GetPtInd();
 
   //cerr << "prevPath=" << &prevPath << " " << subPhrasePath.prevPath << endl;
-  cerr << "wordSought=" << wordSought
-      << " subPhrasePath=" << subPhrasePath
-      << " prevPath=" << &prevPath << " " << prevPath << endl;
+  cerr << "  wordSought=" << wordSought
+      << " prevPath=" << &prevPath << " " << prevPath
+      << " subPhrasePath=" << &subPhrasePath << " " << subPhrasePath
+      << endl;
 
   BOOST_FOREACH(const SCFG::ActiveChartEntry *entry, prevPath.GetActiveChart(ptInd).entries) {
     const ActiveChartEntryMem *entryCast = static_cast<const ActiveChartEntryMem*>(entry);
     const SCFGNODE *node = entryCast->node;
     UTIL_THROW_IF2(node == NULL, "node == NULL");
-    //cerr << "node=" << node << endl;
+    cerr << "    entry=" << entry;
 
     LookupGivenNode(*node, wordSought, subPhrasePath, isNT, path);
   }
@@ -270,7 +273,7 @@ void PhraseTableMemory::LookupGivenNode(const SCFGNODE &node,
 {
   size_t ptInd = GetPtInd();
   const SCFGNODE *nextNode = node.Find(wordSought);
-  cerr << " nextNode=" << nextNode << " ";
+  cerr << "    nextNode=" << nextNode << endl;
 
   if (nextNode) {
     // new entries
