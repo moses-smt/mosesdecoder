@@ -31,10 +31,23 @@ public:
     return *m_targetPhrase;
   }
 
+  //! vector of previous hypotheses this hypo is built on
+  const std::vector<const Hypothesis*> &GetPrevHypos() const {
+    return m_prevHypos;
+  }
+
+  //! get a particular previous hypos
+  const Hypothesis* GetPrevHypo(size_t pos) const {
+    return m_prevHypos[pos];
+  }
+
 protected:
   const SCFG::TargetPhraseImpl *m_targetPhrase;
   const InputPathBase *m_path;
   const SCFG::SymbolBind *m_symbolBind;
+
+  std::vector<const Hypothesis*> m_prevHypos; // always sorted by source position?
+
 };
 
 }
