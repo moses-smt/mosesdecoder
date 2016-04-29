@@ -8,6 +8,7 @@
 
 #include <cstddef>
 #include <vector>
+#include <istream>
 
 namespace Moses2
 {
@@ -97,6 +98,13 @@ enum SourceLabelOverlap {
 };
 
 
+std::istream& operator>>(std::istream &in, XmlInputType &value);
+std::istream& operator>>(std::istream &in, WordAlignmentSort &value);
+std::istream& operator>>(std::istream &in, S2TParsingAlgorithm &value);
+std::istream& operator>>(std::istream &in, SourceLabelOverlap &value);
+std::istream& operator>>(std::istream &in, SearchAlgorithm &value);
+std::istream& operator>>(std::istream &in, InputTypeEnum &value);
+ 
 /////////////////////////
 // MOSES2 only
 
