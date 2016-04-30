@@ -47,7 +47,7 @@ TargetPhraseImpl::TargetPhraseImpl(MemPool &pool,
     const PhraseTable &pt,
     const System &system,
     size_t size)
-:TargetPhrase(pool, pt, system, size)
+:Moses2::TargetPhrase<SCFG::Word>(pool, pt, system, size)
 ,m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 ,m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 
