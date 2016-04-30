@@ -35,7 +35,7 @@ class PhraseTableMemory: public PhraseTable
     :node(vnode)
     {}
 
-    ActiveChartEntryMem(const SCFG::InputPath *subPhrasePath, const SCFG::Word &word, const PhraseTableMemory::SCFGNODE &vnode)
+    ActiveChartEntryMem(const SCFG::InputPath &subPhrasePath, const SCFG::Word &word, const PhraseTableMemory::SCFGNODE &vnode)
     :ActiveChartEntry(subPhrasePath, word)
     ,node(vnode)
     {}
@@ -70,7 +70,8 @@ protected:
       const SCFG::InputPath &prevPath,
       const SCFG::Word &wordSought,
       const SCFG::InputPath &subPhrasePath) const;
-  void LookupGivenNode(const SCFGNODE  &node,
+  void LookupGivenNode(
+      const ActiveChartEntryMem &prevEntry,
       const SCFG::Word &wordSought,
       const SCFG::InputPath &subPhrasePath,
       SCFG::InputPath &path) const;
