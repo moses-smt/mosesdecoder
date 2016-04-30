@@ -175,7 +175,7 @@ void PhraseTableMemory::Lookup(MemPool &pool,
   //cerr << "path=" << path << endl;
   const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(endPos, 1);
 
-  LookupGivenPath(path, *prevPath, lastWord, subPhrasePath, false);
+  LookupGivenPath(path, *prevPath, lastWord, subPhrasePath);
 
   // NON-TERMINAL
   //const SCFG::InputPath *prefixPath = static_cast<const SCFG::InputPath*>(path.prefixPath);
@@ -235,7 +235,7 @@ void PhraseTableMemory::LookupNT(
   BOOST_FOREACH (const SCFG::Stack::Coll::value_type &valPair, coll) {
     const SCFG::Word &ntSought = valPair.first;
     //cerr << "ntSought=" << ntSought << ntSought.isNonTerminal << endl;
-    LookupGivenPath(path, prevPath, ntSought, subPhrasePath, true);
+    LookupGivenPath(path, prevPath, ntSought, subPhrasePath);
   }
 
 
@@ -245,8 +245,7 @@ void PhraseTableMemory::LookupGivenPath(
     SCFG::InputPath &path,
     const SCFG::InputPath &prevPath,
     const SCFG::Word &wordSought,
-    const SCFG::InputPath &subPhrasePath,
-    bool isNT) const
+    const SCFG::InputPath &subPhrasePath) const
 {
   size_t ptInd = GetPtInd();
 
@@ -263,14 +262,13 @@ void PhraseTableMemory::LookupGivenPath(
     UTIL_THROW_IF2(&node == NULL, "node == NULL");
     //cerr << "    entry=" << entry;
 
-    LookupGivenNode(node, wordSought, subPhrasePath, isNT, path);
+    LookupGivenNode(node, wordSought, subPhrasePath, path);
   }
 }
 
 void PhraseTableMemory::LookupGivenNode(const SCFGNODE &node,
     const SCFG::Word &wordSought,
     const SCFG::InputPath &subPhrasePath,
-    bool isNT,
     SCFG::InputPath &path) const
 {
   size_t ptInd = GetPtInd();

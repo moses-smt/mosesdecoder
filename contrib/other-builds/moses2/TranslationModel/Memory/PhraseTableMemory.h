@@ -69,12 +69,10 @@ protected:
       SCFG::InputPath &path,
       const SCFG::InputPath &prevPath,
       const SCFG::Word &wordSought,
-      const SCFG::InputPath &subPhrasePath,
-      bool isNT) const;
+      const SCFG::InputPath &subPhrasePath) const;
   void LookupGivenNode(const SCFGNODE  &node,
       const SCFG::Word &wordSought,
       const SCFG::InputPath &subPhrasePath,
-      bool isNT,
       SCFG::InputPath &path) const;
 
   void LookupNT(
