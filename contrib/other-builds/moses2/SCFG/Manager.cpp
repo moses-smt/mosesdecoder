@@ -10,7 +10,7 @@
 #include "Manager.h"
 #include "InputPath.h"
 #include "Hypothesis.h"
-//#include "Sentence.h"
+#include "TargetPhraseImpl.h"
 #include "Sentence.h"
 #include "../System.h"
 #include "../TranslationModel/PhraseTable.h"
@@ -63,7 +63,7 @@ void Manager::Decode()
     for (int phraseSize = 1; phraseSize < (inputSize - startPos + 1); ++phraseSize) {
       SubPhrase<SCFG::Word> sub = sentence.GetSubPhrase(startPos, phraseSize);
       InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, phraseSize);
-      //cerr << endl << "path=" << path << endl;
+      cerr << endl << "path=" << path << endl;
 
       Stack &stack = m_stacks.GetStack(startPos, phraseSize);
 
@@ -138,11 +138,12 @@ void Manager::Decode(InputPath &path, Stack &stack)
     const SCFG::SymbolBind &symbolBind = iterOuter->first;
 
     const SCFG::TargetPhrases &tps = iterOuter->second;
-    //cerr << "symbolBind=" << symbolBind << " " << tps.GetSize() << endl;
+    cerr << "symbolBind=" << symbolBind << " " << tps.GetSize() << endl;
 
     SCFG::TargetPhrases::const_iterator iter;
     for (iter = tps.begin(); iter != tps.end(); ++iter) {
       const SCFG::TargetPhraseImpl &tp = **iter;
+      cerr << "tp=" << tp << endl;
       SCFG::Hypothesis *hypo = new SCFG::Hypothesis(GetPool(), system);
       hypo->Init(*this, path, symbolBind, tp);
 
