@@ -117,7 +117,7 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
   const System &system = mgr.system;
 
   // terminal
-  const Word &lastWord = path.subPhrase.Back();
+  const SCFG::Word &lastWord = path.subPhrase.Back();
   //cerr << "UnknownWordPenalty lastWord=" << lastWord << endl;
 
   if (path.range.GetNumWordsCovered() == 1) {
@@ -133,7 +133,7 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
     const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(endPos, 1);
 
     SCFG::SymbolBind symbolBind;
-    symbolBind.Add(subPhrasePath.range, false);
+    symbolBind.Add(subPhrasePath.range, lastWord);
 
     path.AddTargetPhrase(*this, symbolBind, tp);
   }

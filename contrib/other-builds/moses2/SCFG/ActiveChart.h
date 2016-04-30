@@ -8,8 +8,8 @@ namespace Moses2
 {
 namespace SCFG
 {
-
 class InputPath;
+class Word;
 
 ////////////////////////////////////////////////////////////////////////////
 //! The range covered by each symbol in the source
@@ -19,13 +19,13 @@ class SymbolBind
   friend std::ostream& operator<<(std::ostream &, const SymbolBind &);
 
 public:
-  typedef std::pair<const Range*, bool> Element;
+  typedef std::pair<const Range*, const SCFG::Word*> Element;
     // range, isNT
   std::vector<Element> coll;
 
-  void Add(const Range &range, bool isNT)
+  void Add(const Range &range, const SCFG::Word &word)
   {
-    Element ele(&range, isNT);
+    Element ele(&range, &word);
     coll.push_back(ele);
   }
 
@@ -47,7 +47,10 @@ class ActiveChartEntry
 public:
   SymbolBind symbolBinds;
 
-  ActiveChartEntry(const SCFG::InputPath *subPhrasePath, bool isNT);
+  ActiveChartEntry()
+  {}
+
+  ActiveChartEntry(const SCFG::InputPath *subPhrasePath, const SCFG::Word &word);
 
 protected:
 };

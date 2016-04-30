@@ -29,10 +29,14 @@ class PhraseTableMemory: public PhraseTable
   class ActiveChartEntryMem : public SCFG::ActiveChartEntry
   {
   public:
-    const PhraseTableMemory::SCFGNODE *node;
+    const PhraseTableMemory::SCFGNODE &node;
 
-    ActiveChartEntryMem(const SCFG::InputPath *subPhrasePath, bool isNT, const PhraseTableMemory::SCFGNODE *vnode)
-    :ActiveChartEntry(subPhrasePath, isNT)
+    ActiveChartEntryMem(const PhraseTableMemory::SCFGNODE &vnode)
+    :node(vnode)
+    {}
+
+    ActiveChartEntryMem(const SCFG::InputPath *subPhrasePath, const SCFG::Word &word, const PhraseTableMemory::SCFGNODE &vnode)
+    :ActiveChartEntry(subPhrasePath, word)
     ,node(vnode)
     {}
   };
