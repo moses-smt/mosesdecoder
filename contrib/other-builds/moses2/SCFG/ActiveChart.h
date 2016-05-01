@@ -14,26 +14,43 @@ class Word;
 ////////////////////////////////////////////////////////////////////////////
 //! The range covered by each symbol in the source
 //! Terminals will cover only 1 word, NT can cover multiple words
+class SymbolBindElement
+{
+public:
+  const Range *range;
+  const SCFG::Word *word;
+
+  SymbolBindElement(const Range *range, const SCFG::Word *word)
+  :range(range)
+  ,word(word)
+  {}
+
+  bool operator==(const SymbolBindElement &compare) const
+  {
+    bool ret = range == compare.range
+            && word == compare.word;
+    return ret;
+  }
+};
+
+size_t hash_value(const SymbolBindElement &obj);
+
+////////////////////////////////////////////////////////////////////////////
 class SymbolBind
 {
   friend std::ostream& operator<<(std::ostream &, const SymbolBind &);
 
 public:
-  typedef std::pair<const Range*, const SCFG::Word*> Element;
-    // range, isNT
-  std::vector<Element> coll;
+  std::vector<SymbolBindElement> coll;
 
   void Add(const Range &range, const SCFG::Word &word)
   {
-    Element ele(&range, &word);
+    SymbolBindElement ele(&range, &word);
     coll.push_back(ele);
   }
 
   bool operator==(const SymbolBind &compare) const
-  {
-    return coll == compare.coll;
-  }
-
+  {  return coll == compare.coll; }
 };
 
 inline size_t hash_value(const SymbolBind &obj)

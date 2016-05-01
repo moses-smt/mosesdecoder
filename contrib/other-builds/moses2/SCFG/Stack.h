@@ -22,13 +22,12 @@ public:
   Stack(const Manager &mgr);
 
   Coll &GetColl()
-  {
-    return m_coll;
-  }
+  {  return m_coll; }
+
   const Coll &GetColl() const
-  {
-    return m_coll;
-  }
+  {  return m_coll; }
+
+  const Moses2::HypothesisColl *GetColl(SCFG::Word &nt) const;
 
   size_t GetSize() const;
 

@@ -54,5 +54,17 @@ size_t Stack::GetSize() const
   return ret;
 }
 
+const Moses2::HypothesisColl *Stack::GetColl(SCFG::Word &nt) const
+{
+  assert(nt.isNonTerminal);
+  Coll::const_iterator iter = m_coll.find(nt);
+  if (iter != m_coll.end()) {
+    return NULL;
+  }
+  else {
+    return iter->second;
+  }
+}
+
 }
 }
