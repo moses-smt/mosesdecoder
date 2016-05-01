@@ -62,7 +62,7 @@ detruecaser = $moses-script-dir/recaser/detruecase.perl
 
 ### generic parallelizer for cluster and multi-core machines
 # you may specify a script that allows the parallel execution
-# parallizable steps (see meta file). you also need specify 
+# parallizableope steps (see meta file). you also need specify 
 # the number of jobs (cluster) or cores (multicore)
 #
 #generic-parallelizer = $moses-script-dir/ems/support/generic-parallelizer.perl
@@ -389,7 +389,7 @@ alignment-symmetrization-method = grow-diag-final-and
 # 
 #operation-sequence-model = "yes"
 #operation-sequence-model-order = 5
-#operation-sequence-model-settings = "-lmplz '$moses-src-dir/bin/lmplz -S 40% -T $working-dir/model/tmp'"
+#operation-sequence-model-settings = "-lmplz '$moses-src-dir/bin/lmplz -S 40% '"
 #
 # OR if you want to use with SRILM
 #
