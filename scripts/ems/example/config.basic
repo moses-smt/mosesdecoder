@@ -62,7 +62,7 @@ detruecaser = $moses-script-dir/recaser/detruecase.perl
 
 ### generic parallelizer for cluster and multi-core machines
 # you may specify a script that allows the parallel execution
-# parallizableope steps (see meta file). you also need specify 
+# parallizable steps (see meta file). you also need specify 
 # the number of jobs (cluster) or cores (multicore)
 #
 #generic-parallelizer = $moses-script-dir/ems/support/generic-parallelizer.perl
