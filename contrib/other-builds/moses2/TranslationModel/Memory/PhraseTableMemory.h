@@ -36,12 +36,9 @@ class PhraseTableMemory: public PhraseTable
     {}
 
     ActiveChartEntryMem(
-        const SCFG::InputPath &subPhrasePath,
-        const SCFG::Word &word,
-        const Moses2::HypothesisColl *hypos,
         const PhraseTableMemory::SCFGNODE &vnode,
         const ActiveChartEntry &prevEntry)
-    :ActiveChartEntry(subPhrasePath, word, hypos, prevEntry)
+    :ActiveChartEntry(prevEntry)
     ,node(vnode)
     {}
   };

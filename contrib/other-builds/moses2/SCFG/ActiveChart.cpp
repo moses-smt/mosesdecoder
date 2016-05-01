@@ -28,16 +28,6 @@ size_t hash_value(const SymbolBindElement &obj)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-ActiveChartEntry::ActiveChartEntry(
-    const SCFG::InputPath &subPhrasePath,
-    const SCFG::Word &word,
-    const Moses2::HypothesisColl *hypos,
-    const ActiveChartEntry &prevEntry)
-:symbolBinds(prevEntry.symbolBinds)
-{
-  symbolBinds.Add(subPhrasePath.range, word, hypos);
-}
-
 std::ostream& operator<<(std::ostream &out, const SymbolBind &obj)
 {
   BOOST_FOREACH(const SymbolBindElement &ele, obj.coll) {

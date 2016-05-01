@@ -67,11 +67,9 @@ public:
   ActiveChartEntry()
   {}
 
-  ActiveChartEntry(
-      const SCFG::InputPath &subPhrasePath,
-      const SCFG::Word &word,
-      const Moses2::HypothesisColl *hypos,
-      const ActiveChartEntry &prevEntry);
+  ActiveChartEntry(const ActiveChartEntry &prevEntry)
+  :symbolBinds(prevEntry.symbolBinds)
+  {}
 
 protected:
 };
