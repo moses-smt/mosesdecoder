@@ -38,9 +38,10 @@ class PhraseTableMemory: public PhraseTable
     ActiveChartEntryMem(
         const SCFG::InputPath &subPhrasePath,
         const SCFG::Word &word,
+        const Moses2::HypothesisColl *hypos,
         const PhraseTableMemory::SCFGNODE &vnode,
         const ActiveChartEntry &prevEntry)
-    :ActiveChartEntry(subPhrasePath, word, prevEntry)
+    :ActiveChartEntry(subPhrasePath, word, hypos, prevEntry)
     ,node(vnode)
     {}
   };
@@ -73,10 +74,12 @@ protected:
       SCFG::InputPath &path,
       const SCFG::InputPath &prevPath,
       const SCFG::Word &wordSought,
+      const Moses2::HypothesisColl *hypos,
       const SCFG::InputPath &subPhrasePath) const;
   void LookupGivenNode(
       const ActiveChartEntryMem &prevEntry,
       const SCFG::Word &wordSought,
+      const Moses2::HypothesisColl *hypos,
       const SCFG::InputPath &subPhrasePath,
       SCFG::InputPath &path) const;
 

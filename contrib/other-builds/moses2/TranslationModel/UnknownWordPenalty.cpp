@@ -133,7 +133,7 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
     const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(endPos, 1);
 
     SCFG::SymbolBind symbolBind;
-    symbolBind.Add(subPhrasePath.range, lastWord);
+    symbolBind.Add(subPhrasePath.range, lastWord, NULL);
 
     path.AddTargetPhrase(*this, symbolBind, tp);
   }

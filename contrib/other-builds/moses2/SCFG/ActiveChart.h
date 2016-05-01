@@ -6,6 +6,8 @@
 
 namespace Moses2
 {
+class HypothesisColl;
+
 namespace SCFG
 {
 class InputPath;
@@ -19,11 +21,9 @@ class SymbolBindElement
 public:
   const Range *range;
   const SCFG::Word *word;
+  const Moses2::HypothesisColl *hypos;
 
-  SymbolBindElement(const Range *range, const SCFG::Word *word)
-  :range(range)
-  ,word(word)
-  {}
+  SymbolBindElement(const Range *range, const SCFG::Word *word, const Moses2::HypothesisColl *hypos);
 
   bool operator==(const SymbolBindElement &compare) const
   {
@@ -43,9 +43,9 @@ class SymbolBind
 public:
   std::vector<SymbolBindElement> coll;
 
-  void Add(const Range &range, const SCFG::Word &word)
+  void Add(const Range &range, const SCFG::Word &word, const Moses2::HypothesisColl *hypos)
   {
-    SymbolBindElement ele(&range, &word);
+    SymbolBindElement ele(&range, &word, hypos);
     coll.push_back(ele);
   }
 
@@ -67,7 +67,11 @@ public:
   ActiveChartEntry()
   {}
 
-  ActiveChartEntry(const SCFG::InputPath &subPhrasePath, const SCFG::Word &word, const ActiveChartEntry &prevEntry);
+  ActiveChartEntry(
+      const SCFG::InputPath &subPhrasePath,
+      const SCFG::Word &word,
+      const Moses2::HypothesisColl *hypos,
+      const ActiveChartEntry &prevEntry);
 
 protected:
 };

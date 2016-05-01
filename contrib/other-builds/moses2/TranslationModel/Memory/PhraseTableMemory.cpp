@@ -175,7 +175,7 @@ void PhraseTableMemory::Lookup(MemPool &pool,
   //cerr << "path=" << path << endl;
   const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(endPos, 1);
 
-  LookupGivenPath(path, *prevPath, lastWord, subPhrasePath);
+  LookupGivenPath(path, *prevPath, lastWord, NULL, subPhrasePath);
 
   // NON-TERMINAL
   //const SCFG::InputPath *prefixPath = static_cast<const SCFG::InputPath*>(path.prefixPath);
@@ -234,8 +234,9 @@ void PhraseTableMemory::LookupNT(
 
   BOOST_FOREACH (const SCFG::Stack::Coll::value_type &valPair, coll) {
     const SCFG::Word &ntSought = valPair.first;
+    const Moses2::HypothesisColl *hypos = valPair.second;
     //cerr << "ntSought=" << ntSought << ntSought.isNonTerminal << endl;
-    LookupGivenPath(path, prevPath, ntSought, subPhrasePath);
+    LookupGivenPath(path, prevPath, ntSought, hypos, subPhrasePath);
   }
 
 
@@ -245,6 +246,7 @@ void PhraseTableMemory::LookupGivenPath(
     SCFG::InputPath &path,
     const SCFG::InputPath &prevPath,
     const SCFG::Word &wordSought,
+    const Moses2::HypothesisColl *hypos,
     const SCFG::InputPath &subPhrasePath) const
 {
   size_t ptInd = GetPtInd();
@@ -260,13 +262,14 @@ void PhraseTableMemory::LookupGivenPath(
     const ActiveChartEntryMem *entryCast = static_cast<const ActiveChartEntryMem*>(entry);
     //cerr << "    entry=" << entry;
 
-    LookupGivenNode(*entryCast, wordSought, subPhrasePath, path);
+    LookupGivenNode(*entryCast, wordSought, hypos, subPhrasePath, path);
   }
 }
 
 void PhraseTableMemory::LookupGivenNode(
     const ActiveChartEntryMem &prevEntry,
     const SCFG::Word &wordSought,
+    const Moses2::HypothesisColl *hypos,
     const SCFG::InputPath &subPhrasePath,
     SCFG::InputPath &path) const
 {
@@ -291,7 +294,7 @@ void PhraseTableMemory::LookupGivenNode(
 
   if (nextNode) {
     // new entries
-    ActiveChartEntryMem *chartEntry = new ActiveChartEntryMem(subPhrasePath, wordSought, *nextNode, prevEntry);
+    ActiveChartEntryMem *chartEntry = new ActiveChartEntryMem(subPhrasePath, wordSought, hypos, *nextNode, prevEntry);
     path.AddActiveChartEntry(ptInd, chartEntry);
 
     const SCFG::SymbolBind &symbolBind = chartEntry->symbolBinds;
