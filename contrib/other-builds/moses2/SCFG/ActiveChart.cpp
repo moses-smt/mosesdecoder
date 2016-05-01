@@ -7,7 +7,11 @@ namespace Moses2
 namespace SCFG
 {
 
-ActiveChartEntry::ActiveChartEntry(const SCFG::InputPath &subPhrasePath, const SCFG::Word &word)
+ActiveChartEntry::ActiveChartEntry(
+    const SCFG::InputPath &subPhrasePath,
+    const SCFG::Word &word,
+    const ActiveChartEntry &prevEntry)
+:symbolBinds(prevEntry.symbolBinds)
 {
   symbolBinds.Add(subPhrasePath.range, word);
 }
@@ -15,7 +19,7 @@ ActiveChartEntry::ActiveChartEntry(const SCFG::InputPath &subPhrasePath, const S
 std::ostream& operator<<(std::ostream &out, const SymbolBind &obj)
 {
   BOOST_FOREACH(const SymbolBind::Element &ele, obj.coll) {
-    out << "("<< *ele.first << " " << *ele.second << ") ";
+    out << "("<< *ele.first << *ele.second << ") ";
   }
 
   return out;

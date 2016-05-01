@@ -50,7 +50,7 @@ public:
   ActiveChartEntry()
   {}
 
-  ActiveChartEntry(const SCFG::InputPath &subPhrasePath, const SCFG::Word &word);
+  ActiveChartEntry(const SCFG::InputPath &subPhrasePath, const SCFG::Word &word, const ActiveChartEntry &prevEntry);
 
 protected:
 };

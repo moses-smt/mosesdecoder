@@ -291,7 +291,7 @@ void PhraseTableMemory::LookupGivenNode(
 
   if (nextNode) {
     // new entries
-    ActiveChartEntryMem *chartEntry = new ActiveChartEntryMem(subPhrasePath, wordSought, *nextNode);
+    ActiveChartEntryMem *chartEntry = new ActiveChartEntryMem(subPhrasePath, wordSought, *nextNode, prevEntry);
     path.AddActiveChartEntry(ptInd, chartEntry);
 
     const SCFG::SymbolBind &symbolBind = chartEntry->symbolBinds;

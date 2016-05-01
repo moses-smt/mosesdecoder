@@ -138,7 +138,7 @@ void Manager::Decode(InputPath &path, Stack &stack)
     const SCFG::SymbolBind &symbolBind = iterOuter->first;
 
     const SCFG::TargetPhrases &tps = iterOuter->second;
-    cerr << "symbolBind=" << symbolBind << " " << tps.GetSize() << endl;
+    cerr << "symbolBind=" << symbolBind << " tps=" << tps.GetSize() << endl;
 
     SCFG::TargetPhrases::const_iterator iter;
     for (iter = tps.begin(); iter != tps.end(); ++iter) {
