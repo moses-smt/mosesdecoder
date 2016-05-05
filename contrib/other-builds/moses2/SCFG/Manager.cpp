@@ -131,8 +131,6 @@ void Manager::LookupUnary(InputPath &path)
 
 void Manager::Decode(InputPath &path, Stack &stack)
 {
-  Recycler<HypothesisBase*> &hypoRecycler = GetHypoRecycle();
-
   boost::unordered_map<SCFG::SymbolBind, SCFG::TargetPhrases>::const_iterator iterOuter;
   for (iterOuter = path.targetPhrases.begin(); iterOuter != path.targetPhrases.end(); ++iterOuter) {
     const SCFG::SymbolBind &symbolBind = iterOuter->first;
@@ -144,13 +142,32 @@ void Manager::Decode(InputPath &path, Stack &stack)
     for (iter = tps.begin(); iter != tps.end(); ++iter) {
       const SCFG::TargetPhraseImpl &tp = **iter;
       cerr << "tp=" << tp << endl;
-      SCFG::Hypothesis *hypo = new SCFG::Hypothesis(GetPool(), system);
-      hypo->Init(*this, path, symbolBind, tp);
-
-      StackAdd added = stack.Add(hypo, hypoRecycler, arcLists);
-      //cerr << "added=" << added.added << " " << (const Phrase&) tp << endl;
+      ExpandHypo(path, symbolBind, tp, stack);
     }
   }
+}
+
+void Manager::ExpandHypo(
+    const InputPath &path,
+    const SCFG::SymbolBind &symbolBind,
+    const SCFG::TargetPhraseImpl &tp,
+    Stack &stack)
+{
+  Recycler<HypothesisBase*> &hypoRecycler = GetHypoRecycle();
+
+  vector<size_t> prevHyposIndices(symbolBind.numNT, 0);
+  size_t currInd = 0;
+
+  do {
+    SCFG::Hypothesis *hypo = new SCFG::Hypothesis(GetPool(), system);
+    hypo->Init(*this, path, symbolBind, tp, prevHyposIndices);
+
+    StackAdd added = stack.Add(hypo, hypoRecycler, arcLists);
+    //cerr << "added=" << added.added << " " << (const Phrase&) tp << endl;
+
+
+  } while (false);
+
 }
 
 }

@@ -1,5 +1,5 @@
 #pragma once
-
+#include <vector>
 #include "../HypothesisBase.h"
 
 namespace Moses2
@@ -16,12 +16,14 @@ class Hypothesis: public HypothesisBase
 {
 
 public:
-  Hypothesis(MemPool &pool, const System &system);
+  Hypothesis(MemPool &pool,
+      const System &system);
 
   void Init(SCFG::Manager &mgr,
       const InputPathBase &path,
       const SCFG::SymbolBind &symbolBind,
-      const SCFG::TargetPhraseImpl &tp);
+      const SCFG::TargetPhraseImpl &tp,
+      const std::vector<size_t> &prevHyposIndices);
 
   virtual SCORE GetFutureScore() const;
   virtual void EvaluateWhenApplied();
@@ -37,8 +39,8 @@ public:
   }
 
   //! get a particular previous hypos
-  const Hypothesis* GetPrevHypo(size_t pos) const {
-    return m_prevHypos[pos];
+  const Hypothesis* GetPrevHypo(size_t ind) const {
+    return m_prevHypos[ind];
   }
 
 protected:

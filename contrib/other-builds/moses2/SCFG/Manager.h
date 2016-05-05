@@ -20,6 +20,8 @@ namespace Moses2
 
 namespace SCFG
 {
+class SymbolBind;
+class TargetPhraseImpl;
 
 class Manager: public Moses2::ManagerBase
 {
@@ -43,6 +45,13 @@ protected:
   void Lookup(InputPath &path);
   void LookupUnary(InputPath &path);
   void Decode(InputPath &path, Stack &stack);
+
+  void ExpandHypo(
+      const InputPath &path,
+      const SCFG::SymbolBind &symbolBind,
+      const SCFG::TargetPhraseImpl &tp,
+      Stack &stack);
+
 
 };
 

@@ -42,12 +42,13 @@ class SymbolBind
 
 public:
   std::vector<SymbolBindElement> coll;
+  size_t numNT;
 
-  void Add(const Range &range, const SCFG::Word &word, const Moses2::HypothesisColl *hypos)
-  {
-    SymbolBindElement ele(&range, &word, hypos);
-    coll.push_back(ele);
-  }
+  SymbolBind()
+  :numNT(0)
+  {}
+
+  void Add(const Range &range, const SCFG::Word &word, const Moses2::HypothesisColl *hypos);
 
   bool operator==(const SymbolBind &compare) const
   {  return coll == compare.coll; }

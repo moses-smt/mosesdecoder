@@ -28,6 +28,16 @@ size_t hash_value(const SymbolBindElement &obj)
 }
 
 ////////////////////////////////////////////////////////////////////////////
+void SymbolBind::Add(const Range &range, const SCFG::Word &word, const Moses2::HypothesisColl *hypos)
+{
+  SymbolBindElement ele(&range, &word, hypos);
+  coll.push_back(ele);
+
+  if (word.isNonTerminal) {
+    ++numNT;
+  }
+}
+
 std::ostream& operator<<(std::ostream &out, const SymbolBind &obj)
 {
   BOOST_FOREACH(const SymbolBindElement &ele, obj.coll) {
