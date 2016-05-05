@@ -59,7 +59,7 @@ my $help=0;
 my $dbg=0;
 my $jobs=4;
 my $cache_model=undef;
-my $mosescmd="$ENV{MOSESBIN}/moses"; #decoder in use
+my $mosescmd="$ENV{MOSESBIN}/moses" if defined $ENV{"MOSESBIN"}; #decoder in use
 my $inputlist=undef;
 my $inputfile=undef;
 my $inputtype=0;
@@ -276,7 +276,7 @@ sub getNbestParameters(){
 #get parameters for search graph computation (possibly from configuration file)
 sub getSearchGraphParameters(){
   if (!$searchgraphlist){
-    open (CFG, "$cfgfile");
+    open (CFG, $cfgfile) or die "Can't read '$cfgfile'";
     while (chomp($_=<CFG>)){
       if (/^\[output-search-graph\]/ || /^\[osg\]/){
 	my $tmp;
@@ -299,7 +299,7 @@ sub getSearchGraphParameters(){
 #get parameters for word graph computation (possibly from configuration file)
 sub getWordGraphParameters(){
   if (!$wordgraphlist){
-    open (CFG, "$cfgfile");
+    open (CFG, $cfgfile) or die "Can't read '$cfgfile'";
     while (chomp($_=<CFG>)){
       if (/^\[output-word-graph\]/ || /^\[owg\]/){
         my $tmp;
@@ -843,12 +843,14 @@ sub concatenate_nbest(){
 
 #computing the length of each input file
     my @in=();
-    open (IN, "${inputfile}.${splitpfx}${idx}.trans");
+    open (IN, "${inputfile}.${splitpfx}${idx}.trans")
+      or die "Failed to open '${inputfile}.${splitpfx}${idx}.trans'";
     @in=<IN>;
     close(IN);
     $inplength{$idx} = scalar(@in);
 
-    open (IN, "${nbestfile}.${splitpfx}${idx}");
+    open (IN, "${nbestfile}.${splitpfx}${idx}")
+      or die "Failed to open '${nbestfile}.${splitpfx}${idx}'";
     while (<IN>){
       my ($code,@extra)=split(/\|\|\|/,$_);
       $code += $offset;
@@ -1078,7 +1080,7 @@ sub safesystem {
 sub getPwdCmd(){
 	my $pwdcmd="pwd";
 	my $a;
-	chomp($a=`which pawd 2> /dev/null | head -1 | awk '{print $1}'`);
+	chomp($a=`which pawd 2> /dev/null | head -1 | awk '{print \$1}'`);
 	if ($a && -e $a){	$pwdcmd=$a;	}
 	return $pwdcmd;
 }
