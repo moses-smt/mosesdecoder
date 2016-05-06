@@ -19,8 +19,8 @@ class Word: public Moses2::Word
 public:
   bool isNonTerminal;
 
-  Word() {}
-  Word(const Word &copy);
+  explicit Word() {}
+  explicit Word(const SCFG::Word &copy);
 
   void CreateFromString(FactorCollection &vocab,
       const System &system,
@@ -28,7 +28,7 @@ public:
 
   bool operator==(const SCFG::Word &compare) const
   {
-    int cmp = Word::Compare(compare);
+    int cmp = Moses2::Word::Compare(compare);
     if (cmp == 0 && isNonTerminal == compare.isNonTerminal) {
       return true;
     }

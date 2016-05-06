@@ -14,7 +14,7 @@ namespace Moses2
 {
 namespace SCFG
 {
-Word::Word(const Word &copy)
+Word::Word(const SCFG::Word &copy)
 :Moses2::Word(copy)
 ,isNonTerminal(copy.isNonTerminal)
 {

@@ -19,8 +19,8 @@ class Word
 {
   friend std::ostream& operator<<(std::ostream &, const Word &);
 public:
-  Word();
-  Word(const Word &copy);
+  explicit Word();
+  explicit Word(const Word &copy);
 
   virtual ~Word();
 
