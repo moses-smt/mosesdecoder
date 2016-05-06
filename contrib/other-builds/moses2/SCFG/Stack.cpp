@@ -66,5 +66,23 @@ const Moses2::HypothesisColl *Stack::GetColl(SCFG::Word &nt) const
   }
 }
 
+const Hypothesis *Stack::GetBestHypo(
+    const Manager &mgr,
+    ArcLists &arcLists) const
+{
+  const Hypothesis *ret = NULL;
+  BOOST_FOREACH (const Coll::value_type &valPair, m_coll) {
+    Moses2::HypothesisColl &hypos = *valPair.second;
+    const Hypotheses &sortedHypos = hypos.GetSortedAndPruneHypos(mgr, arcLists);
+    const Hypothesis *bestHypoColl = static_cast<const Hypothesis*>(sortedHypos[0]);
+
+    if (ret == NULL || ret->GetFutureScore() < bestHypoColl->GetFutureScore()) {
+      ret = bestHypoColl;
+    }
+  }
+
+  return ret;
+}
+
 }
 }

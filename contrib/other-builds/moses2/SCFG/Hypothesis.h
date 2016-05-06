@@ -14,6 +14,7 @@ class SymbolBind;
 
 class Hypothesis: public HypothesisBase
 {
+  friend std::ostream& operator<<(std::ostream &, const Hypothesis &);
 
 public:
   Hypothesis(MemPool &pool,
@@ -29,9 +30,7 @@ public:
   virtual void EvaluateWhenApplied();
 
   const SCFG::TargetPhraseImpl &GetTargetPhrase() const
-  {
-    return *m_targetPhrase;
-  }
+  {  return *m_targetPhrase; }
 
   //! vector of previous hypotheses this hypo is built on
   const std::vector<const Hypothesis*> &GetPrevHypos() const {
@@ -42,6 +41,8 @@ public:
   const Hypothesis* GetPrevHypo(size_t ind) const {
     return m_prevHypos[ind];
   }
+
+  void OutputToStream(std::ostream &out) const;
 
 protected:
   const SCFG::TargetPhraseImpl *m_targetPhrase;

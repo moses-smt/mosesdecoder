@@ -11,6 +11,7 @@
 #include "Hypothesis.h"
 #include "Manager.h"
 #include "Sentence.h"
+#include "TargetPhraseImpl.h"
 #include "../InputPathBase.h"
 #include "../System.h"
 #include "../Scores.h"

@@ -2,6 +2,7 @@
 #include "Hypothesis.h"
 #include "Manager.h"
 #include "ActiveChart.h"
+#include "TargetPhraseImpl.h"
 #include "../System.h"
 #include "../Scores.h"
 #include "../FF/StatefulFeatureFunction.h"
@@ -67,6 +68,34 @@ void Hypothesis::EvaluateWhenApplied()
 
 }
 
+void Hypothesis::OutputToStream(std::ostream &out) const
+{
+  const SCFG::TargetPhraseImpl &tp = GetTargetPhrase();
+  cerr << "tp=" << tp.GetSize() << tp << endl;
+
+  for (size_t pos = 0; pos < tp.GetSize(); ++pos) {
+    const SCFG::Word &word = tp[pos];
+    if (word.isNonTerminal) {
+      cerr << "is nt" << endl;
+      // non-term. fill out with prev hypo
+      size_t nonTermInd = tp.GetAlignNonTerm().GetNonTermIndexMap()[pos];
+      const Hypothesis *prevHypo = m_prevHypos[nonTermInd];
+      prevHypo->OutputToStream(out);
+    }
+    else {
+      cerr << "not nt" << endl;
+      out << word << " ";
+    }
+  }
 }
+
+std::ostream& operator<<(std::ostream &out, const Hypothesis &obj)
+{
+  out << &obj;
+
+  return out;
+}
+
+} // namespaces
 }
 

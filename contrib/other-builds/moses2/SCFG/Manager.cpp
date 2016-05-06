@@ -220,6 +220,28 @@ void Manager::ExpandHypo(
   }
 }
 
+std::string Manager::OutputBest() const
+{
+  stringstream out;
+
+  const Stack &lastStack = m_stacks.GetLastStack();
+  const Hypothesis *bestHypo = lastStack.GetBestHypo(*this, const_cast<ArcLists&>(arcLists));
+
+  if (bestHypo) {
+    bestHypo->OutputToStream(out);
+    cerr << "BEST TRANSLATION: " << *bestHypo << endl;
+  }
+  else {
+    cerr << "NO TRANSLATION " << m_input->GetTranslationId() << endl;
+  }
+
+  out << "\n";
+  cerr << "out=" << out.str();
+
+  return out.str();
+  //cerr << endl;
 }
+
+} // namespace
 }
 

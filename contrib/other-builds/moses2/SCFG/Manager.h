@@ -32,7 +32,7 @@ public:
 
   virtual ~Manager();
   void Decode();
-  std::string OutputBest() const {}
+  std::string OutputBest() const;
   std::string OutputNBest() {}
 
   const InputPaths &GetInputPaths() const

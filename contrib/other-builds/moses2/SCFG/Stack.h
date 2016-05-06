@@ -34,6 +34,10 @@ public:
   StackAdd Add(SCFG::Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
       ArcLists &arcLists);
 
+  const Hypothesis *GetBestHypo(
+      const Manager &mgr,
+      ArcLists &arcLists) const;
+
 protected:
   const Manager &m_mgr;
   Coll m_coll;

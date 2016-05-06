@@ -23,6 +23,9 @@ public:
 
   void OutputStacks() const;
 
+  const Stack &GetLastStack() const
+  { return GetStack(0, m_cells.size()); }
+
 protected:
   std::vector<std::vector<Stack*> > m_cells;
 
