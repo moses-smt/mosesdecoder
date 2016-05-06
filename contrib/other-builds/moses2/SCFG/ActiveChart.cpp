@@ -4,6 +4,8 @@
 #include "InputPath.h"
 #include "Word.h"
 
+using namespace std;
+
 namespace Moses2
 {
 namespace SCFG
@@ -36,6 +38,22 @@ void SymbolBind::Add(const Range &range, const SCFG::Word &word, const Moses2::H
   if (word.isNonTerminal) {
     ++numNT;
   }
+}
+
+std::vector<const SymbolBindElement*> SymbolBind::GetNTElements() const
+{
+  std::vector<const SymbolBindElement*> ret;
+
+  for (size_t i = 0; i < coll.size(); ++i) {
+    const SymbolBindElement &ele = coll[i];
+    //cerr << "ele=" << ele.word->isNonTerminal << " " << ele.hypos << endl;
+
+    if (ele.word->isNonTerminal) {
+      ret.push_back(&ele);
+    }
+  }
+
+  return ret;
 }
 
 std::ostream& operator<<(std::ostream &out, const SymbolBind &obj)

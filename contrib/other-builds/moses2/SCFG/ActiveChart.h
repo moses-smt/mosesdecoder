@@ -48,6 +48,8 @@ public:
   :numNT(0)
   {}
 
+  std::vector<const SymbolBindElement*> GetNTElements() const;
+
   void Add(const Range &range, const SCFG::Word &word, const Moses2::HypothesisColl *hypos);
 
   bool operator==(const SymbolBind &compare) const

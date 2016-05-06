@@ -22,6 +22,7 @@ namespace SCFG
 {
 class SymbolBind;
 class TargetPhraseImpl;
+class SymbolBindElement;
 
 class Manager: public Moses2::ManagerBase
 {
@@ -52,6 +53,10 @@ protected:
       const SCFG::TargetPhraseImpl &tp,
       Stack &stack);
 
+  bool IncrPrevHypoIndices(
+      std::vector<size_t> &prevHyposIndices,
+      size_t ind,
+      const std::vector<const SymbolBindElement*> ntEles);
 
 };
 

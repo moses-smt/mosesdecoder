@@ -5,12 +5,14 @@
  *      Author: hieu
  */
 #include <boost/foreach.hpp>
+#include <cstdlib>
 #include <vector>
 #include <sstream>
 #include "Manager.h"
 #include "InputPath.h"
 #include "Hypothesis.h"
 #include "TargetPhraseImpl.h"
+#include "ActiveChart.h"
 #include "Sentence.h"
 #include "../System.h"
 #include "../TranslationModel/PhraseTable.h"
@@ -147,6 +149,52 @@ void Manager::Decode(InputPath &path, Stack &stack)
   }
 }
 
+bool Manager::IncrPrevHypoIndices(
+    vector<size_t> &prevHyposIndices,
+    size_t ind,
+    const std::vector<const SymbolBindElement*> ntEles)
+{
+  if (ntEles.size() == 0) {
+    // no nt. Do the 1st
+    return ind ? false : true;
+  }
+
+  size_t numHypos = 0;
+
+  cerr << "IncrPrevHypoIndices:" << ind << " " << ntEles.size() << " ";
+  for (size_t i = 0; i < ntEles.size() - 1; ++i) {
+    const SymbolBindElement &ele = *ntEles[i];
+    Hypotheses &hypos = ele.hypos->GetSortedAndPruneHypos(*this, arcLists);
+    numHypos = hypos.size();
+
+    std::div_t divRet = std::div((int)ind, (int)numHypos);
+    ind = divRet.quot;
+
+    size_t hypoInd = divRet.rem;
+    prevHyposIndices[i] = hypoInd;
+    cerr << "(" << i << "," << ind << "," << numHypos << "," << hypoInd << ")";
+  }
+
+  // last
+  prevHyposIndices.back() = ind;
+
+
+  // check if last is over limit
+  const SymbolBindElement &ele = *ntEles.back();
+  Hypotheses &hypos = ele.hypos->GetSortedAndPruneHypos(*this, arcLists);
+  numHypos = hypos.size();
+
+  cerr << "(" << (ntEles.size() - 1) << "," << ind << "," << numHypos << ","  << ind << ")";
+  cerr << endl;
+
+  if (ind >= numHypos) {
+    return false;
+  }
+  else {
+    return true;
+  }
+}
+
 void Manager::ExpandHypo(
     const InputPath &path,
     const SCFG::SymbolBind &symbolBind,
@@ -155,19 +203,21 @@ void Manager::ExpandHypo(
 {
   Recycler<HypothesisBase*> &hypoRecycler = GetHypoRecycle();
 
-  vector<size_t> prevHyposIndices(symbolBind.numNT, 0);
-  size_t currInd = 0;
+  std::vector<const SymbolBindElement*> ntEles = symbolBind.GetNTElements();
+  vector<size_t> prevHyposIndices(symbolBind.numNT);
+  assert(ntEles.size() == symbolBind.numNT);
+  cerr << "ntEles:" << ntEles.size() << endl;
 
-  do {
+  size_t ind = 0;
+  while (IncrPrevHypoIndices(prevHyposIndices, ind, ntEles)) {
     SCFG::Hypothesis *hypo = new SCFG::Hypothesis(GetPool(), system);
     hypo->Init(*this, path, symbolBind, tp, prevHyposIndices);
 
     StackAdd added = stack.Add(hypo, hypoRecycler, arcLists);
-    //cerr << "added=" << added.added << " " << (const Phrase&) tp << endl;
+    cerr << "  added=" << added.added << " " << tp << endl;
 
-
-  } while (false);
-
+    ++ind;
+  }
 }
 
 }
