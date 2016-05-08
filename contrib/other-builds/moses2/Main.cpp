@@ -27,6 +27,7 @@ int main(int argc, char** argv)
 	Moses2::Parameter params;
 	params.LoadParam(argc, argv);
 	Moses2::System system(params);
+	timer.check("Loaded");
 
 	//cerr << "system.numThreads=" << system.numThreads << endl;
 
