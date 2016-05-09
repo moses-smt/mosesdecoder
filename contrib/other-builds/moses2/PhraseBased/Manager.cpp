@@ -15,6 +15,8 @@
 
 #include "Normal/Search.h"
 #include "CubePruningMiniStack/Search.h"
+#include "Batch/Search.h"
+
 /*
  #include "CubePruningPerMiniStack/Search.h"
  #include "CubePruningPerBitmap/Search.h"
@@ -81,7 +83,7 @@ void Manager::Init()
     m_search = new NSNormal::Search(*this);
     break;
   case NormalBatch:
-    m_search = new NSNormal::Search(*this);
+    m_search = new NSBatch::Search(*this);
     break;
   case CubePruning:
   case CubePruningMiniStack:

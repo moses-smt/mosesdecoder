@@ -26,7 +26,7 @@ namespace NSNormal
 {
 
 Search::Search(Manager &mgr)
-: Moses2::Search(mgr)
+:Moses2::Search(mgr)
 , m_stacks(mgr)
 {
   // TODO Auto-generated constructor stub
