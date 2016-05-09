@@ -5,6 +5,7 @@
 #include "../TranslationModel/UnknownWordPenalty.h"
 
 #include "../LM/KENLM.h"
+#include "../LM/KENLMBatch.h"
 #include "../LM/LanguageModel.h"
 
 #include "Distortion.h"
@@ -51,8 +52,9 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(ProbingPT);
   MOSES_FNAME(UnknownWordPenalty);
 
-  //MOSES_FNAME2("KENLM", KENLM<lm::ngram::ProbingModel>);
   Add("KENLM", new KenFactory());
+
+  MOSES_FNAME(KENLMBatch);
 
   MOSES_FNAME(LanguageModel);
 

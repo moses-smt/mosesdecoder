@@ -5,6 +5,7 @@
  *      Author: hieu
  */
 #pragma once
+
 #include <boost/shared_ptr.hpp>
 #include "../FF/StatefulFeatureFunction.h"
 #include "lm/model.hh"
@@ -17,21 +18,17 @@ namespace Moses2
 
 class Word;
 
-FeatureFunction *ConstructKenLM(size_t startInd, const std::string &lineOrig);
-FeatureFunction *ConstructKenLM(size_t startInd, const std::string &line,
-    const std::string &file, FactorType factorType,
-    util::LoadMethod load_method);
-
-template<class Model>
-class KENLM: public StatefulFeatureFunction
+class KENLMBatch: public StatefulFeatureFunction
 {
 public:
-  KENLM(size_t startInd, const std::string &line, const std::string &file,
-      FactorType factorType, util::LoadMethod load_method);
+  KENLMBatch(size_t startInd, const std::string &line);
 
-  virtual ~KENLM();
+  virtual ~KENLMBatch();
 
   virtual void Load(System &system);
+
+  void SetParameter(const std::string& key,
+      const std::string& value);
 
   virtual FFState* BlankState(MemPool &pool) const;
 
@@ -60,6 +57,7 @@ protected:
   const Factor *m_bos;
   const Factor *m_eos;
 
+  typedef lm::ngram::ProbingModel Model;
   boost::shared_ptr<Model> m_ngram;
 
   void CalcScore(const Phrase<Moses2::Word> &phrase, float &fullScore, float &ngramScore,
@@ -78,4 +76,3 @@ protected:
 };
 
 }
-
