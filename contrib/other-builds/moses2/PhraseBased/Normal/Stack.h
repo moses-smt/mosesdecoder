@@ -16,6 +16,8 @@
 namespace Moses2
 {
 
+namespace NSNormal
+{
 class Stack: public HypothesisColl
 {
 public:
@@ -27,4 +29,4 @@ protected:
 };
 
 }
-
+}

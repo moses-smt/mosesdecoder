@@ -22,20 +22,23 @@ using namespace std;
 
 namespace Moses2
 {
+namespace NSNormal
+{
 
-SearchNormal::SearchNormal(Manager &mgr) :
-    Search(mgr), m_stacks(mgr)
+Search::Search(Manager &mgr)
+: Moses2::Search(mgr)
+, m_stacks(mgr)
 {
   // TODO Auto-generated constructor stub
 
 }
 
-SearchNormal::~SearchNormal()
+Search::~Search()
 {
   // TODO Auto-generated destructor stub
 }
 
-void SearchNormal::Decode()
+void Search::Decode()
 {
   // init stacks
   const Sentence &sentence = static_cast<const Sentence&>(mgr.GetInput());
@@ -61,7 +64,7 @@ void SearchNormal::Decode()
   }
 }
 
-void SearchNormal::Decode(size_t stackInd)
+void Search::Decode(size_t stackInd)
 {
   Stack &stack = m_stacks[stackInd];
   if (&stack == &m_stacks.Back()) {
@@ -80,7 +83,7 @@ void SearchNormal::Decode(size_t stackInd)
 }
 }
 
-void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
+void Search::Extend(const Hypothesis &hypo, const InputPath &path)
 {
   const Bitmap &hypoBitmap = hypo.GetBitmap();
   const Range &hypoRange = hypo.GetInputPath().range;
@@ -106,7 +109,7 @@ void SearchNormal::Extend(const Hypothesis &hypo, const InputPath &path)
   }
 }
 
-void SearchNormal::Extend(const Hypothesis &hypo, const TargetPhrases &tps,
+void Search::Extend(const Hypothesis &hypo, const TargetPhrases &tps,
     const InputPath &path, const Bitmap &newBitmap, SCORE estimatedScore)
 {
   BOOST_FOREACH(const TargetPhrase<Moses2::Word> *tp, tps){
@@ -114,7 +117,7 @@ void SearchNormal::Extend(const Hypothesis &hypo, const TargetPhrases &tps,
 }
 }
 
-void SearchNormal::Extend(const Hypothesis &hypo, const TargetPhrase<Moses2::Word> &tp,
+void Search::Extend(const Hypothesis &hypo, const TargetPhrase<Moses2::Word> &tp,
     const InputPath &path, const Bitmap &newBitmap, SCORE estimatedScore)
 {
   Hypothesis *newHypo = Hypothesis::Create(mgr.GetSystemPool(), mgr);
@@ -128,7 +131,7 @@ void SearchNormal::Extend(const Hypothesis &hypo, const TargetPhrase<Moses2::Wor
 
 }
 
-const Hypothesis *SearchNormal::GetBestHypothesis() const
+const Hypothesis *Search::GetBestHypothesis() const
 {
   const Stack &lastStack = m_stacks.Back();
   const Hypotheses &sortedHypos = lastStack.GetSortedAndPruneHypos(mgr,
@@ -141,7 +144,7 @@ const Hypothesis *SearchNormal::GetBestHypothesis() const
   return best;
 }
 
-void SearchNormal::AddInitialTrellisPaths(TrellisPaths &paths) const
+void Search::AddInitialTrellisPaths(TrellisPaths &paths) const
 {
   const Stack &lastStack = m_stacks.Back();
   BOOST_FOREACH(const HypothesisBase *hypoBase, lastStack){
@@ -151,5 +154,6 @@ void SearchNormal::AddInitialTrellisPaths(TrellisPaths &paths) const
 }
 }
 
+} // namespace
 }
 

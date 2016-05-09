@@ -16,6 +16,9 @@ namespace Moses2
 class Manager;
 class ArcLists;
 
+namespace NSNormal
+{
+
 class Stacks
 {
   friend std::ostream& operator<<(std::ostream &, const Stacks &);
@@ -55,4 +58,4 @@ protected:
 };
 
 }
-
+}

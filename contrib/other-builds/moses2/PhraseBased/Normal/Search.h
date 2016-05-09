@@ -4,9 +4,8 @@
  *  Created on: 25 Oct 2015
  *      Author: hieu
  */
+#pragma once
 
-#ifndef SEARCHNORMAL_H_
-#define SEARCHNORMAL_H_
 #include <vector>
 #include "../../legacy/Range.h"
 #include "../../legacy/Bitmap.h"
@@ -22,13 +21,16 @@ class TargetPhrase;
 class Hypothesis;
 class InputPath;
 class TargetPhrases;
+
+namespace NSNormal
+{
 class Stacks;
 
-class SearchNormal: public Search
+class Search: public Moses2::Search
 {
 public:
-  SearchNormal(Manager &mgr);
-  virtual ~SearchNormal();
+  Search(Manager &mgr);
+  virtual ~Search();
 
   virtual void Decode();
   const Hypothesis *GetBestHypothesis() const;
@@ -48,5 +50,4 @@ protected:
 };
 
 }
-
-#endif /* SEARCHNORMAL_H_ */
+}

@@ -14,6 +14,9 @@ using namespace std;
 namespace Moses2
 {
 
+namespace NSNormal
+{
+
 Stacks::Stacks(const Manager &mgr) :
     m_mgr(mgr)
 {
@@ -74,4 +77,4 @@ void Stacks::Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
 }
 
 }
-
+}

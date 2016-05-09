@@ -16,6 +16,9 @@ using namespace std;
 namespace Moses2
 {
 
+namespace NSNormal
+{
+
 Stack::Stack(const Manager &mgr) :
     HypothesisColl(mgr)
 {
@@ -29,4 +32,4 @@ Stack::~Stack()
 }
 
 }
-
+}

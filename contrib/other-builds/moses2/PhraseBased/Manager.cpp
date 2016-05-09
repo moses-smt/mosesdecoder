@@ -78,7 +78,10 @@ void Manager::Init()
 
   switch (system.options.search.algo) {
   case Normal:
-    m_search = new SearchNormal(*this);
+    m_search = new NSNormal::Search(*this);
+    break;
+  case NormalBatch:
+    m_search = new NSNormal::Search(*this);
     break;
   case CubePruning:
   case CubePruningMiniStack:
