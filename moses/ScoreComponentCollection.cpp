@@ -264,7 +264,7 @@ Assign(const FeatureFunction* sp, size_t idx, float sc)
   size_t numScores = sp->GetNumScoreComponents();
   size_t offset = sp->GetIndex();
 
-  if (idx < numScores) {
+  if (idx >= numScores) {
     UTIL_THROW(util::Exception, "Feature function "
                << sp->GetScoreProducerDescription() << " specified index "
                << idx << " dense scores or weights. Actually has "
