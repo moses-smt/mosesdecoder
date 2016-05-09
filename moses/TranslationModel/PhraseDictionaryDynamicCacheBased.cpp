@@ -27,6 +27,7 @@
 #include "moses/StaticData.h"
 #include "moses/TargetPhrase.h"
 
+
 using namespace std;
 
 namespace Moses
@@ -53,6 +54,8 @@ PhraseDictionaryDynamicCacheBased::PhraseDictionaryDynamicCacheBased(const std::
   UTIL_THROW_IF2(s_instance_map.find(m_name) != s_instance_map.end(), "Only 1 PhraseDictionaryDynamicCacheBased feature named " + m_name + " is allowed");
   s_instance_map[m_name] = this;
   s_instance = this; //for back compatibility
+  vector<float> weight = StaticData::Instance().GetWeights(this);
+  m_numscorecomponent = weight.size();
 }
 
 PhraseDictionaryDynamicCacheBased::~PhraseDictionaryDynamicCacheBased()
@@ -66,8 +69,9 @@ void PhraseDictionaryDynamicCacheBased::Load(AllOptions::ptr const& opts)
   VERBOSE(2,"PhraseDictionaryDynamicCacheBased::Load()" << std::endl);
   SetFeaturesToApply();
 
-  vector<float> weight = StaticData::Instance().GetWeights(this);
-  SetPreComputedScores(weight.size());
+  SetPreComputedScores(1);
+  // weights.size() doesn't make sense at all.. why would you have multiple ages for a unique phrase pair??
+//  SetPreComputedScores(m_numscorecomponent);
 
   Load(m_initfiles);
 }
@@ -96,12 +100,12 @@ void PhraseDictionaryDynamicCacheBased::Load_Single_File(const std::string file)
   //age |||| src_phr2 ||| trg_phr2 |||| src_phr3 ||| trg_phr3 |||| src_phr4 ||| trg_ph4
   //....
   //or
-  //age |||| src_phr ||| trg_phr ||| wa_align
-  //age |||| src_phr2 ||| trg_phr2 ||| wa_align2 |||| src_phr3 ||| trg_phr3 ||| wa_align3 |||| src_phr4 ||| trg_phr4 ||| wa_align4
+  //age |||| src_phr ||| trg_phr ||| scores ||| wa_align
+  //age |||| src_phr2 ||| trg_phr2 ||| scores2 ||| wa_align2 |||| src_phr3 ||| trg_phr3 ||| scores3 ||| wa_align3 |||| src_phr4 ||| trg_phr4 ||| scores4 ||| wa_align4
   //....
   //each src_phr ad trg_phr are sequences of src and trg words, respectively, of any length
   //if provided, wa_align is the alignment between src_phr and trg_phr
-  //
+  //scores is the feature scores associated to the source phrase and the target phrase
   //there is no limit on the size of n
   //
   //entries can be repeated, but the last entry overwrites the previous
@@ -159,7 +163,7 @@ TargetPhraseCollection::shared_ptr PhraseDictionaryDynamicCacheBased::GetTargetP
   TargetPhraseCollection::shared_ptr tpc;
   cacheMap::const_iterator it = m_cacheTM.find(source);
   if(it != m_cacheTM.end()) {
-    tpc.reset(new TargetPhraseCollection(*(it->second).first));
+    tpc.reset(new TargetPhraseCollection(*(boost::get<0>(it->second))));
 
     std::vector<const TargetPhrase*>::const_iterator it2 = tpc->begin();
 
@@ -367,9 +371,10 @@ void PhraseDictionaryDynamicCacheBased::ClearEntries(Phrase sp, Phrase tp)
     // here we have to remove the target phrase from targetphrasecollection and from the TargetAgeMap
     // and then add new entry
 
-    TargetCollectionAgePair TgtCollAgePair = it->second;
-    TargetPhraseCollection::shared_ptr  tpc = TgtCollAgePair.first;
-    AgeCollection* ac = TgtCollAgePair.second;
+    TargetCollectionPair TgtCollPair = it->second;
+    TargetPhraseCollection::shared_ptr  tpc = boost::get<0>(TgtCollPair);
+    AgeCollection* ac = boost::get<1>(TgtCollPair);
+    Scores* sc = boost::get<2>(TgtCollPair);
     const Phrase* p_ptr = NULL;
     TargetPhrase* tp_ptr = NULL;
     bool found = false;
@@ -391,16 +396,20 @@ void PhraseDictionaryDynamicCacheBased::ClearEntries(Phrase sp, Phrase tp)
 
       tpc->Remove(tp_pos); //delete entry in the Target Phrase Collection
       ac->erase(ac->begin() + tp_pos); //delete entry in the Age Collection
+      // no need to delete scores here
       m_entries--;
       VERBOSE(3,"tpc size:|" << tpc->GetSize() << "|" << std::endl);
       VERBOSE(3,"ac size:|" << ac->size() << "|" << std::endl);
+      VERBOSE(3,"sc size:|" << sc->size() << "|" << std::endl);
       VERBOSE(3,"tp:|" << tp << "| DELETED" << std::endl);
     }
     if (tpc->GetSize() == 0) {
       // delete the entry from m_cacheTM in case it points to an empty TargetPhraseCollection and AgeCollection
       ac->clear();
+      sc->clear();
       tpc.reset();
       delete ac;
+      delete sc;
       m_cacheTM.erase(sp);
     }
 
@@ -452,16 +461,19 @@ void PhraseDictionaryDynamicCacheBased::ClearSource(Phrase sp)
     VERBOSE(3,"found:|" << sp << "|" << std::endl);
     //sp is found
 
-    TargetCollectionAgePair TgtCollAgePair = it->second;
-    TargetPhraseCollection::shared_ptr  tpc = TgtCollAgePair.first;
-    AgeCollection* ac = TgtCollAgePair.second;
+    TargetCollectionPair TgtCollPair = it->second;
+    TargetPhraseCollection::shared_ptr  tpc = boost::get<0>(TgtCollPair);
+    AgeCollection* ac = boost::get<1>(TgtCollPair);
+    Scores* sc = boost::get<2>(TgtCollPair);
 
     m_entries-=tpc->GetSize(); //reduce the total amount of entries of the cache
 
     // delete the entry from m_cacheTM in case it points to an empty TargetPhraseCollection and AgeCollection
     ac->clear();
+    sc->clear();
     tpc.reset();
     delete ac;
+    delete sc;
     m_cacheTM.erase(sp);
   } else {
     //do nothing
@@ -502,7 +514,11 @@ void PhraseDictionaryDynamicCacheBased::Update(std::vector<std::string> entries,
     VERBOSE(3,"pp[0]:|" << pp[0] << "|" << std::endl);
     VERBOSE(3,"pp[1]:|" << pp[1] << "|" << std::endl);
 
-    if (pp.size() > 2) {
+    if (pp.size() > 3) {
+      VERBOSE(3,"pp[2]:|" << pp[2] << "|" << std::endl);
+      VERBOSE(3,"pp[3]:|" << pp[3] << "|" << std::endl);
+      Update(pp[0], pp[1], ageString, pp[2], pp[3]);
+    } else if (pp.size() > 2){
       VERBOSE(3,"pp[2]:|" << pp[2] << "|" << std::endl);
       Update(pp[0], pp[1], ageString, pp[2]);
     } else {
@@ -511,7 +527,18 @@ void PhraseDictionaryDynamicCacheBased::Update(std::vector<std::string> entries,
   }
 }
 
-void PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, std::string targetPhraseString, std::string ageString, std::string waString)
+Scores PhraseDictionaryDynamicCacheBased::Conv2VecFloats(std::string& s){
+	std::vector<float> n;
+	if (s.empty())
+		return n;
+	std::istringstream iss(s);
+	std::copy(std::istream_iterator<float>(iss),
+	        std::istream_iterator<float>(),
+	        std::back_inserter(n));
+	return n;
+}
+
+void PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, std::string targetPhraseString, std::string ageString, std::string scoreString, std::string waString)
 {
   VERBOSE(3,"PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, std::string targetPhraseString, std::string ageString, std::string waString)" << std::endl);
   const StaticData &staticData = StaticData::Instance();
@@ -523,9 +550,10 @@ void PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, s
   ageString = Trim(ageString);
   int age = strtod(ageString.c_str(), &err_ind_temp);
   VERBOSE(3, "age:|" << age << "|" << std::endl);
-
+  Scores scores = Conv2VecFloats(scoreString);
   //target
   targetPhrase.Clear();
+  // change here for factored based CBTM
   VERBOSE(3, "targetPhraseString:|" << targetPhraseString << "|" << std::endl);
   targetPhrase.CreateFromString(Output, staticData.options()->output.factor_order,
                                 targetPhraseString, /*factorDelimiter,*/ NULL);
@@ -540,10 +568,10 @@ void PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, s
 
   if (!waString.empty()) VERBOSE(3, "waString:|" << waString << "|" << std::endl);
 
-  Update(sourcePhrase, targetPhrase, age, waString);
+  Update(sourcePhrase, targetPhrase, age, scores, waString);
 }
 
-void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, TargetPhrase tp, int age, std::string waString)
+void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, TargetPhrase tp, int age, Scores scores, std::string waString)
 {
   VERBOSE(3,"PhraseDictionaryDynamicCacheBased::Update(Phrase sp, TargetPhrase tp, int age, std::string waString)" << std::endl);
 #ifdef WITH_THREADS
@@ -559,9 +587,10 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, TargetPhrase tp, int a
     // here we have to remove the target phrase from targetphrasecollection and from the TargetAgeMap
     // and then add new entry
 
-    TargetCollectionAgePair TgtCollAgePair = it->second;
-    TargetPhraseCollection::shared_ptr  tpc = TgtCollAgePair.first;
-    AgeCollection* ac = TgtCollAgePair.second;
+    TargetCollectionPair TgtCollPair = it->second;
+    TargetPhraseCollection::shared_ptr  tpc = boost::get<0>(TgtCollPair);
+    AgeCollection* ac = boost::get<1>(TgtCollPair);
+    Scores* sc = boost::get<2>(TgtCollPair);
 //    const TargetPhrase* p_ptr = NULL;
     const Phrase* p_ptr = NULL;
     TargetPhrase* tp_ptr = NULL;
@@ -579,18 +608,40 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, TargetPhrase tp, int a
     if (!found) {
       VERBOSE(3,"tp:|" << tp << "| NOT FOUND" << std::endl);
       std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(tp));
-
-      targetPhrase->GetScoreBreakdown().Assign(this, GetPreComputedScores(age));
+      Scores scoreVec;
+      scoreVec.push_back(GetPreComputedScores(age)[0]);
+      for (unsigned int i=0; i<scores.size(); i++){
+    	  scoreVec.push_back(scores[i]);
+      }
+      if(scoreVec.size() != m_numScoreComponents){
+    	  VERBOSE(1, "Scores does not match number of score components for phrase : "<< sp.ToString() <<" ||| " << tp.ToString() <<endl);
+    	  VERBOSE(1, "Debugging: Press Enter to continue..." <<endl);
+    	  std::cin.ignore();
+      }
+      targetPhrase->GetScoreBreakdown().Assign(this, scoreVec);
+//      targetPhrase->GetScoreBreakdown().Assign(this, GetPreComputedScores(age));
       if (!waString.empty()) targetPhrase->SetAlignmentInfo(waString);
 
       tpc->Add(targetPhrase.release());
 
       tp_pos = tpc->GetSize()-1;
       ac->push_back(age);
+      sc = &scores;
       m_entries++;
       VERBOSE(3,"sp:|" << sp << "tp:|" << tp << "| INSERTED" << std::endl);
     } else {
-      tp_ptr->GetScoreBreakdown().Assign(this, GetPreComputedScores(age));
+	  Scores scoreVec;
+	  scoreVec.push_back(GetPreComputedScores(age)[0]);
+	  for (unsigned int i=0; i<scores.size(); i++){
+	 	scoreVec.push_back(scores[i]);
+	  }
+	  if(scoreVec.size() != m_numScoreComponents){
+	 	VERBOSE(1, "Scores does not match number of score components for phrase : "<< sp.ToString() <<" ||| " << tp.ToString() <<endl);
+		VERBOSE(1, "Debugging: Press Enter to continue..." <<endl);
+		std::cin.ignore();
+	  }
+	  tp_ptr->GetScoreBreakdown().Assign(this, scoreVec);
+//      tp_ptr->GetScoreBreakdown().Assign(this, GetPreComputedScores(age));
       if (!waString.empty()) tp_ptr->SetAlignmentInfo(waString);
       ac->at(tp_pos) = age;
       VERBOSE(3,"sp:|" << sp << "tp:|" << tp << "| UPDATED" << std::endl);
@@ -603,15 +654,28 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, TargetPhrase tp, int a
 
     TargetPhraseCollection::shared_ptr tpc(new TargetPhraseCollection);
     AgeCollection* ac = new AgeCollection();
-    m_cacheTM.insert(make_pair(sp,make_pair(tpc,ac)));
+    Scores* sc = new Scores();
+    m_cacheTM.insert(make_pair(sp,boost::make_tuple(tpc,ac,sc)));
 
     //tp is not found
     std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(tp));
-    targetPhrase->GetScoreBreakdown().Assign(this, GetPreComputedScores(age));
+    // scoreVec is a composition of decay_score and the feature scores
+    Scores scoreVec;
+    scoreVec.push_back(GetPreComputedScores(age)[0]);
+    for (unsigned int i=0; i<scores.size(); i++){
+    	scoreVec.push_back(scores[i]);
+    }
+    if(scoreVec.size() != m_numScoreComponents){
+    	VERBOSE(1, "Scores do not match number of score components for phrase : "<< sp <<" ||| " << tp <<endl);
+    	VERBOSE(1, "Debugging: Press Enter to continue..." <<endl);
+    	std::cin.ignore();
+    }
+    targetPhrase->GetScoreBreakdown().Assign(this, scoreVec);
     if (!waString.empty()) targetPhrase->SetAlignmentInfo(waString);
 
     tpc->Add(targetPhrase.release());
     ac->push_back(age);
+    sc = &scores;
     m_entries++;
     VERBOSE(3,"sp:|" << sp << "| tp:|" << tp << "| INSERTED" << std::endl);
   }
@@ -636,9 +700,10 @@ void PhraseDictionaryDynamicCacheBased::Decay(Phrase sp)
     VERBOSE(3,"found:|" << sp << "|" << std::endl);
     //sp is found
 
-    TargetCollectionAgePair TgtCollAgePair = it->second;
-    TargetPhraseCollection::shared_ptr  tpc = TgtCollAgePair.first;
-    AgeCollection* ac = TgtCollAgePair.second;
+    TargetCollectionPair TgtCollPair = it->second;
+    TargetPhraseCollection::shared_ptr  tpc = boost::get<0>(TgtCollPair);
+    AgeCollection* ac = boost::get<1>(TgtCollPair);
+    Scores* sc = boost::get<2>(TgtCollPair);
 
     //loop in inverted order to allow a correct deletion of std::vectors tpc and ac
     for (int tp_pos = tpc->GetSize() - 1 ; tp_pos >= 0; tp_pos--) {
@@ -652,18 +717,29 @@ void PhraseDictionaryDynamicCacheBased::Decay(Phrase sp)
         VERBOSE(3,"tp_age:|" << tp_age << "| TOO BIG" << std::endl);
         tpc->Remove(tp_pos); //delete entry in the Target Phrase Collection
         ac->erase(ac->begin() + tp_pos); //delete entry in the Age Collection
+        // no need to change scores here
         m_entries--;
       } else {
         VERBOSE(3,"tp_age:|" << tp_age << "| STILL GOOD" << std::endl);
-        tp_ptr->GetScoreBreakdown().Assign(this, GetPreComputedScores(tp_age));
+        // scoreVec is a composition of decay_score and the feature scores
+        size_t idx=0;
+        tp_ptr->GetScoreBreakdown().Assign(this, idx, GetPreComputedScores(tp_age)[0]);
+//        tp_ptr->GetScoreBreakdown().Assign(this, GetPreComputedScores(tp_age));
         ac->at(tp_pos) = tp_age;
       }
     }
     if (tpc->GetSize() == 0) {
       // delete the entry from m_cacheTM in case it points to an empty TargetPhraseCollection and AgeCollection
-      (((*it).second).second)->clear();
-      delete ((*it).second).second;
-      ((*it).second).first.reset();
+      // clear age collection
+      ac->clear();
+      // clear score collection
+      sc->clear();
+      // delete age collection
+      delete ac;
+      // delete score collection
+      delete sc;
+      // reset the target phrase collectio
+      tpc.reset();
       m_cacheTM.erase(sp);
     }
   } else {
@@ -707,9 +783,16 @@ void PhraseDictionaryDynamicCacheBased::Clear()
 #endif
   cacheMap::iterator it;
   for(it = m_cacheTM.begin(); it!=m_cacheTM.end(); it++) {
-    (((*it).second).second)->clear();
-    delete ((*it).second).second;
-    ((*it).second).first.reset();
+	  // clear age collection
+	  (boost::get<1>((*it).second))->clear();
+	  // clear score collection
+	  (boost::get<2>((*it).second))->clear();
+	  // delete age collection
+	  delete boost::get<1>((*it).second);
+	  // delete score collection
+	  delete boost::get<2>((*it).second);
+	  // reset the target phrase collection
+	  (boost::get<0>(it->second)).reset();
   }
   m_cacheTM.clear();
   m_entries = 0;
@@ -748,7 +831,7 @@ void PhraseDictionaryDynamicCacheBased::Print() const
   cacheMap::const_iterator it;
   for(it = m_cacheTM.begin(); it!=m_cacheTM.end(); it++) {
     std::string source = (it->first).ToString();
-    TargetPhraseCollection::shared_ptr  tpc = (it->second).first;
+    TargetPhraseCollection::shared_ptr  tpc = boost::get<0>(it->second);
     TargetPhraseCollection::iterator itr;
     for(itr = tpc->begin(); itr != tpc->end(); itr++) {
       std::string target = (*itr)->ToString();

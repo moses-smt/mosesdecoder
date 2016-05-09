@@ -281,6 +281,8 @@ public:
 
   void Assign(const FeatureFunction* sp, const std::vector<float>& scores);
 
+  void Assign(const FeatureFunction* sp, size_t idx, float sc);
+
   //! Special version Assign(ScoreProducer, vector<float>)
   //! to add the score from a single ScoreProducer that produces
   //! a single value
