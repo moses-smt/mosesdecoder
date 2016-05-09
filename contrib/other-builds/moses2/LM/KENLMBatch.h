@@ -7,6 +7,10 @@
 #pragma once
 
 #include <boost/shared_ptr.hpp>
+#include <boost/bind.hpp>
+#include <boost/thread.hpp>
+#include <pthread.h>
+
 #include "../FF/StatefulFeatureFunction.h"
 #include "lm/model.hh"
 #include "../legacy/Factor.h"
@@ -50,6 +54,9 @@ public:
       const Hypothesis &hypo, const FFState &prevState, Scores &scores,
       FFState &state) const;
 
+  virtual void EvaluateWhenAppliedBatch(
+      const std::vector<Hypothesis*> &batch) const;
+
 protected:
   std::string m_path;
   FactorType m_factorType;
@@ -72,6 +79,18 @@ protected:
   lm::WordIndex *LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const;
 
   std::vector<lm::WordIndex> m_lmIdLookup;
+
+  // batch
+  typedef std::vector<Hypothesis*> Batch;
+  mutable std::vector<const Batch*> m_batches;
+  mutable size_t m_numHypos;
+
+  mutable boost::shared_mutex m_accessLock;
+
+  mutable boost::mutex m_mutex;
+  mutable boost::condition_variable m_threadNeeded;
+
+  void EvaluateWhenAppliedBatch() const;
 
 };
 

@@ -119,6 +119,7 @@ void System::IsPb()
 {
   switch (options.search.algo) {
   case Normal:
+  case NormalBatch:
   case CubePruning:
   case CubePruningPerMiniStack:
   case CubePruningPerBitmap:

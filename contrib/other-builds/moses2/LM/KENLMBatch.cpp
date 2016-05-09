@@ -4,8 +4,16 @@
  *  Created on: 4 Nov 2015
  *      Author: hieu
  */
+#include <boost/foreach.hpp>
 #include <sstream>
 #include <vector>
+
+#include <pthread.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <errno.h>
+#include <unistd.h>
+
 #include "KENLMBatch.h"
 #include "../Phrase.h"
 #include "../Scores.h"
@@ -79,7 +87,9 @@ private:
 /////////////////////////////////////////////////////////////////
 KENLMBatch::KENLMBatch(size_t startInd, const std::string &line)
 :StatefulFeatureFunction(startInd, line)
+,m_numHypos(0)
 {
+  cerr << "KENLMBatch::KENLMBatch" << endl;
   ReadParameters();
 }
 
@@ -90,6 +100,7 @@ KENLMBatch::~KENLMBatch()
 
 void KENLMBatch::Load(System &system)
 {
+  cerr << "KENLMBatch::Load" << endl;
   FactorCollection &fc = system.GetVocab();
 
   m_bos = fc.AddFactor(BOS_, system, false);
@@ -331,6 +342,41 @@ void KENLMBatch::SetParameter(const std::string& key,
   //cerr << "SetParameter done" << endl;
 }
 
+void KENLMBatch::EvaluateWhenAppliedBatch(
+    const std::vector<Hypothesis*> &batch) const
+{
+  {
+    // write lock
+    boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
+    m_batches.push_back(&batch);
+    m_numHypos += batch.size();
+  }
+  //cerr << "m_numHypos=" << m_numHypos << endl;
+
+  if (m_numHypos > 0) {
+    // process batch
+    EvaluateWhenAppliedBatch();
+
+    m_batches.clear();
+    m_numHypos = 0;
+
+    m_threadNeeded.notify_all();
+  }
+  else {
+    boost::mutex::scoped_lock lock(m_mutex);
+    m_threadNeeded.wait(lock);
+  }
+}
+
+void KENLMBatch::EvaluateWhenAppliedBatch() const
+{
+  BOOST_FOREACH(const Batch *batch, m_batches) {
+    //cerr << "batch=" << batch->size() << endl;
+    BOOST_FOREACH(Hypothesis *hypo, *batch) {
+      hypo->EvaluateWhenApplied(*this);
+    }
+  }
+}
 
 }
 

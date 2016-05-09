@@ -13,6 +13,8 @@
 #include "StatefulFeatureFunction.h"
 #include "../PhraseBased/Hypothesis.h"
 
+using namespace std;
+
 namespace Moses2
 {
 
@@ -30,6 +32,7 @@ StatefulFeatureFunction::~StatefulFeatureFunction()
 void StatefulFeatureFunction::EvaluateWhenAppliedBatch(
     const std::vector<Hypothesis*> &batch) const
 {
+   //cerr << "EvaluateWhenAppliedBatch:" << m_name << endl;
 #ifdef __linux
   /*
    pthread_t handle;
