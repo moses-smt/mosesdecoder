@@ -16,7 +16,6 @@ mert-moses.pl \
 Commands are run through shell, so they may contain multiple piped commands
 
 Anything not in the following list is passed through to moses as decoder flags
-
 '''
 
 import argparse
@@ -64,6 +63,13 @@ def main():
 
     # Parse/split args
     (args, moses_args) = parser.parse_known_args()
+    moses_arg_set = set(moses_args)
+
+    # If mert-moses.pl passes -show-weights, just call moses
+    if '--show-weights' in moses_arg_set or '-show-weights' in moses_arg_set:
+        sys.stdout.write(subprocess.check_output([args.moses] + moses_args))
+        sys.stdout.flush()
+        sys.exit(0)
 
     # Scan moses args and sanity check
     input_file = None
@@ -91,14 +97,17 @@ def main():
         try:
             n_best_list_i = moses_args.index('--n-best-list') + 1
         except ValueError:
-            sys.stderr.write(
-                'Error: --wrap-n-best-list requires --n-best-list\n')
-            sys.exit(1)
+            try:
+                n_best_list_i = moses_args.index('-n-best-list') + 1
+            except ValueError:
+                sys.stderr.write(
+                    'Error: --wrap-n-best-list requires --n-best-list\n')
+                sys.exit(1)
         n_best_list = moses_args[n_best_list_i]
     # Don't read from stdin if input file specified
-    moses_arg_set = set(moses_args)
     stream_input = not (
-        '--input-file' in moses_arg_set or '-i' in moses_arg_set)
+        '--input-file' in moses_arg_set or '-input-file' in moses_arg_set
+        or '-i' in moses_arg_set)
 
     # Setup temp dir
     tmp = tempfile.mkdtemp(prefix=os.path.join(args.tmp, 'moses.'))
