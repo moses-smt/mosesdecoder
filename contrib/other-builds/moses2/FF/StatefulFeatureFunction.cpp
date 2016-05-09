@@ -27,8 +27,8 @@ StatefulFeatureFunction::~StatefulFeatureFunction()
   // TODO Auto-generated destructor stub
 }
 
-void StatefulFeatureFunction::EvaluateWhenApplied(
-    const ObjectPoolContiguous<Hypothesis*> &hypos) const
+void StatefulFeatureFunction::EvaluateWhenAppliedBatch(
+    const std::vector<Hypothesis*> &batch) const
 {
 #ifdef __linux
   /*
@@ -49,8 +49,8 @@ void StatefulFeatureFunction::EvaluateWhenApplied(
    */
 #endif
 
-  for (size_t i = 0; i < hypos.GetSize(); ++i) {
-    Hypothesis *hypo = hypos[i];
+  for (size_t i = 0; i < batch.size(); ++i) {
+    Hypothesis *hypo = batch[i];
     hypo->EvaluateWhenApplied(*this);
   }
 

@@ -40,18 +40,12 @@ public:
   virtual void EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
       const InputType &input, const Hypothesis &hypo) const = 0;
 
-  virtual void EvaluateWhenApplied(
-      const ObjectPoolContiguous<Hypothesis*> &hypos) const;
-
   virtual void EvaluateWhenApplied(const ManagerBase &mgr,
       const Hypothesis &hypo, const FFState &prevState, Scores &scores,
       FFState &state) const = 0;
 
-  virtual void EvaluateWhenAppliedNonBatch(const ManagerBase &mgr,
-      const Hypothesis &hypo, const FFState &prevState, Scores &scores,
-      FFState &state) const
-  {
-  }
+  virtual void EvaluateWhenAppliedBatch(
+      const std::vector<Hypothesis*> &batch) const;
 
 protected:
   size_t m_statefulInd;

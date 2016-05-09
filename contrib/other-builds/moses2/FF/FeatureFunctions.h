@@ -27,6 +27,7 @@ class MemPool;
 class PhraseImpl;
 class TargetPhrases;
 class Scores;
+class Hypothesis;
 
 namespace SCFG
 {
@@ -79,6 +80,8 @@ public:
       const Phrase<Moses2::Word> &sourcePhrase) const;
   void EvaluateAfterTablePruning(MemPool &pool, const SCFG::TargetPhrases &tps,
       const Phrase<SCFG::Word> &sourcePhrase) const;
+
+  void EvaluateWhenAppliedBatch(const std::vector<Hypothesis*> &batch) const;
 
 protected:
   std::vector<const FeatureFunction*> m_featureFunctions;

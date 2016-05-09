@@ -81,6 +81,15 @@ void Search::Decode(size_t stackInd)
       Extend(*static_cast<const Hypothesis*>(hypo), *static_cast<const InputPath*>(path));
     }
   }
+
+  // process batch
+  mgr.system.featureFunctions.EvaluateWhenAppliedBatch(m_batch);
+
+  for (size_t i = 0; i < m_batch.size(); ++i) {
+    Hypothesis *hypo = m_batch[i];
+    m_stacks.Add(hypo, mgr.GetHypoRecycle(), mgr.arcLists);
+  }
+  m_batch.clear();
 }
 
 void Search::Extend(const Hypothesis &hypo, const InputPath &path)
@@ -122,6 +131,8 @@ void Search::Extend(const Hypothesis &hypo, const TargetPhrase<Moses2::Word> &tp
 {
   Hypothesis *newHypo = Hypothesis::Create(mgr.GetSystemPool(), mgr);
   newHypo->Init(mgr, hypo, path, tp, newBitmap, estimatedScore);
+
+  m_batch.push_back(newHypo);
   //newHypo->EvaluateWhenApplied();
 
   //m_stacks.Add(newHypo, mgr.GetHypoRecycle(), mgr.arcLists);

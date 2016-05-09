@@ -40,6 +40,8 @@ public:
 protected:
   Stacks m_stacks;
 
+  std::vector<Hypothesis*> m_batch;
+
   void Decode(size_t stackInd);
   void Extend(const Hypothesis &hypo, const InputPath &path);
   void Extend(const Hypothesis &hypo, const TargetPhrases &tps,
