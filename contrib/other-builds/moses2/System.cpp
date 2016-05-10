@@ -95,14 +95,12 @@ void System::LoadMappings()
 
 MemPool &System::GetSystemPool() const
 {
-  MemPool &ret = GetThreadSpecificObj(m_systemPool);
-  return ret;
+  return GetThreadSpecificObj(m_systemPool);
 }
 
 MemPool &System::GetManagerPool() const
 {
-  MemPool &ret = GetThreadSpecificObj(m_managerPool);
-  return ret;
+  return GetThreadSpecificObj(m_managerPool);
 }
 
 FactorCollection &System::GetVocab() const
@@ -113,6 +111,18 @@ FactorCollection &System::GetVocab() const
 Recycler<HypothesisBase*> &System::GetHypoRecycler() const
 {
   return GetThreadSpecificObj(m_hypoRecycler);
+}
+
+Batch &System::GetBatch(MemPool &pool) const
+{
+  Batch *obj;
+  obj = m_batch.get();
+  if (obj == NULL) {
+    obj = new Batch(pool);
+    m_batch.reset(obj);
+  }
+  assert(obj);
+  return *obj;
 }
 
 void System::IsPb()

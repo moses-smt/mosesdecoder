@@ -40,7 +40,7 @@ public:
 protected:
   Stacks m_stacks;
 
-  Batch m_batch;
+  Batch &m_batch;
 
   void Decode(size_t stackInd);
   void Extend(const Hypothesis &hypo, const InputPath &path);
