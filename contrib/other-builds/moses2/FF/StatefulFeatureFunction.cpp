@@ -30,7 +30,7 @@ StatefulFeatureFunction::~StatefulFeatureFunction()
 }
 
 void StatefulFeatureFunction::EvaluateWhenAppliedBatch(
-    const std::vector<Hypothesis*> &batch) const
+    const Batch &batch) const
 {
    //cerr << "EvaluateWhenAppliedBatch:" << m_name << endl;
 #ifdef __linux

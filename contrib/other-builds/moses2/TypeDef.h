@@ -115,5 +115,8 @@ public:
   }
 };
 
+class Hypothesis;
+typedef std::vector<Hypothesis*> Batch;
+
 }
 

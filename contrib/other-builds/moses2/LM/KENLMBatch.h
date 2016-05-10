@@ -16,6 +16,7 @@
 #include "../legacy/Factor.h"
 #include "../legacy/Util2.h"
 #include "../Word.h"
+#include "../TypeDef.h"
 
 namespace Moses2
 {
@@ -55,7 +56,7 @@ public:
       FFState &state) const;
 
   virtual void EvaluateWhenAppliedBatch(
-      const std::vector<Hypothesis*> &batch) const;
+      const Batch &batch) const;
 
 protected:
   std::string m_path;
@@ -81,7 +82,6 @@ protected:
   std::vector<lm::WordIndex> m_lmIdLookup;
 
   // batch
-  typedef std::vector<Hypothesis*> Batch;
   mutable std::vector<const Batch*> m_batches;
   mutable size_t m_numHypos;
 

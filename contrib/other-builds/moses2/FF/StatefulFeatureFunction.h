@@ -45,7 +45,7 @@ public:
       FFState &state) const = 0;
 
   virtual void EvaluateWhenAppliedBatch(
-      const std::vector<Hypothesis*> &batch) const;
+      const Batch &batch) const;
 
 protected:
   size_t m_statefulInd;

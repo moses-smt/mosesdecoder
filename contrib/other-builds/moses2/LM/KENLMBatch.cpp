@@ -343,7 +343,7 @@ void KENLMBatch::SetParameter(const std::string& key,
 }
 
 void KENLMBatch::EvaluateWhenAppliedBatch(
-    const std::vector<Hypothesis*> &batch) const
+    const Batch &batch) const
 {
   {
     // write lock
