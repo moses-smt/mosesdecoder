@@ -9,6 +9,7 @@
 #include <cstddef>
 #include <vector>
 #include <istream>
+#include "Vector.h"
 
 namespace Moses2
 {
@@ -116,7 +117,7 @@ public:
 };
 
 class Hypothesis;
-typedef std::vector<Hypothesis*> Batch;
+typedef Vector<Hypothesis*> Batch;
 
 }
 

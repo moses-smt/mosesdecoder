@@ -81,7 +81,7 @@ public:
   void EvaluateAfterTablePruning(MemPool &pool, const SCFG::TargetPhrases &tps,
       const Phrase<SCFG::Word> &sourcePhrase) const;
 
-  void EvaluateWhenAppliedBatch(const std::vector<Hypothesis*> &batch) const;
+  void EvaluateWhenAppliedBatch(const Batch &batch) const;
 
 protected:
   std::vector<const FeatureFunction*> m_featureFunctions;

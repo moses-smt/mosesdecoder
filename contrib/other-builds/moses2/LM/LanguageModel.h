@@ -5,8 +5,7 @@
  *      Author: hieu
  */
 
-#ifndef LANGUAGEMODEL_H_
-#define LANGUAGEMODEL_H_
+#pragma once
 
 #include "../FF/StatefulFeatureFunction.h"
 #include "../TypeDef.h"
@@ -93,4 +92,3 @@ protected:
 
 }
 
-#endif /* LANGUAGEMODEL_H_ */

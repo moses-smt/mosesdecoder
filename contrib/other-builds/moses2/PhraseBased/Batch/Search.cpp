@@ -28,6 +28,7 @@ namespace NSBatch
 Search::Search(Manager &mgr)
 :Moses2::Search(mgr)
 , m_stacks(mgr)
+, m_batch(mgr.GetPool())
 {
   // TODO Auto-generated constructor stub
 
