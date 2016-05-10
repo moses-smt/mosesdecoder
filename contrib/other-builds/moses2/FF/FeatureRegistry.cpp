@@ -7,6 +7,7 @@
 #include "../LM/KENLM.h"
 #include "../LM/KENLMBatch.h"
 #include "../LM/LanguageModel.h"
+#include "../LM/GLM.h"
 
 #include "Distortion.h"
 #include "LexicalReordering/LexicalReordering.h"
@@ -55,6 +56,7 @@ FeatureRegistry::FeatureRegistry()
   Add("KENLM", new KenFactory());
 
   MOSES_FNAME(KENLMBatch);
+  MOSES_FNAME(GLM);
 
   MOSES_FNAME(LanguageModel);
 
