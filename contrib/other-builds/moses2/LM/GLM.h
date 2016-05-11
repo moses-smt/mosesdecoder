@@ -75,7 +75,9 @@ protected:
   std::vector<lm::WordIndex> m_lmIdLookup;
 
   // batch
-  void CreateNGram(const Hypothesis &hypo) const;
+  typedef std::vector<const Factor*> Context;
+
+  void CreateNGram(std::vector<std::pair<Hypothesis*, Context> > &contexts, Hypothesis &hypo) const;
 
   void ShiftOrPush(std::vector<const Factor*> &context,
       const Factor *factor) const;

@@ -109,6 +109,19 @@ void GLM::EvaluateInIsolation(MemPool &pool, const System &system,
 //  context.push_back(m_bos);
 
   context.reserve(m_order);
+  for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
+    const Factor *factor = targetPhrase[i][m_factorType];
+    ShiftOrPush(context, factor);
+
+    if (context.size() == m_order) {
+      //std::pair<SCORE, void*> fromScoring = Score(context);
+      //score += fromScoring.first;
+    }
+    else if (estimatedScore) {
+      //std::pair<SCORE, void*> fromScoring = Score(context);
+      //nonFullScore += fromScoring.first;
+    }
+  }
 
 }
 
@@ -174,15 +187,33 @@ void GLM::SetParameter(const std::string& key,
 void GLM::EvaluateWhenAppliedBatch(
     const Batch &batch) const
 {
+  std::vector<std::pair<Hypothesis*, Context> > contexts;
+
   for (size_t i = 0; i < batch.size(); ++i) {
     Hypothesis *hypo = batch[i];
-    CreateNGram(*hypo);
+    CreateNGram(contexts, *hypo);
   }
 }
 
-void GLM::CreateNGram(const Hypothesis &hypo) const
+void GLM::CreateNGram(std::vector<std::pair<Hypothesis*, Context> > &contexts, Hypothesis &hypo) const
 {
+  const TargetPhrase<Moses2::Word> &tp = hypo.GetTargetPhrase();
 
+  if (tp.GetSize() == 0) {
+    return;
+  }
+
+  Context context;
+  context.reserve(m_order);
+
+  for (size_t i = 0; i < tp.GetSize(); ++i) {
+    const Word &word = tp[i];
+    const Factor *factor = word[m_factorType];
+    ShiftOrPush(context, factor);
+
+    std::pair<Hypothesis*, Context> ele(&hypo, context);
+    contexts.push_back(ele);
+  }
 }
 
 void GLM::ShiftOrPush(std::vector<const Factor*> &context,
