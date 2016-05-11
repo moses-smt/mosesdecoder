@@ -60,6 +60,9 @@ class PhraseDictionaryDynamicCacheBased : public PhraseDictionary
   typedef boost::tuple<TargetPhraseCollection::shared_ptr , AgeCollection*, Scores*> TargetCollectionPair;
   typedef std::map<Phrase, TargetCollectionPair> cacheMap;
 
+  // factored translation
+  std::vector<FactorType> m_inputFactorsVec, m_outputFactorsVec;
+
   // data structure for the cache
   cacheMap m_cacheTM;
   std::vector<Scores> precomputedScores;
