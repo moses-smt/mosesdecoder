@@ -173,14 +173,13 @@ void GPULM::CreateNGram(std::vector<std::pair<Hypothesis*, Context> > &contexts,
 {
   const TargetPhrase<Moses2::Word> &tp = hypo.GetTargetPhrase();
 
-  FFState *state = hypo.GetState(GetStatefulInd());
-  GPULMState &stateCast = static_cast<GPULMState&>(*state);
-
   if (tp.GetSize() == 0) {
     return;
   }
 
-  Context context;
+  FFState *state = hypo.GetState(GetStatefulInd());
+  GPULMState &stateCast = static_cast<GPULMState&>(*state);
+  Context context = stateCast.lastWords;
   context.reserve(m_order);
 
   for (size_t i = 0; i < tp.GetSize(); ++i) {
