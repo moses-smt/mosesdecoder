@@ -30,9 +30,9 @@ public:
   }
 
   const Scores &GetScores() const
-  {
-    return *m_scores;
-  }
+  { return *m_scores; }
+  Scores &GetScores()
+  { return *m_scores; }
 
   const FFState *GetState(size_t ind) const
   {  return m_ffStates[ind]; }

@@ -209,7 +209,7 @@ void FeatureFunctions::EvaluateAfterTablePruning(MemPool &pool, const SCFG::Targ
 void FeatureFunctions::EvaluateWhenAppliedBatch(const Batch &batch) const
 {
   BOOST_FOREACH(const StatefulFeatureFunction *ff, m_statefulFeatureFunctions) {
-    ff->EvaluateWhenAppliedBatch(batch);
+    ff->EvaluateWhenAppliedBatch(m_system, batch);
   }
 }
 

@@ -45,6 +45,7 @@ public:
       FFState &state) const = 0;
 
   virtual void EvaluateWhenAppliedBatch(
+      const System &system,
       const Batch &batch) const;
 
 protected:

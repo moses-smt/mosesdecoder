@@ -30,6 +30,7 @@ StatefulFeatureFunction::~StatefulFeatureFunction()
 }
 
 void StatefulFeatureFunction::EvaluateWhenAppliedBatch(
+    const System &system,
     const Batch &batch) const
 {
    //cerr << "EvaluateWhenAppliedBatch:" << m_name << endl;

@@ -20,11 +20,7 @@
 #include "../System.h"
 #include "../PhraseBased/Hypothesis.h"
 #include "../PhraseBased/Manager.h"
-#include "lm/state.hh"
-#include "lm/left.hh"
 #include "util/exception.hh"
-#include "util/tokenize_piece.hh"
-#include "util/string_stream.hh"
 #include "../legacy/FactorCollection.h"
 
 using namespace std;
@@ -50,6 +46,14 @@ struct GPULMState: public FFState
     bool ret = lastWords == otherCast.lastWords;
 
     return ret;
+  }
+
+  void SetContext(const Context &context)
+  {
+    lastWords = context;
+    if (lastWords.size()) {
+      lastWords.resize(lastWords.size() - 1);
+    }
   }
 
   Context lastWords;
@@ -159,14 +163,27 @@ void GPULM::SetParameter(const std::string& key,
 }
 
 void GPULM::EvaluateWhenAppliedBatch(
+    const System &system,
     const Batch &batch) const
 {
+  // create list of ngrams
   std::vector<std::pair<Hypothesis*, Context> > contexts;
 
   for (size_t i = 0; i < batch.size(); ++i) {
     Hypothesis *hypo = batch[i];
     CreateNGram(contexts, *hypo);
   }
+
+  // score ngrams
+  for (size_t i = 0; i < contexts.size(); ++i) {
+    const Context &context = contexts[i].second;
+    Hypothesis *hypo = contexts[i].first;
+    SCORE score = Score(context);
+    Scores &scores = hypo->GetScores();
+    scores.PlusEquals(system, *this, score);
+  }
+
+
 }
 
 void GPULM::CreateNGram(std::vector<std::pair<Hypothesis*, Context> > &contexts, Hypothesis &hypo) const
@@ -177,9 +194,13 @@ void GPULM::CreateNGram(std::vector<std::pair<Hypothesis*, Context> > &contexts,
     return;
   }
 
-  FFState *state = hypo.GetState(GetStatefulInd());
-  GPULMState &stateCast = static_cast<GPULMState&>(*state);
-  Context context = stateCast.lastWords;
+  const Hypothesis *prevHypo = hypo.GetPrevHypo();
+  assert(prevHypo);
+  const FFState *prevState = prevHypo->GetState(GetStatefulInd());
+  assert(prevState);
+  const GPULMState &prevStateCast = static_cast<const GPULMState&>(*prevState);
+
+  Context context = prevStateCast.lastWords;
   context.reserve(m_order);
 
   for (size_t i = 0; i < tp.GetSize(); ++i) {
@@ -190,6 +211,10 @@ void GPULM::CreateNGram(std::vector<std::pair<Hypothesis*, Context> > &contexts,
     std::pair<Hypothesis*, Context> ele(&hypo, context);
     contexts.push_back(ele);
   }
+
+  FFState *state = hypo.GetState(GetStatefulInd());
+  GPULMState &stateCast = static_cast<GPULMState&>(*state);
+  stateCast.SetContext(context);
 }
 
 void GPULM::ShiftOrPush(std::vector<const Factor*> &context,
@@ -205,6 +230,12 @@ void GPULM::ShiftOrPush(std::vector<const Factor*> &context,
   }
 
   context[0] = factor;
+}
+
+SCORE GPULM::Score(const Context &context) const
+{
+
+  return 444;
 }
 
 }
