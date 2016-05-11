@@ -23,12 +23,12 @@ namespace Moses2
 
 class Word;
 
-class GLM: public StatefulFeatureFunction
+class GPULM: public StatefulFeatureFunction
 {
 public:
-  GLM(size_t startInd, const std::string &line);
+  GPULM(size_t startInd, const std::string &line);
 
-  virtual ~GLM();
+  virtual ~GPULM();
 
   virtual void Load(System &system);
 
@@ -75,8 +75,6 @@ protected:
   std::vector<lm::WordIndex> m_lmIdLookup;
 
   // batch
-  typedef std::vector<const Factor*> Context;
-
   void CreateNGram(std::vector<std::pair<Hypothesis*, Context> > &contexts, Hypothesis &hypo) const;
 
   void ShiftOrPush(std::vector<const Factor*> &context,

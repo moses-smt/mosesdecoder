@@ -35,9 +35,9 @@ public:
   }
 
   const FFState *GetState(size_t ind) const
-  {
-    return m_ffStates[ind];
-  }
+  {  return m_ffStates[ind]; }
+  FFState *GetState(size_t ind)
+  {  return m_ffStates[ind]; }
 
   virtual size_t hash() const;
   virtual size_t hash(size_t seed) const;

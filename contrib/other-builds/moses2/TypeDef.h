@@ -119,5 +119,8 @@ public:
 class Hypothesis;
 typedef Vector<Hypothesis*> Batch;
 
+class Factor;
+typedef std::vector<const Factor*> Context;
+
 }
 

@@ -1,5 +1,5 @@
 /*
- * GLM.cpp
+ * GPULM.cpp
  *
  *  Created on: 4 Nov 2015
  *      Author: hieu
@@ -14,7 +14,7 @@
 #include <errno.h>
 #include <unistd.h>
 
-#include "GLM.h"
+#include "GPULM.h"
 #include "../Phrase.h"
 #include "../Scores.h"
 #include "../System.h"
@@ -32,47 +32,46 @@ using namespace std;
 namespace Moses2
 {
 
-struct GLMState: public FFState
+struct GPULMState: public FFState
 {
   virtual std::string ToString() const
   {
-    return "GLMState";
+    return "GPULMState";
   }
 
   virtual size_t hash() const
   {
-
-    return 3434;
+    return boost::hash_value(lastWords);
   }
 
   virtual bool operator==(const FFState& other) const
   {
+    const GPULMState &otherCast = static_cast<const GPULMState&>(other);
+    bool ret = lastWords == otherCast.lastWords;
 
-    return true;
+    return ret;
   }
 
-  size_t numWords;
-  const Factor** lastWords;
-
+  Context lastWords;
 };
 
 
 /////////////////////////////////////////////////////////////////
-GLM::GLM(size_t startInd, const std::string &line)
+GPULM::GPULM(size_t startInd, const std::string &line)
 :StatefulFeatureFunction(startInd, line)
 {
-  cerr << "GLM::GLM" << endl;
+  cerr << "GPULM::GPULM" << endl;
   ReadParameters();
 }
 
-GLM::~GLM()
+GPULM::~GPULM()
 {
   // TODO Auto-generated destructor stub
 }
 
-void GLM::Load(System &system)
+void GPULM::Load(System &system)
 {
-  cerr << "GLM::Load" << endl;
+  cerr << "GPULM::Load" << endl;
   FactorCollection &fc = system.GetVocab();
 
   m_bos = fc.AddFactor(BOS_, system, false);
@@ -81,21 +80,21 @@ void GLM::Load(System &system)
   FactorCollection &collection = system.GetVocab();
 }
 
-FFState* GLM::BlankState(MemPool &pool) const
+FFState* GPULM::BlankState(MemPool &pool) const
 {
-  GLMState *ret = new (pool.Allocate<GLMState>()) GLMState();
+  GPULMState *ret = new (pool.Allocate<GPULMState>()) GPULMState();
   return ret;
 }
 
 //! return the state associated with the empty hypothesis for a given sentence
-void GLM::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
+void GPULM::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
     const InputType &input, const Hypothesis &hypo) const
 {
-  GLMState &stateCast = static_cast<GLMState&>(state);
-  //stateCast.state = m_ngram->BeginSentenceState();
+  GPULMState &stateCast = static_cast<GPULMState&>(state);
+  stateCast.lastWords.push_back(m_bos);
 }
 
-void GLM::EvaluateInIsolation(MemPool &pool, const System &system,
+void GPULM::EvaluateInIsolation(MemPool &pool, const System &system,
     const Phrase<Moses2::Word> &source, const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
     SCORE *estimatedScore) const
 {
@@ -105,7 +104,7 @@ void GLM::EvaluateInIsolation(MemPool &pool, const System &system,
 
   SCORE score = 0;
   SCORE nonFullScore = 0;
-  vector<const Factor*> context;
+  Context context;
 //  context.push_back(m_bos);
 
   context.reserve(m_order);
@@ -125,21 +124,21 @@ void GLM::EvaluateInIsolation(MemPool &pool, const System &system,
 
 }
 
-void GLM::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
+void GPULM::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
     const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
     SCORE *estimatedScore) const
 {
   UTIL_THROW2("Not implemented");
 }
 
-void GLM::EvaluateWhenApplied(const ManagerBase &mgr,
+void GPULM::EvaluateWhenApplied(const ManagerBase &mgr,
     const Hypothesis &hypo, const FFState &prevState, Scores &scores,
     FFState &state) const
 {
   UTIL_THROW2("Not implemented");
 }
 
-void GLM::SetParameter(const std::string& key,
+void GPULM::SetParameter(const std::string& key,
     const std::string& value)
 {
   //cerr << "key=" << key << " " << value << endl;
@@ -152,31 +151,6 @@ void GLM::SetParameter(const std::string& key,
   else if (key == "factor") {
     m_factorType = Scan<FactorType>(value);
   }
-  else if (key == "lazyken") {
-    m_load_method =
-           boost::lexical_cast<bool>(value) ?
-           util::LAZY : util::POPULATE_OR_READ;
-  }
-  else if (key == "load") {
-    if (value == "lazy") {
-      m_load_method = util::LAZY;
-    }
-    else if (value == "populate_or_lazy") {
-      m_load_method = util::POPULATE_OR_LAZY;
-    }
-    else if (value == "populate_or_read" || value == "populate") {
-      m_load_method = util::POPULATE_OR_READ;
-    }
-    else if (value == "read") {
-      m_load_method = util::READ;
-    }
-    else if (value == "parallel_read") {
-      m_load_method = util::PARALLEL_READ;
-    }
-    else {
-      UTIL_THROW2("Unknown GLM load method " << value);
-    }
-  }
   else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
@@ -184,7 +158,7 @@ void GLM::SetParameter(const std::string& key,
   //cerr << "SetParameter done" << endl;
 }
 
-void GLM::EvaluateWhenAppliedBatch(
+void GPULM::EvaluateWhenAppliedBatch(
     const Batch &batch) const
 {
   std::vector<std::pair<Hypothesis*, Context> > contexts;
@@ -195,9 +169,12 @@ void GLM::EvaluateWhenAppliedBatch(
   }
 }
 
-void GLM::CreateNGram(std::vector<std::pair<Hypothesis*, Context> > &contexts, Hypothesis &hypo) const
+void GPULM::CreateNGram(std::vector<std::pair<Hypothesis*, Context> > &contexts, Hypothesis &hypo) const
 {
   const TargetPhrase<Moses2::Word> &tp = hypo.GetTargetPhrase();
+
+  FFState *state = hypo.GetState(GetStatefulInd());
+  GPULMState &stateCast = static_cast<GPULMState&>(*state);
 
   if (tp.GetSize() == 0) {
     return;
@@ -216,7 +193,7 @@ void GLM::CreateNGram(std::vector<std::pair<Hypothesis*, Context> > &contexts, H
   }
 }
 
-void GLM::ShiftOrPush(std::vector<const Factor*> &context,
+void GPULM::ShiftOrPush(std::vector<const Factor*> &context,
     const Factor *factor) const
 {
   if (context.size() < m_order) {
