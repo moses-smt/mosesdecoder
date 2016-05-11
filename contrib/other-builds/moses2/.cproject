@@ -35,6 +35,7 @@
 								<option id="gnu.cpp.compiler.option.optimization.level.299605809" name="Optimization Level" superClass="gnu.cpp.compiler.option.optimization.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.optimization.level.none" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.debugging.level.769854045" name="Debug Level" superClass="gnu.cpp.compiler.option.debugging.level" useByScannerDiscovery="false" value="gnu.cpp.compiler.debugging.level.max" valueType="enumerated"/>
 								<option id="gnu.cpp.compiler.option.include.paths.1502531988" name="Include paths (-I)" superClass="gnu.cpp.compiler.option.include.paths" useByScannerDiscovery="false" valueType="includePath">
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../gLM&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../boost/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../xmlrpc-c/include&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../cmph/include&quot;"/>
@@ -49,6 +50,7 @@
 									<listOptionValue builtIn="false" value="MAX_NUM_FACTORS=4"/>
 									<listOptionValue builtIn="false" value="WITH_THREADS"/>
 								</option>
+								<option id="gnu.cpp.compiler.option.dialect.std.1059395313" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.c++11" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.2101942464" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1439481930" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>

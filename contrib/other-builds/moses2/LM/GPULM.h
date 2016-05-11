@@ -18,6 +18,8 @@
 #include "../Word.h"
 #include "../TypeDef.h"
 
+#include "LM/gpuLM.hh"
+
 namespace Moses2
 {
 

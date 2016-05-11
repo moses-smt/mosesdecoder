@@ -136,6 +136,19 @@ if $(with-dalm) {
 #ORLM is always compiled but needs special headers
 #obj ORLM.o : ORLM.cpp ..//headers ../TranslationModel/DynSAInclude//dynsa : : : <include>../TranslationModel/DynSAInclude ;
 
+#GPULM
+local with-irstlm = [ option.get "with-gpulm" ] ;
+if $(with-gpulm) {
+  lib gpulm : : <search>$(with-gpulm)/lib <search>$(with-gpulm)/lib64 ;
+  obj gpulm.o : gpulm.cpp ..//headers : <include>$(with-gpulm)/include <include>$(with-gpulm)/include/gpulm ;
+  alias gpulm : gpulm.o irstlm : : : <define>LM_GPU ;
+  dependencies += gpulm ;
+  lmmacros += LM_GPU ;
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+  echo "!!! You are linking with the GPULM library !!!" ;
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+}
+
 #Top-level LM library.  If you've added a file that doesn't depend on external
 #libraries, put it here.  
 alias LM : Backward.cpp BackwardLMState.cpp Base.cpp BilingualLM.cpp Implementation.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp SkeletonLM.cpp 
