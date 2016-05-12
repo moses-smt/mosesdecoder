@@ -70,13 +70,20 @@ GPULM::GPULM(size_t startInd, const std::string &line)
 
 GPULM::~GPULM()
 {
-  // TODO Auto-generated destructor stub
+  // Free pinned memory:
+  pinnedMemoryDeallocator(ngrams_for_query);
+  pinnedMemoryDeallocator(results);
 }
 
 void GPULM::Load(System &system)
 {
   m_obj = new gpuLM(m_path, 20000);
   cerr << "GPULM::Load" << endl;
+  
+  //Allocate host memory here. Size should be same as the constructor
+  pinnedMemoryAllocator(ngrams_for_query, 20000*m_obj->getMaxNumNgrams());
+  pinnedMemoryAllocator(results, 20000); //Max 20000 ngram batches
+  
   FactorCollection &fc = system.GetVocab();
 
   m_bos = fc.AddFactor(BOS_, system, false);
