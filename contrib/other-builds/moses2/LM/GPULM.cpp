@@ -84,12 +84,15 @@ void GPULM::Load(System &system)
   pinnedMemoryAllocator(ngrams_for_query, 20000*m_obj->getMaxNumNgrams());
   pinnedMemoryAllocator(results, 20000); //Max 20000 ngram batches
   
-  FactorCollection &fc = system.GetVocab();
+  //Add factors 
+  FactorCollection &vocab = system.GetVocab();
+  std::unordered_map<std::string, unsigned int>& origmap = m_obj->getEncodeMap();
 
-  m_bos = fc.AddFactor(BOS_, system, false);
-  m_eos = fc.AddFactor(EOS_, system, false);
-
-  FactorCollection &collection = system.GetVocab();
+  for (auto it : origmap) {
+    const Factor *factor = vocab.AddFactor(it.first, system, false);
+    encode_map.insert(std::make_pair(factor, it.second));
+  }
+  
 }
 
 FFState* GPULM::BlankState(MemPool &pool) const
