@@ -1,5 +1,27 @@
 alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem ../../../moses/TranslationModel/CompactPT//cmph ../../../moses//moses ;
 
+local current = "" ;
+local includes = ;
+local with-gpulm = [ option.get "with-gpulm" ] ;
+if $(with-gpulm) {
+  lib gLM : : <search>$(with-gpulm)/release_build/LM ;
+  lib gpu_search_v2 : : <search>$(with-gpulm)/release_build/gpu ;
+  lib memory_management : : <search>$(with-gpulm)/release_build/gpu ;
+  lib cudart : : <search>/Developer/NVIDIA/CUDA-7.5/lib/ ;
+
+  includes += <include>$(with-gpulm) ;
+  current = "--with-gpulm=$(with-gpulm)" ;
+  fakelib GPULM : LM/GPULM.cpp ../../../moses//headers gLM gpu_search_v2 memory_management cudart : $(includes)  : : $(includes) <define>LM_GPU ;
+}
+else {
+  alias gLM ;
+  fakelib GPULM ;
+}
+
+path-constant PT-LOG : bin/pt.log ;
+update-if-changed $(PT-LOG) $(current) ;
+
+
  lib moses2_lib :
    AlignmentInfo.cpp
    AlignmentInfoCollection.cpp
@@ -154,7 +176,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
 	server/Translator.cpp
 	server/TranslationRequest.cpp
 	
-    deps ;
+    deps GPULM ;
 
 exe moses2 : Main.cpp moses2_lib ;
 exe CreateProbingPT2 : CreateProbingPT2.cpp moses2_lib ;
