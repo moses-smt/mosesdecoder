@@ -11,6 +11,7 @@
 namespace Moses2
 {
 ReorderingStack::ReorderingStack(MemPool &pool) 
+  :m_stack(pool)
 {
 
 }
