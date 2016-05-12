@@ -76,14 +76,6 @@ protected:
   const Factor *m_eos;
   size_t m_order;
 
-  inline lm::WordIndex TranslateID(const Word &word) const
-  {
-    std::size_t factor = word[m_factorType]->GetId();
-    return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
-  }
-
-  std::vector<lm::WordIndex> m_lmIdLookup;
-
   // batch
   void CreateNGram(std::vector<std::pair<Hypothesis*, Context> > &contexts, Hypothesis &hypo) const;
 
