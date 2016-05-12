@@ -8,11 +8,10 @@ if $(with-gpulm) {
   lib gpu_search_v2 : : <search>$(with-gpulm)/release_build/gpu ;
   lib memory_management : : <search>$(with-gpulm)/release_build/gpu ;
   lib cudart : : <search>/Developer/NVIDIA/CUDA-7.5/lib/ ;
-  lib dl : : <search>/Developer/NVIDIA/CUDA-7.5/lib/ ;
 
   includes += <include>$(with-gpulm) ;
   current = "--with-gpulm=$(with-gpulm)" ;
-  fakelib GPULM : LM/GPULM.cpp ../../../moses//headers gLM gpu_search_v2 memory_management cudart dl : $(includes)  : : $(includes) <define>LM_GPU ;
+  fakelib GPULM : LM/GPULM.cpp ../../../moses//headers gLM gpu_search_v2 memory_management cudart : $(includes)  : : $(includes) <define>LM_GPU ;
 }
 else {
   alias gLM ;
