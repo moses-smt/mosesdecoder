@@ -231,6 +231,9 @@ public:
     return this != &other;
   }
 
+  inline pointer address(reference r) { return &r; }
+  inline const_pointer address(const_reference r) { return &r; }
+
   MemPool &m_pool;
 protected:
 };
