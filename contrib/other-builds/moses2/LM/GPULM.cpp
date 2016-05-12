@@ -81,7 +81,8 @@ void GPULM::Load(System &system)
   cerr << "GPULM::Load" << endl;
   
   //Allocate host memory here. Size should be same as the constructor
-  pinnedMemoryAllocator(ngrams_for_query, 20000*m_obj->getMaxNumNgrams());
+  max_ngram_order = m_obj->getMaxNumNgrams();
+  pinnedMemoryAllocator(ngrams_for_query, 20000*max_ngram_order);
   pinnedMemoryAllocator(results, 20000); //Max 20000 ngram batches
   
   //Add factors 
@@ -184,7 +185,31 @@ void GPULM::EvaluateWhenAppliedBatch(
     Hypothesis *hypo = batch[i];
     CreateNGram(contexts, *hypo);
   }
-
+  
+  //Create the query vector
+  unsigned int position = 0; //Position in ngrams_for_query array
+  unsigned int num_queries = 0;
+  for (auto context : contexts) {
+    num_queries++;
+    int counter = 0; //Check for non full ngrams
+    for (auto factor : context.second) {
+      auto vocabID = encode_map.find(factor);
+      if (vocabID == encode_map.end()){
+        ngrams_for_query[position] = 1; //UNK
+      } else {
+        ngrams_for_query[position] = vocabID->second;
+      }
+      counter++;
+      position++;
+    }
+    while (counter < max_ngram_order) {
+      ngrams_for_query[position] = 0;
+      counter++;
+      position++;
+    }
+  }
+  //Score here + copy back-and-forth
+  m_obj->query(results, ngrams_for_query, num_queries);
   // score ngrams
   for (size_t i = 0; i < contexts.size(); ++i) {
     const Context &context = contexts[i].second;
