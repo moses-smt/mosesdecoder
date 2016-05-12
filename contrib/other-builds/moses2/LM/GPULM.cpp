@@ -75,6 +75,7 @@ GPULM::~GPULM()
 
 void GPULM::Load(System &system)
 {
+  m_obj = new gpuLM(m_path, 20000);
   cerr << "GPULM::Load" << endl;
   FactorCollection &fc = system.GetVocab();
 

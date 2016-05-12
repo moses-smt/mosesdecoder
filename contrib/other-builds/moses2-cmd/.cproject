@@ -33,6 +33,7 @@
 								<option id="gnu.cpp.compiler.option.preprocessor.def.758438174" name="Defined symbols (-D)" superClass="gnu.cpp.compiler.option.preprocessor.def" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="MAX_NUM_FACTORS=4"/>
 								</option>
+								<option id="gnu.cpp.compiler.option.dialect.std.1644824670" name="Language standard" superClass="gnu.cpp.compiler.option.dialect.std" value="gnu.cpp.compiler.dialect.c++11" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.123491630" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.c.compiler.exe.debug.848723608" name="GCC C Compiler" superClass="cdt.managedbuild.tool.gnu.c.compiler.exe.debug">
@@ -43,6 +44,10 @@
 							<tool id="cdt.managedbuild.tool.gnu.c.linker.exe.debug.1706155110" name="GCC C Linker" superClass="cdt.managedbuild.tool.gnu.c.linker.exe.debug"/>
 							<tool id="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug.24079646" name="GCC C++ Linker" superClass="cdt.managedbuild.tool.gnu.cpp.linker.exe.debug">
 								<option id="gnu.cpp.link.option.libs.587418382" name="Libraries (-l)" superClass="gnu.cpp.link.option.libs" valueType="libs">
+									<listOptionValue builtIn="false" value="gLM"/>
+									<listOptionValue builtIn="false" value="gpu_search_v2"/>
+									<listOptionValue builtIn="false" value="memory_management"/>
+									<listOptionValue builtIn="false" value="cudart"/>
 									<listOptionValue builtIn="false" value="xmlrpc_xmltok"/>
 									<listOptionValue builtIn="false" value="xmlrpc_xmlparse"/>
 									<listOptionValue builtIn="false" value="xmlrpc_util++"/>
@@ -72,6 +77,9 @@
 									<listOptionValue builtIn="false" value="rt"/>
 								</option>
 								<option id="gnu.cpp.link.option.paths.1920945405" name="Library search path (-L)" superClass="gnu.cpp.link.option.paths" valueType="libPaths">
+									<listOptionValue builtIn="false" value="/Developer/NVIDIA/CUDA-7.5/lib"/>
+									<listOptionValue builtIn="false" value="${workspace_loc:}/../../gLM/release_build/LM/"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../gLM/release_build/gpu&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/../../boost/lib64&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../cmph/lib&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../xmlrpc-c/lib&quot;"/>

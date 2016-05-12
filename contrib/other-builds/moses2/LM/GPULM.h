@@ -62,6 +62,8 @@ public:
       const Batch &batch) const;
 
 protected:
+  gpuLM *m_obj;
+
   std::string m_path;
   FactorType m_factorType;
   util::LoadMethod m_load_method;
