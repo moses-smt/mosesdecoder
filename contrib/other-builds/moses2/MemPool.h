@@ -227,6 +227,10 @@ public:
     //std::cerr << "destroy " << p << " " << n << std::endl;
   }
 
+  bool operator!=(const MemPoolAllocator& other) const {
+    return this != &other;
+  }
+
   MemPool &m_pool;
 protected:
 };

@@ -23,7 +23,7 @@ class ReorderingStack
 {
 private:
 
-  std::vector<Range> m_stack;
+  Vector<Range> m_stack;
 
 public:
   ReorderingStack(MemPool &pool);
