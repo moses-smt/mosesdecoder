@@ -19,6 +19,7 @@
 #include "../TypeDef.h"
 
 #include "LM/gpuLM.hh"
+#include <utility>
 
 namespace Moses2
 {
@@ -29,6 +30,7 @@ class GPULM: public StatefulFeatureFunction
 {
   float * results;
   unsigned int * ngrams_for_query;
+  std::unordered_map<const Factor *, unsigned int> encode_map;
 public:
   GPULM(size_t startInd, const std::string &line);
 
