@@ -7,7 +7,7 @@ if $(with-gpulm) {
   lib gLM : : <search>$(with-gpulm)/release_build/LM ;
   lib gpu_search_v2 : : <search>$(with-gpulm)/release_build/gpu ;
   lib memory_management : : <search>$(with-gpulm)/release_build/gpu ;
-  lib cudart : : <search>/Developer/NVIDIA/CUDA-7.5/lib/ ;
+  lib cudart : : <search>/opt/cuda/lib64 ;
 
   includes += <include>$(with-gpulm) ;
   current = "--with-gpulm=$(with-gpulm)" ;
