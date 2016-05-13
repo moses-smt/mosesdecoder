@@ -97,6 +97,26 @@ void GPULM::Load(System &system)
   
 }
 
+void GPULM::SetParameter(const std::string& key,
+    const std::string& value)
+{
+  //cerr << "key=" << key << " " << value << endl;
+  if (key == "path") {
+    m_path = value;
+  }
+  else if (key == "order") {
+    m_order = Scan<size_t>(value);
+  }
+  else if (key == "factor") {
+    m_factorType = Scan<FactorType>(value);
+  }
+  else {
+    StatefulFeatureFunction::SetParameter(key, value);
+  }
+
+  //cerr << "SetParameter done" << endl;
+}
+
 FFState* GPULM::BlankState(MemPool &pool) const
 {
   GPULMState *ret = new (pool.Allocate<GPULMState>()) GPULMState();
@@ -129,6 +149,10 @@ void GPULM::EvaluateInIsolation(MemPool &pool, const System &system,
     const Factor *factor = targetPhrase[i][m_factorType];
     ShiftOrPush(context, factor);
 
+    unsigned int position = 0; //Position in ngrams_for_query array
+    unsigned int num_queries = 0;
+    CreateQueryVec(context, position);
+
     if (context.size() == m_order) {
       //std::pair<SCORE, void*> fromScoring = Score(context);
       //score += fromScoring.first;
@@ -155,26 +179,6 @@ void GPULM::EvaluateWhenApplied(const ManagerBase &mgr,
   UTIL_THROW2("Not implemented");
 }
 
-void GPULM::SetParameter(const std::string& key,
-    const std::string& value)
-{
-  //cerr << "key=" << key << " " << value << endl;
-  if (key == "path") {
-    m_path = value;
-  }
-  else if (key == "order") {
-    m_order = Scan<size_t>(value);
-  }
-  else if (key == "factor") {
-    m_factorType = Scan<FactorType>(value);
-  }
-  else {
-    StatefulFeatureFunction::SetParameter(key, value);
-  }
-
-  //cerr << "SetParameter done" << endl;
-}
-
 void GPULM::EvaluateWhenAppliedBatch(
     const System &system,
     const Batch &batch) const
@@ -192,8 +196,28 @@ void GPULM::EvaluateWhenAppliedBatch(
   unsigned int num_queries = 0;
   for (auto context : contexts) {
     num_queries++;
+    CreateQueryVec(context.second, position);
+  }
+
+  //Score here + copy back-and-forth
+  m_obj->query(results, ngrams_for_query, num_queries);
+
+  // score ngrams
+  for (size_t i = 0; i < contexts.size(); ++i) {
+    const Context &context = contexts[i].second;
+    Hypothesis *hypo = contexts[i].first;
+    SCORE score = results[i];
+    Scores &scores = hypo->GetScores();
+    scores.PlusEquals(system, *this, score);
+  }
+}
+
+void GPULM::CreateQueryVec(
+		  const Context &context,
+		  unsigned int &position) const
+{
     int counter = 0; //Check for non full ngrams
-    for (auto factor : context.second) {
+    for (auto factor : context) {
       auto vocabID = encode_map.find(factor);
       if (vocabID == encode_map.end()){
         ngrams_for_query[position] = 1; //UNK
@@ -208,19 +232,6 @@ void GPULM::EvaluateWhenAppliedBatch(
       counter++;
       position++;
     }
-  }
-  //Score here + copy back-and-forth
-  m_obj->query(results, ngrams_for_query, num_queries);
-  // score ngrams
-  for (size_t i = 0; i < contexts.size(); ++i) {
-    const Context &context = contexts[i].second;
-    Hypothesis *hypo = contexts[i].first;
-    SCORE score = results[i];
-    Scores &scores = hypo->GetScores();
-    scores.PlusEquals(system, *this, score);
-  }
-
-
 }
 
 void GPULM::CreateNGram(std::vector<std::pair<Hypothesis*, Context> > &contexts, Hypothesis &hypo) const
@@ -267,12 +278,6 @@ void GPULM::ShiftOrPush(std::vector<const Factor*> &context,
   }
 
   context[0] = factor;
-}
-
-SCORE GPULM::Score(const Context &context) const
-{
-
-  return 444;
 }
 
 }

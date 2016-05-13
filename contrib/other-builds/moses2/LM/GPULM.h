@@ -82,7 +82,10 @@ protected:
   void ShiftOrPush(std::vector<const Factor*> &context,
       const Factor *factor) const;
 
-  SCORE Score(const Context &context) const;
+  void CreateQueryVec(
+		  const Context &context,
+		  unsigned int &position) const;
+
 };
 
 }
