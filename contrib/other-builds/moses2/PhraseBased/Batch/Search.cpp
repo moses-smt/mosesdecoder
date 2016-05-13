@@ -67,27 +67,36 @@ void Search::Decode()
 
 void Search::Decode(size_t stackInd)
 {
+  cerr << "stackInd=" << stackInd << endl;
   Stack &stack = m_stacks[stackInd];
   if (&stack == &m_stacks.Back()) {
     // last stack. don't do anythin
     return;
   }
 
+  cerr << "HH1" << endl;
   Hypotheses &hypos = stack.GetSortedAndPruneHypos(mgr, mgr.arcLists);
+  cerr << "HH2" << endl;
 
   const InputPaths &paths = mgr.GetInputPaths();
+  cerr << "HH3" << endl;
 
   BOOST_FOREACH(const InputPathBase *path, paths){
+    //cerr << "HH4" << endl;
     BOOST_FOREACH(const HypothesisBase *hypo, hypos) {
+      //cerr << "HH5" << endl;
       Extend(*static_cast<const Hypothesis*>(hypo), *static_cast<const InputPath*>(path));
     }
   }
 
+  cerr << "HH6" << endl;
   // process batch
   mgr.system.featureFunctions.EvaluateWhenAppliedBatch(m_batch);
+  cerr << "HH7" << endl;
 
   for (size_t i = 0; i < m_batch.size(); ++i) {
     Hypothesis *hypo = m_batch[i];
+    cerr << "  i=" << i << " " << hypo << endl;
     m_stacks.Add(hypo, mgr.GetHypoRecycle(), mgr.arcLists);
   }
   m_batch.clear();
