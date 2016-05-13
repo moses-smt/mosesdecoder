@@ -77,7 +77,8 @@ GPULM::~GPULM()
 
 void GPULM::Load(System &system)
 {
-  m_obj = new gpuLM(m_path, 20000);
+  int deviceID = 0; //@TODO This is an optional argument
+  m_obj = new gpuLM(m_path, 20000, deviceID);
   cerr << "GPULM::Load" << endl;
   
   //Allocate host memory here. Size should be same as the constructor
@@ -214,7 +215,7 @@ void GPULM::EvaluateWhenAppliedBatch(
   for (size_t i = 0; i < contexts.size(); ++i) {
     const Context &context = contexts[i].second;
     Hypothesis *hypo = contexts[i].first;
-    SCORE score = Score(context);
+    SCORE score = results[i];
     Scores &scores = hypo->GetScores();
     scores.PlusEquals(system, *this, score);
   }
