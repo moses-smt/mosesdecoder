@@ -28,12 +28,16 @@ class Word;
 
 class GPULM: public StatefulFeatureFunction
 {
-  float * results;
-  unsigned int * ngrams_for_query;
+  mutable boost::thread_specific_ptr<float> m_results;
+  mutable boost::thread_specific_ptr<unsigned int> m_ngrams_for_query;
+  
+  size_t max_num_queries;
   unsigned short max_ngram_order;
   std::unordered_map<const Factor *, unsigned int> encode_map;
 public:
   GPULM(size_t startInd, const std::string &line);
+  float * getThreadLocalResults() const;
+  unsigned int * getThreadLocalngrams() const;
 
   virtual ~GPULM();
 

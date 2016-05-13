@@ -22,6 +22,7 @@
 #include "../PhraseBased/Manager.h"
 #include "util/exception.hh"
 #include "../legacy/FactorCollection.h"
+#include <boost/thread/tss.hpp>
 
 using namespace std;
 
@@ -71,20 +72,42 @@ GPULM::GPULM(size_t startInd, const std::string &line)
 GPULM::~GPULM()
 {
   // Free pinned memory:
-  pinnedMemoryDeallocator(ngrams_for_query);
-  pinnedMemoryDeallocator(results);
+  //@TODO FREE PINNED MEMORY HERE
+  //pinnedMemoryDeallocator(ngrams_for_query);
+  //pinnedMemoryDeallocator(results);
+}
+
+float * GPULM::getThreadLocalResults() const {
+    float * res = m_results.get();
+    if(!res) {
+        float * local_results;
+        pinnedMemoryAllocator(local_results, max_num_queries); //Max max_num_queries ngram batches @TODO NO FREE
+        m_results.reset(local_results);
+    }
+    return res;
+}
+
+unsigned int * GPULM::getThreadLocalngrams() const {
+    unsigned int * res = m_ngrams_for_query.get();
+    if(!res) {
+    
+        unsigned int * ngrams_for_query;
+        pinnedMemoryAllocator(ngrams_for_query, max_num_queries*max_ngram_order); //Max max_num_queries ngram batches @TODO NO FREEs
+        m_ngrams_for_query.reset(ngrams_for_query);
+    }
+    return res;
+    
 }
 
 void GPULM::Load(System &system)
 {
   int deviceID = 0; //@TODO This is an optional argument
-  m_obj = new gpuLM(m_path, 20000, deviceID);
+  max_num_queries = 20000;
+  m_obj = new gpuLM(m_path, max_num_queries, deviceID);
   cerr << "GPULM::Load" << endl;
   
   //Allocate host memory here. Size should be same as the constructor
   max_ngram_order = m_obj->getMaxNumNgrams();
-  pinnedMemoryAllocator(ngrams_for_query, 20000*max_ngram_order);
-  pinnedMemoryAllocator(results, 20000); //Max 20000 ngram batches
   
   //Add factors 
   FactorCollection &vocab = system.GetVocab();
@@ -190,6 +213,9 @@ void GPULM::EvaluateWhenAppliedBatch(
     Hypothesis *hypo = batch[i];
     CreateNGram(contexts, *hypo);
   }
+  
+  unsigned int * ngrams_for_query = getThreadLocalngrams();
+  float * results = getThreadLocalResults();
   
   //Create the query vector
   unsigned int position = 0; //Position in ngrams_for_query array
