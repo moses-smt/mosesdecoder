@@ -80,9 +80,10 @@ GPULM::~GPULM()
 float * GPULM::getThreadLocalResults() const {
     float * res = m_results.get();
     if(!res) {
-        float * local_results;
-        pinnedMemoryAllocator(local_results, max_num_queries); //Max max_num_queries ngram batches @TODO NO FREE
+        float * local_results = new float[max_num_queries];
+        //pinnedMemoryAllocator(local_results, max_num_queries); //Max max_num_queries ngram batches @TODO NO FREE
         m_results.reset(local_results);
+        res = local_results;
     }
     return res;
 }
@@ -91,9 +92,10 @@ unsigned int * GPULM::getThreadLocalngrams() const {
     unsigned int * res = m_ngrams_for_query.get();
     if(!res) {
     
-        unsigned int * ngrams_for_query;
-        pinnedMemoryAllocator(ngrams_for_query, max_num_queries*max_ngram_order); //Max max_num_queries ngram batches @TODO NO FREEs
+        unsigned int * ngrams_for_query = new unsigned int[max_num_queries*max_ngram_order];
+        //pinnedMemoryAllocator(ngrams_for_query, max_num_queries*max_ngram_order); //Max max_num_queries ngram batches @TODO NO FREEs
         m_ngrams_for_query.reset(ngrams_for_query);
+        res = ngrams_for_query;
     }
     return res;
     
@@ -108,6 +110,7 @@ void GPULM::Load(System &system)
   
   //Allocate host memory here. Size should be same as the constructor
   max_ngram_order = m_obj->getMaxNumNgrams();
+  m_order = max_ngram_order;
   
   //Add factors 
   FactorCollection &vocab = system.GetVocab();
@@ -157,7 +160,7 @@ void GPULM::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
 void GPULM::EvaluateInIsolation(MemPool &pool, const System &system,
     const Phrase<Moses2::Word> &source, const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
     SCORE *estimatedScore) const
-{
+{/*
   if (targetPhrase.GetSize() == 0) {
     return;
   }
@@ -184,7 +187,7 @@ void GPULM::EvaluateInIsolation(MemPool &pool, const System &system,
       //std::pair<SCORE, void*> fromScoring = Score(context);
       //nonFullScore += fromScoring.first;
     }
-  }
+  }*/
 
 }
 
@@ -244,6 +247,7 @@ void GPULM::CreateQueryVec(
 {
     unsigned int * ngrams_for_query = getThreadLocalngrams();
     int counter = 0; //Check for non full ngrams
+
     for (auto factor : context) {
       auto vocabID = encode_map.find(factor);
       if (vocabID == encode_map.end()){
@@ -254,6 +258,7 @@ void GPULM::CreateQueryVec(
       counter++;
       position++;
     }
+
     while (counter < max_ngram_order) {
       ngrams_for_query[position] = 0;
       counter++;
