@@ -242,6 +242,7 @@ void GPULM::CreateQueryVec(
 		  const Context &context,
 		  unsigned int &position) const
 {
+    unsigned int * ngrams_for_query = getThreadLocalngrams();
     int counter = 0; //Check for non full ngrams
     for (auto factor : context) {
       auto vocabID = encode_map.find(factor);
