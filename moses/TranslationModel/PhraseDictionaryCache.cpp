@@ -84,14 +84,11 @@ void PhraseDictionaryCache::InitializeForInput(ttasksptr const& ttask)
 	TargetPhraseCollection::shared_ptr tpc;
 	if (m_cacheTM.find(tID) == m_cacheTM.end()) return;
 	for(cacheMap::const_iterator it=m_cacheTM.at(tID).begin();  it != m_cacheTM.at(tID).end(); it++) {
-		std::cerr<<"Source : "<<it->first<<std::endl;
 		tpc.reset(new TargetPhraseCollection(*(it->second).first));
-		std::cerr<<"TPC size : " << tpc->GetSize() << std::endl;
 		std::vector<const TargetPhrase*>::const_iterator it2 = tpc->begin();
 
 		while (it2 != tpc->end()) {
 			((TargetPhrase*) *it2)->EvaluateInIsolation(it->first, GetFeaturesToApply());
-			std::cerr<< "Target Phrase : "<<**it2 << std::endl;
 			it2++;
 		}
 	}
@@ -488,7 +485,7 @@ void PhraseDictionaryCache::Update(long tID, Phrase sp, TargetPhrase tp, Scores 
     tpc->Add(targetPhrase.release());
     sc = &scores;
     m_entries++;
-    VERBOSE(1,"sp:|" << sp << "| tp:|" << tp << "| INSERTED" << std::endl);
+    VERBOSE(3,"sp:|" << sp << "| tp:|" << tp << "| INSERTED" << std::endl);
   }
 }
 
