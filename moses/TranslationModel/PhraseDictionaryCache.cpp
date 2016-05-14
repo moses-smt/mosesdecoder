@@ -78,6 +78,10 @@ void PhraseDictionaryCache::SetParameter(const std::string& key, const std::stri
   }
 }
 
+void PhraseDictionaryCache::CleanUpAfterSentenceProcessing(const InputType& source) {
+	Clear(source.GetTranslationId());
+}
+
 void PhraseDictionaryCache::InitializeForInput(ttasksptr const& ttask)
 {
 	long tID = ttask->GetSource()->GetTranslationId();
@@ -104,8 +108,10 @@ void PhraseDictionaryCache::GetTargetPhraseCollectionBatch(const InputPathList &
 		InputPath &inputPath = **iter;
 		long tID = inputPath.ttask->GetSource()->GetTranslationId();
 		if (m_cacheTM.find(tID) == m_cacheTM.end()) continue;
+		const Phrase &source = inputPath.GetPhrase();
 		TargetPhraseCollection::shared_ptr tpc;
 		for(cacheMap::const_iterator it=m_cacheTM.at(tID).begin();  it != m_cacheTM.at(tID).end(); it++) {
+			if (source.Compare(it->first)!=0) continue;
 			tpc.reset(new TargetPhraseCollection(*(it->second).first));
 			inputPath.SetTargetPhrases(*this, tpc, NULL);
 		}
@@ -456,7 +462,7 @@ void PhraseDictionaryCache::Update(long tID, Phrase sp, TargetPhrase tp, Scores 
 	  }
 	  tp_ptr->GetScoreBreakdown().Assign(this, scoreVec);
       if (!waString.empty()) tp_ptr->SetAlignmentInfo(waString);
-      VERBOSE(1,"sp:|" << sp << "tp:|" << tp << "| UPDATED" << std::endl);
+      VERBOSE(3,"sp:|" << sp << "tp:|" << tp << "| UPDATED" << std::endl);
     }
   } else {
     VERBOSE(3,"sp:|" << sp << "| NOT FOUND" << std::endl);
@@ -525,6 +531,7 @@ void PhraseDictionaryCache::Clear(long tID)
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
 #endif
+  if (m_cacheTM.find(tID) == m_cacheTM.end()) return;
   cacheMap::iterator it;
   for(it = m_cacheTM.at(tID).begin(); it!=m_cacheTM.at(tID).end(); it++) {
 	  (((*it).second).second)->clear();

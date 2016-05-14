@@ -130,6 +130,7 @@ public:
   TargetPhraseCollection::shared_ptr
   GetTargetPhraseCollection(const Phrase &src, long tID) const;
 
+  void CleanUpAfterSentenceProcessing(const InputType& source);
   // for phrase-based model
 //  virtual void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
