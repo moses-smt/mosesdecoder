@@ -104,7 +104,7 @@ unsigned int * GPULM::getThreadLocalngrams() const {
 void GPULM::Load(System &system)
 {
   int deviceID = 0; //@TODO This is an optional argument
-  max_num_queries = 50000;
+  max_num_queries = 100000;
   m_obj = new gpuLM(m_path, max_num_queries, deviceID);
   cerr << "GPULM::Load" << endl;
   
@@ -160,7 +160,7 @@ void GPULM::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
 void GPULM::EvaluateInIsolation(MemPool &pool, const System &system,
     const Phrase<Moses2::Word> &source, const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
     SCORE *estimatedScore) const
-{/*
+{
   if (targetPhrase.GetSize() == 0) {
     return;
   }
@@ -171,24 +171,29 @@ void GPULM::EvaluateInIsolation(MemPool &pool, const System &system,
 //  context.push_back(m_bos);
 
   context.reserve(m_order);
-  std::cerr << "Size: " << targetPhrase.GetSize()<< std::endl;
+  unsigned int * ngrams_for_query = getThreadLocalngrams();
+  float * results = getThreadLocalResults();
+  //std::cerr << "Size: " << targetPhrase.GetSize()<< std::endl;
   for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
     const Factor *factor = targetPhrase[i][m_factorType];
     ShiftOrPush(context, factor);
 
     unsigned int position = 0; //Position in ngrams_for_query array
-    unsigned int num_queries = 0;
+    unsigned int num_queries = 1;
     CreateQueryVec(context, position);
+    m_obj->query(results, ngrams_for_query, num_queries); //@TODO do this
 
     if (context.size() == m_order) {
+      SCORE score = results[position];
       //std::pair<SCORE, void*> fromScoring = Score(context);
-      //score += fromScoring.first;
+      score += score;
     }
     else if (estimatedScore) {
+      SCORE score = results[position];
       //std::pair<SCORE, void*> fromScoring = Score(context);
-      //nonFullScore += fromScoring.first;
+      nonFullScore += score;
     }
-  }*/
+  }
 
 }
 
@@ -224,7 +229,7 @@ void GPULM::EvaluateWhenAppliedBatch(
   //Create the query vector
   unsigned int position = 0; //Position in ngrams_for_query array
   unsigned int num_queries = 0;
-  for (auto context : contexts) {
+  for (auto context : contexts) { //@TODO can this be 0? need to handle this case
     num_queries++;
     CreateQueryVec(context.second, position);
   }
@@ -265,6 +270,11 @@ void GPULM::CreateQueryVec(
       counter++;
       position++;
     }
+    
+    if (position > max_num_queries*max_ngram_order) {
+      std::cerr << "Number of queries exceeded the allocated space! Please increase the max_num_queries" << std::endl;
+    }
+
 }
 
 void GPULM::CreateNGram(std::vector<std::pair<Hypothesis*, Context> > &contexts, Hypothesis &hypo) const
