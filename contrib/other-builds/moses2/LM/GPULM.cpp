@@ -66,6 +66,7 @@ GPULM::GPULM(size_t startInd, const std::string &line)
 :StatefulFeatureFunction(startInd, line)
 {
   cerr << "GPULM::GPULM" << endl;
+  m_threadID.store(1);
   ReadParameters();
 }
 
@@ -77,28 +78,15 @@ GPULM::~GPULM()
   //pinnedMemoryDeallocator(results);
 }
 
-float * GPULM::getThreadLocalResults() const {
-    float * res = m_results.get();
+QueryMemory * GPULM::getThreadQueryMemory() const {
+    QueryMemory * res = m_QueryMemory.get();
     if(!res) {
-        float * local_results = new float[max_num_queries];
+        QueryMemory * local_querymem = new QueryMemory(m_threadID, max_num_queries, max_ngram_order);
         //pinnedMemoryAllocator(local_results, max_num_queries); //Max max_num_queries ngram batches @TODO NO FREE
-        m_results.reset(local_results);
-        res = local_results;
+        m_QueryMemory.reset(local_querymem);
+        res = local_querymem;
     }
     return res;
-}
-
-unsigned int * GPULM::getThreadLocalngrams() const {
-    unsigned int * res = m_ngrams_for_query.get();
-    if(!res) {
-    
-        unsigned int * ngrams_for_query = new unsigned int[max_num_queries*max_ngram_order];
-        //pinnedMemoryAllocator(ngrams_for_query, max_num_queries*max_ngram_order); //Max max_num_queries ngram batches @TODO NO FREEs
-        m_ngrams_for_query.reset(ngrams_for_query);
-        res = ngrams_for_query;
-    }
-    return res;
-    
 }
 
 void GPULM::Load(System &system)
@@ -171,8 +159,9 @@ void GPULM::EvaluateInIsolation(MemPool &pool, const System &system,
 //  context.push_back(m_bos);
 
   context.reserve(m_order);
-  unsigned int * ngrams_for_query = getThreadLocalngrams();
-  float * results = getThreadLocalResults();
+  QueryMemory * query_mem = getThreadQueryMemory();
+  unsigned int * ngrams_for_query = query_mem->ngrams_for_query;
+  float * results = query_mem->results;
   //std::cerr << "Size: " << targetPhrase.GetSize()<< std::endl;
   for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
     const Factor *factor = targetPhrase[i][m_factorType];
@@ -223,8 +212,9 @@ void GPULM::EvaluateWhenAppliedBatch(
     CreateNGram(contexts, *hypo);
   }
   
-  unsigned int * ngrams_for_query = getThreadLocalngrams();
-  float * results = getThreadLocalResults();
+  QueryMemory * query_mem = getThreadQueryMemory();
+  unsigned int * ngrams_for_query = query_mem->ngrams_for_query;
+  float * results = query_mem->results;
   
   //Create the query vector
   unsigned int position = 0; //Position in ngrams_for_query array
@@ -251,7 +241,8 @@ void GPULM::CreateQueryVec(
 		  const Context &context,
 		  unsigned int &position) const
 {
-    unsigned int * ngrams_for_query = getThreadLocalngrams();
+    QueryMemory * query_mem = getThreadQueryMemory();
+    unsigned int * ngrams_for_query = query_mem->ngrams_for_query;
     int counter = 0; //Check for non full ngrams
 
     for (auto factor : context) {
@@ -264,7 +255,6 @@ void GPULM::CreateQueryVec(
       counter++;
       position++;
     }
-
     while (counter < max_ngram_order) {
       ngrams_for_query[position] = 0;
       counter++;

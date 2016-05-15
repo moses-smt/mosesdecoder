@@ -10,6 +10,8 @@
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
 #include <pthread.h>
+#include <thread> //It's easier to work with C++11 threads.
+#include <atomic>
 
 #include "../FF/StatefulFeatureFunction.h"
 #include "lm/model.hh"
@@ -28,16 +30,15 @@ class Word;
 
 class GPULM: public StatefulFeatureFunction
 {
-  mutable boost::thread_specific_ptr<float> m_results;
-  mutable boost::thread_specific_ptr<unsigned int> m_ngrams_for_query;
+  mutable boost::thread_specific_ptr<QueryMemory> m_QueryMemory;
+  mutable std::atomic<unsigned int> m_threadID;
   
   size_t max_num_queries;
   unsigned short max_ngram_order;
   std::unordered_map<const Factor *, unsigned int> encode_map;
 public:
   GPULM(size_t startInd, const std::string &line);
-  float * getThreadLocalResults() const;
-  unsigned int * getThreadLocalngrams() const;
+  QueryMemory * getThreadQueryMemory() const;
 
   virtual ~GPULM();
 
