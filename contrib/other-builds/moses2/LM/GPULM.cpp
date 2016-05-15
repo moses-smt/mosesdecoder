@@ -38,16 +38,13 @@ struct GPULMState: public FFState
 
   virtual size_t hash() const
   {
-    size_t ret = boost::hash_value(lastWords);
-    cerr << "  hash=" << ret << endl;
-    return ret;
+    return boost::hash_value(lastWords);
   }
 
   virtual bool operator==(const FFState& other) const
   {
     const GPULMState &otherCast = static_cast<const GPULMState&>(other);
     bool ret = lastWords == otherCast.lastWords;
-    cerr << "  ret=" << ret << endl;
 
     return ret;
   }
@@ -215,17 +212,13 @@ void GPULM::EvaluateWhenAppliedBatch(
   // create list of ngrams
   std::vector<std::pair<Hypothesis*, Context> > contexts;
 
-  cerr << "NB1" << endl;
   for (size_t i = 0; i < batch.size(); ++i) {
     Hypothesis *hypo = batch[i];
     CreateNGram(contexts, *hypo);
   }
-  cerr << "NB2" << endl;
   
   unsigned int * ngrams_for_query = getThreadLocalngrams();
-  cerr << "NB3" << endl;
   float * results = getThreadLocalResults();
-  cerr << "NB4" << endl;
   
   //Create the query vector
   unsigned int position = 0; //Position in ngrams_for_query array
@@ -234,11 +227,9 @@ void GPULM::EvaluateWhenAppliedBatch(
     num_queries++;
     CreateQueryVec(context.second, position);
   }
-  cerr << "NB5" << endl;
 
   //Score here + copy back-and-forth
   m_obj->query(results, ngrams_for_query, num_queries);
-  cerr << "NB6" << endl;
 
   // score ngrams
   for (size_t i = 0; i < contexts.size(); ++i) {
@@ -246,12 +237,8 @@ void GPULM::EvaluateWhenAppliedBatch(
     Hypothesis *hypo = contexts[i].first;
     SCORE score = results[i];
     Scores &scores = hypo->GetScores();
-    
-    cerr << i << " " << &hypo << " " << &scores << " " << results[i] << endl;
-
     scores.PlusEquals(system, *this, score);
   }
-  cerr << "NB7" << endl;
 }
 
 void GPULM::CreateQueryVec(
