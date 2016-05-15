@@ -104,7 +104,7 @@ unsigned int * GPULM::getThreadLocalngrams() const {
 void GPULM::Load(System &system)
 {
   int deviceID = 0; //@TODO This is an optional argument
-  max_num_queries = 20000;
+  max_num_queries = 50000;
   m_obj = new gpuLM(m_path, max_num_queries, deviceID);
   cerr << "GPULM::Load" << endl;
   
@@ -171,6 +171,7 @@ void GPULM::EvaluateInIsolation(MemPool &pool, const System &system,
 //  context.push_back(m_bos);
 
   context.reserve(m_order);
+  std::cerr << "Size: " << targetPhrase.GetSize()<< std::endl;
   for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
     const Factor *factor = targetPhrase[i][m_factorType];
     ShiftOrPush(context, factor);
