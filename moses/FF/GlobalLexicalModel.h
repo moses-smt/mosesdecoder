@@ -75,7 +75,8 @@ public:
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedScores) const;
+                           , ScoreComponentCollection &estimatedScores) const {
+  }
 
   void EvaluateWhenApplied(const Hypothesis& hypo,
                            ScoreComponentCollection* accumulator) const {
@@ -89,8 +90,7 @@ public:
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedScores = NULL) const {
-  }
+                                 , ScoreComponentCollection *estimatedScores = NULL) const;
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
       , const TranslationOptionList &translationOptionList) const {
