@@ -10,12 +10,11 @@
 #include <vector>
 #include <string>
 #include "Phrase.h"
+#include "SubPhrase.h"
 #include "legacy/Util2.h"
 
 namespace Moses2
 {
-template<typename WORD>
-class SubPhrase;
 
 template<typename WORD>
 class PhraseImplTemplate : public Phrase<WORD>
