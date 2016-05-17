@@ -76,7 +76,7 @@ FFState* VW::EvaluateWhenApplied(
   const FFState* prevState,
   ScoreComponentCollection* accumulator) const
 { 
-  VERBOSE(2, "VW :: Evaluating translation options\n");
+  VERBOSE(3, "VW :: Evaluating translation options\n");
 
   const VWState& prevVWState = *static_cast<const VWState *>(prevState);
 
@@ -194,7 +194,7 @@ void VW::EvaluateTranslationOptionListWithSourceContext(const InputType &input
   if (translationOptionList.size() == 0)
     return; // nothing to do
 
-  VERBOSE(2, "VW :: Evaluating translation options\n");
+  VERBOSE(3, "VW :: Evaluating translation options\n");
 
   // which feature functions do we use (on the source and target side)
   const std::vector<VWFeatureBase*>& sourceFeatures =
@@ -252,7 +252,7 @@ void VW::EvaluateTranslationOptionListWithSourceContext(const InputType &input
 
       // do not train if there are no positive examples
       if (firstCorrect == -1) {
-        VERBOSE(2, "VW :: skipping topt collection, no correct translation for span at current tgt start position\n");
+        VERBOSE(3, "VW :: skipping topt collection, no correct translation for span at current tgt start position\n");
         continue;
       }
 
@@ -582,7 +582,7 @@ std::vector<bool> VW::LeaveOneOut(const TranslationOptionList &topts, const std:
       static_cast<const CountsPhraseProperty *>(targetPhrase.GetProperty("Counts"));
 
     if (! property) {
-      VERBOSE(1, "VW :: Counts not found for topt! Is this an OOV?\n");
+      VERBOSE(2, "VW :: Counts not found for topt! Is this an OOV?\n");
       // keep all translation opts without updating, this is either OOV or bad usage...
       keepOpt.assign(topts.size(), true);
       return keepOpt;
@@ -600,7 +600,7 @@ std::vector<bool> VW::LeaveOneOut(const TranslationOptionList &topts, const std:
     float discount = correct[i] ? ONE : 0.0;
     float target = property->GetTargetMarginal() - discount;
     float joint  = property->GetJointCount() - discount;
-    if (discount != 0.0) VERBOSE(2, "VW :: leaving one out!\n");
+    if (discount != 0.0) VERBOSE(3, "VW :: leaving one out!\n");
 
     if (joint > 0) {
       // topt survived leaving one out, update its scores
