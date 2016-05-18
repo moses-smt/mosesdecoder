@@ -44,7 +44,7 @@ namespace Moses
 
     bool update(std::map<std::string,xmlrpc_c::value>const& param);
     bool NBestDistinct() const;
-    
+    ~AllOptions() { }
   };
 
 }
