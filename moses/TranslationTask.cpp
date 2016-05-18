@@ -17,6 +17,8 @@
 #include "moses/Syntax/S2T/Parsers/Scope3Parser/Parser.h"
 #include "moses/Syntax/T2S/RuleMatcherSCFG.h"
 
+#include "moses/TranslationModel/PhraseDictionaryCache.h"
+
 #include "util/exception.hh"
 
 using namespace std;
@@ -149,6 +151,13 @@ interpret_dlt()
   typedef std::map<std::string,std::string> dltmap_t;
   BOOST_FOREACH(dltmap_t const& M, snt.GetDltMeta()) {
     dltmap_t::const_iterator i = M.find("type");
+    if (i->second == "cache") {
+      map<string, string>::const_iterator k = M.find("id");
+      string id = k == M.end() ? "default" : k->second;
+      PhraseDictionaryCache* cache;
+      cache = PhraseDictionaryCache::InstanceNonConst(id);
+      if (cache) cache->ExecuteDlt(M, this->GetSource()->GetTranslationId());
+    }
     if (i == M.end() || i->second != "adaptive-lm") continue;
     dltmap_t::const_iterator j = M.find("context-weights");
     if (j == M.end()) continue;
