@@ -229,20 +229,20 @@ TranslationRequest(xmlrpc_c::paramList const& paramList,
 
 }
 
-bool
-check(std::map<std::string, xmlrpc_c::value> const& param, 
-      std::string const key)
-{
-  std::map<std::string, xmlrpc_c::value>::const_iterator m = param.find(key);
-  if(m == param.end()) return false;
+// bool
+// check(std::map<std::string, xmlrpc_c::value> const& param, 
+//       std::string const key)
+// {
+//   std::map<std::string, xmlrpc_c::value>::const_iterator m = param.find(key);
+//   if(m == param.end()) return false;
 
-  if (m->second.type() == xmlrpc_c::value::TYPE_BOOLEAN)
-    return xmlrpc_c::value_boolean(m->second);
+//   if (m->second.type() == xmlrpc_c::value::TYPE_BOOLEAN)
+//     return xmlrpc_c::value_boolean(m->second);
 
-  std::string val = string(xmlrpc_c::value_string(m->second));
-  if(val == "true" || val == "True" || val == "TRUE" || val == "1") return true;
-  return false;
-}
+//   std::string val = string(xmlrpc_c::value_string(m->second));
+//   if(val == "true" || val == "True" || val == "TRUE" || val == "1") return true;
+//   return false;
+// }
 
 void
 TranslationRequest::
@@ -271,7 +271,7 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
   boost::shared_ptr<Moses::AllOptions> opts(new Moses::AllOptions(*StaticData::Instance().options()));
   opts->update(params);
 
-  m_withGraphInfo = check(params, "sg");
+  m_withGraphInfo = Moses::check(params, "sg", false);
   if (m_withGraphInfo || opts->nbest.nbest_size > 0) {
     opts->output.SearchGraph = "true";
     opts->nbest.enabled = true;
@@ -286,8 +286,8 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
   m_source_string = xmlrpc_c::value_string(si->second);
   XVERBOSE(1,"Input: " << m_source_string << endl);
   
-  m_withTopts           = check(params, "topt");
-  m_withScoreBreakdown  = check(params, "add-score-breakdown");
+  m_withTopts           = Moses::check(params, "topt", false);
+  m_withScoreBreakdown  = Moses::check(params, "add-score-breakdown", false);
   si = params.find("lambda");
   if (si != params.end()) 
     {
