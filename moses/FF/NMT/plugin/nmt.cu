@@ -92,20 +92,22 @@ StateInfoPtr NMT::EmptyState() {
   return infos.back();
 }
 
-void NMT::FilterTargetVocab(const std::set<std::string>& filter) {
-  filteredId_.clear();
+void NMT::FilterTargetVocab(const std::set<std::string>& filter, size_t topN) {
+  filteredId_.resize(topN);
+  std::set<size_t> ids(filteredId_.begin(), filteredId_.end());
   filteredId_.resize(trg_->size(), 1); // set all to UNK
   
-  std::vector<size_t> numericFilter;
-  size_t k = 0;
+  size_t k = topN;
   for(auto& s : filter) {
     size_t id = (*trg_)[s];
-    numericFilter.push_back(id);
-    filteredId_[id] = k;
-    k++;
+    if(ids.count(id) == 0) {
+      ids.insert(id);
+      filteredId_[id] = k;
+      k++;
+    }
   }
   // eol
-  numericFilter.push_back(numericFilter.size());
+  std::vector<size_t> numericFilter(ids.begin(), ids.end());
   decoder_->Filter(numericFilter);
 }
 
@@ -139,7 +141,7 @@ void NMT::BatchSteps(const Batches& batches, LastWords& lastWords,
 
     for(size_t i = 0; i < batch.size(); ++i) {
       if(batch[i] != 0) {
-        float p = probs(i, batch[i]);
+        float p = probs(i, filteredId_[batch[i]]);
         probsOut[i] += log(p);
         stateInfos[i] = tempStates[i];
       }
@@ -226,6 +228,7 @@ void NMT::MakeStep(
     decoder_->Lookup(lastEmbeddings, lastIds);
   }
   
+
   Matrix nextEmbeddings;
   std::vector<size_t> nextIds(nextWords.size());
   std::transform(nextWords.begin(), nextWords.end(), nextIds.begin(),

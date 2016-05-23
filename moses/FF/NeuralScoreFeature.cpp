@@ -105,10 +105,10 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
                  "This feature function requires the Sentence input type");
   const Sentence& sentence = static_cast<const Sentence&>(input);
   
-  if(m_filteredSoftmax) {
+  if(m_filteredSoftmax > 0) {
     m_targetWords->insert("eos");
     m_targetWords->insert("UNK");
-    m_nmt->FilterTargetVocab(*m_targetWords);
+    m_nmt->FilterTargetVocab(*m_targetWords, m_filteredSoftmax);
   }
   
   std::vector<std::string> sourceSentence;
@@ -122,7 +122,7 @@ const FFState* NeuralScoreFeature::EmptyHypothesisState(const InputType &input) 
 
 NeuralScoreFeature::NeuralScoreFeature(const std::string &line)
   : StatefulFeatureFunction(1, line), m_batchSize(1000), m_stateLength(5),
-    m_factor(0), m_maxDevices(1), m_filteredSoftmax(false),
+    m_factor(0), m_maxDevices(1), m_filteredSoftmax(0),
     m_mode("precalculate"), m_threadId(0)
 {
   ReadParameters();
@@ -391,13 +391,13 @@ void NeuralScoreFeature::EvaluateWithSourceContext(const InputType &input
 void NeuralScoreFeature::EvaluateTranslationOptionListWithSourceContext(const InputType &input
     , const TranslationOptionList &translationOptionList) const
 {
-  if(m_filteredSoftmax) {
+  if(m_filteredSoftmax > 0) {
     TranslationOptionList::const_iterator iter;
     for (iter = translationOptionList.begin();
          iter != translationOptionList.end(); ++iter) {
       const TranslationOption& to = **iter;
       const TargetPhrase& tp = to.GetTargetPhrase();
-    
+      
       for(size_t i = 0; i < tp.GetSize(); ++i) {
         std::string temp = tp.GetWord(i).GetString(m_factor).as_string();
         const_cast<std::set<std::string>&>(*m_targetWords).insert(temp);

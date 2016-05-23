@@ -93,7 +93,7 @@ private:
   size_t m_stateLength;
   size_t m_factor;
   size_t m_maxDevices;
-  bool m_filteredSoftmax;
+  size_t m_filteredSoftmax;
   std::string m_mode;
   
   std::vector<boost::shared_ptr<Weights> > m_models;

@@ -92,7 +92,7 @@ class Decoder {
           Prod(Temp2_, HiddenState, w_.W_);
           BroadcastVec(_1 + _2, Temp2_, w_.B_);
           
-          cudaDeviceSynchronize();
+          //cudaDeviceSynchronize();
           
           Broadcast(Tanh(_1 + _2), Temp1_, Temp2_);
           
@@ -140,24 +140,45 @@ class Decoder {
           BroadcastVec(_1 + _2, T2_, w_.B2_);
           BroadcastVec(_1 + _2, T3_, w_.B3_);
       
-          cudaDeviceSynchronize();
+          //cudaDeviceSynchronize();
       
           Element(Tanh(_1 + _2 + _3), T1_, T2_, T3_);
           
-          Prod(Probs, T1_, w_.W4_);
-          BroadcastVec(_1 + _2, Probs, w_.B4_);
+          if(filtered_) {
+            Prod(Probs, T1_, FilteredW4_);
+            BroadcastVec(_1 + _2, Probs, FilteredB4_);
+          }
+          else {
+            Prod(Probs, T1_, w_.W4_);
+            BroadcastVec(_1 + _2, Probs, w_.B4_);
+          }
           mblas::Softmax(Probs);
         }
     
         void Filter(const std::vector<size_t>& ids) {
+                    using namespace mblas;
+          
+          std::cerr << "Filtered to: " << ids.size() << std::endl;
+          
+          Matrix TempW4;
+          Transpose(TempW4, w_.W4_);
+          Assemble(FilteredW4_, TempW4, ids);
+          Transpose(FilteredW4_);
+          
+          Matrix TempB4_;
+          Transpose(TempB4_, w_.B4_);
+          Assemble(FilteredB4_, TempB4_, ids);
+          Transpose(FilteredB4_);
+          
+          filtered_ = true;
         }
        
       private:        
         const Weights& w_;
         
         bool filtered_;
-        mblas::Matrix FilteredWo_;
-        mblas::Matrix FilteredWoB_;
+        mblas::Matrix FilteredW4_;
+        mblas::Matrix FilteredB4_;
         
         mblas::Matrix T1_;
         mblas::Matrix T2_;
@@ -202,7 +223,7 @@ class Decoder {
     }
     
     void Filter(const std::vector<size_t>& ids) {
-    
+      softmax_.Filter(ids);
     }
       
     

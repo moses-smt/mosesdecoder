@@ -48,9 +48,10 @@ class NMT {
     
     StateInfoPtr EmptyState();
     
+    
     void PrintState(StateInfoPtr);
     
-    void FilterTargetVocab(const std::set<std::string>& filter);
+    void FilterTargetVocab(const std::set<std::string>& filter, size_t topN);
     
     size_t TargetVocab(const std::string& str);
     
