@@ -65,7 +65,7 @@ void Manager::Decode()
     for (int phraseSize = 1; phraseSize < (inputSize - startPos + 1); ++phraseSize) {
       SubPhrase<SCFG::Word> sub = sentence.GetSubPhrase(startPos, phraseSize);
       InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, phraseSize);
-      cerr << endl << "path=" << path << endl;
+      //cerr << endl << "path=" << path << endl;
 
       Stack &stack = m_stacks.GetStack(startPos, phraseSize);
 
@@ -138,12 +138,12 @@ void Manager::Decode(InputPath &path, Stack &stack)
     const SCFG::SymbolBind &symbolBind = iterOuter->first;
 
     const SCFG::TargetPhrases &tps = iterOuter->second;
-    cerr << "symbolBind=" << symbolBind << " tps=" << tps.GetSize() << endl;
+    //cerr << "symbolBind=" << symbolBind << " tps=" << tps.GetSize() << endl;
 
     SCFG::TargetPhrases::const_iterator iter;
     for (iter = tps.begin(); iter != tps.end(); ++iter) {
       const SCFG::TargetPhraseImpl &tp = **iter;
-      cerr << "tp=" << tp << endl;
+      //cerr << "tp=" << tp << endl;
       ExpandHypo(path, symbolBind, tp, stack);
     }
   }
@@ -161,7 +161,7 @@ bool Manager::IncrPrevHypoIndices(
 
   size_t numHypos = 0;
 
-  cerr << "IncrPrevHypoIndices:" << ind << " " << ntEles.size() << " ";
+  //cerr << "IncrPrevHypoIndices:" << ind << " " << ntEles.size() << " ";
   for (size_t i = 0; i < ntEles.size() - 1; ++i) {
     const SymbolBindElement &ele = *ntEles[i];
     Hypotheses &hypos = ele.hypos->GetSortedAndPruneHypos(*this, arcLists);
@@ -172,7 +172,7 @@ bool Manager::IncrPrevHypoIndices(
 
     size_t hypoInd = divRet.rem;
     prevHyposIndices[i] = hypoInd;
-    cerr << "(" << i << "," << ind << "," << numHypos << "," << hypoInd << ")";
+    //cerr << "(" << i << "," << ind << "," << numHypos << "," << hypoInd << ")";
   }
 
   // last
@@ -184,8 +184,8 @@ bool Manager::IncrPrevHypoIndices(
   Hypotheses &hypos = ele.hypos->GetSortedAndPruneHypos(*this, arcLists);
   numHypos = hypos.size();
 
-  cerr << "(" << (ntEles.size() - 1) << "," << ind << "," << numHypos << ","  << ind << ")";
-  cerr << endl;
+  //cerr << "(" << (ntEles.size() - 1) << "," << ind << "," << numHypos << ","  << ind << ")";
+  //cerr << endl;
 
   if (ind >= numHypos) {
     return false;
@@ -206,7 +206,7 @@ void Manager::ExpandHypo(
   std::vector<const SymbolBindElement*> ntEles = symbolBind.GetNTElements();
   vector<size_t> prevHyposIndices(symbolBind.numNT);
   assert(ntEles.size() == symbolBind.numNT);
-  cerr << "ntEles:" << ntEles.size() << endl;
+  //cerr << "ntEles:" << ntEles.size() << endl;
 
   size_t ind = 0;
   while (IncrPrevHypoIndices(prevHyposIndices, ind, ntEles)) {
@@ -214,7 +214,7 @@ void Manager::ExpandHypo(
     hypo->Init(*this, path, symbolBind, tp, prevHyposIndices);
 
     StackAdd added = stack.Add(hypo, hypoRecycler, arcLists);
-    cerr << "  added=" << added.added << " " << tp << endl;
+    //cerr << "  added=" << added.added << " " << tp << endl;
 
     ++ind;
   }
