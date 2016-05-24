@@ -72,7 +72,7 @@ TargetPhrases *UnknownWordPenalty::Lookup(const Manager &mgr, MemPool &pool,
   }
 
   const SubPhrase<Moses2::Word> &source = inputPath.subPhrase;
-  const Word &sourceWord = source[0];
+  const Moses2::Word &sourceWord = source[0];
   const Factor *factor = sourceWord[0];
 
   tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, 1);
@@ -80,7 +80,7 @@ TargetPhrases *UnknownWordPenalty::Lookup(const Manager &mgr, MemPool &pool,
   TargetPhraseImpl *target =
       new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, *this,
           system, 1);
-  Word &word = (*target)[0];
+  Moses2::Word &word = (*target)[0];
 
   //FactorCollection &fc = system.vocab;
   //const Factor *factor = fc.AddFactor("SSS", false);
@@ -123,11 +123,10 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
   if (path.range.GetNumWordsCovered() == 1) {
     const Factor *factor = lastWord[0];
     SCFG::TargetPhraseImpl *tp = new (pool.Allocate<SCFG::TargetPhraseImpl>(1)) SCFG::TargetPhraseImpl(pool, *this, system, 1);
-    Word &word = (*tp)[0];
-    word[0] = system.GetVocab().AddFactor(factor->GetString(), system, false);
+    SCFG::Word &word = (*tp)[0];
+    word.CreateFromString(system.GetVocab(), system, factor->GetString().as_string());
 
-    tp->lhs[0] = system.GetVocab().AddFactor("X", system, true);
-    tp->lhs.isNonTerminal = true;
+    tp->lhs.CreateFromString(system.GetVocab(), system, "[X]");
 
     size_t endPos = path.range.GetEndPos();
     const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(endPos, 1);
@@ -144,7 +143,6 @@ void UnknownWordPenalty::LookupUnary(MemPool &pool,
     const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
-
 }
 
 }

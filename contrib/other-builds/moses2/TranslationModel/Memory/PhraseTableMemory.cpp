@@ -161,7 +161,7 @@ void PhraseTableMemory::Lookup(MemPool &pool,
     const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
-  //cerr << "Lookup" << endl;
+  cerr << "path=" << path << endl;
 
   size_t endPos = path.range.GetEndPos();
   const SCFG::InputPath *prevPath;
