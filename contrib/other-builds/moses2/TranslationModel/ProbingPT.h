@@ -35,6 +35,7 @@ public:
 
   virtual void Lookup(MemPool &pool,
       const SCFG::Manager &mgr,
+      size_t maxChartSpan,
       const SCFG::Stacks &stacks,
       SCFG::InputPath &path) const;
 

@@ -158,10 +158,10 @@ void PhraseTableMemory::InitActiveChart(SCFG::InputPath &path) const
 
 void PhraseTableMemory::Lookup(MemPool &pool,
     const SCFG::Manager &mgr,
+    size_t maxChartSpan,
     const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
-  size_t maxChartSpan = mgr.system.maxChartSpans[GetPtInd()];
   if (path.range.GetNumWordsCovered() > maxChartSpan) {
     return;
   }

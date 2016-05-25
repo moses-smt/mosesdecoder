@@ -101,7 +101,8 @@ void Manager::Lookup(InputPath &path)
 
   for (size_t i = 0; i < numPt; ++i) {
     const PhraseTable &pt = *system.mappings[i];
-    pt.Lookup(GetPool(), *this, m_stacks, path);
+    size_t maxChartSpan = system.maxChartSpans[i];
+    pt.Lookup(GetPool(), *this, maxChartSpan, m_stacks, path);
   }
 
   /*
