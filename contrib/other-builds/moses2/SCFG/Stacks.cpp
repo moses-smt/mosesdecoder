@@ -7,6 +7,16 @@ namespace Moses2
 {
 namespace SCFG
 {
+Stacks::~Stacks()
+{
+  for (size_t i = 0; i < m_cells.size(); ++i) {
+    std::vector<Stack*> &inner = m_cells[i];
+    for (size_t j = 0; j < inner.size(); ++j) {
+      Stack *stack = inner[j];
+      delete stack;
+    }
+  }
+}
 
 void Stacks::Init(SCFG::Manager &mgr, size_t size)
 {

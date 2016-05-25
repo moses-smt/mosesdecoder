@@ -52,14 +52,15 @@ public:
   virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
       InputPath &inputPath) const;
 
-  virtual void InitActiveChart(SCFG::InputPath &path) const;
+  virtual void InitActiveChart(MemPool &pool, SCFG::InputPath &path) const;
   void Lookup(MemPool &pool,
       const SCFG::Manager &mgr,
       size_t maxChartSpan,
       const SCFG::Stacks &stacks,
       SCFG::InputPath &path) const;
 
-  void LookupUnary(MemPool &pool,
+  void LookupUnary(
+      MemPool &pool,
       const SCFG::Manager &mgr,
       const SCFG::Stacks &stacks,
       SCFG::InputPath &path) const;
@@ -69,12 +70,14 @@ protected:
   SCFGNODE  *m_rootSCFG;
 
   void LookupGivenPath(
+      MemPool &pool,
       SCFG::InputPath &path,
       const SCFG::InputPath &prevPath,
       const SCFG::Word &wordSought,
       const Moses2::HypothesisColl *hypos,
       const SCFG::InputPath &subPhrasePath) const;
   void LookupGivenNode(
+      MemPool &pool,
       const ActiveChartEntryMem &prevEntry,
       const SCFG::Word &wordSought,
       const Moses2::HypothesisColl *hypos,
@@ -82,6 +85,7 @@ protected:
       SCFG::InputPath &path) const;
 
   void LookupNT(
+      MemPool &pool,
       SCFG::InputPath &path,
       const SCFG::InputPath &subPhrasePath,
       const SCFG::InputPath &prevPath,

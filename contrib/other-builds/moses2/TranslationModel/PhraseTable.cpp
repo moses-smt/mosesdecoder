@@ -100,7 +100,7 @@ void PhraseTable::CleanUpAfterSentenceProcessing()
 }
 
 // scfg
-void PhraseTable::InitActiveChart(SCFG::InputPath &path) const
+void PhraseTable::InitActiveChart(MemPool &pool, SCFG::InputPath &path) const
 {
   UTIL_THROW2("Not implemented");
 }

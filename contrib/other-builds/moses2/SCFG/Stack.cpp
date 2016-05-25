@@ -17,6 +17,14 @@ Stack::Stack(const Manager &mgr)
 {
 }
 
+Stack::~Stack()
+{
+  BOOST_FOREACH (const Coll::value_type &valPair, m_coll) {
+    Moses2::HypothesisColl *hypos = valPair.second;
+    delete hypos;
+  }
+}
+
 StackAdd Stack::Add(SCFG::Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
     ArcLists &arcLists)
 {

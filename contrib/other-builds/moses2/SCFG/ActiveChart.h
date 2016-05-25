@@ -81,7 +81,10 @@ protected:
 class ActiveChart
 {
 public:
-  std::vector<ActiveChartEntry*> entries;
+  ActiveChart(MemPool &pool);
+  ~ActiveChart();
+
+  Vector<ActiveChartEntry*> *entries;
 };
 
 }

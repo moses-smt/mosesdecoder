@@ -89,7 +89,7 @@ void Manager::InitActiveChart(size_t pos)
    for (size_t i = 0; i < numPt; ++i) {
      const PhraseTable &pt = *system.mappings[i];
      //cerr << "START InitActiveChart" << endl;
-     pt.InitActiveChart(path);
+     pt.InitActiveChart(GetPool(), path);
      //cerr << "FINISHED InitActiveChart" << endl;
    }
 }
@@ -210,7 +210,7 @@ void Manager::ExpandHypo(
 
   size_t ind = 0;
   while (IncrPrevHypoIndices(prevHyposIndices, ind, ntEles)) {
-    SCFG::Hypothesis *hypo = new SCFG::Hypothesis(GetPool(), system);
+    SCFG::Hypothesis *hypo = new (GetPool().Allocate<SCFG::Hypothesis>()) SCFG::Hypothesis(GetPool(), system);
     hypo->Init(*this, path, symbolBind, tp, prevHyposIndices);
 
     StackAdd added = stack.Add(hypo, hypoRecycler, arcLists);

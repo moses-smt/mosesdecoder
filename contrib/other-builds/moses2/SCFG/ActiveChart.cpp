@@ -3,6 +3,7 @@
 #include "ActiveChart.h"
 #include "InputPath.h"
 #include "Word.h"
+#include "../Vector.h"
 
 using namespace std;
 
@@ -63,6 +64,17 @@ std::ostream& operator<<(std::ostream &out, const SymbolBind &obj)
   }
 
   return out;
+}
+
+////////////////////////////////////////////////////////////////////////////
+ActiveChart::ActiveChart(MemPool &pool)
+{
+  entries = new (pool.Allocate< Vector<ActiveChartEntry*> >()) Vector<ActiveChartEntry*>(pool);
+}
+
+ActiveChart::~ActiveChart()
+{
+
 }
 
 }
