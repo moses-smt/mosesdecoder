@@ -42,6 +42,7 @@ public:
   FeatureFunctions featureFunctions;
   Weights weights;
   std::vector<const PhraseTable*> mappings;
+  std::vector<size_t> maxChartSpans;
   bool isPb;
 
   mutable boost::shared_ptr<OutputCollector> bestCollector, nbestCollector;

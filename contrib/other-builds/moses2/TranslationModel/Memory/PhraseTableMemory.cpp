@@ -161,7 +161,13 @@ void PhraseTableMemory::Lookup(MemPool &pool,
     const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
-  //cerr << "path=" << path << endl;
+  size_t maxChartSpan = mgr.system.maxChartSpans[GetPtInd()];
+  if (path.range.GetNumWordsCovered() > maxChartSpan) {
+    return;
+  }
+  cerr << GetName() << " " << GetPtInd()
+      << " maxChartSpan=" << maxChartSpan
+      << " path=" << path << endl;
 
   size_t endPos = path.range.GetEndPos();
   const SCFG::InputPath *prevPath;

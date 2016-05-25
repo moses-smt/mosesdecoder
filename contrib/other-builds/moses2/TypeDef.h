@@ -18,6 +18,7 @@ class HypothesisBase;
 
 #define NOT_FOUND 			std::numeric_limits<size_t>::max()
 const size_t DEFAULT_MAX_PHRASE_LENGTH = 20;
+const size_t DEFAULT_MAX_CHART_SPAN     = 20;
 const size_t DEFAULT_MAX_HYPOSTACK_SIZE = 200;
 const size_t DEFAULT_CUBE_PRUNING_POP_LIMIT = 1000;
 const size_t DEFAULT_CUBE_PRUNING_DIVERSITY = 0;

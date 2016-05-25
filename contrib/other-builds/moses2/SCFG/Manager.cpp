@@ -47,7 +47,6 @@ void Manager::Decode()
   m_input = Sentence::CreateFromString(GetPool(), vocab, system, m_inputStr,
       m_translationId);
 
-
   const Sentence &sentence = static_cast<const Sentence&>(GetInput());
 
   size_t inputSize = sentence.GetSize();
