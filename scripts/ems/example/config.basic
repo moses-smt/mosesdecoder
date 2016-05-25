@@ -54,7 +54,7 @@ output-tokenizer = "$moses-script-dir/tokenizer/tokenizer.perl -a -l $output-ext
 # For Arabic tokenizer try Farasa (download: http://qatsdemo.cloudapp.net/farasa/)
 #  Abdelali, Darwish, Durrani, Mubarak (NAACL demo 2016)
 #  "Farasa: A Fast and Furious Segmenter for Arabic"
-input-tokenizer = "$farasa-dir/farasa_moses.sh"
+#input-tokenizer = "$farasa-dir/farasa_moses.sh"
 
 
 # truecasers - comment out if you do not use the truecaser
