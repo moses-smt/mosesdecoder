@@ -51,7 +51,7 @@ void Manager::Decode()
   const Sentence &sentence = static_cast<const Sentence&>(GetInput());
 
   size_t inputSize = sentence.GetSize();
-  //cerr << "size=" << size << endl;
+  cerr << "inputSize=" << inputSize << endl;
 
   m_inputPaths.Init(sentence, *this);
   //cerr << "CREATED m_inputPaths" << endl;
@@ -62,10 +62,10 @@ void Manager::Decode()
   for (int startPos = inputSize - 1; startPos >= 0; --startPos) {
     InitActiveChart(startPos);
 
-    for (int phraseSize = 1; phraseSize < (inputSize - startPos + 1); ++phraseSize) {
-      SubPhrase<SCFG::Word> sub = sentence.GetSubPhrase(startPos, phraseSize);
+    int maxPhraseSize = inputSize - startPos + 1;
+    for (int phraseSize = 1; phraseSize < maxPhraseSize; ++phraseSize) {
       InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, phraseSize);
-      //cerr << endl << "path=" << path << endl;
+      cerr << endl << "path=" << path << endl;
 
       Stack &stack = m_stacks.GetStack(startPos, phraseSize);
 

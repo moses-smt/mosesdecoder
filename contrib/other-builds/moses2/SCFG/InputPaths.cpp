@@ -25,10 +25,9 @@ void InputPaths::Init(const InputType &input, const ManagerBase &mgr)
   MemPool &pool = mgr.GetPool();
   size_t numPt = mgr.system.mappings.size();
   size_t size = sentence.GetSize();
-  size_t maxLength = min(size, mgr.system.options.search.max_phrase_length) + 1;
 
   m_matrix = new (pool.Allocate< Matrix<SCFG::InputPath*> >()) Matrix<SCFG::InputPath*>(pool,
-      size, maxLength);
+      size, size + 1);
   m_matrix->Init(NULL);
 
   for (size_t startPos = 0; startPos < size; ++startPos) {
@@ -45,18 +44,18 @@ void InputPaths::Init(const InputType &input, const ManagerBase &mgr)
 
     // create normal paths of subphrases through the sentence
     const SCFG::InputPath *prefixPath = path;
-    for (size_t phaseSize = 1; phaseSize <= maxLength; ++phaseSize) {
-      size_t endPos = startPos + phaseSize - 1;
+    for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
+      size_t endPos = startPos + phaseSize - 1; // pb-like indexing. eg. [1-1] covers 1 word, NOT 0
 
-      if (endPos >= size) {
+      if (endPos > size) {
         break;
       }
 
       SubPhrase<SCFG::Word> subPhrase = sentence.GetSubPhrase(startPos, phaseSize);
       Range range(startPos, endPos);
 
-      SCFG::InputPath *path = new (pool.Allocate<SCFG::InputPath>()) SCFG::InputPath(pool,
-          subPhrase, range, numPt, prefixPath);
+      SCFG::InputPath *path = new (pool.Allocate<SCFG::InputPath>())
+          SCFG::InputPath(pool, subPhrase, range, numPt, prefixPath);
       //cerr << startPos << " " << (phaseSize - 1)
       //    << " path=" << *path << endl;
       m_inputPaths.push_back(path);
