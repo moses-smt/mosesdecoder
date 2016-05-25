@@ -13,6 +13,8 @@ namespace SCFG
 class Stacks
 {
 public:
+  virtual ~Stacks();
+
   void Init(SCFG::Manager &mgr, size_t size);
 
   const Stack &GetStack(size_t startPos, size_t size) const

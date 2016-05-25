@@ -20,6 +20,7 @@ public:
   typedef boost::unordered_map<SCFG::Word, Moses2::HypothesisColl*> Coll;
 
   Stack(const Manager &mgr);
+  virtual ~Stack();
 
   Coll &GetColl()
   {  return m_coll; }
