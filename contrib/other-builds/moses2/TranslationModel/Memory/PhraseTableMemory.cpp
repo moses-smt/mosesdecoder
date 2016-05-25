@@ -165,10 +165,11 @@ void PhraseTableMemory::Lookup(MemPool &pool,
   if (path.range.GetNumWordsCovered() > maxChartSpan) {
     return;
   }
+  /*
   cerr << GetName() << " " << GetPtInd()
       << " maxChartSpan=" << maxChartSpan
       << " path=" << path << endl;
-
+  */
   size_t endPos = path.range.GetEndPos();
   const SCFG::InputPath *prevPath;
   prevPath = static_cast<const SCFG::InputPath*>(path.prefixPath);

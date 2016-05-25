@@ -71,11 +71,11 @@ void Hypothesis::EvaluateWhenApplied()
 void Hypothesis::OutputToStream(std::ostream &out) const
 {
   const SCFG::TargetPhraseImpl &tp = GetTargetPhrase();
-  cerr << "tp=" << tp.GetSize() << tp << endl;
+  //cerr << "tp=" << tp.GetSize() << tp << endl;
 
   for (size_t pos = 0; pos < tp.GetSize(); ++pos) {
     const SCFG::Word &word = tp[pos];
-    cerr << "word=" << word << endl;
+    //cerr << "word=" << word << endl;
     if (word.isNonTerminal) {
       //cerr << "is nt" << endl;
       // non-term. fill out with prev hypo

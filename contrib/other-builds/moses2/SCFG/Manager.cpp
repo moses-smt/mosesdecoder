@@ -50,7 +50,7 @@ void Manager::Decode()
   const Sentence &sentence = static_cast<const Sentence&>(GetInput());
 
   size_t inputSize = sentence.GetSize();
-  cerr << "inputSize=" << inputSize << endl;
+  //cerr << "inputSize=" << inputSize << endl;
 
   m_inputPaths.Init(sentence, *this);
   //cerr << "CREATED m_inputPaths" << endl;
@@ -64,7 +64,7 @@ void Manager::Decode()
     int maxPhraseSize = inputSize - startPos + 1;
     for (int phraseSize = 1; phraseSize < maxPhraseSize; ++phraseSize) {
       InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, phraseSize);
-      cerr << endl << "path=" << path << endl;
+      //cerr << endl << "path=" << path << endl;
 
       Stack &stack = m_stacks.GetStack(startPos, phraseSize);
 
@@ -229,17 +229,14 @@ std::string Manager::OutputBest() const
 
   if (bestHypo) {
     bestHypo->OutputToStream(out);
-    cerr << "BEST TRANSLATION: " << *bestHypo << endl;
+    cerr << "BEST TRANSLATION: " << *bestHypo << " " << out.str() << endl;
   }
   else {
     cerr << "NO TRANSLATION " << m_input->GetTranslationId() << endl;
   }
 
-  out << "\n";
-  cerr << "out=" << out.str();
-
+  out << endl;
   return out.str();
-  //cerr << endl;
 }
 
 } // namespace
