@@ -16,6 +16,7 @@ namespace SCFG
 Hypothesis::Hypothesis(MemPool &pool,
     const System &system)
 :HypothesisBase(pool, system)
+,m_prevHypos(pool)
 {
 
 }
