@@ -51,14 +51,14 @@ public:
   }
 };
 
-void ExpanderCube::operator()(const WordsBitmap &bitmap,
-                              const WordsRange &range,
+void ExpanderCube::operator()(const Bitmap &bitmap,
+                              const Range &range,
                               BitmapContainer &bitmapContainer) {
   m_search->CreateForwardTodos(bitmap, range, bitmapContainer);
 }
 
-void CollectorCube::operator()(const WordsBitmap &bitmap,
-                               const WordsRange &range,
+void CollectorCube::operator()(const Bitmap &bitmap,
+                               const Range &range,
                                BitmapContainer &bitmapContainer) {
   const TranslationOptionList* transOptList;
   transOptList = m_search->m_transOptColl.GetTranslationOptionList(range);

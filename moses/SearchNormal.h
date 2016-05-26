@@ -66,7 +66,6 @@ protected:
   friend ExpanderNormal;
   friend CollectorNormal;
     
-  const InputType &m_source;
   //! stacks to store hypotheses (partial translations)
   // no of elements = no of words in source + 1
   std::vector < HypothesisStack* > m_hypoStackColl;

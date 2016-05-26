@@ -32,8 +32,8 @@ public:
   : m_state(state),
     m_lastWord("") {}
 
-NeuralScoreState()
-  : m_lastWord("") {}
+  NeuralScoreState()
+    : m_lastWord("") {}
 
   std::string ToString() const {
     std::stringstream ss;
@@ -56,6 +56,14 @@ NeuralScoreState()
     return (std::lexicographical_compare(m_lastContext.begin(), m_lastContext.end(),
                    otherState.m_lastContext.begin(),
                    otherState.m_lastContext.end())) ? -1 : +1;
+  }
+
+  bool operator==(const FFState& other) const {
+    if (Compare(other)) return true;
+    else return false;
+  }
+  size_t hash() const {
+    return 0;
   }
 
   void LimitLength(size_t length) {
@@ -248,7 +256,7 @@ void NeuralScoreFeature::ProcessStack(Collector& collector, size_t index) {
       = static_cast<const NeuralScoreState*>(ffstate);
   
     if(first) {
-      const WordsBitmap hypoBitmap = hypothesis.GetWordsBitmap();
+      const Bitmap& hypoBitmap = hypothesis.GetWordsBitmap();
       covered = hypoBitmap.GetNumWordsCovered();
       total = hypoBitmap.GetSize();
       first = false;

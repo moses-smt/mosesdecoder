@@ -50,7 +50,6 @@ class FFState;
 class StatelessFeatureFunction;
 class StatefulFeatureFunction;
 class Manager;
-class WordsBitmap;
 struct ReportingOptions;
 
 typedef std::vector<Hypothesis*> ArcList;
@@ -96,7 +95,7 @@ public:
   /** return the subclass of Hypothesis most appropriate to the given translation option */
   static Hypothesis* Create(const Hypothesis &prevHypo, const TranslationOption &transOpt);
 
-  static Hypothesis* Create(Manager& manager, const WordsBitmap &initialCoverage);
+  static Hypothesis* Create(Manager& manager, const Bitmap &initialCoverage);
 
   /** return the subclass of Hypothesis most appropriate to the given target phrase */
   static Hypothesis* Create(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt);

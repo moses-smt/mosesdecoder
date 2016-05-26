@@ -18,7 +18,7 @@ class FunctorCube {
   public:
     FunctorCube(SearchCubePruning* search) : m_search(search) {}
 
-    virtual void operator()(const WordsBitmap &bitmap,
+    virtual void operator()(const Bitmap &bitmap,
                             const Range &range,
                             BitmapContainer &bitmapContainer) = 0;
 
@@ -31,7 +31,7 @@ class FunctorCube {
 class ExpanderCube : public FunctorCube {
   public:
     ExpanderCube(SearchCubePruning* search) : FunctorCube(search) {}
-    virtual void operator()(const WordsBitmap &bitmap,
+    virtual void operator()(const Bitmap &bitmap,
                             const Range &range,
                             BitmapContainer &bitmapContainer);
 
@@ -41,7 +41,7 @@ class ExpanderCube : public FunctorCube {
 class CollectorCube : public FunctorCube, public Collector {
   public:
     CollectorCube(SearchCubePruning* search) : FunctorCube(search) {}
-    virtual void operator()(const WordsBitmap &bitmap,
+    virtual void operator()(const Bitmap &bitmap,
                             const Range &range,
                             BitmapContainer &bitmapContainer);
 
@@ -69,7 +69,6 @@ protected:
   friend ExpanderCube;
   friend CollectorCube;
 
-  const InputType &m_source;
   std::vector < HypothesisStack* > m_hypoStackColl; /**< stacks to store hypotheses (partial translations) */
   // no of elements = no of words in source + 1
   const TranslationOptionCollection &m_transOptColl; /**< pre-computed list of translation options for the phrases in this sentence */
@@ -77,7 +76,7 @@ protected:
   //! go thru all bitmaps in 1 stack & create backpointers to bitmaps in the stack
   void CreateForwardTodos(HypothesisStackCubePruning &stack, FunctorCube* functor);
   //! create a back pointer to this bitmap, with edge that has this words range translation
-  void CreateForwardTodos(const WordsBitmap &bitmap, const Range &range, BitmapContainer &bitmapContainer);
+  void CreateForwardTodos(const Bitmap &bitmap, const Range &range, BitmapContainer &bitmapContainer);
 
   void CacheForNeural(Collector& collector);
 
@@ -88,8 +87,6 @@ protected:
   //! create a back pointer to this bitmap, with edge that has this words range translation
   //void CreateForwardTodos2(const WordsBitmap &bitmap, const Range &range, BitmapContainer &bitmapContainer);
 
-  bool CheckDistortion(const WordsBitmap &bitmap, const Range &range) const;
-  void CreateForwardTodos(const Bitmap &bitmap, const Range &range, BitmapContainer &bitmapContainer);
   bool CheckDistortion(const Bitmap &bitmap, const Range &range) const;
 
   void PrintBitmapContainerGraph();
