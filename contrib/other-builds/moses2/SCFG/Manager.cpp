@@ -134,7 +134,7 @@ void Manager::LookupUnary(InputPath &path)
 void Manager::Decode(InputPath &path, Stack &stack)
 {
   boost::unordered_map<SCFG::SymbolBind, SCFG::TargetPhrases>::const_iterator iterOuter;
-  for (iterOuter = path.targetPhrases.begin(); iterOuter != path.targetPhrases.end(); ++iterOuter) {
+  for (iterOuter = path.targetPhrases->begin(); iterOuter != path.targetPhrases->end(); ++iterOuter) {
     const SCFG::SymbolBind &symbolBind = iterOuter->first;
 
     const SCFG::TargetPhrases &tps = iterOuter->second;

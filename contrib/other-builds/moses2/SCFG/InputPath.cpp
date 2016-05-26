@@ -23,6 +23,8 @@ InputPath::InputPath(MemPool &pool, const SubPhrase<SCFG::Word> &subPhrase,
 :InputPathBase(pool, range, numPt, prefixPath)
 ,subPhrase(subPhrase)
 {
+  MemPoolAllocator< std::pair<SymbolBind, SCFG::TargetPhrases> > collAlloc(pool);
+  targetPhrases = new (pool.Allocate<Coll>()) Coll(collAlloc);
   m_activeChart = pool.Allocate<ActiveChart>(numPt);
   for (size_t i = 0; i < numPt; ++i) {
     ActiveChart &memAddr = m_activeChart[i];
@@ -45,7 +47,7 @@ void InputPath::AddTargetPhrase(const PhraseTable &pt,
     const SCFG::SymbolBind &symbolBind,
     const SCFG::TargetPhraseImpl *tp)
 {
-  targetPhrases[symbolBind].AddTargetPhrase(*tp);
+  (*targetPhrases)[symbolBind].AddTargetPhrase(*tp);
 }
 
 void InputPath::AddActiveChartEntry(size_t ptInd, ActiveChartEntry *chartEntry)
@@ -58,7 +60,7 @@ void InputPath::AddActiveChartEntry(size_t ptInd, ActiveChartEntry *chartEntry)
 size_t InputPath::GetNumRules() const
 {
   size_t ret = 0;
-  BOOST_FOREACH(const Coll::value_type &valPair, targetPhrases) {
+  BOOST_FOREACH(const Coll::value_type &valPair, *targetPhrases) {
     const SCFG::TargetPhrases &tps = valPair.second;
     ret += tps.GetSize();
   }
