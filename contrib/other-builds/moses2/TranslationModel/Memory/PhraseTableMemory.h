@@ -28,17 +28,20 @@ class PhraseTableMemory: public PhraseTable
 //////////////////////////////////////
   class ActiveChartEntryMem : public SCFG::ActiveChartEntry
   {
+    typedef SCFG::ActiveChartEntry Parent;
   public:
     const PhraseTableMemory::SCFGNODE &node;
 
-    ActiveChartEntryMem(const PhraseTableMemory::SCFGNODE &vnode)
-    :node(vnode)
+    ActiveChartEntryMem(MemPool &pool, const PhraseTableMemory::SCFGNODE &vnode)
+    :Parent(pool)
+    ,node(vnode)
     {}
 
     ActiveChartEntryMem(
+        MemPool &pool,
         const PhraseTableMemory::SCFGNODE &vnode,
         const ActiveChartEntry &prevEntry)
-    :ActiveChartEntry(prevEntry)
+    :Parent(prevEntry)
     ,node(vnode)
     {}
   };

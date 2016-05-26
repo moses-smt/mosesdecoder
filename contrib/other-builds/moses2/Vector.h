@@ -24,6 +24,11 @@ public:
   {
   }
 
+  Vector(const Vector &copy) :
+      Parent(copy)
+  {
+  }
+
 protected:
 };
 

@@ -23,6 +23,7 @@ public:
   const SCFG::Word *word;
   const Moses2::HypothesisColl *hypos;
 
+  SymbolBindElement() {}
   SymbolBindElement(const Range *range, const SCFG::Word *word, const Moses2::HypothesisColl *hypos);
 
   bool operator==(const SymbolBindElement &compare) const
@@ -41,11 +42,17 @@ class SymbolBind
   friend std::ostream& operator<<(std::ostream &, const SymbolBind &);
 
 public:
-  std::vector<SymbolBindElement> coll;
+  Vector<SymbolBindElement> coll;
   size_t numNT;
 
-  SymbolBind()
-  :numNT(0)
+  SymbolBind(MemPool &pool)
+  :coll(pool)
+  ,numNT(0)
+  {}
+
+  SymbolBind(MemPool &pool, const SymbolBind &copy)
+  :coll(copy.coll)
+  ,numNT(copy.numNT)
   {}
 
   std::vector<const SymbolBindElement*> GetNTElements() const;
@@ -65,14 +72,16 @@ inline size_t hash_value(const SymbolBind &obj)
 class ActiveChartEntry
 {
 public:
-  SymbolBind symbolBinds;
+  SymbolBind *symbolBinds;
 
-  ActiveChartEntry()
+  ActiveChartEntry(MemPool &pool)
+  :symbolBinds(new (pool.Allocate<SymbolBind>()) SymbolBind(pool))
   {}
 
-  ActiveChartEntry(const ActiveChartEntry &prevEntry)
-  :symbolBinds(prevEntry.symbolBinds)
-  {}
+  ActiveChartEntry(MemPool &pool, const ActiveChartEntry &prevEntry)
+  {
+    symbolBinds = new (pool.Allocate<SymbolBind>()) SymbolBind(pool, *prevEntry.symbolBinds);
+  }
 
 protected:
 };
