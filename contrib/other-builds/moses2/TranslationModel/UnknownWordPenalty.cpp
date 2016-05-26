@@ -135,7 +135,7 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
     SCFG::SymbolBind symbolBind(pool);
     symbolBind.Add(subPhrasePath.range, lastWord, NULL);
 
-    path.AddTargetPhrase(*this, symbolBind, tp);
+    path.AddTargetPhrase(pool, *this, symbolBind, tp);
   }
 }
 

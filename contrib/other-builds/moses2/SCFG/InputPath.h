@@ -28,10 +28,10 @@ class InputPath: public InputPathBase
   friend std::ostream& operator<<(std::ostream &, const InputPath &);
 public:
   typedef boost::unordered_map<SymbolBind,
-      SCFG::TargetPhrases,
+      SCFG::TargetPhrases*,
       boost::hash<SymbolBind>,
       std::equal_to<SymbolBind>,
-      MemPoolAllocator< std::pair<SymbolBind, SCFG::TargetPhrases> >
+      MemPoolAllocator< std::pair<SymbolBind, SCFG::TargetPhrases*> >
       > Coll;
   Coll *targetPhrases;
   SubPhrase<SCFG::Word> subPhrase;
@@ -45,7 +45,9 @@ public:
 
   void AddActiveChartEntry(size_t ptInd, ActiveChartEntry *chartEntry);
 
-  void AddTargetPhrase(const PhraseTable &pt,
+  void AddTargetPhrase(
+      MemPool &pool,
+      const PhraseTable &pt,
       const SCFG::SymbolBind &symbolBind,
       const SCFG::TargetPhraseImpl *tp);
 

@@ -43,11 +43,24 @@ std::ostream& operator<<(std::ostream &out, const InputPath &obj)
   return out;
 }
 
-void InputPath::AddTargetPhrase(const PhraseTable &pt,
+void InputPath::AddTargetPhrase(
+    MemPool &pool,
+    const PhraseTable &pt,
     const SCFG::SymbolBind &symbolBind,
     const SCFG::TargetPhraseImpl *tp)
 {
-  (*targetPhrases)[symbolBind].AddTargetPhrase(*tp);
+  SCFG::TargetPhrases *tps;
+  Coll::iterator iter;
+  iter = targetPhrases->find(symbolBind);
+  if (iter == targetPhrases->end()) {
+    tps = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool);
+    (*targetPhrases)[symbolBind] = tps;
+  }
+  else {
+    tps = iter->second;
+  }
+
+  tps->AddTargetPhrase(*tp);
 }
 
 void InputPath::AddActiveChartEntry(size_t ptInd, ActiveChartEntry *chartEntry)
@@ -61,7 +74,7 @@ size_t InputPath::GetNumRules() const
 {
   size_t ret = 0;
   BOOST_FOREACH(const Coll::value_type &valPair, *targetPhrases) {
-    const SCFG::TargetPhrases &tps = valPair.second;
+    const SCFG::TargetPhrases &tps = *valPair.second;
     ret += tps.GetSize();
   }
   return ret;

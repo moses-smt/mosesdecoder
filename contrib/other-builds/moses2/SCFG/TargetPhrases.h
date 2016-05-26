@@ -8,6 +8,7 @@
 #pragma once
 #include <vector>
 #include <stddef.h>
+#include "../Vector.h"
 
 namespace Moses2
 {
@@ -19,7 +20,7 @@ class TargetPhraseImpl;
 
 class TargetPhrases
 {
-  typedef std::vector<const SCFG::TargetPhraseImpl*> Coll;
+  typedef Moses2::Vector<const SCFG::TargetPhraseImpl*> Coll;
 
 public:
   typedef Coll::iterator iterator;
@@ -27,29 +28,29 @@ public:
   //! iterators
   const_iterator begin() const
   {
-    return m_coll.begin();
+    return m_coll->begin();
   }
   const_iterator end() const
   {
-    return m_coll.end();
+    return m_coll->end();
   }
 
-  TargetPhrases() {} // required by map obj in InputPath
+  TargetPhrases(MemPool &pool);
   TargetPhrases(MemPool &pool, size_t size);
   virtual ~TargetPhrases();
 
   size_t GetSize() const
-  { return m_coll.size(); }
+  { return m_coll->size(); }
 
   void AddTargetPhrase(const SCFG::TargetPhraseImpl &targetPhrase)
   {
-    m_coll.push_back(&targetPhrase);
+    m_coll->push_back(&targetPhrase);
   }
 
   void SortAndPrune(size_t tableLimit);
 
 protected:
-  Coll m_coll;
+  Coll *m_coll;
 
 };
 

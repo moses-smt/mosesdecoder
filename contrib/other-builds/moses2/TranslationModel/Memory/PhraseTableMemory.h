@@ -95,7 +95,9 @@ protected:
       const SCFG::Stacks &stacks) const;
 
 
-  void AddTargetPhrasesToPath(const SCFGNODE &node,
+  void AddTargetPhrasesToPath(
+      MemPool &pool,
+      const SCFGNODE &node,
       const SCFG::SymbolBind &symbolBind,
       SCFG::InputPath &path) const;
 };

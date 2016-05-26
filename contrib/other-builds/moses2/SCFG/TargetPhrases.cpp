@@ -13,11 +13,14 @@ namespace Moses2
 {
 namespace SCFG
 {
+TargetPhrases::TargetPhrases(MemPool &pool)
+{
+  m_coll = new (pool.Allocate<Coll>()) Coll(pool);
+}
 
 TargetPhrases::TargetPhrases(MemPool &pool, size_t size)
 {
-  // TODO Auto-generated constructor stub
-
+  m_coll = new (pool.Allocate<Coll>()) Coll(pool);
 }
 
 TargetPhrases::~TargetPhrases()
@@ -29,14 +32,14 @@ void TargetPhrases::SortAndPrune(size_t tableLimit)
 {
   iterator iterMiddle;
   iterMiddle =
-      (tableLimit == 0 || m_coll.size() < tableLimit) ?
-          m_coll.end() : m_coll.begin() + tableLimit;
+      (tableLimit == 0 || m_coll->size() < tableLimit) ?
+          m_coll->end() : m_coll->begin() + tableLimit;
 /*
   std::partial_sort(m_coll.begin(), iterMiddle, m_coll.end(),
       CompareFutureScore<SCFG::Word>());
 */
-  if (tableLimit && m_coll.size() > tableLimit) {
-    m_coll.resize(tableLimit);
+  if (tableLimit && m_coll->size() > tableLimit) {
+    m_coll->resize(tableLimit);
   }
 
   //cerr << "TargetPhrases=" << GetSize() << endl;
