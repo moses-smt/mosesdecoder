@@ -65,6 +65,9 @@ protected:
   void CalcScore(const Phrase<Moses2::Word> &phrase, float &fullScore, float &ngramScore,
       std::size_t &oovCount) const;
 
+  void CalcScore(const Phrase<SCFG::Word> &phrase, float &fullScore, float &ngramScore,
+      std::size_t &oovCount) const;
+
   inline lm::WordIndex TranslateID(const Word &word) const
   {
     std::size_t factor = word[m_factorType]->GetId();

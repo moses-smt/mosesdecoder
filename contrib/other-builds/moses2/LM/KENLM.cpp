@@ -168,6 +168,35 @@ void KENLM<Model>::EvaluateInIsolation(MemPool &pool, const System &system, cons
     const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
     SCORE *estimatedScore) const
 {
+  // contains factors used by this LM
+  float fullScore, nGramScore;
+  size_t oovCount;
+
+  CalcScore(targetPhrase, fullScore, nGramScore, oovCount);
+
+  float estimateScore = fullScore - nGramScore;
+
+  bool GetLMEnableOOVFeature = false;
+  if (GetLMEnableOOVFeature) {
+    float scoresVec[2], estimateScoresVec[2];
+    scoresVec[0] = nGramScore;
+    scoresVec[1] = oovCount;
+    scores.PlusEquals(system, *this, scoresVec);
+
+    estimateScoresVec[0] = estimateScore;
+    estimateScoresVec[1] = 0;
+    SCORE weightedScore = Scores::CalcWeightedScore(system, *this,
+        estimateScoresVec);
+    (*estimatedScore) += weightedScore;
+  }
+  else {
+    scores.PlusEquals(system, *this, nGramScore);
+
+    SCORE weightedScore = Scores::CalcWeightedScore(system, *this,
+        estimateScore);
+    (*estimatedScore) += weightedScore;
+  }
+
 }
 
 template<class Model>
@@ -274,6 +303,59 @@ void KENLM<Model>::CalcScore(const Phrase<Moses2::Word> &phrase, float &fullScor
     lm::WordIndex index = TranslateID(word);
     scorer.Terminal(index);
     if (!index) ++oovCount;
+  }
+  fullScore += scorer.Finish();
+
+  ngramScore = TransformLMScore(fullScore - before_boundary);
+  fullScore = TransformLMScore(fullScore);
+}
+
+template<class Model>
+void KENLM<Model>::CalcScore(const Phrase<SCFG::Word> &phrase, float &fullScore,
+    float &ngramScore, std::size_t &oovCount) const
+{
+  fullScore = 0;
+  ngramScore = 0;
+  oovCount = 0;
+
+  if (!phrase.GetSize()) return;
+
+  lm::ngram::ChartState discarded_sadly;
+  lm::ngram::RuleScore<Model> scorer(*m_ngram, discarded_sadly);
+
+  size_t position;
+  if (m_bos == phrase[0][m_factorType]) {
+    scorer.BeginSentence();
+    position = 1;
+  } else {
+    position = 0;
+  }
+
+  size_t ngramBoundary = m_ngram->Order() - 1;
+
+  size_t end_loop = std::min(ngramBoundary, phrase.GetSize());
+  for (; position < end_loop; ++position) {
+    const SCFG::Word &word = phrase[position];
+    if (word.isNonTerminal) {
+      fullScore += scorer.Finish();
+      scorer.Reset();
+    } else {
+      lm::WordIndex index = TranslateID(word);
+      scorer.Terminal(index);
+      if (!index) ++oovCount;
+    }
+  }
+  float before_boundary = fullScore + scorer.Finish();
+  for (; position < phrase.GetSize(); ++position) {
+    const SCFG::Word &word = phrase[position];
+    if (word.isNonTerminal) {
+      fullScore += scorer.Finish();
+      scorer.Reset();
+    } else {
+      lm::WordIndex index = TranslateID(word);
+      scorer.Terminal(index);
+      if (!index) ++oovCount;
+    }
   }
   fullScore += scorer.Finish();
 
