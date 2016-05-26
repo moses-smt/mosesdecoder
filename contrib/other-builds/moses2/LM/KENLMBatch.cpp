@@ -117,7 +117,7 @@ void KENLMBatch::Load(System &system)
   m_ngram.reset(new Model(m_path.c_str(), config));
 }
 
-FFState* KENLMBatch::BlankState(MemPool &pool) const
+FFState* KENLMBatch::BlankState(MemPool &pool, const ManagerBase &mgr) const
 {
   KenLMState *ret = new (pool.Allocate<KenLMState>()) KenLMState();
   return ret;

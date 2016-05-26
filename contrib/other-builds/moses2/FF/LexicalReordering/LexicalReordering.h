@@ -34,7 +34,7 @@ public:
     return true;
   }
 
-  virtual FFState* BlankState(MemPool &pool) const;
+  virtual FFState* BlankState(MemPool &pool, const ManagerBase &mgr) const;
   virtual void EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
       const InputType &input, const Hypothesis &hypo) const;
 

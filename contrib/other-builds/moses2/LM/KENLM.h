@@ -33,7 +33,7 @@ public:
 
   virtual void Load(System &system);
 
-  virtual FFState* BlankState(MemPool &pool) const;
+  virtual FFState* BlankState(MemPool &pool, const ManagerBase &mgr) const;
 
   //! return the state associated with the empty hypothesis for a given sentence
   virtual void EmptyHypothesisState(FFState &state, const ManagerBase &mgr,

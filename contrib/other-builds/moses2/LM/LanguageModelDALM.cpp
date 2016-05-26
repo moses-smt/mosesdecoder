@@ -201,7 +201,7 @@ void LanguageModelDALM::SetParameter(const std::string& key, const std::string& 
   m_ContextSize = m_nGramOrder-1;
 }
 
-FFState* LanguageModelDALM::BlankState(MemPool &pool) const
+FFState* LanguageModelDALM::BlankState(MemPool &pool, const ManagerBase &mgr) const
 {
 	DALMState *state = new DALMState();
 	return state;

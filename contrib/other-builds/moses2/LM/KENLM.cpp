@@ -51,6 +51,38 @@ struct KenLMState: public FFState
 };
 
 /////////////////////////////////////////////////////////////////
+class LanguageModelChartStateKenLM : public FFState
+{
+public:
+  LanguageModelChartStateKenLM() {}
+
+  const lm::ngram::ChartState &GetChartState() const {
+    return m_state;
+  }
+  lm::ngram::ChartState &GetChartState() {
+    return m_state;
+  }
+
+  size_t hash() const {
+    size_t ret = hash_value(m_state);
+    return ret;
+  }
+  virtual bool operator==(const FFState& o) const {
+    const LanguageModelChartStateKenLM &other = static_cast<const LanguageModelChartStateKenLM &>(o);
+    bool ret = m_state == other.m_state;
+    return ret;
+  }
+
+  virtual std::string ToString() const
+  {
+     return "LanguageModelChartStateKenLM";
+  }
+
+private:
+  lm::ngram::ChartState m_state;
+};
+
+/////////////////////////////////////////////////////////////////
 class MappingBuilder: public lm::EnumerateVocab
 {
 public:
@@ -113,9 +145,15 @@ void KENLM<Model>::Load(System &system)
 }
 
 template<class Model>
-FFState* KENLM<Model>::BlankState(MemPool &pool) const
+FFState* KENLM<Model>::BlankState(MemPool &pool, const ManagerBase &mgr) const
 {
-  KenLMState *ret = new (pool.Allocate<KenLMState>()) KenLMState();
+  FFState *ret;
+  if (mgr.system.isPb) {
+    ret = new (pool.Allocate<KenLMState>()) KenLMState();
+  }
+  else {
+    ret = new (pool.Allocate<LanguageModelChartStateKenLM>()) LanguageModelChartStateKenLM();
+  }
   return ret;
 }
 
@@ -386,7 +424,56 @@ void KENLM<Model>::EvaluateWhenApplied(const SCFG::Manager &mgr,
     const SCFG::Hypothesis &hypo, const FFState &prevState, Scores &scores,
     FFState &state) const
 {
-  UTIL_THROW2("Not implemented");
+  /*
+  LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM();
+  lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
+  const TargetPhrase &target = hypo.GetCurrTargetPhrase();
+  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+    target.GetAlignNonTerm().GetNonTermIndexMap();
+
+  const size_t size = hypo.GetCurrTargetPhrase().GetSize();
+  size_t phrasePos = 0;
+  // Special cases for first word.
+  if (size) {
+    const Word &word = hypo.GetCurrTargetPhrase().GetWord(0);
+    if (word.GetFactor(m_factorType) == m_beginSentenceFactor) {
+      // Begin of sentence
+      ruleScore.BeginSentence();
+      phrasePos++;
+    } else if (word.IsNonTerminal()) {
+      // Non-terminal is first so we can copy instead of rescoring.
+      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
+      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
+      ruleScore.BeginNonTerminal(prevState);
+      phrasePos++;
+    }
+  }
+
+  for (; phrasePos < size; phrasePos++) {
+    const Word &word = hypo.GetCurrTargetPhrase().GetWord(phrasePos);
+    if (word.IsNonTerminal()) {
+      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
+      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
+      ruleScore.NonTerminal(prevState);
+    } else {
+      ruleScore.Terminal(TranslateID(word));
+    }
+  }
+
+  float score = ruleScore.Finish();
+  score = TransformLMScore(score);
+  score -= hypo.GetTranslationOption().GetScores().GetScoresForProducer(this)[0];
+
+  if (OOVFeatureEnabled()) {
+    std::vector<float> scores(2);
+    scores[0] = score;
+    scores[1] = 0.0;
+    accumulator->PlusEquals(this, scores);
+  } else {
+    accumulator->PlusEquals(this, score);
+  }
+  return newState;
+  */
 }
 
 ///////////////////////////////////////////////////////////////////////////

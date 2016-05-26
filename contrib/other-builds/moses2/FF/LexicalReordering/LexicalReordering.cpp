@@ -107,7 +107,7 @@ void LexicalReordering::SetParameter(const std::string& key,
   }
 }
 
-FFState* LexicalReordering::BlankState(MemPool &pool) const
+FFState* LexicalReordering::BlankState(MemPool &pool, const ManagerBase &mgr) const
 {
   FFState *ret = m_configuration->CreateLRState(pool);
   return ret;
