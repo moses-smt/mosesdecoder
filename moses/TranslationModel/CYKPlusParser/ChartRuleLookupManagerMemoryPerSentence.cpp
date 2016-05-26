@@ -45,8 +45,8 @@ ChartRuleLookupManagerMemoryPerSentence::ChartRuleLookupManagerMemoryPerSentence
 {
 
   size_t sourceSize = parser.GetSize();
-
-  m_completedRules.resize(sourceSize);
+  size_t ruleLimit  = parser.options()->syntax.rule_limit;
+  m_completedRules.resize(sourceSize, CompletedRuleCollection(ruleLimit));
 
   m_isSoftMatching = !m_softMatchingMap.empty();
 }
@@ -56,7 +56,7 @@ void ChartRuleLookupManagerMemoryPerSentence::GetChartRuleCollection(
   size_t lastPos,
   ChartParserCallback &outColl)
 {
-  const WordsRange &range = inputPath.GetWordsRange();
+  const Range &range = inputPath.GetWordsRange();
   size_t startPos = range.GetStartPos();
   size_t absEndPos = range.GetEndPos();
 
@@ -167,10 +167,11 @@ void ChartRuleLookupManagerMemoryPerSentence::AddAndExtend(
   size_t endPos)
 {
 
-  const TargetPhraseCollection &tpc = node->GetTargetPhraseCollection();
+  TargetPhraseCollection::shared_ptr tpc
+  = node->GetTargetPhraseCollection();
   // add target phrase collection (except if rule is empty or a unary non-terminal rule)
-  if (!tpc.IsEmpty() && (m_stackVec.empty() || endPos != m_unaryPos)) {
-    m_completedRules[endPos].Add(tpc, m_stackVec, m_stackScores, *m_outColl);
+  if (!tpc->IsEmpty() && (m_stackVec.empty() || endPos != m_unaryPos)) {
+    m_completedRules[endPos].Add(*tpc, m_stackVec, m_stackScores, *m_outColl);
   }
 
   // get all further extensions of rule (until reaching end of sentence or max-chart-span)

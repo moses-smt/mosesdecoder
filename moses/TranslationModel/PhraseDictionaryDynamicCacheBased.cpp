@@ -60,8 +60,9 @@ PhraseDictionaryDynamicCacheBased::~PhraseDictionaryDynamicCacheBased()
   Clear();
 }
 
-void PhraseDictionaryDynamicCacheBased::Load()
+void PhraseDictionaryDynamicCacheBased::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   VERBOSE(2,"PhraseDictionaryDynamicCacheBased::Load()" << std::endl);
   SetFeaturesToApply();
 
@@ -150,15 +151,15 @@ void PhraseDictionaryDynamicCacheBased::InitializeForInput(ttasksptr const& ttas
   ReduceCache();
 }
 
-const TargetPhraseCollection *PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollection(const Phrase &source) const
+TargetPhraseCollection::shared_ptr PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollection(const Phrase &source) const
 {
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> read_lock(m_cacheLock);
 #endif
-  TargetPhraseCollection* tpc = NULL;
+  TargetPhraseCollection::shared_ptr tpc;
   cacheMap::const_iterator it = m_cacheTM.find(source);
   if(it != m_cacheTM.end()) {
-    tpc = new TargetPhraseCollection(*(it->second).first);
+    tpc.reset(new TargetPhraseCollection(*(it->second).first));
 
     std::vector<const TargetPhrase*>::const_iterator it2 = tpc->begin();
 
@@ -174,15 +175,15 @@ const TargetPhraseCollection *PhraseDictionaryDynamicCacheBased::GetTargetPhrase
   return tpc;
 }
 
-const TargetPhraseCollection* PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollectionLEGACY(Phrase const &src) const
+TargetPhraseCollection::shared_ptr  PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollectionLEGACY(Phrase const &src) const
 {
-  const TargetPhraseCollection *ret = GetTargetPhraseCollection(src);
+  TargetPhraseCollection::shared_ptr ret = GetTargetPhraseCollection(src);
   return ret;
 }
 
-const TargetPhraseCollection* PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const
+TargetPhraseCollection::shared_ptr  PhraseDictionaryDynamicCacheBased::GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const
 {
-  const TargetPhraseCollection *ret = GetTargetPhraseCollection(src);
+  TargetPhraseCollection::shared_ptr ret = GetTargetPhraseCollection(src);
   return ret;
 }
 
@@ -329,21 +330,22 @@ void PhraseDictionaryDynamicCacheBased::ClearEntries(std::string sourcePhraseStr
 {
   VERBOSE(3,"PhraseDictionaryDynamicCacheBased::ClearEntries(std::string sourcePhraseString, std::string targetPhraseString)" << std::endl);
   const StaticData &staticData = StaticData::Instance();
-  // const std::string& factorDelimiter = staticData.GetFactorDelimiter();
   Phrase sourcePhrase(0);
   Phrase targetPhrase(0);
 
   //target
   targetPhrase.Clear();
   VERBOSE(3, "targetPhraseString:|" << targetPhraseString << "|" << std::endl);
-  targetPhrase.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetPhraseString, /*factorDelimiter,*/ NULL);
+  targetPhrase.CreateFromString(Output, staticData.options()->output.factor_order,
+                                targetPhraseString, /*factorDelimiter,*/ NULL);
   VERBOSE(2, "targetPhrase:|" << targetPhrase << "|" << std::endl);
 
   //TODO: Would be better to reuse source phrases, but ownership has to be
   //consistent across phrase table implementations
   sourcePhrase.Clear();
   VERBOSE(3, "sourcePhraseString:|" << sourcePhraseString << "|" << std::endl);
-  sourcePhrase.CreateFromString(Input, staticData.GetInputFactorOrder(), sourcePhraseString, /*factorDelimiter,*/ NULL);
+  sourcePhrase.CreateFromString(Input, staticData.options()->input.factor_order,
+                                sourcePhraseString, /*factorDelimiter,*/ NULL);
   VERBOSE(3, "sourcePhrase:|" << sourcePhrase << "|" << std::endl);
   ClearEntries(sourcePhrase, targetPhrase);
 
@@ -366,7 +368,7 @@ void PhraseDictionaryDynamicCacheBased::ClearEntries(Phrase sp, Phrase tp)
     // and then add new entry
 
     TargetCollectionAgePair TgtCollAgePair = it->second;
-    TargetPhraseCollection* tpc = TgtCollAgePair.first;
+    TargetPhraseCollection::shared_ptr  tpc = TgtCollAgePair.first;
     AgeCollection* ac = TgtCollAgePair.second;
     const Phrase* p_ptr = NULL;
     TargetPhrase* tp_ptr = NULL;
@@ -397,7 +399,7 @@ void PhraseDictionaryDynamicCacheBased::ClearEntries(Phrase sp, Phrase tp)
     if (tpc->GetSize() == 0) {
       // delete the entry from m_cacheTM in case it points to an empty TargetPhraseCollection and AgeCollection
       ac->clear();
-      delete tpc;
+      tpc.reset();
       delete ac;
       m_cacheTM.erase(sp);
     }
@@ -425,7 +427,6 @@ void PhraseDictionaryDynamicCacheBased::ClearSource(std::vector<std::string> ent
 {
   VERBOSE(3,"entries.size():|" << entries.size() << "|" << std::endl);
   const StaticData &staticData = StaticData::Instance();
-  // const std::string& factorDelimiter = staticData.GetFactorDelimiter();
   Phrase sourcePhrase(0);
 
   std::vector<std::string>::iterator it;
@@ -433,7 +434,8 @@ void PhraseDictionaryDynamicCacheBased::ClearSource(std::vector<std::string> ent
 
     sourcePhrase.Clear();
     VERBOSE(3, "sourcePhraseString:|" << (*it) << "|" << std::endl);
-    sourcePhrase.CreateFromString(Input, staticData.GetInputFactorOrder(), *it, /*factorDelimiter,*/ NULL);
+    sourcePhrase.CreateFromString(Input, staticData.options()->input.factor_order,
+                                  *it, /*factorDelimiter,*/ NULL);
     VERBOSE(3, "sourcePhrase:|" << sourcePhrase << "|" << std::endl);
 
     ClearSource(sourcePhrase);
@@ -451,14 +453,14 @@ void PhraseDictionaryDynamicCacheBased::ClearSource(Phrase sp)
     //sp is found
 
     TargetCollectionAgePair TgtCollAgePair = it->second;
-    TargetPhraseCollection* tpc = TgtCollAgePair.first;
+    TargetPhraseCollection::shared_ptr  tpc = TgtCollAgePair.first;
     AgeCollection* ac = TgtCollAgePair.second;
 
     m_entries-=tpc->GetSize(); //reduce the total amount of entries of the cache
 
     // delete the entry from m_cacheTM in case it points to an empty TargetPhraseCollection and AgeCollection
     ac->clear();
-    delete tpc;
+    tpc.reset();
     delete ac;
     m_cacheTM.erase(sp);
   } else {
@@ -513,7 +515,6 @@ void PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, s
 {
   VERBOSE(3,"PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, std::string targetPhraseString, std::string ageString, std::string waString)" << std::endl);
   const StaticData &staticData = StaticData::Instance();
-  // const std::string& factorDelimiter = staticData.GetFactorDelimiter();
   Phrase sourcePhrase(0);
   TargetPhrase targetPhrase(0);
 
@@ -526,14 +527,15 @@ void PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, s
   //target
   targetPhrase.Clear();
   VERBOSE(3, "targetPhraseString:|" << targetPhraseString << "|" << std::endl);
-  targetPhrase.CreateFromString(Output, staticData.GetOutputFactorOrder(), targetPhraseString, /*factorDelimiter,*/ NULL);
+  targetPhrase.CreateFromString(Output, staticData.options()->output.factor_order,
+                                targetPhraseString, /*factorDelimiter,*/ NULL);
   VERBOSE(3, "targetPhrase:|" << targetPhrase << "|" << std::endl);
 
   //TODO: Would be better to reuse source phrases, but ownership has to be
   //consistent across phrase table implementations
   sourcePhrase.Clear();
   VERBOSE(3, "sourcePhraseString:|" << sourcePhraseString << "|" << std::endl);
-  sourcePhrase.CreateFromString(Input, staticData.GetInputFactorOrder(), sourcePhraseString, /*factorDelimiter,*/ NULL);
+  sourcePhrase.CreateFromString(Input, staticData.options()->input.factor_order, sourcePhraseString, /*factorDelimiter,*/ NULL);
   VERBOSE(3, "sourcePhrase:|" << sourcePhrase << "|" << std::endl);
 
   if (!waString.empty()) VERBOSE(3, "waString:|" << waString << "|" << std::endl);
@@ -558,7 +560,7 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, TargetPhrase tp, int a
     // and then add new entry
 
     TargetCollectionAgePair TgtCollAgePair = it->second;
-    TargetPhraseCollection* tpc = TgtCollAgePair.first;
+    TargetPhraseCollection::shared_ptr  tpc = TgtCollAgePair.first;
     AgeCollection* ac = TgtCollAgePair.second;
 //    const TargetPhrase* p_ptr = NULL;
     const Phrase* p_ptr = NULL;
@@ -599,7 +601,7 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, TargetPhrase tp, int a
     // create target collection
     // we have to create new target collection age pair and add new entry to target collection age pair
 
-    TargetPhraseCollection* tpc = new TargetPhraseCollection();
+    TargetPhraseCollection::shared_ptr tpc(new TargetPhraseCollection);
     AgeCollection* ac = new AgeCollection();
     m_cacheTM.insert(make_pair(sp,make_pair(tpc,ac)));
 
@@ -629,13 +631,13 @@ void PhraseDictionaryDynamicCacheBased::Decay()
 void PhraseDictionaryDynamicCacheBased::Decay(Phrase sp)
 {
   VERBOSE(3,"void PhraseDictionaryDynamicCacheBased::Decay(Phrase sp) sp:|" << sp << "|" << std::endl);
-  cacheMap::const_iterator it = m_cacheTM.find(sp);
+  cacheMap::iterator it = m_cacheTM.find(sp);
   if (it != m_cacheTM.end()) {
     VERBOSE(3,"found:|" << sp << "|" << std::endl);
     //sp is found
 
     TargetCollectionAgePair TgtCollAgePair = it->second;
-    TargetPhraseCollection* tpc = TgtCollAgePair.first;
+    TargetPhraseCollection::shared_ptr  tpc = TgtCollAgePair.first;
     AgeCollection* ac = TgtCollAgePair.second;
 
     //loop in inverted order to allow a correct deletion of std::vectors tpc and ac
@@ -661,7 +663,7 @@ void PhraseDictionaryDynamicCacheBased::Decay(Phrase sp)
       // delete the entry from m_cacheTM in case it points to an empty TargetPhraseCollection and AgeCollection
       (((*it).second).second)->clear();
       delete ((*it).second).second;
-      delete ((*it).second).first;
+      ((*it).second).first.reset();
       m_cacheTM.erase(sp);
     }
   } else {
@@ -703,11 +705,11 @@ void PhraseDictionaryDynamicCacheBased::Clear()
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
 #endif
-  cacheMap::const_iterator it;
+  cacheMap::iterator it;
   for(it = m_cacheTM.begin(); it!=m_cacheTM.end(); it++) {
     (((*it).second).second)->clear();
     delete ((*it).second).second;
-    delete ((*it).second).first;
+    ((*it).second).first.reset();
   }
   m_cacheTM.clear();
   m_entries = 0;
@@ -746,7 +748,7 @@ void PhraseDictionaryDynamicCacheBased::Print() const
   cacheMap::const_iterator it;
   for(it = m_cacheTM.begin(); it!=m_cacheTM.end(); it++) {
     std::string source = (it->first).ToString();
-    TargetPhraseCollection* tpc = (it->second).first;
+    TargetPhraseCollection::shared_ptr  tpc = (it->second).first;
     TargetPhraseCollection::iterator itr;
     for(itr = tpc->begin(); itr != tpc->end(); itr++) {
       std::string target = (*itr)->ToString();

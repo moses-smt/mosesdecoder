@@ -1,5 +1,4 @@
 #include <vector>
-#include <set>
 #include "NieceTerminal.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/TargetPhrase.h"
@@ -28,7 +27,7 @@ std::vector<float> NieceTerminal::DefaultWeights() const
 void NieceTerminal::EvaluateInIsolation(const Phrase &source
                                         , const TargetPhrase &targetPhrase
                                         , ScoreComponentCollection &scoreBreakdown
-                                        , ScoreComponentCollection &estimatedFutureScore) const
+                                        , ScoreComponentCollection &estimatedScores) const
 {
   targetPhrase.SetRuleSource(source);
 }
@@ -38,14 +37,14 @@ void NieceTerminal::EvaluateWithSourceContext(const InputType &input
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {
   assert(stackVec);
 
   const Phrase *ruleSource = targetPhrase.GetRuleSource();
   assert(ruleSource);
 
-  std::set<Word> terms;
+  boost::unordered_set<Word> terms;
   for (size_t i = 0; i < ruleSource->GetSize(); ++i) {
     const Word &word = ruleSource->GetWord(i);
     if (!word.IsNonTerminal()) {
@@ -55,7 +54,7 @@ void NieceTerminal::EvaluateWithSourceContext(const InputType &input
 
   for (size_t i = 0; i < stackVec->size(); ++i) {
     const ChartCellLabel &cell = *stackVec->at(i);
-    const WordsRange &ntRange = cell.GetCoverage();
+    const Range &ntRange = cell.GetCoverage();
     bool containTerm = ContainTerm(input, ntRange, terms);
 
     if (containTerm) {
@@ -80,10 +79,10 @@ void NieceTerminal::EvaluateWhenApplied(const ChartHypothesis &hypo,
 {}
 
 bool NieceTerminal::ContainTerm(const InputType &input,
-                                const WordsRange &ntRange,
-                                const std::set<Word> &terms) const
+                                const Range &ntRange,
+                                const boost::unordered_set<Word> &terms) const
 {
-  std::set<Word>::const_iterator iter;
+  boost::unordered_set<Word>::const_iterator iter;
 
   for (size_t pos = ntRange.GetStartPos(); pos <= ntRange.GetEndPos(); ++pos) {
     const Word &word = input.GetWord(pos);

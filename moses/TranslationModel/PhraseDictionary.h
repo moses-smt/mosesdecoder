@@ -44,26 +44,21 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/TargetPhraseCollection.h"
 #include "moses/InputPath.h"
 #include "moses/FF/DecodeFeature.h"
+#include "moses/ContextScope.h"
 
 namespace Moses
 {
 
 class StaticData;
 class InputType;
-class WordsRange;
+class Range;
 class ChartCellCollectionBase;
 class ChartRuleLookupManager;
 class ChartParser;
 
-class CacheColl : public boost::unordered_map<size_t, std::pair<const TargetPhraseCollection*, clock_t> >
-{
-// 1st = hash of source phrase/ address of phrase-table node
-// 2nd = all translations
-// 3rd = time of last access
-
-public:
-  ~CacheColl();
-};
+// typedef std::pair<TargetPhraseCollection::shared_ptr, clock_t> TPCollLastUse;
+typedef std::pair<TargetPhraseCollection::shared_ptr, clock_t> CacheCollEntry;
+typedef boost::unordered_map<size_t, CacheCollEntry> CacheColl;
 
 /**
   * Abstract base class for phrase dictionaries (tables).
@@ -95,9 +90,9 @@ public:
     return m_id;
   }
 
-  virtual
-  void
-  Release(TargetPhraseCollection const* tpc) const;
+  // virtual
+  // void
+  // Release(ttasksptr const& ttask, TargetPhraseCollection const*& tpc) const;
 
   /// return true if phrase table entries starting with /phrase/
   //  exist in the table.
@@ -111,24 +106,21 @@ public:
   //! find list of translations that can translates src. Only for phrase input
 
 public:
-  virtual
-  TargetPhraseCollection const *
+  virtual TargetPhraseCollection::shared_ptr
   GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
 
-  virtual
-  TargetPhraseCollection const *
-  GetTargetPhraseCollectionLEGACY(ttasksptr const& ttask, const Phrase& src) const {
+  virtual TargetPhraseCollection::shared_ptr
+  GetTargetPhraseCollectionLEGACY(ttasksptr const& ttask,
+                                  Phrase const& src) const {
     return GetTargetPhraseCollectionLEGACY(src);
   }
 
-  virtual
-  void
+  virtual void
   GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
-  virtual
-  void
-  GetTargetPhraseCollectionBatch(ttasksptr const& ttask,
-                                 const InputPathList &inputPathQueue) const {
+  virtual void
+  GetTargetPhraseCollectionBatch
+  (ttasksptr const& ttask, InputPathList const& inputPathQueue) const {
     GetTargetPhraseCollectionBatch(inputPathQueue);
   }
 
@@ -157,7 +149,9 @@ public:
 
   // LEGACY
   //! find list of translations that can translates a portion of src. Used by confusion network decoding
-  virtual const TargetPhraseCollectionWithSourcePhrase* GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const& range) const;
+  virtual
+  TargetPhraseCollectionWithSourcePhrase::shared_ptr
+  GetTargetPhraseCollectionLEGACY(InputType const& src,Range const& range) const;
 
 protected:
   static std::vector<PhraseDictionary*> s_staticColl;
@@ -184,7 +178,10 @@ protected:
   mutable boost::scoped_ptr<CacheColl> m_cache;
 #endif
 
-  virtual const TargetPhraseCollection *GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const;
+  virtual
+  TargetPhraseCollection::shared_ptr
+  GetTargetPhraseCollectionNonCacheLEGACY(const Phrase& src) const;
+
   void ReduceCache() const;
 
 protected:

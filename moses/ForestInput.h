@@ -21,14 +21,15 @@ class ForestInput : public Sentence
 public:
   friend std::ostream &operator<<(std::ostream&, const ForestInput &);
 
-  ForestInput() : Sentence(), m_rootVertex(NULL) {}
+  ForestInput(AllOptions::ptr const& opts) : Sentence(opts), m_rootVertex(NULL) {}
 
   InputTypeEnum GetType() const {
     return ForestInputType;
   }
 
   //! populate this InputType with data from in stream
-  virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
+  virtual int
+  Read(std::istream& in);
 
   //! Output debugging info to stream out
   virtual void Print(std::ostream&) const;
@@ -73,11 +74,9 @@ private:
 
   void FindTopVertices(Forest &, std::vector<Forest::Vertex *> &);
 
-  void ParseHyperedgeLine(const std::string &,
-                          const std::vector<FactorType> &);
+  void ParseHyperedgeLine(const std::string &);
 
-  Forest::Vertex *ParseVertex(const StringPiece &,
-                              const std::vector<FactorType> &);
+  Forest::Vertex *ParseVertex(const StringPiece &);
 
   boost::shared_ptr<Forest> m_forest;
   Forest::Vertex *m_rootVertex;

@@ -2,6 +2,7 @@
 #pragma once
 #include "moses/Util.h"
 #include "moses/ContextScope.h"
+#include "moses/parameters/AllOptions.h"
 #include <sys/time.h>
 #include <boost/unordered_map.hpp>
 
@@ -17,16 +18,19 @@ namespace MosesServer{
     time_t start_time;
     time_t last_access;
     boost::shared_ptr<Moses::ContextScope> const scope; // stores local info
+    SPTR<std::map<std::string,float> > m_context_weights;
 
-
-
+    
     Session(uint64_t const session_id) 
-      : id(session_id), scope(new Moses::ContextScope) 
+      : id(session_id)
+      , scope(new Moses::ContextScope) 
     { 
       last_access = start_time = time(NULL); 
     }
 
     bool is_new() const { return last_access == start_time; }
+
+    void setup(std::map<std::string, xmlrpc_c::value> const& params);
   };
 
   class SessionCache

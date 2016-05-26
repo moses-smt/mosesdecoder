@@ -54,7 +54,7 @@ protected:
 public:
   LanguageModelSRI(const std::string &line);
   ~LanguageModelSRI();
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = 0) const;
 };

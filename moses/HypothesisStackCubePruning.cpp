@@ -36,9 +36,10 @@ namespace Moses
 HypothesisStackCubePruning::HypothesisStackCubePruning(Manager& manager) :
   HypothesisStack(manager)
 {
-  m_nBestIsEnabled = StaticData::Instance().options().nbest.enabled;
+  m_nBestIsEnabled = manager.options()->nbest.enabled;
   m_bestScore = -std::numeric_limits<float>::infinity();
   m_worstScore = -std::numeric_limits<float>::infinity();
+  m_deterministic = manager.options()->cube.deterministic_search;
 }
 
 /** remove all hypotheses from the collection */
@@ -60,9 +61,9 @@ pair<HypothesisStackCubePruning::iterator, bool> HypothesisStackCubePruning::Add
     VERBOSE(3,"added hyp to stack");
 
     // Update best score, if this hypothesis is new best
-    if (hypo->GetTotalScore() > m_bestScore) {
+    if (hypo->GetFutureScore() > m_bestScore) {
       VERBOSE(3,", best on stack");
-      m_bestScore = hypo->GetTotalScore();
+      m_bestScore = hypo->GetFutureScore();
       // this may also affect the worst score
       if ( m_bestScore + m_beamWidth > m_worstScore )
         m_worstScore = m_bestScore + m_beamWidth;
@@ -82,18 +83,18 @@ pair<HypothesisStackCubePruning::iterator, bool> HypothesisStackCubePruning::Add
 
 bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
 {
-  if (hypo->GetTotalScore() == - std::numeric_limits<float>::infinity()) {
+  if (hypo->GetFutureScore() == - std::numeric_limits<float>::infinity()) {
     m_manager.GetSentenceStats().AddDiscarded();
     VERBOSE(3,"discarded, constraint" << std::endl);
-    FREEHYPO(hypo);
+    delete hypo;
     return false;
   }
 
-  if (hypo->GetTotalScore() < m_worstScore) {
+  if (hypo->GetFutureScore() < m_worstScore) {
     // too bad for stack. don't bother adding hypo into collection
     m_manager.GetSentenceStats().AddDiscarded();
     VERBOSE(3,"discarded, too bad for stack" << std::endl);
-    FREEHYPO(hypo);
+    delete hypo;
     return false;
   }
 
@@ -113,7 +114,7 @@ bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
 
   // found existing hypo with same target ending.
   // keep the best 1
-  if (hypo->GetTotalScore() > hypoExisting->GetTotalScore()) {
+  if (hypo->GetFutureScore() > hypoExisting->GetFutureScore()) {
     // incoming hypo is better than the one we have
     VERBOSE(3,"better than matching hyp " << hypoExisting->GetId() << ", recombining, ");
     if (m_nBestIsEnabled) {
@@ -135,7 +136,7 @@ bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
     if (m_nBestIsEnabled) {
       hypoExisting->AddArc(hypo);
     } else {
-      FREEHYPO(hypo);
+      delete hypo;
     }
     return false;
   }
@@ -147,8 +148,8 @@ void HypothesisStackCubePruning::AddInitial(Hypothesis *hypo)
   UTIL_THROW_IF2(!addRet.second,
                  "Should have added hypothesis " << *hypo);
 
-  const WordsBitmap &bitmap = hypo->GetWordsBitmap();
-  m_bitmapAccessor[bitmap] = new BitmapContainer(bitmap, *this);
+  const Bitmap &bitmap = hypo->GetWordsBitmap();
+  AddBitmapContainer(bitmap, *this);
 }
 
 void HypothesisStackCubePruning::PruneToSize(size_t newSize)
@@ -164,7 +165,7 @@ void HypothesisStackCubePruning::PruneToSize(size_t newSize)
     float score = 0;
     while (iter != m_hypos.end()) {
       Hypothesis *hypo = *iter;
-      score = hypo->GetTotalScore();
+      score = hypo->GetFutureScore();
       if (score > m_bestScore+m_beamWidth) {
         bestScores.push(score);
       }
@@ -184,7 +185,7 @@ void HypothesisStackCubePruning::PruneToSize(size_t newSize)
     iter = m_hypos.begin();
     while (iter != m_hypos.end()) {
       Hypothesis *hypo = *iter;
-      float score = hypo->GetTotalScore();
+      float score = hypo->GetFutureScore();
       if (score < scoreThreshold) {
         iterator iterRemove = iter++;
         Remove(iterRemove);
@@ -199,7 +200,7 @@ void HypothesisStackCubePruning::PruneToSize(size_t newSize)
       TRACE_ERR("stack now contains: ");
       for(iter = m_hypos.begin(); iter != m_hypos.end(); iter++) {
         Hypothesis *hypo = *iter;
-        TRACE_ERR( hypo->GetId() << " (" << hypo->GetTotalScore() << ") ");
+        TRACE_ERR( hypo->GetId() << " (" << hypo->GetFutureScore() << ") ");
       }
       TRACE_ERR( endl);
     }
@@ -216,7 +217,7 @@ const Hypothesis *HypothesisStackCubePruning::GetBestHypothesis() const
     Hypothesis *bestHypo = *iter;
     while (++iter != m_hypos.end()) {
       Hypothesis *hypo = *iter;
-      if (hypo->GetTotalScore() > bestHypo->GetTotalScore())
+      if (hypo->GetFutureScore() > bestHypo->GetFutureScore())
         bestHypo = hypo;
     }
     return bestHypo;
@@ -243,32 +244,24 @@ void HypothesisStackCubePruning::CleanupArcList()
   iterator iter;
   for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter) {
     Hypothesis *mainHypo = *iter;
-    mainHypo->CleanupArcList();
+    mainHypo->CleanupArcList(this->m_manager.options()->nbest.nbest_size, this->m_manager.options()->NBestDistinct());
   }
 }
 
-void HypothesisStackCubePruning::SetBitmapAccessor(const WordsBitmap &newBitmap
+void HypothesisStackCubePruning::SetBitmapAccessor(const Bitmap &newBitmap
     , HypothesisStackCubePruning &stack
-    , const WordsRange &/*range*/
+    , const Range &/*range*/
     , BitmapContainer &bitmapContainer
-    , const SquareMatrix &futureScore
+    , const SquareMatrix &estimatedScores
     , const TranslationOptionList &transOptList)
 {
-  _BMType::iterator bcExists = m_bitmapAccessor.find(newBitmap);
-
-  BitmapContainer *bmContainer;
-  if (bcExists == m_bitmapAccessor.end()) {
-    bmContainer = new BitmapContainer(newBitmap, stack);
-    m_bitmapAccessor[newBitmap] = bmContainer;
-  } else {
-    bmContainer = bcExists->second;
-  }
-
+  BitmapContainer *bmContainer =   AddBitmapContainer(newBitmap, stack);
   BackwardsEdge *edge = new BackwardsEdge(bitmapContainer
                                           , *bmContainer
                                           , transOptList
-                                          , futureScore,
-                                          m_manager.GetSource());
+                                          , estimatedScores
+                                          , m_manager.GetSource()
+                                          , m_deterministic);
   bmContainer->AddBackwardsEdge(edge);
 }
 
@@ -295,10 +288,25 @@ HypothesisStackCubePruning::AddHypothesesToBitmapContainers()
   HypothesisStackCubePruning::const_iterator iter;
   for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter) {
     Hypothesis *h = *iter;
-    const WordsBitmap &bitmap = h->GetWordsBitmap();
-    BitmapContainer *container = m_bitmapAccessor[bitmap];
+    const Bitmap &bitmap = h->GetWordsBitmap();
+    BitmapContainer *container = m_bitmapAccessor[&bitmap];
     container->AddHypothesis(h);
   }
+}
+
+BitmapContainer *HypothesisStackCubePruning::AddBitmapContainer(const Bitmap &bitmap, HypothesisStackCubePruning &stack)
+{
+  _BMType::iterator iter = m_bitmapAccessor.find(&bitmap);
+
+  BitmapContainer *bmContainer;
+  if (iter == m_bitmapAccessor.end()) {
+    bmContainer = new BitmapContainer(bitmap, stack, m_deterministic);
+    m_bitmapAccessor[&bitmap] = bmContainer;
+  } else {
+    bmContainer = iter->second;
+  }
+
+  return bmContainer;
 }
 
 }

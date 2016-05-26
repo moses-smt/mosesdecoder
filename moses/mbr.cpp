@@ -10,7 +10,7 @@
 #include <cstdio>
 #include "moses/TrellisPathList.h"
 #include "moses/TrellisPath.h"
-#include "moses/StaticData.h"
+// #include "moses/StaticData.h"
 #include "moses/Util.h"
 #include "mbr.h"
 
@@ -89,10 +89,10 @@ float calculate_score(const vector< vector<const Factor*> > & sents, int ref, in
   return exp(logbleu);
 }
 
-const TrellisPath doMBR(const TrellisPathList& nBestList)
+const TrellisPath doMBR(const TrellisPathList& nBestList, AllOptions const& opts)
 {
   float marginal = 0;
-  float mbr_scale = StaticData::Instance().options().mbr.scale;
+  float mbr_scale = opts.mbr.scale;
   vector<float> joint_prob_vec;
   vector< vector<const Factor*> > translations;
   float joint_prob;
@@ -108,6 +108,8 @@ const TrellisPath doMBR(const TrellisPathList& nBestList)
     if (maxScore < score) maxScore = score;
   }
 
+  vector<FactorType> const& oFactors = opts.output.factor_order;
+  UTIL_THROW_IF2(oFactors.size() != 1, "Need exactly one output factor!");
   for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
     const TrellisPath &path = **iter;
     joint_prob = UntransformScore(mbr_scale * path.GetScoreBreakdown()->GetWeightedScore() - maxScore);
@@ -116,7 +118,7 @@ const TrellisPath doMBR(const TrellisPathList& nBestList)
 
     // get words in translation
     vector<const Factor*> translation;
-    GetOutputFactors(path, translation);
+    GetOutputFactors(path, oFactors[0], translation);
 
     // collect n-gram counts
     map < vector < const Factor *>, int > counts;
@@ -156,11 +158,11 @@ const TrellisPath doMBR(const TrellisPathList& nBestList)
   //return translations[minMBRLossIdx];
 }
 
-void GetOutputFactors(const TrellisPath &path, vector <const Factor*> &translation)
+void
+GetOutputFactors(const TrellisPath &path, FactorType const oFactor,
+                 vector <const Factor*> &translation)
 {
   const std::vector<const Hypothesis *> &edges = path.GetEdges();
-  const std::vector<FactorType>& outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
-  assert (outputFactorOrder.size() == 1);
 
   // print the surface factor of the translation
   for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
@@ -168,8 +170,7 @@ void GetOutputFactors(const TrellisPath &path, vector <const Factor*> &translati
     const Phrase &phrase = edge.GetCurrTargetPhrase();
     size_t size = phrase.GetSize();
     for (size_t pos = 0 ; pos < size ; pos++) {
-
-      const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
+      const Factor *factor = phrase.GetFactor(pos, oFactor);
       translation.push_back(factor);
     }
   }

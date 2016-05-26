@@ -16,7 +16,7 @@ class SkeletonPT : public PhraseDictionary
 public:
   SkeletonPT(const std::string &line);
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   void InitializeForInput(ttasksptr const& ttask);
 

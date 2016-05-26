@@ -103,7 +103,7 @@ void Mismatch::PrintClippedHTML( ostream* out, int width )
 
     // find first and last
     int target_start = -1;
-    int target_end;
+    int target_end = -1;
     for(int i=0; i<m_target_length; i++)
       if (target_annotation[i] == ALIGNED) {
         if (target_start == -1)
@@ -216,7 +216,7 @@ void Mismatch::PrintClippedHTML( ostream* out, int width )
   // print target
   // shorten target context if too long
   int target_start = -1;
-  int target_end;
+  int target_end=0;
   for(int i=0; i<m_target_length; i++)
     if (target_annotation[i] != UNANNOTATED) {
       if (target_start == -1)

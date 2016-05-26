@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // $Id$
 
 /***********************************************************************
@@ -45,8 +46,6 @@ class LanguageModel : public StatefulFeatureFunction
 protected:
   LanguageModel(const std::string &line);
 
-  // This can't be in the constructor for virual function dispatch reasons
-
   bool m_enableOOVFeature;
 
 public:
@@ -58,9 +57,7 @@ public:
     return m_enableOOVFeature;
   }
 
-  float GetWeight() const;
-  float GetOOVWeight() const;
-
+  virtual void SetParameter(const std::string& key, const std::string& value);
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const = 0;
 
@@ -72,9 +69,7 @@ public:
    * \param oovCount number of LM OOVs
    */
   virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const = 0;
-  virtual void CalcScoreWithContext(ttasksptr const& ttask, const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const {
-    CalcScore(phrase, fullScore, ngramScore, oovCount);
-  }
+
   virtual void CalcScoreFromCache(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const {
   }
 
@@ -93,19 +88,7 @@ public:
   virtual void EvaluateInIsolation(const Phrase &source
                                    , const TargetPhrase &targetPhrase
                                    , ScoreComponentCollection &scoreBreakdown
-                                   , ScoreComponentCollection &estimatedFutureScore) const;
-
-  void EvaluateWithSourceContext(const InputType &input
-                                 , const InputPath &inputPath
-                                 , const TargetPhrase &targetPhrase
-                                 , const StackVec *stackVec
-                                 , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
-  }
-
-  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const {
-  }
+                                   , ScoreComponentCollection &estimatedScores) const;
 
 };
 

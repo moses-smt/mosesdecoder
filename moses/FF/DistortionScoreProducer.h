@@ -1,16 +1,11 @@
 #pragma once
 
-#include <stdexcept>
 #include <string>
 #include "StatefulFeatureFunction.h"
+#include "moses/Range.h"
 
 namespace Moses
 {
-class FFState;
-class ScoreComponentCollection;
-class Hypothesis;
-class ChartHypothesis;
-class WordsRange;
 
 /** Calculates Distortion scores
  */
@@ -19,6 +14,14 @@ class DistortionScoreProducer : public StatefulFeatureFunction
 protected:
   static std::vector<const DistortionScoreProducer*> s_staticColl;
 
+  FactorType m_sparseFactorTypeSource;
+  FactorType m_sparseFactorTypeTarget;
+  bool m_useSparse;
+  bool m_sparseDistance;
+  bool m_sparseSubordinate;
+  FactorType m_sparseFactorTypeTargetSubordinate;
+  const Factor* m_subordinateConjunctionTagFactor;
+
 public:
   static const std::vector<const DistortionScoreProducer*>& GetDistortionFeatureFunctions() {
     return s_staticColl;
@@ -26,12 +29,14 @@ public:
 
   DistortionScoreProducer(const std::string &line);
 
+  void SetParameter(const std::string& key, const std::string& value);
+
   bool IsUseable(const FactorMask &mask) const {
     return true;
   }
 
   static float CalculateDistortionScore(const Hypothesis& hypo,
-                                        const WordsRange &prev, const WordsRange &curr, const int FirstGapPosition);
+                                        const Range &prev, const Range &curr, const int FirstGapPosition);
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
@@ -44,26 +49,9 @@ public:
     const ChartHypothesis& /* cur_hypo */,
     int /* featureID - used to index the state in the previous hypotheses */,
     ScoreComponentCollection*) const {
-    throw std::logic_error("DistortionScoreProducer not supported in chart decoder, yet");
+    UTIL_THROW(util::Exception, "DIstortion not implemented in chart decoder");
   }
 
-  void EvaluateWithSourceContext(const InputType &input
-                                 , const InputPath &inputPath
-                                 , const TargetPhrase &targetPhrase
-                                 , const StackVec *stackVec
-                                 , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
-  }
-
-  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const {
-  }
-
-  void EvaluateInIsolation(const Phrase &source
-                           , const TargetPhrase &targetPhrase
-                           , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {
-  }
 };
 }
 

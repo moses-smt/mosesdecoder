@@ -11,11 +11,17 @@
 #include "InputOptions.h"
 #include "MBR_Options.h"
 #include "LMBR_Options.h"
+#include "ReportingOptions.h"
+#include "OOVHandlingOptions.h"
+#include "SyntaxOptions.h"
+#include <boost/shared_ptr.hpp>
+
 namespace Moses
 {
   struct 
   AllOptions : public OptionsBaseClass
   {
+    typedef boost::shared_ptr<AllOptions const> ptr;
     SearchOptions         search;
     CubePruningOptions      cube;
     NBestOptions           nbest;
@@ -24,20 +30,21 @@ namespace Moses
     InputOptions           input;
     MBR_Options              mbr;
     LMBR_Options            lmbr;
-
+    ReportingOptions      output; 
+    OOVHandlingOptions       unk;
+    SyntaxOptions         syntax;
     bool mira;
-
+    bool use_legacy_pt;
     // StackOptions      stack;
     // BeamSearchOptions  beam;
     bool init(Parameter const& param);
     bool sanity_check();
-    AllOptions() {}
+    AllOptions();
     AllOptions(Parameter const& param);
 
-#ifdef HAVE_XMLRPC_C
     bool update(std::map<std::string,xmlrpc_c::value>const& param);
-#endif 
-
+    bool NBestDistinct() const;
+    
   };
 
 }

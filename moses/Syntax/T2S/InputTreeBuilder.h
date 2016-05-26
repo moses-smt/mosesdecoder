@@ -17,7 +17,7 @@ namespace T2S
 class InputTreeBuilder
 {
 public:
-  InputTreeBuilder();
+  InputTreeBuilder(std::vector<FactorType> const& oFactors);
 
   // Constructs a Moses::T2S::InputTree given a Moses::TreeInput and a label
   // for the top-level node (which covers <s> and </s>).

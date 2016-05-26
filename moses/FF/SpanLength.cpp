@@ -3,7 +3,7 @@
 #include "moses/StaticData.h"
 #include "moses/Word.h"
 #include "moses/ChartCellLabel.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 #include "moses/StackVec.h"
 #include "moses/TargetPhrase.h"
 #include "moses/PP/PhraseProperty.h"
@@ -24,7 +24,7 @@ SpanLength::SpanLength(const std::string &line)
 void SpanLength::EvaluateInIsolation(const Phrase &source
                                      , const TargetPhrase &targetPhrase
                                      , ScoreComponentCollection &scoreBreakdown
-                                     , ScoreComponentCollection &estimatedFutureScore) const
+                                     , ScoreComponentCollection &estimatedScores) const
 {
   targetPhrase.SetRuleSource(source);
 }
@@ -34,7 +34,7 @@ void SpanLength::EvaluateWithSourceContext(const InputType &input
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {
   assert(stackVec);
 
@@ -50,7 +50,7 @@ void SpanLength::EvaluateWithSourceContext(const InputType &input
   float score = 0;
   for (size_t i = 0; i < stackVec->size(); ++i) {
     const ChartCellLabel &cell = *stackVec->at(i);
-    const WordsRange &ntRange = cell.GetCoverage();
+    const Range &ntRange = cell.GetCoverage();
     size_t sourceWidth = ntRange.GetNumWordsCovered();
     float prob = slProp->GetProb(i, sourceWidth, m_const);
     score += TransformScore(prob);

@@ -54,7 +54,7 @@ void ChartKBestExtractor::Extract(
   // recombined.
   for (++p; p != topLevelHypos.end(); ++p) {
     // Check that the first item in topLevelHypos really was the best.
-    UTIL_THROW_IF2((*p)->GetTotalScore() > bestTopLevelHypo.GetTotalScore(),
+    UTIL_THROW_IF2((*p)->GetFutureScore() > bestTopLevelHypo.GetFutureScore(),
                    "top-level hypotheses are not correctly sorted");
     // Note: there's no need for a smart pointer here: supremeHypo will take
     // ownership of altHypo.
@@ -82,7 +82,7 @@ void ChartKBestExtractor::Extract(
 // Generate the target-side yield of the derivation d.
 Phrase ChartKBestExtractor::GetOutputPhrase(const Derivation &d)
 {
-  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
+  FactorType placeholderFactor = StaticData::Instance().options()->input.placeholder_factor;
 
   Phrase ret(ARRAY_SIZE_INCR);
 
@@ -308,7 +308,7 @@ ChartKBestExtractor::Derivation::Derivation(const UnweightedHyperarc &e)
     boost::shared_ptr<Derivation> sub(pred.kBestList[0]);
     subderivations.push_back(sub);
   }
-  score = edge.head->hypothesis.GetTotalScore();
+  score = edge.head->hypothesis.GetFutureScore();
 }
 
 // Construct a Derivation that neighbours an existing Derivation.

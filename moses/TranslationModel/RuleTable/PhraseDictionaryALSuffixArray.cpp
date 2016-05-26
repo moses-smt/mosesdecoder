@@ -32,8 +32,9 @@ PhraseDictionaryALSuffixArray::PhraseDictionaryALSuffixArray(const std::string &
   ReadParameters();
 }
 
-void PhraseDictionaryALSuffixArray::Load()
+void PhraseDictionaryALSuffixArray::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   SetFeaturesToApply();
 }
 
@@ -47,11 +48,11 @@ void PhraseDictionaryALSuffixArray::InitializeForInput(ttasksptr const& ttask)
 
   std::auto_ptr<RuleTableLoader> loader =
     RuleTableLoaderFactory::Create(grammarFile);
-  bool ret = loader->Load(m_input, m_output, grammarFile, m_tableLimit,
-                          *this);
+  AllOptions::ptr const& opts = ttask->options();
+  bool ret = loader->Load(*opts, m_input, m_output, grammarFile, m_tableLimit, *this);
 
-  UTIL_THROW_IF2(!ret,
-                 "Rules not successfully loaded for sentence id " << translationId);
+  UTIL_THROW_IF2(!ret, "Rules not successfully loaded for sentence id "
+                 << translationId);
 }
 
 void PhraseDictionaryALSuffixArray::CleanUpAfterSentenceProcessing(const InputType &source)

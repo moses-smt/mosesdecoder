@@ -24,6 +24,9 @@ struct NBestOptions : public OptionsBaseClass
 
   bool init(Parameter const& param);
 
+  bool update(std::map<std::string,xmlrpc_c::value>const& param);
+
+  NBestOptions();
 };
 
 }

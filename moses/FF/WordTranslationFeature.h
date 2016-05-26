@@ -5,7 +5,6 @@
 
 #include "moses/FactorCollection.h"
 #include "moses/Sentence.h"
-#include "FFState.h"
 #include "StatelessFeatureFunction.h"
 
 namespace Moses
@@ -41,23 +40,19 @@ public:
   void SetParameter(const std::string& key, const std::string& value);
   bool IsUseable(const FactorMask &mask) const;
 
-  void Load();
-
-  const FFState* EmptyHypothesisState(const InputType &) const {
-    return new DummyState();
-  }
+  void Load(AllOptions::ptr const& opts);
 
   void EvaluateWithSourceContext(const InputType &input
                                  , const InputPath &inputPath
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+                                 , ScoreComponentCollection *estimatedScores = NULL) const;
 
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {
+                           , ScoreComponentCollection &estimatedScores) const {
   }
 
   void EvaluateWhenApplied(const Hypothesis& hypo,

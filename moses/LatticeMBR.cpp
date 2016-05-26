@@ -90,7 +90,7 @@ LatticeMBRSolution::LatticeMBRSolution(const TrellisPath& path, bool isMap) :
     }
   }
   if (isMap) {
-    m_mapScore = path.GetTotalScore();
+    m_mapScore = path.GetFutureScore();
   } else {
     m_mapScore = 0;
   }
@@ -515,8 +515,8 @@ void getLatticeMBRNBest(const Manager& manager, const TrellisPathList& nBestList
   vector< float> estimatedScores;
   manager.GetForwardBackwardSearchGraph(&connected, &connectedList,
                                         &outgoingHyps, &estimatedScores);
-  LMBR_Options const& lmbr = manager.options().lmbr;
-  MBR_Options  const& mbr  = manager.options().mbr;
+  LMBR_Options const& lmbr = manager.options()->lmbr;
+  MBR_Options  const& mbr  = manager.options()->mbr;
   pruneLatticeFB(connectedList, outgoingHyps, incomingEdges, estimatedScores,
                  manager.GetBestHypothesis(), lmbr.pruning_factor, mbr.scale);
   calcNgramExpectations(connectedList, incomingEdges, ngramPosteriors,true);
@@ -577,8 +577,8 @@ const TrellisPath doConsensusDecoding(const Manager& manager, const TrellisPathL
   map<const Hypothesis*, vector<Edge> > incomingEdges;
   vector< float> estimatedScores;
   manager.GetForwardBackwardSearchGraph(&connected, &connectedList, &outgoingHyps, &estimatedScores);
-  LMBR_Options const& lmbr = manager.options().lmbr;
-  MBR_Options  const&  mbr = manager.options().mbr;
+  LMBR_Options const& lmbr = manager.options()->lmbr;
+  MBR_Options  const&  mbr = manager.options()->mbr;
   pruneLatticeFB(connectedList, outgoingHyps, incomingEdges, estimatedScores,
                  manager.GetBestHypothesis(), lmbr.pruning_factor, mbr.scale);
   calcNgramExpectations(connectedList, incomingEdges, ngramExpectations,false);

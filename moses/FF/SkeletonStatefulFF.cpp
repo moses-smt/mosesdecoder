@@ -7,14 +7,6 @@ using namespace std;
 
 namespace Moses
 {
-int SkeletonState::Compare(const FFState& other) const
-{
-  const SkeletonState &otherState = static_cast<const SkeletonState&>(other);
-
-  if (m_targetLen == otherState.m_targetLen)
-    return 0;
-  return (m_targetLen < otherState.m_targetLen) ? -1 : +1;
-}
 
 ////////////////////////////////////////////////////////////////
 SkeletonStatefulFF::SkeletonStatefulFF(const std::string &line)
@@ -23,22 +15,32 @@ SkeletonStatefulFF::SkeletonStatefulFF(const std::string &line)
   ReadParameters();
 }
 
+
+// An empty implementation of this function is provided by StatefulFeatureFunction.
+// Unless you are actually implementing this, please remove it from your
+// implementation (and the declaration in the header file to reduce code clutter.
 void SkeletonStatefulFF::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScores) const
 {}
 
+// An empty implementation of this function is provided by StatefulFeatureFunction.
+// Unless you are actually implementing this, please remove it from your
+// implementation (and the declaration in the header file to reduce code clutter.
 void SkeletonStatefulFF::EvaluateWithSourceContext(const InputType &input
     , const InputPath &inputPath
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {}
 
-void SkeletonStatefulFF::EvaluateTranslationOptionListWithSourceContext(const InputType &input
-    , const TranslationOptionList &translationOptionList) const
+// An empty implementation of this function is provided by StatefulFeatureFunction.
+// Unless you are actually implementing this, please remove it from your
+// implementation (and the declaration in the header file to reduce code clutter.
+void SkeletonStatefulFF::EvaluateTranslationOptionListWithSourceContext
+(const InputType &input, const TranslationOptionList &translationOptionList) const
 {}
 
 FFState* SkeletonStatefulFF::EvaluateWhenApplied(

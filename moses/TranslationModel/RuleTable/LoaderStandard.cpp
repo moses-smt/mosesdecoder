@@ -33,7 +33,7 @@
 #include "moses/Util.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 #include "moses/ChartTranslationOptionList.h"
 #include "moses/FactorCollection.h"
 #include "util/file_piece.hh"
@@ -47,19 +47,17 @@ using namespace boost::algorithm;
 
 namespace Moses
 {
-bool RuleTableLoaderStandard::Load(const std::vector<FactorType> &input
-                                   , const std::vector<FactorType> &output
-                                   , const std::string &inFile
-                                   , size_t tableLimit
-                                   , RuleTableTrie &ruleTable)
-{
-  bool ret = Load(MosesFormat
-                  ,input, output
-                  ,inFile
-                  ,tableLimit
-                  ,ruleTable);
-  return ret;
 
+bool
+RuleTableLoaderStandard::
+Load(AllOptions const& opts
+     , const std::vector<FactorType> &input
+     , const std::vector<FactorType> &output
+     , const std::string &inFile
+     , size_t tableLimit
+     , RuleTableTrie &ruleTable)
+{
+  return Load(opts, MosesFormat,input, output ,inFile ,tableLimit ,ruleTable);
 }
 
 void ReformatHieroRule(int sourceTarget, string &phrase, map<size_t, pair<size_t, size_t> > &ntAlign)
@@ -126,14 +124,14 @@ void ReformatHieroRule(const string &lineOrig, string &out)
   ReformatHieroRule(1, targetPhraseString, ntAlign);
   ReformateHieroScore(scoreString);
 
-  stringstream align;
+  util::StringStream align;
   map<size_t, pair<size_t, size_t> >::const_iterator iterAlign;
   for (iterAlign = ntAlign.begin(); iterAlign != ntAlign.end(); ++iterAlign) {
     const pair<size_t, size_t> &alignPoint = iterAlign->second;
     align << alignPoint.first << "-" << alignPoint.second << " ";
   }
 
-  stringstream ret;
+  util::StringStream ret;
   ret << sourcePhraseString << " ||| "
       << targetPhraseString << " ||| "
       << scoreString << " ||| "
@@ -142,7 +140,7 @@ void ReformatHieroRule(const string &lineOrig, string &out)
   out = ret.str();
 }
 
-bool RuleTableLoaderStandard::Load(FormatType format
+bool RuleTableLoaderStandard::Load(AllOptions const& opts, FormatType format
                                    , const std::vector<FactorType> &input
                                    , const std::vector<FactorType> &output
                                    , const std::string &inFile
@@ -151,7 +149,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
 {
   PrintUserTime(string("Start loading text phrase table. ") + (format==MosesFormat?"Moses":"Hiero") + " format");
 
-  const StaticData &staticData = StaticData::Instance();
+  // const StaticData &staticData = StaticData::Instance();
 
   string lineOrig;
   size_t count = 0;
@@ -192,7 +190,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     }
 
     bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
-    if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
+    if (isLHSEmpty && !opts.unk.word_deletion_enabled) {
       TRACE_ERR( ruleTable.GetFilePath() << ":" << count << ": pt entry contains empty target, skipping\n");
       continue;
     }
@@ -242,8 +240,10 @@ bool RuleTableLoaderStandard::Load(FormatType format
     targetPhrase->GetScoreBreakdown().Assign(&ruleTable, scoreVector);
     targetPhrase->EvaluateInIsolation(sourcePhrase, ruleTable.GetFeaturesToApply());
 
-    TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
-    phraseColl.Add(targetPhrase);
+    TargetPhraseCollection::shared_ptr phraseColl
+    = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase,
+                                        *targetPhrase, sourceLHS);
+    phraseColl->Add(targetPhrase);
 
     // not implemented correctly in memory pt. just delete it for now
     delete sourceLHS;

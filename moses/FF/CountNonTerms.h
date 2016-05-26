@@ -16,14 +16,14 @@ public:
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const;
+                           , ScoreComponentCollection &estimatedScores) const;
 
   void EvaluateWithSourceContext(const InputType &input
                                  , const InputPath &inputPath
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
+                                 , ScoreComponentCollection *estimatedScores = NULL) const {
   }
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
@@ -41,6 +41,7 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
+  void Load(AllOptions::ptr const& opts);
 protected:
   bool m_all, m_sourceSyntax, m_targetSyntax;
 };

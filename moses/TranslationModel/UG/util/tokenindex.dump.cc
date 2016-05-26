@@ -12,7 +12,7 @@
 #include <iomanip>
 
 using namespace std;
-using namespace ugdiss;
+using namespace sapt;
 int
 main(int argc,char* argv[])
 {

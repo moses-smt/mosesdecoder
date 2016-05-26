@@ -19,7 +19,9 @@ class CoveredReferenceState : public FFState
 public:
   std::multiset<std::string> m_coveredRef;
 
-  int Compare(const FFState& other) const;
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
+
 };
 
 class CoveredReferenceFeature : public StatefulFeatureFunction
@@ -42,7 +44,7 @@ public:
     ReadParameters();
   }
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   bool IsUseable(const FactorMask &mask) const {
     return true;
@@ -51,20 +53,12 @@ public:
     return new CoveredReferenceState();
   }
 
-  void EvaluateInIsolation(const Phrase &source
-                           , const TargetPhrase &targetPhrase
-                           , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const;
   void EvaluateWithSourceContext(const InputType &input
                                  , const InputPath &inputPath
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const;
-
-  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const {
-  }
+                                 , ScoreComponentCollection *estimatedScores = NULL) const;
 
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,

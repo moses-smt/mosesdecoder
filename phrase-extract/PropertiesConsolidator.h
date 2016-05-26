@@ -34,10 +34,15 @@ class PropertiesConsolidator
 {
 public:
 
-  PropertiesConsolidator() : m_sourceLabelsFlag(false) {};
+  PropertiesConsolidator()
+    : m_sourceLabelsFlag(false)
+    , m_partsOfSpeechFlag(false)
+    , m_targetSyntacticPreferencesFlag(false)
+  {};
 
   void ActivateSourceLabelsProcessing(const std::string &sourceLabelSetFile);
   void ActivatePartsOfSpeechProcessing(const std::string &partsOfSpeechFile);
+  void ActivateTargetSyntacticPreferencesProcessing(const std::string &targetSyntacticPreferencesLabelSetFile);
 
   bool GetPOSPropertyValueFromPropertiesString(const std::string &propertiesString, std::vector<std::string>& out) const;
 
@@ -47,11 +52,14 @@ protected:
 
   void ProcessSourceLabelsPropertyValue(const std::string &value, Moses::OutputFileStream& out) const;
   void ProcessPOSPropertyValue(const std::string &value, Moses::OutputFileStream& out) const;
+  void ProcessTargetSyntacticPreferencesPropertyValue(const std::string &value, Moses::OutputFileStream& out) const;
 
   bool m_sourceLabelsFlag;
   std::map<std::string,size_t> m_sourceLabels;
   bool m_partsOfSpeechFlag;
   std::map<std::string,size_t> m_partsOfSpeechVocabulary;
+  bool m_targetSyntacticPreferencesFlag;
+  std::map<std::string,size_t> m_targetSyntacticPreferencesLabels;
 
 };
 

@@ -1,4 +1,4 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #pragma once
 
 #include <boost/smart_ptr/shared_ptr.hpp>
@@ -44,7 +44,7 @@ class TranslationTask : public Moses::Task
     return *this;
   }
 protected:
-  AllOptions m_options;
+  AllOptions::ptr m_options;
   boost::weak_ptr<TranslationTask> m_self; // weak ptr to myself
   boost::shared_ptr<ContextScope> m_scope; // sores local info
   // pointer to ContextScope, which stores context-specific information
@@ -67,7 +67,7 @@ protected:
   // task stays alive till it's done with it.
 
   boost::shared_ptr<std::vector<std::string> > m_context;
-  std::map<std::string, float> m_context_weights;
+  // SPTR<std::map<std::string, float> const> m_context_weights;
 public:
 
   boost::shared_ptr<TranslationTask>
@@ -115,7 +115,7 @@ public:
   }
 
   boost::shared_ptr<BaseManager>
-  SetupManager(SearchAlgorithm algo = DefaultSearchAlgorithm);
+  SetupManager(SearchAlgorithm algo); //  = DefaultSearchAlgorithm);
 
 
   boost::shared_ptr<ContextScope> const&
@@ -130,16 +130,17 @@ public:
   void
   SetContextWindow(boost::shared_ptr<std::vector<std::string> > const& cw);
 
-  std::map<std::string, float> const& GetContextWeights() const;
-  void SetContextWeights(std::string const& context_weights);
-  void ReSetContextWeights(std::map<std::string, float> const& new_weights);
+  // SPTR<std::map<std::string, float> const> GetContextWeights() const;
+  // void SetContextWeights(std::string const& context_weights);
+  // void ReSetContextWeights(std::map<std::string, float> const& new_weights);
 
-  AllOptions const& options() const;
+  AllOptions::ptr const& options() const;
 
 protected:
   boost::shared_ptr<Moses::InputType> m_source;
   boost::shared_ptr<Moses::IOWrapper> m_ioWrapper;
 
+  void interpret_dlt();
 };
 
 

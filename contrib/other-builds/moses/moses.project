@@ -119,6 +119,7 @@
       <File Name="../../../moses/TranslationModel/UG/mmsapt_align.cc"/>
       <File Name="../../../moses/TranslationModel/UG/ptable-describe-features.cc"/>
       <File Name="../../../moses/TranslationModel/UG/ptable-lookup.cc"/>
+      <File Name="../../../moses/TranslationModel/UG/ptable-lookup-corpus.cc"/>
       <File Name="../../../moses/TranslationModel/UG/sapt_phrase_key.h"/>
       <File Name="../../../moses/TranslationModel/UG/sapt_phrase_scorers.h"/>
       <File Name="../../../moses/TranslationModel/UG/sapt_pscore_base.h"/>
@@ -769,10 +770,10 @@
     <File Name="../../../moses/Word.h"/>
     <File Name="../../../moses/WordLattice.cpp"/>
     <File Name="../../../moses/WordLattice.h"/>
-    <File Name="../../../moses/WordsBitmap.cpp"/>
-    <File Name="../../../moses/WordsBitmap.h"/>
-    <File Name="../../../moses/WordsRange.cpp"/>
-    <File Name="../../../moses/WordsRange.h"/>
+    <File Name="../../../moses/Bitmap.cpp"/>
+    <File Name="../../../moses/Bitmap.h"/>
+    <File Name="../../../moses/Range.cpp"/>
+    <File Name="../../../moses/Range.h"/>
     <File Name="../../../moses/XmlOption.cpp"/>
     <File Name="../../../moses/XmlOption.h"/>
     <File Name="../../../moses/OutputFileStream.cpp"/>

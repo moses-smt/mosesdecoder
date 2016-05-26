@@ -1,6 +1,4 @@
-// -*- c++ -*-
-// $Id$
-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -28,11 +26,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Word.h"
 #include "Phrase.h"
 #include "InputType.h"
+#include "parameters/AllOptions.h"
 
 namespace Moses
 {
 
-class WordsRange;
+class Range;
 class PhraseDictionary;
 class TranslationOption;
 class TranslationOptionCollection;
@@ -53,18 +52,20 @@ protected:
    * Utility method that takes in a string representing an XML tag and the name of the attribute,
    * and returns the value of that tag if present, empty string otherwise
    */
-  std::vector<XmlOption*> m_xmlOptions;
+  std::vector<XmlOption const*> m_xmlOptions;
   std::vector <bool> m_xmlCoverageMap;
 
   NonTerminalSet m_defaultLabelSet;
 
   void ProcessPlaceholders(const std::vector< std::pair<size_t, std::string> > &placeholders);
 
+  // "Document Level Translation" instructions, see aux_interpret_dlt
+  std::vector<std::map<std::string,std::string> > m_dlt_meta;
 
 public:
-  Sentence();
-  Sentence(size_t const transId, std::string const& stext,
-           std::vector<FactorType> const* IFO = NULL);
+  Sentence(AllOptions::ptr const& opts);
+  Sentence(AllOptions::ptr const& opts, size_t const transId, std::string stext);
+  // std::vector<FactorType> const* IFO = NULL);
   // Sentence(size_t const transId, std::string const& stext);
   ~Sentence();
 
@@ -73,7 +74,7 @@ public:
   }
 
   //! Calls Phrase::GetSubString(). Implements abstract InputType::GetSubString()
-  Phrase GetSubString(const WordsRange& r) const {
+  Phrase GetSubString(const Range& r) const {
     return Phrase::GetSubString(r);
   }
 
@@ -95,7 +96,10 @@ public:
   void GetXmlTranslationOptions(std::vector<TranslationOption*> &list, size_t startPos, size_t endPos) const;
   std::vector<ChartTranslationOptions*> GetXmlChartTranslationOptions() const;
 
-  virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
+  virtual int
+  Read(std::istream& in);
+  // , const std::vector<FactorType>& factorOrder, AllOptions const& opts);
+
   void Print(std::ostream& out) const;
 
   TranslationOptionCollection*
@@ -111,8 +115,12 @@ public:
   }
 
 
-  void
-  init(std::string line, std::vector<FactorType> const& factorOrder);
+  void init(std::string line);
+
+  std::vector<std::map<std::string,std::string> > const&
+  GetDltMeta() const {
+    return m_dlt_meta;
+  }
 
 private:
   // auxliliary functions for Sentence initialization

@@ -20,7 +20,7 @@
 #pragma once
 
 #include "IntermediateVarSpanNode.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 
 #include <boost/array.hpp>
 

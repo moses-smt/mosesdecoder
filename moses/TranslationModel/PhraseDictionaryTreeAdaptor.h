@@ -19,7 +19,7 @@ namespace Moses
 
 class Phrase;
 class PDTAimp;
-class WordsRange;
+class Range;
 class InputType;
 
 /*** Implementation of a phrase table in a trie that is binarized and
@@ -46,7 +46,7 @@ class PhraseDictionaryTreeAdaptor : public PhraseDictionary
 public:
   PhraseDictionaryTreeAdaptor(const std::string &line);
   virtual ~PhraseDictionaryTreeAdaptor();
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   // enable/disable caching
   // you enable caching if you request the target candidates for a source phrase multiple times
@@ -59,7 +59,8 @@ public:
 
   // get translation candidates for a given source phrase
   // returns null pointer if nothing found
-  TargetPhraseCollection const* GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const;
+  TargetPhraseCollection::shared_ptr
+  GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const;
 
   void InitializeForInput(ttasksptr const& ttask);
   void CleanUpAfterSentenceProcessing(InputType const& source);
@@ -73,7 +74,9 @@ public:
   }
 
   // legacy
-  const TargetPhraseCollectionWithSourcePhrase *GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const & srcRange) const;
+  TargetPhraseCollectionWithSourcePhrase::shared_ptr
+  GetTargetPhraseCollectionLEGACY(InputType const& src,
+                                  Range const & srcRange) const;
 
 };
 

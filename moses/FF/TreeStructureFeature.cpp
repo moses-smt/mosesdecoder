@@ -8,8 +8,9 @@
 namespace Moses
 {
 
-void TreeStructureFeature::Load()
+void TreeStructureFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
 
   // syntactic constraints can be hooked in here.
   m_constraints = NULL;
@@ -34,7 +35,7 @@ FFState* TreeStructureFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hy
       if (word.IsNonTerminal()) {
         size_t nonTermInd = cur_hypo.GetCurrTargetPhrase().GetAlignNonTerm().GetNonTermIndexMap()[pos];
         const ChartHypothesis *prevHypo = cur_hypo.GetPrevHypo(nonTermInd);
-        const TreeState* prev = dynamic_cast<const TreeState*>(prevHypo->GetFFState(featureID));
+        const TreeState* prev = static_cast<const TreeState*>(prevHypo->GetFFState(featureID));
         const TreePointer prev_tree = prev->GetTree();
         previous_trees.push_back(prev_tree);
       }

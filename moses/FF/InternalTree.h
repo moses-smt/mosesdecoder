@@ -6,6 +6,7 @@
 #include <vector>
 #include "FFState.h"
 #include "moses/Word.h"
+#include "moses/StaticData.h"
 #include <boost/shared_ptr.hpp>
 #include <boost/make_shared.hpp>
 #include "util/generator.hh"
@@ -141,9 +142,13 @@ public:
     return m_tree;
   }
 
-  int Compare(const FFState& other) const {
+  virtual size_t hash() const {
     return 0;
-  };
+  }
+  virtual bool operator==(const FFState& other) const {
+    return true;
+  }
+
 };
 
 }

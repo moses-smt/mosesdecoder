@@ -22,7 +22,8 @@ protected:
   void ProcessUnknownWord(size_t sourcePos); // do not implement
 
 public:
-  TranslationOptionCollectionLattice(ttasksptr const& ttask, const WordLattice &source, size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
+  TranslationOptionCollectionLattice(ttasksptr const& ttask, const WordLattice &source);
+  // , size_t maxNoTransOptPerCoverage, float translationOptionThreshold);
 
   void CreateTranslationOptions();
 
@@ -32,7 +33,8 @@ public:
    bool adhereTableLimit, size_t graphInd); // do not implement
 
 protected:
-  void Extend(const InputPath &prevPath, const WordLattice &input);
+  void Extend(const InputPath &prevPath, const WordLattice &input,
+              size_t const maxPhraseLength);
 
 };
 

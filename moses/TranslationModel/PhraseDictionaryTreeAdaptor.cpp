@@ -15,6 +15,7 @@
 #include "moses/PDTAimp.h"
 #include "moses/TranslationTask.h"
 #include "util/exception.hh"
+#include "util/string_stream.hh"
 
 using namespace std;
 
@@ -36,8 +37,9 @@ PhraseDictionaryTreeAdaptor::~PhraseDictionaryTreeAdaptor()
 {
 }
 
-void PhraseDictionaryTreeAdaptor::Load()
+void PhraseDictionaryTreeAdaptor::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   SetFeaturesToApply();
 }
 
@@ -52,7 +54,7 @@ void PhraseDictionaryTreeAdaptor::InitializeForInput(ttasksptr const& ttask)
 
   vector<float> weight = staticData.GetWeights(this);
   if(m_numScoreComponents!=weight.size()) {
-    std::stringstream strme;
+    util::StringStream strme;
     UTIL_THROW2("ERROR: mismatch of number of scaling factors: " << weight.size()
                 << " " << m_numScoreComponents);
   }
@@ -73,11 +75,10 @@ void PhraseDictionaryTreeAdaptor::CleanUpAfterSentenceProcessing(InputType const
   obj.CleanUp();
 }
 
-TargetPhraseCollection const*
+TargetPhraseCollection::shared_ptr
 PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const
 {
-  const TargetPhraseCollection *ret = GetImplementation().GetTargetPhraseCollection(src);
-  return ret;
+  return GetImplementation().GetTargetPhraseCollection(src);
 }
 
 void PhraseDictionaryTreeAdaptor::EnableCache()
@@ -106,16 +107,17 @@ const PDTAimp& PhraseDictionaryTreeAdaptor::GetImplementation() const
 }
 
 // legacy
-const TargetPhraseCollectionWithSourcePhrase*
-PhraseDictionaryTreeAdaptor::GetTargetPhraseCollectionLEGACY(InputType const& src,WordsRange const &range) const
+TargetPhraseCollectionWithSourcePhrase::shared_ptr
+PhraseDictionaryTreeAdaptor::
+GetTargetPhraseCollectionLEGACY(InputType const& src,Range const &range) const
 {
+  TargetPhraseCollectionWithSourcePhrase::shared_ptr ret;
   if(GetImplementation().m_rangeCache.empty()) {
-    const TargetPhraseCollectionWithSourcePhrase *tpColl = GetImplementation().GetTargetPhraseCollection(src.GetSubString(range));
-    return tpColl;
+    ret = GetImplementation().GetTargetPhraseCollection(src.GetSubString(range));
   } else {
-    const TargetPhraseCollectionWithSourcePhrase *tpColl = GetImplementation().m_rangeCache[range.GetStartPos()][range.GetEndPos()];
-    return tpColl;
+    ret = GetImplementation().m_rangeCache[range.GetStartPos()][range.GetEndPos()];
   }
+  return ret;
 }
 
 }

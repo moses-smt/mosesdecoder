@@ -20,7 +20,8 @@ public:
   const Word& GetWord() const {
     return m_word;
   }
-  virtual int Compare(const FFState& other) const;
+  size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
 private:
   Word m_word;
@@ -33,7 +34,7 @@ class TargetBigramFeature : public StatefulFeatureFunction
 public:
   TargetBigramFeature(const std::string &line);
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   bool IsUseable(const FactorMask &mask) const;
 
@@ -46,22 +47,6 @@ public:
                                         int /* featureID */,
                                         ScoreComponentCollection* ) const {
     throw std::logic_error("TargetBigramFeature not valid in chart decoder");
-  }
-  void EvaluateWithSourceContext(const InputType &input
-                                 , const InputPath &inputPath
-                                 , const TargetPhrase &targetPhrase
-                                 , const StackVec *stackVec
-                                 , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
-  }
-  void EvaluateInIsolation(const Phrase &source
-                           , const TargetPhrase &targetPhrase
-                           , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {
-  }
-
-  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const {
   }
 
   void SetParameter(const std::string& key, const std::string& value);

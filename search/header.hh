@@ -1,10 +1,10 @@
 #ifndef SEARCH_HEADER__
 #define SEARCH_HEADER__
 
-// Header consisting of Score, Arity, Note and WordsRange
+// Header consisting of Score, Arity, Note and Range
 
 #include "search/types.hh"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 
 #include <stdint.h>
 
@@ -39,11 +39,11 @@ class Header {
       *reinterpret_cast<Note*>(base_ + sizeof(Score) + sizeof(Arity)) = to;
     }
 
-    Moses::WordsRange GetRange() const {
-      return *reinterpret_cast<const Moses::WordsRange*>(base_ + sizeof(Score) + sizeof(Arity) + sizeof(Note));
+    Moses::Range GetRange() const {
+      return *reinterpret_cast<const Moses::Range*>(base_ + sizeof(Score) + sizeof(Arity) + sizeof(Note));
     }
-    void SetRange(Moses::WordsRange to) {
-      *reinterpret_cast<Moses::WordsRange*>(base_ + sizeof(Score) + sizeof(Arity) + sizeof(Note)) = to;
+    void SetRange(Moses::Range to) {
+      *reinterpret_cast<Moses::Range*>(base_ + sizeof(Score) + sizeof(Arity) + sizeof(Note)) = to;
     }
 
     uint8_t *Base() { return base_; }
@@ -58,7 +58,7 @@ class Header {
       *reinterpret_cast<Arity*>(base_ + sizeof(Score)) = arity;
     }
 
-    static const std::size_t kHeaderSize = sizeof(Score) + sizeof(Arity) + sizeof(Note) + sizeof(Moses::WordsRange);
+    static const std::size_t kHeaderSize = sizeof(Score) + sizeof(Arity) + sizeof(Note) + sizeof(Moses::Range);
 
     uint8_t *After() { return base_ + kHeaderSize; }
     const uint8_t *After() const { return base_ + kHeaderSize; }

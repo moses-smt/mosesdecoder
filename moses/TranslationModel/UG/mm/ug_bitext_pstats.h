@@ -30,8 +30,8 @@ namespace sapt
     size_t sum_pairs;   // total number of target phrases extracted (can be > raw_cnt)
     size_t in_progress; // how many threads are currently working on this?
 
-    uint32_t ofwd[Moses::LRModel::NONE+1]; // distribution of fwd phrase orientations
-    uint32_t obwd[Moses::LRModel::NONE+1]; // distribution of bwd phrase orientations
+    uint32_t ofwd[LRModel::NONE+1]; // distribution of fwd phrase orientations
+    uint32_t obwd[LRModel::NONE+1]; // distribution of bwd phrase orientations
 
     indoc_map_t indoc;
     trg_map_t trg;
@@ -41,16 +41,16 @@ namespace sapt
     void register_worker();
     size_t count_workers() { return in_progress; }
 
-    bool
+    size_t
     add(uint64_t const  pid, // target phrase id
-	float const       w, // sample weight (1./(# of phrases extractable))
-	float const       b, // sample bias score
-	alnvec const&     a, // local alignment
-	uint32_t const cnt2, // raw target phrase count
-	uint32_t fwd_o,      // fwd. phrase orientation
-	uint32_t bwd_o,      // bwd. phrase orientation
-	int const docid);    // document where sample was found
-
+        float const       w, // sample weight (1./(# of phrases extractable))
+        float const       b, // sample bias score
+        alnvec const&     a, // local alignment
+        uint32_t const cnt2, // raw target phrase count
+        uint32_t fwd_o,      // fwd. phrase orientation
+        uint32_t bwd_o,      // bwd. phrase orientation
+        int const docid);    // document where sample was found
+    
     void
     count_sample(int const docid,        // document where sample was found
 		 size_t const num_pairs, // # of phrases extractable here

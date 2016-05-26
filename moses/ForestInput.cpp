@@ -17,8 +17,8 @@ namespace Moses
 {
 
 //! populate this InputType with data from in stream
-int ForestInput::Read(std::istream &in,
-                      const std::vector<FactorType>& factorOrder)
+int ForestInput::
+Read(std::istream &in)
 {
   using Syntax::F2S::Forest;
 
@@ -46,7 +46,7 @@ int ForestInput::Read(std::istream &in,
     std::getline(in, line);
   } else {
     do {
-      ParseHyperedgeLine(line, factorOrder);
+      ParseHyperedgeLine(line);
       std::getline(in, line);
     } while (line != "");
   }
@@ -56,7 +56,7 @@ int ForestInput::Read(std::istream &in,
   // not sure ForestInput needs to.
   std::stringstream strme;
   strme << "<s> " << sentence << " </s>" << std::endl;
-  Sentence::Read(strme, factorOrder);
+  Sentence::Read(strme);
 
   // Find the maximum end position of any vertex (0 if forest is empty).
   std::size_t maxEnd = FindMaxEnd(*m_forest);
@@ -68,12 +68,15 @@ int ForestInput::Read(std::istream &in,
     assert(topVertices.size() >= 1);
   }
 
+
+  const std::vector<FactorType>& factorOrder = m_options->input.factor_order;
+
   // Add <s> vertex.
   Forest::Vertex *startSymbol = NULL;
   {
     Word symbol;
     symbol.CreateFromString(Input, factorOrder, "<s>", false);
-    Syntax::PVertex pvertex(WordsRange(0, 0), symbol);
+    Syntax::PVertex pvertex(Range(0, 0), symbol);
     startSymbol = new Forest::Vertex(pvertex);
     m_forest->vertices.push_back(startSymbol);
   }
@@ -83,7 +86,7 @@ int ForestInput::Read(std::istream &in,
   {
     Word symbol;
     symbol.CreateFromString(Input, factorOrder, "</s>", false);
-    Syntax::PVertex pvertex(WordsRange(maxEnd+1, maxEnd+1), symbol);
+    Syntax::PVertex pvertex(Range(maxEnd+1, maxEnd+1), symbol);
     endSymbol = new Forest::Vertex(pvertex);
     m_forest->vertices.push_back(endSymbol);
   }
@@ -92,7 +95,7 @@ int ForestInput::Read(std::istream &in,
   {
     Word symbol;
     symbol.CreateFromString(Input, factorOrder, "Q", true);
-    Syntax::PVertex pvertex(WordsRange(0, maxEnd+1), symbol);
+    Syntax::PVertex pvertex(Range(0, maxEnd+1), symbol);
     m_rootVertex = new Forest::Vertex(pvertex);
     m_forest->vertices.push_back(m_rootVertex);
   }
@@ -120,7 +123,9 @@ int ForestInput::Read(std::istream &in,
   return 1;
 }
 
-Syntax::F2S::Forest::Vertex *ForestInput::AddOrDeleteVertex(Forest::Vertex *v)
+Syntax::F2S::Forest::Vertex*
+ForestInput::
+AddOrDeleteVertex(Forest::Vertex *v)
 {
   std::pair<VertexSet::iterator, bool> ret = m_vertexSet.insert(v);
   if (ret.second) {
@@ -170,14 +175,16 @@ void ForestInput::FindTopVertices(Forest &forest,
                       std::back_inserter(topVertices));
 }
 
-void ForestInput::ParseHyperedgeLine(
-  const std::string &line, const std::vector<FactorType>& factorOrder)
+void
+ForestInput::
+ParseHyperedgeLine(const std::string &line)
 {
+  const std::vector<FactorType>& factorOrder = m_options->input.factor_order;
   using Syntax::F2S::Forest;
 
   const util::AnyCharacter delimiter(" \t");
   util::TokenIter<util::AnyCharacter, true> p(line, delimiter);
-  Forest::Vertex *v = AddOrDeleteVertex(ParseVertex(*p, factorOrder));
+  Forest::Vertex *v = AddOrDeleteVertex(ParseVertex(*p));
   Forest::Hyperedge *e = new Forest::Hyperedge();
   e->head = v;
   ++p;
@@ -186,11 +193,11 @@ void ForestInput::ParseHyperedgeLine(
     //throw Exception("");
   }
   for (++p; *p != "|||"; ++p) {
-    v = ParseVertex(*p, factorOrder);
+    v = ParseVertex(*p);
     if (!v->pvertex.symbol.IsNonTerminal()) {
       // Egret does not give start/end for terminals.
-      v->pvertex.span = WordsRange(e->head->pvertex.span.GetStartPos(),
-                                   e->head->pvertex.span.GetStartPos());
+      v->pvertex.span = Range(e->head->pvertex.span.GetStartPos(),
+                              e->head->pvertex.span.GetStartPos());
     }
     e->tail.push_back(AddOrDeleteVertex(v));
   }
@@ -201,17 +208,17 @@ void ForestInput::ParseHyperedgeLine(
   e->head->incoming.push_back(e);
 }
 
-Syntax::F2S::Forest::Vertex *ForestInput::ParseVertex(
-  const StringPiece &s, const std::vector<FactorType>& factorOrder)
+Syntax::F2S::Forest::Vertex*
+ForestInput::ParseVertex(const StringPiece &s)
 {
   using Syntax::F2S::Forest;
-
+  const std::vector<FactorType>& factorOrder = m_options->input.factor_order;
   Word symbol;
   std::size_t pos = s.rfind('[');
   if (pos == std::string::npos) {
     symbol.CreateFromString(Input, factorOrder, s, false);
     // Create vertex: caller will fill in span.
-    WordsRange span(0, 0);
+    Range span(0, 0);
     return new Forest::Vertex(Syntax::PVertex(span, symbol));
   }
   symbol.CreateFromString(Input, factorOrder, s.substr(0, pos), true);
@@ -223,7 +230,7 @@ Syntax::F2S::Forest::Vertex *ForestInput::ParseVertex(
   s.substr(pos+1, s.size()-pos-2).CopyToString(&tmp);
   std::size_t end = std::atoi(tmp.c_str());
   // Create vertex: offset span by 1 to allow for <s> in first position.
-  WordsRange span(start+1, end+1);
+  Range span(start+1, end+1);
   return new Forest::Vertex(Syntax::PVertex(span, symbol));
 }
 

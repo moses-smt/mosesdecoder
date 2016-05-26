@@ -24,10 +24,10 @@
 
 #include <list>
 #include <vector>
-#include "WordsRange.h"
+#include "Range.h"
 #include "StackVec.h"
 #include "InputPath.h"
-
+#include "TargetPhraseCollection.h"
 namespace Moses
 {
 
@@ -38,7 +38,7 @@ class Sentence;
 class ChartCellCollectionBase;
 class Word;
 class Phrase;
-class TargetPhraseCollection;
+// class TargetPhraseCollection;
 class DecodeGraph;
 
 class ChartParserUnknown
@@ -48,7 +48,7 @@ public:
   ChartParserUnknown(ttasksptr const& ttask);
   ~ChartParserUnknown();
 
-  void Process(const Word &sourceWord, const WordsRange &range, ChartParserCallback &to);
+  void Process(const Word &sourceWord, const Range &range, ChartParserCallback &to);
 
   const std::vector<Phrase*> &GetUnknownSources() const {
     return m_unksrcs;
@@ -56,7 +56,8 @@ public:
 
 private:
   std::vector<Phrase*> m_unksrcs;
-  std::list<TargetPhraseCollection*> m_cacheTargetPhraseCollection;
+  std::list<TargetPhraseCollection::shared_ptr> m_cacheTargetPhraseCollection;
+  AllOptions::ptr const& options() const;
 };
 
 class ChartParser
@@ -66,17 +67,19 @@ public:
   ChartParser(ttasksptr const& ttask, ChartCellCollectionBase &cells);
   ~ChartParser();
 
-  void Create(const WordsRange &range, ChartParserCallback &to);
+  void Create(const Range &range, ChartParserCallback &to);
 
   //! the sentence being decoded
   //const Sentence &GetSentence() const;
   long GetTranslationId() const;
   size_t GetSize() const;
   const InputPath &GetInputPath(size_t startPos, size_t endPos) const;
-  const InputPath &GetInputPath(const WordsRange &range) const;
+  const InputPath &GetInputPath(const Range &range) const;
   const std::vector<Phrase*> &GetUnknownSources() const {
     return m_unknown.GetUnknownSources();
   }
+
+  AllOptions::ptr const& options() const;
 
 private:
   ChartParserUnknown m_unknown;

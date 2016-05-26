@@ -14,6 +14,7 @@
 
 namespace Moses
 {
+class AllOptions;
 namespace Syntax
 {
 namespace F2S
@@ -22,7 +23,8 @@ namespace F2S
 class HyperTreeLoader : public HyperTreeCreator
 {
 public:
-  bool Load(const std::vector<FactorType> &input,
+  bool Load(AllOptions const& opts,
+            const std::vector<FactorType> &input,
             const std::vector<FactorType> &output,
             const std::string &inFile,
             const RuleTableFF &,

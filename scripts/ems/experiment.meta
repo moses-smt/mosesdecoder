@@ -332,7 +332,7 @@ binarize
 	in: qlm
 	out: binlm
 	pass-unless: lm-binarizer
-	ignore-if: bilingual-lm
+	ignore-if: bilingual-lm nplm
 	rerun-on-change: lm
 	default-name: lm/binlm
 	template: $lm-binarizer IN OUT
@@ -533,7 +533,7 @@ build-domains
 	in: CORPUS:post-split-factorized-stem
 	out: domains
 	default-name: model/domains
-	ignore-unless: domain-features mml-filter-corpora
+	ignore-unless: domain-features mml-filter-corpora interpolated-operation-sequence-model
 	template: $moses-script-dir/ems/support/build-domain-file-from-subcorpora.perl $input-extension IN > OUT
 	final-model: yes
 mml-score
@@ -702,7 +702,14 @@ build-osm
 	out: osm-model
 	ignore-unless: operation-sequence-model
 	rerun-on-change: operation-sequence-model training-options script giza-settings operation-sequence-model-settings
-	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir $operation-sequence-model-settings
+	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir --input-extension $input-extension --output-extension $output-extension $operation-sequence-model-settings
+	default-name: model/OSM
+build-interpolated-osm
+	in: corpus word-alignment domains
+	out: osm-model
+	ignore-unless: interpolated-operation-sequence-model
+	rerun-on-change: interpolated-operation-sequence-model training-options script giza-settings operation-sequence-model-settings
+	template: $moses-script-dir/OSM/OSM-Train.perl --corpus-f IN0.$input-extension --corpus-e IN0.$output-extension --alignment IN1.$alignment-symmetrization-method --order $operation-sequence-model-order --out-dir OUT --moses-src-dir $moses-src-dir --input-extension $input-extension --output-extension $output-extension $operation-sequence-model-settings --domain IN2
 	default-name: model/OSM
 build-transliteration-model
 	in: corpus word-alignment 
@@ -722,19 +729,21 @@ extract-phrases
 	in: corpus-mml-postfilter=OR=word-alignment scored-corpus
 	out: extracted-phrases
 	rerun-on-change: max-phrase-length translation-factors reordering-factors hierarchical-rule-set extract-settings training-options script use-ghkm domain-features baseline-extract lexicalized-reordering
+	pass-if: mmsapt
         only-existence-matters: domain-features
 	default-name: model/extract
 build-reordering
 	in: extracted-phrases
 	out: reordering-table
 	ignore-unless: lexicalized-reordering
+	pass-if: mmsapt
 	rerun-on-change: lexicalized-reordering reordering-factors
 	default-name: model/reordering-table
 	final-model: yes
 build-ttable
 	in: extracted-phrases lexical-translation-table corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains
 	out: phrase-translation-table
-	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script EVALUATION:report-precision-by-coverage include-word-alignment-in-rules domain-features
+	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script include-word-alignment-in-rules domain-features
 	default-name: model/phrase-table
 	ignore-if: suffix-array mmsapt
 	final-model: yes
@@ -802,7 +811,8 @@ generation-prune
 	in: generation-table
 	out: generation-table-pruned
 	rerun-on-change: TRAINING:prune-generation
-	ignore-unless: AND TRAINING:prune-generation
+	pass-unless: TRAINING:prune-generation
+	ignore-unless: generation-factors
 	default-name: model/generation-table-pruned
 	final-model: yes
 	template: $TRAINING:prune-generation IN OUT
@@ -940,6 +950,21 @@ parse-input-devtest
 	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
 	ignore-unless: use-mira	
 	template: $input-parser < IN > OUT
+parse-relax-input
+	in: split-input
+	out: input
+	default-name: tuning/input.parse-relaxed
+	pass-unless: input-parse-relaxer
+	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
+    template: $input-parse-relaxer < IN > OUT
+parse-relax-input-devtest
+	in: split-input-devtest
+	out: input-devtest
+	default-name: tuning/input.devtest.parse-relaxed
+	pass-unless: input-parse-relaxer
+	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
+	ignore-unless: use-mira
+    template: $input-parse-relaxer < IN > OUT
 factorize-input
 	in: parsed-input
 	out: factorized-input
@@ -1001,35 +1026,20 @@ truecase-input-devtest
 	ignore-unless: AND input-truecaser use-mira
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
 split-input 
-	in: truecased-input
+	in: truecased-input SPLITTER:splitter-model
 	out: split-input
-	rerun-on-change: input-splitter SPLITTER:splitter-model
+	rerun-on-change: input-splitter
 	default-name: tuning/input.split
 	pass-unless: input-splitter
-	template: $input-splitter -model SPLITTER:splitter-model.$input-extension < IN > OUT
+	template: $input-splitter -model IN1.$input-extension < IN > OUT
 split-input-devtest
-	in: truecased-input-devtest
+	in: truecased-input-devtest SPLITTER:splitter-model
 	out: split-input-devtest
 	rerun-on-change: input-splitter
 	default-name: tuning/input.devtest.split
 	pass-unless: input-splitter
 	ignore-unless: use-mira
-	template: $input-splitter -model SPLITTER:splitter-model.$input-extension < IN > OUT
-parse-relax-input
-	in: split-input
-	out: input
-	default-name: tuning/input.parse-relaxed
-	pass-unless: input-parse-relaxer
-	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
-    template: $input-parse-relaxer < IN > OUT
-parse-relax-input-devtest
-	in: split-input-devtest
-	out: input-devtest
-	default-name: tuning/input.devtest.parse-relaxed
-	pass-unless: input-parse-relaxer
-	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
-	ignore-unless: use-mira
-    template: $input-parse-relaxer < IN > OUT
+	template: $input-splitter -model IN1.$input-extension < IN > OUT
 reference-from-sgm
 	in: reference-sgm input-sgm
 	out: raw-reference
@@ -1136,7 +1146,7 @@ filter
 	out: filtered-dir
 	default-name: tuning/filtered
 	rerun-on-change: filter-settings ttable-binarizer TRAINING:no-glue-grammar TRAINING:dont-tune-glue-grammar TRAINING:use-syntax-input-weight-feature TRAINING:config
-	ignore-if: TRAINING:binarize-all
+	ignore-if: TRAINING:binarize-all TRAINING:mmsapt
 	error: already exists. Please delete
 filter-devtest
 	in: input-devtest TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table
@@ -1150,7 +1160,7 @@ apply-filter
 	in: TRAINING:bin-config filtered-dir
 	out: filtered-config
 	default-name: tuning/moses.filtered.ini
-	ignore-if: TRAINING:binarize-all
+	ignore-if: TRAINING:binarize-all TRAINING:mmsapt
 	template: $moses-script-dir/ems/support/substitute-filtered-tables.perl IN1/moses.ini < IN > OUT
 apply-filter-devtest
 	in: TRAINING:bin-config filtered-dir-devtest
@@ -1269,25 +1279,24 @@ truecase-input
 	ignore-unless: input-truecaser
         template: $input-truecaser -model IN1.$input-extension < IN > OUT
 split-input
-	in: truecased-input
+	in: truecased-input SPLITTER:splitter-model
 	out: split-input
-	rerun-on-change: input-splitter SPLITTER:splitter-model
 	default-name: evaluation/input.split
 	pass-unless: input-splitter
-	template: $input-splitter -model SPLITTER:splitter-model.$input-extension < IN > OUT
+	template: $input-splitter -model IN1.$input-extension < IN > OUT
 filter
 	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains TRAINING:transliteration-table
 	out: filtered-dir 
 	default-name: evaluation/filtered
 	rerun-on-change: filter-settings report-precision-by-coverage ttable-binarizer TRAINING:no-glue-grammar TRAINING:dont-tune-glue-grammar TRAINING:use-syntax-input-weight-feature TRAINING:config
-	pass-if: TRAINING:binarize-all
+	pass-if: TRAINING:binarize-all TRAINING:mmsapt
 	ignore-if: use-hiero
 	error: already exists. Please delete
 apply-filter
 	in: filtered-dir TRAINING:config TUNING:config-with-reused-weights
 	out: filtered-config
 	default-name: evaluation/filtered.ini
-	ignore-if: TRAINING:binarize-all thot
+	ignore-if: TRAINING:binarize-all TRAINING:mmsapt thot
 	template: $moses-script-dir/ems/support/substitute-filtered-tables-and-weights.perl IN/moses.ini IN1 IN2 OUT
 decode
 	in: TUNING:config-with-reused-weights input filtered-config

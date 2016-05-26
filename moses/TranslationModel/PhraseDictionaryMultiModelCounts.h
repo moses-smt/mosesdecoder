@@ -37,11 +37,11 @@ typedef boost::unordered_map<Word, lexicalMap > lexicalMapJoint;
 typedef std::pair<std::vector<float>, std::vector<float> > lexicalPair;
 typedef std::vector<std::vector<lexicalPair> > lexicalCache;
 
-struct multiModelCountsStatistics : multiModelStatistics {
+struct multiModelCountsStats : multiModelStats {
   std::vector<float> fst, ft;
 };
 
-struct multiModelCountsStatisticsOptimization: multiModelCountsStatistics {
+struct multiModelCountsStatsOptimization: multiModelCountsStats {
   std::vector<float> fs;
   lexicalCache lexCachee2f, lexCachef2e;
   size_t f;
@@ -79,19 +79,19 @@ class PhraseDictionaryMultiModelCounts: public PhraseDictionaryMultiModel
 public:
   PhraseDictionaryMultiModelCounts(const std::string &line);
   ~PhraseDictionaryMultiModelCounts();
-  void Load();
-  TargetPhraseCollection* CreateTargetPhraseCollectionCounts(const Phrase &src, std::vector<float> &fs, std::map<std::string,multiModelCountsStatistics*>* allStats, std::vector<std::vector<float> > &multimodelweights) const;
-  void CollectSufficientStatistics(const Phrase &src, std::vector<float> &fs, std::map<std::string,multiModelCountsStatistics*>* allStats) const;
+  void Load(AllOptions::ptr const& opts);
+  TargetPhraseCollection::shared_ptr  CreateTargetPhraseCollectionCounts(const Phrase &src, std::vector<float> &fs, std::map<std::string,multiModelCountsStats*>* allStats, std::vector<std::vector<float> > &multimodelweights) const;
+  void CollectSufficientStats(const Phrase &src, std::vector<float> &fs, std::map<std::string,multiModelCountsStats*>* allStats) const;
   float GetTargetCount(const Phrase& target, size_t modelIndex) const;
   double GetLexicalProbability( Word &inner, Word &outer, const std::vector<lexicalTable*> &tables, std::vector<float> &multimodelweights ) const;
   double ComputeWeightedLexicalTranslation( const Phrase &phraseS, const Phrase &phraseT, AlignVector &alignment, const std::vector<lexicalTable*> &tables, std::vector<float> &multimodelweights, bool is_input ) const;
   double ComputeWeightedLexicalTranslationFromCache( std::vector<std::vector<std::pair<std::vector<float>, std::vector<float> > > > &cache, std::vector<float> &weights ) const;
   std::pair<PhraseDictionaryMultiModelCounts::AlignVector,PhraseDictionaryMultiModelCounts::AlignVector> GetAlignmentsForLexWeights(const Phrase &phraseS, const Phrase &phraseT, const AlignmentInfo &alignment) const;
-  std::vector<std::vector<std::pair<std::vector<float>, std::vector<float> > > > CacheLexicalStatistics( const Phrase &phraseS, const Phrase &phraseT, AlignVector &alignment, const std::vector<lexicalTable*> &tables, bool is_input );
+  std::vector<std::vector<std::pair<std::vector<float>, std::vector<float> > > > CacheLexicalStats( const Phrase &phraseS, const Phrase &phraseT, AlignVector &alignment, const std::vector<lexicalTable*> &tables, bool is_input );
   void FillLexicalCountsJoint(Word &wordS, Word &wordT, std::vector<float> &count, const std::vector<lexicalTable*> &tables) const;
   void FillLexicalCountsMarginal(Word &wordS, std::vector<float> &count, const std::vector<lexicalTable*> &tables) const;
   void LoadLexicalTable( std::string &fileName, lexicalTable* ltable);
-  const TargetPhraseCollection* GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
+  TargetPhraseCollection::shared_ptr  GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
 #ifdef WITH_DLIB
   std::vector<float> MinimizePerplexity(std::vector<std::pair<std::string, std::string> > &phrase_pair_vector);
 #endif
@@ -117,7 +117,7 @@ class CrossEntropyCounts: public OptimizationObjective
 public:
 
   CrossEntropyCounts (
-    std::vector<multiModelCountsStatisticsOptimization*> &optimizerStats,
+    std::vector<multiModelCountsStatsOptimization*> &optimizerStats,
     PhraseDictionaryMultiModelCounts * model,
     size_t iFeature
   ) {
@@ -129,7 +129,7 @@ public:
   double operator() ( const dlib::matrix<double,0,1>& arg) const;
 
 private:
-  std::vector<multiModelCountsStatisticsOptimization*> m_optimizerStats;
+  std::vector<multiModelCountsStatsOptimization*> m_optimizerStats;
   PhraseDictionaryMultiModelCounts * m_model;
   size_t m_iFeature;
 };

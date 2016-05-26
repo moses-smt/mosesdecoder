@@ -51,9 +51,14 @@ public:
 
 class HypothesisScoreOrdererWithDistortion
 {
+private:
+  bool m_deterministic;
+
 public:
-  HypothesisScoreOrdererWithDistortion(const WordsRange* transOptRange) :
-    m_transOptRange(transOptRange) {
+  HypothesisScoreOrdererWithDistortion(const Range* transOptRange,
+                                       const bool deterministic = false)
+    : m_deterministic(deterministic)
+    , m_transOptRange(transOptRange) {
     m_totalWeightDistortion = 0;
     const StaticData &staticData = StaticData::Instance();
 
@@ -67,7 +72,7 @@ public:
     }
   }
 
-  const WordsRange* m_transOptRange;
+  const Range* m_transOptRange;
   float m_totalWeightDistortion;
 
   bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
@@ -97,6 +102,11 @@ public:
     } else if (scoreA < scoreB) {
       return false;
     } else {
+      if (m_deterministic) {
+        // Equal scores: break ties by comparing target phrases
+        return (hypoA->GetCurrTargetPhrase().Compare(hypoB->GetCurrTargetPhrase()) < 0);
+      }
+      // Fallback: non-deterministic sort
       return hypoA < hypoB;
     }
   }
@@ -110,13 +120,15 @@ public:
 BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
                              , BitmapContainer &parent
                              , const TranslationOptionList &translations
-                             , const SquareMatrix &futureScore,
-                             const InputType& itype)
+                             , const SquareMatrix &estimatedScores,
+                             const InputType& itype,
+                             const bool deterministic)
   : m_initialized(false)
   , m_prevBitmapContainer(prevBitmapContainer)
   , m_parent(parent)
   , m_translations(translations)
-  , m_futurescore(futureScore)
+  , m_estimatedScores(estimatedScores)
+  , m_deterministic(deterministic)
   , m_seenPosition()
 {
 
@@ -127,7 +139,8 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
   }
 
   // Fetch the things we need for distortion cost computation.
-  int maxDistortion = StaticData::Instance().GetMaxDistortion();
+  // int maxDistortion = StaticData::Instance().GetMaxDistortion();
+  int maxDistortion  = itype.options()->reordering.max_distortion;
 
   if (maxDistortion == -1) {
     for (HypothesisSet::const_iterator iter = m_prevBitmapContainer.GetHypotheses().begin(); iter != m_prevBitmapContainer.GetHypotheses().end(); ++iter) {
@@ -136,7 +149,7 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
     return;
   }
 
-  const WordsRange &transOptRange = translations.Get(0)->GetSourceWordsRange();
+  const Range &transOptRange = translations.Get(0)->GetSourceWordsRange();
 
   HypothesisSet::const_iterator iterHypo = m_prevBitmapContainer.GetHypotheses().begin();
   HypothesisSet::const_iterator iterEnd = m_prevBitmapContainer.GetHypotheses().end();
@@ -168,13 +181,13 @@ BackwardsEdge::BackwardsEdge(const BitmapContainer &prevBitmapContainer
   }
 
   if (m_hypotheses.size() > 1) {
-    UTIL_THROW_IF2(m_hypotheses[0]->GetTotalScore() < m_hypotheses[1]->GetTotalScore(),
+    UTIL_THROW_IF2(m_hypotheses[0]->GetFutureScore() < m_hypotheses[1]->GetFutureScore(),
                    "Non-monotonic total score"
-                   << m_hypotheses[0]->GetTotalScore() << " vs. "
-                   << m_hypotheses[1]->GetTotalScore());
+                   << m_hypotheses[0]->GetFutureScore() << " vs. "
+                   << m_hypotheses[1]->GetFutureScore());
   }
 
-  HypothesisScoreOrdererWithDistortion orderer (&transOptRange);
+  HypothesisScoreOrdererWithDistortion orderer (&transOptRange, m_deterministic);
   std::sort(m_hypotheses.begin(), m_hypotheses.end(), orderer);
 
   // std::sort(m_hypotheses.begin(), m_hypotheses.end(), HypothesisScoreOrdererNoDistortion());
@@ -195,6 +208,10 @@ BackwardsEdge::Initialize()
     return;
   }
 
+  const Bitmap &bm = m_hypotheses[0]->GetWordsBitmap();
+  const Range &newRange = m_translations.Get(0)->GetSourceWordsRange();
+  m_estimatedScore = m_estimatedScores.CalcEstimatedScore(bm, newRange.GetStartPos(), newRange.GetEndPos());
+
   Hypothesis *expanded = CreateHypothesis(*m_hypotheses[0], *m_translations.Get(0));
   m_parent.Enqueue(0, 0, expanded, this);
   SetSeenPosition(0, 0);
@@ -207,11 +224,12 @@ Hypothesis *BackwardsEdge::CreateHypothesis(const Hypothesis &hypothesis, const 
   IFVERBOSE(2) {
     hypothesis.GetManager().GetSentenceStats().StartTimeBuildHyp();
   }
-  Hypothesis *newHypo = hypothesis.CreateNext(transOpt); // TODO FIXME This is absolutely broken - don't pass null here
+  const Bitmap &bitmap = m_parent.GetWordsBitmap();
+  Hypothesis *newHypo = new Hypothesis(hypothesis, transOpt, bitmap, hypothesis.GetManager().GetNextHypoId());
   IFVERBOSE(2) {
     hypothesis.GetManager().GetSentenceStats().StopTimeBuildHyp();
   }
-  newHypo->EvaluateWhenApplied(m_futurescore);
+  newHypo->EvaluateWhenApplied(m_estimatedScore);
 
   return newHypo;
 }
@@ -272,11 +290,13 @@ BackwardsEdge::PushSuccessors(const size_t x, const size_t y)
 // BitmapContainer Code
 ////////////////////////////////////////////////////////////////////////////////
 
-BitmapContainer::BitmapContainer(const WordsBitmap &bitmap
-                                 , HypothesisStackCubePruning &stack)
+BitmapContainer::BitmapContainer(const Bitmap &bitmap
+                                 , HypothesisStackCubePruning &stack
+                                 , bool deterministic)
   : m_bitmap(bitmap)
   , m_stack(stack)
   , m_numStackInsertions(0)
+  , m_deterministic(deterministic)
 {
   m_hypotheses = HypothesisSet();
   m_edges = BackwardsEdgeSet();
@@ -291,7 +311,7 @@ BitmapContainer::~BitmapContainer()
     HypothesisQueueItem *item = m_queue.top();
     m_queue.pop();
 
-    FREEHYPO( item->GetHypothesis() );
+    delete item->GetHypothesis();
     delete item;
   }
 
@@ -309,10 +329,13 @@ BitmapContainer::Enqueue(int hypothesis_pos
                          , Hypothesis *hypothesis
                          , BackwardsEdge *edge)
 {
+  // Only supply target phrase if running deterministic search mode
+  const TargetPhrase *target_phrase = m_deterministic ? &(hypothesis->GetCurrTargetPhrase()) : NULL;
   HypothesisQueueItem *item = new HypothesisQueueItem(hypothesis_pos
       , translation_pos
       , hypothesis
-      , edge);
+      , edge
+      , target_phrase);
   IFVERBOSE(2) {
     item->GetHypothesis()->GetManager().GetSentenceStats().StartTimeManageCubes();
   }
@@ -354,13 +377,6 @@ bool
 BitmapContainer::Empty() const
 {
   return m_queue.empty();
-}
-
-
-const WordsBitmap&
-BitmapContainer::GetWordsBitmap()
-{
-  return m_bitmap;
 }
 
 const HypothesisSet&
@@ -445,10 +461,10 @@ BitmapContainer::ProcessBestHypothesis()
   // check we are pulling things off of priority queue in right order
   if (!Empty()) {
     HypothesisQueueItem *check = Dequeue(true);
-    UTIL_THROW_IF2(item->GetHypothesis()->GetTotalScore() < check->GetHypothesis()->GetTotalScore(),
+    UTIL_THROW_IF2(item->GetHypothesis()->GetFutureScore() < check->GetHypothesis()->GetFutureScore(),
                    "Non-monotonic total score: "
-                   << item->GetHypothesis()->GetTotalScore() << " vs. "
-                   << check->GetHypothesis()->GetTotalScore());
+                   << item->GetHypothesis()->GetFutureScore() << " vs. "
+                   << check->GetHypothesis()->GetFutureScore());
   }
 
   // Logging for the criminally insane
@@ -475,7 +491,7 @@ BitmapContainer::ProcessBestHypothesis()
 void
 BitmapContainer::SortHypotheses()
 {
-  std::sort(m_hypotheses.begin(), m_hypotheses.end(), HypothesisScoreOrderer());
+  std::sort(m_hypotheses.begin(), m_hypotheses.end(), HypothesisScoreOrderer(m_deterministic));
 }
 
 }

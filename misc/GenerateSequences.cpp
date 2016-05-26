@@ -252,7 +252,7 @@ void ceptsInGenerativeStoryFormat(vector < pair < set <int> , set <int> > > & ce
   string english;
   vector <int> germanIndex;
   int engIndex = 0;
-  int prev;
+  int prev=0;
   int curr;
   set <int> engDone;
 

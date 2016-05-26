@@ -1,5 +1,4 @@
-// $Id$
-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -48,7 +47,7 @@ protected:
 public:
   virtual ~LanguageModelSingleFactor();
   bool IsUseable(const FactorMask &mask) const;
-  void SetParameter(const std::string& key, const std::string& value);
+  virtual void SetParameter(const std::string& key, const std::string& value);
 
   const Factor *GetSentenceStart() const {
     return m_sentenceStart;
@@ -66,8 +65,9 @@ public:
 
   virtual LMResult GetValueForgotState(const std::vector<const Word*> &contextFactor, FFState &outState) const;
 
+protected:
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const = 0;
-
+public:
   std::string DebugContextFactor(const std::vector<const Word*> &contextFactor) const;
 };
 

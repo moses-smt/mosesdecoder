@@ -30,8 +30,6 @@ namespace F2S
 class HyperPathLoader
 {
 public:
-  HyperPathLoader(FactorDirection, const std::vector<FactorType> &);
-
   void Load(const StringPiece &, HyperPath &);
 
 private:
@@ -58,8 +56,6 @@ private:
     return FactorCollection::Instance().AddFactor(s, true);
   }
 
-  FactorDirection m_direction;
-  const std::vector<FactorType> &m_factorOrder;
   std::vector<TreeFragmentToken> m_tokenSeq;
   std::vector<NodeTuple> m_nodeTupleSeq;
   std::stack<int> m_parentStack;

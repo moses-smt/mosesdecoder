@@ -8,6 +8,7 @@
 
 #include "util/file_piece.hh"
 #include "util/string_piece.hh"
+#include "util/string_stream.hh"
 #include "util/tokenize_piece.hh"
 
 #include "LexicalReordering.h"
@@ -26,7 +27,7 @@ const std::string& SparseReorderingFeatureKey::Name (const string& wordListId)
 {
   static string kSep = "-";
   static string name;
-  ostringstream buf;
+  util::StringStream buf;
   // type side position id word reotype
   if (type == Phrase) {
     buf << "phr";
@@ -88,7 +89,7 @@ SparseReordering::SparseReordering(const map<string,string>& config, const Lexic
       ReadWeightMap(i->second);
       m_useWeightMap = true;
       for (int reoType=0; reoType<=LRModel::MAX; ++reoType) {
-        ostringstream buf;
+        util::StringStream buf;
         buf << reoType;
         m_featureMap2.push_back(m_producer->GetFeatureName(buf.str()));
       }
@@ -236,9 +237,9 @@ void SparseReordering::CopyScores(
     //NB: Using a static cast for speed, but could be nasty if
     //using non-sentence input
     const Sentence& sentence = static_cast<const Sentence&>(input);
-    const WordsRange& currentRange = currentOpt.GetSourceWordsRange();
+    const Range& currentRange = currentOpt.GetSourceWordsRange();
     if (previousOpt) {
-      const WordsRange& previousRange = previousOpt->GetSourceWordsRange();
+      const Range& previousRange = previousOpt->GetSourceWordsRange();
       if (previousRange < currentRange) {
         gapStart = previousRange.GetEndPos() + 1;
         gapEnd = currentRange.GetStartPos();

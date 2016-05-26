@@ -87,8 +87,9 @@ void WordTranslationFeature::SetParameter(const std::string& key, const std::str
   }
 }
 
-void WordTranslationFeature::Load()
+void WordTranslationFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   // load word list for restricted feature set
   if (m_filePathSource.empty()) {
     return;
@@ -110,8 +111,7 @@ void WordTranslationFeature::Load()
     }
 
     inFileSource.close();
-  } else if (!m_filePathSource.empty() || !m_filePathTarget.empty()) {
-    return;
+  } else {
     // restricted source word vocabulary
     ifstream inFileSource(m_filePathSource.c_str());
     UTIL_THROW_IF2(!inFileSource, "could not open file " << m_filePathSource);
@@ -142,7 +142,7 @@ void WordTranslationFeature::EvaluateWithSourceContext(const InputType &input
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {
   const Sentence& sentence = static_cast<const Sentence&>(input);
   const AlignmentInfo &alignment = targetPhrase.GetAlignTerm();
@@ -179,7 +179,7 @@ void WordTranslationFeature::EvaluateWithSourceContext(const InputType &input
 
     if (m_simple) {
       // construct feature name
-      stringstream featureName;
+      util::StringStream featureName;
       featureName << m_description << "_";
       featureName << sourceWord;
       featureName << "~";
@@ -193,7 +193,7 @@ void WordTranslationFeature::EvaluateWithSourceContext(const InputType &input
         if(use_topicid) {
           // use topicid as trigger
           const long topicid = sentence.GetTopicId();
-          stringstream feature;
+          util::StringStream feature;
           feature << m_description << "_";
           if (topicid == -1)
             feature << "unk";
@@ -209,7 +209,7 @@ void WordTranslationFeature::EvaluateWithSourceContext(const InputType &input
           // use topic probabilities
           const vector<string> &topicid_prob = *(input.GetTopicIdAndProb());
           if (atol(topicid_prob[0].c_str()) == -1) {
-            stringstream feature;
+            util::StringStream feature;
             feature << m_description << "_unk_";
             feature << sourceWord;
             feature << "~";
@@ -217,7 +217,7 @@ void WordTranslationFeature::EvaluateWithSourceContext(const InputType &input
             scoreBreakdown.SparsePlusEquals(feature.str(), 1);
           } else {
             for (size_t i=0; i+1 < topicid_prob.size(); i+=2) {
-              stringstream feature;
+              util::StringStream feature;
               feature << m_description << "_";
               feature << topicid_prob[i];
               feature << "_";
@@ -233,7 +233,7 @@ void WordTranslationFeature::EvaluateWithSourceContext(const InputType &input
         const long docid = input.GetDocumentId();
         for (boost::unordered_set<std::string>::const_iterator p = m_vocabDomain[docid].begin(); p != m_vocabDomain[docid].end(); ++p) {
           string sourceTrigger = *p;
-          stringstream feature;
+          util::StringStream feature;
           feature << m_description << "_";
           feature << sourceTrigger;
           feature << "_";
@@ -248,7 +248,7 @@ void WordTranslationFeature::EvaluateWithSourceContext(const InputType &input
       size_t globalSourceIndex = inputPath.GetWordsRange().GetStartPos() + sourceIndex;
       if (!m_domainTrigger && globalSourceIndex == 0) {
         // add <s> trigger feature for source
-        stringstream feature;
+        util::StringStream feature;
         feature << m_description << "_";
         feature << "<s>,";
         feature << sourceWord;
@@ -278,7 +278,7 @@ void WordTranslationFeature::EvaluateWithSourceContext(const InputType &input
 
         if (m_domainTrigger) {
           if (sourceTriggerExists) {
-            stringstream feature;
+            util::StringStream feature;
             feature << m_description << "_";
             feature << sourceTrigger;
             feature << "_";
@@ -288,7 +288,7 @@ void WordTranslationFeature::EvaluateWithSourceContext(const InputType &input
             scoreBreakdown.SparsePlusEquals(feature.str(), 1);
           }
         } else if (m_unrestricted || sourceTriggerExists) {
-          stringstream feature;
+          util::StringStream feature;
           feature << m_description << "_";
           if (contextIndex < globalSourceIndex) {
             feature << sourceTrigger;

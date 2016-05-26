@@ -36,15 +36,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-struct multiModelStatistics {
+struct multiModelStats {
   TargetPhrase *targetPhrase;
   std::vector<std::vector<float> > p;
-  ~multiModelStatistics() {
+  ~multiModelStats() {
     delete targetPhrase;
   };
 };
 
-struct multiModelStatisticsOptimization: multiModelStatistics {
+struct multiModelStatsOptimization: multiModelStats {
   size_t f;
 };
 
@@ -70,29 +70,60 @@ public:
   PhraseDictionaryMultiModel(const std::string &line);
   PhraseDictionaryMultiModel(int type, const std::string &line);
   ~PhraseDictionaryMultiModel();
-  void Load();
-  virtual void CollectSufficientStatistics(const Phrase& src, std::map<std::string,multiModelStatistics*>* allStats) const;
-  virtual TargetPhraseCollection* CreateTargetPhraseCollectionLinearInterpolation(const Phrase& src, std::map<std::string,multiModelStatistics*>* allStats, std::vector<std::vector<float> > &multimodelweights) const;
-  virtual TargetPhraseCollection* CreateTargetPhraseCollectionAll(const Phrase& src, const bool restricted = false) const;
-  std::vector<std::vector<float> > getWeights(size_t numWeights, bool normalize) const;
-  std::vector<float> normalizeWeights(std::vector<float> &weights) const;
-  void CacheForCleanup(TargetPhraseCollection* tpc);
-  void CleanUpAfterSentenceProcessing(const InputType &source);
-  virtual void CleanUpComponentModels(const InputType &source);
+  void Load(AllOptions::ptr const& opts);
+
+  virtual void
+  CollectSufficientStatistics
+  (const Phrase& src, std::map<std::string,multiModelStats*>* allStats)
+  const;
+
+  virtual TargetPhraseCollection::shared_ptr
+  CreateTargetPhraseCollectionLinearInterpolation
+  (const Phrase& src, std::map<std::string,multiModelStats*>* allStats,
+   std::vector<std::vector<float> > &multimodelweights) const;
+
+  std::vector<std::vector<float> >
+  getWeights(size_t numWeights, bool normalize) const;
+
+  std::vector<float>
+  normalizeWeights(std::vector<float> &weights) const;
+
+  void
+  CacheForCleanup(TargetPhraseCollection::shared_ptr tpc);
+
+  void
+  CleanUpAfterSentenceProcessing(const InputType &source);
+
+  virtual void
+  CleanUpComponentModels(const InputType &source);
+
 #ifdef WITH_DLIB
   virtual std::vector<float> MinimizePerplexity(std::vector<std::pair<std::string, std::string> > &phrase_pair_vector);
   std::vector<float> Optimize(OptimizationObjective * ObjectiveFunction, size_t numModels);
 #endif
-  // functions below required by base class
-  virtual const TargetPhraseCollection* GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
-  virtual void InitializeForInput(ttasksptr const& ttask) {
-    /* Don't do anything source specific here as this object is shared between threads.*/
-  }
-  ChartRuleLookupManager *CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&, std::size_t);
-  void SetParameter(const std::string& key, const std::string& value);
 
-  const std::vector<float>* GetTemporaryMultiModelWeightsVector() const;
-  void SetTemporaryMultiModelWeightsVector(std::vector<float> weights);
+  // functions below required by base class
+  virtual TargetPhraseCollection::shared_ptr
+  GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
+
+  virtual void
+  InitializeForInput(ttasksptr const& ttask) {
+    // Don't do anything source specific here as this object is shared
+    // between threads.
+  }
+
+  ChartRuleLookupManager*
+  CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&,
+                          std::size_t);
+
+  void
+  SetParameter(const std::string& key, const std::string& value);
+
+  const std::vector<float>*
+  GetTemporaryMultiModelWeightsVector() const;
+
+  void
+  SetTemporaryMultiModelWeightsVector(std::vector<float> weights);
 
 protected:
   std::string m_mode;
@@ -101,7 +132,7 @@ protected:
   size_t m_numModels;
   std::vector<float> m_multimodelweights;
 
-  typedef std::vector<TargetPhraseCollection*> PhraseCache;
+  typedef std::vector<TargetPhraseCollection::shared_ptr> PhraseCache;
 #ifdef WITH_THREADS
   boost::shared_mutex m_lock_cache;
   typedef std::map<boost::thread::id, PhraseCache> SentenceCache;
@@ -147,7 +178,7 @@ class CrossEntropy: public OptimizationObjective
 public:
 
   CrossEntropy (
-    std::vector<multiModelStatisticsOptimization*> &optimizerStats,
+    std::vector<multiModelStatsOptimization*> &optimizerStats,
     PhraseDictionaryMultiModel * model,
     size_t iFeature
   ) {
@@ -159,7 +190,7 @@ public:
   double operator() ( const dlib::matrix<double,0,1>& arg) const;
 
 protected:
-  std::vector<multiModelStatisticsOptimization*> m_optimizerStats;
+  std::vector<multiModelStatsOptimization*> m_optimizerStats;
   PhraseDictionaryMultiModel * m_model;
   size_t m_iFeature;
 };

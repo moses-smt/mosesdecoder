@@ -23,9 +23,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #define moses_GenerationDictionary_h
 
 #include <list>
-#include <map>
 #include <stdexcept>
 #include <vector>
+#include <boost/unordered_map.hpp>
 #include "ScoreComponentCollection.h"
 #include "Phrase.h"
 #include "TypeDef.h"
@@ -36,7 +36,7 @@ namespace Moses
 
 class FactorCollection;
 
-typedef std::map < Word , ScoreComponentCollection > OutputWordCollection;
+typedef boost::unordered_map < Word , ScoreComponentCollection > OutputWordCollection;
 // 1st = output phrase
 // 2nd = log probability (score)
 
@@ -44,7 +44,7 @@ typedef std::map < Word , ScoreComponentCollection > OutputWordCollection;
  */
 class GenerationDictionary : public DecodeFeature
 {
-  typedef std::map<const Word* , OutputWordCollection, WordComparer> Collection;
+  typedef boost::unordered_map<const Word* , OutputWordCollection, UnorderedComparer<Word>, UnorderedComparer<Word> > Collection;
 protected:
   static std::vector<GenerationDictionary*> s_staticColl;
 
@@ -62,7 +62,7 @@ public:
   virtual ~GenerationDictionary();
 
   //! load data file
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   /** number of unique input entries in the generation table.
   * NOT the number of lines in the generation table

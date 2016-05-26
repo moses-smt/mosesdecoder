@@ -28,7 +28,7 @@ namespace Moses
 {
 class ChartParser;
 class ChartParserCallback;
-class WordsRange;
+class Range;
 class Sentence;
 
 /** Defines an interface for looking up rules in a rule table.  Concrete
@@ -48,7 +48,7 @@ public:
   virtual ~ChartRuleLookupManager();
 
   const ChartCellLabelSet &GetTargetLabelSet(size_t begin, size_t end) const {
-    return m_cellCollection.GetBase(WordsRange(begin, end)).GetTargetLabelSet();
+    return m_cellCollection.GetBase(Range(begin, end)).GetTargetLabelSet();
   }
 
   const ChartParser &GetParser() const {

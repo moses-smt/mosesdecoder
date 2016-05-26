@@ -17,7 +17,8 @@ int main()
   string line;
   getline(cin,line);
   Mmsapt PT(line);
-  PT.Load(false);
+  AllOptions::ptr opts(new AllOptions);
+  PT.Load(opts, false);
   cout << PT.GetFeatureNames().size() << endl;
   exit(0);
 }

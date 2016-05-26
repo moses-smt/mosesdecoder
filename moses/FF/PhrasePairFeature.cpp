@@ -7,6 +7,7 @@
 #include "moses/TranslationOption.h"
 #include "moses/InputPath.h"
 #include "util/string_piece_hash.hh"
+#include "util/string_stream.hh"
 #include "util/exception.hh"
 
 using namespace std;
@@ -64,8 +65,9 @@ void PhrasePairFeature::SetParameter(const std::string& key, const std::string& 
   }
 }
 
-void PhrasePairFeature::Load()
+void PhrasePairFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   if (m_domainTrigger) {
     // domain trigger terms for each input document
     ifstream inFileSource(m_filePathSource.c_str());
@@ -117,7 +119,7 @@ void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {
   const Phrase& source = inputPath.GetPhrase();
   if (m_domainTrigger) {
@@ -126,7 +128,8 @@ void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
     const bool use_topicid_prob = isnt.GetUseTopicIdAndProb();
 
     // compute pair
-    ostringstream pair;
+    util::StringStream pair;
+
     pair << ReplaceTilde( source.GetWord(0).GetFactor(m_sourceFactorId)->GetString() );
     for (size_t i = 1; i < source.GetSize(); ++i) {
       const Factor* sourceFactor = source.GetWord(i).GetFactor(m_sourceFactorId);
@@ -145,7 +148,8 @@ void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
       if(use_topicid) {
         // use topicid as trigger
         const long topicid = isnt.GetTopicId();
-        stringstream feature;
+        util::StringStream feature;
+
         feature << m_description << "_";
         if (topicid == -1)
           feature << "unk";
@@ -159,13 +163,13 @@ void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
         // use topic probabilities
         const vector<string> &topicid_prob = *(isnt.GetTopicIdAndProb());
         if (atol(topicid_prob[0].c_str()) == -1) {
-          stringstream feature;
+          util::StringStream feature;
           feature << m_description << "_unk_";
           feature << pair.str();
           scoreBreakdown.SparsePlusEquals(feature.str(), 1);
         } else {
           for (size_t i=0; i+1 < topicid_prob.size(); i+=2) {
-            stringstream feature;
+            util::StringStream feature;
             feature << m_description << "_";
             feature << topicid_prob[i];
             feature << "_";
@@ -179,7 +183,7 @@ void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
       const long docid = isnt.GetDocumentId();
       for (set<string>::const_iterator p = m_vocabDomain[docid].begin(); p != m_vocabDomain[docid].end(); ++p) {
         string sourceTrigger = *p;
-        ostringstream namestr;
+        util::StringStream namestr;
         namestr << m_description << "_";
         namestr << sourceTrigger;
         namestr << "_";
@@ -207,7 +211,7 @@ void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
         sourceTriggerExists = FindStringPiece(m_vocabSource, sourceTrigger ) != m_vocabSource.end();
 
       if (m_unrestricted || sourceTriggerExists) {
-        ostringstream namestr;
+        util::StringStream namestr;
         namestr << m_description << "_";
         namestr << sourceTrigger;
         namestr << "~";
@@ -234,10 +238,10 @@ void PhrasePairFeature::EvaluateWithSourceContext(const InputType &input
 void PhrasePairFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScores) const
 {
   if (m_simple) {
-    ostringstream namestr;
+    util::StringStream namestr;
     namestr << m_description << "_";
     namestr << ReplaceTilde( source.GetWord(0).GetFactor(m_sourceFactorId)->GetString() );
     for (size_t i = 1; i < source.GetSize(); ++i) {

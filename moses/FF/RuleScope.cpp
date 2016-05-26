@@ -14,16 +14,16 @@ RuleScope::RuleScope(const std::string &line)
 {
 }
 
-bool IsAmbiguous(const Word &word, bool sourceSyntax)
-{
-  const Word &inputDefaultNonTerminal = StaticData::Instance().GetInputDefaultNonTerminal();
-  return word.IsNonTerminal() && (!sourceSyntax || word == inputDefaultNonTerminal);
-}
+// bool IsAmbiguous(const Word &word, bool sourceSyntax)
+// {
+//   const Word &inputDefaultNonTerminal = StaticData::Instance().GetInputDefaultNonTerminal();
+//   return word.IsNonTerminal() && (!sourceSyntax || word == inputDefaultNonTerminal);
+// }
 
 void RuleScope::EvaluateInIsolation(const Phrase &source
                                     , const TargetPhrase &targetPhrase
                                     , ScoreComponentCollection &scoreBreakdown
-                                    , ScoreComponentCollection &estimatedFutureScore) const
+                                    , ScoreComponentCollection &estimatedScores) const
 {
   if (IsGlueRule(source)) {
     return;
@@ -67,12 +67,12 @@ void RuleScope::EvaluateInIsolation(const Phrase &source
     scores[score] = 1;
 
     if (m_futureCostOnly) {
-      estimatedFutureScore.PlusEquals(this, scores);
+      estimatedScores.PlusEquals(this, scores);
     } else {
       scoreBreakdown.PlusEquals(this, scores);
     }
   } else if (m_futureCostOnly) {
-    estimatedFutureScore.PlusEquals(this, score);
+    estimatedScores.PlusEquals(this, score);
   } else {
     scoreBreakdown.PlusEquals(this, score);
   }

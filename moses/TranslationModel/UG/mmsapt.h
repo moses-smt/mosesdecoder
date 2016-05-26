@@ -26,7 +26,9 @@
 
 #include "moses/TranslationModel/UG/TargetPhraseCollectionCache.h"
 
+#ifndef NO_MOSES
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
+#endif
 
 #include "moses/InputFileStream.h"
 #include "moses/FactorTypeSet.h"
@@ -56,6 +58,10 @@ namespace Moses
     friend class Alignment;
     std::map<std::string,std::string> param;
     std::string m_name;
+#ifndef NO_MOSES
+    // Allows PhraseDictionaryGroup to get &m_lr_func
+    friend class PhraseDictionaryGroup;
+#endif
   public:
     typedef sapt::L2R_Token<sapt::SimpleWordId> Token;
     typedef sapt::mmBitext<Token> mmbitext;
@@ -65,7 +71,7 @@ namespace Moses
     typedef sapt::PhraseScorer<Token> pscorer;
   private:
     // vector<SPTR<bitext> > shards;
-    iptr<mmbitext> btfix;
+    SPTR<mmbitext> btfix;
     SPTR<imbitext> btdyn;
     std::string m_bname, m_extra_data, m_bias_file,m_bias_server;
     std::string L1;
@@ -75,13 +81,16 @@ namespace Moses
     // alpha parameter for lexical smoothing (joint+alpha)/(marg + alpha)
     // must be > 0 if dynamic
     size_t m_default_sample_size;
+    size_t m_min_sample_size;
     size_t m_workers;  // number of worker threads for sampling the bitexts
     std::vector<std::string> m_feature_set_names; // one or more of: standard, datasource
     std::string m_bias_logfile;
     boost::scoped_ptr<std::ofstream> m_bias_logger; // for logging to a file
     std::ostream* m_bias_log;
     int m_bias_loglevel;
+#ifndef NO_MOSES
     LexicalReordering* m_lr_func; // associated lexical reordering function
+#endif
     std::string m_lr_func_name; // name of associated lexical reordering function
     sapt::sampling_method m_sampling_method; // sampling method, see ug_bitext_sampler
     boost::scoped_ptr<ug::ThreadPool> m_thread_pool;
@@ -147,11 +156,11 @@ namespace Moses
     std::vector<FactorType> m_ifactor, m_ofactor;
 
     void setup_local_feature_functions();
-    void set_bias_via_server(ttasksptr const& ttask);
+    void setup_bias(ttasksptr const& ttask);
 
 #if PROVIDES_RANKED_SAMPLING
     void 
-    set_bias_for_ranking(ttasksptr const& ttask, iptr<sapt::Bitext<Token> const> bt);
+    set_bias_for_ranking(ttasksptr const& ttask, SPTR<sapt::Bitext<Token> const> bt);
 #endif
   private:
 
@@ -178,7 +187,7 @@ namespace Moses
      uint64_t const  pid1,
      sapt::pstats   const& stats,
      sapt::Bitext<Token> const & bt,
-     TargetPhraseCollection* tpcoll
+     TargetPhraseCollection::shared_ptr  tpcoll
      ) const;
 
     bool
@@ -186,14 +195,14 @@ namespace Moses
     (Phrase   const& src,
      uint64_t const  pid1a, sapt::pstats * statsa, sapt::Bitext<Token> const & bta,
      uint64_t const  pid1b, sapt::pstats const* statsb, sapt::Bitext<Token> const & btb,
-     TargetPhraseCollection* tpcoll) const;
+     TargetPhraseCollection::shared_ptr  tpcoll) const;
 
     bool
     combine_pstats
     (Phrase   const& src,
      uint64_t const  pid1a, sapt::pstats* statsa, sapt::Bitext<Token> const & bta,
      uint64_t const  pid1b, sapt::pstats const* statsb, sapt::Bitext<Token> const & btb,
-     TargetPhraseCollection* tpcoll) const;
+     TargetPhraseCollection::shared_ptr  tpcoll) const;
 
     void load_extra_data(std::string bname, bool locking);
     void load_bias(std::string bname);
@@ -202,21 +211,21 @@ namespace Moses
     // Mmsapt(std::string const& description, std::string const& line);
     Mmsapt(std::string const& line);
 
-    void Load();
-    void Load(bool with_checks);
+    void Load(AllOptions::ptr const& opts);
+    void Load(AllOptions::ptr const& opts, bool with_checks);
     size_t SetTableLimit(size_t limit); // returns the prior table limit
     std::string const& GetName() const;
 
 #ifndef NO_MOSES
-    TargetPhraseCollection const*
+    TargetPhraseCollection::shared_ptr
     GetTargetPhraseCollectionLEGACY(ttasksptr const& ttask, const Phrase& src) const;
 
-    TargetPhraseCollection const*
-    GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
+    // TargetPhraseCollection::shared_ptr
+    // GetTargetPhraseCollectionLEGACY(const Phrase& src) const;
 
     void
-    GetTargetPhraseCollectionBatch(ttasksptr const& ttask,
-				   const InputPathList &inputPathQueue) const;
+    GetTargetPhraseCollectionBatch
+    (ttasksptr const& ttask, InputPathList const& inputPathQueue) const;
 
     //! Create a sentence-specific manager for SCFG rule lookup.
     ChartRuleLookupManager*
@@ -233,7 +242,8 @@ namespace Moses
     void setWeights(std::vector<float> const& w);
 
 
-    void Release(ttasksptr const& ttask, TargetPhraseCollection*& tpc) const;
+    // void Release(ttasksptr const& ttask, 
+    // TargetPhraseCollection const*& tpc) const;
     // some consumer lets me know that *tpc isn't needed any more
 
 

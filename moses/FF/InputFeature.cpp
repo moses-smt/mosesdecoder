@@ -23,9 +23,9 @@ InputFeature::InputFeature(const std::string &line)
   s_instance = this;
 }
 
-void InputFeature::Load()
+void InputFeature::Load(AllOptions::ptr const& opts)
 {
-
+  m_options = opts;
   const PhraseDictionary *pt = PhraseDictionary::GetColl()[0];
   const PhraseDictionaryTreeAdaptor *ptBin = dynamic_cast<const PhraseDictionaryTreeAdaptor*>(pt);
 
@@ -49,7 +49,7 @@ void InputFeature::EvaluateWithSourceContext(const InputType &input
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {
   if (m_legacy) {
     //binary phrase-table does input feature itself

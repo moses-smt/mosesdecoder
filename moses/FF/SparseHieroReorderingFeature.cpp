@@ -6,6 +6,7 @@
 #include "moses/Sentence.h"
 
 #include "util/exception.hh"
+#include "util/string_stream.hh"
 
 #include "SparseHieroReorderingFeature.h"
 
@@ -111,7 +112,7 @@ void SparseHieroReorderingFeature::EvaluateWhenApplied(
   size_t sourceStart = cur_hypo.GetCurrSourceRange().GetStartPos();
   size_t sourceSize = cur_hypo.GetCurrSourceRange().GetNumWordsCovered();
 
-  vector<WordsRange> sourceNTSpans;
+  vector<Range> sourceNTSpans;
   for (size_t prevHypoId = 0; prevHypoId < cur_hypo.GetPrevHypos().size(); ++prevHypoId) {
     sourceNTSpans.push_back(cur_hypo.GetPrevHypo(prevHypoId)->GetCurrSourceRange());
   }
@@ -121,21 +122,21 @@ void SparseHieroReorderingFeature::EvaluateWhenApplied(
   //for (size_t i = 0; i < sourceNTSpans.size(); ++i) cerr << sourceNTSpans[i] << " ";
   //cerr << endl;
 
-  typedef pair<WordsRange,bool> Block;//flag indicates NT
+  typedef pair<Range,bool> Block;//flag indicates NT
   vector<Block> sourceBlocks;
   sourceBlocks.push_back(Block(cur_hypo.GetCurrSourceRange(),false));
-  for (vector<WordsRange>::const_iterator i = sourceNTSpans.begin();
+  for (vector<Range>::const_iterator i = sourceNTSpans.begin();
        i != sourceNTSpans.end(); ++i) {
-    const WordsRange& prevHypoRange = *i;
+    const Range& prevHypoRange = *i;
     Block lastBlock = sourceBlocks.back();
     sourceBlocks.pop_back();
     //split this range into before NT, NT and after NT
     if (prevHypoRange.GetStartPos() > lastBlock.first.GetStartPos()) {
-      sourceBlocks.push_back(Block(WordsRange(lastBlock.first.GetStartPos(),prevHypoRange.GetStartPos()-1),false));
+      sourceBlocks.push_back(Block(Range(lastBlock.first.GetStartPos(),prevHypoRange.GetStartPos()-1),false));
     }
     sourceBlocks.push_back(Block(prevHypoRange,true));
     if (prevHypoRange.GetEndPos() < lastBlock.first.GetEndPos()) {
-      sourceBlocks.push_back(Block(WordsRange(prevHypoRange.GetEndPos()+1,lastBlock.first.GetEndPos()), false));
+      sourceBlocks.push_back(Block(Range(prevHypoRange.GetEndPos()+1,lastBlock.first.GetEndPos()), false));
     }
   }
   /*
@@ -177,7 +178,7 @@ void SparseHieroReorderingFeature::EvaluateWhenApplied(
 
   //Iterate through block pairs
   const Sentence& sentence =
-    dynamic_cast<const Sentence&>(cur_hypo.GetManager().GetSource());
+    static_cast<const Sentence&>(cur_hypo.GetManager().GetSource());
   //const TargetPhrase& targetPhrase = cur_hypo.GetCurrTargetPhrase();
   for (size_t i = 0; i < sourceBlocks.size()-1; ++i) {
     Block& leftSourceBlock = sourceBlocks[i];
@@ -202,7 +203,7 @@ void SparseHieroReorderingFeature::EvaluateWhenApplied(
           targetLeftRulePos < targetRightRulePos))) {
       isMonotone = false;
     }
-    stringstream buf;
+    util::StringStream buf;
     buf << "h_"; //sparse reordering, Huck
     if (m_type == SourceLeft || m_type == SourceCombined) {
       buf << GetFactor(sourceLeftBoundaryWord,m_sourceVocab,m_sourceFactor)->GetString();

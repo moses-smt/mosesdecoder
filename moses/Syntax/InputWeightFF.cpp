@@ -3,6 +3,7 @@
 #include <vector>
 
 #include "moses/ScoreComponentCollection.h"
+#include "moses/Syntax/SHyperedge.h"
 #include "moses/TargetPhrase.h"
 
 namespace Moses

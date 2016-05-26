@@ -8,9 +8,15 @@
 
 use strict;
 
+my $CAT_MODELS = 0;
+
 die("ERROR: syntax is cache-model.perl moses.ini cache-dir") 
-  unless scalar @ARGV == 2;
-my ($CONFIG,$CACHE_DIR) = @ARGV;
+  unless scalar @ARGV >= 2;
+my $CONFIG = $ARGV[0];
+my $CACHE_DIR = $ARGV[1];
+if (scalar(@ARGV) == 3) {
+    $CAT_MODELS = $ARGV[2];
+}
 
 # create dir (if nor already there)
 `mkdir -p $CACHE_DIR`;
@@ -39,25 +45,25 @@ while(<OLD>) {
     my ($pre,$path,$post) = ($1,$2,$3);
     my $new_path;
     if (/^PhraseDictionaryCompact/) {
-      $new_path = &cache_file($path,".minphr");
+      $new_path = &cache_file($path,".minphr", $CAT_MODELS);
     }
     elsif (/^PhraseDictionaryBinary/) {
       foreach my $suffix (".binphr.idx",".binphr.srctree.wa",".binphr.srcvoc",".binphr.tgtdata.wa",".binphr.tgtvoc") {
-        $new_path = &cache_file($path,$suffix);
+        $new_path = &cache_file($path,$suffix, $CAT_MODELS);
       }
     }
     elsif (/^LexicalReordering/ && -e "$path.minlexr") {
-      $new_path = &cache_file($path,".minlexr");
+      $new_path = &cache_file($path,".minlexr", $CAT_MODELS);
     }
     elsif (/^LexicalReordering/ && -e "$path.binlexr.idx") {
       foreach my $suffix (".binlexr.idx",".binlexr.srctree",".binlexr.tgtdata",".binlexr.voc0",".binlexr.voc1") {
-        $new_path = &cache_file($path,$suffix);
+        $new_path = &cache_file($path,$suffix, $CAT_MODELS);
       }
     }
     # some other files may need some more special handling
     # but this works for me right now. feel free to add
     else {  
-      $new_path = &cache_file($path,"");
+      $new_path = &cache_file($path,"", $CAT_MODELS);
     }
     print NEW "$pre$new_path$post\n" unless $just_update_timestamps;
   }
@@ -72,7 +78,7 @@ close(OLD);
 print "$cached_config\n";
 
 sub cache_file {
-  my ($path,$suffix) = @_;
+  my ($path,$suffix, $catModels) = @_;
 
   # add gzipped extension if that's what it is 
   if (! -e "$path$suffix" && -e "$path$suffix.gz") {
@@ -102,14 +108,19 @@ sub cache_file {
   # done if already there
   if (-e "$cached_path$suffix") {
     `touch $cached_path$suffix`; # update time stamp
-    return $cached_path;
+  }
+  else {
+    # okay, go for it
+    `touch $cached_path$suffix.lock`;
+    `cp $path$suffix $cached_path$suffix`;
+    `rm $cached_path$suffix.lock`;
   }
 
-  # okay, go for it
-  `touch $cached_path$suffix.lock`;
-  `cp $path$suffix $cached_path$suffix`;
-  `rm $cached_path$suffix.lock`;
-
+  if ($catModels) {
+      my $cmd = "cat $cached_path* > /dev/null";
+      print STDERR "Executing: $cmd\n";
+      `$cmd`;
+  }
   return $cached_path;
 }
 

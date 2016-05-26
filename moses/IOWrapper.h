@@ -61,8 +61,10 @@ POSSIBILITY OF SUCH DAMAGE.
 #include "moses/LatticeMBR.h"
 #include "moses/ChartKBestExtractor.h"
 #include "moses/Syntax/KBestExtractor.h"
+#include "moses/parameters/AllOptions.h"
 
 #include <boost/format.hpp>
+#include <boost/shared_ptr.hpp>
 
 namespace Moses
 {
@@ -81,6 +83,7 @@ struct SHyperedge;
 class IOWrapper
 {
 protected:
+  boost::shared_ptr<AllOptions const> m_options;
   const std::vector<Moses::FactorType>	*m_inputFactorOrder;
   std::string m_inputFilePath;
   Moses::InputFileStream *m_inputFile;
@@ -124,7 +127,7 @@ protected:
   std::string m_hypergraph_output_filepattern;
 
 public:
-  IOWrapper();
+  IOWrapper(AllOptions const& opts);
   ~IOWrapper();
 
   // Moses::InputType* GetInput(Moses::InputType *inputType);
@@ -223,14 +226,14 @@ BufferInput()
     m_future_input.pop_front();
     m_buffered_ahead -= ret->GetSize();
   } else {
-    source.reset(new itype);
-    if (!source->Read(*m_inputStream, *m_inputFactorOrder))
+    source.reset(new itype(m_options));
+    if (!source->Read(*m_inputStream))
       return ret;
     ret = source;
   }
   while (m_buffered_ahead < m_look_ahead) {
-    source.reset(new itype);
-    if (!source->Read(*m_inputStream, *m_inputFactorOrder))
+    source.reset(new itype(m_options));
+    if (!source->Read(*m_inputStream))
       break;
     m_future_input.push_back(source);
     m_buffered_ahead += source->GetSize();

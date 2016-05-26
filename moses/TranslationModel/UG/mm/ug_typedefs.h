@@ -33,7 +33,9 @@ namespace sapt
   typedef tpt::filepos_type filepos_type;
 }
 
+#ifndef SPTR
 #define SPTR   boost::shared_ptr
+#endif
 #define iptr   boost::intrusive_ptr
 #define scoptr boost::scoped_ptr
 #define rcast  reinterpret_cast

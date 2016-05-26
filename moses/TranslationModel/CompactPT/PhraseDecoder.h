@@ -37,7 +37,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/Util.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 
 #include "PhraseDictionaryCompact.h"
 #include "StringVector.h"
@@ -87,7 +87,6 @@ protected:
 
   const std::vector<FactorType>* m_input;
   const std::vector<FactorType>* m_output;
-  const std::vector<float>* m_weight;
 
   std::string m_separator;
 
@@ -121,8 +120,7 @@ public:
     PhraseDictionaryCompact &phraseDictionary,
     const std::vector<FactorType>* input,
     const std::vector<FactorType>* output,
-    size_t numScoreComponent,
-    const std::vector<float>* weight
+    size_t numScoreComponent
   );
 
   ~PhraseDecoder();

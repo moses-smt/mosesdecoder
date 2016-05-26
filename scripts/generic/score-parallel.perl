@@ -43,6 +43,7 @@ my $ptHalf 			= $ARGV[5]; # output
 my $inverse = 0;
 my $sourceLabelsFile;
 my $partsOfSpeechFile;
+my $targetSyntacticPreferencesLabelsFile;
 
 my $otherExtractArgs= "";
 for (my $i = 6; $i < $#ARGV; ++$i)
@@ -55,6 +56,11 @@ for (my $i = 6; $i < $#ARGV; ++$i)
   if ($ARGV[$i] eq '--PartsOfSpeech') {
     $partsOfSpeechFile = $ARGV[++$i];
     $otherExtractArgs .= "--PartsOfSpeech ";
+    next;
+  }
+  if ($ARGV[$i] eq '--TargetSyntacticPreferences') {
+    $targetSyntacticPreferencesLabelsFile = $ARGV[++$i];
+    $otherExtractArgs .= "--TargetSyntacticPreferences ";
     next;
   }
   if ($ARGV[$i] eq '--Inverse') {
@@ -289,11 +295,11 @@ if (-e $cocPath)
   close(FHCOC);
 }
 
-# merge source label files
+# merge source labels files
 if (!$inverse && defined($sourceLabelsFile))
 {
   my $cmd = "(echo \"GlueTop 0\"; echo \"GlueX 1\"; echo \"SSTART 2\"; echo \"SEND 3\"; cat $TMPDIR/phrase-table.half.*.gz.syntaxLabels.src | LC_ALL=C sort | uniq | perl -pe \"s/\$/ \@{[\$.+3]}/\") > $sourceLabelsFile";
-  print STDERR "Merging source label files: $cmd \n";
+  print STDERR "Merging source labels files: $cmd \n";
   `$cmd`;
 }
 
@@ -305,6 +311,13 @@ if (!$inverse && defined($partsOfSpeechFile))
   `$cmd`;
 }
 
+# merge target syntactic preferences labels files
+if (!$inverse && defined($targetSyntacticPreferencesLabelsFile))
+{
+  my $cmd = "(echo \"GlueTop 0\"; echo \"GlueX 1\"; cat $TMPDIR/phrase-table.half.*.gz.syntaxLabels.tgtpref | LC_ALL=C sort | uniq | perl -pe \"s/\$/ \@{[\$.+1]}/\") > $targetSyntacticPreferencesLabelsFile";
+  print STDERR "Merging target syntactic preferences labels files: $cmd \n";
+  `$cmd`;
+}
 
 $cmd = "rm -rf $TMPDIR \n";
 print STDERR $cmd;

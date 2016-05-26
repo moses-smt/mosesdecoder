@@ -47,8 +47,9 @@ PhraseDictionaryOnDisk::~PhraseDictionaryOnDisk()
 {
 }
 
-void PhraseDictionaryOnDisk::Load()
+void PhraseDictionaryOnDisk::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   SetFeaturesToApply();
 }
 
@@ -149,26 +150,26 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath
     lastWord.OnlyTheseFactors(m_inputFactors);
     OnDiskPt::Word *lastWordOnDisk = wrapper.ConvertFromMoses(m_input, lastWord);
 
+    TargetPhraseCollection::shared_ptr tpc;
     if (lastWordOnDisk == NULL) {
       // OOV according to this phrase table. Not possible to extend
-      inputPath.SetTargetPhrases(*this, NULL, NULL);
+      inputPath.SetTargetPhrases(*this, tpc, NULL);
     } else {
-      const OnDiskPt::PhraseNode *ptNode = prevPtNode->GetChild(*lastWordOnDisk, wrapper);
-      if (ptNode) {
-        const TargetPhraseCollection *targetPhrases = GetTargetPhraseCollection(ptNode);
-        inputPath.SetTargetPhrases(*this, targetPhrases, ptNode);
-      } else {
-        inputPath.SetTargetPhrases(*this, NULL, NULL);
-      }
+      OnDiskPt::PhraseNode const* ptNode;
+      ptNode = prevPtNode->GetChild(*lastWordOnDisk, wrapper);
+      if (ptNode) tpc = GetTargetPhraseCollection(ptNode);
+      inputPath.SetTargetPhrases(*this, tpc, ptNode);
 
       delete lastWordOnDisk;
     }
   }
 }
 
-const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const
+TargetPhraseCollection::shared_ptr
+PhraseDictionaryOnDisk::
+GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const
 {
-  const TargetPhraseCollection *ret;
+  TargetPhraseCollection::shared_ptr ret;
 
   CacheColl &cache = GetCache();
   size_t hash = (size_t) ptNode->GetFilePos();
@@ -181,31 +182,34 @@ const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollection(
     // not in cache, need to look up from phrase table
     ret = GetTargetPhraseCollectionNonCache(ptNode);
 
-    std::pair<const TargetPhraseCollection*, clock_t> value(ret, clock());
+    std::pair<TargetPhraseCollection::shared_ptr , clock_t> value(ret, clock());
     cache[hash] = value;
   } else {
     // in cache. just use it
-    std::pair<const TargetPhraseCollection*, clock_t> &value = iter->second;
-    value.second = clock();
-
-    ret = value.first;
+    iter->second.second = clock();
+    ret = iter->second.first;
   }
 
   return ret;
 }
 
-const TargetPhraseCollection *PhraseDictionaryOnDisk::GetTargetPhraseCollectionNonCache(const OnDiskPt::PhraseNode *ptNode) const
+TargetPhraseCollection::shared_ptr
+PhraseDictionaryOnDisk::
+GetTargetPhraseCollectionNonCache(const OnDiskPt::PhraseNode *ptNode) const
 {
-  OnDiskPt::OnDiskWrapper &wrapper = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
+  OnDiskPt::OnDiskWrapper& wrapper
+  = const_cast<OnDiskPt::OnDiskWrapper&>(GetImplementation());
 
   vector<float> weightT = StaticData::Instance().GetWeights(this);
   OnDiskPt::Vocab &vocab = wrapper.GetVocab();
 
-  const OnDiskPt::TargetPhraseCollection *targetPhrasesOnDisk = ptNode->GetTargetPhraseCollection(m_tableLimit, wrapper);
-  TargetPhraseCollection *targetPhrases
-  = targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this, weightT, vocab, false);
+  OnDiskPt::TargetPhraseCollection::shared_ptr targetPhrasesOnDisk
+  = ptNode->GetTargetPhraseCollection(m_tableLimit, wrapper);
+  TargetPhraseCollection::shared_ptr targetPhrases
+  = targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this,
+                                        weightT, vocab, false);
 
-  delete targetPhrasesOnDisk;
+  // delete targetPhrasesOnDisk;
 
   return targetPhrases;
 }

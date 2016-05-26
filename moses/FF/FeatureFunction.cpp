@@ -54,12 +54,11 @@ FeatureFunction(const std::string& line, bool registerNow)
 {
   m_numTuneableComponents = m_numScoreComponents;
   ParseLine(line);
-  if (registerNow) Register();
+  // if (registerNow) Register(); // now done in FeatureFactory::DefaultSetup()
+  // TO DO: eliminate the registerNow parameter
 }
 
-FeatureFunction::
-FeatureFunction(size_t numScoreComponents,
-                const std::string& line)
+FeatureFunction::FeatureFunction(size_t numScoreComponents, const std::string& line, bool registerNow)
   : m_tuneable(true)
   , m_requireSortingAfterSourceContext(false)
   , m_verbosity(std::numeric_limits<std::size_t>::max())
@@ -68,15 +67,16 @@ FeatureFunction(size_t numScoreComponents,
 {
   m_numTuneableComponents = m_numScoreComponents;
   ParseLine(line);
-  Register();
+  // if (registerNow) Register(); // now done in FeatureFactory::DefaultSetup()
+  // TO DO: eliminate the registerNow parameter
 }
 
 void
 FeatureFunction::
-Register()
+Register(FeatureFunction* ff)
 {
-  ScoreComponentCollection::RegisterScoreProducer(this);
-  s_staticColl.push_back(this);
+  ScoreComponentCollection::RegisterScoreProducer(ff);
+  s_staticColl.push_back(ff);
 }
 
 FeatureFunction::~FeatureFunction() {}
@@ -112,12 +112,10 @@ void FeatureFunction::ParseLine(const std::string &line)
   if (m_description == "") {
     size_t index = description_counts.count(nameStub);
 
-    ostringstream dstream;
-    dstream << nameStub;
-    dstream << index;
+    string descr = SPrint(nameStub) + SPrint(index);
 
     description_counts.insert(nameStub);
-    m_description = dstream.str();
+    m_description = descr;
   }
 
 }

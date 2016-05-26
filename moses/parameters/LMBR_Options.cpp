@@ -3,6 +3,16 @@
 
 namespace Moses {
 
+  LMBR_Options::
+  LMBR_Options() 
+    : enabled(false)
+    , use_lattice_hyp_set(false)
+    , precision(0.8f)
+    , ratio(0.6f)
+    , map_weight(0.8f)
+    , pruning_factor(30)
+  { }
+
   bool
   LMBR_Options::
   init(Parameter const& param)
@@ -20,5 +30,8 @@ namespace Moses {
     
     return true;
   }
-  
+
+
+
+
 }

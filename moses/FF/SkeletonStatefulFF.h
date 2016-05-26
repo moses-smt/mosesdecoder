@@ -15,7 +15,14 @@ public:
     :m_targetLen(targetLen) {
   }
 
-  int Compare(const FFState& other) const;
+  virtual size_t hash() const {
+    return (size_t) m_targetLen;
+  }
+  virtual bool operator==(const FFState& o) const {
+    const SkeletonState& other = static_cast<const SkeletonState&>(o);
+    return m_targetLen == other.m_targetLen;
+  }
+
 };
 
 class SkeletonStatefulFF : public StatefulFeatureFunction
@@ -30,19 +37,35 @@ public:
     return new SkeletonState(0);
   }
 
-  void EvaluateInIsolation(const Phrase &source
-                           , const TargetPhrase &targetPhrase
-                           , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const;
-  void EvaluateWithSourceContext(const InputType &input
-                                 , const InputPath &inputPath
-                                 , const TargetPhrase &targetPhrase
-                                 , const StackVec *stackVec
-                                 , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+  // An empty implementation of this function is provided by StatefulFeatureFunction.
+  // Unless you are actually implementing this, please remove this declaration here
+  // and the empty skeleton implementation from the corresponding .cpp
+  // file to reduce code clutter.
+  void
+  EvaluateInIsolation(const Phrase &source
+                      , const TargetPhrase &targetPhrase
+                      , ScoreComponentCollection &scoreBreakdown
+                      , ScoreComponentCollection &estimatedScores) const;
 
-  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const;
+  // An empty implementation of this function is provided by StatefulFeatureFunction.
+  // Unless you are actually implementing this, please remove this declaration here
+  // and the empty skeleton implementation from the corresponding .cpp
+  // file to reduce code clutter.
+  void
+  EvaluateWithSourceContext(const InputType &input
+                            , const InputPath &inputPath
+                            , const TargetPhrase &targetPhrase
+                            , const StackVec *stackVec
+                            , ScoreComponentCollection &scoreBreakdown
+                            , ScoreComponentCollection *estimatedScores = NULL) const;
+
+  // An empty implementation of this function is provided by StatefulFeatureFunction.
+  // Unless you are actually implementing this, please remove this declaration here
+  // and the empty skeleton implementation from the corresponding .cpp
+  // file to reduce code clutter.
+  void
+  EvaluateTranslationOptionListWithSourceContext
+  ( const InputType &input , const TranslationOptionList &translationOptionList) const;
 
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,

@@ -13,7 +13,8 @@
 #include "moses/Syntax/RuleTableFF.h"
 #include "moses/Syntax/SHyperedgeBundle.h"
 #include "moses/Syntax/SVertex.h"
-#include "moses/Syntax/SVertexRecombinationOrderer.h"
+#include "moses/Syntax/SVertexRecombinationEqualityPred.h"
+#include "moses/Syntax/SVertexRecombinationHasher.h"
 #include "moses/Syntax/SymbolEqualityPred.h"
 #include "moses/Syntax/SymbolHasher.h"
 
@@ -45,7 +46,7 @@ void Manager<Parser>::InitializeCharts()
     const Word &terminal = m_source.GetWord(i);
 
     // PVertex
-    PVertex tmp(WordsRange(i,i), terminal);
+    PVertex tmp(Range(i,i), terminal);
     PVertex &pvertex = m_pchart.AddVertex(tmp);
 
     // SVertex
@@ -108,7 +109,7 @@ void Manager<Parser>::InitializeParsers(PChart &pchart,
 // Find the set of OOVs for this input.  This function assumes that the
 // PChart argument has already been initialized from the input.
 template<typename Parser>
-void Manager<Parser>::FindOovs(const PChart &pchart, std::set<Word> &oovs,
+void Manager<Parser>::FindOovs(const PChart &pchart, boost::unordered_set<Word> &oovs,
                                std::size_t maxOovWidth)
 {
   // Get the set of RuleTries.
@@ -159,12 +160,10 @@ void Manager<Parser>::FindOovs(const PChart &pchart, std::set<Word> &oovs,
 template<typename Parser>
 void Manager<Parser>::Decode()
 {
-  const StaticData &staticData = StaticData::Instance();
-
   // Get various pruning-related constants.
-  const std::size_t popLimit = staticData.options().cube.pop_limit;
-  const std::size_t ruleLimit = staticData.GetRuleLimit();
-  const std::size_t stackLimit = staticData.options().search.stack_size;
+  const std::size_t popLimit = options()->cube.pop_limit;
+  const std::size_t ruleLimit = options()->syntax.rule_limit;
+  const std::size_t stackLimit = options()->search.stack_size;
 
   // Initialise the PChart and SChart.
   InitializeCharts();
@@ -184,7 +183,7 @@ void Manager<Parser>::Decode()
       //PChart::Cell &pcell = m_pchart.GetCell(start, end);
       SChart::Cell &scell = m_schart.GetCell(start, end);
 
-      WordsRange range(start, end);
+      Range range(start, end);
 
       // Call the parsers to generate PHyperedges for this span and convert
       // each one to a SHyperedgeBundle (via the callback).  The callback
@@ -302,7 +301,7 @@ void Manager<Parser>::ExtractKBest(
   // with 0 being 'unlimited.'  This actually sets a large-ish limit in case
   // too many translations are identical.
   const StaticData &staticData = StaticData::Instance();
-  const std::size_t nBestFactor = staticData.options().nbest.factor;
+  const std::size_t nBestFactor = staticData.options()->nbest.factor;
   std::size_t numDerivations = (nBestFactor == 0) ? k*1000 : k*nBestFactor;
 
   // Extract the derivations.
@@ -349,7 +348,9 @@ void Manager<Parser>::RecombineAndSort(const std::vector<SHyperedge*> &buffer,
   // head pointers are updated to point to the vertex instances in the map and
   // any 'duplicate' vertices are deleted.
 // TODO Set?
-  typedef std::map<SVertex *, SVertex *, SVertexRecombinationOrderer> Map;
+  typedef boost::unordered_map<SVertex *, SVertex *,
+          SVertexRecombinationHasher,
+          SVertexRecombinationEqualityPred> Map;
   Map map;
   for (std::vector<SHyperedge*>::const_iterator p = buffer.begin();
        p != buffer.end(); ++p) {
@@ -365,7 +366,7 @@ void Manager<Parser>::RecombineAndSort(const std::vector<SHyperedge*> &buffer,
     // Compare the score of h against the score of the best incoming hyperedge
     // for the stored vertex.
     SVertex *storedVertex = result.first->second;
-    if (h->label.score > storedVertex->best->label.score) {
+    if (h->label.futureScore > storedVertex->best->label.futureScore) {
       // h's score is better.
       storedVertex->recombined.push_back(storedVertex->best);
       storedVertex->best = h;

@@ -1,6 +1,4 @@
-// $Id$
-// vim:tabstop=2
-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -31,17 +29,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <vector>
 #include "Phrase.h"
 #include "TypeDef.h"
-#include "WordsBitmap.h"
+#include "Bitmap.h"
 #include "Sentence.h"
 #include "Phrase.h"
 #include "GenerationDictionary.h"
 #include "ScoreComponentCollection.h"
 #include "InputType.h"
 #include "ObjectPool.h"
-
-#ifdef HAVE_XMLRPC_C
-#include <xmlrpc-c/base.hpp>
-#endif
+#include "xmlrpc-c.h"
 
 namespace Moses
 {
@@ -49,12 +44,14 @@ namespace Moses
 class SquareMatrix;
 class StaticData;
 class TranslationOption;
-class WordsRange;
+class Range;
 class Hypothesis;
 class FFState;
 class StatelessFeatureFunction;
 class StatefulFeatureFunction;
 class Manager;
+class WordsBitmap;
+struct ReportingOptions;
 
 typedef std::vector<Hypothesis*> ArcList;
 
@@ -69,21 +66,15 @@ typedef std::vector<Hypothesis*> ArcList;
 class Hypothesis
 {
   friend std::ostream& operator<<(std::ostream&, const Hypothesis&);
-
 protected:
-  static ObjectPool<Hypothesis> s_objectPool;
-
   const Hypothesis* m_prevHypo; /*! backpointer to previous hypothesis (from which this one was created) */
-//	const Phrase			&m_targetPhrase; /*! target phrase being created at the current decoding step */
-  WordsBitmap				m_sourceCompleted; /*! keeps track of which words have been translated so far */
-  //TODO: how to integrate this into confusion network framework; what if
-  //it's a confusion network in the end???
+  const Bitmap	&m_sourceCompleted; /*! keeps track of which words have been translated so far */
   InputType const&  m_sourceInput;
-  WordsRange				m_currSourceWordsRange; /*! source word positions of the last phrase that was used to create this hypothesis */
-  WordsRange        m_currTargetWordsRange; /*! target word positions of the last phrase that was used to create this hypothesis */
+  Range				m_currSourceWordsRange; /*! source word positions of the last phrase that was used to create this hypothesis */
+  Range        m_currTargetWordsRange; /*! target word positions of the last phrase that was used to create this hypothesis */
   bool							m_wordDeleted;
-  float							m_totalScore;  /*! score so far */
-  float							m_futureScore; /*! estimated future cost to translate rest of sentence */
+  float							m_futureScore;  /*! score so far */
+  float							m_estimatedScore; /*! estimated future cost to translate rest of sentence */
   /*! sum of scores of this hypothesis, and previous hypotheses. Lazily initialised.  */
   mutable boost::scoped_ptr<ScoreComponentCollection> m_scoreBreakdown;
   ScoreComponentCollection m_currScoreBreakdown; /*! scores for this hypothesis only */
@@ -95,16 +86,11 @@ protected:
 
   int m_id; /*! numeric ID of this hypothesis, used for logging */
 
-  /*! used by initial seeding of the translation process */
-  Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt);
-  /*! used when creating a new hypothesis using a translation option (phrase translation) */
-  Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt);
-
 public:
-  static ObjectPool<Hypothesis> &GetObjectPool() {
-    return s_objectPool;
-  }
-
+  /*! used by initial seeding of the translation process */
+  Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const Bitmap &bitmap, int id);
+  /*! used when creating a new hypothesis using a translation option (phrase translation) */
+  Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Bitmap &bitmap, int id);
   ~Hypothesis();
 
   /** return the subclass of Hypothesis most appropriate to the given translation option */
@@ -130,11 +116,11 @@ public:
   const TargetPhrase &GetCurrTargetPhrase() const;
 
   /** return input positions covered by the translation option (phrasal translation) used to create this hypothesis */
-  inline const WordsRange &GetCurrSourceWordsRange() const {
+  inline const Range &GetCurrSourceWordsRange() const {
     return m_currSourceWordsRange;
   }
 
-  inline const WordsRange &GetCurrTargetWordsRange() const {
+  inline const Range &GetCurrTargetWordsRange() const {
     return m_currTargetWordsRange;
   }
 
@@ -147,7 +133,7 @@ public:
     return m_currTargetWordsRange.GetNumWordsCovered();
   }
 
-  void EvaluateWhenApplied(const SquareMatrix &futureScore);
+  void EvaluateWhenApplied(float estimatedScore);
 
   int GetId()const {
     return m_id;
@@ -190,15 +176,13 @@ public:
   /***
    * \return The bitmap of source words we cover
    */
-  inline const WordsBitmap &GetWordsBitmap() const {
+  inline const Bitmap &GetWordsBitmap() const {
     return m_sourceCompleted;
   }
 
   inline bool IsSourceCompleted() const {
     return m_sourceCompleted.IsComplete();
   }
-
-  int RecombineCompare(const Hypothesis &compare) const;
 
   void GetOutputPhrase(Phrase &out) const;
 
@@ -212,7 +196,7 @@ public:
     if (m_prevHypo != NULL) {
       m_prevHypo->ToStream(out);
     }
-    out << (Phrase) GetCurrTargetPhrase();
+    out << (const Phrase&) GetCurrTargetPhrase();
   }
 
   std::string GetOutputString() const {
@@ -231,15 +215,15 @@ public:
   }
 
   void AddArc(Hypothesis *loserHypo);
-  void CleanupArcList();
+  void CleanupArcList(size_t nBestSize, bool distinctNBest);
 
   //! returns a list alternative previous hypotheses (or NULL if n-best support is disabled)
   inline const ArcList* GetArcList() const {
     return m_arcList;
   }
   const ScoreComponentCollection& GetScoreBreakdown() const {
-    if (!m_scoreBreakdown.get()) {
-      m_scoreBreakdown.reset(new ScoreComponentCollection());
+    if (!m_scoreBreakdown) {
+      m_scoreBreakdown.reset(new ScoreComponentCollection);
       m_scoreBreakdown->PlusEquals(m_currScoreBreakdown);
       if (m_prevHypo) {
         m_scoreBreakdown->PlusEquals(m_prevHypo->GetScoreBreakdown());
@@ -247,16 +231,16 @@ public:
     }
     return *(m_scoreBreakdown.get());
   }
-  
+
   ScoreComponentCollection& GetCurrScoreBreakdown() {
     return m_currScoreBreakdown;
   }
-  
-  float GetTotalScore() const {
-    return m_totalScore;
+
+  float GetFutureScore() const {
+    return m_futureScore;
   }
   float GetScore() const {
-    return m_totalScore-m_futureScore;
+    return m_futureScore-m_estimatedScore;
   }
   const FFState* GetFFState(int idx) const {
     return m_ffStates[idx];
@@ -264,13 +248,6 @@ public:
   void SetFFState(int idx, FFState* state) {
     m_ffStates[idx] = state;
   }
-
-  // Added by oliver.wilson@ed.ac.uk for async lm stuff.
-  void EvaluateWhenApplied(const StatefulFeatureFunction &sfff, int state_idx);
-  void EvaluateWhenApplied(const StatelessFeatureFunction &slff);
-
-  //! target span that trans opt would populate if applied to this hypo. Used for alignment check
-  size_t GetNextStartPos(const TranslationOption &transOpt) const;
 
   std::vector<std::vector<unsigned int> > *GetLMStats() const {
     return NULL;
@@ -280,25 +257,25 @@ public:
     return m_transOpt;
   }
 
-  void OutputAlignment(std::ostream &out) const;
-  static void OutputAlignment(std::ostream &out, const std::vector<const Hypothesis *> &edges);
-  static void OutputAlignment(std::ostream &out, const Moses::AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset);
+  size_t OutputAlignment(std::ostream &out, bool recursive) const;
 
   void OutputInput(std::ostream& os) const;
   static void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo);
 
-  void OutputBestSurface(std::ostream &out, const std::vector<Moses::FactorType> &outputFactorOrder, char reportSegmentation, bool reportAllFactors) const;
-  void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
-                     char reportSegmentation, bool reportAllFactors) const;
-
   // creates a map of TARGET positions which should be replaced by word using placeholder
   std::map<size_t, const Moses::Factor*> GetPlaceholders(const Moses::Hypothesis &hypo, Moses::FactorType placeholderFactor) const;
 
+  // for unordered_set in stack
+  size_t hash() const;
+  bool operator==(const Hypothesis& other) const;
+
 #ifdef HAVE_XMLRPC_C
+  // these are implemented in moses/server/Hypothesis_4server.cpp !
   void OutputWordAlignment(std::vector<xmlrpc_c::value>& out) const;
   void OutputLocalWordAlignment(std::vector<xmlrpc_c::value>& dest) const;
 #endif
 
+  bool beats(Hypothesis const& b) const;
 
 
 };
@@ -307,37 +284,8 @@ std::ostream& operator<<(std::ostream& out, const Hypothesis& hypothesis);
 
 // sorting helper
 struct CompareHypothesisTotalScore {
-  bool operator()(const Hypothesis* hypo1, const Hypothesis* hypo2) const {
-    return hypo1->GetTotalScore() > hypo2->GetTotalScore();
-  }
-};
-
-#ifdef USE_HYPO_POOL
-
-#define FREEHYPO(hypo) \
-{ \
-	ObjectPool<Hypothesis> &pool = Hypothesis::GetObjectPool(); \
-	pool.freeObject(hypo); \
-} \
-
-#else
-#define FREEHYPO(hypo) delete hypo
-#endif
-
-/** defines less-than relation on hypotheses.
-* The particular order is not important for us, we need just to figure out
-* which hypothesis are equal based on:
-*   the last n-1 target words are the same
-*   and the covers (source words translated) are the same
-* Directly using RecombineCompare is unreliable because the Compare methods
-* of some states are based on archictecture-dependent pointer comparisons.
-* That's why we use the hypothesis IDs instead.
-*/
-class HypothesisRecombinationOrderer
-{
-public:
-  bool operator()(const Hypothesis* hypoA, const Hypothesis* hypoB) const {
-    return (hypoA->RecombineCompare(*hypoB) < 0);
+  bool operator()(const Hypothesis* a, const Hypothesis* b) const {
+    return a->beats(*b);
   }
 };
 

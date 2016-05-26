@@ -12,6 +12,7 @@
 #include "moses/LM/SingleFactor.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/ChartManager.h"
+#include "util/string_stream.hh"
 
 namespace Moses
 {
@@ -19,11 +20,15 @@ namespace Moses
 class TargetNgramState : public FFState
 {
 public:
-  TargetNgramState(std::vector<Word> &words): m_words(words) {}
+  TargetNgramState() {}
+
+  TargetNgramState(const std::vector<Word> &words): m_words(words) {}
   const std::vector<Word> GetWords() const {
     return m_words;
   }
-  virtual int Compare(const FFState& other) const;
+
+  size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
 private:
   std::vector<Word> m_words;
@@ -127,7 +132,7 @@ public:
     :m_contextPrefix(order - 1),
      m_contextSuffix(order - 1) {
     m_numTargetTerminals = hypo.GetCurrTargetPhrase().GetNumTerminals();
-    const WordsRange range = hypo.GetCurrSourceRange();
+    const Range range = hypo.GetCurrSourceRange();
     m_startPos = range.GetStartPos();
     m_endPos = range.GetEndPos();
     m_inputSize = hypo.GetManager().GetSource().GetSize();
@@ -153,24 +158,42 @@ public:
     return m_contextSuffix;
   }
 
-  int Compare(const FFState& o) const {
+  size_t hash() const {
+    // not sure if this is correct
+    size_t ret;
+
+    ret = m_startPos;
+    boost::hash_combine(ret, m_endPos);
+    boost::hash_combine(ret, m_inputSize);
+
+    // prefix
+    if (m_startPos > 0) { // not for "<s> ..."
+      boost::hash_combine(ret, hash_value(GetPrefix()));
+    }
+
+    if (m_endPos < m_inputSize - 1) { // not for "... </s>"
+      boost::hash_combine(ret, hash_value(GetSuffix()));
+    }
+
+    return ret;
+  }
+  virtual bool operator==(const FFState& o) const {
     const TargetNgramChartState &other =
       static_cast<const TargetNgramChartState &>( o );
 
     // prefix
     if (m_startPos > 0) { // not for "<s> ..."
-      int ret = GetPrefix().Compare(other.GetPrefix());
-      if (ret != 0)
-        return ret;
+      if (GetPrefix() != other.GetPrefix())
+        return false;
     }
 
     if (m_endPos < m_inputSize - 1) { // not for "... </s>"
-      int ret = GetSuffix().Compare(other.GetSuffix());
-      if (ret != 0)
-        return ret;
+      if (GetSuffix() != other.GetSuffix())
+        return false;
     }
-    return 0;
+    return true;
   }
+
 };
 
 /** Sets the features of observed ngrams.
@@ -180,7 +203,7 @@ class TargetNgramFeature : public StatefulFeatureFunction
 public:
   TargetNgramFeature(const std::string &line);
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   bool IsUseable(const FactorMask &mask) const;
 
@@ -191,24 +214,6 @@ public:
 
   virtual FFState* EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureId,
                                        ScoreComponentCollection* accumulator) const;
-
-  void EvaluateWithSourceContext(const InputType &input
-                                 , const InputPath &inputPath
-                                 , const TargetPhrase &targetPhrase
-                                 , const StackVec *stackVec
-                                 , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
-  }
-
-  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const {
-  }
-
-  void EvaluateInIsolation(const Phrase &source
-                           , const TargetPhrase &targetPhrase
-                           , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {
-  }
 
   void SetParameter(const std::string& key, const std::string& value);
 
@@ -222,7 +227,7 @@ private:
 
   std::string m_baseName;
 
-  void appendNgram(const Word& word, bool& skip, std::stringstream& ngram) const;
+  void appendNgram(const Word& word, bool& skip, util::StringStream& ngram) const;
   void MakePrefixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator,
                         size_t numberOfStartPos = 1, size_t offset = 0) const;
   void MakeSuffixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator,

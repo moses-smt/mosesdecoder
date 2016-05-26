@@ -24,17 +24,25 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "DecodeStep.h"
 #include "DecodeStepTranslation.h"
 #include "FactorCollection.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include <list>
+#include "TranslationTask.h"
 
 using namespace std;
 
 namespace Moses
 {
 /** constructor; just initialize the base class */
-TranslationOptionCollectionText::TranslationOptionCollectionText(ttasksptr const& ttask, Sentence const &input, size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
-  : TranslationOptionCollection(ttask,input, maxNoTransOptPerCoverage, translationOptionThreshold)
+TranslationOptionCollectionText::
+TranslationOptionCollectionText(ttasksptr const& ttask, Sentence const &input)
+//, size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
+  : TranslationOptionCollection(ttask,input)
+  // , maxNoTransOptPerCoverage, translationOptionThreshold)
 {
+  size_t maxNoTransOptPerCoverage
+  = ttask->options()->search.max_trans_opt_per_cov;
+  float translationOptionThreshold
+  = ttask->options()->search.trans_opt_threshold;
   size_t size = input.GetSize();
   m_inputPathMatrix.resize(size);
   for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
@@ -42,17 +50,17 @@ TranslationOptionCollectionText::TranslationOptionCollectionText(ttasksptr const
       size_t endPos = startPos + phaseSize -1;
       vector<InputPath*> &vec = m_inputPathMatrix[startPos];
 
-      WordsRange range(startPos, endPos);
-      Phrase subphrase(input.GetSubString(WordsRange(startPos, endPos)));
+      Range range(startPos, endPos);
+      Phrase subphrase(input.GetSubString(Range(startPos, endPos)));
       const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
 
       InputPath *path;
       if (range.GetNumWordsCovered() == 1) {
-        path = new InputPath(subphrase, labels, range, NULL, NULL);
+        path = new InputPath(ttask.get(), subphrase, labels, range, NULL, NULL);
         vec.push_back(path);
       } else {
         const InputPath &prevPath = GetInputPath(startPos, endPos - 1);
-        path = new InputPath(subphrase, labels, range, &prevPath, NULL);
+        path = new InputPath(ttask.get(), subphrase, labels, range, &prevPath, NULL);
         vec.push_back(path);
       }
 
@@ -75,7 +83,7 @@ void TranslationOptionCollectionText::ProcessUnknownWord(size_t sourcePos)
  */
 bool TranslationOptionCollectionText::HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const
 {
-  Sentence const& source=dynamic_cast<Sentence const&>(m_source);
+  Sentence const& source=static_cast<Sentence const&>(m_source);
   return source.XmlOverlap(startPosition,endPosition);
 }
 
@@ -85,14 +93,14 @@ bool TranslationOptionCollectionText::HasXmlOptionsOverlappingRange(size_t start
 bool TranslationOptionCollectionText::ViolatesXmlOptionsConstraint(size_t startPosition, size_t endPosition, TranslationOption *transOpt) const
 {
   // skip if there is no overlap
-  Sentence const& source=dynamic_cast<Sentence const&>(m_source);
+  Sentence const& source=static_cast<Sentence const&>(m_source);
   if (!source.XmlOverlap(startPosition,endPosition)) {
     return false;
   }
   vector <TranslationOption*> xmlOptions;
   source.GetXmlTranslationOptions(xmlOptions);
   for(size_t i=0; i<xmlOptions.size(); i++) {
-    const WordsRange &range = xmlOptions[i]->GetSourceWordsRange();
+    const Range &range = xmlOptions[i]->GetSourceWordsRange();
     // if transOpt is a subphrase of a xml specification, do not use it
     if (range.GetStartPos() <= startPosition && range.GetEndPos() >= endPosition &&
         (range.GetStartPos() < startPosition || range.GetEndPos() > endPosition)) {
@@ -135,7 +143,7 @@ bool TranslationOptionCollectionText::ViolatesXmlOptionsConstraint(size_t startP
  */
 void TranslationOptionCollectionText::CreateXmlOptionsForRange(size_t startPos, size_t endPos)
 {
-  Sentence const& source=dynamic_cast<Sentence const&>(m_source);
+  Sentence const& source=static_cast<Sentence const&>(m_source);
   InputPath &inputPath = GetInputPath(startPos,endPos);
 
   vector <TranslationOption*> xmlOptions;

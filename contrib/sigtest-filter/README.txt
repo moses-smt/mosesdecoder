@@ -12,7 +12,12 @@ BUILD INSTRUCTIONS
 
 1. Download and build SALM.
 
-2. make SALMDIR=/path/to/SALM
+2. If your boost path is in a non-standard directory:
+       export CPLUS_INCLUDE_PATH=/path/to/boost/include
+       export LIBRARY_PATH=/path/to/boost/lib64
+
+3. make SALMDIR=/path/to/SALM
+
 
 
 USAGE INSTRUCTIONS

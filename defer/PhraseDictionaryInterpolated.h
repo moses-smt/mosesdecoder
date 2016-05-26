@@ -52,7 +52,7 @@ public:
             , const LMList &languageModels
             , float weightWP);
 
-  virtual const TargetPhraseCollection *GetTargetPhraseCollection(const Phrase& src) const;
+  virtual TargetPhraseCollection::shared_ptr GetTargetPhraseCollection(const Phrase& src) const;
   virtual void InitializeForInput(ttasksptr const& ttask);
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const InputType &,
@@ -65,7 +65,7 @@ private:
   typedef boost::shared_ptr<PhraseDictionaryTreeAdaptor> DictionaryHandle;
   std::vector<DictionaryHandle> m_dictionaries;
   std::vector<std::vector<float> > m_weights; //feature x table
-  mutable TargetPhraseCollection* m_targetPhrases;
+  mutable TargetPhraseCollection::shared_ptr  m_targetPhrases;
   std::vector<float> m_weightT;
   size_t m_tableLimit;
   const LMList* m_languageModels;

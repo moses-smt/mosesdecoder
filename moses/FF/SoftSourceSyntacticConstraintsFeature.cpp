@@ -88,8 +88,9 @@ void SoftSourceSyntacticConstraintsFeature::SetParameter(const std::string& key,
   }
 }
 
-void SoftSourceSyntacticConstraintsFeature::Load()
+void SoftSourceSyntacticConstraintsFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   // don't change the loading order!
   LoadSourceLabelSet();
   if (!m_coreSourceLabelSetFile.empty()) {
@@ -192,7 +193,7 @@ void SoftSourceSyntacticConstraintsFeature::LoadLabelSet(std::string &filename,
     if ( foundSourceLabelIndex != m_sourceLabels.end() ) {
       labelSet.insert(foundSourceLabelIndex->second);
     } else {
-      FEATUREVERBOSE(2, "Ignoring unknown source label \"" << label << "\" "
+      FEATUREVERBOSE(2, "Ignoring undefined source label \"" << label << "\" "
                      << "from core source label set file " << filename << "."
                      << std::endl);
     }
@@ -231,7 +232,7 @@ void SoftSourceSyntacticConstraintsFeature::LoadTargetSourceLeftHandSideJointCou
     boost::unordered_map<std::string,size_t>::iterator foundSourceLabelIndex = m_sourceLabels.find( sourceLabel );
     UTIL_THROW_IF2(foundSourceLabelIndex == m_sourceLabels.end(), GetScoreProducerDescription()
                    << ": Target/source label joint count file " << m_targetSourceLHSJointCountFile
-                   << " contains unknown source label \"" << sourceLabel << "\".");
+                   << " contains undefined source label \"" << sourceLabel << "\".");
 
     const Factor* targetLabelFactor = factorCollection.AddFactor(targetLabel,true);
 
@@ -288,7 +289,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {
   assert(stackVec);
 
@@ -297,7 +298,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
     FEATUREVERBOSE(3, inputPath << std::endl);
     for (size_t i = 0; i < stackVec->size(); ++i) {
       const ChartCellLabel &cell = *stackVec->at(i);
-      const WordsRange &ntRange = cell.GetCoverage();
+      const Range &ntRange = cell.GetCoverage();
       FEATUREVERBOSE(3, "stackVec[ " << i << " ] : " << ntRange.GetStartPos() << " - " << ntRange.GetEndPos() << std::endl);
     }
 
@@ -311,8 +312,8 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
   std::vector<float> newScores(m_numScoreComponents,0);
 
   const TreeInput& treeInput = static_cast<const TreeInput&>(input);
-  const StaticData& staticData = StaticData::Instance();
-  const Word& outputDefaultNonTerminal = staticData.GetOutputDefaultNonTerminal();
+  // const StaticData& staticData = StaticData::Instance();
+  // const Word& outputDefaultNonTerminal = staticData.GetOutputDefaultNonTerminal();
 
   size_t nNTs = 1;
   bool treeInputMismatchLHSBinary = true;
@@ -339,9 +340,9 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
     boost::unordered_set<size_t> treeInputLabelsLHS;
 
     // get index map for underlying hypotheses
-    const WordsRange& wordsRange = inputPath.GetWordsRange();
-    size_t startPos = wordsRange.GetStartPos();
-    size_t endPos = wordsRange.GetEndPos();
+    const Range& range = inputPath.GetWordsRange();
+    size_t startPos = range.GetStartPos();
+    size_t endPos = range.GetEndPos();
     const Phrase *sourcePhrase = targetPhrase.GetRuleSource();
 
     if (nNTs > 1) { // rule has right-hand side non-terminals, i.e. it's a hierarchical rule
@@ -356,7 +357,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
         if ( word.IsNonTerminal() ) {
           // retrieve information that is required for input tree label matching (RHS)
           const ChartCellLabel &cell = *stackVec->at(nonTerminalNumber);
-          const WordsRange& prevWordsRange = cell.GetCoverage();
+          const Range& prevWordsRange = cell.GetCoverage();
           symbolStartPos = prevWordsRange.GetStartPos();
           symbolEndPos = prevWordsRange.GetEndPos();
         }
@@ -365,7 +366,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
 
         for (NonTerminalSet::const_iterator treeInputLabelsIt = treeInputLabels.begin();
              treeInputLabelsIt != treeInputLabels.end(); ++treeInputLabelsIt) {
-          if (*treeInputLabelsIt != outputDefaultNonTerminal) {
+          if (*treeInputLabelsIt != m_options->syntax.output_default_non_terminal) {
             boost::unordered_map<const Factor*,size_t>::const_iterator foundTreeInputLabel
             = m_sourceLabelIndexesByFactor.find((*treeInputLabelsIt)[0]);
             if (foundTreeInputLabel != m_sourceLabelIndexesByFactor.end()) {
@@ -387,7 +388,7 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
 
     for (NonTerminalSet::const_iterator treeInputLabelsIt = treeInputLabels.begin();
          treeInputLabelsIt != treeInputLabels.end(); ++treeInputLabelsIt) {
-      if (*treeInputLabelsIt != outputDefaultNonTerminal) {
+      if (*treeInputLabelsIt != m_options->syntax.output_default_non_terminal) {
         boost::unordered_map<const Factor*,size_t>::const_iterator foundTreeInputLabel
         = m_sourceLabelIndexesByFactor.find((*treeInputLabelsIt)[0]);
         if (foundTreeInputLabel != m_sourceLabelIndexesByFactor.end()) {
@@ -568,7 +569,9 @@ void SoftSourceSyntacticConstraintsFeature::EvaluateWithSourceContext(const Inpu
       }
       if ( treeInputLabelsLHS.size() == 0 ) {
         scoreBreakdown.PlusEquals(this,
-                                  "LHSPAIR_" + targetLHS->GetString().as_string() + "_" + outputDefaultNonTerminal[0]->GetString().as_string(),
+                                  "LHSPAIR_" + targetLHS->GetString().as_string() + "_"
+                                  + m_options->syntax.output_default_non_terminal[0]
+                                  ->GetString().as_string(),
                                   1);
         if (!m_targetSourceLHSJointCountFile.empty()) {
           t2sLabelsScore = TransformScore(m_floor);

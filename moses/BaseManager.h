@@ -22,13 +22,11 @@ protected:
   BaseManager(ttasksptr const& ttask);
 
   // output
-  typedef std::vector<std::pair<Moses::Word, Moses::WordsRange> > ApplicationContext;
+  typedef std::vector<std::pair<Moses::Word, Moses::Range> > ApplicationContext;
   typedef std::set< std::pair<size_t, size_t>  > Alignments;
 
-  void OutputSurface(std::ostream &out,
-                     const Phrase &phrase,
-                     const std::vector<FactorType> &outputFactorOrder,
-                     bool reportAllFactors) const;
+  void OutputSurface(std::ostream &out, Phrase const& phrase) const;
+
   void WriteApplicationContext(std::ostream &out,
                                const ApplicationContext &context) const;
 
@@ -51,7 +49,7 @@ public:
   //! the input sentence being decoded
   const InputType& GetSource() const;
   const ttasksptr  GetTtask() const;
-  AllOptions const& options() const;
+  AllOptions::ptr const& options() const;
 
   virtual void Decode() = 0;
   // outputs

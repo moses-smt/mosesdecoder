@@ -26,6 +26,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/shared_ptr.hpp>
 
 #include "lm/word_index.hh"
+#include "util/mmap.hh"
 
 #include "moses/LM/Base.h"
 #include "moses/Hypothesis.h"
@@ -41,7 +42,7 @@ class FFState;
 LanguageModel *ConstructKenLM(const std::string &line);
 
 //! This will also load. Returns a templated KenLM class
-LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy);
+LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, FactorType factorType, util::LoadMethod load_method);
 
 /*
  * An implementation of single factor LM using Kenneth's code.
@@ -49,7 +50,7 @@ LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, 
 template <class Model> class LanguageModelKen : public LanguageModel
 {
 public:
-  LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, bool lazy);
+  LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, util::LoadMethod load_method);
 
   virtual const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
 
@@ -73,10 +74,14 @@ protected:
 
   FactorType m_factorType;
 
+  void LoadModel(const std::string &file, util::LoadMethod load_method);
+
   lm::WordIndex TranslateID(const Word &word) const {
     std::size_t factor = word.GetFactor(m_factorType)->GetId();
     return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
   }
+
+  std::vector<lm::WordIndex> m_lmIdLookup;
 
 private:
   LanguageModelKen(const LanguageModelKen<Model> &copy_from);
@@ -96,8 +101,9 @@ private:
     }
   }
 
-  std::vector<lm::WordIndex> m_lmIdLookup;
 
+protected:
+  //bool m_oovFeatureEnabled; /// originally from LanguageModel, copied here to separate the interfaces. Called m_enableOOVFeature there
 };
 
 } // namespace Moses

@@ -94,31 +94,38 @@ OutputSearchGraphAsHypergraph(std::string const& fname, size_t const precision) 
 /***
  * print surface factor only for the given phrase
  */
-void BaseManager::OutputSurface(std::ostream &out, const Phrase &phrase,
-                                const std::vector<FactorType> &outputFactorOrder,
-                                bool reportAllFactors) const
+void
+BaseManager::
+OutputSurface(std::ostream &out, Phrase const& phrase) const
 {
-  UTIL_THROW_IF2(outputFactorOrder.size() == 0,
-                 "Cannot be empty phrase");
-  if (reportAllFactors == true) {
-    out << phrase;
-  } else {
-    size_t size = phrase.GetSize();
-    for (size_t pos = 0 ; pos < size ; pos++) {
-      const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
-      out << *factor;
-      UTIL_THROW_IF2(factor == NULL,
-                     "Empty factor 0 at position " << pos);
+  std::vector<FactorType> const& factor_order = options()->output.factor_order;
 
-      for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
-        const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
-        UTIL_THROW_IF2(factor == NULL,
-                       "Empty factor " << i << " at position " << pos);
+  bool markUnknown = options()->unk.mark;
+  std::string const& fd = options()->output.factor_delimiter;
 
-        out << "|" << *factor;
-      }
-      out << " ";
+  size_t size = phrase.GetSize();
+  for (size_t pos = 0 ; pos < size ; pos++) {
+    const Factor *factor = phrase.GetFactor(pos, factor_order[0]);
+    UTIL_THROW_IF2(factor == NULL, "Empty factor 0 at position " << pos);
+
+    const Word &word = phrase.GetWord(pos);
+    if(markUnknown && word.IsOOV()) {
+      out << options()->unk.prefix;
     }
+
+    out << *factor;
+
+    for (size_t i = 1 ; i < factor_order.size() ; i++) {
+      const Factor *factor = phrase.GetFactor(pos, factor_order[i]);
+      UTIL_THROW_IF2(!factor, "Empty factor " << i << " at position " << pos);
+      out << fd << *factor;
+    }
+
+    if(markUnknown && word.IsOOV()) {
+      out << options()->unk.suffix;
+    }
+
+    out << " ";
   }
 }
 
@@ -140,7 +147,7 @@ void BaseManager::WriteApplicationContext(std::ostream &out,
   }
 }
 
-AllOptions const&
+AllOptions::ptr const&
 BaseManager::
 options() const
 {

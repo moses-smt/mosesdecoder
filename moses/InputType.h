@@ -1,5 +1,4 @@
-// -*- c++ -*-
-// $Id$
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 // vim:tabstop=2
 
 /***********************************************************************
@@ -30,7 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TargetPhraseCollection.h"
 #include "ReorderingConstraint.h"
 #include "NonTerminal.h"
-#include "WordsRange.h"
+#include "Range.h"
+#include "parameters/AllOptions.h"
 
 namespace Moses
 {
@@ -45,6 +45,7 @@ class TranslationTask;
 class InputType
 {
 protected:
+  AllOptions::ptr m_options;
   long m_translationId; 	//< contiguous Id
   long m_documentId;
   long m_topicId;
@@ -67,10 +68,14 @@ public:
   size_t m_frontSpanCoveredLength;
   // how many words from the beginning are covered
 
-  InputType(long translationId = 0);
+  InputType(AllOptions::ptr const& opts, long translationId = 0);
   virtual ~InputType();
 
   virtual InputTypeEnum GetType() const = 0;
+
+  AllOptions::ptr const& options() const {
+    return m_options;
+  }
 
   long GetTranslationId() const {
     return m_translationId;
@@ -133,18 +138,18 @@ public:
     m_passthrough = passthrough;
   }
   //! returns the number of words moved
-  virtual int ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const;
+  virtual int ComputeDistortionDistance(const Range& prev, const Range& current) const;
 
   //! In a word lattice, tells you if there's a path from node start to node end
   virtual bool CanIGetFromAToB(size_t start, size_t end) const;
 
   //! is there a path covering [range] (lattice only, otherwise true)
-  inline bool IsCoveragePossible(const WordsRange& range) const {
+  inline bool IsCoveragePossible(const Range& range) const {
     return CanIGetFromAToB(range.GetStartPos(), range.GetEndPos() + 1);
   }
 
   //! In a word lattice, you can't always get from node A to node B
-  inline bool IsExtensionPossible(const WordsRange& prev, const WordsRange& current) const {
+  inline bool IsExtensionPossible(const Range& prev, const Range& current) const {
     //  return ComputeDistortionDistance(prev, current) < 100000;
     size_t t = prev.GetEndPos()+1;  // 2
     size_t l = current.GetEndPos()+1;   //l=1
@@ -184,7 +189,11 @@ public:
   }
 
   //! populate this InputType with data from in stream
-  virtual int Read(std::istream& in,const std::vector<FactorType>& factorOrder) =0;
+  virtual int
+  Read(std::istream& in) = 0;
+  // ,
+  //    std::vector<FactorType> const& factorOrder,
+  //    AllOptions const& opts) =0;
 
   //! Output debugging info to stream out
   virtual void Print(std::ostream&) const =0;
@@ -194,7 +203,7 @@ public:
   CreateTranslationOptionCollection(ttasksptr const& ttask) const=0;
 
   //! return substring. Only valid for Sentence class. TODO - get rid of this fn
-  virtual Phrase GetSubString(const WordsRange&) const =0;
+  virtual Phrase GetSubString(const Range&) const =0;
 
   //! return substring at a particular position. Only valid for Sentence class. TODO - get rid of this fn
   virtual const Word& GetWord(size_t pos) const=0;

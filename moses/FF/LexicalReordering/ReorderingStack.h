@@ -12,7 +12,7 @@
 //#include "Phrase.h"
 //#include "TypeDef.h"
 //#include "Util.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 
 namespace Moses
 {
@@ -23,15 +23,17 @@ class ReorderingStack
 {
 private:
 
-  std::vector<WordsRange> m_stack;
+  std::vector<Range> m_stack;
 
 public:
 
-  int Compare(const ReorderingStack& o) const;
-  int ShiftReduce(WordsRange input_span);
+  size_t hash() const;
+  bool operator==(const ReorderingStack& other) const;
+
+  int ShiftReduce(Range input_span);
 
 private:
-  void Reduce(WordsRange input_span);
+  void Reduce(Range input_span);
 };
 
 

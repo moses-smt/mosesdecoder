@@ -68,6 +68,9 @@
 #include "ug_bitext_phrase_extraction_record.h"
 #include "moses/TranslationModel/UG/generic/threading/ug_ref_counter.h"
 
+// Minimum source count for caching phrase lookup statistics.
+// If source phrase occurs less frequently, never cache; 
+// always re-compute.
 #define PSTATS_CACHE_THRESHOLD 50
 
 namespace Moses { class Mmsapt; }
@@ -99,7 +102,7 @@ namespace sapt
   template<typename Token> class BitextSampler;
   
   template<typename TKN>
-  class Bitext : public Moses::reference_counter
+  class Bitext // : public Moses::reference_counter
   {
   public:
     template<typename Token> friend class BitextSampler;
@@ -164,7 +167,7 @@ namespace sapt
     prep2(ttasksptr const& ttask, iter const& phrase, int max_sample = -1) const;
 #endif 
 
-  public:
+  protected:
     Bitext(size_t const max_sample = 1000, size_t const xnum_workers = 16);
 
     Bitext(Ttrack<Token>* const t1, Ttrack<Token>* const t2,
@@ -173,7 +176,7 @@ namespace sapt
            TSA<Token>*    const i1, TSA<Token>*    const i2,
            size_t const max_sample=1000,
            size_t const xnum_workers=16);
-
+  public:
     virtual void
     open(std::string const base, std::string const L1, std::string const L2) = 0;
 
@@ -214,17 +217,42 @@ namespace sapt
     write_yawat_alignment
     ( id_type const sid, iter const* m1, iter const* m2, std::ostream& out ) const;
 
-    std::string docname(id_type const sid) const;
-
+    std::string sid2docname(id_type const sid) const;
+    std::string docid2name(id_type const sid) const;
+    int docname2docid(std::string const& name) const;
+    
     std::vector<id_type> const* sid2did() const;
+    int sid2did(uint32_t sid) const;
   };
 
   #include "ug_bitext_agenda.h"
 
   template<typename Token>
+  int
+  Bitext<Token>::
+  docname2docid(std::string const& name) const
+  {
+    std::map<std::string,id_type>::const_iterator m;
+    m = m_docname2docid.find(name);
+    if (m != m_docname2docid.end()) return m->second;
+    return -1;
+  }
+
+  template<typename Token>
   std::string
   Bitext<Token>::
-  docname(id_type const sid) const
+  docid2name(id_type const did) const
+  {
+    if (did < m_docname.size())
+      return m_docname[did];
+    else
+      return (boost::format("%d") % did).str();
+  }
+
+  template<typename Token>
+  std::string
+  Bitext<Token>::
+  sid2docname(id_type const sid) const
   {
     if (sid < m_sid2docid->size() && (*m_sid2docid)[sid] < m_docname.size())
       return m_docname[(*m_sid2docid)[sid]];
@@ -239,6 +267,17 @@ namespace sapt
   {
     return m_sid2docid.get();
   }
+
+  template<typename Token>
+  int
+  Bitext<Token>::
+  sid2did(uint32_t sid) const
+  {
+    if (m_sid2docid) 
+      return m_sid2docid->at(sid);
+    return -1;
+  }
+
 
   template<typename Token>
   SPTR<SentenceBias>
@@ -594,6 +633,9 @@ namespace sapt
           m_pp.update(a->first, m_other.sntStart(sid)+off, len, a->second);
           m_pp.good2 = max(uint32_t(m_pp.raw2 * float(m_pp.good1)/m_pp.raw1),
                            m_pp.joint);
+          // Poor man's early pruning: if p(f|e) or p(e|f) < 1/128, don't
+          // even consider the phrase pair, as it is unlikely to ever be 
+          // considered as a valid translation. 
           size_t J = m_pp.joint<<7; // hard coded threshold of 1/128
           if (m_pp.good1 > J || m_pp.good2 > J) continue;
           if (m_scorer)

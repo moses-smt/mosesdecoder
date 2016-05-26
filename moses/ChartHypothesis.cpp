@@ -37,10 +37,6 @@ using namespace std;
 namespace Moses
 {
 
-#ifdef USE_HYPO_POOL
-ObjectPool<ChartHypothesis> ChartHypothesis::s_objectPool("ChartHypothesis", 300000);
-#endif
-
 /** Create a hypothesis from a rule
  * \param transOpt wrapper around the rule
  * \param item @todo dunno
@@ -93,7 +89,7 @@ ChartHypothesis::~ChartHypothesis()
     ChartArcList::iterator iter;
     for (iter = m_arcList->begin() ; iter != m_arcList->end() ; ++iter) {
       ChartHypothesis *hypo = *iter;
-      Delete(hypo);
+      delete hypo;
     }
     m_arcList->clear();
 
@@ -106,7 +102,7 @@ ChartHypothesis::~ChartHypothesis()
  */
 void ChartHypothesis::GetOutputPhrase(Phrase &outPhrase) const
 {
-  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
+  FactorType placeholderFactor = StaticData::Instance().options()->input.placeholder_factor;
 
   for (size_t pos = 0; pos < GetCurrTargetPhrase().GetSize(); ++pos) {
     const Word &word = GetCurrTargetPhrase().GetWord(pos);
@@ -181,32 +177,6 @@ void ChartHypothesis::GetOutputPhrase(size_t leftRightMost, size_t numWords, Phr
   }
 }
 
-/** check, if two hypothesis can be recombined.
-    this is actually a sorting function that allows us to
-    keep an ordered list of hypotheses. This makes recombination
-    much quicker. Returns one of 3 possible values:
-      -1 = this < compare
-      +1 = this > compare
-      0	= this ==compare
- \param compare the other hypo to compare to
-*/
-int ChartHypothesis::RecombineCompare(const ChartHypothesis &compare) const
-{
-  int comp = 0;
-
-  for (unsigned i = 0; i < m_ffStates.size(); ++i) {
-    if (m_ffStates[i] == NULL || compare.m_ffStates[i] == NULL)
-      comp = m_ffStates[i] - compare.m_ffStates[i];
-    else
-      comp = m_ffStates[i]->Compare(*compare.m_ffStates[i]);
-
-    if (comp != 0)
-      return comp;
-  }
-
-  return 0;
-}
-
 /** calculate total score */
 void ChartHypothesis::EvaluateWhenApplied()
 {
@@ -237,7 +207,7 @@ void ChartHypothesis::EvaluateWhenApplied()
   // total scores from prev hypos
   for (std::vector<const ChartHypothesis*>::const_iterator iter = m_prevHypos.begin(); iter != m_prevHypos.end(); ++iter) {
     const ChartHypothesis &prevHypo = **iter;
-    m_totalScore += prevHypo.GetTotalScore();
+    m_totalScore += prevHypo.GetFutureScore();
   }
 }
 
@@ -271,7 +241,7 @@ void ChartHypothesis::AddArc(ChartHypothesis *loserHypo)
 // sorting helper
 struct CompareChartHypothesisTotalScore {
   bool operator()(const ChartHypothesis* hypo1, const ChartHypothesis* hypo2) const {
-    return hypo1->GetTotalScore() > hypo2->GetTotalScore();
+    return hypo1->GetFutureScore() > hypo2->GetFutureScore();
   }
 };
 
@@ -286,12 +256,12 @@ void ChartHypothesis::CleanupArcList()
    * However, may not be enough if only unique candidates are needed,
    * so we'll keep all of arc list if nedd distinct n-best list
    */
-  const StaticData &staticData = StaticData::Instance();
-  size_t nBestSize = staticData.options().nbest.nbest_size;
-  bool distinctNBest = (staticData.options().nbest.only_distinct
-                        || staticData.options().mbr.enabled
-                        || staticData.GetOutputSearchGraph()
-                        || staticData.GetOutputSearchGraphHypergraph());
+  AllOptions const& opts = *StaticData::Instance().options();
+  size_t nBestSize = opts.nbest.nbest_size;
+  bool distinctNBest = (opts.nbest.only_distinct
+                        || opts.mbr.enabled
+                        || opts.output.NeedSearchGraph()
+                        || !opts.output.SearchGraphHG.empty());
 
   if (!distinctNBest && m_arcList->size() > nBestSize) {
     // prune arc list only if there too many arcs
@@ -304,7 +274,7 @@ void ChartHypothesis::CleanupArcList()
     ChartArcList::iterator iter;
     for (iter = m_arcList->begin() + nBestSize ; iter != m_arcList->end() ; ++iter) {
       ChartHypothesis *arc = *iter;
-      ChartHypothesis::Delete(arc);
+      delete arc;
     }
     m_arcList->erase(m_arcList->begin() + nBestSize
                      , m_arcList->end());
@@ -325,6 +295,33 @@ void ChartHypothesis::SetWinningHypo(const ChartHypothesis *hypo)
   m_winningHypo = hypo;
 }
 
+size_t ChartHypothesis::hash() const
+{
+  size_t seed = 0;
+
+  // states
+  for (size_t i = 0; i < m_ffStates.size(); ++i) {
+    const FFState *state = m_ffStates[i];
+    size_t hash = state->hash();
+    boost::hash_combine(seed, hash);
+  }
+  return seed;
+
+}
+
+bool ChartHypothesis::operator==(const ChartHypothesis& other) const
+{
+  // states
+  for (size_t i = 0; i < m_ffStates.size(); ++i) {
+    const FFState &thisState = *m_ffStates[i];
+    const FFState &otherState = *other.m_ffStates[i];
+    if (thisState != otherState) {
+      return false;
+    }
+  }
+  return true;
+}
+
 TO_STRING_BODY(ChartHypothesis)
 
 // friend
@@ -339,7 +336,7 @@ std::ostream& operator<<(std::ostream& out, const ChartHypothesis& hypo)
     out << "->" << hypo.GetWinningHypothesis()->GetId();
   }
 
-  if (StaticData::Instance().GetIncludeLHSInSearchGraph()) {
+  if (hypo.GetManager().options()->output.include_lhs_in_search_graph) {
     out << " " << hypo.GetTargetLHS() << "=>";
   }
   out << " " << hypo.GetCurrTargetPhrase()
@@ -352,7 +349,7 @@ std::ostream& operator<<(std::ostream& out, const ChartHypothesis& hypo)
     out << " " << prevHypo.GetId();
   }
 
-  out << " [total=" << hypo.GetTotalScore() << "]";
+  out << " [total=" << hypo.GetFutureScore() << "]";
   out << " " << hypo.GetScoreBreakdown();
 
   //out << endl;

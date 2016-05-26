@@ -48,7 +48,7 @@ ChartRuleLookupManagerSkeleton::ChartRuleLookupManagerSkeleton(
 
 ChartRuleLookupManagerSkeleton::~ChartRuleLookupManagerSkeleton()
 {
-  RemoveAllInColl(m_tpColl);
+  // RemoveAllInColl(m_tpColl);
 }
 
 void ChartRuleLookupManagerSkeleton::GetChartRuleCollection(
@@ -58,10 +58,10 @@ void ChartRuleLookupManagerSkeleton::GetChartRuleCollection(
 {
   //m_tpColl.push_back(TargetPhraseCollection());
   //TargetPhraseCollection &tpColl = m_tpColl.back();
-  TargetPhraseCollection *tpColl = new TargetPhraseCollection();
+  TargetPhraseCollection::shared_ptr tpColl(new TargetPhraseCollection);
   m_tpColl.push_back(tpColl);
 
-  const WordsRange &range = inputPath.GetWordsRange();
+  const Range &range = inputPath.GetWordsRange();
 
   if (range.GetNumWordsCovered() == 1) {
     const ChartCellLabel &sourceWordLabel = GetSourceAt(range.GetStartPos());
@@ -73,7 +73,9 @@ void ChartRuleLookupManagerSkeleton::GetChartRuleCollection(
   outColl.Add(*tpColl, m_stackVec, range);
 }
 
-TargetPhrase *ChartRuleLookupManagerSkeleton::CreateTargetPhrase(const Word &sourceWord) const
+TargetPhrase *
+ChartRuleLookupManagerSkeleton::
+CreateTargetPhrase(const Word &sourceWord) const
 {
   // create a target phrase from the 1st word of the source, prefix with 'ChartManagerSkeleton:'
   string str = sourceWord.GetFactor(0)->GetString().as_string();

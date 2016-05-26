@@ -28,8 +28,8 @@ Bitext<Token>::agenda
       while (j->nextSample(sid,offset))
 	{
 	  aln.clear();
-	  int po_fwd = Moses::LRModel::NONE;
-	  int po_bwd = Moses::LRModel::NONE;
+	  int po_fwd = LRModel::NONE;
+	  int po_bwd = LRModel::NONE;
 	  int docid  = j->m_bias ? j->m_bias->GetClass(sid) : -1;
 	  bitvector* full_aln = j->fwd ? &full_alignment : NULL;
 

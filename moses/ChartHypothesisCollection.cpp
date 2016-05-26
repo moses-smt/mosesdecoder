@@ -26,6 +26,7 @@
 #include "ChartManager.h"
 #include "HypergraphOutput.h"
 #include "util/exception.hh"
+#include "parameters/AllOptions.h"
 
 using namespace std;
 using namespace Moses;
@@ -33,13 +34,13 @@ using namespace Moses;
 namespace Moses
 {
 
-ChartHypothesisCollection::ChartHypothesisCollection()
+ChartHypothesisCollection::ChartHypothesisCollection(AllOptions const& opts)
 {
-  const StaticData &staticData = StaticData::Instance();
+  // const StaticData &staticData = StaticData::Instance();
 
-  m_beamWidth = staticData.GetBeamWidth();
-  m_maxHypoStackSize = staticData.options().search.stack_size;
-  m_nBestIsEnabled = staticData.options().nbest.enabled;
+  m_beamWidth = opts.search.beam_width; // staticData.GetBeamWidth();
+  m_maxHypoStackSize = opts.search.stack_size; // staticData.options().search.stack_size;
+  m_nBestIsEnabled = opts.nbest.enabled; // staticData.options().nbest.enabled;
   m_bestScore = -std::numeric_limits<float>::infinity();
 }
 
@@ -48,7 +49,7 @@ ChartHypothesisCollection::~ChartHypothesisCollection()
   HCType::iterator iter;
   for (iter = m_hypos.begin() ; iter != m_hypos.end() ; ++iter) {
     ChartHypothesis *hypo = *iter;
-    ChartHypothesis::Delete(hypo);
+    delete hypo;
   }
   //RemoveAllInColl(m_hypos);
 }
@@ -62,18 +63,18 @@ ChartHypothesisCollection::~ChartHypothesisCollection()
  */
 bool ChartHypothesisCollection::AddHypothesis(ChartHypothesis *hypo, ChartManager &manager)
 {
-  if (hypo->GetTotalScore() == - std::numeric_limits<float>::infinity()) {
+  if (hypo->GetFutureScore() == - std::numeric_limits<float>::infinity()) {
     manager.GetSentenceStats().AddDiscarded();
     VERBOSE(3,"discarded, -inf score" << std::endl);
-    ChartHypothesis::Delete(hypo);
+    delete hypo;
     return false;
   }
 
-  if (hypo->GetTotalScore() < m_bestScore + m_beamWidth) {
+  if (hypo->GetFutureScore() < m_bestScore + m_beamWidth) {
     // really bad score. don't bother adding hypo into collection
     manager.GetSentenceStats().AddDiscarded();
     VERBOSE(3,"discarded, too bad for stack" << std::endl);
-    ChartHypothesis::Delete(hypo);
+    delete hypo;
     return false;
   }
 
@@ -96,7 +97,7 @@ bool ChartHypothesisCollection::AddHypothesis(ChartHypothesis *hypo, ChartManage
 
   // found existing hypo with same target ending.
   // keep the best 1
-  if (hypo->GetTotalScore() > hypoExisting->GetTotalScore()) {
+  if (hypo->GetFutureScore() > hypoExisting->GetFutureScore()) {
     // incoming hypo is better than the one we have
     VERBOSE(3,"better than matching hyp " << hypoExisting->GetId() << ", recombining, ");
     if (m_nBestIsEnabled) {
@@ -118,7 +119,7 @@ bool ChartHypothesisCollection::AddHypothesis(ChartHypothesis *hypo, ChartManage
     if (m_nBestIsEnabled) {
       hypoExisting->AddArc(hypo);
     } else {
-      ChartHypothesis::Delete(hypo);
+      delete hypo;
     }
     return false;
   }
@@ -137,9 +138,9 @@ pair<ChartHypothesisCollection::HCType::iterator, bool> ChartHypothesisCollectio
     VERBOSE(3,"added hyp to stack");
 
     // Update best score, if this hypothesis is new best
-    if (hypo->GetTotalScore() > m_bestScore) {
+    if (hypo->GetFutureScore() > m_bestScore) {
       VERBOSE(3,", best on stack");
-      m_bestScore = hypo->GetTotalScore();
+      m_bestScore = hypo->GetFutureScore();
     }
 
     // Prune only if stack is twice as big as needed (lazy pruning)
@@ -167,22 +168,8 @@ void ChartHypothesisCollection::Detach(const HCType::iterator &iter)
 void ChartHypothesisCollection::Remove(const HCType::iterator &iter)
 {
   ChartHypothesis *h = *iter;
-
-  /*
-   stringstream strme("");
-   strme << h->GetOutputPhrase();
-   string toFind = "the goal of gene scientists is ";
-   size_t pos = toFind.find(strme.str());
-
-   if (pos == 0)
-   {
-   cerr << pos << " " << strme.str() << *h << endl;
-   cerr << *this << endl;
-   }
-   */
-
   Detach(iter);
-  ChartHypothesis::Delete(h);
+  delete h;
 }
 
 /** prune number of hypo to a particular number of hypos, specified by m_maxHypoStackSize, according to score
@@ -202,7 +189,7 @@ void ChartHypothesisCollection::PruneToSize(ChartManager &manager)
     float score = 0;
     while (iter != m_hypos.end()) {
       ChartHypothesis *hypo = *iter;
-      score = hypo->GetTotalScore();
+      score = hypo->GetFutureScore();
       if (score > m_bestScore+m_beamWidth) {
         bestScores.push(score);
       }
@@ -222,7 +209,7 @@ void ChartHypothesisCollection::PruneToSize(ChartManager &manager)
     iter = m_hypos.begin();
     while (iter != m_hypos.end()) {
       ChartHypothesis *hypo = *iter;
-      float score = hypo->GetTotalScore();
+      float score = hypo->GetFutureScore();
       if (score < scoreThreshold) {
         HCType::iterator iterRemove = iter++;
         Remove(iterRemove);
@@ -237,7 +224,7 @@ void ChartHypothesisCollection::PruneToSize(ChartManager &manager)
       TRACE_ERR("stack now contains: ");
       for(iter = m_hypos.begin(); iter != m_hypos.end(); iter++) {
         ChartHypothesis *hypo = *iter;
-        TRACE_ERR( hypo->GetId() << " (" << hypo->GetTotalScore() << ") ");
+        TRACE_ERR( hypo->GetId() << " (" << hypo->GetFutureScore() << ") ");
       }
       TRACE_ERR( endl);
     }

@@ -9,6 +9,26 @@
 namespace Moses
 {
 
+//global variable
+Timer g_timer;
+
+
+void ResetUserTime()
+{
+  g_timer.start();
+};
+
+void PrintUserTime(const std::string &message)
+{
+  g_timer.check(message.c_str());
+}
+
+double GetUserTime()
+{
+  return g_timer.get_elapsed_time();
+}
+
+
 /***
  * Return the total wall time that the timer has been in the "running"
  * state since it was first "started".

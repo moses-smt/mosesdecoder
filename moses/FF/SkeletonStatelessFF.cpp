@@ -16,7 +16,7 @@ SkeletonStatelessFF::SkeletonStatelessFF(const std::string &line)
 void SkeletonStatelessFF::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScores) const
 {
   // dense scores
   vector<float> newScores(m_numScoreComponents);
@@ -34,7 +34,7 @@ void SkeletonStatelessFF::EvaluateWithSourceContext(const InputType &input
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {
   if (targetPhrase.GetNumNonTerminals()) {
     vector<float> newScores(m_numScoreComponents);

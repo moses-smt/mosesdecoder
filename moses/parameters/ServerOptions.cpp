@@ -1,4 +1,4 @@
-// -*- mode: c++; cc-style: gnu -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 #include "ServerOptions.h"
 #include <boost/foreach.hpp>
 #include <string>
@@ -35,6 +35,20 @@ parse_timespec(std::string const& spec)
 }
 
 ServerOptions::
+ServerOptions()
+  : is_serial(false)
+  , numThreads(15) // why 15?
+  , sessionTimeout(1800) // = 30 min
+  , sessionCacheSize(25)
+  , port(8080)
+  , maxConn(15)
+  , maxConnBacklog(15)
+  , keepaliveTimeout(15)
+  , keepaliveMaxConn(30)
+  , timeout(15)
+{ }
+
+ServerOptions::
 ServerOptions(Parameter const& P)
 { 
   init(P);
@@ -44,14 +58,26 @@ bool
 ServerOptions::
 init(Parameter const& P)
 {
+  // Settings for the abyss server
   P.SetParameter(this->port, "server-port", 8080);
   P.SetParameter(this->is_serial, "serial", false);
   P.SetParameter(this->logfile, "server-log", std::string("/dev/null"));
-  P.SetParameter(this->num_threads, "threads", uint32_t(10));
-  P.SetParameter(this->session_cache_size, "session-cache_size",25UL);
+  P.SetParameter(this->numThreads, "threads", uint32_t(15));
+
+  // defaults reflect recommended defaults (according to Hieu)
+  // -> http://xmlrpc-c.sourceforge.net/doc/libxmlrpc_server_abyss.html#max_conn
+  P.SetParameter(this->maxConn,"server-maxconn", 15);
+  P.SetParameter(this->maxConnBacklog,"server-maxconn-backlog", 15);
+  P.SetParameter(this->keepaliveTimeout,"server-keepalive-timeout", 15);
+  P.SetParameter(this->keepaliveMaxConn,"server-keepalive-maxconn", 30);
+  P.SetParameter(this->timeout,"server-timeout",15);
+
+  // the stuff below is related to Moses translation sessions
   std::string timeout_spec;
   P.SetParameter(timeout_spec, "session-timeout",std::string("30m"));
-  this->session_timeout = parse_timespec(timeout_spec);
+  this->sessionTimeout = parse_timespec(timeout_spec);
+  P.SetParameter(this->sessionCacheSize, "session-cache_size", size_t(25));
+
   return true;
 }
 } // namespace Moses

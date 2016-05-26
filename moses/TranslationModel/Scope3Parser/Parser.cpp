@@ -43,11 +43,12 @@ void Scope3Parser::GetChartRuleCollection(
   size_t last,
   ChartParserCallback &outColl)
 {
-  const WordsRange &range = inputPath.GetWordsRange();
+  const Range &range = inputPath.GetWordsRange();
   const size_t start = range.GetStartPos();
   const size_t end = range.GetEndPos();
 
-  std::vector<std::pair<const UTrieNode *, const VarSpanNode *> > &pairVec = m_ruleApplications[start][end-start+1];
+  std::vector<std::pair<const UTrieNode *, const VarSpanNode *> > &pairVec
+  = m_ruleApplications[start][end-start+1];
 
   MatchCallback matchCB(range, outColl);
   for (std::vector<std::pair<const UTrieNode *, const VarSpanNode *> >::const_iterator p = pairVec.begin(); p != pairVec.end(); ++p) {
@@ -58,8 +59,8 @@ void Scope3Parser::GetChartRuleCollection(
 
     if (varSpanNode.m_rank == 0) {  // Purely lexical rule.
       assert(labelMap.size() == 1);
-      const TargetPhraseCollection &tpc = labelMap.begin()->second;
-      matchCB.m_tpc = &tpc;
+      TargetPhraseCollection::shared_ptr tpc = labelMap.begin()->second;
+      matchCB.m_tpc = tpc;
       matchCB(m_emptyStackVec);
     } else {  // Rule has at least one non-terminal.
       varSpanNode.CalculateRanges(start, end, m_ranges);
@@ -70,7 +71,7 @@ void Scope3Parser::GetChartRuleCollection(
       UTrieNode::LabelMap::const_iterator p = labelMap.begin();
       for (; p != labelMap.end(); ++p) {
         const std::vector<int> &labels = p->first;
-        const TargetPhraseCollection &tpc = p->second;
+        TargetPhraseCollection::shared_ptr tpc = p->second;
         assert(labels.size() == varSpanNode.m_rank);
         bool failCheck = false;
         for (size_t i = 0; i < varSpanNode.m_rank; ++i) {
@@ -82,7 +83,7 @@ void Scope3Parser::GetChartRuleCollection(
         if (failCheck) {
           continue;
         }
-        matchCB.m_tpc = &tpc;
+        matchCB.m_tpc = tpc;
         searcher.Search(labels, matchCB);
       }
     }

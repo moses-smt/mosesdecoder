@@ -5,6 +5,7 @@
 #include "moses/TranslationAnalysis.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
+#include "moses/Timer.h"
 #include "moses/InputType.h"
 #include "moses/OutputCollector.h"
 #include "moses/Incremental.h"
@@ -30,37 +31,12 @@ GetContextWindow() const
   return m_context;
 }
 
-std::map<std::string, float> const&
-TranslationTask::GetContextWeights() const
-{
-  return m_context_weights;
-}
-
-void
-TranslationTask
-::ReSetContextWeights(std::map<std::string, float> const& new_weights)
-{
-  m_context_weights = new_weights;
-}
-
 void
 TranslationTask::
 SetContextWindow(boost::shared_ptr<std::vector<std::string> > const& cw)
 {
   m_context = cw;
 }
-
-void
-TranslationTask::
-SetContextWeights(std::string const& context_weights)
-{
-  std::vector<std::string> tokens = Tokenize(context_weights,":");
-  for (std::vector<std::string>::iterator it = tokens.begin(); it != tokens.end(); it++) {
-    std::vector<std::string> key_and_value = Tokenize(*it, ",");
-    m_context_weights.insert(std::pair<std::string, float>(key_and_value[0], atof(key_and_value[1].c_str())));
-  }
-}
-
 
 boost::shared_ptr<TranslationTask>
 TranslationTask
@@ -101,7 +77,7 @@ TranslationTask
                   boost::shared_ptr<IOWrapper> const& ioWrapper)
   : m_source(source) , m_ioWrapper(ioWrapper)
 {
-  m_options = StaticData::Instance().options();
+  m_options = source->options();
 }
 
 TranslationTask::~TranslationTask()
@@ -113,8 +89,8 @@ TranslationTask
 ::SetupManager(SearchAlgorithm algo)
 {
   boost::shared_ptr<BaseManager> manager;
-  StaticData const& staticData = StaticData::Instance();
-  if (algo == DefaultSearchAlgorithm) algo = staticData.options().search.algo;
+  // StaticData const& staticData = StaticData::Instance();
+  // if (algo == DefaultSearchAlgorithm) algo = staticData.options().search.algo;
 
   if (!is_syntax(algo))
     manager.reset(new Manager(this->self())); // phrase-based
@@ -128,7 +104,7 @@ TranslationTask
 
   else if (algo == SyntaxS2T) {
     // new-style string-to-tree decoding (ask Phil Williams)
-    S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();
+    S2TParsingAlgorithm algorithm = m_options->syntax.s2t_parsing_algo;
     if (algorithm == RecursiveCYKPlus) {
       typedef Syntax::S2T::EagerParserCallback Callback;
       typedef Syntax::S2T::RecursiveCYKPlusParser<Callback> Parser;
@@ -156,12 +132,30 @@ TranslationTask
   return manager;
 }
 
-AllOptions const&
+AllOptions::ptr const&
 TranslationTask::
 options() const
 {
   return m_options;
 }
+
+/// parse document-level translation info stored on the input
+void
+TranslationTask::
+interpret_dlt()
+{
+  if (m_source->GetType() != SentenceInput) return;
+  Sentence const& snt = static_cast<Sentence const&>(*m_source);
+  typedef std::map<std::string,std::string> dltmap_t;
+  BOOST_FOREACH(dltmap_t const& M, snt.GetDltMeta()) {
+    dltmap_t::const_iterator i = M.find("type");
+    if (i == M.end() || i->second != "adaptive-lm") continue;
+    dltmap_t::const_iterator j = M.find("context-weights");
+    if (j == M.end()) continue;
+    m_scope->SetContextWeights(j->second);
+  }
+}
+
 
 void TranslationTask::Run()
 {
@@ -169,17 +163,19 @@ void TranslationTask::Run()
                  "Base Instances of TranslationTask must be initialized with"
                  << " input and iowrapper.");
 
-
-  // shorthand for "global data"
   const size_t translationId = m_source->GetTranslationId();
+
 
   // report wall time spent on translation
   Timer translationTime;
   translationTime.start();
 
+  interpret_dlt(); // parse document-level translation info stored on the input
+
   // report thread number
 #if defined(WITH_THREADS) && defined(BOOST_HAS_PTHREADS)
-  VERBOSE(2, "Translating line " << translationId << "  in thread id " << pthread_self() << endl);
+  VERBOSE(2, "Translating line " << translationId << "  in thread id "
+          << pthread_self() << endl);
 #endif
 
 
@@ -189,7 +185,7 @@ void TranslationTask::Run()
   Timer initTime;
   initTime.start();
 
-  boost::shared_ptr<BaseManager> manager = SetupManager();
+  boost::shared_ptr<BaseManager> manager = SetupManager(m_options->search.algo);
 
   VERBOSE(1, "Line " << translationId << ": Initialize search took "
           << initTime << " seconds total" << endl);
@@ -207,8 +203,8 @@ void TranslationTask::Run()
   OutputCollector* ocoll;
   Timer additionalReportingTime;
   additionalReportingTime.start();
-
   boost::shared_ptr<IOWrapper> const& io = m_ioWrapper;
+
   manager->OutputBest(io->GetSingleBestOutputCollector());
 
   // output word graph
@@ -222,7 +218,7 @@ void TranslationTask::Run()
 
   // Output search graph in hypergraph format for Kenneth Heafield's
   // lazy hypergraph decoder; writes to stderr
-  if (StaticData::Instance().GetOutputSearchGraphHypergraph()) {
+  if (m_options->output.SearchGraphHG.size()) {
     size_t transId = manager->GetSource().GetTranslationId();
     string fname = io->GetHypergraphOutputFileName(transId);
     manager->OutputSearchGraphAsHypergraph(fname, PRECISION);

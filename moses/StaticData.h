@@ -72,9 +72,8 @@ private:
   static StaticData s_instance;
 protected:
   Parameter *m_parameter;
-  AllOptions m_options;
+  boost::shared_ptr<AllOptions> m_options;
 
-  std::vector<FactorType>	m_inputFactorOrder, m_outputFactorOrder;
   mutable ScoreComponentCollection m_allWeights;
 
   std::vector<DecodeGraph*> m_decodeGraphs;
@@ -82,9 +81,6 @@ protected:
   // Initial	= 0 = can be used when creating poss trans
   // Other		= 1 = used to calculate LM score once all steps have been processed
   float
-  // m_beamWidth,
-  // m_earlyDiscardingThreshold,
-  // m_translationOptionThreshold,
   m_wordDeletionWeight;
 
 
@@ -94,106 +90,28 @@ protected:
   // -ve	= no limit on distortion
   // 0		= no disortion (monotone in old pharaoh)
   bool m_reorderingConstraint; //! use additional reordering constraints
-  // bool m_useEarlyDistortionCost;
-  // size_t m_maxHypoStackSize; //! hypothesis-stack size that triggers pruning
-  // size_t m_minHypoStackDiversity; //! minimum number of hypothesis in stack for each source word coverage;
   BookkeepingOptions m_bookkeeping_options;
 
-  size_t m_latticeSamplesSize;
-  // size_t m_maxNoTransOptPerCoverage;
-  // size_t m_maxNoPartTransOpt;
-  // size_t m_maxPhraseLength;
 
-  std::string  m_latticeSamplesFilePath;
-  bool m_dropUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = drop (ignore) them
-  bool m_markUnknown; //! false = treat unknown words as unknowns, and translate them as themselves; true = mark and (ignore) them
-  std::string m_unknownWordPrefix;
-  std::string m_unknownWordSuffix;
-  bool m_wordDeletionEnabled;
-
-  bool m_disableDiscarding;
-  bool m_printAllDerivations;
-  bool m_printTranslationOptions;
-
-  bool m_sourceStartPosMattersForRecombination;
-  bool m_recoverPath;
-  bool m_outputHypoScore;
   bool m_requireSortingAfterSourceContext;
-
-  // SearchAlgorithm m_searchAlgorithm;
-  InputTypeEnum m_inputType;
 
   mutable size_t m_verboseLevel;
 
-  bool m_reportSegmentation;
-  bool m_reportSegmentationEnriched;
-  bool m_reportAllFactors;
-  std::string m_detailedTranslationReportingFilePath;
-  std::string m_detailedTreeFragmentsTranslationReportingFilePath;
-
-  std::string m_detailedAllTranslationReportingFilePath;
-
-  bool m_PrintAlignmentInfo;
-
-  bool m_PrintID;
-  bool m_PrintPassthroughInformation;
-
-  std::string m_alignmentOutputFile;
-
   std::string m_factorDelimiter; //! by default, |, but it can be changed
 
-  XmlInputType m_xmlInputType; //! method for handling sentence XML input
-  std::pair<std::string,std::string> m_xmlBrackets; //! strings to use as XML tags' opening and closing brackets. Default are "<" and ">"
-
-  // bool m_mbr; //! use MBR decoder
-  // bool m_useLatticeMBR; //! use MBR decoder
-  // bool m_mira; // do mira training
-  // bool m_useConsensusDecoding; //! Use Consensus decoding  (DeNero et al 2009)
-  // size_t m_mbrSize; //! number of translation candidates considered
-  // float m_mbrScale; //! scaling factor for computing marginal probability of candidate translation
-  // size_t m_lmbrPruning; //! average number of nodes per word wanted in pruned lattice
-  // std::vector<float> m_lmbrThetas; //! theta(s) for lattice mbr calculation
-  // bool m_useLatticeHypSetForLatticeMBR; //! to use nbest as hypothesis set during lattice MBR
-  // float m_lmbrPrecision; //! unigram precision theta - see Tromble et al 08 for more details
-  // float m_lmbrPRatio; //! decaying factor for ngram thetas - see Tromble et al 08 for more details
-  // float m_lmbrMapWeight; //! Weight given to the map solution. See Kumar et al 09 for details
 
   size_t m_lmcache_cleanup_threshold; //! number of translations after which LM claenup is performed (0=never, N=after N translations; default is 1)
-  bool m_lmEnableOOVFeature;
 
-  // bool m_timeout; //! use timeout
-  // size_t m_timeout_threshold; //! seconds after which time out is activated
-
-  bool m_isAlwaysCreateDirectTranslationOption;
-  //! constructor. only the 1 static variable can be created
-
-  bool m_outputWordGraph; //! whether to output word graph
-  bool m_outputSearchGraph; //! whether to output search graph
-  bool m_outputSearchGraphExtended; //! ... in extended format
-  bool m_outputSearchGraphSLF; //! whether to output search graph in HTK standard lattice format (SLF)
-  bool m_outputSearchGraphHypergraph; //! whether to output search graph in hypergraph
-#ifdef HAVE_PROTOBUF
-  bool m_outputSearchGraphPB; //! whether to output search graph as a protobuf
-#endif
-  bool m_unprunedSearchGraph; //! do not exclude dead ends (chart decoder only)
-  bool m_includeLHSInSearchGraph; //! include LHS of rules in search graph
   std::string m_outputUnknownsFile; //! output unknowns in this file
-
-  size_t m_ruleLimit;
-
-  // Whether to load compact phrase table and reordering table into memory
-  bool m_minphrMemory;
-  bool m_minlexrMemory;
 
   // Initial = 0 = can be used when creating poss trans
   // Other = 1 = used to calculate LM score once all steps have been processed
   Word m_inputDefaultNonTerminal, m_outputDefaultNonTerminal;
   SourceLabelOverlap m_sourceLabelOverlap;
   UnknownLHSList m_unknownLHS;
-  WordAlignmentSort m_wordAlignmentSort;
 
   int m_threadCount;
-  long m_startTranslationId;
+  // long m_startTranslationId;
 
   // alternate weight settings
   mutable std::string m_currentWeightSetting;
@@ -201,10 +119,9 @@ protected:
   std::map< std::string, std::set< std::string > > m_weightSettingIgnoreFF; // feature function
   std::map< std::string, std::set< size_t > > m_weightSettingIgnoreDP; // decoding path
 
-  FactorType m_placeHolderFactor;
   bool m_useLegacyPT;
-  bool m_defaultNonTermOnlyForEmptyRange;
-  S2TParsingAlgorithm m_s2tParsingAlgorithm;
+  // bool m_defaultNonTermOnlyForEmptyRange;
+  // S2TParsingAlgorithm m_s2tParsingAlgorithm;
 
   FeatureRegistry m_registry;
   PhrasePropertyFactory m_phrasePropertyFactory;
@@ -216,12 +133,13 @@ protected:
 
   //! load decoding steps
   void LoadDecodeGraphs();
-  void LoadDecodeGraphsOld(const std::vector<std::string> &mappingVector, const std::vector<size_t> &maxChartSpans);
-  void LoadDecodeGraphsNew(const std::vector<std::string> &mappingVector, const std::vector<size_t> &maxChartSpans);
+  void LoadDecodeGraphsOld(const std::vector<std::string> &mappingVector,
+                           const std::vector<size_t> &maxChartSpans);
+  void LoadDecodeGraphsNew(const std::vector<std::string> &mappingVector,
+                           const std::vector<size_t> &maxChartSpans);
 
   void NoCache();
 
-  bool m_continuePartialTranslation;
   std::string m_binPath;
 
   // soft NT lookup for chart models
@@ -229,33 +147,13 @@ protected:
 
   const StatefulFeatureFunction* m_treeStructure;
 
-  // number of nonterminal labels
-//   size_t m_nonTerminalSize;
-
-
-  void ini_compact_table_options();
-  void ini_consensus_decoding_options();
-  void ini_cube_pruning_options();
-  void ini_distortion_options();
-  void ini_factor_maps();
-  void ini_input_options();
-  void ini_lm_options();
-  void ini_lmbr_options();
-  void ini_mbr_options();
-  void ini_mira_options();
   void ini_oov_options();
   bool ini_output_options();
   bool ini_performance_options();
-  void ini_phrase_lookup_options();
-  bool ini_stack_decoding_options();
-  void ini_zombie_options();
 
   void initialize_features();
 public:
 
-  bool IsAlwaysCreateDirectTranslationOption() const {
-    return m_isAlwaysCreateDirectTranslationOption;
-  }
   //! destructor
   ~StaticData();
 
@@ -278,7 +176,8 @@ public:
   }
 #endif
 
-  //! Load data into static instance. This function is required as LoadData() is not const
+  //! Load data into static instance. This function is required as
+  //  LoadData() is not const
   static bool LoadDataStatic(Parameter *parameter, const std::string &execPath);
 
   //! Main function to load everything. Also initialize the Parameter object
@@ -289,195 +188,19 @@ public:
     return *m_parameter;
   }
 
-  AllOptions const&
-  options() const {
+  AllOptions::ptr const
+    options() const {
     return m_options;
   }
 
-  AllOptions&
-  options() {
-    return m_options;
-  }
-
-  const std::vector<FactorType> &GetInputFactorOrder() const {
-    return m_inputFactorOrder;
-  }
-  const std::vector<FactorType> &GetOutputFactorOrder() const {
-    return m_outputFactorOrder;
-  }
-
-  inline bool GetSourceStartPosMattersForRecombination() const {
-    return m_sourceStartPosMattersForRecombination;
-  }
-  inline bool GetDropUnknown() const {
-    return m_dropUnknown;
-  }
-  inline bool GetMarkUnknown() const {
-    return m_markUnknown;
-  }
-  inline std::string GetUnknownWordPrefix() const {
-    return m_unknownWordPrefix;
-  }
-  inline std::string GetUnknownWordSuffix() const {
-    return m_unknownWordSuffix;
-  }
-  inline bool GetDisableDiscarding() const {
-    return m_disableDiscarding;
-  }
-  inline size_t GetMaxNoTransOptPerCoverage() const {
-    return m_options.search.max_trans_opt_per_cov;
-  }
-  inline size_t GetMaxNoPartTransOpt() const {
-    return m_options.search.max_partial_trans_opt;
-  }
-  inline size_t GetMaxPhraseLength() const {
-    return m_options.search.max_phrase_length;
-  }
-  bool IsWordDeletionEnabled() const {
-    return m_wordDeletionEnabled;
-  }
-  // size_t GetMaxHypoStackSize() const {
-  //   return m_options.search.stack_size;
-  // }
-  // size_t GetMinHypoStackDiversity() const {
-  //   return m_options.search.stack_diversity;
-  // }
-
-  size_t IsPathRecoveryEnabled() const {
-    return m_recoverPath;
-  }
-  bool IsIDEnabled() const {
-    return m_PrintID;
-  }
-  bool IsPassthroughEnabled() const {
-    return m_PrintPassthroughInformation;
-  }
-
-  int GetMaxDistortion() const {
-    return m_options.reordering.max_distortion;
-  }
-  bool UseReorderingConstraint() const {
-    return m_reorderingConstraint;
-  }
-  float GetBeamWidth() const {
-    return m_options.search.beam_width;
-  }
-  float GetEarlyDiscardingThreshold() const {
-    return m_options.search.early_discarding_threshold;
-  }
-
-  bool UseEarlyDiscarding() const {
-    return m_options.search.early_discarding_threshold
-           != -std::numeric_limits<float>::infinity();
-  }
-  bool UseEarlyDistortionCost() const {
-    return m_options.reordering.use_early_distortion_cost;
-    // return m_useEarlyDistortionCost;
-  }
-  float GetTranslationOptionThreshold() const {
-    return m_options.search.trans_opt_threshold;
-  }
-
-  size_t GetVerboseLevel() const {
+  size_t
+  GetVerboseLevel() const {
     return m_verboseLevel;
   }
-  void SetVerboseLevel(int x) const {
+
+  void
+  SetVerboseLevel(int x) const {
     m_verboseLevel = x;
-  }
-  char GetReportSegmentation() const {
-    if (m_reportSegmentation) return 1;
-    if (m_reportSegmentationEnriched) return 2;
-    return 0;
-  }
-  void SetReportSegmentation(const int &val) {
-    if (val == 0)
-      m_reportSegmentation = m_reportSegmentationEnriched = false;
-    else if (val == 1)
-      m_reportSegmentation = true;
-    else if (val == 2)
-      m_reportSegmentationEnriched = true;
-    else
-      std::cerr << "Warning: Invalid value for reportSegmentation (0 - 2)!  Ignoring";
-  }
-
-  bool GetReportAllFactors() const {
-    return m_reportAllFactors;
-  }
-
-  bool IsDetailedTranslationReportingEnabled() const {
-    return !m_detailedTranslationReportingFilePath.empty();
-  }
-
-  bool IsDetailedAllTranslationReportingEnabled() const {
-    return !m_detailedAllTranslationReportingFilePath.empty();
-  }
-
-  const std::string &GetDetailedTranslationReportingFilePath() const {
-    return m_detailedTranslationReportingFilePath;
-  }
-  bool IsDetailedTreeFragmentsTranslationReportingEnabled() const {
-    return !m_detailedTreeFragmentsTranslationReportingFilePath.empty();
-  }
-  const std::string &GetDetailedTreeFragmentsTranslationReportingFilePath() const {
-    return m_detailedTreeFragmentsTranslationReportingFilePath;
-  }
-
-  // bool IsLabeledNBestList() const {
-  //   return m_options.nbest.include_feature_labels;
-  // }
-
-  bool UseMinphrInMemory() const {
-    return m_minphrMemory;
-  }
-
-  bool UseMinlexrInMemory() const {
-    return m_minlexrMemory;
-  }
-
-  // for mert
-  // size_t GetNBestSize() const {
-  //   return m_options.nbest.nbest_size;
-  // }
-
-  // const std::string &GetNBestFilePath() const {
-  //   return m_options.nbest.output_file_path;
-  // }
-
-  // bool IsNBestEnabled() const {
-  //   return m_options.nbest.enabled;
-  // }
-
-  size_t GetLatticeSamplesSize() const {
-    return m_latticeSamplesSize;
-  }
-
-  const std::string& GetLatticeSamplesFilePath() const {
-    return m_latticeSamplesFilePath;
-  }
-
-  // size_t GetNBestFactor() const {
-  //   return m_options.nbest.factor;
-  // }
-  bool GetOutputWordGraph() const {
-    return m_outputWordGraph;
-  }
-
-  //! Sets the global score vector weights for a given FeatureFunction.
-  InputTypeEnum GetInputType() const {
-    return m_inputType;
-  }
-
-  // SearchAlgorithm GetSearchAlgorithm() const {
-  //   return m_searchAlgorithm;
-  // }
-
-  bool IsSyntax(SearchAlgorithm algo = DefaultSearchAlgorithm) const {
-    if (algo == DefaultSearchAlgorithm)
-      algo = m_options.search.algo;
-
-    return (algo == CYKPlus   || algo == ChartIncremental ||
-            algo == SyntaxS2T || algo == SyntaxT2S ||
-            algo == SyntaxF2S || algo == SyntaxT2S_SCFG);
   }
 
   const ScoreComponentCollection&
@@ -506,152 +229,24 @@ public:
   //Weights for feature with fixed number of values
   void SetWeights(const FeatureFunction* sp, const std::vector<float>& weights);
 
-  // bool GetDistinctNBest() const {
-  //   return m_options.nbest.only_distinct;
-  // }
   const std::string& GetFactorDelimiter() const {
     return m_factorDelimiter;
   }
-  // bool UseMBR() const {
-  //   return m_mbr;
-  // }
-  // bool UseLatticeMBR() const {
-  //   return m_useLatticeMBR ;
-  // }
-  // bool UseConsensusDecoding() const {
-  //   return m_useConsensusDecoding;
-  // }
-  // void SetUseLatticeMBR(bool flag) {
-  //   m_useLatticeMBR = flag;
-  // }
-  // size_t GetMBRSize() const {
-  //   return m_mbrSize;
-  // }
-  // float GetMBRScale() const {
-  //   return m_mbrScale;
-  // }
-  // void SetMBRScale(float scale) {
-  //   m_mbrScale = scale;
-  // }
-  // size_t GetLatticeMBRPruningFactor() const {
-  //   return m_lmbrPruning;
-  // }
-  // void SetLatticeMBRPruningFactor(size_t prune) {
-  //   m_lmbrPruning = prune;
-  // }
-  // const std::vector<float>& GetLatticeMBRThetas() const {
-  //   return m_lmbrThetas;
-  // }
-  // bool  UseLatticeHypSetForLatticeMBR() const {
-  //   return m_useLatticeHypSetForLatticeMBR;
-  // }
-  // float GetLatticeMBRPrecision() const {
-  //   return m_lmbrPrecision;
-  // }
-  // void SetLatticeMBRPrecision(float p) {
-  //   m_lmbrPrecision = p;
-  // }
-  // float GetLatticeMBRPRatio() const {
-  //   return m_lmbrPRatio;
-  // }
-  // void SetLatticeMBRPRatio(float r) {
-  //   m_lmbrPRatio = r;
-  // }
-
-  // float GetLatticeMBRMapWeight() const {
-  //   return m_lmbrMapWeight;
-  // }
-
-  // bool UseTimeout() const {
-  //   return m_timeout;
-  // }
-  // size_t GetTimeoutThreshold() const {
-  //   return m_timeout_threshold;
-  // }
 
   size_t GetLMCacheCleanupThreshold() const {
     return m_lmcache_cleanup_threshold;
   }
 
-  bool GetLMEnableOOVFeature() const {
-    return m_lmEnableOOVFeature;
-  }
-
-  bool GetOutputSearchGraph() const {
-    return m_outputSearchGraph;
-  }
-  void SetOutputSearchGraph(bool outputSearchGraph) {
-    m_outputSearchGraph = outputSearchGraph;
-  }
-  bool GetOutputSearchGraphExtended() const {
-    return m_outputSearchGraphExtended;
-  }
-  bool GetOutputSearchGraphSLF() const {
-    return m_outputSearchGraphSLF;
-  }
-  bool GetOutputSearchGraphHypergraph() const {
-    return m_outputSearchGraphHypergraph;
-  }
-#ifdef HAVE_PROTOBUF
-  bool GetOutputSearchGraphPB() const {
-    return m_outputSearchGraphPB;
-  }
-#endif
   const std::string& GetOutputUnknownsFile() const {
     return m_outputUnknownsFile;
-  }
-
-  bool GetUnprunedSearchGraph() const {
-    return m_unprunedSearchGraph;
-  }
-
-  bool GetIncludeLHSInSearchGraph() const {
-    return m_includeLHSInSearchGraph;
-  }
-
-  XmlInputType GetXmlInputType() const {
-    return m_xmlInputType;
-  }
-
-  std::pair<std::string,std::string> GetXmlBrackets() const {
-    return m_xmlBrackets;
-  }
-
-  bool PrintTranslationOptions() const {
-    return m_printTranslationOptions;
-  }
-
-  bool PrintAllDerivations() const {
-    return m_printAllDerivations;
   }
 
   const UnknownLHSList &GetUnknownLHS() const {
     return m_unknownLHS;
   }
 
-  const Word &GetInputDefaultNonTerminal() const {
-    return m_inputDefaultNonTerminal;
-  }
-  const Word &GetOutputDefaultNonTerminal() const {
-    return m_outputDefaultNonTerminal;
-  }
-
-  SourceLabelOverlap GetSourceLabelOverlap() const {
-    return m_sourceLabelOverlap;
-  }
-
-  bool GetOutputHypoScore() const {
-    return m_outputHypoScore;
-  }
-  size_t GetRuleLimit() const {
-    return m_ruleLimit;
-  }
   float GetRuleCountThreshold() const {
     return 999999; /* TODO wtf! */
-  }
-
-  bool ContinuePartialTranslation() const {
-    return m_continuePartialTranslation;
   }
 
   void ReLoadBleuScoreFeatureParameter(float weight);
@@ -664,26 +259,11 @@ public:
     return m_threadCount;
   }
 
-  long GetStartTranslationId() const {
-    return m_startTranslationId;
-  }
-
   void SetExecPath(const std::string &path);
   const std::string &GetBinDirectory() const;
 
   bool NeedAlignmentInfo() const {
     return m_bookkeeping_options.need_alignment_info;
-    // return m_needAlignmentInfo;
-  }
-  const std::string &GetAlignmentOutputFile() const {
-    return m_alignmentOutputFile;
-  }
-  bool PrintAlignmentInfo() const {
-    return m_PrintAlignmentInfo;
-  }
-
-  WordAlignmentSort GetWordAlignmentSort() const {
-    return m_wordAlignmentSort;
   }
 
   bool GetHasAlternateWeightSettings() const {
@@ -763,7 +343,6 @@ public:
   }
 
   //sentence (and thread) specific initialisationn and cleanup
-  // void InitializeForInput(const InputType& source, ttaskptr const& ttask) const;
   void InitializeForInput(ttasksptr const& ttask) const;
   void CleanUpAfterSentenceProcessing(ttasksptr const& ttask) const;
 
@@ -775,10 +354,6 @@ public:
 
   std::map<std::string, std::string> OverrideFeatureNames();
   void OverrideFeatures();
-
-  FactorType GetPlaceholderFactor() const {
-    return m_placeHolderFactor;
-  }
 
   const FeatureRegistry &GetFeatureRegistry() const {
     return m_registry;
@@ -813,14 +388,6 @@ public:
 
   void SetTreeStructure(const StatefulFeatureFunction* treeStructure) {
     m_treeStructure = treeStructure;
-  }
-
-  bool GetDefaultNonTermOnlyForEmptyRange() const {
-    return m_defaultNonTermOnlyForEmptyRange;
-  }
-
-  S2TParsingAlgorithm GetS2TParsingAlgorithm() const {
-    return m_s2tParsingAlgorithm;
   }
 
   bool RequireSortingAfterSourceContext() const {

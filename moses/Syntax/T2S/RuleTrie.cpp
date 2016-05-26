@@ -35,7 +35,7 @@ void RuleTrie::Node::Prune(std::size_t tableLimit)
   // Prune TargetPhraseCollections at this node.
   for (TPCMap::iterator p = m_targetPhraseCollections.begin();
        p != m_targetPhraseCollections.end(); ++p) {
-    p->second.Prune(true, tableLimit);
+    p->second->Prune(true, tableLimit);
   }
 }
 
@@ -54,17 +54,21 @@ void RuleTrie::Node::Sort(std::size_t tableLimit)
   // Sort TargetPhraseCollections at this node.
   for (TPCMap::iterator p = m_targetPhraseCollections.begin();
        p != m_targetPhraseCollections.end(); ++p) {
-    p->second.Sort(true, tableLimit);
+    p->second->Sort(true, tableLimit);
   }
 }
 
-RuleTrie::Node *RuleTrie::Node::GetOrCreateChild(
-  const Word &sourceTerm)
+RuleTrie::Node*
+RuleTrie::Node::
+GetOrCreateChild(const Word &sourceTerm)
 {
   return &m_sourceTermMap[sourceTerm];
 }
 
-RuleTrie::Node *RuleTrie::Node::GetOrCreateNonTerminalChild(const Word &targetNonTerm)
+RuleTrie::Node *
+RuleTrie::
+Node::
+GetOrCreateNonTerminalChild(const Word &targetNonTerm)
 {
   UTIL_THROW_IF2(!targetNonTerm.IsNonTerminal(),
                  "Not a non-terminal: " << targetNonTerm);
@@ -72,42 +76,52 @@ RuleTrie::Node *RuleTrie::Node::GetOrCreateNonTerminalChild(const Word &targetNo
   return &m_nonTermMap[targetNonTerm];
 }
 
-TargetPhraseCollection &RuleTrie::Node::GetOrCreateTargetPhraseCollection(
-  const Word &sourceLHS)
+TargetPhraseCollection::shared_ptr
+RuleTrie::
+Node::
+GetOrCreateTargetPhraseCollection(const Word &sourceLHS)
 {
   UTIL_THROW_IF2(!sourceLHS.IsNonTerminal(),
                  "Not a non-terminal: " << sourceLHS);
-  return m_targetPhraseCollections[sourceLHS];
+  TargetPhraseCollection::shared_ptr& foo
+  = m_targetPhraseCollections[sourceLHS];
+  if (!foo) foo.reset(new TargetPhraseCollection);
+  return foo;
 }
 
-const RuleTrie::Node *RuleTrie::Node::GetChild(
-  const Word &sourceTerm) const
+RuleTrie::Node const*
+RuleTrie::
+Node::
+GetChild(const Word &sourceTerm) const
 {
-  UTIL_THROW_IF2(sourceTerm.IsNonTerminal(),
-                 "Not a terminal: " << sourceTerm);
-
+  UTIL_THROW_IF2(sourceTerm.IsNonTerminal(), "Not a terminal: " << sourceTerm);
   SymbolMap::const_iterator p = m_sourceTermMap.find(sourceTerm);
   return (p == m_sourceTermMap.end()) ? NULL : &p->second;
 }
 
-const RuleTrie::Node *RuleTrie::Node::GetNonTerminalChild(
-  const Word &targetNonTerm) const
+RuleTrie::Node const*
+RuleTrie::
+Node::
+GetNonTerminalChild(const Word &targetNonTerm) const
 {
   UTIL_THROW_IF2(!targetNonTerm.IsNonTerminal(),
                  "Not a non-terminal: " << targetNonTerm);
-
   SymbolMap::const_iterator p = m_nonTermMap.find(targetNonTerm);
   return (p == m_nonTermMap.end()) ? NULL : &p->second;
 }
 
-TargetPhraseCollection &RuleTrie::GetOrCreateTargetPhraseCollection(
-  const Word &sourceLHS, const Phrase &sourceRHS)
+TargetPhraseCollection::shared_ptr
+RuleTrie::
+GetOrCreateTargetPhraseCollection
+( const Word &sourceLHS, const Phrase &sourceRHS )
 {
   Node &currNode = GetOrCreateNode(sourceRHS);
   return currNode.GetOrCreateTargetPhraseCollection(sourceLHS);
 }
 
-RuleTrie::Node &RuleTrie::GetOrCreateNode(const Phrase &sourceRHS)
+RuleTrie::Node &
+RuleTrie::
+GetOrCreateNode(const Phrase &sourceRHS)
 {
   const std::size_t size = sourceRHS.GetSize();
 

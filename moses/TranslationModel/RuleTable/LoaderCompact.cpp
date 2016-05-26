@@ -22,6 +22,7 @@
 #include "moses/AlignmentInfoCollection.h"
 #include "moses/InputFileStream.h"
 #include "moses/Util.h"
+#include "moses/Timer.h"
 #include "moses/Word.h"
 #include "Trie.h"
 
@@ -31,7 +32,8 @@
 namespace Moses
 {
 
-bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
+bool RuleTableLoaderCompact::Load(AllOptions const& opts,
+                                  const std::vector<FactorType> &input,
                                   const std::vector<FactorType> &output,
                                   const std::string &inFile,
                                   size_t /* tableLimit */,
@@ -224,9 +226,10 @@ bool RuleTableLoaderCompact::LoadRuleSection(
     targetPhrase->EvaluateInIsolation(sourcePhrase, ruleTable.GetFeaturesToApply());
 
     // Insert rule into table.
-    TargetPhraseCollection &coll = GetOrCreateTargetPhraseCollection(
-                                     ruleTable, sourcePhrase, *targetPhrase, &sourceLHS);
-    coll.Add(targetPhrase);
+    TargetPhraseCollection::shared_ptr coll;
+    coll = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase,
+           *targetPhrase, &sourceLHS);
+    coll->Add(targetPhrase);
   }
 
   return true;

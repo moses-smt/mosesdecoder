@@ -1,11 +1,15 @@
 #ifndef UTIL_EXCEPTION_H
 #define UTIL_EXCEPTION_H
 
+#include "util/string_stream.hh"
+
 #include <exception>
 #include <limits>
-#include <sstream>
 #include <string>
 #include <stdint.h>
+
+// TODO(hieu): delete this
+#include <sstream>
 
 namespace util {
 
@@ -16,11 +20,7 @@ class Exception : public std::exception {
     Exception() throw();
     virtual ~Exception() throw();
 
-    Exception(const Exception &from);
-    Exception &operator=(const Exception &from);
-
-    // Not threadsafe, but probably doesn't matter.  FWIW, Boost's exception guidance implies that what() isn't threadsafe.
-    const char *what() const throw();
+    const char *what() const throw() { return what_.str().c_str(); }
 
     // For use by the UTIL_THROW macros.
     void SetLocation(
@@ -38,8 +38,7 @@ class Exception : public std::exception {
       typedef T Identity;
     };
 
-    std::stringstream stream_;
-    mutable std::string text_;
+    StringStream what_;
 };
 
 /* This implements the normal operator<< for Exception and all its children.
@@ -47,7 +46,10 @@ class Exception : public std::exception {
  * boost::enable_if.
  */
 template <class Except, class Data> typename Except::template ExceptionTag<Except&>::Identity operator<<(Except &e, const Data &data) {
-  e.stream_ << data;
+  // TODO(hieu): delete this.
+  std::stringstream moses_hack;
+  moses_hack << data;
+  e.what_ << moses_hack.str();
   return e;
 }
 
@@ -148,6 +150,15 @@ template <> inline std::size_t CheckOverflowInternal<8>(uint64_t value) {
 inline std::size_t CheckOverflow(uint64_t value) {
   return CheckOverflowInternal<sizeof(std::size_t)>(value);
 }
+
+#if defined(_WIN32) || defined(_WIN64)
+/* Thrown for Windows specific operations. */
+class WindowsException : public Exception {
+  public:
+    WindowsException() throw();
+    ~WindowsException() throw();
+};
+#endif
 
 } // namespace util
 

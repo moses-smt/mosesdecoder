@@ -11,7 +11,7 @@ PDTAimp::PDTAimp(PhraseDictionaryTreeAdaptor *p)
     distinctE(0)
 {
   m_numInputScores = 0;
-  m_inputFeature = &InputFeature::Instance();
+  m_inputFeature = InputFeature::InstancePtr();
 
   if (m_inputFeature) {
     const PhraseDictionary *firstPt = PhraseDictionary::GetColl()[0];
@@ -63,27 +63,29 @@ void PDTAimp::CleanUp()
 {
   assert(m_dict);
   m_dict->FreeMemory();
-  for(size_t i=0; i<m_tgtColls.size(); ++i) delete m_tgtColls[i];
+  // for(size_t i=0; i<m_tgtColls.size(); ++i) m_tgtColls[i].reset();
   m_tgtColls.clear();
   m_cache.clear();
   m_rangeCache.clear();
   uniqSrcPhr.clear();
 }
 
-TargetPhraseCollectionWithSourcePhrase const*
+TargetPhraseCollectionWithSourcePhrase::shared_ptr
 PDTAimp::GetTargetPhraseCollection(Phrase const &src) const
 {
 
   assert(m_dict);
-  if(src.GetSize()==0) return 0;
+
+  TargetPhraseCollectionWithSourcePhrase::shared_ptr ret;
+  if(src.GetSize()==0) return ret;
 
   std::pair<MapSrc2Tgt::iterator,bool> piter;
   if(useCache) {
-    piter=m_cache.insert(std::make_pair(src,static_cast<TargetPhraseCollectionWithSourcePhrase const*>(0)));
+    piter=m_cache.insert(std::make_pair(src, ret));
     if(!piter.second) return piter.first->second;
   } else if (m_cache.size()) {
     MapSrc2Tgt::const_iterator i=m_cache.find(src);
-    return (i!=m_cache.end() ? i->second : 0);
+    return (i!=m_cache.end() ? i->second : ret);
   }
 
   std::vector<std::string> srcString(src.GetSize());
@@ -97,7 +99,7 @@ PDTAimp::GetTargetPhraseCollection(Phrase const &src) const
   std::vector<std::string> wacands;
   m_dict->GetTargetCandidates(srcString,cands,wacands);
   if(cands.empty()) {
-    return 0;
+    return ret;
   }
 
   //TODO: Multiple models broken here
@@ -114,6 +116,7 @@ PDTAimp::GetTargetPhraseCollection(Phrase const &src) const
 
 
   // convert into TargetPhrases
+  std::string fd = m_obj->options()->output.factor_delimiter;
   for(size_t i=0; i<cands.size(); ++i) {
     TargetPhrase targetPhrase(m_obj);
 
@@ -132,7 +135,8 @@ PDTAimp::GetTargetPhraseCollection(Phrase const &src) const
       targetPhrase.GetScoreBreakdown().Assign(m_obj, *cands[i].fnames[j], cands[i].fvalues[j]);
     }
 
-    CreateTargetPhrase(targetPhrase,factorStrings,scoreVector, Scores(0), &wacands[i], &src);
+    CreateTargetPhrase(targetPhrase,factorStrings, fd, scoreVector, Scores(0),
+                       &wacands[i], &src);
 
     costs.push_back(std::make_pair(-targetPhrase.GetFutureScore(),tCands.size()));
     tCands.push_back(targetPhrase);
@@ -140,16 +144,14 @@ PDTAimp::GetTargetPhraseCollection(Phrase const &src) const
     sourcePhrases.push_back(src);
   }
 
-  TargetPhraseCollectionWithSourcePhrase *rv;
-  rv=PruneTargetCandidates(tCands,costs, sourcePhrases);
-  if(rv->IsEmpty()) {
-    delete rv;
-    return 0;
+  ret = PruneTargetCandidates(tCands,costs, sourcePhrases);
+  if(ret->IsEmpty()) {
+    ret.reset();
   } else {
-    if(useCache) piter.first->second=rv;
-    m_tgtColls.push_back(rv);
-    return rv;
+    if(useCache) piter.first->second = ret;
+    m_tgtColls.push_back(ret);
   }
+  return ret;
 
 }
 
@@ -352,7 +354,8 @@ void PDTAimp::CacheSource(ConfusionNet const& src)
     pathExplored[len]+=exploredPaths[len];
 
 
-  m_rangeCache.resize(src.GetSize(),vTPC(src.GetSize(),0));
+  // m_rangeCache.resize(src.GetSize(),vTPC(src.GetSize(),0));
+  m_rangeCache.resize(src.GetSize(),vTPC(src.GetSize()));
 
   for(std::map<Range,E2Costs>::const_iterator i=cov2cand.begin(); i!=cov2cand.end(); ++i) {
     assert(i->first.first<m_rangeCache.size());
@@ -374,6 +377,7 @@ void PDTAimp::CacheSource(ConfusionNet const& src)
       TargetPhrase targetPhrase(m_obj);
       CreateTargetPhrase(targetPhrase
                          , j ->first
+                         , m_obj->options()->output.factor_delimiter
                          , scores.transScore
                          , scores.inputScores
                          , NULL
@@ -386,10 +390,11 @@ void PDTAimp::CacheSource(ConfusionNet const& src)
       //std::cerr << i->first.first << "-" << i->first.second << ": " << targetPhrase << std::endl;
     }
 
-    TargetPhraseCollectionWithSourcePhrase *rv=PruneTargetCandidates(tCands, costs, sourcePhrases);
+    TargetPhraseCollectionWithSourcePhrase::shared_ptr
+    rv = PruneTargetCandidates(tCands, costs, sourcePhrases);
 
     if(rv->IsEmpty())
-      delete rv;
+      rv.reset();
     else {
       m_rangeCache[i->first.first][i->first.second-1]=rv;
       m_tgtColls.push_back(rv);
@@ -401,6 +406,7 @@ void PDTAimp::CacheSource(ConfusionNet const& src)
 
 void PDTAimp::CreateTargetPhrase(TargetPhrase& targetPhrase,
                                  StringTgtCand::Tokens const& factorStrings,
+                                 std::string const& factorDelimiter,
                                  Scores const& transVector,
                                  Scores const& inputVector,
                                  const std::string *alignmentString,
@@ -409,7 +415,8 @@ void PDTAimp::CreateTargetPhrase(TargetPhrase& targetPhrase,
   FactorCollection &factorCollection = FactorCollection::Instance();
 
   for(size_t k=0; k<factorStrings.size(); ++k) {
-    util::TokenIter<util::MultiCharacter, false> word(*factorStrings[k], StaticData::Instance().GetFactorDelimiter());
+    util::TokenIter<util::MultiCharacter, false>
+    word(*factorStrings[k], factorDelimiter);
     Word& w=targetPhrase.AddWord();
     for(size_t l=0; l<m_output.size(); ++l, ++word) {
       w[m_output[l]]= factorCollection.AddFactor(*word);
@@ -428,7 +435,8 @@ void PDTAimp::CreateTargetPhrase(TargetPhrase& targetPhrase,
   targetPhrase.EvaluateInIsolation(*srcPtr, m_obj->GetFeaturesToApply());
 }
 
-TargetPhraseCollectionWithSourcePhrase* PDTAimp::PruneTargetCandidates
+TargetPhraseCollectionWithSourcePhrase::shared_ptr
+PDTAimp::PruneTargetCandidates
 (const std::vector<TargetPhrase> & tCands,
  std::vector<std::pair<float,size_t> >& costs,
  const std::vector<Phrase> &sourcePhrases) const
@@ -437,7 +445,8 @@ TargetPhraseCollectionWithSourcePhrase* PDTAimp::PruneTargetCandidates
   UTIL_THROW_IF2(tCands.size() != sourcePhrases.size(),
                  "Number of target phrases must equal number of source phrases");
 
-  TargetPhraseCollectionWithSourcePhrase *rv=new TargetPhraseCollectionWithSourcePhrase;
+  TargetPhraseCollectionWithSourcePhrase::shared_ptr rv;
+  rv.reset(new TargetPhraseCollectionWithSourcePhrase);
 
 
   // set limit to tableLimit or actual size, whatever is smaller

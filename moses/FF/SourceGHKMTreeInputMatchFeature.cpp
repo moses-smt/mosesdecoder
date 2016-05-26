@@ -37,21 +37,22 @@ void SourceGHKMTreeInputMatchFeature::EvaluateWithSourceContext(const InputType 
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {
-  const WordsRange& wordsRange = inputPath.GetWordsRange();
-  size_t startPos = wordsRange.GetStartPos();
-  size_t endPos = wordsRange.GetEndPos();
+  const Range& range = inputPath.GetWordsRange();
+  size_t startPos = range.GetStartPos();
+  size_t endPos = range.GetEndPos();
   const TreeInput& treeInput = static_cast<const TreeInput&>(input);
   const NonTerminalSet& treeInputLabels = treeInput.GetLabelSet(startPos,endPos);
   const Word& lhsLabel = targetPhrase.GetTargetLHS();
 
   const StaticData& staticData = StaticData::Instance();
-  const Word& outputDefaultNonTerminal = staticData.GetOutputDefaultNonTerminal();
 
-  std::vector<float> newScores(m_numScoreComponents,0.0); // m_numScoreComponents == 2 // first fires for matches, second for mismatches
+  std::vector<float> newScores(m_numScoreComponents,0.0);
+  // m_numScoreComponents == 2 // first fires for matches, second for mismatches
 
-  if ( (treeInputLabels.find(lhsLabel) != treeInputLabels.end()) && (lhsLabel != outputDefaultNonTerminal) ) {
+  if ( (treeInputLabels.find(lhsLabel) != treeInputLabels.end())
+       && (lhsLabel != m_options->syntax.output_default_non_terminal) ) {
     // match
     newScores[0] = 1.0;
   } else {
@@ -62,6 +63,13 @@ void SourceGHKMTreeInputMatchFeature::EvaluateWithSourceContext(const InputType 
   scoreBreakdown.PlusEquals(this, newScores);
 }
 
+void
+SourceGHKMTreeInputMatchFeature::
+Load(AllOptions::ptr const& opts)
+{
+  m_options = opts;
+  // m_output_default_nonterminal = opts->syntax.output_default_non_terminal;
+}
 
 }
 

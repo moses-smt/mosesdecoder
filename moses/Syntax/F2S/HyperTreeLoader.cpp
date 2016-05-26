@@ -13,12 +13,14 @@
 #include "moses/FactorCollection.h"
 #include "moses/Word.h"
 #include "moses/Util.h"
+#include "moses/Timer.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 #include "moses/ChartTranslationOptionList.h"
 #include "moses/FactorCollection.h"
 #include "moses/Syntax/RuleTableFF.h"
+#include "moses/parameters/AllOptions.h"
 #include "util/file_piece.hh"
 #include "util/string_piece.hh"
 #include "util/tokenize_piece.hh"
@@ -31,12 +33,14 @@
 
 namespace Moses
 {
+
 namespace Syntax
 {
 namespace F2S
 {
 
-bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
+bool HyperTreeLoader::Load(AllOptions const& opts,
+                           const std::vector<FactorType> &input,
                            const std::vector<FactorType> &output,
                            const std::string &inFile,
                            const RuleTableFF &ff,
@@ -59,7 +63,7 @@ bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
 
   double_conversion::StringToDoubleConverter converter(double_conversion::StringToDoubleConverter::NO_FLAGS, NAN, NAN, "inf", "nan");
 
-  HyperPathLoader hyperPathLoader(Input, input);
+  HyperPathLoader hyperPathLoader;
 
   Phrase dummySourcePhrase;
   {
@@ -86,9 +90,7 @@ bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
       alignString = temp;
     }
 
-    if (++pipes) {
-      StringPiece str(*pipes); //counts
-    }
+    ++pipes;  // counts
 
     scoreVector.clear();
     for (util::TokenIter<util::AnyCharacter, true> s(scoreString, " \t"); s; ++s) {
@@ -130,9 +132,9 @@ bool HyperTreeLoader::Load(const std::vector<FactorType> &input,
                                       ff.GetFeaturesToApply());
 
     // Add rule to trie.
-    TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(
-                                           trie, sourceFragment);
-    phraseColl.Add(targetPhrase);
+    TargetPhraseCollection::shared_ptr phraseColl
+    = GetOrCreateTargetPhraseCollection(trie, sourceFragment);
+    phraseColl->Add(targetPhrase);
 
     count++;
   }

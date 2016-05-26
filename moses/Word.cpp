@@ -28,6 +28,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "FactorCollection.h"
 #include "StaticData.h"  // needed to determine the FactorDelimiter
 #include "util/exception.hh"
+#include "util/string_stream.hh"
 #include "util/tokenize_piece.hh"
 
 using namespace std;
@@ -63,7 +64,23 @@ int Word::Compare(const Word &targetWord, const Word &sourceWord)
     return (targetFactor<sourceFactor) ? -1 : +1;
   }
   return 0;
+}
 
+bool Word::operator==(const Word &compare) const
+{
+  if (IsNonTerminal() != compare.IsNonTerminal()) {
+    return false;
+  }
+
+  for (size_t factorType = 0 ; factorType < MAX_NUM_FACTORS ; factorType++) {
+    const Factor *thisFactor = GetFactor(factorType);
+    const Factor *otherFactor = compare.GetFactor(factorType);
+
+    if (thisFactor != otherFactor) {
+      return false;
+    }
+  }
+  return true;
 }
 
 void Word::Merge(const Word &sourceWord)
@@ -79,7 +96,7 @@ void Word::Merge(const Word &sourceWord)
 
 std::string Word::GetString(const vector<FactorType> factorType,bool endWithBlank) const
 {
-  stringstream strme;
+  util::StringStream strme;
   const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
   bool firstPass = true;
   unsigned int stop = min(max_fax(),factorType.size());
@@ -195,8 +212,9 @@ TO_STRING_BODY(Word);
 // friend
 ostream& operator<<(ostream& out, const Word& word)
 {
-  stringstream strme;
-  const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
+  util::StringStream strme;
+  const std::string& factorDelimiter
+  = StaticData::Instance().options()->output.factor_delimiter;
   bool firstPass = true;
   unsigned int stop = max_fax();
   for (unsigned int currFactor = 0 ; currFactor < stop; currFactor++) {
@@ -208,7 +226,7 @@ ostream& operator<<(ostream& out, const Word& word)
       } else {
         strme << factorDelimiter;
       }
-      strme << *factor;
+      strme << factor->GetString();
     }
   }
   out << strme.str() << " ";

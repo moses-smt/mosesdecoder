@@ -26,15 +26,27 @@ public:
     }
 
     // Compare the top hypothesis of each bitmap container using the TotalScore, which includes future cost
-    const float scoreA = A->Top()->GetHypothesis()->GetTotalScore();
-    const float scoreB = B->Top()->GetHypothesis()->GetTotalScore();
+    const float scoreA = A->Top()->GetHypothesis()->GetFutureScore();
+    const float scoreB = B->Top()->GetHypothesis()->GetFutureScore();
 
     if (scoreA < scoreB) {
       return true;
     } else if (scoreA > scoreB) {
       return false;
     } else {
-      return A < B;
+      // Equal scores: break ties by comparing target phrases (if they exist)
+      // *Important*: these are pointers to copies of the target phrases from the
+      // hypotheses.  This class is used to keep priority queues ordered in the
+      // background, so comparisons made as those data structures are cleaned up
+      // may occur *after* the target phrases in hypotheses have been cleaned up,
+      // leading to segfaults if relying on hypotheses to provide target phrases.
+      boost::shared_ptr<TargetPhrase> phrA = A->Top()->GetTargetPhrase();
+      boost::shared_ptr<TargetPhrase> phrB = B->Top()->GetTargetPhrase();
+      if (!phrA || !phrB) {
+        // Fallback: compare pointers, non-deterministic sort
+        return A < B;
+      }
+      return (phrA->Compare(*phrB) > 0);
     }
   }
 };
@@ -50,9 +62,9 @@ void CollectorCube::operator()(const WordsBitmap &bitmap,
                                BitmapContainer &bitmapContainer) {
   const TranslationOptionList* transOptList;
   transOptList = m_search->m_transOptColl.GetTranslationOptionList(range);
-  
+
   if (!transOptList) return;
-  
+
   BOOST_FOREACH(const Hypothesis* hypothesis, bitmapContainer.GetHypotheses()) {
     if(m_options.count(hypothesis->GetId()) == 0)
       m_hypotheses.push_back(hypothesis);
@@ -61,11 +73,9 @@ void CollectorCube::operator()(const WordsBitmap &bitmap,
 }
 
 SearchCubePruning::
-SearchCubePruning(Manager& manager, const InputType &source,
-                  const TranslationOptionCollection &transOptColl)
+SearchCubePruning(Manager& manager, TranslationOptionCollection const& transOptColl)
   : Search(manager)
-  , m_source(source)
-  , m_hypoStackColl(source.GetSize() + 1)
+  , m_hypoStackColl(manager.GetSource().GetSize() + 1)
   , m_transOptColl(transOptColl)
 {
   std::vector < HypothesisStackCubePruning >::iterator iterStack;
@@ -100,7 +110,8 @@ void SearchCubePruning::CacheForNeural(Collector& collector) {
 void SearchCubePruning::Decode()
 {
   // initial seed hypothesis: nothing translated, no words produced
-  Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTransOpt);
+  const Bitmap &initBitmap = m_bitmaps.GetInitialBitmap();
+  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, initBitmap, m_manager.GetNextHypoId());
 
   HypothesisStackCubePruning &firstStack
   = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
@@ -110,13 +121,13 @@ void SearchCubePruning::Decode()
   
   CreateForwardTodos(firstStack, 0);
 
-  const size_t PopLimit = m_manager.options().cube.pop_limit;
+  const size_t PopLimit = m_manager.options()->cube.pop_limit;
   VERBOSE(2,"Cube Pruning pop limit is " << PopLimit << std::endl);
 
-  const size_t Diversity = m_manager.options().cube.diversity;
+  const size_t Diversity = m_manager.options()->cube.diversity;
   VERBOSE(2,"Cube Pruning diversity is " << Diversity << std::endl);
   VERBOSE(2,"Max Phrase length is "
-          << m_manager.options().search.max_phrase_length << std::endl);
+          << m_manager.options()->search.max_phrase_length << std::endl);
 
   // go through each stack
   size_t stackNo = 1;
@@ -139,13 +150,17 @@ void SearchCubePruning::Decode()
 
     for(bmIter = accessor.begin(); bmIter != accessor.end(); ++bmIter) {
       // build the first hypotheses
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StartTimeOtherScore();
+      }
       bmIter->second->InitializeEdges();
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StopTimeOtherScore();
+      }
       m_manager.GetSentenceStats().StartTimeManageCubes();
       BCQueue.push(bmIter->second);
       m_manager.GetSentenceStats().StopTimeManageCubes();
 
-      // old algorithm
-      // bmIter->second->EnsureMinStackHyps(PopLimit);
     }
 
     // main search loop, pop k best hyps
@@ -159,7 +174,13 @@ void SearchCubePruning::Decode()
         m_manager.GetSentenceStats().AddPopped();
       }
       // push on stack and create successors
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StartTimeOtherScore();
+      }
       bc->ProcessBestHypothesis();
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StopTimeOtherScore();
+      }
       // if there are any hypothesis left in this specific container, add back to queue
       m_manager.GetSentenceStats().StartTimeManageCubes();
       if (!bc->Empty())
@@ -170,8 +191,14 @@ void SearchCubePruning::Decode()
     // ensure diversity, a minimum number of inserted hyps for each bitmap container;
     //    NOTE: diversity doesn't ensure they aren't pruned at some later point
     if (Diversity > 0) {
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StartTimeOtherScore();
+      }
       for(bmIter = accessor.begin(); bmIter != accessor.end(); ++bmIter) {
         bmIter->second->EnsureMinStackHyps(Diversity);
+      }
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StopTimeOtherScore();
       }
     }
 
@@ -235,7 +262,7 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack, Fu
   stack.AddHypothesesToBitmapContainers();
 
   for (iterAccessor = bitmapAccessor.begin() ; iterAccessor != bitmapAccessor.end() ; ++iterAccessor) {
-    const WordsBitmap &bitmap = iterAccessor->first;
+    const Bitmap &bitmap = *iterAccessor->first;
     BitmapContainer &bitmapContainer = *iterAccessor->second;
 
     if (bitmapContainer.GetHypothesesSize() == 0) {
@@ -253,7 +280,7 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack, Fu
         continue;
       
       // not yet covered
-      WordsRange applyRange(startPos, startPos);
+      Range applyRange(startPos, startPos);
       if (CheckDistortion(bitmap, applyRange)) {
         // apply range
         //{
@@ -268,13 +295,13 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack, Fu
       }
 
       size_t maxSize = size - startPos;
-      size_t maxSizePhrase = m_manager.options().search.max_phrase_length;
+      size_t maxSizePhrase = m_manager.options()->search.max_phrase_length;
       maxSize = std::min(maxSize, maxSizePhrase);
       for (endPos = startPos+1; endPos < startPos + maxSize; endPos++) {
         if (bitmap.GetValue(endPos))
           break;
 
-        WordsRange applyRange(startPos, endPos);
+        Range applyRange(startPos, endPos);
         if (CheckDistortion(bitmap, applyRange)) {
           // apply range
           //{
@@ -294,32 +321,31 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack, Fu
 
 void
 SearchCubePruning::
-CreateForwardTodos(WordsBitmap const& bitmap, WordsRange const& range,
+CreateForwardTodos(Bitmap const& bitmap, Range const& range,
                    BitmapContainer& bitmapContainer)
 {
-  WordsBitmap newBitmap = bitmap;
-  newBitmap.SetValue(range.GetStartPos(), range.GetEndPos(), true);
+  const Bitmap &newBitmap = m_bitmaps.GetBitmap(bitmap, range);
 
   size_t numCovered = newBitmap.GetNumWordsCovered();
   const TranslationOptionList* transOptList;
   transOptList = m_transOptColl.GetTranslationOptionList(range);
-  const SquareMatrix &futureScore = m_transOptColl.GetFutureScore();
+  const SquareMatrix &estimatedScores = m_transOptColl.GetEstimatedScores();
 
   if (transOptList && transOptList->size() > 0) {    
     HypothesisStackCubePruning& newStack
     = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl[numCovered]);
     newStack.SetBitmapAccessor(newBitmap, newStack, range, bitmapContainer,
-                               futureScore, *transOptList);
+                               estimatedScores, *transOptList);
   }
 }
 
 
 bool
 SearchCubePruning::
-CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &range) const
+CheckDistortion(const Bitmap &hypoBitmap, const Range &range) const
 {
   // since we check for reordering limits, its good to have that limit handy
-  int maxDistortion = m_manager.options().reordering.max_distortion;
+  int maxDistortion = m_manager.options()->reordering.max_distortion;
   if (maxDistortion < 0) return true;
 
   // if there are reordering limits, make sure it is not violated
@@ -344,7 +370,7 @@ CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &range) const
   // its maximum value will be (which will always be the value of the
   // hypothesis starting at the left-most edge).  If this vlaue is than
   // the distortion limit, we don't allow this extension to be made.
-  WordsRange bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
+  Range bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
   return (m_source.ComputeDistortionDistance(range, bestNextExtension)
           <= maxDistortion);
 }

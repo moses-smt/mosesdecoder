@@ -23,7 +23,8 @@ public:
   const Word* GetTargetWord() const {
     return m_targetWord;
   }
-  virtual int Compare(const FFState& other) const;
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
 
 private:
@@ -51,23 +52,6 @@ public:
                                         int /* featureID */,
                                         ScoreComponentCollection* ) const {
     throw std::logic_error("PhraseBoundaryState not supported in chart decoder, yet");
-  }
-
-  void EvaluateWithSourceContext(const InputType &input
-                                 , const InputPath &inputPath
-                                 , const TargetPhrase &targetPhrase
-                                 , const StackVec *stackVec
-                                 , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
-  }
-
-  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const {
-  }
-  void EvaluateInIsolation(const Phrase &source
-                           , const TargetPhrase &targetPhrase
-                           , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {
   }
 
   void SetParameter(const std::string& key, const std::string& value);

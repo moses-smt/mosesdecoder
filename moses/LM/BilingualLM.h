@@ -37,7 +37,14 @@ public:
     return neuralLM_ids;
   }
 
-  int Compare(const FFState& other) const;
+  virtual size_t hash() const {
+    return m_hash;
+  }
+  virtual bool operator==(const FFState& other) const {
+    const BilingualLMState &otherState = static_cast<const BilingualLMState&>(other);
+    return m_hash == otherState.m_hash;
+  }
+
 };
 
 class BilingualLM : public StatefulFeatureFunction
@@ -57,7 +64,7 @@ private:
     const TargetPhrase &targetPhrase,
     int targetWordIdx,
     const Sentence &source_sent,
-    const WordsRange &sourceWordRange,
+    const Range &sourceWordRange,
     std::vector<int> &words) const;
 
   void appendSourceWordsToVector(const Sentence &source_sent, std::vector<int> &words, int source_word_mid_idx) const;
@@ -110,24 +117,7 @@ public:
     return new BilingualLMState(0);
   }
 
-  void Load();
-
-  void EvaluateInIsolation(
-    const Phrase &source,
-    const TargetPhrase &targetPhrase,
-    ScoreComponentCollection &scoreBreakdown,
-    ScoreComponentCollection &estimatedFutureScore) const;
-
-  void EvaluateWithSourceContext(
-    const InputType &input,
-    const InputPath &inputPath,
-    const TargetPhrase &targetPhrase,
-    const StackVec *stackVec,
-    ScoreComponentCollection &scoreBreakdown,
-    ScoreComponentCollection *estimatedFutureScore = NULL) const;
-
-  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const {};
+  void Load(AllOptions::ptr const& opts);
 
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,

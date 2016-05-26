@@ -17,13 +17,13 @@ class SearchCubePruning;
 class FunctorCube {
   public:
     FunctorCube(SearchCubePruning* search) : m_search(search) {}
-    
+
     virtual void operator()(const WordsBitmap &bitmap,
-                            const WordsRange &range,
+                            const Range &range,
                             BitmapContainer &bitmapContainer) = 0;
-    
+
     virtual bool IsCollector() = 0;
-    
+
   protected:
     SearchCubePruning* m_search;
 };
@@ -32,9 +32,9 @@ class ExpanderCube : public FunctorCube {
   public:
     ExpanderCube(SearchCubePruning* search) : FunctorCube(search) {}
     virtual void operator()(const WordsBitmap &bitmap,
-                            const WordsRange &range,
+                            const Range &range,
                             BitmapContainer &bitmapContainer);
-    
+
     virtual bool IsCollector() { return false; }
 };
 
@@ -42,19 +42,19 @@ class CollectorCube : public FunctorCube, public Collector {
   public:
     CollectorCube(SearchCubePruning* search) : FunctorCube(search) {}
     virtual void operator()(const WordsBitmap &bitmap,
-                            const WordsRange &range,
+                            const Range &range,
                             BitmapContainer &bitmapContainer);
 
     virtual bool IsCollector() { return true; }
-                            
+
     std::vector<const Hypothesis*> GetHypotheses() {
-      return m_hypotheses;                   
+      return m_hypotheses;
     }
-    
+
     std::vector<const TranslationOptionList*>& GetOptions(int hypId) {
       return m_options[hypId];
     }
-    
+
   private:
     std::vector<const Hypothesis*> m_hypotheses;
     std::map<size_t, std::vector<const TranslationOptionList*> > m_options;
@@ -77,23 +77,25 @@ protected:
   //! go thru all bitmaps in 1 stack & create backpointers to bitmaps in the stack
   void CreateForwardTodos(HypothesisStackCubePruning &stack, FunctorCube* functor);
   //! create a back pointer to this bitmap, with edge that has this words range translation
-  void CreateForwardTodos(const WordsBitmap &bitmap, const WordsRange &range, BitmapContainer &bitmapContainer);
+  void CreateForwardTodos(const WordsBitmap &bitmap, const Range &range, BitmapContainer &bitmapContainer);
 
   void CacheForNeural(Collector& collector);
-  
+
   void ProcessStackForNeuro(HypothesisStackCubePruning*& stack);
 
-  
+
   //void CreateForwardTodos2(HypothesisStackCubePruning &stack);
   //! create a back pointer to this bitmap, with edge that has this words range translation
-  //void CreateForwardTodos2(const WordsBitmap &bitmap, const WordsRange &range, BitmapContainer &bitmapContainer);
+  //void CreateForwardTodos2(const WordsBitmap &bitmap, const Range &range, BitmapContainer &bitmapContainer);
 
-  bool CheckDistortion(const WordsBitmap &bitmap, const WordsRange &range) const;
+  bool CheckDistortion(const WordsBitmap &bitmap, const Range &range) const;
+  void CreateForwardTodos(const Bitmap &bitmap, const Range &range, BitmapContainer &bitmapContainer);
+  bool CheckDistortion(const Bitmap &bitmap, const Range &range) const;
 
   void PrintBitmapContainerGraph();
 
 public:
-  SearchCubePruning(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl);
+  SearchCubePruning(Manager& manager, const TranslationOptionCollection &transOptColl);
   ~SearchCubePruning();
 
   void Decode();

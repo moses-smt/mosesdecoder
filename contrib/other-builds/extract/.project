@@ -56,6 +56,41 @@
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/SentenceAlignment.h</locationURI>
 		</link>
 		<link>
+			<name>SentenceAlignmentWithSyntax.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/SentenceAlignmentWithSyntax.cpp</locationURI>
+		</link>
+		<link>
+			<name>SentenceAlignmentWithSyntax.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/SentenceAlignmentWithSyntax.h</locationURI>
+		</link>
+		<link>
+			<name>SyntaxNodeCollection.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/SyntaxNodeCollection.cpp</locationURI>
+		</link>
+		<link>
+			<name>SyntaxNodeCollection.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/SyntaxNodeCollection.h</locationURI>
+		</link>
+		<link>
+			<name>XmlException.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/XmlException.h</locationURI>
+		</link>
+		<link>
+			<name>XmlTree.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/XmlTree.cpp</locationURI>
+		</link>
+		<link>
+			<name>XmlTree.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/XmlTree.h</locationURI>
+		</link>
+		<link>
 			<name>extract-main.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/extract-main.cpp</locationURI>

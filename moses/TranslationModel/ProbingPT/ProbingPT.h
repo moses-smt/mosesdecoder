@@ -21,7 +21,7 @@ public:
   ProbingPT(const std::string &line);
   ~ProbingPT();
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   void InitializeForInput(ttasksptr const& ttask);
 
@@ -46,7 +46,7 @@ protected:
   typedef boost::bimap<const Factor *, unsigned int> TargetVocabMap;
   mutable TargetVocabMap m_vocabMap;
 
-  TargetPhraseCollection *CreateTargetPhrase(const Phrase &sourcePhrase) const;
+  TargetPhraseCollection::shared_ptr CreateTargetPhrase(const Phrase &sourcePhrase) const;
   TargetPhrase *CreateTargetPhrase(const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const;
   const Factor *GetTargetFactor(uint64_t probingId) const;
   uint64_t GetSourceProbingId(const Factor *factor) const;

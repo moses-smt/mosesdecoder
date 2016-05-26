@@ -50,6 +50,12 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
 #endif
+#ifdef HAVE_CMPH
+#include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
+#endif
+#if defined HAVE_CMPH
+#include "moses/TranslationModel/CompactPT/LexicalReorderingTableCompact.h"
+#endif
 
 using namespace std;
 using namespace boost::algorithm;
@@ -61,18 +67,11 @@ bool g_mosesDebug = false;
 StaticData StaticData::s_instance;
 
 StaticData::StaticData()
-  : m_sourceStartPosMattersForRecombination(false)
+  : m_options(new AllOptions)
   , m_requireSortingAfterSourceContext(false)
-  , m_inputType(SentenceInput)
-  , m_lmEnableOOVFeature(false)
-  , m_isAlwaysCreateDirectTranslationOption(false)
   , m_currentWeightSetting("default")
   , m_treeStructure(NULL)
 {
-  m_xmlBrackets.first="<";
-  m_xmlBrackets.second=">";
-
-  // memory pools
   Phrase::InitializeMemPool();
 }
 
@@ -125,186 +124,15 @@ StaticData
 
 }
 
-void
-StaticData
-::ini_input_options()
-{
-  const PARAM_VEC *params;
-
-  // input type has to be specified BEFORE loading the phrase tables!
-  m_parameter->SetParameter(m_inputType, "inputtype", SentenceInput);
-
-  m_parameter->SetParameter(m_continuePartialTranslation,
-                            "continue-partial-translation", false );
-
-  std::string s_it = "text input";
-  if (m_inputType == 1) {
-    s_it = "confusion net";
-  }
-  if (m_inputType == 2) {
-    s_it = "word lattice";
-  }
-  if (m_inputType == 3) {
-    s_it = "tree";
-  }
-  VERBOSE(2,"input type is: "<<s_it<<"\n");
-
-  // use of xml in input
-  m_parameter->SetParameter<XmlInputType>(m_xmlInputType, "xml-input", XmlPassThrough);
-
-  // specify XML tags opening and closing brackets for XML option
-  params = m_parameter->GetParam("xml-brackets");
-  if (params && params->size()) {
-    std::vector<std::string> brackets = Tokenize(params->at(0));
-    if(brackets.size()!=2) {
-      cerr << "invalid xml-brackets value, must specify exactly 2 blank-delimited strings for XML tags opening and closing brackets" << endl;
-      exit(1);
-    }
-    m_xmlBrackets.first= brackets[0];
-    m_xmlBrackets.second=brackets[1];
-    VERBOSE(1,"XML tags opening and closing brackets for XML input are: "
-            << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl);
-  }
-
-  m_parameter->SetParameter(m_defaultNonTermOnlyForEmptyRange,
-                            "default-non-term-for-empty-range-only", false );
-
-}
-
 bool
 StaticData
 ::ini_output_options()
 {
-  const PARAM_VEC *params;
-
   // verbose level
   m_parameter->SetParameter(m_verboseLevel, "verbose", (size_t) 1);
-
-
-  m_parameter->SetParameter(m_recoverPath, "recover-input-path", false);
-  if (m_recoverPath && m_inputType == SentenceInput) {
-    TRACE_ERR("--recover-input-path should only be used with confusion net or word lattice input!\n");
-    m_recoverPath = false;
-  }
-
-  m_parameter->SetParameter(m_outputHypoScore, "output-hypo-score", false );
-  m_parameter->SetParameter(m_PrintAlignmentInfo, "print-alignment-info", false );
-  m_parameter->SetParameter(m_wordAlignmentSort, "sort-word-alignment", NoSort);
-  params = m_parameter->GetParam("alignment-output-file");
-  if (params && params->size()) {
-    m_alignmentOutputFile = Scan<std::string>(params->at(0));
-  }
-
-  m_parameter->SetParameter( m_PrintID, "print-id", false );
-  m_parameter->SetParameter( m_PrintPassthroughInformation, "print-passthrough", false );
-
-  params = m_parameter->GetParam("output-word-graph");
-  m_outputWordGraph = (params && params->size() == 2);
-
-  params = m_parameter->GetParam("output-search-graph");
-  if (params && params->size()) {
-    if (params->size() != 1) {
-      std::cerr << "ERROR: wrong format for switch -output-search-graph file";
-      return false;
-    }
-    m_outputSearchGraph = true;
-  }
-  // ... in extended format
-  else if (m_parameter->GetParam("output-search-graph-extended") &&
-           m_parameter->GetParam("output-search-graph-extended")->size()) {
-    if (m_parameter->GetParam("output-search-graph-extended")->size() != 1) {
-      std::cerr << "ERROR: wrong format for switch -output-search-graph-extended file";
-      return false;
-    }
-    m_outputSearchGraph = true;
-    m_outputSearchGraphExtended = true;
-  } else {
-    m_outputSearchGraph = false;
-  }
-
-  params = m_parameter->GetParam("output-search-graph-slf");
-  if (params && params->size()) {
-    m_outputSearchGraphSLF = true;
-  } else {
-    m_outputSearchGraphSLF = false;
-  }
-
-  params = m_parameter->GetParam("output-search-graph-hypergraph");
-  if (params && params->size()) {
-    m_outputSearchGraphHypergraph = true;
-  } else {
-    m_outputSearchGraphHypergraph = false;
-  }
-
-#ifdef HAVE_PROTOBUF
-  params = m_parameter->GetParam("output-search-graph-pb");
-  if (params && params->size()) {
-    if (params->size() != 1) {
-      cerr << "ERROR: wrong format for switch -output-search-graph-pb path";
-      return false;
-    }
-    m_outputSearchGraphPB = true;
-  } else
-    m_outputSearchGraphPB = false;
-#endif
-
-  m_parameter->SetParameter( m_unprunedSearchGraph, "unpruned-search-graph", false );
-  m_parameter->SetParameter( m_includeLHSInSearchGraph, "include-lhs-in-search-graph", false );
-
-  m_parameter->SetParameter<string>(m_outputUnknownsFile, "output-unknowns", "");
-
-  // printing source phrase spans
-  m_parameter->SetParameter( m_reportSegmentation, "report-segmentation", false );
-  m_parameter->SetParameter( m_reportSegmentationEnriched, "report-segmentation-enriched", false );
-
-  // print all factors of output translations
-  m_parameter->SetParameter( m_reportAllFactors, "report-all-factors", false );
-
-  //Print Translation Options
-  m_parameter->SetParameter(m_printTranslationOptions, "print-translation-option", false );
-
-  //Print All Derivations
-  m_parameter->SetParameter(m_printAllDerivations , "print-all-derivations", false );
-
-  // additional output
-  m_parameter->SetParameter<string>(m_detailedTranslationReportingFilePath,
-                                    "translation-details", "");
-  m_parameter->SetParameter<string>(m_detailedTreeFragmentsTranslationReportingFilePath,
-                                    "tree-translation-details", "");
-  m_parameter->SetParameter<string>(m_detailedAllTranslationReportingFilePath,
-                                    "translation-all-details", "");
-  m_parameter->SetParameter<long>(m_startTranslationId, "start-translation-id", 0);
-
-  //lattice samples
-  params = m_parameter->GetParam("lattice-samples");
-  if (params) {
-    if (params->size() ==2 ) {
-      m_latticeSamplesFilePath = params->at(0);
-      m_latticeSamplesSize = Scan<size_t>(params->at(1));
-    } else {
-      std::cerr <<"wrong format for switch -lattice-samples file size";
-      return false;
-    }
-  } else {
-    m_latticeSamplesSize = 0;
-  }
+  m_parameter->SetParameter<string>(m_outputUnknownsFile,
+                                    "output-unknowns", "");
   return true;
-}
-
-void
-StaticData
-::ini_compact_table_options()
-{
-  // Compact phrase table and reordering model
-  m_parameter->SetParameter(m_minphrMemory, "minphr-memory", false );
-  m_parameter->SetParameter(m_minlexrMemory, "minlexr-memory", false );
-}
-
-void
-StaticData
-::ini_lm_options()
-{
-  m_parameter->SetParameter<size_t>(m_lmcache_cleanup_threshold, "clean-lm-cache", 1);
 }
 
 // threads, timeouts, etc.
@@ -313,8 +141,6 @@ StaticData
 ::ini_performance_options()
 {
   const PARAM_VEC *params;
-  // m_parameter->SetParameter<size_t>(m_timeout_threshold, "time-out", -1);
-  // m_timeout = (GetTimeoutThreshold() == (size_t)-1) ? false : true;
 
   m_threadCount = 1;
   params = m_parameter->GetParam("threads");
@@ -348,116 +174,39 @@ StaticData
   return true;
 }
 
-void
-StaticData
-::ini_factor_maps()
-{
-  const PARAM_VEC *params;
-  // factor delimiter
-  m_parameter->SetParameter<string>(m_factorDelimiter, "factor-delimiter", "|");
-  if (m_factorDelimiter == "none") {
-    m_factorDelimiter = "";
-  }
-
-  //input factors
-  params = m_parameter->GetParam("input-factors");
-  if (params) {
-    m_inputFactorOrder = Scan<FactorType>(*params);
-  }
-  if(m_inputFactorOrder.empty()) {
-    m_inputFactorOrder.push_back(0);
-  }
-
-  //output factors
-  params = m_parameter->GetParam("output-factors");
-  if (params) {
-    m_outputFactorOrder = Scan<FactorType>(*params);
-  }
-  if(m_outputFactorOrder.empty()) {
-    // default. output factor 0
-    m_outputFactorOrder.push_back(0);
-  }
-}
-
-void
-StaticData
-::ini_oov_options()
-{
-  // unknown word processing
-  m_parameter->SetParameter(m_dropUnknown, "drop-unknown", false );
-  m_parameter->SetParameter(m_markUnknown, "mark-unknown", false );
-  m_parameter->SetParameter<string>(m_unknownWordPrefix, "unknown-word-prefix", "UNK" );
-  m_parameter->SetParameter<string>(m_unknownWordSuffix, "unknown-word-suffix", "" );
-
-  m_parameter->SetParameter(m_lmEnableOOVFeature, "lmodel-oov-feature", false);
-
-  //source word deletion
-  m_parameter->SetParameter(m_wordDeletionEnabled, "phrase-drop-allowed", false );
-
-  m_parameter->SetParameter(m_isAlwaysCreateDirectTranslationOption, "always-create-direct-transopt", false );
-}
-
-void
-StaticData
-::ini_zombie_options()
-{
-  //Disable discarding
-  m_parameter->SetParameter(m_disableDiscarding, "disable-discarding", false);
-
-}
-
 bool StaticData::LoadData(Parameter *parameter)
 {
-  ResetUserTime();
   m_parameter = parameter;
 
   const PARAM_VEC *params;
 
-  m_options.init(*parameter);
+  m_options->init(*parameter);
+  if (is_syntax(m_options->search.algo))
+    m_options->syntax.LoadNonTerminals(*parameter, FactorCollection::Instance());
 
-  if (IsSyntax())
+  if (is_syntax(m_options->search.algo))
     LoadChartDecodingParameters();
 
   // ORDER HERE MATTERS, SO DON'T CHANGE IT UNLESS YOU KNOW WHAT YOU ARE DOING!
   // input, output
-  ini_factor_maps();
-  ini_input_options();
+
+  m_parameter->SetParameter<string>(m_factorDelimiter, "factor-delimiter", "|");
+  m_parameter->SetParameter<size_t>(m_lmcache_cleanup_threshold, "clean-lm-cache", 1);
+
   m_bookkeeping_options.init(*parameter);
   if (!ini_output_options()) return false;
 
   // threading etc.
   if (!ini_performance_options()) return false;
 
-  // model loading
-  ini_compact_table_options();
-
-  // search
-  ini_oov_options();
-
-  // set m_nbest_options.enabled = true if necessary:
-  if (m_options.mbr.enabled
-      || m_options.mira
-      || m_options.search.consensus
-      || m_outputSearchGraph
-      || m_outputSearchGraphSLF
-      || m_outputSearchGraphHypergraph
-#ifdef HAVE_PROTOBUF
-      || m_outputSearchGraphPB
-#endif
-      || m_latticeSamplesFilePath.size()) {
-    m_options.nbest.enabled = true;
-  }
-
-  // S2T decoder
-  m_parameter->SetParameter(m_s2tParsingAlgorithm, "s2t-parsing-algorithm",
-                            RecursiveCYKPlus);
-
-
-  ini_zombie_options(); // probably dead, or maybe not
-
-  m_parameter->SetParameter(m_placeHolderFactor, "placeholder-factor", NOT_FOUND);
-
   // FEATURE FUNCTION INITIALIZATION HAPPENS HERE ===============================
+
+  // set class-specific default parameters
+#if defined HAVE_CMPH
+  LexicalReorderingTableCompact::SetStaticDefaultParameters(*parameter);
+  PhraseDictionaryCompact::SetStaticDefaultParameters(*parameter);
+#endif
+
   initialize_features();
 
   if (m_parameter->GetParam("show-weights") == NULL)
@@ -507,7 +256,8 @@ void StaticData::SetWeight(const FeatureFunction* sp, float weight)
   m_allWeights.Assign(sp,weight);
 }
 
-void StaticData::SetWeights(const FeatureFunction* sp, const std::vector<float>& weights)
+void StaticData::SetWeights(const FeatureFunction* sp,
+                            const std::vector<float>& weights)
 {
   m_allWeights.Resize();
   m_allWeights.Assign(sp,weights);
@@ -557,8 +307,8 @@ void StaticData::LoadChartDecodingParameters()
   LoadNonTerminals();
 
   // source label overlap
-  m_parameter->SetParameter(m_sourceLabelOverlap, "source-label-overlap", SourceLabelOverlapAdd);
-  m_parameter->SetParameter(m_ruleLimit, "rule-limit", DEFAULT_MAX_TRANS_OPT_SIZE);
+  m_parameter->SetParameter(m_sourceLabelOverlap, "source-label-overlap",
+                            SourceLabelOverlapAdd);
 
 }
 
@@ -572,6 +322,8 @@ void StaticData::LoadDecodeGraphs()
   params = m_parameter->GetParam("mapping");
   if (params && params->size()) {
     mappingVector = *params;
+  } else {
+    mappingVector.assign(1,"0 T 0");
   }
 
   params = m_parameter->GetParam("max-chart-span");
@@ -596,12 +348,16 @@ void StaticData::LoadDecodeGraphs()
   }
 }
 
-void StaticData::LoadDecodeGraphsOld(const vector<string> &mappingVector, const vector<size_t> &maxChartSpans)
+void
+StaticData::
+LoadDecodeGraphsOld(const vector<string> &mappingVector,
+                    const vector<size_t> &maxChartSpans)
 {
   const vector<PhraseDictionary*>& pts = PhraseDictionary::GetColl();
   const vector<GenerationDictionary*>& gens = GenerationDictionary::GetColl();
 
-  const std::vector<FeatureFunction*> *featuresRemaining = &FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> *featuresRemaining
+  = &FeatureFunction::GetFeatureFunctions();
   DecodeStep *prev = 0;
   size_t prevDecodeGraphInd = 0;
 
@@ -620,7 +376,8 @@ void StaticData::LoadDecodeGraphsOld(const vector<string> &mappingVector, const 
       // For specifying multiple translation model
       decodeGraphInd = Scan<size_t>(token[0]);
       //the vectorList index can only increment by one
-      UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd && decodeGraphInd != prevDecodeGraphInd + 1,
+      UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd
+                     && decodeGraphInd != prevDecodeGraphInd + 1,
                      "Malformed mapping");
       if (decodeGraphInd > prevDecodeGraphInd) {
         prev = NULL;
@@ -640,7 +397,7 @@ void StaticData::LoadDecodeGraphsOld(const vector<string> &mappingVector, const 
     switch (decodeType) {
     case Translate:
       if(index>=pts.size()) {
-        stringstream strme;
+        util::StringStream strme;
         strme << "No phrase dictionary with index "
               << index << " available!";
         UTIL_THROW(util::Exception, strme.str());
@@ -649,7 +406,7 @@ void StaticData::LoadDecodeGraphsOld(const vector<string> &mappingVector, const 
       break;
     case Generate:
       if(index>=gens.size()) {
-        stringstream strme;
+        util::StringStream strme;
         strme << "No generation dictionary with index "
               << index << " available!";
         UTIL_THROW(util::Exception, strme.str());
@@ -666,7 +423,7 @@ void StaticData::LoadDecodeGraphsOld(const vector<string> &mappingVector, const 
     UTIL_THROW_IF2(decodeStep == NULL, "Null decode step");
     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
       DecodeGraph *decodeGraph;
-      if (IsSyntax()) {
+      if (is_syntax(m_options->search.algo)) {
         size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
         VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
         decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
@@ -707,7 +464,8 @@ void StaticData::LoadDecodeGraphsNew(const std::vector<std::string> &mappingVect
 
     decodeGraphInd = Scan<size_t>(token[0]);
     //the vectorList index can only increment by one
-    UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd && decodeGraphInd != prevDecodeGraphInd + 1,
+    UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd
+                   && decodeGraphInd != prevDecodeGraphInd + 1,
                    "Malformed mapping");
     if (decodeGraphInd > prevDecodeGraphInd) {
       prev = NULL;
@@ -733,7 +491,7 @@ void StaticData::LoadDecodeGraphsNew(const std::vector<std::string> &mappingVect
     UTIL_THROW_IF2(decodeStep == NULL, "Null decode step");
     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
       DecodeGraph *decodeGraph;
-      if (IsSyntax()) {
+      if (is_syntax(m_options->search.algo)) {
         size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
         VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
         decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
@@ -783,17 +541,6 @@ void StaticData::ReLoadBleuScoreFeatureParameter(float weight)
 
 void StaticData::SetExecPath(const std::string &path)
 {
-  /*
-   namespace fs = boost::filesystem;
-
-   fs::path full_path( fs::initial_path<fs::path>() );
-
-   full_path = fs::system_complete( fs::path( path ) );
-
-   //Without file name
-   m_binPath = full_path.parent_path().string();
-   */
-
   // NOT TESTED
   size_t pos = path.rfind("/");
   if (pos !=  string::npos) {
@@ -810,13 +557,12 @@ const string &StaticData::GetBinDirectory() const
 float StaticData::GetWeightWordPenalty() const
 {
   float weightWP = GetWeight(&WordPenaltyProducer::Instance());
-  //VERBOSE(1, "Read weightWP from translation sytem: " << weightWP << std::endl);
   return weightWP;
 }
 
 void
-StaticData
-::InitializeForInput(ttasksptr const& ttask) const
+StaticData::
+InitializeForInput(ttasksptr const& ttask) const
 {
   const std::vector<FeatureFunction*> &producers
   = FeatureFunction::GetFeatureFunctions();
@@ -826,15 +572,15 @@ StaticData
       Timer iTime;
       iTime.start();
       ff.InitializeForInput(ttask);
-      VERBOSE(3,"InitializeForInput( " << ff.GetScoreProducerDescription() << " )"
-              << "= " << iTime << endl);
+      VERBOSE(3,"InitializeForInput( " << ff.GetScoreProducerDescription()
+              << " )" << "= " << iTime << endl);
     }
   }
 }
 
 void
-StaticData
-::CleanUpAfterSentenceProcessing(ttasksptr const& ttask) const
+StaticData::
+CleanUpAfterSentenceProcessing(ttasksptr const& ttask) const
 {
   const std::vector<FeatureFunction*> &producers
   = FeatureFunction::GetFeatureFunctions();
@@ -858,14 +604,13 @@ void StaticData::LoadFeatureFunctions()
       m_requireSortingAfterSourceContext = true;
     }
 
-    // if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
     if (dynamic_cast<PhraseDictionary*>(ff)) {
       doLoad = false;
     }
 
     if (doLoad) {
       VERBOSE(1, "Loading " << ff->GetScoreProducerDescription() << endl);
-      ff->Load();
+      ff->Load(options());
     }
   }
 
@@ -873,7 +618,7 @@ void StaticData::LoadFeatureFunctions()
   for (size_t i = 0; i < pts.size(); ++i) {
     PhraseDictionary *pt = pts[i];
     VERBOSE(1, "Loading " << pt->GetScoreProducerDescription() << endl);
-    pt->Load();
+    pt->Load(options());
   }
 
   CheckLEGACYPT();
@@ -1092,7 +837,7 @@ StaticData
 
   // FIXME Does this make sense for F2S?  Perhaps it should be changed once
   // FIXME the pipeline uses RuleTable consistently.
-  SearchAlgorithm algo = m_options.search.algo;
+  SearchAlgorithm algo = m_options->search.algo;
   if (algo == SyntaxS2T || algo == SyntaxT2S ||
       algo == SyntaxT2S_SCFG || algo == SyntaxF2S) {
     // Automatically override PhraseDictionary{Memory,Scope3}.  This will

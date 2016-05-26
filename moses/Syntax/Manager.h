@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/unordered_set.hpp>
 #include "moses/InputType.h"
 #include "moses/BaseManager.h"
 
@@ -50,7 +51,7 @@ public:
   virtual const SHyperedge *GetBestSHyperedge() const = 0;
 
 protected:
-  std::set<Word> m_oovs;
+  boost::unordered_set<Word> m_oovs;
 
 private:
   // Syntax-specific helper functions used to implement OutputNBest.

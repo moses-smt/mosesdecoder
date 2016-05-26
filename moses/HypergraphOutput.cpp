@@ -56,7 +56,7 @@ WriteHypos(const ChartHypothesisCollection& hypos,
   ChartHypothesisCollection::const_iterator iter;
   for (iter = hypos.begin() ; iter != hypos.end() ; ++iter) {
     ChartHypothesis &mainHypo = **iter;
-    if (StaticData::Instance().GetUnprunedSearchGraph() ||
+    if (m_options->output.DontPruneSearchGraph ||
         reachable.find(mainHypo.GetId()) != reachable.end()) {
       (*m_out) << m_lineNumber << " " << mainHypo << endl;
     }
@@ -90,7 +90,7 @@ WriteHypos(const ChartHypothesisCollection& hypos,
   ChartHypothesisCollection::const_iterator iter;
   for (iter = hypos.begin() ; iter != hypos.end() ; ++iter) {
     const ChartHypothesis* mainHypo = *iter;
-    if (!StaticData::Instance().GetUnprunedSearchGraph() &&
+    if (!m_options->output.DontPruneSearchGraph &&
         reachable.find(mainHypo->GetId()) == reachable.end()) {
       //Ignore non reachable nodes
       continue;

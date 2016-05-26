@@ -9,8 +9,8 @@ namespace Syntax
 namespace T2S
 {
 
-InputTreeBuilder::InputTreeBuilder()
-  : m_outputFactorOrder(StaticData::Instance().GetOutputFactorOrder())
+InputTreeBuilder::InputTreeBuilder(std::vector<FactorType> const& oFactors)
+  : m_outputFactorOrder(oFactors)
 {
 }
 
@@ -50,10 +50,10 @@ void InputTreeBuilder::CreateNodes(const TreeInput &in,
        p != xmlNodes.end(); ++p) {
     std::size_t start = p->m_range.GetStartPos();
     std::size_t end = p->m_range.GetEndPos();
-    nonTerms.push_back(XMLParseOutput(p->m_label, WordsRange(start+1, end+1)));
+    nonTerms.push_back(XMLParseOutput(p->m_label, Range(start+1, end+1)));
   }
   // Add a top-level node that also covers <s> and </s>.
-  nonTerms.push_back(XMLParseOutput(topLevelLabel, WordsRange(0, numWords-1)));
+  nonTerms.push_back(XMLParseOutput(topLevelLabel, Range(0, numWords-1)));
 
   // Allocate space for the InputTree nodes.  In the case of out.nodes, this
   // step is essential because once created the PVertex objects must not be
@@ -75,7 +75,7 @@ void InputTreeBuilder::CreateNodes(const TreeInput &in,
       // Add a node for each terminal to the left of or below the first
       // nonTerm child of the subtree.
       for (int i = prevEnd+1; i <= end; ++i) {
-        PVertex v(WordsRange(i, i), in.GetWord(i));
+        PVertex v(Range(i, i), in.GetWord(i));
         out.nodes.push_back(InputTree::Node(v));
         out.nodesAtPos[i].push_back(&out.nodes.back());
       }
@@ -83,7 +83,7 @@ void InputTreeBuilder::CreateNodes(const TreeInput &in,
     // Add a node for the non-terminal.
     Word w(true);
     w.CreateFromString(Moses::Output, m_outputFactorOrder, p->m_label, true);
-    PVertex v(WordsRange(start, end), w);
+    PVertex v(Range(start, end), w);
     out.nodes.push_back(InputTree::Node(v));
     out.nodesAtPos[start].push_back(&out.nodes.back());
 

@@ -7,12 +7,13 @@
 #include <string>
 #include "moses/FeatureVector.h"
 #include "moses/TypeDef.h"
-
+#include "moses/parameters/AllOptions.h"
 #include <boost/shared_ptr.hpp>
 
 namespace Moses
 {
 
+class AllOptions;
 class Phrase;
 class TargetPhrase;
 class TranslationOptionList;
@@ -21,8 +22,8 @@ class Hypothesis;
 class ChartHypothesis;
 class InputType;
 class ScoreComponentCollection;
-class WordsBitmap;
-class WordsRange;
+class Bitmap;
+class Range;
 class FactorMask;
 class InputPath;
 class StackVec;
@@ -46,10 +47,12 @@ protected:
   size_t m_index; // index into vector covering ALL feature function values
   std::vector<bool> m_tuneableComponents;
   size_t m_numTuneableComponents;
+  AllOptions::ptr m_options;
   //In case there's multiple producers with the same description
   static std::multiset<std::string> description_counts;
 
-  void Register();
+public:
+  static void Register(FeatureFunction* ff);
 private:
   // void Initialize(const std::string &line);
   void ParseLine(const std::string &line);
@@ -62,13 +65,19 @@ public:
   static FeatureFunction &FindFeatureFunction(const std::string& name);
   static void Destroy();
 
-  FeatureFunction(const std::string &line, bool initializeNow);
-  FeatureFunction(size_t numScoreComponents, const std::string &line);
+  FeatureFunction(const std::string &line, bool registerNow);
+  FeatureFunction(size_t numScoreComponents, const std::string &line, bool registerNow = true);
   virtual bool IsStateless() const = 0;
   virtual ~FeatureFunction();
 
   //! override to load model files
-  virtual void Load() {
+  virtual void Load(AllOptions::ptr const& opts) {
+    m_options = opts;
+  }
+
+  AllOptions::ptr const&
+  options() const {
+    return m_options;
   }
 
   static void ResetDescriptionCounts() {
@@ -151,7 +160,7 @@ public:
   virtual void
   EvaluateInIsolation(const Phrase &source, const TargetPhrase &targetPhrase,
                       ScoreComponentCollection& scoreBreakdown,
-                      ScoreComponentCollection& estimatedFutureScore) const = 0;
+                      ScoreComponentCollection& estimatedScores) const = 0;
 
   // for context-dependent processing
   static void SetupAll(TranslationTask const& task);
@@ -163,13 +172,13 @@ public:
   // 'stackVec' is a vector of chart cells that the RHS non-terms cover.
   // It is guaranteed to be in the same order as the non-terms in the source phrase.
   // For pb models, stackvec is NULL.
-  // No FF should set estimatedFutureScore in both overloads!
+  // No FF should set estimatedScores in both overloads!
   virtual void EvaluateWithSourceContext(const InputType &input
                                          , const InputPath &inputPath
                                          , const TargetPhrase &targetPhrase
                                          , const StackVec *stackVec
                                          , ScoreComponentCollection &scoreBreakdown
-                                         , ScoreComponentCollection *estimatedFutureScore = NULL) const = 0;
+                                         , ScoreComponentCollection *estimatedScores = NULL) const = 0;
 
   // This method is called once all the translation options are retrieved from the phrase table, and
   // just before search.
@@ -177,7 +186,7 @@ public:
   // 'stackVec' is a vector of chart cells that the RHS non-terms cover.
   // It is guaranteed to be in the same order as the non-terms in the source phrase.
   // For pb models, stackvec is NULL.
-  // No FF should set estimatedFutureScore in both overloads!
+  // No FF should set estimatedScores in both overloads!
   virtual void EvaluateTranslationOptionListWithSourceContext(const InputType &input
       , const TranslationOptionList &translationOptionList) const = 0;
 

@@ -782,7 +782,8 @@ sub hs_scan_line {
     if ($line =~ /^Trans Opt/) {
         # Old format
         $line =~ /^Trans Opt (\d+) \[(\d+)\.\.(\d+)\]: (.+)  : (\S+) \-\>(.+) :([\(\),\d\- ]*): pC=[\d\.\-e]+, c=/ ||
-        $line =~ /^Trans Opt (\d+) \[(\d+)\.\.(\d+)\]: (.+)  : (\S+) \-\>\S+  \-\> (.+) :([\(\),\d\- ]*): c=/ || return 0;
+        $line =~ /^Trans Opt (\d+) \[(\d+)\.\.(\d+)\]: (.+)  : (\S+) \-\>\S+  \-\> (.+) :([\(\),\d\- ]*): c=/ || 
+        $line =~ /^Trans Opt (\d+) \[(\d+)\.\.(\d+)\]: (.+)  : (\S+) \-\>\S+  \-\> (.+) :([\(\),\d\- ]*): term=.*: nonterm=.*: c=/ || return 0;
         my ($sentence,$start,$end,$spans,$rule_lhs,$rule_rhs,$alignment) = ($1,$2,$3,$4,$5,$6,$7);
 
         ${$ref_sentence} = $sentence;
@@ -1202,7 +1203,8 @@ sub process_search_graph {
     if (/^(\d+) (\d+)\-?\>?(\S*) (\S+) =\> (.+) :(.*): pC=([\de\-\.]+), c=([\de\-\.]+) \[(\d+)\.\.(\d+)\] (.*)\[total=([\d\-\.]+)\] \<\</) {
       ($sentence,$id,$recomb,$lhs,$output,$alignment,$rule_score,$heuristic_rule_score,$from,$to,$children,$hyp_score) = ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12);
     }
-    elsif (/^(\d+) (\d+)\-?\>?(\S*) (\S+) =\> (.+) :(.*): c=([\de\-\.]+) \[(\d+)\.\.(\d+)\] (.*)\[total=([\d\-\.]+)\] core/) {
+    elsif (/^(\d+) (\d+)\-?\>?(\S*) (\S+) =\> (.+) :(.*): c=([\de\-\.]+) \[(\d+)\.\.(\d+)\] (.*)\[total=([\de\-\.]+)\] core/ || 
+    /^(\d+) (\d+)\-?\>?(\S*) (\S+) =\> (.+) :(.*): c=([\de\-\.]+) core=\(.*\)  \[(\d+)\.\.(\d+)\] (.*)\[total=([\de\-\.]+)\] core/) {
       ($sentence,$id,$recomb,$lhs,$output,$alignment,$rule_score,$from,$to,$children,$hyp_score) = ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12);
       $heuristic_rule_score = $rule_score; # hmmmm....
     }

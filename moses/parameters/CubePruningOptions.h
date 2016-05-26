@@ -12,15 +12,14 @@ namespace Moses
     size_t  pop_limit;
     size_t  diversity;
     bool lazy_scoring;
+    bool deterministic_search;
 
     bool init(Parameter const& param);
     CubePruningOptions(Parameter const& param);
-    CubePruningOptions() {};
+    CubePruningOptions();
 
-#ifdef HAVE_XMLRPC_C
     bool 
     update(std::map<std::string,xmlrpc_c::value>const& params);
-#endif
   };
 
 }

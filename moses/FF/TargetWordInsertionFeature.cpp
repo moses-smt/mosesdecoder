@@ -34,8 +34,9 @@ void TargetWordInsertionFeature::SetParameter(const std::string& key, const std:
   }
 }
 
-void TargetWordInsertionFeature::Load()
+void TargetWordInsertionFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   if (m_filename.empty())
     return;
 
@@ -56,7 +57,7 @@ void TargetWordInsertionFeature::Load()
 void TargetWordInsertionFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScores) const
 {
   const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
   ComputeFeatures(source, targetPhrase, &scoreBreakdown, alignmentInfo);

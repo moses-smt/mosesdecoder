@@ -24,8 +24,8 @@ namespace sapt
     std::vector<std::pair<size_t, std::vector<unsigned char> > > my_aln; 
     // internal word alignment
 
-    uint32_t ofwd[Moses::LRModel::NONE+1]; //  forward distortion type counts
-    uint32_t obwd[Moses::LRModel::NONE+1]; // backward distortion type counts
+    uint32_t ofwd[LRModel::NONE+1]; //  forward distortion type counts
+    uint32_t obwd[LRModel::NONE+1]; // backward distortion type counts
 
   public:
     std::map<uint32_t,uint32_t> indoc;
@@ -39,7 +39,7 @@ namespace sapt
 
     std::vector<std::pair<size_t, std::vector<unsigned char> > > const & aln() const;
 
-    void 
+    size_t 
     add(float w, float b, std::vector<unsigned char> const& a, uint32_t const cnt2, 
 	uint32_t fwd_orient, uint32_t bwd_orient, int const docid);
 
@@ -48,8 +48,8 @@ namespace sapt
     bool valid();
     uint32_t dcnt_fwd(PhraseOrientation const idx) const;
     uint32_t dcnt_bwd(PhraseOrientation const idx) const;
-    void fill_lr_vec(Moses::LRModel::Direction const& dir,
-                     Moses::LRModel::ModelType const& mdl,
+    void fill_lr_vec(LRModel::Direction const& dir,
+                     LRModel::ModelType const& mdl,
                      std::vector<float>& v);
   };
 }

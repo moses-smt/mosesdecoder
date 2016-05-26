@@ -60,12 +60,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #endif
 
 #include "ExportInterface.h"
+
 #ifdef HAVE_XMLRPC_C
-#include <xmlrpc-c/base.hpp>
-#include <xmlrpc-c/registry.hpp>
-#include <xmlrpc-c/server_abyss.hpp>
-#include "server/Server.h"
+#include "moses/server/Server.h"
 #endif
+#include <signal.h>
 
 using namespace std;
 using namespace Moses;
@@ -86,6 +85,7 @@ SimpleTranslationInterface::SimpleTranslationInterface(const string &mosesIni): 
     cerr << "Error; Cannot load parameters at " << mosesIni<<endl;
     exit(1);
   }
+  ResetUserTime();
   if (!StaticData::LoadDataStatic(&m_params, mosesIni.c_str())) {
     cerr << "Error; Cannot load static data in file " << mosesIni<<endl;
     exit(1);
@@ -101,7 +101,7 @@ SimpleTranslationInterface::~SimpleTranslationInterface()
 //the simplified version of string input/output translation
 string SimpleTranslationInterface::translate(const string &inputString)
 {
-  boost::shared_ptr<Moses::IOWrapper> ioWrapper(new IOWrapper);
+  boost::shared_ptr<Moses::IOWrapper> ioWrapper(new IOWrapper(*StaticData::Instance().options()));
   // main loop over set of input sentences
   size_t sentEnd = inputString.rfind('\n'); //find the last \n, the input stream has to be appended with \n to be translated
   const string &newString = sentEnd != string::npos ? inputString : inputString + '\n';
@@ -141,13 +141,32 @@ void SimpleTranslationInterface::DestroyFeatureFunctionStatic()
 
 Parameter params;
 
+void
+signal_handler(int signum)
+{
+  if (signum == SIGALRM) {
+    exit(0); // that's what we expected from the child process after forking
+  } else if (signum == SIGTERM || signum == SIGKILL) {
+    exit(0);
+  } else {
+    std::cerr << "Unexpected signal " << signum << std::endl;
+    exit(signum);
+  }
+}
+
 //! run moses in server mode
 int
 run_as_server()
 {
 #ifdef HAVE_XMLRPC_C
+  if (params.GetParam("daemon")) {
+    kill(getppid(),SIGALRM);
+  }
   MosesServer::Server server(params);
   return server.run(); // actually: don't return. see Server::run()
+#else
+  UTIL_THROW2("Moses was compiled without xmlrpc-c. "
+              << "No server functionality available.");
 #endif
 }
 
@@ -163,7 +182,7 @@ batch_run()
   IFVERBOSE(1) PrintUserTime("Created input-output object");
 
   // set up read/writing class:
-  boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper);
+  boost::shared_ptr<IOWrapper> ioWrapper(new IOWrapper(*staticData.options()));
   UTIL_THROW_IF2(ioWrapper == NULL, "Error; Failed to create IO object"
                  << " [" << HERE << "]");
 
@@ -191,7 +210,7 @@ batch_run()
   // ... or the surrounding context (--context-window ...)
   size_t size_t_max = std::numeric_limits<size_t>::max();
   bool use_context_window = ioWrapper->GetLookAhead() || ioWrapper->GetLookBack();
-  bool use_context = use_context_window || context_string.size();
+  // bool use_context = use_context_window || context_string.size();
   bool use_sliding_context_window = (use_context_window
                                      && ioWrapper->GetLookAhead() != size_t_max);
 
@@ -225,11 +244,12 @@ batch_run()
       if(!use_sliding_context_window)
         cw = NULL;
     }
+
     if (context_window)
       task->SetContextWindow(context_window);
 
-    if (context_weights != "")
-      task->SetContextWeights(context_weights);
+    if (context_weights != "" && !task->GetScope()->GetContextWeights())
+      task->GetScope()->SetContextWeights(context_weights);
 
     // Allow for (sentence-)context-specific processing prior to
     // decoding. This can be used, for example, for context-sensitive
@@ -287,7 +307,7 @@ batch_run()
 }
 
 /** Called by main function of the command line version of the decoder **/
-int decoder_main(int argc, char** argv)
+int decoder_main(int argc, char const** argv)
 {
 #ifdef NDEBUG
   try
@@ -315,20 +335,32 @@ int decoder_main(int argc, char** argv)
 
     // initialize all "global" variables, which are stored in StaticData
     // note: this also loads models such as the language model, etc.
+    ResetUserTime();
     if (!StaticData::LoadDataStatic(&params, argv[0]))
       exit(1);
 
+    //
+#if 1
+    pid_t pid;
+    if (params.GetParam("daemon")) {
+      pid = fork();
+      if (pid) {
+        pause();  // parent process
+        exit(0);
+      }
+    }
+#endif
     // setting "-show-weights" -> just dump out weights and exit
     if (params.isParamSpecified("show-weights")) {
       ShowWeights();
       exit(0);
     }
 
-    if (params.GetParam("server"))
+    if (params.GetParam("server")) {
+      std::cerr << "RUN SERVER at pid " << pid << std::endl;
       return run_as_server();
-    else
+    } else
       return batch_run();
-
   }
 #ifdef NDEBUG
   catch (const std::exception &e) {

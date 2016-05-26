@@ -685,7 +685,7 @@ void ExtractGHKM::WriteGlueGrammar(
     out << " {{SourceLabels 2 1 " << sourceLabelSentenceStart << " 1 1 " << sourceLabelGlueTop << " 1}}";
   }
   if (options.phraseOrientation) {
-    out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
+    out << " {{Orientation 1 1 0.5 0.5 1 1 0.5 0.5}}";
   }
   out << std::endl;
 
@@ -700,7 +700,7 @@ void ExtractGHKM::WriteGlueGrammar(
     out << " {{SourceLabels 4 1 " << sourceLabelSentenceStart << " " << sourceLabelGlueTop << " " << sourceLabelSentenceEnd << " 1 1 " << sourceLabelGlueTop << " 1}}";
   }
   if (options.phraseOrientation) {
-    out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
+    out << " {{Orientation 1 1 0.5 0.5 1 1 0.5 0.5}}";
   }
   out << std::endl;
 
@@ -718,7 +718,7 @@ void ExtractGHKM::WriteGlueGrammar(
       out << " {{SourceLabels 4 1 " << sourceLabelSentenceStart << " " << sourceLabelGlueX << " " << sourceLabelSentenceEnd << " 1 1 " << sourceLabelGlueTop << " 1}}";
     }
     if (options.phraseOrientation) {
-      out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
+      out << " {{Orientation 1 1 0.5 0.5 1 1 0.5 0.5}}";
     }
     out << std::endl;
   }
@@ -734,7 +734,7 @@ void ExtractGHKM::WriteGlueGrammar(
       out << " {{SourceLabels 3 1 " << sourceLabelGlueTop << " " << sourceLabelGlueX << " 1 1 " << sourceLabelGlueTop << " 1}}";
     }
     if (options.phraseOrientation) {
-      out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
+      out << " {{Orientation 1 1 0.5 0.5 1 1 0.5 0.5}}";
     }
     out << std::endl;
   }
@@ -748,7 +748,7 @@ void ExtractGHKM::WriteGlueGrammar(
     out << " {{SourceLabels 3 1 " << sourceLabelGlueTop << " " << sourceLabelGlueX << " 1 1 " << sourceLabelGlueTop << " 1}}";
   }
   if (options.phraseOrientation) {
-    out << " {{Orientation 0.25 0.25 0.25 0.25 0.25 0.25 0.25 0.25}}";
+    out << " {{Orientation 1 1 0.5 0.5 1 1 0.5 0.5}}";
   }
   out << std::endl;
 }

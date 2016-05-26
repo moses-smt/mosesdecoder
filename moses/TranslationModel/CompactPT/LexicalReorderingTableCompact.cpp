@@ -21,9 +21,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include "LexicalReorderingTableCompact.h"
+#include "moses/parameters/OOVHandlingOptions.h"
 
 namespace Moses
 {
+bool LexicalReorderingTableCompact::s_inMemoryByDefault = false;
 
 LexicalReorderingTableCompact::
 LexicalReorderingTableCompact(const std::string& filePath,
@@ -31,7 +33,7 @@ LexicalReorderingTableCompact(const std::string& filePath,
                               const std::vector<FactorType>& e_factors,
                               const std::vector<FactorType>& c_factors)
   : LexicalReorderingTable(f_factors, e_factors, c_factors)
-  , m_inMemory(StaticData::Instance().UseMinlexrInMemory())
+  , m_inMemory(s_inMemoryByDefault)
   , m_numScoreComponent(6)
   , m_multipleScoreTrees(true)
   , m_hash(10, 16)
@@ -45,7 +47,7 @@ LexicalReorderingTableCompact(const std::vector<FactorType>& f_factors,
                               const std::vector<FactorType>& e_factors,
                               const std::vector<FactorType>& c_factors)
   : LexicalReorderingTable(f_factors, e_factors, c_factors)
-  , m_inMemory(StaticData::Instance().UseMinlexrInMemory())
+  , m_inMemory(s_inMemoryByDefault)
   , m_numScoreComponent(6)
   , m_multipleScoreTrees(true)
   , m_hash(10, 16)
@@ -70,7 +72,7 @@ GetScore(const Phrase& f, const Phrase& e, const Phrase& c)
     key = MakeKey(f, e, c);
   else
     for(size_t i = 0; i <= c.GetSize(); ++i) {
-      Phrase sub_c(c.GetSubString(WordsRange(i,c.GetSize()-1)));
+      Phrase sub_c(c.GetSubString(Range(i,c.GetSize()-1)));
       key = MakeKey(f,e,sub_c);
     }
 
@@ -155,10 +157,12 @@ LexicalReorderingTableCompact::
 Load(std::string filePath)
 {
   std::FILE* pFile = std::fopen(filePath.c_str(), "r");
-  if(m_inMemory)
-    m_hash.Load(pFile);
-  else
-    m_hash.LoadIndex(pFile);
+  UTIL_THROW_IF2(pFile == NULL, "File " << filePath << " could not be opened");
+
+  //if(m_inMemory)
+  m_hash.Load(pFile);
+  //else
+  //m_hash.LoadIndex(pFile);
 
   size_t read = 0;
   read += std::fread(&m_numScoreComponent, sizeof(m_numScoreComponent), 1, pFile);
@@ -179,5 +183,13 @@ Load(std::string filePath)
   else
     m_scoresMapped.load(pFile, true);
 }
+
+void
+LexicalReorderingTableCompact::
+SetStaticDefaultParameters(Parameter const& param)
+{
+  param.SetParameter(s_inMemoryByDefault, "minlexr-memory", false);
+}
+
 
 }

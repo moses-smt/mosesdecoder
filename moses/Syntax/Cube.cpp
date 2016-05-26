@@ -93,7 +93,7 @@ SHyperedge *Cube::CreateHyperedge(const std::vector<int> &coordinates)
   SVertex *head = new SVertex();
   head->best = hyperedge;
   head->pvertex = 0;  // FIXME???
-  head->state.resize(
+  head->states.resize(
     StatefulFeatureFunction::GetStatefulFeatureFunctions().size());
   hyperedge->head = head;
 
@@ -101,10 +101,6 @@ SHyperedge *Cube::CreateHyperedge(const std::vector<int> &coordinates)
   for (std::size_t i = 0; i < coordinates.size()-1; ++i) {
     boost::shared_ptr<SVertex> pred = (*m_bundle.stacks[i])[coordinates[i]];
     hyperedge->tail[i] = pred.get();
-    if (pred->best) {
-      hyperedge->label.scoreBreakdown.PlusEquals(
-        pred->best->label.scoreBreakdown);
-    }
   }
 
   hyperedge->label.inputWeight = m_bundle.inputWeight;
@@ -112,8 +108,7 @@ SHyperedge *Cube::CreateHyperedge(const std::vector<int> &coordinates)
   hyperedge->label.translation =
     *(m_bundle.translations->begin()+coordinates.back());
 
-  hyperedge->label.scoreBreakdown.PlusEquals(
-    hyperedge->label.translation->GetScoreBreakdown());
+  // Calculate feature deltas.
 
   const StaticData &staticData = StaticData::Instance();
 
@@ -123,7 +118,7 @@ SHyperedge *Cube::CreateHyperedge(const std::vector<int> &coordinates)
     StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i) {
     if (!staticData.IsFeatureFunctionIgnored(*sfs[i])) {
-      sfs[i]->EvaluateWhenApplied(*hyperedge, &hyperedge->label.scoreBreakdown);
+      sfs[i]->EvaluateWhenApplied(*hyperedge, &hyperedge->label.deltas);
     }
   }
 
@@ -131,13 +126,25 @@ SHyperedge *Cube::CreateHyperedge(const std::vector<int> &coordinates)
     StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i) {
     if (!staticData.IsFeatureFunctionIgnored(*ffs[i])) {
-      head->state[i] =
-        ffs[i]->EvaluateWhenApplied(*hyperedge, i,
-                                    &hyperedge->label.scoreBreakdown);
+      head->states[i] =
+        ffs[i]->EvaluateWhenApplied(*hyperedge, i, &hyperedge->label.deltas);
     }
   }
 
-  hyperedge->label.score = hyperedge->label.scoreBreakdown.GetWeightedScore();
+  // Calculate future score.
+
+  hyperedge->label.futureScore =
+    hyperedge->label.translation->GetScoreBreakdown().GetWeightedScore();
+
+  hyperedge->label.futureScore += hyperedge->label.deltas.GetWeightedScore();
+
+  for (std::vector<SVertex*>::const_iterator p = hyperedge->tail.begin();
+       p != hyperedge->tail.end(); ++p) {
+    const SVertex *pred = *p;
+    if (pred->best) {
+      hyperedge->label.futureScore += pred->best->label.futureScore;
+    }
+  }
 
   return hyperedge;
 }

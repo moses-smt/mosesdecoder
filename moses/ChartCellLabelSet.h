@@ -44,7 +44,7 @@ public:
   typedef MapType::const_iterator const_iterator;
   typedef MapType::iterator iterator;
 
-  ChartCellLabelSet(const WordsRange &coverage)
+  ChartCellLabelSet(const Range &coverage)
     : m_coverage(coverage)
     , m_map(FactorCollection::Instance().GetNumNonTerminals(), NULL)
     , m_size(0) { }
@@ -139,7 +139,7 @@ public:
   }
 
 private:
-  const WordsRange &m_coverage;
+  const Range &m_coverage;
   MapType m_map;
   size_t m_size;
 };

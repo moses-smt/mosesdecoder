@@ -29,8 +29,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-InputType::InputType(long translationId)
-  : m_translationId(translationId)
+InputType::InputType(AllOptions::ptr const& opts, long translationId)
+  : m_options(opts)
+  , m_translationId(translationId)
+  , m_reorderingConstraint(opts->reordering.max_distortion)
 {
   m_frontSpanCoveredLength = 0;
   m_sourceCompleted.resize(0);
@@ -47,7 +49,7 @@ std::ostream& operator<<(std::ostream& out,InputType const& x)
 }
 
 // default implementation is one column equals one word
-int InputType::ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const
+int InputType::ComputeDistortionDistance(const Range& prev, const Range& current) const
 {
   int dist = 0;
   if (prev.GetNumWordsCovered() == 0) {

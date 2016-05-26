@@ -1,6 +1,7 @@
 #pragma once
 
 #include "StatelessFeatureFunction.h"
+#include "moses/parameters/AllOptions.h"
 
 namespace Moses
 {
@@ -20,14 +21,14 @@ public:
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {};
+                           , ScoreComponentCollection &estimatedScores) const {};
 
   void EvaluateWithSourceContext(const InputType &input
                                  , const InputPath &inputPath
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+                                 , ScoreComponentCollection *estimatedScores = NULL) const;
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
       , const TranslationOptionList &translationOptionList) const {
@@ -40,6 +41,7 @@ public:
   void EvaluateWhenApplied(const ChartHypothesis &hypo,
                            ScoreComponentCollection* accumulator) const {};
 
+  void Load(AllOptions::ptr const& opts);
 };
 
 

@@ -26,7 +26,7 @@
 #include <cstdlib>
 
 #include <boost/functional/hash.hpp>
-
+#include "TypeDef.h"
 namespace Moses
 {
 
@@ -83,7 +83,8 @@ public:
     return m_collection.size();
   }
 
-  std::vector< const std::pair<size_t,size_t>* > GetSortedAlignments() const;
+  std::vector< const std::pair<size_t,size_t>* >
+  GetSortedAlignments(WordAlignmentSort SortOrder) const;
 
   std::vector<size_t> GetSourceIndex2PosMap() const;
 

@@ -17,12 +17,11 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
+#include <boost/test/unit_test.hpp>
 #include "MockHypothesis.h"
 #include "TranslationOption.h"
 #include "TranslationTask.h"
-
-#include <boost/test/unit_test.hpp>
-
+#include "Bitmaps.h"
 
 using namespace Moses;
 using namespace std;
@@ -39,27 +38,34 @@ MockHypothesisGuard
     m_uwp("UnknownWordPenalty"), m_dist("Distortion")
 {
   BOOST_CHECK_EQUAL(alignments.size(), targetSegments.size());
-  std::vector<Moses::FactorType> factors(1,0);
-  m_sentence.reset(new Sentence(0, sourceSentence, &factors));
+  AllOptions::ptr opts(new AllOptions(*StaticData::Instance().options()));
+  m_sentence.reset(new Sentence(opts, 0, sourceSentence));
   m_ttask = TranslationTask::create(m_sentence);
   m_manager.reset(new Manager(m_ttask));
 
   //Initial empty hypothesis
+  Bitmaps bitmaps(m_sentence.get()->GetSize(),
+                  m_sentence.get()->m_sourceCompleted);
   m_manager->ResetSentenceStats(*m_sentence);
-  m_hypothesis = Hypothesis::Create(*m_manager, *m_sentence, m_initialTransOpt);
+
+  const Bitmap &initBitmap = bitmaps.GetInitialBitmap();
+  m_hypothesis = new Hypothesis(*m_manager, *m_sentence, m_initialTransOpt,
+                                initBitmap, m_manager->GetNextHypoId());
 
   //create the chain
   vector<Alignment>::const_iterator ai = alignments.begin();
   vector<string>::const_iterator ti = targetSegments.begin();
   for (; ti != targetSegments.end() && ai != alignments.end(); ++ti,++ai) {
     Hypothesis* prevHypo = m_hypothesis;
-    WordsRange wordsRange(ai->first,ai->second);
+    Range range(ai->first,ai->second);
+    const Bitmap &newBitmap = bitmaps.GetBitmap(prevHypo->GetWordsBitmap(), range);
     m_targetPhrases.push_back(TargetPhrase(NULL));
-    // m_targetPhrases.back().CreateFromString(Input, factors, *ti, "|", NULL);
+    vector<FactorType> const& factors = opts->output.factor_order;
     m_targetPhrases.back().CreateFromString(Input, factors, *ti, NULL);
     m_toptions.push_back(new TranslationOption
-                         (wordsRange,m_targetPhrases.back()));
-    m_hypothesis =  Hypothesis::Create(*prevHypo,*m_toptions.back());
+                         (range,m_targetPhrases.back()));
+    m_hypothesis = new Hypothesis(*prevHypo, *m_toptions.back(), newBitmap,
+                                  m_manager->GetNextHypoId());
   }
 
 

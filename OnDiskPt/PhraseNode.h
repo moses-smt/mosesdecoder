@@ -92,7 +92,10 @@ public:
   }
 
   const PhraseNode *GetChild(const Word &wordSought, OnDiskWrapper &onDiskWrapper) const;
-  const TargetPhraseCollection *GetTargetPhraseCollection(size_t tableLimit, OnDiskWrapper &onDiskWrapper) const;
+
+  TargetPhraseCollection::shared_ptr
+  GetTargetPhraseCollection(size_t tableLimit,
+                            OnDiskWrapper &onDiskWrapper) const;
 
   void AddCounts(const std::vector<float> &counts) {
     m_counts = counts;

@@ -25,7 +25,7 @@ public:
   ~OpSequenceModel();
 
   void readLanguageModel(const char *);
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
@@ -37,22 +37,10 @@ public:
     int /* featureID - used to index the state in the previous hypotheses */,
     ScoreComponentCollection* accumulator) const;
 
-  void EvaluateWithSourceContext(const InputType &input
-                                 , const InputPath &inputPath
-                                 , const TargetPhrase &targetPhrase
-                                 , const StackVec *stackVec
-                                 , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
-  }
-
-  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const {
-  }
-
   void  EvaluateInIsolation(const Phrase &source
                             , const TargetPhrase &targetPhrase
                             , ScoreComponentCollection &scoreBreakdown
-                            , ScoreComponentCollection &estimatedFutureScore) const;
+                            , ScoreComponentCollection &estimatedScores) const;
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 

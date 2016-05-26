@@ -39,7 +39,7 @@
 #include "moses/Util.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h"
 #include "moses/TranslationModel/fuzzy-match/FuzzyMatchWrapper.h"
 #include "moses/TranslationModel/fuzzy-match/SentenceAlignment.h"
@@ -93,8 +93,9 @@ PhraseDictionaryFuzzyMatch::~PhraseDictionaryFuzzyMatch()
   delete m_FuzzyMatchWrapper;
 }
 
-void PhraseDictionaryFuzzyMatch::Load()
+void PhraseDictionaryFuzzyMatch::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   SetFeaturesToApply();
 
   m_FuzzyMatchWrapper = new tmmt::FuzzyMatchWrapper(m_config[0], m_config[1], m_config[2]);
@@ -241,7 +242,7 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(ttasksptr const& ttask)
                                                , &alignString        = tokens[3];
 
     bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
-    if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
+    if (isLHSEmpty && !ttask->options()->unk.word_deletion_enabled) {
       TRACE_ERR( ptFileName << ":" << count << ": pt entry contains empty target, skipping\n");
       continue;
     }
@@ -282,8 +283,10 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(ttasksptr const& ttask)
     targetPhrase->GetScoreBreakdown().Assign(this, scoreVector);
     targetPhrase->EvaluateInIsolation(sourcePhrase, GetFeaturesToApply());
 
-    TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(rootNode, sourcePhrase, *targetPhrase, sourceLHS);
-    phraseColl.Add(targetPhrase);
+    TargetPhraseCollection::shared_ptr phraseColl
+    = GetOrCreateTargetPhraseCollection(rootNode, sourcePhrase,
+                                        *targetPhrase, sourceLHS);
+    phraseColl->Add(targetPhrase);
 
     count++;
 
@@ -301,10 +304,12 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(ttasksptr const& ttask)
   //removedirectoryrecursively(dirName);
 }
 
-TargetPhraseCollection &PhraseDictionaryFuzzyMatch::GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeMemory &rootNode
-    , const Phrase &source
-    , const TargetPhrase &target
-    , const Word *sourceLHS)
+TargetPhraseCollection::shared_ptr
+PhraseDictionaryFuzzyMatch::
+GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeMemory &rootNode
+                                  , const Phrase &source
+                                  , const TargetPhrase &target
+                                  , const Word *sourceLHS)
 {
   PhraseDictionaryNodeMemory &currNode = GetOrCreateNode(rootNode, source, target, sourceLHS);
   return currNode.GetTargetPhraseCollection();

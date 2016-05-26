@@ -38,6 +38,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/InputPath.h"
 #include "moses/Parameter.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
+#include "moses/Timer.h"
 #include "moses/StaticData.h"
 
 #include "util/file_piece.hh"
@@ -53,7 +54,7 @@ using namespace std;
 namespace po = boost::program_options;
 typedef multimap<float,string> Lines;
 
-static void usage(const po::options_description& desc, char** argv)
+static void usage(const po::options_description& desc, char const** argv)
 {
   cerr << "Usage: " + string(argv[0]) +  " [options] input-file output-file" << endl;
   cerr << desc << endl;
@@ -94,7 +95,7 @@ static void outputTopN(const Phrase& sourcePhrase, const multimap<float,const Ta
       out << endl;
     }
 }*/
-int main(int argc, char** argv)
+int main(int argc, char const** argv)
 {
   bool help;
   string input_file;
@@ -138,10 +139,11 @@ int main(int argc, char** argv)
   mosesargs.push_back(config_file);
 
   boost::scoped_ptr<Parameter> params(new Parameter());
-  char** mosesargv = new char*[mosesargs.size()];
+  char const** mosesargv = new char const*[mosesargs.size()];
   for (size_t i = 0; i < mosesargs.size(); ++i) {
-    mosesargv[i] = new char[mosesargs[i].length() + 1];
-    strcpy(mosesargv[i], mosesargs[i].c_str());
+    mosesargv[i] = mosesargs[i].c_str();
+    // mosesargv[i] = new char[mosesargs[i].length() + 1];
+    // strcpy(mosesargv[i], mosesargs[i].c_str());
   }
 
   if (!params->LoadParam(mosesargs.size(), mosesargv)) {
@@ -149,6 +151,7 @@ int main(int argc, char** argv)
     exit(1);
   }
 
+  ResetUserTime();
   if (!StaticData::LoadDataStatic(params.get(),argv[0])) {
     exit(1);
   }

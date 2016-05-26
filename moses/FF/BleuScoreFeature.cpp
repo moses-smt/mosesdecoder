@@ -13,41 +13,37 @@ namespace Moses
 size_t BleuScoreState::bleu_order = 4;
 std::vector<BleuScoreFeature*> BleuScoreFeature::s_staticColl;
 
-BleuScoreState::BleuScoreState(): m_words(1),
-  m_source_length(0),
-  m_target_length(0),
-  m_scaled_ref_length(0),
-  m_ngram_counts(bleu_order),
-  m_ngram_matches(bleu_order)
+BleuScoreState::BleuScoreState(bool is_syntax)
+  : m_words(1),
+    m_source_length(0),
+    m_target_length(0),
+    m_is_syntax(false),
+    m_scaled_ref_length(0),
+    m_ngram_counts(bleu_order),
+    m_ngram_matches(bleu_order)
+{ }
+
+size_t BleuScoreState::hash() const
 {
+  if (m_is_syntax)
+    return 0;
+
+  size_t ret = hash_value(m_words);
+  return ret;
 }
 
-int BleuScoreState::Compare(const FFState& o) const
+bool BleuScoreState::operator==(const FFState& o) const
 {
   if (&o == this)
-    return 0;
+    return true;
 
-  if (StaticData::Instance().IsSyntax())
-    return 0;
+  if (m_is_syntax)
+    return true;
 
-  const BleuScoreState& other = dynamic_cast<const BleuScoreState&>(o);
-  int c = m_words.Compare(other.m_words);
-  if (c != 0)
-    return c;
-
-  /*for(size_t i = 0; i < m_ngram_counts.size(); i++) {
-    if (m_ngram_counts[i] < other.m_ngram_counts[i])
-  return -1;
-    if (m_ngram_counts[i] > other.m_ngram_counts[i])
-  return 1;
-    if (m_ngram_matches[i] < other.m_ngram_matches[i])
-  return -1;
-    if (m_ngram_matches[i] > other.m_ngram_matches[i])
-  return 1;
-  }*/
-
-  return 0;
+  const BleuScoreState& other = static_cast<const BleuScoreState&>(o);
+  return m_words == other.m_words;
 }
+
 std::ostream& operator<<(std::ostream& out, const BleuScoreState& state)
 {
   state.print(out);
@@ -385,7 +381,7 @@ void BleuScoreFeature::GetNgramMatchCounts(Phrase& phrase,
       ngram_end_idx = end_idx;
       ngram_start_idx = end_idx - order;
 
-      Phrase ngram = phrase.GetSubString(WordsRange(ngram_start_idx, ngram_end_idx), 0);
+      Phrase ngram = phrase.GetSubString(Range(ngram_start_idx, ngram_end_idx), 0);
       ret_counts[order]++;
 
       ref_ngram_counts_iter = ref_ngram_counts.find(ngram);
@@ -414,7 +410,7 @@ void BleuScoreFeature::GetNgramMatchCounts_prefix(Phrase& phrase,
       if (order > ngram_end_idx) break;
       if (ngram_end_idx > last_end_index) break;
 
-      Phrase ngram = phrase.GetSubString(WordsRange(ngram_start_idx, ngram_end_idx), 0);
+      Phrase ngram = phrase.GetSubString(Range(ngram_start_idx, ngram_end_idx), 0);
       ret_counts[order]++;
 
       ref_ngram_counts_iter = ref_ngram_counts.find(ngram);
@@ -444,7 +440,7 @@ void BleuScoreFeature::GetNgramMatchCounts_overlap(Phrase& phrase,
       ngram_start_idx = end_idx - order;
       if (ngram_start_idx >= overlap_index) continue; // only score ngrams that span the overlap point
 
-      Phrase ngram = phrase.GetSubString(WordsRange(ngram_start_idx, ngram_end_idx), 0);
+      Phrase ngram = phrase.GetSubString(Range(ngram_start_idx, ngram_end_idx), 0);
       ret_counts[order]++;
 
       ref_ngram_counts_iter = ref_ngram_counts.find(ngram);
@@ -471,7 +467,7 @@ void BleuScoreFeature::GetClippedNgramMatchesAndCounts(Phrase& phrase,
       ngram_end_idx = end_idx;
       ngram_start_idx = end_idx - order;
 
-      Phrase ngram = phrase.GetSubString(WordsRange(ngram_start_idx, ngram_end_idx), 0);
+      Phrase ngram = phrase.GetSubString(Range(ngram_start_idx, ngram_end_idx), 0);
       ret_counts[order]++;
 
       ref_ngram_counts_iter = ref_ngram_counts.find(ngram);
@@ -505,10 +501,10 @@ FFState* BleuScoreFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const
 {
-  if (!m_enabled) return new BleuScoreState();
+  if (!m_enabled) return new BleuScoreState(m_is_syntax);
 
   NGrams::const_iterator reference_ngrams_iter;
-  const BleuScoreState& ps = dynamic_cast<const BleuScoreState&>(*prev_state);
+  const BleuScoreState& ps = static_cast<const BleuScoreState&>(*prev_state);
   BleuScoreState* new_state = new BleuScoreState(ps);
 
   float old_bleu, new_bleu;
@@ -543,10 +539,10 @@ FFState* BleuScoreFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
     ctx_start_idx = 0;
   }
 
-  WordsBitmap coverageVector = cur_hypo.GetWordsBitmap();
+  const Bitmap &coverageVector = cur_hypo.GetWordsBitmap();
   new_state->m_source_length = coverageVector.GetNumWordsCovered();
 
-  new_state->m_words = new_words.GetSubString(WordsRange(ctx_start_idx,
+  new_state->m_words = new_words.GetSubString(Range(ctx_start_idx,
                        ctx_end_idx));
   new_state->m_target_length += cur_hypo.GetCurrTargetLength();
 
@@ -565,7 +561,7 @@ FFState* BleuScoreFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
 FFState* BleuScoreFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureID,
     ScoreComponentCollection* accumulator ) const
 {
-  if (!m_enabled) return new BleuScoreState();
+  if (!m_enabled) return new BleuScoreState(m_is_syntax);
 
   NGrams::const_iterator reference_ngrams_iter;
 
@@ -581,16 +577,16 @@ FFState* BleuScoreFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo, 
   assert(cur_hypo.GetPrevHypos().size() <= 2);
   BleuScoreState* new_state;
   if (cur_hypo.GetPrevHypos().size() == 0)
-    new_state = new BleuScoreState();
+    new_state = new BleuScoreState(m_is_syntax);
   else {
     const FFState* prev_state_zero = cur_hypo.GetPrevHypo(0)->GetFFState(featureID);
-    const BleuScoreState& ps_zero = dynamic_cast<const BleuScoreState&>(*prev_state_zero);
+    const BleuScoreState& ps_zero = static_cast<const BleuScoreState&>(*prev_state_zero);
     new_state = new BleuScoreState(ps_zero);
     num_words_first_prev = ps_zero.m_target_length;
 
     for (size_t i = 0; i < cur_hypo.GetPrevHypos().size(); ++i) {
       const FFState* prev_state = cur_hypo.GetPrevHypo(i)->GetFFState(featureID);
-      const BleuScoreState* ps = dynamic_cast<const BleuScoreState*>(prev_state);
+      const BleuScoreState* ps = static_cast<const BleuScoreState*>(prev_state);
       BleuScoreState* ps_nonConst = const_cast<BleuScoreState*>(ps);
 //  		cerr << "prev phrase: " << cur_hypo.GetPrevHypo(i)->GetOutputPhrase()
 //  				<< " ( " << cur_hypo.GetPrevHypo(i)->GetTargetLHS() << ")" << endl;
@@ -677,7 +673,7 @@ FFState* BleuScoreFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo, 
   }
 
   new_state->m_source_length = cur_hypo.GetCurrSourceRange().GetNumWordsCovered();
-  new_state->m_words = new_words.GetSubString(WordsRange(ctx_start_idx, ctx_end_idx));
+  new_state->m_words = new_words.GetSubString(Range(ctx_start_idx, ctx_end_idx));
   new_state->m_target_length = cur_hypo.GetOutputPhrase().GetSize();
 
   // we need a scaled reference length to compare the current target phrase to the corresponding
@@ -704,12 +700,12 @@ float BleuScoreFeature::CalculateBleu(Phrase translation) const
   Phrase normTranslation = translation;
   // remove start and end symbol for chart decoding
   if (m_cur_source_length != m_cur_norm_source_length) {
-    WordsRange* range = new WordsRange(1, translation.GetSize()-2);
+    Range* range = new Range(1, translation.GetSize()-2);
     normTranslation = translation.GetSubString(*range);
   }
 
   // get ngram matches for translation
-  BleuScoreState* state = new BleuScoreState();
+  BleuScoreState* state = new BleuScoreState(m_is_syntax);
   GetClippedNgramMatchesAndCounts(normTranslation,
                                   m_cur_ref_ngrams,
                                   state->m_ngram_counts,
@@ -875,7 +871,7 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const
 
 const FFState* BleuScoreFeature::EmptyHypothesisState(const InputType& input) const
 {
-  return new BleuScoreState();
+  return new BleuScoreState(m_is_syntax);
 }
 
 bool BleuScoreFeature::IsUseable(const FactorMask &mask) const
@@ -883,6 +879,13 @@ bool BleuScoreFeature::IsUseable(const FactorMask &mask) const
   // TODO: Was this meant to return mask[0]!?
   bool ret = mask[0];
   return 0;
+}
+
+void
+BleuScoreFeature::
+Load(AllOptions::ptr const& opts)
+{
+  m_is_syntax = is_syntax(opts->search.algo);
 }
 
 } // namespace.

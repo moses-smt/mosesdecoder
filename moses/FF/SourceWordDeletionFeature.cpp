@@ -36,8 +36,9 @@ void SourceWordDeletionFeature::SetParameter(const std::string& key, const std::
   }
 }
 
-void SourceWordDeletionFeature::Load()
+void SourceWordDeletionFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   if (m_filename.empty())
     return;
 
@@ -64,7 +65,7 @@ bool SourceWordDeletionFeature::IsUseable(const FactorMask &mask) const
 void SourceWordDeletionFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScores) const
 {
   const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
   ComputeFeatures(source, targetPhrase, &scoreBreakdown, alignmentInfo);

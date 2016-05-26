@@ -37,7 +37,7 @@ public:
     }
 
     bool HasRules() const {
-      return !m_targetPhraseCollection.IsEmpty();
+      return !m_targetPhraseCollection->IsEmpty();
     }
 
     void Prune(std::size_t tableLimit);
@@ -47,11 +47,13 @@ public:
 
     const Node *GetChild(const HyperPath::NodeSeq &) const;
 
-    const TargetPhraseCollection &GetTargetPhraseCollection() const {
+    TargetPhraseCollection::shared_ptr
+    GetTargetPhraseCollection() const {
       return m_targetPhraseCollection;
     }
 
-    TargetPhraseCollection &GetTargetPhraseCollection() {
+    TargetPhraseCollection::shared_ptr
+    GetTargetPhraseCollection() {
       return m_targetPhraseCollection;
     }
 
@@ -59,12 +61,14 @@ public:
       return m_map;
     }
 
+    Node() : m_targetPhraseCollection(new TargetPhraseCollection) { }
+
   private:
     Map m_map;
-    TargetPhraseCollection m_targetPhraseCollection;
+    TargetPhraseCollection::shared_ptr m_targetPhraseCollection;
   };
 
-  HyperTree(const RuleTableFF *ff) : RuleTable(ff) {}
+  HyperTree(const RuleTableFF *ff) : RuleTable(ff) { }
 
   const Node &GetRootNode() const {
     return m_root;
@@ -73,7 +77,8 @@ public:
 private:
   friend class HyperTreeCreator;
 
-  TargetPhraseCollection &GetOrCreateTargetPhraseCollection(const HyperPath &);
+  TargetPhraseCollection::shared_ptr
+  GetOrCreateTargetPhraseCollection(const HyperPath &);
 
   Node &GetOrCreateNode(const HyperPath &);
 

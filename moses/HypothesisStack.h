@@ -3,8 +3,9 @@
 
 #include <vector>
 #include <set>
+#include <boost/unordered_set.hpp>
 #include "Hypothesis.h"
-#include "WordsBitmap.h"
+#include "Bitmap.h"
 
 namespace Moses
 {
@@ -18,7 +19,7 @@ class HypothesisStack
 {
 
 protected:
-  typedef std::set< Hypothesis*, HypothesisRecombinationOrderer > _HCType;
+  typedef boost::unordered_set< Hypothesis*, UnorderedComparer<Hypothesis>, UnorderedComparer<Hypothesis> > _HCType;
   _HCType m_hypos; /**< contains hypotheses */
   Manager& m_manager;
 
@@ -42,7 +43,7 @@ public:
   virtual float GetWorstScoreForBitmap( WordsBitmapID ) {
     return -std::numeric_limits<float>::infinity();
   };
-  virtual float GetWorstScoreForBitmap( const WordsBitmap& ) {
+  virtual float GetWorstScoreForBitmap( const Bitmap& ) {
     return -std::numeric_limits<float>::infinity();
   };
 

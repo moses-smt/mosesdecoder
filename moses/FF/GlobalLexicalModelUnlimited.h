@@ -12,11 +12,9 @@
 #include "moses/Phrase.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 #include "moses/FactorTypeSet.h"
 #include "moses/Sentence.h"
-
-#include "moses/FF/FFState.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread/tss.hpp>
@@ -76,10 +74,6 @@ public:
 
   void InitializeForInput(ttasksptr const& ttask);
 
-  const FFState* EmptyHypothesisState(const InputType &) const {
-    return new DummyState();
-  }
-
   //TODO: This implements the old interface, but cannot be updated because
   //it appears to be stateful
   void EvaluateWhenApplied(const Hypothesis& cur_hypo,
@@ -96,7 +90,7 @@ public:
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
+                                 , ScoreComponentCollection *estimatedScores = NULL) const {
   }
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
@@ -106,7 +100,7 @@ public:
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {
+                           , ScoreComponentCollection &estimatedScores) const {
   }
 
   void AddFeature(ScoreComponentCollection* accumulator,

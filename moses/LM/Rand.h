@@ -39,7 +39,7 @@ public:
   LanguageModelRandLM(const std::string &line);
   ~LanguageModelRandLM();
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
   void InitializeForInput(ttasksptr const& ttask);
   void CleanUpAfterSentenceProcessing(const InputType& source);

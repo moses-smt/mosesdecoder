@@ -17,16 +17,13 @@ protected:
   bool m_legacy;
 
 public:
-  static const InputFeature& Instance() {
-    return *s_instance;
-  }
-  static InputFeature& InstanceNonConst() {
-    return *s_instance;
+  static const InputFeature *InstancePtr() {
+    return s_instance;
   }
 
   InputFeature(const std::string &line);
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   void SetParameter(const std::string& key, const std::string& value);
 
@@ -44,7 +41,7 @@ public:
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const {
+                           , ScoreComponentCollection &estimatedScores) const {
   }
 
   void EvaluateWithSourceContext(const InputType &input
@@ -52,7 +49,7 @@ public:
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+                                 , ScoreComponentCollection *estimatedScores = NULL) const;
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
       , const TranslationOptionList &translationOptionList) const {

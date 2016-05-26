@@ -30,10 +30,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
+#include "util/string_stream.hh"
 #include "util/exception.hh"
 #include "util/random.hh"
 #include <boost/program_options.hpp>
 
+#ifdef HAVE_XMLRPC_C
+#include <xmlrpc_server.h>
+#endif
 
 using namespace std;
 using namespace boost::algorithm;
@@ -52,6 +56,7 @@ Parameter::Parameter()
   AddParam(main_opts,"input-file", "i", "location of the input file to be translated");
 
   AddParam(main_opts,"verbose", "v", "verbosity level of the logging");
+  AddParam(main_opts,"version", "show version of Moses and libraries used");
   AddParam(main_opts,"show-weights", "print feature weights and exit");
   AddParam(main_opts,"time-out", "seconds after which is interrupted (-1=no time-out, default is -1)");
 
@@ -116,6 +121,7 @@ Parameter::Parameter()
   AddParam(cube_opts,"cube-pruning-pop-limit", "cbp", "How many hypotheses should be popped for each stack. (default = 1000)");
   AddParam(cube_opts,"cube-pruning-diversity", "cbd", "How many hypotheses should be created for each coverage. (default = 0)");
   AddParam(cube_opts,"cube-pruning-lazy-scoring", "cbls", "Don't fully score a hypothesis until it is popped");
+  AddParam(cube_opts,"cube-pruning-deterministic-search", "cbds", "Break ties deterministically during search");
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // minimum bayes risk decoding
@@ -212,13 +218,27 @@ Parameter::Parameter()
   // server options
   po::options_description server_opts("Moses Server Options");
   AddParam(server_opts,"server", "Run moses as a translation server.");
+  AddParam(server_opts,"daemon", "Run moses as a translation server in the background.");
   AddParam(server_opts,"server-port", "Port for moses server");
   AddParam(server_opts,"server-log", "Log destination for moses server");
+  AddParam(server_opts,"serial", "Run server in serial mode, processing only one request at a time.");
+
+  AddParam(server_opts,"server-maxconn",
+           "Max. No of simultaneous HTTP transactions allowed by the server.");
+  AddParam(server_opts,"server-maxconn-backlog",
+           "Max. No. of requests the OS will queue if the server is busy.");
+  AddParam(server_opts,"server-keepalive-maxconn",
+           "Max. No. of requests the server will accept on a single TCP connection.");
+  AddParam(server_opts,"server-keepalive-timeout",
+           "Max. number of seconds the server will keep a persistent connection alive.");
+  AddParam(server_opts,"server-timeout",
+           "Max. number of seconds the server will wait for a client to submit a request once a connection has been established.");
+  // session timeout and session cache size are for moses translation session handling
+  // they have nothing to do with the abyss server (but relate to the moses server)
   AddParam(server_opts,"session-timeout",
            "Timeout for sessions, e.g. '2h30m' or 1d (=24h)");
   AddParam(server_opts,"session-cache-size", string("Max. number of sessions cached.")
            +"Least recently used session is dumped first.");
-  AddParam(server_opts,"serial", "Run server in serial mode, processing only one request at a time.");
 
   po::options_description irstlm_opts("IRSTLM Options");
   AddParam(irstlm_opts,"clean-lm-cache",
@@ -428,22 +448,57 @@ Parameter::
 LoadParam(const string &filePath)
 {
   const char *argv[] = {"executable", "-f", filePath.c_str() };
-  return LoadParam(3, (char**) argv);
+  return LoadParam(3, (char const**) argv);
+}
+
+/// Print out version information about the things that went into this
+/// executable.
+void show_version()
+{
+  std::cout << "\nMoses code version (git tag or commit hash):\n   "
+            << MOSES_VERSION_ID << std::endl
+            << "Libraries used:" << std::endl
+            << "      Boost  version "
+            << BOOST_VERSION / 100000     << "."  // major version
+            << BOOST_VERSION / 100 % 1000 << "."  // minor version
+            << BOOST_VERSION % 100                // patch level
+            << std::endl;
+#ifdef HAVE_XMLRPC_C
+  unsigned int major, minor, point;
+  xmlrpc_server_version(&major, &minor, &point);
+  std::cout << "   Xmlrpc-c  version "
+            << major << "." << minor << "." << point << std::endl;
+#endif
+#ifdef HAVE_CMPH
+  // there's no easy way to determine the cmph version at compile time
+  std::cout << "       CMPH (version unknown)" << std::endl;
+#endif
+
+#ifdef MMT_VERSION_ID
+  std::cout << string(20,'-')
+            << "\nMMT extras version: " << MMT_VERSION_ID << std::endl;
+#endif
 }
 
 /** load all parameters from the configuration file and the command line switches */
 bool
 Parameter::
-LoadParam(int argc, char* xargv[])
+LoadParam(int argc, char const* xargv[])
 {
   // legacy parameter handling: all parameters are expected
   // to start with a single dash
-  char* argv[argc+1];
+  char const* argv[argc+1];
   for (int i = 0; i < argc; ++i) {
     argv[i] = xargv[i];
     if (strlen(argv[i]) > 2 && argv[i][0] == '-' && argv[i][1] == '-')
       ++argv[i];
+    if (!strcmp(argv[i],"-version")) {
+      show_version();
+      exit(0);
+    }
   }
+
+
 
   // config file (-f) arg mandatory
   string configPath;
@@ -700,7 +755,7 @@ ConvertWeightArgsPhraseModel(const string &oldWeightName)
 
     size_t currOldInd = 0;
     for(size_t currDict = 0 ; currDict < translationVector.size(); currDict++) {
-      stringstream ptLine;
+      util::StringStream ptLine;
 
       vector<string> token = Tokenize(translationVector[currDict]);
 
@@ -859,7 +914,7 @@ ConvertWeightArgsDistortion()
       }
       SetWeight("LexicalReordering", indTable, weights);
 
-      stringstream strme;
+      util::StringStream strme;
       strme << "LexicalReordering "
             << "type=" << toks[1] << " ";
 
@@ -960,10 +1015,11 @@ ConvertWeightArgsLM()
                            + "order="  + modelToks[2] + " " // order
                            + "num-features=" + SPrint(numFF) + " ";
       if (lmType == 9) {
-        featureLine += "lazyken=1 ";
-      } else if (lmType == 8) {
-        featureLine += "lazyken=0 ";
+        featureLine += "load=lazy ";
       }
+
+      if(oovWeights.size() > lmIndex)
+        featureLine += "oov-feature=1 ";
 
       featureLine += "path=" + modelToks[3]; // file
 
@@ -1006,7 +1062,7 @@ ConvertWeightArgsGeneration(const std::string &oldWeightName, const std::string 
       }
       SetWeight(newWeightName, indTable, weights);
 
-      stringstream strme;
+      util::StringStream strme;
       strme << "Generation "
             << "input-factor=" << modelToks[0] << " "
             << "output-factor=" << modelToks[1] << " "
@@ -1314,7 +1370,7 @@ FilesExist(const string &paramName, int fieldNo,
 // in moses-cmd
 string
 Parameter::
-FindParam(const string &paramSwitch, int argc, char* argv[])
+FindParam(const string &paramSwitch, int argc, char const* argv[])
 {
   for (int i = 0 ; i < argc ; i++) {
     if (string(argv[i]) == paramSwitch) {
@@ -1336,7 +1392,8 @@ FindParam(const string &paramSwitch, int argc, char* argv[])
  * \param argv values of paramters on command line */
 void
 Parameter::
-OverwriteParam(const string &paramSwitch, const string &paramName, int argc, char* argv[])
+OverwriteParam(const string &paramSwitch, const string &paramName,
+               int argc, char const* argv[])
 {
   int startPos = -1;
   for (int i = 0 ; i < argc ; i++) {
@@ -1616,6 +1673,13 @@ SetParameter<bool>(bool &parameter, std::string const& parameterName,
   else if (params->size() == 1) {
     parameter = Scan<bool>( params->at(0));
   }
+}
+
+void
+Parameter::
+SetParameter(bool& var, std::string const& name)
+{
+  SetParameter(var,name,false);
 }
 
 } // namespace

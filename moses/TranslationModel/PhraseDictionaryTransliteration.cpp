@@ -22,8 +22,9 @@ PhraseDictionaryTransliteration::PhraseDictionaryTransliteration(const std::stri
                  m_outputLang.empty(), "Must specify all arguments");
 }
 
-void PhraseDictionaryTransliteration::Load()
+void PhraseDictionaryTransliteration::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   SetFeaturesToApply();
 }
 
@@ -54,7 +55,9 @@ void PhraseDictionaryTransliteration::GetTargetPhraseCollectionBatch(const Input
   }
 }
 
-void PhraseDictionaryTransliteration::GetTargetPhraseCollection(InputPath &inputPath) const
+void
+PhraseDictionaryTransliteration::
+GetTargetPhraseCollection(InputPath &inputPath) const
 {
   const Phrase &sourcePhrase = inputPath.GetPhrase();
   size_t hash = hash_value(sourcePhrase);
@@ -66,7 +69,7 @@ void PhraseDictionaryTransliteration::GetTargetPhraseCollection(InputPath &input
 
   if (iter != cache.end()) {
     // already in cache
-    const TargetPhraseCollection *tpColl = iter->second.first;
+    TargetPhraseCollection::shared_ptr tpColl = iter->second.first;
     inputPath.SetTargetPhrases(*this, tpColl, NULL);
   } else {
     // TRANSLITERATE
@@ -89,17 +92,15 @@ void PhraseDictionaryTransliteration::GetTargetPhraseCollection(InputPath &input
     int ret = system(cmd.c_str());
     UTIL_THROW_IF2(ret != 0, "Transliteration script error");
 
-    TargetPhraseCollection *tpColl = new TargetPhraseCollection();
-    vector<TargetPhrase*> targetPhrases = CreateTargetPhrases(sourcePhrase, outDir.path());
+    TargetPhraseCollection::shared_ptr tpColl(new TargetPhraseCollection);
+    vector<TargetPhrase*> targetPhrases
+    = CreateTargetPhrases(sourcePhrase, outDir.path());
     vector<TargetPhrase*>::const_iterator iter;
     for (iter = targetPhrases.begin(); iter != targetPhrases.end(); ++iter) {
       TargetPhrase *tp = *iter;
       tpColl->Add(tp);
     }
-
-    std::pair<const TargetPhraseCollection*, clock_t> value(tpColl, clock());
-    cache[hash] = value;
-
+    cache[hash] = CacheCollEntry(tpColl, clock());
     inputPath.SetTargetPhrases(*this, tpColl, NULL);
   }
 }

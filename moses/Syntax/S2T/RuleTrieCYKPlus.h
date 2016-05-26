@@ -38,7 +38,7 @@ public:
     }
 
     bool HasRules() const {
-      return !m_targetPhraseCollection.IsEmpty();
+      return !m_targetPhraseCollection->IsEmpty();
     }
 
     void Prune(std::size_t tableLimit);
@@ -50,11 +50,13 @@ public:
     const Node *GetChild(const Word &sourceTerm) const;
     const Node *GetNonTerminalChild(const Word &targetNonTerm) const;
 
-    const TargetPhraseCollection &GetTargetPhraseCollection() const {
+    TargetPhraseCollection::shared_ptr
+    GetTargetPhraseCollection() const {
       return m_targetPhraseCollection;
     }
 
-    TargetPhraseCollection &GetTargetPhraseCollection() {
+    TargetPhraseCollection::shared_ptr
+    GetTargetPhraseCollection() {
       return m_targetPhraseCollection;
     }
 
@@ -66,10 +68,12 @@ public:
       return m_nonTermMap;
     }
 
+    Node() : m_targetPhraseCollection(new TargetPhraseCollection) {}
+
   private:
     SymbolMap m_sourceTermMap;
     SymbolMap m_nonTermMap;
-    TargetPhraseCollection m_targetPhraseCollection;
+    TargetPhraseCollection::shared_ptr m_targetPhraseCollection;
   };
 
   RuleTrieCYKPlus(const RuleTableFF *ff) : RuleTrie(ff) {}
@@ -81,8 +85,9 @@ public:
   bool HasPreterminalRule(const Word &) const;
 
 private:
-  TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-    const Phrase &source, const TargetPhrase &target, const Word *sourceLHS);
+  TargetPhraseCollection::shared_ptr
+  GetOrCreateTargetPhraseCollection
+  (const Phrase &source, const TargetPhrase &target, const Word *sourceLHS);
 
   Node &GetOrCreateNode(const Phrase &source, const TargetPhrase &target,
                         const Word *sourceLHS);

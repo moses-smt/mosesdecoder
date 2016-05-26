@@ -1,11 +1,8 @@
-#include "Manager.h"
-
 #include <sstream>
-
-#include "moses/OutputCollector.h"
-#include "moses/StaticData.h"
-
+#include "Manager.h"
 #include "PVertex.h"
+#include "moses/OutputCollector.h"
+#include "moses/Util.h"
 
 namespace Moses
 {
@@ -26,13 +23,13 @@ void Manager::OutputBest(OutputCollector *collector) const
   const SHyperedge *best = GetBestSHyperedge();
   if (best == NULL) {
     VERBOSE(1, "NO BEST TRANSLATION" << std::endl);
-    if (StaticData::Instance().GetOutputHypoScore()) {
+    if (options()->output.ReportHypoScore) {
       out << "0 ";
     }
     out << '\n';
   } else {
-    if (StaticData::Instance().GetOutputHypoScore()) {
-      out << best->label.score << " ";
+    if (options()->output.ReportHypoScore) {
+      out << best->label.futureScore << " ";
     }
     Phrase yield = GetOneBestTargetYield(*best);
     // delete 1st & last
@@ -40,7 +37,7 @@ void Manager::OutputBest(OutputCollector *collector) const
                    "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
     yield.RemoveWord(0);
     yield.RemoveWord(yield.GetSize()-1);
-    out << yield.GetStringRep(StaticData::Instance().GetOutputFactorOrder());
+    out << yield.GetStringRep(options()->output.factor_order);
     out << '\n';
   }
   collector->Write(m_source.GetTranslationId(), out.str());
@@ -49,12 +46,10 @@ void Manager::OutputBest(OutputCollector *collector) const
 void Manager::OutputNBest(OutputCollector *collector) const
 {
   if (collector) {
-    const StaticData &staticData = StaticData::Instance();
     long translationId = m_source.GetTranslationId();
-
     KBestExtractor::KBestVec nBestList;
-    ExtractKBest(staticData.options().nbest.nbest_size, nBestList,
-                 staticData.options().nbest.only_distinct);
+    ExtractKBest(options()->nbest.nbest_size, nBestList,
+                 options()->nbest.only_distinct);
     OutputNBestList(collector, nBestList, translationId);
   }
 }
@@ -65,7 +60,7 @@ void Manager::OutputUnknowns(OutputCollector *collector) const
     long translationId = m_source.GetTranslationId();
 
     std::ostringstream out;
-    for (std::set<Moses::Word>::const_iterator p = m_oovs.begin();
+    for (boost::unordered_set<Moses::Word>::const_iterator p = m_oovs.begin();
          p != m_oovs.end(); ++p) {
       out << *p;
     }
@@ -78,10 +73,7 @@ void Manager::OutputNBestList(OutputCollector *collector,
                               const KBestExtractor::KBestVec &nBestList,
                               long translationId) const
 {
-  const StaticData &staticData = StaticData::Instance();
-
-  const std::vector<FactorType> &outputFactorOrder =
-    staticData.GetOutputFactorOrder();
+  const std::vector<FactorType> &outputFactorOrder = options()->output.factor_order;
 
   std::ostringstream out;
 
@@ -91,8 +83,8 @@ void Manager::OutputNBestList(OutputCollector *collector,
     FixPrecision(out);
   }
 
-  bool includeWordAlignment = staticData.options().nbest.include_alignment_info;
-  bool PrintNBestTrees = staticData.options().nbest.print_trees; // PrintNBestTrees();
+  bool includeWordAlignment = options()->nbest.include_alignment_info;
+  bool PrintNBestTrees = options()->nbest.print_trees; // PrintNBestTrees();
 
   for (KBestExtractor::KBestVec::const_iterator p = nBestList.begin();
        p != nBestList.end(); ++p) {
@@ -109,9 +101,10 @@ void Manager::OutputNBestList(OutputCollector *collector,
 
     // print the translation ID, surface factors, and scores
     out << translationId << " ||| ";
-    OutputSurface(out, outputPhrase, outputFactorOrder, false);
+    OutputSurface(out, outputPhrase); // , outputFactorOrder, false);
     out << " ||| ";
-    derivation.scoreBreakdown.OutputAllFeatureScores(out);
+    bool with_labels = options()->nbest.include_feature_labels;
+    derivation.scoreBreakdown.OutputAllFeatureScores(out, with_labels);
     out << " ||| " << derivation.score;
 
     // optionally, print word alignments

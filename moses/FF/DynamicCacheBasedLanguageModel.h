@@ -31,7 +31,7 @@ typedef std::map<std::string, decaying_cache_value_t > decaying_cache_t;
 namespace Moses
 {
 
-class WordsRange;
+class Range;
 
 /** Calculates score for the Dynamic Cache-Based pseudo LM
  */
@@ -119,7 +119,7 @@ public:
     return true;
   }
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
   void Load(const std::string filestr);
   void Execute(std::string command);
   void SetParameter(const std::string& key, const std::string& value);
@@ -132,14 +132,14 @@ public:
   virtual void EvaluateInIsolation(const Phrase &source
                                    , const TargetPhrase &targetPhrase
                                    , ScoreComponentCollection &scoreBreakdown
-                                   , ScoreComponentCollection &estimatedFutureScore) const;
+                                   , ScoreComponentCollection &estimatedScores) const;
 
   void EvaluateWithSourceContext(const InputType &input
                                  , const InputPath &inputPath
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const {
+                                 , ScoreComponentCollection *estimatedScores = NULL) const {
   }
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input

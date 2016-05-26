@@ -3,8 +3,8 @@
 #include <sstream>
 
 #include "moses/FF/UnknownWordPenaltyProducer.h"
-#include "moses/StaticData.h"
-
+#include "util/string_stream.hh"
+#include "moses/parameters/AllOptions.h"
 namespace Moses
 {
 namespace Syntax
@@ -12,13 +12,14 @@ namespace Syntax
 namespace F2S
 {
 
-GlueRuleSynthesizer::GlueRuleSynthesizer(HyperTree &trie)
-  : m_hyperTree(trie)
+GlueRuleSynthesizer::
+GlueRuleSynthesizer(Moses::AllOptions const& opts, HyperTree &trie)
+  : m_input_default_nonterminal(opts.syntax.input_default_non_terminal)
+  , m_output_default_nonterminal(opts.syntax.output_default_non_terminal)
+  , m_hyperTree(trie)
 {
-  const std::vector<FactorType> &inputFactorOrder =
-    StaticData::Instance().GetInputFactorOrder();
   Word *lhs = NULL;
-  m_dummySourcePhrase.CreateFromString(Input, inputFactorOrder, "hello", &lhs);
+  m_dummySourcePhrase.CreateFromString(Input, opts.input.factor_order, "hello", &lhs);
   delete lhs;
 }
 
@@ -27,9 +28,9 @@ void GlueRuleSynthesizer::SynthesizeRule(const Forest::Hyperedge &e)
   HyperPath source;
   SynthesizeHyperPath(e, source);
   TargetPhrase *tp = SynthesizeTargetPhrase(e);
-  TargetPhraseCollection &tpc = GetOrCreateTargetPhraseCollection(m_hyperTree,
-                                source);
-  tpc.Add(tp);
+  TargetPhraseCollection::shared_ptr tpc
+  = GetOrCreateTargetPhraseCollection(m_hyperTree, source);
+  tpc->Add(tp);
 }
 
 void GlueRuleSynthesizer::SynthesizeHyperPath(const Forest::Hyperedge &e,
@@ -45,21 +46,20 @@ void GlueRuleSynthesizer::SynthesizeHyperPath(const Forest::Hyperedge &e,
   }
 }
 
-TargetPhrase *GlueRuleSynthesizer::SynthesizeTargetPhrase(
-  const Forest::Hyperedge &e)
+TargetPhrase*
+GlueRuleSynthesizer::
+SynthesizeTargetPhrase(const Forest::Hyperedge &e)
 {
-  const StaticData &staticData = StaticData::Instance();
-
   const UnknownWordPenaltyProducer &unknownWordPenaltyProducer =
     UnknownWordPenaltyProducer::Instance();
 
   TargetPhrase *targetPhrase = new TargetPhrase();
 
-  std::ostringstream alignmentSS;
+  util::StringStream alignmentSS;
   for (std::size_t i = 0; i < e.tail.size(); ++i) {
     const Word &symbol = e.tail[i]->pvertex.symbol;
     if (symbol.IsNonTerminal()) {
-      targetPhrase->AddWord(staticData.GetOutputDefaultNonTerminal());
+      targetPhrase->AddWord(m_output_default_nonterminal);
     } else {
       // TODO Check this
       Word &targetWord = targetPhrase->AddWord();
@@ -73,7 +73,7 @@ TargetPhrase *GlueRuleSynthesizer::SynthesizeTargetPhrase(
   float score = LOWEST_SCORE;
   targetPhrase->GetScoreBreakdown().Assign(&unknownWordPenaltyProducer, score);
   targetPhrase->EvaluateInIsolation(m_dummySourcePhrase);
-  Word *targetLhs = new Word(staticData.GetOutputDefaultNonTerminal());
+  Word *targetLhs = new Word(m_output_default_nonterminal);
   targetPhrase->SetTargetLHS(targetLhs);
   targetPhrase->SetAlignmentInfo(alignmentSS.str());
 

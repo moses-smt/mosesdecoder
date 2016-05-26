@@ -5,14 +5,14 @@
 #include <vector>
 
 #ifndef NO_MOSES
-#include "moses/FF/LexicalReordering/LexicalReorderingState.h"
+#include "moses/FF/LexicalReordering/LRState.h"
 #endif
 
 namespace sapt {
 
 #ifdef NO_MOSES
 class LRModel{
-
+public:
   enum ModelType { Monotonic, MSD, MSLR, LeftRight, None };
   enum Direction { Forward, Backward, Bidirectional };
 

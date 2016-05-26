@@ -16,7 +16,7 @@
 #include "StatefulFeatureFunction.h"
 #include "FFState.h"
 #include "moses/Factor.h"
-#include "phrase-extract/extract-ghkm/PhraseOrientation.h"
+#include "phrase-extract/PhraseOrientation.h"
 #include "moses/PP/OrientationPhraseProperty.h"
 #include <boost/unordered_set.hpp>
 
@@ -99,46 +99,8 @@ public:
     return m_rightBoundaryNonTerminalR2LScores[2];
   }
 
-
-  int Compare(const FFState& other) const {
-    if (!m_distinguishStates) {
-      return 0;
-    }
-
-    const PhraseOrientationFeatureState &otherState = static_cast<const PhraseOrientationFeatureState&>(other);
-
-    if (!m_leftBoundaryIsSet && !otherState.m_leftBoundaryIsSet &&
-        !m_rightBoundaryIsSet && !otherState.m_rightBoundaryIsSet) {
-      return 0;
-    }
-    if (m_leftBoundaryIsSet && !otherState.m_leftBoundaryIsSet) {
-      return 1;
-    }
-    if (!m_leftBoundaryIsSet && otherState.m_leftBoundaryIsSet) {
-      return -1;
-    }
-    if (m_rightBoundaryIsSet && !otherState.m_rightBoundaryIsSet) {
-      return 1;
-    }
-    if (!m_rightBoundaryIsSet && otherState.m_rightBoundaryIsSet) {
-      return -1;
-    }
-
-    if (m_leftBoundaryIsSet) {
-      int compareLeft = CompareLeftBoundaryRecursive(*this, otherState, m_useSparseNT);
-      if (compareLeft != 0) {
-        return compareLeft;
-      }
-    }
-    if (m_rightBoundaryIsSet) {
-      int compareRight = CompareRightBoundaryRecursive(*this, otherState, m_useSparseNT);
-      if (compareRight != 0) {
-        return compareRight;
-      }
-    }
-
-    return 0;
-  };
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
 protected:
 
@@ -264,6 +226,54 @@ protected:
     return CompareRightBoundaryRecursive(*prevState, *otherPrevState, useSparseNT);
   };
 
+
+  static void HashCombineLeftBoundaryRecursive(size_t &hash, const PhraseOrientationFeatureState& state, bool useSparseNT) {
+    if (useSparseNT) {
+      boost::hash_combine(hash, state.m_leftBoundaryNonTerminalSymbol);
+    }
+    // boost::hash_combine(hash, state.m_leftBoundaryNonTerminalL2RHeuristicScoreIndex);
+    // boost::hash_combine(hash, state.m_leftBoundaryNonTerminalL2RPossibleFutureOrientations);
+
+    for (size_t i=0; i<state.m_leftBoundaryNonTerminalL2RScores.size(); ++i) {
+      if (state.m_leftBoundaryNonTerminalL2RPossibleFutureOrientations[i]) {
+        boost::hash_combine(hash, state.m_leftBoundaryNonTerminalL2RScores[i]);
+      } else {
+        boost::hash_combine(hash, 0);
+      }
+    }
+
+    if (!state.m_leftBoundaryRecursionGuard) {
+      const PhraseOrientationFeatureState *prevState = state.m_leftBoundaryPrevState;
+      if (prevState->m_leftBoundaryIsSet) {
+        HashCombineLeftBoundaryRecursive(hash, *prevState, useSparseNT);
+      }
+    }
+  };
+
+  static void HashCombineRightBoundaryRecursive(size_t &hash, const PhraseOrientationFeatureState& state, bool useSparseNT) {
+    if (useSparseNT) {
+      boost::hash_combine(hash, state.m_rightBoundaryNonTerminalSymbol);
+    }
+    // boost::hash_combine(hash, state.m_leftBoundaryNonTerminalL2RHeuristicScoreIndex);
+    // boost::hash_combine(hash, state.m_leftBoundaryNonTerminalL2RPossibleFutureOrientations);
+
+    for (size_t i=0; i<state.m_rightBoundaryNonTerminalR2LScores.size(); ++i) {
+      if (state.m_rightBoundaryNonTerminalR2LPossibleFutureOrientations[i]) {
+        boost::hash_combine(hash, state.m_rightBoundaryNonTerminalR2LScores[i]);
+      } else {
+        boost::hash_combine(hash, 0);
+      }
+    }
+
+    if (!state.m_rightBoundaryRecursionGuard) {
+      const PhraseOrientationFeatureState *prevState = state.m_rightBoundaryPrevState;
+      if (prevState->m_rightBoundaryIsSet) {
+        HashCombineRightBoundaryRecursive(hash, *prevState, useSparseNT);
+      }
+    }
+  };
+
+
   template<std::size_t N> static bool Smaller(const std::bitset<N>& x, const std::bitset<N>& y) {
     for (size_t i=0; i<N; ++i) {
       if (x[i] ^ y[i])
@@ -302,8 +312,8 @@ public:
 
   struct ReoClassData {
   public:
-    std::vector<MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS> nonTerminalReoClassL2R;
-    std::vector<MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS> nonTerminalReoClassR2L;
+    std::vector<MosesTraining::PhraseOrientation::REO_CLASS> nonTerminalReoClassL2R;
+    std::vector<MosesTraining::PhraseOrientation::REO_CLASS> nonTerminalReoClassR2L;
     bool firstNonTerminalIsBoundary;
     bool firstNonTerminalPreviousSourceSpanIsAligned;
     bool firstNonTerminalFollowingSourceSpanIsAligned;
@@ -327,24 +337,12 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const;
-
-  void EvaluateWithSourceContext(const InputType &input
-                                 , const InputPath &inputPath
-                                 , const TargetPhrase &targetPhrase
-                                 , const StackVec *stackVec
-                                 , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {};
-
-  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const
-  {}
+                           , ScoreComponentCollection &estimatedScores) const;
 
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
@@ -367,6 +365,7 @@ protected:
 
   void LookaheadScore(const OrientationPhraseProperty *orientationPhraseProperty,
                       ScoreComponentCollection &scoreBreakdown,
+                      const Factor* targetPhraseLHS,
                       bool subtract=false) const;
 
   size_t GetHeuristicScoreIndex(const std::vector<float>& scores,
@@ -401,15 +400,19 @@ protected:
                                  ScoreComponentCollection* scoreBreakdown,
                                  const std::string* o) const;
 
-  const std::string* ToString(const MosesTraining::Syntax::GHKM::PhraseOrientation::REO_CLASS o) const;
+  const std::string* ToString(const MosesTraining::PhraseOrientation::REO_CLASS o) const;
 
   static const std::string MORIENT;
   static const std::string SORIENT;
   static const std::string DORIENT;
 
-  std::string m_glueTargetLHSStr;
-  const Factor* m_glueTargetLHS;
+  std::string m_glueLabelStr;
+  const Factor* m_glueLabel;
+  bool m_noScoreBoundary;
+  bool m_monotoneScoreBoundary;
   bool m_distinguishStates;
+  bool m_lookaheadScore;
+  bool m_heuristicScoreUseWeights;
   bool m_useSparseWord;
   bool m_useSparseNT;
   size_t m_offsetR2LScores;

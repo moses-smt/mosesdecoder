@@ -23,7 +23,7 @@
 #include <vector>
 #include <boost/scoped_ptr.hpp>
 #include "Util.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include "ScoreComponentCollection.h"
 #include "Phrase.h"
 #include "ChartTranslationOptions.h"
@@ -49,13 +49,10 @@ class ChartHypothesis
 //  friend class ChartKBestExtractor;
 
 protected:
-#ifdef USE_HYPO_POOL
-  static ObjectPool<ChartHypothesis> s_objectPool;
-#endif
 
   boost::shared_ptr<ChartTranslationOption> m_transOpt;
 
-  WordsRange					m_currSourceWordsRange;
+  Range m_currSourceWordsRange;
   std::vector<const FFState*> m_ffStates; /*! stateful feature function states */
   /*! sum of scores of this hypothesis, and previous hypotheses. Lazily initialised.  */
   mutable boost::scoped_ptr<ScoreComponentCollection> m_scoreBreakdown;
@@ -65,8 +62,8 @@ protected:
   ,m_lmPrefix;
   float m_totalScore;
 
-  ChartArcList 					*m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
-  const ChartHypothesis 	*m_winningHypo;
+  ChartArcList *m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
+  const ChartHypothesis *m_winningHypo;
 
   std::vector<const ChartHypothesis*> m_prevHypos; // always sorted by source position?
 
@@ -81,23 +78,6 @@ protected:
   ChartHypothesis(const ChartHypothesis &copy);
 
 public:
-#ifdef USE_HYPO_POOL
-  void *operator new(size_t /* num_bytes */) {
-    void *ptr = s_objectPool.getPtr();
-    return ptr;
-  }
-
-  //! delete \param hypo. Works with object pool too
-  static void Delete(ChartHypothesis *hypo) {
-    s_objectPool.freeObject(hypo);
-  }
-#else
-  //! delete \param hypo. Works with object pool too
-  static void Delete(ChartHypothesis *hypo) {
-    delete hypo;
-  }
-#endif
-
   ChartHypothesis(const ChartTranslationOptions &, const RuleCubeItem &item,
                   ChartManager &manager);
 
@@ -120,7 +100,7 @@ public:
   }
 
   //! the source range that this hypothesis spans
-  const WordsRange &GetCurrSourceRange() const {
+  const Range &GetCurrSourceRange() const {
     return m_currSourceWordsRange;
   }
 
@@ -145,8 +125,6 @@ public:
   // get leftmost/rightmost words only
   // leftRightMost: 1=left, 2=right
   void GetOutputPhrase(size_t leftRightMost, size_t numWords, Phrase &outPhrase) const;
-
-  int RecombineCompare(const ChartHypothesis &compare) const;
 
   void EvaluateWhenApplied();
 
@@ -189,7 +167,7 @@ public:
   }
 
   //! Get the weighted total score
-  float GetTotalScore() const {
+  float GetFutureScore() const {
     // scores from current translation rule. eg. translation models & word penalty
     return m_totalScore;
   }
@@ -213,6 +191,10 @@ public:
   const ChartHypothesis* GetWinningHypothesis() const {
     return m_winningHypo;
   }
+
+  // for unordered_set in stack
+  size_t hash() const;
+  bool operator==(const ChartHypothesis& other) const;
 
   TO_STRING();
 

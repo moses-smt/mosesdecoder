@@ -130,11 +130,12 @@ private:
 
   TerminalMap m_sourceTermMap;
   NonTerminalMap m_nonTermMap;
-  TargetPhraseCollection m_targetPhraseCollection;
+  TargetPhraseCollection::shared_ptr m_targetPhraseCollection;
 
 
 public:
-  PhraseDictionaryNodeMemory() {}
+  PhraseDictionaryNodeMemory()
+    : m_targetPhraseCollection(new TargetPhraseCollection) { }
 
   bool IsLeaf() const {
     return m_sourceTermMap.empty() && m_nonTermMap.empty();
@@ -152,10 +153,12 @@ public:
   const PhraseDictionaryNodeMemory *GetChild(const Word &sourceNonTerm, const Word &targetNonTerm) const;
 #endif
 
-  const TargetPhraseCollection &GetTargetPhraseCollection() const {
+  TargetPhraseCollection::shared_ptr
+  GetTargetPhraseCollection() const {
     return m_targetPhraseCollection;
   }
-  TargetPhraseCollection &GetTargetPhraseCollection() {
+  TargetPhraseCollection::shared_ptr
+  GetTargetPhraseCollection() {
     return m_targetPhraseCollection;
   }
 

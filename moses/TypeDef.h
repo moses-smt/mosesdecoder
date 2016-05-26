@@ -189,3 +189,5 @@ typedef boost::shared_ptr<TranslationTask> ttasksptr;
 typedef boost::weak_ptr<TranslationTask> ttaskwptr;
 }
 
+#define SPTR boost::shared_ptr
+#define WPTR boost::weak_ptr

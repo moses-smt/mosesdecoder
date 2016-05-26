@@ -25,8 +25,8 @@ namespace sapt
     int loglevel;
     std::ostream* log;
     // Map to store the biasmap as you get it from the server:
-    std::map<std::string, float> m_bias_map; 
-    std::map<std::string, float>& getBiasMap();
+    SPTR<std::map<std::string, float> > m_bias_map; 
+    SPTR<std::map<std::string, float> const> getBiasMap();
     virtual float
     operator[](id_type const ID) const = 0;
     // returns (unnormalized bias) for the class of item ID
@@ -73,6 +73,8 @@ namespace sapt
 
     size_t
     size() const;
+
+    const std::map<id_type, float>& GetDocumentBiasMap() const;
   };
 
   class

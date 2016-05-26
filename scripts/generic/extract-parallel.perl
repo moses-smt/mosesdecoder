@@ -44,7 +44,7 @@ my $phraseOrientationPriorsFile;
 my $splitCmdOption = "";
 
 my $GZIP_EXEC;
-if(`which pigz`) {
+if(`which pigz 2> /dev/null`) {
   $GZIP_EXEC = 'pigz';
 }
 else {
@@ -374,7 +374,7 @@ sub NumStr($)
 sub GetSplitVersion($)
 {
 	my $splitCmd = shift;
-	my $retVal = system("$splitCmd --help");
+	my $retVal = system("$splitCmd --help > /dev/null");
 	if ($retVal != 0) {
 		return 1;
 	}

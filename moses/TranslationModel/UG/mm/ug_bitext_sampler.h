@@ -20,8 +20,15 @@
 namespace sapt
 {
   
-enum sampling_method { full_coverage, random_sampling, ranked_sampling };
-
+enum 
+sampling_method 
+  { 
+    full_coverage, 
+    random_sampling, 
+    ranked_sampling, 
+    ranked_sampling2 
+  };
+  
 typedef ttrack::Position TokenPosition;
 class CandidateSorter
 {
@@ -38,49 +45,56 @@ BitextSampler : public Moses::reference_counter
 {
   typedef Bitext<Token> bitext;
   typedef TSA<Token>       tsa;
-  typedef SamplingBias    bias;
+  typedef SamplingBias    bias_t;
   typedef typename Bitext<Token>::iter tsa_iter;
   mutable boost::condition_variable   m_ready; 
   mutable boost::mutex                 m_lock; 
   // const members
   // SPTR<bitext const> const   m_bitext; // keep bitext alive while I am 
   // should be an 
-  iptr<bitext const> const   m_bitext; // keep bitext alive as long as I am 
-  size_t             const     m_plen; // length of lookup phrase
-  bool               const      m_fwd; // forward or backward direction?
-  SPTR<tsa const>    const     m_root; // root of suffix array
-  char               const*    m_next; // current position
-  char               const*    m_stop; // end of search range
-  sampling_method    const   m_method; // look at all/random/ranked samples 
-  SPTR<bias const>   const     m_bias; // bias over candidates
-  size_t             const  m_samples; // how many samples at most 
+  SPTR<bitext const> const       m_bitext; // keep bitext alive as long as I am 
+  size_t             const         m_plen; // length of lookup phrase
+  bool               const          m_fwd; // forward or backward direction?
+  SPTR<tsa const>    const         m_root; // root of suffix array
+  char               const*        m_next; // current position
+  char               const*        m_stop; // end of search range
+  sampling_method    const       m_method; // look at all/random/ranked samples 
+  SPTR<bias_t const> const         m_bias; // bias over candidates
+  size_t             const      m_samples; // how many samples at most 
+  size_t             const  m_min_samples;
   // non-const members
   SPTR<pstats>                m_stats; // destination for phrase stats
   size_t                        m_ctr; // number of samples considered
   float                  m_total_bias; // for random sampling with bias
   bool                     m_finished;
-
+  size_t m_num_occurrences; // estimated number of phrase occurrences in corpus
   boost::taus88 m_rnd;  // every job has its own pseudo random generator
-  // double m_rnd_denom;   // denominator for scaling random sampling
   double m_bias_total;
 
-  bool   consider_sample(TokenPosition const& p);
-  size_t perform_ranked_sampling();
+  size_t consider_sample(TokenPosition const& p);
   size_t perform_random_sampling();
+  size_t perform_full_phrase_extraction();
 
   int check_sample_distribution(uint64_t const& sid, uint64_t const& offset);
-  bool flip_coin(id_type & sid, ushort & offset);
+  bool flip_coin(id_type const& sid, ushort const& offset, SamplingBias const* bias);
     
 public:
   BitextSampler(BitextSampler const& other);
-  BitextSampler const& operator=(BitextSampler const& other);
-  BitextSampler(bitext const*  const bitext, typename bitext::iter const& phrase,
-                SPTR<SamplingBias const> const& bias, size_t const max_samples,
+  // BitextSampler const& operator=(BitextSampler const& other);
+  BitextSampler(SPTR<bitext const> const& bitext, 
+                typename bitext::iter const& phrase,
+                SPTR<SamplingBias const> const& bias, 
+                size_t const min_samples, 
+                size_t const max_samples,
                 sampling_method const method); 
   ~BitextSampler();
-  bool operator()(); // run sampling
   SPTR<pstats> stats();
   bool done() const;
+#ifdef MMT
+#include "mmt_bitext_sampler-inc.h"
+#else
+  bool operator()(); // run sampling
+#endif
 };
 
 template<typename Token>
@@ -145,9 +159,9 @@ check_sample_distribution(uint64_t const& sid, uint64_t const& offset)
 template<typename Token>
 bool 
 BitextSampler<Token>::
-flip_coin(id_type & sid, ushort & offset)
+flip_coin(id_type const& sid, ushort const& offset, bias_t const* bias)
 {
-  int no_maybe_yes = m_bias ? check_sample_distribution(sid, offset) : 1;
+  int no_maybe_yes = bias ? check_sample_distribution(sid, offset) : 1;
   if (no_maybe_yes == 0) return false; // no
   if (no_maybe_yes > 1)  return true;  // yes
   // ... maybe: flip a coin
@@ -156,8 +170,8 @@ flip_coin(id_type & sid, ushort & offset)
   size_t options_left   = (options_total - m_ctr);
   size_t random_number  = options_left * (m_rnd()/(m_rnd.max()+1.));
   size_t threshold;
-  if (m_bias_total) // we have a bias and there are candidates with non-zero prob
-    threshold = ((*m_bias)[sid]/m_bias_total * options_total * m_samples);
+  if (bias && m_bias_total > 0) // we have a bias and there are candidates with non-zero prob
+    threshold = ((*bias)[sid]/m_bias_total * options_total * m_samples);
   else // no bias, or all have prob 0 (can happen with a very opinionated bias)
     threshold = m_samples;
   return random_number + options_chosen < threshold;
@@ -168,9 +182,9 @@ flip_coin(id_type & sid, ushort & offset)
 
 template<typename Token>
 BitextSampler<Token>::
-BitextSampler(Bitext<Token> const* const bitext, 
+BitextSampler(SPTR<Bitext<Token> const> const& bitext, 
               typename bitext::iter const& phrase,
-              SPTR<SamplingBias const> const& bias, size_t const max_samples,
+              SPTR<SamplingBias const> const& bias, size_t const min_samples, size_t const max_samples,
               sampling_method const method)
   : m_bitext(bitext)
   , m_plen(phrase.size())
@@ -181,16 +195,16 @@ BitextSampler(Bitext<Token> const* const bitext,
   , m_method(method)
   , m_bias(bias)
   , m_samples(max_samples)
+  , m_min_samples(min_samples)
   , m_ctr(0)
   , m_total_bias(0)
   , m_finished(false)
+  , m_num_occurrences(phrase.ca())
   , m_rnd(0)
-    // , m_rnd_denom(m_rnd.max() + 1)
 {
   m_stats.reset(new pstats);
   m_stats->raw_cnt = phrase.ca();
   m_stats->register_worker();
-  // cerr << phrase.str(bitext->V1.get()) << " [" << HERE << "]" << endl;
 }
   
 template<typename Token>
@@ -205,8 +219,9 @@ BitextSampler(BitextSampler const& other)
   , m_method(other.m_method)
   , m_bias(other.m_bias)
   , m_samples(other.m_samples)
+  , m_min_samples(other.m_min_samples)
+  , m_num_occurrences(other.m_num_occurrences)
   , m_rnd(0)
-    // , m_rnd_denom(m_rnd.max() + 1)
 {
   // lock both instances
   boost::unique_lock<boost::mutex> mylock(m_lock);
@@ -219,28 +234,23 @@ BitextSampler(BitextSampler const& other)
   m_finished = other.m_finished;
 }
 
-// Ranked sampling sorts all samples by score and then considers the top-ranked 
-// candidates for phrase extraction.
+// Uniform sampling 
 template<typename Token>
 size_t
 BitextSampler<Token>::
-perform_ranked_sampling()
+perform_full_phrase_extraction()
 {
   if (m_next == m_stop) return m_ctr;
-  CandidateSorter sorter(*m_bias);
-  // below: nbest size = 4 * m_samples to allow for failed phrase extraction
-  Moses::NBestList<TokenPosition, CandidateSorter> nbest(4*m_samples, sorter);
-  sapt::tsa::ArrayEntry I(m_next);
-  while (I.next < m_stop)
+  for (sapt::tsa::ArrayEntry I(m_next); I.next < m_stop; ++m_ctr)
     {
       ++m_ctr;
-      nbest.add(m_root->readEntry(I.next, I));
+      m_root->readEntry(I.next, I);
+      consider_sample(I);
     }
-  for (size_t i = 0; m_stats->good < m_samples && i < nbest.size(); ++i)
-    consider_sample(nbest[i]);
   return m_ctr;
 }
-  
+
+
 // Uniform sampling 
 template<typename Token>
 size_t
@@ -266,14 +276,14 @@ perform_random_sampling()
     {
       ++m_ctr;
       m_root->readEntry(I.next,I);
-      if (!flip_coin(I.sid, I.offset)) continue;
+      if (!flip_coin(I.sid, I.offset, m_bias.get())) continue;
       consider_sample(I);
     }
   return m_ctr;
 }
 
 template<typename Token>
-bool
+size_t
 BitextSampler<Token>::
 consider_sample(TokenPosition const& p)
 {
@@ -281,11 +291,11 @@ consider_sample(TokenPosition const& p)
   bitvector full_aln(100*100);
   PhraseExtractionRecord 
     rec(p.sid, p.offset, p.offset + m_plen, !m_fwd, &aln, &full_aln);
-  int docid = m_bias ? m_bias->GetClass(p.sid) : -1;
+  int docid = m_bias ? m_bias->GetClass(p.sid) : m_bitext->sid2did(p.sid);
   if (!m_bitext->find_trg_phr_bounds(rec))
     { // no good, probably because phrase is not coherent
       m_stats->count_sample(docid, 0, rec.po_fwd, rec.po_bwd);
-      return false;
+      return 0;
     }
     
   // all good: register this sample as valid
@@ -306,6 +316,7 @@ consider_sample(TokenPosition const& p)
   // pair once per source phrase occurrence, or else run the risk of
   // having more joint counts than marginal counts.
     
+  size_t max_evidence = 0;
   for (size_t s = rec.s1; s <= rec.s2; ++s)
     {
       TSA<Token> const& I = m_fwd ? *m_bitext->I2 : *m_bitext->I1;
@@ -319,8 +330,10 @@ consider_sample(TokenPosition const& p)
             continue; // don't over-count
           seen.push_back(tpid);
           size_t raw2 = b->approxOccurrenceCount();
-          m_stats->add(tpid, sample_weight, m_bias ? (*m_bias)[p.sid] : 1, 
-                       aln, raw2, rec.po_fwd, rec.po_bwd, docid);
+          size_t evid = m_stats->add(tpid, sample_weight, 
+                                     m_bias ? (*m_bias)[p.sid] : 1, 
+                                     aln, raw2, rec.po_fwd, rec.po_bwd, docid);
+          max_evidence = std::max(max_evidence, evid);
           bool ok = (i == rec.e2) || b->extend(o[i].id());
           UTIL_THROW_IF2(!ok, "Could not extend target phrase.");
         }
@@ -328,9 +341,10 @@ consider_sample(TokenPosition const& p)
         for (size_t k = 1; k < aln.size(); k += 2)
           --aln[k];
     }
-  return true;
+  return max_evidence;
 }
   
+#ifndef MMT
 template<typename Token>
 bool
 BitextSampler<Token>::
@@ -338,8 +352,8 @@ operator()()
 {
   if (m_finished) return true;
   boost::unique_lock<boost::mutex> lock(m_lock);
-  if (m_method == ranked_sampling)
-    perform_ranked_sampling(); 
+  if (m_method == full_coverage)
+    perform_full_phrase_extraction(); // consider all occurrences 
   else if (m_method == random_sampling)
     perform_random_sampling();
   else UTIL_THROW2("Unsupported sampling method.");
@@ -347,6 +361,7 @@ operator()()
   m_ready.notify_all();
   return true;
 }
+#endif
 
   
 template<typename Token>

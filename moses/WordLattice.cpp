@@ -7,12 +7,13 @@
 #include "TranslationOptionCollectionLattice.h"
 #include "TranslationOptionCollectionConfusionNet.h"
 #include "moses/FF/InputFeature.h"
+#include "moses/TranslationTask.h"
 
 namespace Moses
 {
-WordLattice::WordLattice()  : ConfusionNet()
+WordLattice::WordLattice(AllOptions::ptr const& opts)  : ConfusionNet(opts)
 {
-  UTIL_THROW_IF2(&InputFeature::Instance() == NULL,
+  UTIL_THROW_IF2(InputFeature::InstancePtr() == NULL,
                  "Input feature must be specified");
 }
 
@@ -51,17 +52,14 @@ void WordLattice::Print(std::ostream& out) const
 
 int
 WordLattice::
-InitializeFromPCNDataType
-(const PCN::CN& cn,
- const std::vector<FactorType>& factorOrder,
- const std::string& debug_line)
+InitializeFromPCNDataType(const PCN::CN& cn, const std::string& debug_line)
 {
-  // const StaticData &staticData = StaticData::Instance();
-  const InputFeature &inputFeature = InputFeature::Instance();
-  size_t numInputScores = inputFeature.GetNumInputScores();
-  size_t numRealWordCount = inputFeature.GetNumRealWordsInInput();
+  const std::vector<FactorType>& factorOrder = m_options->input.factor_order;
+  size_t const maxPhraseLength = m_options->search.max_phrase_length;
 
-  size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+  const InputFeature *inputFeature = InputFeature::InstancePtr();
+  size_t numInputScores = inputFeature->GetNumInputScores();
+  size_t numRealWordCount = inputFeature->GetNumRealWordsInInput();
 
   bool addRealWordCount = (numRealWordCount > 0);
 
@@ -118,8 +116,8 @@ InitializeFromPCNDataType
       // String2Word(alt.m_word, data[i][j]. first, factorOrder);
       next_nodes[i][j] = alt.m_next;
 
-      if(next_nodes[i][j] > maxSizePhrase) {
-        TRACE_ERR("ERROR: Jump length " << next_nodes[i][j] << " in word lattice exceeds maximum phrase length " << maxSizePhrase << ".\n");
+      if(next_nodes[i][j] > maxPhraseLength) {
+        TRACE_ERR("ERROR: Jump length " << next_nodes[i][j] << " in word lattice exceeds maximum phrase length " << maxPhraseLength << ".\n");
         TRACE_ERR("ERROR: Increase max-phrase-length to process this lattice.\n");
         return false;
       }
@@ -147,7 +145,9 @@ InitializeFromPCNDataType
   return !cn.empty();
 }
 
-int WordLattice::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
+int
+WordLattice::
+Read(std::istream& in)
 {
   Clear();
   std::string line;
@@ -158,7 +158,7 @@ int WordLattice::Read(std::istream& in,const std::vector<FactorType>& factorOrde
   }
 
   PCN::CN cn = PCN::parsePCN(line);
-  return InitializeFromPCNDataType(cn, factorOrder, line);
+  return InitializeFromPCNDataType(cn, line);
 }
 
 void WordLattice::GetAsEdgeMatrix(std::vector<std::vector<bool> >& edges) const
@@ -171,7 +171,7 @@ void WordLattice::GetAsEdgeMatrix(std::vector<std::vector<bool> >& edges) const
   }
 }
 
-int WordLattice::ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const
+int WordLattice::ComputeDistortionDistance(const Range& prev, const Range& current) const
 {
   int result;
 
@@ -219,21 +219,15 @@ bool WordLattice::CanIGetFromAToB(size_t start, size_t end) const
 }
 
 TranslationOptionCollection*
-WordLattice
-::CreateTranslationOptionCollection(ttasksptr const& ttask) const
+WordLattice::
+CreateTranslationOptionCollection(ttasksptr const& ttask) const
 {
-  size_t maxNoTransOptPerCoverage = StaticData::Instance().GetMaxNoTransOptPerCoverage();
-  float translationOptionThreshold = StaticData::Instance().GetTranslationOptionThreshold();
-
   TranslationOptionCollection *rv = NULL;
-  //rv = new TranslationOptionCollectionConfusionNet(*this, maxNoTransOptPerCoverage, translationOptionThreshold);
-
   if (StaticData::Instance().GetUseLegacyPT()) {
-    rv = new TranslationOptionCollectionConfusionNet(ttask, *this, maxNoTransOptPerCoverage, translationOptionThreshold);
+    rv = new TranslationOptionCollectionConfusionNet(ttask, *this);
   } else {
-    rv = new TranslationOptionCollectionLattice(ttask, *this, maxNoTransOptPerCoverage, translationOptionThreshold);
+    rv = new TranslationOptionCollectionLattice(ttask, *this);
   }
-
   assert(rv);
   return rv;
 }

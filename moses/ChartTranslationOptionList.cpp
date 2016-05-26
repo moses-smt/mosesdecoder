@@ -24,7 +24,7 @@
 #include "ChartTranslationOptionList.h"
 #include "ChartTranslationOptions.h"
 #include "ChartCellCollection.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include "InputType.h"
 #include "InputPath.h"
 
@@ -33,7 +33,8 @@ using namespace std;
 namespace Moses
 {
 
-ChartTranslationOptionList::ChartTranslationOptionList(size_t ruleLimit, const InputType &input)
+ChartTranslationOptionList::
+ChartTranslationOptionList(size_t ruleLimit, const InputType &input)
   : m_size(0)
   , m_ruleLimit(ruleLimit)
 {
@@ -61,7 +62,7 @@ public:
 
 void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
                                      const StackVec &stackVec,
-                                     const WordsRange &range)
+                                     const Range &range)
 {
   if (tpc.IsEmpty()) {
     return;
@@ -115,16 +116,20 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
   }
 }
 
-void ChartTranslationOptionList::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range)
+void
+ChartTranslationOptionList::
+AddPhraseOOV(TargetPhrase &phrase,
+             std::list<TargetPhraseCollection::shared_ptr > &waste_memory,
+             const Range &range)
 {
-  TargetPhraseCollection *tpc = new TargetPhraseCollection();
+  TargetPhraseCollection::shared_ptr tpc(new TargetPhraseCollection);
   tpc->Add(&phrase);
   waste_memory.push_back(tpc);
   StackVec empty;
   Add(*tpc, empty, range);
 }
 
-void ChartTranslationOptionList::ApplyThreshold()
+void ChartTranslationOptionList::ApplyThreshold(float const threshold)
 {
   if (m_ruleLimit && m_size > m_ruleLimit) {
     // Something's gone wrong if the list has grown to m_ruleLimit * 2
@@ -150,7 +155,7 @@ void ChartTranslationOptionList::ApplyThreshold()
     scoreThreshold = (score > scoreThreshold) ? score : scoreThreshold;
   }
 
-  scoreThreshold += StaticData::Instance().GetTranslationOptionThreshold();
+  scoreThreshold += threshold; // StaticData::Instance().GetTranslationOptionThreshold();
 
   CollType::iterator bound = std::partition(m_collection.begin(),
                              m_collection.begin()+m_size,
@@ -165,7 +170,7 @@ float ChartTranslationOptionList::GetBestScore(const ChartCellLabel *chartCell) 
   assert(stack);
   assert(!stack->empty());
   const ChartHypothesis &bestHypo = **(stack->begin());
-  return bestHypo.GetTotalScore();
+  return bestHypo.GetFutureScore();
 }
 
 void ChartTranslationOptionList::EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath)

@@ -11,7 +11,8 @@
 #include "moses/Syntax/RuleTableFF.h"
 #include "moses/Syntax/SHyperedgeBundle.h"
 #include "moses/Syntax/SVertex.h"
-#include "moses/Syntax/SVertexRecombinationOrderer.h"
+#include "moses/Syntax/SVertexRecombinationEqualityPred.h"
+#include "moses/Syntax/SVertexRecombinationHasher.h"
 #include "moses/Syntax/SymbolEqualityPred.h"
 #include "moses/Syntax/SymbolHasher.h"
 
@@ -32,7 +33,7 @@ Manager<RuleMatcher>::Manager(ttasksptr const& ttask)
 {
   if (const TreeInput *p = dynamic_cast<const TreeInput*>(&m_source)) {
     // Construct the InputTree.
-    InputTreeBuilder builder;
+    InputTreeBuilder builder(options()->output.factor_order);
     builder.Build(*p, "Q", m_inputTree);
   } else {
     UTIL_THROW2("ERROR: T2S::Manager requires input to be a tree");
@@ -93,12 +94,12 @@ void Manager<RuleMatcher>::InitializeStacks()
 template<typename RuleMatcher>
 void Manager<RuleMatcher>::Decode()
 {
-  const StaticData &staticData = StaticData::Instance();
+  // const StaticData &staticData = StaticData::Instance();
 
   // Get various pruning-related constants.
-  const std::size_t popLimit = this->options().cube.pop_limit;
-  const std::size_t ruleLimit = staticData.GetRuleLimit();
-  const std::size_t stackLimit = this->options().search.stack_size;
+  const std::size_t popLimit = this->options()->cube.pop_limit;
+  const std::size_t ruleLimit = this->options()->syntax.rule_limit;
+  const std::size_t stackLimit = this->options()->search.stack_size;
 
   // Initialize the stacks.
   InitializeStacks();
@@ -110,7 +111,8 @@ void Manager<RuleMatcher>::Decode()
   F2S::RuleMatcherCallback callback(m_stackMap, ruleLimit);
 
   // Create a glue rule synthesizer.
-  GlueRuleSynthesizer glueRuleSynthesizer(*m_glueRuleTrie);
+  Word dflt_nonterm = options()->syntax.output_default_non_terminal;
+  GlueRuleSynthesizer glueRuleSynthesizer(*m_glueRuleTrie, dflt_nonterm);
 
   // Visit each node of the input tree in post-order.
   for (std::vector<InputTree::Node>::const_iterator p =
@@ -213,8 +215,8 @@ void Manager<RuleMatcher>::ExtractKBest(
   // than k.  The k-best factor determines how much bigger the limit should be,
   // with 0 being 'unlimited.'  This actually sets a large-ish limit in case
   // too many translations are identical.
-  const StaticData &staticData = StaticData::Instance();
-  const std::size_t nBestFactor = staticData.options().nbest.factor;
+  // const StaticData &staticData = StaticData::Instance();
+  const std::size_t nBestFactor = this->options()->nbest.factor;
   std::size_t numDerivations = (nBestFactor == 0) ? k*1000 : k*nBestFactor;
 
   // Extract the derivations.
@@ -245,7 +247,9 @@ void Manager<RuleMatcher>::RecombineAndSort(
   // head pointers are updated to point to the vertex instances in the map and
   // any 'duplicate' vertices are deleted.
 // TODO Set?
-  typedef std::map<SVertex *, SVertex *, SVertexRecombinationOrderer> Map;
+  typedef boost::unordered_map<SVertex *, SVertex *,
+          SVertexRecombinationHasher,
+          SVertexRecombinationEqualityPred> Map;
   Map map;
   for (std::vector<SHyperedge*>::const_iterator p = buffer.begin();
        p != buffer.end(); ++p) {
@@ -261,7 +265,7 @@ void Manager<RuleMatcher>::RecombineAndSort(
     // Compare the score of h against the score of the best incoming hyperedge
     // for the stored vertex.
     SVertex *storedVertex = result.first->second;
-    if (h->label.score > storedVertex->best->label.score) {
+    if (h->label.futureScore > storedVertex->best->label.futureScore) {
       // h's score is better.
       storedVertex->recombined.push_back(storedVertex->best);
       storedVertex->best = h;

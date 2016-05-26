@@ -51,6 +51,7 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
 
   size_t sourceSize = parser.GetSize();
   m_expandableDottedRuleListVec.resize(sourceSize);
+  m_input_default_nonterminal = parser.options()->syntax.input_default_non_terminal;
 
   for (size_t ind = 0; ind < m_expandableDottedRuleListVec.size(); ++ind) {
     DottedRuleOnDisk *initDottedRule = new DottedRuleOnDisk(m_dbWrapper.GetRootSourceNode());
@@ -64,11 +65,12 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
 
 ChartRuleLookupManagerOnDisk::~ChartRuleLookupManagerOnDisk()
 {
-  std::map<uint64_t, const TargetPhraseCollection*>::const_iterator iterCache;
-  for (iterCache = m_cache.begin(); iterCache != m_cache.end(); ++iterCache) {
-    delete iterCache->second;
-  }
-  m_cache.clear();
+  // not needed any more due to the switch to shared pointers
+  // std::map<uint64_t, TargetPhraseCollection::shared_ptr >::const_iterator iterCache;
+  // for (iterCache = m_cache.begin(); iterCache != m_cache.end(); ++iterCache) {
+  //   iterCache->second.reset();
+  // }
+  // m_cache.clear();
 
   RemoveAllInColl(m_expandableDottedRuleListVec);
   RemoveAllInColl(m_sourcePhraseNode);
@@ -80,8 +82,8 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
   ChartParserCallback &outColl)
 {
   const StaticData &staticData = StaticData::Instance();
-  const Word &defaultSourceNonTerm = staticData.GetInputDefaultNonTerminal();
-  const WordsRange &range = inputPath.GetWordsRange();
+  // const Word &defaultSourceNonTerm = staticData.GetInputDefaultNonTerminal();
+  const Range &range = inputPath.GetWordsRange();
 
   size_t relEndPos = range.GetEndPos() - range.GetStartPos();
   size_t absEndPos = range.GetEndPos();
@@ -177,7 +179,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
         if (m_dictionary.m_maxSpanDefault != NOT_FOUND) {
           // for Hieu's source syntax
 
-          bool isSourceSyntaxNonTerm = sourceLHS != defaultSourceNonTerm;
+          bool isSourceSyntaxNonTerm = sourceLHS != m_input_default_nonterminal; // defaultSourceNonTerm;
           size_t nonTermNumWordsCovered = endPos - startPos + 1;
 
           doSearch = isSourceSyntaxNonTerm ?
@@ -236,14 +238,16 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
         if (sourceLHSBerkeleyDb == NULL)
           continue;
 
-        const TargetPhraseCollection *targetPhraseCollection = NULL;
-        const OnDiskPt::PhraseNode *node = prevNode.GetChild(*sourceLHSBerkeleyDb, m_dbWrapper);
+        TargetPhraseCollection::shared_ptr targetPhraseCollection;
+        const OnDiskPt::PhraseNode *node
+        = prevNode.GetChild(*sourceLHSBerkeleyDb, m_dbWrapper);
         if (node) {
           uint64_t tpCollFilePos = node->GetValue();
-          std::map<uint64_t, const TargetPhraseCollection*>::const_iterator iterCache = m_cache.find(tpCollFilePos);
+          std::map<uint64_t, TargetPhraseCollection::shared_ptr >::const_iterator iterCache = m_cache.find(tpCollFilePos);
           if (iterCache == m_cache.end()) {
 
-            const OnDiskPt::TargetPhraseCollection *tpcollBerkeleyDb = node->GetTargetPhraseCollection(m_dictionary.GetTableLimit(), m_dbWrapper);
+            OnDiskPt::TargetPhraseCollection::shared_ptr tpcollBerkeleyDb
+            = node->GetTargetPhraseCollection(m_dictionary.GetTableLimit(), m_dbWrapper);
 
             std::vector<float> weightT = staticData.GetWeights(&m_dictionary);
             targetPhraseCollection
@@ -254,7 +258,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
                                                ,m_dbWrapper.GetVocab()
                                                ,true);
 
-            delete tpcollBerkeleyDb;
+            tpcollBerkeleyDb.reset();
             m_cache[tpCollFilePos] = targetPhraseCollection;
           } else {
             // just get out of cache

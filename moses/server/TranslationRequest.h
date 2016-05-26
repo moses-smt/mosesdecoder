@@ -38,15 +38,11 @@ TranslationRequest : public virtual Moses::TranslationTask
 
   Translator* m_translator;
   std::string m_source_string, m_target_string;
-  bool m_withAlignInfo;
-  bool m_withWordAlignInfo;
+  // bool m_withAlignInfo;
+  // bool m_withWordAlignInfo;
   bool m_withGraphInfo;
   bool m_withTopts;
-  bool m_reportAllFactors;
-  bool m_nbestDistinct;
   bool m_withScoreBreakdown;
-  size_t m_nbestSize;
-
   uint64_t m_session_id; // 0 means none, 1 means new
 
   void
@@ -62,17 +58,15 @@ TranslationRequest : public virtual Moses::TranslationTask
   run_phrase_decoder();
 
   void
-  pack_hypothesis(std::vector<Moses::Hypothesis const* > const& edges,
+  pack_hypothesis(const Moses::Manager& manager, 
+		  std::vector<Moses::Hypothesis const* > const& edges,
                   std::string const& key,
                   std::map<std::string, xmlrpc_c::value> & dest) const;
 
   void
-  pack_hypothesis(Moses::Hypothesis const* h, std::string const& key,
+  pack_hypothesis(const Moses::Manager& manager, Moses::Hypothesis const* h, 
+		  std::string const& key,
                   std::map<std::string, xmlrpc_c::value> & dest) const;
-
-
-  void
-  output_phrase(std::ostream& out, Moses::Phrase const& phrase) const;
 
   void
   add_phrase_aln_info(Moses::Hypothesis const& h,

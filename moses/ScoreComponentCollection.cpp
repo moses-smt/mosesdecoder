@@ -1,9 +1,10 @@
-// $Id$
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #include <vector>
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>
 #include "util/exception.hh"
+#include "util/string_stream.hh"
 #include "ScoreComponentCollection.h"
 #include "StaticData.h"
 #include "moses/FF/StatelessFeatureFunction.h"
@@ -88,9 +89,8 @@ void ScoreComponentCollection::MultiplyEquals(const FeatureFunction* sp, float s
 {
   std::string prefix = sp->GetScoreProducerDescription() + FName::SEP;
   for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {
-    std::stringstream name;
-    name << i->first;
-    if (starts_with(name.str(), prefix))
+    const std::string &name = i->first.name();
+    if (starts_with(name, prefix))
       m_scores[i->first] = i->second * scalar;
   }
 }
@@ -101,9 +101,8 @@ size_t ScoreComponentCollection::GetNumberWeights(const FeatureFunction* sp)
   std::string prefix = sp->GetScoreProducerDescription() + FName::SEP;
   size_t weights = 0;
   for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {
-    std::stringstream name;
-    name << i->first;
-    if (starts_with(name.str(), prefix))
+    const std::string &name = i->first.name();
+    if (starts_with(name, prefix))
       weights++;
   }
   return weights;
@@ -215,7 +214,7 @@ void ScoreComponentCollection::Save(const string& filename) const
 {
   ofstream out(filename.c_str());
   if (!out) {
-    ostringstream msg;
+    util::StringStream msg;
     msg << "Unable to open " << filename;
     throw runtime_error(msg.str());
   }
@@ -281,7 +280,9 @@ void ScoreComponentCollection::ZeroDenseFeatures(const FeatureFunction* sp)
 }
 
 //! get subset of scores that belong to a certain sparse ScoreProducer
-FVector ScoreComponentCollection::GetVectorForProducer(const FeatureFunction* sp) const
+FVector
+ScoreComponentCollection::
+GetVectorForProducer(const FeatureFunction* sp) const
 {
   FVector fv(s_denseVectorSize);
   std::string prefix = sp->GetScoreProducerDescription() + FName::SEP;
@@ -306,35 +307,40 @@ void ScoreComponentCollection::PlusEquals(const FeatureFunction* sp, const Score
   }
 }
 
-void ScoreComponentCollection::OutputAllFeatureScores(std::ostream &out) const
+void
+ScoreComponentCollection::
+OutputAllFeatureScores(std::ostream &out, bool with_labels) const
 {
   std::string lastName = "";
-  const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& sff
+  = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for( size_t i=0; i<sff.size(); i++ ) {
     const StatefulFeatureFunction *ff = sff[i];
     if (ff->IsTuneable()) {
-      OutputFeatureScores( out, ff, lastName );
+      OutputFeatureScores(out, ff, lastName, with_labels);
     }
   }
-  const vector<const StatelessFeatureFunction*>& slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
+  const vector<const StatelessFeatureFunction*>& slf
+  = StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for( size_t i=0; i<slf.size(); i++ ) {
     const StatelessFeatureFunction *ff = slf[i];
     if (ff->IsTuneable()) {
-      OutputFeatureScores( out, ff, lastName );
+      OutputFeatureScores(out, ff, lastName, with_labels);
     }
   }
 }
 
-void ScoreComponentCollection::OutputFeatureScores( std::ostream& out
-    , const FeatureFunction *ff
-    , std::string &lastName ) const
+void
+ScoreComponentCollection::
+OutputFeatureScores(std::ostream& out, FeatureFunction const* ff,
+                    std::string &lastName, bool with_labels) const
 {
-  const StaticData &staticData = StaticData::Instance();
-  bool labeledOutput = staticData.options().nbest.include_feature_labels;
+  // const StaticData &staticData = StaticData::Instance();
+  // bool labeledOutput = staticData.options().nbest.include_feature_labels;
 
   // regular features (not sparse)
   if (ff->HasTuneableComponents()) {
-    if( labeledOutput && lastName != ff->GetScoreProducerDescription() ) {
+    if( with_labels && lastName != ff->GetScoreProducerDescription() ) {
       lastName = ff->GetScoreProducerDescription();
       out << " " << lastName << "=";
     }

@@ -31,7 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOptionCollection.h"
 #include "TrellisPathList.h"
 #include "SquareMatrix.h"
-#include "WordsBitmap.h"
+#include "Bitmap.h"
 #include "Search.h"
 #include "SearchCubePruning.h"
 #include "BaseManager.h"
@@ -131,21 +131,19 @@ protected:
   // nbest
   mutable std::ostringstream m_latticeNBestOut;
   mutable std::ostringstream m_alignmentOut;
+public:
+  void OutputNBest(std::ostream& out, const Moses::TrellisPathList &nBestList) const;
+  void OutputSurface(std::ostream &out,
+                     Hypothesis const& edge,
+                     bool const recursive=false) const;
 
-  void OutputNBest(std::ostream& out
-                   , const Moses::TrellisPathList &nBestList
-                   , const std::vector<Moses::FactorType>& outputFactorOrder
-                   , long translationId
-                   , char reportSegmentation) const;
-  void OutputSurface(std::ostream &out, const Hypothesis &edge, const std::vector<FactorType> &outputFactorOrder,
-                     char reportSegmentation, bool reportAllFactors) const;
   void OutputAlignment(std::ostream &out, const AlignmentInfo &ai, size_t sourceOffset, size_t targetOffset) const;
   void OutputInput(std::ostream& os, const Hypothesis* hypo) const;
   void OutputInput(std::vector<const Phrase*>& map, const Hypothesis* hypo) const;
   void OutputPassthroughInformation(std::ostream& os, const Hypothesis* hypo) const;
-  std::map<size_t, const Factor*> GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor) const;
-  void OutputAlignment(OutputCollector* collector, size_t lineNo , const std::vector<const Hypothesis *> &edges) const;
-  void OutputAlignment(std::ostream &out, const std::vector<const Hypothesis *> &edges) const;
+
+  std::map<size_t, const Factor*>
+  GetPlaceholders(const Hypothesis &hypo, FactorType placeholderFactor) const;
 
   void OutputWordGraph(std::ostream &outputWordGraphStream, const Hypothesis *hypo, size_t &linkId) const;
 
@@ -170,9 +168,8 @@ public:
   int GetNextHypoId();
 
   void OutputLatticeMBRNBest(std::ostream& out, const std::vector<LatticeMBRSolution>& solutions,long translationId) const;
-  void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, long /*translationId*/,
-                      char reportSegmentation, bool reportAllFactors, std::ostream& out) const;
-  void OutputBestHypo(const Moses::TrellisPath &path, long /*translationId*/,char reportSegmentation, bool reportAllFactors, std::ostream &out) const;
+  void OutputBestHypo(const std::vector<Moses::Word>&  mbrBestHypo, std::ostream& out) const;
+  void OutputBestHypo(const Moses::TrellisPath &path, std::ostream &out) const;
 
 #ifdef HAVE_PROTOBUF
   void SerializeSearchGraphPB(long translationId, std::ostream& outputStream) const;
@@ -195,8 +192,12 @@ public:
   /***
    *For Lattice MBR
   */
-  void GetForwardBackwardSearchGraph(std::map< int, bool >* pConnected,
-                                     std::vector< const Hypothesis* >* pConnectedList, std::map < const Hypothesis*, std::set < const Hypothesis* > >* pOutgoingHyps, std::vector< float>* pFwdBwdScores) const;
+  void
+  GetForwardBackwardSearchGraph
+  ( std::map< int, bool >* pConnected,
+    std::vector< const Hypothesis* >* pConnectedList,
+    std::map < const Hypothesis*, std::set < const Hypothesis* > >* pOutgoingHyps,
+    std::vector< float>* pFwdBwdScores) const;
 
   // outputs
   void OutputBest(OutputCollector *collector)  const;

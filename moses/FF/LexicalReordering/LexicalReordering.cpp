@@ -5,7 +5,7 @@
 #include "moses/FF/FFState.h"
 #include "moses/TranslationOptionList.h"
 #include "LexicalReordering.h"
-#include "LexicalReorderingState.h"
+#include "LRState.h"
 #include "moses/StaticData.h"
 #include "moses/Util.h"
 #include "moses/InputPath.h"
@@ -75,7 +75,7 @@ LexicalReordering(const std::string &line)
                  << m_configuration->GetNumScoreComponents() << ")");
 
   m_configuration->ConfigureSparse(sparseArgs, this);
-  this->Register();
+  // this->Register();
 }
 
 LexicalReordering::
@@ -84,8 +84,9 @@ LexicalReordering::
 
 void
 LexicalReordering::
-Load()
+Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   typedef LexicalReorderingTable LRTable;
   if (m_filePath.size())
     m_table.reset(LRTable::LoadAvailable(m_filePath, m_factorsF,
@@ -106,11 +107,9 @@ EvaluateWhenApplied(const Hypothesis& hypo,
                     ScoreComponentCollection* out) const
 {
   VERBOSE(3,"LexicalReordering::Evaluate(const Hypothesis& hypo,...) START" << std::endl);
-  Scores score(GetNumScoreComponents(), 0);
-  const LRState *prev = dynamic_cast<const LRState *>(prev_state);
+  const LRState *prev = static_cast<const LRState *>(prev_state);
   LRState *next_state = prev->Expand(hypo.GetTranslationOption(), hypo.GetInput(), out);
 
-  out->PlusEquals(this, score);
   VERBOSE(3,"LexicalReordering::Evaluate(const Hypothesis& hypo,...) END" << std::endl);
 
   return next_state;
@@ -145,8 +144,8 @@ SetCache(TranslationOption& to) const
     Phrase const& tphrase = to.GetTargetPhrase();
     to.CacheLexReorderingScores(*this, this->GetProb(sphrase,tphrase));
   } else { // e.g. OOV with Mmsapt
-    Scores vals(GetNumScoreComponents(), 0);
-    to.CacheLexReorderingScores(*this, vals);
+    // Scores vals(GetNumScoreComponents(), 0);
+    // to.CacheLexReorderingScores(*this, vals);
   }
 }
 

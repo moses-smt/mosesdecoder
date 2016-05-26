@@ -2,10 +2,14 @@
 
 #include "FeatureFunction.h"
 
-#include "moses/Syntax/SHyperedge.h"
 
 namespace Moses
 {
+
+namespace Syntax
+{
+struct SHyperedge;
+}
 
 /** base class for all stateless feature functions.
  * eg. phrase table, word penalty, phrase penalty

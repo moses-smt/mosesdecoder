@@ -12,8 +12,8 @@ using namespace Moses;
 
 Translator::
 Translator(Server& server)
-  : m_threadPool(server.options().num_threads),
-    m_server(server)
+  : m_server(server),
+    m_threadPool(server.options().numThreads)
 {
   // signature and help strings are documentation -- the client
   // can query this information with a system.methodSignature and

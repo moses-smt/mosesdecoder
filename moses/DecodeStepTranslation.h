@@ -48,7 +48,7 @@ public:
                        , PartialTranslOptColl &outputPartialTranslOptColl
                        , TranslationOptionCollection *toc
                        , bool adhereTableLimit
-                       , const TargetPhraseCollection *phraseColl) const;
+                       , TargetPhraseCollection::shared_ptr phraseColl) const;
 
 
   /*! initialize list of partial translation options by applying the first translation step
@@ -58,13 +58,16 @@ public:
                                  , PartialTranslOptColl &outputPartialTranslOptColl
                                  , size_t startPos, size_t endPos, bool adhereTableLimit
                                  , const InputPath &inputPath
-                                 , const TargetPhraseCollection *phraseColl) const;
+                                 , TargetPhraseCollection::shared_ptr phraseColl) const;
 
   // legacy
-  void ProcessInitialTranslationLEGACY(const InputType &source
-                                       , PartialTranslOptColl &outputPartialTranslOptColl
-                                       , size_t startPos, size_t endPos, bool adhereTableLimit
-                                       , const InputPathList &inputPathList) const;
+  void
+  ProcessInitialTransLEGACY(InputType const& source,
+                            PartialTranslOptColl &outputPartialTranslOptColl,
+                            size_t startPos, size_t endPos,
+                            bool adhereTableLimit,
+                            InputPathList const& inputPathList) const;
+
   void ProcessLEGACY(const TranslationOption &inputPartialTranslOpt
                      , const DecodeStep &decodeStep
                      , PartialTranslOptColl &outputPartialTranslOptColl

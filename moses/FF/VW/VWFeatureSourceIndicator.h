@@ -21,7 +21,7 @@ public:
 
   void operator()(const InputType &input
                   , const InputPath &inputPath
-                  , const WordsRange &sourceRange
+                  , const Range &sourceRange
                   , Discriminative::Classifier &classifier) const {
     size_t begin = sourceRange.GetStartPos();
     size_t end   = sourceRange.GetEndPos() + 1;

@@ -1,6 +1,8 @@
+#include <boost/functional/hash.hpp>
 #include <vector>
 #include <algorithm>
 #include <iterator>
+#include <boost/foreach.hpp>
 #include "CoveredReferenceFeature.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/Hypothesis.h"
@@ -17,41 +19,24 @@ using namespace std;
 namespace Moses
 {
 
-int CoveredReferenceState::Compare(const FFState& other) const
+size_t CoveredReferenceState::hash() const
 {
-  const CoveredReferenceState &otherState = static_cast<const CoveredReferenceState&>(other);
-
-  if (m_coveredRef.size() != otherState.m_coveredRef.size()) {
-    return (m_coveredRef.size() < otherState.m_coveredRef.size()) ? -1 : +1;
-  } else {
-    multiset<string>::const_iterator thisIt, otherIt;
-    for (thisIt = m_coveredRef.begin(), otherIt = otherState.m_coveredRef.begin();
-         thisIt != m_coveredRef.end();
-         thisIt++, otherIt++) {
-      if (*thisIt != *otherIt) return thisIt->compare(*otherIt);
-    }
-  }
-  return 0;
-
-//  return m_coveredRef == otherState.m_coveredRef;
-
-//  if (m_coveredRef == otherState.m_coveredRef)
-//    return 0;
-//  return (m_coveredRef.size() < otherState.m_coveredRef.size()) ? -1 : +1;
+  UTIL_THROW2("TODO:Haven't figure this out yet");
 }
 
-void CoveredReferenceFeature::EvaluateInIsolation(const Phrase &source
-    , const TargetPhrase &targetPhrase
-    , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
-{}
+bool CoveredReferenceState::operator==(const FFState& other) const
+{
+  UTIL_THROW2("TODO:Haven't figure this out yet");
+}
+
+//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 void CoveredReferenceFeature::EvaluateWithSourceContext(const InputType &input
     , const InputPath &inputPath
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection *estimatedFutureScore) const
+    , ScoreComponentCollection *estimatedScores) const
 {
   long id = input.GetTranslationId();
   boost::unordered_map<long, std::multiset<string> >::const_iterator refIt = m_refs.find(id);
@@ -64,15 +49,16 @@ void CoveredReferenceFeature::EvaluateWithSourceContext(const InputType &input
   scores.push_back(covered.size());
 
   scoreBreakdown.Assign(this, scores);
-  estimatedFutureScore->Assign(this, scores);
+  estimatedScores->Assign(this, scores);
 }
 
-void CoveredReferenceFeature::Load()
+void CoveredReferenceFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   InputFileStream refFile(m_path);
   std::string line;
   const StaticData &staticData = StaticData::Instance();
-  long sentenceID = staticData.GetStartTranslationId();
+  long sentenceID = opts->output.start_translation_id;
   while (getline(refFile, line)) {
     vector<string> words = Tokenize(line, " ");
     multiset<string> wordSet;

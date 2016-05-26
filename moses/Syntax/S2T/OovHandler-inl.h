@@ -32,9 +32,10 @@ boost::shared_ptr<RuleTrie> OovHandler<RuleTrie>::SynthesizeRuleTrie(
 // TODO Check ownership and fix any leaks.
       Word *tgtLHS = SynthesizeTargetLhs(targetLhsStr);
       TargetPhrase *tp = SynthesizeTargetPhrase(oov, *srcPhrase, *tgtLHS, prob);
-      TargetPhraseCollection &tpc = GetOrCreateTargetPhraseCollection(
-                                      *trie, *srcPhrase, *tp, NULL);  // TODO Check NULL is valid argument
-      tpc.Add(tp);
+      TargetPhraseCollection::shared_ptr tpc;
+      tpc= GetOrCreateTargetPhraseCollection(*trie, *srcPhrase, *tp, NULL);
+      // TODO Check NULL is valid argument
+      tpc->Add(tp);
     }
   }
 
@@ -51,11 +52,12 @@ Phrase *OovHandler<RuleTrie>::SynthesizeSourcePhrase(const Word &sourceWord)
 }
 
 template<typename RuleTrie>
-Word *OovHandler<RuleTrie>::SynthesizeTargetLhs(const std::string &lhsStr)
+Word *
+OovHandler<RuleTrie>::SynthesizeTargetLhs(const std::string &lhsStr)
 {
   Word *targetLhs = new Word(true);
   targetLhs->CreateFromString(Output,
-                              StaticData::Instance().GetOutputFactorOrder(),
+                              StaticData::Instance().options()->output.factor_order,
                               lhsStr, true);
   UTIL_THROW_IF2(targetLhs->GetFactor(0) == NULL, "Null factor for target LHS");
   return targetLhs;
@@ -65,7 +67,7 @@ template<typename RuleTrie>
 TargetPhrase *OovHandler<RuleTrie>::SynthesizeTargetPhrase(
   const Word &oov, const Phrase &srcPhrase, const Word &targetLhs, float prob)
 {
-  const StaticData &staticData = StaticData::Instance();
+  const StaticData &SD = StaticData::Instance();
 
   const UnknownWordPenaltyProducer &unknownWordPenaltyProducer =
     UnknownWordPenaltyProducer::Instance();
@@ -81,8 +83,8 @@ TargetPhrase *OovHandler<RuleTrie>::SynthesizeTargetPhrase(
   targetPhrase->EvaluateInIsolation(srcPhrase);
   targetPhrase->SetTargetLHS(&targetLhs);
   targetPhrase->SetAlignmentInfo("0-0");
-  if (staticData.IsDetailedTreeFragmentsTranslationReportingEnabled() ||
-      staticData.GetTreeStructure() != NULL) {
+  if (!SD.options()->output.detailed_tree_transrep_filepath.empty() ||
+      SD.GetTreeStructure() != NULL) {
     std::string value = "[ " + targetLhs[0]->GetString().as_string() + " " +
                         oov[0]->GetString().as_string() + " ]";
     targetPhrase->SetProperty("Tree", value);
@@ -94,7 +96,7 @@ TargetPhrase *OovHandler<RuleTrie>::SynthesizeTargetPhrase(
 template<typename RuleTrie>
 bool OovHandler<RuleTrie>::ShouldDrop(const Word &oov)
 {
-  if (!StaticData::Instance().GetDropUnknown()) {
+  if (!StaticData::Instance().options()->unk.drop) {
     return false;
   }
   const Factor *f = oov[0]; // TODO hack. shouldn't know which factor is surface

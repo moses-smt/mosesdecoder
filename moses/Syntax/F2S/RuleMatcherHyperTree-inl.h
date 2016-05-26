@@ -51,8 +51,8 @@ void RuleMatcherHyperTree<Callback>::EnumerateHyperedges(
         m_hyperedge.label.inputWeight += (*p)->weight;
       }
       // Set the output hyperedge label's translation set pointer.
-      m_hyperedge.label.translations =
-        &(item.trieNode->GetTargetPhraseCollection());
+      m_hyperedge.label.translations
+      = item.trieNode->GetTargetPhraseCollection();
       // Pass the output hyperedge to the callback.
       callback(m_hyperedge);
     }

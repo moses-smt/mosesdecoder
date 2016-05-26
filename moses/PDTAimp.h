@@ -44,10 +44,10 @@ public:
   std::vector<FactorType> m_input,m_output;
   PhraseDictionaryTree *m_dict;
   const InputFeature *m_inputFeature;
-  typedef std::vector<TargetPhraseCollectionWithSourcePhrase const*> vTPC;
+  typedef std::vector<TargetPhraseCollectionWithSourcePhrase::shared_ptr> vTPC;
   mutable vTPC m_tgtColls;
 
-  typedef std::map<Phrase,TargetPhraseCollectionWithSourcePhrase const*> MapSrc2Tgt;
+  typedef std::map<Phrase,TargetPhraseCollectionWithSourcePhrase::shared_ptr> MapSrc2Tgt;
   mutable MapSrc2Tgt m_cache;
   PhraseDictionaryTreeAdaptor *m_obj;
   int useCache;
@@ -69,7 +69,7 @@ public:
 
   void CleanUp();
 
-  TargetPhraseCollectionWithSourcePhrase const*
+  TargetPhraseCollectionWithSourcePhrase::shared_ptr
   GetTargetPhraseCollection(Phrase const &src) const;
 
   void Create(const std::vector<FactorType> &input
@@ -116,12 +116,13 @@ public:
 
   void CreateTargetPhrase(TargetPhrase& targetPhrase,
                           StringTgtCand::Tokens const& factorStrings,
+                          std::string const& factorDelimiter,
                           Scores const& transVector,
                           Scores const& inputVector,
                           const std::string *alignmentString,
                           Phrase const* srcPtr=0) const;
 
-  TargetPhraseCollectionWithSourcePhrase* PruneTargetCandidates
+  TargetPhraseCollectionWithSourcePhrase::shared_ptr PruneTargetCandidates
   (const std::vector<TargetPhrase> & tCands,
    std::vector<std::pair<float,size_t> >& costs,
    const std::vector<Phrase> &sourcePhrases) const;

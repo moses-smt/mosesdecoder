@@ -30,8 +30,6 @@ ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 POSSIBILITY OF SUCH DAMAGE.
  ***********************************************************************/
 
-// example file on how to use moses library
-
 #include <iostream>
 #include <stack>
 #include <boost/algorithm/string.hpp>
@@ -39,33 +37,21 @@ POSSIBILITY OF SUCH DAMAGE.
 
 #include "moses/Syntax/KBestExtractor.h"
 #include "moses/Syntax/PVertex.h"
-#include "moses/Syntax/SHyperedge.h"
 #include "moses/Syntax/S2T/DerivationWriter.h"
-#include "moses/Syntax/SVertex.h"
 
-#include "moses/TypeDef.h"
-#include "moses/Util.h"
 #include "moses/Hypothesis.h"
-#include "moses/WordsRange.h"
 #include "moses/TrellisPathList.h"
 #include "moses/StaticData.h"
-#include "moses/FeatureVector.h"
 #include "moses/InputFileStream.h"
 #include "moses/FF/StatefulFeatureFunction.h"
-#include "moses/FF/StatelessFeatureFunction.h"
 #include "moses/TreeInput.h"
 #include "moses/ForestInput.h"
 #include "moses/ConfusionNet.h"
 #include "moses/WordLattice.h"
-#include "moses/Incremental.h"
 #include "moses/ChartManager.h"
-
-
-#include "util/exception.hh"
 
 #include "IOWrapper.h"
 
-#include <boost/algorithm/string/predicate.hpp>
 #include <boost/filesystem.hpp>
 #include <boost/iostreams/device/file.hpp>
 #include <boost/iostreams/filter/bzip2.hpp>
@@ -77,14 +63,9 @@ using namespace std;
 namespace Moses
 {
 
-IOWrapper::IOWrapper()
-  : m_nBestStream(NULL)
-  // , m_outputWordGraphStream(NULL)
-  // , m_outputSearchGraphStream(NULL)
-  // , m_detailedTranslationReportingStream(NULL)
-  // , m_unknownsStream(NULL)
-  // , m_alignmentInfoStream(NULL)
-  // , m_latticeSamplesStream(NULL)
+IOWrapper::IOWrapper(AllOptions const& opts)
+  : m_options(new AllOptions(opts))
+  , m_nBestStream(NULL)
   , m_surpressSingleBestOutput(false)
   , m_look_ahead(0)
   , m_look_back(0)
@@ -97,20 +78,18 @@ IOWrapper::IOWrapper()
   Parameter const& P = staticData.GetParameter();
 
   // context buffering for context-sensitive decoding
-  m_look_ahead = staticData.options().context.look_ahead;
-  m_look_back  = staticData.options().context.look_back;
-
-  m_inputType = staticData.GetInputType();
+  m_look_ahead = m_options->context.look_ahead;
+  m_look_back  = m_options->context.look_back;
+  m_inputType  = m_options->input.input_type;
 
   UTIL_THROW_IF2((m_look_ahead || m_look_back) && m_inputType != SentenceInput,
                  "Context-sensitive decoding currently works only with sentence input.");
 
-  m_currentLine = staticData.GetStartTranslationId();
+  m_currentLine = m_options->output.start_translation_id;
+  m_inputFactorOrder = &m_options->input.factor_order;
 
-  m_inputFactorOrder = &staticData.GetInputFactorOrder();
-
-  size_t nBestSize = staticData.options().nbest.nbest_size;
-  string nBestFilePath = staticData.options().nbest.output_file_path;
+  size_t nBestSize = m_options->nbest.nbest_size;
+  string nBestFilePath = m_options->nbest.output_file_path;
 
   staticData.GetParameter().SetParameter<string>(m_inputFilePath, "input-file", "");
   if (m_inputFilePath.empty()) {
@@ -149,8 +128,8 @@ IOWrapper::IOWrapper()
   P.SetParameter<string>(path, "output-word-graph", "");
   if (path.size()) m_wordGraphCollector.reset(new OutputCollector(path));
 
-  size_t latticeSamplesSize = staticData.GetLatticeSamplesSize();
-  string latticeSamplesFile = staticData.GetLatticeSamplesFilePath();
+  size_t latticeSamplesSize = staticData.options()->output.lattice_sample_size;
+  string latticeSamplesFile = staticData.options()->output.lattice_sample_filepath;
   if (latticeSamplesSize) {
     m_latticeSamplesCollector.reset(new OutputCollector(latticeSamplesFile));
     if (m_latticeSamplesCollector->OutputIsCout()) {

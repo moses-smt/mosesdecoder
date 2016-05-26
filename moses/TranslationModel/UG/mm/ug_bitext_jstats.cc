@@ -17,7 +17,7 @@ namespace sapt
   jstats()
     : my_rcnt(0), my_cnt2(0), my_wcnt(0), my_bcnt(0)
   {
-    for (int i = 0; i <= Moses::LRModel::NONE; ++i)
+    for (int i = 0; i <= LRModel::NONE; ++i)
       ofwd[i] = obwd[i] = 0;
     my_aln.reserve(1);
   }
@@ -30,10 +30,10 @@ namespace sapt
     my_bcnt = other.bcnt();
     my_aln  = other.aln();
     indoc   = other.indoc;
-    for (int i = 0; i <= Moses::LRModel::NONE; i++)
+    for (int i = 0; i <= LRModel::NONE; i++)
       {
-	ofwd[i] = other.ofwd[i];
-	obwd[i] = other.obwd[i];
+        ofwd[i] = other.ofwd[i];
+        obwd[i] = other.obwd[i];
       }
   }
 
@@ -41,7 +41,7 @@ namespace sapt
   jstats::
   dcnt_fwd(PhraseOrientation const idx) const
   {
-    assert(idx <= Moses::LRModel::NONE);
+    assert(idx <= LRModel::NONE);
     return ofwd[idx];
   }
 
@@ -49,11 +49,11 @@ namespace sapt
   jstats::
   dcnt_bwd(PhraseOrientation const idx) const
   {
-    assert(idx <= Moses::LRModel::NONE);
+    assert(idx <= LRModel::NONE);
     return obwd[idx];
   }
 
-  void
+  size_t
   jstats::
   add(float w, float b, std::vector<unsigned char> const& a, uint32_t const cnt2,
       uint32_t fwd_orient, uint32_t bwd_orient, int const docid)
@@ -65,24 +65,25 @@ namespace sapt
     my_bcnt += b;
     if (a.size())
       {
-	size_t i = 0;
-	while (i < my_aln.size() && my_aln[i].second != a) ++i;
-	if (i == my_aln.size())
-	  my_aln.push_back(std::pair<size_t,std::vector<unsigned char> >(1,a));
-	else
-	  my_aln[i].first++;
-	if (my_aln[i].first > my_aln[i/2].first)
-	  push_heap(my_aln.begin(),my_aln.begin()+i+1);
+        size_t i = 0;
+        while (i < my_aln.size() && my_aln[i].second != a) ++i;
+        if (i == my_aln.size())
+          my_aln.push_back(std::pair<size_t,std::vector<unsigned char> >(1,a));
+        else
+          my_aln[i].first++;
+        if (my_aln[i].first > my_aln[i/2].first)
+          push_heap(my_aln.begin(),my_aln.begin()+i+1);
       }
     ++ofwd[fwd_orient];
     ++obwd[bwd_orient];
     if (docid >= 0)
       {
-	// while (int(indoc.size()) <= docid) indoc.push_back(0);
-	++indoc[docid];
+        // while (int(indoc.size()) <= docid) indoc.push_back(0);
+        ++indoc[docid];
       }
+    return my_rcnt;
   }
-
+  
   std::vector<std::pair<size_t, std::vector<unsigned char> > > const&
   jstats::
   aln() const

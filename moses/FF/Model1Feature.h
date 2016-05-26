@@ -2,6 +2,7 @@
 
 #include <string>
 #include <limits>
+#include <set>
 #include <boost/unordered_map.hpp>
 #include "StatelessFeatureFunction.h"
 #include "moses/Factor.h"
@@ -66,7 +67,7 @@ public:
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
-                           , ScoreComponentCollection &estimatedFutureScore) const
+                           , ScoreComponentCollection &estimatedScores) const
   {};
 
   void EvaluateWithSourceContext(const InputType &input
@@ -74,7 +75,7 @@ public:
                                  , const TargetPhrase &targetPhrase
                                  , const StackVec *stackVec
                                  , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+                                 , ScoreComponentCollection *estimatedScores = NULL) const;
 
   void EvaluateTranslationOptionListWithSourceContext(const InputType &input
       , const TranslationOptionList &translationOptionList) const
@@ -98,8 +99,11 @@ private:
   std::string m_fileNameModel1;
   Model1LexicalTable m_model1;
   const Factor* m_emptyWord;
+  bool m_skipTargetPunctuation;
+  std::set<const Factor*> m_punctuation;
+  bool m_is_syntax;
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   // cache
   mutable boost::unordered_map<const InputType*, boost::unordered_map<const Factor*, float> > m_cache;

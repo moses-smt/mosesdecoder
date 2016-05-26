@@ -2,6 +2,7 @@
 #include "ProbingPT.h"
 #include "moses/StaticData.h"
 #include "moses/FactorCollection.h"
+#include "moses/TargetPhraseCollection.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
 #include "quering.hh"
 
@@ -24,8 +25,9 @@ ProbingPT::~ProbingPT()
   delete m_engine;
 }
 
-void ProbingPT::Load()
+void ProbingPT::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   SetFeaturesToApply();
 
   m_engine = new QueryEngine(m_filePath.c_str());
@@ -75,15 +77,15 @@ void ProbingPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQue
     InputPath &inputPath = **iter;
     const Phrase &sourcePhrase = inputPath.GetPhrase();
 
-    if (sourcePhrase.GetSize() > StaticData::Instance().GetMaxPhraseLength()) {
+    if (sourcePhrase.GetSize() > m_options->search.max_phrase_length) {
       continue;
     }
 
-    TargetPhraseCollection *tpColl = CreateTargetPhrase(sourcePhrase);
+    TargetPhraseCollection::shared_ptr tpColl = CreateTargetPhrase(sourcePhrase);
 
     // add target phrase to phrase-table cache
     size_t hash = hash_value(sourcePhrase);
-    std::pair<const TargetPhraseCollection*, clock_t> value(tpColl, clock());
+    std::pair<TargetPhraseCollection::shared_ptr , clock_t> value(tpColl, clock());
     cache[hash] = value;
 
     inputPath.SetTargetPhrases(*this, tpColl, NULL);
@@ -109,29 +111,28 @@ std::vector<uint64_t> ProbingPT::ConvertToProbingSourcePhrase(const Phrase &sour
   return ret;
 }
 
-TargetPhraseCollection *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase) const
+TargetPhraseCollection::shared_ptr ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase) const
 {
   // create a target phrase from the 1st word of the source, prefix with 'ProbingPT:'
   assert(sourcePhrase.GetSize());
 
+  TargetPhraseCollection::shared_ptr tpColl;
   bool ok;
   vector<uint64_t> probingSource = ConvertToProbingSourcePhrase(sourcePhrase, ok);
   if (!ok) {
     // source phrase contains a word unknown in the pt.
     // We know immediately there's no translation for it
-    return NULL;
+    return tpColl;
   }
 
   std::pair<bool, std::vector<target_text> > query_result;
-
-  TargetPhraseCollection *tpColl = NULL;
 
   //Actual lookup
   query_result = m_engine->query(probingSource);
 
   if (query_result.first) {
     //m_engine->printTargetInfo(query_result.second);
-    tpColl = new TargetPhraseCollection();
+    tpColl.reset(new TargetPhraseCollection());
 
     const std::vector<target_text> &probingTargetPhrases = query_result.second;
     for (size_t i = 0; i < probingTargetPhrases.size(); ++i) {

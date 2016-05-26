@@ -25,9 +25,8 @@
 #include "HypergraphOutput.h"
 #include "RuleCubeQueue.h"
 #include "RuleCube.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include "Util.h"
-#include "StaticData.h"
 #include "ChartTranslationOptions.h"
 #include "ChartTranslationOptionList.h"
 #include "ChartManager.h"
@@ -52,8 +51,7 @@ ChartCellBase::~ChartCellBase() {}
 ChartCell::ChartCell(size_t startPos, size_t endPos, ChartManager &manager) :
   ChartCellBase(startPos, endPos), m_manager(manager)
 {
-  const StaticData &staticData = StaticData::Instance();
-  m_nBestIsEnabled = staticData.options().nbest.enabled;
+  m_nBestIsEnabled = manager.options()->nbest.enabled;
 }
 
 ChartCell::~ChartCell() {}
@@ -66,7 +64,13 @@ ChartCell::~ChartCell() {}
 bool ChartCell::AddHypothesis(ChartHypothesis *hypo)
 {
   const Word &targetLHS = hypo->GetTargetLHS();
-  return m_hypoColl[targetLHS].AddHypothesis(hypo, m_manager);
+  MapType::iterator m = m_hypoColl.find(targetLHS);
+  if (m == m_hypoColl.end()) {
+    std::pair<Word, ChartHypothesisCollection>
+    e(targetLHS, ChartHypothesisCollection(*m_manager.options()));
+    m = m_hypoColl.insert(e).first;
+  }
+  return m->second.AddHypothesis(hypo, m_manager);
 }
 
 /** Prune each collection in this cell to a particular size */
@@ -87,8 +91,6 @@ void ChartCell::PruneToSize()
 void ChartCell::Decode(const ChartTranslationOptionList &transOptList
                        , const ChartCellCollection &allChartCells)
 {
-  const StaticData &staticData = StaticData::Instance();
-
   // priority queue for applicable rules with selected hypotheses
   RuleCubeQueue queue(m_manager);
 
@@ -100,7 +102,7 @@ void ChartCell::Decode(const ChartTranslationOptionList &transOptList
   }
 
   // pluck things out of queue and add to hypo collection
-  const size_t popLimit = staticData.options().cube.pop_limit;
+  const size_t popLimit = m_manager.options()->cube.pop_limit;
   for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops) {
     ChartHypothesis *hypo = queue.Pop();
     AddHypothesis(hypo);
@@ -134,8 +136,8 @@ const ChartHypothesis *ChartCell::GetBestHypothesis() const
     const HypoList &sortedList = iter->second.GetSortedHypotheses();
     if (sortedList.size() > 0) {
       const ChartHypothesis *hypo = sortedList[0];
-      if (hypo->GetTotalScore() > bestScore) {
-        bestScore = hypo->GetTotalScore();
+      if (hypo->GetFutureScore() > bestScore) {
+        bestScore = hypo->GetFutureScore();
         ret = hypo;
       }
     }
