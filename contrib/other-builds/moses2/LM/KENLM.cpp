@@ -381,6 +381,14 @@ lm::WordIndex *KENLM<Model>::LastIDs(const Hypothesis &hypo,
   }
 }
 
+template<class Model>
+void KENLM<Model>::EvaluateWhenApplied(const SCFG::Manager &mgr,
+    const SCFG::Hypothesis &hypo, const FFState &prevState, Scores &scores,
+    FFState &state) const
+{
+  UTIL_THROW2("Not implemented");
+}
+
 ///////////////////////////////////////////////////////////////////////////
 
 /* Instantiate LanguageModelKen here.  Tells the compiler to generate code

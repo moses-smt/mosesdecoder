@@ -234,8 +234,14 @@ void GPULM::ShiftOrPush(std::vector<const Factor*> &context,
 
 SCORE GPULM::Score(const Context &context) const
 {
-
   return 444;
+}
+
+void GPULM::EvaluateWhenApplied(const SCFG::Manager &mgr,
+    const SCFG::Hypothesis &hypo, const FFState &prevState, Scores &scores,
+    FFState &state) const
+{
+  UTIL_THROW2("Not implemented");
 }
 
 }

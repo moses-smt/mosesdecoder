@@ -89,5 +89,12 @@ void SkeletonStatefulFF::EvaluateWhenApplied(const ManagerBase &mgr,
   stateCast.targetLen = hypo.GetTargetPhrase().GetSize();
 }
 
+void SkeletonStatefulFF::EvaluateWhenApplied(const SCFG::Manager &mgr,
+    const SCFG::Hypothesis &hypo, const FFState &prevState, Scores &scores,
+    FFState &state) const
+{
+  UTIL_THROW2("Not implemented");
+}
+
 }
 

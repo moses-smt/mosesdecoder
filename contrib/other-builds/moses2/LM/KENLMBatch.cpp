@@ -378,5 +378,12 @@ void KENLMBatch::EvaluateWhenAppliedBatch() const
   }
 }
 
+void KENLMBatch::EvaluateWhenApplied(const SCFG::Manager &mgr,
+    const SCFG::Hypothesis &hypo, const FFState &prevState, Scores &scores,
+    FFState &state) const
+{
+  UTIL_THROW2("Not implemented");
+}
+
 }
 

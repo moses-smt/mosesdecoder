@@ -55,6 +55,10 @@ public:
       const Hypothesis &hypo, const FFState &prevState, Scores &scores,
       FFState &state) const;
 
+  virtual void EvaluateWhenApplied(const SCFG::Manager &mgr,
+      const SCFG::Hypothesis &hypo, const FFState &prevState, Scores &scores,
+      FFState &state) const;
+
   virtual void EvaluateWhenAppliedBatch(
       const Batch &batch) const;
 

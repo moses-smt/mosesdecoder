@@ -178,5 +178,12 @@ int Distortion::ComputeDistortionDistance(const Range& prev,
   return abs(dist);
 }
 
+void Distortion::EvaluateWhenApplied(const SCFG::Manager &mgr,
+    const SCFG::Hypothesis &hypo, const FFState &prevState, Scores &scores,
+    FFState &state) const
+{
+  UTIL_THROW2("Not implemented");
+}
+
 }
 

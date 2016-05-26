@@ -56,6 +56,10 @@ public:
       const Hypothesis &hypo, const FFState &prevState, Scores &scores,
       FFState &state) const;
 
+  virtual void EvaluateWhenApplied(const SCFG::Manager &mgr,
+      const SCFG::Hypothesis &hypo, const FFState &prevState, Scores &scores,
+      FFState &state) const;
+
 protected:
   std::string m_path;
   FactorList m_FactorsF;

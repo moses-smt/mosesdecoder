@@ -18,6 +18,12 @@ namespace Moses2
 class Hypothesis;
 class InputType;
 
+namespace SCFG
+{
+class Hypothesis;
+class Manager;
+}
+
 class StatefulFeatureFunction: public FeatureFunction
 {
 public:
@@ -42,6 +48,10 @@ public:
 
   virtual void EvaluateWhenApplied(const ManagerBase &mgr,
       const Hypothesis &hypo, const FFState &prevState, Scores &scores,
+      FFState &state) const = 0;
+
+  virtual void EvaluateWhenApplied(const SCFG::Manager &mgr,
+      const SCFG::Hypothesis &hypo, const FFState &prevState, Scores &scores,
       FFState &state) const = 0;
 
   virtual void EvaluateWhenAppliedBatch(
