@@ -47,7 +47,7 @@ private:
 
 typedef KenOSMBase OSMLM;
 
-OSMLM* ConstructOSMLM(const char *file);
+OSMLM* ConstructOSMLM(const char *file, util::LoadMethod load_method);
 
 
 } // namespace

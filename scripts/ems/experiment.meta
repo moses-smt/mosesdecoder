@@ -827,7 +827,7 @@ create-config
 	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table transliteration-table generation-table-pruned sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm
 	out: config
 	ignore-if: use-hiero thot
-	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini mmsapt no-glue-grammar dont-tune-glue-grammar use-syntax-input-weight-feature
+	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini mmsapt no-glue-grammar dont-tune-glue-grammar use-syntax-input-weight-feature operation-sequence-model-load-method
 	default-name: model/moses.ini
 	error: Unknown option
 	error: requires an argument
