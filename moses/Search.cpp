@@ -27,19 +27,24 @@ out_of_time()
   int const& timelimit = m_options.search.timeout;
   if (timelimit > 0) {
     double elapsed_time = GetUserTime();
-    if (elapsed_time <= timelimit) return false;
-    VERBOSE(1,"Decoding is out of time (" << elapsed_time << ","
-            << timelimit << ")" << std::endl);
+    if (elapsed_time > timelimit) {
+      VERBOSE(1,"Decoding is out of time (" << elapsed_time << ","
+              << timelimit << ")" << std::endl);
+      interrupted_flag = 1;
+      return true;
+    }
   }
   int const& segment_timelimit = m_options.search.segment_timeout;
   if (segment_timelimit > 0) {
     double elapsed_time = m_timer.get_elapsed_time();
-    if (elapsed_time <= segment_timelimit) return false;
-    VERBOSE(1,"Decoding for segment is out of time (" << elapsed_time << ","
-            << segment_timelimit << ")" << std::endl);
+    if (elapsed_time > segment_timelimit) {
+      VERBOSE(1,"Decoding for segment is out of time (" << elapsed_time << ","
+              << segment_timelimit << ")" << std::endl);
+      interrupted_flag = 1;
+      return true;
+    }
   }
-  interrupted_flag = 1;
-  return true;
+  return false;
 }
 
 }
