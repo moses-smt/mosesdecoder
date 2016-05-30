@@ -18,6 +18,8 @@
 #include "util/tokenize_piece.hh"
 #include "util/string_stream.hh"
 #include "../legacy/FactorCollection.h"
+#include "../SCFG/TargetPhraseImpl.h"
+#include "../SCFG/Hypothesis.h"
 
 using namespace std;
 
@@ -421,39 +423,39 @@ lm::WordIndex *KENLM<Model>::LastIDs(const Hypothesis &hypo,
 
 template<class Model>
 void KENLM<Model>::EvaluateWhenApplied(const SCFG::Manager &mgr,
-    const SCFG::Hypothesis &hypo, const FFState &prevState, Scores &scores,
+    const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
     FFState &state) const
 {
   /*
   LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM();
   lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
-  const TargetPhrase &target = hypo.GetCurrTargetPhrase();
+  const SCFG::TargetPhraseImpl &target = hypo.GetTargetPhrase();
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
     target.GetAlignNonTerm().GetNonTermIndexMap();
 
-  const size_t size = hypo.GetCurrTargetPhrase().GetSize();
+  const size_t size = target.GetSize();
   size_t phrasePos = 0;
   // Special cases for first word.
   if (size) {
-    const Word &word = hypo.GetCurrTargetPhrase().GetWord(0);
-    if (word.GetFactor(m_factorType) == m_beginSentenceFactor) {
+    const SCFG::Word &word = target[0];
+    if (word[m_factorType] == m_bos) {
       // Begin of sentence
       ruleScore.BeginSentence();
       phrasePos++;
-    } else if (word.IsNonTerminal()) {
+    } else if (word.isNonTerminal) {
       // Non-terminal is first so we can copy instead of rescoring.
-      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
-      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
+      const SCFG::Hypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
+      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetState(featureID))->GetChartState();
       ruleScore.BeginNonTerminal(prevState);
       phrasePos++;
     }
   }
 
   for (; phrasePos < size; phrasePos++) {
-    const Word &word = hypo.GetCurrTargetPhrase().GetWord(phrasePos);
-    if (word.IsNonTerminal()) {
-      const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
-      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
+    const SCFG::Word &word = target[phrasePos];
+    if (word.isNonTerminal) {
+      const SCFG::Hypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
+      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetState(featureID))->GetChartState();
       ruleScore.NonTerminal(prevState);
     } else {
       ruleScore.Terminal(TranslateID(word));
@@ -462,7 +464,7 @@ void KENLM<Model>::EvaluateWhenApplied(const SCFG::Manager &mgr,
 
   float score = ruleScore.Finish();
   score = TransformLMScore(score);
-  score -= hypo.GetTranslationOption().GetScores().GetScoresForProducer(this)[0];
+  score -= target.GetScores().GetScoresForProducer(this)[0];
 
   if (OOVFeatureEnabled()) {
     std::vector<float> scores(2);

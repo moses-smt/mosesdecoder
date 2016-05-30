@@ -236,7 +236,7 @@ FFState &state) const
 }
 
 void LanguageModelDALM::EvaluateWhenApplied(const SCFG::Manager &mgr,
-    const SCFG::Hypothesis &hypo, const FFState &prevState, Scores &scores,
+    const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
     FFState &state) const
 {
   UTIL_THROW2("Not implemented");

@@ -238,7 +238,7 @@ SCORE GPULM::Score(const Context &context) const
 }
 
 void GPULM::EvaluateWhenApplied(const SCFG::Manager &mgr,
-    const SCFG::Hypothesis &hypo, const FFState &prevState, Scores &scores,
+    const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
     FFState &state) const
 {
   UTIL_THROW2("Not implemented");

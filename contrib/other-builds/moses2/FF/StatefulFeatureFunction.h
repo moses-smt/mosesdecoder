@@ -51,7 +51,7 @@ public:
       FFState &state) const = 0;
 
   virtual void EvaluateWhenApplied(const SCFG::Manager &mgr,
-      const SCFG::Hypothesis &hypo, const FFState &prevState, Scores &scores,
+      const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
       FFState &state) const = 0;
 
   virtual void EvaluateWhenAppliedBatch(
