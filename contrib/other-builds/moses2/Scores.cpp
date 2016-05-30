@@ -51,7 +51,7 @@ Scores::~Scores()
 
 }
 
-const SCORE *Scores::GetTotalScore(const FeatureFunction &featureFunction) const
+const SCORE *Scores::GetScores(const FeatureFunction &featureFunction) const
 {
   assert(m_scores);
   size_t ffStartInd = featureFunction.GetStartInd();

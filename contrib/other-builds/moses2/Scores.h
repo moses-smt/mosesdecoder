@@ -32,7 +32,7 @@ public:
   SCORE GetTotalScore() const
   {  return m_total; }
 
-  const SCORE *GetTotalScore(const FeatureFunction &featureFunction) const;
+  const SCORE *GetScores(const FeatureFunction &featureFunction) const;
 
   void Reset(const System &system);
 

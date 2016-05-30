@@ -20,6 +20,7 @@
 #include "../legacy/FactorCollection.h"
 #include "../SCFG/TargetPhraseImpl.h"
 #include "../SCFG/Hypothesis.h"
+#include "../SCFG/Manager.h"
 
 using namespace std;
 
@@ -426,7 +427,6 @@ void KENLM<Model>::EvaluateWhenApplied(const SCFG::Manager &mgr,
     const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
     FFState &state) const
 {
-  /*
   LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM();
   lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
   const SCFG::TargetPhraseImpl &target = hypo.GetTargetPhrase();
@@ -464,18 +464,19 @@ void KENLM<Model>::EvaluateWhenApplied(const SCFG::Manager &mgr,
 
   float score = ruleScore.Finish();
   score = TransformLMScore(score);
-  score -= target.GetScores().GetScoresForProducer(this)[0];
+  score -= target.GetScores().GetScores(*this)[0];
 
-  if (OOVFeatureEnabled()) {
-    std::vector<float> scores(2);
-    scores[0] = score;
-    scores[1] = 0.0;
-    accumulator->PlusEquals(this, scores);
+  bool OOVFeatureEnabled = false;
+  if (OOVFeatureEnabled) {
+    std::vector<float> scoresVec(2);
+    scoresVec[0] = score;
+    scoresVec[1] = 0.0;
+    scores.PlusEquals(mgr.system, *this, scoresVec);
   } else {
-    accumulator->PlusEquals(this, score);
+    scores.PlusEquals(mgr.system, *this, score);
   }
-  return newState;
-  */
+  //return newState;
+
 }
 
 ///////////////////////////////////////////////////////////////////////////
