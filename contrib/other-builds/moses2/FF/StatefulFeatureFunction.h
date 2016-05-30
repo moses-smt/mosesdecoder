@@ -40,7 +40,7 @@ public:
   }
 
   //! return uninitialise state
-  virtual FFState* BlankState(MemPool &pool, const ManagerBase &mgr) const = 0;
+  virtual FFState* BlankState(MemPool &pool, const System &sys) const = 0;
 
   //! return the state associated with the empty hypothesis for a given sentence
   virtual void EmptyHypothesisState(FFState &state, const ManagerBase &mgr,

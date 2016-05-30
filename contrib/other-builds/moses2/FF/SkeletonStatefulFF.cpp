@@ -55,7 +55,7 @@ SkeletonStatefulFF::~SkeletonStatefulFF()
   // TODO Auto-generated destructor stub
 }
 
-FFState* SkeletonStatefulFF::BlankState(MemPool &pool, const ManagerBase &mgr) const
+FFState* SkeletonStatefulFF::BlankState(MemPool &pool, const System &sys) const
 {
   return new (pool.Allocate<SkeletonState>()) SkeletonState();
 }

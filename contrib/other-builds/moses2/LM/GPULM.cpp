@@ -84,7 +84,7 @@ void GPULM::Load(System &system)
   FactorCollection &collection = system.GetVocab();
 }
 
-FFState* GPULM::BlankState(MemPool &pool, const ManagerBase &mgr) const
+FFState* GPULM::BlankState(MemPool &pool, const System &sys) const
 {
   GPULMState *ret = new (pool.Allocate<GPULMState>()) GPULMState();
   return ret;

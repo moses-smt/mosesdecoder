@@ -145,10 +145,10 @@ void KENLM<Model>::Load(System &system)
 }
 
 template<class Model>
-FFState* KENLM<Model>::BlankState(MemPool &pool, const ManagerBase &mgr) const
+FFState* KENLM<Model>::BlankState(MemPool &pool, const System &sys) const
 {
   FFState *ret;
-  if (mgr.system.isPb) {
+  if (sys.isPb) {
     ret = new (pool.Allocate<KenLMState>()) KenLMState();
   }
   else {

@@ -127,7 +127,7 @@ void LanguageModel::SetParameter(const std::string& key,
   }
 }
 
-FFState* LanguageModel::BlankState(MemPool &pool, const ManagerBase &mgr) const
+FFState* LanguageModel::BlankState(MemPool &pool, const System &sys) const
 {
   return new (pool.Allocate<LMState>()) LMState();
 }

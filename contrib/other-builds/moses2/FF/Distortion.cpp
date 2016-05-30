@@ -65,7 +65,7 @@ Distortion::~Distortion()
   // TODO Auto-generated destructor stub
 }
 
-FFState* Distortion::BlankState(MemPool &pool, const ManagerBase &mgr) const
+FFState* Distortion::BlankState(MemPool &pool, const System &sys) const
 {
   return new (pool.Allocate<DistortionState_traditional>()) DistortionState_traditional();
 }

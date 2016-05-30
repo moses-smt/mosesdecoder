@@ -34,7 +34,7 @@ public:
   virtual void Load(System &system);
   virtual void SetParameter(const std::string& key, const std::string& value);
 
-  virtual FFState* BlankState(MemPool &pool, const ManagerBase &mgr) const;
+  virtual FFState* BlankState(MemPool &pool, const System &sys) const;
   virtual void EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
       const InputType &input, const Hypothesis &hypo) const;
 

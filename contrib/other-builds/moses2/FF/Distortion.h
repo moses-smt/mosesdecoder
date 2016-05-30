@@ -21,7 +21,7 @@ public:
   Distortion(size_t startInd, const std::string &line);
   virtual ~Distortion();
 
-  virtual FFState* BlankState(MemPool &pool, const ManagerBase &mgr) const;
+  virtual FFState* BlankState(MemPool &pool, const System &sys) const;
   virtual void EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
       const InputType &input, const Hypothesis &hypo) const;
 
