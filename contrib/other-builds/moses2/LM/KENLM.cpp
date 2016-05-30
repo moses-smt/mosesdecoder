@@ -427,8 +427,8 @@ void KENLM<Model>::EvaluateWhenApplied(const SCFG::Manager &mgr,
     const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
     FFState &state) const
 {
-  LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM();
-  lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
+  LanguageModelChartStateKenLM &newState = static_cast<LanguageModelChartStateKenLM&>(state);
+  lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState.GetChartState());
   const SCFG::TargetPhraseImpl &target = hypo.GetTargetPhrase();
   const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
     target.GetAlignNonTerm().GetNonTermIndexMap();
@@ -475,8 +475,6 @@ void KENLM<Model>::EvaluateWhenApplied(const SCFG::Manager &mgr,
   } else {
     scores.PlusEquals(mgr.system, *this, score);
   }
-  //return newState;
-
 }
 
 ///////////////////////////////////////////////////////////////////////////
