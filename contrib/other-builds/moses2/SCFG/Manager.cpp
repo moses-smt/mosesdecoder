@@ -212,6 +212,7 @@ void Manager::ExpandHypo(
   while (IncrPrevHypoIndices(prevHyposIndices, ind, ntEles)) {
     SCFG::Hypothesis *hypo = new (GetPool().Allocate<SCFG::Hypothesis>()) SCFG::Hypothesis(GetPool(), system);
     hypo->Init(*this, path, symbolBind, tp, prevHyposIndices);
+    hypo->EvaluateWhenApplied();
 
     StackAdd added = stack.Add(hypo, hypoRecycler, arcLists);
     //cerr << "  added=" << added.added << " " << tp << endl;

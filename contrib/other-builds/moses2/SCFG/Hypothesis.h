@@ -6,6 +6,7 @@
 namespace Moses2
 {
 class InputPathBase;
+class StatefulFeatureFunction;
 
 namespace SCFG
 {
@@ -46,6 +47,8 @@ protected:
   const SCFG::SymbolBind *m_symbolBind;
 
   Vector<const Hypothesis*> m_prevHypos; // always sorted by source position?
+
+  void EvaluateWhenApplied(const StatefulFeatureFunction &sfff);
 
 };
 

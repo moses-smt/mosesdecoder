@@ -63,9 +63,19 @@ void Hypothesis::EvaluateWhenApplied()
   const std::vector<const StatefulFeatureFunction*> &sfffs =
       GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
   BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs){
-    //EvaluateWhenApplied(*sfff);
+    EvaluateWhenApplied(*sfff);
   }
 //cerr << *this << endl;
+
+}
+
+void Hypothesis::EvaluateWhenApplied(const StatefulFeatureFunction &sfff)
+{
+  const SCFG::Manager &mgr = static_cast<const SCFG::Manager&>(GetManager());
+  size_t statefulInd = sfff.GetStatefulInd();
+  FFState *thisState = m_ffStates[statefulInd];
+  sfff.EvaluateWhenApplied(mgr, *this, statefulInd, GetScores(),
+      *thisState);
 
 }
 

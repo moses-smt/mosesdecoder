@@ -33,7 +33,8 @@ public:
   virtual ~Manager();
   void Decode();
   std::string OutputBest() const;
-  std::string OutputNBest() {}
+  std::string OutputNBest()
+  { return ""; }
 
   const InputPaths &GetInputPaths() const
   { return m_inputPaths; }
