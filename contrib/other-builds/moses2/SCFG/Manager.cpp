@@ -133,6 +133,8 @@ void Manager::LookupUnary(InputPath &path)
 
 void Manager::Decode(InputPath &path, Stack &stack)
 {
+  //cerr << "path=" << path << endl;
+
   boost::unordered_map<SCFG::SymbolBind, SCFG::TargetPhrases*>::const_iterator iterOuter;
   for (iterOuter = path.targetPhrases->begin(); iterOuter != path.targetPhrases->end(); ++iterOuter) {
     const SCFG::SymbolBind &symbolBind = iterOuter->first;
@@ -146,6 +148,32 @@ void Manager::Decode(InputPath &path, Stack &stack)
       //cerr << "tp=" << tp << endl;
       ExpandHypo(path, symbolBind, tp, stack);
     }
+  }
+}
+
+void Manager::ExpandHypo(
+    const SCFG::InputPath &path,
+    const SCFG::SymbolBind &symbolBind,
+    const SCFG::TargetPhraseImpl &tp,
+    Stack &stack)
+{
+  Recycler<HypothesisBase*> &hypoRecycler = GetHypoRecycle();
+
+  std::vector<const SymbolBindElement*> ntEles = symbolBind.GetNTElements();
+  vector<size_t> prevHyposIndices(symbolBind.numNT);
+  assert(ntEles.size() == symbolBind.numNT);
+  //cerr << "ntEles:" << ntEles.size() << endl;
+
+  size_t ind = 0;
+  while (IncrPrevHypoIndices(prevHyposIndices, ind, ntEles)) {
+    SCFG::Hypothesis *hypo = new (GetPool().Allocate<SCFG::Hypothesis>()) SCFG::Hypothesis(GetPool(), system);
+    hypo->Init(*this, path, symbolBind, tp, prevHyposIndices);
+    hypo->EvaluateWhenApplied();
+
+    StackAdd added = stack.Add(hypo, hypoRecycler, arcLists);
+    //cerr << "  added=" << added.added << " " << tp << endl;
+
+    ++ind;
   }
 }
 
@@ -192,32 +220,6 @@ bool Manager::IncrPrevHypoIndices(
   }
   else {
     return true;
-  }
-}
-
-void Manager::ExpandHypo(
-    const InputPath &path,
-    const SCFG::SymbolBind &symbolBind,
-    const SCFG::TargetPhraseImpl &tp,
-    Stack &stack)
-{
-  Recycler<HypothesisBase*> &hypoRecycler = GetHypoRecycle();
-
-  std::vector<const SymbolBindElement*> ntEles = symbolBind.GetNTElements();
-  vector<size_t> prevHyposIndices(symbolBind.numNT);
-  assert(ntEles.size() == symbolBind.numNT);
-  //cerr << "ntEles:" << ntEles.size() << endl;
-
-  size_t ind = 0;
-  while (IncrPrevHypoIndices(prevHyposIndices, ind, ntEles)) {
-    SCFG::Hypothesis *hypo = new (GetPool().Allocate<SCFG::Hypothesis>()) SCFG::Hypothesis(GetPool(), system);
-    hypo->Init(*this, path, symbolBind, tp, prevHyposIndices);
-    hypo->EvaluateWhenApplied();
-
-    StackAdd added = stack.Add(hypo, hypoRecycler, arcLists);
-    //cerr << "  added=" << added.added << " " << tp << endl;
-
-    ++ind;
   }
 }
 

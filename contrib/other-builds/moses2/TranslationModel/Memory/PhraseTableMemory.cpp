@@ -247,8 +247,6 @@ void PhraseTableMemory::LookupNT(
     //cerr << "ntSought=" << ntSought << ntSought.isNonTerminal << endl;
     LookupGivenPath(pool, path, prevPath, ntSought, hypos, subPhrasePath);
   }
-
-
 }
 
 void PhraseTableMemory::LookupGivenPath(
@@ -309,6 +307,7 @@ void PhraseTableMemory::LookupGivenNode(
 
     SCFG::SymbolBind &symbolBind = *chartEntry->symbolBinds;
     symbolBind.Add(subPhrasePath.range, wordSought, hypos);
+    cerr << "new symbolBind=" << symbolBind << endl;
 
     path.AddActiveChartEntry(ptInd, chartEntry);
 

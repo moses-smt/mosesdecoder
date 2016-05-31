@@ -25,7 +25,7 @@ class TargetPhraseImpl;
 ////////////////////////////////////////////////////////////////////////////
 class InputPath: public InputPathBase
 {
-  friend std::ostream& operator<<(std::ostream &, const InputPath &);
+  friend std::ostream& operator<<(std::ostream &, const SCFG::InputPath &);
 public:
   typedef boost::unordered_map<SymbolBind,
       SCFG::TargetPhrases*,

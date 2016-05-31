@@ -49,7 +49,7 @@ protected:
   void Decode(InputPath &path, Stack &stack);
 
   void ExpandHypo(
-      const InputPath &path,
+      const SCFG::InputPath &path,
       const SCFG::SymbolBind &symbolBind,
       const SCFG::TargetPhraseImpl &tp,
       Stack &stack);

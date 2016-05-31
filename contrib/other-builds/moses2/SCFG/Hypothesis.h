@@ -13,6 +13,7 @@ namespace SCFG
 class TargetPhraseImpl;
 class Manager;
 class SymbolBind;
+class InputPath;
 
 class Hypothesis: public HypothesisBase
 {
@@ -23,7 +24,7 @@ public:
       const System &system);
 
   void Init(SCFG::Manager &mgr,
-      const InputPathBase &path,
+      const SCFG::InputPath &path,
       const SCFG::SymbolBind &symbolBind,
       const SCFG::TargetPhraseImpl &tp,
       const std::vector<size_t> &prevHyposIndices);

@@ -22,7 +22,7 @@ Hypothesis::Hypothesis(MemPool &pool,
 }
 
 void Hypothesis::Init(SCFG::Manager &mgr,
-    const InputPathBase &path,
+    const SCFG::InputPath &path,
     const SCFG::SymbolBind &symbolBind,
     const SCFG::TargetPhraseImpl &tp,
     const std::vector<size_t> &prevHyposIndices)
@@ -31,7 +31,9 @@ void Hypothesis::Init(SCFG::Manager &mgr,
   m_symbolBind = &symbolBind;
   m_targetPhrase = &tp;
 
-  //cerr << "symbolBind.numNT=" << symbolBind.numNT << endl;
+  //cerr << "tp=" << tp << endl;
+  //cerr << "symbolBind=" << symbolBind << endl;
+  //cerr << endl;
   m_prevHypos.resize(symbolBind.numNT);
 
   size_t currInd = 0;
@@ -82,11 +84,11 @@ void Hypothesis::EvaluateWhenApplied(const StatefulFeatureFunction &sfff)
 void Hypothesis::OutputToStream(std::ostream &out) const
 {
   const SCFG::TargetPhraseImpl &tp = GetTargetPhrase();
-  //cerr << "tp=" << tp.GetSize() << tp << endl;
+  cerr << "tp=" << tp.GetSize() << tp << endl;
 
   for (size_t pos = 0; pos < tp.GetSize(); ++pos) {
     const SCFG::Word &word = tp[pos];
-    //cerr << "word=" << word << endl;
+    cerr << "word " << pos << "=" << word << endl;
     if (word.isNonTerminal) {
       //cerr << "is nt" << endl;
       // non-term. fill out with prev hypo

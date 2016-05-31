@@ -37,7 +37,7 @@ InputPath::~InputPath()
   // TODO Auto-generated destructor stub
 }
 
-std::ostream& operator<<(std::ostream &out, const InputPath &obj)
+std::ostream& operator<<(std::ostream &out, const SCFG::InputPath &obj)
 {
   out << obj.range << " " << obj.subPhrase << " " << obj.prefixPath;
   return out;
