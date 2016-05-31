@@ -240,7 +240,7 @@ sub train_transliteration_module{
 
     `$MOSES_SRC_DIR/scripts/ems/support/substitute-filtered-tables.perl $OUT_DIR/tuning/filtered/moses.ini < $OUT_DIR/model/moses.ini > $OUT_DIR/tuning/moses.filtered.ini`;
 
-    `$MOSES_SRC_DIR/scripts/training/mert-moses.pl $OUT_DIR/tuning/input $OUT_DIR/tuning/reference $DECODER $OUT_DIR/tuning/moses.filtered.ini --nbest 100 --working-dir $OUT_DIR/tuning/tmp  --decoder-flags "-threads 16 -drop-unknown -v 0 -distortion-limit 0" --rootdir $MOSES_SRC_DIR/scripts -mertdir $MOSES_SRC_DIR/mert -threads=16 --no-filter-phrase-table`;
+    `$MOSES_SRC_DIR/scripts/training/mert-moses.pl $OUT_DIR/tuning/input $OUT_DIR/tuning/reference $DECODER $OUT_DIR/tuning/moses.filtered.ini --nbest 100 --working-dir $OUT_DIR/tuning/tmp  --decoder-flags "-threads 16 -drop-unknown -v 0 -distortion-limit 0" --rootdir $MOSES_SRC_DIR/scripts -mertdir $MOSES_SRC_DIR/bin -threads=16 --no-filter-phrase-table`;
 
     `cp $OUT_DIR/tuning/tmp/moses.ini $OUT_DIR/tuning/moses.ini`;
 
