@@ -46,6 +46,8 @@ public:
   virtual SCORE GetFutureScore() const = 0;
   virtual void EvaluateWhenApplied() = 0;
 
+  virtual std::string Debug() const = 0;
+
 protected:
   ManagerBase *m_mgr;
   Scores *m_scores;

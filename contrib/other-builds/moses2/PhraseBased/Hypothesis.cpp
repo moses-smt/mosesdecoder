@@ -162,6 +162,13 @@ std::ostream& operator<<(std::ostream &out, const Hypothesis &obj)
   return out;
 }
 
+std::string Hypothesis::Debug() const
+{
+  std::stringstream strm;
+  strm << *this;
+  return strm.str();
+}
+
 void Hypothesis::EmptyHypothesisState(const InputType &input)
 {
   const std::vector<const StatefulFeatureFunction*> &sfffs =

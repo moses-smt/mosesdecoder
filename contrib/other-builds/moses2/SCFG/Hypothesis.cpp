@@ -1,4 +1,5 @@
 #include <boost/foreach.hpp>
+#include <sstream>
 #include "Hypothesis.h"
 #include "Manager.h"
 #include "ActiveChart.h"
@@ -104,11 +105,19 @@ void Hypothesis::OutputToStream(std::ostream &out) const
   }
 }
 
-std::ostream& operator<<(std::ostream &out, const Hypothesis &obj)
+std::ostream& operator<<(std::ostream &out, const SCFG::Hypothesis &obj)
 {
   out << &obj;
+  obj.OutputToStream(out);
 
   return out;
+}
+
+std::string Hypothesis::Debug() const
+{
+  std::stringstream strm;
+  strm << *this;
+  return strm.str();
 }
 
 } // namespaces

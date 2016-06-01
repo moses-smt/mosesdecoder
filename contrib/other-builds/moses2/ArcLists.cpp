@@ -95,6 +95,8 @@ void ArcLists::Sort()
 
 void ArcLists::Delete(const HypothesisBase *hypo)
 {
+  cerr << "hypo=" << hypo->Debug() << endl;
+  cerr << "m_coll=" << m_coll.size() << endl;
   Coll::iterator iter = m_coll.find(hypo);
   UTIL_THROW_IF2(iter == m_coll.end(), "Can't find arc list");
   ArcList *arcList = iter->second;

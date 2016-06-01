@@ -17,7 +17,7 @@ class InputPath;
 
 class Hypothesis: public HypothesisBase
 {
-  friend std::ostream& operator<<(std::ostream &, const Hypothesis &);
+  friend std::ostream& operator<<(std::ostream &, const SCFG::Hypothesis &);
 
 public:
   Hypothesis(MemPool &pool,
@@ -41,6 +41,7 @@ public:
   }
 
   void OutputToStream(std::ostream &out) const;
+  virtual std::string Debug() const;
 
 protected:
   const SCFG::TargetPhraseImpl *m_targetPhrase;

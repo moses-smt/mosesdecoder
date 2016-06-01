@@ -70,6 +70,7 @@ public:
   }
 
   void OutputToStream(std::ostream &out) const;
+  virtual std::string Debug() const;
 
   void EmptyHypothesisState(const InputType &input);
 
