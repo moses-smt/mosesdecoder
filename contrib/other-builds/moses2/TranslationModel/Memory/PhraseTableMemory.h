@@ -56,6 +56,7 @@ public:
       InputPath &inputPath) const;
 
   virtual void InitActiveChart(MemPool &pool, SCFG::InputPath &path) const;
+
   void Lookup(MemPool &pool,
       const SCFG::Manager &mgr,
       size_t maxChartSpan,
@@ -74,32 +75,32 @@ protected:
 
   void LookupGivenPath(
       MemPool &pool,
-      SCFG::InputPath &path,
       const SCFG::InputPath &prevPath,
       const SCFG::Word &wordSought,
       const Moses2::HypothesisColl *hypos,
-      const SCFG::InputPath &subPhrasePath) const;
+      const SCFG::InputPath &subPhrasePath,
+      SCFG::InputPath &outPath) const;
   void LookupGivenNode(
       MemPool &pool,
       const ActiveChartEntryMem &prevEntry,
       const SCFG::Word &wordSought,
       const Moses2::HypothesisColl *hypos,
       const SCFG::InputPath &subPhrasePath,
-      SCFG::InputPath &path) const;
+      SCFG::InputPath &outPath) const;
 
   void LookupNT(
       MemPool &pool,
-      SCFG::InputPath &path,
       const SCFG::InputPath &subPhrasePath,
       const SCFG::InputPath &prevPath,
-      const SCFG::Stacks &stacks) const;
+      const SCFG::Stacks &stacks,
+      SCFG::InputPath &outPath) const;
 
 
   void AddTargetPhrasesToPath(
       MemPool &pool,
       const SCFGNODE &node,
       const SCFG::SymbolBind &symbolBind,
-      SCFG::InputPath &path) const;
+      SCFG::InputPath &outPath) const;
 };
 
 }
