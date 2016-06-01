@@ -4,6 +4,7 @@
  *  Created on: 23 Oct 2015
  *      Author: hieu
  */
+#include <boost/foreach.hpp>
 #include <iostream>
 #include "InputPaths.h"
 #include "Sentence.h"
@@ -25,6 +26,7 @@ void InputPaths::Init(const InputType &input, const ManagerBase &mgr)
   MemPool &pool = mgr.GetPool();
   size_t numPt = mgr.system.mappings.size();
   size_t size = sentence.GetSize();
+  //cerr << "size=" << size << endl;
 
   m_matrix = new (pool.Allocate< Matrix<SCFG::InputPath*> >()) Matrix<SCFG::InputPath*>(pool,
       size, size + 1);
@@ -37,8 +39,7 @@ void InputPaths::Init(const InputType &input, const ManagerBase &mgr)
 
     SCFG::InputPath *path = new (pool.Allocate<SCFG::InputPath>()) SCFG::InputPath(pool,
         subPhrase, range, numPt, NULL);
-    //cerr << startPos << " "
-    //    << " path=" << *path << endl;
+    //cerr << "path=" << *path << endl;
     m_inputPaths.push_back(path);
     m_matrix->SetValue(startPos, 0, path);
 
@@ -47,7 +48,7 @@ void InputPaths::Init(const InputType &input, const ManagerBase &mgr)
     for (size_t phaseSize = 1; phaseSize <= size; ++phaseSize) {
       size_t endPos = startPos + phaseSize - 1; // pb-like indexing. eg. [1-1] covers 1 word, NOT 0
 
-      if (endPos > size) {
+      if (endPos >= size) {
         break;
       }
 
@@ -56,16 +57,29 @@ void InputPaths::Init(const InputType &input, const ManagerBase &mgr)
 
       SCFG::InputPath *path = new (pool.Allocate<SCFG::InputPath>())
           SCFG::InputPath(pool, subPhrase, range, numPt, prefixPath);
-      //cerr << startPos << " " << (phaseSize - 1)
-      //    << " path=" << *path << endl;
+      //cerr << "path=" << *path << endl;
       m_inputPaths.push_back(path);
 
       prefixPath = path;
-
       m_matrix->SetValue(startPos, phaseSize, path);
     }
   }
 
+}
+
+std::ostream& operator<<(std::ostream &out, const SCFG::InputPaths &obj)
+{
+  const Matrix<InputPath*> &matrix = obj.GetMatrix();
+  for (size_t i = 0; i < matrix.GetRows(); ++i) {
+    for (size_t j = 0; j < matrix.GetCols(); ++j) {
+      SCFG::InputPath *path = matrix.GetValue(i, j);
+      if (path) {
+        out << *path << endl;
+      }
+    }
+  }
+
+  return out;
 }
 
 }

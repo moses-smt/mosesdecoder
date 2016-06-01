@@ -41,7 +41,7 @@ public:
 
 protected:
   Stacks m_stacks;
-  InputPaths m_inputPaths;
+  SCFG::InputPaths m_inputPaths;
 
   void InitActiveChart(SCFG::InputPath &path);
   void Lookup(InputPath &path);

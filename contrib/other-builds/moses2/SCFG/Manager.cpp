@@ -53,7 +53,7 @@ void Manager::Decode()
   //cerr << "inputSize=" << inputSize << endl;
 
   m_inputPaths.Init(sentence, *this);
-  //cerr << "CREATED m_inputPaths" << endl;
+  cerr << "CREATED m_inputPaths" << m_inputPaths << endl;
 
   m_stacks.Init(*this, inputSize);
   //cerr << "CREATED m_stacks" << endl;
@@ -83,6 +83,7 @@ void Manager::Decode()
       LookupUnary(path);
       cerr << "AFTER LookupUnary path=" << path << endl;
 
+      cerr << "m_inputPaths=" << m_inputPaths << endl;
       //cerr << "#rules=" << path.GetNumRules() << endl;
     }
   }

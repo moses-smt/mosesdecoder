@@ -23,6 +23,8 @@ class InputPath;
 
 class InputPaths: public InputPathsBase
 {
+  friend std::ostream& operator<<(std::ostream &, const SCFG::InputPaths &);
+
 public:
   void Init(const InputType &input, const ManagerBase &mgr);
 
