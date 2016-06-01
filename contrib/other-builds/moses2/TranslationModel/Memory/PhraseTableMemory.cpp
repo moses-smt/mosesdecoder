@@ -61,6 +61,7 @@ void PhraseTableMemory::Load(System &system)
   }
   else {
     m_rootSCFG = new SCFGNODE();
+    cerr << "m_rootSCFG=" << m_rootSCFG << endl;
   }
 
   vector<string> toks;
@@ -154,6 +155,8 @@ void PhraseTableMemory::InitActiveChart(MemPool &pool, SCFG::InputPath &path) co
   size_t ptInd = GetPtInd();
   ActiveChartEntryMem *chartEntry = new (pool.Allocate<ActiveChartEntryMem>()) ActiveChartEntryMem(pool, *m_rootSCFG);
   path.AddActiveChartEntry(ptInd, chartEntry);
+
+  cerr << "InitActiveChart=" << path << endl;
 }
 
 void PhraseTableMemory::Lookup(MemPool &pool,
@@ -206,7 +209,7 @@ void PhraseTableMemory::LookupUnary(
     const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
-  //cerr << "LookupUnary" << endl;
+  cerr << "LookupUnary" << endl;
   //size_t activeEntriesBefore = path.GetActiveChart(GetPtInd()).entries.size();
 
   size_t startPos = path.range.GetStartPos();
@@ -244,7 +247,7 @@ void PhraseTableMemory::LookupNT(
   BOOST_FOREACH (const SCFG::Stack::Coll::value_type &valPair, stackColl) {
     const SCFG::Word &ntSought = valPair.first;
     const Moses2::HypothesisColl *hypos = valPair.second;
-    //cerr << "ntSought=" << ntSought << ntSought.isNonTerminal << endl;
+    cerr << "ntSought=" << ntSought << ntSought.isNonTerminal << endl;
     LookupGivenWord(pool, prevPath, ntSought, hypos, subPhraseRange, outPath);
   }
 }
@@ -259,16 +262,11 @@ void PhraseTableMemory::LookupGivenWord(
 {
   size_t ptInd = GetPtInd();
 
-  /*
-  cerr << "  wordSought=" << wordSought
-      << " prevPath=" << &prevPath << " " << prevPath
-      << " subPhrasePath=" << &subPhrasePath << " " << subPhrasePath
-      << endl;
-  */
+  cerr << "prevPath=" << prevPath << endl;
 
   BOOST_FOREACH(const SCFG::ActiveChartEntry *entry, *prevPath.GetActiveChart(ptInd).entries) {
     const ActiveChartEntryMem *entryCast = static_cast<const ActiveChartEntryMem*>(entry);
-    //cerr << "    entry=" << entry;
+    //cerr << "entry=" << &entryCast->node << endl;
 
     LookupGivenNode(pool, *entryCast, wordSought, hypos, subPhraseRange, outPath);
   }
@@ -288,32 +286,24 @@ void PhraseTableMemory::LookupGivenNode(
   size_t ptInd = GetPtInd();
   const SCFGNODE *nextNode = prevNode.Find(wordSought);
 
-  /*
-  cerr << "    finding " << wordSought
-      << " from " << &node
-      << " found " << nextNode << endl;
-
-  if (nextNode == NULL) {
-    cerr << "      " << wordSought << "(" << wordSought.hash() << ")"
-        << " node contains:";
-    node.Debug();
-    cerr << endl;
-  }
-  */
+  cerr << "prevEntry=" << *prevEntry.symbolBinds << endl;
 
   if (nextNode) {
     // new entries
     ActiveChartEntryMem *chartEntry = new (pool.Allocate<ActiveChartEntryMem>()) ActiveChartEntryMem(pool, *nextNode, prevEntry);
 
     SCFG::SymbolBind &symbolBind = *chartEntry->symbolBinds;
-    cerr << "BEFORE new symbolBind=" << symbolBind << endl;
+    //cerr << "BEFORE new symbolBind=" << symbolBind << endl;
     symbolBind.Add(subPhraseRange, wordSought, hypos);
     cerr << "AFTER new symbolBind=" << symbolBind << endl;
+    //cerr << "BEFORE outPath=" << outPath << endl;
 
     outPath.AddActiveChartEntry(ptInd, chartEntry);
 
     // there are some rules
     AddTargetPhrasesToPath(pool, *nextNode, symbolBind, outPath);
+
+    cerr << "AFTER outPath=" << outPath << endl;
   }
 }
 

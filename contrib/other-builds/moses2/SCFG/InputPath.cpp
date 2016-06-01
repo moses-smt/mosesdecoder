@@ -40,8 +40,16 @@ InputPath::~InputPath()
 std::ostream& operator<<(std::ostream &out, const SCFG::InputPath &obj)
 {
   out << obj.range << " " << obj.subPhrase << " " << obj.prefixPath << " ";
-  out << "m_activeChart=" << obj.GetActiveChart(0).entries->size() << " ";
 
+  const Vector<ActiveChartEntry*> &activeEntries = *obj.GetActiveChart(1).entries;
+  out << "m_activeChart=" << obj.GetActiveChart(1).entries->size() << " ";
+
+  for (size_t i = 0; i < activeEntries.size(); ++i) {
+    const ActiveChartEntry &entry = *activeEntries[i];
+    out << *entry.symbolBinds << "| ";
+  }
+
+  // tps
   out << "tps=" << obj.targetPhrases->size();
 
   out << " ";
