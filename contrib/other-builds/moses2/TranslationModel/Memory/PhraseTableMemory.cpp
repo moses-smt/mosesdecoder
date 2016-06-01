@@ -233,7 +233,7 @@ void PhraseTableMemory::LookupNT(
   size_t ntSize = endPos - startPos + 1;
 
   const SCFG::Stack &ntStack = stacks.GetStack(startPos, ntSize);
-  const SCFG::Stack::Coll &coll = ntStack.GetColl();
+  const SCFG::Stack::Coll &stackColl = ntStack.GetColl();
 
   /*
   cerr << "    LookupNT subPhrasePath=" << subPhrasePath
@@ -241,7 +241,7 @@ void PhraseTableMemory::LookupNT(
       << " stack=" << coll.size() << endl;
   */
 
-  BOOST_FOREACH (const SCFG::Stack::Coll::value_type &valPair, coll) {
+  BOOST_FOREACH (const SCFG::Stack::Coll::value_type &valPair, stackColl) {
     const SCFG::Word &ntSought = valPair.first;
     const Moses2::HypothesisColl *hypos = valPair.second;
     //cerr << "ntSought=" << ntSought << ntSought.isNonTerminal << endl;
@@ -306,8 +306,9 @@ void PhraseTableMemory::LookupGivenNode(
     ActiveChartEntryMem *chartEntry = new (pool.Allocate<ActiveChartEntryMem>()) ActiveChartEntryMem(pool, *nextNode, prevEntry);
 
     SCFG::SymbolBind &symbolBind = *chartEntry->symbolBinds;
+    cerr << "BEFORE new symbolBind=" << symbolBind << endl;
     symbolBind.Add(subPhraseRange, wordSought, hypos);
-    //cerr << "new symbolBind=" << symbolBind << endl;
+    cerr << "AFTER new symbolBind=" << symbolBind << endl;
 
     outPath.AddActiveChartEntry(ptInd, chartEntry);
 
