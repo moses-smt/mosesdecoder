@@ -59,12 +59,18 @@ void Manager::Decode()
   //cerr << "CREATED m_stacks" << endl;
 
   for (int startPos = inputSize - 1; startPos >= 0; --startPos) {
-    InitActiveChart(startPos);
+    cerr << endl << "startPos=" << startPos << endl;
+    SCFG::InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, 0);
+
+    cerr << "BEFORE path=" << path << endl;
+    InitActiveChart(path);
+    cerr << "AFTER path=" << path << endl;
 
     int maxPhraseSize = inputSize - startPos + 1;
     for (int phraseSize = 1; phraseSize < maxPhraseSize; ++phraseSize) {
       InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, phraseSize);
-      //cerr << endl << "path=" << path << endl;
+      cerr << endl << "phraseSize=" << phraseSize << endl;
+      cerr << "BEFORE path=" << path << endl;
 
       Stack &stack = m_stacks.GetStack(startPos, phraseSize);
 
@@ -72,6 +78,7 @@ void Manager::Decode()
       Decode(path, stack);
       LookupUnary(path);
 
+      cerr << "AFTER path=" << path << endl;
       //cerr << "#rules=" << path.GetNumRules() << endl;
     }
   }
@@ -79,10 +86,8 @@ void Manager::Decode()
   m_stacks.OutputStacks();
 }
 
-void Manager::InitActiveChart(size_t pos)
+void Manager::InitActiveChart(SCFG::InputPath &path)
 {
-   InputPath &path = *m_inputPaths.GetMatrix().GetValue(pos, 0);
-   //cerr << "pos=" << pos << " path=" << path << endl;
    size_t numPt = system.mappings.size();
    //cerr << "numPt=" << numPt << endl;
 

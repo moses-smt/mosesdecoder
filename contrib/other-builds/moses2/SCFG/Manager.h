@@ -43,7 +43,7 @@ protected:
   Stacks m_stacks;
   InputPaths m_inputPaths;
 
-  void InitActiveChart(size_t pos);
+  void InitActiveChart(SCFG::InputPath &path);
   void Lookup(InputPath &path);
   void LookupUnary(InputPath &path);
   void Decode(InputPath &path, Stack &stack);

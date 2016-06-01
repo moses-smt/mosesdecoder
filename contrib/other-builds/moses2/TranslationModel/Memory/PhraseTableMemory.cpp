@@ -307,7 +307,7 @@ void PhraseTableMemory::LookupGivenNode(
 
     SCFG::SymbolBind &symbolBind = *chartEntry->symbolBinds;
     symbolBind.Add(subPhrasePath.range, wordSought, hypos);
-    cerr << "new symbolBind=" << symbolBind << endl;
+    //cerr << "new symbolBind=" << symbolBind << endl;
 
     path.AddActiveChartEntry(ptInd, chartEntry);
 
