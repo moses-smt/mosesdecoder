@@ -53,7 +53,7 @@ void Manager::Decode()
   //cerr << "inputSize=" << inputSize << endl;
 
   m_inputPaths.Init(sentence, *this);
-  cerr << "CREATED m_inputPaths" << m_inputPaths << endl;
+  //cerr << "CREATED m_inputPaths" << m_inputPaths << endl;
 
   m_stacks.Init(*this, inputSize);
   //cerr << "CREATED m_stacks" << endl;
@@ -62,28 +62,27 @@ void Manager::Decode()
     cerr << endl << "startPos=" << startPos << endl;
     SCFG::InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, 0);
 
-    cerr << "BEFORE path=" << path << endl;
+    cerr << "BEFORE path=" << m_inputPaths << endl;
     InitActiveChart(path);
-    cerr << "AFTER path=" << path << endl;
+    cerr << "AFTER path=" << m_inputPaths << endl;
 
     int maxPhraseSize = inputSize - startPos + 1;
     for (int phraseSize = 1; phraseSize < maxPhraseSize; ++phraseSize) {
       InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, phraseSize);
       cerr << endl << "phraseSize=" << phraseSize << endl;
-      cerr << "BEFORE path=" << path << endl;
 
       Stack &stack = m_stacks.GetStack(startPos, phraseSize);
 
+      cerr << "BEFORE LOOKUP path=" << m_inputPaths << endl;
       Lookup(path);
-      cerr << "AFTER LOOKUP path=" << path << endl;
+      cerr << "AFTER LOOKUP path=" << m_inputPaths << endl;
 
       Decode(path, stack);
-      cerr << "AFTER DECODE path=" << path << endl;
+      cerr << "AFTER DECODE path=" << m_inputPaths << endl;
 
       LookupUnary(path);
-      cerr << "AFTER LookupUnary path=" << path << endl;
+      cerr << "AFTER LookupUnary path=" << m_inputPaths << endl;
 
-      cerr << "m_inputPaths=" << m_inputPaths << endl;
       //cerr << "#rules=" << path.GetNumRules() << endl;
     }
   }
