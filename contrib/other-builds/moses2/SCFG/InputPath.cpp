@@ -46,7 +46,7 @@ std::ostream& operator<<(std::ostream &out, const SCFG::InputPath &obj)
 
   for (size_t i = 0; i < activeEntries.size(); ++i) {
     const ActiveChartEntry &entry = *activeEntries[i];
-    out << *entry.symbolBinds << "| ";
+    out << entry.GetSymbolBind() << "| ";
   }
 
   // tps

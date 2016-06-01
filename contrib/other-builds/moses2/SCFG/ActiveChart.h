@@ -72,18 +72,27 @@ inline size_t hash_value(const SymbolBind &obj)
 class ActiveChartEntry
 {
 public:
-  SymbolBind *symbolBinds;
-
   ActiveChartEntry(MemPool &pool)
-  :symbolBinds(new (pool.Allocate<SymbolBind>()) SymbolBind(pool))
-  {}
-
-  ActiveChartEntry(MemPool &pool, const ActiveChartEntry &prevEntry)
+  :symbolBinds(pool)
   {
-    symbolBinds = new (pool.Allocate<SymbolBind>()) SymbolBind(pool, *prevEntry.symbolBinds);
+    //symbolBinds = new (pool.Allocate<SymbolBind>()) SymbolBind(pool);
   }
 
+  ActiveChartEntry(MemPool &pool, const ActiveChartEntry &prevEntry)
+  :symbolBinds(pool, prevEntry.GetSymbolBind())
+  {
+    //symbolBinds = new (pool.Allocate<SymbolBind>()) SymbolBind(pool, *prevEntry.symbolBinds);
+  }
+
+  const SymbolBind &GetSymbolBind() const
+  { return symbolBinds; }
+
+  SymbolBind &GetSymbolBind()
+  { return symbolBinds; }
+
 protected:
+  SymbolBind symbolBinds;
+
 };
 
 ////////////////////////////////////////////////////////////////////////////
