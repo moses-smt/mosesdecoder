@@ -31,15 +31,15 @@ public:
   virtual float calculateScore(const std::vector<ScoreStatsType>& comps) const;
   virtual float getReferenceLength(const std::vector<ScoreStatsType>& comps) const;
 
-private:  
-  float beta_; 
+private:
+  float beta_;
   int max_unchanged_words_;
   bool truecase_;
   bool verbose_;
   M2::M2 m2_;
-  
+
   std::map<std::pair<size_t, std::string>, std::vector<ScoreStatsType> > seen_;
-    
+
   // no copying allowed
   M2Scorer(const M2Scorer&);
   M2Scorer& operator=(const M2Scorer&);
