@@ -72,6 +72,9 @@
 #include "moses/Syntax/InputWeightFF.h"
 #include "moses/Syntax/RuleTableFF.h"
 
+#include "moses/FF/EditOps.h"
+#include "moses/FF/CorrectionPattern.h"
+
 #ifdef HAVE_VW
 #include "moses/FF/VW/VW.h"
 #include "moses/FF/VW/VWFeatureSourceBagOfWords.h"
@@ -291,6 +294,9 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SkeletonLM);
   MOSES_FNAME(SkeletonTranslationOptionListFeature);
   MOSES_FNAME(SkeletonPT);
+
+  MOSES_FNAME(EditOps);
+  MOSES_FNAME(CorrectionPattern);
 
 #ifdef HAVE_VW
   MOSES_FNAME(VW);

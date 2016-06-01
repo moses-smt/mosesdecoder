@@ -31,6 +31,8 @@ Point.cpp
 PerScorer.cpp
 HwcmScorer.cpp
 InternalTree.cpp
+M2.cpp
+M2Scorer.cpp
 Scorer.cpp
 ScorerFactory.cpp
 Optimizer.cpp
