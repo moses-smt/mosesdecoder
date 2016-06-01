@@ -61,7 +61,7 @@ void PhraseTableMemory::Load(System &system)
   }
   else {
     m_rootSCFG = new SCFGNODE();
-    cerr << "m_rootSCFG=" << m_rootSCFG << endl;
+    //cerr << "m_rootSCFG=" << m_rootSCFG << endl;
   }
 
   vector<string> toks;
@@ -178,9 +178,9 @@ void PhraseTableMemory::Lookup(MemPool &pool,
 
   const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(endPos, 1);
 
-  cerr << "BEFORE LookupGivenWord=" << *prevPath << endl;
+  //cerr << "BEFORE LookupGivenWord=" << *prevPath << endl;
   LookupGivenWord(pool, *prevPath, lastWord, NULL, subPhrasePath.range, path);
-  cerr << "AFTER LookupGivenWord=" << *prevPath << endl;
+  //cerr << "AFTER LookupGivenWord=" << *prevPath << endl;
 
   // NON-TERMINAL
   //const SCFG::InputPath *prefixPath = static_cast<const SCFG::InputPath*>(path.prefixPath);
@@ -251,9 +251,9 @@ void PhraseTableMemory::LookupGivenWord(
     const ActiveChartEntryMem *prevEntryCast = static_cast<const ActiveChartEntryMem*>(prevEntry);
     //cerr << "entry=" << &entryCast->node << endl;
 
-    cerr << "BEFORE LookupGivenNode=" << prevPath << endl;
+    //cerr << "BEFORE LookupGivenNode=" << prevPath << endl;
     LookupGivenNode(pool, *prevEntryCast, wordSought, hypos, subPhraseRange, outPath);
-    cerr << "AFTER LookupGivenNode=" << prevPath << endl;
+    //cerr << "AFTER LookupGivenNode=" << prevPath << endl;
   }
 }
 
@@ -278,10 +278,8 @@ void PhraseTableMemory::LookupGivenNode(
     ActiveChartEntryMem *chartEntry = new (pool.Allocate<ActiveChartEntryMem>()) ActiveChartEntryMem(pool, *nextNode, prevEntry);
 
     SCFG::SymbolBind &symbolBind = chartEntry->GetSymbolBind();
-    cerr << "BEFORE Add=" << prevEntry.GetSymbolBind() << endl;
     symbolBind.Add(subPhraseRange, wordSought, hypos);
-    cerr << "AFTER Add=" << prevEntry.GetSymbolBind() << endl;
-    //cerr << "BEFORE outPath=" << outPath << endl;
+    //cerr << "AFTER Add=" << symbolBind << endl;
 
     outPath.AddActiveChartEntry(ptInd, chartEntry);
 

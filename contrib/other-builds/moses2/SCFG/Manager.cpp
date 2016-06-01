@@ -47,7 +47,7 @@ void Manager::Decode()
   m_input = Sentence::CreateFromString(GetPool(), vocab, system, m_inputStr,
       m_translationId);
 
-  const Sentence &sentence = static_cast<const Sentence&>(GetInput());
+  const SCFG::Sentence &sentence = static_cast<const SCFG::Sentence&>(GetInput());
 
   size_t inputSize = sentence.GetSize();
   //cerr << "inputSize=" << inputSize << endl;
@@ -59,29 +59,29 @@ void Manager::Decode()
   //cerr << "CREATED m_stacks" << endl;
 
   for (int startPos = inputSize - 1; startPos >= 0; --startPos) {
-    cerr << endl << "startPos=" << startPos << endl;
+    //cerr << endl << "startPos=" << startPos << endl;
     SCFG::InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, 0);
 
-    cerr << "BEFORE path=" << m_inputPaths << endl;
+    //cerr << "BEFORE path=" << m_inputPaths << endl;
     InitActiveChart(path);
-    cerr << "AFTER path=" << m_inputPaths << endl;
+    //cerr << "AFTER path=" << m_inputPaths << endl;
 
     int maxPhraseSize = inputSize - startPos + 1;
     for (int phraseSize = 1; phraseSize < maxPhraseSize; ++phraseSize) {
       InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, phraseSize);
-      cerr << endl << "phraseSize=" << phraseSize << endl;
+      //cerr << endl << "phraseSize=" << phraseSize << endl;
 
       Stack &stack = m_stacks.GetStack(startPos, phraseSize);
 
-      cerr << "BEFORE LOOKUP path=" << m_inputPaths << endl;
+      //cerr << "BEFORE LOOKUP path=" << m_inputPaths << endl;
       Lookup(path);
-      cerr << "AFTER LOOKUP path=" << m_inputPaths << endl;
+      //cerr << "AFTER LOOKUP path=" << m_inputPaths << endl;
 
       Decode(path, stack);
-      cerr << "AFTER DECODE path=" << m_inputPaths << endl;
+      //cerr << "AFTER DECODE path=" << m_inputPaths << endl;
 
       LookupUnary(path);
-      cerr << "AFTER LookupUnary path=" << m_inputPaths << endl;
+      //cerr << "AFTER LookupUnary path=" << m_inputPaths << endl;
 
       //cerr << "#rules=" << path.GetNumRules() << endl;
     }

@@ -42,7 +42,7 @@ std::ostream& operator<<(std::ostream &out, const SCFG::InputPath &obj)
   out << obj.range << " " << obj.subPhrase << " " << obj.prefixPath << " ";
 
   const Vector<ActiveChartEntry*> &activeEntries = *obj.GetActiveChart(1).entries;
-  out << "m_activeChart=" << obj.GetActiveChart(1).entries->size() << " ";
+  out << "m_activeChart=" << activeEntries.size() << " ";
 
   for (size_t i = 0; i < activeEntries.size(); ++i) {
     const ActiveChartEntry &entry = *activeEntries[i];

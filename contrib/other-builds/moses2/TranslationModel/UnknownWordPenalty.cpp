@@ -15,6 +15,7 @@
 #include "../SCFG/InputPath.h"
 #include "../SCFG/TargetPhraseImpl.h"
 #include "../SCFG/Manager.h"
+#include "../SCFG/Sentence.h"
 
 using namespace std;
 
@@ -116,6 +117,15 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
     SCFG::InputPath &path) const
 {
   const System &system = mgr.system;
+
+  // don't do 1st of last word
+  if (path.range.GetStartPos() == 0) {
+    return;
+  }
+  const SCFG::Sentence &sentence = static_cast<const SCFG::Sentence&>(mgr.GetInput());
+  if (path.range.GetStartPos() + 1 == sentence.GetSize()) {
+    return;
+  }
 
   // terminal
   const SCFG::Word &lastWord = path.subPhrase.Back();
