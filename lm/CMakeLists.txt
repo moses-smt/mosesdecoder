@@ -63,6 +63,7 @@ set(EXE_LIST
   fragment
   build_binary
 )
+set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -std=c++11")
 
 AddExes(EXES ${EXE_LIST}
         DEPENDS $<TARGET_OBJECTS:kenlm> $<TARGET_OBJECTS:kenlm_util>

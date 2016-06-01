@@ -19,43 +19,42 @@ namespace {
 
 class SimpleAutomaton {
   public:
-    typedef std::pair<std::string, unsigned int> Task;
+    using Task = std::pair<std::string, unsigned int>;
+    enum class State {Stop, Continue};
 
-    SimpleAutomaton(int) : state_(0) {}
+    SimpleAutomaton(int x = 0) : repeat_(0) {}
 
-    Signal Poke() {
-      if (state_ <= 0) return STOP;
+    State Step() {
+      if (repeat_ <= 0) return State::Stop;
       std::cout << word_ << std::endl;
-      --state_;
-      return CONTINUE;
+      --repeat_;
+      return State::Continue;
     }
     
     void SetTask(const Task& task){
-      state_ = task.second;
+      repeat_ = task.second;
       word_ = task.first;
     }
 
   private:
-    std::size_t state_;
+    std::size_t repeat_;
     std::string word_;
 };
 
 } // namespace
 
 template <class Automaton> class Queue {
-  typedef typename Automaton::Task Task;
+  using Task = typename Automaton::Task;
+  using State = typename Automaton::State;
   public:
-    template <class Construct> explicit Queue(std::size_t size, Construct automaton_construct) : size_(size), curr_(0) {
-      for (std::size_t i = 0; i < size_; ++i) {
-        automata_.push_back(Automaton(automaton_construct));
-      }
-    }
+    template <class Construct> explicit Queue(std::size_t size, Construct construct) : size_(size), curr_(0), automata_(size, Automaton(construct)) {}
 
     void Add(const Task task) {
-      while (automata_[curr_].Poke() != STOP) {
+      while (automata_[curr_].Step() != State::Stop) {
         Next();
       }
       automata_[curr_].SetTask(task);
+      automata_[curr_].Step();
       Next();
     }
 
@@ -64,9 +63,11 @@ template <class Automaton> class Queue {
     }
 
     void Drain() {
+      // TODO: what if the Queue was not filled before draining?
+      // an automaton without a task should be in State::Stop
       std::size_t drained = 0;
       while (drained != size_) {
-        while (automata_[curr_].Poke() != STOP) {}
+        while (automata_[curr_].Step() != State::Stop) {}
         Next();
         ++drained;
       }
@@ -87,7 +88,7 @@ template <class Value> class NGramAutomaton {
       WordIndex new_word;
       State out_state;
     };
-    typedef NGramTask Task;
+    using Task = NGramTask;
 
     struct Construct {
       unsigned short order;
@@ -211,12 +212,16 @@ template <class Value> class NGramAutomaton {
 } // namespace lm
 
 int main(){
+  auto x = 10;
+  std::cout << x << std::endl;
+  auto f = [&x](int y){return x+y;};
+  std::cout << f(32) << std::endl;
   std::cout << "It is working...\n";
   lm::Queue<lm::SimpleAutomaton> q(2, 10);
   std::cout << "Add hello"<<std::endl;
   q.Add(std::make_pair("Hello", 3));
   std::cout << "Add Bye"<<std::endl;
-  q.Add(std::make_pair("Bye", 1));
+  q.Add(std::make_pair("Bye", 5));
   std::cout << "Add C U"<<std::endl;
   q.Add(std::make_pair("C U", 3));
   std::cout << "Drain"<<std::endl;
