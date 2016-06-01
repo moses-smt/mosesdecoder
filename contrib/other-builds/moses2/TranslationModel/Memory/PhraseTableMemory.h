@@ -73,28 +73,27 @@ protected:
   PBNODE    *m_rootPb;
   SCFGNODE  *m_rootSCFG;
 
+  void LookupNT(
+      MemPool &pool,
+      const Moses2::Range &subPhraseRange,
+      const SCFG::InputPath &prevPath,
+      const SCFG::Stacks &stacks,
+      SCFG::InputPath &outPath) const;
+
   void LookupGivenWord(
       MemPool &pool,
       const SCFG::InputPath &prevPath,
       const SCFG::Word &wordSought,
       const Moses2::HypothesisColl *hypos,
-      const SCFG::InputPath &subPhrasePath,
+      const Moses2::Range &subPhraseRange,
       SCFG::InputPath &outPath) const;
   void LookupGivenNode(
       MemPool &pool,
       const ActiveChartEntryMem &prevEntry,
       const SCFG::Word &wordSought,
       const Moses2::HypothesisColl *hypos,
-      const SCFG::InputPath &subPhrasePath,
+      const Moses2::Range &subPhraseRange,
       SCFG::InputPath &outPath) const;
-
-  void LookupNT(
-      MemPool &pool,
-      const SCFG::InputPath &subPhrasePath,
-      const SCFG::InputPath &prevPath,
-      const SCFG::Stacks &stacks,
-      SCFG::InputPath &outPath) const;
-
 
   void AddTargetPhrasesToPath(
       MemPool &pool,
