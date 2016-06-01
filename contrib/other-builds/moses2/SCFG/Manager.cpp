@@ -59,7 +59,7 @@ void Manager::Decode()
   //cerr << "CREATED m_stacks" << endl;
 
   for (int startPos = inputSize - 1; startPos >= 0; --startPos) {
-    cerr << endl << "startPos=" << startPos << endl;
+    //cerr << endl << "startPos=" << startPos << endl;
     SCFG::InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, 0);
 
     //cerr << "BEFORE path=" << m_inputPaths << endl;
@@ -69,7 +69,7 @@ void Manager::Decode()
     int maxPhraseSize = inputSize - startPos + 1;
     for (int phraseSize = 1; phraseSize < maxPhraseSize; ++phraseSize) {
       InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, phraseSize);
-      cerr << endl << "phraseSize=" << phraseSize << endl;
+      //cerr << endl << "phraseSize=" << phraseSize << endl;
 
       Stack &stack = m_stacks.GetStack(startPos, phraseSize);
 
@@ -179,8 +179,7 @@ void Manager::ExpandHypo(
     hypo->Init(*this, path, symbolBind, tp, prevHyposIndices);
     hypo->EvaluateWhenApplied();
 
-    StackAdd added = stack.Add(hypo, hypoRecycler, arcLists);
-    //cerr << "  added=" << added.added << " " << tp << endl;
+    stack.Add(hypo, hypoRecycler, arcLists);
 
     ++ind;
   }

@@ -25,7 +25,7 @@ Stack::~Stack()
   }
 }
 
-StackAdd Stack::Add(SCFG::Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
+void Stack::Add(SCFG::Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
     ArcLists &arcLists)
 {
   const SCFG::TargetPhraseImpl &tp = hypo->GetTargetPhrase();
@@ -34,7 +34,19 @@ StackAdd Stack::Add(SCFG::Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecyc
 
   HypothesisColl &coll = GetMiniStack(lhs);
   StackAdd added = coll.Add(hypo);
-  return added;
+
+  size_t nbestSize = m_mgr.system.options.nbest.nbest_size;
+  if (nbestSize) {
+    arcLists.AddArc(added.added, hypo, added.other);
+  }
+  else {
+    if (!added.added) {
+      hypoRecycle.Recycle(hypo);
+    }
+    else if (added.other) {
+      hypoRecycle.Recycle(added.other);
+    }
+  }
 }
 
 Moses2::HypothesisColl &Stack::GetMiniStack(const SCFG::Word &key)

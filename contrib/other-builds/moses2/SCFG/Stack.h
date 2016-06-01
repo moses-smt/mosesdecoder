@@ -32,7 +32,7 @@ public:
 
   size_t GetSize() const;
 
-  StackAdd Add(SCFG::Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
+  void Add(SCFG::Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
       ArcLists &arcLists);
 
   const Hypothesis *GetBestHypo(
