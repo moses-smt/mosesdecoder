@@ -73,7 +73,7 @@ protected:
   PBNODE    *m_rootPb;
   SCFGNODE  *m_rootSCFG;
 
-  void LookupGivenPath(
+  void LookupGivenWord(
       MemPool &pool,
       const SCFG::InputPath &prevPath,
       const SCFG::Word &wordSought,

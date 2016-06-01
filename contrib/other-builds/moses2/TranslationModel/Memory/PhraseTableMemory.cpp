@@ -182,7 +182,7 @@ void PhraseTableMemory::Lookup(MemPool &pool,
   //cerr << "path=" << path << endl;
   const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(endPos, 1);
 
-  LookupGivenPath(pool, *prevPath, lastWord, NULL, subPhrasePath, path);
+  LookupGivenWord(pool, *prevPath, lastWord, NULL, subPhrasePath, path);
 
   // NON-TERMINAL
   //const SCFG::InputPath *prefixPath = static_cast<const SCFG::InputPath*>(path.prefixPath);
@@ -245,11 +245,11 @@ void PhraseTableMemory::LookupNT(
     const SCFG::Word &ntSought = valPair.first;
     const Moses2::HypothesisColl *hypos = valPair.second;
     //cerr << "ntSought=" << ntSought << ntSought.isNonTerminal << endl;
-    LookupGivenPath(pool, prevPath, ntSought, hypos, subPhrasePath, outPath);
+    LookupGivenWord(pool, prevPath, ntSought, hypos, subPhrasePath, outPath);
   }
 }
 
-void PhraseTableMemory::LookupGivenPath(
+void PhraseTableMemory::LookupGivenWord(
     MemPool &pool,
     const SCFG::InputPath &prevPath,
     const SCFG::Word &wordSought,

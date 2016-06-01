@@ -75,10 +75,14 @@ void Manager::Decode()
       Stack &stack = m_stacks.GetStack(startPos, phraseSize);
 
       Lookup(path);
-      Decode(path, stack);
-      LookupUnary(path);
+      cerr << "AFTER LOOKUP path=" << path << endl;
 
-      cerr << "AFTER path=" << path << endl;
+      Decode(path, stack);
+      cerr << "AFTER DECODE path=" << path << endl;
+
+      LookupUnary(path);
+      cerr << "AFTER LookupUnary path=" << path << endl;
+
       //cerr << "#rules=" << path.GetNumRules() << endl;
     }
   }

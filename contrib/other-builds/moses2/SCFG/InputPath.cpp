@@ -39,15 +39,16 @@ InputPath::~InputPath()
 
 std::ostream& operator<<(std::ostream &out, const SCFG::InputPath &obj)
 {
-  out << obj.range << " " << obj.subPhrase << " " << obj.prefixPath;
+  out << obj.range << " " << obj.subPhrase << " " << obj.prefixPath << " ";
+  out << "m_activeChart=" << obj.GetActiveChart(0).entries->size() << " ";
 
-  out << " tps=" << obj.targetPhrases->size();
+  out << "tps=" << obj.targetPhrases->size();
 
   out << " ";
   BOOST_FOREACH(const SCFG::InputPath::Coll::value_type &valPair, *obj.targetPhrases) {
     const SymbolBind &symbolBind = valPair.first;
     const SCFG::TargetPhrases &tps = *valPair.second;
-    out << symbolBind << "=" << &tps << " ";
+    out << symbolBind << "=" << &tps.GetSize() << " ";
   }
 
   return out;
