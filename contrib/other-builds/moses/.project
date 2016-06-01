@@ -1106,6 +1106,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ControlRecombination.h</locationURI>
 		</link>
 		<link>
+			<name>FF/CorrectionPattern.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CorrectionPattern.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/CorrectionPattern.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CorrectionPattern.h</locationURI>
+		</link>
+		<link>
 			<name>FF/CountNonTerms.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/CountNonTerms.cpp</locationURI>
@@ -1169,6 +1179,16 @@
 			<name>FF/DynamicCacheBasedLanguageModel.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/DynamicCacheBasedLanguageModel.h</locationURI>
+		</link>
+		<link>
+			<name>FF/EditOps.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/EditOps.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/EditOps.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/EditOps.h</locationURI>
 		</link>
 		<link>
 			<name>FF/FFState.cpp</name>
