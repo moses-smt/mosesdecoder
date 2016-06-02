@@ -63,7 +63,10 @@ protected:
   // cube pruning
   Queue m_queue;
 
-  void CreateQueue(const SymbolBind &symbolBind, const SCFG::TargetPhrases &tps);
+  void CreateQueue(
+      const SCFG::InputPath &path,
+      const SymbolBind &symbolBind,
+      const SCFG::TargetPhrases &tps);
 };
 
 }

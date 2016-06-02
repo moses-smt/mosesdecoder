@@ -22,17 +22,19 @@ class QueueItem
 {
 public:
   const SCFG::TargetPhrases &tps;
-  size_t tpsInd;
+  size_t tpInd;
 
-  typedef std::pair<const Moses2::HypothesisColl *, size_t> HyposElement;
-  std::vector<HyposElement> hyposColl;
+  std::vector<const Moses2::HypothesisColl *> hyposColl;
+  std::vector<size_t> hypoIndColl;
     // hypos and ind to the 1 we're using
 
   SCFG::Hypothesis *hypo;
 
   QueueItem(const SCFG::TargetPhrases &tps);
   void AddHypos(const Moses2::HypothesisColl &hypos);
-  void CreateHypo(Manager &mgr);
+  void CreateHypo(SCFG::Manager &mgr,
+      const SCFG::InputPath &path,
+      const SCFG::SymbolBind &symbolBind);
 };
 
 ///////////////////////////////////////////

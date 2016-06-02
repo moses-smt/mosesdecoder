@@ -35,6 +35,11 @@ public:
     return m_coll->end();
   }
 
+  const SCFG::TargetPhraseImpl& operator[](size_t ind) const
+  {
+    return *(*m_coll)[ind];
+  }
+
   TargetPhrases(MemPool &pool);
   TargetPhrases(MemPool &pool, size_t size);
   virtual ~TargetPhrases();

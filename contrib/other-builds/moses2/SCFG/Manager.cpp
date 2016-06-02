@@ -148,18 +148,31 @@ void Manager::Decode(SCFG::InputPath &path, Stack &stack)
   BOOST_FOREACH(const InputPath::Coll::value_type &valPair, *path.targetPhrases) {
     const SymbolBind &symbolBind = valPair.first;
     const SCFG::TargetPhrases &tps = *valPair.second;
-    CreateQueue(symbolBind, tps);
+    CreateQueue(path, symbolBind, tps);
   }
 
   size_t pops = 0;
   while (!m_queue.empty() && pops < system.options.cube.pop_limit) {
+    QueueItem *item = m_queue.top();
+    m_queue.pop();
+
+    // add hypo to stack
+    Hypothesis *hypo = item->hypo;
+
+    //cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
+    stack.Add(hypo, GetHypoRecycle(), arcLists);
+
+    //edge->CreateNext(mgr, item, m_queue, m_seenPositions, m_queueItemRecycler);
 
     ++pops;
   }
 
 }
 
-void Manager::CreateQueue(const SymbolBind &symbolBind, const SCFG::TargetPhrases &tps)
+void Manager::CreateQueue(
+    const SCFG::InputPath &path,
+    const SymbolBind &symbolBind,
+    const SCFG::TargetPhrases &tps)
 {
   QueueItem *queueItem = new QueueItem(tps);
   for (size_t i = 0; i < symbolBind.coll.size(); ++i) {
@@ -168,7 +181,8 @@ void Manager::CreateQueue(const SymbolBind &symbolBind, const SCFG::TargetPhrase
       queueItem->AddHypos(*ele.hypos);
     }
   }
-  //queueItem
+  queueItem->CreateHypo(*this, path, symbolBind);
+  m_queue.push(queueItem);
 }
 
 ///////////////////////////////////////////////////////////////
