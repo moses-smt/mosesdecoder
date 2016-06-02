@@ -162,7 +162,7 @@ void Manager::Decode(SCFG::InputPath &path, Stack &stack)
     //cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
     stack.Add(hypo, GetHypoRecycle(), arcLists);
 
-    //edge->CreateNext(mgr, item, m_queue, m_seenPositions, m_queueItemRecycler);
+    item->CreateNext(*this, m_queue, path);
 
     ++pops;
   }
@@ -174,15 +174,15 @@ void Manager::CreateQueue(
     const SymbolBind &symbolBind,
     const SCFG::TargetPhrases &tps)
 {
-  QueueItem *queueItem = new QueueItem(tps);
+  QueueItem *item = new QueueItem(tps);
   for (size_t i = 0; i < symbolBind.coll.size(); ++i) {
     const SymbolBindElement &ele = symbolBind.coll[i];
     if (ele.hypos) {
-      queueItem->AddHypos(*ele.hypos);
+      item->AddHypos(*ele.hypos);
     }
   }
-  queueItem->CreateHypo(*this, path, symbolBind);
-  m_queue.push(queueItem);
+  item->CreateHypo(*this, path, symbolBind);
+  m_queue.push(item);
 }
 
 ///////////////////////////////////////////////////////////////

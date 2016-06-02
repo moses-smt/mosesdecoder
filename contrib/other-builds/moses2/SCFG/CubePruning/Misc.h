@@ -16,6 +16,7 @@ namespace Moses2
 namespace SCFG
 {
 class TargetPhrases;
+class Queue;
 
 ///////////////////////////////////////////
 class QueueItem
@@ -30,11 +31,17 @@ public:
 
   SCFG::Hypothesis *hypo;
 
-  QueueItem(const SCFG::TargetPhrases &tps);
+  QueueItem(const SCFG::TargetPhrases &tps, size_t vTPInd = 0);
   void AddHypos(const Moses2::HypothesisColl &hypos);
-  void CreateHypo(SCFG::Manager &mgr,
+  void CreateHypo(
+      SCFG::Manager &mgr,
       const SCFG::InputPath &path,
       const SCFG::SymbolBind &symbolBind);
+
+  void CreateNext(
+      SCFG::Manager &mgr,
+      SCFG::Queue &queue,
+      const SCFG::InputPath &path);
 };
 
 ///////////////////////////////////////////
@@ -49,9 +56,12 @@ public:
 };
 
 ///////////////////////////////////////////
-typedef std::priority_queue<QueueItem*,
+class Queue : public std::priority_queue<QueueItem*,
     std::vector<QueueItem*>,
-    QueueItemOrderer> Queue;
+    QueueItemOrderer>
+{
+
+};
 
 
 }

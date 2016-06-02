@@ -37,6 +37,9 @@ public:
   const SCFG::TargetPhraseImpl &GetTargetPhrase() const
   {  return *m_targetPhrase; }
 
+  const SCFG::SymbolBind &GetSymbolBind() const
+  {  return *m_symbolBind; }
+
   //! get a particular previous hypos
   const Hypothesis* GetPrevHypo(size_t ind) const {
     return m_prevHypos[ind];
