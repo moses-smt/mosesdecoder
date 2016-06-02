@@ -6,7 +6,9 @@
  */
 #pragma once
 #include <vector>
+#include <queue>
 #include "../../HypothesisColl.h"
+#include "../Hypothesis.h"
 
 namespace Moses2
 {
@@ -15,6 +17,7 @@ namespace SCFG
 {
 class TargetPhrases;
 
+///////////////////////////////////////////
 class QueueItem
 {
 public:
@@ -25,17 +28,29 @@ public:
   std::vector<HyposElement> hyposColl;
     // hypos and ind to the 1 we're using
 
+  SCFG::Hypothesis *hypo;
+
   QueueItem(const SCFG::TargetPhrases &tps);
   void AddHypos(const Moses2::HypothesisColl &hypos);
-
+  void CreateHypo(Manager &mgr);
 };
 
-class Queue
+///////////////////////////////////////////
+class QueueItemOrderer
 {
 public:
-  bool empty() const
-  { return true; }
+  bool operator()(QueueItem* itemA, QueueItem* itemB) const
+  {
+    HypothesisFutureScoreOrderer orderer;
+    return !orderer(itemA->hypo, itemB->hypo);
+  }
 };
+
+///////////////////////////////////////////
+typedef std::priority_queue<QueueItem*,
+    std::vector<QueueItem*>,
+    QueueItemOrderer> Queue;
+
 
 }
 }

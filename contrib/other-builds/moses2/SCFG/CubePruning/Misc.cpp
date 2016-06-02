@@ -5,6 +5,7 @@
  *      Author: hieu
  */
 #include "Misc.h"
+#include "../Manager.h"
 
 namespace Moses2
 {
@@ -23,6 +24,12 @@ void QueueItem::AddHypos(const Moses2::HypothesisColl &hypos)
   HyposElement hyposEle(&hypos, 0);
   hyposColl.push_back(hyposEle);
 
+}
+
+void QueueItem::CreateHypo(Manager &mgr)
+{
+  hypo = SCFG::Hypothesis::Create(mgr.GetPool(), mgr);
+  //hypo->Init(mgr, )
 }
 
 }

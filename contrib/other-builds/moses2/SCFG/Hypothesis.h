@@ -20,6 +20,8 @@ class Hypothesis: public HypothesisBase
   friend std::ostream& operator<<(std::ostream &, const SCFG::Hypothesis &);
 
 public:
+  static Hypothesis *Create(MemPool &pool, Manager &mgr);
+
   Hypothesis(MemPool &pool,
       const System &system);
 

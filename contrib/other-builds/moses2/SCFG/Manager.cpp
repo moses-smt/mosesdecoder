@@ -143,7 +143,6 @@ void Manager::LookupUnary(SCFG::InputPath &path)
 ///////////////////////////////////////////////////////////////
 // CUBE-PRUNING
 ///////////////////////////////////////////////////////////////
-
 void Manager::Decode(SCFG::InputPath &path, Stack &stack)
 {
   BOOST_FOREACH(const InputPath::Coll::value_type &valPair, *path.targetPhrases) {
@@ -157,24 +156,24 @@ void Manager::Decode(SCFG::InputPath &path, Stack &stack)
 
     ++pops;
   }
+
 }
 
 void Manager::CreateQueue(const SymbolBind &symbolBind, const SCFG::TargetPhrases &tps)
 {
-  QueueItem queueItem(tps);
+  QueueItem *queueItem = new QueueItem(tps);
   for (size_t i = 0; i < symbolBind.coll.size(); ++i) {
     const SymbolBindElement &ele = symbolBind.coll[i];
     if (ele.hypos) {
-      queueItem.AddHypos(*ele.hypos);
+      queueItem->AddHypos(*ele.hypos);
     }
   }
-
+  //queueItem
 }
 
 ///////////////////////////////////////////////////////////////
 // NON CUBE-PRUNING
 ///////////////////////////////////////////////////////////////
-
 /*
 void Manager::Decode(SCFG::InputPath &path, Stack &stack)
 {
@@ -212,7 +211,7 @@ void Manager::ExpandHypo(
 
   size_t ind = 0;
   while (IncrPrevHypoIndices(prevHyposIndices, ind, ntEles)) {
-    SCFG::Hypothesis *hypo = new (GetPool().Allocate<SCFG::Hypothesis>()) SCFG::Hypothesis(GetPool(), system);
+    SCFG::Hypothesis *hypo = SCFG::Hypothesis::Create(GetPool(), *this);
     hypo->Init(*this, path, symbolBind, tp, prevHyposIndices);
     hypo->EvaluateWhenApplied();
 
