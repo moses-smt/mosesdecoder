@@ -8,14 +8,14 @@
 #include <cstdlib>
 #include <vector>
 #include <sstream>
+#include "../System.h"
+#include "../TranslationModel/PhraseTable.h"
 #include "Manager.h"
 #include "InputPath.h"
 #include "Hypothesis.h"
 #include "TargetPhraseImpl.h"
 #include "ActiveChart.h"
 #include "Sentence.h"
-#include "../System.h"
-#include "../TranslationModel/PhraseTable.h"
 
 using namespace std;
 
@@ -103,7 +103,7 @@ void Manager::InitActiveChart(SCFG::InputPath &path)
    }
 }
 
-void Manager::Lookup(InputPath &path)
+void Manager::Lookup(SCFG::InputPath &path)
 {
   size_t numPt = system.mappings.size();
   //cerr << "numPt=" << numPt << endl;
@@ -122,7 +122,7 @@ void Manager::Lookup(InputPath &path)
   */
 }
 
-void Manager::LookupUnary(InputPath &path)
+void Manager::LookupUnary(SCFG::InputPath &path)
 {
   size_t numPt = system.mappings.size();
   //cerr << "numPt=" << numPt << endl;
@@ -140,7 +140,43 @@ void Manager::LookupUnary(InputPath &path)
   */
 }
 
-void Manager::Decode(InputPath &path, Stack &stack)
+///////////////////////////////////////////////////////////////
+// CUBE-PRUNING
+///////////////////////////////////////////////////////////////
+
+void Manager::Decode(SCFG::InputPath &path, Stack &stack)
+{
+  BOOST_FOREACH(const InputPath::Coll::value_type &valPair, *path.targetPhrases) {
+    const SymbolBind &symbolBind = valPair.first;
+    const SCFG::TargetPhrases &tps = *valPair.second;
+    CreateQueue(symbolBind, tps);
+  }
+
+  size_t pops = 0;
+  while (!m_queue.empty() && pops < system.options.cube.pop_limit) {
+
+    ++pops;
+  }
+}
+
+void Manager::CreateQueue(const SymbolBind &symbolBind, const SCFG::TargetPhrases &tps)
+{
+  QueueItem queueItem(tps);
+  for (size_t i = 0; i < symbolBind.coll.size(); ++i) {
+    const SymbolBindElement &ele = symbolBind.coll[i];
+    if (ele.hypos) {
+      queueItem.AddHypos(*ele.hypos);
+    }
+  }
+
+}
+
+///////////////////////////////////////////////////////////////
+// NON CUBE-PRUNING
+///////////////////////////////////////////////////////////////
+
+/*
+void Manager::Decode(SCFG::InputPath &path, Stack &stack)
 {
   //cerr << "path=" << path << endl;
 
@@ -159,6 +195,7 @@ void Manager::Decode(InputPath &path, Stack &stack)
     }
   }
 }
+*/
 
 void Manager::ExpandHypo(
     const SCFG::InputPath &path,

@@ -29,16 +29,16 @@ namespace NSCubePruningMiniStack
 
 ////////////////////////////////////////////////////////////////////////
 Search::Search(Manager &mgr) :
-    Moses2::Search(mgr), m_stack(mgr), m_cubeEdgeAlloc(mgr.GetPool())
+        Moses2::Search(mgr), m_stack(mgr), m_cubeEdgeAlloc(mgr.GetPool())
 
-    , m_queue(QueueItemOrderer(),
-        std::vector<QueueItem*, MemPoolAllocator<QueueItem*> >(
-            MemPoolAllocator<QueueItem*>(mgr.GetPool())))
+, m_queue(QueueItemOrderer(),
+    std::vector<QueueItem*, MemPoolAllocator<QueueItem*> >(
+        MemPoolAllocator<QueueItem*>(mgr.GetPool())))
 
-            , m_seenPositions(
-        MemPoolAllocator<CubeEdge::SeenPositionItem>(mgr.GetPool()))
+, m_seenPositions(
+    MemPoolAllocator<CubeEdge::SeenPositionItem>(mgr.GetPool()))
 
-        , m_queueItemRecycler(MemPoolAllocator<QueueItem*>(mgr.GetPool()))
+, m_queueItemRecycler(MemPoolAllocator<QueueItem*>(mgr.GetPool()))
 
 {
 }
@@ -90,13 +90,13 @@ void Search::Decode(size_t stackInd)
       m_queue);
   //cerr << "container=" << container.size() << endl;
   BOOST_FOREACH(QueueItem *item, container){
-  // recycle unused hypos from queue
-  Hypothesis *hypo = item->hypo;
-  hypoRecycler.Recycle(hypo);
+    // recycle unused hypos from queue
+    Hypothesis *hypo = item->hypo;
+    hypoRecycler.Recycle(hypo);
 
-  // recycle queue item
-  m_queueItemRecycler.push_back(item);
-}
+    // recycle queue item
+    m_queueItemRecycler.push_back(item);
+  }
   container.clear();
 
   m_seenPositions.clear();
@@ -105,11 +105,11 @@ void Search::Decode(size_t stackInd)
   CubeEdges &edges = *m_cubeEdges[stackInd];
 
   BOOST_FOREACH(CubeEdge *edge, edges){
-  //cerr << *edge << " ";
-  edge->CreateFirst(mgr, m_queue, m_seenPositions, m_queueItemRecycler);
-}
+    //cerr << *edge << " ";
+    edge->CreateFirst(mgr, m_queue, m_seenPositions, m_queueItemRecycler);
+  }
 
-/*
+  /*
  cerr << "edges: ";
  boost::unordered_set<const Bitmap*> uniqueBM;
  BOOST_FOREACH(CubeEdge *edge, edges) {
@@ -118,7 +118,7 @@ void Search::Decode(size_t stackInd)
  }
  cerr << edges.size() << " " << uniqueBM.size();
  cerr << endl;
- */
+   */
 
   size_t pops = 0;
   while (!m_queue.empty() && pops < mgr.system.options.cube.pop_limit) {
@@ -170,48 +170,48 @@ void Search::PostDecode(size_t stackInd)
   size_t numPaths = pathMatrix.GetCols();
 
   BOOST_FOREACH(const Stack::Coll::value_type &val, m_stack.GetColl()){
-  const Bitmap &hypoBitmap = *val.first.first;
-  size_t firstGap = hypoBitmap.GetFirstGapPos();
-  size_t hypoEndPos = val.first.second;
-  //cerr << "key=" << hypoBitmap << " " << firstGap << " " << inputSize << endl;
+    const Bitmap &hypoBitmap = *val.first.first;
+    size_t firstGap = hypoBitmap.GetFirstGapPos();
+    size_t hypoEndPos = val.first.second;
+    //cerr << "key=" << hypoBitmap << " " << firstGap << " " << inputSize << endl;
 
-  // create edges to next hypos from existing hypos
-  for (size_t startPos = firstGap; startPos < inputSize; ++startPos) {
-    for (size_t pathInd = 0; pathInd < numPaths; ++pathInd) {
-      const InputPath *path = pathMatrix.GetValue(startPos, pathInd);
+    // create edges to next hypos from existing hypos
+    for (size_t startPos = firstGap; startPos < inputSize; ++startPos) {
+      for (size_t pathInd = 0; pathInd < numPaths; ++pathInd) {
+        const InputPath *path = pathMatrix.GetValue(startPos, pathInd);
 
-      if (path == NULL) {
-        break;
-      }
-      if (!path->IsUsed()) {
-        continue;
-      }
+        if (path == NULL) {
+          break;
+        }
+        if (!path->IsUsed()) {
+          continue;
+        }
 
-      const Range &pathRange = path->range;
-      //cerr << "pathRange=" << pathRange << endl;
-      if (!CanExtend(hypoBitmap, hypoEndPos, pathRange)) {
-        continue;
-      }
+        const Range &pathRange = path->range;
+        //cerr << "pathRange=" << pathRange << endl;
+        if (!CanExtend(hypoBitmap, hypoEndPos, pathRange)) {
+          continue;
+        }
 
-      const Bitmap &newBitmap = mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
-      size_t numWords = newBitmap.GetNumWordsCovered();
+        const Bitmap &newBitmap = mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
+        size_t numWords = newBitmap.GetNumWordsCovered();
 
-      CubeEdges &edges = *m_cubeEdges[numWords];
+        CubeEdges &edges = *m_cubeEdges[numWords];
 
-      // sort hypo for a particular bitmap and hypoEndPos
-      Hypotheses &sortedHypos = val.second->GetSortedAndPruneHypos(mgr, mgr.arcLists);
+        // sort hypo for a particular bitmap and hypoEndPos
+        Hypotheses &sortedHypos = val.second->GetSortedAndPruneHypos(mgr, mgr.arcLists);
 
-      size_t numPt = mgr.system.mappings.size();
-      for (size_t i = 0; i < numPt; ++i) {
-        const TargetPhrases *tps = path->targetPhrases[i];
-        if (tps && tps->GetSize()) {
-          CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(mgr, sortedHypos, *path, *tps, newBitmap);
-          edges.push_back(edge);
+        size_t numPt = mgr.system.mappings.size();
+        for (size_t i = 0; i < numPt; ++i) {
+          const TargetPhrases *tps = path->targetPhrases[i];
+          if (tps && tps->GetSize()) {
+            CubeEdge *edge = new (pool.Allocate<CubeEdge>()) CubeEdge(mgr, sortedHypos, *path, *tps, newBitmap);
+            edges.push_back(edge);
+          }
         }
       }
     }
   }
-}
 }
 
 const Hypothesis *Search::GetBestHypothesis() const
@@ -229,13 +229,13 @@ void Search::AddInitialTrellisPaths(TrellisPaths &paths) const
 {
   const Stack::Coll &coll = m_stack.GetColl();
   BOOST_FOREACH(const Stack::Coll::value_type &val, coll){
-  const Moses2::HypothesisColl &hypos = *val.second;
-  BOOST_FOREACH(const HypothesisBase *hypoBase, hypos) {
-    const Hypothesis *hypo = static_cast<const Hypothesis*>(hypoBase);
-    TrellisPath *path = new TrellisPath(hypo, mgr.arcLists);
-    paths.Add(path);
+    const Moses2::HypothesisColl &hypos = *val.second;
+    BOOST_FOREACH(const HypothesisBase *hypoBase, hypos) {
+      const Hypothesis *hypo = static_cast<const Hypothesis*>(hypoBase);
+      TrellisPath *path = new TrellisPath(hypo, mgr.arcLists);
+      paths.Add(path);
+    }
   }
-}
 }
 
 }

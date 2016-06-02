@@ -14,6 +14,7 @@
 #include "../ManagerBase.h"
 #include "Stacks.h"
 #include "InputPaths.h"
+#include "CubePruning/Misc.h"
 
 namespace Moses2
 {
@@ -44,9 +45,9 @@ protected:
   SCFG::InputPaths m_inputPaths;
 
   void InitActiveChart(SCFG::InputPath &path);
-  void Lookup(InputPath &path);
-  void LookupUnary(InputPath &path);
-  void Decode(InputPath &path, Stack &stack);
+  void Lookup(SCFG::InputPath &path);
+  void LookupUnary(SCFG::InputPath &path);
+  void Decode(SCFG::InputPath &path, Stack &stack);
 
   void ExpandHypo(
       const SCFG::InputPath &path,
@@ -59,6 +60,10 @@ protected:
       size_t ind,
       const std::vector<const SymbolBindElement*> ntEles);
 
+  // cube pruning
+  Queue m_queue;
+
+  void CreateQueue(const SymbolBind &symbolBind, const SCFG::TargetPhrases &tps);
 };
 
 }

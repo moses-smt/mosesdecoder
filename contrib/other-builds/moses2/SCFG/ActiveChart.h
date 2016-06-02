@@ -42,7 +42,8 @@ class SymbolBind
   friend std::ostream& operator<<(std::ostream &, const SymbolBind &);
 
 public:
-  Vector<SymbolBindElement> coll;
+  typedef Vector<SymbolBindElement> Coll;
+  Coll coll;
   size_t numNT;
 
   SymbolBind(MemPool &pool)
