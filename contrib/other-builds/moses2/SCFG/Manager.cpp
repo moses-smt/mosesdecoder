@@ -88,6 +88,12 @@ void Manager::Decode()
   }
 
   m_stacks.OutputStacks();
+
+  SCFG::InputPath &path = *m_inputPaths.GetMatrix().GetValue(0, 1);
+  cerr << "path0=" << path << endl;
+
+  Stack &stack = m_stacks.GetStack(0, 1);
+  cerr << "stack0=" << stack << endl;
 }
 
 void Manager::InitActiveChart(SCFG::InputPath &path)

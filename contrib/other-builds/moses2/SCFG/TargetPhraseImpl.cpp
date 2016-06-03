@@ -12,6 +12,7 @@
 #include "../MemPool.h"
 #include "../PhraseBased/Manager.h"
 #include "../AlignmentInfoCollection.h"
+#include "../TranslationModel/PhraseTable.h"
 
 using namespace std;
 
@@ -69,7 +70,8 @@ std::ostream& operator<<(std::ostream &out, const SCFG::TargetPhraseImpl &obj)
     const SCFG::Word &word = obj[i];
     out << word << " ";
   }
-  out << " SCORES:" << obj.GetScores()
+  out << "pt=" << obj.pt.GetName()
+      << " SCORES:" << obj.GetScores()
       << " ALIGN:" << obj.GetAlignTerm() << " " << obj.GetAlignNonTerm();
   return out;
 }

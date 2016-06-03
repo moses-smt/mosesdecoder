@@ -16,6 +16,8 @@ class Manager;
 
 class Stack
 {
+  friend std::ostream& operator<<(std::ostream &out, const SCFG::Stack &obj);
+
 public:
   typedef boost::unordered_map<SCFG::Word, Moses2::HypothesisColl*> Coll;
 

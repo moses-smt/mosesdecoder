@@ -104,5 +104,15 @@ const Hypothesis *Stack::GetBestHypo(
   return ret;
 }
 
+std::ostream& operator<<(std::ostream &out, const SCFG::Stack &obj)
+{
+  BOOST_FOREACH (const SCFG::Stack::Coll::value_type &valPair, obj.m_coll) {
+    const SCFG::Word &lhs = valPair.first;
+    const Moses2::HypothesisColl &hypos = *valPair.second;
+    out << lhs << "=" << hypos.GetSize() << hypos << "\n";
+  }
+  return out;
+}
+
 }
 }

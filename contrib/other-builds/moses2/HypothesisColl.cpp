@@ -4,6 +4,7 @@
  *  Created on: 26 Feb 2016
  *      Author: hieu
  */
+#include <iostream>
 #include <algorithm>
 #include <boost/foreach.hpp>
 #include "HypothesisColl.h"
@@ -121,6 +122,15 @@ void HypothesisColl::Clear()
 {
   m_sortedHypos = NULL;
   m_coll.clear();
+}
+
+std::ostream& operator<<(std::ostream &out, const HypothesisColl &obj)
+{
+  BOOST_FOREACH (const HypothesisBase *hypo, obj.m_coll) {
+    out << hypo->Debug() << std::endl;
+  }
+
+  return out;
 }
 
 } /* namespace Moses2 */

@@ -134,6 +134,7 @@ std::ostream& operator<<(std::ostream &out, const SCFG::Hypothesis &obj)
     out << obj.m_prevHypos[i] << " ";
   }
   //obj.OutputToStream(out);
+  out << *obj.m_targetPhrase;
 
   return out;
 }

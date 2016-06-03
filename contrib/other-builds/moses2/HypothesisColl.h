@@ -21,6 +21,8 @@ typedef Array<const HypothesisBase*> Hypotheses;
 
 class HypothesisColl
 {
+  friend std::ostream& operator<<(std::ostream &out, const HypothesisColl &obj);
+
 public:
   typedef boost::unordered_set<const HypothesisBase*,
       UnorderedComparer<HypothesisBase>, UnorderedComparer<HypothesisBase>,
