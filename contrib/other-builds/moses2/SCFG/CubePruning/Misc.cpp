@@ -14,8 +14,12 @@ namespace Moses2
 namespace SCFG
 {
 
-QueueItem::QueueItem(const SCFG::TargetPhrases &tps, size_t vTPInd)
-:tps(tps)
+QueueItem::QueueItem(
+    const SymbolBind &vSymbolBind,
+    const SCFG::TargetPhrases &vTPS,
+    size_t vTPInd)
+:symbolBind(vSymbolBind)
+,tps(vTPS)
 ,tpInd(vTPInd)
 {
 }
@@ -43,10 +47,10 @@ void QueueItem::CreateNext(
     const SCFG::InputPath &path)
 {
   if (tpInd + 1 < tps.GetSize()) {
-    QueueItem *item = new QueueItem(tps, tpInd + 1);
+    QueueItem *item = new QueueItem(symbolBind, tps, tpInd + 1);
     item->hyposColl = hyposColl;
     item->hypoIndColl = hypoIndColl;
-    item->CreateHypo(mgr, path, hypo->GetSymbolBind());
+    item->CreateHypo(mgr, path, symbolBind);
 
     queue.push(item);
   }
@@ -57,14 +61,14 @@ void QueueItem::CreateNext(
     size_t hypoInd = hypoIndColl[i];
 
     if (hypoInd + 1 < hypos.GetSize()) {
-      QueueItem *item = new QueueItem(tps, tpInd);
+      QueueItem *item = new QueueItem(symbolBind, tps, tpInd);
 
       item->hyposColl = hyposColl;
       item->hypoIndColl = hypoIndColl;
 
       item->hypoIndColl[i] = hypoInd + 1;
 
-      item->CreateHypo(mgr, path, hypo->GetSymbolBind());
+      item->CreateHypo(mgr, path, symbolBind);
 
       queue.push(item);
     }

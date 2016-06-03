@@ -174,7 +174,7 @@ void Manager::CreateQueue(
     const SymbolBind &symbolBind,
     const SCFG::TargetPhrases &tps)
 {
-  QueueItem *item = new QueueItem(tps);
+  QueueItem *item = new QueueItem(symbolBind, tps);
   for (size_t i = 0; i < symbolBind.coll.size(); ++i) {
     const SymbolBindElement &ele = symbolBind.coll[i];
     if (ele.hypos) {

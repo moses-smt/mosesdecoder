@@ -50,7 +50,6 @@ void Hypothesis::Init(SCFG::Manager &mgr,
     const std::vector<size_t> &prevHyposIndices)
 {
   m_mgr = &mgr;
-  m_symbolBind = &symbolBind;
   m_targetPhrase = &tp;
 
   //cerr << "tp=" << tp << endl;

@@ -22,6 +22,7 @@ class Queue;
 class QueueItem
 {
 public:
+  const SymbolBind &symbolBind;
   const SCFG::TargetPhrases &tps;
   size_t tpInd;
 
@@ -31,7 +32,10 @@ public:
 
   SCFG::Hypothesis *hypo;
 
-  QueueItem(const SCFG::TargetPhrases &tps, size_t vTPInd = 0);
+  QueueItem(
+      const SymbolBind &symbolBind,
+      const SCFG::TargetPhrases &tps,
+      size_t vTPInd = 0);
   void AddHypos(const Moses2::HypothesisColl &hypos);
   void CreateHypo(
       SCFG::Manager &mgr,

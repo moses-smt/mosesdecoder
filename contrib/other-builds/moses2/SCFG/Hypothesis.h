@@ -37,9 +37,6 @@ public:
   const SCFG::TargetPhraseImpl &GetTargetPhrase() const
   {  return *m_targetPhrase; }
 
-  const SCFG::SymbolBind &GetSymbolBind() const
-  {  return *m_symbolBind; }
-
   //! get a particular previous hypos
   const Hypothesis* GetPrevHypo(size_t ind) const {
     return m_prevHypos[ind];
@@ -51,7 +48,6 @@ public:
 protected:
   const SCFG::TargetPhraseImpl *m_targetPhrase;
   const InputPathBase *m_path;
-  const SCFG::SymbolBind *m_symbolBind;
 
   Vector<const Hypothesis*> m_prevHypos; // always sorted by source position?
 
