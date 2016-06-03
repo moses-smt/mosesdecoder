@@ -209,6 +209,7 @@ void KENLM<Model>::EvaluateInIsolation(MemPool &pool, const System &system, cons
     const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
     SCORE *estimatedScore) const
 {
+  /*
   // contains factors used by this LM
   float fullScore, nGramScore;
   size_t oovCount;
@@ -237,7 +238,7 @@ void KENLM<Model>::EvaluateInIsolation(MemPool &pool, const System &system, cons
         estimateScore);
     (*estimatedScore) += weightedScore;
   }
-
+  */
 }
 
 template<class Model>
@@ -464,7 +465,9 @@ void KENLM<Model>::EvaluateWhenApplied(const SCFG::Manager &mgr,
 
   float score = ruleScore.Finish();
   score = TransformLMScore(score);
-  score -= target.GetScores().GetScores(*this)[0];
+
+  // take out score from loading. This needs reworking
+  //score -= target.GetScores().GetScores(*this)[0];
 
   bool OOVFeatureEnabled = false;
   if (OOVFeatureEnabled) {
