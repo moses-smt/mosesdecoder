@@ -23,14 +23,9 @@ class Queue;
 class QueueItem
 {
 public:
-  const SymbolBind &symbolBind;
-  const SCFG::TargetPhrases &tps;
-  size_t tpInd;
-
-  std::vector<size_t> hypoIndColl;
-    // hypos and ind to the 1 we're using
-
   SCFG::Hypothesis *hypo;
+
+  QueueItem() {}
 
   QueueItem(
       MemPool &pool,
@@ -56,6 +51,13 @@ public:
 protected:
   typedef Vector<const Moses2::HypothesisColl *> HyposColl;
   HyposColl *m_hyposColl;
+
+  const SymbolBind *symbolBind;
+  const SCFG::TargetPhrases *tps;
+  size_t tpInd;
+
+  std::vector<size_t> hypoIndColl;
+    // hypos and ind to the 1 we're using
 
 };
 

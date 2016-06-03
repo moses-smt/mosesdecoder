@@ -18,8 +18,8 @@ QueueItem::QueueItem(
     MemPool &pool,
     const SymbolBind &vSymbolBind,
     const SCFG::TargetPhrases &vTPS)
-:symbolBind(vSymbolBind)
-,tps(vTPS)
+:symbolBind(&vSymbolBind)
+,tps(&vTPS)
 ,tpInd(0)
 {
   m_hyposColl = new (pool.Allocate<HyposColl>()) HyposColl(pool);
@@ -30,8 +30,8 @@ QueueItem::QueueItem(
     const SymbolBind &vSymbolBind,
     const SCFG::TargetPhrases &vTPS,
     size_t vTPInd)
-:symbolBind(vSymbolBind)
-,tps(vTPS)
+:symbolBind(&vSymbolBind)
+,tps(&vTPS)
 ,tpInd(vTPInd)
 ,m_hyposColl(NULL)
 {
@@ -48,7 +48,7 @@ void QueueItem::CreateHypo(
     const SCFG::InputPath &path,
     const SCFG::SymbolBind &symbolBind)
 {
-  const SCFG::TargetPhraseImpl &tp = tps[tpInd];
+  const SCFG::TargetPhraseImpl &tp = (*tps)[tpInd];
 
   hypo = SCFG::Hypothesis::Create(mgr.GetPool(), mgr);
   hypo->Init(mgr, path, symbolBind, tp, hypoIndColl);
@@ -61,11 +61,11 @@ void QueueItem::CreateNext(
     SCFG::Queue &queue,
     const SCFG::InputPath &path)
 {
-  if (tpInd + 1 < tps.GetSize()) {
-    QueueItem *item = new QueueItem(pool, symbolBind, tps, tpInd + 1);
+  if (tpInd + 1 < tps->GetSize()) {
+    QueueItem *item = new QueueItem(pool, *symbolBind, *tps, tpInd + 1);
     item->m_hyposColl = m_hyposColl;
     item->hypoIndColl = hypoIndColl;
-    item->CreateHypo(mgr, path, symbolBind);
+    item->CreateHypo(mgr, path, *symbolBind);
 
     queue.push(item);
   }
@@ -76,12 +76,12 @@ void QueueItem::CreateNext(
     size_t hypoInd = hypoIndColl[i];
 
     if (hypoInd + 1 < hypos.GetSize()) {
-      QueueItem *item = new QueueItem(pool, symbolBind, tps, tpInd);
+      QueueItem *item = new QueueItem(pool, *symbolBind, *tps, tpInd);
 
       item->m_hyposColl = m_hyposColl;
       item->hypoIndColl = hypoIndColl;
       item->hypoIndColl[i] = hypoInd + 1;
-      item->CreateHypo(mgr, path, symbolBind);
+      item->CreateHypo(mgr, path, *symbolBind);
 
       queue.push(item);
     }
