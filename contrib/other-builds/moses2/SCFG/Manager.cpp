@@ -164,7 +164,7 @@ void Manager::Decode(SCFG::InputPath &path, Stack &stack)
     stack.Add(hypo, GetHypoRecycle(), arcLists);
     //cerr << "Added " << *hypo << " " << endl;
 
-    item->CreateNext(*this, m_queue, path);
+    item->CreateNext(GetPool(), *this, m_queue, path);
     //cerr << "Created next " << endl;
 
     ++pops;
@@ -177,7 +177,7 @@ void Manager::CreateQueue(
     const SymbolBind &symbolBind,
     const SCFG::TargetPhrases &tps)
 {
-  QueueItem *item = new QueueItem(symbolBind, tps);
+  QueueItem *item = new QueueItem(GetPool(), symbolBind, tps);
   for (size_t i = 0; i < symbolBind.coll.size(); ++i) {
     const SymbolBindElement &ele = symbolBind.coll[i];
     if (ele.hypos) {

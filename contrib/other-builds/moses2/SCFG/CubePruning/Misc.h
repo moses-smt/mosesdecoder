@@ -8,6 +8,7 @@
 #include <vector>
 #include <queue>
 #include "../../HypothesisColl.h"
+#include "../../Vector.h"
 #include "../Hypothesis.h"
 
 namespace Moses2
@@ -26,16 +27,20 @@ public:
   const SCFG::TargetPhrases &tps;
   size_t tpInd;
 
-  std::vector<const Moses2::HypothesisColl *> hyposColl;
   std::vector<size_t> hypoIndColl;
     // hypos and ind to the 1 we're using
 
   SCFG::Hypothesis *hypo;
 
   QueueItem(
+      MemPool &pool,
+      const SymbolBind &symbolBind,
+      const SCFG::TargetPhrases &tps);
+  QueueItem(
+      MemPool &pool,
       const SymbolBind &symbolBind,
       const SCFG::TargetPhrases &tps,
-      size_t vTPInd = 0);
+      size_t vTPInd);
   void AddHypos(const Moses2::HypothesisColl &hypos);
   void CreateHypo(
       SCFG::Manager &mgr,
@@ -43,9 +48,15 @@ public:
       const SCFG::SymbolBind &symbolBind);
 
   void CreateNext(
+      MemPool &pool,
       SCFG::Manager &mgr,
       SCFG::Queue &queue,
       const SCFG::InputPath &path);
+
+protected:
+  typedef Vector<const Moses2::HypothesisColl *> HyposColl;
+  HyposColl *m_hyposColl;
+
 };
 
 ///////////////////////////////////////////

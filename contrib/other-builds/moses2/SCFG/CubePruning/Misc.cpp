@@ -15,18 +15,31 @@ namespace SCFG
 {
 
 QueueItem::QueueItem(
+    MemPool &pool,
+    const SymbolBind &vSymbolBind,
+    const SCFG::TargetPhrases &vTPS)
+:symbolBind(vSymbolBind)
+,tps(vTPS)
+,tpInd(0)
+{
+  m_hyposColl = new (pool.Allocate<HyposColl>()) HyposColl(pool);
+}
+
+QueueItem::QueueItem(
+    MemPool &pool,
     const SymbolBind &vSymbolBind,
     const SCFG::TargetPhrases &vTPS,
     size_t vTPInd)
 :symbolBind(vSymbolBind)
 ,tps(vTPS)
 ,tpInd(vTPInd)
+,m_hyposColl(NULL)
 {
 }
 
 void QueueItem::AddHypos(const Moses2::HypothesisColl &hypos)
 {
-  hyposColl.push_back(&hypos);
+  m_hyposColl->push_back(&hypos);
   hypoIndColl.push_back(0);
 }
 
@@ -43,28 +56,29 @@ void QueueItem::CreateHypo(
 }
 
 void QueueItem::CreateNext(
+    MemPool &pool,
     SCFG::Manager &mgr,
     SCFG::Queue &queue,
     const SCFG::InputPath &path)
 {
   if (tpInd + 1 < tps.GetSize()) {
-    QueueItem *item = new QueueItem(symbolBind, tps, tpInd + 1);
-    item->hyposColl = hyposColl;
+    QueueItem *item = new QueueItem(pool, symbolBind, tps, tpInd + 1);
+    item->m_hyposColl = m_hyposColl;
     item->hypoIndColl = hypoIndColl;
     item->CreateHypo(mgr, path, symbolBind);
 
     queue.push(item);
   }
 
-  assert(hyposColl.size() == hypoIndColl.size());
-  for (size_t i = 0; i < hyposColl.size(); ++i) {
-    const Moses2::HypothesisColl &hypos = *hyposColl[i];
+  assert(m_hyposColl->size() == hypoIndColl.size());
+  for (size_t i = 0; i < m_hyposColl->size(); ++i) {
+    const Moses2::HypothesisColl &hypos = *(*m_hyposColl)[i];
     size_t hypoInd = hypoIndColl[i];
 
     if (hypoInd + 1 < hypos.GetSize()) {
-      QueueItem *item = new QueueItem(symbolBind, tps, tpInd);
+      QueueItem *item = new QueueItem(pool, symbolBind, tps, tpInd);
 
-      item->hyposColl = hyposColl;
+      item->m_hyposColl = m_hyposColl;
       item->hypoIndColl = hypoIndColl;
       item->hypoIndColl[i] = hypoInd + 1;
       item->CreateHypo(mgr, path, symbolBind);
