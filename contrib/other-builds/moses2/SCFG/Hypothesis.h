@@ -22,9 +22,6 @@ class Hypothesis: public HypothesisBase
 public:
   static Hypothesis *Create(MemPool &pool, Manager &mgr);
 
-  Hypothesis(MemPool &pool,
-      const System &system);
-
   void Init(SCFG::Manager &mgr,
       const SCFG::InputPath &path,
       const SCFG::SymbolBind &symbolBind,
@@ -50,6 +47,9 @@ protected:
   const InputPathBase *m_path;
 
   Vector<const Hypothesis*> m_prevHypos; // always sorted by source position?
+
+  Hypothesis(MemPool &pool,
+      const System &system);
 
   void EvaluateWhenApplied(const StatefulFeatureFunction &sfff);
 
