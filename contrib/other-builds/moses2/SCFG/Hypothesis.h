@@ -2,6 +2,7 @@
 #include <vector>
 #include "../HypothesisBase.h"
 #include "../MemPool.h"
+#include "../Vector.h"
 
 namespace Moses2
 {
@@ -26,7 +27,7 @@ public:
       const SCFG::InputPath &path,
       const SCFG::SymbolBind &symbolBind,
       const SCFG::TargetPhraseImpl &tp,
-      const std::vector<size_t> &prevHyposIndices);
+      const Vector<size_t> &prevHyposIndices);
 
   virtual SCORE GetFutureScore() const;
   virtual void EvaluateWhenApplied();

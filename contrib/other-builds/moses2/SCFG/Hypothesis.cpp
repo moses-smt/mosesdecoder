@@ -47,7 +47,7 @@ void Hypothesis::Init(SCFG::Manager &mgr,
     const SCFG::InputPath &path,
     const SCFG::SymbolBind &symbolBind,
     const SCFG::TargetPhraseImpl &tp,
-    const std::vector<size_t> &prevHyposIndices)
+    const Vector<size_t> &prevHyposIndices)
 {
   m_mgr = &mgr;
   m_targetPhrase = &tp;

@@ -56,7 +56,7 @@ protected:
       Stack &stack);
 
   bool IncrPrevHypoIndices(
-      std::vector<size_t> &prevHyposIndices,
+      Vector<size_t> &prevHyposIndices,
       size_t ind,
       const std::vector<const SymbolBindElement*> ntEles);
 

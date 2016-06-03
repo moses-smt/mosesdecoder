@@ -25,13 +25,13 @@ class QueueItem
 public:
   SCFG::Hypothesis *hypo;
 
-  QueueItem() {}
+  static QueueItem *Create(MemPool &pool);
 
-  QueueItem(
+  void Init(
       MemPool &pool,
       const SymbolBind &symbolBind,
       const SCFG::TargetPhrases &tps);
-  QueueItem(
+  void Init(
       MemPool &pool,
       const SymbolBind &symbolBind,
       const SCFG::TargetPhrases &tps,
@@ -56,8 +56,10 @@ protected:
   const SCFG::TargetPhrases *tps;
   size_t tpInd;
 
-  std::vector<size_t> hypoIndColl;
+  Vector<size_t> hypoIndColl;
     // hypos and ind to the 1 we're using
+
+  QueueItem(MemPool &pool);
 
 };
 

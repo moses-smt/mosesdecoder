@@ -177,7 +177,8 @@ void Manager::CreateQueue(
     const SymbolBind &symbolBind,
     const SCFG::TargetPhrases &tps)
 {
-  QueueItem *item = new QueueItem(GetPool(), symbolBind, tps);
+  QueueItem *item = QueueItem::Create(GetPool());
+  item->Init(GetPool(), symbolBind, tps);
   for (size_t i = 0; i < symbolBind.coll.size(); ++i) {
     const SymbolBindElement &ele = symbolBind.coll[i];
     if (ele.hypos) {
@@ -222,7 +223,7 @@ void Manager::ExpandHypo(
   Recycler<HypothesisBase*> &hypoRecycler = GetHypoRecycle();
 
   std::vector<const SymbolBindElement*> ntEles = symbolBind.GetNTElements();
-  vector<size_t> prevHyposIndices(symbolBind.numNT);
+  Vector<size_t> prevHyposIndices(GetPool(), symbolBind.numNT);
   assert(ntEles.size() == symbolBind.numNT);
   //cerr << "ntEles:" << ntEles.size() << endl;
 
@@ -239,7 +240,7 @@ void Manager::ExpandHypo(
 }
 
 bool Manager::IncrPrevHypoIndices(
-    vector<size_t> &prevHyposIndices,
+    Vector<size_t> &prevHyposIndices,
     size_t ind,
     const std::vector<const SymbolBindElement*> ntEles)
 {
