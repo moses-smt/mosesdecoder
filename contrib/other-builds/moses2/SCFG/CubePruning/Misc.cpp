@@ -4,6 +4,7 @@
  *  Created on: 2 Jun 2016
  *      Author: hieu
  */
+#include <boost/functional/hash.hpp>
 #include "Misc.h"
 #include "../Manager.h"
 #include "../TargetPhrases.h"
@@ -103,6 +104,14 @@ void QueueItem::CreateNext(
     }
   }
 
+}
+
+////////////////////////////////////////////////////////
+size_t hash_value(const SeenPositionItem& obj)
+{
+  size_t ret = boost::hash_value(obj.hypoIndColl);
+  boost::hash_combine(ret, (size_t) obj.tp);
+  return ret;
 }
 
 }

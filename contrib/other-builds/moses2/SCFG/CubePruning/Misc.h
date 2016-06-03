@@ -82,6 +82,22 @@ class Queue : public std::priority_queue<QueueItem*,
 
 };
 
+///////////////////////////////////////////
+class SeenPositionItem
+{
+public:
+  const SCFG::TargetPhraseImpl *tp;
+  std::vector<size_t> hypoIndColl;
+
+  virtual bool operator==(const SeenPositionItem &compare) const
+  {
+    bool ret = (tp == compare.tp) && (hypoIndColl == compare.hypoIndColl);
+    return ret;
+  }
+
+};
+
+size_t hash_value(const SeenPositionItem& obj);
 
 }
 }
