@@ -58,13 +58,14 @@ void QueueItem::AddHypos(const Moses2::HypothesisColl &hypos)
 }
 
 void QueueItem::CreateHypo(
+    MemPool &pool,
     SCFG::Manager &mgr,
     const SCFG::InputPath &path,
     const SCFG::SymbolBind &symbolBind)
 {
   const SCFG::TargetPhraseImpl &tp = (*tps)[tpInd];
 
-  hypo = SCFG::Hypothesis::Create(mgr.GetPool(), mgr);
+  hypo = SCFG::Hypothesis::Create(pool, mgr);
   hypo->Init(mgr, path, symbolBind, tp, hypoIndColl);
   hypo->EvaluateWhenApplied();
 }
@@ -81,7 +82,7 @@ void QueueItem::CreateNext(
     item->Init(pool, *symbolBind, *tps, tpInd + 1);
     item->m_hyposColl = m_hyposColl;
     item->hypoIndColl = hypoIndColl;
-    item->CreateHypo(mgr, path, *symbolBind);
+    item->CreateHypo(pool, mgr, path, *symbolBind);
 
     queue.push(item);
   }
@@ -98,7 +99,7 @@ void QueueItem::CreateNext(
       item->m_hyposColl = m_hyposColl;
       item->hypoIndColl = hypoIndColl;
       item->hypoIndColl[i] = hypoInd + 1;
-      item->CreateHypo(mgr, path, *symbolBind);
+      item->CreateHypo(pool, mgr, path, *symbolBind);
 
       queue.push(item);
     }

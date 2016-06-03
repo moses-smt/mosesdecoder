@@ -188,7 +188,7 @@ void Manager::CreateQueue(
       item->AddHypos(*ele.hypos);
     }
   }
-  item->CreateHypo(*this, path, symbolBind);
+  item->CreateHypo(GetPool(), *this, path, symbolBind);
   m_queue.push(item);
 }
 
