@@ -63,7 +63,7 @@ protected:
   // cube pruning
   Queue m_queue;
 
-  typedef boost::unordered_set<SeenPositionItem> SeenPositions;
+  SeenPositions m_seenPositions;
 
   void CreateQueue(
       const SCFG::InputPath &path,

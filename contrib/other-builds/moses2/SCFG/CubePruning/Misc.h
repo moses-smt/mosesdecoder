@@ -7,6 +7,7 @@
 #pragma once
 #include <vector>
 #include <queue>
+#include <boost/unordered_set.hpp>
 #include "../../HypothesisColl.h"
 #include "../../Vector.h"
 #include "../Hypothesis.h"
@@ -18,6 +19,7 @@ namespace SCFG
 {
 class TargetPhrases;
 class Queue;
+class SeenPositions;
 
 ///////////////////////////////////////////
 class QueueItem
@@ -47,6 +49,7 @@ public:
       MemPool &pool,
       SCFG::Manager &mgr,
       SCFG::Queue &queue,
+      SeenPositions &seenPositions,
       const SCFG::InputPath &path);
 
 protected:
@@ -90,6 +93,8 @@ public:
   const SCFG::TargetPhraseImpl *tp;
   std::vector<size_t> hypoIndColl;
 
+  SeenPositionItem(const SCFG::TargetPhraseImpl &vtp, const Vector<size_t> &vhypoIndColl);
+
   virtual bool operator==(const SeenPositionItem &compare) const
   {
     bool ret = (tp == compare.tp) && (hypoIndColl == compare.hypoIndColl);
@@ -99,6 +104,11 @@ public:
 };
 
 size_t hash_value(const SeenPositionItem& obj);
+
+class SeenPositions: public boost::unordered_set<SeenPositionItem>
+{
+
+};
 
 }
 }

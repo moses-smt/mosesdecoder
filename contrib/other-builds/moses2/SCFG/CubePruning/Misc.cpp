@@ -74,10 +74,15 @@ void QueueItem::CreateNext(
     MemPool &pool,
     SCFG::Manager &mgr,
     SCFG::Queue &queue,
+    SeenPositions &seenPositions,
     const SCFG::InputPath &path)
 {
   //cerr << "tpInd=" << tpInd << " " << tps->GetSize() << endl;
   if (tpInd + 1 < tps->GetSize()) {
+    const SCFG::TargetPhraseImpl &tp = (*tps)[tpInd + 1];
+    SeenPositionItem seenItem(tp, hypoIndColl);
+    seenPositions.insert(seenItem);
+
     QueueItem *item = QueueItem::Create(pool);
     item->Init(pool, *symbolBind, *tps, tpInd + 1);
     item->m_hyposColl = m_hyposColl;
@@ -88,17 +93,22 @@ void QueueItem::CreateNext(
   }
 
   assert(m_hyposColl->size() == hypoIndColl.size());
+  const SCFG::TargetPhraseImpl &tp = (*tps)[tpInd];
   for (size_t i = 0; i < m_hyposColl->size(); ++i) {
     const Moses2::HypothesisColl &hypos = *(*m_hyposColl)[i];
-    size_t hypoInd = hypoIndColl[i];
+    size_t hypoInd = hypoIndColl[i] + 1;
 
-    if (hypoInd + 1 < hypos.GetSize()) {
+    if (hypoInd < hypos.GetSize()) {
+      SeenPositionItem seenItem(tp, hypoIndColl);
+      seenItem.hypoIndColl[i] = hypoInd;
+      seenPositions.insert(seenItem);
+
       QueueItem *item = QueueItem::Create(pool);
       item->Init(pool, *symbolBind, *tps, tpInd);
 
       item->m_hyposColl = m_hyposColl;
       item->hypoIndColl = hypoIndColl;
-      item->hypoIndColl[i] = hypoInd + 1;
+      item->hypoIndColl[i] = hypoInd;
       item->CreateHypo(pool, mgr, path, *symbolBind);
 
       queue.push(item);
@@ -108,6 +118,15 @@ void QueueItem::CreateNext(
 }
 
 ////////////////////////////////////////////////////////
+SeenPositionItem::SeenPositionItem(const SCFG::TargetPhraseImpl &vtp, const Vector<size_t> &vhypoIndColl)
+:tp(&vtp)
+,hypoIndColl(vhypoIndColl.size())
+{
+  for (size_t i = 0; i < hypoIndColl.size(); ++i) {
+    hypoIndColl[i] = vhypoIndColl[i];
+  }
+}
+
 size_t hash_value(const SeenPositionItem& obj)
 {
   size_t ret = boost::hash_value(obj.hypoIndColl);
