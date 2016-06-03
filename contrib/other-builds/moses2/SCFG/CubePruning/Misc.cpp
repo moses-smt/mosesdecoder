@@ -8,6 +8,8 @@
 #include "../Manager.h"
 #include "../TargetPhrases.h"
 
+using namespace std;
+
 namespace Moses2
 {
 
@@ -72,6 +74,7 @@ void QueueItem::CreateNext(
     SCFG::Queue &queue,
     const SCFG::InputPath &path)
 {
+  //cerr << "tpInd=" << tpInd << " " << tps->GetSize() << endl;
   if (tpInd + 1 < tps->GetSize()) {
     QueueItem *item = QueueItem::Create(pool);
     item->Init(pool, *symbolBind, *tps, tpInd + 1);

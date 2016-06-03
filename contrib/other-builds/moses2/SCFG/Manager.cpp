@@ -151,6 +151,9 @@ void Manager::LookupUnary(SCFG::InputPath &path)
 ///////////////////////////////////////////////////////////////
 void Manager::Decode(SCFG::InputPath &path, Stack &stack)
 {
+  std::vector<QueueItem*> &container = Container(m_queue);
+  container.clear();
+
   BOOST_FOREACH(const InputPath::Coll::value_type &valPair, *path.targetPhrases) {
     const SymbolBind &symbolBind = valPair.first;
     const SCFG::TargetPhrases &tps = *valPair.second;
