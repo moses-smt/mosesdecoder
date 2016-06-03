@@ -39,6 +39,7 @@ void QueueItem::CreateHypo(
 
   hypo = SCFG::Hypothesis::Create(mgr.GetPool(), mgr);
   hypo->Init(mgr, path, symbolBind, tp, hypoIndColl);
+  hypo->EvaluateWhenApplied();
 }
 
 void QueueItem::CreateNext(
@@ -65,9 +66,7 @@ void QueueItem::CreateNext(
 
       item->hyposColl = hyposColl;
       item->hypoIndColl = hypoIndColl;
-
       item->hypoIndColl[i] = hypoInd + 1;
-
       item->CreateHypo(mgr, path, symbolBind);
 
       queue.push(item);

@@ -68,20 +68,20 @@ void Manager::Decode()
 
     int maxPhraseSize = inputSize - startPos + 1;
     for (int phraseSize = 1; phraseSize < maxPhraseSize; ++phraseSize) {
-      InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, phraseSize);
       //cerr << endl << "phraseSize=" << phraseSize << endl;
+      InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, phraseSize);
 
       Stack &stack = m_stacks.GetStack(startPos, phraseSize);
 
-      //cerr << "BEFORE LOOKUP path=" << m_inputPaths << endl;
+      //cerr << "BEFORE LOOKUP path=" << path << endl;
       Lookup(path);
-      //cerr << "AFTER LOOKUP path=" << m_inputPaths << endl;
+      //cerr << "AFTER LOOKUP path=" << path << endl;
 
       Decode(path, stack);
-      //cerr << "AFTER DECODE path=" << m_inputPaths << endl;
+      //cerr << "AFTER DECODE path=" << path << endl;
 
       LookupUnary(path);
-      //cerr << "AFTER LookupUnary path=" << m_inputPaths << endl;
+      //cerr << "AFTER LookupUnary path=" << path << endl;
 
       //cerr << "#rules=" << path.GetNumRules() << endl;
     }
@@ -153,16 +153,19 @@ void Manager::Decode(SCFG::InputPath &path, Stack &stack)
 
   size_t pops = 0;
   while (!m_queue.empty() && pops < system.options.cube.pop_limit) {
+    //cerr << "pops=" << pops << endl;
     QueueItem *item = m_queue.top();
     m_queue.pop();
 
     // add hypo to stack
     Hypothesis *hypo = item->hypo;
 
-    //cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
+    //cerr << "hypo=" << *hypo << " " << endl;
     stack.Add(hypo, GetHypoRecycle(), arcLists);
+    //cerr << "Added " << *hypo << " " << endl;
 
     item->CreateNext(*this, m_queue, path);
+    //cerr << "Created next " << endl;
 
     ++pops;
   }

@@ -128,7 +128,12 @@ void Hypothesis::OutputToStream(std::ostream &out) const
 std::ostream& operator<<(std::ostream &out, const SCFG::Hypothesis &obj)
 {
   out << &obj;
-  obj.OutputToStream(out);
+
+  out << " m_prevHypos=" << obj.m_prevHypos.size() << " ";
+  for (size_t i = 0; i < obj.m_prevHypos.size(); ++i) {
+    out << obj.m_prevHypos[i] << " ";
+  }
+  //obj.OutputToStream(out);
 
   return out;
 }
