@@ -21,14 +21,15 @@ namespace Moses
 
 using namespace std;
 
-std::string ParseScores(const std::string &line, const std::string& defaultScores) {
+std::string ParseScores(const std::string &line, const std::string& defaultScores)
+{
   std::vector<std::string> toks = Tokenize(line);
   UTIL_THROW_IF2(toks.empty(), "Empty line");
 
   for (size_t i = 1; i < toks.size(); ++i) {
     std::vector<std::string> args = TokenizeFirstOnly(toks[i], "=");
     UTIL_THROW_IF2(args.size() != 2,
-      "Incorrect format for feature function arg: " << toks[i]);
+                   "Incorrect format for feature function arg: " << toks[i]);
 
     if (args[0] == "scores") {
       return args[1];
@@ -62,30 +63,29 @@ void EditOps::Load()
 { }
 
 void EditOps::EvaluateInIsolation(const Phrase &source
-    , const TargetPhrase &target
-    , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+                                  , const TargetPhrase &target
+                                  , ScoreComponentCollection &scoreBreakdown
+                                  , ScoreComponentCollection &estimatedFutureScore) const
 {
   ComputeFeatures(source, target, &scoreBreakdown);
 }
 
 void EditOps::ComputeFeatures(
-    const Phrase &source,
-    const TargetPhrase& target,
-    ScoreComponentCollection* accumulator) const
+  const Phrase &source,
+  const TargetPhrase& target,
+  ScoreComponentCollection* accumulator) const
 {
   std::vector<float> ops(GetNumScoreComponents(), 0);
-  
+
   if(m_chars) {
     std::vector<FactorType> factors;
     factors.push_back(m_factorType);
-    
+
     std::string sourceStr = source.GetStringRep(factors);
     std::string targetStr = target.GetStringRep(factors);
-    
+
     AddStats(sourceStr, targetStr, m_scores, ops);
-  }
-  else {
+  } else {
     std::vector<std::string> sourceTokens;
     //std::cerr << "Ed src: ";
     for(size_t i = 0; i < source.GetSize(); ++i) {
@@ -94,7 +94,7 @@ void EditOps::ComputeFeatures(
       //std::cerr << sourceTokens.back() << " ";
     }
     //std::cerr << std::endl;
-    
+
     std::vector<std::string> targetTokens;
     //std::cerr << "Ed trg: ";
     for(size_t i = 0; i < target.GetSize(); ++i) {
@@ -103,10 +103,10 @@ void EditOps::ComputeFeatures(
       //std::cerr << targetTokens.back() << " ";
     }
     //std::cerr << std::endl;
-    
+
     AddStats(sourceTokens, targetTokens, m_scores, ops);
   }
-  
+
   accumulator->PlusEquals(this, ops);
 }
 
