@@ -62,7 +62,6 @@ protected:
 
   // cube pruning
   Queue m_queue;
-
   SeenPositions m_seenPositions;
 
   void CreateQueue(

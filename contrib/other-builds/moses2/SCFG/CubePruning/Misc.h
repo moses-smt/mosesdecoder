@@ -89,6 +89,8 @@ class Queue : public std::priority_queue<QueueItem*,
 ///////////////////////////////////////////
 class SeenPositionItem
 {
+  friend std::ostream& operator<<(std::ostream &out, const SeenPositionItem &obj);
+
 public:
   const SCFG::TargetPhraseImpl *tp;
   std::vector<size_t> hypoIndColl;
@@ -105,9 +107,20 @@ public:
 
 size_t hash_value(const SeenPositionItem& obj);
 
-class SeenPositions: public boost::unordered_set<SeenPositionItem>
-{
+///////////////////////////////////////////
 
+class SeenPositions
+{
+public:
+  bool Add(const SeenPositionItem &item);
+
+  void clear()
+  { m_coll.clear(); }
+
+
+protected:
+  typedef boost::unordered_set<SeenPositionItem> Coll;
+  Coll m_coll;
 };
 
 }

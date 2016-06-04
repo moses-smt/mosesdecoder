@@ -25,7 +25,7 @@ class StatefulFeatureFunction;
 
 class Hypothesis: public HypothesisBase
 {
-  friend std::ostream& operator<<(std::ostream &, const Hypothesis &);
+  friend std::ostream& operator<<(std::ostream &out, const Hypothesis &obj);
 
   Hypothesis(MemPool &pool, const System &system);
 
