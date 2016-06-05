@@ -48,11 +48,13 @@ public:
     m_currInd = m_all.size();
   }
 
+  // call this for new objects when u 1st create it. It is assumed the object will be used right away
   void Keep(const T& val)
   {
     m_all.push_back(val);
   }
 
+  // call this for existing object to put back into queue for reuse
   void Recycle(const T& val)
   {
     m_coll.push_back(val);

@@ -146,8 +146,19 @@ void Manager::LookupUnary(SCFG::InputPath &path)
 void Manager::Decode(SCFG::InputPath &path, Stack &stack)
 {
   // clear cube pruning data
-  std::vector<QueueItem*> &container = Container(m_queue);
-  container.clear();
+  //std::vector<QueueItem*> &container = Container(m_queue);
+  //container.clear();
+  Recycler<HypothesisBase*> &hypoRecycler = GetHypoRecycle();
+  while (!m_queue.empty()) {
+    QueueItem *item = m_queue.top();
+    m_queue.pop();
+    // recycle unused hypos from queue
+    Hypothesis *hypo = item->hypo;
+    hypoRecycler.Recycle(hypo);
+
+    // recycle queue item
+    m_queueItemRecycler.push_back(item);
+  }
 
   m_seenPositions.clear();
 
