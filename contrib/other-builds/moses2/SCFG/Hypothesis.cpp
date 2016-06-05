@@ -18,9 +18,8 @@ Hypothesis *Hypothesis::Create(MemPool &pool, Manager &mgr)
 {
   //  ++g_numHypos;
     Hypothesis *ret;
-    ret = new (pool.Allocate<Hypothesis>()) Hypothesis(pool, mgr.system);
+    //ret = new (pool.Allocate<Hypothesis>()) Hypothesis(pool, mgr.system);
 
-    /*
     Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
     ret = static_cast<Hypothesis*>(recycler.Get());
     if (ret) {
@@ -31,7 +30,6 @@ Hypothesis *Hypothesis::Create(MemPool &pool, Manager &mgr)
       //cerr << "Hypothesis=" << sizeof(Hypothesis) << " " << ret << endl;
       recycler.Keep(ret);
     }
-    */
     return ret;
 }
 

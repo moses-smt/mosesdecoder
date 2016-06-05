@@ -172,7 +172,7 @@ void Manager::Decode(SCFG::InputPath &path, Stack &stack)
     stack.Add(hypo, GetHypoRecycle(), arcLists);
     //cerr << "Added " << *hypo << " " << endl;
 
-    item->CreateNext(GetPool(), *this, m_queue, m_seenPositions, path);
+    item->CreateNext(GetSystemPool(), *this, m_queue, m_seenPositions, path);
     //cerr << "Created next " << endl;
 
     ++pops;
@@ -193,7 +193,7 @@ void Manager::CreateQueue(
       item->AddHypos(*ele.hypos);
     }
   }
-  item->CreateHypo(GetPool(), *this, path, symbolBind);
+  item->CreateHypo(GetSystemPool(), *this, path, symbolBind);
   m_queue.push(item);
 }
 
@@ -237,7 +237,7 @@ void Manager::ExpandHypo(
 
   size_t ind = 0;
   while (IncrPrevHypoIndices(prevHyposIndices, ind, ntEles)) {
-    SCFG::Hypothesis *hypo = SCFG::Hypothesis::Create(GetPool(), *this);
+    SCFG::Hypothesis *hypo = SCFG::Hypothesis::Create(GetSystemPool(), *this);
     hypo->Init(*this, path, symbolBind, tp, prevHyposIndices);
     hypo->EvaluateWhenApplied();
 
