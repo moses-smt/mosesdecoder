@@ -185,7 +185,7 @@ void Manager::CreateQueue(
     const SymbolBind &symbolBind,
     const SCFG::TargetPhrases &tps)
 {
-  QueueItem *item = QueueItem::Create(GetPool());
+  QueueItem *item = QueueItem::Create(GetPool(), *this);
   item->Init(GetPool(), symbolBind, tps);
   for (size_t i = 0; i < symbolBind.coll.size(); ++i) {
     const SymbolBindElement &ele = symbolBind.coll[i];

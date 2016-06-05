@@ -27,7 +27,7 @@ class QueueItem
 public:
   SCFG::Hypothesis *hypo;
 
-  static QueueItem *Create(MemPool &pool);
+  static QueueItem *Create(MemPool &pool, SCFG::Manager &mgr);
 
   void Init(
       MemPool &pool,
@@ -66,6 +66,10 @@ protected:
   QueueItem(MemPool &pool);
 
 };
+
+///////////////////////////////////////////
+
+typedef std::deque<QueueItem*> QueueItemRecycler;
 
 ///////////////////////////////////////////
 class QueueItemOrderer

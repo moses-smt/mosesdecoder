@@ -17,7 +17,7 @@ namespace Moses2
 
 namespace SCFG
 {
-QueueItem *QueueItem::Create(MemPool &pool)
+QueueItem *QueueItem::Create(MemPool &pool, SCFG::Manager &mgr)
 {
   QueueItem *item = new (pool.Allocate<QueueItem>()) QueueItem(pool);
   return item;
@@ -86,7 +86,7 @@ void QueueItem::CreateNext(
 
     bool unseen = seenPositions.Add(seenItem);
     if (unseen) {
-      QueueItem *item = QueueItem::Create(pool);
+      QueueItem *item = QueueItem::Create(pool, mgr);
       item->Init(pool, *symbolBind, *tps, tpInd + 1);
       item->m_hyposColl = m_hyposColl;
       item->hypoIndColl = hypoIndColl;
@@ -108,7 +108,7 @@ void QueueItem::CreateNext(
 
       bool unseen = seenPositions.Add(seenItem);
       if (unseen) {
-        QueueItem *item = QueueItem::Create(pool);
+        QueueItem *item = QueueItem::Create(pool, mgr);
         item->Init(pool, *symbolBind, *tps, tpInd);
 
         item->m_hyposColl = m_hyposColl;

@@ -40,6 +40,9 @@ public:
   const InputPaths &GetInputPaths() const
   { return m_inputPaths; }
 
+  QueueItemRecycler &GetQueueItemRecycler()
+  { return m_queueItemRecycler; }
+
 protected:
   Stacks m_stacks;
   SCFG::InputPaths m_inputPaths;
@@ -63,6 +66,8 @@ protected:
   // cube pruning
   Queue m_queue;
   SeenPositions m_seenPositions;
+
+  QueueItemRecycler m_queueItemRecycler;
 
   void CreateQueue(
       const SCFG::InputPath &path,
