@@ -13,6 +13,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
    ManagerBase.cpp
    MemPool.cpp
    Phrase.cpp 
+   pugixml.cpp
    Scores.cpp 
    SubPhrase.cpp
    System.cpp 

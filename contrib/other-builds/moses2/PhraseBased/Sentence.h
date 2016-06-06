@@ -6,10 +6,12 @@
  */
 #pragma once
 
+#include <boost/property_tree/ptree.hpp>
 #include <string>
 #include "PhraseImpl.h"
 #include "../InputType.h"
 #include "../MemPool.h"
+#include "../pugixml.hpp"
 #include "../legacy/Util2.h"
 
 namespace Moses2
@@ -17,6 +19,17 @@ namespace Moses2
 class FactorCollection;
 class System;
 
+//////////////////////////////////////////////////////////////////////////////
+class XMLNode
+{
+  friend std::ostream& operator<<(std::ostream &out, const XMLNode &obj);
+
+public:
+  std::string nodeName;
+  size_t startPos, phraseSize;
+};
+
+//////////////////////////////////////////////////////////////////////////////
 class Sentence: public InputType, public PhraseImpl
 {
 public:
@@ -30,6 +43,13 @@ public:
 
   virtual ~Sentence()
   {}
+
+protected:
+  static void XMLParse(
+      size_t depth,
+      const pugi::xml_node &parentNode,
+      std::vector<std::string> &toks,
+      std::vector<XMLNode*> &xmlNodes);
 
 };
 
