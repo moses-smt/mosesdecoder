@@ -20,9 +20,9 @@ class FactorCollection;
 class System;
 
 //////////////////////////////////////////////////////////////////////////////
-class XMLNode
+class XMLOption
 {
-  friend std::ostream& operator<<(std::ostream &out, const XMLNode &obj);
+  friend std::ostream& operator<<(std::ostream &out, const XMLOption &obj);
 
 public:
   std::string nodeName;
@@ -49,7 +49,7 @@ protected:
       size_t depth,
       const pugi::xml_node &parentNode,
       std::vector<std::string> &toks,
-      std::vector<XMLNode*> &xmlNodes);
+      std::vector<XMLOption*> &xmlOptions);
 
 };
 

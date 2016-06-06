@@ -15,7 +15,7 @@ using namespace std;
 
 namespace Moses2
 {
-std::ostream& operator<<(std::ostream &out, const XMLNode &obj)
+std::ostream& operator<<(std::ostream &out, const XMLOption &obj)
 {
   out << "[" << obj.startPos << "," << obj.phraseSize << "]=" << obj.nodeName;
   return out;
@@ -28,12 +28,13 @@ Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
 {
 
   std::vector<std::string> toks;
-  vector<XMLNode*> xmlNodes;
+  vector<XMLOption*> *xmlOptions;
 
   Sentence *ret;
 
   if (system.options.input.xml_policy) {
     // xml
+    xmlOptions = new vector<XMLOption*>();
     pugi::xml_document doc;
 
     string str2 = "<xml>" + str + "</xml>";
@@ -41,10 +42,10 @@ Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
                                     pugi::parse_default | pugi::parse_comments);
     pugi::xml_node topNode = doc.child("xml");
 
-    XMLParse(0, topNode, toks, xmlNodes);
+    XMLParse(0, topNode, toks, *xmlOptions);
 
-    for (size_t i = 0; i < xmlNodes.size(); ++i) {
-      cerr << *xmlNodes[i] << endl;
+    for (size_t i = 0; i < xmlOptions->size(); ++i) {
+      cerr << *(*xmlOptions)[i] << endl;
     }
   }
   else {
@@ -61,9 +62,10 @@ Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
     // xml
 
     // clean up
-    for (size_t i = 0; i < xmlNodes.size(); ++i) {
-      delete xmlNodes[i];
+    for (size_t i = 0; i < xmlOptions->size(); ++i) {
+      delete (*xmlOptions)[i];
     }
+    delete xmlOptions;
 
   }
 
@@ -75,7 +77,7 @@ void Sentence::XMLParse(
     size_t depth,
     const pugi::xml_node &parentNode,
     std::vector<std::string> &toks,
-    vector<XMLNode*> &xmlNodes)
+    vector<XMLOption*> &xmlOptions)
 {  // pugixml
   for (pugi::xml_node childNode = parentNode.first_child(); childNode; childNode = childNode.next_sibling()) {
     string nodeName = childNode.name();
@@ -93,13 +95,13 @@ void Sentence::XMLParse(
     }
 
     if (!nodeName.empty()) {
-      XMLNode *xmlNode = new XMLNode();
+      XMLOption *xmlNode = new XMLOption();
       xmlNode->nodeName = nodeName;
       xmlNode->startPos = startPos - 1;
-      xmlNodes.push_back(xmlNode);
+      xmlOptions.push_back(xmlNode);
 
       // recursively call this function. For proper recursive trees
-      XMLParse(depth + 1, childNode, toks, xmlNodes);
+      XMLParse(depth + 1, childNode, toks, xmlOptions);
 
       size_t endPos = toks.size();
       xmlNode->phraseSize = endPos - startPos;
