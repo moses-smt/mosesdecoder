@@ -41,7 +41,7 @@ void ReorderingConstraint::FinalizeWalls()
       if (m_wall[ pos ]) {
         m_localWall[ pos ] = z;
         m_wall[ pos ] = false;
-        cerr << "SETTING local wall " << pos << std::endl;
+        //cerr << "SETTING local wall " << pos << std::endl;
       }
       // enforce that local walls only apply to innermost zone
       else if (m_localWall[ pos ] != NOT_A_ZONE) {
@@ -58,7 +58,7 @@ void ReorderingConstraint::FinalizeWalls()
 //! set value at a particular position
 void ReorderingConstraint::SetWall( size_t pos, bool value )
 {
-  cerr << "SETTING reordering wall at position " << pos << std::endl;
+  //cerr << "SETTING reordering wall at position " << pos << std::endl;
   m_wall[pos] = value;
   m_active = true;
 }
@@ -66,7 +66,7 @@ void ReorderingConstraint::SetWall( size_t pos, bool value )
 //! set a reordering zone (once entered, need to finish)
 void ReorderingConstraint::SetZone( size_t startPos, size_t endPos )
 {
-  cerr << "SETTING zone " << startPos << "-" << endPos << std::endl;
+  //cerr << "SETTING zone " << startPos << "-" << endPos << std::endl;
   std::vector< size_t > newZone;
   newZone.push_back( startPos );
   newZone.push_back( endPos );
@@ -99,7 +99,7 @@ bool ReorderingConstraint::Check( const Bitmap &bitmap, size_t startPos, size_t 
   // nothing to be checked, we are done
   if (! IsActive() ) return true;
 
-  cerr << "Check " << bitmap << " " << startPos << "-" << endPos;
+  //cerr << "Check " << bitmap << " " << startPos << "-" << endPos;
 
   // check walls
   size_t firstGapPos = bitmap.GetFirstGapPos();
@@ -110,7 +110,7 @@ bool ReorderingConstraint::Check( const Bitmap &bitmap, size_t startPos, size_t 
     // -> violation
     for( size_t pos = firstGapPos; pos < endPos; pos++ ) {
       if( GetWall( pos ) ) {
-        cerr << " hitting wall " << pos << std::endl;
+        //cerr << " hitting wall " << pos << std::endl;
         return false;
       }
     }
@@ -121,7 +121,7 @@ bool ReorderingConstraint::Check( const Bitmap &bitmap, size_t startPos, size_t 
   if ((lastPos == NOT_FOUND && startPos == 0) || // nothing translated
       (firstGapPos > lastPos &&  // no gaps
        firstGapPos == startPos)) { // translating first empty word
-    cerr << " montone, fine." << std::endl;
+    //cerr << " montone, fine." << std::endl;
     return true;
   }
 
@@ -166,7 +166,7 @@ bool ReorderingConstraint::Check( const Bitmap &bitmap, size_t startPos, size_t 
 
     // violation, if phrase completely outside active zone
     if (activeZone && ( endPos < startZone || startPos > endZone ) ) {
-      cerr << " outside active zone" << std::endl;
+      //cerr << " outside active zone" << std::endl;
       return false;
     }
 
@@ -180,7 +180,7 @@ bool ReorderingConstraint::Check( const Bitmap &bitmap, size_t startPos, size_t 
     // size_t distortionLimit = (size_t)StaticData::Instance().GetMaxDistortion();
     size_t distortionLimit = m_max_distortion;
     if (startPos != firstGapPos && endZone-firstGapPos >= distortionLimit) {
-      cerr << " dead end due to distortion limit" << std::endl;
+      //cerr << " dead end due to distortion limit" << std::endl;
       return false;
     }
 
@@ -195,7 +195,7 @@ bool ReorderingConstraint::Check( const Bitmap &bitmap, size_t startPos, size_t 
     if (endPos > endZone) {
       if (endZone-startPos+1 < // num. words filled in by phrase
           endZone-startZone+1-numWordsInZoneTranslated) { // num. untranslated
-        cerr << " overlap end, but not completing" << std::endl;
+        //cerr << " overlap end, but not completing" << std::endl;
         return false;
       } else {
         continue;
@@ -212,7 +212,7 @@ bool ReorderingConstraint::Check( const Bitmap &bitmap, size_t startPos, size_t 
         seenUntranslatedBeforeStartPos = true;
       }
       if( seenUntranslatedBeforeStartPos && GetLocalWall( pos, z ) ) {
-        cerr << " local wall violation" << std::endl;
+        //cerr << " local wall violation" << std::endl;
         return false;
       }
     }
@@ -221,7 +221,7 @@ bool ReorderingConstraint::Check( const Bitmap &bitmap, size_t startPos, size_t 
   }
 
   // passed all checks, no violations
-  cerr << " fine." << std::endl;
+  //cerr << " fine." << std::endl;
   return true;
 }
 

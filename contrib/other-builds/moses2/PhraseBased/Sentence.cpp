@@ -45,9 +45,11 @@ Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
     XMLParse(0, topNode, toks, xmlOptions);
 
     // debug
+    /*
     for (size_t i = 0; i < xmlOptions.size(); ++i) {
       cerr << *xmlOptions[i] << endl;
     }
+    */
 
     // create words
     size_t size = toks.size();
@@ -95,7 +97,7 @@ Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
     ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks, false);
   }
 
-  cerr << "REORDERING CONSTRAINTS:" << ret->GetReorderingConstraint() << endl;
+  //cerr << "REORDERING CONSTRAINTS:" << ret->GetReorderingConstraint() << endl;
 
   return ret;
 }
