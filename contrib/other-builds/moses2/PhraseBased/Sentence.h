@@ -19,20 +19,22 @@ namespace Moses2
 class FactorCollection;
 class System;
 
-//////////////////////////////////////////////////////////////////////////////
-class XMLOption
-{
-  friend std::ostream& operator<<(std::ostream &out, const XMLOption &obj);
-
-public:
-  std::string nodeName;
-  size_t startPos, phraseSize;
-};
-
-//////////////////////////////////////////////////////////////////////////////
 class Sentence: public InputType, public PhraseImpl
 {
 public:
+
+  //////////////////////////////////////////////////////////////////////////////
+  class XMLOption
+  {
+    friend std::ostream& operator<<(std::ostream &out, const XMLOption &obj);
+
+  public:
+    std::string nodeName;
+    size_t startPos, phraseSize;
+  };
+
+  //////////////////////////////////////////////////////////////////////////////
+
   static Sentence *CreateFromString(MemPool &pool, FactorCollection &vocab,
       const System &system, const std::string &str, long translationId);
 
