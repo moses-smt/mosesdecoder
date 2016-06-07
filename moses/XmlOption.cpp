@@ -163,7 +163,8 @@ ProcessAndStripXMLTags(AllOptions const& opts, string &line,
                        vector<XmlOption const*> &res,
                        ReorderingConstraint &reorderingConstraint,
                        vector< size_t > &walls,
-                       std::vector< std::pair<size_t, std::string> > &placeholders)
+                       std::vector< std::pair<size_t, std::string> > &placeholders,
+                       InputType &input)
 {
   //parse XML markup in translation line
 
@@ -399,6 +400,14 @@ ProcessAndStripXMLTags(AllOptions const& opts, string &line,
             allWeights.Assign(ffi->second, ffWeights);
           }
           StaticData::InstanceNonConst().SetAllWeights(allWeights);
+        }
+
+        // coord: coordinate(s) of the input sentence in some space
+        // (one or more floats)
+        else if (tagName == "coord") {
+          vector<string> toks = Tokenize(ParseXmlTagAttribute(tagContent, "coord"));
+          input.m_coord.reset(new vector<float>());
+          Scan<float>(*(input.m_coord), toks);
         }
 
         // default: opening tag that specifies translation options

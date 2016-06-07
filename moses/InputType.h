@@ -68,6 +68,9 @@ public:
   size_t m_frontSpanCoveredLength;
   // how many words from the beginning are covered
 
+  // coordinates in some space, populated by xml tag "coord"
+  boost::shared_ptr<std::vector<float> > m_coord;
+
   InputType(AllOptions::ptr const& opts, long translationId = 0);
   virtual ~InputType();
 
