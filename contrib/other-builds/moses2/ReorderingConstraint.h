@@ -18,7 +18,7 @@ protected:
   size_t m_size; /**< number of words in sentence */
   bool *m_wall; /**< flag for each word if it is a wall */
   size_t *m_localWall;  /**< flag for each word if it is a local wall */
-  std::vector< std::vector< size_t > > m_zone; /** zones that limit reordering */
+  std::vector< std::pair<size_t,size_t> > m_zone; /** zones that limit reordering */
   bool   m_active; /**< flag indicating, if there are any active constraints */
   int m_max_distortion;
   MemPool &m_pool;
@@ -61,7 +61,7 @@ public:
   void SetZone( size_t startPos, size_t endPos );
 
   //! returns the vector of zones
-  std::vector< std::vector< size_t > > & GetZones() {
+  std::vector< std::pair< size_t,size_t> > & GetZones() {
     return m_zone;
   }
 
