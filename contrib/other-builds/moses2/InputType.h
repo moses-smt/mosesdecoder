@@ -5,8 +5,9 @@
  *      Author: hieu
  */
 
-#ifndef INPUTTYPE_H_
-#define INPUTTYPE_H_
+#pragma once
+
+#include "ReorderingConstraint.h"
 
 namespace Moses2
 {
@@ -21,16 +22,21 @@ public:
 
   virtual ~InputType();
 
+  virtual void Init(size_t size, int max_distortion);
+
   long GetTranslationId() const
   {
     return m_translationId;
   }
 
+  ReorderingConstraint &GetReorderingConstraint()
+  { return m_reorderingConstraint; }
+
 protected:
   long m_translationId; 	//< contiguous Id
+  ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
 
 };
 
 } /* namespace Moses2 */
 
-#endif /* INPUTTYPE_H_ */

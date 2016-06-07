@@ -27,14 +27,13 @@ Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
     const System &system, const std::string &str, long translationId)
 {
 
-  std::vector<std::string> toks;
   vector<XMLOption*> *xmlOptions;
 
   Sentence *ret;
 
   if (system.options.input.xml_policy) {
     // xml
-    xmlOptions = new vector<XMLOption*>();
+    vector<XMLOption*> xmlOptions;
     pugi::xml_document doc;
 
     string str2 = "<xml>" + str + "</xml>";
@@ -42,31 +41,50 @@ Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
                                     pugi::parse_default | pugi::parse_comments);
     pugi::xml_node topNode = doc.child("xml");
 
-    XMLParse(0, topNode, toks, *xmlOptions);
+    std::vector<std::string> toks;
+    XMLParse(0, topNode, toks, xmlOptions);
 
-    for (size_t i = 0; i < xmlOptions->size(); ++i) {
-      cerr << *(*xmlOptions)[i] << endl;
+    // debug
+    for (size_t i = 0; i < xmlOptions.size(); ++i) {
+      cerr << *xmlOptions[i] << endl;
+    }
+
+    // create words
+    size_t size = toks.size();
+    ret = new (pool.Allocate<Sentence>()) Sentence(translationId, pool, size);
+    ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks, false);
+
+    // xml
+    ret->Init(size, system.options.reordering.max_distortion);
+
+    ReorderingConstraint &reorderingConstraint = ret->GetReorderingConstraint();
+
+    // set reordering walls, if "-monotone-at-punction" is set
+    if (system.options.reordering.monotone_at_punct && ret->GetSize()) {
+      reorderingConstraint.SetMonotoneAtPunctuation(*ret);
+    }
+
+    // set walls obtained from xml
+    for(size_t i=0; i<xmlOptions.size(); i++) {
+      const XMLOption &xmlOption = *xmlOptions[i];
+      if(xmlOption.nodeName == "wall" && xmlOption.startPos < ret->GetSize()) // no buggy walls, please
+        reorderingConstraint.SetWall(xmlOption.startPos, true);
+    }
+    reorderingConstraint.FinalizeWalls();
+
+    // clean up
+    for (size_t i = 0; i < xmlOptions.size(); ++i) {
+      delete xmlOptions[i];
     }
   }
   else {
+    // no xml
     //cerr << "PB Sentence" << endl;
-    toks = Tokenize(str);
-  }
+    std::vector<std::string> toks = Tokenize(str);
 
-  size_t size = toks.size();
-
-  ret = new (pool.Allocate<Sentence>()) Sentence(translationId, pool, size);
-  ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks, false);
-
-  if (system.options.input.xml_policy) {
-    // xml
-
-    // clean up
-    for (size_t i = 0; i < xmlOptions->size(); ++i) {
-      delete (*xmlOptions)[i];
-    }
-    delete xmlOptions;
-
+    size_t size = toks.size();
+    ret = new (pool.Allocate<Sentence>()) Sentence(translationId, pool, size);
+    ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks, false);
   }
 
   return ret;

@@ -15,4 +15,10 @@ InputType::~InputType()
   // TODO Auto-generated destructor stub
 }
 
+void InputType::Init(size_t size, int max_distortion)
+{
+  m_reorderingConstraint.InitializeWalls(size, max_distortion);
+
+}
+
 } /* namespace Moses2 */
