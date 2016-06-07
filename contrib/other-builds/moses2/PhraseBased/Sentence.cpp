@@ -69,7 +69,7 @@ Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
       const XMLOption &xmlOption = *xmlOptions[i];
       if(xmlOption.nodeName == "wall") {
         UTIL_THROW_IF2(xmlOption.startPos >= ret->GetSize(), "wall is beyond the sentence"); // no buggy walls, please
-        reorderingConstraint.SetWall(xmlOption.startPos, true);
+        reorderingConstraint.SetWall(xmlOption.startPos - 1, true);
       }
       else if (xmlOption.nodeName == "zone") {
         reorderingConstraint.SetZone( xmlOption.startPos, xmlOption.startPos + xmlOption.phraseSize -1 );
@@ -94,6 +94,8 @@ Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
     ret = new (pool.Allocate<Sentence>()) Sentence(translationId, pool, size);
     ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks, false);
   }
+
+  cerr << "REORDERING CONSTRAINTS:" << ret->GetReorderingConstraint() << endl;
 
   return ret;
 }
@@ -123,7 +125,7 @@ void Sentence::XMLParse(
     if (!nodeName.empty()) {
       XMLOption *xmlNode = new XMLOption();
       xmlNode->nodeName = nodeName;
-      xmlNode->startPos = startPos - 1;
+      xmlNode->startPos = startPos;
       xmlOptions.push_back(xmlNode);
 
       // recursively call this function. For proper recursive trees

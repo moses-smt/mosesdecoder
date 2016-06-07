@@ -45,7 +45,7 @@ class Bitmap;
  */
 class ReorderingConstraint
 {
-  friend std::ostream& operator<<(std::ostream& out, const ReorderingConstraint& reorderingConstraint);
+  friend std::ostream& operator<<(std::ostream& out, const ReorderingConstraint &obj);
 protected:
   // const size_t m_size; /**< number of words in sentence */
   size_t m_size; /**< number of words in sentence */

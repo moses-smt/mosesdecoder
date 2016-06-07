@@ -236,4 +236,26 @@ bool ReorderingConstraint::Check( const Bitmap &bitmap, size_t startPos, size_t 
   return true;
 }
 
+std::ostream& operator<<(std::ostream& out, const ReorderingConstraint &obj)
+{
+  out << "Zones:";
+  for (size_t i = 0; i < obj.m_zone.size(); ++i) {
+    const std::vector< size_t > &zone1 = obj.m_zone[i];
+    UTIL_THROW_IF2(zone1.size() != 2, "m_zone[" << i << "] != 2");
+    out << zone1[0] << "-" << zone1[1] << " ";
+  }
+
+  out << "Walls:";
+  for (size_t i = 0; i < obj.m_size; ++i) {
+      out << obj.m_wall[i];
+  }
+
+  out << " Local walls:";
+  for (size_t i = 0; i < obj.m_size; ++i) {
+      out << obj.m_localWall[i] << " ";
+  }
+
+  return out;
+}
+
 }
