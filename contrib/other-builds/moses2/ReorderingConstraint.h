@@ -21,6 +21,8 @@ protected:
   bool   m_active; /**< flag indicating, if there are any active constraints */
   int m_max_distortion;
 
+  ReorderingConstraint(const ReorderingConstraint &); // do not implement
+
 public:
 
   //! create ReorderingConstraint of length size and initialise to zero

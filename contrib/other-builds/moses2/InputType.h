@@ -32,6 +32,9 @@ public:
   ReorderingConstraint &GetReorderingConstraint()
   { return m_reorderingConstraint; }
 
+  const ReorderingConstraint &GetReorderingConstraint() const
+  { return m_reorderingConstraint; }
+
 protected:
   long m_translationId; 	//< contiguous Id
   ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */

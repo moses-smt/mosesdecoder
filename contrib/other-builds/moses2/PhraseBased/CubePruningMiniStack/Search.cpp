@@ -193,6 +193,11 @@ void Search::PostDecode(size_t stackInd)
           continue;
         }
 
+        const ReorderingConstraint &reorderingConstraint = mgr.GetInput().GetReorderingConstraint();
+        if (!reorderingConstraint.Check(hypoBitmap, startPos, pathRange.GetEndPos())) {
+          continue;
+        }
+
         const Bitmap &newBitmap = mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
         size_t numWords = newBitmap.GetNumWordsCovered();
 
