@@ -36,7 +36,8 @@ VW::VW(const std::string &line)
   : StatefulFeatureFunction(1, line)
   , TLSTargetSentence(this)
   , m_train(false)
-  , m_sentenceStartWord(Word()) {
+  , m_sentenceStartWord(Word())
+{
   ReadParameters();
   Discriminative::ClassifierFactory *classifierFactory = m_train
       ? new Discriminative::ClassifierFactory(m_modelPath)
@@ -65,7 +66,8 @@ VW::VW(const std::string &line)
     m_sentenceStartWord.SetFactor(i, bosFactor);
 }
 
-VW::~VW() {
+VW::~VW()
+{
   delete m_tlsClassifier;
   delete m_normalizer;
   // TODO delete more stuff
@@ -75,7 +77,7 @@ FFState* VW::EvaluateWhenApplied(
   const Hypothesis& curHypo,
   const FFState* prevState,
   ScoreComponentCollection* accumulator) const
-{ 
+{
   VERBOSE(3, "VW :: Evaluating translation options\n");
 
   const VWState& prevVWState = *static_cast<const VWState *>(prevState);
@@ -96,12 +98,12 @@ FFState* VW::EvaluateWhenApplied(
   // compute our current key
   size_t cacheKey = MakeCacheKey(prevState, spanStart, spanEnd);
 
-  boost::unordered_map<size_t, FloatHashMap> &computedStateExtensions 
-    = *m_tlsComputedStateExtensions->GetStored();
+  boost::unordered_map<size_t, FloatHashMap> &computedStateExtensions
+  = *m_tlsComputedStateExtensions->GetStored();
 
   if (computedStateExtensions.find(cacheKey) == computedStateExtensions.end()) {
     // we have not computed this set of translation options yet
-    const TranslationOptionList *topts = 
+    const TranslationOptionList *topts =
       curHypo.GetManager().getSntTranslationOptions()->GetTranslationOptionList(spanStart, spanEnd);
 
     const InputType& input = curHypo.GetManager().GetSource();
@@ -178,17 +180,19 @@ FFState* VW::EvaluateWhenApplied(
   return new VWState(prevVWState, curHypo);
 }
 
-const FFState* VW::EmptyHypothesisState(const InputType &input) const {
+const FFState* VW::EmptyHypothesisState(const InputType &input) const
+{
   size_t maxContextSize = VWFeatureBase::GetMaximumContextSize(GetScoreProducerDescription());
   Phrase initialPhrase;
   for (size_t i = 0; i < maxContextSize; i++)
     initialPhrase.AddWord(m_sentenceStartWord);
-    
+
   return new VWState(initialPhrase);
 }
 
 void VW::EvaluateTranslationOptionListWithSourceContext(const InputType &input
-    , const TranslationOptionList &translationOptionList) const {
+    , const TranslationOptionList &translationOptionList) const
+{
   Discriminative::Classifier &classifier = *m_tlsClassifier->GetStored();
 
   if (translationOptionList.size() == 0)
@@ -329,7 +333,7 @@ void VW::EvaluateTranslationOptionListWithSourceContext(const InputType &input
       // for future use at decoding time
       size_t toptHash = hash_value(*topt);
       m_tlsTranslationOptionFeatures->GetStored()->insert(
-          std::make_pair(toptHash, outFeaturesTargetNamespace));
+        std::make_pair(toptHash, outFeaturesTargetNamespace));
 
       // get classifier score
       losses[toptIdx] = classifier.Predict(MakeTargetLabel(targetPhrase));
@@ -355,7 +359,7 @@ void VW::EvaluateTranslationOptionListWithSourceContext(const InputType &input
         // We have target context features => this is just a partial score,
         // do not add it to the score component collection.
         size_t toptHash = hash_value(*topt);
-        
+
         // Subtract the score contribution of target-only features, otherwise it would
         // be included twice.
         Discriminative::FeatureVector emptySource;
@@ -372,7 +376,8 @@ void VW::EvaluateTranslationOptionListWithSourceContext(const InputType &input
   }
 }
 
-void VW::SetParameter(const std::string& key, const std::string& value) {
+void VW::SetParameter(const std::string& key, const std::string& value)
+{
   if (key == "train") {
     m_train = Scan<bool>(value);
   } else if (key == "path") {
@@ -405,7 +410,8 @@ void VW::SetParameter(const std::string& key, const std::string& value) {
   }
 }
 
-void VW::InitializeForInput(ttasksptr const& ttask) {
+void VW::InitializeForInput(ttasksptr const& ttask)
+{
   // do not keep future cost estimates across sentences!
   m_tlsFutureScores->GetStored()->clear();
 
@@ -457,7 +463,8 @@ void VW::InitializeForInput(ttasksptr const& ttask) {
  * private methods
  ************************************************************************************/
 
-const AlignmentInfo *VW::TransformAlignmentInfo(const Hypothesis &curHypo, size_t contextSize) const {
+const AlignmentInfo *VW::TransformAlignmentInfo(const Hypothesis &curHypo, size_t contextSize) const
+{
   std::set<std::pair<size_t, size_t> > alignmentPoints;
   const Hypothesis *contextHypo = curHypo.GetPrevHypo();
   int idxInContext = contextSize - 1;
@@ -482,7 +489,8 @@ const AlignmentInfo *VW::TransformAlignmentInfo(const Hypothesis &curHypo, size_
   return AlignmentInfoCollection::Instance().Add(alignmentPoints);
 }
 
-AlignmentInfo VW::TransformAlignmentInfo(const AlignmentInfo &alignInfo, size_t contextSize, int currentStart) const {
+AlignmentInfo VW::TransformAlignmentInfo(const AlignmentInfo &alignInfo, size_t contextSize, int currentStart) const
+{
   std::set<std::pair<size_t, size_t> > alignmentPoints;
   for (int i = std::max(0, currentStart - (int)contextSize); i < currentStart; i++) {
     std::set<size_t> alignedToTgt = alignInfo.GetAlignmentsForTarget(i);
@@ -493,7 +501,8 @@ AlignmentInfo VW::TransformAlignmentInfo(const AlignmentInfo &alignInfo, size_t 
   return AlignmentInfo(alignmentPoints);
 }
 
-std::pair<bool, int> VW::IsCorrectTranslationOption(const TranslationOption &topt) const {
+std::pair<bool, int> VW::IsCorrectTranslationOption(const TranslationOption &topt) const
+{
 
   //std::cerr << topt.GetSourceWordsRange() << std::endl;
 
@@ -565,7 +574,8 @@ std::pair<bool, int> VW::IsCorrectTranslationOption(const TranslationOption &top
   return std::make_pair(false, -1);
 }
 
-std::vector<bool> VW::LeaveOneOut(const TranslationOptionList &topts, const std::vector<bool> &correct) const {
+std::vector<bool> VW::LeaveOneOut(const TranslationOptionList &topts, const std::vector<bool> &correct) const
+{
   UTIL_THROW_IF2(m_leaveOneOut.size() == 0 || ! m_train, "LeaveOneOut called in wrong setting!");
 
   float sourceRawCount = 0.0;
