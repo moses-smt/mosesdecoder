@@ -9,6 +9,11 @@
 
 namespace Moses2
 {
+InputType::InputType(long translationId, MemPool &pool)
+:m_translationId(translationId)
+,m_reorderingConstraint(pool)
+{
+}
 
 InputType::~InputType()
 {

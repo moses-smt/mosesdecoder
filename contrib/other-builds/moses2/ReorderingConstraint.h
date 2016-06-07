@@ -6,6 +6,7 @@ namespace Moses2
 {
 class Sentence;
 class Bitmap;
+class MemPool;
 
 #define NOT_A_ZONE 999999999
 
@@ -20,16 +21,18 @@ protected:
   std::vector< std::vector< size_t > > m_zone; /** zones that limit reordering */
   bool   m_active; /**< flag indicating, if there are any active constraints */
   int m_max_distortion;
+  MemPool &m_pool;
 
   ReorderingConstraint(const ReorderingConstraint &); // do not implement
 
 public:
 
   //! create ReorderingConstraint of length size and initialise to zero
-  ReorderingConstraint()
+  ReorderingConstraint(MemPool &pool)
     : m_wall(NULL)
     , m_localWall(NULL)
     , m_active(false)
+    , m_pool(pool)
   {}
 
   //! destructer

@@ -39,7 +39,7 @@ public:
       const System &system, const std::string &str, long translationId);
 
   Sentence(long translationId, MemPool &pool, size_t size)
-  :InputType(translationId)
+  :InputType(translationId, pool)
   ,PhraseImpl(pool, size)
   {}
 

@@ -12,16 +12,17 @@ namespace Moses2
 //! destructer
 ReorderingConstraint::~ReorderingConstraint()
 {
-  if (m_wall != NULL) free(m_wall);
-  if (m_localWall != NULL) free(m_localWall);
+  //if (m_wall != NULL) free(m_wall);
+  //if (m_localWall != NULL) free(m_localWall);
 }
 
 //! allocate memory for reordering walls
 void ReorderingConstraint::InitializeWalls(size_t size, int max_distortion)
 {
   m_size = size;
-  m_wall      = (bool*)   malloc(sizeof(bool) * size);
-  m_localWall = (size_t*) malloc(sizeof(size_t) * size);
+
+  m_wall = m_pool.Allocate<bool>(size);
+  m_localWall = m_pool.Allocate<size_t>(size);
 
   m_max_distortion = max_distortion;
 

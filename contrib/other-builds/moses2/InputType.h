@@ -15,11 +15,7 @@ namespace Moses2
 class InputType
 {
 public:
-  InputType(long translationId) :
-      m_translationId(translationId)
-  {
-  }
-
+  InputType(long translationId, MemPool &pool);
   virtual ~InputType();
 
   virtual void Init(size_t size, int max_distortion);
