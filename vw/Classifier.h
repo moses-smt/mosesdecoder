@@ -24,6 +24,8 @@ class ezexample;
 
 namespace Discriminative
 {
+typedef std::pair<uint32_t, float> FeatureType; // feature hash (=ID) and value
+typedef std::vector<FeatureType> FeatureVector;
 
 /**
 * Abstract class to be implemented by classifiers.
@@ -34,12 +36,22 @@ public:
   /**
    * Add a feature that does not depend on the class (label).
    */
-  virtual void AddLabelIndependentFeature(const StringPiece &name, float value) = 0;
+  virtual FeatureType AddLabelIndependentFeature(const StringPiece &name, float value) = 0;
 
   /**
    * Add a feature that is specific for the given class.
    */
-  virtual void AddLabelDependentFeature(const StringPiece &name, float value) = 0;
+  virtual FeatureType AddLabelDependentFeature(const StringPiece &name, float value) = 0;
+
+  /**
+   * Efficient addition of features when their IDs are already computed.
+   */
+  virtual void AddLabelIndependentFeatureVector(const FeatureVector &features) = 0;
+
+  /**
+   * Efficient addition of features when their IDs are already computed.
+   */
+  virtual void AddLabelDependentFeatureVector(const FeatureVector &features) = 0;
 
   /**
    * Train using current example. Use loss to distinguish positive and negative training examples.
@@ -54,12 +66,12 @@ public:
   virtual float Predict(const StringPiece &label) = 0;
 
   // helper methods for indicator features
-  void AddLabelIndependentFeature(const StringPiece &name) {
-    AddLabelIndependentFeature(name, 1.0);
+  FeatureType AddLabelIndependentFeature(const StringPiece &name) {
+    return AddLabelIndependentFeature(name, 1.0);
   }
 
-  void AddLabelDependentFeature(const StringPiece &name) {
-    AddLabelDependentFeature(name, 1.0);
+  FeatureType AddLabelDependentFeature(const StringPiece &name) {
+    return AddLabelDependentFeature(name, 1.0);
   }
 
   virtual ~Classifier() {}
@@ -95,8 +107,10 @@ public:
   VWTrainer(const std::string &outputFile);
   virtual ~VWTrainer();
 
-  virtual void AddLabelIndependentFeature(const StringPiece &name, float value);
-  virtual void AddLabelDependentFeature(const StringPiece &name, float value);
+  virtual FeatureType AddLabelIndependentFeature(const StringPiece &name, float value);
+  virtual FeatureType AddLabelDependentFeature(const StringPiece &name, float value);
+  virtual void AddLabelIndependentFeatureVector(const FeatureVector &features);
+  virtual void AddLabelDependentFeatureVector(const FeatureVector &features);
   virtual void Train(const StringPiece &label, float loss);
   virtual float Predict(const StringPiece &label);
 
@@ -121,15 +135,17 @@ public:
   VWPredictor(const std::string &modelFile, const std::string &vwOptions);
   virtual ~VWPredictor();
 
-  virtual void AddLabelIndependentFeature(const StringPiece &name, float value);
-  virtual void AddLabelDependentFeature(const StringPiece &name, float value);
+  virtual FeatureType AddLabelIndependentFeature(const StringPiece &name, float value);
+  virtual FeatureType AddLabelDependentFeature(const StringPiece &name, float value);
+  virtual void AddLabelIndependentFeatureVector(const FeatureVector &features);
+  virtual void AddLabelDependentFeatureVector(const FeatureVector &features);
   virtual void Train(const StringPiece &label, float loss);
   virtual float Predict(const StringPiece &label);
 
   friend class ClassifierFactory;
 
 protected:
-  void AddFeature(const StringPiece &name, float values);
+  FeatureType AddFeature(const StringPiece &name, float values);
 
   ::vw *m_VWInstance, *m_VWParser;
   ::ezexample *m_ex;

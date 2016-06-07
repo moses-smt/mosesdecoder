@@ -17,15 +17,22 @@ class VWFeatureTarget : public VWFeatureBase
 {
 public:
   VWFeatureTarget(const std::string &line)
-    : VWFeatureBase(line, false) {
+    : VWFeatureBase(line, vwft_target) {
   }
 
   // Gets its pure virtual functions from VWFeatureBase
 
   virtual void operator()(const InputType &input
-                          , const InputPath &inputPath
                           , const Range &sourceRange
-                          , Discriminative::Classifier &classifier) const {
+                          , Discriminative::Classifier &classifier
+                          , Discriminative::FeatureVector &outFeatures) const {
+  }
+
+  virtual void operator()(const InputType &input
+                          , const Phrase &contextPhrase
+                          , const AlignmentInfo &alignmentInfo
+                          , Discriminative::Classifier &classifier
+                          , Discriminative::FeatureVector &outFeatures) const {
   }
 
   virtual void SetParameter(const std::string& key, const std::string& value) {

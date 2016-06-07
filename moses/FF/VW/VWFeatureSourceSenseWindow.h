@@ -51,9 +51,9 @@ public:
   }
 
   void operator()(const InputType &input
-                  , const InputPath &inputPath
                   , const Range &sourceRange
-                  , Discriminative::Classifier &classifier) const {
+                  , Discriminative::Classifier &classifier
+                  , Discriminative::FeatureVector &outFeatures) const {
     int begin = sourceRange.GetStartPos();
     int end   = sourceRange.GetEndPos() + 1;
     int inputLen = input.GetSize();
@@ -64,24 +64,24 @@ public:
     // before current phrase
     for (int i = std::max(0, begin - m_size); i < begin; i++) {
       BOOST_FOREACH(const Sense &sense, senses[i]) {
-        classifier.AddLabelIndependentFeature("snsb^" + forms[i] + SPrint(i - begin) + "^" + sense.m_label, sense.m_prob);
-        classifier.AddLabelIndependentFeature("snsb^" + forms[i] + sense.m_label, sense.m_prob);
+        outFeatures.push_back(classifier.AddLabelIndependentFeature("snsb^" + forms[i] + SPrint(i - begin) + "^" + sense.m_label, sense.m_prob));
+        outFeatures.push_back(classifier.AddLabelIndependentFeature("snsb^" + forms[i] + sense.m_label, sense.m_prob));
       }
     }
 
     // within current phrase
     for (int i = begin; i < end; i++) {
       BOOST_FOREACH(const Sense &sense, senses[i]) {
-        classifier.AddLabelIndependentFeature("snsin^" + forms[i] + SPrint(i - begin) + "^" + sense.m_label, sense.m_prob);
-        classifier.AddLabelIndependentFeature("snsin^" + forms[i] + sense.m_label, sense.m_prob);
+        outFeatures.push_back(classifier.AddLabelIndependentFeature("snsin^" + forms[i] + SPrint(i - begin) + "^" + sense.m_label, sense.m_prob));
+        outFeatures.push_back(classifier.AddLabelIndependentFeature("snsin^" + forms[i] + sense.m_label, sense.m_prob));
       }
     }
 
     // after current phrase
     for (int i = end; i < std::min(end + m_size, inputLen); i++) {
       BOOST_FOREACH(const Sense &sense, senses[i]) {
-        classifier.AddLabelIndependentFeature("snsa^" + forms[i] + SPrint(i - begin) + "^" + sense.m_label, sense.m_prob);
-        classifier.AddLabelIndependentFeature("snsa^" + forms[i] + sense.m_label, sense.m_prob);
+        outFeatures.push_back(classifier.AddLabelIndependentFeature("snsa^" + forms[i] + SPrint(i - begin) + "^" + sense.m_label, sense.m_prob));
+        outFeatures.push_back(classifier.AddLabelIndependentFeature("snsa^" + forms[i] + sense.m_label, sense.m_prob));
       }
     }
   }

@@ -3,8 +3,12 @@
 #include <string>
 #include <map>
 #include <limits>
+#include <vector>
 
-#include "moses/FF/StatelessFeatureFunction.h"
+#include <boost/unordered_map.hpp>
+#include <boost/functional/hash.hpp>
+
+#include "moses/FF/StatefulFeatureFunction.h"
 #include "moses/PP/CountsPhraseProperty.h"
 #include "moses/TranslationOptionList.h"
 #include "moses/TranslationOption.h"
@@ -13,6 +17,8 @@
 #include "moses/StaticData.h"
 #include "moses/Phrase.h"
 #include "moses/AlignmentInfo.h"
+#include "moses/Word.h"
+#include "moses/FactorCollection.h"
 
 #include "Normalizer.h"
 #include "Classifier.h"
@@ -20,119 +26,50 @@
 #include "TabbedSentence.h"
 #include "ThreadLocalByFeatureStorage.h"
 #include "TrainingLoss.h"
+#include "VWTargetSentence.h"
+
+/*
+ * VW classifier feature. See vw/README.md for further information.
+ *
+ * TODO: say which paper to cite.
+ */
 
 namespace Moses
 {
 
-const std::string VW_DUMMY_LABEL = "1111"; // VW does not use the actual label, other classifiers might
+// dummy class label; VW does not use the actual label, other classifiers might
+const std::string VW_DUMMY_LABEL = "1111";
 
-/**
- * Helper class for storing alignment constraints.
- */
-class Constraint
-{
-public:
-  Constraint() : m_min(std::numeric_limits<int>::max()), m_max(-1) {}
-
-  Constraint(int min, int max) : m_min(min), m_max(max) {}
-
-  /**
-   * We are aligned to point => our min cannot be larger, our max cannot be smaller.
-   */
-  void Update(int point) {
-    if (m_min > point) m_min = point;
-    if (m_max < point) m_max = point;
-  }
-
-  bool IsSet() const {
-    return m_max != -1;
-  }
-
-  int GetMin() const {
-    return m_min;
-  }
-
-  int GetMax() const {
-    return m_max;
-  }
-
-private:
-  int m_min, m_max;
-};
-
-/**
- * VW thread-specific data about target sentence.
- */
-struct VWTargetSentence {
-  VWTargetSentence() : m_sentence(NULL), m_alignment(NULL) {}
-
-  void Clear() {
-    if (m_sentence) delete m_sentence;
-    if (m_alignment) delete m_alignment;
-  }
-
-  ~VWTargetSentence() {
-    Clear();
-  }
-
-  void SetConstraints(size_t sourceSize) {
-    // initialize to unconstrained
-    m_sourceConstraints.assign(sourceSize, Constraint());
-    m_targetConstraints.assign(m_sentence->GetSize(), Constraint());
-
-    // set constraints according to alignment points
-    AlignmentInfo::const_iterator it;
-    for (it = m_alignment->begin(); it != m_alignment->end(); it++) {
-      int src = it->first;
-      int tgt = it->second;
-
-      if (src >= m_sourceConstraints.size() || tgt >= m_targetConstraints.size()) {
-        UTIL_THROW2("VW :: alignment point out of bounds: " << src << "-" << tgt);
-      }
-
-      m_sourceConstraints[src].Update(tgt);
-      m_targetConstraints[tgt].Update(src);
-    }
-  }
-
-  Phrase *m_sentence;
-  AlignmentInfo *m_alignment;
-  std::vector<Constraint> m_sourceConstraints, m_targetConstraints;
-};
-
+// thread-specific classifier instance
 typedef ThreadLocalByFeatureStorage<Discriminative::Classifier, Discriminative::ClassifierFactory &> TLSClassifier;
 
+// current target sentence, used in VW training (vwtrainer), not in decoding (prediction time)
 typedef ThreadLocalByFeatureStorage<VWTargetSentence> TLSTargetSentence;
 
-class VW : public StatelessFeatureFunction, public TLSTargetSentence
+// hash table of feature vectors
+typedef boost::unordered_map<size_t, Discriminative::FeatureVector> FeatureVectorMap;
+
+// thread-specific feature vector hash
+typedef ThreadLocalByFeatureStorage<FeatureVectorMap> TLSFeatureVectorMap;
+
+// hash table of partial scores
+typedef boost::unordered_map<size_t, float> FloatHashMap;
+
+// thread-specific score hash table, used for caching
+typedef ThreadLocalByFeatureStorage<FloatHashMap> TLSFloatHashMap;
+
+// thread-specific hash tablei for caching full classifier outputs
+typedef ThreadLocalByFeatureStorage<boost::unordered_map<size_t, FloatHashMap> > TLSStateExtensions;
+
+/*
+ * VW feature function. A discriminative classifier with source and target context features.
+ */
+class VW : public StatefulFeatureFunction, public TLSTargetSentence
 {
 public:
-  VW(const std::string &line)
-    : StatelessFeatureFunction(1, line)
-    , TLSTargetSentence(this)
-    , m_train(false) {
-    ReadParameters();
-    Discriminative::ClassifierFactory *classifierFactory = m_train
-        ? new Discriminative::ClassifierFactory(m_modelPath)
-        : new Discriminative::ClassifierFactory(m_modelPath, m_vwOptions);
+  VW(const std::string &line);
 
-    m_tlsClassifier = new TLSClassifier(this, *classifierFactory);
-
-    if (! m_normalizer) {
-      VERBOSE(1, "VW :: No loss function specified, assuming logistic loss.\n");
-      m_normalizer = (Discriminative::Normalizer *) new Discriminative::LogisticLossNormalizer();
-    }
-
-    if (! m_trainingLoss) {
-      VERBOSE(1, "VW :: Using basic 1/0 loss calculation in training.\n");
-      m_trainingLoss = (TrainingLoss *) new TrainingLossBasic();
-    }
-  }
-
-  virtual ~VW() {
-    delete m_tlsClassifier;
-    delete m_normalizer;
-  }
+  virtual ~VW();
 
   bool IsUseable(const FactorMask &mask) const {
     return true;
@@ -152,335 +89,89 @@ public:
                                  , ScoreComponentCollection *estimatedFutureScore = NULL) const {
   }
 
-  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const {
-    Discriminative::Classifier &classifier = *m_tlsClassifier->GetStored();
+  // This behavior of this method depends on whether it's called during VW
+  // training (feature extraction) by vwtrainer or during decoding (prediction
+  // time) by Moses.
+  //
+  // When predicting, it evaluates all translation options with the VW model;
+  // if no target-context features are defined, this is the final score and it
+  // is added directly to the TranslationOption score. If there are target
+  // context features, the score is a partial score and it is only stored in
+  // cache; the final score is computed based on target context in
+  // EvaluateWhenApplied().
+  //
+  // This method is also used in training by vwtrainer in which case features
+  // are written to a file, no classifier predictions take place. Target-side
+  // context is constant at training time (we know the true target sentence),
+  // so target-context features are extracted here as well.
+  virtual void EvaluateTranslationOptionListWithSourceContext(const InputType &input 
+      , const TranslationOptionList &translationOptionList) const;
 
-    if (translationOptionList.size() == 0)
-      return; // nothing to do
+  // Evaluate VW during decoding. This is only used at prediction time (not in training).
+  // When no target-context features are defined, VW predictions were already fully calculated
+  // in EvaluateTranslationOptionListWithSourceContext() and the scores were added to the model.
+  // If there are target-context features, we compute the context-dependent part of the 
+  // classifier score and combine it with the source-context only partial score which was computed
+  // in EvaluateTranslationOptionListWithSourceContext(). Various caches are used to make this
+  // method more efficient.
+  virtual FFState* EvaluateWhenApplied(
+    const Hypothesis& curHypo,
+    const FFState* prevState,
+    ScoreComponentCollection* accumulator) const;
 
-    VERBOSE(2, "VW :: Evaluating translation options\n");
-
-    // which feature functions do we use (on the source and target side)
-    const std::vector<VWFeatureBase*>& sourceFeatures =
-      VWFeatureBase::GetSourceFeatures(GetScoreProducerDescription());
-
-    const std::vector<VWFeatureBase*>& targetFeatures =
-      VWFeatureBase::GetTargetFeatures(GetScoreProducerDescription());
-
-    const Range &sourceRange = translationOptionList.Get(0)->GetSourceWordsRange();
-    const InputPath  &inputPath   = translationOptionList.Get(0)->GetInputPath();
-
-    if (m_train) {
-      //
-      // extract features for training the classifier (only call this when using vwtrainer, not in Moses!)
-      //
-
-      // find which topts are correct
-      std::vector<bool> correct(translationOptionList.size());
-      for (size_t i = 0; i < translationOptionList.size(); i++)
-        correct[i] = IsCorrectTranslationOption(* translationOptionList.Get(i));
-
-      // optionally update translation options using leave-one-out
-      std::vector<bool> keep = (m_leaveOneOut.size() > 0)
-                               ? LeaveOneOut(translationOptionList, correct)
-                               : std::vector<bool>(translationOptionList.size(), true);
-
-      // check whether we (still) have some correct translation
-      int firstCorrect = -1;
-      for (size_t i = 0; i < translationOptionList.size(); i++) {
-        if (keep[i] && correct[i]) {
-          firstCorrect = i;
-          break;
-        }
-      }
-
-      // do not train if there are no positive examples
-      if (firstCorrect == -1) {
-        VERBOSE(2, "VW :: skipping topt collection, no correct translation for span\n");
-        return;
-      }
-
-      // the first correct topt can be used by some loss functions
-      const TargetPhrase &correctPhrase = translationOptionList.Get(firstCorrect)->GetTargetPhrase();
-
-      // extract source side features
-      for(size_t i = 0; i < sourceFeatures.size(); ++i)
-        (*sourceFeatures[i])(input, inputPath, sourceRange, classifier);
-
-      // go over topts, extract target side features and train the classifier
-      for (size_t toptIdx = 0; toptIdx < translationOptionList.size(); toptIdx++) {
-
-        // this topt was discarded by leaving one out
-        if (! keep[toptIdx])
-          continue;
-
-        // extract target-side features for each topt
-        const TargetPhrase &targetPhrase = translationOptionList.Get(toptIdx)->GetTargetPhrase();
-        for(size_t i = 0; i < targetFeatures.size(); ++i)
-          (*targetFeatures[i])(input, inputPath, targetPhrase, classifier);
-
-        float loss = (*m_trainingLoss)(targetPhrase, correctPhrase, correct[toptIdx]);
-
-        // train classifier on current example
-        classifier.Train(MakeTargetLabel(targetPhrase), loss);
-      }
-    } else {
-      //
-      // predict using a trained classifier, use this in decoding (=at test time)
-      //
-
-      std::vector<float> losses(translationOptionList.size());
-
-      // extract source side features
-      for(size_t i = 0; i < sourceFeatures.size(); ++i)
-        (*sourceFeatures[i])(input, inputPath, sourceRange, classifier);
-
-      for (size_t toptIdx = 0; toptIdx < translationOptionList.size(); toptIdx++) {
-        const TranslationOption *topt = translationOptionList.Get(toptIdx);
-        const TargetPhrase &targetPhrase = topt->GetTargetPhrase();
-
-        // extract target-side features for each topt
-        for(size_t i = 0; i < targetFeatures.size(); ++i)
-          (*targetFeatures[i])(input, inputPath, targetPhrase, classifier);
-
-        // get classifier score
-        losses[toptIdx] = classifier.Predict(MakeTargetLabel(targetPhrase));
-      }
-
-      // normalize classifier scores to get a probability distribution
-      (*m_normalizer)(losses);
-
-      // update scores of topts
-      for (size_t toptIdx = 0; toptIdx < translationOptionList.size(); toptIdx++) {
-        TranslationOption *topt = *(translationOptionList.begin() + toptIdx);
-        std::vector<float> newScores(m_numScoreComponents);
-        newScores[0] = FloorScore(TransformScore(losses[toptIdx]));
-
-        ScoreComponentCollection &scoreBreakDown = topt->GetScoreBreakdown();
-        scoreBreakDown.PlusEquals(this, newScores);
-
-        topt->UpdateScore();
-      }
-    }
+  virtual FFState* EvaluateWhenApplied(
+    const ChartHypothesis&,
+    int,
+    ScoreComponentCollection* accumulator) const { 
+    throw new std::logic_error("hiearchical/syntax not supported"); 
   }
 
-  void EvaluateWhenApplied(const Hypothesis& hypo,
-                           ScoreComponentCollection* accumulator) const {
-  }
+  // Initial VW state; contains unaligned BOS symbols.
+  const FFState* EmptyHypothesisState(const InputType &input) const; 
 
-  void EvaluateWhenApplied(const ChartHypothesis &hypo,
-                           ScoreComponentCollection* accumulator) const {
-  }
+  void SetParameter(const std::string& key, const std::string& value);
 
-  void SetParameter(const std::string& key, const std::string& value) {
-    if (key == "train") {
-      m_train = Scan<bool>(value);
-    } else if (key == "path") {
-      m_modelPath = value;
-    } else if (key == "vw-options") {
-      m_vwOptions = value;
-    } else if (key == "leave-one-out-from") {
-      m_leaveOneOut = value;
-    } else if (key == "training-loss") {
-      // which type of loss to use for training
-      if (value == "basic") {
-        m_trainingLoss = (TrainingLoss *) new TrainingLossBasic();
-      } else if (value == "bleu") {
-        m_trainingLoss = (TrainingLoss *) new TrainingLossBLEU();
-      } else {
-        UTIL_THROW2("Unknown training loss type:" << value);
-      }
-    } else if (key == "loss") {
-      // which normalizer to use (theoretically depends on the loss function used for training the
-      // classifier (squared/logistic/hinge/...), hence the name "loss"
-      if (value == "logistic") {
-        m_normalizer = (Discriminative::Normalizer *) new Discriminative::LogisticLossNormalizer();
-      } else if (value == "squared") {
-        m_normalizer = (Discriminative::Normalizer *) new Discriminative::SquaredLossNormalizer();
-      } else {
-        UTIL_THROW2("Unknown loss type:" << value);
-      }
-    } else {
-      StatelessFeatureFunction::SetParameter(key, value);
-    }
-  }
-
-  virtual void InitializeForInput(ttasksptr const& ttask) {
-    InputType const& source = *(ttask->GetSource().get());
-    // tabbed sentence is assumed only in training
-    if (! m_train)
-      return;
-
-    UTIL_THROW_IF2(source.GetType() != TabbedSentenceInput,
-                   "This feature function requires the TabbedSentence input type");
-
-    const TabbedSentence& tabbedSentence = static_cast<const TabbedSentence&>(source);
-    UTIL_THROW_IF2(tabbedSentence.GetColumns().size() < 2,
-                   "TabbedSentence must contain target<tab>alignment");
-
-    // target sentence represented as a phrase
-    Phrase *target = new Phrase();
-    target->CreateFromString(
-      Output
-      , StaticData::Instance().options()->output.factor_order
-      , tabbedSentence.GetColumns()[0]
-      , NULL);
-
-    // word alignment between source and target sentence
-    // we don't store alignment info in AlignmentInfoCollection because we keep alignments of whole
-    // sentences, not phrases
-    AlignmentInfo *alignment = new AlignmentInfo(tabbedSentence.GetColumns()[1]);
-
-    VWTargetSentence &targetSent = *GetStored();
-    targetSent.Clear();
-    targetSent.m_sentence = target;
-    targetSent.m_alignment = alignment;
-
-    // pre-compute max- and min- aligned points for faster translation option checking
-    targetSent.SetConstraints(source.GetSize());
-  }
-
+  // At prediction time, this clears our caches. At training time, we load the next sentence, its 
+  // translation and word alignment.
+  virtual void InitializeForInput(ttasksptr const& ttask);
 
 private:
-  std::string MakeTargetLabel(const TargetPhrase &targetPhrase) const {
-    return VW_DUMMY_LABEL;
+  inline std::string MakeTargetLabel(const TargetPhrase &targetPhrase) const {
+    return VW_DUMMY_LABEL; // VW does not care about class labels in our setting (--csoaa_ldf mc).
   }
 
-  bool IsCorrectTranslationOption(const TranslationOption &topt) const {
-
-    //std::cerr << topt.GetSourceWordsRange() << std::endl;
-
-    int sourceStart = topt.GetSourceWordsRange().GetStartPos();
-    int sourceEnd   = topt.GetSourceWordsRange().GetEndPos();
-
-    const VWTargetSentence &targetSentence = *GetStored();
-
-    // [targetStart, targetEnd] spans aligned target words
-    int targetStart = targetSentence.m_sentence->GetSize();
-    int targetEnd   = -1;
-
-    // get the left-most and right-most alignment point within source span
-    for(int i = sourceStart; i <= sourceEnd; ++i) {
-      if(targetSentence.m_sourceConstraints[i].IsSet()) {
-        if(targetStart > targetSentence.m_sourceConstraints[i].GetMin())
-          targetStart = targetSentence.m_sourceConstraints[i].GetMin();
-        if(targetEnd < targetSentence.m_sourceConstraints[i].GetMax())
-          targetEnd = targetSentence.m_sourceConstraints[i].GetMax();
-      }
-    }
-    // there was no alignment
-    if(targetEnd == -1)
-      return false;
-
-    //std::cerr << "Shorter: " << targetStart << " " << targetEnd << std::endl;
-
-    // [targetStart2, targetEnd2] spans unaligned words left and right of [targetStart, targetEnd]
-    int targetStart2 = targetStart;
-    for(int i = targetStart2; i >= 0 && !targetSentence.m_targetConstraints[i].IsSet(); --i)
-      targetStart2 = i;
-
-    int targetEnd2   = targetEnd;
-    for(int i = targetEnd2;
-        i < targetSentence.m_sentence->GetSize() && !targetSentence.m_targetConstraints[i].IsSet();
-        ++i)
-      targetEnd2 = i;
-
-    //std::cerr << "Longer: " << targetStart2 << " " << targetEnd2 << std::endl;
-
-    const TargetPhrase &tphrase = topt.GetTargetPhrase();
-    //std::cerr << tphrase << std::endl;
-
-    // if target phrase is shorter than inner span return false
-    if(tphrase.GetSize() < targetEnd - targetStart + 1)
-      return false;
-
-    // if target phrase is longer than outer span return false
-    if(tphrase.GetSize() > targetEnd2 - targetStart2 + 1)
-      return false;
-
-    // for each possible starting point
-    for(int tempStart = targetStart2; tempStart <= targetStart; tempStart++) {
-      bool found = true;
-      // check if the target phrase is within longer span
-      for(int i = tempStart; i <= targetEnd2 && i < tphrase.GetSize() + tempStart; ++i) {
-        if(tphrase.GetWord(i - tempStart) != targetSentence.m_sentence->GetWord(i)) {
-          found = false;
-          break;
-        }
-      }
-      // return true if there was a match
-      if(found) {
-        //std::cerr << "Found" << std::endl;
-        return true;
-      }
-    }
-
-    return false;
+  inline size_t MakeCacheKey(const FFState *prevState, size_t spanStart, size_t spanEnd) const {
+    size_t key = 0;
+    boost::hash_combine(key, prevState);
+    boost::hash_combine(key, spanStart);
+    boost::hash_combine(key, spanEnd);
+    return key;
   }
 
-  std::vector<bool> LeaveOneOut(const TranslationOptionList &topts, const std::vector<bool> &correct) const {
-    UTIL_THROW_IF2(m_leaveOneOut.size() == 0 || ! m_train, "LeaveOneOut called in wrong setting!");
+  // used in decoding to transform the global word alignment information into
+  // context-phrase internal alignment information (i.e., with target indices correspoding
+  // to positions in contextPhrase)
+  const AlignmentInfo *TransformAlignmentInfo(const Hypothesis &curHypo, size_t contextSize) const;
 
-    float sourceRawCount = 0.0;
-    const float ONE = 1.0001; // I don't understand floating point numbers
+  // used during training to extract relevant alignment points from the full sentence alignment
+  // and shift them by target context size
+  AlignmentInfo TransformAlignmentInfo(const AlignmentInfo &alignInfo, size_t contextSize, int currentStart) const;
 
-    std::vector<bool> keepOpt;
+  // At training time, determine whether a translation option is correct for the current target sentence
+  // based on word alignment. This is a bit complicated because we need to handle various corner-cases
+  // where some word(s) on phrase borders are unaligned.
+  std::pair<bool, int> IsCorrectTranslationOption(const TranslationOption &topt) const;
 
-    for (size_t i = 0; i < topts.size(); i++) {
-      TranslationOption *topt = *(topts.begin() + i);
-      const TargetPhrase &targetPhrase = topt->GetTargetPhrase();
-
-      // extract raw counts from phrase-table property
-      const CountsPhraseProperty *property =
-        static_cast<const CountsPhraseProperty *>(targetPhrase.GetProperty("Counts"));
-
-      if (! property) {
-        VERBOSE(1, "VW :: Counts not found for topt! Is this an OOV?\n");
-        // keep all translation opts without updating, this is either OOV or bad usage...
-        keepOpt.assign(topts.size(), true);
-        return keepOpt;
-      }
-
-      if (sourceRawCount == 0.0) {
-        sourceRawCount = property->GetSourceMarginal() - ONE; // discount one occurrence of the source phrase
-        if (sourceRawCount <= 0) {
-          // no translation options survived, source phrase was a singleton
-          keepOpt.assign(topts.size(), false);
-          return keepOpt;
-        }
-      }
-
-      float discount = correct[i] ? ONE : 0.0;
-      float target = property->GetTargetMarginal() - discount;
-      float joint  = property->GetJointCount() - discount;
-      if (discount != 0.0) VERBOSE(2, "VW :: leaving one out!\n");
-
-      if (joint > 0) {
-        // topt survived leaving one out, update its scores
-        const FeatureFunction *feature = &FindFeatureFunction(m_leaveOneOut);
-        std::vector<float> scores = targetPhrase.GetScoreBreakdown().GetScoresForProducer(feature);
-        UTIL_THROW_IF2(scores.size() != 4, "Unexpected number of scores in feature " << m_leaveOneOut);
-        scores[0] = TransformScore(joint / target); // P(f|e)
-        scores[2] = TransformScore(joint / sourceRawCount); // P(e|f)
-
-        ScoreComponentCollection &scoreBreakDown = topt->GetScoreBreakdown();
-        scoreBreakDown.Assign(feature, scores);
-        topt->UpdateScore();
-        keepOpt.push_back(true);
-      } else {
-        // they only occurred together once, discard topt
-        VERBOSE(2, "VW :: discarded topt when leaving one out\n");
-        keepOpt.push_back(false);
-      }
-    }
-
-    return keepOpt;
-  }
+  // At training time, optionally discount occurrences of phrase pairs from the current sentence, helps prevent
+  // over-fitting.
+  std::vector<bool> LeaveOneOut(const TranslationOptionList &topts, const std::vector<bool> &correct) const;
 
   bool m_train; // false means predict
-  std::string m_modelPath;
-  std::string m_vwOptions;
+  std::string m_modelPath; // path to the VW model file; at training time, this is where extracted features are stored
+  std::string m_vwOptions; // options for Vowpal Wabbit
+
+  // BOS token, all factors
+  Word m_sentenceStartWord;
 
   // calculator of training loss
   TrainingLoss *m_trainingLoss = NULL;
@@ -488,9 +179,16 @@ private:
   // optionally contains feature name of a phrase table where we recompute scores with leaving one out
   std::string m_leaveOneOut;
 
+  // normalizer, typically this means softmax
   Discriminative::Normalizer *m_normalizer = NULL;
+  
+  // thread-specific classifier instance
   TLSClassifier *m_tlsClassifier;
+
+  // caches for partial scores and feature vectors
+  TLSFloatHashMap *m_tlsFutureScores;
+  TLSStateExtensions *m_tlsComputedStateExtensions;
+  TLSFeatureVectorMap *m_tlsTranslationOptionFeatures, *m_tlsTargetContextFeatures;
 };
 
 }
-
