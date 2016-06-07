@@ -23,12 +23,12 @@ public:
   }
 
   void operator()(const InputType &input
-                  , const InputPath &inputPath
                   , const Range &sourceRange
-                  , Discriminative::Classifier &classifier) const {
+                  , Discriminative::Classifier &classifier
+                  , Discriminative::FeatureVector &outFeatures) const {
     const Features& features = *m_tls.GetStored();
     for (size_t i = 0; i < features.size(); i++) {
-      classifier.AddLabelIndependentFeature("srcext^" + features[i]);
+      outFeatures.push_back(classifier.AddLabelIndependentFeature("srcext^" + features[i]));
     }
   }
 

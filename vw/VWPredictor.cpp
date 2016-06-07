@@ -36,7 +36,7 @@ VWPredictor::~VWPredictor()
     VW::finish(*m_VWInstance);
 }
 
-void VWPredictor::AddLabelIndependentFeature(const StringPiece &name, float value)
+FeatureType VWPredictor::AddLabelIndependentFeature(const StringPiece &name, float value)
 {
   // label-independent features are kept in a different feature namespace ('s' = source)
 
@@ -48,10 +48,10 @@ void VWPredictor::AddLabelIndependentFeature(const StringPiece &name, float valu
     m_ex->addns('s');
     if (DEBUG) std::cerr << "VW :: Setting source namespace\n";
   }
-  AddFeature(name, value); // namespace 's' is set up, add the feature
+  return AddFeature(name, value); // namespace 's' is set up, add the feature
 }
 
-void VWPredictor::AddLabelDependentFeature(const StringPiece &name, float value)
+FeatureType VWPredictor::AddLabelDependentFeature(const StringPiece &name, float value)
 {
   // VW does not use the label directly, instead, we do a Cartesian product between source and target feature
   // namespaces, where the source namespace ('s') contains label-independent features and the target
@@ -63,7 +63,37 @@ void VWPredictor::AddLabelDependentFeature(const StringPiece &name, float value)
     m_ex->addns('t');
     if (DEBUG) std::cerr << "VW :: Setting target namespace\n";
   }
-  AddFeature(name, value);
+  return AddFeature(name, value);
+}
+
+void VWPredictor::AddLabelIndependentFeatureVector(const FeatureVector &features)
+{
+  if (m_isFirstSource) {
+    // the first feature of a new example => create the source namespace for
+    // label-independent features to live in
+    m_isFirstSource = false;
+    m_ex->finish();
+    m_ex->addns('s');
+    if (DEBUG) std::cerr << "VW :: Setting source namespace\n";
+  }
+
+  // add each feature index using this "low level" call to VW
+  for (FeatureVector::const_iterator it = features.begin(); it != features.end(); it++)
+    m_ex->addf(it->first, it->second);
+}
+
+void VWPredictor::AddLabelDependentFeatureVector(const FeatureVector &features)
+{
+  if (m_isFirstTarget) {
+    // the first target-side feature => create namespace 't'
+    m_isFirstTarget = false;
+    m_ex->addns('t');
+    if (DEBUG) std::cerr << "VW :: Setting target namespace\n";
+  }
+
+  // add each feature index using this "low level" call to VW
+  for (FeatureVector::const_iterator it = features.begin(); it != features.end(); it++)
+    m_ex->addf(it->first, it->second);
 }
 
 void VWPredictor::Train(const StringPiece &label, float loss)
@@ -82,10 +112,10 @@ float VWPredictor::Predict(const StringPiece &label)
   return loss;
 }
 
-void VWPredictor::AddFeature(const StringPiece &name, float value)
+FeatureType VWPredictor::AddFeature(const StringPiece &name, float value)
 {
   if (DEBUG) std::cerr << "VW :: Adding feature: " << EscapeSpecialChars(name.as_string()) << ":" << value << "\n";
-  m_ex->addf(EscapeSpecialChars(name.as_string()), value);
+  return std::make_pair(m_ex->addf(EscapeSpecialChars(name.as_string()), value), value);
 }
 
 } // namespace Discriminative
