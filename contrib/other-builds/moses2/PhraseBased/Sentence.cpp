@@ -67,8 +67,16 @@ Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
     // set walls obtained from xml
     for(size_t i=0; i<xmlOptions.size(); i++) {
       const XMLOption &xmlOption = *xmlOptions[i];
-      if(xmlOption.nodeName == "wall" && xmlOption.startPos < ret->GetSize()) // no buggy walls, please
+      if(xmlOption.nodeName == "wall") {
+        UTIL_THROW_IF2(xmlOption.startPos >= ret->GetSize(), "wall is beyond the sentence"); // no buggy walls, please
         reorderingConstraint.SetWall(xmlOption.startPos, true);
+      }
+      else if (xmlOption.nodeName == "zone") {
+        reorderingConstraint.SetZone( xmlOption.startPos, xmlOption.startPos + xmlOption.phraseSize -1 );
+      }
+      else {
+        UTIL_THROW2("Unknown xml");
+      }
     }
     reorderingConstraint.FinalizeWalls();
 
