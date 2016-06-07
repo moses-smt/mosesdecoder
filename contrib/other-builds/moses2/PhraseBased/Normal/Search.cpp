@@ -92,7 +92,11 @@ void Search::Extend(const Hypothesis &hypo, const InputPath &path)
   if (!CanExtend(hypoBitmap, hypoRange.GetEndPos(), pathRange)) {
     return;
   }
-  //cerr << " YES" << endl;
+
+  const ReorderingConstraint &reorderingConstraint = mgr.GetInput().GetReorderingConstraint();
+  if (!reorderingConstraint.Check(hypoBitmap, pathRange.GetStartPos(), pathRange.GetEndPos())) {
+    return;
+  }
 
   // extend this hypo
   const Bitmap &newBitmap = mgr.GetBitmaps().GetBitmap(hypoBitmap, pathRange);
