@@ -332,7 +332,8 @@ consider_sample(TokenPosition const& p)
           size_t raw2 = b->approxOccurrenceCount();
           size_t evid = m_stats->add(tpid, sample_weight, 
                                      m_bias ? (*m_bias)[p.sid] : 1, 
-                                     aln, raw2, rec.po_fwd, rec.po_bwd, docid);
+                                     aln, raw2, rec.po_fwd, rec.po_bwd, docid,
+                                     p.sid);
           max_evidence = std::max(max_evidence, evid);
           bool ok = (i == rec.e2) || b->extend(o[i].id());
           UTIL_THROW_IF2(!ok, "Could not extend target phrase.");

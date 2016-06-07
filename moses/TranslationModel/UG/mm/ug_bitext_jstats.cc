@@ -29,6 +29,7 @@ namespace sapt
     my_wcnt = other.wcnt();
     my_bcnt = other.bcnt();
     my_aln  = other.aln();
+    sids = other.sids;
     indoc   = other.indoc;
     for (int i = 0; i <= LRModel::NONE; i++)
       {
@@ -56,7 +57,7 @@ namespace sapt
   size_t
   jstats::
   add(float w, float b, std::vector<unsigned char> const& a, uint32_t const cnt2,
-      uint32_t fwd_orient, uint32_t bwd_orient, int const docid)
+      uint32_t fwd_orient, uint32_t bwd_orient, int const docid, int const sid)
   {
     boost::lock_guard<boost::mutex> lk(this->lock);
     my_cnt2 = cnt2;
@@ -76,6 +77,7 @@ namespace sapt
       }
     ++ofwd[fwd_orient];
     ++obwd[bwd_orient];
+    sids.push_back(sid);
     if (docid >= 0)
       {
         // while (int(indoc.size()) <= docid) indoc.push_back(0);

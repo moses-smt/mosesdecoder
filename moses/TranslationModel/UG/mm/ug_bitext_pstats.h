@@ -49,7 +49,8 @@ namespace sapt
         uint32_t const cnt2, // raw target phrase count
         uint32_t fwd_o,      // fwd. phrase orientation
         uint32_t bwd_o,      // bwd. phrase orientation
-        int const docid);    // document where sample was found
+        int const docid,     // document where sample was found
+        int const sid);      // index of sentence where sample was found
     
     void
     count_sample(int const docid,        // document where sample was found

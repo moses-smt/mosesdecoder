@@ -31,6 +31,8 @@ namespace sapt
     std::vector<unsigned char> aln;
     float score;
     bool inverse;
+    std::vector<uint32_t> sids; // list of sampled sentence ids where this
+                                // phrase pair was found
     // std::vector<uint32_t> indoc;
     std::map<uint32_t,uint32_t> indoc;
     PhrasePair() { };
@@ -132,6 +134,7 @@ namespace sapt
         dbwd[i] = js.dcnt_bwd(po);
       }
     
+    sids = js.sids;
     indoc = js.indoc;
     return *this;
   }
@@ -199,6 +202,7 @@ namespace sapt
     , aln(o.aln)
     , score(o.score)
     , inverse(o.inverse)
+    , sids(o.sids)
     , indoc(o.indoc)
   {
     for (int i = 0; i <= LRModel::NONE; ++i)
