@@ -68,37 +68,22 @@ public:
     return (T*) ret;
   }
 
-  // when allocating small objects (bool. char etc). There is a segfault when mem isn't aligned to 64-bit mem
-  uint8_t *AllocateWithAlign(std::size_t size)
-  {
-    size_t remainder = size % 8;
-    size += remainder;
-
-    uint8_t *ret = current_;
-    current_ += size;
-
-    Page &page = *m_pages[m_currPage];
-    if (current_ <= page.end) {
-      // return what we got
-    }
-    else {
-      ret = More(size);
-    }
-    return ret;
-
-  }
-
   template<typename T>
   T *AllocateWithAlign()
   {
-    uint8_t *ret = AllocateWithAlign(sizeof(T));
+    size_t size = sizeof(T);
+    size += size % 8;
+    uint8_t *ret = Allocate(size);
     return (T*) ret;
   }
 
   template<typename T>
   T *AllocateWithAlign(size_t num)
   {
-    uint8_t *ret = AllocateWithAlign(sizeof(T) * num);
+    size_t size = sizeof(T);
+    size += size % 8;
+    size *= num;
+    uint8_t *ret = Allocate(size);
     return (T*) ret;
   }
 
