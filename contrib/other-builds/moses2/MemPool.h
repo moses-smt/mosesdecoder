@@ -71,10 +71,8 @@ public:
   // when allocating small objects (bool. char etc). There is a segfault when mem isn't aligned to 64-bit mem
   uint8_t *AllocateWithAlign(std::size_t size)
   {
-    size_t remainder = size % 8;
-    if (remainder) {
-      size += (8 - remainder);
-    }
+    size_t remainder = size % 4;
+    size = remainder ? size + 4 - remainder : size;
 
     uint8_t *ret = current_;
     current_ += size;
