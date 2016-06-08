@@ -21,7 +21,7 @@ void ReorderingConstraint::InitializeWalls(size_t size, int max_distortion)
 {
   m_size = size;
 
-  m_wall = m_pool.Allocate<bool>(size);
+  m_wall = m_pool.Allocate<size_t>(size);
   m_localWall = m_pool.Allocate<size_t>(size);
 
   m_max_distortion = max_distortion;
