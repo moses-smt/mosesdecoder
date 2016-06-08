@@ -17,8 +17,8 @@ class ReorderingConstraint
 protected:
   // const size_t m_size; /**< number of words in sentence */
   size_t m_size; /**< number of words in sentence */
-  //bool *m_wall; /**< flag for each word if it is a wall */
-  size_t *m_wall; /**< flag for each word if it is a wall */
+  bool *m_wall; /**< flag for each word if it is a wall */
+  //size_t *m_wall; /**< flag for each word if it is a wall */
   size_t *m_localWall;  /**< flag for each word if it is a local wall */
   Vector< std::pair<size_t,size_t> > m_zone; /** zones that limit reordering */
   bool   m_active; /**< flag indicating, if there are any active constraints */
