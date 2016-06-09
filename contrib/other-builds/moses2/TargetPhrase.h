@@ -32,7 +32,6 @@ public:
       system.featureFunctions.GetNumScores());
   }
 
-
   Scores &GetScores()
   {  return *m_scores; }
 

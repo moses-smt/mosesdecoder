@@ -50,6 +50,9 @@ void Hypothesis::Init(SCFG::Manager &mgr,
   m_mgr = &mgr;
   m_targetPhrase = &tp;
 
+  m_scores->Reset(mgr.system);
+  m_scores->PlusEquals(mgr.system, GetTargetPhrase().GetScores());
+
   //cerr << "tp=" << tp << endl;
   //cerr << "symbolBind=" << symbolBind << endl;
   //cerr << endl;
@@ -68,6 +71,8 @@ void Hypothesis::Init(SCFG::Manager &mgr,
 
       const Hypothesis *prevHypo = static_cast<const SCFG::Hypothesis*>(sortedHypos[prevHyposInd]);
       m_prevHypos[currInd] = prevHypo;
+
+      m_scores->PlusEquals(mgr.system, prevHypo->GetScores());
 
       ++currInd;
     }
@@ -127,12 +132,23 @@ std::ostream& operator<<(std::ostream &out, const SCFG::Hypothesis &obj)
 {
   out << &obj;
 
+  // score
+  out << "SCORE:";
+  obj.GetScores().OutputBreakdownToStream(out, obj.GetManager().system);
+
   out << " m_prevHypos=" << obj.m_prevHypos.size() << " ";
   for (size_t i = 0; i < obj.m_prevHypos.size(); ++i) {
     out << obj.m_prevHypos[i] << " ";
   }
+
   //obj.OutputToStream(out);
   out << *obj.m_targetPhrase;
+
+  for (size_t i = 0; i < obj.m_prevHypos.size(); ++i) {
+    const Hypothesis &prevHypo = *obj.m_prevHypos[i];
+    out << endl;
+    out << prevHypo;
+  }
 
   return out;
 }

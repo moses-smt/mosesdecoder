@@ -68,6 +68,8 @@ public:
 
   void SetAlignmentInfo(const std::string &alignString);
 
+  void OutputToStream(std::ostream &out, const System &system) const;
+
   //mutable void *chartState;
 protected:
 };

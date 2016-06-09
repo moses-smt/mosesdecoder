@@ -76,6 +76,20 @@ std::ostream& operator<<(std::ostream &out, const SCFG::TargetPhraseImpl &obj)
   return out;
 }
 
+void TargetPhraseImpl::OutputToStream(std::ostream &out, const System &system) const
+{
+  out << lhs << " -> ";
+  for (size_t i = 0; i < GetSize(); ++i) {
+    const SCFG::Word &word = (*this)[i];
+    out << word << " ";
+  }
+  out << "pt=" << pt.GetName();
+  out << " SCORES:";
+  GetScores().OutputBreakdownToStream(out, system);
+  out << " ALIGN:" << GetAlignTerm() << " " << GetAlignNonTerm();
+
+}
+
 void TargetPhraseImpl::SetAlignmentInfo(const std::string &alignString)
 {
   AlignmentInfo::CollType alignTerm, alignNonTerm;
