@@ -7,6 +7,8 @@
 #include "lm/search_hashed.hh"
 #include "lm/value.hh"
 #include "lm/blank.hh"
+#include "lm/config.hh"
+#include "lm/model.hh"
 
 #include <iostream>
 #include <string>
@@ -257,7 +259,6 @@ template <class Value> class NGramAutomaton {
             ret_.ngram_length = ngram_order_;
 
             if (!HasExtension(pointer.Backoff())){
-                //TODO: could possibly make things faster if the condition is 'if(!out_length_is_written_ && !HasExtension(...))
                 WriteOutLength(ngram_order_-1); 
             }
 
@@ -367,15 +368,18 @@ class Pipeline {
         Pipeline(std::size_t queue_size, ngram::detail::HashedSearch<ngram::BackoffValue>& search) : queue_(queue_size, search) {}
         void Add(const WordIndex* const r_context_begin, std::size_t context_length, const WordIndex* const new_words, std::size_t new_words_length) {
             auto context_begin = r_context_begin;
+            auto new_word = new_words;
             ngram::NGramAutomaton<ngram::BackoffValue>* pred = nullptr;
             for (std::size_t i = 0; i < new_words_length; i++) {
-                auto length = std::min<std::size_t>(KENLM_MAX_ORDER - 1, new_words_length - i);
-                auto new_word = *new_words;
+                auto remaining = std::max(static_cast<std::size_t>(0), new_words_length - i);
+                auto length = std::min<std::size_t>(KENLM_MAX_ORDER - 1, remaining);
+
                 auto context_end = context_begin + length;
-                Task task_{pred, context_begin, context_end, new_word};
+                Task task_{pred, context_begin, context_end, *new_word};
                 pred = queue_.Add(task_);
 
                 context_begin++;
+                new_word++;
             }
 
 
@@ -395,10 +399,8 @@ class Pipeline {
 } // namespace lm
 
 int main(){
-    typename lm::ngram::detail::HashedSearch<lm::ngram::BackoffValue> hs;
-    lm::Pipeline pipeline(10, hs);
 
-
+    /*
     lm::Queue<lm::SimpleAutomaton> q(20, 10);
     std::cout << "Add hello"<<std::endl;
     q.Add(std::make_pair("Hello", 3));
@@ -408,5 +410,26 @@ int main(){
     q.Add(std::make_pair("C U", 3));
     std::cout << "Drain"<<std::endl;
     q.Drain();
+    */
+
+    lm::ngram::Config config;
+    config.arpa_complain = lm::ngram::Config::ALL;
+    config.messages = &std::cout;
+    config.probing_multiplier = 2.0;
+    lm::ngram::ProbingModel model("test.arpa", config);
+    //typename lm::ngram::detail::HashedSearch<lm::ngram::BackoffValue> hs;
+    lm::Pipeline pipeline(10, model.GetSearch());
+    const char *words[] = {"<s>", "looking", "on", "a", "little", "the", "biarritz", "not_found", "more", ".", "</s>"};
+    const size_t num_words = sizeof(words) / sizeof(const char*);
+    // Silience "array subscript is above array bounds" when extracting end pointer.
+    lm::WordIndex indices[num_words + 1];
+    for (unsigned int i = 0; i < num_words; ++i) {
+        indices[num_words - 1 - i] = model.GetVocabulary().Index(words[i]);
+    }
+    pipeline.Add(indices, 1, indices+1, num_words-1);
+    pipeline.Drain();
+
+
+
 }
 #endif //LM_AUTOMATON_H
