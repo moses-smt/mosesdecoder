@@ -118,6 +118,12 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
 {
   const System &system = mgr.system;
 
+  size_t numWords = path.range.GetNumWordsCovered();
+  if (numWords > 1) {
+    // only create 1 word phrases
+    return;
+  }
+
   // don't do 1st of last word
   if (path.range.GetStartPos() == 0) {
     return;
@@ -131,22 +137,27 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
   const SCFG::Word &lastWord = path.subPhrase.Back();
   //cerr << "UnknownWordPenalty lastWord=" << lastWord << endl;
 
-  if (path.range.GetNumWordsCovered() == 1) {
-    const Factor *factor = lastWord[0];
-    SCFG::TargetPhraseImpl *tp = new (pool.Allocate<SCFG::TargetPhraseImpl>(1)) SCFG::TargetPhraseImpl(pool, *this, system, 1);
-    SCFG::Word &word = (*tp)[0];
-    word.CreateFromString(system.GetVocab(), system, factor->GetString().as_string());
+  const Factor *factor = lastWord[0];
+  SCFG::TargetPhraseImpl *tp = new (pool.Allocate<SCFG::TargetPhraseImpl>(1)) SCFG::TargetPhraseImpl(pool, *this, system, 1);
+  SCFG::Word &word = (*tp)[0];
+  word.CreateFromString(system.GetVocab(), system, factor->GetString().as_string());
 
-    tp->lhs.CreateFromString(system.GetVocab(), system, "[X]");
+  tp->lhs.CreateFromString(system.GetVocab(), system, "[X]");
 
-    size_t endPos = path.range.GetEndPos();
-    const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(endPos, 1);
+  size_t endPos = path.range.GetEndPos();
+  const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(endPos, 1);
 
-    SCFG::SymbolBind symbolBind(pool);
-    symbolBind.Add(subPhrasePath.range, lastWord, NULL);
+  SCFG::SymbolBind symbolBind(pool);
+  symbolBind.Add(subPhrasePath.range, lastWord, NULL);
 
-    path.AddTargetPhrase(pool, *this, symbolBind, tp);
-  }
+  Scores &scores = tp->GetScores();
+  scores.PlusEquals(mgr.system, *this, -100);
+
+  MemPool &memPool = mgr.GetPool();
+  const SubPhrase<SCFG::Word> &source = path.subPhrase;
+  system.featureFunctions.EvaluateInIsolation(memPool, system, source, *tp);
+
+  path.AddTargetPhrase(pool, *this, symbolBind, tp);
 }
 
 void UnknownWordPenalty::LookupUnary(MemPool &pool,

@@ -144,12 +144,13 @@ std::ostream& operator<<(std::ostream &out, const SCFG::Hypothesis &obj)
   //obj.OutputToStream(out);
   out << *obj.m_targetPhrase;
 
+  /*
   for (size_t i = 0; i < obj.m_prevHypos.size(); ++i) {
     const Hypothesis &prevHypo = *obj.m_prevHypos[i];
     out << endl;
     out << prevHypo;
   }
-
+  */
   return out;
 }
 
