@@ -11,6 +11,7 @@
 #include "legacy/Parameter.h"
 #include "legacy/ThreadPool.h"
 #include "legacy/Timer.h"
+#include "util/usage.hh"
 
 using namespace std;
 
@@ -90,6 +91,8 @@ void batch_run(Moses2::Parameter &params, Moses2::System &system, Moses2::Thread
   if (&inStream != &cin) {
     delete &inStream;
   }
+
+  util::PrintUsage(std::cerr);
 
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////
