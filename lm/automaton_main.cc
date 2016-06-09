@@ -84,6 +84,7 @@ template <class Value> class NGramAutomaton {
             if (state_ == State::Done || ngram_order_ > KENLM_MAX_ORDER){
                 return State::Done;
             }
+            std::cout << "order: " << ngram_order_ << std::endl;
 
             switch(ngram_order_) {
                 case 0:
@@ -125,7 +126,7 @@ template <class Value> class NGramAutomaton {
     private:
         struct SuccessorData {
             FullScoreReturn ret;
-            std::function<void()> callback;
+            std::function<void(FullScoreReturn&)> callback;
         };
 
         struct PredecessorData {
@@ -164,7 +165,7 @@ template <class Value> class NGramAutomaton {
                     for(auto i = succ_data_.ret.ngram_length - 1; i < out_length_; i++){
                         succ_data_.ret.prob += out_backoffs_[i];
                     }
-                    succ_data_.callback();
+                    succ_data_.callback(succ_data_.ret);
                 }
                 else {
                     // transfer backoffs to successor so he can apply them himself
@@ -180,12 +181,16 @@ template <class Value> class NGramAutomaton {
                     for(auto i = ret_.ngram_length - 1; i < pred_data_.length; i++){
                         ret_.prob += pred_data_.backoffs[i];
                     }
-                    callback_();
+                    callback_(ret_);
                 }
                 else {
                     // Give callback and fullscorereturn to predecessor
                     NotifyPredecessorOfCompletion();
                 }
+            }
+            else {
+                std::cout << "No predecessor - not applying backoffs...";
+                callback_(ret_);
             }
         }
 
@@ -238,7 +243,7 @@ template <class Value> class NGramAutomaton {
             else {
                 if (KENLM_MAX_ORDER == 2) {
                     //for bigrams we don't prefetch middle since there are none
-                    search_.PrefetchLongest(context_rbegin_[ngram_order_ - 1], node_);
+                    search_.PrefetchLongest(context_rbegin_[0], node_);
                 }
                 else {
                     search_.PrefetchMiddle(0, context_rbegin_[0], node_);
@@ -293,6 +298,7 @@ template <class Value> class NGramAutomaton {
         }
 
         void Finish(){
+            std::cout << "Finishing...";
             WriteOutLength(std::min(ret_.ngram_length, static_cast<unsigned char>(KENLM_MAX_ORDER - 1)));
             CheckPredecessorFinished();
             CheckSuccessorFinished();
@@ -300,12 +306,13 @@ template <class Value> class NGramAutomaton {
         }
 
 
+        FullScoreReturn ret_;
+        std::function<void(FullScoreReturn&)> callback_ = [](FullScoreReturn& r){std::cout << "In callback, prob: " << r.prob << " ngram_length: " << (int)r.ngram_length << std::endl;};
         std::size_t ngram_order_;
         bool out_length_is_written_;
         State state_;
         detail::HashedSearch<Value> &search_;
         typename detail::HashedSearch<Value>::Node node_;
-        std::function<void()> callback_ = [](){std::cout << "In callback\n";};
         unsigned char out_length_;
         std::array<float, KENLM_MAX_ORDER - 1> out_backoffs_;
         bool pred_finished_;
@@ -317,7 +324,6 @@ template <class Value> class NGramAutomaton {
         WordIndex new_word_;
         const WordIndex* context_rbegin_;
         const WordIndex* context_rend_;
-        FullScoreReturn ret_;
 };
 
 } // namespace ngram
@@ -331,6 +337,7 @@ template <class Automaton> class Queue {
         }
 
         Automaton* Add(const Task task) {
+            std::cout << "Adding a task...";
             while (automata_[curr_].Step() != State::Done) {
                 Next();
             }
@@ -412,19 +419,21 @@ int main(){
     q.Drain();
     */
 
+    std::cout << "KENLM_MAX_ORDER: " << KENLM_MAX_ORDER << std::endl;
     lm::ngram::Config config;
     config.arpa_complain = lm::ngram::Config::ALL;
     config.messages = &std::cout;
     config.probing_multiplier = 2.0;
     lm::ngram::ProbingModel model("test.arpa", config);
     //typename lm::ngram::detail::HashedSearch<lm::ngram::BackoffValue> hs;
-    lm::Pipeline pipeline(10, model.GetSearch());
+    lm::Pipeline pipeline(5, model.GetSearch());
     const char *words[] = {"<s>", "looking", "on", "a", "little", "the", "biarritz", "not_found", "more", ".", "</s>"};
     const size_t num_words = sizeof(words) / sizeof(const char*);
+    std::cout << "num_words = " << num_words << std::endl;
     // Silience "array subscript is above array bounds" when extracting end pointer.
     lm::WordIndex indices[num_words + 1];
     for (unsigned int i = 0; i < num_words; ++i) {
-        indices[num_words - 1 - i] = model.GetVocabulary().Index(words[i]);
+        indices[i] = model.GetVocabulary().Index(words[i]);
     }
     pipeline.Add(indices, 1, indices+1, num_words-1);
     pipeline.Drain();
