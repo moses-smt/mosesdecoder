@@ -27,6 +27,7 @@
 
       virtual void
       operator()(Bitext<Token> const& pt, PhrasePair<Token>& pp,
+                 ttasksptr const& ttask,
                  std::vector<float> * dest=NULL) const = 0;
 
       void

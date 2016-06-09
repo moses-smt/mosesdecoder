@@ -35,6 +35,8 @@ public:
   SPTR<pstats>     stats; // stores statistics collected during sampling
   SPTR<SamplingBias const> const m_bias; // sentence-level bias for sampling
   float bias_total;
+  bool m_track_sids;  // track sentence ids in sample?
+
   bool nextSample(uint64_t & sid, uint64_t & offset); // select next occurrence
 
   int
@@ -46,7 +48,7 @@ public:
   job(Bitext<Token> const* const theBitext,
       typename TSA<Token>::tree_iterator const& m,
       SPTR<TSA<Token> > const& r, size_t maxsmpl, bool isfwd,
-      SPTR<SamplingBias const> const& bias);
+      SPTR<SamplingBias const> const& bias, bool const track_sids);
   ~job();
 };
 
@@ -66,7 +68,8 @@ Bitext<Token>::agenda::job
 ::job(Bitext<Token> const* const theBitext,
       typename TSA<Token>::tree_iterator const& m,
       SPTR<TSA<Token> > const& r, size_t maxsmpl,
-      bool isfwd, SPTR<SamplingBias const> const& bias)
+      bool isfwd, SPTR<SamplingBias const> const& bias,
+      bool const track_sids)
   : m_bitext(theBitext)
   , rnd(0)
   , rnddenom(rnd.max() + 1.)
@@ -80,8 +83,9 @@ Bitext<Token>::agenda::job
   , len(m.size())
   , fwd(isfwd)
   , m_bias(bias)
+  , m_track_sids(track_sids)
 {
-  stats.reset(new pstats());
+  stats.reset(new pstats(m_track_sids));
   stats->raw_cnt = m.approxOccurrenceCount();
   bias_total = 0;
 

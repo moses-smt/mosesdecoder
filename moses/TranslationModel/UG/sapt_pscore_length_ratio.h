@@ -48,8 +48,9 @@ namespace sapt  {
 
     void
     operator()(Bitext<Token> const& bt,
-               PhrasePair<Token>& pp,
-               std::vector<float> * dest = NULL) const
+         PhrasePair<Token>& pp,
+         ttasksptr const& ttask,
+         std::vector<float> * dest = NULL) const
     {
       if (!dest) dest = &pp.fvals;
       float p  = float(bt.T1->numTokens());

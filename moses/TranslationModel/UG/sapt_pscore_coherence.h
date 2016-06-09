@@ -22,6 +22,7 @@ namespace sapt
     void
     operator()(Bitext<Token> const& bt,
 	       PhrasePair<Token>& pp,
+	       ttasksptr const& ttask,
 	       std::vector<float> * dest = NULL) const
     {
       if (!dest) dest = &pp.fvals;

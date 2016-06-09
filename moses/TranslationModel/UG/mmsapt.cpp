@@ -215,6 +215,7 @@ namespace Moses
     param.insert(pair<string,string>("coh",    "0"));
     param.insert(pair<string,string>("prov",   "0"));
     param.insert(pair<string,string>("cumb",   "0"));
+    param.insert(pair<string,string>("dist",   "0"));
 
     poolCounts = true;
 
@@ -291,6 +292,7 @@ namespace Moses
     known_parameters.push_back("coh");
     known_parameters.push_back("config");
     known_parameters.push_back("cumb");
+    known_parameters.push_back("dist");
     known_parameters.push_back("extra");
     known_parameters.push_back("feature-sets");
     known_parameters.push_back("input-factor");
@@ -466,6 +468,19 @@ namespace Moses
             SPTR<PScoreWC<Token> > ffwcnt(new PScoreWC<Token>("wcnt"));
             register_ff(ffwcnt,m_active_ff_common);
           }
+        // Optional distance feature
+        if(param["dist"] != "0")
+          {
+            // Now using sid coordinate list
+            // (to be populated after bitext load)
+            if(m_sid_coord == NULL) {
+              m_sid_coord.reset(new vector<vector<float> >());
+            }
+            // Track sids when sampling bitext
+            m_track_sids = true;
+            SPTR<PScoreDist<Token> > ff(new PScoreDist<Token>(m_sid_coord, param["dist"]));
+            register_ff(ff,m_active_ff_common);
+          }
       }
     // cerr << "Features: " << Join("|",m_feature_names) << endl;
     this->m_numScoreComponents = this->m_feature_names.size();
@@ -509,6 +524,28 @@ namespace Moses
     if (m_extra_data.size())
       load_extra_data(m_extra_data, false);
 
+    // A feature (such as dist) left a note that we need to populate src
+    // sentence coordinates
+    if (m_sid_coord)
+      {
+        // We know the corpus size from the bitext
+        m_sid_coord->reserve(btfix->T1->size());
+        string coordfile = m_bname + L1 + ".coord.gz";
+        string line;
+        cerr << "Loading coordinate lines from " << coordfile << endl;
+        boost::iostreams::filtering_istream in;
+        ugdiss::open_input_stream(coordfile, in);
+        while(getline(in, line))
+          {
+            m_sid_coord->push_back(Scan<float>(Tokenize(line)));
+          }
+        cerr << "Loaded " << m_sid_coord->size() << " lines" << endl;
+        UTIL_THROW_IF2(m_sid_coord->size() != btfix->T1->size(),
+                       "Coordinates file size does not match bitext size ("
+                       << m_sid_coord->size() << " != " << btfix->T1->size()
+                       << ")");
+      }
+
 #if 0
     // currently not used
     LexicalPhraseScorer2<Token>::table_t & COOC = calc_lex.scorer.COOC;
@@ -550,12 +587,12 @@ namespace Moses
     if (fix)
       {
         BOOST_FOREACH(SPTR<pscorer> const& ff, m_active_ff_fix)
-          (*ff)(*btfix, *fix, &fvals);
+          (*ff)(*btfix, *fix, ttask, &fvals);
       }
     if (dyn)
       {
         BOOST_FOREACH(SPTR<pscorer> const& ff, m_active_ff_dyn)
-          (*ff)(*dynbt, *dyn, &fvals);
+          (*ff)(*dynbt, *dyn, ttask, &fvals);
       }
 
     if (fix && dyn) { pool += *dyn; }
@@ -567,7 +604,7 @@ namespace Moses
           zilch.raw2 = m.approxOccurrenceCount();
         pool += zilch;
         BOOST_FOREACH(SPTR<pscorer> const& ff, m_active_ff_dyn)
-          (*ff)(*dynbt, ff->allowPooling() ? pool : zilch, &fvals);
+          (*ff)(*dynbt, ff->allowPooling() ? pool : zilch, ttask, &fvals);
       }
     else if (dyn)
       {
@@ -577,17 +614,17 @@ namespace Moses
           zilch.raw2 = m.approxOccurrenceCount();
         pool += zilch;
         BOOST_FOREACH(SPTR<pscorer> const& ff, m_active_ff_fix)
-          (*ff)(*dynbt, ff->allowPooling() ? pool : zilch, &fvals);
+          (*ff)(*dynbt, ff->allowPooling() ? pool : zilch, ttask, &fvals);
       }
     if (fix)
       {
         BOOST_FOREACH(SPTR<pscorer> const& ff, m_active_ff_common)
-          (*ff)(*btfix, pool, &fvals);
+          (*ff)(*btfix, pool, ttask, &fvals);
       }
     else
       {
         BOOST_FOREACH(SPTR<pscorer> const& ff, m_active_ff_common)
-          (*ff)(*dynbt, pool, &fvals);
+          (*ff)(*dynbt, pool, ttask, &fvals);
       }
 
     TargetPhrase* tp = new TargetPhrase(const_cast<ttasksptr&>(ttask), this);
@@ -730,7 +767,8 @@ namespace Moses
             BitextSampler<Token> s(btfix, mfix, context->bias, 
                                    m_min_sample_size, 
                                    m_default_sample_size, 
-                                   m_sampling_method);
+                                   m_sampling_method,
+                                   m_track_sids);
             s();
             sfix = s.stats();
           }
@@ -918,7 +956,7 @@ namespace Moses
           {
             BitextSampler<Token> s(btfix, mfix, context->bias, 
                                    m_min_sample_size, m_default_sample_size, 
-                                   m_sampling_method);
+                                   m_sampling_method, m_track_sids);
             if (*context->cache1->get(pid, s.stats()) == s.stats())
               m_thread_pool->add(s);
           }
@@ -939,7 +977,7 @@ namespace Moses
         for (size_t i = 0; mdyn.size() == i && i < myphrase.size(); ++i)
           mdyn.extend(myphrase[i]);
         // let's assume a uniform bias over the foreground corpus
-        if (mdyn.size() == myphrase.size()) dyn->prep(ttask, mdyn);
+        if (mdyn.size() == myphrase.size()) dyn->prep(ttask, mdyn, m_track_sids);
       }
     return mdyn.size() == myphrase.size();
   }

@@ -42,7 +42,8 @@ namespace sapt
 
     size_t 
     add(float w, float b, std::vector<unsigned char> const& a, uint32_t const cnt2, 
-	uint32_t fwd_orient, uint32_t bwd_orient, int const docid, int const sid);
+	uint32_t fwd_orient, uint32_t bwd_orient, int const docid, uint32_t const sid,
+	bool const track_sid);
 
     void invalidate();
     void validate();
