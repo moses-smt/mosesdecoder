@@ -226,25 +226,23 @@ bool ReorderingConstraint::Check( const Bitmap &bitmap, size_t startPos, size_t 
   return true;
 }
 
-std::ostream& operator<<(std::ostream& out, const ReorderingConstraint &obj)
+void ReorderingConstraint::Debug(std::ostream &out, const System &system) const
 {
   out << "Zones:";
-  for (size_t i = 0; i < obj.m_zone.size(); ++i) {
-    const std::pair<size_t,size_t> &zone1 = obj.m_zone[i];
+  for (size_t i = 0; i < m_zone.size(); ++i) {
+    const std::pair<size_t,size_t> &zone1 = m_zone[i];
     out << zone1.first << "-" << zone1.second << " ";
   }
 
   out << "Walls:";
-  for (size_t i = 0; i < obj.m_size; ++i) {
-      out << obj.m_wall[i];
+  for (size_t i = 0; i < m_size; ++i) {
+      out << m_wall[i];
   }
 
   out << " Local walls:";
-  for (size_t i = 0; i < obj.m_size; ++i) {
-      out << obj.m_localWall[i] << " ";
+  for (size_t i = 0; i < m_size; ++i) {
+      out << m_localWall[i] << " ";
   }
-
-  return out;
 }
 
 } // namespace

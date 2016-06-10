@@ -16,8 +16,6 @@ namespace Moses2
 template<typename WORD>
 class TargetPhrase: public PhraseImplTemplate<WORD>
 {
-  friend std::ostream& operator<<(std::ostream &, const TargetPhrase &);
-
 public:
   const PhraseTable &pt;
   mutable void **ffData;
@@ -47,25 +45,16 @@ public:
   SCORE *GetScoresProperty(int propertyInd) const
   {    return scoreProperties ? scoreProperties + propertyInd : NULL; }
 
+  void Debug(std::ostream &out) const
+  {
+    static_cast<const Phrase<WORD> &>(*this).Debug(out);
+    out << " SCORES:" << GetScores();
+  }
+
 protected:
   Scores *m_scores;
   SCORE m_estimatedScore;
 };
-
-///////////////////////////////////////////////////////////////////////
-inline std::ostream& operator<<(std::ostream &out, const TargetPhrase<Moses2::Word> &obj)
-{
-  out << (const Phrase<Moses2::Word> &) obj << " SCORES:" << obj.GetScores();
-  return out;
-}
-/*
-template<typename WORD>
-std::ostream& operator<<(std::ostream &out, const TargetPhrase<WORD> &obj)
-{
-  out << (const Phrase<WORD> &) obj << " SCORES:" << obj.GetScores();
-  return out;
-}
-*/
 
 ///////////////////////////////////////////////////////////////////////
 template<typename WORD>

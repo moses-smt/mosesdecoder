@@ -67,19 +67,18 @@ void InputPaths::Init(const InputType &input, const ManagerBase &mgr)
 
 }
 
-std::ostream& operator<<(std::ostream &out, const SCFG::InputPaths &obj)
+void InputPaths::Debug(std::ostream &out, const System &system) const
 {
-  const Matrix<InputPath*> &matrix = obj.GetMatrix();
+  const Matrix<InputPath*> &matrix = GetMatrix();
   for (size_t i = 0; i < matrix.GetRows(); ++i) {
     for (size_t j = 0; j < matrix.GetCols(); ++j) {
       SCFG::InputPath *path = matrix.GetValue(i, j);
       if (path) {
-        out << *path << endl;
+        path->Debug(out, system);
+        out << endl;
       }
     }
   }
-
-  return out;
 }
 
 }

@@ -5,6 +5,7 @@
 
 namespace Moses2
 {
+class System;
 class Sentence;
 class Bitmap;
 class MemPool;
@@ -13,7 +14,6 @@ class MemPool;
 
 class ReorderingConstraint
 {
-  friend std::ostream& operator<<(std::ostream& out, const ReorderingConstraint& reorderingConstraint);
 protected:
   // const size_t m_size; /**< number of words in sentence */
   size_t m_size; /**< number of words in sentence */
@@ -78,6 +78,9 @@ public:
   bool IsActive() const {
     return m_active;
   }
+
+  void Debug(std::ostream &out, const System &system) const;
+
 };
 
 

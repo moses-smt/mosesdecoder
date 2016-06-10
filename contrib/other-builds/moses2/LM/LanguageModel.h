@@ -33,14 +33,13 @@ struct LMScores
   {
   }
 
+  void Debug(std::ostream &out, const System &system) const
+  {
+    out << "(" << prob << "," << backoff << ")" << std::flush;
+  }
+
   float prob, backoff;
 };
-
-inline std::ostream& operator<<(std::ostream &out, const LMScores &obj)
-{
-  out << "(" << obj.prob << "," << obj.backoff << ")" << std::flush;
-  return out;
-}
 
 ////////////////////////////////////////////////////////////////////////////////////////
 class LanguageModel: public StatefulFeatureFunction

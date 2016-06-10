@@ -21,7 +21,6 @@ namespace NSNormal
 
 class Stacks
 {
-  friend std::ostream& operator<<(std::ostream &, const Stacks &);
 public:
   Stacks(const Manager &mgr);
   virtual ~Stacks();
@@ -51,6 +50,8 @@ public:
 
   void Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
       ArcLists &arcLists);
+
+  void Debug(std::ostream &out, const System &system) const;
 
 protected:
   const Manager &m_mgr;

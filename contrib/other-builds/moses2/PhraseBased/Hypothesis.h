@@ -25,8 +25,6 @@ class StatefulFeatureFunction;
 
 class Hypothesis: public HypothesisBase
 {
-  friend std::ostream& operator<<(std::ostream &out, const Hypothesis &obj);
-
   Hypothesis(MemPool &pool, const System &system);
 
 public:
@@ -69,7 +67,7 @@ public:
     return *m_targetPhrase;
   }
 
-  void OutputToStream(std::ostream &out) const;
+  void Debug(std::ostream &out) const;
   virtual std::string Debug() const;
 
   void EmptyHypothesisState(const InputType &input);

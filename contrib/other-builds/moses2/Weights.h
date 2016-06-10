@@ -19,7 +19,6 @@ class FeatureFunctions;
 
 class Weights
 {
-  friend std::ostream& operator<<(std::ostream &, const Weights &);
 public:
   Weights();
   virtual ~Weights();

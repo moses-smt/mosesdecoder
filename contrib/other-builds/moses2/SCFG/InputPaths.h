@@ -23,8 +23,6 @@ class InputPath;
 
 class InputPaths: public InputPathsBase
 {
-  friend std::ostream& operator<<(std::ostream &, const SCFG::InputPaths &);
-
 public:
   void Init(const InputType &input, const ManagerBase &mgr);
 
@@ -32,6 +30,8 @@ public:
   {
     return *m_matrix;
   }
+
+  void Debug(std::ostream &out, const System &system) const;
 
 protected:
   Matrix<InputPath*> *m_matrix;

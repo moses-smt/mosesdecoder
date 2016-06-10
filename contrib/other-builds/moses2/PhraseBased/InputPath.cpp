@@ -42,10 +42,10 @@ const TargetPhrases *InputPath::GetTargetPhrases(const PhraseTable &pt) const
   return targetPhrases[ptInd];
 }
 
-std::ostream& operator<<(std::ostream &out, const InputPath &obj)
+void InputPath::Debug(std::ostream &out, const System &system) const
 {
-  out << obj.range << " " << obj.subPhrase;
-  return out;
+  out << range << " ";
+  subPhrase.Debug(out, system);
 }
 
 }

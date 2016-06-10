@@ -29,13 +29,11 @@
 namespace Moses2
 {
 class MemPool;
+class System;
 
 //! A square array of floats to store future costs in the phrase-based decoder
 class EstimatedScores: public Matrix<float>
 {
-  friend std::ostream& operator<<(std::ostream &out,
-      const EstimatedScores &matrix);
-
 public:
   EstimatedScores(MemPool &pool, size_t size) :
       Matrix<float>(pool, size, size)
@@ -47,19 +45,16 @@ public:
   float CalcEstimatedScore(Bitmap const&) const;
   float CalcEstimatedScore(Bitmap const&, size_t startPos, size_t endPos) const;
 
-};
-
-inline std::ostream& operator<<(std::ostream &out,
-    const EstimatedScores &matrix)
-{
-  for (size_t endPos = 0; endPos < matrix.GetSize(); endPos++) {
-    for (size_t startPos = 0; startPos < matrix.GetSize(); startPos++)
-      out << matrix.GetValue(startPos, endPos) << " ";
-    out << std::endl;
+  void Debug(std::ostream &out, const System &system) const
+  {
+    for (size_t endPos = 0; endPos < GetSize(); endPos++) {
+      for (size_t startPos = 0; startPos < GetSize(); startPos++)
+        out << GetValue(startPos, endPos) << " ";
+      out << std::endl;
+    }
   }
 
-  return out;
-}
+};
 
 }
 

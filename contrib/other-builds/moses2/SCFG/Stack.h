@@ -16,8 +16,6 @@ class Manager;
 
 class Stack
 {
-  friend std::ostream& operator<<(std::ostream &out, const SCFG::Stack &obj);
-
 public:
   typedef boost::unordered_map<SCFG::Word, Moses2::HypothesisColl*> Coll;
 
@@ -40,6 +38,8 @@ public:
   const Hypothesis *GetBestHypo(
       const Manager &mgr,
       ArcLists &arcLists) const;
+
+  void Debug(std::ostream &out, const System &system) const;
 
 protected:
   const Manager &m_mgr;

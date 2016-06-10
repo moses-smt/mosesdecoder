@@ -21,8 +21,6 @@ typedef Array<const HypothesisBase*> Hypotheses;
 
 class HypothesisColl
 {
-  friend std::ostream& operator<<(std::ostream &out, const HypothesisColl &obj);
-
 public:
   typedef boost::unordered_set<const HypothesisBase*,
       UnorderedComparer<HypothesisBase>, UnorderedComparer<HypothesisBase>,
@@ -64,6 +62,8 @@ public:
   Hypotheses &GetSortedAndPruneHypos(
       const ManagerBase &mgr,
       ArcLists &arcLists) const;
+
+  void Debug(std::ostream &out, const System &system) const;
 
 protected:
   _HCType m_coll;

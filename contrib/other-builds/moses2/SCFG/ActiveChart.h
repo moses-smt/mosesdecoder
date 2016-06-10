@@ -7,6 +7,7 @@
 namespace Moses2
 {
 class HypothesisColl;
+class System;
 
 namespace SCFG
 {
@@ -39,8 +40,6 @@ size_t hash_value(const SymbolBindElement &obj);
 ////////////////////////////////////////////////////////////////////////////
 class SymbolBind
 {
-  friend std::ostream& operator<<(std::ostream &, const SymbolBind &);
-
 public:
   typedef Vector<SymbolBindElement> Coll;
   Coll coll;
@@ -62,6 +61,9 @@ public:
 
   bool operator==(const SymbolBind &compare) const
   {  return coll == compare.coll; }
+
+  void Debug(std::ostream &out, const System &system) const;
+
 };
 
 inline size_t hash_value(const SymbolBind &obj)

@@ -17,7 +17,6 @@ namespace Moses2
 
 class Word
 {
-  friend std::ostream& operator<<(std::ostream &, const Word &);
 public:
   explicit Word();
   explicit Word(const Word &copy);

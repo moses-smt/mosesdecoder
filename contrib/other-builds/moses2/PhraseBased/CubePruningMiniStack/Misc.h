@@ -62,8 +62,6 @@ public:
 ///////////////////////////////////////////
 class CubeEdge
 {
-  friend std::ostream& operator<<(std::ostream &, const CubeEdge &);
-
 public:
   typedef std::priority_queue<QueueItem*,
       std::vector<QueueItem*, MemPoolAllocator<QueueItem*> >, QueueItemOrderer> Queue;
@@ -89,6 +87,8 @@ public:
   void CreateNext(Manager &mgr, QueueItem *item, Queue &queue,
       SeenPositions &seenPositions,
       std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > &queueItemRecycler);
+
+  void Debug(std::ostream &out, const System &system) const;
 
 protected:
 

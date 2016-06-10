@@ -37,29 +37,31 @@ InputPath::~InputPath()
   // TODO Auto-generated destructor stub
 }
 
-std::ostream& operator<<(std::ostream &out, const SCFG::InputPath &obj)
+void InputPath::Debug(std::ostream &out, const System &system) const
 {
-  out << obj.range << " " << obj.subPhrase << " " << obj.prefixPath << " ";
+  out << range << " ";
+  subPhrase.Debug(out, system);
+  out << " " << prefixPath << " ";
 
-  const Vector<ActiveChartEntry*> &activeEntries = *obj.GetActiveChart(1).entries;
+  const Vector<ActiveChartEntry*> &activeEntries = *GetActiveChart(1).entries;
   out << "m_activeChart=" << activeEntries.size() << " ";
 
   for (size_t i = 0; i < activeEntries.size(); ++i) {
     const ActiveChartEntry &entry = *activeEntries[i];
-    out << entry.GetSymbolBind() << "| ";
+    entry.GetSymbolBind().Debug(out, system);
+    out << "| ";
   }
 
   // tps
-  out << "tps=" << obj.targetPhrases->size();
+  out << "tps=" << targetPhrases->size();
 
   out << " ";
-  BOOST_FOREACH(const SCFG::InputPath::Coll::value_type &valPair, *obj.targetPhrases) {
+  BOOST_FOREACH(const SCFG::InputPath::Coll::value_type &valPair, *targetPhrases) {
     const SymbolBind &symbolBind = valPair.first;
     const SCFG::TargetPhrases &tps = *valPair.second;
-    out << symbolBind << "=" << tps.GetSize() << " ";
+    symbolBind.Debug(out, system);
+    out << "=" << tps.GetSize() << " ";
   }
-
-  return out;
 }
 
 void InputPath::AddTargetPhrase(

@@ -44,11 +44,6 @@ void Weights::Debug(std::ostream &out, const FeatureFunctions &ffs) const
 
 }
 
-std::ostream& operator<<(std::ostream &out, const Weights &obj)
-{
-
-  return out;
-}
 
 void Weights::CreateFromString(const FeatureFunctions &ffs,
     const std::string &line)

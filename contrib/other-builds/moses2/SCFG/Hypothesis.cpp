@@ -122,27 +122,30 @@ void Hypothesis::OutputToStream(std::ostream &out) const
     }
     else {
       //cerr << "not nt" << endl;
-      out << word << " ";
+      word.Debug(out);
+      out << " ";
     }
 
   }
 }
 
-std::ostream& operator<<(std::ostream &out, const SCFG::Hypothesis &obj)
+std::string Hypothesis::Debug() const
 {
-  out << &obj;
+  std::stringstream out;
+
+  out << this;
 
   // score
   out << "SCORE:";
-  obj.GetScores().OutputBreakdownToStream(out, obj.GetManager().system);
+  GetScores().Debug(out, GetManager().system);
 
-  out << " m_prevHypos=" << obj.m_prevHypos.size() << " ";
-  for (size_t i = 0; i < obj.m_prevHypos.size(); ++i) {
-    out << obj.m_prevHypos[i] << " ";
+  out << " m_prevHypos=" << m_prevHypos.size() << " ";
+  for (size_t i = 0; i < m_prevHypos.size(); ++i) {
+    out << m_prevHypos[i] << " ";
   }
 
   //obj.OutputToStream(out);
-  out << *obj.m_targetPhrase;
+  m_targetPhrase->Debug(out, GetManager().system);
 
   /*
   for (size_t i = 0; i < obj.m_prevHypos.size(); ++i) {
@@ -151,14 +154,7 @@ std::ostream& operator<<(std::ostream &out, const SCFG::Hypothesis &obj)
     out << prevHypo;
   }
   */
-  return out;
-}
-
-std::string Hypothesis::Debug() const
-{
-  std::stringstream strm;
-  strm << *this;
-  return strm.str();
+  return out.str();
 }
 
 } // namespaces

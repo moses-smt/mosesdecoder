@@ -30,7 +30,6 @@ class System;
 template<typename WORD>
 class Phrase
 {
-  friend std::ostream& operator<<(std::ostream &, const Phrase &);
 public:
   virtual ~Phrase()
   {
@@ -95,44 +94,20 @@ public:
 
   virtual SubPhrase<WORD> GetSubPhrase(size_t start, size_t size) const = 0;
 
-  virtual void OutputToStream(std::ostream &out) const
+  virtual void Debug(std::ostream &out) const
   {
     size_t size = GetSize();
     if (size) {
-      out << (*this)[0];
+      (*this)[0].Debug(out);
       for (size_t i = 1; i < size; ++i) {
         const WORD &word = (*this)[i];
-        out << " " << word;
+        out << " ";
+        word.Debug(out);
       }
     }
   }
 
 };
-
-////////////////////////////////////////////////////////////////////////
-inline std::ostream& operator<<(std::ostream &out, const Phrase<Moses2::Word> &obj)
-{
-  if (obj.GetSize()) {
-    out << obj[0];
-    for (size_t i = 1; i < obj.GetSize(); ++i) {
-      const Moses2::Word &word = obj[i];
-      out << " " << word;
-    }
-  }
-  return out;
-}
-
-inline std::ostream& operator<<(std::ostream &out, const Phrase<SCFG::Word> &obj)
-{
-  if (obj.GetSize()) {
-    out << obj[0];
-    for (size_t i = 1; i < obj.GetSize(); ++i) {
-      const SCFG::Word &word = obj[i];
-      out << " " << word;
-    }
-  }
-  return out;
-}
 
 ////////////////////////////////////////////////////////////////////////
 template<typename WORD>

@@ -184,7 +184,7 @@ std::string Manager::OutputBest() const
       out << bestHypo->GetScores().GetTotalScore() << " ";
     }
 
-    bestHypo->OutputToStream(out);
+    bestHypo->Debug(out);
     //cerr << "BEST TRANSLATION: " << *bestHypo;
   }
   else {
@@ -232,7 +232,7 @@ std::string Manager::OutputNBest()
 
     if (ok) {
       out << transId << " |||";
-      path->OutputToStream(out, system);
+      path->Debug(out, system);
       out << "\n";
     }
 

@@ -313,7 +313,9 @@ std::string Manager::OutputBest() const
 
   if (bestHypo) {
     bestHypo->OutputToStream(out);
-    cerr << "BEST TRANSLATION: " << *bestHypo << " " << out.str() << endl;
+    cerr << "BEST TRANSLATION: ";
+    bestHypo->Debug();
+    cerr << " " << out.str() << endl;
   }
   else {
     cerr << "NO TRANSLATION " << m_input->GetTranslationId() << endl;

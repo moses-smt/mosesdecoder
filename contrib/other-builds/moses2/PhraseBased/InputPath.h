@@ -17,7 +17,6 @@ class TargetPhrases;
 
 class InputPath: public InputPathBase
 {
-  friend std::ostream& operator<<(std::ostream &, const InputPath &);
 public:
   const TargetPhrases** targetPhrases;
   SubPhrase<Moses2::Word> subPhrase;
@@ -33,6 +32,8 @@ public:
   {
     return m_isUsed;
   }
+
+  void Debug(std::ostream &out, const System &system) const;
 
 protected:
   bool m_isUsed;

@@ -15,10 +15,10 @@ template<typename WORD>
 class TargetPhrase;
 
 class Word;
+class System;
 
 class TargetPhrases
 {
-  friend std::ostream& operator<<(std::ostream &, const TargetPhrases &);
   typedef Array<const TargetPhrase<Moses2::Word>*> Coll;
 public:
   typedef Coll::iterator iterator;
@@ -54,7 +54,8 @@ public:
 
   void SortAndPrune(size_t tableLimit);
 
-  //const TargetPhrases *Clone(MemPool &pool, const System &system) const;
+  void Debug(std::ostream &out, const System &system) const;
+
 protected:
   Coll m_coll;
   size_t m_currInd;

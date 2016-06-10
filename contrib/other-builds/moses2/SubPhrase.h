@@ -5,11 +5,11 @@
 
 namespace Moses2
 {
+class System;
 
 template<typename WORD>
 class SubPhrase: public Phrase<WORD>
 {
-  friend std::ostream& operator<<(std::ostream &, const SubPhrase &);
 public:
   SubPhrase(const Phrase<WORD> &origPhrase, size_t start, size_t size)
   :m_origPhrase(&origPhrase)
@@ -29,35 +29,23 @@ public:
     return ret;
   }
 
+  void Debug(std::ostream &out, const System &system) const
+  {
+    if (GetSize()) {
+      (*this)[0].Debug(out);
+      for (size_t i = 1; i < GetSize(); ++i) {
+        const WORD &word = (*this)[i];
+        out << " ";
+        word.Debug(out);
+      }
+    }
+  }
+
 protected:
   const Phrase<WORD> *m_origPhrase;
   size_t m_start, m_size;
 };
 
-///////////////////////////////////////////////////////
-inline std::ostream& operator<<(std::ostream &out, const SubPhrase<Moses2::Word> &obj)
-{
-  if (obj.GetSize()) {
-    out << obj[0];
-    for (size_t i = 1; i < obj.GetSize(); ++i) {
-      const Word &word = obj[i];
-      out << " " << word;
-    }
-  }
-  return out;
-}
-
-inline std::ostream& operator<<(std::ostream &out, const SubPhrase<SCFG::Word> &obj)
-{
-  if (obj.GetSize()) {
-    out << obj[0];
-    for (size_t i = 1; i < obj.GetSize(); ++i) {
-      const SCFG::Word &word = obj[i];
-      out << " " << word;
-    }
-  }
-  return out;
-}
 
 }
 

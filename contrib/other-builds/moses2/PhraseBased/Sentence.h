@@ -26,11 +26,12 @@ public:
   //////////////////////////////////////////////////////////////////////////////
   class XMLOption
   {
-    friend std::ostream& operator<<(std::ostream &out, const XMLOption &obj);
-
   public:
     std::string nodeName;
     size_t startPos, phraseSize;
+
+    void Debug(std::ostream &out, const System &system) const;
+
   };
 
   //////////////////////////////////////////////////////////////////////////////

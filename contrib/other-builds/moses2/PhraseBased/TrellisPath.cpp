@@ -16,10 +16,9 @@ using namespace std;
 namespace Moses2
 {
 
-std::ostream& operator<<(std::ostream &out, const TrellisNode &node)
+void TrellisNode::Debug(std::ostream &out, const System &system) const
 {
-  out << "arcList=" << node.arcList->size() << " " << node.ind;
-  return out;
+  out << "arcList=" << arcList->size() << " " << ind;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -75,12 +74,12 @@ SCORE TrellisPath::GetFutureScore() const
   return m_scores->GetTotalScore();
 }
 
-void TrellisPath::OutputToStream(std::ostream &out, const System &system) const
+void TrellisPath::Debug(std::ostream &out, const System &system) const
 {
   out << ToString();
   out << "||| ";
 
-  GetScores().OutputBreakdownToStream(out, system);
+  GetScores().Debug(out, system);
   out << "||| ";
 
   out << GetScores().GetTotalScore();
@@ -94,7 +93,7 @@ std::string TrellisPath::ToString() const
     const TrellisNode &node = nodes[i];
     const Hypothesis *hypo = static_cast<const Hypothesis*>(node.GetHypo());
     //cerr << "hypo=" << hypo << " " << *hypo << endl;
-    hypo->GetTargetPhrase().OutputToStream(out);
+    hypo->GetTargetPhrase().Debug(out);
     out << " ";
   }
   return out.str();

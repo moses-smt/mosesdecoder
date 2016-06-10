@@ -48,10 +48,11 @@ TargetPhraseImpl::~TargetPhraseImpl()
   // TODO Auto-generated destructor stub
 }
 
-std::ostream& operator<<(std::ostream &out, const TargetPhraseImpl &obj)
+void TargetPhraseImpl::Debug(std::ostream &out, const System &system) const
 {
-  out << (const Phrase<Moses2::Word>&) obj << " SCORES:" << obj.GetScores();
-  return out;
+  static_cast<const Phrase<Moses2::Word>&>(*this).Debug(out);
+  out << " SCORES:";
+  GetScores().Debug(out, system);
 }
 
 }

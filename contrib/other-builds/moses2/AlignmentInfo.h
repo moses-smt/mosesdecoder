@@ -32,13 +32,13 @@ namespace Moses2
 {
 
 class AlignmentInfoCollection;
+class System;
 
 /** Collection of non-terminal alignment pairs, ordered by source index.
   * Usually held by a TargetPhrase to map non-terms in hierarchical/syntax models
  */
 class AlignmentInfo
 {
-  friend std::ostream& operator<<(std::ostream &, const AlignmentInfo &);
   friend struct AlignmentInfoOrderer;
   friend struct AlignmentInfoHasher;
   friend class AlignmentInfoCollection;
@@ -93,6 +93,8 @@ public:
     return m_collection == rhs.m_collection &&
            m_nonTermIndexMap == rhs.m_nonTermIndexMap;
   }
+
+  void Debug(std::ostream &out, const System &system) const;
 
 private:
   //! AlignmentInfo objects should only be created by an AlignmentInfoCollection

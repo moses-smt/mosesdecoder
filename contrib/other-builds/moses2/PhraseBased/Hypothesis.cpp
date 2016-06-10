@@ -108,16 +108,17 @@ bool Hypothesis::operator==(const Hypothesis &other) const
   return ret;
 }
 
-void Hypothesis::OutputToStream(std::ostream &out) const
+void Hypothesis::Debug(std::ostream &out) const
 {
   if (m_prevHypo) {
-    m_prevHypo->OutputToStream(out);
+    m_prevHypo->Debug(out);
   }
   //cerr << *this << endl;
 
   if (GetTargetPhrase().GetSize()) {
     const Phrase<Moses2::Word> &phrase = GetTargetPhrase();
-    out << phrase << " ";
+    phrase.Debug(out);
+    out << " ";
   }
 
   if (m_path->range.GetStartPos() != NOT_FOUND) {
@@ -133,40 +134,36 @@ void Hypothesis::OutputToStream(std::ostream &out) const
       out << m_path->range.GetStartPos() << "-" << m_path->range.GetEndPos() << ",";
 
       // score breakdown
-      m_scores->OutputBreakdownToStream(out, m_mgr->system);
+      m_scores->Debug(out, m_mgr->system);
 
       out << "| ";
     }
   }
 }
 
-std::ostream& operator<<(std::ostream &out, const Hypothesis &obj)
+std::string Hypothesis::Debug() const
 {
+  std::stringstream out;
+
   // coverage
-  out << obj.GetBitmap() << " " << obj.GetInputPath().range << " ";
+  out << GetBitmap() << " " << GetInputPath().range << " ";
 
   // states
   const std::vector<const StatefulFeatureFunction*> &sfffs =
-      obj.GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
+      GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
   size_t numStatefulFFs = sfffs.size();
   for (size_t i = 0; i < numStatefulFFs; ++i) {
-    const FFState &state = *obj.GetState(i);
+    const FFState &state = *GetState(i);
     out << "(" << state << ") ";
   }
 
   // string
-  obj.OutputToStream(out);
+  Debug(out);
   out << " ";
-  out << "fc=" << obj.GetFutureScore() << " ";
-  obj.GetScores().Debug(out, obj.GetManager().system);
-  return out;
-}
+  out << "fc=" << GetFutureScore() << " ";
+  GetScores().Debug(out, GetManager().system);
 
-std::string Hypothesis::Debug() const
-{
-  std::stringstream strm;
-  strm << *this;
-  return strm.str();
+  return out.str();
 }
 
 void Hypothesis::EmptyHypothesisState(const InputType &input)

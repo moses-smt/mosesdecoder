@@ -20,8 +20,6 @@ class TrellisPaths;
 
 class TrellisNode
 {
-  friend std::ostream& operator<<(std::ostream &, const TrellisNode &);
-
 public:
   const ArcList *arcList;
   size_t ind;
@@ -35,6 +33,9 @@ public:
   {
     return (*arcList)[ind];
   }
+
+  void Debug(std::ostream &out, const System &system) const;
+
 };
 
 class TrellisPath
@@ -63,7 +64,7 @@ public:
   }
   SCORE GetFutureScore() const;
 
-  void OutputToStream(std::ostream &out, const System &system) const;
+  void Debug(std::ostream &out, const System &system) const;
   std::string ToString() const;
 
   //! create a set of next best paths by wiggling 1 of the node at a time.

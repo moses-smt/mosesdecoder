@@ -93,8 +93,6 @@ class Queue : public std::priority_queue<QueueItem*,
 ///////////////////////////////////////////
 class SeenPositionItem
 {
-  friend std::ostream& operator<<(std::ostream &out, const SeenPositionItem &obj);
-
 public:
   const SCFG::TargetPhraseImpl *tp;
   std::vector<size_t> hypoIndColl;
@@ -106,6 +104,8 @@ public:
     bool ret = (tp == compare.tp) && (hypoIndColl == compare.hypoIndColl);
     return ret;
   }
+
+  void Debug(std::ostream &out, const System &system) const;
 
 };
 

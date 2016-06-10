@@ -39,10 +39,10 @@ void Stacks::Init(const Manager &mgr, size_t numStacks)
   }
 }
 
-std::ostream& operator<<(std::ostream &out, const Stacks &obj)
+void Stacks::Debug(std::ostream &out, const System &system) const
 {
-  for (size_t i = 0; i < obj.GetSize(); ++i) {
-    const Stack *stack = obj.m_stacks[i];
+  for (size_t i = 0; i < GetSize(); ++i) {
+    const Stack *stack = m_stacks[i];
     if (stack) {
       out << stack->GetSize() << " ";
     }
@@ -50,8 +50,6 @@ std::ostream& operator<<(std::ostream &out, const Stacks &obj)
       out << "N ";
     }
   }
-
-  return out;
 }
 
 void Stacks::Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,

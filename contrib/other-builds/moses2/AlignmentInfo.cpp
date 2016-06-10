@@ -156,13 +156,12 @@ std::vector<size_t> AlignmentInfo::GetSourceIndex2PosMap() const
   return ret;
 }
 
-std::ostream& operator<<(std::ostream &out, const AlignmentInfo &alignmentInfo)
+void AlignmentInfo::Debug(std::ostream &out, const System &system) const
 {
   AlignmentInfo::const_iterator iter;
-  for (iter = alignmentInfo.begin(); iter != alignmentInfo.end(); ++iter) {
+  for (iter = begin(); iter != end(); ++iter) {
     out << iter->first << "-" << iter->second << " ";
   }
-  return out;
 }
 
 }

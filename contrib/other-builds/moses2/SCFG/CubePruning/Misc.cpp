@@ -133,14 +133,13 @@ SeenPositionItem::SeenPositionItem(const SCFG::TargetPhraseImpl &vtp, const Vect
   }
 }
 
-std::ostream& operator<<(std::ostream &out, const SeenPositionItem &obj)
+void SeenPositionItem::Debug(std::ostream &out, const System &system) const
 {
-  out << obj.tp << " ";
+  out << tp << " ";
 
-  for (size_t i = 0; i < obj.hypoIndColl.size(); ++i) {
-    out << obj.hypoIndColl[i] << " ";
+  for (size_t i = 0; i < hypoIndColl.size(); ++i) {
+    out << hypoIndColl[i] << " ";
   }
-  return out;
 }
 
 size_t hash_value(const SeenPositionItem& obj)

@@ -124,13 +124,11 @@ void HypothesisColl::Clear()
   m_coll.clear();
 }
 
-std::ostream& operator<<(std::ostream &out, const HypothesisColl &obj)
+void HypothesisColl::Debug(std::ostream &out, const System &system) const
 {
-  BOOST_FOREACH (const HypothesisBase *hypo, obj.m_coll) {
+  BOOST_FOREACH (const HypothesisBase *hypo, m_coll) {
     out << hypo->Debug() << std::endl;
   }
-
-  return out;
 }
 
 } /* namespace Moses2 */

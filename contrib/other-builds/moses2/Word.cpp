@@ -86,11 +86,6 @@ void Word::Debug(std::ostream &out) const
   }
 }
 
-std::ostream& operator<<(std::ostream &out, const Word &obj)
-{
-  obj.Debug(out);
-  return out;
-}
 
 std::string Word::GetString(const FactorList &factorTypes) const
 {

@@ -63,30 +63,22 @@ TargetPhraseImpl::~TargetPhraseImpl()
   // TODO Auto-generated destructor stub
 }
 
-std::ostream& operator<<(std::ostream &out, const SCFG::TargetPhraseImpl &obj)
+void TargetPhraseImpl::Debug(std::ostream &out, const System &system) const
 {
-  out << obj.lhs << " -> ";
-  for (size_t i = 0; i < obj.GetSize(); ++i) {
-    const SCFG::Word &word = obj[i];
-    out << word << " ";
-  }
-  out << "pt=" << obj.pt.GetName()
-      << " SCORES:" << obj.GetScores()
-      << " ALIGN:" << obj.GetAlignTerm() << " " << obj.GetAlignNonTerm();
-  return out;
-}
-
-void TargetPhraseImpl::OutputToStream(std::ostream &out, const System &system) const
-{
-  out << lhs << " -> ";
+  lhs.Debug(out);
+  out << " -> ";
   for (size_t i = 0; i < GetSize(); ++i) {
     const SCFG::Word &word = (*this)[i];
-    out << word << " ";
+    word.Debug(out);
+    out << " ";
   }
   out << "pt=" << pt.GetName();
   out << " SCORES:";
-  GetScores().OutputBreakdownToStream(out, system);
-  out << " ALIGN:" << GetAlignTerm() << " " << GetAlignNonTerm();
+  GetScores().Debug(out, system);
+  out << " ALIGN:";
+  GetAlignTerm().Debug(out, system);
+  out << " ";
+  GetAlignNonTerm().Debug(out, system);
 
 }
 

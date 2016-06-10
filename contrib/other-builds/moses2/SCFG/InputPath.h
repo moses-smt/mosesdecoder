@@ -25,7 +25,6 @@ class TargetPhraseImpl;
 ////////////////////////////////////////////////////////////////////////////
 class InputPath: public InputPathBase
 {
-  friend std::ostream& operator<<(std::ostream &, const SCFG::InputPath &);
 public:
   typedef boost::unordered_map<SymbolBind,
       SCFG::TargetPhrases*,
@@ -52,6 +51,9 @@ public:
       const SCFG::TargetPhraseImpl *tp);
 
   size_t GetNumRules() const;
+
+  void Debug(std::ostream &out, const System &system) const;
+
 protected:
   ActiveChart *m_activeChart;
 };

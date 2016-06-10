@@ -25,7 +25,6 @@ class PhraseTable;
 
 class TargetPhraseImpl: public TargetPhrase<Moses2::Word>
 {
-  friend std::ostream& operator<<(std::ostream &, const TargetPhraseImpl &);
 public:
 
   static TargetPhraseImpl *CreateFromString(MemPool &pool,
@@ -36,7 +35,7 @@ public:
 
   virtual ~TargetPhraseImpl();
 
-  //mutable void *chartState;
+  void Debug(std::ostream &out, const System &system) const;
 
 protected:
 };
