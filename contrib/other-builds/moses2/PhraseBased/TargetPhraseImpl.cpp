@@ -50,7 +50,7 @@ TargetPhraseImpl::~TargetPhraseImpl()
 
 void TargetPhraseImpl::Debug(std::ostream &out, const System &system) const
 {
-  static_cast<const Phrase<Moses2::Word>&>(*this).Debug(out);
+  Phrase<Moses2::Word>::Debug(out);
   out << " SCORES:";
   GetScores().Debug(out, system);
 }

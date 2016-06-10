@@ -47,7 +47,7 @@ public:
 
   void Debug(std::ostream &out) const
   {
-    static_cast<const Phrase<WORD> &>(*this).Debug(out);
+    Phrase<WORD>::Debug(out);
     out << " SCORES:" << GetScores();
   }
 
