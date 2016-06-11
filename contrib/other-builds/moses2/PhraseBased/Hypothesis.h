@@ -67,7 +67,7 @@ public:
     return *m_targetPhrase;
   }
 
-  void Debug(std::ostream &out) const;
+  void Debug(std::ostream &out, const System &system) const;
   virtual std::string Debug() const;
 
   void EmptyHypothesisState(const InputType &input);

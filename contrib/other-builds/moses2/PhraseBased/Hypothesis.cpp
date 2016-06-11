@@ -108,10 +108,10 @@ bool Hypothesis::operator==(const Hypothesis &other) const
   return ret;
 }
 
-void Hypothesis::Debug(std::ostream &out) const
+void Hypothesis::Debug(std::ostream &out, const System &system) const
 {
   if (m_prevHypo) {
-    m_prevHypo->Debug(out);
+    m_prevHypo->Debug(out, m_mgr->system);
   }
   //cerr << *this << endl;
 
@@ -158,7 +158,7 @@ std::string Hypothesis::Debug() const
   }
 
   // string
-  Debug(out);
+  Debug(out, m_mgr->system);
   out << " ";
   out << "fc=" << GetFutureScore() << " ";
   GetScores().Debug(out, GetManager().system);

@@ -35,7 +35,7 @@ public:
 
   virtual ~TargetPhraseImpl();
 
-  void Debug(std::ostream &out, const System &system) const;
+  virtual void Debug(std::ostream &out, const System &system) const;
 
 protected:
 };

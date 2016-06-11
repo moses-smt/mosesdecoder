@@ -29,7 +29,7 @@ public:
     return ret;
   }
 
-  void Debug(std::ostream &out, const System &system) const
+  virtual void Debug(std::ostream &out, const System &system) const
   {
     if (GetSize()) {
       (*this)[0].Debug(out);

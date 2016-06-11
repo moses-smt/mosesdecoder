@@ -45,7 +45,7 @@ public:
   SCORE *GetScoresProperty(int propertyInd) const
   {    return scoreProperties ? scoreProperties + propertyInd : NULL; }
 
-  void Debug(std::ostream &out) const
+  virtual void Debug(std::ostream &out) const
   {
     Phrase<WORD>::Debug(out);
     out << " SCORES:" << GetScores();
