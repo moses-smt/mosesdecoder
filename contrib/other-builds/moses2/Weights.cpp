@@ -10,6 +10,7 @@
 #include "FF/FeatureFunction.h"
 #include "FF/FeatureFunctions.h"
 #include "Weights.h"
+#include "System.h"
 #include "legacy/Util2.h"
 
 using namespace std;
@@ -35,8 +36,9 @@ void Weights::Init(const FeatureFunctions &ffs)
   m_weights.resize(totalNumScores, 1);
 }
 
-void Weights::Debug(std::ostream &out, const FeatureFunctions &ffs) const
+void Weights::Debug(std::ostream &out, const System &system) const
 {
+  const FeatureFunctions &ffs  = system.featureFunctions;
   size_t numScores = ffs.GetNumScores();
   for (size_t i = 0; i < numScores; ++i) {
     out << m_weights[i] << " ";

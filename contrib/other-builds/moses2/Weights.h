@@ -29,7 +29,7 @@ public:
     return m_weights[ind];
   }
 
-  void Debug(std::ostream &out, const FeatureFunctions &ffs) const;
+  void Debug(std::ostream &out, const System &system) const;
 
   void CreateFromString(const FeatureFunctions &ffs, const std::string &line);
 

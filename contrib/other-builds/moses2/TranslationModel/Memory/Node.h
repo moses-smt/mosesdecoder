@@ -99,7 +99,7 @@ public:
   const Children &GetChildren() const
   { return m_children; }
 
-  void Debug() const {
+  void Debug(std::ostream &out, const System &system) const {
     BOOST_FOREACH(const typename Children::value_type &valPair, m_children) {
       const WORD &word = valPair.first;
       //std::cerr << word << "(" << word.hash() << ") ";
