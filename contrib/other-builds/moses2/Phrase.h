@@ -107,6 +107,20 @@ public:
     }
   }
 
+  virtual void OutputToStream(std::ostream &out) const
+  {
+    size_t size = GetSize();
+    if (size) {
+      (*this)[0].Debug(out);
+      for (size_t i = 1; i < size; ++i) {
+        const WORD &word = (*this)[i];
+        out << " ";
+        word.OutputToStream(out);
+      }
+    }
+  }
+
+
 };
 
 ////////////////////////////////////////////////////////////////////////

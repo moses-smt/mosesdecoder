@@ -184,7 +184,7 @@ std::string Manager::OutputBest() const
       out << bestHypo->GetScores().GetTotalScore() << " ";
     }
 
-    bestHypo->Debug(out, system);
+    bestHypo->OutputToStream(out);
     //cerr << "BEST TRANSLATION: " << *bestHypo;
   }
   else {

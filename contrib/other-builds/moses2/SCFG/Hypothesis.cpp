@@ -129,10 +129,8 @@ void Hypothesis::OutputToStream(std::ostream &out) const
   }
 }
 
-std::string Hypothesis::Debug() const
+void Hypothesis::Debug(std::ostream &out, const System &system) const
 {
-  std::stringstream out;
-
   out << this;
 
   // score
@@ -154,7 +152,6 @@ std::string Hypothesis::Debug() const
     out << prevHypo;
   }
   */
-  return out.str();
 }
 
 } // namespaces

@@ -39,7 +39,8 @@ public:
   }
 
   void OutputToStream(std::ostream &out) const;
-  virtual std::string Debug() const;
+
+  void Debug(std::ostream &out, const System &system) const;
 
 protected:
   const SCFG::TargetPhraseImpl *m_targetPhrase;

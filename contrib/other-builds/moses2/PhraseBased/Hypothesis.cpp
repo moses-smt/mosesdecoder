@@ -110,14 +110,36 @@ bool Hypothesis::operator==(const Hypothesis &other) const
 
 void Hypothesis::Debug(std::ostream &out, const System &system) const
 {
+  // coverage
+  out << GetBitmap() << " " << GetInputPath().range << " ";
+
+  // states
+  const std::vector<const StatefulFeatureFunction*> &sfffs =
+      GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
+  size_t numStatefulFFs = sfffs.size();
+  for (size_t i = 0; i < numStatefulFFs; ++i) {
+    const FFState &state = *GetState(i);
+    out << "(" << state << ") ";
+  }
+
+  // string
+  Debug(out, m_mgr->system);
+  out << " ";
+  out << "fc=" << GetFutureScore() << " ";
+  GetScores().Debug(out, GetManager().system);
+
+}
+
+void Hypothesis::OutputToStream(std::ostream &out) const
+{
   if (m_prevHypo) {
-    m_prevHypo->Debug(out, m_mgr->system);
+    m_prevHypo->OutputToStream(out);
   }
   //cerr << *this << endl;
 
   if (GetTargetPhrase().GetSize()) {
     const Phrase<Moses2::Word> &phrase = GetTargetPhrase();
-    phrase.Debug(out);
+    phrase.OutputToStream(out);
     out << " ";
   }
 
@@ -139,31 +161,6 @@ void Hypothesis::Debug(std::ostream &out, const System &system) const
       out << "| ";
     }
   }
-}
-
-std::string Hypothesis::Debug() const
-{
-  std::stringstream out;
-
-  // coverage
-  out << GetBitmap() << " " << GetInputPath().range << " ";
-
-  // states
-  const std::vector<const StatefulFeatureFunction*> &sfffs =
-      GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
-  size_t numStatefulFFs = sfffs.size();
-  for (size_t i = 0; i < numStatefulFFs; ++i) {
-    const FFState &state = *GetState(i);
-    out << "(" << state << ") ";
-  }
-
-  // string
-  Debug(out, m_mgr->system);
-  out << " ";
-  out << "fc=" << GetFutureScore() << " ";
-  GetScores().Debug(out, GetManager().system);
-
-  return out.str();
 }
 
 void Hypothesis::EmptyHypothesisState(const InputType &input)

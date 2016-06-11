@@ -68,7 +68,8 @@ public:
   }
 
   void Debug(std::ostream &out, const System &system) const;
-  virtual std::string Debug() const;
+
+  virtual void OutputToStream(std::ostream &out) const;
 
   void EmptyHypothesisState(const InputType &input);
 

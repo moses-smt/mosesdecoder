@@ -86,6 +86,21 @@ void Word::Debug(std::ostream &out) const
   }
 }
 
+void Word::OutputToStream(std::ostream &out) const
+{
+  bool outputAlready = false;
+  for (size_t i = 0; i < MAX_NUM_FACTORS; ++i) {
+    const Factor *factor = m_factors[i];
+    if (factor) {
+      if (outputAlready) {
+        out << "|";
+      }
+      out << *factor;
+      outputAlready = true;
+    }
+  }
+}
+
 
 std::string Word::GetString(const FactorList &factorTypes) const
 {

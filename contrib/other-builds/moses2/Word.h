@@ -53,6 +53,7 @@ public:
   }
 
   virtual void Debug(std::ostream &out) const;
+  virtual void OutputToStream(std::ostream &out) const;
 
   std::string GetString(const FactorList &factorTypes) const;
 protected:
