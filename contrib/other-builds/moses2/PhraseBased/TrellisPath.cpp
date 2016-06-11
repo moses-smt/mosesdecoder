@@ -93,7 +93,7 @@ std::string TrellisPath::ToString() const
     const TrellisNode &node = nodes[i];
     const Hypothesis *hypo = static_cast<const Hypothesis*>(node.GetHypo());
     //cerr << "hypo=" << hypo << " " << *hypo << endl;
-    hypo->GetTargetPhrase().Debug(out);
+    hypo->GetTargetPhrase().OutputToStream(out);
     out << " ";
   }
   return out.str();
