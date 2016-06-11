@@ -21,7 +21,6 @@ class System;
 
 class Scores
 {
-  friend std::ostream& operator<<(std::ostream &, const Scores &);
 public:
   Scores(const System &system, MemPool &pool, size_t numScores);
   Scores(const System &system, MemPool &pool, size_t numScores,

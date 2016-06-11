@@ -48,7 +48,8 @@ public:
   virtual void Debug(std::ostream &out, const System &system) const
   {
     Phrase<WORD>::Debug(out, system);
-    out << " SCORES:" << GetScores();
+    out << " SCORES:";
+    GetScores().Debug(out, system);
   }
 
 protected:

@@ -242,18 +242,12 @@ void Scores::Debug(std::ostream &out, const System &system) const
   if (system.options.nbest.nbest_size) {
     out << ", ";
     BOOST_FOREACH(const FeatureFunction *ff, system.featureFunctions.GetFeatureFunctions()){
-    out << ff->GetName() << "= ";
-    for (size_t i = ff->GetStartInd(); i < (ff->GetStartInd() + ff->GetNumScores()); ++i) {
-      out << m_scores[i] << " ";
+      out << ff->GetName() << "= ";
+      for (size_t i = ff->GetStartInd(); i < (ff->GetStartInd() + ff->GetNumScores()); ++i) {
+        out << m_scores[i] << " ";
+      }
     }
   }
-}
-}
-
-std::ostream& operator<<(std::ostream &out, const Scores &obj)
-{
-  out << obj.m_total;
-  return out;
 }
 
 // static functions to work out estimated scores
