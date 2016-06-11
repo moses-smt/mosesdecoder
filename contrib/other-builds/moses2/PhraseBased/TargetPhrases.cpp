@@ -41,7 +41,7 @@ TargetPhrases::~TargetPhrases()
 void TargetPhrases::Debug(std::ostream &out, const System &system) const
 {
   BOOST_FOREACH(const TargetPhrase<Moses2::Word> *tp, *this){
-    tp->Debug(out);
+    tp->Debug(out, system);
     out << endl;
   }
 }

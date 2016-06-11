@@ -122,7 +122,7 @@ void Hypothesis::OutputToStream(std::ostream &out) const
     }
     else {
       //cerr << "not nt" << endl;
-      word.Debug(out);
+      word.OutputToStream(out);
       out << " ";
     }
 

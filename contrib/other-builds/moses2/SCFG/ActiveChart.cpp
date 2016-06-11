@@ -61,7 +61,7 @@ void SymbolBind::Debug(std::ostream &out, const System &system) const
 {
   BOOST_FOREACH(const SymbolBindElement &ele, coll) {
     out << "("<< *ele.range;
-    ele.word->Debug(out);
+    ele.word->Debug(out, system);
     out << ") ";
   }
 }

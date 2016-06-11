@@ -94,15 +94,15 @@ public:
 
   virtual SubPhrase<WORD> GetSubPhrase(size_t start, size_t size) const = 0;
 
-  virtual void Debug(std::ostream &out) const
+  virtual void Debug(std::ostream &out, const System &system) const
   {
     size_t size = GetSize();
     if (size) {
-      (*this)[0].Debug(out);
+      (*this)[0].Debug(out, system);
       for (size_t i = 1; i < size; ++i) {
         const WORD &word = (*this)[i];
         out << " ";
-        word.Debug(out);
+        word.Debug(out, system);
       }
     }
   }
@@ -111,7 +111,7 @@ public:
   {
     size_t size = GetSize();
     if (size) {
-      (*this)[0].Debug(out);
+      (*this)[0].OutputToStream(out);
       for (size_t i = 1; i < size; ++i) {
         const WORD &word = (*this)[i];
         out << " ";

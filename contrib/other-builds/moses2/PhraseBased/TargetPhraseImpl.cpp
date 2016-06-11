@@ -50,7 +50,7 @@ TargetPhraseImpl::~TargetPhraseImpl()
 
 void TargetPhraseImpl::Debug(std::ostream &out, const System &system) const
 {
-  Phrase<Moses2::Word>::Debug(out);
+  Phrase<Moses2::Word>::Debug(out, system);
   out << " SCORES:";
   GetScores().Debug(out, system);
 }

@@ -32,11 +32,11 @@ public:
   virtual void Debug(std::ostream &out, const System &system) const
   {
     if (GetSize()) {
-      (*this)[0].Debug(out);
+      (*this)[0].Debug(out, system);
       for (size_t i = 1; i < GetSize(); ++i) {
         const WORD &word = (*this)[i];
         out << " ";
-        word.Debug(out);
+        word.Debug(out, system);
       }
     }
   }

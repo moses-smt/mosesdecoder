@@ -64,12 +64,23 @@ size_t Word::hash() const
   return ret;
 }
 
-void Word::Debug(std::ostream &out) const
+void Word::OutputToStream(std::ostream &out) const
 {
   if (isNonTerminal) {
     out << "[";
   }
-  Moses2::Word::Debug(out);
+  Moses2::Word::OutputToStream(out);
+  if (isNonTerminal) {
+      out << "]";
+  }
+}
+
+void Word::Debug(std::ostream &out, const System &system) const
+{
+  if (isNonTerminal) {
+    out << "[";
+  }
+  Moses2::Word::Debug(out, system);
   if (isNonTerminal) {
       out << "]";
   }

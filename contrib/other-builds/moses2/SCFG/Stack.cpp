@@ -109,7 +109,7 @@ void Stack::Debug(std::ostream &out, const System &system) const
   BOOST_FOREACH (const SCFG::Stack::Coll::value_type &valPair, m_coll) {
     const SCFG::Word &lhs = valPair.first;
     const Moses2::HypothesisColl &hypos = *valPair.second;
-    lhs.Debug(out);
+    lhs.Debug(out, system);
     out << "=" << hypos.GetSize();
     hypos.Debug(out, system);
     out << "\n";

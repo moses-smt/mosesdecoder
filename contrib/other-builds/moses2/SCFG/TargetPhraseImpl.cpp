@@ -65,11 +65,11 @@ TargetPhraseImpl::~TargetPhraseImpl()
 
 void TargetPhraseImpl::Debug(std::ostream &out, const System &system) const
 {
-  lhs.Debug(out);
+  lhs.Debug(out, system);
   out << " -> ";
   for (size_t i = 0; i < GetSize(); ++i) {
     const SCFG::Word &word = (*this)[i];
-    word.Debug(out);
+    word.Debug(out, system);
     out << " ";
   }
   out << "pt=" << pt.GetName();

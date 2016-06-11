@@ -52,8 +52,8 @@ public:
     return m_factors[ind];
   }
 
-  virtual void Debug(std::ostream &out) const;
   virtual void OutputToStream(std::ostream &out) const;
+  virtual void Debug(std::ostream &out, const System &system) const;
 
   std::string GetString(const FactorList &factorTypes) const;
 protected:
