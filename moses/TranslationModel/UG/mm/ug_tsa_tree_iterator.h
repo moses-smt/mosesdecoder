@@ -254,7 +254,7 @@ namespace sapt
     if (lower.size() == 1)
       {
         Token const* t = this->getToken(0);
-	id_type wid = t->id();
+        id_type wid = t->id();
         char const* hi = root->getUpperBound(wid);
         if (upper[0] < hi)
           {
@@ -290,8 +290,8 @@ namespace sapt
         // display(root->corpus->getToken(L),"L1");
         // display(root->corpus->getToken(U),"U1");
 
-	int x = root->corpus->cmp(U,L,lower.size()-1);
-	// cerr << "x=" << x << std::endl;
+        int x = root->corpus->cmp(U,L,lower.size()-1);
+        // cerr << "x=" << x << std::endl;
         if (x != 1)
           return false;
         lower.back() = upper.back();
