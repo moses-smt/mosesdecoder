@@ -232,6 +232,7 @@ namespace sapt
     return totalCount;
   }
 
+#if 1
   template<typename TKN>
   int
   Ttrack<TKN>::
@@ -251,28 +252,21 @@ namespace sapt
 
     int ret=-1;
 
-#if 0
-    cerr << "A: "; for (TKN const* x = a; x; x = next(x)) cerr << x->lemma << " "; cerr << std::endl;
-    cerr << "B: "; for (TKN const* x = b; x; x = next(x)) cerr << x->lemma << " "; cerr << std::endl;
-#endif
-
     while (a >= bosA && a < eosA)
       {
-        // cerr << keyLength << "a. " << (a ? a->lemma : 0) << " " << (b ? b->lemma : 0) << std::endl;
-	if (*a < *b) {          break; } // return -1;
+        if (*a < *b) {          break; } // return -1;
         if (*a > *b) { ret = 2; break; } // return  2;
         a = next(a);
         b = next(b);
-        // cerr << keyLength << "b. " << (a ? a->lemma : 0) << " " << (b ? b->lemma : 0) << std::endl;
         if (--keyLength==0 || b < bosB || b >= eosB)
           {
             ret = (a < bosA || a >= eosA) ? 0 : 1;
             break;
           }
       }
-    // cerr << "RETURNING " << ret << std::endl;
     return ret;
   }
+#endif
 
   template<typename TKN>
   int
