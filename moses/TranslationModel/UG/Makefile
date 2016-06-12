@@ -35,6 +35,7 @@ CXXFLAGS += -DMAX_NUM_FACTORS=4
 CXXFLAGS += -DKENLM_MAX_ORDER=5
 CXXFLAGS += -DWITH_THREADS
 CXXFLAGS += -DNO_MOSES
+CXXFLAGS += -std=c++0x
 CXXFLAGS += -I$(dir ${MOSES_ROOT})mmt-only
 CXXFLAGS += -I${MOSES_ROOT} -I. -I${MOSES_ROOT}/opt/include -I${MOSES_ROOT}/opt/include/eigen3
 
@@ -46,7 +47,7 @@ else ifeq ($(variant),syntax)
 CXXFLAGS += -fsyntax-only
 endif
 
-LDFLAGS  = -L${MOSES_ROOT}/opt/lib64 -L./lib/ 
+LDFLAGS  = -L${MOSES_ROOT}/opt/lib -L./lib/ 
 
 # WDIR = build/$(variant)/${HOSTTYPE}/${KERNEL}
 WDIR = build/$(variant)
@@ -61,18 +62,19 @@ nil:
 
 # libraries required
 
-BOOSTLIBS :=  program_options iostreams thread system filesystem
+BOOSTLIBS :=  program_options iostreams thread timer chrono system filesystem 
 BOOSTLIBS := $(addprefix -lboost_,${BOOSTLIBS})
 ifeq ($(BOOSTLIBTAG),"")
 BOOSTLIBS := $(addsuffix ${BOOSTLIBTAG},${BOOSTLIBS})
 endif
 
-STATIC_LIBS   = m bz2 z dl rt 
+XMLRPC_LIBS = xmlrpc++ xmlrpc xmlrpc_xmlparse xmlrpc_xmltok xmlrpc_util 
+STATIC_LIBS   = m bz2 z dl rt ${XMLRPC_LIBS}
 DYNAMIC_LIBS  = pthread 
-#DYNAMIC_LIBS  += tcmalloc
+DYNAMIC_LIBS  += tcmalloc
 
 LIBS  = -Wl,-B$(link) 
-LIBS += -L${MOSES_ROOT}/opt/lib64 ${BOOSTLIBS}
+LIBS += -L${MOSES_ROOT}/opt/lib ${BOOSTLIBS}
 LIBS += $(addprefix -l,${STATIC_LIBS})
 LIBS += -Wl,-Bdynamic
 LIBS += $(addprefix -l,${DYNAMIC_LIBS})
