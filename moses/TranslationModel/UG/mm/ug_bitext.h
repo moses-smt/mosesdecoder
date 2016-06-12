@@ -124,6 +124,7 @@ namespace sapt
     SPTR<pstats::cache_t> m_cache1, m_cache2; // caches for sampling results
 
     std::vector<std::string> m_docname;
+    std::vector<size_t> m_doc_end; // id where document ends
     std::map<std::string,id_type>  m_docname2docid; // maps from doc names to ids
     SPTR<std::vector<id_type> >   m_sid2docid; // maps from sentences to docs (ids)
 
@@ -220,13 +221,51 @@ namespace sapt
     ( id_type const sid, iter const* m1, iter const* m2, std::ostream& out ) const;
 
     std::string sid2docname(id_type const sid) const;
-    std::string docid2name(id_type const sid) const;
+    std::string docid2name(id_type const did) const;
     int docname2docid(std::string const& name) const;
     
     std::vector<id_type> const* sid2did() const;
     int sid2did(uint32_t sid) const;
+
+    size_t count_docs() const { return m_doc_end.size(); }
+    size_t doc_start(int i) const; 
+    size_t doc_end(int i) const; 
+    size_t doc_size(int i) const; 
+
   };
 
+  template<typename Token>
+  size_t
+  Bitext<Token>::
+  doc_start(int i) const
+  {
+    if (i < 0) i += m_doc_end.size();
+    if (i == 0) return 0;
+    UTIL_THROW_IF2(i >= m_doc_end.size(), "index out of bounds at " << HERE);
+    return m_doc_end[i-1];
+  }
+
+  template<typename Token>
+  size_t
+  Bitext<Token>::
+  doc_size(int i) const
+  {
+    if (i < 0) i += m_doc_end.size();
+    UTIL_THROW_IF2(i >= m_doc_end.size(), "index out of bounds at " << HERE);
+    if (i == 0) return m_doc_end[0];
+    return m_doc_end[i] - m_doc_end[i-1];
+  }
+
+  template<typename Token>
+  size_t
+  Bitext<Token>::
+  doc_end(int i) const
+  {
+    if (i < 0) i += m_doc_end.size();
+    UTIL_THROW_IF2(i >= m_doc_end.size(), "index out of bounds at " << HERE);
+    return m_doc_end[i];
+  }
+  
   #include "ug_bitext_agenda.h"
 
   template<typename Token>

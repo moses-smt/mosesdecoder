@@ -48,6 +48,7 @@ namespace sapt
 #endif
 	for (b += a; a < b; ++a)
 	  (*this->m_sid2docid)[a] = docid;
+        this->m_doc_end.push_back(b);
       }
     UTIL_THROW_IF2(b != this->T1->size(),
 		   "Document map doesn't match corpus!");
