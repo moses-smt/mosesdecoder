@@ -56,7 +56,7 @@ sourceforge = http://downloads.sourceforge.net/project
 nproc := $(shell getconf _NPROCESSORS_ONLN)
 sfget  = mkdir -p '${TMP}' && cd '${TMP}' && wget -qO- ${URL} | tar xz 
 configure-make-install  = cd '$1' && ./configure --prefix='${PREFIX}' 
-configure-make-install += && make -j$(getconf _NPROCESSORS_ONLN) && make install
+configure-make-install += && make -j$(nproc) && make install
 
 # XMLRPC-C for moses server
 xmlrpc: URL=$(sourceforge)/xmlrpc-c/Xmlrpc-c%20Super%20Stable/1.33.17/xmlrpc-c-1.33.17.tgz
@@ -87,15 +87,15 @@ irstlm: | $(call safepath,$(IRSTLM_PREFIX)/bin/build-lm.sh)
 $(call safepath,$(IRSTLM_PREFIX)/bin/build-lm.sh):
 	$(sfget)
 	cd $$(find '${TMP}' -name trunk) && ./regenerate-makefiles.sh \
-	&& ./configure --prefix='${PREFIX}' && make -j${shell getconf _NPROCESSORS_ONLN} && make install -j$(shell getconf _NPROCESSORS_ONLN)
+	&& ./configure --prefix='${PREFIX}' && make -j${nproc} && make install -j$(shell getconf _NPROCESSORS_ONLN)
 	rm -rf ${TMP}
 
-# boost 
-boost: URL=http://sourceforge.net/projects/boost/files/boost/1.59.0/boost_1_59_0.tar.gz/download
+# boost https://sourceforge.net/projects/boost/files/boost/1.61.0/boost_1_61_0.tar.gz/download 
+boost: URL=http://sourceforge.net/projects/boost/files/boost/1.61.0/boost_1_61_0.tar.gz/download
 boost: TMP=$(CWD)/build/boost
 boost: PREFIX=${BOOST_PREFIX}
 boost: | $(call safepath,${BOOST_PREFIX}/include/boost)
 $(call safepath,${BOOST_PREFIX}/include/boost):
 	$(sfget)
-	cd '${TMP}/boost_1_59_0' && ./bootstrap.sh && ./b2 --prefix=${PREFIX} -j$(shell getconf _NPROCESSORS_ONLN) install
+	cd '${TMP}/boost_1_61_0' && ./bootstrap.sh && ./b2 -sHAVE_ICU=1 --prefix=${PREFIX} -j$(nproc) install
 	rm -rf ${TMP}
