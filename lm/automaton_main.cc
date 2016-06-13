@@ -129,8 +129,8 @@ template <class Value> class NGramAutomaton {
 
             ngram_order_ = 0;
             node_ = 0;
-            out_length_ = max_order_ - 1 ;
-            ret_ = FullScoreReturn(); //TODO: is this necessary?
+            out_length_ = std::min(pred_data_.length + 1, max_order_ - 1);
+            ret_ = FullScoreReturn();
             succ_ = nullptr;
             succ_finished_ = false;
             state_ = State::Working;
@@ -157,8 +157,12 @@ template <class Value> class NGramAutomaton {
                 }
                 else {
                     pred_finished_ = false;
+                    pred_data_.length = pred_->GetOutLength();
                     NotifyPredecessorWithoutCheck();
                 }
+            }
+            else {
+                pred_finished_ = false;
             }
         }
 
