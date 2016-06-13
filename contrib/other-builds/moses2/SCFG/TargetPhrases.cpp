@@ -5,6 +5,7 @@
  *      Author: hieu
  */
 
+#include <boost/foreach.hpp>
 #include <algorithm>
 #include "TargetPhrases.h"
 #include "TargetPhraseImpl.h"
@@ -46,6 +47,14 @@ void TargetPhrases::SortAndPrune(size_t tableLimit)
   }
 
   //cerr << "TargetPhrases=" << GetSize() << endl;
+}
+
+void TargetPhrases::Debug(std::ostream &out, const System &system) const
+{
+  BOOST_FOREACH(const SCFG::TargetPhraseImpl *tp, m_coll) {
+    out << std::endl;
+    tp->Debug(out, system);
+  }
 }
 
 }

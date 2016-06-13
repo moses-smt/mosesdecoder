@@ -60,7 +60,8 @@ void InputPath::Debug(std::ostream &out, const System &system) const
     const SymbolBind &symbolBind = valPair.first;
     const SCFG::TargetPhrases &tps = *valPair.second;
     symbolBind.Debug(out, system);
-    out << "=" << tps.GetSize() << " ";
+    //out << "=" << tps.GetSize() << " ";
+    tps.Debug(out, system);
   }
 }
 

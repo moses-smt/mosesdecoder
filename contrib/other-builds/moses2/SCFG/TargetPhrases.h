@@ -13,6 +13,7 @@
 namespace Moses2
 {
 class MemPool;
+class System;
 
 namespace SCFG
 {
@@ -53,6 +54,8 @@ public:
   }
 
   void SortAndPrune(size_t tableLimit);
+
+  void Debug(std::ostream &out, const System &system) const;
 
 protected:
   Coll m_coll;

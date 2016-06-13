@@ -75,7 +75,12 @@ void Manager::Decode()
 
       //cerr << "BEFORE LOOKUP path=" << path << endl;
       Lookup(path);
-      //cerr << "AFTER LOOKUP path=" << path << endl;
+
+      if (phraseSize == 1) {
+        cerr << "AFTER LOOKUP path=";
+        path.Debug(cerr, system);
+        cerr << endl;
+      }
 
       Decode(path, stack);
       //cerr << "AFTER DECODE path=" << path << endl;
