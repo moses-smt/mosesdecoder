@@ -28,16 +28,16 @@ public:
   //! iterators
   const_iterator begin() const
   {
-    return m_coll->begin();
+    return m_coll.begin();
   }
   const_iterator end() const
   {
-    return m_coll->end();
+    return m_coll.end();
   }
 
   const SCFG::TargetPhraseImpl& operator[](size_t ind) const
   {
-    return *(*m_coll)[ind];
+    return *m_coll[ind];
   }
 
   TargetPhrases(MemPool &pool);
@@ -45,17 +45,17 @@ public:
   virtual ~TargetPhrases();
 
   size_t GetSize() const
-  { return m_coll->size(); }
+  { return m_coll.size(); }
 
   void AddTargetPhrase(const SCFG::TargetPhraseImpl &targetPhrase)
   {
-    m_coll->push_back(&targetPhrase);
+    m_coll.push_back(&targetPhrase);
   }
 
   void SortAndPrune(size_t tableLimit);
 
 protected:
-  Coll *m_coll;
+  Coll m_coll;
 
 };
 
