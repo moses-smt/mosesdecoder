@@ -44,7 +44,7 @@ public:
 
 protected:
   const SCFG::TargetPhraseImpl *m_targetPhrase;
-  const InputPathBase *m_path;
+  //const InputPathBase *m_path;
 
   Vector<const Hypothesis*> m_prevHypos; // always sorted by source position?
 

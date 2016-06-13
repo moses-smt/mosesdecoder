@@ -6,6 +6,7 @@
 #include "TargetPhraseImpl.h"
 #include "../System.h"
 #include "../Scores.h"
+#include "../InputPathBase.h"
 #include "../FF/StatefulFeatureFunction.h"
 
 using namespace std;
@@ -133,25 +134,28 @@ void Hypothesis::Debug(std::ostream &out, const System &system) const
 {
   out << this;
 
+  //out << " RANGE:";
+  //out << m_path->range;
+
   // score
-  out << "SCORE:";
+  out << " SCORE:";
   GetScores().Debug(out, GetManager().system);
 
+  /*
   out << " m_prevHypos=" << m_prevHypos.size() << " ";
   for (size_t i = 0; i < m_prevHypos.size(); ++i) {
     out << m_prevHypos[i] << " ";
   }
+  */
 
-  //obj.OutputToStream(out);
   m_targetPhrase->Debug(out, GetManager().system);
 
-  /*
-  for (size_t i = 0; i < obj.m_prevHypos.size(); ++i) {
-    const Hypothesis &prevHypo = *obj.m_prevHypos[i];
+  // recursive
+  for (size_t i = 0; i < m_prevHypos.size(); ++i) {
+    const Hypothesis &prevHypo = *m_prevHypos[i];
     out << endl;
-    out << prevHypo;
+    prevHypo.Debug(out, system);
   }
-  */
 }
 
 } // namespaces
