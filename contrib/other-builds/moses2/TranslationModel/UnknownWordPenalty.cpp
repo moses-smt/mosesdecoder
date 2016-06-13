@@ -124,6 +124,10 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
     return;
   }
 
+  if (path.GetNumRules()) {
+    return;
+  }
+
   // don't do 1st of last word
   if (path.range.GetStartPos() == 0) {
     return;
