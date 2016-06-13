@@ -19,7 +19,8 @@ class System;
 
 class TargetPhrases
 {
-  typedef Array<const TargetPhrase<Moses2::Word>*> Coll;
+  typedef TargetPhrase<Moses2::Word> TP;
+  typedef Array<const TP*> Coll;
 public:
   typedef Coll::iterator iterator;
   typedef Coll::const_iterator const_iterator;
@@ -37,7 +38,7 @@ public:
   //TargetPhrases(MemPool &pool, const System &system, const TargetPhrases &copy);
   virtual ~TargetPhrases();
 
-  void AddTargetPhrase(const TargetPhrase<Moses2::Word> &targetPhrase)
+  void AddTargetPhrase(const TP &targetPhrase)
   {
     m_coll[m_currInd++] = &targetPhrase;
   }
@@ -47,7 +48,7 @@ public:
     return m_coll.size();
   }
 
-  const TargetPhrase<Moses2::Word>& operator[](size_t ind) const
+  const TP& operator[](size_t ind) const
   {
     return *m_coll[ind];
   }

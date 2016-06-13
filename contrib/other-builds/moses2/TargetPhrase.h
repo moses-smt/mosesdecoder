@@ -58,15 +58,15 @@ protected:
 };
 
 ///////////////////////////////////////////////////////////////////////
-template<typename WORD>
+template<typename TP>
 struct CompareFutureScore
 {
-  bool operator()(const TargetPhrase<WORD> *a, const TargetPhrase<WORD> *b) const
+  bool operator()(const TP *a, const TP *b) const
   {
     return a->GetFutureScore() > b->GetFutureScore();
   }
 
-  bool operator()(const TargetPhrase<WORD> &a, const TargetPhrase<WORD> &b) const
+  bool operator()(const TP &a, const TP &b) const
   {
     return a.GetFutureScore() > b.GetFutureScore();
   }
