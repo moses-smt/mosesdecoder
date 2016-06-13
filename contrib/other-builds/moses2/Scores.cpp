@@ -59,6 +59,14 @@ const SCORE *Scores::GetScores(const FeatureFunction &featureFunction) const
   return &scores;
 }
 
+const SCORE Scores::GetScore(const FeatureFunction &featureFunction, size_t offset) const
+{
+  assert(m_scores);
+  size_t ffStartInd = featureFunction.GetStartInd();
+  SCORE score = m_scores[ffStartInd + offset];
+  return score;
+}
+
 void Scores::Reset(const System &system)
 {
   if (system.options.nbest.nbest_size) {
