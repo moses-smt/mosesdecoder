@@ -69,12 +69,6 @@ void QueueItem::CreateHypo(
   hypo = SCFG::Hypothesis::Create(pool, mgr);
   hypo->Init(mgr, path, symbolBind, tp, hypoIndColl);
   hypo->EvaluateWhenApplied();
-
-  if (path.range.GetStartPos() == 0 && path.range.GetEndPos() == 2) {
-    cerr << "HYPO:" << endl;
-    hypo->Debug(cerr, mgr.system);
-    cerr << endl;
-  }
 }
 
 void QueueItem::CreateNext(
@@ -84,22 +78,13 @@ void QueueItem::CreateNext(
     SeenPositions &seenPositions,
     const SCFG::InputPath &path)
 {
-  cerr << "from: ";
-  Debug(cerr, mgr.system);
-  cerr << endl;
-
   //cerr << "tpInd=" << tpInd << " " << tps->GetSize() << endl;
   if (tpInd + 1 < tps->GetSize()) {
 
     const SCFG::TargetPhraseImpl &tp = (*tps)[tpInd + 1];
-    SeenPositionItem *seenItem = new (pool.Allocate<SeenPositionItem>()) SeenPositionItem(tp, hypoIndColl);
+    SeenPositionItem *seenItem = new (pool.Allocate<SeenPositionItem>()) SeenPositionItem(tps, tpInd, hypoIndColl);
     bool unseen = seenPositions.Add(seenItem);
 
-    cerr << "\nSEEN1:";
-    seenItem->Debug(cerr, mgr.system);
-    cerr << unseen << endl;
-
-    unseen = true;
     if (unseen) {
       QueueItem *item = QueueItem::Create(pool, mgr);
       item->Init(pool, *symbolBind, *tps, tpInd + 1);
@@ -118,15 +103,10 @@ void QueueItem::CreateNext(
     size_t hypoInd = hypoIndColl[i] + 1;
 
     if (hypoInd < hypos.GetSize()) {
-      SeenPositionItem *seenItem = new (pool.Allocate<SeenPositionItem>()) SeenPositionItem(tp, hypoIndColl);
+      SeenPositionItem *seenItem = new (pool.Allocate<SeenPositionItem>()) SeenPositionItem(tps, tpInd, hypoIndColl);
       seenItem->hypoIndColl[i] = hypoInd;
       bool unseen = seenPositions.Add(seenItem);
 
-      cerr << "\nSEEN2:" << i << " " << hypoInd << " ";
-      seenItem->Debug(cerr, mgr.system);
-      cerr << unseen << endl;
-
-      unseen = true;
       if (unseen) {
         QueueItem *item = QueueItem::Create(pool, mgr);
         item->Init(pool, *symbolBind, *tps, tpInd);
@@ -151,8 +131,9 @@ void QueueItem::Debug(std::ostream &out, const System &system) const
 }
 
 ////////////////////////////////////////////////////////
-SeenPositionItem::SeenPositionItem(const SCFG::TargetPhraseImpl &vtp, const Vector<size_t> &vhypoIndColl)
-:tp(&vtp)
+SeenPositionItem::SeenPositionItem(const SCFG::TargetPhrases *vtps, size_t vtpInd, const Vector<size_t> &vhypoIndColl)
+:tps(vtps)
+,tpInd(vtpInd)
 ,hypoIndColl(vhypoIndColl.size())
 {
   for (size_t i = 0; i < hypoIndColl.size(); ++i) {
@@ -162,7 +143,7 @@ SeenPositionItem::SeenPositionItem(const SCFG::TargetPhraseImpl &vtp, const Vect
 
 void SeenPositionItem::Debug(std::ostream &out, const System &system) const
 {
-  out << tp << " ";
+  out << tps << " " << tpInd << " ";
 
   for (size_t i = 0; i < hypoIndColl.size(); ++i) {
     out << hypoIndColl[i] << " ";
@@ -171,19 +152,16 @@ void SeenPositionItem::Debug(std::ostream &out, const System &system) const
 
 bool SeenPositionItem::operator==(const SeenPositionItem &compare) const
 {
-  bool ret = (tp == compare.tp);
-  if (!ret) {
+  if (tps != compare.tps) {
     return false;
   }
 
-  if (hypoIndColl.size() != compare.hypoIndColl.size()) {
+  if (tpInd != compare.tpInd) {
     return false;
   }
 
-  for (size_t i = 0; i < hypoIndColl.size(); ++i) {
-    if (hypoIndColl[i] != compare.hypoIndColl[i]) {
-      return false;
-    }
+  if (hypoIndColl != compare.hypoIndColl) {
+    return false;
   }
 
   return true;
@@ -196,10 +174,9 @@ size_t SeenPositionItem::hash() const
 
 size_t hash_value(const SeenPositionItem& obj)
 {
-  size_t ret = (size_t) obj.tp;
-  for (size_t i = 0; i < obj.hypoIndColl.size(); ++i) {
-    boost::hash_combine(ret, obj.hypoIndColl[i]);
-  }
+  size_t ret = (size_t) obj.tps;
+  boost::hash_combine(ret, obj.tpInd);
+  boost::hash_combine(ret, obj.hypoIndColl);
   return ret;
 }
 

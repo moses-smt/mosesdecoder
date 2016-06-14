@@ -96,10 +96,11 @@ class Queue : public std::priority_queue<QueueItem*,
 class SeenPositionItem
 {
 public:
-  const SCFG::TargetPhraseImpl *tp;
+  const SCFG::TargetPhrases *tps;
+  size_t tpInd;
   std::vector<size_t> hypoIndColl;
 
-  SeenPositionItem(const SCFG::TargetPhraseImpl &vtp, const Vector<size_t> &vhypoIndColl);
+  SeenPositionItem(const SCFG::TargetPhrases *vtps, size_t vtpInd, const Vector<size_t> &vhypoIndColl);
 
   bool operator==(const SeenPositionItem &compare) const;
   size_t hash() const;
