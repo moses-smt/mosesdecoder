@@ -1,5 +1,6 @@
 #pragma once
 #include <vector>
+#include "InputPath.h"
 #include "../HypothesisBase.h"
 #include "../MemPool.h"
 #include "../Vector.h"
@@ -33,6 +34,9 @@ public:
   const SCFG::TargetPhraseImpl &GetTargetPhrase() const
   {  return *m_targetPhrase; }
 
+  const SCFG::InputPath &GetInputPath() const
+  {  return *m_path; }
+
   //! get a particular previous hypos
   const Hypothesis* GetPrevHypo(size_t ind) const {
     return m_prevHypos[ind];
@@ -44,7 +48,8 @@ public:
 
 protected:
   const SCFG::TargetPhraseImpl *m_targetPhrase;
-  //const InputPathBase *m_path;
+  const SCFG::InputPath *m_path;
+
 
   Vector<const Hypothesis*> m_prevHypos; // always sorted by source position?
 

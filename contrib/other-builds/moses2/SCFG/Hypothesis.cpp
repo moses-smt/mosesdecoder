@@ -50,6 +50,7 @@ void Hypothesis::Init(SCFG::Manager &mgr,
 {
   m_mgr = &mgr;
   m_targetPhrase = &tp;
+  m_path = &path;
 
   m_scores->Reset(mgr.system);
   m_scores->PlusEquals(mgr.system, GetTargetPhrase().GetScores());
@@ -134,8 +135,8 @@ void Hypothesis::Debug(std::ostream &out, const System &system) const
 {
   out << this;
 
-  //out << " RANGE:";
-  //out << m_path->range;
+  out << " RANGE:";
+  out << m_path->range;
 
   // score
   out << " SCORE:";

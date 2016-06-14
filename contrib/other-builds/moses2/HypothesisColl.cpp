@@ -128,7 +128,7 @@ void HypothesisColl::Debug(std::ostream &out, const System &system) const
 {
   BOOST_FOREACH (const HypothesisBase *hypo, m_coll) {
     hypo->Debug(out, system);
-    out << std::endl;
+    out << std::endl << std::endl;
   }
 }
 

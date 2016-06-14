@@ -85,6 +85,11 @@ void Manager::Decode()
       Decode(path, stack);
       //cerr << "AFTER DECODE path=" << path << endl;
 
+      if (startPos == 0 && phraseSize == 2) {
+        cerr << "STACK:" << endl;
+        stack.Debug(cerr, system);
+      }
+
       LookupUnary(path);
       //cerr << "AFTER LookupUnary path=" << path << endl;
 
