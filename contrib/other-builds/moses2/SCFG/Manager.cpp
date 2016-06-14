@@ -59,7 +59,7 @@ void Manager::Decode()
   //cerr << "CREATED m_stacks" << endl;
 
   for (int startPos = inputSize - 1; startPos >= 0; --startPos) {
-    //cerr << endl << "startPos=" << startPos << endl;
+    cerr << endl << "startPos=" << startPos << endl;
     SCFG::InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, 0);
 
     //cerr << "BEFORE path=" << m_inputPaths << endl;
@@ -68,20 +68,13 @@ void Manager::Decode()
 
     int maxPhraseSize = inputSize - startPos + 1;
     for (int phraseSize = 1; phraseSize < maxPhraseSize; ++phraseSize) {
-      //cerr << endl << "phraseSize=" << phraseSize << endl;
+      cerr << endl << "phraseSize=" << phraseSize << endl;
       InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, phraseSize);
 
       Stack &stack = m_stacks.GetStack(startPos, phraseSize);
 
       //cerr << "BEFORE LOOKUP path=" << path << endl;
       Lookup(path);
-
-      if (phraseSize == 1) {
-        cerr << "AFTER LOOKUP path=";
-        path.Debug(cerr, system);
-        cerr << endl;
-      }
-
       Decode(path, stack);
       //cerr << "AFTER DECODE path=" << path << endl;
 
