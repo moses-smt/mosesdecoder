@@ -84,6 +84,10 @@ void QueueItem::CreateNext(
     SeenPositions &seenPositions,
     const SCFG::InputPath &path)
 {
+  cerr << "from: ";
+  Debug(cerr, mgr.system);
+  cerr << endl;
+
   //cerr << "tpInd=" << tpInd << " " << tps->GetSize() << endl;
   if (tpInd + 1 < tps->GetSize()) {
 
@@ -91,7 +95,7 @@ void QueueItem::CreateNext(
     SeenPositionItem *seenItem = new (pool.Allocate<SeenPositionItem>()) SeenPositionItem(tp, hypoIndColl);
     bool unseen = seenPositions.Add(seenItem);
 
-    cerr << "\nSEEN:";
+    cerr << "\nSEEN1:";
     seenItem->Debug(cerr, mgr.system);
     cerr << unseen << endl;
 
@@ -118,7 +122,7 @@ void QueueItem::CreateNext(
       seenItem->hypoIndColl[i] = hypoInd;
       bool unseen = seenPositions.Add(seenItem);
 
-      cerr << "\nSEEN:";
+      cerr << "\nSEEN2:" << i << " " << hypoInd << " ";
       seenItem->Debug(cerr, mgr.system);
       cerr << unseen << endl;
 
@@ -136,7 +140,14 @@ void QueueItem::CreateNext(
       }
     }
   }
+}
 
+void QueueItem::Debug(std::ostream &out, const System &system) const
+{
+  out << hypo << " " << &(*tps)[tpInd] << "(" << tps << " " << tpInd << ") ";
+  for (size_t i = 0; i < hypoIndColl.size(); ++i) {
+    out << hypoIndColl[i] << " ";
+  }
 }
 
 ////////////////////////////////////////////////////////

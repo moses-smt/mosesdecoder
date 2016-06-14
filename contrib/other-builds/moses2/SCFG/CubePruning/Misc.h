@@ -52,6 +52,8 @@ public:
       SeenPositions &seenPositions,
       const SCFG::InputPath &path);
 
+  void Debug(std::ostream &out, const System &system) const;
+
 protected:
   typedef Vector<const Moses2::HypothesisColl *> HyposColl;
   HyposColl *m_hyposColl;
