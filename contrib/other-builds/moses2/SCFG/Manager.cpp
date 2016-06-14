@@ -78,11 +78,13 @@ void Manager::Decode()
       Decode(path, stack);
       //cerr << "AFTER DECODE path=" << path << endl;
 
+      /*
       if ((startPos == 0 && phraseSize == 2)
           || startPos == 2 && phraseSize == 1) {
         cerr << "STACK:" << endl;
         stack.Debug(cerr, system);
       }
+      */
 
       LookupUnary(path);
       //cerr << "AFTER LookupUnary path=" << path << endl;
@@ -167,11 +169,13 @@ void Manager::Decode(SCFG::InputPath &path, Stack &stack)
   m_seenPositions.clear();
 
   // init queue
+  cerr << "start init" << endl;
   BOOST_FOREACH(const InputPath::Coll::value_type &valPair, *path.targetPhrases) {
     const SymbolBind &symbolBind = valPair.first;
     const SCFG::TargetPhrases &tps = *valPair.second;
     CreateQueue(path, symbolBind, tps);
   }
+  cerr << "\nfinished init" << endl;
 
   // MAIN LOOP
   size_t pops = 0;

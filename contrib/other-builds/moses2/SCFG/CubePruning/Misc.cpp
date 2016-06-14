@@ -69,6 +69,12 @@ void QueueItem::CreateHypo(
   hypo = SCFG::Hypothesis::Create(pool, mgr);
   hypo->Init(mgr, path, symbolBind, tp, hypoIndColl);
   hypo->EvaluateWhenApplied();
+
+  if (path.range.GetStartPos() == 0 && path.range.GetEndPos() == 2) {
+    cerr << "HYPO:" << endl;
+    hypo->Debug(cerr, mgr.system);
+    cerr << endl;
+  }
 }
 
 void QueueItem::CreateNext(
@@ -83,8 +89,12 @@ void QueueItem::CreateNext(
 
     const SCFG::TargetPhraseImpl &tp = (*tps)[tpInd + 1];
     SeenPositionItem *seenItem = new (pool.Allocate<SeenPositionItem>()) SeenPositionItem(tp, hypoIndColl);
-
     bool unseen = seenPositions.Add(seenItem);
+
+    cerr << "\nSEEN:";
+    seenItem->Debug(cerr, mgr.system);
+    cerr << unseen << endl;
+
     unseen = true;
     if (unseen) {
       QueueItem *item = QueueItem::Create(pool, mgr);
@@ -106,8 +116,12 @@ void QueueItem::CreateNext(
     if (hypoInd < hypos.GetSize()) {
       SeenPositionItem *seenItem = new (pool.Allocate<SeenPositionItem>()) SeenPositionItem(tp, hypoIndColl);
       seenItem->hypoIndColl[i] = hypoInd;
-
       bool unseen = seenPositions.Add(seenItem);
+
+      cerr << "\nSEEN:";
+      seenItem->Debug(cerr, mgr.system);
+      cerr << unseen << endl;
+
       unseen = true;
       if (unseen) {
         QueueItem *item = QueueItem::Create(pool, mgr);
