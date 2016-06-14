@@ -99,11 +99,8 @@ public:
 
   SeenPositionItem(const SCFG::TargetPhraseImpl &vtp, const Vector<size_t> &vhypoIndColl);
 
-  virtual bool operator==(const SeenPositionItem &compare) const
-  {
-    bool ret = (tp == compare.tp) && (hypoIndColl == compare.hypoIndColl);
-    return ret;
-  }
+  bool operator==(const SeenPositionItem &compare) const;
+  size_t hash() const;
 
   void Debug(std::ostream &out, const System &system) const;
 
@@ -116,14 +113,15 @@ size_t hash_value(const SeenPositionItem& obj);
 class SeenPositions
 {
 public:
-  bool Add(const SeenPositionItem &item);
+  bool Add(const SeenPositionItem *item);
 
   void clear()
   { m_coll.clear(); }
 
 
 protected:
-  typedef boost::unordered_set<SeenPositionItem> Coll;
+  typedef boost::unordered_set<const SeenPositionItem*,
+      UnorderedComparer<SeenPositionItem>, UnorderedComparer<SeenPositionItem> > Coll;
   Coll m_coll;
 };
 

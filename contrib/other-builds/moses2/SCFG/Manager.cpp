@@ -25,8 +25,8 @@ namespace SCFG
 {
 
 Manager::Manager(System &sys, const TranslationTask &task,
-    const std::string &inputStr, long translationId) :
-    ManagerBase(sys, task, inputStr, translationId)
+    const std::string &inputStr, long translationId)
+:ManagerBase(sys, task, inputStr, translationId)
 {
 
 }
@@ -78,7 +78,8 @@ void Manager::Decode()
       Decode(path, stack);
       //cerr << "AFTER DECODE path=" << path << endl;
 
-      if (startPos == 0 && phraseSize == 2) {
+      if ((startPos == 0 && phraseSize == 2)
+          || startPos == 2 && phraseSize == 1) {
         cerr << "STACK:" << endl;
         stack.Debug(cerr, system);
       }
