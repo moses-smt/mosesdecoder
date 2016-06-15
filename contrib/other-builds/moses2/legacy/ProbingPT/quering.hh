@@ -23,6 +23,8 @@ class QueryEngine
   size_t table_filesize;
   bool is_reordering;
 
+  void read_map(const char* filename);
+
 public:
   int num_scores;
   int num_lex_scores;

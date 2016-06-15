@@ -15,13 +15,9 @@
 
 namespace Moses2
 {
+template<typename VOCABID>
+class StoreVocab;
 
-void add_to_map(std::map<uint64_t, std::string> *karta,
-    const StringPiece &textin);
-
-void serialize_map(const std::map<uint64_t, std::string> &karta,
-    const std::string &filename);
-
-void read_map(std::map<uint64_t, std::string> &karta, const char* filename);
+void add_to_map(StoreVocab<uint64_t> &sourceVocab, const std::string &textin);
 
 }

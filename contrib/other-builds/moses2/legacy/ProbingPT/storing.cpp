@@ -1,7 +1,9 @@
+#include <boost/functional/hash/hash.hpp>
 #include <sys/stat.h>
 #include "line_splitter.hh"
 #include "storing.hh"
 #include "StoreTarget.h"
+#include "StoreVocab.h"
 #include "../Util2.h"
 #include "../InputFileStream.h"
 
@@ -23,7 +25,7 @@ void createProbingPT(const std::string &phrasetable_path,
   unsigned long uniq_entries = countUniqueSource(phrasetable_path);
 
   //Source phrase vocabids
-  std::map<uint64_t, std::string> source_vocabids;
+  StoreVocab<uint64_t> sourceVocab(basepath + "/SourceVocab.dat");
 
   //Read the file
   util::FilePiece filein(phrasetable_path.c_str());
@@ -54,7 +56,7 @@ void createProbingPT(const std::string &phrasetable_path,
       }
 
       //Add source phrases to vocabularyIDs
-      add_to_map(&source_vocabids, line.source_phrase);
+      add_to_map(sourceVocab, line.source_phrase.as_string());
 
       if (prevSource.empty()) {
         // 1st line
@@ -81,11 +83,8 @@ void createProbingPT(const std::string &phrasetable_path,
         pesho.value = targetInd;
         //The key is the sum of hashes of individual words bitshifted by their position in the phrase.
         //Probably not entirerly correct, but fast and seems to work fine in practise.
-        pesho.key = 0;
-        std::vector<uint64_t> vocabid_source = getVocabIDs(prevSource);
-        for (int i = 0; i < vocabid_source.size(); i++) {
-          pesho.key += (vocabid_source[i] << i);
-        }
+        std::vector<uint64_t> vocabid_source = sourceVocab.GetVocabIds(prevSource);
+        pesho.key = getKey(vocabid_source);
 
         //Put into table
         table.Insert(pesho);
@@ -129,11 +128,9 @@ void createProbingPT(const std::string &phrasetable_path,
       pesho.value = targetInd;
 
       //The key is the sum of hashes of individual words. Probably not entirerly correct, but fast
-      pesho.key = 0;
-      std::vector<uint64_t> vocabid_source = getVocabIDs(prevSource);
-      for (int i = 0; i < vocabid_source.size(); i++) {
-        pesho.key += (vocabid_source[i] << i);
-      }
+      std::vector<uint64_t> vocabid_source = sourceVocab.GetVocabIds(prevSource);
+      pesho.key = getKey(vocabid_source);
+
       //Put into table
       table.Insert(pesho);
 
@@ -143,7 +140,8 @@ void createProbingPT(const std::string &phrasetable_path,
 
   serialize_table(mem, size, (basepath + "/probing_hash.dat"));
 
-  serialize_map(source_vocabids, (basepath + "/source_vocabids"));
+  //serialize_map(source_vocabids, (basepath + "/source_vocabids"));
+  sourceVocab.Save();
 
   serialize_cache(cache, (basepath + "/cache"), totalSourceCount);
 
@@ -203,6 +201,17 @@ void serialize_cache(
   }
 
   os.close();
+}
+
+uint64_t getKey(const std::vector<uint64_t> &source_phrase)
+{
+  //TOO SLOW
+  //uint64_t key = util::MurmurHashNative(&source_phrase[0], source_phrase.size());
+  size_t key = 0;
+  for (size_t i = 0; i < source_phrase.size(); i++) {
+    boost::hash_combine(key, source_phrase[i]);
+  }
+  return key;
 }
 
 }
