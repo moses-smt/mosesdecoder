@@ -82,7 +82,7 @@ void QueueItem::CreateNext(
   if (tpInd + 1 < tps->GetSize()) {
 
     const SCFG::TargetPhraseImpl &tp = (*tps)[tpInd + 1];
-    SeenPosition *seenItem = new (pool.Allocate<SeenPosition>()) SeenPosition(pool, tps, tpInd, hypoIndColl);
+    SeenPosition *seenItem = new (pool.Allocate<SeenPosition>()) SeenPosition(pool, tps, tpInd + 1, hypoIndColl);
     bool unseen = seenPositions.Add(seenItem);
 
     if (unseen) {
