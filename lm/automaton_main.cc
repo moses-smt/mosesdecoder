@@ -11,6 +11,7 @@
 #include "lm/blank.hh"
 #include "lm/config.hh"
 #include "lm/model.hh"
+#include "util/exception.hh"
 
 #include <iostream>
 #include <string>
@@ -19,10 +20,13 @@
 #include <array>
 #include <assert.h>
 #include <string>
+#include <fstream>
+#include <sstream>
+#include <iterator>
 
 namespace lm {
 
-enum class State {Done, Working};
+enum class Status {Done, Working};
 
 namespace {
 
@@ -33,11 +37,11 @@ class SimpleAutomaton {
 
         SimpleAutomaton(int x = 0) : repeat_(0) {}
 
-        State Step() {
-            if (repeat_ <= 0) return State::Done;
+        Status Step() {
+            if (repeat_ <= 0) return Status::Done;
             std::cout << word_ << std::endl;
             --repeat_;
-            return State::Working;
+            return Status::Working;
         }
 
         void SetTask(const Task& task){
@@ -57,44 +61,40 @@ namespace ngram {
 template <class Value> class NGramAutomaton {
     public:
         struct NGramTask {
-            NGramAutomaton<Value>* pred;
-            const WordIndex* const context_rbegin;
-            const WordIndex* const context_rend;
+            NGramAutomaton<Value>* const pred;
             const WordIndex new_word;
+            const State* const context_state; // unused if pred != nullptr
+            const std::function<void(FullScoreReturn)> callback;
         };
 
         struct NGramConstruct {
             detail::HashedSearch<Value>& search;
-            unsigned short max_order;
+            unsigned char max_order;
         };
 
 
         using Task = NGramTask;
         using Construct = NGramConstruct;
-        using State = lm::State;
+        using Status = lm::Status;
 
         explicit NGramAutomaton(Construct construct) :
             ngram_order_(0),
-            state_(State::Done),
+            status_(Status::Done),
             search_(construct.search),
             max_order_(construct.max_order),
             node_(0),
-            out_length_(0),
-            out_backoffs_(),
             pred_finished_(false), 
             succ_finished_(false),
             pred_(nullptr),
             succ_(nullptr),
-            pred_data_(),
+            in_state_(),
             succ_data_(),
             new_word_(),
-            context_rbegin_(nullptr),
-            context_rend_(nullptr),
             ret_(){}
 
-        State Step() {
-            if (state_ == State::Done || ngram_order_ > max_order_){
-                return State::Done;
+        Status Step() {
+            if (status_ == Status::Done || ngram_order_ > max_order_){
+                return Status::Done;
             }
             std::cout << this << " step " << (int) ngram_order_ <<  std::endl;
 
@@ -112,28 +112,26 @@ template <class Value> class NGramAutomaton {
                     break;
             }
             ngram_order_ += 1;
-            return state_;
+            return status_;
 
         }
 
         void SetTask(const Task& task) {
             std::cout << this << " start" << std::endl;
 
-            context_rbegin_ = task.context_rbegin;
-            context_rend_ = task.context_rend;
             new_word_ = task.new_word;
             pred_ = task.pred;
+            callback_ = task.callback;
 
-            pred_data_.length = std::min(static_cast<std::size_t>(context_rend_ - context_rbegin_), static_cast<std::size_t>(max_order_ - 1));
-            InitialPredecessorCheck();
+            InitialPredecessorCheck(task);
 
             ngram_order_ = 0;
             node_ = 0;
-            out_length_ = std::min(pred_data_.length + 1, max_order_ - 1);
+            out_state_.length = std::min(in_state_.length + 1, max_order_ - 1);
             ret_ = FullScoreReturn();
             succ_ = nullptr;
             succ_finished_ = false;
-            state_ = State::Working;
+            status_ = Status::Working;
         }
 
     private:
@@ -142,45 +140,58 @@ template <class Value> class NGramAutomaton {
             std::function<void(FullScoreReturn&)> callback;
         };
 
-        struct PredecessorData {
-            std::array<float, KENLM_MAX_ORDER - 1> backoffs;
-            unsigned char length;
-        };
-
-        void InitialPredecessorCheck() {
+        void InitialPredecessorCheck(const Task& task) {
+            assert(task.pred == nullptr ^ task.context_state == nullptr); //either predecessor is set or context_state
+            pred_ = task.pred;
+            pred_finished_ = false;
             if (pred_) {
                 if (pred_->Finished() || this == pred_) {
                     // the second condition (this == pred_) does not need to be there
-                    // if we assume this->state_ == State::Done when this function is called
+                    // if we assume this->status_ == Status::Done when this function is called
                     pred_finished_ = true;
-                    CopyStateFromPredecessorWithoutCheck();
+                    CopyStateFromPredecessor();
                 }
                 else {
-                    pred_finished_ = false;
-                    pred_data_.length = pred_->GetOutLength();
-                    NotifyPredecessorWithoutCheck();
+                    NotifyPredecessor();
                 }
             }
             else {
-                pred_finished_ = false;
+                pred_finished_ = true;
+                std::copy(task.context_state->words, task.context_state->words + task.context_state->length, in_state_.words);
+                std::copy(task.context_state->backoff, task.context_state->backoff + task.context_state->length, in_state_.backoff);
+                in_state_.length = task.context_state->length;
             }
         }
 
-        void CopyStateFromPredecessorWithoutCheck() {
-            pred_data_.backoffs = pred_->GetOutBackoffs();
-            pred_data_.length = pred_->GetOutLength();
+        void CopyStateFromPredecessor() {
+            CopyContextWordsFromPredecessor();
+            std::copy(pred_->out_state_.backoff, pred_->out_state_.backoff + pred_->out_state_.length, in_state_.backoff);
+            in_state_.length = pred_->out_state_.length;
         }
 
-        void NotifyPredecessorWithoutCheck(){
+        void NotifyPredecessor(){
             pred_->SetSuccessor(this);
+            //predecessor copies context words and state length to his successor(=this)
+            CopyContextWordsFromPredecessor();
+            in_state_.length = pred_->out_state_.length;
+        }
+        
+        void CopyContextWordsFromPredecessor(){
+            in_state_.words[0] = pred_->new_word_;
+            //std::cout<<"pred new_word_: " << pred_->new_word_;
+            auto length = std::min(pred_->out_state_.length, static_cast<unsigned char>(max_order_ - 2));
+            std::copy(pred_->in_state_.words, pred_->in_state_.words + length, in_state_.words + 1);
+            std::cout << "Copying words";
+            for (auto b : in_state_.words) std::cout << b << " ";
+            std::cout << std::endl;
         }
 
         void CheckSuccessorFinished(){
             if (succ_finished_) {
                 assert(succ_!=nullptr);
                 // apply backoffs to fullscorereturn and call callback
-                for(auto i = succ_data_.ret.ngram_length - 1; i < out_length_; i++){
-                    succ_data_.ret.prob += out_backoffs_[i];
+                for(auto i = succ_data_.ret.ngram_length - 1; i < out_state_.length; i++){
+                    succ_data_.ret.prob += out_state_.backoff[i];
                 }
                 std::cout<< this << " handling callback from " << succ_ << std::endl;
                 succ_data_.callback(succ_data_.ret);
@@ -193,22 +204,17 @@ template <class Value> class NGramAutomaton {
 
         void CheckPredecessorFinished(){
             if (pred_finished_) {
-                assert(pred_ != nullptr);
                 // apply backoffs from predecessor and call callback
-                for(auto i = ret_.ngram_length - 1; i < pred_data_.length; i++){
-                    ret_.prob += pred_data_.backoffs[i];
+                for(auto i = ret_.ngram_length - 1; i < in_state_.length; i++){
+                    ret_.prob += in_state_.backoff[i];
                 }
                 std::cout << this << " callback" <<std::endl;
                 callback_(ret_);
             }
-            else if (pred_){
-                // Give callback and fullscorereturn to predecessor
+            else {
+                // Give callback and FullScoreReturn to predecessor
                 std::cout << this << " callback left for " << pred_ << std::endl;
                 NotifyPredecessorOfCompletion();
-            }
-            else {
-                std::cout << this << "callback - no backoffs" <<std::endl;
-                callback_(ret_);
             }
         }
 
@@ -220,50 +226,44 @@ template <class Value> class NGramAutomaton {
 
         void NotifySuccessorOfCompletion() {
             succ_->pred_finished_ = true;
-            succ_->pred_data_. backoffs = out_backoffs_;
-            succ_->pred_data_.length = out_length_;
+            std::copy(out_state_.backoff, out_state_.backoff + out_state_.length, succ_->in_state_.backoff);
+            succ_->in_state_.length = out_state_.length;
         }
 
         bool Finished() {
-            return state_ == State::Done;
-        }
-
-        const std::array<float, KENLM_MAX_ORDER - 1>& GetOutBackoffs() {
-            return out_backoffs_;
-        }
-
-        unsigned char GetOutLength() {
-            return out_length_;
+            return status_ == Status::Done;
         }
 
         void SetSuccessor(NGramAutomaton<Value>* succ){
             succ_ = succ;
         }
 
-        State GetState() {
-            return state_;
+        Status GetStatus() {
+            return status_;
         }
 
 
         void GetUnigramPrefetchNext(){
             typename detail::HashedSearch<Value>::UnigramPointer uni(search_.LookupUnigram(new_word_, node_, ret_.independent_left, ret_.extend_left));
-            out_backoffs_[0] = uni.Backoff(); //TODO: What if the word is not found?
+            std::cout << new_word_ << " performed " << 1 << " lookup" << std::endl;
+            WriteWordToSuccInState(new_word_);
+            out_state_.backoff[0] = uni.Backoff(); //TODO: What if the word is not found?
             ret_.prob = uni.Prob();
             ret_.rest = uni.Rest();
             ret_.ngram_length = 1;
             if (!HasExtension(uni.Backoff())) {
                 WriteOutLength(0);
             }
-            if (pred_data_.length == 0 || ret_.independent_left) {
+            if (in_state_.length == 0 || ret_.independent_left) {
                 Finish();
             }
             else {
                 if (max_order_ == 2) {
                     //for bigrams we don't prefetch middle since there are none
-                    search_.PrefetchLongest(context_rbegin_[0], node_);
+                    search_.PrefetchLongest(in_state_.words[0], node_);
                 }
                 else {
-                    search_.PrefetchMiddle(0, context_rbegin_[0], node_);
+                    search_.PrefetchMiddle(0, in_state_.words[0], node_);
                 }
             }
 
@@ -271,11 +271,13 @@ template <class Value> class NGramAutomaton {
 
         void GetMiddlePrefetchNext(){
             typename detail::HashedSearch<Value>::MiddlePointer pointer(search_.LookupMiddleFromNode(ngram_order_ - 2, node_, ret_.independent_left, ret_.extend_left));
+            std::cout << new_word_ << " performed " << ngram_order_ << " lookup" << std::endl;
             if (!pointer.Found()) {
                 Finish();
                 return;
             }
-            out_backoffs_[ngram_order_-1] = pointer.Backoff();
+            WriteWordToSuccInState(in_state_.words[ngram_order_-2]);
+            out_state_.backoff[ngram_order_-1] = pointer.Backoff();
             ret_.prob = pointer.Prob();
             ret_.rest = pointer.Rest();
             ret_.ngram_length = ngram_order_;
@@ -283,19 +285,19 @@ template <class Value> class NGramAutomaton {
             if (!HasExtension(pointer.Backoff())){
                 WriteOutLength(ngram_order_-1); 
             }
-            std::cout << ngram_order_ << " " << (int) pred_data_.length << std::endl;
+            std::cout << ngram_order_ << " " << (int) in_state_.length << std::endl;
 
-            if (ngram_order_ - 1 == pred_data_.length || ret_.independent_left) {
+            if (ngram_order_ - 1 == in_state_.length || ret_.independent_left) {
 
                 Finish();
                 return;
             }
 
             if (ngram_order_ + 1 == max_order_){
-                search_.PrefetchLongest(context_rbegin_[ngram_order_ - 1], node_);
+                search_.PrefetchLongest(in_state_.words[ngram_order_ - 1], node_);
             }
             else {
-                search_.PrefetchMiddle(ngram_order_ - 1, context_rbegin_[ngram_order_ - 1], node_);
+                search_.PrefetchMiddle(ngram_order_ - 1, in_state_.words[ngram_order_ - 1], node_);
             }
         }
 
@@ -303,6 +305,7 @@ template <class Value> class NGramAutomaton {
             WriteOutLength(ngram_order_-1);
             ret_.independent_left = true;
             typename detail::HashedSearch<Value>::LongestPointer longest(search_.LookupLongestFromNode(node_));
+            std::cout << new_word_ << " performed " << ngram_order_ << " lookup" << std::endl;
             if (longest.Found()) {
                 ret_.prob = longest.Prob();
                 ret_.rest = ret_.prob;
@@ -310,43 +313,54 @@ template <class Value> class NGramAutomaton {
             }
             Finish();
         }
+        
+        void WriteWordToSuccInState(lm::WordIndex word){
+            if (!succ_finished_ && succ_) {
+                succ_->in_state_.words[ngram_order_-1];
+            }
+        }
 
         void WriteOutLength(const unsigned char length){
-            if (length < out_length_) {
-                out_length_ = length;
+            if (length < out_state_.length) {
+                out_state_.length = length;
                 if (succ_ && !succ_finished_) {
-                    succ_->pred_data_.length = length;
+                    succ_->in_state_.length = length;
                 }
             }
         }
 
         void Finish(){
             std::cout << this << " finish" << std::endl;
+            std::cout << "new word: " << new_word_ << std::endl;
+            std::cout << "in_length: " << (int)in_state_.length << std::endl;
+            std::cout << "ind left: " << ret_.independent_left << std::endl;
+            std::cout << "out length: " << (int)out_state_.length << std::endl;
+            std::cout << "in length: " << (int)in_state_.length << std::endl;
+
+
+
             WriteOutLength(std::min(ret_.ngram_length, static_cast<unsigned char>(max_order_ - 1)));
             CheckPredecessorFinished();
             CheckSuccessorFinished();
-            state_ = State::Done;
+            status_ = Status::Done;
         }
 
 
-        std::function<void(FullScoreReturn&)> callback_ = [](FullScoreReturn& r){std::cout << "In callback, prob: " << r.prob << " ngram_length: " << (int)r.ngram_length << std::endl;};
+        std::function<void(const FullScoreReturn&)> callback_;// = [](FullScoreReturn& r){std::cout << "In callback, prob: " << r.prob << " ngram_length: " << (int)r.ngram_length << std::endl;};
         std::size_t ngram_order_;
-        State state_;
+        Status status_;
         detail::HashedSearch<Value> &search_;
-        unsigned short max_order_;
+        unsigned char max_order_;
         typename detail::HashedSearch<Value>::Node node_;
-        unsigned char out_length_;
-        std::array<float, KENLM_MAX_ORDER - 1> out_backoffs_;
         bool pred_finished_;
         bool succ_finished_;
         NGramAutomaton<Value>* pred_;
         NGramAutomaton<Value>* succ_;
-        PredecessorData pred_data_;
         SuccessorData succ_data_; 
         WordIndex new_word_;
-        const WordIndex* context_rbegin_;
-        const WordIndex* context_rend_;
         FullScoreReturn ret_;
+        State in_state_;
+        State out_state_;
 };
 
 } // namespace ngram
@@ -358,7 +372,7 @@ template <class Automaton> class Queue {
         explicit Queue(std::size_t size, Construct construct) : size_(size), curr_(0), automata_(size, Automaton(construct)) {}
 
         Automaton* Add(const Task task) {
-            while (automata_[curr_].Step() != State::Done) {
+            while (automata_[curr_].Step() != Status::Done) {
                 Next();
             }
             automata_[curr_].SetTask(task);
@@ -376,7 +390,7 @@ template <class Automaton> class Queue {
         void Drain() {
             std::size_t drained = 0;
             while (drained != size_) {
-                while (automata_[curr_].Step() != State::Done) {std::cout <<"step" <<std::endl;}
+                while (automata_[curr_].Step() != Status::Done) {std::cout <<"step" <<std::endl;}
                 Next();
                 ++drained;
             }
@@ -393,17 +407,28 @@ class Pipeline {
 
     public:
         Pipeline(std::size_t queue_size, ngram::NGramAutomaton<ngram::BackoffValue>::Construct construct) : queue_(queue_size, construct) {}
-        void Add(const WordIndex* const r_context_begin, const WordIndex* const r_context_end, const WordIndex* const new_words, std::size_t new_words_count) {
-            auto context_begin = r_context_begin;
-            auto new_word = new_words;
-            ngram::NGramAutomaton<ngram::BackoffValue>* pred = nullptr;
-            for (std::size_t i = 0; i < new_words_count; i++) {
-                Task task_{pred, context_begin, r_context_end, *new_word};
-                pred = queue_.Add(task_);
-                --new_word;
-                --context_begin;
-            }
+        void FullScore(const lm::ngram::State& context_state, const WordIndex word, const std::function<void(const FullScoreReturn&)> callback) {
+            std::cout << "appending " << word << std::endl;
+            pred_ = queue_.Add({nullptr, word, &context_state, callback});
         }
+
+//      void ScoreWords(const lm::ngram::State& context_state, const WordIndex* const words_begin, const WordIndex* const words_end) {
+//          if (words_begin == words_end) return;
+//          auto word = words_begin;
+//          pred_ = queue_.Add({nullptr, *word, &context_state});
+//          ++word;
+//          while(word != words_end){ 
+//              AddWord(*word);
+//              ++word;
+//          }
+//      }
+
+        void AppendWord(const WordIndex word, const std::function<void(const FullScoreReturn&)>& callback){
+            std::cout << "appending " << word << std::endl;
+            assert(pred_);
+            pred_ = queue_.Add({pred_, word, nullptr, callback});
+        }
+
         void Drain() {
             queue_.Drain();
         }
@@ -413,30 +438,73 @@ class Pipeline {
         using Task = ngram::NGramAutomaton<ngram::BackoffValue>::Task;
 
         Queue<ngram::NGramAutomaton<ngram::BackoffValue>> queue_;
+        ngram::NGramAutomaton<ngram::BackoffValue>* pred_;
 
 };
 
 } // namespace lm
 
+void CheckEqual(const lm::FullScoreReturn& lhs, const lm::FullScoreReturn& rhs) {
+    assert(lhs.prob == rhs.prob);
+    assert(lhs.independent_left == rhs.independent_left);
+    assert(lhs.ngram_length == rhs.ngram_length);
+}
+
 int main(int argc, char* argv[]){
+    if (argc < 4) {
+        std::cerr << "Usage: <pipeline size> <arpa file> <test file>" << std::endl;
+        return 1;
+    }
     int pipeline_size = std::stoi(std::string(argv[1]));
+    std::string arpa(argv[2]);
+    std::string test(argv[3]);
+
     lm::ngram::Config config;
     config.arpa_complain = lm::ngram::Config::NONE;
     config.messages = nullptr;
+    config.positive_log_probability = lm::SILENT;
     config.probing_multiplier = 2.0;
-    lm::ngram::ProbingModel model("test.arpa", config);
+    lm::ngram::ProbingModel model(arpa.data(), config);
     std::cout << "ORDER: " << (int)model.Order() << std::endl;
     std::cout << "PIPELINE SIZE: " << pipeline_size << std::endl;
-    //typename lm::ngram::detail::HashedSearch<lm::ngram::BackoffValue> hs;
     lm::Pipeline pipeline(pipeline_size, {model.GetSearch(), model.Order()});
-    const char *words[] = {"<s>", "looking", "on", "a", "little", "the", "biarritz", "not_found", "more", ".", "</s>"};
-    const size_t num_words = sizeof(words) / sizeof(const char*);
-    // Silience "array subscript is above array bounds" when extracting end pointer.
-    lm::WordIndex indices[num_words + 1];
-    for (unsigned int i = 0; i < num_words; ++i) {
-        indices[num_words - 1 - i] = model.GetVocabulary().Index(words[i]);
+    
+    util::FilePiece in(test.data());
+    StringPiece word;
+    auto model_score = 0.0;
+    auto pipe_score = 0.0;
+
+    while (true) {
+        lm::ngram::State in_state, out_state;
+        if (in.ReadWordSameLine(word)) {
+            lm::WordIndex vocab = model.GetVocabulary().Index(word);
+            auto ret = model.FullScore(model.BeginSentenceState(), vocab, out_state); 
+            model_score += ret.prob;
+            auto callback = [=, &pipe_score](const lm::FullScoreReturn& r){CheckEqual(ret, r); pipe_score += r.prob;};
+            pipeline.FullScore(model.BeginSentenceState(), vocab, callback);
+            in_state = out_state;
+        }
+
+        while(in.ReadWordSameLine(word)) {
+            lm::WordIndex vocab = model.GetVocabulary().Index(word);
+            auto ret = model.FullScore(in_state, vocab, out_state);
+            model_score += ret.prob;
+            auto callback = [=, &pipe_score](const lm::FullScoreReturn& r){CheckEqual(ret, r); pipe_score += r.prob;};
+            pipeline.AppendWord(vocab, callback);
+            in_state = out_state;
+        }
+
+        try {
+            UTIL_THROW_IF('\n' != in.get(), util::Exception, "FilePiece is confused.");
+        } catch (const util::EndOfFileException &e) { break; }
+
+        
+        auto ret = model.FullScore(in_state, model.GetVocabulary().EndSentence(), out_state);
+        model_score += ret.prob;
+        auto callback = [=, &pipe_score](const lm::FullScoreReturn& r){CheckEqual(ret, r); pipe_score += r.prob;};
+        pipeline.AppendWord(model.GetVocabulary().EndSentence(), callback);
     }
-    pipeline.Add(indices + num_words - 1, indices + num_words, indices + num_words - 2, num_words-1);
     pipeline.Drain();
+    std::cout << model_score << " " << pipe_score << std::endl;
 }
 #endif //LM_AUTOMATON_H
