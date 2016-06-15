@@ -8,6 +8,7 @@
 #include <string>
 #include <boost/unordered_map.hpp>
 #include "../OutputFileStream.h"
+#include "../Util2.h"
 
 namespace Moses2
 {
@@ -39,6 +40,20 @@ public:
     else {
       return iter->second;
     }
+  }
+
+  std::vector<VOCABID> GetVocabIds(const std::string &line)
+  {
+    std::vector<std::string> toks = Moses2::Tokenize(line, " ");
+    std::vector<VOCABID> ret(toks.size());
+
+    for (size_t i = 0; i < toks.size(); ++i) {
+      const std::string &tok = toks[i];
+      VOCABID id = GetVocabId(tok);
+      ret[i] = id;
+    }
+
+    return ret;
   }
 
   void Save()
