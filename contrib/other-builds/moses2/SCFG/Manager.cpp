@@ -310,13 +310,21 @@ std::string Manager::OutputBest() const
   const Hypothesis *bestHypo = lastStack.GetBestHypo(*this, const_cast<ArcLists&>(arcLists));
 
   if (bestHypo) {
+    if (system.options.output.ReportHypoScore) {
+      out << bestHypo->GetScores().GetTotalScore() << " ";
+    }
+
     bestHypo->OutputToStream(out);
     cerr << "BEST TRANSLATION: ";
     bestHypo->Debug(cerr, system);
     cerr << " " << out.str() << endl;
   }
   else {
-    cerr << "NO TRANSLATION " << m_input->GetTranslationId() << endl;
+    if (system.options.output.ReportHypoScore) {
+      out << "0 ";
+    }
+
+    //cerr << "NO TRANSLATION " << m_input->GetTranslationId() << endl;
   }
 
   out << endl;

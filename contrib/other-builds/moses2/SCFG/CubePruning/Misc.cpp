@@ -82,7 +82,7 @@ void QueueItem::CreateNext(
   if (tpInd + 1 < tps->GetSize()) {
 
     const SCFG::TargetPhraseImpl &tp = (*tps)[tpInd + 1];
-    SeenPositionItem *seenItem = new (pool.Allocate<SeenPositionItem>()) SeenPositionItem(tps, tpInd, hypoIndColl);
+    SeenPositionItem *seenItem = new (pool.Allocate<SeenPositionItem>()) SeenPositionItem(pool, tps, tpInd, hypoIndColl);
     bool unseen = seenPositions.Add(seenItem);
 
     if (unseen) {
@@ -103,7 +103,7 @@ void QueueItem::CreateNext(
     size_t hypoInd = hypoIndColl[i] + 1;
 
     if (hypoInd < hypos.GetSize()) {
-      SeenPositionItem *seenItem = new (pool.Allocate<SeenPositionItem>()) SeenPositionItem(tps, tpInd, hypoIndColl);
+      SeenPositionItem *seenItem = new (pool.Allocate<SeenPositionItem>()) SeenPositionItem(pool, tps, tpInd, hypoIndColl);
       seenItem->hypoIndColl[i] = hypoInd;
       bool unseen = seenPositions.Add(seenItem);
 
@@ -131,10 +131,10 @@ void QueueItem::Debug(std::ostream &out, const System &system) const
 }
 
 ////////////////////////////////////////////////////////
-SeenPositionItem::SeenPositionItem(const SCFG::TargetPhrases *vtps, size_t vtpInd, const Vector<size_t> &vhypoIndColl)
+SeenPositionItem::SeenPositionItem(MemPool &pool, const SCFG::TargetPhrases *vtps, size_t vtpInd, const Vector<size_t> &vhypoIndColl)
 :tps(vtps)
 ,tpInd(vtpInd)
-,hypoIndColl(vhypoIndColl.size())
+,hypoIndColl(pool, vhypoIndColl.size())
 {
   for (size_t i = 0; i < hypoIndColl.size(); ++i) {
     hypoIndColl[i] = vhypoIndColl[i];
@@ -169,14 +169,9 @@ bool SeenPositionItem::operator==(const SeenPositionItem &compare) const
 
 size_t SeenPositionItem::hash() const
 {
-  return hash_value(*this);
-}
-
-size_t hash_value(const SeenPositionItem& obj)
-{
-  size_t ret = (size_t) obj.tps;
-  boost::hash_combine(ret, obj.tpInd);
-  boost::hash_combine(ret, obj.hypoIndColl);
+  size_t ret = (size_t) tps;
+  boost::hash_combine(ret, tpInd);
+  boost::hash_combine(ret, hypoIndColl);
   return ret;
 }
 

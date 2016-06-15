@@ -98,9 +98,9 @@ class SeenPositionItem
 public:
   const SCFG::TargetPhrases *tps;
   size_t tpInd;
-  std::vector<size_t> hypoIndColl;
+  Vector<size_t> hypoIndColl;
 
-  SeenPositionItem(const SCFG::TargetPhrases *vtps, size_t vtpInd, const Vector<size_t> &vhypoIndColl);
+  SeenPositionItem(MemPool &pool, const SCFG::TargetPhrases *vtps, size_t vtpInd, const Vector<size_t> &vhypoIndColl);
 
   bool operator==(const SeenPositionItem &compare) const;
   size_t hash() const;
@@ -108,8 +108,6 @@ public:
   void Debug(std::ostream &out, const System &system) const;
 
 };
-
-size_t hash_value(const SeenPositionItem& obj);
 
 ///////////////////////////////////////////
 
