@@ -33,7 +33,7 @@ public:
   {
     typename Coll::iterator iter = m_vocab.find(word);
     if (iter == m_vocab.end()) {
-      uint32_t ind = m_vocab.size() + 1;
+      VOCABID ind = m_vocab.size() + 1;
       m_vocab[word] = ind;
       return ind;
     }
