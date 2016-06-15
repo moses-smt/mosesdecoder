@@ -388,6 +388,7 @@ void CheckEqual(const lm::FullScoreReturn& lhs, const lm::FullScoreReturn& rhs) 
     assert(lhs.prob == rhs.prob);
     assert(lhs.independent_left == rhs.independent_left);
     assert(lhs.ngram_length == rhs.ngram_length);
+    assert(lhs.rest == rhs.rest);
 }
 }
 
