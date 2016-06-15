@@ -82,7 +82,7 @@ void QueueItem::CreateNext(
   if (tpInd + 1 < tps->GetSize()) {
 
     const SCFG::TargetPhraseImpl &tp = (*tps)[tpInd + 1];
-    SeenPositionItem *seenItem = new (pool.Allocate<SeenPositionItem>()) SeenPositionItem(pool, tps, tpInd, hypoIndColl);
+    SeenPosition *seenItem = new (pool.Allocate<SeenPosition>()) SeenPosition(pool, tps, tpInd, hypoIndColl);
     bool unseen = seenPositions.Add(seenItem);
 
     if (unseen) {
@@ -103,7 +103,7 @@ void QueueItem::CreateNext(
     size_t hypoInd = hypoIndColl[i] + 1;
 
     if (hypoInd < hypos.GetSize()) {
-      SeenPositionItem *seenItem = new (pool.Allocate<SeenPositionItem>()) SeenPositionItem(pool, tps, tpInd, hypoIndColl);
+      SeenPosition *seenItem = new (pool.Allocate<SeenPosition>()) SeenPosition(pool, tps, tpInd, hypoIndColl);
       seenItem->hypoIndColl[i] = hypoInd;
       bool unseen = seenPositions.Add(seenItem);
 
@@ -131,7 +131,7 @@ void QueueItem::Debug(std::ostream &out, const System &system) const
 }
 
 ////////////////////////////////////////////////////////
-SeenPositionItem::SeenPositionItem(MemPool &pool, const SCFG::TargetPhrases *vtps, size_t vtpInd, const Vector<size_t> &vhypoIndColl)
+SeenPosition::SeenPosition(MemPool &pool, const SCFG::TargetPhrases *vtps, size_t vtpInd, const Vector<size_t> &vhypoIndColl)
 :tps(vtps)
 ,tpInd(vtpInd)
 ,hypoIndColl(pool, vhypoIndColl.size())
@@ -141,7 +141,7 @@ SeenPositionItem::SeenPositionItem(MemPool &pool, const SCFG::TargetPhrases *vtp
   }
 }
 
-void SeenPositionItem::Debug(std::ostream &out, const System &system) const
+void SeenPosition::Debug(std::ostream &out, const System &system) const
 {
   out << tps << " " << tpInd << " ";
 
@@ -150,7 +150,7 @@ void SeenPositionItem::Debug(std::ostream &out, const System &system) const
   }
 }
 
-bool SeenPositionItem::operator==(const SeenPositionItem &compare) const
+bool SeenPosition::operator==(const SeenPosition &compare) const
 {
   if (tps != compare.tps) {
     return false;
@@ -167,7 +167,7 @@ bool SeenPositionItem::operator==(const SeenPositionItem &compare) const
   return true;
 }
 
-size_t SeenPositionItem::hash() const
+size_t SeenPosition::hash() const
 {
   size_t ret = (size_t) tps;
   boost::hash_combine(ret, tpInd);
@@ -176,7 +176,7 @@ size_t SeenPositionItem::hash() const
 }
 
 ////////////////////////////////////////////////////////
-bool SeenPositions::Add(const SeenPositionItem *item)
+bool SeenPositions::Add(const SeenPosition *item)
 {
   std::pair<Coll::iterator, bool> ret = m_coll.insert(item);
   return ret.second;
