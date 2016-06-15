@@ -10,7 +10,7 @@
 namespace Moses2
 {
 
-#define API_VERSION 10
+#define API_VERSION 11
 
 //Hash table entry
 struct Entry

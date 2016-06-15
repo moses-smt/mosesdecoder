@@ -152,11 +152,11 @@ void createProbingPT(const std::string &phrasetable_path,
   //Write configfile
   std::ofstream configfile;
   configfile.open((basepath + "/config").c_str());
-  configfile << API_VERSION << '\n';
-  configfile << uniq_entries << '\n';
-  configfile << num_scores << '\n';
-  configfile << num_lex_scores << '\n';
-  configfile << log_prob << '\n';
+  configfile << "API_VERSION\t" << API_VERSION << '\n';
+  configfile << "uniq_entries\t" << uniq_entries << '\n';
+  configfile << "num_scores\t" << num_scores << '\n';
+  configfile << "num_lex_scores\t" << num_lex_scores << '\n';
+  configfile << "log_prob\t" << log_prob << '\n';
   configfile.close();
 }
 

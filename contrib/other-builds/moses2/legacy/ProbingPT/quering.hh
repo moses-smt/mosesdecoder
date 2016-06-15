@@ -1,5 +1,6 @@
 #pragma once
 
+#include <unordered_map>
 #include <sys/stat.h> //For finding size of file
 #include "vocabid.hh"
 #include <algorithm> //toLower
@@ -7,6 +8,7 @@
 #include "probing_hash_utils.hh"
 #include "hash.hh" //Includes line splitter
 #include "line_splitter.hh"
+#include "../Util2.h"
 
 namespace Moses2
 {
@@ -38,6 +40,19 @@ public:
   }
 
   uint64_t getKey(uint64_t source_phrase[], size_t size) const;
+
+  template<typename T>
+  inline bool Get(const std::unordered_map<std::string, std::string> &keyValue, const std::string &sought, T &found) const
+  {
+    std::unordered_map<std::string, std::string>::const_iterator iter = keyValue.find(sought);
+    if (iter == keyValue.end()) {
+      return false;
+    }
+
+    const std::string &foundStr = iter->second;
+    found = Scan<T>(foundStr);
+    return true;
+  }
 
 };
 

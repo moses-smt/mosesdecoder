@@ -1,4 +1,7 @@
+#include <unordered_map>
 #include "quering.hh"
+#include "util/exception.hh"
+#include "../Util2.h"
 
 namespace Moses2
 {
@@ -15,28 +18,54 @@ QueryEngine::QueryEngine(const char * filepath)
   read_map(source_vocabids, path_to_source_vocabid.c_str());
 
   //Read config file
-  std::string line;
+  std::unordered_map<std::string, std::string> keyValue;
+
   std::ifstream config((basepath + "/config").c_str());
+  std::string line;
+  while (getline(config, line)) {
+    std::vector<std::string> toks = Moses2::Tokenize(line, "\t");
+    UTIL_THROW_IF2(toks.size() != 2, "Wrong config format:" << line);
+    keyValue[ toks[0] ] = toks[1];
+  }
+
+  bool found;
   //Check API version:
-  getline(config, line);
-  int version = atoi(line.c_str());
-  if (version != API_VERSION) {
+  int version;
+  found = Get(keyValue, "API_VERSION", version);
+  if (!found || version != API_VERSION) {
     std::cerr << "The ProbingPT API has changed. " << version << "!="
         << API_VERSION << " Please rebinarize your phrase tables." << std::endl;
     exit(EXIT_FAILURE);
   }
+
   //Get tablesize.
-  getline(config, line);
-  int tablesize = atoi(line.c_str());
+  int tablesize;
+  found = Get(keyValue, "uniq_entries", tablesize);
+  if (!found) {
+    std::cerr << "uniq_entries not found" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
   //Number of scores
-  getline(config, line);
-  num_scores = atoi(line.c_str());
+  found = Get(keyValue, "num_scores", num_scores);
+  if (!found) {
+    std::cerr << "num_scores not found" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
   //How may scores from lex reordering models
-  getline(config, line);
-  num_lex_scores = atoi(line.c_str());
+  found = Get(keyValue, "num_lex_scores", num_lex_scores);
+  if (!found) {
+    std::cerr << "num_lex_scores not found" << std::endl;
+    exit(EXIT_FAILURE);
+  }
+
   // have the scores been log() and FloorScore()?
-  getline(config, line);
-  logProb = atoi(line.c_str());
+  found = Get(keyValue, "log_prob", logProb);
+  if (!found) {
+    std::cerr << "logProb not found" << std::endl;
+    exit(EXIT_FAILURE);
+  }
 
   config.close();
 
