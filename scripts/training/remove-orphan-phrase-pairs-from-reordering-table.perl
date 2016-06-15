@@ -41,7 +41,7 @@ while(my $reordering_line = <STDIN>) {
   $ttable_phrase_pair = &get_phrase_pair($ttable_line);
 }
 if (defined($ttable_line)) {
-  print STDERR "ERROR: trailing ttable lines -> could not find $ttable_line!\n";
+  die "ERROR: trailing ttable lines -> could not find $ttable_line!\n";
 }
 
 sub get_phrase_pair {
