@@ -31,7 +31,10 @@ QueryEngine::QueryEngine(const char * filepath)
   //Check API version:
   int version;
   found = Get(keyValue, "API_VERSION", version);
-  if (!found || version != API_VERSION) {
+  if (!found) {
+    std::cerr << "Old version of ProbingPT. Please rebinarize your phrase tables." << std::endl;
+  }
+  else if (version != API_VERSION) {
     std::cerr << "The ProbingPT API has changed. " << version << "!="
         << API_VERSION << " Please rebinarize your phrase tables." << std::endl;
     exit(EXIT_FAILURE);
