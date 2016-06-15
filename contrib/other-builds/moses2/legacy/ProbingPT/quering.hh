@@ -1,6 +1,6 @@
 #pragma once
 
-#include <unordered_map>
+#include <boost/unordered_map.hpp>
 #include <sys/stat.h> //For finding size of file
 #include "vocabid.hh"
 #include <algorithm> //toLower
@@ -42,9 +42,9 @@ public:
   uint64_t getKey(uint64_t source_phrase[], size_t size) const;
 
   template<typename T>
-  inline bool Get(const std::unordered_map<std::string, std::string> &keyValue, const std::string &sought, T &found) const
+  inline bool Get(const boost::unordered_map<std::string, std::string> &keyValue, const std::string &sought, T &found) const
   {
-    std::unordered_map<std::string, std::string>::const_iterator iter = keyValue.find(sought);
+    boost::unordered_map<std::string, std::string>::const_iterator iter = keyValue.find(sought);
     if (iter == keyValue.end()) {
       return false;
     }

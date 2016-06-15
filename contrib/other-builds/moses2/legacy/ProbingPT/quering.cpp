@@ -1,4 +1,3 @@
-#include <unordered_map>
 #include "quering.hh"
 #include "util/exception.hh"
 #include "../Util2.h"
@@ -18,7 +17,7 @@ QueryEngine::QueryEngine(const char * filepath)
   read_map(source_vocabids, path_to_source_vocabid.c_str());
 
   //Read config file
-  std::unordered_map<std::string, std::string> keyValue;
+  boost::unordered_map<std::string, std::string> keyValue;
 
   std::ifstream config((basepath + "/config").c_str());
   std::string line;
