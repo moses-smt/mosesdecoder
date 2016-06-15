@@ -130,6 +130,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
     legacy/ProbingPT/probing_hash_utils.cpp
     legacy/ProbingPT/quering.cpp
     legacy/ProbingPT/storing.cpp
+    legacy/ProbingPT/StoreVocab.cpp
     legacy/ProbingPT/StoreTarget.cpp
     legacy/ProbingPT/vocabid.cpp
 
