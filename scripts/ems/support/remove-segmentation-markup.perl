@@ -9,7 +9,16 @@ use strict;
 $|++;
 
 while(<STDIN>) {
-  s/ \|\d+\-\d+\| / /g;
-  s/ \|\d+\-\d+\|$//;
-  print $_;
+  chop;
+  s/\|[^\|]+\|//g;
+  s/\s+/ /g;
+  s/^ //;
+  s/ $//;
+  print $_."\n";
 }
+
+#while(<STDIN>) {
+#  s/ \|\d+\-\d+\| / /g;
+#  s/ \|\d+\-\d+\|$//;
+#  print $_;
+#}

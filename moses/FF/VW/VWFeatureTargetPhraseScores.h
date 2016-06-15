@@ -20,9 +20,9 @@ public:
   }
 
   void operator()(const InputType &input
-                  , const InputPath &inputPath
                   , const TargetPhrase &targetPhrase
-                  , Discriminative::Classifier &classifier) const {
+                  , Discriminative::Classifier &classifier
+                  , Discriminative::FeatureVector &outFeatures) const {
     std::vector<FeatureFunction*> features = FeatureFunction::GetFeatureFunctions();
     for (size_t i = 0; i < features.size(); i++) {
       std::string fname = features[i]->GetScoreProducerDescription();
@@ -31,7 +31,7 @@ public:
 
       std::vector<float> scores = targetPhrase.GetScoreBreakdown().GetScoresForProducer(features[i]);
       for(size_t j = 0; j < scores.size(); ++j)
-        classifier.AddLabelDependentFeature(fname + "^" + boost::lexical_cast<std::string>(j), scores[j]);
+        outFeatures.push_back(classifier.AddLabelDependentFeature(fname + "^" + boost::lexical_cast<std::string>(j), scores[j]));
     }
   }
 

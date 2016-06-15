@@ -73,8 +73,14 @@
 #include "moses/Syntax/InputWeightFF.h"
 #include "moses/Syntax/RuleTableFF.h"
 
+#include "moses/FF/EditOps.h"
+#include "moses/FF/CorrectionPattern.h"
+
 #ifdef HAVE_VW
 #include "moses/FF/VW/VW.h"
+#include "moses/FF/VW/VWFeatureContextBigrams.h"
+#include "moses/FF/VW/VWFeatureContextBilingual.h"
+#include "moses/FF/VW/VWFeatureContextWindow.h"
 #include "moses/FF/VW/VWFeatureSourceBagOfWords.h"
 #include "moses/FF/VW/VWFeatureSourceBigrams.h"
 #include "moses/FF/VW/VWFeatureSourceIndicator.h"
@@ -294,8 +300,14 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SkeletonTranslationOptionListFeature);
   MOSES_FNAME(SkeletonPT);
 
+  MOSES_FNAME(EditOps);
+  MOSES_FNAME(CorrectionPattern);
+
 #ifdef HAVE_VW
   MOSES_FNAME(VW);
+  MOSES_FNAME(VWFeatureContextBigrams);
+  MOSES_FNAME(VWFeatureContextBilingual);
+  MOSES_FNAME(VWFeatureContextWindow);
   MOSES_FNAME(VWFeatureSourceBagOfWords);
   MOSES_FNAME(VWFeatureSourceBigrams);
   MOSES_FNAME(VWFeatureSourceIndicator);

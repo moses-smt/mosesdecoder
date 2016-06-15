@@ -76,7 +76,7 @@ public:
                            , const TargetPhrase &targetPhrase
                            , ScoreComponentCollection &scoreBreakdown
                            , ScoreComponentCollection &estimatedScores) const {
-	}
+  }
 
   void EvaluateWhenApplied(const Hypothesis& hypo,
                            ScoreComponentCollection* accumulator) const {

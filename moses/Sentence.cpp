@@ -155,7 +155,9 @@ aux_interpret_xml(std::string& line, std::vector<size_t> & xmlWalls,
                                      m_xmlOptions,
                                      m_reorderingConstraint,
                                      xmlWalls, placeholders);
-    UTIL_THROW_IF2(!OK, "Unable to parse XML in line: " << line);
+    if (!OK) {
+      TRACE_ERR("Unable to parse XML in line: " << line);
+    }
   }
 }
 

@@ -25,7 +25,7 @@ VWTrainer::~VWTrainer()
   close(m_bfos);
 }
 
-void VWTrainer::AddLabelIndependentFeature(const StringPiece &name, float value)
+FeatureType VWTrainer::AddLabelIndependentFeature(const StringPiece &name, float value)
 {
   if (m_isFirstSource) {
     if (m_isFirstExample) {
@@ -43,9 +43,11 @@ void VWTrainer::AddLabelIndependentFeature(const StringPiece &name, float value)
   }
 
   AddFeature(name, value);
+
+  return std::make_pair(0, value); // we don't hash features
 }
 
-void VWTrainer::AddLabelDependentFeature(const StringPiece &name, float value)
+FeatureType VWTrainer::AddLabelDependentFeature(const StringPiece &name, float value)
 {
   if (m_isFirstTarget) {
     m_isFirstTarget = false;
@@ -56,6 +58,18 @@ void VWTrainer::AddLabelDependentFeature(const StringPiece &name, float value)
   }
 
   AddFeature(name, value);
+
+  return std::make_pair(0, value); // we don't hash features
+}
+
+void VWTrainer::AddLabelIndependentFeatureVector(const FeatureVector &features)
+{
+  throw logic_error("VW trainer does not support feature IDs.");
+}
+
+void VWTrainer::AddLabelDependentFeatureVector(const FeatureVector &features)
+{
+  throw logic_error("VW trainer does not support feature IDs.");
 }
 
 void VWTrainer::Train(const StringPiece &label, float loss)

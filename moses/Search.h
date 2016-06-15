@@ -7,6 +7,7 @@
 #include "Phrase.h"
 #include "InputPath.h"
 #include "Bitmaps.h"
+#include "Timer.h"
 
 namespace Moses
 {
@@ -48,6 +49,7 @@ protected:
   /** flag indicating that decoder ran out of time (see switch -time-out) */
   size_t interrupted_flag;
 
+  Timer m_timer;
   bool out_of_time();
 };
 

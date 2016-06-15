@@ -59,6 +59,7 @@ Parameter::Parameter()
   AddParam(main_opts,"version", "show version of Moses and libraries used");
   AddParam(main_opts,"show-weights", "print feature weights and exit");
   AddParam(main_opts,"time-out", "seconds after which is interrupted (-1=no time-out, default is -1)");
+  AddParam(main_opts,"segment-time-out", "seconds for single segment after which is interrupted (-1=no time-out, default is -1)");
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // factorization options

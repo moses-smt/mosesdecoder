@@ -2660,11 +2660,15 @@ sub define_training_create_config {
 
     if ($osm) {
       my $osm_settings = &get("TRAINING:operation-sequence-model-settings");
-      if ($osm_settings =~ /-factor *(\S+)/){
+      if ($osm_settings =~ /-factor *(\S+)/) {
         $cmd .= "-osm-model $osm/ -osm-setting $1 ";
       }
       else {
         $cmd .= "-osm-model $osm/operationLM.bin ";
+      }
+      my $osm_load_method = &get("TRAINING:operation-sequence-model-load-method");
+      if (defined($osm_load_method)) {
+        $cmd .= "-osm-load-method $osm_load_method ";
       }
     }
 

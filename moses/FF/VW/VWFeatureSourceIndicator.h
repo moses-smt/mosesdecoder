@@ -20,9 +20,9 @@ public:
   }
 
   void operator()(const InputType &input
-                  , const InputPath &inputPath
                   , const Range &sourceRange
-                  , Discriminative::Classifier &classifier) const {
+                  , Discriminative::Classifier &classifier
+                  , Discriminative::FeatureVector &outFeatures) const {
     size_t begin = sourceRange.GetStartPos();
     size_t end   = sourceRange.GetEndPos() + 1;
 
@@ -31,7 +31,7 @@ public:
     for (size_t i = 0; i < end - begin; i++)
       words[i] = GetWord(input, begin + i);
 
-    classifier.AddLabelIndependentFeature("sind^" + Join(" ", words));
+    outFeatures.push_back(classifier.AddLabelIndependentFeature("sind^" + Join(" ", words)));
   }
 
   virtual void SetParameter(const std::string& key, const std::string& value) {
