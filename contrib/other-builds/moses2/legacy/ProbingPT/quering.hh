@@ -15,7 +15,6 @@ namespace Moses2
 
 class QueryEngine
 {
-  const std::map<unsigned int, std::string> *vocabids;
   std::map<uint64_t, std::string> source_vocabids;
 
   Table table;
