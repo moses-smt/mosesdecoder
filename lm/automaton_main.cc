@@ -89,13 +89,11 @@ template <class Value> class NGramAutomaton {
         }
 
         void SetTask(const Task& task) {
-
-            new_word_ = task.new_word;
-            pred_ = task.pred;
-            callback_ = task.callback;
-
+            //InitialPredecessorCheck must be called first because pred_==this might be true
             InitialPredecessorCheck(task);
 
+            new_word_ = task.new_word;
+            callback_ = task.callback;
             ngram_order_ = 0;
             node_ = 0;
             out_state_.length = std::min(in_state_.length + 1, max_order_ - 1);
@@ -114,19 +112,23 @@ template <class Value> class NGramAutomaton {
         void InitialPredecessorCheck(const Task& task) {
             assert(task.pred == nullptr ^ task.context_state == nullptr); //either predecessor is set or context_state
             pred_ = task.pred;
-            pred_finished_ = false;
             if (pred_) {
-                if (pred_->Finished() || this == pred_) {
-                    // the second condition (this == pred_) does not need to be there
-                    // if we assume this->status_ == Status::Done when this function is called
+                CopyContextWordsFromPredecessor();
+                in_state_.length = pred_->out_state_.length;
+
+                if (pred_->Finished()) {
                     pred_finished_ = true;
-                    CopyStateFromPredecessor();
+
+                    //copy backoffs
+                    std::copy(pred_->out_state_.backoff, pred_->out_state_.backoff + pred_->out_state_.length, in_state_.backoff);
                 }
                 else {
-                    NotifyPredecessor();
+                    pred_finished_ = false;
+                    pred_->SetSuccessor(this);
                 }
             }
             else {
+                //copy from context state
                 pred_finished_ = true;
                 std::copy(task.context_state->words, task.context_state->words + task.context_state->length, in_state_.words);
                 std::copy(task.context_state->backoff, task.context_state->backoff + task.context_state->length, in_state_.backoff);
@@ -134,19 +136,6 @@ template <class Value> class NGramAutomaton {
             }
         }
 
-        void CopyStateFromPredecessor() {
-            CopyContextWordsFromPredecessor();
-            std::copy(pred_->out_state_.backoff, pred_->out_state_.backoff + pred_->out_state_.length, in_state_.backoff);
-            in_state_.length = pred_->out_state_.length;
-        }
-
-        void NotifyPredecessor(){
-            pred_->SetSuccessor(this);
-            //predecessor copies context words and state length to his successor(=this)
-            CopyContextWordsFromPredecessor();
-            in_state_.length = pred_->out_state_.length;
-        }
-        
         void CopyContextWordsFromPredecessor(){
             //pred_ might equal this, hence the copying order
             auto length = std::min(pred_->out_state_.length, static_cast<unsigned char>(max_order_ - 2));
