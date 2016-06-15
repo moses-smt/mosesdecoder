@@ -50,6 +50,7 @@ template <class Value> class NGramAutomaton {
         using Status = lm::Status;
 
         explicit NGramAutomaton(Construct construct) :
+            callback_(),
             ngram_order_(0),
             status_(Status::Done),
             search_(construct.search),
@@ -147,9 +148,13 @@ template <class Value> class NGramAutomaton {
         }
         
         void CopyContextWordsFromPredecessor(){
-            in_state_.words[0] = pred_->new_word_;
+            //pred_ might equal this, hence the copying order
             auto length = std::min(pred_->out_state_.length, static_cast<unsigned char>(max_order_ - 2));
-            std::copy(pred_->in_state_.words, pred_->in_state_.words + length, in_state_.words + 1);
+
+            auto from = pred_->in_state_.words + length - 1;
+            auto to = in_state_.words + length;
+            for(; from >= pred_->in_state_.words; --from, --to){*to = *from;}
+            in_state_.words[0] = pred_->new_word_;
         }
 
         void CheckSuccessorFinished(){
@@ -228,7 +233,6 @@ template <class Value> class NGramAutomaton {
                     search_.PrefetchMiddle(0, in_state_.words[0], node_);
                 }
             }
-
         }
 
         void GetMiddlePrefetchNext(){
@@ -248,7 +252,6 @@ template <class Value> class NGramAutomaton {
             }
 
             if (ngram_order_ - 1 == in_state_.length || ret_.independent_left) {
-
                 Finish();
                 return;
             }
@@ -289,9 +292,6 @@ template <class Value> class NGramAutomaton {
         }
 
         void Finish(){
-
-
-
             WriteOutLength(std::min(ret_.ngram_length, static_cast<unsigned char>(max_order_ - 1)));
             CheckPredecessorFinished();
             CheckSuccessorFinished();
@@ -329,7 +329,6 @@ template <class Automaton> class Queue {
                 Next();
             }
             automata_[curr_].SetTask(task);
-            //TODO: What about single step automata?
             automata_[curr_].Step();
             auto& ret = automata_[curr_];
             Next();
@@ -395,10 +394,12 @@ class Pipeline {
 
 } // namespace lm
 
+namespace {
 void CheckEqual(const lm::FullScoreReturn& lhs, const lm::FullScoreReturn& rhs) {
     assert(lhs.prob == rhs.prob);
     assert(lhs.independent_left == rhs.independent_left);
     assert(lhs.ngram_length == rhs.ngram_length);
+}
 }
 
 int main(int argc, char* argv[]){
