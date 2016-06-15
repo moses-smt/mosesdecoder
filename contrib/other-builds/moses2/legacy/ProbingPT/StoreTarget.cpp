@@ -16,8 +16,9 @@ using namespace std;
 namespace Moses2
 {
 
-StoreTarget::StoreTarget(const std::string &basepath) :
-    m_basePath(basepath)
+StoreTarget::StoreTarget(const std::string &basepath)
+:m_basePath(basepath)
+,m_vocab(basepath + "/TargetVocab.dat")
 {
   std::string path = basepath + "/TargetColl.dat";
   m_fileTargetColl.open(path.c_str(),
@@ -34,15 +35,7 @@ StoreTarget::~StoreTarget()
   m_fileTargetColl.close();
 
   // vocab
-  std::string path = m_basePath + "/TargetVocab.dat";
-  OutputFileStream strme(path);
-
-  boost::unordered_map<std::string, uint32_t>::const_iterator iter;
-  for (iter = m_vocab.begin(); iter != m_vocab.end(); ++iter) {
-    strme << iter->first << "\t" << iter->second << endl;
-  }
-
-  strme.Close();
+  m_vocab.Save();
 }
 
 uint64_t StoreTarget::Save()
@@ -102,7 +95,7 @@ void StoreTarget::Append(const line_text &line, bool log_prob)
       util::SingleCharacter(' '));
   while (it) {
     string tok = it->as_string();
-    uint32_t vocabId = GetVocabId(tok);
+    uint32_t vocabId = m_vocab.GetVocabId(tok);
 
     rule->target_phrase.push_back(vocabId);
     it++;
@@ -154,20 +147,6 @@ void StoreTarget::Append(const line_text &line, bool log_prob)
    }
    */
   m_coll.push_back(rule);
-}
-
-uint32_t StoreTarget::GetVocabId(const std::string &word)
-{
-  boost::unordered_map<std::string, uint32_t>::iterator iter = m_vocab.find(
-      word);
-  if (iter == m_vocab.end()) {
-    uint32_t ind = m_vocab.size() + 1;
-    m_vocab[word] = ind;
-    return ind;
-  }
-  else {
-    return iter->second;
-  }
 }
 
 uint16_t StoreTarget::GetAlignId(const std::vector<unsigned char> &align)

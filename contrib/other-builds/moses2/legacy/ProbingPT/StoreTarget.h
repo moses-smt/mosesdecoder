@@ -10,6 +10,7 @@
 #include <vector>
 #include <inttypes.h>
 #include <boost/unordered_map.hpp>
+#include "StoreVocab.h"
 
 namespace Moses2
 {
@@ -28,12 +29,11 @@ public:
 protected:
   std::string m_basePath;
   std::fstream m_fileTargetColl;
-  boost::unordered_map<std::string, uint32_t> m_vocab;
+  StoreVocab<uint32_t> m_vocab;
   boost::unordered_map<std::vector<unsigned char>, uint16_t> m_aligns;
 
   std::vector<target_text*> m_coll;
 
-  uint32_t GetVocabId(const std::string &word);
   uint16_t GetAlignId(const std::vector<unsigned char> &align);
   void Save(const target_text &rule);
 
