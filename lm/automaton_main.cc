@@ -28,34 +28,6 @@ namespace lm {
 
 enum class Status {Done, Working};
 
-namespace {
-
-class SimpleAutomaton {
-    public:
-        using Task = std::pair<std::string, unsigned int>;
-        using Construct = int;
-
-        SimpleAutomaton(int x = 0) : repeat_(0) {}
-
-        Status Step() {
-            if (repeat_ <= 0) return Status::Done;
-            std::cout << word_ << std::endl;
-            --repeat_;
-            return Status::Working;
-        }
-
-        void SetTask(const Task& task){
-            repeat_ = task.second;
-            word_ = task.first;
-        }
-
-    private:
-        std::size_t repeat_;
-        std::string word_;
-};
-
-} // namespace
-
 namespace ngram {
 
 template <class Value> class NGramAutomaton {
