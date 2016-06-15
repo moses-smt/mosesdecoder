@@ -22,6 +22,40 @@ class Queue;
 class SeenPositions;
 
 ///////////////////////////////////////////
+class SeenPosition
+{
+public:
+  const SCFG::TargetPhrases *tps;
+  size_t tpInd;
+  Vector<size_t> hypoIndColl;
+
+  SeenPosition(MemPool &pool, const SCFG::TargetPhrases *vtps, size_t vtpInd, const Vector<size_t> &vhypoIndColl);
+
+  bool operator==(const SeenPosition &compare) const;
+  size_t hash() const;
+
+  void Debug(std::ostream &out, const System &system) const;
+
+};
+
+///////////////////////////////////////////
+
+class SeenPositions
+{
+public:
+  bool Add(const SeenPosition *item);
+
+  void clear()
+  { m_coll.clear(); }
+
+
+protected:
+  typedef boost::unordered_set<const SeenPosition*,
+      UnorderedComparer<SeenPosition>, UnorderedComparer<SeenPosition> > Coll;
+  Coll m_coll;
+};
+
+///////////////////////////////////////////
 class QueueItem
 {
 public:
@@ -92,39 +126,6 @@ class Queue : public std::priority_queue<QueueItem*,
 
 };
 
-///////////////////////////////////////////
-class SeenPosition
-{
-public:
-  const SCFG::TargetPhrases *tps;
-  size_t tpInd;
-  Vector<size_t> hypoIndColl;
-
-  SeenPosition(MemPool &pool, const SCFG::TargetPhrases *vtps, size_t vtpInd, const Vector<size_t> &vhypoIndColl);
-
-  bool operator==(const SeenPosition &compare) const;
-  size_t hash() const;
-
-  void Debug(std::ostream &out, const System &system) const;
-
-};
-
-///////////////////////////////////////////
-
-class SeenPositions
-{
-public:
-  bool Add(const SeenPosition *item);
-
-  void clear()
-  { m_coll.clear(); }
-
-
-protected:
-  typedef boost::unordered_set<const SeenPosition*,
-      UnorderedComparer<SeenPosition>, UnorderedComparer<SeenPosition> > Coll;
-  Coll m_coll;
-};
 
 }
 }

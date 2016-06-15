@@ -17,6 +17,60 @@ namespace Moses2
 
 namespace SCFG
 {
+
+////////////////////////////////////////////////////////
+SeenPosition::SeenPosition(MemPool &pool, const SCFG::TargetPhrases *vtps, size_t vtpInd, const Vector<size_t> &vhypoIndColl)
+:tps(vtps)
+,tpInd(vtpInd)
+,hypoIndColl(pool, vhypoIndColl.size())
+{
+  for (size_t i = 0; i < hypoIndColl.size(); ++i) {
+    hypoIndColl[i] = vhypoIndColl[i];
+  }
+}
+
+void SeenPosition::Debug(std::ostream &out, const System &system) const
+{
+  out << tps << " " << tpInd << " ";
+
+  for (size_t i = 0; i < hypoIndColl.size(); ++i) {
+    out << hypoIndColl[i] << " ";
+  }
+}
+
+bool SeenPosition::operator==(const SeenPosition &compare) const
+{
+  if (tps != compare.tps) {
+    return false;
+  }
+
+  if (tpInd != compare.tpInd) {
+    return false;
+  }
+
+  if (hypoIndColl != compare.hypoIndColl) {
+    return false;
+  }
+
+  return true;
+}
+
+size_t SeenPosition::hash() const
+{
+  size_t ret = (size_t) tps;
+  boost::hash_combine(ret, tpInd);
+  boost::hash_combine(ret, hypoIndColl);
+  return ret;
+}
+
+////////////////////////////////////////////////////////
+bool SeenPositions::Add(const SeenPosition *item)
+{
+  std::pair<Coll::iterator, bool> ret = m_coll.insert(item);
+  return ret.second;
+}
+
+////////////////////////////////////////////////////////
 QueueItem *QueueItem::Create(MemPool &pool, SCFG::Manager &mgr)
 {
   QueueItem *item = new (pool.Allocate<QueueItem>()) QueueItem(pool);
@@ -129,60 +183,6 @@ void QueueItem::Debug(std::ostream &out, const System &system) const
     out << hypoIndColl[i] << " ";
   }
 }
-
-////////////////////////////////////////////////////////
-SeenPosition::SeenPosition(MemPool &pool, const SCFG::TargetPhrases *vtps, size_t vtpInd, const Vector<size_t> &vhypoIndColl)
-:tps(vtps)
-,tpInd(vtpInd)
-,hypoIndColl(pool, vhypoIndColl.size())
-{
-  for (size_t i = 0; i < hypoIndColl.size(); ++i) {
-    hypoIndColl[i] = vhypoIndColl[i];
-  }
-}
-
-void SeenPosition::Debug(std::ostream &out, const System &system) const
-{
-  out << tps << " " << tpInd << " ";
-
-  for (size_t i = 0; i < hypoIndColl.size(); ++i) {
-    out << hypoIndColl[i] << " ";
-  }
-}
-
-bool SeenPosition::operator==(const SeenPosition &compare) const
-{
-  if (tps != compare.tps) {
-    return false;
-  }
-
-  if (tpInd != compare.tpInd) {
-    return false;
-  }
-
-  if (hypoIndColl != compare.hypoIndColl) {
-    return false;
-  }
-
-  return true;
-}
-
-size_t SeenPosition::hash() const
-{
-  size_t ret = (size_t) tps;
-  boost::hash_combine(ret, tpInd);
-  boost::hash_combine(ret, hypoIndColl);
-  return ret;
-}
-
-////////////////////////////////////////////////////////
-bool SeenPositions::Add(const SeenPosition *item)
-{
-  std::pair<Coll::iterator, bool> ret = m_coll.insert(item);
-  return ret.second;
-}
-
-////////////////////////////////////////////////////////
 
 }
 }
