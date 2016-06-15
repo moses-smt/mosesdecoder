@@ -96,7 +96,6 @@ template <class Value> class NGramAutomaton {
             if (status_ == Status::Done || ngram_order_ > max_order_){
                 return Status::Done;
             }
-            std::cout << this << " step " << (int) ngram_order_ <<  std::endl;
 
             switch(ngram_order_) {
                 case 0:
@@ -117,7 +116,6 @@ template <class Value> class NGramAutomaton {
         }
 
         void SetTask(const Task& task) {
-            std::cout << this << " start" << std::endl;
 
             new_word_ = task.new_word;
             pred_ = task.pred;
@@ -178,12 +176,8 @@ template <class Value> class NGramAutomaton {
         
         void CopyContextWordsFromPredecessor(){
             in_state_.words[0] = pred_->new_word_;
-            //std::cout<<"pred new_word_: " << pred_->new_word_;
             auto length = std::min(pred_->out_state_.length, static_cast<unsigned char>(max_order_ - 2));
             std::copy(pred_->in_state_.words, pred_->in_state_.words + length, in_state_.words + 1);
-            std::cout << "Copying words";
-            for (auto b : in_state_.words) std::cout << b << " ";
-            std::cout << std::endl;
         }
 
         void CheckSuccessorFinished(){
@@ -193,7 +187,6 @@ template <class Value> class NGramAutomaton {
                 for(auto i = succ_data_.ret.ngram_length - 1; i < out_state_.length; i++){
                     succ_data_.ret.prob += out_state_.backoff[i];
                 }
-                std::cout<< this << " handling callback from " << succ_ << std::endl;
                 succ_data_.callback(succ_data_.ret);
             }
             else if (succ_) {
@@ -208,12 +201,10 @@ template <class Value> class NGramAutomaton {
                 for(auto i = ret_.ngram_length - 1; i < in_state_.length; i++){
                     ret_.prob += in_state_.backoff[i];
                 }
-                std::cout << this << " callback" <<std::endl;
                 callback_(ret_);
             }
             else {
                 // Give callback and FullScoreReturn to predecessor
-                std::cout << this << " callback left for " << pred_ << std::endl;
                 NotifyPredecessorOfCompletion();
             }
         }
@@ -245,7 +236,6 @@ template <class Value> class NGramAutomaton {
 
         void GetUnigramPrefetchNext(){
             typename detail::HashedSearch<Value>::UnigramPointer uni(search_.LookupUnigram(new_word_, node_, ret_.independent_left, ret_.extend_left));
-            std::cout << new_word_ << " performed " << 1 << " lookup" << std::endl;
             WriteWordToSuccInState(new_word_);
             out_state_.backoff[0] = uni.Backoff(); //TODO: What if the word is not found?
             ret_.prob = uni.Prob();
@@ -271,7 +261,6 @@ template <class Value> class NGramAutomaton {
 
         void GetMiddlePrefetchNext(){
             typename detail::HashedSearch<Value>::MiddlePointer pointer(search_.LookupMiddleFromNode(ngram_order_ - 2, node_, ret_.independent_left, ret_.extend_left));
-            std::cout << new_word_ << " performed " << ngram_order_ << " lookup" << std::endl;
             if (!pointer.Found()) {
                 Finish();
                 return;
@@ -285,7 +274,6 @@ template <class Value> class NGramAutomaton {
             if (!HasExtension(pointer.Backoff())){
                 WriteOutLength(ngram_order_-1); 
             }
-            std::cout << ngram_order_ << " " << (int) in_state_.length << std::endl;
 
             if (ngram_order_ - 1 == in_state_.length || ret_.independent_left) {
 
@@ -305,7 +293,6 @@ template <class Value> class NGramAutomaton {
             WriteOutLength(ngram_order_-1);
             ret_.independent_left = true;
             typename detail::HashedSearch<Value>::LongestPointer longest(search_.LookupLongestFromNode(node_));
-            std::cout << new_word_ << " performed " << ngram_order_ << " lookup" << std::endl;
             if (longest.Found()) {
                 ret_.prob = longest.Prob();
                 ret_.rest = ret_.prob;
@@ -330,12 +317,6 @@ template <class Value> class NGramAutomaton {
         }
 
         void Finish(){
-            std::cout << this << " finish" << std::endl;
-            std::cout << "new word: " << new_word_ << std::endl;
-            std::cout << "in_length: " << (int)in_state_.length << std::endl;
-            std::cout << "ind left: " << ret_.independent_left << std::endl;
-            std::cout << "out length: " << (int)out_state_.length << std::endl;
-            std::cout << "in length: " << (int)in_state_.length << std::endl;
 
 
 
@@ -346,7 +327,7 @@ template <class Value> class NGramAutomaton {
         }
 
 
-        std::function<void(const FullScoreReturn&)> callback_;// = [](FullScoreReturn& r){std::cout << "In callback, prob: " << r.prob << " ngram_length: " << (int)r.ngram_length << std::endl;};
+        std::function<void(const FullScoreReturn&)> callback_;
         std::size_t ngram_order_;
         Status status_;
         detail::HashedSearch<Value> &search_;
@@ -390,7 +371,7 @@ template <class Automaton> class Queue {
         void Drain() {
             std::size_t drained = 0;
             while (drained != size_) {
-                while (automata_[curr_].Step() != Status::Done) {std::cout <<"step" <<std::endl;}
+                while (automata_[curr_].Step() != Status::Done) {}
                 Next();
                 ++drained;
             }
@@ -408,7 +389,6 @@ class Pipeline {
     public:
         Pipeline(std::size_t queue_size, ngram::NGramAutomaton<ngram::BackoffValue>::Construct construct) : queue_(queue_size, construct) {}
         void FullScore(const lm::ngram::State& context_state, const WordIndex word, const std::function<void(const FullScoreReturn&)> callback) {
-            std::cout << "appending " << word << std::endl;
             pred_ = queue_.Add({nullptr, word, &context_state, callback});
         }
 
@@ -424,7 +404,6 @@ class Pipeline {
 //      }
 
         void AppendWord(const WordIndex word, const std::function<void(const FullScoreReturn&)>& callback){
-            std::cout << "appending " << word << std::endl;
             assert(pred_);
             pred_ = queue_.Add({pred_, word, nullptr, callback});
         }
@@ -465,8 +444,6 @@ int main(int argc, char* argv[]){
     config.positive_log_probability = lm::SILENT;
     config.probing_multiplier = 2.0;
     lm::ngram::ProbingModel model(arpa.data(), config);
-    std::cout << "ORDER: " << (int)model.Order() << std::endl;
-    std::cout << "PIPELINE SIZE: " << pipeline_size << std::endl;
     lm::Pipeline pipeline(pipeline_size, {model.GetSearch(), model.Order()});
     
     util::FilePiece in(test.data());
