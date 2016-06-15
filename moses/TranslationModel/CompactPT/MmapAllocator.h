@@ -122,7 +122,7 @@ public:
     if(!m_fixed) {
       size_t read = 0;
       read += ftruncate(m_file_desc, m_map_size);
-      m_data_ptr = (char*)mmap(0, m_map_size, PROT_READ|PROT_WRITE, MAP_SHARED,
+      m_data_ptr = (char*)mmap(0, m_map_size, PROT_READ|PROT_WRITE, MAP_SHARED|MAP_POPULATE,
                                m_file_desc, 0);
       if(m_data_ptr == MAP_FAILED)
         std::cerr << "Error: mmapping" << std::endl;
@@ -133,7 +133,7 @@ public:
 
       size_t map_size = m_map_size + relative_offset;
 
-      m_data_ptr = (char*)mmap(0, map_size, PROT_READ, MAP_SHARED,
+      m_data_ptr = (char*)mmap(0, map_size, PROT_READ, MAP_SHARED|MAP_POPULATE,
                                m_file_desc, map_offset);
 
       return (pointer)(m_data_ptr + relative_offset);

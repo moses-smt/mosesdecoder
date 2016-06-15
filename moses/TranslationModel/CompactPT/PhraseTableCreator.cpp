@@ -1027,6 +1027,7 @@ RankingTask::RankingTask(InputFileStream& inFile, PhraseTableCreator& creator)
 void RankingTask::operator()()
 {
   size_t lineNum = 0;
+  std::string lastLine;
 
   std::vector<std::string> lines;
   size_t max_lines = 1000;
@@ -1037,8 +1038,16 @@ void RankingTask::operator()()
     boost::mutex::scoped_lock lock(m_fileMutex);
 #endif
     std::string line;
-    while(lines.size() < max_lines && std::getline(m_inFile, line))
+    while(lines.size() < max_lines && std::getline(m_inFile, line)) {
+      if(lastLine >= line) {
+        std::stringstream strme;
+        strme << "Error: Incorrectly sorted or non-uniq line:" << std::endl;
+        strme << "Line " << line << std::endl;
+        UTIL_THROW2(strme.str());
+      }
       lines.push_back(line);
+      lastLine = line;
+    }
     lineNum = m_lineNum;
     m_lineNum += lines.size();
   }
