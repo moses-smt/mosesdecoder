@@ -324,23 +324,6 @@ void ProbingPT::CreateCache(System &system)
 
 }
 
-void ProbingPT::Lookup(MemPool &pool,
-    const SCFG::Manager &mgr,
-    size_t maxChartSpan,
-    const SCFG::Stacks &stacks,
-    SCFG::InputPath &path) const
-{
-  UTIL_THROW2("Not implemented");
-}
-
-void ProbingPT::LookupUnary(MemPool &pool,
-    const SCFG::Manager &mgr,
-    const SCFG::Stacks &stacks,
-    SCFG::InputPath &path) const
-{
-
-}
-
 void ProbingPT::ReformatWord(System &system, std::string &wordStr, bool &isNT)
 {
   isNT = false;
@@ -364,6 +347,31 @@ void ProbingPT::ReformatWord(System &system, std::string &wordStr, bool &isNT)
       //cerr << "wordStr=" << wordStr << endl;
     }
   }
+}
+
+/////////////////////////////////////////////////////////////////////
+// SCFG
+/////////////////////////////////////////////////////////////////////
+void ProbingPT::InitActiveChart(MemPool &pool, SCFG::InputPath &path) const
+{
+  cerr << "InitActiveChart" << endl;
+}
+
+void ProbingPT::Lookup(MemPool &pool,
+    const SCFG::Manager &mgr,
+    size_t maxChartSpan,
+    const SCFG::Stacks &stacks,
+    SCFG::InputPath &path) const
+{
+  cerr << "Lookup" << endl;
+}
+
+void ProbingPT::LookupUnary(MemPool &pool,
+    const SCFG::Manager &mgr,
+    const SCFG::Stacks &stacks,
+    SCFG::InputPath &path) const
+{
+  cerr << "LookupUnary" << endl;
 }
 
 }
