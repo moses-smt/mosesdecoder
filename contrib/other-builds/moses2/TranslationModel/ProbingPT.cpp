@@ -10,15 +10,17 @@
 #include "../Scores.h"
 #include "../Phrase.h"
 #include "../legacy/InputFileStream.h"
+#include "../legacy/FactorCollection.h"
+#include "../legacy/ProbingPT/quering.hh"
+#include "../legacy/Util2.h"
 #include "../legacy/ProbingPT/probing_hash_utils.hh"
 #include "../FF/FeatureFunctions.h"
 #include "../PhraseBased/PhraseImpl.h"
 #include "../PhraseBased/TargetPhraseImpl.h"
 #include "../PhraseBased/Manager.h"
 #include "../PhraseBased/TargetPhrases.h"
-#include "../legacy/FactorCollection.h"
-#include "../legacy/ProbingPT/quering.hh"
-#include "../legacy/Util2.h"
+#include "../SCFG/InputPath.h"
+#include "../SCFG/Manager.h"
 
 using namespace std;
 
@@ -354,7 +356,10 @@ void ProbingPT::ReformatWord(System &system, std::string &wordStr, bool &isNT)
 /////////////////////////////////////////////////////////////////////
 void ProbingPT::InitActiveChart(MemPool &pool, SCFG::InputPath &path) const
 {
-  cerr << "InitActiveChart" << endl;
+  size_t ptInd = GetPtInd();
+  ActiveChartEntryProbing *chartEntry = new (pool.Allocate<ActiveChartEntryProbing>()) ActiveChartEntryProbing(pool);
+  path.AddActiveChartEntry(ptInd, chartEntry);
+  //cerr << "InitActiveChart=" << path << endl;
 }
 
 void ProbingPT::Lookup(MemPool &pool,
@@ -363,7 +368,38 @@ void ProbingPT::Lookup(MemPool &pool,
     const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
-  cerr << "Lookup" << endl;
+  if (path.range.GetNumWordsCovered() > maxChartSpan) {
+    return;
+  }
+
+  size_t endPos = path.range.GetEndPos();
+
+  const SCFG::InputPath *prevPath = static_cast<const SCFG::InputPath*>(path.prefixPath);
+  UTIL_THROW_IF2(prevPath == NULL, "prefixPath == NULL");
+
+  // TERMINAL
+  const SCFG::Word &lastWord = path.subPhrase.Back();
+
+  const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(endPos, 1);
+
+  //cerr << "BEFORE LookupGivenWord=" << *prevPath << endl;
+  LookupGivenWord(pool, *prevPath, lastWord, NULL, subPhrasePath.range, path);
+  //cerr << "AFTER LookupGivenWord=" << *prevPath << endl;
+
+  // NON-TERMINAL
+  //const SCFG::InputPath *prefixPath = static_cast<const SCFG::InputPath*>(path.prefixPath);
+  while (prevPath) {
+    const Range &prevRange = prevPath->range;
+    //cerr << "prevRange=" << prevRange << endl;
+
+    size_t startPos = prevRange.GetEndPos() + 1;
+    size_t ntSize = endPos - startPos + 1;
+    const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(startPos, ntSize);
+
+    LookupNT(pool, subPhrasePath.range, *prevPath, stacks, path);
+
+    prevPath = static_cast<const SCFG::InputPath*>(prevPath->prefixPath);
+  }
 }
 
 void ProbingPT::LookupUnary(MemPool &pool,
@@ -372,6 +408,90 @@ void ProbingPT::LookupUnary(MemPool &pool,
     SCFG::InputPath &path) const
 {
   cerr << "LookupUnary" << endl;
+  size_t startPos = path.range.GetStartPos();
+  const SCFG::InputPath *prevPath = mgr.GetInputPaths().GetMatrix().GetValue(startPos, 0);
+  LookupNT(pool, path.range, *prevPath, stacks, path);
+}
+
+void ProbingPT::LookupNT(
+    MemPool &pool,
+    const Moses2::Range &subPhraseRange,
+    const SCFG::InputPath &prevPath,
+    const SCFG::Stacks &stacks,
+    SCFG::InputPath &outPath) const
+{
+  size_t endPos = outPath.range.GetEndPos();
+
+  const Range &prevRange = prevPath.range;
+
+  size_t startPos = prevRange.GetEndPos() + 1;
+  size_t ntSize = endPos - startPos + 1;
+
+  const SCFG::Stack &ntStack = stacks.GetStack(startPos, ntSize);
+  const SCFG::Stack::Coll &stackColl = ntStack.GetColl();
+
+  BOOST_FOREACH (const SCFG::Stack::Coll::value_type &valPair, stackColl) {
+    const SCFG::Word &ntSought = valPair.first;
+    const Moses2::HypothesisColl *hypos = valPair.second;
+    //cerr << "ntSought=" << ntSought << ntSought.isNonTerminal << endl;
+    LookupGivenWord(pool, prevPath, ntSought, hypos, subPhraseRange, outPath);
+  }
+}
+
+void ProbingPT::LookupGivenWord(
+    MemPool &pool,
+    const SCFG::InputPath &prevPath,
+    const SCFG::Word &wordSought,
+    const Moses2::HypothesisColl *hypos,
+    const Moses2::Range &subPhraseRange,
+    SCFG::InputPath &outPath) const
+{
+  size_t ptInd = GetPtInd();
+
+
+  BOOST_FOREACH(const SCFG::ActiveChartEntry *prevEntry, *prevPath.GetActiveChart(ptInd).entries) {
+    const ActiveChartEntryProbing *prevEntryCast = static_cast<const ActiveChartEntryProbing*>(prevEntry);
+    //cerr << "entry=" << &entryCast->node << endl;
+
+    //cerr << "BEFORE LookupGivenNode=" << prevPath << endl;
+    LookupGivenNode(pool, *prevEntryCast, wordSought, hypos, subPhraseRange, outPath);
+    //cerr << "AFTER LookupGivenNode=" << prevPath << endl;
+  }
+}
+
+void ProbingPT::LookupGivenNode(
+    MemPool &pool,
+    const ActiveChartEntryProbing &prevEntry,
+    const SCFG::Word &wordSought,
+    const Moses2::HypothesisColl *hypos,
+    const Moses2::Range &subPhraseRange,
+    SCFG::InputPath &outPath) const
+{
+  /*
+  const SCFGNODE &prevNode = prevEntry.node;
+  UTIL_THROW_IF2(&prevNode == NULL, "node == NULL");
+
+  size_t ptInd = GetPtInd();
+  const SCFGNODE *nextNode = prevNode.Find(wordSought);
+
+  //cerr << "prevEntry=" << *prevEntry.symbolBinds << endl;
+
+  if (nextNode) {
+    // new entries
+    ActiveChartEntryProbing *chartEntry = new (pool.Allocate<ActiveChartEntryProbing>()) ActiveChartEntryProbing(pool, prevEntry);
+
+    SCFG::SymbolBind &symbolBind = chartEntry->GetSymbolBind();
+    symbolBind.Add(subPhraseRange, wordSought, hypos);
+    //cerr << "AFTER Add=" << symbolBind << endl;
+
+    outPath.AddActiveChartEntry(ptInd, chartEntry);
+
+    // there are some rules
+    AddTargetPhrasesToPath(pool, *nextNode, symbolBind, outPath);
+
+    //cerr << "AFTER outPath=" << outPath << endl;
+  }
+    */
 }
 
 }

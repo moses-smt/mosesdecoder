@@ -14,6 +14,7 @@
 #include "PhraseTable.h"
 #include "../Vector.h"
 #include "../Phrase.h"
+#include "../SCFG/ActiveChart.h"
 
 namespace Moses2
 {
@@ -26,6 +27,23 @@ class RecycleData;
 
 class ProbingPT: public PhraseTable
 {
+  //////////////////////////////////////
+    class ActiveChartEntryProbing : public SCFG::ActiveChartEntry
+    {
+      typedef SCFG::ActiveChartEntry Parent;
+    public:
+
+      ActiveChartEntryProbing(MemPool &pool)
+      :Parent(pool)
+      {}
+
+      ActiveChartEntryProbing(
+          MemPool &pool,
+          const ActiveChartEntry &prevEntry)
+      :Parent(prevEntry)
+      {}
+    };
+
 public:
   ProbingPT(size_t startInd, const std::string &line);
   virtual ~ProbingPT();
@@ -96,6 +114,31 @@ protected:
   void CreateCache(System &system);
 
   void ReformatWord(System &system, std::string &wordStr, bool &isNT);
+
+  // scfg
+  void LookupNT(
+      MemPool &pool,
+      const Moses2::Range &subPhraseRange,
+      const SCFG::InputPath &prevPath,
+      const SCFG::Stacks &stacks,
+      SCFG::InputPath &outPath) const;
+
+  void LookupGivenWord(
+      MemPool &pool,
+      const SCFG::InputPath &prevPath,
+      const SCFG::Word &wordSought,
+      const Moses2::HypothesisColl *hypos,
+      const Moses2::Range &subPhraseRange,
+      SCFG::InputPath &outPath) const;
+
+  void LookupGivenNode(
+      MemPool &pool,
+      const ActiveChartEntryProbing &prevEntry,
+      const SCFG::Word &wordSought,
+      const Moses2::HypothesisColl *hypos,
+      const Moses2::Range &subPhraseRange,
+      SCFG::InputPath &outPath) const;
+
 };
 
 }

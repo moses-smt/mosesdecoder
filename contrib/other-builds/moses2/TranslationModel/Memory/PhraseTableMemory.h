@@ -87,6 +87,7 @@ protected:
       const Moses2::HypothesisColl *hypos,
       const Moses2::Range &subPhraseRange,
       SCFG::InputPath &outPath) const;
+
   void LookupGivenNode(
       MemPool &pool,
       const ActiveChartEntryMem &prevEntry,
