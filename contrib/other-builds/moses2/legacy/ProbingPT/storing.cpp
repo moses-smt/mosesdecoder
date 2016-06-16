@@ -81,11 +81,8 @@ void createProbingPT(const std::string &phrasetable_path,
         pesho.value = targetInd;
         //The key is the sum of hashes of individual words bitshifted by their position in the phrase.
         //Probably not entirerly correct, but fast and seems to work fine in practise.
-        pesho.key = 0;
         std::vector<uint64_t> vocabid_source = getVocabIDs(prevSource);
-        for (int i = 0; i < vocabid_source.size(); i++) {
-          pesho.key += (vocabid_source[i] << i);
-        }
+        pesho.key = getKey(vocabid_source);
 
         //Put into table
         table.Insert(pesho);
@@ -129,11 +126,9 @@ void createProbingPT(const std::string &phrasetable_path,
       pesho.value = targetInd;
 
       //The key is the sum of hashes of individual words. Probably not entirerly correct, but fast
-      pesho.key = 0;
       std::vector<uint64_t> vocabid_source = getVocabIDs(prevSource);
-      for (int i = 0; i < vocabid_source.size(); i++) {
-        pesho.key += (vocabid_source[i] << i);
-      }
+      pesho.key = getKey(vocabid_source);
+
       //Put into table
       table.Insert(pesho);
 
@@ -203,6 +198,11 @@ void serialize_cache(
   }
 
   os.close();
+}
+
+uint64_t getKey(const std::vector<uint64_t> &vocabid_source)
+{
+  return Moses2::getKey(vocabid_source.data(), vocabid_source.size());
 }
 
 }
