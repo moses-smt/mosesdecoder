@@ -12,16 +12,8 @@
 #include "lm/model.hh"
 #include "util/exception.hh"
 
-#include <iostream>
-#include <string>
-#include <utility>
 #include <vector>
-#include <array>
 #include <assert.h>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <iterator>
 
 namespace lm {
 
