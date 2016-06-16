@@ -20,11 +20,13 @@ line_text splitLine(const StringPiece &textin, bool scfg)
   //std::cerr << "output.target_phrase=" << output.target_phrase << "AAAA" << std::endl;
 
   if (scfg) {
+    /*
     std::cerr << "output.source_phrase=" << output.source_phrase << std::endl;
     std::cerr << "output.target_phrase=" << output.target_phrase << std::endl;
     reformatSCFG(output);
     std::cerr << "output.source_phrase=" << output.source_phrase << std::endl;
     std::cerr << "output.target_phrase=" << output.target_phrase << std::endl;
+    */
   }
 
   //Get probabilities

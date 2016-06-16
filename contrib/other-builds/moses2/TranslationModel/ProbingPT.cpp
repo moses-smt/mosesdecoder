@@ -51,7 +51,34 @@ void ProbingPT::Load(System &system)
   for (iterSource = sourceVocab.begin(); iterSource != sourceVocab.end();
       ++iterSource) {
     const string &wordStr = iterSource->second;
-    const Factor *factor = vocab.AddFactor(wordStr, system, false);
+    //cerr << "wordStr=" << wordStr << endl;
+
+    const Factor *factor;
+    if (system.isPb) {
+      factor = vocab.AddFactor(wordStr, system, false);
+    }
+    else {
+      bool nt = (wordStr[0] == '[' && wordStr[wordStr.size() - 1] == ']');
+      //cerr << "nt=" << nt << endl;
+
+      if (nt) {
+        size_t startPos = wordStr.find("][");
+        if (startPos == string::npos) {
+          startPos = 1;
+        }
+        else {
+          startPos += 2;
+        }
+
+        string ntStr = wordStr.substr(startPos, wordStr.size() - startPos - 1);
+        //cerr << "ntStr=" << ntStr << endl;
+
+        factor = vocab.AddFactor(ntStr, system, true);
+      }
+      else {
+        factor = vocab.AddFactor(wordStr, system, false);
+      }
+    }
 
     uint64_t probingId = iterSource->first;
     size_t factorId = factor->GetId();
