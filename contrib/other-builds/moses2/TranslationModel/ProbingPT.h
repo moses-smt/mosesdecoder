@@ -93,6 +93,7 @@ protected:
 
   void CreateCache(System &system);
 
+  void ReformatWord(System &system, std::string &wordStr, bool &isNT);
 };
 
 }

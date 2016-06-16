@@ -50,35 +50,13 @@ void ProbingPT::Load(System &system)
   std::map<uint64_t, std::string>::const_iterator iterSource;
   for (iterSource = sourceVocab.begin(); iterSource != sourceVocab.end();
       ++iterSource) {
-    const string &wordStr = iterSource->second;
+    string wordStr = iterSource->second;
+    bool isNT;
+    //cerr << "wordStr=" << wordStr << endl;
+    ReformatWord(system, wordStr, isNT);
     //cerr << "wordStr=" << wordStr << endl;
 
-    const Factor *factor;
-    if (system.isPb) {
-      factor = vocab.AddFactor(wordStr, system, false);
-    }
-    else {
-      bool nt = (wordStr[0] == '[' && wordStr[wordStr.size() - 1] == ']');
-      //cerr << "nt=" << nt << endl;
-
-      if (nt) {
-        size_t startPos = wordStr.find("][");
-        if (startPos == string::npos) {
-          startPos = 1;
-        }
-        else {
-          startPos += 2;
-        }
-
-        string ntStr = wordStr.substr(startPos, wordStr.size() - startPos - 1);
-        //cerr << "ntStr=" << ntStr << endl;
-
-        factor = vocab.AddFactor(ntStr, system, true);
-      }
-      else {
-        factor = vocab.AddFactor(wordStr, system, false);
-      }
-    }
+    const Factor *factor = vocab.AddFactor(wordStr, system, isNT);
 
     uint64_t probingId = iterSource->first;
     size_t factorId = factor->GetId();
@@ -94,8 +72,14 @@ void ProbingPT::Load(System &system)
   string line;
   while (getline(targetVocabStrme, line)) {
     vector<string> toks = Tokenize(line, "\t");
-    assert(toks.size());
-    const Factor *factor = vocab.AddFactor(toks[0], system, false);
+    UTIL_THROW_IF2(toks.size() != 2, string("Incorrect format:") + line + "\n");
+
+    bool isNT;
+    //cerr << "wordStr=" << toks[0] << endl;
+    ReformatWord(system, toks[0], isNT);
+    //cerr << "wordStr=" << toks[0] << endl;
+
+    const Factor *factor = vocab.AddFactor(toks[0], system, isNT);
     uint32_t probingId = Scan<uint32_t>(toks[1]);
 
     if (probingId >= m_targetVocab.size()) {
@@ -112,8 +96,7 @@ void ProbingPT::Load(System &system)
   }
 
   data = file.data();
-
-  size_t size = file.size();
+  //size_t size = file.size();
 
   // cache
   CreateCache(system);
@@ -356,6 +339,31 @@ void ProbingPT::LookupUnary(MemPool &pool,
     SCFG::InputPath &path) const
 {
 
+}
+
+void ProbingPT::ReformatWord(System &system, std::string &wordStr, bool &isNT)
+{
+  isNT = false;
+  if (system.isPb) {
+    return;
+  }
+  else {
+    isNT = (wordStr[0] == '[' && wordStr[wordStr.size() - 1] == ']');
+    //cerr << "nt=" << nt << endl;
+
+    if (isNT) {
+      size_t startPos = wordStr.find("][");
+      if (startPos == string::npos) {
+        startPos = 1;
+      }
+      else {
+        startPos += 2;
+      }
+
+      wordStr = wordStr.substr(startPos, wordStr.size() - startPos - 1);
+      //cerr << "wordStr=" << wordStr << endl;
+    }
+  }
 }
 
 }
