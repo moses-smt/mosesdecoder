@@ -20,7 +20,6 @@ namespace Moses2
 void createProbingPT(const std::string &phrasetable_path,
     const std::string &basepath, int num_scores, int num_lex_scores,
     bool log_prob, int max_cache_size, bool scfg);
-uint64_t getKey(const std::vector<uint64_t> &source_phrase);
 
 size_t countUniqueSource(const std::string &path);
 

@@ -45,7 +45,8 @@ void ProbingPT::Load(System &system)
   FactorCollection &vocab = system.GetVocab();
 
   // source vocab
-  const std::map<uint64_t, std::string> &sourceVocab = m_engine->getSourceVocab();
+  const std::map<uint64_t, std::string> &sourceVocab =
+      m_engine->getSourceVocab();
   std::map<uint64_t, std::string>::const_iterator iterSource;
   for (iterSource = sourceVocab.begin(); iterSource != sourceVocab.end();
       ++iterSource) {
@@ -54,7 +55,6 @@ void ProbingPT::Load(System &system)
 
     uint64_t probingId = iterSource->first;
     size_t factorId = factor->GetId();
-    //cerr << probingId << " " << wordStr << endl;
 
     if (factorId >= m_sourceVocab.size()) {
       m_sourceVocab.resize(factorId + 1, m_unkId);

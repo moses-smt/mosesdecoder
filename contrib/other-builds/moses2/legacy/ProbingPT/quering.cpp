@@ -11,10 +11,10 @@ QueryEngine::QueryEngine(const char * filepath)
   //Create filepaths
   std::string basepath(filepath);
   std::string path_to_hashtable = basepath + "/probing_hash.dat";
-  std::string path_to_source_vocabid = basepath + "/SourceVocab.dat";
+  std::string path_to_source_vocabid = basepath + "/source_vocabids";
 
   ///Source phrase vocabids
-  read_map(path_to_source_vocabid.c_str());
+  read_map(source_vocabids, path_to_source_vocabid.c_str());
 
   //Read config file
   boost::unordered_map<std::string, std::string> keyValue;
@@ -91,9 +91,9 @@ uint64_t QueryEngine::getKey(uint64_t source_phrase[], size_t size) const
 {
   //TOO SLOW
   //uint64_t key = util::MurmurHashNative(&source_phrase[0], source_phrase.size());
-  size_t key = 0;
+  uint64_t key = 0;
   for (size_t i = 0; i < size; i++) {
-    boost::hash_combine(key, source_phrase[i]);
+    key += (source_phrase[i] << i);
   }
   return key;
 }
@@ -108,22 +108,6 @@ std::pair<bool, uint64_t> QueryEngine::query(uint64_t key)
     ret.second = entry->value;
   }
   return ret;
-}
-
-void QueryEngine::read_map(const char* filename)
-{
-  std::ifstream is(filename);
-
-  std::string line;
-  while (getline(is, line)) {
-    std::vector<std::string> toks = Tokenize(line, "\t");
-    assert(toks.size() == 2);
-    uint64_t ind = Scan<uint64_t>(toks[1]);
-    source_vocabids[ind] = toks[0];
-  }
-
-  //Close the stream after we are done.
-  is.close();
 }
 
 }
