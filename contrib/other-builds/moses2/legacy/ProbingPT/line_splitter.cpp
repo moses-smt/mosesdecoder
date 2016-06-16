@@ -3,7 +3,7 @@
 namespace Moses2
 {
 
-line_text splitLine(const StringPiece &textin)
+line_text splitLine(const StringPiece &textin, bool scfg)
 {
   const char delim[] = "|||";
   line_text output;
@@ -18,6 +18,14 @@ line_text splitLine(const StringPiece &textin)
   it++;
   output.target_phrase = Trim(*it);
   //std::cerr << "output.target_phrase=" << output.target_phrase << "AAAA" << std::endl;
+
+  if (scfg) {
+    std::cerr << "output.source_phrase=" << output.source_phrase << std::endl;
+    std::cerr << "output.target_phrase=" << output.target_phrase << std::endl;
+    reformatSCFG(output);
+    std::cerr << "output.source_phrase=" << output.source_phrase << std::endl;
+    std::cerr << "output.target_phrase=" << output.target_phrase << std::endl;
+  }
 
   //Get probabilities
   it++;
@@ -81,6 +89,11 @@ std::vector<unsigned char> splitWordAll1(const StringPiece &textin)
   }
 
   return output;
+
+}
+
+void reformatSCFG(line_text &output)
+{
 
 }
 

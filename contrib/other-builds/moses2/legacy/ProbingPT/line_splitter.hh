@@ -47,7 +47,8 @@ struct target_text
 };
 
 //Ask if it's better to have it receive a pointer to a line_text struct
-line_text splitLine(const StringPiece &textin);
+line_text splitLine(const StringPiece &textin, bool scfg);
+void reformatSCFG(line_text &output);
 
 std::vector<unsigned char> splitWordAll1(const StringPiece &textin);
 

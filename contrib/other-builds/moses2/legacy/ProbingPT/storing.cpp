@@ -47,7 +47,7 @@ void createProbingPT(const std::string &phrasetable_path,
     try {
       //Process line read
       line_text line;
-      line = splitLine(filein.ReadLine());
+      line = splitLine(filein.ReadLine(), scfg);
 
       ++line_num;
       if (line_num % 1000000 == 0) {
