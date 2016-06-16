@@ -351,17 +351,6 @@ class Pipeline {
             pred_ = queue_.Add({nullptr, word, &context_state, callback});
         }
 
-//      void ScoreWords(const lm::ngram::State& context_state, const WordIndex* const words_begin, const WordIndex* const words_end) {
-//          if (words_begin == words_end) return;
-//          auto word = words_begin;
-//          pred_ = queue_.Add({nullptr, *word, &context_state});
-//          ++word;
-//          while(word != words_end){ 
-//              AddWord(*word);
-//              ++word;
-//          }
-//      }
-
         void AppendWord(const WordIndex word, const std::function<void(const FullScoreReturn&)>& callback){
             assert(pred_);
             pred_ = queue_.Add({pred_, word, nullptr, callback});
