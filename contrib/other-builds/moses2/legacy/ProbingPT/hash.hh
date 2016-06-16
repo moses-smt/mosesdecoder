@@ -14,6 +14,4 @@ uint64_t getHash(StringPiece text);
 
 std::vector<uint64_t> getVocabIDs(const StringPiece &textin);
 
-uint64_t getVocabID(const std::string &candidate);
-
 }

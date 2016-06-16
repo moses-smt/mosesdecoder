@@ -1,19 +1,19 @@
 #include <boost/foreach.hpp>
 #include "vocabid.hh"
+#include "StoreVocab.h"
 #include "../Util2.h"
 
 namespace Moses2
 {
 
-void add_to_map(std::map<uint64_t, std::string> *karta,
+void add_to_map(StoreVocab<uint64_t> &sourceVocab,
     const StringPiece &textin)
 {
   //Tokenize
   util::TokenIter<util::SingleCharacter> it(textin, util::SingleCharacter(' '));
 
   while (it) {
-    karta->insert(
-        std::pair<uint64_t, std::string>(getHash(*it), it->as_string()));
+    sourceVocab.Insert(getHash(*it), it->as_string());
     it++;
   }
 }
@@ -37,10 +37,10 @@ void read_map(std::map<uint64_t, std::string> &karta, const char* filename)
 
   std::string line;
   while (getline(is, line)) {
-    std::vector<std::string> toks = Tokenize(line);
+    std::vector<std::string> toks = Tokenize(line, "\t");
     assert(toks.size() == 2);
-    uint64_t ind = Scan<uint64_t>(toks[0]);
-    karta[ind] = toks[1];
+    uint64_t ind = Scan<uint64_t>(toks[1]);
+    karta[ind] = toks[0];
   }
 
   //Close the stream after we are done.

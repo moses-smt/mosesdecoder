@@ -42,18 +42,9 @@ public:
     }
   }
 
-  std::vector<VOCABID> GetVocabIds(const std::string &line)
+  void Insert(VOCABID id, const std::string &word)
   {
-    std::vector<std::string> toks = Moses2::Tokenize(line, " ");
-    std::vector<VOCABID> ret(toks.size());
-
-    for (size_t i = 0; i < toks.size(); ++i) {
-      const std::string &tok = toks[i];
-      VOCABID id = GetVocabId(tok);
-      ret[i] = id;
-    }
-
-    return ret;
+    m_vocab[word] = id;
   }
 
   void Save()

@@ -25,12 +25,5 @@ std::vector<uint64_t> getVocabIDs(const StringPiece &textin)
   return output;
 }
 
-uint64_t getVocabID(const std::string &candidate)
-{
-  std::size_t len = candidate.length();
-  uint64_t key = util::MurmurHashNative(candidate.c_str(), len);
-  return key;
-}
-
 }
 

@@ -2,6 +2,7 @@
 #include "line_splitter.hh"
 #include "storing.hh"
 #include "StoreTarget.h"
+#include "StoreVocab.h"
 #include "../Util2.h"
 #include "../InputFileStream.h"
 
@@ -23,7 +24,7 @@ void createProbingPT(const std::string &phrasetable_path,
   unsigned long uniq_entries = countUniqueSource(phrasetable_path);
 
   //Source phrase vocabids
-  std::map<uint64_t, std::string> source_vocabids;
+  StoreVocab<uint64_t> sourceVocab(basepath + "/source_vocabids");
 
   //Read the file
   util::FilePiece filein(phrasetable_path.c_str());
@@ -54,7 +55,7 @@ void createProbingPT(const std::string &phrasetable_path,
       }
 
       //Add source phrases to vocabularyIDs
-      add_to_map(&source_vocabids, line.source_phrase);
+      add_to_map(sourceVocab, line.source_phrase);
 
       if (prevSource.empty()) {
         // 1st line
@@ -138,7 +139,7 @@ void createProbingPT(const std::string &phrasetable_path,
 
   serialize_table(mem, size, (basepath + "/probing_hash.dat"));
 
-  serialize_map(source_vocabids, (basepath + "/source_vocabids"));
+  sourceVocab.Save();
 
   serialize_cache(cache, (basepath + "/cache"), totalSourceCount);
 
