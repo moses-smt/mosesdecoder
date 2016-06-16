@@ -27,7 +27,7 @@ template <class Value> class NGramAutomaton {
             NGramAutomaton<Value>* const pred;
             const WordIndex new_word;
             const State* const context_state; // unused if pred != nullptr
-            const std::function<void(FullScoreReturn)> callback;
+            const std::function<void(FullScoreReturn)>& callback;
         };
 
         struct NGramConstruct {
@@ -339,7 +339,7 @@ class Pipeline {
 
     public:
         Pipeline(std::size_t queue_size, ngram::NGramAutomaton<ngram::BackoffValue>::Construct construct) : queue_(queue_size, construct) {}
-        void FullScore(const lm::ngram::State& context_state, const WordIndex word, const std::function<void(const FullScoreReturn&)> callback) {
+        void FullScore(const lm::ngram::State& context_state, const WordIndex word, const std::function<void(const FullScoreReturn&)>& callback) {
             pred_ = queue_.Add({nullptr, word, &context_state, callback});
         }
 

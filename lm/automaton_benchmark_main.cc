@@ -1,4 +1,5 @@
 #include "automaton.hh"
+#include "util/usage.hh"
 
 namespace {
 void CheckEqual(const lm::FullScoreReturn& lhs, const lm::FullScoreReturn& rhs) {
@@ -16,45 +17,58 @@ void CheckEqual(const lm::FullScoreReturn& lhs, const lm::FullScoreReturn& rhs) 
 #endif
 }
 }
-int main(int argc, char* argv[]){
-    if (argc < 4) {
-        std::cerr << "Usage: <pipeline size> <arpa file> <test file>" << std::endl;
-        return 1;
-    }
-    int pipeline_size = std::stoi(std::string(argv[1]));
-    std::string arpa(argv[2]);
-    std::string test(argv[3]);
 
-    lm::ngram::Config config;
-    config.arpa_complain = lm::ngram::Config::NONE;
-    config.messages = nullptr;
-    config.positive_log_probability = lm::SILENT;
-    config.probing_multiplier = 2.0;
-    lm::ngram::ProbingModel model(arpa.data(), config);
-    lm::Pipeline pipeline(pipeline_size, {model.GetSearch(), model.Order()});
-    
-    util::FilePiece in(test.data());
+void PipelineScore(lm::Pipeline& pipeline, const lm::ngram::ProbingModel& model, char* test_file) {
+    util::FilePiece in(test_file);
     StringPiece word;
-    auto model_score = 0.0;
-    auto pipe_score = 0.0;
+    auto score = 0.0;
+    auto time = util::CPUTime();
+    const auto callback = [&score](const lm::FullScoreReturn& r){score += r.prob;};
 
+    //start timer
     while (true) {
-        lm::ngram::State in_state, out_state;
+        if (in.ReadWordSameLine(word)) {
+            lm::WordIndex vocab = model.GetVocabulary().Index(word);
+            pipeline.FullScore(model.BeginSentenceState(), vocab, callback);
+        }
+
+        while(in.ReadWordSameLine(word)) {
+            lm::WordIndex vocab = model.GetVocabulary().Index(word);
+            pipeline.AppendWord(vocab, callback);
+        }
+
+        try {
+            UTIL_THROW_IF('\n' != in.get(), util::Exception, "FilePiece is confused.");
+        } catch (const util::EndOfFileException &e) { break; }
+        
+        pipeline.AppendWord(model.GetVocabulary().EndSentence(), callback);
+    }
+    pipeline.Drain();
+    //stop timer
+    time = util::CPUTime() - time;
+    std::printf("Score: %f Time: %f (pipeline)\n", score, time);
+}
+
+void ModelScore(const lm::ngram::ProbingModel& model, char * test_file){
+    util::FilePiece in(test_file);
+    StringPiece word;
+    lm::ngram::State in_state, out_state;
+    auto score = 0.0;
+    auto time = util::CPUTime();
+
+    //start timer
+    while (true) {
         if (in.ReadWordSameLine(word)) {
             lm::WordIndex vocab = model.GetVocabulary().Index(word);
             auto ret = model.FullScore(model.BeginSentenceState(), vocab, out_state); 
-            model_score += ret.prob;
-            auto callback = [=, &pipe_score](const lm::FullScoreReturn& r){CheckEqual(ret, r); pipe_score += r.prob;};
-            pipeline.FullScore(model.BeginSentenceState(), vocab, callback);
+            score += ret.prob;
             in_state = out_state;
         }
 
         while(in.ReadWordSameLine(word)) {
             lm::WordIndex vocab = model.GetVocabulary().Index(word);
             auto ret = model.FullScore(in_state, vocab, out_state);
-            model_score += ret.prob;
-            auto callback = [=, &pipe_score](const lm::FullScoreReturn& r){CheckEqual(ret, r); pipe_score += r.prob;};
-            pipeline.AppendWord(vocab, callback);
+            score += ret.prob;
             in_state = out_state;
         }
 
@@ -62,12 +76,33 @@ int main(int argc, char* argv[]){
             UTIL_THROW_IF('\n' != in.get(), util::Exception, "FilePiece is confused.");
         } catch (const util::EndOfFileException &e) { break; }
 
-        
         auto ret = model.FullScore(in_state, model.GetVocabulary().EndSentence(), out_state);
-        model_score += ret.prob;
-        auto callback = [=, &pipe_score](const lm::FullScoreReturn& r){CheckEqual(ret, r); pipe_score += r.prob;};
-        pipeline.AppendWord(model.GetVocabulary().EndSentence(), callback);
+        score += ret.prob;
     }
-    pipeline.Drain();
-    std::cout << model_score << " " << pipe_score << std::endl;
+    //stop timer
+    time = util::CPUTime() - time;
+    std::printf("Score: %f Time: %f (model)\n", score, time);
+
+}
+
+int main(int argc, char* argv[]){
+    if (argc < 4) {
+        std::cerr << "Usage: <pipeline size> <arpa file> <test file>" << std::endl;
+        return 1;
+    }
+    int pipeline_size = std::stoi(std::string(argv[1]));
+    char* arpa_file(argv[2]);
+    char* test_file(argv[3]);
+
+    lm::ngram::Config config;
+    config.arpa_complain = lm::ngram::Config::ALL;
+    config.messages = &std::cout;
+    config.positive_log_probability = lm::SILENT;
+    config.probing_multiplier = 2.0;
+    lm::ngram::ProbingModel model(arpa_file, config);
+    lm::Pipeline pipeline(pipeline_size, {model.GetSearch(), model.Order()});
+
+    PipelineScore(pipeline, model, test_file);
+    ModelScore(model, test_file);
+    
 }
