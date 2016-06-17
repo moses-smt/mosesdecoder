@@ -33,19 +33,21 @@ void ProbingPT::ActiveChartEntryProbing::AddSymbolBindElement(
     const Moses2::HypothesisColl *hypos,
     const PhraseTable &pt)
 {
-  ActiveChartEntry::AddSymbolBindElement(range, word, hypos);
-
   const ProbingPT &probingPt = static_cast<const ProbingPT&>(pt);
-  uint64_t probingId = probingPt.GetSourceProbingId(word);
-  UTIL_THROW_IF2(probingId == probingPt.GetUnk(), "Word should have been in source vocab");
+  m_key = GetKey(word, probingPt);
 
-  size_t phraseSize = m_symbolBind.coll.size();
-  m_hash += probingId << (phraseSize - 1);
+  ActiveChartEntry::AddSymbolBindElement(range, word, hypos);
 }
 
-uint64_t ProbingPT::ActiveChartEntryProbing::GetHash(const SCFG::Word &nextWord, const ProbingPT &pt) const
+uint64_t ProbingPT::ActiveChartEntryProbing::GetKey(const SCFG::Word &nextWord, const ProbingPT &pt) const
 {
+  uint64_t ret = m_key;
+  uint64_t probingId = pt.GetSourceProbingId(nextWord);
+  UTIL_THROW_IF2(probingId == pt.GetUnk(), "Word should have been in source vocab");
 
+  size_t phraseSize = m_symbolBind.coll.size();
+  ret += probingId << phraseSize;
+  return ret;
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -153,7 +155,7 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr, MemPool &pool,
   const Phrase<Moses2::Word> &sourcePhrase = inputPath.subPhrase;
 
   // get hash for source phrase
-  std::pair<bool, uint64_t> keyStruct = GetHash(sourcePhrase);
+  std::pair<bool, uint64_t> keyStruct = GetKey(sourcePhrase);
   if (!keyStruct.first) {
     return NULL;
   }
@@ -171,7 +173,7 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr, MemPool &pool,
   return tps;
 }
 
-std::pair<bool, uint64_t> ProbingPT::GetHash(const Phrase<Moses2::Word> &sourcePhrase) const
+std::pair<bool, uint64_t> ProbingPT::GetKey(const Phrase<Moses2::Word> &sourcePhrase) const
 {
   std::pair<bool, uint64_t> ret;
 
@@ -343,7 +345,7 @@ void ProbingPT::CreateCache(System &system)
     PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system,
         toks[1]);
 
-    std::pair<bool, uint64_t> retStruct = GetHash(*sourcePhrase);
+    std::pair<bool, uint64_t> retStruct = GetKey(*sourcePhrase);
     if (!retStruct.first) {
       return;
     }
@@ -524,7 +526,7 @@ void ProbingPT::LookupGivenNode(
 
     //cerr << "AFTER outPath=" << outPath << endl;
   }
-    */
+  */
 }
 
 }

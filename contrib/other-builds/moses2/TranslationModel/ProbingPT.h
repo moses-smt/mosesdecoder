@@ -35,20 +35,20 @@ class ProbingPT: public PhraseTable
 
       ActiveChartEntryProbing(MemPool &pool)
       :Parent(pool)
-      ,m_hash(0)
+      ,m_key(0)
       {}
 
       ActiveChartEntryProbing(
           MemPool &pool,
           const ActiveChartEntry &prevEntry)
       :Parent(prevEntry)
-      ,m_hash(0)
+      ,m_key(0)
       {}
 
-      uint64_t GetHash() const
-      { return m_hash; }
+      uint64_t GetKey() const
+      { return m_key; }
 
-      uint64_t GetHash(const SCFG::Word &nextWord, const ProbingPT &pt) const;
+      uint64_t GetKey(const SCFG::Word &nextWord, const ProbingPT &pt) const;
 
       virtual void AddSymbolBindElement(
           const Range &range,
@@ -57,7 +57,7 @@ class ProbingPT: public PhraseTable
           const PhraseTable &pt);
 
     protected:
-      uint64_t m_hash;
+      uint64_t m_key;
     };
     //////////////////////////////////////
 
@@ -82,7 +82,8 @@ public:
       SCFG::InputPath &path) const;
 
   uint64_t GetUnk() const
-  { m_unkId; }
+  { return m_unkId; }
+
 protected:
   std::vector<uint64_t> m_sourceVocab; // factor id -> pt id
   std::vector<const Factor*> m_targetVocab; // pt id -> factor*
@@ -108,7 +109,7 @@ protected:
     return m_targetVocab[probingId];
   }
 
-  std::pair<bool, uint64_t> GetHash(const Phrase<Moses2::Word> &sourcePhrase) const;
+  std::pair<bool, uint64_t> GetKey(const Phrase<Moses2::Word> &sourcePhrase) const;
 
   void GetSourceProbingIds(const Phrase<Moses2::Word> &sourcePhrase, bool &ok,
       uint64_t probingSource[]) const;

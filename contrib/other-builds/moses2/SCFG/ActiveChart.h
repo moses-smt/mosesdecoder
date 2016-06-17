@@ -90,7 +90,7 @@ public:
   const SymbolBind &GetSymbolBind() const
   { return m_symbolBind; }
 
-  virtual void AddSymbolBindElement(const Range &range, const SCFG::Word &word, const Moses2::HypothesisColl *hypos)
+  void AddSymbolBindElement(const Range &range, const SCFG::Word &word, const Moses2::HypothesisColl *hypos)
   {
     m_symbolBind.Add(range, word, hypos);
   }
