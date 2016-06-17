@@ -6,6 +6,7 @@
  */
 #include <boost/foreach.hpp>
 #include "ProbingPT.h"
+#include "util/exception.hh"
 #include "../System.h"
 #include "../Scores.h"
 #include "../Phrase.h"
@@ -26,9 +27,25 @@ using namespace std;
 
 namespace Moses2
 {
-void ProbingPT::ActiveChartEntryProbing::AddSymbolBindElement(const Range &range, const SCFG::Word &word, const Moses2::HypothesisColl *hypos)
+void ProbingPT::ActiveChartEntryProbing::AddSymbolBindElement(
+    const Range &range,
+    const SCFG::Word &word,
+    const Moses2::HypothesisColl *hypos,
+    const PhraseTable &pt)
 {
   ActiveChartEntry::AddSymbolBindElement(range, word, hypos);
+
+  const ProbingPT &probingPt = static_cast<const ProbingPT&>(pt);
+  uint64_t probingId = probingPt.GetSourceProbingId(word);
+  UTIL_THROW_IF2(probingId == probingPt.GetUnk(), "Word should have been in source vocab");
+
+  size_t phraseSize = m_symbolBind.coll.size();
+  m_hash += probingId << (phraseSize - 1);
+}
+
+uint64_t ProbingPT::ActiveChartEntryProbing::GetHash(const SCFG::Word &nextWord, const ProbingPT &pt) const
+{
+
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -136,7 +153,7 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr, MemPool &pool,
   const Phrase<Moses2::Word> &sourcePhrase = inputPath.subPhrase;
 
   // get hash for source phrase
-  std::pair<bool, uint64_t> keyStruct = GetSourceProbingId(sourcePhrase);
+  std::pair<bool, uint64_t> keyStruct = GetHash(sourcePhrase);
   if (!keyStruct.first) {
     return NULL;
   }
@@ -154,8 +171,7 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr, MemPool &pool,
   return tps;
 }
 
-std::pair<bool, uint64_t> ProbingPT::GetSourceProbingId(
-    const Phrase<Moses2::Word> &sourcePhrase) const
+std::pair<bool, uint64_t> ProbingPT::GetHash(const Phrase<Moses2::Word> &sourcePhrase) const
 {
   std::pair<bool, uint64_t> ret;
 
@@ -164,7 +180,7 @@ std::pair<bool, uint64_t> ProbingPT::GetSourceProbingId(
   assert(sourceSize);
 
   uint64_t probingSource[sourceSize];
-  ConvertToProbingSourcePhrase(sourcePhrase, ret.first, probingSource);
+  GetSourceProbingIds(sourcePhrase, ret.first, probingSource);
   if (!ret.first) {
     // source phrase contains a word unknown in the pt.
     // We know immediately there's no translation for it
@@ -272,14 +288,14 @@ TargetPhrase<Moses2::Word> *ProbingPT::CreateTargetPhrase(MemPool &pool, const S
   return tp;
 }
 
-void ProbingPT::ConvertToProbingSourcePhrase(const Phrase<Moses2::Word> &sourcePhrase,
+void ProbingPT::GetSourceProbingIds(const Phrase<Moses2::Word> &sourcePhrase,
     bool &ok, uint64_t probingSource[]) const
 {
 
   size_t size = sourcePhrase.GetSize();
   for (size_t i = 0; i < size; ++i) {
-    const Factor *factor = sourcePhrase[i][0];
-    uint64_t probingId = GetSourceProbingId(factor);
+    const Word &word = sourcePhrase[i];
+    uint64_t probingId = GetSourceProbingId(word);
     if (probingId == m_unkId) {
       ok = false;
       return;
@@ -290,6 +306,18 @@ void ProbingPT::ConvertToProbingSourcePhrase(const Phrase<Moses2::Word> &sourceP
   }
 
   ok = true;
+}
+
+uint64_t ProbingPT::GetSourceProbingId(const Word &word) const
+{
+  const Factor *factor = word[0];
+
+  size_t factorId = factor->GetId();
+  if (factorId >= m_sourceVocab.size()) {
+    return m_unkId;
+  }
+  return m_sourceVocab[factorId];
+
 }
 
 void ProbingPT::CreateCache(System &system)
@@ -315,7 +343,7 @@ void ProbingPT::CreateCache(System &system)
     PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system,
         toks[1]);
 
-    std::pair<bool, uint64_t> retStruct = GetSourceProbingId(*sourcePhrase);
+    std::pair<bool, uint64_t> retStruct = GetHash(*sourcePhrase);
     if (!retStruct.first) {
       return;
     }

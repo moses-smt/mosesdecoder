@@ -35,23 +35,29 @@ class ProbingPT: public PhraseTable
 
       ActiveChartEntryProbing(MemPool &pool)
       :Parent(pool)
-      ,m_key(0)
+      ,m_hash(0)
       {}
 
       ActiveChartEntryProbing(
           MemPool &pool,
           const ActiveChartEntry &prevEntry)
       :Parent(prevEntry)
-      ,m_key(0)
+      ,m_hash(0)
       {}
 
-      uint64_t GetKey() const
-      { return m_key; }
+      uint64_t GetHash() const
+      { return m_hash; }
 
-      virtual void AddSymbolBindElement(const Range &range, const SCFG::Word &word, const Moses2::HypothesisColl *hypos);
+      uint64_t GetHash(const SCFG::Word &nextWord, const ProbingPT &pt) const;
+
+      virtual void AddSymbolBindElement(
+          const Range &range,
+          const SCFG::Word &word,
+          const Moses2::HypothesisColl *hypos,
+          const PhraseTable &pt);
 
     protected:
-      uint64_t m_key;
+      uint64_t m_hash;
     };
     //////////////////////////////////////
 
@@ -75,6 +81,8 @@ public:
       const SCFG::Stacks &stacks,
       SCFG::InputPath &path) const;
 
+  uint64_t GetUnk() const
+  { m_unkId; }
 protected:
   std::vector<uint64_t> m_sourceVocab; // factor id -> pt id
   std::vector<const Factor*> m_targetVocab; // pt id -> factor*
@@ -92,9 +100,6 @@ protected:
   TargetPhrase<Moses2::Word> *CreateTargetPhrase(MemPool &pool, const System &system,
       const char *&offset) const;
 
-  void ConvertToProbingSourcePhrase(const Phrase<Moses2::Word> &sourcePhrase, bool &ok,
-      uint64_t probingSource[]) const;
-
   inline const Factor *GetTargetFactor(uint32_t probingId) const
   {
     if (probingId >= m_targetVocab.size()) {
@@ -103,18 +108,12 @@ protected:
     return m_targetVocab[probingId];
   }
 
-  std::pair<bool, uint64_t> GetSourceProbingId(
-      const Phrase<Moses2::Word> &sourcePhrase) const;
+  std::pair<bool, uint64_t> GetHash(const Phrase<Moses2::Word> &sourcePhrase) const;
 
-  inline uint64_t GetSourceProbingId(const Factor *factor) const
-  {
-    size_t factorId = factor->GetId();
-    if (factorId >= m_sourceVocab.size()) {
-      return m_unkId;
-    }
-    return m_sourceVocab[factorId];
+  void GetSourceProbingIds(const Phrase<Moses2::Word> &sourcePhrase, bool &ok,
+      uint64_t probingSource[]) const;
 
-  }
+  uint64_t GetSourceProbingId(const Word &word) const;
 
   // caching
   typedef boost::unordered_map<uint64_t, TargetPhrases*> Cache;
