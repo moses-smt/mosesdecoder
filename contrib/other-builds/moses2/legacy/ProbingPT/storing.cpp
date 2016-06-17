@@ -6,6 +6,8 @@
 #include "../Util2.h"
 #include "../InputFileStream.h"
 
+using namespace std;
+
 namespace Moses2
 {
 
@@ -83,6 +85,9 @@ void createProbingPT(const std::string &phrasetable_path,
         //The key is the sum of hashes of individual words bitshifted by their position in the phrase.
         //Probably not entirerly correct, but fast and seems to work fine in practise.
         std::vector<uint64_t> vocabid_source = getVocabIDs(prevSource);
+        if (scfg) {
+          vocabid_source.erase(vocabid_source.begin() + vocabid_source.size() - 1);
+        }
         pesho.key = getKey(vocabid_source);
 
         //Put into table

@@ -42,6 +42,7 @@ class ProbingPT: public PhraseTable
           const ActiveChartEntry &prevEntry)
       :Parent(prevEntry)
       {}
+
     };
     //////////////////////////////////////
 
