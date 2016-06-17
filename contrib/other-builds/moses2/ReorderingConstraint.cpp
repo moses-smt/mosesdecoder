@@ -226,7 +226,7 @@ bool ReorderingConstraint::Check( const Bitmap &bitmap, size_t startPos, size_t 
   return true;
 }
 
-void ReorderingConstraint::Debug(std::ostream &out, const System &system) const
+std::ostream &ReorderingConstraint::Debug(std::ostream &out, const System &system) const
 {
   out << "Zones:";
   for (size_t i = 0; i < m_zone.size(); ++i) {
@@ -243,6 +243,8 @@ void ReorderingConstraint::Debug(std::ostream &out, const System &system) const
   for (size_t i = 0; i < m_size; ++i) {
       out << m_localWall[i] << " ";
   }
+
+  return out;
 }
 
 } // namespace

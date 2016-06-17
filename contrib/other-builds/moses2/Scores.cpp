@@ -243,7 +243,7 @@ void Scores::CreateFromString(const std::string &str,
   PlusEquals(system, featureFunction, scores);
 }
 
-void Scores::Debug(std::ostream &out, const System &system) const
+std::ostream &Scores::Debug(std::ostream &out, const System &system) const
 {
   out << "total=" << m_total;
 
@@ -256,6 +256,8 @@ void Scores::Debug(std::ostream &out, const System &system) const
       }
     }
   }
+
+  return out;
 }
 
 // static functions to work out estimated scores
