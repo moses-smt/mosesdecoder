@@ -177,8 +177,11 @@ void FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
   targetPhrase.SetEstimatedScore(estimatedScore);
 }
 
-void FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
-    const Phrase<SCFG::Word> &source, TargetPhrase<SCFG::Word> &targetPhrase) const
+void FeatureFunctions::EvaluateInIsolation(
+    MemPool &pool,
+    const System &system,
+    const Phrase<SCFG::Word> &source,
+    TargetPhrase<SCFG::Word> &targetPhrase) const
 {
   SCORE estimatedScore = 0;
 

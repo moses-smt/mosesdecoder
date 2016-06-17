@@ -25,7 +25,12 @@ class MemPool;
 class System;
 class RecycleData;
 
-class ProbingPT: public PhraseTable
+namespace SCFG
+{
+class TargetPhraseImpl;
+}
+
+class ProbingPT: public Moses2::PhraseTable
 {
   //////////////////////////////////////
     class ActiveChartEntryProbing : public SCFG::ActiveChartEntry
@@ -54,7 +59,7 @@ class ProbingPT: public PhraseTable
           const Range &range,
           const SCFG::Word &word,
           const Moses2::HypothesisColl *hypos,
-          const PhraseTable &pt);
+          const Moses2::PhraseTable &pt);
 
     protected:
       uint64_t m_key;
@@ -127,6 +132,7 @@ protected:
   // scfg
   void LookupNT(
       MemPool &pool,
+      const SCFG::Manager &mgr,
       const Moses2::Range &subPhraseRange,
       const SCFG::InputPath &prevPath,
       const SCFG::Stacks &stacks,
@@ -134,6 +140,7 @@ protected:
 
   void LookupGivenWord(
       MemPool &pool,
+      const SCFG::Manager &mgr,
       const SCFG::InputPath &prevPath,
       const SCFG::Word &wordSought,
       const Moses2::HypothesisColl *hypos,
@@ -142,11 +149,17 @@ protected:
 
   void LookupGivenNode(
       MemPool &pool,
+      const SCFG::Manager &mgr,
       const ActiveChartEntryProbing &prevEntry,
       const SCFG::Word &wordSought,
       const Moses2::HypothesisColl *hypos,
       const Moses2::Range &subPhraseRange,
       SCFG::InputPath &outPath) const;
+
+  SCFG::TargetPhraseImpl *CreateTargetPhraseSCFG(
+      MemPool &pool,
+      const System &system,
+      const char *&offset) const;
 
 };
 

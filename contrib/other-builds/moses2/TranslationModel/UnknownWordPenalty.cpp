@@ -142,7 +142,7 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
   //cerr << "UnknownWordPenalty lastWord=" << lastWord << endl;
 
   const Factor *factor = lastWord[0];
-  SCFG::TargetPhraseImpl *tp = new (pool.Allocate<SCFG::TargetPhraseImpl>(1)) SCFG::TargetPhraseImpl(pool, *this, system, 1);
+  SCFG::TargetPhraseImpl *tp = new (pool.Allocate<SCFG::TargetPhraseImpl>()) SCFG::TargetPhraseImpl(pool, *this, system, 1);
   SCFG::Word &word = (*tp)[0];
   word.CreateFromString(system.GetVocab(), system, factor->GetString().as_string());
 

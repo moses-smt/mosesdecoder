@@ -8,6 +8,7 @@ namespace Moses2
 {
 class HypothesisColl;
 class System;
+class PhraseTable;
 
 namespace SCFG
 {
@@ -90,7 +91,11 @@ public:
   const SymbolBind &GetSymbolBind() const
   { return m_symbolBind; }
 
-  void AddSymbolBindElement(const Range &range, const SCFG::Word &word, const Moses2::HypothesisColl *hypos)
+  virtual void AddSymbolBindElement(
+      const Range &range,
+      const SCFG::Word &word,
+      const Moses2::HypothesisColl *hypos,
+      const PhraseTable &pt)
   {
     m_symbolBind.Add(range, word, hypos);
   }

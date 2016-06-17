@@ -277,7 +277,7 @@ void PhraseTableMemory::LookupGivenNode(
     // new entries
     ActiveChartEntryMem *chartEntry = new (pool.Allocate<ActiveChartEntryMem>()) ActiveChartEntryMem(pool, *nextNode, prevEntry);
 
-    chartEntry->AddSymbolBindElement(subPhraseRange, wordSought, hypos);
+    chartEntry->AddSymbolBindElement(subPhraseRange, wordSought, hypos, *this);
     //cerr << "AFTER Add=" << symbolBind << endl;
 
     outPath.AddActiveChartEntry(ptInd, chartEntry);
