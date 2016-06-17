@@ -247,6 +247,26 @@
 			<locationURI>PARENT-3-PROJECT_LOC/mert/Jamfile</locationURI>
 		</link>
 		<link>
+			<name>M2.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/M2.cpp</locationURI>
+		</link>
+		<link>
+			<name>M2.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/M2.h</locationURI>
+		</link>
+		<link>
+			<name>M2Scorer.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/M2Scorer.cpp</locationURI>
+		</link>
+		<link>
+			<name>M2Scorer.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/M2Scorer.h</locationURI>
+		</link>
+		<link>
 			<name>MeteorScorer.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/mert/MeteorScorer.cpp</locationURI>
