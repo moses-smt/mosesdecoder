@@ -4,7 +4,6 @@
 
 set -e -o pipefail
 opt=$(pwd)/opt
-irstlm=$(pwd)/irstlm/$(cd irstlm && git describe)
-echo $irstlm
-./bjam --with-irstlm=$irstlm --with-boost=$opt --with-cmph=$opt --with-xmlrpc-c=$opt --with-mm --with-probing-pt -j$(getconf _NPROCESSORS_ONLN) $@
+irstlm=${opt}/irstlm-5.80.08
+./bjam --with-boost=$opt --with-cmph=$opt --with-xmlrpc-c=$opt --with-mm --with-probing-pt -j$(getconf _NPROCESSORS_ONLN) $@
 
