@@ -1,4 +1,4 @@
-// -*- mode: c++; tab-width: 2; indent-tabs-mode: nil; cc-style: moses-cc-style -*-
+// -*- mode: c++; tab-width: 2; indent-tabs-mode: nil -*-
 #pragma once
 #ifndef NO_MOSES
 namespace sapt {

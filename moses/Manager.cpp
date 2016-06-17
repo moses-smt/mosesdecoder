@@ -1083,7 +1083,6 @@ void Manager::OutputSearchGraphAsSLF(long translationId, std::ostream &outputSea
 
 }
 
-
 void
 OutputSearchNode(AllOptions const& opts, long translationId,
                  std::ostream &out,

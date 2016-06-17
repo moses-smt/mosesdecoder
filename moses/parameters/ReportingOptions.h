@@ -64,6 +64,6 @@ namespace Moses
     
     ReportingOptions();
   };
-  
+
 }
 

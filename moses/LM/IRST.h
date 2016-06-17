@@ -25,12 +25,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <string>
 #include <vector>
 
-#include "moses/Factor.h"
 #include "moses/LM/SingleFactor.h"
+#include "moses/Factor.h"
 #include "moses/Hypothesis.h"
 #include "moses/TypeDef.h"
 
 #include "moses/Util.h"
+
+#ifdef WITH_THREADS
+#include <boost/thread.hpp>
+#endif
 
 //this is required because:
 //- IRSTLM package uses the namespace irstlm
@@ -57,6 +61,11 @@ class Phrase;
  */
 class LanguageModelIRST : public LanguageModelSingleFactor
 {
+public:
+  // the type weightmap_t  must be equal to the type topic_map_t of IRSTLM
+  typedef std::map<std::string,float> weightmap_t;
+  typedef std::map<std::string, weightmap_t > weightmap_map_t;
+
 protected:
   mutable std::vector<int> m_lmIdLookup;
   lmContainer* m_lmtb;
@@ -67,6 +76,10 @@ protected:
   int m_lmtb_sentenceEnd;   //lmt symbol to initialize ngram with
   int m_lmtb_dub;           //dictionary upperboud
   int m_lmtb_size;          //max ngram stored in the table
+  bool m_weight_map_normalization;     //flag to use normalized LM context weights
+  bool m_use_context_weights; 
+  // => use context weights if no interpolation weights are given
+  std::string m_id; // internal name to identify this instance of the LanguageModelIRST
 
   dictionary* d;
 
@@ -78,6 +91,12 @@ protected:
   int GetLmID( const std::string &str ) const;
   int GetLmID( const Factor *factor ) const;
 
+#ifdef WITH_THREAD
+  // mutable boost::shared_mutex m_lock;
+  boost::thread_specific_ptr<SPTR<weightmap_t> > t_interpolation_weights;
+#else
+  boost::scoped_ptr<weightmap_t> t_interpolation_weights; 
+#endif
 
 public:
   LanguageModelIRST(const std::string &line);
@@ -92,7 +111,6 @@ public:
   const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;
-
 
   virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
 
@@ -109,7 +127,21 @@ public:
   void set_dictionary_upperbound(int dub) {
     m_lmtb_size=dub ;
   };
+
+  const std::string GetId() const {
+    return m_id;
+  }
+
+  void SetId(const std::string id) {
+    m_id = id;
+  }
+
+  // void print_lm_context_weights(std::string const& id);
+  // void print_lm_context_weights();
+
 };
+
+
 
 }
 

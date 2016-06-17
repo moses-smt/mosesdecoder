@@ -63,9 +63,13 @@ EvaluateInIsolation(Phrase const& source, TargetPhrase const& targetPhrase,
                     ScoreComponentCollection &scoreBreakdown,
                     ScoreComponentCollection &estimatedScores) const
 {
+VERBOSE(2,"void LanguageModel::EvaluateInIsolation(const Phrase &source, const TargetPhrase &targetPhrase, ...)" << std::endl);
   // contains factors used by this LM
   float fullScore, nGramScore;
   size_t oovCount;
+
+VERBOSE(2,"targetPhrase:|" << targetPhrase << "|" << std::endl);
+VERBOSE(2,"pthread_self():" << pthread_self() << endl);
 
   CalcScore(targetPhrase, fullScore, nGramScore, oovCount);
 

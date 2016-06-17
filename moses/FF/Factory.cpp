@@ -19,6 +19,7 @@
 
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
 
+#include "moses/FF/DomainAdaptationViaLSA.h"
 #include "moses/FF/BleuScoreFeature.h"
 #include "moses/FF/TargetWordInsertionFeature.h"
 #include "moses/FF/SourceWordDeletionFeature.h"
@@ -260,6 +261,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(RulePairUnlexicalizedSource);
   MOSES_FNAME(LexicalReordering);
   MOSES_FNAME2("Generation", GenerationDictionary);
+  MOSES_FNAME2("DA-via-LSA", DA_via_LSA);
   MOSES_FNAME(BleuScoreFeature);
   MOSES_FNAME2("Distortion", DistortionScoreProducer);
   MOSES_FNAME2("WordPenalty", WordPenaltyProducer);

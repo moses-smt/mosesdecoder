@@ -49,24 +49,37 @@ SetContextWeights(Moses::ContextScope& s, xmlrpc_c::value const& w)
     (*M)[m->first] = xmlrpc_c::value_double(m->second);
   s.SetContextWeights(M);
 }
-  
+
+void
+SetLmInterpolationWeights(Moses::ContextScope& s, xmlrpc_c::value const& w)
+{
+  SPTR<std::map<std::string,float> > M(new std::map<std::string, float>);
+  typedef std::map<std::string,xmlrpc_c::value> tmap;
+  tmap const tmp = static_cast<tmap>(xmlrpc_c::value_struct(w));
+  for(tmap::const_iterator m = tmp.begin(); m != tmp.end(); ++m)
+    (*M)[m->first] = xmlrpc_c::value_double(m->second);
+  s.SetContextWeights(M);
+}
+
 void
 TranslationRequest::
 Run()
 {
+// #ifdef WITH_THREADS
+//   s_current.reset(this);
+// #endif
   typedef std::map<std::string,xmlrpc_c::value> param_t;
   param_t const& params = m_paramList.getStruct(0);
   parse_request(params);
-  // cerr << "SESSION ID" << ret->m_session_id << endl;
-
 
   // settings within the session scope
   param_t::const_iterator si = params.find("context-weights");
   if (si != params.end()) SetContextWeights(*m_scope, si->second);
   
-  Moses::StaticData const& SD = Moses::StaticData::Instance();
-
-  if (is_syntax(m_options->search.algo))
+  si = params.find("lm-interpolation-weights");
+  if (si != params.end()) SetLmInterpolationWeights(*m_scope, si->second);
+ 
+ if (is_syntax(m_options->search.algo))
     run_chart_decoder();
   else
     run_phrase_decoder();
@@ -77,6 +90,9 @@ Run()
   }
   m_cond.notify_one();
 
+// #ifdef WITH_THREADS
+//   s_current.release();
+// #endif
 }
 
 /// add phrase alignment information from a Hypothesis

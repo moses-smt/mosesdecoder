@@ -1,4 +1,4 @@
-// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 // (c) 2007-2009 Ulrich Germann. All rights reserved.
 #ifndef _ug_im_tsa_h
 #define _ug_im_tsa_h
@@ -116,6 +116,12 @@ namespace sapt
     /// add a sentence to the database
     // shared_ptr<imTSA<TOKEN> > add(vector<TOKEN> const& snt) const;
 
+    char const* 
+    adjustPosition(char const* p, char const* stop) const 
+    { 
+      return p; 
+    }
+
   };
 
   template<typename TOKEN>
@@ -158,7 +164,6 @@ namespace sapt
     this->startArray = NULL;
     this->endArray   = NULL;
     this->corpusSize = 0;
-    this->BitSetCachingThreshold=4096;
   };
 
   // build an array from all the tokens in the sentences in *c that are
@@ -421,12 +426,12 @@ namespace sapt
     size_t n = 0;
     BOOST_FOREACH(id_type sid, newsids)
       {
-	assert(sid < crp->size());
-  	for (size_t o = 0; o < (*crp)[sid].size(); ++o, ++n)
-  	  { nidx[n].offset = o; nidx[n].sid  = sid; }
+        assert(sid < crp->size());
+        for (size_t o = 0; o < (*crp)[sid].size(); ++o, ++n)
+          { nidx[n].offset = o; nidx[n].sid  = sid; }
       }
     sort(nidx.begin(),nidx.end(),sorter);
-
+    
     // create the new suffix array
     this->numTokens = newToks + prior.sufa.size();
     this->sufa.resize(this->numTokens);
@@ -449,27 +454,27 @@ namespace sapt
   	    this->index[i] = k - this->sufa.begin();
   	    if (++i < prior.index.size() && prior.index[i-1] < prior.index[i])
   	      {
-  		k = copy(prior.sufa.begin() + prior.index[i-1],
-  			 prior.sufa.begin() + prior.index[i], k);
+            k = copy(prior.sufa.begin() + prior.index[i-1],
+                     prior.sufa.begin() + prior.index[i], k);
   	      }
   	  }
-	this->index[i] = k - this->sufa.begin();
+    this->index[i] = k - this->sufa.begin();
   	if (++i < prior.index.size() && prior.index[i] > prior.index[i-1])
   	  {
   	    size_t j = prior.index[i-1];
   	    while (j < prior.index[i] && n < nidx.size()
-  		   && crp->getToken(nidx[n])->id() < i)
+               && crp->getToken(nidx[n])->id() < i)
   	      {
-  		assert(k < this->sufa.end());
-  		if (sorter(prior.sufa[j],nidx[n]))
-  		  *k++ = prior.sufa[j++];
-  		else
-  		  *k++ = nidx[n++];
+            assert(k < this->sufa.end());
+            if (sorter(prior.sufa[j],nidx[n]))
+              *k++ = prior.sufa[j++];
+            else
+              *k++ = nidx[n++];
   	      }
   	    while (j < prior.index[i])
   	      {
-  		assert(k < this->sufa.end());
-  		*k++ = prior.sufa[j++];
+            assert(k < this->sufa.end());
+            *k++ = prior.sufa[j++];
   	      }
   	  }
   	while (n < nidx.size() && this->corpus->getToken(nidx[n])->id() < i)
@@ -482,32 +487,32 @@ namespace sapt
     this->index[i] = k - this->sufa.begin();
     while (++i < this->index.size())
       {
-  	if (i < prior.index.size() && prior.index[i-1] < prior.index[i])
-  	  k = copy(prior.sufa.begin() + prior.index[i-1],
-  		   prior.sufa.begin() + prior.index[i], k);
-  	this->index[i] = k - this->sufa.begin();
+        if (i < prior.index.size() && prior.index[i-1] < prior.index[i])
+          k = copy(prior.sufa.begin() + prior.index[i-1],
+                   prior.sufa.begin() + prior.index[i], k);
+        this->index[i] = k - this->sufa.begin();
       }
 #if 0
     // sanity checks
     assert(this->sufa.size() == this->index.back());
     BOOST_FOREACH(cpos const& x, this->sufa)
       {
-	assert(x.sid < this->corpusSize);
-	assert(x.offset < this->corpus->sntLen(x.sid));
+        assert(x.sid < this->corpusSize);
+        assert(x.offset < this->corpus->sntLen(x.sid));
       }
     for (size_t i = 1; i < index.size(); ++i)
       {
-	assert(index[i-1] <= index[i]);
-	assert(index[i] <= sufa.size());
-	for (size_t k = index[i-1]; k < index[i]; ++k)
-	  assert(this->corpus->getToken(sufa[k])->id() == i-1);
+        assert(index[i-1] <= index[i]);
+        assert(index[i] <= sufa.size());
+        for (size_t k = index[i-1]; k < index[i]; ++k)
+          assert(this->corpus->getToken(sufa[k])->id() == i-1);
       }
     assert(index[0] == 0);
     assert(this->startArray == reinterpret_cast<char const*>(&(*this->sufa.begin())));
     assert(this->endArray == reinterpret_cast<char const*>(&(*this->sufa.end())));
 #endif
   }
-
+  
 }
 
 #endif

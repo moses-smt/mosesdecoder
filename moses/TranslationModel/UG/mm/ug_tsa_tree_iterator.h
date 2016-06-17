@@ -1,5 +1,6 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // (c) 2007 - 2010 Ulrich Germann. All rights reserved.
+
 #ifndef __ug_tsa_tree_iterator_h
 #define __ug_tsa_tree_iterator_h
 
@@ -66,10 +67,6 @@ namespace sapt
     TSA_tree_iterator(TSA<Token> const* s,
 		      Token const* kstart,
 		      size_t const len,
-		      bool full_match_only=true);
-    TSA_tree_iterator(TSA<Token> const* s,
-		      Token const* kstart,
-		      Token const* kend,
 		      bool full_match_only=true);
     TSA_tree_iterator(TSA<Token> const* s,
     		      TokenIndex const& V,
@@ -257,7 +254,7 @@ namespace sapt
     if (lower.size() == 1)
       {
         Token const* t = this->getToken(0);
-	id_type wid = t->id();
+        id_type wid = t->id();
         char const* hi = root->getUpperBound(wid);
         if (upper[0] < hi)
           {
@@ -293,8 +290,8 @@ namespace sapt
         // display(root->corpus->getToken(L),"L1");
         // display(root->corpus->getToken(U),"U1");
 
-	int x = root->corpus->cmp(U,L,lower.size()-1);
-	// cerr << "x=" << x << std::endl;
+        int x = root->corpus->cmp(U,L,lower.size()-1);
+        // cerr << "x=" << x << std::endl;
         if (x != 1)
           return false;
         lower.back() = upper.back();
@@ -362,7 +359,6 @@ namespace sapt
 
   // ---------------------------------------------------------------------------
 
-#if 1
   template<typename Token>
   TSA_tree_iterator<Token>::
   TSA_tree_iterator(TSA<Token> const* s,
@@ -383,37 +379,6 @@ namespace sapt
 	  }
       }
   };
-#endif
-
-#if 0
-  // ---------------------------------------------------------------------------
-
-  template<typename Token>
-  TSA_tree_iterator<Token>::
-  TSA_tree_iterator(TSA_tree_iterator<Token> const& other)
-    : root(other.root)
-  {
-    lower = other.lower;
-    upper = other.upper;
-  };
-
-  // ---------------------------------------------------------------------------
-
-  template<typename Token>
-  TSA_tree_iterator<Token>::
-  TSA_tree_iterator(TSA<Token> const* s, Token const& t)
-    : root(s)
-  {
-    if (!root) return;
-    char const* up = root->getUpperBound(t.id());
-    if (!up) return;
-    lower.push_back(root->getLowerBound(t.id()));
-    upper.push_back(up);
-  };
-
-  // ---------------------------------------------------------------------------
-
-#endif
 
   template<typename Token>
   TSA_tree_iterator<Token>::
@@ -432,23 +397,6 @@ namespace sapt
       }
   };
 
-  // DEPRECATED: DO NOT USE. Use the one that takes the length
-  // instead of kend.
-  template<typename Token>
-  TSA_tree_iterator<Token>::
-  TSA_tree_iterator(TSA<Token> const* s, Token const* kstart,
-		    Token const* kend, bool full_match_only)
-    : root(s)
-  {
-    for (;kstart != kend; kstart = kstart->next())
-      if (!extend(*kstart))
-        break;
-    if (full_match_only && kstart != kend)
-      {
-        lower.clear();
-        upper.clear();
-      }
-  };
 
   // ---------------------------------------------------------------------------
   // EXTEND

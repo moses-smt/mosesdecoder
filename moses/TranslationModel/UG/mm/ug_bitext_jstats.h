@@ -41,7 +41,7 @@ namespace sapt
 
     size_t 
     add(float w, float b, std::vector<unsigned char> const& a, uint32_t const cnt2, 
-	uint32_t fwd_orient, uint32_t bwd_orient, int const docid);
+        uint32_t fwd_orient, uint32_t bwd_orient, int const docid);
 
     void invalidate();
     void validate();
@@ -51,6 +51,9 @@ namespace sapt
     void fill_lr_vec(LRModel::Direction const& dir,
                      LRModel::ModelType const& mdl,
                      std::vector<float>& v);
+
+    bool operator==(jstats const& other) const;
+
   };
 }
 

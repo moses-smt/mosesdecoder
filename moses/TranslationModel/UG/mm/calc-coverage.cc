@@ -1,3 +1,5 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
+
 #include "moses/TranslationModel/UG/mm/ug_mm_ttrack.h"
 #include "moses/TranslationModel/UG/mm/ug_mm_tsa.h"
 #include "moses/TranslationModel/UG/mm/tpt_tokenindex.h"

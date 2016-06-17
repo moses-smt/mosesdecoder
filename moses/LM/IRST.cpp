@@ -29,7 +29,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 using namespace irstlm;
 
 #include "IRST.h"
-#include "moses/LM/PointerState.h"
+#include "SingleFactor.h"
+#include "moses/FF/FFState.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
 #include "moses/FactorCollection.h"
@@ -42,8 +43,45 @@ using namespace std;
 
 namespace Moses
 {
+typedef unsigned int  ngram_state_t; //type for pointing to a full ngram in the table; must be equal to that define in IRSTLM toolkit
 
-class IRSTLMState : public PointerState
+class IRSTLMState : public FFState
+{
+  // Allow LanguageModelIRST to access the private members of this class
+  friend class LanguageModelIRST;
+  friend ostream& operator<<(ostream& out, const IRSTLMState& obj);
+
+ public:
+  size_t hash() const
+  {
+    boost::hash<size_t> hasher;
+    return hasher(state);
+  }
+
+  bool operator==(const FFState& o) const
+  {
+    const IRSTLMState &other = static_cast<const IRSTLMState &>(o);
+    return (state == other.state);
+  }
+
+  IRSTLMState():state(0) {}
+
+  IRSTLMState(ngram_state_t st):state(st) {}  
+
+ private:
+  ngram_state_t state;
+};
+
+// friend
+ostream& operator<<(ostream& out, const IRSTLMState& obj)
+{
+  out << " obj.state:|" << obj.state << "|";
+  return out;
+}
+
+
+/*
+ * class IRSTLMState : public PointerState
 {
 public:
   IRSTLMState():PointerState(NULL)  {}
@@ -59,30 +97,52 @@ public:
     return lmstate;
   }
 };
+*/
 
 LanguageModelIRST::LanguageModelIRST(const std::string &line)
   :LanguageModelSingleFactor(line)
-  ,m_lmtb_dub(0), m_lmtb_size(0)
+  ,m_lmtb_dub(IRSTLM_DUB_DEFAULT), m_lmtb_size(0)
 {
+//  ,m_lmtb_dub(0), m_lmtb_size(0)
+/*
   const StaticData &staticData = StaticData::Instance();
   int threadCount = staticData.ThreadCount();
   if (threadCount != 1) {
     throw runtime_error("Error: " + SPrint(threadCount) + " number of threads specified but IRST LM is not threadsafe.");
   }
+*/
 
+  m_id = "default";
+  m_weight_map_normalization=false;
+  m_use_context_weights=false; 
   ReadParameters();
 
-  VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_lmtb_dub:|" << m_lmtb_dub << "|" << std::endl);
-  VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_filePath:|" << m_filePath << "|" << std::endl);
-  VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_factorType:|" << m_factorType << "|" << std::endl);
-  VERBOSE(4, GetScoreProducerDescription() << " LanguageModelIRST::LanguageModelIRST() m_lmtb_size:|" << m_lmtb_size << "|" << std::endl);
+  VERBOSE(3, GetScoreProducerDescription() 
+	  << " LanguageModelIRST::LanguageModelIRST() m_lmtb_dub:|" 
+	  << m_lmtb_dub << "|" << std::endl);
+  VERBOSE(3, GetScoreProducerDescription() 
+	  << " LanguageModelIRST::LanguageModelIRST() m_filePath:|" 
+	  << m_filePath << "|" << std::endl);
+  VERBOSE(3, GetScoreProducerDescription() 
+	  << " LanguageModelIRST::LanguageModelIRST() m_factorType:|" 
+	  << m_factorType << "|" << std::endl);
+  VERBOSE(3, GetScoreProducerDescription() 
+	  << " LanguageModelIRST::LanguageModelIRST() m_id:|" 
+	  << m_id << "|" << std::endl);
+  VERBOSE(3, GetScoreProducerDescription() 
+	  << " LanguageModelIRST::LanguageModelIRST() m_weight_map_normalization:|" 
+	  << m_weight_map_normalization << "|" << std::endl);
+  VERBOSE(3, GetScoreProducerDescription() 
+	  << " LanguageModelIRST::LanguageModelIRST() "
+	  << "m_use_context_weights:|" << m_use_context_weights << "|" 
+	  << std::endl);
 }
 
 LanguageModelIRST::~LanguageModelIRST()
 {
 
 #ifndef WIN32
-  TRACE_ERR( "reset mmap\n");
+  VERBOSE(1,"reset mmap" << std::endl);
   if (m_lmtb) m_lmtb->reset_mmap();
 #endif
 
@@ -101,12 +161,17 @@ void LanguageModelIRST::Load(AllOptions::ptr const& opts)
   FactorCollection &factorCollection = FactorCollection::Instance();
 
   m_lmtb = m_lmtb->CreateLanguageModel(m_filePath);
+  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::Load() type:|" << m_lmtb->getLanguageModelType() << "|" << std::endl);
+
   if (m_lmtb_size > 0) m_lmtb->setMaxLoadedLevel(m_lmtb_size);
+  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::Load() m_lmtb_size:|" << m_lmtb_size << "|" << std::endl);
+
   m_lmtb->load(m_filePath);
   d=m_lmtb->getDict();
   d->incflag(1);
 
   m_nGramOrder = m_lmtb_size = m_lmtb->maxlevel();
+  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::Load() m_lmtb_size:|" << m_lmtb_size << "|" << std::endl);
 
   // LM can be ok, just outputs warnings
   // Mauro: in the original, the following two instructions are wrongly switched:
@@ -115,16 +180,20 @@ void LanguageModelIRST::Load(AllOptions::ptr const& opts)
 
   CreateFactors(factorCollection);
 
-  VERBOSE(1, GetScoreProducerDescription() << "  LanguageModelIRST::Load() m_unknownId=" << m_unknownId << std::endl);
+  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::Load() m_unknownId=" << m_unknownId << std::endl);
 
   //install caches to save time (only if PS_CACHE_ENABLE is defined through compilation flags)
   m_lmtb->init_caches(m_lmtb_size>2?m_lmtb_size-1:2);
 
+  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::Load() m_lmtb_dub:" << m_lmtb_dub << "|" << std::endl);
   if (m_lmtb_dub > 0) m_lmtb->setlogOOVpenalty(m_lmtb_dub);
+  VERBOSE(3, GetScoreProducerDescription() << " LanguageModelIRST::Load() oovpenalty:" << m_lmtb->getlogOOVpenalty() << "|" << std::endl);
+  d->incflag(0);
 }
 
 void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 {
+VERBOSE(1,"void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection) START" << std::endl);
   // add factors which have srilm id
   // code copied & paste from SRI LM class. should do template function
   std::map<size_t, int> lmIdMap;
@@ -143,15 +212,17 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
 
   m_sentenceStart = factorCollection.AddFactor(Output, m_factorType, BOS_);
   factorId = m_sentenceStart->GetId();
-  const std::string bs = BOS_;
-  const std::string es = EOS_;
-  m_lmtb_sentenceStart=lmIdMap[factorId] = GetLmID(BOS_);
+  d->incflag(1);
+  m_lmtb_sentenceStart = lmIdMap[factorId] = GetLmID(BOS_);
+  d->incflag(0);
   maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
   m_sentenceStartWord[m_factorType] = m_sentenceStart;
 
-  m_sentenceEnd		= factorCollection.AddFactor(Output, m_factorType, EOS_);
+  m_sentenceEnd         = factorCollection.AddFactor(Output, m_factorType, EOS_);
   factorId = m_sentenceEnd->GetId();
-  m_lmtb_sentenceEnd=lmIdMap[factorId] = GetLmID(EOS_);
+  d->incflag(1);
+  m_lmtb_sentenceEnd = lmIdMap[factorId] = GetLmID(EOS_);
+  d->incflag(0);
   maxFactorId = (factorId > maxFactorId) ? factorId : maxFactorId;
   m_sentenceEndWord[m_factorType] = m_sentenceEnd;
 
@@ -163,6 +234,7 @@ void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection)
   for (iterMap = lmIdMap.begin() ; iterMap != lmIdMap.end() ; ++iterMap) {
     m_lmIdLookup[iterMap->first] = iterMap->second;
   }
+VERBOSE(1,"void LanguageModelIRST::CreateFactors(FactorCollection &factorCollection) END" << std::endl);
 }
 
 int LanguageModelIRST::GetLmID( const std::string &str ) const
@@ -178,7 +250,19 @@ int LanguageModelIRST::GetLmID( const Word &word ) const
 int LanguageModelIRST::GetLmID( const Factor *factor ) const
 {
   size_t factorId = factor->GetId();
+  if  ((factorId >= m_lmIdLookup.size()) || (m_lmIdLookup[factorId] == m_empty)) {
+    return m_unknownId;
+  }else {
+    return m_lmIdLookup[factorId];
+  }
+}
 
+/*
+int LanguageModelIRST::GetLmID( const Factor *factor ) const
+{
+VERBOSE(1,"int LanguageModelIRST::GetLmID( const Factor *factor ) const version A" << std::endl;);
+  size_t factorId = factor->GetId();
+int c;
   if  ((factorId >= m_lmIdLookup.size()) || (m_lmIdLookup[factorId] == m_empty)) {
     if (d->incflag()==1) {
       std::string s = factor->GetString().as_string();
@@ -221,30 +305,43 @@ int LanguageModelIRST::GetLmID( const Factor *factor ) const
 
       //insert new code
       m_lmIdLookup[factorId] = code;
-      return code;
+      c=code;
+//      return code;
 
     } else {
-      return m_unknownId;
+      c=m_unknownId;
+//      return m_unknownId;
     }
   } else {
-    return m_lmIdLookup[factorId];
+    c=m_lmIdLookup[factorId];
+//    return m_lmIdLookup[factorId];
   }
+VERBOSE(1,"int LanguageModelIRST::GetLmID( const Factor *factor ) const version A: word:|" << s << "| code:|" << c << "|" << std::endl;);
+  return c;
 }
+*/
 
 const FFState* LanguageModelIRST::EmptyHypothesisState(const InputType &/*input*/) const
 {
+  VERBOSE(2,"const FFState* LanguageModelIRST::EmptyHypothesisState(const InputType &/*input*/)"<< std::endl);
   std::auto_ptr<IRSTLMState> ret(new IRSTLMState());
 
   return ret.release();
 }
 
+
 void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const
 {
+  VERBOSE(2,"void LanguageModelIRST::CalcScore(const Phrase &phrase, ...) START id:|" << m_id << "| phrase:|" << phrase << "|" << std::endl);
+
   fullScore = 0;
   ngramScore = 0;
   oovCount = 0;
 
   if ( !phrase.GetSize() ) return;
+
+
+  weightmap_t* weight_map = t_interpolation_weights.get();
 
   int _min = min(m_lmtb_size - 1, (int) phrase.GetSize());
 
@@ -254,12 +351,16 @@ void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float 
   ++idx;
   int position = 0;
 
-  char* msp = NULL;
   float before_boundary = 0.0;
   for (; position < _min; ++position) {
     codes[idx] = GetLmID(phrase.GetWord(position));
     if (codes[idx] == m_unknownId) ++oovCount;
-    before_boundary += m_lmtb->clprob(codes,idx+1,NULL,NULL,&msp);
+
+    if (weight_map && weight_map->size()>0)
+      before_boundary += m_lmtb->clprob(codes,idx+1,*weight_map);
+    else
+      before_boundary += m_lmtb->clprob(codes,idx+1); 
+
     ++idx;
   }
 
@@ -272,17 +373,23 @@ void LanguageModelIRST::CalcScore(const Phrase &phrase, float &fullScore, float 
     }
     codes[idx-1] = GetLmID(phrase.GetWord(position));
     if (codes[idx-1] == m_unknownId) ++oovCount;
-    ngramScore += m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
+
+    if (weight_map && weight_map->size()>0)
+      ngramScore += m_lmtb->clprob(codes,idx,*weight_map);
+    else
+      ngramScore += m_lmtb->clprob(codes,idx);
   }
+
   before_boundary = TransformLMScore(before_boundary);
   ngramScore = TransformLMScore(ngramScore);
   fullScore = ngramScore + before_boundary;
 }
 
+
 FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
 {
   if (!hypo.GetCurrTargetLength()) {
-    std::auto_ptr<IRSTLMState> ret(new IRSTLMState(ps));
+    std::auto_ptr<IRSTLMState> ret(new IRSTLMState(*((IRSTLMState*)ps)));
     return ret.release();
   }
 
@@ -308,7 +415,14 @@ FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FF
   }
 
   char* msp = NULL;
-  float score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+  ngram_state_t msidx = 0;
+  float score;
+  weightmap_t* weight_map = t_interpolation_weights.get();
+  if (weight_map && weight_map->size()>0){
+    score = m_lmtb->clprob(codes,m_lmtb_size,*weight_map,NULL,NULL,&msidx,&msp);
+  }else{
+    score = m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp);
+  }
 
   position = (const int) begin+1;
   while (position < adjust_end) {
@@ -316,7 +430,11 @@ FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FF
       codes[idx-1] = codes[idx];
     }
     codes[idx-1] =  GetLmID(hypo.GetWord(position));
-    score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+    if (weight_map && weight_map->size()>0){
+      score += m_lmtb->clprob(codes,m_lmtb_size,*weight_map,NULL,NULL,&msidx,&msp);
+    }else{
+      score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp);
+    }
     ++position;
   }
 
@@ -336,7 +454,11 @@ FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FF
       codes[idx] = m_lmtb_sentenceStart;
       --idx;
     }
-    score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msp);
+    if (weight_map && weight_map->size()>0){
+      score += m_lmtb->clprob(codes,m_lmtb_size,*weight_map,NULL,NULL,&msidx,&msp);
+    }else{
+      score += m_lmtb->clprob(codes,m_lmtb_size,NULL,NULL,&msidx,&msp);
+    }
   } else {
     // need to set the LM state
 
@@ -346,51 +468,26 @@ FFState* LanguageModelIRST::EvaluateWhenApplied(const Hypothesis &hypo, const FF
         codes[idx] =  GetLmID(hypo.GetWord(position));
       }
       codes[idx] = m_lmtb_sentenceStart;
-      msp = (char *) m_lmtb->cmaxsuffptr(codes,m_lmtb_size);
+      msidx = m_lmtb->cmaxsuffidx(codes,m_lmtb_size);
     }
   }
 
   score = TransformLMScore(score);
   out->PlusEquals(this, score);
 
-  std::auto_ptr<IRSTLMState> ret(new IRSTLMState(msp));
+  std::auto_ptr<IRSTLMState> ret(new IRSTLMState(msidx));
 
   return ret.release();
 }
 
 LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
-{
-  // set up context
-  size_t count = contextFactor.size();
-  if (count < 0) {
-    cerr << "ERROR count < 0\n";
-    exit(100);
-  };
-
-  // set up context
-  int codes[MAX_NGRAM_SIZE];
-
-  size_t idx=0;
-  //fill the farthest positions with at most ONE sentenceEnd symbol and at most ONE sentenceEnd symbol, if "empty" positions are available
-  //so that the vector looks like = "</s> <s> context_word context_word" for a two-word context and a LM of order 5
-  if (count < (size_t) (m_lmtb_size-1)) codes[idx++] = m_lmtb_sentenceEnd;
-  if (count < (size_t) m_lmtb_size) codes[idx++] = m_lmtb_sentenceStart;
-
-  for (size_t i = 0 ; i < count ; i++) {
-    codes[idx] =  GetLmID(*contextFactor[i]);
-    ++idx;
-  }
-
+{ //dummy version
+  VERBOSE(2,"LMResult LanguageModelIRST::GetValue(const vector<const Word*> &contextFactor, State* finalState)"<< std::endl);
+  if (finalState) *finalState=NULL;
   LMResult result;
-  result.unknown = (codes[idx - 1] == m_unknownId);
-
-  char* msp = NULL;
-  result.score = m_lmtb->clprob(codes,idx,NULL,NULL,&msp);
-
-  if (finalState) *finalState=(State *) msp;
-
-  result.score = TransformLMScore(result.score);
-
+  result.unknown = 0.0;
+  result.score = 0.0;
+  
   return result;
 }
 
@@ -403,12 +500,63 @@ bool LMCacheCleanup(const int sentences_done, const size_t m_lmcache_cleanup_thr
   return false;
 }
 
+
+void Normalize(LanguageModelIRST::weightmap_t& M)
+{
+  float total = 0;
+  typedef LanguageModelIRST::weightmap_t::value_type entry;
+  BOOST_FOREACH(entry const& e, M) {
+    UTIL_THROW_IF2(e.second < 0, "Negative context weight at" << HERE);
+    total += e.second;
+  }
+  if (total == 0) return;
+  BOOST_FOREACH(entry& e, M) e.second /= total;
+}
+
 void LanguageModelIRST::InitializeForInput(ttasksptr const& ttask)
 {
   //nothing to do
 #ifdef TRACE_CACHE
   m_lmtb->sentence_id++;
 #endif
+  // we assume here that translation is run in one single thread for each ttask
+  // (no parallelization at a finer granularity involving IRSTLM)
+  
+  // This function is called prior to actual translation and allows the class
+  // to set up thread-specific information such as context weights
+#ifdef WITH_THREAD
+  boost::unique_lock<boost::shared_mutex> mylock(m_lock);
+#endif
+
+  SPTR<ContextScope> const& scope = ttask->GetScope();
+  bool normalize = m_weight_map_normalization;
+  bool using_context_weights=false;
+  SPTR<weightmap_t const> weights = scope->GetLmInterpolationWeights();
+  if (!weights && m_use_context_weights) {
+    normalize = true; // always normalize context weights
+    weights = scope->GetContextWeights();
+    using_context_weights = true;
+  }
+  if (weights) {
+    t_interpolation_weights.reset(new weightmap_t(*weights));
+    if (normalize) 
+      Normalize(*t_interpolation_weights);
+    IFFEATUREVERBOSE(3) {
+      typedef weightmap_t::value_type item;
+      std::string weight_source = (using_context_weights ? "context weight" : 
+				   "lm interpolation weight");
+      BOOST_FOREACH(item const& e, *t_interpolation_weights) {
+	ostringstream buf;
+	weightmap_t::const_iterator m = weights->find(e.first);
+	if (m != weights->end()) buf << m->second; 
+	if (normalize) buf << " => " << (*t_interpolation_weights)[e.first];
+	TRACE_ERR("[" << GetScoreProducerDescription() << "] " 
+		  << weight_source << ": " << e.first << " => "
+		  << buf.str() << std::endl);
+      }
+    }
+  }
+
 }
 
 void LanguageModelIRST::CleanUpAfterSentenceProcessing(const InputType& source)
@@ -423,17 +571,26 @@ void LanguageModelIRST::CleanUpAfterSentenceProcessing(const InputType& source)
     TRACE_ERR( "reset caches\n");
     m_lmtb->reset_caches();
   }
+  t_interpolation_weights.reset();
 }
 
 void LanguageModelIRST::SetParameter(const std::string& key, const std::string& value)
 {
-  if (key == "dub") {
+  if (key == "id") {
+    m_id = Scan<std::string>(value);
+  } else if (key == "dub") {
     m_lmtb_dub = Scan<unsigned int>(value);
+  } else if (key == "weight_normalization") {
+    m_weight_map_normalization = Scan<bool>(value);
+  } else if (key == "consider-context-weights") {
+    m_use_context_weights = Scan<bool>(value);
   } else {
     LanguageModelSingleFactor::SetParameter(key, value);
   }
+  //m_nGramOrder   is set though LanguageModelImplementation::SetParameter   using "order" attribute 
   m_lmtb_size = m_nGramOrder;
 }
 
 }
+
 

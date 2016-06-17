@@ -20,6 +20,7 @@
 #include "tpt_typedefs.h"
 #include "tpt_tokenindex.h"
 #include "moses/Util.h"
+#include "num_read_write.h"
 
 namespace sapt
 {
@@ -156,6 +157,10 @@ namespace sapt
 
 
     virtual size_t offset(TKN const* t) const { return t-sntStart(0); }
+
+    void 
+    extract_part_as_mm_ttrack(size_t start, size_t stop, std::string const& dest);
+
   };
 
   // ---------------------------------------------------------------------------
@@ -227,6 +232,7 @@ namespace sapt
     return totalCount;
   }
 
+#if 1
   template<typename TKN>
   int
   Ttrack<TKN>::
@@ -246,28 +252,21 @@ namespace sapt
 
     int ret=-1;
 
-#if 0
-    cerr << "A: "; for (TKN const* x = a; x; x = next(x)) cerr << x->lemma << " "; cerr << std::endl;
-    cerr << "B: "; for (TKN const* x = b; x; x = next(x)) cerr << x->lemma << " "; cerr << std::endl;
-#endif
-
     while (a >= bosA && a < eosA)
       {
-        // cerr << keyLength << "a. " << (a ? a->lemma : 0) << " " << (b ? b->lemma : 0) << std::endl;
-	if (*a < *b) {          break; } // return -1;
+        if (*a < *b) {          break; } // return -1;
         if (*a > *b) { ret = 2; break; } // return  2;
         a = next(a);
         b = next(b);
-        // cerr << keyLength << "b. " << (a ? a->lemma : 0) << " " << (b ? b->lemma : 0) << std::endl;
         if (--keyLength==0 || b < bosB || b >= eosB)
           {
             ret = (a < bosA || a >= eosA) ? 0 : 1;
             break;
           }
       }
-    // cerr << "RETURNING " << ret << std::endl;
     return ret;
   }
+#endif
 
   template<typename TKN>
   int
@@ -413,6 +412,32 @@ namespace sapt
 	  }
       }
     return buf.str();
+  }
+
+  template<typename TKN>
+  void 
+  Ttrack<TKN>::
+  extract_part_as_mm_ttrack(size_t start, size_t stop, std::string const& dest)
+  {
+    id_type idxSize       = stop-start;
+    id_type totalWords    = sntStart(stop)-sntStart(start);
+    filepos_type startIdx = (sizeof(filepos_type) 
+                             + 2 * sizeof(id_type) 
+                             + totalWords * sizeof(Token));
+    std::ofstream out(dest.c_str());
+    tpt::numwrite(out,startIdx);
+    tpt::numwrite(out,idxSize); 
+    tpt::numwrite(out,totalWords); 
+    for (size_t i = start; i < stop; ++i)
+      out.write(sntStart(i),sntLen(i) * sizeof(Token));
+    id_type offset = 0;
+    for (size_t i = start; i < stop; ++i)
+      {
+        tpt::numwrite(out,offset);
+        offset += sntLen(i);
+      }
+    tpt::numwrite(out,offset);
+    out.close();
   }
 
 }

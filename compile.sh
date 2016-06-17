@@ -3,6 +3,8 @@
 # you can install all 3rd-party dependencies by running make -f contrib/Makefiles/install-dependencies.gmake
 
 set -e -o pipefail
-OPT=${OPT:-$(pwd)/opt}
-./bjam --with-irstlm=$OPT/irstlm-5.80.08 --with-boost=$OPT --with-cmph=$OPT --with-xmlrpc-c=$OPT --with-mm --with-probing-pt -j$(getconf _NPROCESSORS_ONLN) $@
+opt=$(pwd)/opt
+irstlm=$(pwd)/irstlm/$(cd irstlm && git describe)
+echo $irstlm
+./bjam --with-irstlm=$irstlm --with-boost=$opt --with-cmph=$opt --with-xmlrpc-c=$opt --with-mm --with-probing-pt -j$(getconf _NPROCESSORS_ONLN) $@
 

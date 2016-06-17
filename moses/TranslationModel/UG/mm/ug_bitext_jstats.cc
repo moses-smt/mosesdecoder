@@ -29,12 +29,27 @@ namespace sapt
     my_wcnt = other.wcnt();
     my_bcnt = other.bcnt();
     my_aln  = other.aln();
+    my_cnt2 = other.cnt2();
     indoc   = other.indoc;
     for (int i = 0; i <= LRModel::NONE; i++)
       {
         ofwd[i] = other.ofwd[i];
         obwd[i] = other.obwd[i];
       }
+  }
+
+  bool 
+  jstats::
+  operator==(jstats const& other) const
+  {
+    if (my_rcnt != other.my_rcnt || my_cnt2 != other.my_cnt2 || 
+        my_wcnt != other.my_wcnt || my_bcnt != other.my_bcnt ||
+        my_aln  != other.my_aln  || indoc   != other.indoc) 
+      return false;
+    for (int i = 0; i <= LRModel::NONE; ++i)
+      if (ofwd[i] != other.ofwd[i] || obwd[i] != other.obwd[i])
+        return false;
+    return true;
   }
 
   uint32_t

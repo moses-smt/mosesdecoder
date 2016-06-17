@@ -21,8 +21,11 @@
 #include "TypeDef.h"
 #include "Util.h"
 
+#include "moses/StaticData.h"
+
 namespace Moses
 {
+
 class ContextScope
 {
 protected:
@@ -34,7 +37,8 @@ protected:
 #ifdef WITH_THREADS
   mutable boost::shared_mutex m_lock;
 #endif
-  SPTR<std::map<std::string,float> const> m_context_weights;
+  SPTR< std::map<std::string,float> const> m_context_weights;
+  SPTR< std::map<std::string,float> const> m_lm_interpolation_weights;
 public:
   typedef boost::shared_ptr<ContextScope> ptr;
   template<typename T>
@@ -52,7 +56,6 @@ public:
 #ifdef WITH_THREADS
     using boost::shared_mutex;
     using boost::upgrade_lock;
-    // T const* key = reinterpret_cast<T const*>(xkey);
     upgrade_lock<shared_mutex> lock(m_lock);
 #endif
     iter_t m = m_scratchpad.find(key);
@@ -76,7 +79,7 @@ public:
     return ret;
   }
 
-  ContextScope() { }
+  ContextScope() {}
 
   ContextScope(ContextScope const& other) {
 #ifdef WITH_THREADS
@@ -86,26 +89,54 @@ public:
     m_scratchpad = other.m_scratchpad;
   }
 
-  SPTR<std::map<std::string,float> const>
+  SPTR<std::map<std::string,float> const> const&
   GetContextWeights() {
     return m_context_weights;
   }
+  
+  SPTR<std::map<std::string,float> const> const&
+  GetLmInterpolationWeights() {
+    return m_lm_interpolation_weights;
+  }
+
+  std::map<std::string,float>*
+  CreateWeightMap(std::string const& spec) {
+   std::map<std::string,float>* M = new std::map<std::string,float>;
+   
+   std::vector<std::string> tokens = Tokenize(spec,":");
+   for (std::vector<std::string>::iterator it = tokens.begin();
+        it != tokens.end(); it++) {
+     std::vector<std::string> key_and_value = Tokenize(*it, ",");
+     (*M)[key_and_value[0]] = atof(key_and_value[1].c_str());
+   }
+   return M;
+ }
 
   bool
   SetContextWeights(std::string const& spec) {
     if (m_context_weights) return false;
+    // You can set the weights only once during the lifetime of a
+    // ContextScope object!
+#ifdef WITH_THREADS
     boost::unique_lock<boost::shared_mutex> lock(m_lock);
-    SPTR<std::map<std::string,float> > M(new std::map<std::string, float>);
+#endif
+    // may have changed while we waited for the lock
+    if (m_context_weights) return false;
+    m_context_weights.reset(CreateWeightMap(spec));
+    return true;
+  }
 
-    // TO DO; This needs to be done with StringPiece.find, not Tokenize
-    // PRIORITY: low
-    std::vector<std::string> tokens = Tokenize(spec,":");
-    for (std::vector<std::string>::iterator it = tokens.begin();
-         it != tokens.end(); it++) {
-      std::vector<std::string> key_and_value = Tokenize(*it, ",");
-      (*M)[key_and_value[0]] = atof(key_and_value[1].c_str());
-    }
-    m_context_weights = M;
+  bool
+  SetLmInterpolationWeights(std::string const& spec) {
+    if (m_lm_interpolation_weights) return false;
+    // You can set the weights only once during the lifetime of a
+    // ContextScope object!
+#ifdef WITH_THREADS
+    boost::unique_lock<boost::shared_mutex> lock(m_lock);
+#endif
+    // may have changed while we waited for the lock
+    if (m_lm_interpolation_weights) return false;
+    m_lm_interpolation_weights.reset(CreateWeightMap(spec));
     return true;
   }
 
@@ -115,10 +146,23 @@ public:
 #ifdef WITH_THREADS
     boost::unique_lock<boost::shared_mutex> lock(m_lock);
 #endif
+    // may have changed while we waited for the lock
+    if (m_context_weights) return false;
     m_context_weights = w;
     return true;
   }
 
+  bool
+  SetLmInterpolationWeights(SPTR<std::map<std::string,float> const> const& w) {
+    if (m_lm_interpolation_weights) return false;
+#ifdef WITH_THREADS
+    boost::unique_lock<boost::shared_mutex> lock(m_lock);
+#endif
+    // may have changed while we waited for the lock
+    if (m_lm_interpolation_weights) return false;
+    m_lm_interpolation_weights = w;
+    return true;
+  }
 };
 
 };

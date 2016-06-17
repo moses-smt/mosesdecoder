@@ -31,7 +31,7 @@ BUILD_DIR = $(CWD)/opt/build/${URL}
 # you can also specify specific prefixes for different packages:
 XMLRPC_PREFIX ?= ${PREFIX}
 CMPH_PREFIX   ?= ${PREFIX}
-IRSTLM_PREFIX ?= ${PREFIX}/irstlm-5.80.08
+IRSTLM_PREFIX ?= ${PREFIX}
 BOOST_PREFIX  ?= ${PREFIX}
 
 # currently, the full enchilada means xmlrpc-c, cmph, irstlm, boost
@@ -90,12 +90,12 @@ $(call safepath,$(IRSTLM_PREFIX)/bin/build-lm.sh):
 	&& ./configure --prefix='${PREFIX}' && make -j${nproc} && make install -j${nproc}
 	rm -rf ${TMP}
 
-# boost 
-boost: URL=http://sourceforge.net/projects/boost/files/boost/1.59.0/boost_1_59_0.tar.gz/download
+# boost https://sourceforge.net/projects/boost/files/boost/1.61.0/boost_1_61_0.tar.gz/download 
+boost: URL=http://sourceforge.net/projects/boost/files/boost/1.61.0/boost_1_61_0.tar.gz/download
 boost: TMP=$(CWD)/build/boost
 boost: override PREFIX=${BOOST_PREFIX}
 boost: | $(call safepath,${BOOST_PREFIX}/include/boost)
 $(call safepath,${BOOST_PREFIX}/include/boost):
 	$(sfget)
-	cd '${TMP}/boost_1_59_0' && ./bootstrap.sh && ./b2 --prefix=${PREFIX} -j${nproc} install
+	cd '${TMP}/boost_1_61_0' && ./bootstrap.sh && ./b2 -sHAVE_ICU=1 --prefix=${PREFIX} -j$(nproc) install
 	rm -rf ${TMP}

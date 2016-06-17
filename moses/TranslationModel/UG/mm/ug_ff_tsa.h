@@ -24,7 +24,7 @@ namespace sapt
   namespace bio=boost::iostreams;
 
   template<typename TOKEN>
-  class mmTSA : public TSA<TOKEN>
+  class fixed_field_TSA : public TSA<TOKEN>
   {
   public:
     typedef typename TSA<TOKEN>::tree_iterator tree_iterator;
@@ -34,8 +34,13 @@ namespace sapt
 
   public: // temporarily for debugging
 
-    filepos_type const* index; // random access to top-level sufa ranges
-
+    unsigned char const*     m_index; // random access to top-level sufa ranges
+    unsigned char         m_sid_bits; // how many bits are used to encode sids?
+    unsigned char      m_offset_bits; // how many bits to encode offsets?
+    unsigned char       m_entry_size; // how many bytes does each entry take?
+    unsigned char m_index_entry_size; // how many bytes for index entries
+    uint64_t           m_offset_mask;
+    uint64_t              m_base_sid; //
   private:
 
     char const* index_jump(char const* a, char const* z, float ratio) const;
@@ -43,8 +48,8 @@ namespace sapt
     char const* getUpperBound(id_type t) const;
 
   public:
-    mmTSA();
-    mmTSA(std::string fname, Ttrack<TOKEN> const* c);
+    fixed_field_TSA();
+    fixed_field_TSA(std::string fname, Ttrack<TOKEN> const* c);
     void open(std::string fname, typename boost::shared_ptr<Ttrack<TOKEN> const> c);
 
     count_type
@@ -74,6 +79,7 @@ namespace sapt
     char const* 
     adjustPosition(char const* p, char const* stop) const;
 
+
   };
 
   // ======================================================================
@@ -83,26 +89,19 @@ namespace sapt
    */
   template<typename TOKEN>
   char const*
-  mmTSA<TOKEN>::
+  fixed_field_TSA<TOKEN>::
   index_jump(char const* a, char const* z, float ratio) const
   {
     assert(ratio >= 0 && ratio < 1);
-    char const* m = a+int(ratio*(z-a));
-    if (m > a)
-      {
-        while (m > a && *m <  0) --m;
-        while (m > a && *m >= 0) --m;
-        if (*m < 0) ++m;
-      }
-    assert(*m >= 0);
+    char const* m = a + int(ratio*(z-a));
     return m;
   }
 
   // ======================================================================
 
   template<typename TOKEN>
-  mmTSA<TOKEN>::
-  mmTSA()
+  fixed_field_TSA<TOKEN>::
+  fixed_field_TSA()
   {
     this->startArray   = NULL;
     this->endArray     = NULL;
@@ -111,8 +110,8 @@ namespace sapt
   // ======================================================================
 
   template<typename TOKEN>
-  mmTSA<TOKEN>::
-  mmTSA(std::string fname, Ttrack<TOKEN> const* c)
+  fixed_field_TSA<TOKEN>::
+  fixed_field_TSA(std::string fname, Ttrack<TOKEN> const* c)
   {
     open(fname,c);
   }
@@ -121,13 +120,14 @@ namespace sapt
 
   template<typename TOKEN>
   void
-  mmTSA<TOKEN>::
+  fixed_field_TSA<TOKEN>::
   open(std::string fname, typename boost::shared_ptr<Ttrack<TOKEN> const> c)
   {
     if (access(fname.c_str(),F_OK))
       {
         std::ostringstream msg;
-        msg << "mmTSA<>::open: File '" << fname << "' does not exist.";
+        msg << "fixed_field_TSA<>::open: File '" 
+            << fname << "' does not exist.";
         throw std::runtime_error(msg.str().c_str());
       }
     assert(c);
@@ -135,64 +135,100 @@ namespace sapt
     file.open(fname);
     Moses::prime(file);
     char const* p = file.data();
-    filepos_type idxOffset;
+    filepos_type magicNumber,idxOffset;
+    p = tpt::numread(p,magicNumber); 
+    // magicNumber is currently not used, but might be in the future
+    
+    // how many bits are used to encode sentence ids and offsets in this
+    // particular token sequence array
+    m_sid_bits = *reinterpret_chast<unsigned char*>(p++);
+    m_offset_bits = *reinterpret_chast<unsigned char*>(p++);
+    size_t total_bits = m_sid_bits + m_offset_bits;
+    m_entry_size = total_bits/8 + (total_bits%8 ? 1 : 0);
+    
+    p = tpt::numread(p,m_base_sid);
     p = tpt::numread(p,idxOffset);
     p = tpt::numread(p,this->indexSize);
-
-    // cerr << fname << ": " << idxOffset << " " << this->indexSize << std::endl;
-
+    
     this->startArray = p;
-    this->index      = reinterpret_cast<filepos_type const*>(file.data()+idxOffset);
-    this->endArray   = reinterpret_cast<char const*>(index);
+    this->endArray   = file.data() + idxOffset;
+    this->index      = reinterpret_cast<uchar const*>(this->endArray);
     this->corpusSize = c->size();
-    this->numTokens  = c->numTokens();
+    this->numTokens  = (this->endArray - this->startArray)/m_entry_size;
+    size_t index_entry_bits = std::ceil(std::log2(this-numTokens));
+    m_index_entry_size = index_entry_bits/8 + (index_entry_bits%8 ? 1 : 0);
+    m_offset_mask = uint64_t(1)<<m_offset_bits;
   }
 
   // ======================================================================
 
   template<typename TOKEN>
   char const*
-  mmTSA<TOKEN>::
+  fixed_field_TSA<TOKEN>::
   getLowerBound(id_type id) const
   {
-    if (id >= this->indexSize)
-      return NULL;
-    return this->startArray + this->index[id];
+    // For the time being, we never use the index.
+    // Later the index can be used to speed up search for frequent items.
+    char const* lo = this->startArray;
+    char const* hi = this->endArray;
+    ArrayEntry I;
+    while (lo < up)
+      {
+        readEntry(index_jump(lo,hi,.5),I);
+        if (corpus->getToken(I)->id() >= id) hi = I.pos; 
+        else lo = I.next;
+      }
+    assert(lo == hi);
+    if (lo == this->endArray) return NULL;
+    readEntry(lo, I);
+    return corpus->getToken(I)->id() == id ? lo : NULL;
   }
-
+          
   // ======================================================================
 
   template<typename TOKEN>
   char const*
-  mmTSA<TOKEN>::
+  fixed_field_TSA<TOKEN>::
   getUpperBound(id_type id) const
   {
-    if (id >= this->indexSize)
-      return NULL;
-    // if (index[id] == index[id+1])
-    // return NULL;
-    else
-      return this->startArray + this->index[id+1];
+    // For the time being, we never use the index.
+    // Later the index can be used to speed up search for frequent items.
+    char const* lo = this->startArray;
+    char const* hi = this->endArray;
+    ArrayEntry I;
+    while (lo < up)
+      {
+        readEntry(index_jump(lo,hi,.5),I);
+        if (corpus->getToken(I)->id() > id) hi = I.pos; 
+        else lo = I.next;
+      }
+    return lo;
   }
 
   // ======================================================================
 
   template<typename TOKEN>
   char const*
-  mmTSA<TOKEN>::
+  fixed_field_TSA<TOKEN>::
   readSid(char const* p, char const* q, id_type& sid) const
   {
-    return tpt::tightread(p,q,sid);
+    ArrayEntry I;
+    readEntry(p,I);
+    sid = I.sid;
+    return p;
   }
 
   // ======================================================================
 
   template<typename TOKEN>
   char const*
-  mmTSA<TOKEN>::
+  fixed_field_TSA<TOKEN>::
   readSid(char const* p, char const* q, ::uint64_t& sid) const
   {
-    return tpt::tightread(p,q,sid);
+    ArrayEntry I;
+    readEntry(p,I);
+    sid = I.sid;
+    return p;
   }
 
   // ======================================================================
@@ -200,10 +236,13 @@ namespace sapt
   template<typename TOKEN>
   inline
   char const*
-  mmTSA<TOKEN>::
+  fixed_field_TSA<TOKEN>::
   readOffset(char const* p, char const* q, uint16_t& offset) const
   {
-    return tpt::tightread(p,q,offset);
+    ArrayEntry I;
+    readEntry(p,I);
+    offset = I.offset;
+    return I.next;
   }
 
   // ======================================================================
@@ -211,47 +250,41 @@ namespace sapt
   template<typename TOKEN>
   inline
   char const*
-  mmTSA<TOKEN>::
+  fixed_field_TSA<TOKEN>::
   readOffset(char const* p, char const* q, ::uint64_t& offset) const
   {
-    return tpt::tightread(p,q,offset);
+    ArrayEntry I;
+    readEntry(p,I);
+    offset = I.offset;
+    return I.next;
   }
 
   // ======================================================================
 
   template<typename TOKEN>
   count_type
-  mmTSA<TOKEN>::
+  fixed_field_TSA<TOKEN>::
   rawCnt(char const* p, char const* const q) const
   {
-    id_type sid; uint16_t off;
-    size_t ret=0;
-    while (p < q)
-      {
-        p = tpt::tightread(p,q,sid);
-        p = tpt::tightread(p,q,off);
-        ret++;
-      }
-    return ret;
+    return (q-p)/m_entry_size;
   }
   
   // ======================================================================
 
   template<typename TOKEN>
   void
-  mmTSA<TOKEN>::
+  fixed_field_TSA<TOKEN>::
   getCounts(char const* p, char const* const q,
-	    count_type& sids, count_type& raw) const
+            count_type& sids, count_type& raw) const
   {
     raw = 0;
-    id_type sid; uint16_t off;
     boost::dynamic_bitset<uint64_t> check(this->corpus->size());
-    while (p < q)
+    ArrayEntry I(p);
+    while (I.next < q)
       {
-	p = tpt::tightread(p,q,sid);
-	p = tpt::tightread(p,q,off);
-	check.set(sid);
-	raw++;
+       readEntry(I.next,I);
+       check.set(I.sid);
+       raw++;
       }
     sids = check.count();
   }
@@ -260,15 +293,28 @@ namespace sapt
 
   template<typename TOKEN>
   char const* 
-  mmTSA<TOKEN>::
+  fixed_field_TSA<TOKEN>::
   adjustPosition(char const* p, char const* stop) const
   {
     UTIL_THROW_IF2(stop > p,"stop parameter must be <= p at " 
                    << __FILE__ << ":" << __LINE__);
-    while (*p < 0  && p > stop) p--;
-    while (*p >= 0 && p > stop) p--;
-    return (*p < 0) ? ++p : p;
+    return p;
   }
+
+  tsa::ArrayEntry& 
+  fixed_field_TSA<TOKEN>::
+  readEntry(char const* p, tsa::ArrayEntry& I) const
+  {
+    uchar const* x = reinterpret_cast<uchar const*>(p);
+    uchar const* z = x + m_entry_size;
+    uint64_t number = *x;
+    while (++x < z) number += (number<<8) + *x;
+    I.pos    = p;
+    I.next   = p + m_entry_size;
+    I.sid    = m_base_sid + number / m_offset_mask;
+    I.offset = number % m_offset_mask;
+  }
+
   
 } // end of namespace ugdiss
 

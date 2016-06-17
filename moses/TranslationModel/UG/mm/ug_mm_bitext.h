@@ -17,7 +17,7 @@ namespace sapt
   mmBitext()
     : Bitext<TKN>(new mmTtrack<TKN>(), new mmTtrack<TKN>(), new mmTtrack<char>(),
 		  new TokenIndex(), new TokenIndex(),
-		  new mmTSA<TKN>(), new mmTSA<TKN>())
+		  new mmTSA<TKN>(), new mmTSA<TKN>(),false)
   {};
 
   template<typename TKN>
@@ -48,6 +48,7 @@ namespace sapt
 #endif
 	for (b += a; a < b; ++a)
 	  (*this->m_sid2docid)[a] = docid;
+        this->m_doc_end.push_back(b);
       }
     UTIL_THROW_IF2(b != this->T1->size(),
 		   "Document map doesn't match corpus!");
@@ -63,7 +64,16 @@ namespace sapt
     mmTtrack<char>& tx = *reinterpret_cast<mmTtrack<char>*>(this->Tx.get());
     t1.open(base+L1+".mct");
     t2.open(base+L2+".mct");
-    tx.open(base+L1+"-"+L2+".mam");
+
+
+    if (!access((base+L1+"-"+L2+".mam").c_str(),F_OK))
+      tx.open(base+L1+"-"+L2+".mam");
+    else
+      {
+	tx.open(base+L2+"-"+L1+".mam");
+	this->m_transpose_alignment_matrix = true;
+      }
+
     this->V1->open(base+L1+".tdx"); this->V1->iniReverseIndex();
     this->V2->open(base+L2+".tdx"); this->V2->iniReverseIndex();
     mmTSA<TKN>& i1 = *reinterpret_cast<mmTSA<TKN>*>(this->I1.get());

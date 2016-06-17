@@ -71,13 +71,23 @@ BitextSampler : public Moses::reference_counter
   boost::taus88 m_rnd;  // every job has its own pseudo random generator
   double m_bias_total;
 
+  size_t m_random_size_t;
+  double m_rnd_float; 
+
   size_t consider_sample(TokenPosition const& p);
   size_t perform_random_sampling();
+  size_t perform_random_sampling_with_replacement();
   size_t perform_full_phrase_extraction();
 
   int check_sample_distribution(uint64_t const& sid, uint64_t const& offset);
-  bool flip_coin(id_type const& sid, ushort const& offset, SamplingBias const* bias);
-    
+  bool flip_coin(id_type const& sid, ushort const& offset, 
+                 SamplingBias const* bias);
+  bool 
+  flip_coin(size_t options_total, 
+            size_t const options_considered, 
+            size_t const options_chosen,
+            size_t const threshold);
+  
 public:
   BitextSampler(BitextSampler const& other);
   // BitextSampler const& operator=(BitextSampler const& other);
@@ -90,11 +100,231 @@ public:
   ~BitextSampler();
   SPTR<pstats> stats();
   bool done() const;
-#ifdef MMT
-#include "mmt_bitext_sampler-inc.h"
-#else
-  bool operator()(); // run sampling
-#endif
+
+
+  // Ranked sampling sorts all samples by score and then considers the
+  // top-ranked candidates for phrase extraction.
+  
+  // namespace bitext {
+private:
+
+  // the original ranked sampling
+  size_t
+  perform_ranked_sampling()
+  {
+    if (m_next == m_stop) return m_ctr;
+
+    CandidateSorter sorter(*m_bias);
+
+    // below: nbest size = 2 * m_samples to allow for failed phrase extraction
+    Moses::NBestList<TokenPosition, CandidateSorter> nbest(2*m_samples, sorter);
+    sapt::tsa::ArrayEntry I(m_next);
+
+    // collect candidates, keep track of how many rejected candidates
+    // are tied with the lowest-scoring one.
+    size_t tied = 0;
+    while (I.next < m_stop)
+    {
+      ++m_ctr;
+      m_root->readEntry(I.next, I);
+      if (nbest.size() >= 2 * m_samples)
+      {
+        float s = (*m_bias)[I.sid];
+        float th = (*m_bias)[nbest.get_unsorted(0).sid];
+        if (s <= th)
+        {
+          if (s == th) ++tied;
+          continue;
+        }
+        else tied = 0;
+      }
+      nbest.add(I);
+    }
+
+    float th = (*m_bias)[nbest.get_unsorted(0).sid];
+    size_t stop = nbest.size();
+    while (stop && (*m_bias)[nbest[stop-1].sid] == th) --stop;
+    tied += nbest.size() - stop;
+
+    // From the highest-scoring candidate, go down the list and extract
+    // phrases. If multiple phrase are tied and considering them all
+    // would exceed the target sample size, select randomly
+
+    // max_joint: highest number of joint phrase counts seen
+    // good_enough: ninumum of max_joint required to stop sampling
+    // Currently not used, so we set:
+    size_t good_enough = m_samples;
+    size_t max_joint = 0;
+    size_t samples_considered = 0;
+    for (size_t i=0,k; i < stop && max_joint < good_enough; i = k)
+    {
+      float s = (*m_bias)[nbest[i].sid];
+      for (k = i+1; k < stop && (*m_bias)[nbest[k].sid] == s; ++k);
+      if (m_stats->good + k - i <= m_samples)
+      { // consider all occurrences
+        for (; i < k; ++i)
+          max_joint = std::max(max_joint, consider_sample(nbest[i]));
+      }
+      else
+      {
+        for (; i < k; ++i)
+        {
+          size_t random_number  = (k-i) * (m_rnd()/(m_rnd.max()+1.));
+          if (m_stats->good + random_number < m_samples)
+            max_joint = std::max(max_joint, consider_sample(nbest[i]));
+        }
+      }
+    }
+
+    // if we haven't met the quota yet, scan the occurrences again and
+    // select randomly from the highest-scoring occurrences that haven't
+    // been considered yet:
+
+    if (tied == m_ctr)
+      tied = m_stats->raw_cnt;
+
+    if (m_stats->good < m_samples)
+    {
+      I.next = m_next;
+      while (I.next < m_stop // && tied > 0 && max_joint < good_enough
+             && m_stats->good < m_samples)
+      {
+        m_root->readEntry(I.next, I);
+        if ((*m_bias)[I.sid] != th) continue;
+        ++samples_considered;
+        m_rnd_float  = (m_rnd()/(m_rnd.max()+1.));
+        m_random_size_t = tied-- * m_rnd_float;
+
+        if (m_stats->good + m_random_size_t < m_samples)
+        {
+          max_joint = std::max(max_joint, consider_sample(I));
+        }
+      }
+    }
+    return m_ctr;
+  }
+
+
+// Davide C.'s experimental variant of ranked sampling
+  size_t
+  perform_ranked_sampling2()
+  {
+    if (m_next == m_stop) return m_ctr;
+
+    boost::shared_ptr<const sapt::DocumentBias> documentBias = boost::static_pointer_cast<const sapt::DocumentBias>(m_bias);
+    const std::map<id_type, float> &biasMap = documentBias->GetDocumentBiasMap();
+
+    id_type matchingDomainId = 0;
+    float matchingDomainScore = -1.f;
+
+    for(std::map<id_type, float>::const_iterator iterator = biasMap.begin(); iterator != biasMap.end(); ++iterator) {
+      id_type id = iterator->first;
+      float score = iterator->second;
+
+      if (score > matchingDomainScore) {
+        matchingDomainId = id;
+        matchingDomainScore = score;
+      }
+    }
+
+    size_t inDomainSamples = 0;
+
+    sapt::tsa::ArrayEntry I(m_next);
+    while (I.next < m_stop && m_stats->good < m_samples) {
+      TokenPosition const& token = m_root->readEntry(I.next, I);
+      id_type domain = m_bias->GetClass(token.sid);
+
+      if (domain == matchingDomainId && consider_sample(token)) {
+        inDomainSamples++;
+      }
+
+      ++m_ctr;
+    }
+
+    size_t min_samples = m_min_samples == 0 ? m_samples : m_min_samples;
+    size_t outDomainSamples = 0;
+
+    if (min_samples > 0 && inDomainSamples < min_samples) {
+      CandidateSorter sorter(*m_bias);
+      Moses::NBestList<TokenPosition, CandidateSorter> nbest(min_samples - inDomainSamples, sorter);
+      I = sapt::tsa::ArrayEntry(m_next);
+
+      while (I.next < m_stop) {
+        TokenPosition const& token = m_root->readEntry(I.next, I);
+        id_type domain = m_bias->GetClass(token.sid);
+
+        if (domain != matchingDomainId && is_good_sample(token)) {
+          nbest.add(token);
+        }
+      }
+
+      for (size_t i = 0; i < nbest.size(); ++i) {
+        if (consider_sample(nbest[i])) {
+          outDomainSamples++;
+        }
+      }
+    }
+
+    if (m_bias->loglevel > 1) {
+      *(m_bias->log) << "RANKED SAMPLING: found " << (outDomainSamples + inDomainSamples) << " samples. IN " << inDomainSamples << ", OUT " << outDomainSamples << std::endl;
+    }
+
+    return m_ctr;
+  }
+
+
+// auxiliary function for Davide C.'s variant of ranked sampling
+  bool
+  is_good_sample(TokenPosition const& p)
+  {
+    std::vector<unsigned char> aln;
+    bitvector full_aln(100*100);
+    PhraseExtractionRecord rec(p.sid, p.offset, p.offset + m_plen, !m_fwd, &aln, &full_aln);
+
+    return m_bitext->find_trg_phr_bounds(rec);
+  }
+
+
+public:
+  bool
+  operator()()
+  {
+    if (m_finished) return true;
+    boost::unique_lock<boost::mutex> lock(m_lock);
+    if (m_method == full_coverage)
+    {
+      // std::cerr << "FULL COVERAGE " << HERE << std::endl;
+      perform_full_phrase_extraction(); // consider all occurrences
+    }
+    else if (m_method == ranked_sampling)
+    {
+      // std::cerr << "RANKED SAMPLING " << HERE << std::endl;
+      if (false and m_num_occurrences <= m_samples)
+        perform_full_phrase_extraction();
+      else if (m_bias)
+        perform_ranked_sampling();
+      else
+      {
+        // std::cerr
+        // << "Ranked sampling requested but no bias given " << std::endl;
+        perform_random_sampling();
+      }
+    }
+    else if (m_method == ranked_sampling2)
+      perform_ranked_sampling2();
+    else if (m_method == random_sampling)
+    {
+      // std::cerr << "RANDOM SAMPLING " << HERE << std::endl;
+      perform_random_sampling();
+    }
+    else UTIL_THROW2("Unsupported sampling method.");
+    m_finished = true;
+    m_ready.notify_all();
+    return true;
+  }
+//}
+
+
 };
 
 template<typename Token>
@@ -134,7 +364,7 @@ check_sample_distribution(uint64_t const& sid, uint64_t const& offset)
   if (log)
     {
       Token const* t = m_root->getCorpus()->sntStart(sid)+offset;
-      Token const* x = t - min(offset,uint64_t(3));
+      Token const* x = t - std::min(offset,uint64_t(3));
       Token const* e = t + 4;
       if (e > m_root->getCorpus()->sntEnd(sid))
         e = m_root->getCorpus()->sntEnd(sid);
@@ -159,32 +389,42 @@ check_sample_distribution(uint64_t const& sid, uint64_t const& offset)
 template<typename Token>
 bool 
 BitextSampler<Token>::
+flip_coin(size_t options_total, 
+          size_t const options_considered, 
+          size_t const options_chosen,
+          size_t const threshold) 
+{
+  if (options_considered > options_total)
+    options_total = options_considered;
+  size_t options_left = (options_total - options_considered);
+  m_rnd_float = (m_rnd()/(m_rnd.max()+1.));
+  m_random_size_t = options_left * m_rnd_float;
+  return m_random_size_t + options_chosen < threshold;
+}
+
+template<typename Token>
+bool 
+BitextSampler<Token>::
 flip_coin(id_type const& sid, ushort const& offset, bias_t const* bias)
 {
   int no_maybe_yes = bias ? check_sample_distribution(sid, offset) : 1;
   if (no_maybe_yes == 0) return false; // no
   if (no_maybe_yes > 1)  return true;  // yes
   // ... maybe: flip a coin
-  size_t options_chosen = m_stats->good;
   size_t options_total  = std::max(m_stats->raw_cnt, m_ctr);
-  size_t options_left   = (options_total - m_ctr);
-  size_t random_number  = options_left * (m_rnd()/(m_rnd.max()+1.));
-  size_t threshold;
-  if (bias && m_bias_total > 0) // we have a bias and there are candidates with non-zero prob
-    threshold = ((*bias)[sid]/m_bias_total * options_total * m_samples);
-  else // no bias, or all have prob 0 (can happen with a very opinionated bias)
-    threshold = m_samples;
-  return random_number + options_chosen < threshold;
+  size_t threshold = ((bias && m_bias_total > 0 && m_method != ranked_sampling)
+                      ? round((*bias)[sid]/m_bias_total * options_total * m_samples) // w/ bias
+                      : m_samples); // no bias
+  return flip_coin(m_stats->raw_cnt, m_ctr, m_stats->good,threshold);
 }
-
-
-
 
 template<typename Token>
 BitextSampler<Token>::
 BitextSampler(SPTR<Bitext<Token> const> const& bitext, 
               typename bitext::iter const& phrase,
-              SPTR<SamplingBias const> const& bias, size_t const min_samples, size_t const max_samples,
+              SPTR<SamplingBias const> const& bias, 
+              size_t const min_samples, 
+              size_t const max_samples,
               sampling_method const method)
   : m_bitext(bitext)
   , m_plen(phrase.size())
@@ -234,6 +474,7 @@ BitextSampler(BitextSampler const& other)
   m_finished = other.m_finished;
 }
 
+
 // Uniform sampling 
 template<typename Token>
 size_t
@@ -258,15 +499,20 @@ BitextSampler<Token>::
 perform_random_sampling()
 {
   if (m_next == m_stop) return m_ctr;
+  if (!m_bias && m_num_occurrences > 100 * m_samples)
+    perform_random_sampling_with_replacement();
+    
   m_bias_total = 0;
   sapt::tsa::ArrayEntry I(m_next);
   if (m_bias)
     {
-      m_stats->raw_cnt = 0;
+      // Ranked and random sampling use approximate raw count
+      // For consistency of results, biased sampling should also use the
+      // approximate count
+      // m_stats->raw_cnt = 0;
       while (I.next < m_stop)
         {
           m_root->readEntry(I.next,I);
-          ++m_stats->raw_cnt;
           m_bias_total += (*m_bias)[I.sid];
         }
       I.next = m_next;
@@ -274,13 +520,46 @@ perform_random_sampling()
       
   while (m_stats->good < m_samples && I.next < m_stop)
     {
-      ++m_ctr;
       m_root->readEntry(I.next,I);
-      if (!flip_coin(I.sid, I.offset, m_bias.get())) continue;
+      bool foo = flip_coin(I.sid, I.offset, m_bias.get());
+#if 0
+      size_t options_total  = std::max(m_stats->raw_cnt, m_ctr);
+      size_t threshold = ((m_bias && m_bias_total > 0 && m_method != ranked_sampling)
+                          ? round((*m_bias)[I.sid]/m_bias_total 
+                                  * options_total * m_samples) // w/ bias
+                          : m_samples); // no bias
+
+      std::cerr << "[" << m_ctr << "/ " << m_stats->raw_cnt << ": " << m_rnd_float << "] " 
+                << m_stats->good << " + " << m_random_size_t << " = " 
+                << m_stats->good + m_random_size_t << " | " << threshold << "; "
+                << I.sid << ":" << I.offset << " " << (foo ? "Y" : "N") << std::endl;
+#endif
+      ++m_ctr;
+      size_t maxevid = foo ? consider_sample(I) : 0;
+    }
+  return m_ctr;
+}
+
+// Uniform sampling 
+template<typename Token>
+size_t
+BitextSampler<Token>::
+perform_random_sampling_with_replacement()
+{
+  if (m_next == m_stop) return m_ctr;
+  char const* startRange = m_next; 
+  char const* endRange   = m_stop;
+  sapt::tsa::ArrayEntry I;
+  while (m_stats->good < m_samples)
+    {
+      char const* p = startRange + size_t((endRange-startRange) * (m_rnd()/(m_rnd.max()+1.)));
+      m_root->readEntry(m_root->adjustPosition(p,startRange),I);
+      ++m_ctr;
       consider_sample(I);
     }
   return m_ctr;
 }
+
 
 template<typename Token>
 size_t
@@ -343,27 +622,7 @@ consider_sample(TokenPosition const& p)
     }
   return max_evidence;
 }
-  
-#ifndef MMT
-template<typename Token>
-bool
-BitextSampler<Token>::
-operator()()
-{
-  if (m_finished) return true;
-  boost::unique_lock<boost::mutex> lock(m_lock);
-  if (m_method == full_coverage)
-    perform_full_phrase_extraction(); // consider all occurrences 
-  else if (m_method == random_sampling)
-    perform_random_sampling();
-  else UTIL_THROW2("Unsupported sampling method.");
-  m_finished = true;
-  m_ready.notify_all();
-  return true;
-}
-#endif
 
-  
 template<typename Token>
 bool
 BitextSampler<Token>::

@@ -55,7 +55,7 @@ namespace Moses {
     PARAM_VEC const* params;
     params = param.GetParam("output-word-graph");
     WordGraph = (params && params->size() == 2); // what are the two options?
-    
+
     // dump the search graph
     param.SetParameter(SearchGraph, "output-search-graph", e);
     param.SetParameter(SearchGraphExtended, "output-search-graph-extended", e);
@@ -108,7 +108,7 @@ namespace Moses {
     
     return true;
   }
-  
+
 #ifdef HAVE_XMLRPC_C
   bool 
   ReportingOptions::
@@ -148,4 +148,5 @@ namespace Moses {
     return true;
   }
 #endif
+
 }

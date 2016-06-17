@@ -270,7 +270,8 @@ Parameter::Parameter()
   AddParam(misc_opts,"feature", "All the feature functions should be here");
   AddParam(misc_opts,"context-string",
            "A (tokenized) string containing context words for context-sensitive translation.");
-  AddParam(misc_opts,"context-weights", "A key-value map for context-sensitive translation.");
+  AddParam(misc_opts,"context-weights", "A key-value map of weights for context-sensitive translation (e.g., for Mmsapt).");
+  AddParam(misc_opts,"lm-interpolation-weights", "A key-value map for dynamic LM interpolation (via IRSTLM).");
   AddParam(misc_opts,"context-window",
            "Context window (in words) for context-sensitive translation: {+|-|+-}<number>.");
 
@@ -471,13 +472,7 @@ void show_version()
             << major << "." << minor << "." << point << std::endl;
 #endif
 #ifdef HAVE_CMPH
-  // there's no easy way to determine the cmph version at compile time
-  std::cout << "       CMPH (version unknown)" << std::endl;
-#endif
-
-#ifdef MMT_VERSION_ID
-  std::cout << string(20,'-')
-            << "\nMMT extras version: " << MMT_VERSION_ID << std::endl;
+  std::cout << "       CMPH  version " << CMPH_VERSION << std::endl;
 #endif
 }
 
