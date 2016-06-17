@@ -371,6 +371,10 @@ void ProbingPT::CreateCache(System &system)
 
 }
 
+///////////////////////////////////////////////////////////////////////////////
+// SCFG
+///////////////////////////////////////////////////////////////////////////////
+
 void ProbingPT::ReformatWord(System &system, std::string &wordStr, bool &isNT)
 {
   isNT = false;
@@ -396,15 +400,12 @@ void ProbingPT::ReformatWord(System &system, std::string &wordStr, bool &isNT)
   }
 }
 
-/////////////////////////////////////////////////////////////////////
-// SCFG
-/////////////////////////////////////////////////////////////////////
 void ProbingPT::InitActiveChart(MemPool &pool, SCFG::InputPath &path) const
 {
+  cerr << "InitActiveChart=" << endl;
   size_t ptInd = GetPtInd();
   ActiveChartEntryProbing *chartEntry = new (pool.Allocate<ActiveChartEntryProbing>()) ActiveChartEntryProbing(pool);
   path.AddActiveChartEntry(ptInd, chartEntry);
-  //cerr << "InitActiveChart=" << path << endl;
 }
 
 void ProbingPT::Lookup(MemPool &pool,
@@ -413,15 +414,7 @@ void ProbingPT::Lookup(MemPool &pool,
     const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
-}
-
-/*
-void ProbingPT::Lookup(MemPool &pool,
-    const SCFG::Manager &mgr,
-    size_t maxChartSpan,
-    const SCFG::Stacks &stacks,
-    SCFG::InputPath &path) const
-{
+  cerr << "Lookup=" << endl;
   if (path.range.GetNumWordsCovered() > maxChartSpan) {
     return;
   }
@@ -455,7 +448,7 @@ void ProbingPT::Lookup(MemPool &pool,
     prevPath = static_cast<const SCFG::InputPath*>(prevPath->prefixPath);
   }
 }
-*/
+
 void ProbingPT::LookupUnary(MemPool &pool,
     const SCFG::Manager &mgr,
     const SCFG::Stacks &stacks,
