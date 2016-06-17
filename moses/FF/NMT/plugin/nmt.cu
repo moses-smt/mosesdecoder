@@ -22,7 +22,7 @@ NMT::NMT(const boost::shared_ptr<Weights> model,
     for(size_t i = 0; i < trg_->size(); ++i)
       filteredId_.push_back(i);
   }
-  
+
 void NMT::PrintState(StateInfoPtr ptr) {
   std::cerr << *ptr << std::endl;
 }
@@ -31,7 +31,7 @@ size_t NMT::GetDevices(size_t maxDevices) {
   int num_gpus = 0;   // number of CUDA GPUs
   cudaGetDeviceCount(&num_gpus);
   std::cerr << "Number of CUDA devices: " << num_gpus << std::endl;
-  
+
   for (int i = 0; i < num_gpus; i++) {
       cudaDeviceProp dprop;
       cudaGetDeviceProperties(&dprop, i);
@@ -50,7 +50,7 @@ size_t NMT::GetDevice() {
   return w_->GetDevice();
 }
 
-void NMT::ClearStates() { 
+void NMT::ClearStates() {
   firstWord_ = true;
   states_->Clear();
 }
@@ -72,12 +72,12 @@ size_t NMT::TargetVocab(const std::string& str) {
   return (*trg_)[str];
 }
 
-void NMT::CalcSourceContext(const std::vector<std::string>& s) {  
+void NMT::CalcSourceContext(const std::vector<std::string>& s) {
   std::vector<size_t> words(s.size());
   std::transform(s.begin(), s.end(), words.begin(),
                  [&](const std::string& w) { return (*src_)[w]; });
   words.push_back((*src_)["eos"]);
-  
+
   SourceContext_.reset(new Matrix());
   Matrix& SC = *boost::static_pointer_cast<Matrix>(SourceContext_);
   encoder_->GetContext(words, SC);
@@ -96,7 +96,7 @@ void NMT::FilterTargetVocab(const std::set<std::string>& filter, size_t topN) {
   filteredId_.resize(topN);
   std::set<size_t> ids(filteredId_.begin(), filteredId_.end());
   filteredId_.resize(trg_->size(), 1); // set all to UNK
-  
+
   size_t k = topN;
   for(auto& s : filter) {
     size_t id = (*trg_)[s];
@@ -161,16 +161,16 @@ void NMT::OnePhrase(
   StateInfoPtr inputState,
   float& prob, size_t& unks,
   StateInfoPtr& outputState) {
-  
+
   Matrix& sourceContext = *boost::static_pointer_cast<Matrix>(SourceContext_);
-  
+
   Matrix prevEmbeddings;
   Matrix nextEmbeddings;
   Matrix prevStates;
   Matrix probs;
   Matrix alignedSourceContext;
   Matrix nextStates;
-    
+
   if(firstWord) {
     decoder_->EmptyEmbedding(prevEmbeddings, 1);
   }
@@ -179,26 +179,26 @@ void NMT::OnePhrase(
     std::vector<size_t> ids = { (*trg_)[lastWord] };
     decoder_->Lookup(prevEmbeddings, ids);
   }
-    
+
   std::vector<StateInfoPtr> inputStates = { inputState };
   states_->ConstructStates(prevStates, inputStates);
-    
+
   for(auto& w : phrase) {
     size_t id = (*trg_)[w];
     std::vector<size_t> nextIds = { id };
     if(id == 1)
       unks++;
-    
+
     decoder_->MakeStep(nextStates, probs,
                        prevStates, prevEmbeddings, sourceContext);
     decoder_->Lookup(nextEmbeddings, nextIds);
     float p = probs(0, filteredId_[id]);
     prob += log(p);
-    
+
     Swap(nextStates, prevStates);
     Swap(nextEmbeddings, prevEmbeddings);
   }
-  
+
   std::vector<StateInfoPtr> outputStates;
   states_->SaveStates(outputStates, prevStates);
   outputState = outputStates.back();
@@ -211,9 +211,9 @@ void NMT::MakeStep(
   std::vector<double>& logProbs,
   std::vector<StateInfoPtr>& outputStates,
   std::vector<bool>& unks) {
-  
+
   Matrix& sourceContext = *boost::static_pointer_cast<Matrix>(SourceContext_);
-  
+
   Matrix lastEmbeddings;
   if(firstWord_) {
     firstWord_ = false;
@@ -227,35 +227,82 @@ void NMT::MakeStep(
                    [&](const std::string& w) { return (*trg_)[w]; });
     decoder_->Lookup(lastEmbeddings, lastIds);
   }
-  
+
 
   Matrix nextEmbeddings;
   std::vector<size_t> nextIds(nextWords.size());
   std::transform(nextWords.begin(), nextWords.end(), nextIds.begin(),
                  [&](const std::string& w) { return (*trg_)[w]; });
-  
+
   Matrix prevStates;
   states_->ConstructStates(prevStates, inputStates);
 
   Matrix probs;
   Matrix nextStates;
-  
+
   decoder_->MakeStep(nextStates, probs,
                      prevStates, lastEmbeddings, sourceContext);
   decoder_->Lookup(nextEmbeddings, nextIds);
   states_->SaveStates(outputStates, nextStates);
-  
+
   for(auto id : nextIds) {
     if(id != 1)
       unks.push_back(true);
     else
       unks.push_back(false);
   }
-  
+
   for(size_t i = 0; i < nextIds.size(); ++i) {
     float p = probs(i, filteredId_[nextIds[i]]);
     //float p = probs(i, nextIds[i]);
     logProbs.push_back(log(p));
   }
-  
+
+std::vector<double> NMT::RescoreNBestList(
+    const std::vector<std::vector<std::string> >& nbest,
+    const size_t maxBatchSize) {
+
+  mblas::Matrix PrevState;
+  mblas::Matrix PrevEmbedding;
+  mblas::Matrix Probs;
+  mblas::Matrix State;
+  mblas::Matrix Embedding;
+
+  NBest nBest(srcVocab_, trgVocab_, nbest);
+
+  std::vector<double> nbestScores;
+  for (auto& batch: nBest.DivideNBestListIntoBatches()) {
+    size_t batchSize = batch[0].size();
+
+    decoder_->EmptyState(PrevState, SourceContext_, batchSize);
+    decoder_->EmptyEmbedding(PrevEmbedding, batchSize);
+
+    std::vector<float> scores(batch[0].size(), 0.0f);
+    size_t lengthIndex = 0;
+    for (auto& w : batch) {
+      decoder_->MakeStep(State, Probs,
+                          PrevState, PrevEmbedding, SourceContext_);
+
+      for (size_t j = 0; j < w.size(); ++j) {
+        if (batch[lengthIndex][j]) {
+          float p = Probs_(j, w[j]);
+          scores[j] += p;
+        }
+      }
+
+      decoder_->Lookup(Embedding_, w);
+
+      mblas::Swap(State_, PrevState_);
+      mblas::Swap(Embedding_, PrevEmbedding_);
+      ++lengthIndex;
+    }
+
+    for (const auto& score: batchScores) {
+      nBestScores.push_back(score);
+    }
+  }
+  return scores;
+}
+
+
 }

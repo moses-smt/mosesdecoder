@@ -17,6 +17,12 @@ class NBest {
       const std::shared_ptr<Vocab> trgVocab,
       const size_t maxBatchSize=64);
 
+    NBest(
+      const std::vector<std::vector<std::string> >& nBestList,
+      const std::shared_ptr<Vocab> srcVocab,
+      const std::shared_ptr<Vocab> trgVocab,
+      const size_t maxBatchSize=64);
+
     std::vector<Batch> GetBatches(const size_t index) const;
 
     size_t GetIndex(const size_t index) const {
@@ -34,6 +40,7 @@ class NBest {
     std::vector<std::string> GetTokens(const size_t index) const;
 
     std::vector<size_t> GetEncodedTokens(const size_t index) const;
+    std::vector<Batch> DivideNBestListIntoBatches() const;
 
   private:
     void Parse_(const std::string& path);
@@ -45,6 +52,7 @@ class NBest {
     Batch MaskAndTransposeBatch(const Batch& batch) const;
 
     Batch ProcessBatch(std::vector<std::string>& batch) const;
+    Batch ProcessBatch(std::vector<std::vector<std::string> >& batch) const;
   private:
     std::vector<std::vector<std::string> > data_;
     std::vector<std::string> srcSentences_;
