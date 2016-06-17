@@ -76,25 +76,25 @@ class ActiveChartEntry
 {
 public:
   ActiveChartEntry(MemPool &pool)
-  :symbolBinds(pool)
+  :symbolBind(pool)
   {
     //symbolBinds = new (pool.Allocate<SymbolBind>()) SymbolBind(pool);
   }
 
   ActiveChartEntry(MemPool &pool, const ActiveChartEntry &prevEntry)
-  :symbolBinds(pool, prevEntry.GetSymbolBind())
+  :symbolBind(pool, prevEntry.GetSymbolBind())
   {
     //symbolBinds = new (pool.Allocate<SymbolBind>()) SymbolBind(pool, *prevEntry.symbolBinds);
   }
 
   const SymbolBind &GetSymbolBind() const
-  { return symbolBinds; }
+  { return symbolBind; }
 
   SymbolBind &GetSymbolBind()
-  { return symbolBinds; }
+  { return symbolBind; }
 
 protected:
-  SymbolBind symbolBinds;
+  SymbolBind symbolBind;
 
 };
 
