@@ -400,9 +400,12 @@ void ProbingPT::ReformatWord(System &system, std::string &wordStr, bool &isNT)
   }
 }
 
-void ProbingPT::InitActiveChart(MemPool &pool, SCFG::InputPath &path) const
+void ProbingPT::InitActiveChart(
+    MemPool &pool,
+    const SCFG::Manager &mgr,
+    SCFG::InputPath &path) const
 {
-  cerr << "InitActiveChart=" << endl;
+  cerr << "InitActiveChart=" << path.Debug(cerr, mgr.system) << endl;
   size_t ptInd = GetPtInd();
   ActiveChartEntryProbing *chartEntry = new (pool.Allocate<ActiveChartEntryProbing>()) ActiveChartEntryProbing(pool);
   path.AddActiveChartEntry(ptInd, chartEntry);

@@ -63,7 +63,7 @@ TargetPhraseImpl::~TargetPhraseImpl()
   // TODO Auto-generated destructor stub
 }
 
-void TargetPhraseImpl::Debug(std::ostream &out, const System &system) const
+std::ostream &TargetPhraseImpl::Debug(std::ostream &out, const System &system) const
 {
   lhs.Debug(out, system);
   out << " -> ";
@@ -80,6 +80,7 @@ void TargetPhraseImpl::Debug(std::ostream &out, const System &system) const
   out << " ";
   GetAlignNonTerm().Debug(out, system);
 
+  return out;
 }
 
 void TargetPhraseImpl::SetAlignmentInfo(const std::string &alignString)

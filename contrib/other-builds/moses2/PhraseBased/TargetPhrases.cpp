@@ -38,12 +38,13 @@ TargetPhrases::~TargetPhrases()
   // TODO Auto-generated destructor stub
 }
 
-void TargetPhrases::Debug(std::ostream &out, const System &system) const
+std::ostream &TargetPhrases::Debug(std::ostream &out, const System &system) const
 {
   BOOST_FOREACH(const TargetPhrase<Moses2::Word> *tp, *this){
     tp->Debug(out, system);
     out << endl;
   }
+  return out;
 }
 
 void TargetPhrases::SortAndPrune(size_t tableLimit)

@@ -71,7 +71,7 @@ bool Word::operator<(const Word &compare) const
   return (cmp < 0);
 }
 
-void Word::Debug(std::ostream &out, const System &system) const
+std::ostream &Word::Debug(std::ostream &out, const System &system) const
 {
   bool outputAlready = false;
   for (size_t i = 0; i < MAX_NUM_FACTORS; ++i) {
@@ -84,6 +84,8 @@ void Word::Debug(std::ostream &out, const System &system) const
       outputAlready = true;
     }
   }
+
+  return out;
 }
 
 void Word::OutputToStream(std::ostream &out) const

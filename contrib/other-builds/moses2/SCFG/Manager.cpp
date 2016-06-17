@@ -97,7 +97,7 @@ void Manager::InitActiveChart(SCFG::InputPath &path)
    for (size_t i = 0; i < numPt; ++i) {
      const PhraseTable &pt = *system.mappings[i];
      //cerr << "START InitActiveChart" << endl;
-     pt.InitActiveChart(GetPool(), path);
+     pt.InitActiveChart(GetPool(), *this, path);
      //cerr << "FINISHED InitActiveChart" << endl;
    }
 }

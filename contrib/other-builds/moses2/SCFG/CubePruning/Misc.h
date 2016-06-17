@@ -34,7 +34,7 @@ public:
   bool operator==(const SeenPosition &compare) const;
   size_t hash() const;
 
-  void Debug(std::ostream &out, const System &system) const;
+  std::ostream &Debug(std::ostream &out, const System &system) const;
 
 };
 
@@ -86,7 +86,7 @@ public:
       SeenPositions &seenPositions,
       const SCFG::InputPath &path);
 
-  void Debug(std::ostream &out, const System &system) const;
+  std::ostream &Debug(std::ostream &out, const System &system) const;
 
 protected:
   typedef Vector<const Moses2::HypothesisColl *> HyposColl;

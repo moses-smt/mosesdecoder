@@ -52,7 +52,7 @@ public:
 
   size_t GetNumRules() const;
 
-  void Debug(std::ostream &out, const System &system) const;
+  std::ostream &Debug(std::ostream &out, const System &system) const;
 
 protected:
   ActiveChart *m_activeChart;

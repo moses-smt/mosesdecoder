@@ -104,7 +104,7 @@ const Hypothesis *Stack::GetBestHypo(
   return ret;
 }
 
-void Stack::Debug(std::ostream &out, const System &system) const
+std::ostream &Stack::Debug(std::ostream &out, const System &system) const
 {
   BOOST_FOREACH (const SCFG::Stack::Coll::value_type &valPair, m_coll) {
     const SCFG::Word &lhs = valPair.first;
@@ -115,6 +115,8 @@ void Stack::Debug(std::ostream &out, const System &system) const
     hypos.Debug(out, system);
     out << endl;
   }
+
+  return out;
 }
 
 }

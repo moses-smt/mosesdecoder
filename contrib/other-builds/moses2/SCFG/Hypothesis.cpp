@@ -131,7 +131,7 @@ void Hypothesis::OutputToStream(std::ostream &out) const
   }
 }
 
-void Hypothesis::Debug(std::ostream &out, const System &system) const
+std::ostream &Hypothesis::Debug(std::ostream &out, const System &system) const
 {
   out << this;
 
@@ -157,6 +157,8 @@ void Hypothesis::Debug(std::ostream &out, const System &system) const
     out << endl;
     prevHypo.Debug(out, system);
   }
+
+  return out;
 }
 
 } // namespaces

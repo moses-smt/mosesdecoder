@@ -37,7 +37,7 @@ InputPath::~InputPath()
   // TODO Auto-generated destructor stub
 }
 
-void InputPath::Debug(std::ostream &out, const System &system) const
+std::ostream &InputPath::Debug(std::ostream &out, const System &system) const
 {
   out << range << " ";
   subPhrase.Debug(out, system);
@@ -63,6 +63,8 @@ void InputPath::Debug(std::ostream &out, const System &system) const
     //out << "=" << tps.GetSize() << " ";
     tps.Debug(out, system);
   }
+
+  return out;
 }
 
 void InputPath::AddTargetPhrase(

@@ -73,7 +73,10 @@ public:
 
   void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
 
-  void InitActiveChart(MemPool &pool, SCFG::InputPath &path) const;
+  void InitActiveChart(
+      MemPool &pool,
+      const SCFG::Manager &mgr,
+      SCFG::InputPath &path) const;
 
   virtual void Lookup(MemPool &pool,
       const SCFG::Manager &mgr,

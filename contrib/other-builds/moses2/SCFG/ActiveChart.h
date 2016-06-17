@@ -63,7 +63,7 @@ public:
   bool operator==(const SymbolBind &compare) const
   {  return coll == compare.coll; }
 
-  void Debug(std::ostream &out, const System &system) const;
+  std::ostream &Debug(std::ostream &out, const System &system) const;
 
 };
 

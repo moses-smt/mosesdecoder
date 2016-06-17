@@ -108,7 +108,7 @@ bool Hypothesis::operator==(const Hypothesis &other) const
   return ret;
 }
 
-void Hypothesis::Debug(std::ostream &out, const System &system) const
+std::ostream &Hypothesis::Debug(std::ostream &out, const System &system) const
 {
   // coverage
   out << GetBitmap() << " " << GetInputPath().range << " ";
@@ -128,6 +128,7 @@ void Hypothesis::Debug(std::ostream &out, const System &system) const
   out << "fc=" << GetFutureScore() << " ";
   GetScores().Debug(out, GetManager().system);
 
+  return out;
 }
 
 void Hypothesis::OutputToStream(std::ostream &out) const

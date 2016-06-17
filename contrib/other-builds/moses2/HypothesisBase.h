@@ -46,7 +46,7 @@ public:
   virtual SCORE GetFutureScore() const = 0;
   virtual void EvaluateWhenApplied() = 0;
 
-  virtual void Debug(std::ostream &out, const System &system) const = 0;
+  virtual std::ostream &Debug(std::ostream &out, const System &system) const = 0;
 
 protected:
   ManagerBase *m_mgr;

@@ -45,11 +45,13 @@ public:
   SCORE *GetScoresProperty(int propertyInd) const
   {    return scoreProperties ? scoreProperties + propertyInd : NULL; }
 
-  virtual void Debug(std::ostream &out, const System &system) const
+  virtual std::ostream &Debug(std::ostream &out, const System &system) const
   {
     Phrase<WORD>::Debug(out, system);
     out << " SCORES:";
     GetScores().Debug(out, system);
+
+    return out;
   }
 
 protected:

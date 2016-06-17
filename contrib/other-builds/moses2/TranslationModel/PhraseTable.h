@@ -61,7 +61,10 @@ public:
   virtual void CleanUpAfterSentenceProcessing();
 
   // scfg
-  virtual void InitActiveChart(MemPool &pool, SCFG::InputPath &path) const;
+  virtual void InitActiveChart(
+      MemPool &pool,
+      const SCFG::Manager &mgr,
+      SCFG::InputPath &path) const;
 
   virtual void Lookup(
       MemPool &pool,

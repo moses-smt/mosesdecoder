@@ -75,7 +75,7 @@ void Word::OutputToStream(std::ostream &out) const
   }
 }
 
-void Word::Debug(std::ostream &out, const System &system) const
+std::ostream &Word::Debug(std::ostream &out, const System &system) const
 {
   if (isNonTerminal) {
     out << "[";
@@ -84,6 +84,7 @@ void Word::Debug(std::ostream &out, const System &system) const
   if (isNonTerminal) {
       out << "]";
   }
+  return out;
 }
 
 }

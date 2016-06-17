@@ -16,9 +16,10 @@ using namespace std;
 namespace Moses2
 {
 
-void TrellisNode::Debug(std::ostream &out, const System &system) const
+std::ostream &TrellisNode::Debug(std::ostream &out, const System &system) const
 {
   out << "arcList=" << arcList->size() << " " << ind;
+  return out;
 }
 
 /////////////////////////////////////////////////////////////////////////////////
@@ -74,7 +75,7 @@ SCORE TrellisPath::GetFutureScore() const
   return m_scores->GetTotalScore();
 }
 
-void TrellisPath::Debug(std::ostream &out, const System &system) const
+std::ostream &TrellisPath::Debug(std::ostream &out, const System &system) const
 {
   out << ToString();
   out << "||| ";
@@ -83,6 +84,8 @@ void TrellisPath::Debug(std::ostream &out, const System &system) const
   out << "||| ";
 
   out << GetScores().GetTotalScore();
+
+  return out;
 }
 
 std::string TrellisPath::ToString() const

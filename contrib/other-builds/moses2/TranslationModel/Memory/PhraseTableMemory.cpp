@@ -150,7 +150,10 @@ TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool,
   return tps;
 }
 
-void PhraseTableMemory::InitActiveChart(MemPool &pool, SCFG::InputPath &path) const
+void PhraseTableMemory::InitActiveChart(
+    MemPool &pool,
+    const SCFG::Manager &mgr,
+    SCFG::InputPath &path) const
 {
   size_t ptInd = GetPtInd();
   ActiveChartEntryMem *chartEntry = new (pool.Allocate<ActiveChartEntryMem>()) ActiveChartEntryMem(pool, *m_rootSCFG);

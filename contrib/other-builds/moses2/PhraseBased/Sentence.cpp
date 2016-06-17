@@ -15,9 +15,10 @@ using namespace std;
 
 namespace Moses2
 {
-void Sentence::XMLOption::Debug(std::ostream &out, const System &system) const
+std::ostream &Sentence::XMLOption::Debug(std::ostream &out, const System &system) const
 {
   out << "[" << startPos << "," << phraseSize << "]=" << nodeName;
+  return out;
 }
 
 //////////////////////////////////////////////////////////////////////////////

@@ -31,7 +31,7 @@ public:
     return *m_matrix;
   }
 
-  void Debug(std::ostream &out, const System &system) const;
+  std::ostream &Debug(std::ostream &out, const System &system) const;
 
 protected:
   Matrix<InputPath*> *m_matrix;

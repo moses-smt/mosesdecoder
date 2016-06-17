@@ -49,12 +49,13 @@ void TargetPhrases::SortAndPrune(size_t tableLimit)
   //cerr << "TargetPhrases=" << GetSize() << endl;
 }
 
-void TargetPhrases::Debug(std::ostream &out, const System &system) const
+std::ostream &TargetPhrases::Debug(std::ostream &out, const System &system) const
 {
   BOOST_FOREACH(const SCFG::TargetPhraseImpl *tp, m_coll) {
     out << std::endl;
     tp->Debug(out, system);
   }
+  return out;
 }
 
 }

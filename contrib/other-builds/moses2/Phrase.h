@@ -94,7 +94,7 @@ public:
 
   virtual SubPhrase<WORD> GetSubPhrase(size_t start, size_t size) const = 0;
 
-  virtual void Debug(std::ostream &out, const System &system) const
+  virtual std::ostream &Debug(std::ostream &out, const System &system) const
   {
     size_t size = GetSize();
     if (size) {
@@ -105,6 +105,8 @@ public:
         word.Debug(out, system);
       }
     }
+
+    return out;
   }
 
   virtual void OutputToStream(std::ostream &out) const

@@ -67,7 +67,7 @@ void InputPaths::Init(const InputType &input, const ManagerBase &mgr)
 
 }
 
-void InputPaths::Debug(std::ostream &out, const System &system) const
+std::ostream &InputPaths::Debug(std::ostream &out, const System &system) const
 {
   const Matrix<InputPath*> &matrix = GetMatrix();
   for (size_t i = 0; i < matrix.GetRows(); ++i) {
@@ -79,6 +79,7 @@ void InputPaths::Debug(std::ostream &out, const System &system) const
       }
     }
   }
+  return out;
 }
 
 }

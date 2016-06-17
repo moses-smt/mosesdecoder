@@ -34,7 +34,9 @@ class Parameter;
 
     bool
     update(std::map<std::string,xmlrpc_c::value>const& params)
-    {}
+    {
+      return true;
+    }
 
   };
 

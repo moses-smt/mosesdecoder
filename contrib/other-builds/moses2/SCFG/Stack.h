@@ -39,7 +39,7 @@ public:
       const Manager &mgr,
       ArcLists &arcLists) const;
 
-  void Debug(std::ostream &out, const System &system) const;
+  std::ostream &Debug(std::ostream &out, const System &system) const;
 
 protected:
   const Manager &m_mgr;
