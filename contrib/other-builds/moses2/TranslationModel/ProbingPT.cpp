@@ -35,19 +35,26 @@ void ProbingPT::ActiveChartEntryProbing::AddSymbolBindElement(
     const Moses2::PhraseTable &pt)
 {
   const ProbingPT &probingPt = static_cast<const ProbingPT&>(pt);
-  m_key = GetKey(word, probingPt);
+  std::pair<bool, uint64_t> key = GetKey(word, probingPt);
+  UTIL_THROW_IF2(!key.first, "Word should have been in source vocab");
+  m_key = key.second;
 
   ActiveChartEntry::AddSymbolBindElement(range, word, hypos, pt);
 }
 
-uint64_t ProbingPT::ActiveChartEntryProbing::GetKey(const SCFG::Word &nextWord, const ProbingPT &pt) const
+std::pair<bool, uint64_t> ProbingPT::ActiveChartEntryProbing::GetKey(const SCFG::Word &nextWord, const ProbingPT &pt) const
 {
-  uint64_t ret = m_key;
+  std::pair<bool, uint64_t> ret;
+  ret.second = m_key;
   uint64_t probingId = pt.GetSourceProbingId(nextWord);
-  UTIL_THROW_IF2(probingId == pt.GetUnk(), "Word should have been in source vocab");
+  if (probingId == pt.GetUnk()) {
+    ret.first = false;
+    return ret;
+  }
 
+  ret.first = true;
   size_t phraseSize = m_symbolBind.coll.size();
-  ret += probingId << phraseSize;
+  ret.second += probingId << phraseSize;
   return ret;
 }
 
@@ -406,6 +413,15 @@ void ProbingPT::Lookup(MemPool &pool,
     const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
+}
+
+/*
+void ProbingPT::Lookup(MemPool &pool,
+    const SCFG::Manager &mgr,
+    size_t maxChartSpan,
+    const SCFG::Stacks &stacks,
+    SCFG::InputPath &path) const
+{
   if (path.range.GetNumWordsCovered() > maxChartSpan) {
     return;
   }
@@ -439,7 +455,7 @@ void ProbingPT::Lookup(MemPool &pool,
     prevPath = static_cast<const SCFG::InputPath*>(prevPath->prefixPath);
   }
 }
-
+*/
 void ProbingPT::LookupUnary(MemPool &pool,
     const SCFG::Manager &mgr,
     const SCFG::Stacks &stacks,
@@ -508,10 +524,15 @@ void ProbingPT::LookupGivenNode(
     const Moses2::Range &subPhraseRange,
     SCFG::InputPath &outPath) const
 {
-  uint64_t key = prevEntry.GetKey(wordSought, *this);
+  std::pair<bool, uint64_t> key = prevEntry.GetKey(wordSought, *this);
+
+  if (!key.first) {
+    // should only happen when looking up unary rules
+    return;
+  }
 
   std::pair<bool, uint64_t> query_result; // 1st=found, 2nd=target file offset
-  query_result = m_engine->query(key);
+  query_result = m_engine->query(key.second);
 
   if (query_result.first) {
     size_t ptInd = GetPtInd();
@@ -558,7 +579,72 @@ SCFG::TargetPhraseImpl *ProbingPT::CreateTargetPhraseSCFG(
     const System &system,
     const char *&offset) const
 {
+  TargetPhraseInfo *tpInfo = (TargetPhraseInfo*) offset;
+  SCFG::TargetPhraseImpl *tp =
+      new (pool.Allocate<SCFG::TargetPhraseImpl>()) SCFG::TargetPhraseImpl(pool, *this,
+          system, tpInfo->numWords - 1);
 
+  offset += sizeof(TargetPhraseInfo);
+
+  // scores
+  SCORE *scores = (SCORE*) offset;
+
+  size_t totalNumScores = m_engine->num_scores + m_engine->num_lex_scores;
+
+  if (m_engine->logProb) {
+    // set pt score for rule
+    tp->GetScores().PlusEquals(system, *this, scores);
+
+    // save scores for other FF, eg. lex RO. Just give the offset
+    if (m_engine->num_lex_scores) {
+      tp->scoreProperties = scores + m_engine->num_scores;
+    }
+  }
+  else {
+    // log score 1st
+    SCORE logScores[totalNumScores];
+    for (size_t i = 0; i < totalNumScores; ++i) {
+      logScores[i] = FloorScore(TransformScore(scores[i]));
+    }
+
+    // set pt score for rule
+    tp->GetScores().PlusEquals(system, *this, logScores);
+
+    // save scores for other FF, eg. lex RO.
+    tp->scoreProperties = pool.Allocate<SCORE>(m_engine->num_lex_scores);
+    for (size_t i = 0; i < m_engine->num_lex_scores; ++i) {
+      tp->scoreProperties[i] = logScores[i + m_engine->num_scores];
+    }
+  }
+
+  offset += sizeof(SCORE) * totalNumScores;
+
+  // words
+  for (size_t i = 0; i < tpInfo->numWords - 1; ++i) {
+    uint32_t *probingId = (uint32_t*) offset;
+
+    const Factor *factor = GetTargetFactor(*probingId);
+    assert(factor);
+
+    SCFG::Word &word = (*tp)[i];
+    word[0] = factor;
+
+    offset += sizeof(uint32_t);
+  }
+
+  // lhs
+  uint32_t *probingId = (uint32_t*) offset;
+
+  const Factor *factor = GetTargetFactor(*probingId);
+  assert(factor);
+
+  tp->lhs[0] = factor;
+
+  offset += sizeof(uint32_t);
+
+  // properties TODO
+
+  return tp;
 }
 
 } // namespace

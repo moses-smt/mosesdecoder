@@ -53,7 +53,7 @@ class ProbingPT: public Moses2::PhraseTable
       uint64_t GetKey() const
       { return m_key; }
 
-      uint64_t GetKey(const SCFG::Word &nextWord, const ProbingPT &pt) const;
+      std::pair<bool, uint64_t> GetKey(const SCFG::Word &nextWord, const ProbingPT &pt) const;
 
       virtual void AddSymbolBindElement(
           const Range &range,

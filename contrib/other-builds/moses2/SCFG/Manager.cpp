@@ -41,7 +41,7 @@ void Manager::Decode()
   // init pools etc
   //cerr << "START InitPools()" << endl;
   InitPools();
-  //cerr << "START ParseInput()" << endl;
+  cerr << "START ParseInput()" << endl;
 
   FactorCollection &vocab = system.GetVocab();
   m_input = Sentence::CreateFromString(GetPool(), vocab, system, m_inputStr,
@@ -50,16 +50,16 @@ void Manager::Decode()
   const SCFG::Sentence &sentence = static_cast<const SCFG::Sentence&>(GetInput());
 
   size_t inputSize = sentence.GetSize();
-  //cerr << "inputSize=" << inputSize << endl;
+  cerr << "inputSize=" << inputSize << endl;
 
   m_inputPaths.Init(sentence, *this);
-  //cerr << "CREATED m_inputPaths" << m_inputPaths << endl;
+  cerr << "CREATED m_inputPaths" << endl;
 
   m_stacks.Init(*this, inputSize);
-  //cerr << "CREATED m_stacks" << endl;
+  cerr << "CREATED m_stacks" << endl;
 
   for (int startPos = inputSize - 1; startPos >= 0; --startPos) {
-    //cerr << endl << "startPos=" << startPos << endl;
+    cerr << endl << "startPos=" << startPos << endl;
     SCFG::InputPath &initPath = *m_inputPaths.GetMatrix().GetValue(startPos, 0);
 
     //cerr << "BEFORE path=" << m_inputPaths << endl;
