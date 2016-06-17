@@ -43,6 +43,7 @@ class ProbingPT: public PhraseTable
       :Parent(prevEntry)
       {}
     };
+    //////////////////////////////////////
 
 public:
   ProbingPT(size_t startInd, const std::string &line);
@@ -73,8 +74,6 @@ protected:
 
   boost::iostreams::mapped_file_source file;
   const char *data;
-
-  mutable boost::thread_specific_ptr<std::deque<target_text*> > m_recycler;
 
   TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
       InputPath &inputPath) const;
