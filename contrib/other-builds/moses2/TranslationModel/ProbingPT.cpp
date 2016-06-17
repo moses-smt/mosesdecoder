@@ -26,7 +26,12 @@ using namespace std;
 
 namespace Moses2
 {
+void ProbingPT::ActiveChartEntryProbing::AddSymbolBindElement(const Range &range, const SCFG::Word &word, const Moses2::HypothesisColl *hypos)
+{
+  ActiveChartEntry::AddSymbolBindElement(range, word, hypos);
+}
 
+////////////////////////////////////////////////////////////////////////////
 ProbingPT::ProbingPT(size_t startInd, const std::string &line) :
     PhraseTable(startInd, line)
 {

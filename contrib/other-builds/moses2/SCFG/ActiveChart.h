@@ -76,25 +76,27 @@ class ActiveChartEntry
 {
 public:
   ActiveChartEntry(MemPool &pool)
-  :symbolBind(pool)
+  :m_symbolBind(pool)
   {
     //symbolBinds = new (pool.Allocate<SymbolBind>()) SymbolBind(pool);
   }
 
   ActiveChartEntry(MemPool &pool, const ActiveChartEntry &prevEntry)
-  :symbolBind(pool, prevEntry.GetSymbolBind())
+  :m_symbolBind(pool, prevEntry.GetSymbolBind())
   {
     //symbolBinds = new (pool.Allocate<SymbolBind>()) SymbolBind(pool, *prevEntry.symbolBinds);
   }
 
   const SymbolBind &GetSymbolBind() const
-  { return symbolBind; }
+  { return m_symbolBind; }
 
-  SymbolBind &GetSymbolBind()
-  { return symbolBind; }
+  virtual void AddSymbolBindElement(const Range &range, const SCFG::Word &word, const Moses2::HypothesisColl *hypos)
+  {
+    m_symbolBind.Add(range, word, hypos);
+  }
 
 protected:
-  SymbolBind symbolBind;
+  SymbolBind m_symbolBind;
 
 };
 

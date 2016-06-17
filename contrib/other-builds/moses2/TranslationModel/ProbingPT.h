@@ -35,14 +35,23 @@ class ProbingPT: public PhraseTable
 
       ActiveChartEntryProbing(MemPool &pool)
       :Parent(pool)
+      ,m_key(0)
       {}
 
       ActiveChartEntryProbing(
           MemPool &pool,
           const ActiveChartEntry &prevEntry)
       :Parent(prevEntry)
+      ,m_key(0)
       {}
 
+      uint64_t GetKey() const
+      { return m_key; }
+
+      virtual void AddSymbolBindElement(const Range &range, const SCFG::Word &word, const Moses2::HypothesisColl *hypos);
+
+    protected:
+      uint64_t m_key;
     };
     //////////////////////////////////////
 

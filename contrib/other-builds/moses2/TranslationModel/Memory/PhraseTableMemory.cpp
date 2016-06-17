@@ -277,14 +277,13 @@ void PhraseTableMemory::LookupGivenNode(
     // new entries
     ActiveChartEntryMem *chartEntry = new (pool.Allocate<ActiveChartEntryMem>()) ActiveChartEntryMem(pool, *nextNode, prevEntry);
 
-    SCFG::SymbolBind &symbolBind = chartEntry->GetSymbolBind();
-    symbolBind.Add(subPhraseRange, wordSought, hypos);
+    chartEntry->AddSymbolBindElement(subPhraseRange, wordSought, hypos);
     //cerr << "AFTER Add=" << symbolBind << endl;
 
     outPath.AddActiveChartEntry(ptInd, chartEntry);
 
     // there are some rules
-    AddTargetPhrasesToPath(pool, *nextNode, symbolBind, outPath);
+    AddTargetPhrasesToPath(pool, *nextNode, chartEntry->GetSymbolBind(), outPath);
 
     //cerr << "AFTER outPath=" << outPath << endl;
   }
