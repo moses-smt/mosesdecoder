@@ -6,15 +6,17 @@
 #include "moses/Phrase.h"
 #include "moses/Hypothesis.h"
 
-namespace Moses {
+namespace Moses
+{
 
 /**
  * VW state, used in decoding (when target context is enabled).
  */
-class VWState : public FFState {
+class VWState : public FFState
+{
 public:
   // empty state, used only when VWState is ignored
-  VWState(); 
+  VWState();
 
   // used for construction of the initial VW state
   VWState(const Phrase &phrase);

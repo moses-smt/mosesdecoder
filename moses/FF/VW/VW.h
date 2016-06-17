@@ -104,13 +104,13 @@ public:
   // are written to a file, no classifier predictions take place. Target-side
   // context is constant at training time (we know the true target sentence),
   // so target-context features are extracted here as well.
-  virtual void EvaluateTranslationOptionListWithSourceContext(const InputType &input 
+  virtual void EvaluateTranslationOptionListWithSourceContext(const InputType &input
       , const TranslationOptionList &translationOptionList) const;
 
   // Evaluate VW during decoding. This is only used at prediction time (not in training).
   // When no target-context features are defined, VW predictions were already fully calculated
   // in EvaluateTranslationOptionListWithSourceContext() and the scores were added to the model.
-  // If there are target-context features, we compute the context-dependent part of the 
+  // If there are target-context features, we compute the context-dependent part of the
   // classifier score and combine it with the source-context only partial score which was computed
   // in EvaluateTranslationOptionListWithSourceContext(). Various caches are used to make this
   // method more efficient.
@@ -122,16 +122,16 @@ public:
   virtual FFState* EvaluateWhenApplied(
     const ChartHypothesis&,
     int,
-    ScoreComponentCollection* accumulator) const { 
-    throw new std::logic_error("hiearchical/syntax not supported"); 
+    ScoreComponentCollection* accumulator) const {
+    throw new std::logic_error("hiearchical/syntax not supported");
   }
 
   // Initial VW state; contains unaligned BOS symbols.
-  const FFState* EmptyHypothesisState(const InputType &input) const; 
+  const FFState* EmptyHypothesisState(const InputType &input) const;
 
   void SetParameter(const std::string& key, const std::string& value);
 
-  // At prediction time, this clears our caches. At training time, we load the next sentence, its 
+  // At prediction time, this clears our caches. At training time, we load the next sentence, its
   // translation and word alignment.
   virtual void InitializeForInput(ttasksptr const& ttask);
 
@@ -181,7 +181,7 @@ private:
 
   // normalizer, typically this means softmax
   Discriminative::Normalizer *m_normalizer = NULL;
-  
+
   // thread-specific classifier instance
   TLSClassifier *m_tlsClassifier;
 

@@ -13,7 +13,8 @@ namespace Moses
 /**
  * VW thread-specific data about target sentence.
  */
-class VWTargetSentence {
+class VWTargetSentence
+{
 public:
   VWTargetSentence() : m_sentence(NULL), m_alignment(NULL) {}
 

@@ -9,24 +9,28 @@
 #include "moses/TranslationOption.h"
 #include <boost/functional/hash.hpp>
 
-namespace Moses {
+namespace Moses
+{
 
-VWState::VWState() : m_spanStart(0), m_spanEnd(0) {
+VWState::VWState() : m_spanStart(0), m_spanEnd(0)
+{
   ComputeHash();
 }
 
-VWState::VWState(const Phrase &phrase) 
-  : m_phrase(phrase), m_spanStart(0), m_spanEnd(0) {
+VWState::VWState(const Phrase &phrase)
+  : m_phrase(phrase), m_spanStart(0), m_spanEnd(0)
+{
   ComputeHash();
 }
 
-VWState::VWState(const VWState &prevState, const Hypothesis &curHypo) {
+VWState::VWState(const VWState &prevState, const Hypothesis &curHypo)
+{
   VERBOSE(3, "VW :: updating state\n>> previous state: " << prevState << "\n");
 
   // copy phrase from previous state
   Phrase phrase = prevState.GetPhrase();
   size_t contextSize = phrase.GetSize(); // identical to VWFeatureBase::GetMaximumContextSize()
-  
+
   // add words from current hypothesis
   phrase.Append(curHypo.GetCurrTargetPhrase());
 
@@ -46,15 +50,17 @@ VWState::VWState(const VWState &prevState, const Hypothesis &curHypo) {
   VERBOSE(3, ">> updated state: " << *this << "\n");
 }
 
-bool VWState::operator==(const FFState& o) const {
+bool VWState::operator==(const FFState& o) const
+{
   const VWState &other = static_cast<const VWState &>(o);
 
   return m_phrase == other.GetPhrase()
-    && m_spanStart == other.GetSpanStart()
-    && m_spanEnd == other.GetSpanEnd();
+         && m_spanStart == other.GetSpanStart()
+         && m_spanEnd == other.GetSpanEnd();
 }
 
-void VWState::ComputeHash() {
+void VWState::ComputeHash()
+{
   m_hash = 0;
 
   boost::hash_combine(m_hash, m_phrase);
@@ -62,7 +68,8 @@ void VWState::ComputeHash() {
   boost::hash_combine(m_hash, m_spanEnd);
 }
 
-std::ostream &operator<<(std::ostream &out, const VWState &state) {
+std::ostream &operator<<(std::ostream &out, const VWState &state)
+{
   out << state.GetPhrase() << "::" << state.GetSpanStart() << "-" << state.GetSpanEnd();
   return out;
 }

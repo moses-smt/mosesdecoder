@@ -12,7 +12,7 @@
 namespace Moses
 {
 
-enum VWFeatureType { 
+enum VWFeatureType {
   vwft_source,
   vwft_target,
   vwft_targetContext

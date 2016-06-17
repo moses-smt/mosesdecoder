@@ -246,12 +246,12 @@ std::ostream& operator<<(std::ostream& out, const ReorderingConstraint &obj)
 
   out << "Walls:";
   for (size_t i = 0; i < obj.m_size; ++i) {
-      out << obj.m_wall[i];
+    out << obj.m_wall[i];
   }
 
   out << " Local walls:";
   for (size_t i = 0; i < obj.m_size; ++i) {
-      out << obj.m_localWall[i] << " ";
+    out << obj.m_localWall[i] << " ";
   }
 
   return out;

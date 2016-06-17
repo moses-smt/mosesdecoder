@@ -25,8 +25,8 @@ public:
                           , Discriminative::Classifier &classifier
                           , Discriminative::FeatureVector &outFeatures) const {
     for (size_t i = 1; i < m_contextSize; i++)
-      outFeatures.push_back(classifier.AddLabelIndependentFeature("tcbigram^-" + SPrint(i + 1) 
-            + "^" + GetWord(contextPhrase, i - 1) + "^" + GetWord(contextPhrase, i)));
+      outFeatures.push_back(classifier.AddLabelIndependentFeature("tcbigram^-" + SPrint(i + 1)
+                            + "^" + GetWord(contextPhrase, i - 1) + "^" + GetWord(contextPhrase, i)));
   }
 
   virtual void SetParameter(const std::string& key, const std::string& value) {

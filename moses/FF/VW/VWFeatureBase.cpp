@@ -14,7 +14,8 @@ std::map<std::string, std::vector<VWFeatureBase*> > VWFeatureBase::s_targetFeatu
 std::map<std::string, size_t> VWFeatureBase::s_targetContextLength;
 
 
-void VWFeatureBase::UpdateContextSize(const std::string &usedBy) {
+void VWFeatureBase::UpdateContextSize(const std::string &usedBy)
+{
   // using the standard map behavior here: if the entry does not
   // exist, it will be added and initialized to zero
   size_t currentSize = s_targetContextLength[usedBy];
