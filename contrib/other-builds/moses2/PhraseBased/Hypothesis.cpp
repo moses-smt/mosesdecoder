@@ -2,9 +2,8 @@
  * Hypothesis.cpp
  *
  *  Created on: 24 Oct 2015
- *      Author: hieu
+ *      Author: hieu hoang
  */
-
 #include <boost/foreach.hpp>
 #include <stdlib.h>
 #include <deque>
