@@ -297,27 +297,27 @@ template <class Automaton> class Queue {
     using Task = typename Automaton::Task;
     using Construct = typename Automaton::Construct;
     public:
-        explicit Queue(std::size_t size, Construct construct) : size_(size), curr_(0), automata_(size, Automaton(construct)) {}
+        explicit Queue(std::size_t size, Construct construct) : size_(size), automata_(size, Automaton(construct)), curr_(automata_.begin()){}
 
         Automaton* Add(const Task task) {
-            while (automata_[curr_].Step() != Status::Done) {
+            while (curr_->Step() != Status::Done) {
                 Next();
             }
-            automata_[curr_].SetTask(task);
-            automata_[curr_].Step();
-            auto& ret = automata_[curr_];
+            curr_->SetTask(task);
+            curr_->Step();
+            auto& ret = *curr_;
             Next();
             return &ret;
         }
 
         void Next() {
-            curr_ = (curr_ + 1) % size_;
+            if (++curr_ == automata_.end()) curr_ = automata_.begin();
         }
 
         void Drain() {
             std::size_t drained = 0;
             while (drained != size_) {
-                while (automata_[curr_].Step() != Status::Done) {}
+                while (curr_->Step() != Status::Done) {}
                 Next();
                 ++drained;
             }
@@ -325,8 +325,9 @@ template <class Automaton> class Queue {
 
     private:
         std::size_t size_;
-        std::size_t curr_;
         std::vector<Automaton> automata_;
+        using It = decltype(automata_.begin());
+        It curr_;
 };
 
 
