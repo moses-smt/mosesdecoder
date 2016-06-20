@@ -21,17 +21,17 @@ enum class Status {Done, Working};
 
 namespace ngram {
 
-template <class Value> class NGramAutomaton {
+template <typename Value, typename Callback> class NGramAutomaton {
     public:
         struct NGramTask {
-            NGramAutomaton<Value>* const pred;
+            NGramAutomaton<Value, Callback>* const pred;
             const WordIndex new_word;
             const State* const context_state; // unused if pred != nullptr
-            const std::function<void(FullScoreReturn)>& callback;
         };
 
         struct NGramConstruct {
             detail::HashedSearch<Value>& search;
+            Callback callback;
             unsigned char max_order;
         };
 
@@ -41,7 +41,7 @@ template <class Value> class NGramAutomaton {
         using Status = lm::Status;
 
         explicit NGramAutomaton(Construct construct) :
-            callback_(),
+            callback_(construct.callback),
             ngram_order_(0),
             status_(Status::Done),
             search_(construct.search),
@@ -84,7 +84,6 @@ template <class Value> class NGramAutomaton {
             InitialPredecessorCheck(task);
 
             new_word_ = task.new_word;
-            callback_ = task.callback;
             ngram_order_ = 0;
             node_ = 0;
             out_state_.length = std::min(in_state_.length + 1, max_order_ - 1);
@@ -97,7 +96,6 @@ template <class Value> class NGramAutomaton {
     private:
         struct SuccessorData {
             FullScoreReturn ret;
-            std::function<void(FullScoreReturn&)> callback;
         };
 
         void InitialPredecessorCheck(const Task& task) {
@@ -144,7 +142,7 @@ template <class Value> class NGramAutomaton {
                 for(auto i = succ_data_.ret.ngram_length - 1; i < out_state_.length; i++){
                     succ_data_.ret.prob += out_state_.backoff[i];
                 }
-                succ_data_.callback(succ_data_.ret);
+                succ_->callback_(succ_data_.ret);
             }
             else if (succ_) {
                 // transfer backoffs to successor so he can apply them himself
@@ -168,7 +166,6 @@ template <class Value> class NGramAutomaton {
 
         void NotifyPredecessorOfCompletion() {
             pred_->succ_finished_ = true;
-            pred_->succ_data_.callback = callback_;
             pred_->succ_data_.ret = ret_;
         }
 
@@ -182,7 +179,7 @@ template <class Value> class NGramAutomaton {
             return status_ == Status::Done;
         }
 
-        void SetSuccessor(NGramAutomaton<Value>* succ){
+        void SetSuccessor(NGramAutomaton<Value, Callback>* succ){
             succ_ = succ;
         }
 
@@ -279,7 +276,7 @@ template <class Value> class NGramAutomaton {
         }
 
 
-        std::function<void(const FullScoreReturn&)> callback_;
+        Callback callback_;
         std::size_t ngram_order_;
         Status status_;
         detail::HashedSearch<Value> &search_;
@@ -287,8 +284,8 @@ template <class Value> class NGramAutomaton {
         typename detail::HashedSearch<Value>::Node node_;
         bool pred_finished_;
         bool succ_finished_;
-        NGramAutomaton<Value>* pred_;
-        NGramAutomaton<Value>* succ_;
+        NGramAutomaton<Value, Callback>* pred_;
+        NGramAutomaton<Value, Callback>* succ_;
         SuccessorData succ_data_; 
         WordIndex new_word_;
         FullScoreReturn ret_;
@@ -335,17 +332,18 @@ template <class Automaton> class Queue {
 };
 
 
+template<typename Callback>
 class Pipeline {
 
     public:
-        Pipeline(std::size_t queue_size, ngram::NGramAutomaton<ngram::BackoffValue>::Construct construct) : queue_(queue_size, construct) {}
-        void FullScore(const lm::ngram::State& context_state, const WordIndex word, const std::function<void(const FullScoreReturn&)>& callback) {
-            pred_ = queue_.Add({nullptr, word, &context_state, callback});
+        Pipeline(std::size_t queue_size, typename ngram::NGramAutomaton<ngram::BackoffValue, Callback>::Construct construct) : queue_(queue_size, construct) {}
+        void FullScore(const lm::ngram::State& context_state, const WordIndex word) {
+            pred_ = queue_.Add({nullptr, word, &context_state});
         }
 
-        void AppendWord(const WordIndex word, const std::function<void(const FullScoreReturn&)>& callback){
+        void AppendWord(const WordIndex word){
             assert(pred_);
-            pred_ = queue_.Add({pred_, word, nullptr, callback});
+            pred_ = queue_.Add({pred_, word, nullptr});
         }
 
         void Drain() {
@@ -354,10 +352,10 @@ class Pipeline {
 
 
     private:
-        using Task = ngram::NGramAutomaton<ngram::BackoffValue>::Task;
+        using Task = typename ngram::NGramAutomaton<ngram::BackoffValue, Callback>::Task;
 
-        Queue<ngram::NGramAutomaton<ngram::BackoffValue>> queue_;
-        ngram::NGramAutomaton<ngram::BackoffValue>* pred_;
+        Queue<ngram::NGramAutomaton<ngram::BackoffValue, Callback>> queue_;
+        ngram::NGramAutomaton<ngram::BackoffValue, Callback>* pred_;
 
 };
 

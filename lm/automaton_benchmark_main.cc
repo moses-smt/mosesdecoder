@@ -18,35 +18,33 @@ void CheckEqual(const lm::FullScoreReturn& lhs, const lm::FullScoreReturn& rhs) 
 }
 }
 
-void PipelineScore(lm::Pipeline& pipeline, const lm::ngram::ProbingModel& model, char* test_file) {
+template <typename Callback>
+void PipelineScore(lm::Pipeline<Callback>& pipeline, const lm::ngram::ProbingModel& model, char* test_file) {
     util::FilePiece in(test_file);
     StringPiece word;
-    auto score = 0.0;
     auto time = util::CPUTime();
-    const auto callback = [&score](const lm::FullScoreReturn& r){score += r.prob;};
 
     //start timer
     while (true) {
         if (in.ReadWordSameLine(word)) {
             lm::WordIndex vocab = model.GetVocabulary().Index(word);
-            pipeline.FullScore(model.BeginSentenceState(), vocab, callback);
+            pipeline.FullScore(model.BeginSentenceState(), vocab);
         }
 
         while(in.ReadWordSameLine(word)) {
             lm::WordIndex vocab = model.GetVocabulary().Index(word);
-            pipeline.AppendWord(vocab, callback);
+            pipeline.AppendWord(vocab);
         }
 
         try {
             UTIL_THROW_IF('\n' != in.get(), util::Exception, "FilePiece is confused.");
         } catch (const util::EndOfFileException &e) { break; }
         
-        pipeline.AppendWord(model.GetVocabulary().EndSentence(), callback);
+        pipeline.AppendWord(model.GetVocabulary().EndSentence());
     }
     pipeline.Drain();
     //stop timer
     time = util::CPUTime() - time;
-    std::cerr << "Score (pipeline): " << score << std::endl;
     std::cout << time << " ";
 }
 
@@ -103,9 +101,14 @@ int main(int argc, char* argv[]){
     lm::ngram::ProbingModel model(arpa_file, config);
     ModelScore(model, test_file);
 
+    auto score = 0.0;
+    const auto callback = [&score](const lm::FullScoreReturn& r){score += r.prob;};
     for(auto pipeline_size = 1; pipeline_size <= max_pipeline_size; ++pipeline_size){
-        lm::Pipeline pipeline(pipeline_size, {model.GetSearch(), model.Order()});
+        score = 0.0;
+        typename lm::ngram::NGramAutomaton<lm::ngram::BackoffValue, decltype(callback)>::Construct construct{model.GetSearch(), callback, model.Order(),};
+        lm::Pipeline<decltype(callback)> pipeline(pipeline_size, construct);
         PipelineScore(pipeline, model, test_file);
+        std::cerr << "Score (pipeline): " << score << std::endl;
     }
     std::cout << std::endl;
 
