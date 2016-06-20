@@ -336,29 +336,37 @@ for(my $i=0;$i<=$#TABLE;$i++) {
     my $new_file = $TABLE_NEW_NAME[$i];
     print STDERR "filtering $file -> $new_file...\n";
     my $mid_file = $new_file; # used when both filtering and binarizing
-    if (!$opt_filter) {
-      # check if original file was gzipped
-      if ($file !~ /\.gz$/ && -e "$file.gz") {
-        $file .= ".gz";
-      }
-      $mid_file .= ".gz" if $file =~ /\.gz$/;
-      $cmd = "ln -s $file $mid_file";
-      safesystem($cmd) or die "Failed to make symlink";
+ 
+    $mid_file .= ".gz"
+      if $mid_file !~ /\.gz/
+         && $binarizer && $binarizer =~ /processPhraseTable/;
+
+    my $openstring = mk_open_string($file);
+
+    my $mid_openstring;
+    if ($mid_file =~ /\.gz$/) {
+      $mid_openstring = "| gzip -c > $mid_file";
     } else {
-
-      $mid_file .= ".gz"
-        if $mid_file !~ /\.gz/
-           && $binarizer && $binarizer =~ /processPhraseTable/;
-
-      my $openstring = mk_open_string($file);
-
-      my $mid_openstring;
-      if ($mid_file =~ /\.gz$/) {
-        $mid_openstring = "| gzip -c > $mid_file";
+      $mid_openstring = ">$mid_file";
+    }
+ 
+    if (!$opt_filter) {
+      # not filtering
+      if (defined($min_score) and $KNOWN_TTABLE{$i}) {
+        # Threshold pruning
+        $cmd = "$openstring $RealBin/threshold-filter.perl $min_score $mid_openstring";
+        safesystem($cmd) or die "Threshold pruning of phrase table failed";
       } else {
-        $mid_openstring = ">$mid_file";
+        # If we are not filtering, or threshold pruning a phrase table, then
+        # we can just sym-link it.
+        # check if original file was gzipped
+        if ($file !~ /\.gz$/ && -e "$file.gz") {
+          $file .= ".gz";
+        }
+        $cmd = "ln -s $file $mid_file";
+        safesystem($cmd) or die "Failed to make symlink";
       }
-
+    } else {
 
       open(FILE_OUT,$mid_openstring) or die "Can't write to $mid_openstring";
 
