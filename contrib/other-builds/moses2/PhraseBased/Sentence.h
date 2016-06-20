@@ -48,6 +48,9 @@ public:
   {}
 
 protected:
+  static Sentence *CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
+      const System &system, const std::string &str, long translationId);
+
   static void XMLParse(
       size_t depth,
       const pugi::xml_node &parentNode,

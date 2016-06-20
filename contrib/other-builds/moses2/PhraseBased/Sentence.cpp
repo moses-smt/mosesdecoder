@@ -32,6 +32,28 @@ Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
 
   if (system.options.input.xml_policy) {
     // xml
+	ret = CreateFromStringXML(pool, vocab, system, str, translationId);
+  }
+  else {
+    // no xml
+    //cerr << "PB Sentence" << endl;
+    std::vector<std::string> toks = Tokenize(str);
+
+    size_t size = toks.size();
+    ret = new (pool.Allocate<Sentence>()) Sentence(translationId, pool, size);
+    ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks, false);
+  }
+
+  //cerr << "REORDERING CONSTRAINTS:" << ret->GetReorderingConstraint() << endl;
+
+  return ret;
+}
+
+Sentence *Sentence::CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
+    const System &system, const std::string &str, long translationId)
+{
+  Sentence *ret;
+
     vector<XMLOption*> xmlOptions;
     pugi::xml_document doc;
 
@@ -85,22 +107,9 @@ Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
     for (size_t i = 0; i < xmlOptions.size(); ++i) {
       delete xmlOptions[i];
     }
-  }
-  else {
-    // no xml
-    //cerr << "PB Sentence" << endl;
-    std::vector<std::string> toks = Tokenize(str);
 
-    size_t size = toks.size();
-    ret = new (pool.Allocate<Sentence>()) Sentence(translationId, pool, size);
-    ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks, false);
-  }
-
-  //cerr << "REORDERING CONSTRAINTS:" << ret->GetReorderingConstraint() << endl;
-
-  return ret;
+    return ret;
 }
-
 
 void Sentence::XMLParse(
     size_t depth,
