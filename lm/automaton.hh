@@ -53,10 +53,11 @@ template <typename Value, typename Callback> class NGramAutomaton {
             in_state_(),
             succ_data_(),
             new_word_(),
-            ret_(){}
+            ret_(),
+            MAX_ORDER(search_.Order()){}
 
         Status Step() {
-            if (status_ == Status::Done || ngram_order_ > search_.Order()){
+            if (status_ == Status::Done || ngram_order_ > MAX_ORDER){
                 return Status::Done;
             }
 
@@ -69,7 +70,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
                     GetUnigramPrefetchNext();
                     break;
                 default:
-                    if (ngram_order_ == search_.Order()) GetLongest();
+                    if (ngram_order_ == MAX_ORDER) GetLongest();
                     else GetMiddlePrefetchNext();
                     break;
             }
@@ -85,7 +86,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
             new_word_ = task.new_word;
             ngram_order_ = 0;
             node_ = 0;
-            out_state_.length = std::min(in_state_.length + 1, search_.Order() - 1);
+            out_state_.length = std::min(in_state_.length + 1, MAX_ORDER - 1);
             ret_ = FullScoreReturn();
             succ_ = nullptr;
             succ_finished_ = false;
@@ -126,7 +127,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
 
         void CopyContextWordsFromPredecessor(){
             //pred_ might equal this, hence the copying order
-            auto length = std::min(pred_->out_state_.length, static_cast<unsigned char>(search_.Order() - 2));
+            auto length = std::min(pred_->out_state_.length, static_cast<unsigned char>(MAX_ORDER - 2));
 
             auto from = pred_->in_state_.words + length - 1;
             auto to = in_state_.words + length;
@@ -201,7 +202,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
                 Finish();
             }
             else {
-                if (search_.Order() == 2) {
+                if (MAX_ORDER == 2) {
                     //for bigrams we don't prefetch middle since there are none
                     search_.PrefetchLongest(in_state_.words[0], node_);
                 }
@@ -232,7 +233,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
                 return;
             }
 
-            if (ngram_order_ + 1 == search_.Order()){
+            if (ngram_order_ + 1 == MAX_ORDER){
                 search_.PrefetchLongest(in_state_.words[ngram_order_ - 1], node_);
             }
             else {
@@ -268,7 +269,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
         }
 
         void Finish(){
-            WriteOutLength(std::min(ret_.ngram_length, static_cast<unsigned char>(search_.Order() - 1)));
+            WriteOutLength(std::min(ret_.ngram_length, static_cast<unsigned char>(MAX_ORDER - 1)));
             CheckPredecessorFinished();
             CheckSuccessorFinished();
             status_ = Status::Done;
@@ -289,6 +290,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
         FullScoreReturn ret_;
         State in_state_;
         State out_state_;
+        const unsigned short MAX_ORDER;
 };
 
 } // namespace ngram
