@@ -95,14 +95,12 @@ void System::LoadMappings()
   else {
     ptInd = Scan<size_t>(toks[2]);
   }
-  const PhraseTable *pt = featureFunctions.GetPhraseTablesExcludeUnknownWordPenalty(ptInd);
+  const PhraseTable *pt = featureFunctions.GetPhraseTableExcludeUnknownWordPenalty(ptInd);
   mappings.push_back(pt);
 }
 
 // unk pt
-  const UnknownWordPenalty *unkWP =
-      dynamic_cast<const UnknownWordPenalty*>(featureFunctions.FindFeatureFunction(
-          "UnknownWordPenalty0"));
+  const UnknownWordPenalty *unkWP = featureFunctions.GetUnknownWordPenalty();
   if (unkWP) {
     mappings.push_back(unkWP);
   }
