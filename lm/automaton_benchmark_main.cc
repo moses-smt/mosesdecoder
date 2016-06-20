@@ -105,7 +105,7 @@ int main(int argc, char* argv[]){
     const auto callback = [&score](const lm::FullScoreReturn& r){score += r.prob;};
     for(auto pipeline_size = 1; pipeline_size <= max_pipeline_size; ++pipeline_size){
         score = 0.0;
-        typename lm::ngram::NGramAutomaton<lm::ngram::BackoffValue, decltype(callback)>::Construct construct{model.GetSearch(), callback, model.Order(),};
+        typename lm::ngram::NGramAutomaton<lm::ngram::BackoffValue, decltype(callback)>::Construct construct{model.GetSearch(), callback};
         lm::Pipeline<decltype(callback)> pipeline(pipeline_size, construct);
         PipelineScore(pipeline, model, test_file);
         std::cerr << "Score (pipeline): " << score << std::endl;

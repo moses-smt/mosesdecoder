@@ -32,7 +32,6 @@ template <typename Value, typename Callback> class NGramAutomaton {
         struct NGramConstruct {
             detail::HashedSearch<Value>& search;
             Callback callback;
-            unsigned char max_order;
         };
 
 
