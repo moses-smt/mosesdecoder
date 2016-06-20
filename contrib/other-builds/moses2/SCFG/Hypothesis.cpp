@@ -131,16 +131,16 @@ void Hypothesis::OutputToStream(std::ostream &out) const
   }
 }
 
-std::ostream &Hypothesis::Debug(std::ostream &out, const System &system) const
+std::string Hypothesis::Debug(const System &system) const
 {
+  stringstream out;
   out << this;
 
   out << " RANGE:";
   out << m_path->range;
 
   // score
-  out << " SCORE:";
-  GetScores().Debug(out, GetManager().system);
+  out << " SCORE:" << GetScores().Debug(GetManager().system);
 
   /*
   out << " m_prevHypos=" << m_prevHypos.size() << " ";
@@ -149,16 +149,16 @@ std::ostream &Hypothesis::Debug(std::ostream &out, const System &system) const
   }
   */
 
-  m_targetPhrase->Debug(out, GetManager().system);
+  out << m_targetPhrase->Debug(GetManager().system);
 
   // recursive
   for (size_t i = 0; i < m_prevHypos.size(); ++i) {
     const Hypothesis &prevHypo = *m_prevHypos[i];
     out << endl;
-    prevHypo.Debug(out, system);
+    out << prevHypo.Debug(system);
   }
 
-  return out;
+  return out.str();
 }
 
 } // namespaces

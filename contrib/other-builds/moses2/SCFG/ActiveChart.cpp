@@ -57,14 +57,15 @@ std::vector<const SymbolBindElement*> SymbolBind::GetNTElements() const
   return ret;
 }
 
-std::ostream &SymbolBind::Debug(std::ostream &out, const System &system) const
+std::string SymbolBind::Debug(const System &system) const
 {
+  stringstream out;
   BOOST_FOREACH(const SymbolBindElement &ele, coll) {
     out << "("<< *ele.range;
-    ele.word->Debug(out, system);
+    out << ele.word->Debug(system);
     out << ") ";
   }
-  return out;
+  return out.str();
 }
 
 ////////////////////////////////////////////////////////////////////////////

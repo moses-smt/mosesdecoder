@@ -37,10 +37,11 @@ InputPath::~InputPath()
   // TODO Auto-generated destructor stub
 }
 
-std::ostream &InputPath::Debug(std::ostream &out, const System &system) const
+std::string InputPath::Debug(const System &system) const
 {
+  stringstream out;
   out << range << " ";
-  subPhrase.Debug(out, system);
+  out << subPhrase.Debug(system);
   out << " " << prefixPath << " ";
 
   const Vector<ActiveChartEntry*> &activeEntries = *GetActiveChart(1).entries;
@@ -48,7 +49,7 @@ std::ostream &InputPath::Debug(std::ostream &out, const System &system) const
 
   for (size_t i = 0; i < activeEntries.size(); ++i) {
     const ActiveChartEntry &entry = *activeEntries[i];
-    entry.GetSymbolBind().Debug(out, system);
+    out << entry.GetSymbolBind().Debug(system);
     out << "| ";
   }
 
@@ -59,12 +60,12 @@ std::ostream &InputPath::Debug(std::ostream &out, const System &system) const
   BOOST_FOREACH(const SCFG::InputPath::Coll::value_type &valPair, *targetPhrases) {
     const SymbolBind &symbolBind = valPair.first;
     const SCFG::TargetPhrases &tps = *valPair.second;
-    symbolBind.Debug(out, system);
+    out << symbolBind.Debug(system);
     //out << "=" << tps.GetSize() << " ";
-    tps.Debug(out, system);
+    out << tps.Debug(system);
   }
 
-  return out;
+  return out.str();
 }
 
 void InputPath::AddTargetPhrase(

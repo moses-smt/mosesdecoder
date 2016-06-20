@@ -62,9 +62,9 @@ void Manager::Decode()
     cerr << endl << "startPos=" << startPos << endl;
     SCFG::InputPath &initPath = *m_inputPaths.GetMatrix().GetValue(startPos, 0);
 
-    //cerr << "BEFORE path=" << m_inputPaths << endl;
+    cerr << "BEFORE InitActiveChart=" << initPath.Debug(system) << endl;
     InitActiveChart(initPath);
-    cerr << "AFTER path=" << endl;
+    cerr << "AFTER InitActiveChart=" << initPath.Debug(system) << endl;
 
     int maxPhraseSize = inputSize - startPos + 1;
     for (int phraseSize = 1; phraseSize < maxPhraseSize; ++phraseSize) {
@@ -73,14 +73,14 @@ void Manager::Decode()
 
       Stack &stack = m_stacks.GetStack(startPos, phraseSize);
 
-      cerr << "BEFORE LOOKUP path=" << endl;
+      cerr << "BEFORE LOOKUP path=" << path.Debug(system) << endl;
       Lookup(path);
-      cerr << "AFTER LOOKUP path=" << endl;
+      cerr << "AFTER LOOKUP path="  << path.Debug(system) << endl;
       Decode(path, stack);
-      cerr << "AFTER DECODE path=" << endl;
+      cerr << "AFTER DECODE path=" << path.Debug(system) << endl;
 
       LookupUnary(path);
-      //cerr << "AFTER LookupUnary path=" << path << endl;
+      cerr << "AFTER LookupUnary path=" << path.Debug(system) << endl;
 
       //cerr << "#rules=" << path.GetNumRules() << endl;
     }
@@ -317,7 +317,7 @@ std::string Manager::OutputBest() const
 
     bestHypo->OutputToStream(out);
     cerr << "BEST TRANSLATION: ";
-    bestHypo->Debug(cerr, system);
+    cerr << bestHypo->Debug(system);
     cerr << " " << out.str() << endl;
   }
   else {

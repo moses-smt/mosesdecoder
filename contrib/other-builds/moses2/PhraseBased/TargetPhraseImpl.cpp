@@ -5,6 +5,7 @@
  *      Author: hieu
  */
 
+#include <sstream>
 #include <stdlib.h>
 #include "TargetPhraseImpl.h"
 #include "../Scores.h"
@@ -48,12 +49,12 @@ TargetPhraseImpl::~TargetPhraseImpl()
   // TODO Auto-generated destructor stub
 }
 
-std::ostream &TargetPhraseImpl::Debug(std::ostream &out, const System &system) const
+std::string TargetPhraseImpl::Debug(const System &system) const
 {
-  Phrase<Moses2::Word>::Debug(out, system);
-  out << " SCORES:";
-  GetScores().Debug(out, system);
-  return out;
+  stringstream out;
+  out << Phrase<Moses2::Word>::Debug(system);
+  out << " SCORES:" << GetScores().Debug(system);
+  return out.str();
 }
 
 }

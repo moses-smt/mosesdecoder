@@ -40,7 +40,7 @@ public:
   size_t hash() const;
 
   virtual void OutputToStream(std::ostream &out) const;
-  virtual std::ostream &Debug(std::ostream &out, const System &system) const;
+  virtual std::string Debug(const System &system) const;
 
 protected:
 };

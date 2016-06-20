@@ -88,7 +88,7 @@ public:
       SeenPositions &seenPositions,
       std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > &queueItemRecycler);
 
-  std::ostream &Debug(std::ostream &out, const System &system) const;
+  std::string Debug(const System &system) const;
 
 protected:
 

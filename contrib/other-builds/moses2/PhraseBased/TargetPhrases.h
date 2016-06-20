@@ -55,7 +55,7 @@ public:
 
   void SortAndPrune(size_t tableLimit);
 
-  std::ostream &Debug(std::ostream &out, const System &system) const;
+  std::string Debug(const System &system) const;
 
 protected:
   Coll m_coll;

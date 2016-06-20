@@ -405,7 +405,7 @@ void ProbingPT::InitActiveChart(
     const SCFG::Manager &mgr,
     SCFG::InputPath &path) const
 {
-  cerr << "InitActiveChart=" << path.Debug(cerr, mgr.system) << endl;
+  //cerr << "InitActiveChart=" << path.Debug(cerr, mgr.system) << endl;
   size_t ptInd = GetPtInd();
   ActiveChartEntryProbing *chartEntry = new (pool.Allocate<ActiveChartEntryProbing>()) ActiveChartEntryProbing(pool);
   path.AddActiveChartEntry(ptInd, chartEntry);
@@ -417,7 +417,7 @@ void ProbingPT::Lookup(MemPool &pool,
     const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
-  cerr << "Lookup=" << endl;
+  //cerr << "Lookup=" << endl;
   if (path.range.GetNumWordsCovered() > maxChartSpan) {
     return;
   }
@@ -521,9 +521,12 @@ void ProbingPT::LookupGivenNode(
     SCFG::InputPath &outPath) const
 {
   std::pair<bool, uint64_t> key = prevEntry.GetKey(wordSought, *this);
+  //cerr << "wordSought=" << wordSought.Debug(cerr, mgr.system) << " " << key.first << endl;
+  cerr << "wordSought=" << wordSought.Debug(mgr.system) << endl;
+  //cerr << "HELLO" << endl;
 
   if (!key.first) {
-    // should only happen when looking up unary rules
+    // should only occasionally happen when looking up unary rules
     return;
   }
 

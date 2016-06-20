@@ -5,11 +5,14 @@
  *      Author: hieu
  */
 #include <iostream>
+#include <sstream>
 #include <algorithm>
 #include <boost/foreach.hpp>
 #include "HypothesisColl.h"
 #include "ManagerBase.h"
 #include "System.h"
+
+using namespace std;
 
 namespace Moses2
 {
@@ -124,14 +127,15 @@ void HypothesisColl::Clear()
   m_coll.clear();
 }
 
-std::ostream &HypothesisColl::Debug(std::ostream &out, const System &system) const
+std::string HypothesisColl::Debug(const System &system) const
 {
+  stringstream out;
   BOOST_FOREACH (const HypothesisBase *hypo, m_coll) {
-    hypo->Debug(out, system);
+    out << hypo->Debug(system);
     out << std::endl << std::endl;
   }
 
-  return out;
+  return out.str();
 }
 
 } /* namespace Moses2 */

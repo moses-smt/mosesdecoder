@@ -91,10 +91,11 @@ CubeEdge::CubeEdge(Manager &mgr, const Hypotheses &hypos, const InputPath &path,
   estimatedScore = mgr.GetEstimatedScores().CalcEstimatedScore(newBitmap);
 }
 
-std::ostream &CubeEdge::Debug(std::ostream &out, const System &system) const
+std::string CubeEdge::Debug(const System &system) const
 {
+  stringstream out;
   out << newBitmap;
-  return out;
+  return out.str();
 }
 
 bool CubeEdge::SetSeenPosition(const size_t x, const size_t y,

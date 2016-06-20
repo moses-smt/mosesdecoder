@@ -67,7 +67,7 @@ public:
 
   void SetAlignmentInfo(const std::string &alignString);
 
-  std::ostream &Debug(std::ostream &out, const System &system) const;
+  std::string Debug(const System &system) const;
 
   //mutable void *chartState;
 protected:

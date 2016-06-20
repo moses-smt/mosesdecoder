@@ -30,7 +30,7 @@ public:
     std::string nodeName;
     size_t startPos, phraseSize;
 
-    std::ostream &Debug(std::ostream &out, const System &system) const;
+    std::string Debug(const System &system) const;
 
   };
 

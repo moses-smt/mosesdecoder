@@ -33,7 +33,7 @@ public:
     return m_isUsed;
   }
 
-  std::ostream &Debug(std::ostream &out, const System &system) const;
+  std::string Debug(const System &system) const;
 
 protected:
   bool m_isUsed;

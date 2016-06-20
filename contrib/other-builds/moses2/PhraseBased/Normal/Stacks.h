@@ -51,7 +51,7 @@ public:
   void Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
       ArcLists &arcLists);
 
-  std::ostream &Debug(std::ostream &out, const System &system) const;
+  std::string Debug(const System &system) const;
 
 protected:
   const Manager &m_mgr;

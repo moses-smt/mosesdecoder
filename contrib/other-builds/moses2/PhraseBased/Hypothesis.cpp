@@ -107,8 +107,10 @@ bool Hypothesis::operator==(const Hypothesis &other) const
   return ret;
 }
 
-std::ostream &Hypothesis::Debug(std::ostream &out, const System &system) const
+std::string Hypothesis::Debug(const System &system) const
 {
+  stringstream out;
+
   // coverage
   out << GetBitmap() << " " << GetInputPath().range << " ";
 
@@ -122,12 +124,12 @@ std::ostream &Hypothesis::Debug(std::ostream &out, const System &system) const
   }
 
   // string
-  Debug(out, m_mgr->system);
+  //Debug(out, m_mgr->system);
   out << " ";
   out << "fc=" << GetFutureScore() << " ";
-  GetScores().Debug(out, GetManager().system);
+  out << GetScores().Debug(GetManager().system);
 
-  return out;
+  return out.str();
 }
 
 void Hypothesis::OutputToStream(std::ostream &out) const
@@ -156,7 +158,7 @@ void Hypothesis::OutputToStream(std::ostream &out) const
       out << m_path->range.GetStartPos() << "-" << m_path->range.GetEndPos() << ",";
 
       // score breakdown
-      m_scores->Debug(out, m_mgr->system);
+      out << m_scores->Debug(m_mgr->system);
 
       out << "| ";
     }

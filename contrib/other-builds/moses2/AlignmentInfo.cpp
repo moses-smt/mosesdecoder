@@ -18,6 +18,7 @@
 ***********************************************************************/
 #include <algorithm>
 #include <set>
+#include <sstream>
 #include "AlignmentInfo.h"
 #include "legacy/Util2.h"
 #include "util/exception.hh"
@@ -156,13 +157,15 @@ std::vector<size_t> AlignmentInfo::GetSourceIndex2PosMap() const
   return ret;
 }
 
-std::ostream &AlignmentInfo::Debug(std::ostream &out, const System &system) const
+std::string AlignmentInfo::Debug(const System &system) const
 {
+  std::stringstream out;
+
   AlignmentInfo::const_iterator iter;
   for (iter = begin(); iter != end(); ++iter) {
     out << iter->first << "-" << iter->second << " ";
   }
-  return out;
+  return out.str();
 }
 
 }
