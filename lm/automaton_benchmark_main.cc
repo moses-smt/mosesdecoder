@@ -46,7 +46,8 @@ void PipelineScore(lm::Pipeline& pipeline, const lm::ngram::ProbingModel& model,
     pipeline.Drain();
     //stop timer
     time = util::CPUTime() - time;
-    std::printf("Score: %f Time: %f (pipeline)\n", score, time);
+    std::cerr << "Score (pipeline): " << score << std::endl;
+    std::cout << time << " ";
 }
 
 void ModelScore(const lm::ngram::ProbingModel& model, char * test_file){
@@ -81,16 +82,16 @@ void ModelScore(const lm::ngram::ProbingModel& model, char * test_file){
     }
     //stop timer
     time = util::CPUTime() - time;
-    std::printf("Score: %f Time: %f (model)\n", score, time);
-
+    std::cerr << "Score (model): " << score << std::endl;
+    std::cout << time << " ";
 }
 
 int main(int argc, char* argv[]){
     if (argc < 4) {
-        std::cerr << "Usage: <pipeline size> <arpa file> <test file>" << std::endl;
+        std::cerr << argv[0] <<" max_pipeline_size model_file test_file" << std::endl;
         return 1;
     }
-    int pipeline_size = std::stoi(std::string(argv[1]));
+    int max_pipeline_size = std::stoi(std::string(argv[1]));
     char* arpa_file(argv[2]);
     char* test_file(argv[3]);
 
@@ -100,9 +101,13 @@ int main(int argc, char* argv[]){
     config.positive_log_probability = lm::SILENT;
     config.probing_multiplier = 2.0;
     lm::ngram::ProbingModel model(arpa_file, config);
-    lm::Pipeline pipeline(pipeline_size, {model.GetSearch(), model.Order()});
-
-    PipelineScore(pipeline, model, test_file);
     ModelScore(model, test_file);
+
+    for(auto pipeline_size = 1; pipeline_size <= max_pipeline_size; ++pipeline_size){
+        lm::Pipeline pipeline(pipeline_size, {model.GetSearch(), model.Order()});
+        PipelineScore(pipeline, model, test_file);
+    }
+    std::cout << std::endl;
+
     
 }
