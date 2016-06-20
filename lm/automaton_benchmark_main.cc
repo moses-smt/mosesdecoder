@@ -110,6 +110,7 @@ int main(int argc, char* argv[]){
         PipelineScore(pipeline, model, test_file);
         std::cerr << "Score (pipeline): " << score << std::endl;
     }
+    ModelScore(model, test_file);
     std::cout << std::endl;
 
     
