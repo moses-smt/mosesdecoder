@@ -202,13 +202,8 @@ template <typename Value, typename Callback> class NGramAutomaton {
                 Finish();
             }
             else {
-                if (MAX_ORDER == 2) {
-                    //for bigrams we don't prefetch middle since there are none
-                    search_.PrefetchLongest(in_state_.words[0], node_);
-                }
-                else {
-                    search_.PrefetchMiddle(0, in_state_.words[0], node_);
-                }
+                //bigrams are not supported
+                search_.PrefetchMiddle(0, in_state_.words[0], node_);
             }
         }
 
