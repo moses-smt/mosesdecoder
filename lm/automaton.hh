@@ -104,6 +104,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
                 CopyContextWordsFromPredecessor();
                 in_state_.length = pred_->out_state_.length;
 
+                //TODO: This IF statement does not need to be here although if removed then backoffs are copied uselessly
                 if (pred_->Finished()) {
                     pred_finished_ = true;
 
