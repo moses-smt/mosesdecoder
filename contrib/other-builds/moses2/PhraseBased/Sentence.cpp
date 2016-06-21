@@ -91,7 +91,7 @@ Sentence *Sentence::CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
       }
       else {
     	// default - forced translation. Add to class variable
-    	  ret->GetXMLOptions().push_back(new XMLOption(xmlOption));
+    	  ret->AddXMLOption(new XMLOption(xmlOption));
       }
     }
     reorderingConstraint.FinalizeWalls();

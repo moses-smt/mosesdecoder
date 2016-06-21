@@ -39,10 +39,9 @@ void UnknownWordPenalty::ProcessXML(
 		const Manager &mgr,
 		MemPool &pool,
 		const Sentence &sentence,
-		InputPaths &inputPaths,
-		std::set<const Moses2::Range*> &ranges) const
+		InputPaths &inputPaths) const
 {
-	const std::vector<InputType::XMLOption*> &xmlOptions = sentence.GetXMLOptions();
+	const std::vector<const InputType::XMLOption*> &xmlOptions = sentence.GetXMLOptions();
 	BOOST_FOREACH(const InputType::XMLOption *xmlOption, xmlOptions) {
 //	      cerr << "xmlOptions=";
 //	      xmlOption->Debug(cerr, mgr.system);
@@ -67,8 +66,6 @@ void UnknownWordPenalty::ProcessXML(
 	      mgr.system.featureFunctions.EvaluateAfterTablePruning(pool, *tps, source);
 
 	      path->AddTargetPhrases(*this, tps);
-
-	      ranges.insert(&path->range);
 	}
 }
 

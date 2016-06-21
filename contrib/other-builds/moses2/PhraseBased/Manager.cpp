@@ -71,7 +71,7 @@ void Manager::Init()
   // xml
   const UnknownWordPenalty *unkWP = system.featureFunctions.GetUnknownWordPenalty();
   UTIL_THROW_IF2(unkWP == NULL, "There must be a UnknownWordPenalty FF");
-  unkWP->ProcessXML(*this, GetPool(), sentence, m_inputPaths, m_xmlRanges);
+  unkWP->ProcessXML(*this, GetPool(), sentence, m_inputPaths);
 
   // lookup with every pt
   const std::vector<const PhraseTable*> &pts = system.mappings;

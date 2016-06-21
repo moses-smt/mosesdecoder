@@ -52,9 +52,6 @@ public:
   const TargetPhrase<Moses2::Word> &GetInitPhrase() const
   {  return *m_initPhrase; }
 
-  const std::set<const Moses2::Range*> &GetXMLRanges() const
-  { return m_xmlRanges; }
-
   void Decode();
   std::string OutputBest() const;
   std::string OutputNBest();
@@ -65,7 +62,6 @@ protected:
   Bitmaps *m_bitmaps;
   EstimatedScores *m_estimatedScores;
   TargetPhrase<Moses2::Word> *m_initPhrase;
-  std::set<const Moses2::Range*> m_xmlRanges;
 
   Search *m_search;
 

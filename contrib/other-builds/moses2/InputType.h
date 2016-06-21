@@ -52,16 +52,17 @@ public:
   const ReorderingConstraint &GetReorderingConstraint() const
   { return m_reorderingConstraint; }
 
-  std::vector<XMLOption*> &GetXMLOptions()
+  const std::vector<const XMLOption*> &GetXMLOptions() const
   { return m_xmlOptions; }
 
-  const std::vector<XMLOption*> &GetXMLOptions() const
-  { return m_xmlOptions; }
+  void AddXMLOption(const XMLOption *xmlOption);
 
 protected:
   long m_translationId; 	//< contiguous Id
   ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
-  std::vector<XMLOption*> m_xmlOptions;
+  std::vector<const XMLOption*> m_xmlOptions;
+  std::vector <bool> m_xmlCoverageMap;
+
 };
 
 } /* namespace Moses2 */

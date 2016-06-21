@@ -29,8 +29,7 @@ public:
 		  const Manager &mgr,
 		  MemPool &pool,
 		  const Sentence &sentence,
-		  InputPaths &inputPaths,
-		  std::set<const Moses2::Range*> &ranges) const;
+		  InputPaths &inputPaths) const;
 
   virtual void
   EvaluateInIsolation(const System &system, const Phrase<Moses2::Word> &source,

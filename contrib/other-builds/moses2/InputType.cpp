@@ -38,4 +38,9 @@ void InputType::Init(size_t size, int max_distortion)
 
 }
 
+void InputType::AddXMLOption(const XMLOption *xmlOption)
+{
+	m_xmlOptions.push_back(xmlOption);
+}
+
 } /* namespace Moses2 */
