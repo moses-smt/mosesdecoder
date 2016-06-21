@@ -14,7 +14,6 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
    MemPool.cpp
    Phrase.cpp 
    pugixml.cpp
-   ReorderingConstraint.cpp
    Scores.cpp 
    SubPhrase.cpp
    System.cpp 
@@ -75,7 +74,8 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
  	 	PhraseBased/InputPath.cpp
  	 	PhraseBased/InputPaths.cpp
 		PhraseBased/Manager.cpp 
-    PhraseBased/PhraseImpl.cpp 
+    PhraseBased/PhraseImpl.cpp
+		PhraseBased/ReorderingConstraint.cpp 
 	  PhraseBased/TargetPhrases.cpp
  	 	PhraseBased/Search.cpp
     PhraseBased/Sentence.cpp

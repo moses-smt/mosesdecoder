@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include "ReorderingConstraint.h"
+#include "PhraseBased/ReorderingConstraint.h"
 #include "TypeDef.h"
 
 namespace Moses2

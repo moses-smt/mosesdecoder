@@ -1,9 +1,9 @@
 #include <stdlib.h>
 #include <iostream>
 #include "ReorderingConstraint.h"
-#include "TypeDef.h"
-#include "legacy/Bitmap.h"
-#include "PhraseBased/Sentence.h"
+#include "Sentence.h"
+#include "../TypeDef.h"
+#include "../legacy/Bitmap.h"
 
 using namespace std;
 
