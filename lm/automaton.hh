@@ -103,16 +103,14 @@ template <typename Value, typename Callback> class NGramAutomaton {
             if (pred_) {
                 CopyContextWordsFromPredecessor();
                 in_state_.length = pred_->out_state_.length;
+                pred_finished_ = pred_->Finished();
 
                 //TODO: This IF statement does not need to be here although if removed then backoffs are copied uselessly
-                if (pred_->Finished()) {
-                    pred_finished_ = true;
-
+                if (pred_finished_) {
                     //copy backoffs
                     std::copy(pred_->out_state_.backoff, pred_->out_state_.backoff + pred_->out_state_.length, in_state_.backoff);
                 }
                 else {
-                    pred_finished_ = false;
                     pred_->SetSuccessor(this);
                 }
             }
