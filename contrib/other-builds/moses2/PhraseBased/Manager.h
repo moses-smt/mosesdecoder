@@ -41,24 +41,19 @@ public:
   virtual ~Manager();
 
   Bitmaps &GetBitmaps()
-  {
-    return *m_bitmaps;
-  }
+  {  return *m_bitmaps; }
 
   const EstimatedScores &GetEstimatedScores() const
-  {
-    return *m_estimatedScores;
-  }
+  {  return *m_estimatedScores; }
 
   const InputPaths &GetInputPaths() const
-  {
-    return m_inputPaths;
-  }
+  {  return m_inputPaths; }
 
   const TargetPhrase<Moses2::Word> &GetInitPhrase() const
-  {
-    return *m_initPhrase;
-  }
+  {  return *m_initPhrase; }
+
+  const std::set<const Moses2::Range*> &GetXMLRanges() const
+  { return m_xmlRanges; }
 
   void Decode();
   std::string OutputBest() const;
@@ -70,6 +65,7 @@ protected:
   Bitmaps *m_bitmaps;
   EstimatedScores *m_estimatedScores;
   TargetPhrase<Moses2::Word> *m_initPhrase;
+  std::set<const Moses2::Range*> m_xmlRanges;
 
   Search *m_search;
 
