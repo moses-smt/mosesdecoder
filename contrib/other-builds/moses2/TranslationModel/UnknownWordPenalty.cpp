@@ -33,6 +33,11 @@ UnknownWordPenalty::~UnknownWordPenalty()
   // TODO Auto-generated destructor stub
 }
 
+void UnknownWordPenalty::ProcessXML(const Sentence &sentence, InputPaths &inputPaths) const
+{
+
+}
+
 void UnknownWordPenalty::Lookup(const Manager &mgr,
     InputPathsBase &inputPaths) const
 {

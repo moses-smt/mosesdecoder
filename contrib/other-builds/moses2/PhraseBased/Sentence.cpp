@@ -10,24 +10,16 @@
 #include "../System.h"
 #include "../parameters/AllOptions.h"
 #include "../pugixml.hpp"
+#include "../legacy/Util2.h"
 
 using namespace std;
 
 namespace Moses2
 {
-void Sentence::XMLOption::Debug(std::ostream &out, const System &system) const
-{
-  out << "[" << startPos << "," << phraseSize << "]=" << nodeName;
-}
-
-//////////////////////////////////////////////////////////////////////////////
 
 Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
     const System &system, const std::string &str, long translationId)
 {
-
-  vector<XMLOption*> *xmlOptions;
-
   Sentence *ret;
 
   if (system.options.input.xml_policy) {
@@ -63,7 +55,7 @@ Sentence *Sentence::CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
     pugi::xml_node topNode = doc.child("xml");
 
     std::vector<std::string> toks;
-    XMLParse(0, topNode, toks, xmlOptions);
+    XMLParse(system, 0, topNode, toks, xmlOptions);
 
     // debug
     /*
@@ -98,7 +90,8 @@ Sentence *Sentence::CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
         reorderingConstraint.SetZone( xmlOption.startPos, xmlOption.startPos + xmlOption.phraseSize -1 );
       }
       else {
-        UTIL_THROW2("Unknown xml");
+    	// default - forced translation. Add to class variable
+    	  ret->GetXMLOptions().push_back(new XMLOption(xmlOption));
       }
     }
     reorderingConstraint.FinalizeWalls();
@@ -112,6 +105,7 @@ Sentence *Sentence::CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
 }
 
 void Sentence::XMLParse(
+    const System &system,
     size_t depth,
     const pugi::xml_node &parentNode,
     std::vector<std::string> &toks,
@@ -133,16 +127,31 @@ void Sentence::XMLParse(
     }
 
     if (!nodeName.empty()) {
-      XMLOption *xmlNode = new XMLOption();
-      xmlNode->nodeName = nodeName;
-      xmlNode->startPos = startPos;
-      xmlOptions.push_back(xmlNode);
+      XMLOption *xmlOption = new XMLOption();
+      xmlOption->nodeName = nodeName;
+      xmlOption->startPos = startPos;
+
+      pugi::xml_attribute attr = childNode.attribute("translation");
+      if (!attr.empty()) {
+    	  xmlOption->translation = attr.as_string();
+      }
+
+      attr = childNode.attribute("prob");
+      if (!attr.empty()) {
+    	  xmlOption->prob = attr.as_float();
+      }
+
+      xmlOptions.push_back(xmlOption);
 
       // recursively call this function. For proper recursive trees
-      XMLParse(depth + 1, childNode, toks, xmlOptions);
+      XMLParse(system, depth + 1, childNode, toks, xmlOptions);
 
       size_t endPos = toks.size();
-      xmlNode->phraseSize = endPos - startPos;
+      xmlOption->phraseSize = endPos - startPos;
+
+      cerr << "xmlOptions=";
+      xmlOption->Debug(cerr, system);
+      cerr << endl;
     }
 
   }

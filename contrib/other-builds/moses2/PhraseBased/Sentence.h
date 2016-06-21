@@ -23,19 +23,6 @@ class Sentence: public InputType, public PhraseImpl
 {
 public:
 
-  //////////////////////////////////////////////////////////////////////////////
-  class XMLOption
-  {
-  public:
-    std::string nodeName;
-    size_t startPos, phraseSize;
-
-    void Debug(std::ostream &out, const System &system) const;
-
-  };
-
-  //////////////////////////////////////////////////////////////////////////////
-
   static Sentence *CreateFromString(MemPool &pool, FactorCollection &vocab,
       const System &system, const std::string &str, long translationId);
 
@@ -52,6 +39,7 @@ protected:
       const System &system, const std::string &str, long translationId);
 
   static void XMLParse(
+	  const System &system,
       size_t depth,
       const pugi::xml_node &parentNode,
       std::vector<std::string> &toks,

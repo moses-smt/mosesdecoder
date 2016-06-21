@@ -54,8 +54,7 @@ void PhraseTable::SetParameter(const std::string& key, const std::string& value)
 
 bool PhraseTable::SatisfyBackoff(const Manager &mgr, const InputPath &path) const
 {
-	cerr << GetName() << "=" << GetPtInd() << "=" << decodeGraphBackoff << endl;
-
+	//cerr << GetName() << "=" << GetPtInd() << "=" << decodeGraphBackoff << endl;
 	if (decodeGraphBackoff == 0) {
 			// always lookup
 			return true;

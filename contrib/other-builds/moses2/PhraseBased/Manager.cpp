@@ -27,6 +27,7 @@
 #include "../Phrase.h"
 #include "../InputPathsBase.h"
 #include "../TranslationModel/PhraseTable.h"
+#include "../TranslationModel/UnknownWordPenalty.h"
 #include "../legacy/Range.h"
 #include "../PhraseBased/TargetPhrases.h"
 
@@ -67,6 +68,12 @@ void Manager::Init()
 
   m_inputPaths.Init(sentence, *this);
 
+  // xml
+  const UnknownWordPenalty *unkWP = system.featureFunctions.GetUnknownWordPenalty();
+  UTIL_THROW_IF2(unkWP == NULL, "There must be a UnknownWordPenalty FF");
+  unkWP->ProcessXML(sentence, m_inputPaths);
+
+  // lookup with every pt
   const std::vector<const PhraseTable*> &pts = system.mappings;
   for (size_t i = 0; i < pts.size(); ++i) {
     const PhraseTable &pt = *pts[i];
