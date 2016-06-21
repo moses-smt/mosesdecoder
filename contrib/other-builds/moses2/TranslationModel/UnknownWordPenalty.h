@@ -11,6 +11,8 @@
 
 namespace Moses2
 {
+class Sentence;
+class InputPaths;
 
 class UnknownWordPenalty: public PhraseTable
 {
@@ -21,6 +23,8 @@ public:
   void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
   virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
       InputPath &inputPath) const;
+
+  void ProcessXML(const Manager &mgr, MemPool &pool, const Sentence &sentence, InputPaths &inputPaths) const;
 
   virtual void
   EvaluateInIsolation(const System &system, const Phrase<Moses2::Word> &source,

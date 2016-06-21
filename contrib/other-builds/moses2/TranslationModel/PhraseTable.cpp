@@ -52,25 +52,43 @@ void PhraseTable::SetParameter(const std::string& key, const std::string& value)
   }
 }
 
+bool PhraseTable::SatisfyBackoff(const Manager &mgr, const InputPath &path) const
+{
+	//cerr << GetName() << "=" << GetPtInd() << "=" << decodeGraphBackoff << endl;
+	if (decodeGraphBackoff == 0) {
+			// always lookup
+			return true;
+	}
+	else if (decodeGraphBackoff == -1) {
+			// lookup only if there's no existing rules
+			return path.GetNumRules() ? false : true;
+	}
+	else if (path.range.GetNumWordsCovered() <= decodeGraphBackoff) {
+			return path.GetNumRules() ? false : true;
+	}
+
+	return false;
+}
+
 void PhraseTable::Lookup(const Manager &mgr, InputPathsBase &inputPaths) const
 {
   BOOST_FOREACH(InputPathBase *pathBase, inputPaths){
     InputPath *path = static_cast<InputPath*>(pathBase);
 
-    const SubPhrase<Moses2::Word> &phrase = path->subPhrase;
+    if (SatisfyBackoff(mgr, *path)) {
+		TargetPhrases *tpsPtr = tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
 
-    TargetPhrases *tpsPtr = tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
+		/*
+		 cerr << "path=" << path.GetRange() << " ";
+		 cerr << "tps=" << tps << " ";
+		 if (tps.get()) {
+		 cerr << tps.get()->GetSize();
+		 }
+		 cerr << endl;
+		 */
 
-    /*
-     cerr << "path=" << path.GetRange() << " ";
-     cerr << "tps=" << tps << " ";
-     if (tps.get()) {
-     cerr << tps.get()->GetSize();
-     }
-     cerr << endl;
-     */
-
-    path->AddTargetPhrases(*this, tpsPtr);
+		path->AddTargetPhrases(*this, tpsPtr);
+    }
   }
 
 }

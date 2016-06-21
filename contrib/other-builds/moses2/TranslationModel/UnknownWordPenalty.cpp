@@ -8,10 +8,12 @@
 #include "UnknownWordPenalty.h"
 #include "../System.h"
 #include "../Scores.h"
+#include "../InputType.h"
 #include "../PhraseBased/Manager.h"
 #include "../PhraseBased/TargetPhraseImpl.h"
 #include "../PhraseBased/InputPath.h"
 #include "../PhraseBased/TargetPhrases.h"
+#include "../PhraseBased/Sentence.h"
 #include "../SCFG/InputPath.h"
 #include "../SCFG/TargetPhraseImpl.h"
 #include "../SCFG/Manager.h"
@@ -33,17 +35,50 @@ UnknownWordPenalty::~UnknownWordPenalty()
   // TODO Auto-generated destructor stub
 }
 
+void UnknownWordPenalty::ProcessXML(const Manager &mgr, MemPool &pool, const Sentence &sentence, InputPaths &inputPaths) const
+{
+	const std::vector<InputType::XMLOption*> &xmlOptions = sentence.GetXMLOptions();
+	BOOST_FOREACH(const InputType::XMLOption *xmlOption, xmlOptions) {
+	      cerr << "xmlOptions=";
+	      xmlOption->Debug(cerr, mgr.system);
+	      cerr << endl;
+
+
+		TargetPhraseImpl *target = TargetPhraseImpl::CreateFromString(pool, *this, mgr.system, xmlOption->translation);
+
+	      if (xmlOption->prob) {
+		      Scores &scores = target->GetScores();
+	    	  scores.PlusEquals(mgr.system, *this, Moses2::TransformScore(xmlOption->prob));
+	      }
+
+	      InputPath *path = inputPaths.GetMatrix().GetValue(xmlOption->startPos, xmlOption->phraseSize);
+	      const SubPhrase<Moses2::Word> &source = path->subPhrase;
+
+	      mgr.system.featureFunctions.EvaluateInIsolation(pool, mgr.system, source, *target);
+
+	      TargetPhrases *tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, 1);
+
+	      tps->AddTargetPhrase(*target);
+	      mgr.system.featureFunctions.EvaluateAfterTablePruning(pool, *tps, source);
+
+	      path->AddTargetPhrases(*this, tps);
+	      cerr << "path=" << endl;
+	}
+}
+
 void UnknownWordPenalty::Lookup(const Manager &mgr,
     InputPathsBase &inputPaths) const
 {
-  BOOST_FOREACH(InputPathBase *pathBase, inputPaths){
-  InputPath *path = static_cast<InputPath*>(pathBase);
-  const SubPhrase<Moses2::Word> &phrase = path->subPhrase;
+	BOOST_FOREACH(InputPathBase *pathBase, inputPaths){
+	  InputPath *path = static_cast<InputPath*>(pathBase);
 
-  TargetPhrases *tpsPtr;
-  tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
-  path->AddTargetPhrases(*this, tpsPtr);
-}
+	  if (SatisfyBackoff(mgr, *path)) {
+		  const SubPhrase<Moses2::Word> &phrase = path->subPhrase;
+
+		  TargetPhrases *tps = Lookup(mgr, mgr.GetPool(), *path);
+		  path->AddTargetPhrases(*this, tps);
+	  }
+	}
 
 }
 
@@ -51,14 +86,7 @@ TargetPhrases *UnknownWordPenalty::Lookup(const Manager &mgr, MemPool &pool,
     InputPath &inputPath) const
 {
   const System &system = mgr.system;
-
   TargetPhrases *tps = NULL;
-
-  size_t numWords = inputPath.range.GetNumWordsCovered();
-  if (numWords > 1) {
-    // only create 1 word phrases
-    return tps;
-  }
 
   // any other pt translate this?
   size_t numPt = mgr.system.mappings.size();

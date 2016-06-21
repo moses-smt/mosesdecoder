@@ -45,6 +45,8 @@ System::System(const Parameter &paramsArg) :
   cerr << "START LoadMappings()" << endl;
   LoadMappings();
   cerr << "END LoadMappings()" << endl;
+  LoadDecodeGraphBackoff();
+  cerr << "END LoadDecodeGraphBackoff()" << endl;
 
   // max spans for scfg decoding
   if (!isPb) {
@@ -95,17 +97,60 @@ void System::LoadMappings()
   else {
     ptInd = Scan<size_t>(toks[2]);
   }
-  const PhraseTable *pt = featureFunctions.GetPhraseTablesExcludeUnknownWordPenalty(ptInd);
+  const PhraseTable *pt = featureFunctions.GetPhraseTableExcludeUnknownWordPenalty(ptInd);
   mappings.push_back(pt);
 }
 
 // unk pt
-  const UnknownWordPenalty *unkWP =
-      dynamic_cast<const UnknownWordPenalty*>(featureFunctions.FindFeatureFunction(
-          "UnknownWordPenalty0"));
+  const UnknownWordPenalty *unkWP = featureFunctions.GetUnknownWordPenalty();
   if (unkWP) {
     mappings.push_back(unkWP);
   }
+}
+
+void System::LoadDecodeGraphBackoff()
+{
+  const PARAM_VEC *vec = params.GetParam("decoding-graph-backoff");
+
+  if (vec) {
+	  for (size_t i = 0; i < mappings.size(); ++i) {
+		  PhraseTable *pt = const_cast<PhraseTable*>(mappings[i]);
+		  if (vec->size() < i) {
+			  pt->decodeGraphBackoff = Scan<int>((*vec)[i]);
+		  }
+		  else if (pt == featureFunctions.GetUnknownWordPenalty()) {
+			  pt->decodeGraphBackoff = 1;
+		  }
+		  else {
+			  pt->decodeGraphBackoff = 0;
+		  }
+	  }
+  }
+  else {
+	  for (size_t i = 0; i < mappings.size(); ++i) {
+		  PhraseTable *pt = const_cast<PhraseTable*>(mappings[i]);
+		  cerr << pt->GetName() << "=";
+		  if (pt == featureFunctions.GetUnknownWordPenalty()) {
+			  pt->decodeGraphBackoff = 1; // lookup only if range is 1 or less, and there's no existing rule
+			  cerr << "1\n";
+		  }
+		  else if (options.input.xml_policy == XmlExclusive) {
+			  pt->decodeGraphBackoff = -1; // lookup only if there's no existing rules
+			  cerr << "-1\n";
+		  }
+		  else if (options.input.xml_policy == XmlInclusive) {
+			  pt->decodeGraphBackoff = 0; // always lookup
+			  cerr << "0\n";
+		  }
+		  else {
+			  pt->decodeGraphBackoff = 0; // always lookup
+			  cerr << "0(2)\n";
+		  }
+
+
+	  }
+  }
+
 }
 
 MemPool &System::GetSystemPool() const

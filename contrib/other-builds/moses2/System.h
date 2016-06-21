@@ -42,6 +42,7 @@ public:
   FeatureFunctions featureFunctions;
   Weights weights;
   std::vector<const PhraseTable*> mappings;
+
   std::vector<size_t> maxChartSpans;
   bool isPb;
 
@@ -73,6 +74,7 @@ protected:
 
   void LoadWeights();
   void LoadMappings();
+  void LoadDecodeGraphBackoff();
 
   void IsPb();
 

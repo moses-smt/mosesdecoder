@@ -183,7 +183,7 @@ void Search::PostDecode(size_t stackInd)
         if (path == NULL) {
           break;
         }
-        if (!path->IsUsed()) {
+        if (path->GetNumRules() == 0) {
           continue;
         }
 

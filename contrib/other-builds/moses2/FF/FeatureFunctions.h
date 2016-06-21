@@ -28,6 +28,7 @@ class PhraseImpl;
 class TargetPhrases;
 class Scores;
 class Hypothesis;
+class UnknownWordPenalty;
 
 namespace SCFG
 {
@@ -45,30 +46,25 @@ public:
   virtual ~FeatureFunctions();
 
   const std::vector<const FeatureFunction*> &GetFeatureFunctions() const
-  {
-    return m_featureFunctions;
-  }
+  { return m_featureFunctions; }
 
   const std::vector<const StatefulFeatureFunction*> &GetStatefulFeatureFunctions() const
-  {
-    return m_statefulFeatureFunctions;
-  }
+  { return m_statefulFeatureFunctions; }
 
   const std::vector<const FeatureFunction*> &GetWithPhraseTableInd() const
-  {
-    return m_withPhraseTableInd;
-  }
+  { return m_withPhraseTableInd; }
 
   size_t GetNumScores() const
-  {
-    return m_ffStartInd;
-  }
+  { return m_ffStartInd; }
 
   void Create();
   void Load();
 
   const FeatureFunction *FindFeatureFunction(const std::string &name) const;
-  const PhraseTable *GetPhraseTablesExcludeUnknownWordPenalty(size_t ptInd);
+
+  const PhraseTable *GetPhraseTableExcludeUnknownWordPenalty(size_t ptInd);
+  const UnknownWordPenalty *GetUnknownWordPenalty() const
+  { return m_unkWP; }
 
   // the pool here must be the system pool if the rule was loaded during load, or the mgr pool if it was loaded on demand
   void EvaluateInIsolation(MemPool &pool, const System &system,
@@ -87,6 +83,8 @@ protected:
   std::vector<const FeatureFunction*> m_featureFunctions;
   std::vector<const StatefulFeatureFunction*> m_statefulFeatureFunctions;
   std::vector<const FeatureFunction*> m_withPhraseTableInd;
+  const UnknownWordPenalty *m_unkWP;
+
   boost::unordered_map<std::string, size_t> m_defaultNames;
   System &m_system;
   size_t m_ffStartInd;

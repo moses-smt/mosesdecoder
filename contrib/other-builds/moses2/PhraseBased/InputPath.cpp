@@ -13,7 +13,8 @@ namespace Moses2
 {
 InputPath::InputPath(MemPool &pool, const SubPhrase<Moses2::Word> &subPhrase,
     const Range &range, size_t numPt, const InputPath *prefixPath)
-:InputPathBase(pool, range, numPt, prefixPath), m_isUsed(false)
+:InputPathBase(pool, range, numPt, prefixPath)
+,m_numRules(0)
 ,subPhrase(subPhrase)
 {
   targetPhrases = pool.Allocate<const TargetPhrases*>(numPt);
@@ -31,8 +32,8 @@ void InputPath::AddTargetPhrases(const PhraseTable &pt,
   size_t ptInd = pt.GetPtInd();
   targetPhrases[ptInd] = tps;
 
-  if (tps && tps->GetSize()) {
-    m_isUsed = true;
+  if (tps) {
+    m_numRules += tps->GetSize();
   }
 }
 

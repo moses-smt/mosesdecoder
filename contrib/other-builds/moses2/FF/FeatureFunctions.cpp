@@ -98,6 +98,12 @@ void FeatureFunctions::Create()
     pt->SetPtInd(m_phraseTables.size());
     m_phraseTables.push_back(pt);
   }
+
+  const UnknownWordPenalty *unkWP = dynamic_cast<const UnknownWordPenalty *>(pt);
+  if (unkWP) {
+	  m_unkWP = unkWP;
+  }
+
 }
 }
 
@@ -144,17 +150,14 @@ const FeatureFunction *FeatureFunctions::FindFeatureFunction(
 return NULL;
 }
 
-const PhraseTable *FeatureFunctions::GetPhraseTablesExcludeUnknownWordPenalty(
-    size_t ptInd)
+const PhraseTable *FeatureFunctions::GetPhraseTableExcludeUnknownWordPenalty(size_t ptInd)
 {
   // assume only 1 unk wp
   std::vector<const PhraseTable*> tmpVec(m_phraseTables);
   std::vector<const PhraseTable*>::iterator iter;
   for (iter = tmpVec.begin(); iter != tmpVec.end(); ++iter) {
     const PhraseTable *pt = *iter;
-    const UnknownWordPenalty *unkWP =
-        dynamic_cast<const UnknownWordPenalty *>(pt);
-    if (unkWP) {
+    if (pt == m_unkWP) {
       tmpVec.erase(iter);
       break;
     }

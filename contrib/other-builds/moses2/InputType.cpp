@@ -9,6 +9,18 @@
 
 namespace Moses2
 {
+//////////////////////////////////////////////////////////////////////////////
+
+void InputType::XMLOption::Debug(std::ostream &out, const System &system) const
+{
+  out << "[" << startPos << "," << phraseSize << "]="
+	<< nodeName << ","
+	<< translation << ","
+	<< prob;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+
 InputType::InputType(long translationId, MemPool &pool)
 :m_translationId(translationId)
 ,m_reorderingConstraint(pool)
