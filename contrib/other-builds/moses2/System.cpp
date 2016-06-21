@@ -48,6 +48,8 @@ System::System(const Parameter &paramsArg) :
   LoadDecodeGraphBackoff();
   cerr << "END LoadDecodeGraphBackoff()" << endl;
 
+  UTIL_THROW_IF2(options.input.xml_policy == XmlConstraint, "XmlConstraint not supported");
+
   // max spans for scfg decoding
   if (!isPb) {
     section = params.GetParam("max-chart-span");
@@ -112,45 +114,19 @@ void System::LoadDecodeGraphBackoff()
 {
   const PARAM_VEC *vec = params.GetParam("decoding-graph-backoff");
 
-  if (vec) {
-	  for (size_t i = 0; i < mappings.size(); ++i) {
-		  PhraseTable *pt = const_cast<PhraseTable*>(mappings[i]);
-		  if (vec->size() < i) {
-			  pt->decodeGraphBackoff = Scan<int>((*vec)[i]);
-		  }
-		  else if (pt == featureFunctions.GetUnknownWordPenalty()) {
-			  pt->decodeGraphBackoff = 1;
-		  }
-		  else {
-			  pt->decodeGraphBackoff = 0;
-		  }
+  for (size_t i = 0; i < mappings.size(); ++i) {
+	  PhraseTable *pt = const_cast<PhraseTable*>(mappings[i]);
+
+	  if (vec && vec->size() < i) {
+		  pt->decodeGraphBackoff = Scan<int>((*vec)[i]);
+	  }
+	  else if (pt == featureFunctions.GetUnknownWordPenalty()) {
+		  pt->decodeGraphBackoff = 1;
+	  }
+	  else {
+		  pt->decodeGraphBackoff = 0;
 	  }
   }
-  else {
-	  for (size_t i = 0; i < mappings.size(); ++i) {
-		  PhraseTable *pt = const_cast<PhraseTable*>(mappings[i]);
-		  cerr << pt->GetName() << "=";
-		  if (pt == featureFunctions.GetUnknownWordPenalty()) {
-			  pt->decodeGraphBackoff = 1; // lookup only if range is 1 or less, and there's no existing rule
-			  cerr << "1\n";
-		  }
-		  else if (options.input.xml_policy == XmlExclusive) {
-			  pt->decodeGraphBackoff = -1; // lookup only if there's no existing rules
-			  cerr << "-1\n";
-		  }
-		  else if (options.input.xml_policy == XmlInclusive) {
-			  pt->decodeGraphBackoff = 0; // always lookup
-			  cerr << "0\n";
-		  }
-		  else {
-			  pt->decodeGraphBackoff = 0; // always lookup
-			  cerr << "0(2)\n";
-		  }
-
-
-	  }
-  }
-
 }
 
 MemPool &System::GetSystemPool() const

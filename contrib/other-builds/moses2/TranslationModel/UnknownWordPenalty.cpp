@@ -35,15 +35,14 @@ UnknownWordPenalty::~UnknownWordPenalty()
   // TODO Auto-generated destructor stub
 }
 
-void UnknownWordPenalty::ProcessXML(const Manager &mgr, MemPool &pool, const Sentence &sentence, InputPaths &inputPaths) const
+void UnknownWordPenalty::ProcessXML(
+		const Manager &mgr,
+		MemPool &pool,
+		const Sentence &sentence,
+		InputPaths &inputPaths) const
 {
-	const std::vector<InputType::XMLOption*> &xmlOptions = sentence.GetXMLOptions();
+	const std::vector<const InputType::XMLOption*> &xmlOptions = sentence.GetXMLOptions();
 	BOOST_FOREACH(const InputType::XMLOption *xmlOption, xmlOptions) {
-	      cerr << "xmlOptions=";
-	      xmlOption->Debug(cerr, mgr.system);
-	      cerr << endl;
-
-
 		TargetPhraseImpl *target = TargetPhraseImpl::CreateFromString(pool, *this, mgr.system, xmlOption->translation);
 
 	      if (xmlOption->prob) {
@@ -51,7 +50,7 @@ void UnknownWordPenalty::ProcessXML(const Manager &mgr, MemPool &pool, const Sen
 	    	  scores.PlusEquals(mgr.system, *this, Moses2::TransformScore(xmlOption->prob));
 	      }
 
-	      InputPath *path = inputPaths.GetMatrix().GetValue(xmlOption->startPos, xmlOption->phraseSize);
+	      InputPath *path = inputPaths.GetMatrix().GetValue(xmlOption->startPos, xmlOption->phraseSize - 1);
 	      const SubPhrase<Moses2::Word> &source = path->subPhrase;
 
 	      mgr.system.featureFunctions.EvaluateInIsolation(pool, mgr.system, source, *target);
@@ -62,7 +61,6 @@ void UnknownWordPenalty::ProcessXML(const Manager &mgr, MemPool &pool, const Sen
 	      mgr.system.featureFunctions.EvaluateAfterTablePruning(pool, *tps, source);
 
 	      path->AddTargetPhrases(*this, tps);
-	      cerr << "path=" << endl;
 	}
 }
 

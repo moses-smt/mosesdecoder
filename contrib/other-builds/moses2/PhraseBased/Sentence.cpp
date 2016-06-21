@@ -70,7 +70,7 @@ Sentence *Sentence::CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
     ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks, false);
 
     // xml
-    ret->Init(size, system.options.reordering.max_distortion);
+    ret->Init(system, size, system.options.reordering.max_distortion);
 
     ReorderingConstraint &reorderingConstraint = ret->GetReorderingConstraint();
 
@@ -91,7 +91,7 @@ Sentence *Sentence::CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
       }
       else {
     	// default - forced translation. Add to class variable
-    	  ret->GetXMLOptions().push_back(new XMLOption(xmlOption));
+    	  ret->AddXMLOption(system, new XMLOption(xmlOption));
       }
     }
     reorderingConstraint.FinalizeWalls();

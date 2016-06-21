@@ -9,6 +9,7 @@
 #include "PhraseTable.h"
 #include "../legacy/Util2.h"
 #include "../TypeDef.h"
+#include "../InputType.h"
 #include "../PhraseBased/Manager.h"
 #include "../PhraseBased/InputPath.h"
 
@@ -54,6 +55,12 @@ void PhraseTable::SetParameter(const std::string& key, const std::string& value)
 
 bool PhraseTable::SatisfyBackoff(const Manager &mgr, const InputPath &path) const
 {
+  const InputType &input = mgr.GetInput();
+  if ((mgr.system.options.input.xml_policy == XmlExclusive)
+	  && input.XmlOverlap(path.range.GetStartPos(), path.range.GetEndPos())) {
+	  return false;
+  }
+
 	//cerr << GetName() << "=" << GetPtInd() << "=" << decodeGraphBackoff << endl;
 	if (decodeGraphBackoff == 0) {
 			// always lookup
