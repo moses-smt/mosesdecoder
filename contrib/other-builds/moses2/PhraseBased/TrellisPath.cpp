@@ -76,7 +76,7 @@ SCORE TrellisPath::GetFutureScore() const
 
 void TrellisPath::Debug(std::ostream &out, const System &system) const
 {
-  out << ToString();
+  out << OutputTargetPhrase(system);
   out << "||| ";
 
   GetScores().Debug(out, system);
@@ -85,7 +85,7 @@ void TrellisPath::Debug(std::ostream &out, const System &system) const
   out << GetScores().GetTotalScore();
 }
 
-std::string TrellisPath::ToString() const
+std::string TrellisPath::OutputTargetPhrase(const System &system) const
 {
   //cerr << "path=" << this << " " << nodes.size() << endl;
   std::stringstream out;

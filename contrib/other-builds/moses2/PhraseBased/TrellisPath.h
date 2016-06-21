@@ -65,7 +65,7 @@ public:
   SCORE GetFutureScore() const;
 
   void Debug(std::ostream &out, const System &system) const;
-  std::string ToString() const;
+  std::string OutputTargetPhrase(const System &system) const;
 
   //! create a set of next best paths by wiggling 1 of the node at a time.
   void CreateDeviantPaths(TrellisPaths &paths, const ArcLists &arcLists,
