@@ -13,13 +13,16 @@ namespace Moses2
 //////////////////////////////////////////////////////////////////////////////
 InputType::XMLOption::XMLOption(MemPool &pool, const std::string &nodeName, size_t vStartPos)
 :startPos(vStartPos)
-,m_nodeName(nodeName)
 ,prob(0)
-{}
+{
+	m_nodeName = pool.Allocate<char>(nodeName.size() + 1);
+	strcpy(m_nodeName, nodeName.c_str());
+}
 
 void InputType::XMLOption::SetTranslation(MemPool &pool, const std::string &val)
 {
-	m_translation = val;
+	m_translation = pool.Allocate<char>(val.size() + 1);
+	strcpy(m_translation, val.c_str());
 }
 
 void InputType::XMLOption::Debug(std::ostream &out, const System &system) const

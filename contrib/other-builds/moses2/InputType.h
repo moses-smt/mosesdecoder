@@ -27,17 +27,17 @@ public:
 	XMLOption(MemPool &pool, const std::string &nodeName, size_t vStartPos);
 
 	const char *GetNodeName() const
-	{ return m_nodeName.c_str(); }
+	{ return m_nodeName; }
 
 	const char *GetTranslation() const
-	{ return m_translation.c_str(); }
+	{ return m_translation; }
 
 	void SetTranslation(MemPool &pool, const std::string &val);
 
 	void Debug(std::ostream &out, const System &system) const;
   public:
-	std::string m_nodeName;
-	std::string m_translation;
+	char *m_nodeName;
+	char *m_translation;
 
   };
 
