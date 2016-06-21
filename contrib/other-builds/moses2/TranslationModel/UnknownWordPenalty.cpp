@@ -36,14 +36,17 @@ UnknownWordPenalty::~UnknownWordPenalty()
 void UnknownWordPenalty::Lookup(const Manager &mgr,
     InputPathsBase &inputPaths) const
 {
-  BOOST_FOREACH(InputPathBase *pathBase, inputPaths){
-  InputPath *path = static_cast<InputPath*>(pathBase);
-  const SubPhrase<Moses2::Word> &phrase = path->subPhrase;
+	BOOST_FOREACH(InputPathBase *pathBase, inputPaths){
+	  InputPath *path = static_cast<InputPath*>(pathBase);
 
-  TargetPhrases *tpsPtr;
-  tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
-  path->AddTargetPhrases(*this, tpsPtr);
-}
+	  if (SatisfyBackoff(mgr, *path)) {
+		  const SubPhrase<Moses2::Word> &phrase = path->subPhrase;
+
+		  TargetPhrases *tpsPtr;
+		  tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
+		  path->AddTargetPhrases(*this, tpsPtr);
+	  }
+	}
 
 }
 
@@ -51,14 +54,7 @@ TargetPhrases *UnknownWordPenalty::Lookup(const Manager &mgr, MemPool &pool,
     InputPath &inputPath) const
 {
   const System &system = mgr.system;
-
   TargetPhrases *tps = NULL;
-
-  size_t numWords = inputPath.range.GetNumWordsCovered();
-  if (numWords > 1) {
-    // only create 1 word phrases
-    return tps;
-  }
 
   // any other pt translate this?
   size_t numPt = mgr.system.mappings.size();

@@ -31,6 +31,8 @@ class Manager;
 class PhraseTable: public StatelessFeatureFunction
 {
 public:
+  int decodeGraphBackoff;
+
   PhraseTable(size_t startInd, const std::string &line);
   virtual ~PhraseTable();
 
@@ -40,13 +42,12 @@ public:
       InputPath &inputPath) const;
 
   void SetPtInd(size_t ind)
-  {
-    m_ptInd = ind;
-  }
+  {  m_ptInd = ind; }
+
   size_t GetPtInd() const
-  {
-    return m_ptInd;
-  }
+  {  return m_ptInd; }
+
+  bool SatisfyBackoff(const Manager &mgr, const InputPath &path) const;
 
   virtual void
   EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<Moses2::Word> &source,
@@ -77,7 +78,7 @@ public:
 
 protected:
   std::string m_path;
-  size_t m_ptInd;
+  size_t m_ptInd; // in the order that it is list in [feature], NOT order of [mapping]
   size_t m_tableLimit;
 
   // cache

@@ -95,11 +95,14 @@ void ProbingPT::Load(System &system)
 void ProbingPT::Lookup(const Manager &mgr, InputPathsBase &inputPaths) const
 {
   BOOST_FOREACH(InputPathBase *pathBase, inputPaths){
-  InputPath *path = static_cast<InputPath*>(pathBase);
-  TargetPhrases *tpsPtr;
-  tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
-  path->AddTargetPhrases(*this, tpsPtr);
-}
+	  InputPath *path = static_cast<InputPath*>(pathBase);
+
+	  if (SatisfyBackoff(mgr, *path)) {
+		  TargetPhrases *tpsPtr;
+		  tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
+		  path->AddTargetPhrases(*this, tpsPtr);
+	  }
+  }
 }
 
 TargetPhrases* ProbingPT::Lookup(const Manager &mgr, MemPool &pool,

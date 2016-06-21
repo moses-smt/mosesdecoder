@@ -28,15 +28,13 @@ public:
   void AddTargetPhrases(const PhraseTable &pt, const TargetPhrases *tps);
   const TargetPhrases *GetTargetPhrases(const PhraseTable &pt) const;
 
-  inline bool IsUsed() const
-  {
-    return m_isUsed;
-  }
+  size_t GetNumRules() const
+  { return m_numRules; }
 
   void Debug(std::ostream &out, const System &system) const;
 
 protected:
-  bool m_isUsed;
+  size_t m_numRules;
 };
 
 }
