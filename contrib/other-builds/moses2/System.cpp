@@ -28,7 +28,7 @@ System::System(const Parameter &paramsArg) :
 
   bestCollector.reset(new OutputCollector());
 
-  params.SetParameter(cpuAffinityOffset, "cpu-affinity-offset", 0);
+  params.SetParameter(cpuAffinityOffset, "cpu-affinity-offset", -1);
   params.SetParameter(cpuAffinityOffsetIncr, "cpu-affinity-increment", 1);
 
   const PARAM_VEC *section;

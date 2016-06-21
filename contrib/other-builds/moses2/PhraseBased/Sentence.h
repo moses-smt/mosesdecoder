@@ -39,6 +39,7 @@ protected:
       const System &system, const std::string &str, long translationId);
 
   static void XMLParse(
+	  MemPool &pool,
 	  const System &system,
       size_t depth,
       const pugi::xml_node &parentNode,

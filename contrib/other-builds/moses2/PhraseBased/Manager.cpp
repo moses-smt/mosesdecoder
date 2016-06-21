@@ -228,7 +228,9 @@ std::string Manager::OutputNBest()
 
     bool ok = false;
     if (system.options.nbest.only_distinct) {
-      string tgtPhrase = path->ToString();
+      string tgtPhrase = path->OutputTargetPhrase(system);
+      //cerr << "tgtPhrase=" << tgtPhrase << endl;
+
       if (distinctHypos.insert(tgtPhrase).second) {
         ok = true;
       }
@@ -239,7 +241,7 @@ std::string Manager::OutputNBest()
 
     if (ok) {
       out << transId << " |||";
-      out << path->Debug(system);
+      path->OutputToStream(out, system);
       out << "\n";
     }
 
