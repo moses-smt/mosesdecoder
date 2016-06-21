@@ -6,6 +6,7 @@
  */
 
 #include "InputType.h"
+#include "System.h"
 
 namespace Moses2
 {
@@ -32,10 +33,34 @@ InputType::~InputType()
   // TODO Auto-generated destructor stub
 }
 
-void InputType::Init(size_t size, int max_distortion)
+void InputType::Init(const System &system, size_t size, int max_distortion)
 {
   m_reorderingConstraint.InitializeWalls(size, max_distortion);
 
+  if (system.options.input.xml_policy != XmlPassThrough) {
+	m_xmlCoverageMap.assign(size, false);
+  }
+}
+
+void InputType::AddXMLOption(const System &system, const XMLOption *xmlOption)
+{
+	m_xmlOptions.push_back(xmlOption);
+
+  if (system.options.input.xml_policy != XmlPassThrough) {
+	  for(size_t j = xmlOption->startPos; j < xmlOption->startPos + xmlOption->phraseSize; ++j) {
+			m_xmlCoverageMap[j]=true;
+	  }
+  }
+}
+
+bool InputType::XmlOverlap(size_t startPos, size_t endPos) const
+{
+  for (size_t pos = startPos; pos <=  endPos ; pos++) {
+    if (pos < m_xmlCoverageMap.size() && m_xmlCoverageMap[pos]) {
+      return true;
+    }
+  }
+  return false;
 }
 
 } /* namespace Moses2 */

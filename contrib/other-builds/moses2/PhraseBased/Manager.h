@@ -41,24 +41,16 @@ public:
   virtual ~Manager();
 
   Bitmaps &GetBitmaps()
-  {
-    return *m_bitmaps;
-  }
+  {  return *m_bitmaps; }
 
   const EstimatedScores &GetEstimatedScores() const
-  {
-    return *m_estimatedScores;
-  }
+  {  return *m_estimatedScores; }
 
   const InputPaths &GetInputPaths() const
-  {
-    return m_inputPaths;
-  }
+  {  return m_inputPaths; }
 
   const TargetPhrase<Moses2::Word> &GetInitPhrase() const
-  {
-    return *m_initPhrase;
-  }
+  {  return *m_initPhrase; }
 
   void Decode();
   std::string OutputBest() const;

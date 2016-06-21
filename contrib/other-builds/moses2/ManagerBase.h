@@ -46,24 +46,16 @@ public:
   virtual std::string OutputNBest() = 0;
 
   MemPool &GetPool() const
-  {
-    return *m_pool;
-  }
+  {  return *m_pool; }
 
   MemPool &GetSystemPool() const
-  {
-    return *m_systemPool;
-  }
+  {  return *m_systemPool; }
 
   Recycler<HypothesisBase*> &GetHypoRecycle() const
-  {
-    return *m_hypoRecycle;
-  }
+  {  return *m_hypoRecycle; }
 
   const InputType &GetInput() const
-  {
-    return *m_input;
-  }
+  {  return *m_input; }
 
 protected:
   std::string m_inputStr;
