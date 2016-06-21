@@ -271,20 +271,34 @@ template <typename Value, typename Callback> class NGramAutomaton {
         }
 
 
+        //Callback to be called once the score is computed
         Callback callback_;
+        //ngram_order_ is equal to the ordger of the ngram that will be looked-up at the next invocation of Step()
+        //ngram_order_ is initialized to 0 because first invocation of Step() only prefetches a unigram and doesn't do any lookups
         std::size_t ngram_order_;
+        //status_ indicatates whether the automaton has finished (Status::DONE) or not (Status::Working)
         Status status_;
+        //search_ performs all the prefetches and lookups of ngrams
         detail::HashedSearch<Value> &search_;
+        //node_ stores the intermediate hash so that it does not have to be recomputed at every invocation of Step()
         typename detail::HashedSearch<Value>::Node node_;
+        //Indicates whether predecessor is finished
         bool pred_finished_;
+        //Indicates whether successor is finished
         bool succ_finished_;
+        //Pointer to predecessor, can be nullptr only if context_state was provided in Task 
         NGramAutomaton<Value, Callback>* pred_;
+        //Pointer to successor
         NGramAutomaton<Value, Callback>* succ_;
+        //successor stores its data in its predecessor's succ_data_ so that once predecessor completes it can add backoffs
         SuccessorData succ_data_; 
         WordIndex new_word_;
         FullScoreReturn ret_;
         State in_state_;
+        //out_state_ stores the backoffs for its successor
+        //out_state_.length starts as an upper bound for the context_length but is correct at latest when the automaton finishes
         State out_state_;
+        //MAX_ORDER is the order of the language model being used by search_
         const unsigned short MAX_ORDER;
 };
 
