@@ -39,8 +39,9 @@ void Stacks::Init(const Manager &mgr, size_t numStacks)
   }
 }
 
-void Stacks::Debug(std::ostream &out, const System &system) const
+std::string Stacks::Debug(const System &system) const
 {
+  stringstream out;
   for (size_t i = 0; i < GetSize(); ++i) {
     const Stack *stack = m_stacks[i];
     if (stack) {
@@ -50,6 +51,7 @@ void Stacks::Debug(std::ostream &out, const System &system) const
       out << "N ";
     }
   }
+  return out.str();
 }
 
 void Stacks::Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,

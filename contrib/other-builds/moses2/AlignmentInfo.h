@@ -94,7 +94,7 @@ public:
            m_nonTermIndexMap == rhs.m_nonTermIndexMap;
   }
 
-  void Debug(std::ostream &out, const System &system) const;
+  std::string Debug(const System &system) const;
 
 private:
   //! AlignmentInfo objects should only be created by an AlignmentInfoCollection

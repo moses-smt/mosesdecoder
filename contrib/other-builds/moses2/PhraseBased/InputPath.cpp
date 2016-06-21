@@ -4,10 +4,13 @@
  *  Created on: 23 Oct 2015
  *      Author: hieu
  */
+#include <sstream>
 #include <boost/foreach.hpp>
 #include "InputPath.h"
 #include "TargetPhrases.h"
 #include "../TranslationModel/PhraseTable.h"
+
+using namespace std;
 
 namespace Moses2
 {
@@ -43,10 +46,13 @@ const TargetPhrases *InputPath::GetTargetPhrases(const PhraseTable &pt) const
   return targetPhrases[ptInd];
 }
 
-void InputPath::Debug(std::ostream &out, const System &system) const
+std::string InputPath::Debug(const System &system) const
 {
+  stringstream out;
+
   out << range << " ";
-  subPhrase.Debug(out, system);
+  out << subPhrase.Debug(system);
+  return out.str();
 }
 
 }

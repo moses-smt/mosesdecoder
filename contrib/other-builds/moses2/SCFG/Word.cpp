@@ -75,15 +75,17 @@ void Word::OutputToStream(std::ostream &out) const
   }
 }
 
-void Word::Debug(std::ostream &out, const System &system) const
+std::string Word::Debug(const System &system) const
 {
+  stringstream out;
   if (isNonTerminal) {
     out << "[";
   }
-  Moses2::Word::Debug(out, system);
+  out << Moses2::Word::Debug(system);
   if (isNonTerminal) {
       out << "]";
   }
+  return out.str();
 }
 
 }

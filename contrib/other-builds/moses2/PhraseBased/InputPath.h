@@ -31,7 +31,7 @@ public:
   size_t GetNumRules() const
   { return m_numRules; }
 
-  void Debug(std::ostream &out, const System &system) const;
+  std::string Debug(const System &system) const;
 
 protected:
   size_t m_numRules;

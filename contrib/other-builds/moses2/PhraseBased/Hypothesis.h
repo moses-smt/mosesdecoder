@@ -67,7 +67,7 @@ public:
     return *m_targetPhrase;
   }
 
-  void Debug(std::ostream &out, const System &system) const;
+  std::string Debug(const System &system) const;
 
   virtual void OutputToStream(std::ostream &out) const;
 

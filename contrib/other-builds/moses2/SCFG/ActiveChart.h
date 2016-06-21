@@ -8,6 +8,7 @@ namespace Moses2
 {
 class HypothesisColl;
 class System;
+class PhraseTable;
 
 namespace SCFG
 {
@@ -62,7 +63,7 @@ public:
   bool operator==(const SymbolBind &compare) const
   {  return coll == compare.coll; }
 
-  void Debug(std::ostream &out, const System &system) const;
+  std::string Debug(const System &system) const;
 
 };
 
@@ -76,25 +77,31 @@ class ActiveChartEntry
 {
 public:
   ActiveChartEntry(MemPool &pool)
-  :symbolBinds(pool)
+  :m_symbolBind(pool)
   {
     //symbolBinds = new (pool.Allocate<SymbolBind>()) SymbolBind(pool);
   }
 
   ActiveChartEntry(MemPool &pool, const ActiveChartEntry &prevEntry)
-  :symbolBinds(pool, prevEntry.GetSymbolBind())
+  :m_symbolBind(pool, prevEntry.GetSymbolBind())
   {
     //symbolBinds = new (pool.Allocate<SymbolBind>()) SymbolBind(pool, *prevEntry.symbolBinds);
   }
 
   const SymbolBind &GetSymbolBind() const
-  { return symbolBinds; }
+  { return m_symbolBind; }
 
-  SymbolBind &GetSymbolBind()
-  { return symbolBinds; }
+  virtual void AddSymbolBindElement(
+      const Range &range,
+      const SCFG::Word &word,
+      const Moses2::HypothesisColl *hypos,
+      const PhraseTable &pt)
+  {
+    m_symbolBind.Add(range, word, hypos);
+  }
 
 protected:
-  SymbolBind symbolBinds;
+  SymbolBind m_symbolBind;
 
 };
 

@@ -30,7 +30,7 @@ int main(int argc, char** argv)
 	Moses2::System system(params);
 	timer.check("Loaded");
 
-	//cerr << "system.numThreads=" << system.numThreads << endl;
+	//cerr << "system.numThreads=" << system.options.server.numThreads << endl;
 
 	Moses2::ThreadPool pool(system.options.server.numThreads, system.cpuAffinityOffset, system.cpuAffinityOffsetIncr);
 	//cerr << "CREATED POOL" << endl;

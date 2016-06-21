@@ -55,7 +55,10 @@ public:
   virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
       InputPath &inputPath) const;
 
-  virtual void InitActiveChart(MemPool &pool, SCFG::InputPath &path) const;
+  virtual void InitActiveChart(
+      MemPool &pool,
+      const SCFG::Manager &mgr,
+      SCFG::InputPath &path) const;
 
   void Lookup(MemPool &pool,
       const SCFG::Manager &mgr,

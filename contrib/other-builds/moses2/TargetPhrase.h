@@ -6,6 +6,7 @@
  */
 
 #pragma once
+#include <sstream>
 #include "PhraseImplTemplate.h"
 #include "System.h"
 #include "Scores.h"
@@ -45,11 +46,13 @@ public:
   SCORE *GetScoresProperty(int propertyInd) const
   {    return scoreProperties ? scoreProperties + propertyInd : NULL; }
 
-  virtual void Debug(std::ostream &out, const System &system) const
+  virtual std::string Debug(const System &system) const
   {
-    Phrase<WORD>::Debug(out, system);
-    out << " SCORES:";
-    GetScores().Debug(out, system);
+    std::stringstream out;
+    out << Phrase<WORD>::Debug(system);
+    out << " SCORES:" << GetScores().Debug(system);
+
+    return out.str();
   }
 
 protected:

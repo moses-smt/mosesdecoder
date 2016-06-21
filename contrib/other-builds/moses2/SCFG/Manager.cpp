@@ -41,7 +41,7 @@ void Manager::Decode()
   // init pools etc
   //cerr << "START InitPools()" << endl;
   InitPools();
-  //cerr << "START ParseInput()" << endl;
+  cerr << "START ParseInput()" << endl;
 
   FactorCollection &vocab = system.GetVocab();
   m_input = Sentence::CreateFromString(GetPool(), vocab, system, m_inputStr,
@@ -50,21 +50,21 @@ void Manager::Decode()
   const SCFG::Sentence &sentence = static_cast<const SCFG::Sentence&>(GetInput());
 
   size_t inputSize = sentence.GetSize();
-  //cerr << "inputSize=" << inputSize << endl;
+  cerr << "inputSize=" << inputSize << endl;
 
   m_inputPaths.Init(sentence, *this);
-  //cerr << "CREATED m_inputPaths" << m_inputPaths << endl;
+  cerr << "CREATED m_inputPaths" << endl;
 
   m_stacks.Init(*this, inputSize);
-  //cerr << "CREATED m_stacks" << endl;
+  cerr << "CREATED m_stacks" << endl;
 
   for (int startPos = inputSize - 1; startPos >= 0; --startPos) {
-    //cerr << endl << "startPos=" << startPos << endl;
+    cerr << endl << "startPos=" << startPos << endl;
     SCFG::InputPath &initPath = *m_inputPaths.GetMatrix().GetValue(startPos, 0);
 
-    //cerr << "BEFORE path=" << m_inputPaths << endl;
+    cerr << "BEFORE InitActiveChart=" << initPath.Debug(system) << endl;
     InitActiveChart(initPath);
-    cerr << "AFTER path=" << endl;
+    cerr << "AFTER InitActiveChart=" << initPath.Debug(system) << endl;
 
     int maxPhraseSize = inputSize - startPos + 1;
     for (int phraseSize = 1; phraseSize < maxPhraseSize; ++phraseSize) {
@@ -73,14 +73,14 @@ void Manager::Decode()
 
       Stack &stack = m_stacks.GetStack(startPos, phraseSize);
 
-      cerr << "BEFORE LOOKUP path=" << endl;
+      cerr << "BEFORE LOOKUP path=" << path.Debug(system) << endl;
       Lookup(path);
-      cerr << "AFTER LOOKUP path=" << endl;
+      cerr << "AFTER LOOKUP path="  << path.Debug(system) << endl;
       Decode(path, stack);
-      cerr << "AFTER DECODE path=" << endl;
+      cerr << "AFTER DECODE path=" << path.Debug(system) << endl;
 
       LookupUnary(path);
-      //cerr << "AFTER LookupUnary path=" << path << endl;
+      cerr << "AFTER LookupUnary path=" << path.Debug(system) << endl;
 
       //cerr << "#rules=" << path.GetNumRules() << endl;
     }
@@ -97,7 +97,7 @@ void Manager::InitActiveChart(SCFG::InputPath &path)
    for (size_t i = 0; i < numPt; ++i) {
      const PhraseTable &pt = *system.mappings[i];
      //cerr << "START InitActiveChart" << endl;
-     pt.InitActiveChart(GetPool(), path);
+     pt.InitActiveChart(GetPool(), *this, path);
      //cerr << "FINISHED InitActiveChart" << endl;
    }
 }
@@ -317,7 +317,7 @@ std::string Manager::OutputBest() const
 
     bestHypo->OutputToStream(out);
     cerr << "BEST TRANSLATION: ";
-    bestHypo->Debug(cerr, system);
+    cerr << bestHypo->Debug(system);
     cerr << " " << out.str() << endl;
   }
   else {

@@ -44,7 +44,7 @@ public:
 
   void OutputToStream(std::ostream &out) const;
 
-  void Debug(std::ostream &out, const System &system) const;
+  std::string Debug(const System &system) const;
 
 protected:
   const SCFG::TargetPhraseImpl *m_targetPhrase;

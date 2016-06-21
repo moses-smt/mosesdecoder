@@ -25,7 +25,12 @@ class MemPool;
 class System;
 class RecycleData;
 
-class ProbingPT: public PhraseTable
+namespace SCFG
+{
+class TargetPhraseImpl;
+}
+
+class ProbingPT: public Moses2::PhraseTable
 {
   //////////////////////////////////////
     class ActiveChartEntryProbing : public SCFG::ActiveChartEntry
@@ -35,14 +40,31 @@ class ProbingPT: public PhraseTable
 
       ActiveChartEntryProbing(MemPool &pool)
       :Parent(pool)
+      ,m_key(0)
       {}
 
       ActiveChartEntryProbing(
           MemPool &pool,
           const ActiveChartEntry &prevEntry)
       :Parent(prevEntry)
+      ,m_key(0)
       {}
+
+      uint64_t GetKey() const
+      { return m_key; }
+
+      std::pair<bool, uint64_t> GetKey(const SCFG::Word &nextWord, const ProbingPT &pt) const;
+
+      virtual void AddSymbolBindElement(
+          const Range &range,
+          const SCFG::Word &word,
+          const Moses2::HypothesisColl *hypos,
+          const Moses2::PhraseTable &pt);
+
+    protected:
+      uint64_t m_key;
     };
+    //////////////////////////////////////
 
 public:
   ProbingPT(size_t startInd, const std::string &line);
@@ -51,7 +73,10 @@ public:
 
   void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
 
-  void InitActiveChart(MemPool &pool, SCFG::InputPath &path) const;
+  void InitActiveChart(
+      MemPool &pool,
+      const SCFG::Manager &mgr,
+      SCFG::InputPath &path) const;
 
   virtual void Lookup(MemPool &pool,
       const SCFG::Manager &mgr,
@@ -64,6 +89,9 @@ public:
       const SCFG::Stacks &stacks,
       SCFG::InputPath &path) const;
 
+  uint64_t GetUnk() const
+  { return m_unkId; }
+
 protected:
   std::vector<uint64_t> m_sourceVocab; // factor id -> pt id
   std::vector<const Factor*> m_targetVocab; // pt id -> factor*
@@ -74,17 +102,12 @@ protected:
   boost::iostreams::mapped_file_source file;
   const char *data;
 
-  mutable boost::thread_specific_ptr<std::deque<target_text*> > m_recycler;
-
   TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
       InputPath &inputPath) const;
   TargetPhrases *CreateTargetPhrase(MemPool &pool, const System &system,
       const Phrase<Moses2::Word> &sourcePhrase, uint64_t key) const;
   TargetPhrase<Moses2::Word> *CreateTargetPhrase(MemPool &pool, const System &system,
       const char *&offset) const;
-
-  void ConvertToProbingSourcePhrase(const Phrase<Moses2::Word> &sourcePhrase, bool &ok,
-      uint64_t probingSource[]) const;
 
   inline const Factor *GetTargetFactor(uint32_t probingId) const
   {
@@ -94,18 +117,12 @@ protected:
     return m_targetVocab[probingId];
   }
 
-  std::pair<bool, uint64_t> GetSourceProbingId(
-      const Phrase<Moses2::Word> &sourcePhrase) const;
+  std::pair<bool, uint64_t> GetKey(const Phrase<Moses2::Word> &sourcePhrase) const;
 
-  inline uint64_t GetSourceProbingId(const Factor *factor) const
-  {
-    size_t factorId = factor->GetId();
-    if (factorId >= m_sourceVocab.size()) {
-      return m_unkId;
-    }
-    return m_sourceVocab[factorId];
+  void GetSourceProbingIds(const Phrase<Moses2::Word> &sourcePhrase, bool &ok,
+      uint64_t probingSource[]) const;
 
-  }
+  uint64_t GetSourceProbingId(const Word &word) const;
 
   // caching
   typedef boost::unordered_map<uint64_t, TargetPhrases*> Cache;
@@ -118,6 +135,7 @@ protected:
   // scfg
   void LookupNT(
       MemPool &pool,
+      const SCFG::Manager &mgr,
       const Moses2::Range &subPhraseRange,
       const SCFG::InputPath &prevPath,
       const SCFG::Stacks &stacks,
@@ -125,6 +143,7 @@ protected:
 
   void LookupGivenWord(
       MemPool &pool,
+      const SCFG::Manager &mgr,
       const SCFG::InputPath &prevPath,
       const SCFG::Word &wordSought,
       const Moses2::HypothesisColl *hypos,
@@ -133,11 +152,17 @@ protected:
 
   void LookupGivenNode(
       MemPool &pool,
+      const SCFG::Manager &mgr,
       const ActiveChartEntryProbing &prevEntry,
       const SCFG::Word &wordSought,
       const Moses2::HypothesisColl *hypos,
       const Moses2::Range &subPhraseRange,
       SCFG::InputPath &outPath) const;
+
+  SCFG::TargetPhraseImpl *CreateTargetPhraseSCFG(
+      MemPool &pool,
+      const System &system,
+      const char *&offset) const;
 
 };
 

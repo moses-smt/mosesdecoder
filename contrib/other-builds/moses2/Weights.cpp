@@ -36,7 +36,7 @@ void Weights::Init(const FeatureFunctions &ffs)
   m_weights.resize(totalNumScores, 1);
 }
 
-void Weights::Debug(std::ostream &out, const System &system) const
+std::ostream &Weights::Debug(std::ostream &out, const System &system) const
 {
   const FeatureFunctions &ffs  = system.featureFunctions;
   size_t numScores = ffs.GetNumScores();

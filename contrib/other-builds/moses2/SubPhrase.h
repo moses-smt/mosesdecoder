@@ -1,4 +1,5 @@
 #pragma once
+#include <sstream>
 #include "Phrase.h"
 #include "Word.h"
 #include "SCFG/Word.h"
@@ -29,16 +30,18 @@ public:
     return ret;
   }
 
-  virtual void Debug(std::ostream &out, const System &system) const
+  virtual std::string Debug(const System &system) const
   {
+    std::stringstream out;
     if (GetSize()) {
-      (*this)[0].Debug(out, system);
+      out << (*this)[0].Debug(system);
       for (size_t i = 1; i < GetSize(); ++i) {
         const WORD &word = (*this)[i];
-        out << " ";
-        word.Debug(out, system);
+        out << " " << word.Debug(system);
       }
     }
+
+    return out.str();
   }
 
 protected:

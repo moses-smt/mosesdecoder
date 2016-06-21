@@ -6,6 +6,7 @@
  */
 #include <boost/foreach.hpp>
 #include "ProbingPT.h"
+#include "util/exception.hh"
 #include "../System.h"
 #include "../Scores.h"
 #include "../Phrase.h"
@@ -21,12 +22,43 @@
 #include "../PhraseBased/TargetPhrases.h"
 #include "../SCFG/InputPath.h"
 #include "../SCFG/Manager.h"
+#include "../SCFG/TargetPhraseImpl.h"
 
 using namespace std;
 
 namespace Moses2
 {
+void ProbingPT::ActiveChartEntryProbing::AddSymbolBindElement(
+    const Range &range,
+    const SCFG::Word &word,
+    const Moses2::HypothesisColl *hypos,
+    const Moses2::PhraseTable &pt)
+{
+  const ProbingPT &probingPt = static_cast<const ProbingPT&>(pt);
+  std::pair<bool, uint64_t> key = GetKey(word, probingPt);
+  UTIL_THROW_IF2(!key.first, "Word should have been in source vocab");
+  m_key = key.second;
 
+  ActiveChartEntry::AddSymbolBindElement(range, word, hypos, pt);
+}
+
+std::pair<bool, uint64_t> ProbingPT::ActiveChartEntryProbing::GetKey(const SCFG::Word &nextWord, const ProbingPT &pt) const
+{
+  std::pair<bool, uint64_t> ret;
+  ret.second = m_key;
+  uint64_t probingId = pt.GetSourceProbingId(nextWord);
+  if (probingId == pt.GetUnk()) {
+    ret.first = false;
+    return ret;
+  }
+
+  ret.first = true;
+  size_t phraseSize = m_symbolBind.coll.size();
+  ret.second += probingId << phraseSize;
+  return ret;
+}
+
+////////////////////////////////////////////////////////////////////////////
 ProbingPT::ProbingPT(size_t startInd, const std::string &line) :
     PhraseTable(startInd, line)
 {
@@ -134,7 +166,7 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr, MemPool &pool,
   const Phrase<Moses2::Word> &sourcePhrase = inputPath.subPhrase;
 
   // get hash for source phrase
-  std::pair<bool, uint64_t> keyStruct = GetSourceProbingId(sourcePhrase);
+  std::pair<bool, uint64_t> keyStruct = GetKey(sourcePhrase);
   if (!keyStruct.first) {
     return NULL;
   }
@@ -152,8 +184,7 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr, MemPool &pool,
   return tps;
 }
 
-std::pair<bool, uint64_t> ProbingPT::GetSourceProbingId(
-    const Phrase<Moses2::Word> &sourcePhrase) const
+std::pair<bool, uint64_t> ProbingPT::GetKey(const Phrase<Moses2::Word> &sourcePhrase) const
 {
   std::pair<bool, uint64_t> ret;
 
@@ -162,7 +193,7 @@ std::pair<bool, uint64_t> ProbingPT::GetSourceProbingId(
   assert(sourceSize);
 
   uint64_t probingSource[sourceSize];
-  ConvertToProbingSourcePhrase(sourcePhrase, ret.first, probingSource);
+  GetSourceProbingIds(sourcePhrase, ret.first, probingSource);
   if (!ret.first) {
     // source phrase contains a word unknown in the pt.
     // We know immediately there's no translation for it
@@ -209,7 +240,9 @@ TargetPhrases *ProbingPT::CreateTargetPhrase(MemPool &pool,
   return tps;
 }
 
-TargetPhrase<Moses2::Word> *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system,
+TargetPhrase<Moses2::Word> *ProbingPT::CreateTargetPhrase(
+    MemPool &pool,
+    const System &system,
     const char *&offset) const
 {
   TargetPhraseInfo *tpInfo = (TargetPhraseInfo*) offset;
@@ -270,14 +303,14 @@ TargetPhrase<Moses2::Word> *ProbingPT::CreateTargetPhrase(MemPool &pool, const S
   return tp;
 }
 
-void ProbingPT::ConvertToProbingSourcePhrase(const Phrase<Moses2::Word> &sourcePhrase,
+void ProbingPT::GetSourceProbingIds(const Phrase<Moses2::Word> &sourcePhrase,
     bool &ok, uint64_t probingSource[]) const
 {
 
   size_t size = sourcePhrase.GetSize();
   for (size_t i = 0; i < size; ++i) {
-    const Factor *factor = sourcePhrase[i][0];
-    uint64_t probingId = GetSourceProbingId(factor);
+    const Word &word = sourcePhrase[i];
+    uint64_t probingId = GetSourceProbingId(word);
     if (probingId == m_unkId) {
       ok = false;
       return;
@@ -288,6 +321,18 @@ void ProbingPT::ConvertToProbingSourcePhrase(const Phrase<Moses2::Word> &sourceP
   }
 
   ok = true;
+}
+
+uint64_t ProbingPT::GetSourceProbingId(const Word &word) const
+{
+  const Factor *factor = word[0];
+
+  size_t factorId = factor->GetId();
+  if (factorId >= m_sourceVocab.size()) {
+    return m_unkId;
+  }
+  return m_sourceVocab[factorId];
+
 }
 
 void ProbingPT::CreateCache(System &system)
@@ -313,7 +358,7 @@ void ProbingPT::CreateCache(System &system)
     PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system,
         toks[1]);
 
-    std::pair<bool, uint64_t> retStruct = GetSourceProbingId(*sourcePhrase);
+    std::pair<bool, uint64_t> retStruct = GetKey(*sourcePhrase);
     if (!retStruct.first) {
       return;
     }
@@ -328,6 +373,10 @@ void ProbingPT::CreateCache(System &system)
   }
 
 }
+
+///////////////////////////////////////////////////////////////////////////////
+// SCFG
+///////////////////////////////////////////////////////////////////////////////
 
 void ProbingPT::ReformatWord(System &system, std::string &wordStr, bool &isNT)
 {
@@ -354,15 +403,15 @@ void ProbingPT::ReformatWord(System &system, std::string &wordStr, bool &isNT)
   }
 }
 
-/////////////////////////////////////////////////////////////////////
-// SCFG
-/////////////////////////////////////////////////////////////////////
-void ProbingPT::InitActiveChart(MemPool &pool, SCFG::InputPath &path) const
+void ProbingPT::InitActiveChart(
+    MemPool &pool,
+    const SCFG::Manager &mgr,
+    SCFG::InputPath &path) const
 {
+  //cerr << "InitActiveChart=" << path.Debug(cerr, mgr.system) << endl;
   size_t ptInd = GetPtInd();
   ActiveChartEntryProbing *chartEntry = new (pool.Allocate<ActiveChartEntryProbing>()) ActiveChartEntryProbing(pool);
   path.AddActiveChartEntry(ptInd, chartEntry);
-  //cerr << "InitActiveChart=" << path << endl;
 }
 
 void ProbingPT::Lookup(MemPool &pool,
@@ -371,6 +420,7 @@ void ProbingPT::Lookup(MemPool &pool,
     const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
+  //cerr << "Lookup=" << endl;
   if (path.range.GetNumWordsCovered() > maxChartSpan) {
     return;
   }
@@ -386,7 +436,7 @@ void ProbingPT::Lookup(MemPool &pool,
   const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(endPos, 1);
 
   //cerr << "BEFORE LookupGivenWord=" << *prevPath << endl;
-  LookupGivenWord(pool, *prevPath, lastWord, NULL, subPhrasePath.range, path);
+  LookupGivenWord(pool, mgr, *prevPath, lastWord, NULL, subPhrasePath.range, path);
   //cerr << "AFTER LookupGivenWord=" << *prevPath << endl;
 
   // NON-TERMINAL
@@ -399,7 +449,7 @@ void ProbingPT::Lookup(MemPool &pool,
     size_t ntSize = endPos - startPos + 1;
     const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(startPos, ntSize);
 
-    LookupNT(pool, subPhrasePath.range, *prevPath, stacks, path);
+    LookupNT(pool, mgr, subPhrasePath.range, *prevPath, stacks, path);
 
     prevPath = static_cast<const SCFG::InputPath*>(prevPath->prefixPath);
   }
@@ -413,11 +463,12 @@ void ProbingPT::LookupUnary(MemPool &pool,
   cerr << "LookupUnary" << endl;
   size_t startPos = path.range.GetStartPos();
   const SCFG::InputPath *prevPath = mgr.GetInputPaths().GetMatrix().GetValue(startPos, 0);
-  LookupNT(pool, path.range, *prevPath, stacks, path);
+  LookupNT(pool, mgr, path.range, *prevPath, stacks, path);
 }
 
 void ProbingPT::LookupNT(
     MemPool &pool,
+    const SCFG::Manager &mgr,
     const Moses2::Range &subPhraseRange,
     const SCFG::InputPath &prevPath,
     const SCFG::Stacks &stacks,
@@ -437,12 +488,13 @@ void ProbingPT::LookupNT(
     const SCFG::Word &ntSought = valPair.first;
     const Moses2::HypothesisColl *hypos = valPair.second;
     //cerr << "ntSought=" << ntSought << ntSought.isNonTerminal << endl;
-    LookupGivenWord(pool, prevPath, ntSought, hypos, subPhraseRange, outPath);
+    LookupGivenWord(pool, mgr, prevPath, ntSought, hypos, subPhraseRange, outPath);
   }
 }
 
 void ProbingPT::LookupGivenWord(
     MemPool &pool,
+    const SCFG::Manager &mgr,
     const SCFG::InputPath &prevPath,
     const SCFG::Word &wordSought,
     const Moses2::HypothesisColl *hypos,
@@ -457,45 +509,145 @@ void ProbingPT::LookupGivenWord(
     //cerr << "entry=" << &entryCast->node << endl;
 
     //cerr << "BEFORE LookupGivenNode=" << prevPath << endl;
-    LookupGivenNode(pool, *prevEntryCast, wordSought, hypos, subPhraseRange, outPath);
+    LookupGivenNode(pool, mgr, *prevEntryCast, wordSought, hypos, subPhraseRange, outPath);
     //cerr << "AFTER LookupGivenNode=" << prevPath << endl;
   }
 }
 
 void ProbingPT::LookupGivenNode(
     MemPool &pool,
+    const SCFG::Manager &mgr,
     const ActiveChartEntryProbing &prevEntry,
     const SCFG::Word &wordSought,
     const Moses2::HypothesisColl *hypos,
     const Moses2::Range &subPhraseRange,
     SCFG::InputPath &outPath) const
 {
-  /*
-  const SCFGNODE &prevNode = prevEntry.node;
-  UTIL_THROW_IF2(&prevNode == NULL, "node == NULL");
+  std::pair<bool, uint64_t> key = prevEntry.GetKey(wordSought, *this);
+  //cerr << "wordSought=" << wordSought.Debug(cerr, mgr.system) << " " << key.first << endl;
+  cerr << "wordSought=" << wordSought.Debug(mgr.system) << endl;
+  //cerr << "HELLO" << endl;
 
-  size_t ptInd = GetPtInd();
-  const SCFGNODE *nextNode = prevNode.Find(wordSought);
+  if (!key.first) {
+    // should only occasionally happen when looking up unary rules
+    return;
+  }
 
-  //cerr << "prevEntry=" << *prevEntry.symbolBinds << endl;
+  std::pair<bool, uint64_t> query_result; // 1st=found, 2nd=target file offset
+  query_result = m_engine->query(key.second);
 
-  if (nextNode) {
+  if (query_result.first) {
+    size_t ptInd = GetPtInd();
+    const FeatureFunctions &ffs = mgr.system.featureFunctions;
+
+    const char *offset = data + query_result.second;
+    uint64_t *numTP = (uint64_t*) offset;
+
+    const Phrase<SCFG::Word> &sourcePhrase = outPath.subPhrase;
+
+    SCFG::TargetPhrases *tps = NULL;
+    tps = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool, *numTP);
+
+    offset += sizeof(uint64_t);
+    for (size_t i = 0; i < *numTP; ++i) {
+      SCFG::TargetPhraseImpl *tp = CreateTargetPhraseSCFG(pool, mgr.system, offset);
+      assert(tp);
+      ffs.EvaluateInIsolation(pool, mgr.system, sourcePhrase, *tp);
+
+      tps->AddTargetPhrase(*tp);
+
+    }
+
+    tps->SortAndPrune(m_tableLimit);
+    ffs.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
+    //cerr << *tps << endl;
+
+    // there are some rules
+    //AddTargetPhrasesToPath(pool, *nextNode, symbolBind, outPath);
+
     // new entries
     ActiveChartEntryProbing *chartEntry = new (pool.Allocate<ActiveChartEntryProbing>()) ActiveChartEntryProbing(pool, prevEntry);
 
-    SCFG::SymbolBind &symbolBind = chartEntry->GetSymbolBind();
-    symbolBind.Add(subPhraseRange, wordSought, hypos);
+    chartEntry->AddSymbolBindElement(subPhraseRange, wordSought, hypos, *this);
     //cerr << "AFTER Add=" << symbolBind << endl;
 
     outPath.AddActiveChartEntry(ptInd, chartEntry);
 
-    // there are some rules
-    AddTargetPhrasesToPath(pool, *nextNode, symbolBind, outPath);
-
-    //cerr << "AFTER outPath=" << outPath << endl;
   }
-    */
 }
 
+SCFG::TargetPhraseImpl *ProbingPT::CreateTargetPhraseSCFG(
+    MemPool &pool,
+    const System &system,
+    const char *&offset) const
+{
+  TargetPhraseInfo *tpInfo = (TargetPhraseInfo*) offset;
+  SCFG::TargetPhraseImpl *tp =
+      new (pool.Allocate<SCFG::TargetPhraseImpl>()) SCFG::TargetPhraseImpl(pool, *this,
+          system, tpInfo->numWords - 1);
+
+  offset += sizeof(TargetPhraseInfo);
+
+  // scores
+  SCORE *scores = (SCORE*) offset;
+
+  size_t totalNumScores = m_engine->num_scores + m_engine->num_lex_scores;
+
+  if (m_engine->logProb) {
+    // set pt score for rule
+    tp->GetScores().PlusEquals(system, *this, scores);
+
+    // save scores for other FF, eg. lex RO. Just give the offset
+    if (m_engine->num_lex_scores) {
+      tp->scoreProperties = scores + m_engine->num_scores;
+    }
+  }
+  else {
+    // log score 1st
+    SCORE logScores[totalNumScores];
+    for (size_t i = 0; i < totalNumScores; ++i) {
+      logScores[i] = FloorScore(TransformScore(scores[i]));
+    }
+
+    // set pt score for rule
+    tp->GetScores().PlusEquals(system, *this, logScores);
+
+    // save scores for other FF, eg. lex RO.
+    tp->scoreProperties = pool.Allocate<SCORE>(m_engine->num_lex_scores);
+    for (size_t i = 0; i < m_engine->num_lex_scores; ++i) {
+      tp->scoreProperties[i] = logScores[i + m_engine->num_scores];
+    }
+  }
+
+  offset += sizeof(SCORE) * totalNumScores;
+
+  // words
+  for (size_t i = 0; i < tpInfo->numWords - 1; ++i) {
+    uint32_t *probingId = (uint32_t*) offset;
+
+    const Factor *factor = GetTargetFactor(*probingId);
+    assert(factor);
+
+    SCFG::Word &word = (*tp)[i];
+    word[0] = factor;
+
+    offset += sizeof(uint32_t);
+  }
+
+  // lhs
+  uint32_t *probingId = (uint32_t*) offset;
+
+  const Factor *factor = GetTargetFactor(*probingId);
+  assert(factor);
+
+  tp->lhs[0] = factor;
+
+  offset += sizeof(uint32_t);
+
+  // properties TODO
+
+  return tp;
 }
+
+} // namespace
 

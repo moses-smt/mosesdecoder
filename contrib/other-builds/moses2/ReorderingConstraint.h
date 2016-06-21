@@ -79,7 +79,7 @@ public:
     return m_active;
   }
 
-  void Debug(std::ostream &out, const System &system) const;
+  std::ostream &Debug(std::ostream &out, const System &system) const;
 
 };
 

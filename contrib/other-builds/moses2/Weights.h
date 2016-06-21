@@ -4,9 +4,7 @@
  *  Created on: 24 Oct 2015
  *      Author: hieu
  */
-
-#ifndef WEIGHTS_H_
-#define WEIGHTS_H_
+#pragma once
 
 #include <iostream>
 #include <vector>
@@ -29,7 +27,7 @@ public:
     return m_weights[ind];
   }
 
-  void Debug(std::ostream &out, const System &system) const;
+  std::ostream &Debug(std::ostream &out, const System &system) const;
 
   void CreateFromString(const FeatureFunctions &ffs, const std::string &line);
 
@@ -39,4 +37,3 @@ protected:
 
 }
 
-#endif /* WEIGHTS_H_ */

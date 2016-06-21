@@ -63,23 +63,23 @@ TargetPhraseImpl::~TargetPhraseImpl()
   // TODO Auto-generated destructor stub
 }
 
-void TargetPhraseImpl::Debug(std::ostream &out, const System &system) const
+std::string TargetPhraseImpl::Debug(const System &system) const
 {
-  lhs.Debug(out, system);
+  stringstream out;
+  out << lhs.Debug(system);
   out << " -> ";
   for (size_t i = 0; i < GetSize(); ++i) {
     const SCFG::Word &word = (*this)[i];
-    word.Debug(out, system);
-    out << " ";
+    out << word.Debug(system) << " ";
   }
   out << "pt=" << pt.GetName();
-  out << " SCORES:";
-  GetScores().Debug(out, system);
+  out << " SCORES:" << GetScores().Debug(system);
   out << " ALIGN:";
-  GetAlignTerm().Debug(out, system);
+  out << GetAlignTerm().Debug(system);
   out << " ";
-  GetAlignNonTerm().Debug(out, system);
+  out << GetAlignNonTerm().Debug(system);
 
+  return out.str();
 }
 
 void TargetPhraseImpl::SetAlignmentInfo(const std::string &alignString)

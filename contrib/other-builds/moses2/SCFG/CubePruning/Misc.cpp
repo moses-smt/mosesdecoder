@@ -29,13 +29,16 @@ SeenPosition::SeenPosition(MemPool &pool, const SCFG::TargetPhrases *vtps, size_
   }
 }
 
-void SeenPosition::Debug(std::ostream &out, const System &system) const
+std::string SeenPosition::Debug(const System &system) const
 {
+  stringstream out;
   out << tps << " " << tpInd << " ";
 
   for (size_t i = 0; i < hypoIndColl.size(); ++i) {
     out << hypoIndColl[i] << " ";
   }
+
+  return out.str();
 }
 
 bool SeenPosition::operator==(const SeenPosition &compare) const
@@ -176,12 +179,15 @@ void QueueItem::CreateNext(
   }
 }
 
-void QueueItem::Debug(std::ostream &out, const System &system) const
+std::string QueueItem::Debug(const System &system) const
 {
+  stringstream out;
   out << hypo << " " << &(*tps)[tpInd] << "(" << tps << " " << tpInd << ") ";
   for (size_t i = 0; i < hypoIndColl.size(); ++i) {
     out << hypoIndColl[i] << " ";
   }
+
+  return out.str();
 }
 
 }
