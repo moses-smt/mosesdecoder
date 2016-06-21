@@ -85,6 +85,17 @@ void TrellisPath::Debug(std::ostream &out, const System &system) const
   out << GetScores().GetTotalScore();
 }
 
+void TrellisPath::OutputToStream(std::ostream &out, const System &system) const
+{
+  out << OutputTargetPhrase(system);
+  out << "||| ";
+
+  GetScores().OutputBreakdown(out, system);
+  out << "||| ";
+
+  out << GetScores().GetTotalScore();
+}
+
 std::string TrellisPath::OutputTargetPhrase(const System &system) const
 {
   //cerr << "path=" << this << " " << nodes.size() << endl;

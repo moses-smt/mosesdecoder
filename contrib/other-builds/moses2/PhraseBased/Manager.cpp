@@ -241,7 +241,7 @@ std::string Manager::OutputNBest()
 
     if (ok) {
       out << transId << " |||";
-      path->Debug(out, system);
+      path->OutputToStream(out, system);
       out << "\n";
     }
 
