@@ -345,7 +345,7 @@ Parameter::Parameter()
       "A key-value map for context-sensitive translation.");
   AddParam(misc_opts, "context-window",
       "Context window (in words) for context-sensitive translation: {+|-|+-}<number>.");
-  AddParam(misc_opts, "cpu-affinity-offset", "CPU Affinity");
+  AddParam(misc_opts, "cpu-affinity-offset", "CPU Affinity. Default = -1 (no affinity)");
   AddParam(misc_opts, "cpu-affinity-increment",
       "Set to 1 (default) to put each thread on different cores. 0 to run all threads on one core");
 
