@@ -20,17 +20,24 @@ public:
   class XMLOption
   {
   public:
-	std::string nodeName;
 	size_t startPos, phraseSize;
 
-	std::string translation;
 	SCORE prob;
 
-	XMLOption()
-	:prob(0)
-	{}
+	XMLOption(MemPool &pool, const std::string &nodeName, size_t vStartPos);
+
+	const char *GetNodeName() const
+	{ return m_nodeName.c_str(); }
+
+	const char *GetTranslation() const
+	{ return m_translation.c_str(); }
+
+	void SetTranslation(MemPool &pool, const std::string &val);
 
 	void Debug(std::ostream &out, const System &system) const;
+  public:
+	std::string m_nodeName;
+	std::string m_translation;
 
   };
 
@@ -52,7 +59,7 @@ public:
   const ReorderingConstraint &GetReorderingConstraint() const
   { return m_reorderingConstraint; }
 
-  const std::vector<const XMLOption*> &GetXMLOptions() const
+  const Vector<const XMLOption*> &GetXMLOptions() const
   { return m_xmlOptions; }
 
   void AddXMLOption(const System &system, const XMLOption *xmlOption);
@@ -63,8 +70,8 @@ public:
 protected:
   long m_translationId; 	//< contiguous Id
   ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
-  std::vector<const XMLOption*> m_xmlOptions;
-  std::vector <bool> m_xmlCoverageMap;
+  Vector<const XMLOption*> m_xmlOptions;
+  Vector<bool> m_xmlCoverageMap;
 
 };
 

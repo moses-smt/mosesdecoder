@@ -41,14 +41,14 @@ void UnknownWordPenalty::ProcessXML(
 		const Sentence &sentence,
 		InputPaths &inputPaths) const
 {
-	const std::vector<const InputType::XMLOption*> &xmlOptions = sentence.GetXMLOptions();
+	const Vector<const InputType::XMLOption*> &xmlOptions = sentence.GetXMLOptions();
 	BOOST_FOREACH(const InputType::XMLOption *xmlOption, xmlOptions) {
 //	      cerr << "xmlOptions=";
 //	      xmlOption->Debug(cerr, mgr.system);
 //	      cerr << endl;
 
 
-		TargetPhraseImpl *target = TargetPhraseImpl::CreateFromString(pool, *this, mgr.system, xmlOption->translation);
+		TargetPhraseImpl *target = TargetPhraseImpl::CreateFromString(pool, *this, mgr.system, xmlOption->GetTranslation());
 
 	      if (xmlOption->prob) {
 		      Scores &scores = target->GetScores();

@@ -11,12 +11,22 @@
 namespace Moses2
 {
 //////////////////////////////////////////////////////////////////////////////
+InputType::XMLOption::XMLOption(MemPool &pool, const std::string &nodeName, size_t vStartPos)
+:startPos(vStartPos)
+,m_nodeName(nodeName)
+,prob(0)
+{}
+
+void InputType::XMLOption::SetTranslation(MemPool &pool, const std::string &val)
+{
+	m_translation = val;
+}
 
 void InputType::XMLOption::Debug(std::ostream &out, const System &system) const
 {
   out << "[" << startPos << "," << phraseSize << "]="
-	<< nodeName << ","
-	<< translation << ","
+	<< m_nodeName << ","
+	<< m_translation << ","
 	<< prob;
 }
 
@@ -25,6 +35,8 @@ void InputType::XMLOption::Debug(std::ostream &out, const System &system) const
 InputType::InputType(long translationId, MemPool &pool)
 :m_translationId(translationId)
 ,m_reorderingConstraint(pool)
+,m_xmlOptions(pool)
+,m_xmlCoverageMap(pool)
 {
 }
 
