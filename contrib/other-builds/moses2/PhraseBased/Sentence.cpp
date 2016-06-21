@@ -81,25 +81,20 @@ Sentence *Sentence::CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
 
     // set walls obtained from xml
     for(size_t i=0; i<xmlOptions.size(); i++) {
-      const XMLOption &xmlOption = *xmlOptions[i];
-      if(strcmp(xmlOption.GetNodeName(), "wall") == 0) {
-        UTIL_THROW_IF2(xmlOption.startPos >= ret->GetSize(), "wall is beyond the sentence"); // no buggy walls, please
-        reorderingConstraint.SetWall(xmlOption.startPos - 1, true);
+      const XMLOption *xmlOption = xmlOptions[i];
+      if(strcmp(xmlOption->GetNodeName(), "wall") == 0) {
+        UTIL_THROW_IF2(xmlOption->startPos >= ret->GetSize(), "wall is beyond the sentence"); // no buggy walls, please
+        reorderingConstraint.SetWall(xmlOption->startPos - 1, true);
       }
-      else if (strcmp(xmlOption.GetNodeName(), "zone") == 0) {
-        reorderingConstraint.SetZone( xmlOption.startPos, xmlOption.startPos + xmlOption.phraseSize -1 );
+      else if (strcmp(xmlOption->GetNodeName(), "zone") == 0) {
+        reorderingConstraint.SetZone( xmlOption->startPos, xmlOption->startPos + xmlOption->phraseSize -1 );
       }
       else {
     	// default - forced translation. Add to class variable
-    	  ret->AddXMLOption(system, new XMLOption(xmlOption));
+    	  ret->AddXMLOption(system, xmlOption);
       }
     }
     reorderingConstraint.FinalizeWalls();
-
-    // clean up
-    for (size_t i = 0; i < xmlOptions.size(); ++i) {
-      delete xmlOptions[i];
-    }
 
     return ret;
 }
@@ -128,7 +123,7 @@ void Sentence::XMLParse(
     }
 
     if (!nodeName.empty()) {
-      XMLOption *xmlOption = new XMLOption(pool, nodeName, startPos);
+      XMLOption *xmlOption = new (pool.Allocate<XMLOption>()) XMLOption(pool, nodeName, startPos);
 
       pugi::xml_attribute attr = childNode.attribute("translation");
       if (!attr.empty()) {
