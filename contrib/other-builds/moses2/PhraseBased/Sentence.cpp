@@ -148,10 +148,6 @@ void Sentence::XMLParse(
 
       size_t endPos = toks.size();
       xmlOption->phraseSize = endPos - startPos;
-
-      cerr << "xmlOptions=";
-      xmlOption->Debug(cerr, system);
-      cerr << endl;
     }
 
   }

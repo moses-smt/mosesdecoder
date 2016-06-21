@@ -26,6 +26,10 @@ public:
 	std::string translation;
 	SCORE prob;
 
+	XMLOption()
+	:prob(0)
+	{}
+
 	void Debug(std::ostream &out, const System &system) const;
 
   };
