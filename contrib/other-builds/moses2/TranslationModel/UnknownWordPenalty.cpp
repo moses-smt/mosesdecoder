@@ -8,10 +8,12 @@
 #include "UnknownWordPenalty.h"
 #include "../System.h"
 #include "../Scores.h"
+#include "../InputType.h"
 #include "../PhraseBased/Manager.h"
 #include "../PhraseBased/TargetPhraseImpl.h"
 #include "../PhraseBased/InputPath.h"
 #include "../PhraseBased/TargetPhrases.h"
+#include "../PhraseBased/Sentence.h"
 #include "../SCFG/InputPath.h"
 #include "../SCFG/TargetPhraseImpl.h"
 #include "../SCFG/Manager.h"
@@ -35,7 +37,10 @@ UnknownWordPenalty::~UnknownWordPenalty()
 
 void UnknownWordPenalty::ProcessXML(const Sentence &sentence, InputPaths &inputPaths) const
 {
+	const std::vector<InputType::XMLOption*> &xmlOptions = sentence.GetXMLOptions();
+	BOOST_FOREACH(InputType::XMLOption *xmlOption, xmlOptions) {
 
+	}
 }
 
 void UnknownWordPenalty::Lookup(const Manager &mgr,
