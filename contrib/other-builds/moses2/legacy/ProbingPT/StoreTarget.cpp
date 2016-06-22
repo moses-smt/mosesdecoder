@@ -85,6 +85,23 @@ void StoreTarget::Save(const target_text &rule)
 
 }
 
+void StoreTarget::SaveAlignment()
+{
+  std::string path = m_basePath + "/Alignments.dat";
+  Moses2::OutputFileStream file(path);
+
+  BOOST_FOREACH(Alignments::value_type &valPair, m_aligns) {
+    file << valPair.second << "\t";
+
+    const std::vector<unsigned char> &aligns = valPair.first;
+    BOOST_FOREACH(unsigned char align, aligns) {
+      file << align << " ";
+    }
+    file << endl;
+  }
+
+}
+
 void StoreTarget::Append(const line_text &line, bool log_prob)
 {
   target_text *rule = new target_text;

@@ -142,6 +142,8 @@ void createProbingPT(const std::string &phrasetable_path,
     }
   }
 
+  storeTarget.SaveAlignment();
+
   serialize_table(mem, size, (basepath + "/probing_hash.dat"));
 
   sourceVocab.Save();

@@ -25,12 +25,16 @@ public:
   virtual ~StoreTarget();
 
   uint64_t Save();
+  void SaveAlignment();
+
   void Append(const line_text &line, bool log_prob);
 protected:
   std::string m_basePath;
   std::fstream m_fileTargetColl;
   StoreVocab<uint32_t> m_vocab;
-  boost::unordered_map<std::vector<unsigned char>, uint16_t> m_aligns;
+
+  typedef boost::unordered_map<std::vector<unsigned char>, uint16_t> Alignments;
+  Alignments m_aligns;
 
   std::vector<target_text*> m_coll;
 
