@@ -117,9 +117,11 @@ void ProbingPT::Load(System &system)
     uint32_t probingId = Scan<uint32_t>(toks[1]);
 
     if (probingId >= m_targetVocab.size()) {
-      m_targetVocab.resize(probingId + 1, NULL);
+      m_targetVocab.resize(probingId + 1);
     }
-    m_targetVocab[probingId] = factor;
+
+    std::pair<bool, const Factor*> ele(isNT, factor);
+    m_targetVocab[probingId] = ele;
   }
 
   // memory mapped file to tps
@@ -289,11 +291,12 @@ TargetPhrase<Moses2::Word> *ProbingPT::CreateTargetPhrase(
   for (size_t i = 0; i < tpInfo->numWords; ++i) {
     uint32_t *probingId = (uint32_t*) offset;
 
-    const Factor *factor = GetTargetFactor(*probingId);
-    assert(factor);
+    const std::pair<bool, const Factor *> *factorPair = GetTargetFactor(*probingId);
+    assert(factorPair);
+    assert(!factorPair->first);
 
     Word &word = (*tp)[i];
-    word[0] = factor;
+    word[0] = factorPair->second;
 
     offset += sizeof(uint32_t);
   }
@@ -567,11 +570,13 @@ void ProbingPT::LookupGivenNode(
 
     // new entries
     ActiveChartEntryProbing *chartEntry = new (pool.Allocate<ActiveChartEntryProbing>()) ActiveChartEntryProbing(pool, prevEntry);
+    //cerr << "AFTER chartEntry" << endl;
 
     chartEntry->AddSymbolBindElement(subPhraseRange, wordSought, hypos, *this);
-    //cerr << "AFTER Add=" << symbolBind << endl;
+    //cerr << "AFTER AddSymbolBindElement" << endl;
 
     outPath.AddActiveChartEntry(ptInd, chartEntry);
+    //cerr << "AFTER AddActiveChartEntry" << endl;
 
     // there are some rules
     cerr << "symbolbind=" << chartEntry->GetSymbolBind().Debug(mgr.system) << endl;
@@ -628,11 +633,12 @@ SCFG::TargetPhraseImpl *ProbingPT::CreateTargetPhraseSCFG(
   for (size_t i = 0; i < tpInfo->numWords - 1; ++i) {
     uint32_t *probingId = (uint32_t*) offset;
 
-    const Factor *factor = GetTargetFactor(*probingId);
-    assert(factor);
+    const std::pair<bool, const Factor *> *factorPair = GetTargetFactor(*probingId);
+    assert(factorPair);
 
     SCFG::Word &word = (*tp)[i];
-    word[0] = factor;
+    word[0] = factorPair->second;
+    word.isNonTerminal = factorPair->first;
 
     offset += sizeof(uint32_t);
   }
@@ -640,11 +646,12 @@ SCFG::TargetPhraseImpl *ProbingPT::CreateTargetPhraseSCFG(
   // lhs
   uint32_t *probingId = (uint32_t*) offset;
 
-  const Factor *factor = GetTargetFactor(*probingId);
-  assert(factor);
+  const std::pair<bool, const Factor *> *factorPair = GetTargetFactor(*probingId);
+  assert(factorPair);
+  assert(factorPair->first);
 
-  tp->lhs[0] = factor;
-  tp->lhs.isNonTerminal = true;
+  tp->lhs[0] = factorPair->second;
+  tp->lhs.isNonTerminal = factorPair->first;
 
   offset += sizeof(uint32_t);
 

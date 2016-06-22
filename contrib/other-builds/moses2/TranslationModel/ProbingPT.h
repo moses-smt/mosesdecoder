@@ -94,7 +94,7 @@ public:
 
 protected:
   std::vector<uint64_t> m_sourceVocab; // factor id -> pt id
-  std::vector<const Factor*> m_targetVocab; // pt id -> factor*
+  std::vector< std::pair<bool, const Factor*> > m_targetVocab; // pt id -> factor*
 
   uint64_t m_unkId;
   QueryEngine *m_engine;
@@ -109,12 +109,12 @@ protected:
   TargetPhrase<Moses2::Word> *CreateTargetPhrase(MemPool &pool, const System &system,
       const char *&offset) const;
 
-  inline const Factor *GetTargetFactor(uint32_t probingId) const
+  inline const std::pair<bool, const Factor*> *GetTargetFactor(uint32_t probingId) const
   {
     if (probingId >= m_targetVocab.size()) {
       return NULL;
     }
-    return m_targetVocab[probingId];
+    return &m_targetVocab[probingId];
   }
 
   std::pair<bool, uint64_t> GetKey(const Phrase<Moses2::Word> &sourcePhrase) const;
