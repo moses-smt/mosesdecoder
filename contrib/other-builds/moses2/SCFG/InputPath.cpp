@@ -68,6 +68,20 @@ std::string InputPath::Debug(const System &system) const
   return out.str();
 }
 
+void InputPath::AddTargetPhrasesToPath(
+    MemPool &pool,
+    const PhraseTable &pt,
+    const SCFG::TargetPhrases &tps,
+    const SCFG::SymbolBind &symbolBind)
+{
+  SCFG::TargetPhrases::const_iterator iter;
+  for (iter = tps.begin(); iter != tps.end(); ++iter) {
+    const SCFG::TargetPhraseImpl *tp = *iter;
+    //cerr << "tpCast=" << *tp << endl;
+    AddTargetPhrase(pool, pt, symbolBind, tp);
+  }
+}
+
 void InputPath::AddTargetPhrase(
     MemPool &pool,
     const PhraseTable &pt,

@@ -99,11 +99,6 @@ protected:
       const Moses2::Range &subPhraseRange,
       SCFG::InputPath &outPath) const;
 
-  void AddTargetPhrasesToPath(
-      MemPool &pool,
-      const SCFG::TargetPhrases &tps,
-      const SCFG::SymbolBind &symbolBind,
-      SCFG::InputPath &outPath) const;
 };
 
 }

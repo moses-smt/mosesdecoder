@@ -44,6 +44,12 @@ public:
 
   void AddActiveChartEntry(size_t ptInd, ActiveChartEntry *chartEntry);
 
+  void AddTargetPhrasesToPath(
+      MemPool &pool,
+      const PhraseTable &pt,
+      const SCFG::TargetPhrases &tps,
+      const SCFG::SymbolBind &symbolBind);
+
   void AddTargetPhrase(
       MemPool &pool,
       const PhraseTable &pt,

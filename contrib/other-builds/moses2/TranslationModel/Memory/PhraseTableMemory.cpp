@@ -288,25 +288,11 @@ void PhraseTableMemory::LookupGivenNode(
     const SCFG::TargetPhrases *tps = nextNode->GetTargetPhrases();
     if (tps) {
       // there are some rules
-      AddTargetPhrasesToPath(pool, *tps, chartEntry->GetSymbolBind(), outPath);
+      outPath.AddTargetPhrasesToPath(pool, *this, *tps, chartEntry->GetSymbolBind());
 
     }
 
     //cerr << "AFTER outPath=" << outPath << endl;
-  }
-}
-
-void PhraseTableMemory::AddTargetPhrasesToPath(
-    MemPool &pool,
-    const SCFG::TargetPhrases &tps,
-    const SCFG::SymbolBind &symbolBind,
-    SCFG::InputPath &outPath) const
-{
-  SCFG::TargetPhrases::const_iterator iter;
-  for (iter = tps.begin(); iter != tps.end(); ++iter) {
-    const SCFG::TargetPhraseImpl *tp = *iter;
-    //cerr << "tpCast=" << *tp << endl;
-    outPath.AddTargetPhrase(pool, *this, symbolBind, tp);
   }
 }
 

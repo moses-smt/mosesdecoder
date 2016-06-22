@@ -566,7 +566,7 @@ void ProbingPT::LookupGivenNode(
     cerr << "tps=" << tps->Debug(mgr.system) << endl;
 
     // there are some rules
-    //AddTargetPhrasesToPath(pool, *nextNode, symbolBind, outPath);
+    //outPath.AddTargetPhrasesToPath(pool, *this, *tps, symbolBind);
 
     // new entries
     ActiveChartEntryProbing *chartEntry = new (pool.Allocate<ActiveChartEntryProbing>()) ActiveChartEntryProbing(pool, prevEntry);
