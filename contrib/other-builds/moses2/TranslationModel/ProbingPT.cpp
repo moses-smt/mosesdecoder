@@ -553,7 +553,7 @@ void ProbingPT::LookupGivenNode(
     for (size_t i = 0; i < *numTP; ++i) {
       SCFG::TargetPhraseImpl *tp = CreateTargetPhraseSCFG(pool, mgr.system, offset);
       assert(tp);
-      cerr << "tp=" << tp->Debug(mgr.system) << endl;
+      //cerr << "tp=" << tp->Debug(mgr.system) << endl;
 
       ffs.EvaluateInIsolation(pool, mgr.system, sourcePhrase, *tp);
 
@@ -565,9 +565,6 @@ void ProbingPT::LookupGivenNode(
     ffs.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
     cerr << "tps=" << tps->Debug(mgr.system) << endl;
 
-    // there are some rules
-    //outPath.AddTargetPhrasesToPath(pool, *this, *tps, symbolBind);
-
     // new entries
     ActiveChartEntryProbing *chartEntry = new (pool.Allocate<ActiveChartEntryProbing>()) ActiveChartEntryProbing(pool, prevEntry);
 
@@ -576,6 +573,9 @@ void ProbingPT::LookupGivenNode(
 
     outPath.AddActiveChartEntry(ptInd, chartEntry);
 
+    // there are some rules
+    cerr << "symbolbind=" << chartEntry->GetSymbolBind().Debug(mgr.system) << endl;
+    outPath.AddTargetPhrasesToPath(pool, *this, *tps, chartEntry->GetSymbolBind());
   }
 }
 
@@ -644,6 +644,7 @@ SCFG::TargetPhraseImpl *ProbingPT::CreateTargetPhraseSCFG(
   assert(factor);
 
   tp->lhs[0] = factor;
+  tp->lhs.isNonTerminal = true;
 
   offset += sizeof(uint32_t);
 
