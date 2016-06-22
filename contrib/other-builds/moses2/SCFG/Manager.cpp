@@ -86,7 +86,7 @@ void Manager::Decode()
     }
   }
 
-  //m_stacks.OutputStacks();
+  m_stacks.OutputStacks();
 }
 
 void Manager::InitActiveChart(SCFG::InputPath &path)
@@ -306,21 +306,25 @@ bool Manager::IncrPrevHypoIndices(
 std::string Manager::OutputBest() const
 {
   stringstream out;
-
+  cerr << "HH A" << endl;
   const Stack &lastStack = m_stacks.GetLastStack();
+  cerr << "HH B" << endl;
   const Hypothesis *bestHypo = lastStack.GetBestHypo(*this, const_cast<ArcLists&>(arcLists));
+  cerr << "HH C" << endl;
 
   if (bestHypo) {
+    cerr << "HH D" << endl;
     if (system.options.output.ReportHypoScore) {
       out << bestHypo->GetScores().GetTotalScore() << " ";
     }
 
+    cerr << "HH E" << endl;
+    cerr << "BEST TRANSLATION: " << bestHypo << bestHypo->Debug(system) << endl;
+    cerr << "HH F" << endl;
+
     bestHypo->OutputToStream(out);
-    /*
-    cerr << "BEST TRANSLATION: ";
-    cerr << bestHypo->Debug(system);
-    cerr << " " << out.str() << endl;
-    */
+
+    //cerr << " " << out.str() << endl;
   }
   else {
     if (system.options.output.ReportHypoScore) {
@@ -330,6 +334,7 @@ std::string Manager::OutputBest() const
     //cerr << "NO TRANSLATION " << m_input->GetTranslationId() << endl;
   }
 
+  cerr << "HH G" << endl;
   out << endl;
   return out.str();
 }

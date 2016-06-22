@@ -574,8 +574,7 @@ void ProbingPT::LookupGivenNode(
 
     const Phrase<SCFG::Word> &sourcePhrase = outPath.subPhrase;
 
-    SCFG::TargetPhrases *tps = NULL;
-    tps = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool, *numTP);
+    SCFG::TargetPhrases *tps = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool, *numTP);
 
     offset += sizeof(uint64_t);
     for (size_t i = 0; i < *numTP; ++i) {
@@ -644,6 +643,9 @@ SCFG::TargetPhraseImpl *ProbingPT::CreateTargetPhraseSCFG(
 
     // set pt score for rule
     tp->GetScores().PlusEquals(system, *this, logScores);
+
+    // sort score. Just for scfg
+    tp->sortScore = logScores[2];
 
     // save scores for other FF, eg. lex RO.
     tp->scoreProperties = pool.Allocate<SCORE>(m_engine->num_lex_scores);

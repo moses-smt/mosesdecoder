@@ -110,7 +110,7 @@ void Hypothesis::EvaluateWhenApplied(const StatefulFeatureFunction &sfff)
 void Hypothesis::OutputToStream(std::ostream &out) const
 {
   const SCFG::TargetPhraseImpl &tp = GetTargetPhrase();
-  //cerr << "tp=" << tp.GetSize() << tp << endl;
+  //cerr << "tp=" << tp.Debug(m_mgr->system) << endl;
 
   for (size_t pos = 0; pos < tp.GetSize(); ++pos) {
     const SCFG::Word &word = tp[pos];
@@ -134,13 +134,13 @@ void Hypothesis::OutputToStream(std::ostream &out) const
 std::string Hypothesis::Debug(const System &system) const
 {
   stringstream out;
-  out << this;
+  cerr << this << flush;
 
-  out << " RANGE:";
-  out << m_path->range;
+  cerr << " RANGE:";
+  cerr << m_path->range << flush;
 
   // score
-  out << " SCORE:" << GetScores().Debug(GetManager().system);
+  cerr << " SCORE:" << GetScores().Debug(GetManager().system) << flush;
 
   /*
   out << " m_prevHypos=" << m_prevHypos.size() << " ";
@@ -149,13 +149,19 @@ std::string Hypothesis::Debug(const System &system) const
   }
   */
 
-  out << m_targetPhrase->Debug(GetManager().system);
+  cerr << m_targetPhrase->Debug(GetManager().system);
+
+  cerr << "PREV:";
+  for (size_t i = 0; i < m_prevHypos.size(); ++i) {
+    const Hypothesis &prevHypo = *m_prevHypos[i];
+    cerr << &prevHypo << " ";
+  }
 
   // recursive
   for (size_t i = 0; i < m_prevHypos.size(); ++i) {
     const Hypothesis &prevHypo = *m_prevHypos[i];
-    out << endl;
-    out << prevHypo.Debug(system);
+    cerr << endl;
+    cerr << prevHypo.Debug(system);
   }
 
   return out.str();

@@ -32,7 +32,6 @@ public:
   {  return m_total; }
 
   const SCORE *GetScores(const FeatureFunction &featureFunction) const;
-  const SCORE GetScore(const FeatureFunction &featureFunction, size_t offset) const;
 
   void Reset(const System &system);
 

@@ -76,22 +76,12 @@ struct CompareFutureScore
 };
 
 template<typename TP>
-struct Compare1Score
+struct CompareSortScore
 {
   bool operator()(const TP *a, const TP *b) const
   {
-    size_t numScores = a->pt.GetNumScores();
-    //std::cerr << "numScores=" << numScores << std::endl;
-    size_t offset;
-    if (numScores == 1) {
-      offset = 0;
-    }
-    else if (numScores == 4 || numScores == 5) {
-      offset = 2;
-    }
-
-    SCORE scoreA = a->GetScores().GetScore(a->pt, offset);
-    SCORE scoreB = b->GetScores().GetScore(b->pt, offset);
+    SCORE scoreA = a->sortScore;
+    SCORE scoreB = b->sortScore;
 
     return scoreA > scoreB;
   }

@@ -112,6 +112,9 @@ void PhraseTableMemory::Load(System &system)
       target->GetScores().CreateFromString(toks[2], *this, system, true);
       //cerr << "created scores:" << *target << endl;
 
+      vector<SCORE> scores = Tokenize<SCORE>(toks[2]);
+      target->sortScore = TransformScore(scores[2]);
+
       // properties
       if (toks.size() == 7) {
         //target->properties = (char*) system.systemPool.Allocate(toks[6].size() + 1);

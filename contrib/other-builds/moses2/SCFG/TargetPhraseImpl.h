@@ -32,6 +32,7 @@ class TargetPhraseImpl: public Moses2::TargetPhrase<SCFG::Word>
 public:
   SCFG::Word lhs;
   const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
+  SCORE sortScore;
 
   static TargetPhraseImpl *CreateFromString(MemPool &pool,
       const PhraseTable &pt, const System &system, const std::string &str);
