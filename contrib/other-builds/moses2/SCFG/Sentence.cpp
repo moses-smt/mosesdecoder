@@ -16,7 +16,7 @@ namespace SCFG
 Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
     const System &system, const std::string &str, long translationId)
 {
-  cerr << "SCFG Sentence" << endl;
+  //cerr << "SCFG Sentence" << endl;
 
   std::vector<std::string> toks = Tokenize(str);
   size_t size = toks.size();

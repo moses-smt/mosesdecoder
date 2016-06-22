@@ -39,10 +39,10 @@ void TargetPhrases::SortAndPrune(size_t tableLimit)
   iterMiddle =
       (tableLimit == 0 || m_coll.size() < tableLimit) ?
           m_coll.end() : m_coll.begin() + tableLimit;
-
+  /*
   std::partial_sort(m_coll.begin(), iterMiddle, m_coll.end(),
       Compare1Score<SCFG::TargetPhraseImpl>());
-
+  */
   if (tableLimit && m_coll.size() > tableLimit) {
     m_coll.resize(tableLimit);
   }

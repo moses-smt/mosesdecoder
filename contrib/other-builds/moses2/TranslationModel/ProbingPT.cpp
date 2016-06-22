@@ -488,7 +488,7 @@ void ProbingPT::LookupUnary(MemPool &pool,
     const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
-  cerr << "LookupUnary" << endl;
+  //cerr << "LookupUnary" << endl;
   size_t startPos = path.range.GetStartPos();
   const SCFG::InputPath *prevPath = mgr.GetInputPaths().GetMatrix().GetValue(startPos, 0);
   LookupNT(pool, mgr, path.range, *prevPath, stacks, path);
@@ -552,8 +552,8 @@ void ProbingPT::LookupGivenNode(
     SCFG::InputPath &outPath) const
 {
   std::pair<bool, uint64_t> key = prevEntry.GetKey(wordSought, *this);
-  cerr << "wordSought=" << wordSought.Debug(mgr.system)
-      << " key=" << key.first << endl;
+  //cerr << "wordSought=" << wordSought.Debug(mgr.system)
+  //    << " key=" << key.first << endl;
 
   if (!key.first) {
     // should only occasionally happen when looking up unary rules
@@ -562,7 +562,7 @@ void ProbingPT::LookupGivenNode(
 
   std::pair<bool, uint64_t> query_result; // 1st=found, 2nd=target file offset
   query_result = m_engine->query(key.second);
-  cerr << "query_result=" << query_result.first << endl;
+  //cerr << "query_result=" << query_result.first << endl;
 
   if (query_result.first) {
     size_t ptInd = GetPtInd();
@@ -570,7 +570,7 @@ void ProbingPT::LookupGivenNode(
 
     const char *offset = data + query_result.second;
     uint64_t *numTP = (uint64_t*) offset;
-    cerr << "numTP=" << *numTP << endl;
+    //cerr << "numTP=" << *numTP << endl;
 
     const Phrase<SCFG::Word> &sourcePhrase = outPath.subPhrase;
 
@@ -591,7 +591,7 @@ void ProbingPT::LookupGivenNode(
 
     tps->SortAndPrune(m_tableLimit);
     ffs.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
-    cerr << "tps=" << tps->Debug(mgr.system) << endl;
+    //cerr << "tps=" << tps->Debug(mgr.system) << endl;
 
     // new entries
     ActiveChartEntryProbing *chartEntry = new (pool.Allocate<ActiveChartEntryProbing>()) ActiveChartEntryProbing(pool, prevEntry);
@@ -604,7 +604,7 @@ void ProbingPT::LookupGivenNode(
     //cerr << "AFTER AddActiveChartEntry" << endl;
 
     // there are some rules
-    cerr << "symbolbind=" << chartEntry->GetSymbolBind().Debug(mgr.system) << endl;
+    //cerr << "symbolbind=" << chartEntry->GetSymbolBind().Debug(mgr.system) << endl;
     outPath.AddTargetPhrasesToPath(pool, *this, *tps, chartEntry->GetSymbolBind());
   }
 }
