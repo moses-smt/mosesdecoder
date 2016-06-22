@@ -85,32 +85,35 @@ void ModelScore(const lm::ngram::ProbingModel& model, char * test_file){
 }
 
 int main(int argc, char* argv[]){
-    if (argc < 4) {
-        std::cerr << argv[0] <<" max_pipeline_size model_file test_file" << std::endl;
+    if (argc < 6) {
+        std::cerr << argv[0] <<" pipeline_size_start pipeline_size_end model_file test_file <probing|pipeline>" << std::endl;
         return 1;
     }
-    int max_pipeline_size = std::stoi(std::string(argv[1]));
-    char* arpa_file(argv[2]);
-    char* test_file(argv[3]);
+    int pipeline_size_start = std::stoi(std::string(argv[1]));
+    int pipeline_size_end = std::stoi(std::string(argv[2]));
+    char* arpa_file(argv[3]);
+    char* test_file(argv[4]);
+    std::string type(argv[5]);
 
     lm::ngram::Config config;
     config.arpa_complain = lm::ngram::Config::ALL;
     config.messages = &std::cout;
     config.positive_log_probability = lm::SILENT;
-    config.probing_multiplier = 2.0;
+    config.probing_multiplier = 1.5;
     lm::ngram::ProbingModel model(arpa_file, config);
-    ModelScore(model, test_file);
 
-    auto score = 0.0;
-    const auto callback = [&score](const lm::FullScoreReturn& r){score += r.prob;};
-    for(auto pipeline_size = 1; pipeline_size <= max_pipeline_size; ++pipeline_size){
-        score = 0.0;
+    if (type == "probing") ModelScore(model, test_file);
+    else if (type == "pipeline") {
+        auto score = 0.0;
+        const auto callback = [&score](const lm::FullScoreReturn& r){score += r.prob;};
         typename lm::ngram::NGramAutomaton<lm::ngram::BackoffValue, decltype(callback)>::Construct construct{model.GetSearch(), callback};
-        lm::Pipeline<decltype(callback)> pipeline(pipeline_size, construct);
-        PipelineScore(pipeline, model, test_file);
-        std::cerr << "Score (pipeline): " << score << std::endl;
+        for (std::size_t pipeline_size = pipeline_size_start; pipeline_size <= pipeline_size_end; ++pipeline_size) {
+            score = 0.0;
+            lm::Pipeline<decltype(callback)> pipeline(pipeline_size, construct);
+            PipelineScore(pipeline, model, test_file);
+            std::cerr << "Score (pipeline): " << score << std::endl;
+        }
     }
-    ModelScore(model, test_file);
     std::cout << std::endl;
 
     
