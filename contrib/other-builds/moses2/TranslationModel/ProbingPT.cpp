@@ -524,9 +524,8 @@ void ProbingPT::LookupGivenNode(
     SCFG::InputPath &outPath) const
 {
   std::pair<bool, uint64_t> key = prevEntry.GetKey(wordSought, *this);
-  //cerr << "wordSought=" << wordSought.Debug(cerr, mgr.system) << " " << key.first << endl;
-  cerr << "wordSought=" << wordSought.Debug(mgr.system) << endl;
-  //cerr << "HELLO" << endl;
+  cerr << "wordSought=" << wordSought.Debug(mgr.system)
+      << " key=" << key.first << endl;
 
   if (!key.first) {
     // should only occasionally happen when looking up unary rules
@@ -535,6 +534,7 @@ void ProbingPT::LookupGivenNode(
 
   std::pair<bool, uint64_t> query_result; // 1st=found, 2nd=target file offset
   query_result = m_engine->query(key.second);
+  cerr << "query_result=" << query_result.first << endl;
 
   if (query_result.first) {
     size_t ptInd = GetPtInd();
@@ -542,6 +542,7 @@ void ProbingPT::LookupGivenNode(
 
     const char *offset = data + query_result.second;
     uint64_t *numTP = (uint64_t*) offset;
+    cerr << "numTP=" << *numTP << endl;
 
     const Phrase<SCFG::Word> &sourcePhrase = outPath.subPhrase;
 
@@ -552,6 +553,8 @@ void ProbingPT::LookupGivenNode(
     for (size_t i = 0; i < *numTP; ++i) {
       SCFG::TargetPhraseImpl *tp = CreateTargetPhraseSCFG(pool, mgr.system, offset);
       assert(tp);
+      cerr << "tp=" << tp->Debug(mgr.system) << endl;
+
       ffs.EvaluateInIsolation(pool, mgr.system, sourcePhrase, *tp);
 
       tps->AddTargetPhrase(*tp);
@@ -560,7 +563,7 @@ void ProbingPT::LookupGivenNode(
 
     tps->SortAndPrune(m_tableLimit);
     ffs.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
-    //cerr << *tps << endl;
+    cerr << "tps=" << tps->Debug(mgr.system) << endl;
 
     // there are some rules
     //AddTargetPhrasesToPath(pool, *nextNode, symbolBind, outPath);

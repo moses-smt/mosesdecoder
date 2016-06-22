@@ -101,7 +101,7 @@ protected:
 
   void AddTargetPhrasesToPath(
       MemPool &pool,
-      const SCFGNODE &node,
+      const SCFG::TargetPhrases &tps,
       const SCFG::SymbolBind &symbolBind,
       SCFG::InputPath &outPath) const;
 };

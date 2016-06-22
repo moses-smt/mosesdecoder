@@ -54,6 +54,7 @@ std::string TargetPhrases::Debug(const System &system) const
 {
   std::stringstream out;
 
+  out << m_coll.size() << std::endl;
   BOOST_FOREACH(const SCFG::TargetPhraseImpl *tp, m_coll) {
     out << std::endl;
     out << tp->Debug(system);

@@ -285,8 +285,12 @@ void PhraseTableMemory::LookupGivenNode(
 
     outPath.AddActiveChartEntry(ptInd, chartEntry);
 
-    // there are some rules
-    AddTargetPhrasesToPath(pool, *nextNode, chartEntry->GetSymbolBind(), outPath);
+    const SCFG::TargetPhrases *tps = nextNode->GetTargetPhrases();
+    if (tps) {
+      // there are some rules
+      AddTargetPhrasesToPath(pool, *tps, chartEntry->GetSymbolBind(), outPath);
+
+    }
 
     //cerr << "AFTER outPath=" << outPath << endl;
   }
@@ -294,18 +298,15 @@ void PhraseTableMemory::LookupGivenNode(
 
 void PhraseTableMemory::AddTargetPhrasesToPath(
     MemPool &pool,
-    const SCFGNODE &node,
+    const SCFG::TargetPhrases &tps,
     const SCFG::SymbolBind &symbolBind,
     SCFG::InputPath &outPath) const
 {
-  const SCFG::TargetPhrases *tps = node.GetTargetPhrases();
-  if (tps) {
-    SCFG::TargetPhrases::const_iterator iter;
-    for (iter = tps->begin(); iter != tps->end(); ++iter) {
-      const SCFG::TargetPhraseImpl *tp = *iter;
-      //cerr << "tpCast=" << *tp << endl;
-      outPath.AddTargetPhrase(pool, *this, symbolBind, tp);
-    }
+  SCFG::TargetPhrases::const_iterator iter;
+  for (iter = tps.begin(); iter != tps.end(); ++iter) {
+    const SCFG::TargetPhraseImpl *tp = *iter;
+    //cerr << "tpCast=" << *tp << endl;
+    outPath.AddTargetPhrase(pool, *this, symbolBind, tp);
   }
 }
 
