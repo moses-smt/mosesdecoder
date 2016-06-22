@@ -18,7 +18,7 @@
 
 namespace Moses2
 {
-
+class AlignmentInfo;
 class QueryEngine;
 class target_text;
 class MemPool;
@@ -71,6 +71,8 @@ public:
   virtual ~ProbingPT();
   void Load(System &system);
 
+  void CreateAlignmentMap(const std::string path);
+
   void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
 
   void InitActiveChart(
@@ -95,6 +97,7 @@ public:
 protected:
   std::vector<uint64_t> m_sourceVocab; // factor id -> pt id
   std::vector< std::pair<bool, const Factor*> > m_targetVocab; // pt id -> factor*
+  std::vector<const AlignmentInfo*> m_aligns;
 
   uint64_t m_unkId;
   QueryEngine *m_engine;

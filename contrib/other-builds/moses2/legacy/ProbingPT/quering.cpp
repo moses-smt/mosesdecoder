@@ -2,6 +2,8 @@
 #include "util/exception.hh"
 #include "../Util2.h"
 
+using namespace std;
+
 namespace Moses2
 {
 
@@ -12,9 +14,13 @@ QueryEngine::QueryEngine(const char * filepath)
   std::string basepath(filepath);
   std::string path_to_hashtable = basepath + "/probing_hash.dat";
   std::string path_to_source_vocabid = basepath + "/source_vocabids";
+  std::string alignPath = basepath + "/Alignments.dat";
 
   ///Source phrase vocabids
   read_map(source_vocabids, path_to_source_vocabid.c_str());
+
+  // alignments
+  read_alignments(alignPath);
 
   //Read config file
   boost::unordered_map<std::string, std::string> keyValue;
@@ -104,6 +110,28 @@ std::pair<bool, uint64_t> QueryEngine::query(uint64_t key)
     ret.second = entry->value;
   }
   return ret;
+}
+
+void QueryEngine::read_alignments(const std::string &alignPath)
+{
+  std::ifstream strm(alignPath.c_str());
+
+  string line;
+  while (getline(strm, line)) {
+    vector<string> toks = Moses2::Tokenize(line, "\t ");
+    UTIL_THROW_IF2(toks.size() == 0, "Corrupt alignment file");
+
+    uint16_t alignInd = Scan<uint16_t>(toks[0]);
+    if (alignInd >= alignColl.size()) {
+      alignColl.resize(alignInd + 1);
+    }
+
+    Alignments &aligns = alignColl[alignInd];
+    for (size_t i = 1; i < toks.size(); ++i) {
+      size_t pos = Scan<unsigned char>(toks[i]);
+      aligns.push_back(pos);
+    }
+  }
 }
 
 }

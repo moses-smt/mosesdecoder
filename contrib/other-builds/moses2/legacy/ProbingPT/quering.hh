@@ -17,11 +17,16 @@ class QueryEngine
 {
   std::map<uint64_t, std::string> source_vocabids;
 
+  typedef std::vector<unsigned char> Alignments;
+  std::vector<Alignments> alignColl;
+
   Table table;
   char *mem; //Memory for the table, necessary so that we can correctly destroy the object
 
   size_t table_filesize;
   bool is_reordering;
+
+  void read_alignments(const std::string &alignPath);
 
 public:
   int num_scores;
@@ -34,9 +39,10 @@ public:
   std::pair<bool, uint64_t> query(uint64_t key);
 
   const std::map<uint64_t, std::string> &getSourceVocab() const
-  {
-    return source_vocabids;
-  }
+  {  return source_vocabids; }
+
+  const std::vector<Alignments> &getAlignments() const
+  {  return alignColl; }
 
   uint64_t getKey(uint64_t source_phrase[], size_t size) const;
 

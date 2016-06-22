@@ -59,8 +59,8 @@ std::pair<bool, uint64_t> ProbingPT::ActiveChartEntryProbing::GetKey(const SCFG:
 }
 
 ////////////////////////////////////////////////////////////////////////////
-ProbingPT::ProbingPT(size_t startInd, const std::string &line) :
-    PhraseTable(startInd, line)
+ProbingPT::ProbingPT(size_t startInd, const std::string &line)
+:PhraseTable(startInd, line)
 {
   ReadParameters();
 }
@@ -124,6 +124,9 @@ void ProbingPT::Load(System &system)
     m_targetVocab[probingId] = ele;
   }
 
+  // alignments
+  CreateAlignmentMap(m_path + "/Alignments.dat");
+
   // memory mapped file to tps
   string filePath = m_path + "/TargetColl.dat";
   file.open(filePath.c_str());
@@ -136,6 +139,24 @@ void ProbingPT::Load(System &system)
 
   // cache
   CreateCache(system);
+}
+
+void ProbingPT::CreateAlignmentMap(const std::string path)
+{
+  const std::vector< std::vector<unsigned char> > &probingAlignColl = m_engine->getAlignments();
+  m_aligns.resize(probingAlignColl.size());
+
+  for (size_t i = 0; i < probingAlignColl.size(); ++i) {
+    AlignmentInfo::CollType aligns;
+
+    const std::vector<unsigned char> &probingAligns = probingAlignColl[i];
+    for (size_t j = 0; j < probingAligns.size(); j += 2) {
+      aligns.insert(std::pair<size_t,size_t>(probingAligns[j], probingAligns[j+1]));
+    }
+
+    const AlignmentInfo *align = AlignmentInfoCollection::Instance().Add(aligns);
+    m_aligns[i] = align;
+  }
 }
 
 void ProbingPT::Lookup(const Manager &mgr, InputPathsBase &inputPaths) const
