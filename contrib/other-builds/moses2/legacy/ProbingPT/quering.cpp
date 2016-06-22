@@ -128,7 +128,7 @@ void QueryEngine::read_alignments(const std::string &alignPath)
 
     Alignments &aligns = alignColl[alignInd];
     for (size_t i = 1; i < toks.size(); ++i) {
-      size_t pos = Scan<unsigned char>(toks[i]);
+      size_t pos = Scan<size_t>(toks[i]);
       aligns.push_back(pos);
     }
   }

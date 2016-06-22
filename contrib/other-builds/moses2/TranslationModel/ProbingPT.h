@@ -71,8 +71,6 @@ public:
   virtual ~ProbingPT();
   void Load(System &system);
 
-  void CreateAlignmentMap(const std::string path);
-
   void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
 
   void InitActiveChart(
@@ -104,6 +102,8 @@ protected:
 
   boost::iostreams::mapped_file_source file;
   const char *data;
+
+  void CreateAlignmentMap(System &system, const std::string path);
 
   TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
       InputPath &inputPath) const;

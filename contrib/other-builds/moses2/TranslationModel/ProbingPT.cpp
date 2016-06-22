@@ -125,7 +125,7 @@ void ProbingPT::Load(System &system)
   }
 
   // alignments
-  CreateAlignmentMap(m_path + "/Alignments.dat");
+  CreateAlignmentMap(system, m_path + "/Alignments.dat");
 
   // memory mapped file to tps
   string filePath = m_path + "/TargetColl.dat";
@@ -141,21 +141,25 @@ void ProbingPT::Load(System &system)
   CreateCache(system);
 }
 
-void ProbingPT::CreateAlignmentMap(const std::string path)
+void ProbingPT::CreateAlignmentMap(System &system, const std::string path)
 {
   const std::vector< std::vector<unsigned char> > &probingAlignColl = m_engine->getAlignments();
-  m_aligns.resize(probingAlignColl.size());
+  m_aligns.resize(probingAlignColl.size(), NULL);
 
   for (size_t i = 0; i < probingAlignColl.size(); ++i) {
     AlignmentInfo::CollType aligns;
 
     const std::vector<unsigned char> &probingAligns = probingAlignColl[i];
     for (size_t j = 0; j < probingAligns.size(); j += 2) {
-      aligns.insert(std::pair<size_t,size_t>(probingAligns[j], probingAligns[j+1]));
+      size_t startPos = probingAligns[j];
+      size_t endPos = probingAligns[j+1];
+      //cerr << "startPos=" << startPos << " " << endPos << endl;
+      aligns.insert(std::pair<size_t,size_t>(startPos, endPos));
     }
 
     const AlignmentInfo *align = AlignmentInfoCollection::Instance().Add(aligns);
     m_aligns[i] = align;
+    //cerr << "align=" << align->Debug(system) << endl;
   }
 }
 
@@ -675,6 +679,32 @@ SCFG::TargetPhraseImpl *ProbingPT::CreateTargetPhraseSCFG(
   tp->lhs.isNonTerminal = factorPair->first;
 
   offset += sizeof(uint32_t);
+
+  // align
+  uint16_t alignInd = tpInfo->alignInd;
+  //cerr << "alignInd=" << alignInd << endl;
+
+  UTIL_THROW_IF2(alignInd >= m_aligns.size(), "Unknown alignInd");
+  const AlignmentInfo *alignInfo = m_aligns[alignInd];
+  assert(alignInfo);
+
+  AlignmentInfo::CollType alignTerm, alignNonTerm;
+
+  BOOST_FOREACH(const AlignmentInfo::CollType::value_type  &val, *alignInfo) {
+    size_t sourcePos = val.first;
+    size_t targetPos = val.second;
+    //cerr << "val=" << sourcePos << " " << targetPos << endl;
+
+    if ((*tp)[targetPos].isNonTerminal) {
+      alignNonTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
+    }
+    else {
+      alignTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
+    }
+  }
+
+  tp->SetAlignTerm(alignTerm);
+  tp->SetAlignNonTerm(alignNonTerm);
 
   // properties TODO
 
