@@ -238,14 +238,15 @@ void InsertPrefixes(
   }
 
   // loop through each prefix
+  /*
   cerr << endl;
   cerr << "prev=" << Debug(prevVocabid_source) << endl;
   cerr << "curr=" << Debug(vocabid_source) << endl;
   cerr << "startPos=" << startPos << endl;
-
+  */
   for (size_t i = startPos; i < vocabid_source.size() - 1; ++i) {
     std::vector<uint64_t> prefix = CreatePrefix(vocabid_source, i);
-    cerr << "pref=" << Debug(prefix) << endl;
+    //cerr << "pref=" << Debug(prefix) << endl;
 
     // save
     Entry sourceEntry;

@@ -509,31 +509,6 @@ void ProbingPT::LookupGivenNode(
 
   if (query_result.first) {
     size_t ptInd = GetPtInd();
-    const FeatureFunctions &ffs = mgr.system.featureFunctions;
-
-    const char *offset = data + query_result.second;
-    uint64_t *numTP = (uint64_t*) offset;
-    //cerr << "numTP=" << *numTP << endl;
-
-    const Phrase<SCFG::Word> &sourcePhrase = outPath.subPhrase;
-
-    SCFG::TargetPhrases *tps = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool, *numTP);
-
-    offset += sizeof(uint64_t);
-    for (size_t i = 0; i < *numTP; ++i) {
-      SCFG::TargetPhraseImpl *tp = CreateTargetPhraseSCFG(pool, mgr.system, offset);
-      assert(tp);
-      //cerr << "tp=" << tp->Debug(mgr.system) << endl;
-
-      ffs.EvaluateInIsolation(pool, mgr.system, sourcePhrase, *tp);
-
-      tps->AddTargetPhrase(*tp);
-
-    }
-
-    tps->SortAndPrune(m_tableLimit);
-    ffs.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
-    //cerr << "tps=" << tps->Debug(mgr.system) << endl;
 
     // new entries
     ActiveChartEntryProbing *chartEntry = new (pool.Allocate<ActiveChartEntryProbing>()) ActiveChartEntryProbing(pool, prevEntry);
@@ -545,9 +520,37 @@ void ProbingPT::LookupGivenNode(
     outPath.AddActiveChartEntry(ptInd, chartEntry);
     //cerr << "AFTER AddActiveChartEntry" << endl;
 
-    // there are some rules
-    //cerr << "symbolbind=" << chartEntry->GetSymbolBind().Debug(mgr.system) << endl;
-    outPath.AddTargetPhrasesToPath(pool, *this, *tps, chartEntry->GetSymbolBind());
+    if (query_result.second != NONE) {
+      // there are some rules
+      const FeatureFunctions &ffs = mgr.system.featureFunctions;
+
+      const char *offset = data + query_result.second;
+      uint64_t *numTP = (uint64_t*) offset;
+      //cerr << "numTP=" << *numTP << endl;
+
+      const Phrase<SCFG::Word> &sourcePhrase = outPath.subPhrase;
+
+      SCFG::TargetPhrases *tps = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool, *numTP);
+
+      offset += sizeof(uint64_t);
+      for (size_t i = 0; i < *numTP; ++i) {
+        SCFG::TargetPhraseImpl *tp = CreateTargetPhraseSCFG(pool, mgr.system, offset);
+        assert(tp);
+        //cerr << "tp=" << tp->Debug(mgr.system) << endl;
+
+        ffs.EvaluateInIsolation(pool, mgr.system, sourcePhrase, *tp);
+
+        tps->AddTargetPhrase(*tp);
+
+      }
+
+      tps->SortAndPrune(m_tableLimit);
+      ffs.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
+      //cerr << "tps=" << tps->Debug(mgr.system) << endl;
+
+      //cerr << "symbolbind=" << chartEntry->GetSymbolBind().Debug(mgr.system) << endl;
+      outPath.AddTargetPhrasesToPath(pool, *this, *tps, chartEntry->GetSymbolBind());
+    }
   }
 }
 
