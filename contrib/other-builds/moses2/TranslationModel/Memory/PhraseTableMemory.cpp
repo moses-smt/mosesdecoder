@@ -185,7 +185,7 @@ void PhraseTableMemory::Lookup(MemPool &pool,
   const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(endPos, 1);
 
   //cerr << "BEFORE LookupGivenWord=" << *prevPath << endl;
-  LookupGivenWord(pool, *prevPath, lastWord, NULL, subPhrasePath.range, path);
+  LookupGivenWord(pool, mgr, *prevPath, lastWord, NULL, subPhrasePath.range, path);
   //cerr << "AFTER LookupGivenWord=" << *prevPath << endl;
 
   // NON-TERMINAL
@@ -198,7 +198,7 @@ void PhraseTableMemory::Lookup(MemPool &pool,
     size_t ntSize = endPos - startPos + 1;
     const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(startPos, ntSize);
 
-    LookupNT(pool, subPhrasePath.range, *prevPath, stacks, path);
+    LookupNT(pool, mgr, subPhrasePath.range, *prevPath, stacks, path);
 
     prevPath = static_cast<const SCFG::InputPath*>(prevPath->prefixPath);
   }
@@ -214,11 +214,12 @@ void PhraseTableMemory::LookupUnary(
 
   size_t startPos = path.range.GetStartPos();
   const SCFG::InputPath *prevPath = mgr.GetInputPaths().GetMatrix().GetValue(startPos, 0);
-  LookupNT(pool, path.range, *prevPath, stacks, path);
+  LookupNT(pool, mgr, path.range, *prevPath, stacks, path);
 }
 
 void PhraseTableMemory::LookupNT(
     MemPool &pool,
+    const SCFG::Manager &mgr,
     const Moses2::Range &subPhraseRange,
     const SCFG::InputPath &prevPath,
     const SCFG::Stacks &stacks,
@@ -238,12 +239,13 @@ void PhraseTableMemory::LookupNT(
     const SCFG::Word &ntSought = valPair.first;
     const Moses2::HypothesisColl *hypos = valPair.second;
     //cerr << "ntSought=" << ntSought << ntSought.isNonTerminal << endl;
-    LookupGivenWord(pool, prevPath, ntSought, hypos, subPhraseRange, outPath);
+    LookupGivenWord(pool, mgr, prevPath, ntSought, hypos, subPhraseRange, outPath);
   }
 }
 
 void PhraseTableMemory::LookupGivenWord(
     MemPool &pool,
+    const SCFG::Manager &mgr,
     const SCFG::InputPath &prevPath,
     const SCFG::Word &wordSought,
     const Moses2::HypothesisColl *hypos,
@@ -258,13 +260,14 @@ void PhraseTableMemory::LookupGivenWord(
     //cerr << "entry=" << &entryCast->node << endl;
 
     //cerr << "BEFORE LookupGivenNode=" << prevPath << endl;
-    LookupGivenNode(pool, *prevEntryCast, wordSought, hypos, subPhraseRange, outPath);
+    LookupGivenNode(pool, mgr, *prevEntryCast, wordSought, hypos, subPhraseRange, outPath);
     //cerr << "AFTER LookupGivenNode=" << prevPath << endl;
   }
 }
 
 void PhraseTableMemory::LookupGivenNode(
     MemPool &pool,
+    const SCFG::Manager &mgr,
     const ActiveChartEntryMem &prevEntry,
     const SCFG::Word &wordSought,
     const Moses2::HypothesisColl *hypos,

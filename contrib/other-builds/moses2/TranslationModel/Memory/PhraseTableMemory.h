@@ -78,6 +78,7 @@ protected:
 
   void LookupNT(
       MemPool &pool,
+      const SCFG::Manager &mgr,
       const Moses2::Range &subPhraseRange,
       const SCFG::InputPath &prevPath,
       const SCFG::Stacks &stacks,
@@ -85,6 +86,7 @@ protected:
 
   void LookupGivenWord(
       MemPool &pool,
+      const SCFG::Manager &mgr,
       const SCFG::InputPath &prevPath,
       const SCFG::Word &wordSought,
       const Moses2::HypothesisColl *hypos,
@@ -93,6 +95,7 @@ protected:
 
   void LookupGivenNode(
       MemPool &pool,
+      const SCFG::Manager &mgr,
       const ActiveChartEntryMem &prevEntry,
       const SCFG::Word &wordSought,
       const Moses2::HypothesisColl *hypos,
