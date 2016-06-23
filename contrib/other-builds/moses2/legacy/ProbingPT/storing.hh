@@ -23,7 +23,10 @@ void createProbingPT(const std::string &phrasetable_path,
     bool log_prob, int max_cache_size, bool scfg);
 uint64_t getKey(const std::vector<uint64_t> &source_phrase);
 
-void InsertPrefixes(const std::vector<uint64_t> &vocabid_source, const std::vector<uint64_t> &prevVocabid_source);
+void InsertPrefixes(
+    const std::vector<uint64_t> &vocabid_source,
+    const std::vector<uint64_t> &prevVocabid_source,
+    Table &sourceEntries);
 std::vector<uint64_t> CreatePrefix(const std::vector<uint64_t> &vocabid_source, size_t endPos);
 
 template<typename T>

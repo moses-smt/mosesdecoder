@@ -92,7 +92,7 @@ void createProbingPT(const std::string &phrasetable_path,
           // don't store the last non-term in the source phrase
           vocabid_source.erase(vocabid_source.begin() + vocabid_source.size() - 1);
 
-          InsertPrefixes(vocabid_source, prevVocabid_source);
+          InsertPrefixes(vocabid_source, prevVocabid_source, sourceEntries);
         }
         sourceEntry.key = getKey(vocabid_source);
 
@@ -222,7 +222,10 @@ uint64_t getKey(const std::vector<uint64_t> &vocabid_source)
   return Moses2::getKey(vocabid_source.data(), vocabid_source.size());
 }
 
-void InsertPrefixes(const std::vector<uint64_t> &vocabid_source, const std::vector<uint64_t> &prevVocabid_source)
+void InsertPrefixes(
+    const std::vector<uint64_t> &vocabid_source,
+    const std::vector<uint64_t> &prevVocabid_source,
+    Table &sourceEntries)
 {
   size_t minSize = std::min(vocabid_source.size(), prevVocabid_source.size());
   size_t startPos = prevVocabid_source.size();
@@ -243,6 +246,15 @@ void InsertPrefixes(const std::vector<uint64_t> &vocabid_source, const std::vect
   for (size_t i = startPos; i < vocabid_source.size() - 1; ++i) {
     std::vector<uint64_t> prefix = CreatePrefix(vocabid_source, i);
     cerr << "pref=" << Debug(prefix) << endl;
+
+    // save
+    Entry sourceEntry;
+    sourceEntry.value = NONE;
+    sourceEntry.key = getKey(prefix);
+
+    //Put into table
+    sourceEntries.Insert(sourceEntry);
+
   }
 
 }
