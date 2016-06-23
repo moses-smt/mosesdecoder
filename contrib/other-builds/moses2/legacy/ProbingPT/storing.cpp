@@ -1,4 +1,5 @@
 #include <sys/stat.h>
+#include <boost/unordered_set.hpp>
 #include "line_splitter.hh"
 #include "storing.hh"
 #include "StoreTarget.h"
@@ -35,7 +36,7 @@ void createProbingPT(const std::string &phrasetable_path,
   size_t size = Table::Size(uniq_entries, 1.2);
   char * mem = new char[size];
   memset(mem, 0, size);
-  Table table(mem, size);
+  Table sourceEntries(mem, size);
 
   std::priority_queue<CacheItem*, std::vector<CacheItem*>, CacheItemOrderer> cache;
   float totalSourceCount = 0;
@@ -45,6 +46,8 @@ void createProbingPT(const std::string &phrasetable_path,
 
   //Read everything and processs
   std::string prevSource;
+  std::vector<uint64_t> prevVocabid_source;
+
   while (true) {
     try {
       //Process line read
@@ -80,18 +83,21 @@ void createProbingPT(const std::string &phrasetable_path,
         storeTarget.Append(line, log_prob);
 
         //Create an entry for the previous source phrase:
-        Entry pesho;
-        pesho.value = targetInd;
+        Entry sourceEntry;
+        sourceEntry.value = targetInd;
         //The key is the sum of hashes of individual words bitshifted by their position in the phrase.
         //Probably not entirerly correct, but fast and seems to work fine in practise.
         std::vector<uint64_t> vocabid_source = getVocabIDs(prevSource);
         if (scfg) {
+          // don't store the last non-term in the source phrase
           vocabid_source.erase(vocabid_source.begin() + vocabid_source.size() - 1);
+
+          InsertPrefixes(vocabid_source, prevVocabid_source);
         }
-        pesho.key = getKey(vocabid_source);
+        sourceEntry.key = getKey(vocabid_source);
 
         //Put into table
-        table.Insert(pesho);
+        sourceEntries.Insert(sourceEntry);
 
         // update cache
         if (max_cache_size) {
@@ -116,6 +122,9 @@ void createProbingPT(const std::string &phrasetable_path,
         //Set prevLine
         prevSource = line.source_phrase.as_string();
 
+        if (scfg){
+          prevVocabid_source = vocabid_source;
+        }
       }
 
     }
@@ -128,15 +137,15 @@ void createProbingPT(const std::string &phrasetable_path,
       //Create an entry for the previous source phrase:
       uint64_t targetInd = storeTarget.Save();
 
-      Entry pesho;
-      pesho.value = targetInd;
+      Entry sourceEntry;
+      sourceEntry.value = targetInd;
 
       //The key is the sum of hashes of individual words. Probably not entirerly correct, but fast
       std::vector<uint64_t> vocabid_source = getVocabIDs(prevSource);
-      pesho.key = getKey(vocabid_source);
+      sourceEntry.key = getKey(vocabid_source);
 
       //Put into table
-      table.Insert(pesho);
+      sourceEntries.Insert(sourceEntry);
 
       break;
     }
@@ -171,7 +180,7 @@ size_t countUniqueSource(const std::string &path)
   std::string line, prevSource;
   while (std::getline(strme, line)) {
     std::vector<std::string> toks = TokenizeMultiCharSeparator(line, "|||");
-    assert(toks.size() == 0);
+    assert(toks.size() != 0);
 
     if (prevSource != toks[0]) {
       prevSource = toks[0];
@@ -211,6 +220,42 @@ void serialize_cache(
 uint64_t getKey(const std::vector<uint64_t> &vocabid_source)
 {
   return Moses2::getKey(vocabid_source.data(), vocabid_source.size());
+}
+
+void InsertPrefixes(const std::vector<uint64_t> &vocabid_source, const std::vector<uint64_t> &prevVocabid_source)
+{
+  size_t minSize = std::min(vocabid_source.size(), prevVocabid_source.size());
+  size_t startPos = prevVocabid_source.size();
+
+  for (size_t i = 0; i < minSize; ++i) {
+    if (vocabid_source[i] != prevVocabid_source[i]) {
+      startPos = i + 1;
+      break;
+    }
+  }
+
+  // loop through each prefix
+  cerr << endl;
+  cerr << "prev=" << Debug(prevVocabid_source) << endl;
+  cerr << "curr=" << Debug(vocabid_source) << endl;
+  cerr << "startPos=" << startPos << endl;
+
+  for (size_t i = startPos; i < vocabid_source.size() - 1; ++i) {
+    std::vector<uint64_t> prefix = CreatePrefix(vocabid_source, i);
+    cerr << "pref=" << Debug(prefix) << endl;
+  }
+
+}
+
+std::vector<uint64_t> CreatePrefix(const std::vector<uint64_t> &vocabid_source, size_t endPos)
+{
+  assert(endPos < vocabid_source.size());
+
+  std::vector<uint64_t> ret(endPos + 1);
+  for (size_t i = 0; i <= endPos; ++i) {
+    ret[i] = vocabid_source[i];
+  }
+  return ret;
 }
 
 }

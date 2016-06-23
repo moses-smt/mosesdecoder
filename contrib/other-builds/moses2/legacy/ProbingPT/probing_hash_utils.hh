@@ -15,21 +15,23 @@ namespace Moses2
 //Hash table entry
 struct Entry
 {
-  uint64_t key;
   typedef uint64_t Key;
+  Key key;
 
-  uint64_t GetKey() const
+  Key GetKey() const
   {
     return key;
   }
 
-  void SetKey(uint64_t to)
+  void SetKey(Key to)
   {
     key = to;
   }
 
   uint64_t value;
 };
+
+#define NONE       std::numeric_limits<uint64_t>::max()
 
 //Define table
 typedef util::ProbingHashTable<Entry, boost::hash<uint64_t> > Table;
