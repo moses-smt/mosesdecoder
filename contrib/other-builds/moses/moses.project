@@ -124,8 +124,6 @@
       <File Name="../../../moses/TranslationModel/UG/sapt_phrase_scorers.h"/>
       <File Name="../../../moses/TranslationModel/UG/sapt_pscore_base.h"/>
       <File Name="../../../moses/TranslationModel/UG/sapt_pscore_coherence.h"/>
-      <File Name="../../../moses/TranslationModel/UG/sapt_pscore_dist.h"/>
-      <File Name="../../../moses/TranslationModel/UG/sapt_pscore_length_ratio.h"/>
       <File Name="../../../moses/TranslationModel/UG/sapt_pscore_lex1.h"/>
       <File Name="../../../moses/TranslationModel/UG/sapt_pscore_logcnt.h"/>
       <File Name="../../../moses/TranslationModel/UG/sapt_pscore_pbwd.h"/>
@@ -135,7 +133,6 @@
       <File Name="../../../moses/TranslationModel/UG/sapt_pscore_rareness.h"/>
       <File Name="../../../moses/TranslationModel/UG/sapt_pscore_unaligned.h"/>
       <File Name="../../../moses/TranslationModel/UG/sapt_pscore_wordcount.h"/>
-      <File Name="../../../moses/TranslationModel/UG/sapt_pscore_cumulative_bias.h"/>
       <File Name="../../../moses/TranslationModel/UG/sim-pe.cc" ExcludeProjConfig="Debug"/>
       <File Name="../../../moses/TranslationModel/UG/spe-check-coverage.cc" ExcludeProjConfig="Debug"/>
       <File Name="../../../moses/TranslationModel/UG/spe-check-coverage2.cc" ExcludeProjConfig="Debug"/>

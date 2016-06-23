@@ -147,6 +147,14 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
+  void AddKnownSpace(const std::string& name) {
+    m_knownSpaces.push_back(name);
+  }
+
+  const std::vector<std::string> &GetKnownSpaces() const {
+    return m_knownSpaces;
+  }
+
   // LEGACY
   //! find list of translations that can translates a portion of src. Used by confusion network decoding
   virtual
@@ -170,6 +178,9 @@ protected:
 
   // cache
   size_t m_maxCacheSize; // 0 = no caching
+
+  // Named coordinate spaces used by this model, in order (see "coord" XML tag)
+  std::vector<std::string> m_knownSpaces;
 
 #ifdef WITH_THREADS
   //reader-writer lock

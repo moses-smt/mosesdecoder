@@ -14,4 +14,3 @@
 #include "sapt_pscore_phrasecount.h"  // phrase count
 #include "sapt_pscore_wordcount.h"    // word count
 #include "sapt_pscore_cumulative_bias.h" // cumulative bias score
-#include "sapt_pscore_dist.h"         // sample distance score

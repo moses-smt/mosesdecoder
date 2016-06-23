@@ -31,8 +31,8 @@ namespace sapt
     std::vector<unsigned char> aln;
     float score;
     bool inverse;
-    std::vector<uint32_t> sids; // list of sampled sentence ids where this
-                                // phrase pair was found
+    SPTR<std::vector<uint32_t> > sids; // list of sampled sentence ids where
+                                       // this phrase pair was found
     // std::vector<uint32_t> indoc;
     std::map<uint32_t,uint32_t> indoc;
     PhrasePair() { };
@@ -185,6 +185,8 @@ namespace sapt
     sample2 += o.sample2;
     cum_bias += o.cum_bias;
     // todo: add distortion counts
+    if (sids && o.sids)
+      sids->insert(sids->end(), o.sids->begin(), o.sids->end());
     return *this;
   }
 

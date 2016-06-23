@@ -402,12 +402,37 @@ ProcessAndStripXMLTags(AllOptions const& opts, string &line,
           StaticData::InstanceNonConst().SetAllWeights(allWeights);
         }
 
-        // coord: coordinate(s) of the input sentence in some space
-        // (one or more floats)
+        // Coord: coordinates of the input sentence in a user-defined space
+        // <coord space="NAME" coord="X Y Z ..." />
+        // where NAME is the name of the space and X Y Z ... are floats.  See
+        // PScoreDist in PhraseDictionaryBitextSampling (Mmsapt) for an example
+        // of using this information for feature scoring.
         else if (tagName == "coord") {
+          // Parse tag
+          string space = ParseXmlTagAttribute(tagContent, "space");
           vector<string> toks = Tokenize(ParseXmlTagAttribute(tagContent, "coord"));
-          input.m_coord.reset(new vector<float>());
-          Scan<float>(*(input.m_coord), toks);
+          boost::shared_ptr<vector<float> > coord(new vector<float>);
+          Scan<float>(*coord, toks);
+          // Init if needed
+          if (!input.m_pd2InputCoord) {
+            input.m_pd2InputCoord.reset(new std::map<PhraseDictionary const*, std::vector<boost::shared_ptr<std::vector<float> > > >);
+          }
+          // Scan phrase dictionaries to see which (if any) use this space
+          BOOST_FOREACH(PhraseDictionary const* pd, PhraseDictionary::GetColl()) {
+            const vector<string>& pdKnownSpaces = pd->GetKnownSpaces();
+            for (size_t i = 0; i < pdKnownSpaces.size(); ++i) {
+              // Match
+              if (pdKnownSpaces[i] == space) {
+                // Make sure a slot to store the coordinates exists
+                std::vector<boost::shared_ptr<std::vector<float> > >& inputCoord = (*input.m_pd2InputCoord)[pd];
+                if (inputCoord.size() < i + 1) {
+                  inputCoord.resize(i + 1);
+                }
+                // Store
+                inputCoord[i] = coord;
+              }
+            }
+          }
         }
 
         // default: opening tag that specifies translation options

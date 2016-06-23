@@ -3656,16 +3656,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/sapt_pscore_coherence.h</locationURI>
         </link>
 		<link>
-			<name>TranslationModel/UG/sapt_pscore_dist.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/sapt_pscore_dist.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/UG/sapt_pscore_length_ratio.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/sapt_pscore_length_ratio.h</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/UG/sapt_pscore_lex1.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/sapt_pscore_lex1.h</locationURI>
@@ -3710,11 +3700,6 @@
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/sapt_pscore_wordcount.h</locationURI>
         </link>
-		<link>
-			<name>TranslationModel/UG/sapt_pscore_cumulative_bias.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/sapt_pscore_cumulative_bias.h</locationURI>
-		</link>
 		<link>
 			<name>TranslationModel/UG/sim-pe.cc</name>
 			<type>1</type>

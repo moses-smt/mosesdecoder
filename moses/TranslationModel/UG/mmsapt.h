@@ -119,9 +119,8 @@ namespace Moses
     std::vector<SPTR<pscorer > > m_active_ff_common;
     // activated feature functions (dyn)
 
-    // Coordinates of bitext source sentences for dist feature
-    boost::shared_ptr<std::vector<std::vector<float> > > m_sid_coord;
-    bool m_track_sids; // track sids when sampling bitext?
+    bool m_track_coord = false; // track coordinates?  Effectively: track sids when sampling bitext?
+    std::vector<std::vector<std::vector<float> > > m_sid_coord_list;
 
     void
     parse_factor_spec(std::vector<FactorType>& flist, std::string const key);

@@ -28,7 +28,7 @@ namespace sapt
     uint32_t obwd[LRModel::NONE+1]; // backward distortion type counts
 
   public:
-    std::vector<uint32_t> sids; // list of sentence ids in this sample
+    SPTR<std::vector<uint32_t> > sids; // list of sentence ids in this sample
     std::map<uint32_t,uint32_t> indoc;
     // std::vector<uint32_t> indoc; // counts origin of samples (for biased sampling)
     jstats();
