@@ -58,7 +58,7 @@ class ProbingPT: public Moses2::PhraseTable
       virtual void AddSymbolBindElement(
           const Range &range,
           const SCFG::Word &word,
-          const Moses2::HypothesisColl *hypos,
+          const Moses2::Hypotheses *hypos,
           const Moses2::PhraseTable &pt);
 
     protected:
@@ -149,7 +149,7 @@ protected:
       const SCFG::Manager &mgr,
       const SCFG::InputPath &prevPath,
       const SCFG::Word &wordSought,
-      const Moses2::HypothesisColl *hypos,
+      const Moses2::Hypotheses *hypos,
       const Moses2::Range &subPhraseRange,
       SCFG::InputPath &outPath) const;
 
@@ -158,7 +158,7 @@ protected:
       const SCFG::Manager &mgr,
       const ActiveChartEntryProbing &prevEntry,
       const SCFG::Word &wordSought,
-      const Moses2::HypothesisColl *hypos,
+      const Moses2::Hypotheses *hypos,
       const Moses2::Range &subPhraseRange,
       SCFG::InputPath &outPath) const;
 

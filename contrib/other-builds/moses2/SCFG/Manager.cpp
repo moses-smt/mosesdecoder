@@ -86,7 +86,7 @@ void Manager::Decode()
     }
   }
 
-  m_stacks.OutputStacks();
+  //m_stacks.OutputStacks();
 }
 
 void Manager::InitActiveChart(SCFG::InputPath &path)
@@ -272,7 +272,7 @@ bool Manager::IncrPrevHypoIndices(
   //cerr << "IncrPrevHypoIndices:" << ind << " " << ntEles.size() << " ";
   for (size_t i = 0; i < ntEles.size() - 1; ++i) {
     const SymbolBindElement &ele = *ntEles[i];
-    Hypotheses &hypos = ele.hypos->GetSortedAndPruneHypos(*this, arcLists);
+    const Hypotheses &hypos = *ele.hypos;
     numHypos = hypos.size();
 
     std::div_t divRet = std::div((int)ind, (int)numHypos);
@@ -289,7 +289,7 @@ bool Manager::IncrPrevHypoIndices(
 
   // check if last is over limit
   const SymbolBindElement &ele = *ntEles.back();
-  Hypotheses &hypos = ele.hypos->GetSortedAndPruneHypos(*this, arcLists);
+  const Hypotheses &hypos = *ele.hypos;
   numHypos = hypos.size();
 
   //cerr << "(" << (ntEles.size() - 1) << "," << ind << "," << numHypos << ","  << ind << ")";
@@ -306,25 +306,17 @@ bool Manager::IncrPrevHypoIndices(
 std::string Manager::OutputBest() const
 {
   stringstream out;
-  cerr << "HH A" << endl;
   const Stack &lastStack = m_stacks.GetLastStack();
-  cerr << "HH B" << endl;
   const Hypothesis *bestHypo = lastStack.GetBestHypo(*this, const_cast<ArcLists&>(arcLists));
-  cerr << "HH C" << endl;
 
   if (bestHypo) {
-    cerr << "HH D" << endl;
     if (system.options.output.ReportHypoScore) {
       out << bestHypo->GetScores().GetTotalScore() << " ";
     }
 
-    cerr << "HH E" << endl;
-    cerr << "BEST TRANSLATION: " << bestHypo << bestHypo->Debug(system) << endl;
-    cerr << "HH F" << endl;
-
-    bestHypo->OutputToStream(out);
-
+    //cerr << "BEST TRANSLATION: " << bestHypo << bestHypo->Debug(system) << endl;
     //cerr << " " << out.str() << endl;
+    bestHypo->OutputToStream(out);
   }
   else {
     if (system.options.output.ReportHypoScore) {
@@ -334,7 +326,6 @@ std::string Manager::OutputBest() const
     //cerr << "NO TRANSLATION " << m_input->GetTranslationId() << endl;
   }
 
-  cerr << "HH G" << endl;
   out << endl;
   return out.str();
 }

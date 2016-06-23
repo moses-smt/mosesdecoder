@@ -52,7 +52,7 @@ StackAdd HypothesisColl::Add(const HypothesisBase *hypo)
   assert(false);
 }
 
-Hypotheses &HypothesisColl::GetSortedAndPruneHypos(
+const Hypotheses &HypothesisColl::GetSortedAndPruneHypos(
     const ManagerBase &mgr,
     ArcLists &arcLists) const
 {

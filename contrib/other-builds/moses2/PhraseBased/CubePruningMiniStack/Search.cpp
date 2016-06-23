@@ -204,7 +204,7 @@ void Search::PostDecode(size_t stackInd)
         CubeEdges &edges = *m_cubeEdges[numWords];
 
         // sort hypo for a particular bitmap and hypoEndPos
-        Hypotheses &sortedHypos = val.second->GetSortedAndPruneHypos(mgr, mgr.arcLists);
+        const Hypotheses &sortedHypos = val.second->GetSortedAndPruneHypos(mgr, mgr.arcLists);
 
         size_t numPt = mgr.system.mappings.size();
         for (size_t i = 0; i < numPt; ++i) {

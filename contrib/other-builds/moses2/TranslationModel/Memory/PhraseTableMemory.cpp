@@ -238,8 +238,9 @@ void PhraseTableMemory::LookupNT(
   BOOST_FOREACH (const SCFG::Stack::Coll::value_type &valPair, stackColl) {
     const SCFG::Word &ntSought = valPair.first;
     const Moses2::HypothesisColl *hypos = valPair.second;
+    const Moses2::Hypotheses &sortedHypos = hypos->GetSortedAndPruneHypos(mgr, mgr.arcLists);
     //cerr << "ntSought=" << ntSought << ntSought.isNonTerminal << endl;
-    LookupGivenWord(pool, mgr, prevPath, ntSought, hypos, subPhraseRange, outPath);
+    LookupGivenWord(pool, mgr, prevPath, ntSought, &sortedHypos, subPhraseRange, outPath);
   }
 }
 
@@ -248,7 +249,7 @@ void PhraseTableMemory::LookupGivenWord(
     const SCFG::Manager &mgr,
     const SCFG::InputPath &prevPath,
     const SCFG::Word &wordSought,
-    const Moses2::HypothesisColl *hypos,
+    const Moses2::Hypotheses *hypos,
     const Moses2::Range &subPhraseRange,
     SCFG::InputPath &outPath) const
 {
@@ -270,7 +271,7 @@ void PhraseTableMemory::LookupGivenNode(
     const SCFG::Manager &mgr,
     const ActiveChartEntryMem &prevEntry,
     const SCFG::Word &wordSought,
-    const Moses2::HypothesisColl *hypos,
+    const Moses2::Hypotheses *hypos,
     const Moses2::Range &subPhraseRange,
     SCFG::InputPath &outPath) const
 {

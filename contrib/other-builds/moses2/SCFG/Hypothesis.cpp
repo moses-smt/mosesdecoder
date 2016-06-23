@@ -66,7 +66,7 @@ void Hypothesis::Init(SCFG::Manager &mgr,
     //cerr << "ele=" << ele.word->isNonTerminal << " " << ele.hypos << endl;
 
     if (ele.hypos) {
-      const Hypotheses &sortedHypos = ele.hypos->GetSortedAndPruneHypos(mgr, mgr.arcLists);
+      const Hypotheses &sortedHypos = *ele.hypos;
 
       size_t prevHyposInd = prevHyposIndices[currInd];
       assert(prevHyposInd < sortedHypos.size());

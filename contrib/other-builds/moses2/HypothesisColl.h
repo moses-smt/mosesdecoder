@@ -59,7 +59,7 @@ public:
 
   void Clear();
 
-  Hypotheses &GetSortedAndPruneHypos(
+  const Hypotheses &GetSortedAndPruneHypos(
       const ManagerBase &mgr,
       ArcLists &arcLists) const;
 

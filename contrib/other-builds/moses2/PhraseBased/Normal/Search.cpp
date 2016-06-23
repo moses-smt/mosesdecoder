@@ -72,7 +72,7 @@ void Search::Decode(size_t stackInd)
     return;
   }
 
-  Hypotheses &hypos = stack.GetSortedAndPruneHypos(mgr, mgr.arcLists);
+  const Hypotheses &hypos = stack.GetSortedAndPruneHypos(mgr, mgr.arcLists);
 
   const InputPaths &paths = mgr.GetInputPaths();
 

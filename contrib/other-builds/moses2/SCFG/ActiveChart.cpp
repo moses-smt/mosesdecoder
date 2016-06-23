@@ -14,7 +14,7 @@ namespace SCFG
 SymbolBindElement::SymbolBindElement(
     const Range *range,
     const SCFG::Word *word,
-    const Moses2::HypothesisColl *hypos)
+    const Moses2::Hypotheses *hypos)
 :range(range)
 ,word(word)
 ,hypos(hypos)
@@ -31,7 +31,7 @@ size_t hash_value(const SymbolBindElement &obj)
 }
 
 ////////////////////////////////////////////////////////////////////////////
-void SymbolBind::Add(const Range &range, const SCFG::Word &word, const Moses2::HypothesisColl *hypos)
+void SymbolBind::Add(const Range &range, const SCFG::Word &word, const Moses2::Hypotheses *hypos)
 {
   SymbolBindElement ele(&range, &word, hypos);
   coll.push_back(ele);

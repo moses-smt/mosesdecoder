@@ -3,10 +3,10 @@
 #include <iostream>
 #include <boost/functional/hash/hash.hpp>
 #include "../legacy/Range.h"
+#include "../HypothesisColl.h"
 
 namespace Moses2
 {
-class HypothesisColl;
 class System;
 class PhraseTable;
 
@@ -23,10 +23,10 @@ class SymbolBindElement
 public:
   const Range *range;
   const SCFG::Word *word;
-  const Moses2::HypothesisColl *hypos;
+  const Moses2::Hypotheses *hypos;
 
   SymbolBindElement() {}
-  SymbolBindElement(const Range *range, const SCFG::Word *word, const Moses2::HypothesisColl *hypos);
+  SymbolBindElement(const Range *range, const SCFG::Word *word, const Moses2::Hypotheses *hypos);
 
   bool operator==(const SymbolBindElement &compare) const
   {
@@ -58,7 +58,7 @@ public:
 
   std::vector<const SymbolBindElement*> GetNTElements() const;
 
-  void Add(const Range &range, const SCFG::Word &word, const Moses2::HypothesisColl *hypos);
+  void Add(const Range &range, const SCFG::Word &word, const Moses2::Hypotheses *hypos);
 
   bool operator==(const SymbolBind &compare) const
   {  return coll == compare.coll; }
@@ -94,7 +94,7 @@ public:
   virtual void AddSymbolBindElement(
       const Range &range,
       const SCFG::Word &word,
-      const Moses2::HypothesisColl *hypos,
+      const Moses2::Hypotheses *hypos,
       const PhraseTable &pt)
   {
     m_symbolBind.Add(range, word, hypos);

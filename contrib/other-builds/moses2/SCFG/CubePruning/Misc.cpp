@@ -109,7 +109,7 @@ void QueueItem::Init(
   m_hyposColl = NULL;
 }
 
-void QueueItem::AddHypos(const Moses2::HypothesisColl &hypos)
+void QueueItem::AddHypos(const Moses2::Hypotheses &hypos)
 {
   m_hyposColl->push_back(&hypos);
   hypoIndColl.push_back(0);
@@ -156,10 +156,10 @@ void QueueItem::CreateNext(
   assert(m_hyposColl->size() == hypoIndColl.size());
   const SCFG::TargetPhraseImpl &tp = (*tps)[tpInd];
   for (size_t i = 0; i < m_hyposColl->size(); ++i) {
-    const Moses2::HypothesisColl &hypos = *(*m_hyposColl)[i];
+    const Moses2::Hypotheses &hypos = *(*m_hyposColl)[i];
     size_t hypoInd = hypoIndColl[i] + 1;
 
-    if (hypoInd < hypos.GetSize()) {
+    if (hypoInd < hypos.size()) {
       SeenPosition *seenItem = new (pool.Allocate<SeenPosition>()) SeenPosition(pool, tps, tpInd, hypoIndColl);
       seenItem->hypoIndColl[i] = hypoInd;
       bool unseen = seenPositions.Add(seenItem);

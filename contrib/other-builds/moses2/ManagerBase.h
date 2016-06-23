@@ -35,7 +35,7 @@ class ManagerBase
 public:
   const System &system;
   const TranslationTask &task;
-  ArcLists arcLists;
+  mutable ArcLists arcLists;
   long m_translationId;
 
   ManagerBase(System &sys, const TranslationTask &task,

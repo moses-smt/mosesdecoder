@@ -72,7 +72,7 @@ public:
       const SymbolBind &symbolBind,
       const SCFG::TargetPhrases &tps,
       size_t vTPInd);
-  void AddHypos(const Moses2::HypothesisColl &hypos);
+  void AddHypos(const Moses2::Hypotheses &hypos);
   void CreateHypo(
       MemPool &pool,
       SCFG::Manager &mgr,
@@ -89,7 +89,7 @@ public:
   std::string Debug(const System &system) const;
 
 protected:
-  typedef Vector<const Moses2::HypothesisColl *> HyposColl;
+  typedef Vector<const Moses2::Hypotheses *> HyposColl;
   HyposColl *m_hyposColl;
 
   const SymbolBind *symbolBind;
