@@ -204,38 +204,18 @@ void PhraseTableMemory::Lookup(MemPool &pool,
   }
 }
 
-void PhraseTableMemory::LookupGivenWord(
-    MemPool &pool,
-    const SCFG::Manager &mgr,
-    const SCFG::InputPath &prevPath,
-    const SCFG::Word &wordSought,
-    const Moses2::Hypotheses *hypos,
-    const Moses2::Range &subPhraseRange,
-    SCFG::InputPath &outPath) const
-{
-  size_t ptInd = GetPtInd();
-
-
-  BOOST_FOREACH(const SCFG::ActiveChartEntry *prevEntry, *prevPath.GetActiveChart(ptInd).entries) {
-    const ActiveChartEntryMem *prevEntryCast = static_cast<const ActiveChartEntryMem*>(prevEntry);
-    //cerr << "entry=" << &entryCast->node << endl;
-
-    //cerr << "BEFORE LookupGivenNode=" << prevPath << endl;
-    LookupGivenNode(pool, mgr, *prevEntryCast, wordSought, hypos, subPhraseRange, outPath);
-    //cerr << "AFTER LookupGivenNode=" << prevPath << endl;
-  }
-}
-
 void PhraseTableMemory::LookupGivenNode(
     MemPool &pool,
     const SCFG::Manager &mgr,
-    const ActiveChartEntryMem &prevEntry,
+    const SCFG::ActiveChartEntry &prevEntry,
     const SCFG::Word &wordSought,
     const Moses2::Hypotheses *hypos,
     const Moses2::Range &subPhraseRange,
     SCFG::InputPath &outPath) const
 {
-  const SCFGNODE &prevNode = prevEntry.node;
+  const ActiveChartEntryMem &prevEntryCast = static_cast<const ActiveChartEntryMem&>(prevEntry);
+
+  const SCFGNODE &prevNode = prevEntryCast.node;
   UTIL_THROW_IF2(&prevNode == NULL, "node == NULL");
 
   size_t ptInd = GetPtInd();

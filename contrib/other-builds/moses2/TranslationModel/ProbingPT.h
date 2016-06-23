@@ -131,19 +131,10 @@ protected:
   void ReformatWord(System &system, std::string &wordStr, bool &isNT);
 
   // scfg
-  void LookupGivenWord(
-      MemPool &pool,
-      const SCFG::Manager &mgr,
-      const SCFG::InputPath &prevPath,
-      const SCFG::Word &wordSought,
-      const Moses2::Hypotheses *hypos,
-      const Moses2::Range &subPhraseRange,
-      SCFG::InputPath &outPath) const;
-
   void LookupGivenNode(
       MemPool &pool,
       const SCFG::Manager &mgr,
-      const ActiveChartEntryProbing &prevEntry,
+      const SCFG::ActiveChartEntry &prevEntry,
       const SCFG::Word &wordSought,
       const Moses2::Hypotheses *hypos,
       const Moses2::Range &subPhraseRange,

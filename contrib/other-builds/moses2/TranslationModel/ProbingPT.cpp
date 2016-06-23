@@ -483,38 +483,18 @@ void ProbingPT::Lookup(MemPool &pool,
   }
 }
 
-void ProbingPT::LookupGivenWord(
-    MemPool &pool,
-    const SCFG::Manager &mgr,
-    const SCFG::InputPath &prevPath,
-    const SCFG::Word &wordSought,
-    const Moses2::Hypotheses *hypos,
-    const Moses2::Range &subPhraseRange,
-    SCFG::InputPath &outPath) const
-{
-  size_t ptInd = GetPtInd();
-
-
-  BOOST_FOREACH(const SCFG::ActiveChartEntry *prevEntry, *prevPath.GetActiveChart(ptInd).entries) {
-    const ActiveChartEntryProbing *prevEntryCast = static_cast<const ActiveChartEntryProbing*>(prevEntry);
-    //cerr << "entry=" << &entryCast->node << endl;
-
-    //cerr << "BEFORE LookupGivenNode=" << prevPath << endl;
-    LookupGivenNode(pool, mgr, *prevEntryCast, wordSought, hypos, subPhraseRange, outPath);
-    //cerr << "AFTER LookupGivenNode=" << prevPath << endl;
-  }
-}
-
 void ProbingPT::LookupGivenNode(
     MemPool &pool,
     const SCFG::Manager &mgr,
-    const ActiveChartEntryProbing &prevEntry,
+    const SCFG::ActiveChartEntry &prevEntry,
     const SCFG::Word &wordSought,
     const Moses2::Hypotheses *hypos,
     const Moses2::Range &subPhraseRange,
     SCFG::InputPath &outPath) const
 {
-  std::pair<bool, uint64_t> key = prevEntry.GetKey(wordSought, *this);
+  const ActiveChartEntryProbing &prevEntryCast = static_cast<const ActiveChartEntryProbing&>(prevEntry);
+
+  std::pair<bool, uint64_t> key = prevEntryCast.GetKey(wordSought, *this);
   //cerr << "wordSought=" << wordSought.Debug(mgr.system)
   //    << " key=" << key.first << endl;
 

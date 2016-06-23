@@ -70,19 +70,10 @@ protected:
   PBNODE    *m_rootPb;
   SCFGNODE  *m_rootSCFG;
 
-  void LookupGivenWord(
-      MemPool &pool,
-      const SCFG::Manager &mgr,
-      const SCFG::InputPath &prevPath,
-      const SCFG::Word &wordSought,
-      const Moses2::Hypotheses *hypos,
-      const Moses2::Range &subPhraseRange,
-      SCFG::InputPath &outPath) const;
-
   void LookupGivenNode(
       MemPool &pool,
       const SCFG::Manager &mgr,
-      const ActiveChartEntryMem &prevEntry,
+      const SCFG::ActiveChartEntry &prevEntry,
       const SCFG::Word &wordSought,
       const Moses2::Hypotheses *hypos,
       const Moses2::Range &subPhraseRange,

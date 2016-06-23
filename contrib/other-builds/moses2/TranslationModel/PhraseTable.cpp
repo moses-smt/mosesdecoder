@@ -166,6 +166,24 @@ void PhraseTable::LookupNT(
   }
 }
 
+void PhraseTable::LookupGivenWord(
+    MemPool &pool,
+    const SCFG::Manager &mgr,
+    const SCFG::InputPath &prevPath,
+    const SCFG::Word &wordSought,
+    const Moses2::Hypotheses *hypos,
+    const Moses2::Range &subPhraseRange,
+    SCFG::InputPath &outPath) const
+{
+  size_t ptInd = GetPtInd();
+
+
+  BOOST_FOREACH(const SCFG::ActiveChartEntry *prevEntry, *prevPath.GetActiveChart(ptInd).entries) {
+    //cerr << "BEFORE LookupGivenNode=" << prevPath << endl;
+    LookupGivenNode(pool, mgr, *prevEntry, wordSought, hypos, subPhraseRange, outPath);
+    //cerr << "AFTER LookupGivenNode=" << prevPath << endl;
+  }
+}
 
 }
 
