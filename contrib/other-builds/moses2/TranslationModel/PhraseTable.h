@@ -19,6 +19,7 @@ class InputPathsBase;
 class InputPath;
 class Manager;
 class TargetPhrases;
+class Range;
 
 namespace SCFG
 {
@@ -65,7 +66,7 @@ public:
   virtual void InitActiveChart(
       MemPool &pool,
       const SCFG::Manager &mgr,
-      SCFG::InputPath &path) const;
+      SCFG::InputPath &path) const = 0;
 
   virtual void Lookup(
       MemPool &pool,
@@ -77,7 +78,7 @@ public:
   virtual void LookupUnary(MemPool &pool,
       const SCFG::Manager &mgr,
       const SCFG::Stacks &stacks,
-      SCFG::InputPath &path) const = 0;
+      SCFG::InputPath &path) const;
 
 protected:
   std::string m_path;
@@ -92,6 +93,15 @@ protected:
     TargetPhrases *tpsPtr;
     clock_t clock;
   };
+
+  // scfg
+  virtual void LookupNT(
+      MemPool &pool,
+      const SCFG::Manager &mgr,
+      const Moses2::Range &subPhraseRange,
+      const SCFG::InputPath &prevPath,
+      const SCFG::Stacks &stacks,
+      SCFG::InputPath &outPath) const = 0;
 
 };
 

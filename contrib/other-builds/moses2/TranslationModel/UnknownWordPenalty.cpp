@@ -200,5 +200,16 @@ void UnknownWordPenalty::LookupUnary(MemPool &pool,
 {
 }
 
+void UnknownWordPenalty::LookupNT(
+    MemPool &pool,
+    const SCFG::Manager &mgr,
+    const Moses2::Range &subPhraseRange,
+    const SCFG::InputPath &prevPath,
+    const SCFG::Stacks &stacks,
+    SCFG::InputPath &outPath) const
+{
+  UTIL_THROW2("Not implemented");
+}
+
 }
 

@@ -52,6 +52,15 @@ public:
       const SCFG::Stacks &stacks,
       SCFG::InputPath &path) const;
 
+protected:
+  virtual void LookupNT(
+      MemPool &pool,
+      const SCFG::Manager &mgr,
+      const Moses2::Range &subPhraseRange,
+      const SCFG::InputPath &prevPath,
+      const SCFG::Stacks &stacks,
+      SCFG::InputPath &outPath) const;
+
 };
 
 }

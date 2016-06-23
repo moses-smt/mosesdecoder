@@ -483,17 +483,6 @@ void ProbingPT::Lookup(MemPool &pool,
   }
 }
 
-void ProbingPT::LookupUnary(MemPool &pool,
-    const SCFG::Manager &mgr,
-    const SCFG::Stacks &stacks,
-    SCFG::InputPath &path) const
-{
-  //cerr << "LookupUnary" << endl;
-  size_t startPos = path.range.GetStartPos();
-  const SCFG::InputPath *prevPath = mgr.GetInputPaths().GetMatrix().GetValue(startPos, 0);
-  LookupNT(pool, mgr, path.range, *prevPath, stacks, path);
-}
-
 void ProbingPT::LookupNT(
     MemPool &pool,
     const SCFG::Manager &mgr,

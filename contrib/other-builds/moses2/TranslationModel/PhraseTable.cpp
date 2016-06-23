@@ -12,6 +12,8 @@
 #include "../InputType.h"
 #include "../PhraseBased/Manager.h"
 #include "../PhraseBased/InputPath.h"
+#include "../SCFG/InputPath.h"
+#include "../SCFG/Manager.h"
 
 using namespace std;
 
@@ -125,12 +127,16 @@ void PhraseTable::CleanUpAfterSentenceProcessing()
 }
 
 // scfg
-void PhraseTable::InitActiveChart(
-    MemPool &pool,
+void PhraseTable::LookupUnary(MemPool &pool,
     const SCFG::Manager &mgr,
+    const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
-  UTIL_THROW2("Not implemented");
+  cerr << "BEFORE LookupUnary" << path.Debug(mgr.system) << endl;
+  size_t startPos = path.range.GetStartPos();
+  const SCFG::InputPath *prevPath = mgr.GetInputPaths().GetMatrix().GetValue(startPos, 0);
+  LookupNT(pool, mgr, path.range, *prevPath, stacks, path);
+  cerr << "AFTER LookupUnary" << path.Debug(mgr.system) << endl;
 }
 
 
