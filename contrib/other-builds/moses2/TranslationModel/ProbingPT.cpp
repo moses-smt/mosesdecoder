@@ -495,8 +495,6 @@ void ProbingPT::LookupGivenNode(
   const ActiveChartEntryProbing &prevEntryCast = static_cast<const ActiveChartEntryProbing&>(prevEntry);
 
   std::pair<bool, uint64_t> key = prevEntryCast.GetKey(wordSought, *this);
-  //cerr << "wordSought=" << wordSought.Debug(mgr.system)
-  //    << " key=" << key.first << endl;
 
   if (!key.first) {
     // should only occasionally happen when looking up unary rules
@@ -506,6 +504,15 @@ void ProbingPT::LookupGivenNode(
   std::pair<bool, uint64_t> query_result; // 1st=found, 2nd=target file offset
   query_result = m_engine->query(key.second);
   //cerr << "query_result=" << query_result.first << endl;
+
+  if (outPath.range.GetStartPos() == 1) {
+    cerr  << "range=" << outPath.range
+          << " prevEntry=" << prevEntry.GetSymbolBind().Debug(mgr.system)
+          << " wordSought=" << wordSought.Debug(mgr.system)
+          << " key=" << key.first << " " << key.second
+          << " query_result=" << query_result.first << " " << (query_result.second == NONE)
+          << endl;
+  }
 
   if (query_result.first) {
     size_t ptInd = GetPtInd();
@@ -546,7 +553,7 @@ void ProbingPT::LookupGivenNode(
 
       tps->SortAndPrune(m_tableLimit);
       ffs.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
-      //cerr << "tps=" << tps->Debug(mgr.system) << endl;
+      cerr << "tps=" << tps->GetSize() << endl;
 
       //cerr << "symbolbind=" << chartEntry->GetSymbolBind().Debug(mgr.system) << endl;
       outPath.AddTargetPhrasesToPath(pool, *this, *tps, chartEntry->GetSymbolBind());

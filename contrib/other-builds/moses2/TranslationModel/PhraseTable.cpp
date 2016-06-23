@@ -132,11 +132,11 @@ void PhraseTable::LookupUnary(MemPool &pool,
     const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
-  cerr << "BEFORE LookupUnary" << path.Debug(mgr.system) << endl;
+  //cerr << "BEFORE LookupUnary" << path.Debug(mgr.system) << endl;
   size_t startPos = path.range.GetStartPos();
   const SCFG::InputPath *prevPath = mgr.GetInputPaths().GetMatrix().GetValue(startPos, 0);
   LookupNT(pool, mgr, path.range, *prevPath, stacks, path);
-  cerr << "AFTER LookupUnary" << path.Debug(mgr.system) << endl;
+  //cerr << "AFTER LookupUnary" << path.Debug(mgr.system) << endl;
 }
 
 void PhraseTable::LookupNT(
