@@ -1,5 +1,5 @@
 #include <sys/stat.h>
-#include <boost/unordered_set.hpp>
+#include <boost/foreach.hpp>
 #include "line_splitter.hh"
 #include "storing.hh"
 #include "StoreTarget.h"
@@ -46,7 +46,8 @@ void createProbingPT(const std::string &phrasetable_path,
 
   //Read everything and processs
   std::string prevSource;
-  std::vector<uint64_t> prevVocabid_source;
+
+  boost::unordered_set<SourcePhrase> sourcePhrases;
 
   while (true) {
     try {
@@ -92,7 +93,7 @@ void createProbingPT(const std::string &phrasetable_path,
           // don't store the last non-term in the source phrase
           vocabid_source.erase(vocabid_source.begin() + vocabid_source.size() - 1);
 
-          InsertPrefixes(vocabid_source, prevVocabid_source, sourceEntries);
+          sourcePhrases.insert(vocabid_source);
         }
         sourceEntry.key = getKey(vocabid_source);
 
@@ -121,10 +122,6 @@ void createProbingPT(const std::string &phrasetable_path,
 
         //Set prevLine
         prevSource = line.source_phrase.as_string();
-
-        if (scfg){
-          prevVocabid_source = vocabid_source;
-        }
       }
 
     }
@@ -150,6 +147,8 @@ void createProbingPT(const std::string &phrasetable_path,
       break;
     }
   }
+
+  InsertPrefixes(sourcePhrases, sourceEntries);
 
   storeTarget.SaveAlignment();
 
@@ -260,34 +259,34 @@ void InsertPrefixes(
 }
 */
 void InsertPrefixes(
-    const std::vector<uint64_t> &vocabid_source,
-    const std::vector<uint64_t> &prevVocabid_source,
+    const boost::unordered_set<SourcePhrase> &sourcePhrases,
     Table &sourceEntries)
 {
-  typedef std::vector<uint64_t> SourcePhrase;
-  static boost::unordered_set<SourcePhrase> sourcePhrases;
+  boost::unordered_set<SourcePhrase> sourcePhrasesNew = sourcePhrases;
 
   // loop through each prefix
-  cerr << endl;
-  cerr << "curr=" << Debug(vocabid_source) << endl;
+  BOOST_FOREACH(const SourcePhrase &sourcePhrase, sourcePhrases) {
+    cerr << endl;
+    cerr << "curr=" << Debug(sourcePhrase) << endl;
 
-  for (size_t i = 0; i < vocabid_source.size() - 1; ++i) {
-    std::vector<uint64_t> prefix = CreatePrefix(vocabid_source, i);
-    cerr << "pref=" << Debug(prefix) << endl;
-    if (sourcePhrases.find(prefix) == sourcePhrases.end()) {
-      // save
-      Entry sourceEntry;
-      sourceEntry.value = NONE;
-      sourceEntry.key = getKey(prefix);
+    for (size_t i = 0; i < sourcePhrase.size() - 1; ++i) {
+      std::vector<uint64_t> prefix = CreatePrefix(sourcePhrase, i);
+      cerr << "pref=" << Debug(prefix) << endl;
+      if (sourcePhrasesNew.find(prefix) == sourcePhrasesNew.end()) {
+        // save
+        Entry sourceEntry;
+        sourceEntry.value = NONE;
+        sourceEntry.key = getKey(prefix);
 
-      //Put into table
-      sourceEntries.Insert(sourceEntry);
+        //Put into table
+        sourceEntries.Insert(sourceEntry);
 
-      sourcePhrases.insert(prefix);
+        sourcePhrasesNew.insert(prefix);
+      }
     }
 
-    sourcePhrases.insert(vocabid_source);
   }
+
 }
 
 std::vector<uint64_t> CreatePrefix(const std::vector<uint64_t> &vocabid_source, size_t endPos)

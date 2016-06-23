@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/unordered_set.hpp>
 #include <cstdio>
 #include <sstream>
 #include <fstream>
@@ -17,6 +18,7 @@
 
 namespace Moses2
 {
+typedef std::vector<uint64_t> SourcePhrase;
 
 void createProbingPT(const std::string &phrasetable_path,
     const std::string &basepath, int num_scores, int num_lex_scores,
@@ -24,8 +26,7 @@ void createProbingPT(const std::string &phrasetable_path,
 uint64_t getKey(const std::vector<uint64_t> &source_phrase);
 
 void InsertPrefixes(
-    const std::vector<uint64_t> &vocabid_source,
-    const std::vector<uint64_t> &prevVocabid_source,
+    const boost::unordered_set<SourcePhrase> &sourcePhrases,
     Table &sourceEntries);
 std::vector<uint64_t> CreatePrefix(const std::vector<uint64_t> &vocabid_source, size_t endPos);
 

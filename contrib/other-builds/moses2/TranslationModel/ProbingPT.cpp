@@ -505,7 +505,7 @@ void ProbingPT::LookupGivenNode(
   query_result = m_engine->query(key.second);
   //cerr << "query_result=" << query_result.first << endl;
 
-  if (outPath.range.GetStartPos() == 1) {
+  if (outPath.range.GetStartPos() == 1 || outPath.range.GetStartPos() == 2) {
     cerr  << "range=" << outPath.range
           << " prevEntry=" << prevEntry.GetSymbolBind().Debug(mgr.system)
           << " wordSought=" << wordSought.Debug(mgr.system)
