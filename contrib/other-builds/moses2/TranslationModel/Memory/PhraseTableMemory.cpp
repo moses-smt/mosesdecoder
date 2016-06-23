@@ -204,33 +204,6 @@ void PhraseTableMemory::Lookup(MemPool &pool,
   }
 }
 
-void PhraseTableMemory::LookupNT(
-    MemPool &pool,
-    const SCFG::Manager &mgr,
-    const Moses2::Range &subPhraseRange,
-    const SCFG::InputPath &prevPath,
-    const SCFG::Stacks &stacks,
-    SCFG::InputPath &outPath) const
-{
-  size_t endPos = outPath.range.GetEndPos();
-
-  const Range &prevRange = prevPath.range;
-
-  size_t startPos = prevRange.GetEndPos() + 1;
-  size_t ntSize = endPos - startPos + 1;
-
-  const SCFG::Stack &ntStack = stacks.GetStack(startPos, ntSize);
-  const SCFG::Stack::Coll &stackColl = ntStack.GetColl();
-
-  BOOST_FOREACH (const SCFG::Stack::Coll::value_type &valPair, stackColl) {
-    const SCFG::Word &ntSought = valPair.first;
-    const Moses2::HypothesisColl *hypos = valPair.second;
-    const Moses2::Hypotheses &sortedHypos = hypos->GetSortedAndPruneHypos(mgr, mgr.arcLists);
-    //cerr << "ntSought=" << ntSought << ntSought.isNonTerminal << endl;
-    LookupGivenWord(pool, mgr, prevPath, ntSought, &sortedHypos, subPhraseRange, outPath);
-  }
-}
-
 void PhraseTableMemory::LookupGivenWord(
     MemPool &pool,
     const SCFG::Manager &mgr,

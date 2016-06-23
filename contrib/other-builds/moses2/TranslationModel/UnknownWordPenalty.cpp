@@ -211,5 +211,17 @@ void UnknownWordPenalty::LookupNT(
   UTIL_THROW2("Not implemented");
 }
 
+void UnknownWordPenalty::LookupGivenWord(
+    MemPool &pool,
+    const SCFG::Manager &mgr,
+    const SCFG::InputPath &prevPath,
+    const SCFG::Word &wordSought,
+    const Moses2::Hypotheses *hypos,
+    const Moses2::Range &subPhraseRange,
+    SCFG::InputPath &outPath) const
+{
+  UTIL_THROW2("Not implemented");
+}
+
 }
 

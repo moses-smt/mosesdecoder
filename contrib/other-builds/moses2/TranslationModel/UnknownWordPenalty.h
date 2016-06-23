@@ -61,6 +61,15 @@ protected:
       const SCFG::Stacks &stacks,
       SCFG::InputPath &outPath) const;
 
+  virtual void LookupGivenWord(
+      MemPool &pool,
+      const SCFG::Manager &mgr,
+      const SCFG::InputPath &prevPath,
+      const SCFG::Word &wordSought,
+      const Moses2::Hypotheses *hypos,
+      const Moses2::Range &subPhraseRange,
+      SCFG::InputPath &outPath) const;
+
 };
 
 }
