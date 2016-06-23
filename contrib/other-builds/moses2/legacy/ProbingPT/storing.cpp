@@ -221,7 +221,7 @@ uint64_t getKey(const std::vector<uint64_t> &vocabid_source)
 {
   return Moses2::getKey(vocabid_source.data(), vocabid_source.size());
 }
-
+/*
 void InsertPrefixes(
     const std::vector<uint64_t> &vocabid_source,
     const std::vector<uint64_t> &prevVocabid_source,
@@ -238,12 +238,11 @@ void InsertPrefixes(
   }
 
   // loop through each prefix
-  /*
   cerr << endl;
   cerr << "prev=" << Debug(prevVocabid_source) << endl;
   cerr << "curr=" << Debug(vocabid_source) << endl;
   cerr << "startPos=" << startPos << endl;
-  */
+
   for (size_t i = startPos; i < vocabid_source.size() - 1; ++i) {
     std::vector<uint64_t> prefix = CreatePrefix(vocabid_source, i);
     //cerr << "pref=" << Debug(prefix) << endl;
@@ -255,9 +254,40 @@ void InsertPrefixes(
 
     //Put into table
     sourceEntries.Insert(sourceEntry);
-
+    //Table::MutableIterator iter;
+    //sourceEntries.FindOrInsert(sourceEntry, iter);
   }
+}
+*/
+void InsertPrefixes(
+    const std::vector<uint64_t> &vocabid_source,
+    const std::vector<uint64_t> &prevVocabid_source,
+    Table &sourceEntries)
+{
+  typedef std::vector<uint64_t> SourcePhrase;
+  static boost::unordered_set<SourcePhrase> sourcePhrases;
 
+  // loop through each prefix
+  cerr << endl;
+  cerr << "curr=" << Debug(vocabid_source) << endl;
+
+  for (size_t i = 0; i < vocabid_source.size() - 1; ++i) {
+    std::vector<uint64_t> prefix = CreatePrefix(vocabid_source, i);
+    cerr << "pref=" << Debug(prefix) << endl;
+    if (sourcePhrases.find(prefix) == sourcePhrases.end()) {
+      // save
+      Entry sourceEntry;
+      sourceEntry.value = NONE;
+      sourceEntry.key = getKey(prefix);
+
+      //Put into table
+      sourceEntries.Insert(sourceEntry);
+
+      sourcePhrases.insert(prefix);
+    }
+
+    sourcePhrases.insert(vocabid_source);
+  }
 }
 
 std::vector<uint64_t> CreatePrefix(const std::vector<uint64_t> &vocabid_source, size_t endPos)
