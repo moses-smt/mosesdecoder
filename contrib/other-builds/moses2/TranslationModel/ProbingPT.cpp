@@ -28,6 +28,13 @@ using namespace std;
 
 namespace Moses2
 {
+ProbingPT::ActiveChartEntryProbing::ActiveChartEntryProbing(
+    MemPool &pool,
+    const ActiveChartEntryProbing &prevEntry)
+:Parent(prevEntry)
+,m_key(prevEntry.m_key)
+{}
+
 void ProbingPT::ActiveChartEntryProbing::AddSymbolBindElement(
     const Range &range,
     const SCFG::Word &word,
@@ -505,20 +512,22 @@ void ProbingPT::LookupGivenNode(
   query_result = m_engine->query(key.second);
   //cerr << "query_result=" << query_result.first << endl;
 
+  /*
   if (outPath.range.GetStartPos() == 1 || outPath.range.GetStartPos() == 2) {
     cerr  << "range=" << outPath.range
-          << " prevEntry=" << prevEntry.GetSymbolBind().Debug(mgr.system)
+          << " prevEntry=" << prevEntry.GetSymbolBind().Debug(mgr.system) << " " << prevEntryCast.GetKey()
           << " wordSought=" << wordSought.Debug(mgr.system)
           << " key=" << key.first << " " << key.second
           << " query_result=" << query_result.first << " " << (query_result.second == NONE)
           << endl;
   }
+  */
 
   if (query_result.first) {
     size_t ptInd = GetPtInd();
 
     // new entries
-    ActiveChartEntryProbing *chartEntry = new (pool.Allocate<ActiveChartEntryProbing>()) ActiveChartEntryProbing(pool, prevEntry);
+    ActiveChartEntryProbing *chartEntry = new (pool.Allocate<ActiveChartEntryProbing>()) ActiveChartEntryProbing(pool, prevEntryCast);
     //cerr << "AFTER chartEntry" << endl;
 
     chartEntry->AddSymbolBindElement(subPhraseRange, wordSought, hypos, *this);
@@ -553,7 +562,7 @@ void ProbingPT::LookupGivenNode(
 
       tps->SortAndPrune(m_tableLimit);
       ffs.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
-      cerr << "tps=" << tps->GetSize() << endl;
+      //cerr << "tps=" << tps->GetSize() << endl;
 
       //cerr << "symbolbind=" << chartEntry->GetSymbolBind().Debug(mgr.system) << endl;
       outPath.AddTargetPhrasesToPath(pool, *this, *tps, chartEntry->GetSymbolBind());

@@ -45,10 +45,7 @@ class ProbingPT: public Moses2::PhraseTable
 
       ActiveChartEntryProbing(
           MemPool &pool,
-          const ActiveChartEntry &prevEntry)
-      :Parent(prevEntry)
-      ,m_key(0)
-      {}
+          const ActiveChartEntryProbing &prevEntry);
 
       uint64_t GetKey() const
       { return m_key; }

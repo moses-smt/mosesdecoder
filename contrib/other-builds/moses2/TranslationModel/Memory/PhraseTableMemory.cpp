@@ -221,8 +221,15 @@ void PhraseTableMemory::LookupGivenNode(
   size_t ptInd = GetPtInd();
   const SCFGNODE *nextNode = prevNode.Find(wordSought);
 
-  //cerr << "prevEntry=" << *prevEntry.symbolBinds << endl;
-
+  /*
+  if (outPath.range.GetStartPos() == 1 || outPath.range.GetStartPos() == 2) {
+    cerr  << "range=" << outPath.range
+          << " prevEntry=" << prevEntry.GetSymbolBind().Debug(mgr.system)
+          << " wordSought=" << wordSought.Debug(mgr.system)
+          << " nextNode=" << nextNode
+          << endl;
+  }
+  */
   if (nextNode) {
     // new entries
     ActiveChartEntryMem *chartEntry = new (pool.Allocate<ActiveChartEntryMem>()) ActiveChartEntryMem(pool, *nextNode, prevEntry);

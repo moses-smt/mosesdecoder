@@ -96,6 +96,9 @@ void createProbingPT(const std::string &phrasetable_path,
           sourcePhrases.insert(vocabid_source);
         }
         sourceEntry.key = getKey(vocabid_source);
+        cerr << "prevSource=" << prevSource
+            << " vocabids=" << Debug(vocabid_source)
+            << " key=" << sourceEntry.key << endl;
 
         //Put into table
         sourceEntries.Insert(sourceEntry);
