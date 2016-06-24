@@ -90,7 +90,7 @@ public:
 
 protected:
   typedef Vector<const Moses2::Hypotheses *> HyposColl;
-  HyposColl m_hyposColl;
+  HyposColl *m_hyposColl;
 
   const SymbolBind *symbolBind;
   const SCFG::TargetPhrases *tps;

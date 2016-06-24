@@ -82,7 +82,6 @@ QueueItem *QueueItem::Create(MemPool &pool, SCFG::Manager &mgr)
 
 QueueItem::QueueItem(MemPool &pool)
 :hypoIndColl(pool)
-,m_hyposColl(pool)
 {
 
 }
@@ -95,7 +94,7 @@ void QueueItem::Init(
   symbolBind = &vSymbolBind;
   tps = &vTPS;
   tpInd = 0;
-  m_hyposColl.clear();
+  m_hyposColl = new (pool.Allocate<HyposColl>()) HyposColl(pool);
 }
 
 void QueueItem::Init(
@@ -107,12 +106,12 @@ void QueueItem::Init(
   symbolBind = &vSymbolBind;
   tps = &vTPS;
   tpInd = vTPInd;
-  m_hyposColl.clear();
+  m_hyposColl = NULL;
 }
 
 void QueueItem::AddHypos(const Moses2::Hypotheses &hypos)
 {
-  m_hyposColl.push_back(&hypos);
+  m_hyposColl->push_back(&hypos);
   hypoIndColl.push_back(0);
 }
 
@@ -154,10 +153,10 @@ void QueueItem::CreateNext(
     }
   }
 
-  assert(m_hyposColl.size() == hypoIndColl.size());
+  assert(m_hyposColl->size() == hypoIndColl.size());
   const SCFG::TargetPhraseImpl &tp = (*tps)[tpInd];
-  for (size_t i = 0; i < m_hyposColl.size(); ++i) {
-    const Moses2::Hypotheses &hypos = *m_hyposColl[i];
+  for (size_t i = 0; i < m_hyposColl->size(); ++i) {
+    const Moses2::Hypotheses &hypos = *(*m_hyposColl)[i];
     size_t hypoInd = hypoIndColl[i] + 1;
 
     if (hypoInd < hypos.size()) {
