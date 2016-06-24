@@ -11,6 +11,10 @@ namespace Moses2
 {
 namespace SCFG
 {
+SymbolBindElement::SymbolBindElement()
+{
+}
+
 SymbolBindElement::SymbolBindElement(
     const Range *range,
     const SCFG::Word *word,
@@ -31,6 +35,12 @@ size_t hash_value(const SymbolBindElement &obj)
 }
 
 ////////////////////////////////////////////////////////////////////////////
+SymbolBind::SymbolBind(MemPool &pool)
+:coll(pool)
+,numNT(0)
+{
+}
+
 void SymbolBind::Add(const Range &range, const SCFG::Word &word, const Moses2::Hypotheses *hypos)
 {
   SymbolBindElement ele(&range, &word, hypos);
@@ -67,11 +77,16 @@ std::string SymbolBind::Debug(const System &system) const
   }
   return out.str();
 }
+////////////////////////////////////////////////////////////////////////////
+ActiveChartEntry::ActiveChartEntry(MemPool &pool)
+:m_symbolBind(pool)
+{
+}
 
 ////////////////////////////////////////////////////////////////////////////
 ActiveChart::ActiveChart(MemPool &pool)
+:entries(pool)
 {
-  entries = new (pool.Allocate< Vector<ActiveChartEntry*> >()) Vector<ActiveChartEntry*>(pool);
 }
 
 ActiveChart::~ActiveChart()

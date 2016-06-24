@@ -44,7 +44,7 @@ std::string InputPath::Debug(const System &system) const
   out << subPhrase.Debug(system);
   out << " " << prefixPath << " ";
 
-  const Vector<ActiveChartEntry*> &activeEntries = *GetActiveChart(1).entries;
+  const Vector<ActiveChartEntry*> &activeEntries = GetActiveChart(1).entries;
   out << "m_activeChart=" << activeEntries.size() << " ";
 
   for (size_t i = 0; i < activeEntries.size(); ++i) {
@@ -106,7 +106,7 @@ void InputPath::AddActiveChartEntry(size_t ptInd, ActiveChartEntry *chartEntry)
 {
   //cerr << "      added " << chartEntry << " " << range << " " << ptInd << endl;
   ActiveChart &activeChart = m_activeChart[ptInd];
-  activeChart.entries->push_back(chartEntry);
+  activeChart.entries.push_back(chartEntry);
 }
 
 size_t InputPath::GetNumRules() const

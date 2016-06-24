@@ -178,7 +178,7 @@ void PhraseTable::LookupGivenWord(
   size_t ptInd = GetPtInd();
 
 
-  BOOST_FOREACH(const SCFG::ActiveChartEntry *prevEntry, *prevPath.GetActiveChart(ptInd).entries) {
+  BOOST_FOREACH(const SCFG::ActiveChartEntry *prevEntry, prevPath.GetActiveChart(ptInd).entries) {
     //cerr << "BEFORE LookupGivenNode=" << prevPath << endl;
     LookupGivenNode(pool, mgr, *prevEntry, wordSought, hypos, subPhraseRange, outPath);
     //cerr << "AFTER LookupGivenNode=" << prevPath << endl;

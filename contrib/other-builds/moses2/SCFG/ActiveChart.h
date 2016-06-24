@@ -25,7 +25,7 @@ public:
   const SCFG::Word *word;
   const Moses2::Hypotheses *hypos;
 
-  SymbolBindElement() {}
+  SymbolBindElement();
   SymbolBindElement(const Range *range, const SCFG::Word *word, const Moses2::Hypotheses *hypos);
 
   bool operator==(const SymbolBindElement &compare) const
@@ -46,10 +46,7 @@ public:
   Coll coll;
   size_t numNT;
 
-  SymbolBind(MemPool &pool)
-  :coll(pool)
-  ,numNT(0)
-  {}
+  SymbolBind(MemPool &pool);
 
   SymbolBind(MemPool &pool, const SymbolBind &copy)
   :coll(copy.coll)
@@ -76,11 +73,7 @@ inline size_t hash_value(const SymbolBind &obj)
 class ActiveChartEntry
 {
 public:
-  ActiveChartEntry(MemPool &pool)
-  :m_symbolBind(pool)
-  {
-    //symbolBinds = new (pool.Allocate<SymbolBind>()) SymbolBind(pool);
-  }
+  ActiveChartEntry(MemPool &pool);
 
   ActiveChartEntry(MemPool &pool, const ActiveChartEntry &prevEntry)
   :m_symbolBind(pool, prevEntry.GetSymbolBind())
@@ -112,7 +105,7 @@ public:
   ActiveChart(MemPool &pool);
   ~ActiveChart();
 
-  Vector<ActiveChartEntry*> *entries;
+  Vector<ActiveChartEntry*> entries;
 };
 
 }
