@@ -607,7 +607,7 @@ SCFG::TargetPhraseImpl *ProbingPT::CreateTargetPhraseSCFG(
     tp->GetScores().PlusEquals(system, *this, logScores);
 
     // sort score. Just for scfg
-    tp->sortScore = logScores[2];
+    tp->sortScore = (totalNumScores >= 3) ? logScores[2] : 0;
 
     // save scores for other FF, eg. lex RO.
     tp->scoreProperties = pool.Allocate<SCORE>(m_engine->num_lex_scores);

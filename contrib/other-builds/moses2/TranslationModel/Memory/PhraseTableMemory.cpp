@@ -113,7 +113,7 @@ void PhraseTableMemory::Load(System &system)
       //cerr << "created scores:" << *target << endl;
 
       vector<SCORE> scores = Tokenize<SCORE>(toks[2]);
-      target->sortScore = TransformScore(scores[2]);
+      target->sortScore = (scores.size() >= 3) ? TransformScore(scores[2]) : 0;
 
       // properties
       if (toks.size() == 7) {

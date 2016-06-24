@@ -100,7 +100,12 @@ std::string ReformatSCFGFile(const std::string &path)
   outFile.Close();
 
   string sortedPath = path + ".reformat.sorted.gz";
-  string cmd = "gzip -dc " + reformattedPath + " | LC_ALL=C sort | gzip -c > " + sortedPath;
+  string tmpPath = path + ".tmp ";
+  string cmd = "mkdir " + tmpPath
+      + " && gzip -dc " + reformattedPath + " | LC_ALL=C sort -T " + tmpPath + " | gzip -c > " + sortedPath;
+  system(cmd.c_str());
+
+  cmd = "rm -rf " + tmpPath + " " + reformattedPath;
   system(cmd.c_str());
 
   return sortedPath;
