@@ -12,6 +12,59 @@ using namespace std;
 namespace Moses2
 {
 
+///////////////////////////////////////////////////////////////////////
+void Node::Add(Table &table, const SourcePhrase &sourcePhrase, size_t pos)
+{
+  if (pos < sourcePhrase.size()) {
+    uint64_t vocabId = sourcePhrase[pos];
+
+    Node *child;
+    Children::iterator iter = m_children.find(vocabId);
+    if (iter == m_children.end()) {
+      // New node. Write other children then discard them
+      BOOST_FOREACH(Children::value_type &valPair, m_children) {
+        Node &otherChild = valPair.second;
+        otherChild.Write(table);
+      }
+      m_children.clear();
+
+      // create new node
+      child = &m_children[vocabId];
+      assert(!child->done);
+      child->key = key + (vocabId << pos);
+    }
+    else {
+      child = &iter->second;
+    }
+
+    child->Add(table, sourcePhrase, pos + 1);
+  }
+  else {
+    // this node was written previously 'cos it has rules
+    done = true;
+  }
+}
+
+void Node::Write(Table &table)
+{
+  //cerr << "START write " << done << " " << key << endl;
+  BOOST_FOREACH(Children::value_type &valPair, m_children) {
+    Node &child = valPair.second;
+    child.Write(table);
+  }
+
+  if (!done) {
+    // save
+    Entry sourceEntry;
+    sourceEntry.value = NONE;
+    sourceEntry.key = key;
+
+    //Put into table
+    table.Insert(sourceEntry);
+  }
+}
+
+///////////////////////////////////////////////////////////////////////
 void createProbingPT(const std::string &phrasetable_path,
     const std::string &basepath, int num_scores, int num_lex_scores,
     bool log_prob, int max_cache_size, bool scfg)
@@ -47,13 +100,16 @@ void createProbingPT(const std::string &phrasetable_path,
   //Read everything and processs
   std::string prevSource;
 
-  boost::unordered_set<SourcePhrase> sourcePhrases;
+  Node sourcePhrases;
+  sourcePhrases.done = true;
+  sourcePhrases.key = 0;
 
   while (true) {
     try {
       //Process line read
       line_text line;
       line = splitLine(filein.ReadLine(), scfg);
+      //cerr << "line=" << line.source_phrase << endl;
 
       ++line_num;
       if (line_num % 1000000 == 0) {
@@ -92,13 +148,14 @@ void createProbingPT(const std::string &phrasetable_path,
         if (scfg) {
           // don't store the last non-term in the source phrase
           //vocabid_source.erase(vocabid_source.begin() + vocabid_source.size() - 1);
-
-          sourcePhrases.insert(vocabid_source);
+          sourcePhrases.Add(sourceEntries, vocabid_source);
         }
         sourceEntry.key = getKey(vocabid_source);
-        cerr << "prevSource=" << prevSource
-            << " vocabids=" << Debug(vocabid_source)
+        /*
+        cerr << "prevSource=" << prevSource << flush
+            << " vocabids=" << Debug(vocabid_source) << flush
             << " key=" << sourceEntry.key << endl;
+        */
 
         //Put into table
         sourceEntries.Insert(sourceEntry);
@@ -151,7 +208,7 @@ void createProbingPT(const std::string &phrasetable_path,
     }
   }
 
-  InsertPrefixes(sourcePhrases, sourceEntries);
+  sourcePhrases.Write(sourceEntries);
 
   storeTarget.SaveAlignment();
 
@@ -222,73 +279,6 @@ void serialize_cache(
 uint64_t getKey(const std::vector<uint64_t> &vocabid_source)
 {
   return Moses2::getKey(vocabid_source.data(), vocabid_source.size());
-}
-/*
-void InsertPrefixes(
-    const std::vector<uint64_t> &vocabid_source,
-    const std::vector<uint64_t> &prevVocabid_source,
-    Table &sourceEntries)
-{
-  size_t minSize = std::min(vocabid_source.size(), prevVocabid_source.size());
-  size_t startPos = prevVocabid_source.size();
-
-  for (size_t i = 0; i < minSize; ++i) {
-    if (vocabid_source[i] != prevVocabid_source[i]) {
-      startPos = i + 1;
-      break;
-    }
-  }
-
-  // loop through each prefix
-  cerr << endl;
-  cerr << "prev=" << Debug(prevVocabid_source) << endl;
-  cerr << "curr=" << Debug(vocabid_source) << endl;
-  cerr << "startPos=" << startPos << endl;
-
-  for (size_t i = startPos; i < vocabid_source.size() - 1; ++i) {
-    std::vector<uint64_t> prefix = CreatePrefix(vocabid_source, i);
-    //cerr << "pref=" << Debug(prefix) << endl;
-
-    // save
-    Entry sourceEntry;
-    sourceEntry.value = NONE;
-    sourceEntry.key = getKey(prefix);
-
-    //Put into table
-    sourceEntries.Insert(sourceEntry);
-    //Table::MutableIterator iter;
-    //sourceEntries.FindOrInsert(sourceEntry, iter);
-  }
-}
-*/
-void InsertPrefixes(
-    const boost::unordered_set<SourcePhrase> &sourcePhrases,
-    Table &sourceEntries)
-{
-  boost::unordered_set<SourcePhrase> sourcePhrasesNew = sourcePhrases;
-
-  // loop through each prefix
-  BOOST_FOREACH(const SourcePhrase &sourcePhrase, sourcePhrases) {
-    //cerr << endl << "curr=" << Debug(sourcePhrase) << endl;
-
-    for (size_t i = 0; i < sourcePhrase.size() - 1; ++i) {
-      std::vector<uint64_t> prefix = CreatePrefix(sourcePhrase, i);
-      //cerr << "pref=" << Debug(prefix) << endl;
-      if (sourcePhrasesNew.find(prefix) == sourcePhrasesNew.end()) {
-        // save
-        Entry sourceEntry;
-        sourceEntry.value = NONE;
-        sourceEntry.key = getKey(prefix);
-
-        //Put into table
-        sourceEntries.Insert(sourceEntry);
-
-        sourcePhrasesNew.insert(prefix);
-      }
-    }
-
-  }
-
 }
 
 std::vector<uint64_t> CreatePrefix(const std::vector<uint64_t> &vocabid_source, size_t endPos)

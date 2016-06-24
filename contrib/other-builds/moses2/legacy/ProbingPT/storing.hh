@@ -1,6 +1,7 @@
 #pragma once
 
 #include <boost/unordered_set.hpp>
+#include <boost/unordered_map.hpp>
 #include <cstdio>
 #include <sstream>
 #include <fstream>
@@ -20,14 +21,30 @@ namespace Moses2
 {
 typedef std::vector<uint64_t> SourcePhrase;
 
+
+class Node
+{
+  typedef boost::unordered_map<uint64_t, Node> Children;
+  Children m_children;
+
+public:
+  uint64_t key;
+  bool done;
+
+  Node()
+  :done(false)
+  {}
+
+  void Add(Table &table, const SourcePhrase &sourcePhrase, size_t pos = 0);
+  void Write(Table &table);
+};
+
+
 void createProbingPT(const std::string &phrasetable_path,
     const std::string &basepath, int num_scores, int num_lex_scores,
     bool log_prob, int max_cache_size, bool scfg);
 uint64_t getKey(const std::vector<uint64_t> &source_phrase);
 
-void InsertPrefixes(
-    const boost::unordered_set<SourcePhrase> &sourcePhrases,
-    Table &sourceEntries);
 std::vector<uint64_t> CreatePrefix(const std::vector<uint64_t> &vocabid_source, size_t endPos);
 
 template<typename T>
