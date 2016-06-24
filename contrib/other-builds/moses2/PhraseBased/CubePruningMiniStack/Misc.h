@@ -49,6 +49,10 @@ protected:
 };
 
 ///////////////////////////////////////////
+
+typedef std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > QueueItemRecycler;
+
+///////////////////////////////////////////
 class QueueItemOrderer
 {
 public:
