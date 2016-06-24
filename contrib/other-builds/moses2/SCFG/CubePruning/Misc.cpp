@@ -76,8 +76,23 @@ bool SeenPositions::Add(const SeenPosition *item)
 ////////////////////////////////////////////////////////
 QueueItem *QueueItem::Create(MemPool &pool, SCFG::Manager &mgr)
 {
-  QueueItem *item = new (pool.Allocate<QueueItem>()) QueueItem(pool);
-  return item;
+  //QueueItem *item = new (pool.Allocate<QueueItem>()) QueueItem(pool);
+  //return item;
+
+  QueueItemRecycler &queueItemRecycler = mgr.GetQueueItemRecycler();
+  QueueItem *ret;
+  if (!queueItemRecycler.empty()) {
+    // use item from recycle bin
+    ret = queueItemRecycler.back();
+    queueItemRecycler.pop_back();
+  }
+  else {
+    // create new item
+    ret = new (pool.Allocate<QueueItem>()) QueueItem(pool);
+  }
+
+  return ret;
+
 }
 
 QueueItem::QueueItem(MemPool &pool)
@@ -95,6 +110,7 @@ void QueueItem::Init(
   tps = &vTPS;
   tpInd = 0;
   m_hyposColl = new (pool.Allocate<HyposColl>()) HyposColl(pool);
+  hypoIndColl.clear();
 }
 
 void QueueItem::Init(
@@ -107,6 +123,7 @@ void QueueItem::Init(
   tps = &vTPS;
   tpInd = vTPInd;
   m_hyposColl = NULL;
+  hypoIndColl.clear();
 }
 
 void QueueItem::AddHypos(const Moses2::Hypotheses &hypos)

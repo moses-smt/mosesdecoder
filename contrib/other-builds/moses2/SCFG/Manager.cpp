@@ -184,6 +184,7 @@ void Manager::Decode(SCFG::InputPath &path, Stack &stack)
 
     item->CreateNext(GetSystemPool(), *this, m_queue, m_seenPositions, path);
     //cerr << "Created next " << endl;
+    m_queueItemRecycler.push_back(item);
 
     ++pops;
   }
