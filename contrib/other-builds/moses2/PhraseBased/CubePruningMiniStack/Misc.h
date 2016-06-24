@@ -28,6 +28,9 @@ namespace NSCubePruningMiniStack
 {
 class CubeEdge;
 
+class QueueItem;
+typedef std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > QueueItemRecycler;
+
 ///////////////////////////////////////////
 class QueueItem
 {
@@ -35,7 +38,7 @@ class QueueItem
 public:
   static QueueItem *Create(QueueItem *currItem, Manager &mgr, CubeEdge &edge,
       size_t hypoIndex, size_t tpIndex,
-      std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > &queueItemRecycler);
+      QueueItemRecycler &queueItemRecycler);
   QueueItem(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex);
 
   void Init(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex);
@@ -47,10 +50,6 @@ public:
 protected:
   void CreateHypothesis(Manager &mgr);
 };
-
-///////////////////////////////////////////
-
-typedef std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > QueueItemRecycler;
 
 ///////////////////////////////////////////
 class QueueItemOrderer
@@ -87,10 +86,10 @@ public:
       SeenPositions &seenPositions) const;
 
   void CreateFirst(Manager &mgr, Queue &queue, SeenPositions &seenPositions,
-      std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > &queueItemRecycler);
+      QueueItemRecycler &queueItemRecycler);
   void CreateNext(Manager &mgr, QueueItem *item, Queue &queue,
       SeenPositions &seenPositions,
-      std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > &queueItemRecycler);
+      QueueItemRecycler &queueItemRecycler);
 
   std::string Debug(const System &system) const;
 

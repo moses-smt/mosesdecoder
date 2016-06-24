@@ -23,7 +23,7 @@ namespace NSCubePruningMiniStack
 ////////////////////////////////////////////////////////////////////////
 QueueItem *QueueItem::Create(QueueItem *currItem, Manager &mgr, CubeEdge &edge,
     size_t hypoIndex, size_t tpIndex,
-    std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > &queueItemRecycler)
+    QueueItemRecycler &queueItemRecycler)
 {
   QueueItem *ret;
   if (currItem) {
@@ -111,7 +111,7 @@ bool CubeEdge::SetSeenPosition(const size_t x, const size_t y,
 
 void CubeEdge::CreateFirst(Manager &mgr, Queue &queue,
     SeenPositions &seenPositions,
-    std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > &queueItemRecycler)
+    QueueItemRecycler &queueItemRecycler)
 {
   assert(hypos.size());
   assert(tps.GetSize());
@@ -125,7 +125,7 @@ void CubeEdge::CreateFirst(Manager &mgr, Queue &queue,
 
 void CubeEdge::CreateNext(Manager &mgr, QueueItem *item, Queue &queue,
     SeenPositions &seenPositions,
-    std::deque<QueueItem*, MemPoolAllocator<QueueItem*> > &queueItemRecycler)
+    QueueItemRecycler &queueItemRecycler)
 {
   size_t hypoIndex = item->hypoIndex;
   size_t tpIndex = item->tpIndex;
