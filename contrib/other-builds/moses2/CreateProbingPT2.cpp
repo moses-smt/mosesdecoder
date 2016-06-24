@@ -2,8 +2,13 @@
 #include <boost/program_options.hpp>
 #include "util/usage.hh"
 #include "legacy/ProbingPT/storing.hh"
+#include "legacy/InputFileStream.h"
+#include "legacy/OutputFileStream.h"
+#include "legacy/Util2.h"
 
 using namespace std;
+
+std::string ReformatSCFGFile(const std::string &path);
 
 int main(int argc, char* argv[])
 {
@@ -57,9 +62,47 @@ int main(int argc, char* argv[])
   if (vm.count("scfg")) scfg = true;
 
 
+  if (scfg) {
+    inPath = ReformatSCFGFile(inPath);
+  }
+
   Moses2::createProbingPT(inPath, outPath, num_scores, num_lex_scores, log_prob, max_cache_size, scfg);
 
   util::PrintUsage(std::cout);
   return 0;
+}
+
+std::string ReformatSCFGFile(const std::string &path)
+{
+  Moses2::InputFileStream inFile(path);
+  string reformattedPath = path + ".reformat.gz";
+  Moses2::OutputFileStream outFile(reformattedPath);
+
+  string line;
+  while (getline(inFile, line)) {
+    vector<string> toks = Moses2::TokenizeMultiCharSeparator(line, "|||");
+    assert(toks.size() >= 3);
+
+    // source
+    vector<string> sourceToks = Moses2::Tokenize(toks[0], " ");
+    for (size_t i = 0; i < sourceToks.size() - 1; ++i) {
+      outFile << sourceToks[i] << " ";
+    }
+
+    // other columns
+    for (size_t i = 1; i < toks.size(); ++i) {
+      outFile << "|||" << toks[i];
+    }
+    outFile << endl;
+  }
+
+  inFile.Close();
+  outFile.Close();
+
+  string sortedPath = path + ".reformat.sorted.gz";
+  string cmd = "gzip -dc " + reformattedPath + " | LC_ALL=C sort | gzip -c > " + sortedPath;
+  system(cmd.c_str());
+
+  return sortedPath;
 }
 

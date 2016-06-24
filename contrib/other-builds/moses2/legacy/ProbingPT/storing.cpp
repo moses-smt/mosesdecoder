@@ -91,7 +91,7 @@ void createProbingPT(const std::string &phrasetable_path,
         std::vector<uint64_t> vocabid_source = getVocabIDs(prevSource);
         if (scfg) {
           // don't store the last non-term in the source phrase
-          vocabid_source.erase(vocabid_source.begin() + vocabid_source.size() - 1);
+          //vocabid_source.erase(vocabid_source.begin() + vocabid_source.size() - 1);
 
           sourcePhrases.insert(vocabid_source);
         }
@@ -269,12 +269,11 @@ void InsertPrefixes(
 
   // loop through each prefix
   BOOST_FOREACH(const SourcePhrase &sourcePhrase, sourcePhrases) {
-    cerr << endl;
-    cerr << "curr=" << Debug(sourcePhrase) << endl;
+    //cerr << endl << "curr=" << Debug(sourcePhrase) << endl;
 
     for (size_t i = 0; i < sourcePhrase.size() - 1; ++i) {
       std::vector<uint64_t> prefix = CreatePrefix(sourcePhrase, i);
-      cerr << "pref=" << Debug(prefix) << endl;
+      //cerr << "pref=" << Debug(prefix) << endl;
       if (sourcePhrasesNew.find(prefix) == sourcePhrasesNew.end()) {
         // save
         Entry sourceEntry;
