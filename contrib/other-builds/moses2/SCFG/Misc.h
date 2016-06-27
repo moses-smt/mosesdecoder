@@ -8,9 +8,9 @@
 #include <vector>
 #include <queue>
 #include <boost/unordered_set.hpp>
-#include "../../HypothesisColl.h"
-#include "../../Vector.h"
-#include "../Hypothesis.h"
+#include "../HypothesisColl.h"
+#include "../Vector.h"
+#include "Hypothesis.h"
 
 namespace Moses2
 {

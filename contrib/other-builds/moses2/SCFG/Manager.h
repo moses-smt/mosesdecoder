@@ -14,7 +14,7 @@
 #include "../ManagerBase.h"
 #include "Stacks.h"
 #include "InputPaths.h"
-#include "CubePruning/Misc.h"
+#include "Misc.h"
 
 namespace Moses2
 {

@@ -7,8 +7,8 @@
 #include <boost/foreach.hpp>
 #include <boost/functional/hash.hpp>
 #include "Misc.h"
-#include "../Manager.h"
-#include "../TargetPhrases.h"
+#include "Manager.h"
+#include "TargetPhrases.h"
 
 using namespace std;
 

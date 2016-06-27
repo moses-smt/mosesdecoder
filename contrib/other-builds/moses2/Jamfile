@@ -145,6 +145,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
     SCFG/InputPath.cpp
     SCFG/InputPaths.cpp
     SCFG/Manager.cpp
+    SCFG/Misc.cpp
     SCFG/PhraseImpl.cpp
     SCFG/Sentence.cpp
     SCFG/Stack.cpp
@@ -152,7 +153,6 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
     SCFG/TargetPhraseImpl.cpp
     SCFG/TargetPhrases.cpp
     SCFG/Word.cpp
-    SCFG/CubePruning/Misc.cpp
 
 	server/Server.cpp
 	server/Translator.cpp
