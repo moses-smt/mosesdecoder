@@ -35,34 +35,6 @@ PhraseTableOnDisk::~PhraseTableOnDisk()
   // TODO Auto-generated destructor stub
 }
 
-void PhraseTableOnDisk::ProcessXML(
-		const Manager &mgr,
-		MemPool &pool,
-		const Sentence &sentence,
-		InputPaths &inputPaths) const
-{
-	const Vector<const InputType::XMLOption*> &xmlOptions = sentence.GetXMLOptions();
-	BOOST_FOREACH(const InputType::XMLOption *xmlOption, xmlOptions) {
-		TargetPhraseImpl *target = TargetPhraseImpl::CreateFromString(pool, *this, mgr.system, xmlOption->GetTranslation());
-
-    if (xmlOption->prob) {
-      Scores &scores = target->GetScores();
-      scores.PlusEquals(mgr.system, *this, Moses2::TransformScore(xmlOption->prob));
-    }
-
-    InputPath *path = inputPaths.GetMatrix().GetValue(xmlOption->startPos, xmlOption->phraseSize - 1);
-    const SubPhrase<Moses2::Word> &source = path->subPhrase;
-
-    mgr.system.featureFunctions.EvaluateInIsolation(pool, mgr.system, source, *target);
-
-    TargetPhrases *tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, 1);
-
-    tps->AddTargetPhrase(*target);
-    mgr.system.featureFunctions.EvaluateAfterTablePruning(pool, *tps, source);
-
-    path->AddTargetPhrases(*this, tps);
-	}
-}
 
 void PhraseTableOnDisk::Lookup(const Manager &mgr,
     InputPathsBase &inputPaths) const

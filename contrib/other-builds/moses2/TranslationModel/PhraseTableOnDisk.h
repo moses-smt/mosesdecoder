@@ -25,12 +25,6 @@ public:
   virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
       InputPath &inputPath) const;
 
-  void ProcessXML(
-		  const Manager &mgr,
-		  MemPool &pool,
-		  const Sentence &sentence,
-		  InputPaths &inputPaths) const;
-
   virtual void
   EvaluateInIsolation(const System &system, const Phrase<Moses2::Word> &source,
       const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,

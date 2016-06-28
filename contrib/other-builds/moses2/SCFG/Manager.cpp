@@ -204,7 +204,7 @@ void Manager::CreateQueue(
       item->AddHypos(*ele.hypos);
     }
   }
-  item->CreateHypo(GetSystemPool(), *this, path, symbolBind);
+  item->CreateHypo(GetPool(), *this, path, symbolBind);
 
   cerr << "hypo" << item->hypo->Debug(system) << endl;
 
