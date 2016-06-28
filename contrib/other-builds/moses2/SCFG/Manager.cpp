@@ -86,7 +86,7 @@ void Manager::Decode()
     }
   }
 
-  m_stacks.OutputStacks();
+  //m_stacks.OutputStacks();
 }
 
 void Manager::InitActiveChart(SCFG::InputPath &path)
