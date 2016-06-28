@@ -11,11 +11,11 @@ namespace Moses2
 TranslationTask::TranslationTask(System &system, const std::string &line,
     long translationId)
 {
-  if (system.options.search.algo == CYKPlus) {
-    m_mgr = new SCFG::Manager(system, *this, line, translationId);
+  if (system.isPb) {
+    m_mgr = new Manager(system, *this, line, translationId);
   }
   else {
-    m_mgr = new Manager(system, *this, line, translationId);
+    m_mgr = new SCFG::Manager(system, *this, line, translationId);
   }
 }
 

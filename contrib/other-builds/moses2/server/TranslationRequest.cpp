@@ -43,7 +43,11 @@ void
 TranslationRequest::
 Run()
 {
-  run_phrase_decoder();
+  m_mgr->Decode();
+
+  string out;
+  out = m_mgr->OutputBest();
+  m_retData["text"] = xmlrpc_c::value_string(out);
 
   {
     boost::lock_guard<boost::mutex> lock(m_mutex);
@@ -51,16 +55,6 @@ Run()
   }
   m_cond.notify_one();
 
-}
-
-void
-TranslationRequest::run_phrase_decoder()
-{
-  m_mgr->Decode();
-
-  string out;
-  out = m_mgr->OutputBest();
-  m_retData["text"] = xmlrpc_c::value_string(out);
 }
 
 void TranslationRequest::pack_hypothesis(const Manager& manager, Hypothesis const* h,

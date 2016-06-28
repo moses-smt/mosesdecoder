@@ -38,8 +38,6 @@ protected:
                      System &system,
                      const std::string &line,
                      long translationId);
-  virtual void
-  run_phrase_decoder();
 
   void
   pack_hypothesis(const Manager& manager, Hypothesis const* h,
