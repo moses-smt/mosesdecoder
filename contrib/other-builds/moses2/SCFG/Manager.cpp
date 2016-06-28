@@ -206,7 +206,7 @@ void Manager::CreateQueue(
   }
   item->CreateHypo(GetSystemPool(), *this, path, symbolBind);
 
-  cerr << "hypo" << item->hypo->Debug(system) << endl;
+  //cerr << "hypo=" << item->hypo->Debug(system) << endl;
 
   m_queue.push(item);
 }
