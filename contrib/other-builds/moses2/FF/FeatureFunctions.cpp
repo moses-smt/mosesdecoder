@@ -12,21 +12,11 @@
 #include "../Scores.h"
 #include "../MemPool.h"
 
-#include "SkeletonStatelessFF.h"
-#include "SkeletonStatefulFF.h"
-#include "WordPenalty.h"
-#include "PhrasePenalty.h"
-#include "Distortion.h"
-#include "LexicalReordering/LexicalReordering.h"
-#include "../TranslationModel/Memory/PhraseTableMemory.h"
-#include "../TranslationModel/ProbingPT.h"
+#include "../TranslationModel/PhraseTable.h"
 #include "../TranslationModel/UnknownWordPenalty.h"
-#include "../LM/LanguageModel.h"
-//#include "../LM/LanguageModelDALM.h"
-#include "../LM/KENLM.h"
 #include "../SCFG/TargetPhraseImpl.h"
-#include "util/exception.hh"
 #include "../SCFG/Word.h"
+#include "util/exception.hh"
 
 using namespace std;
 

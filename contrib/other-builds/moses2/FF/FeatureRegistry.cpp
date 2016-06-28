@@ -1,6 +1,7 @@
 #include "FeatureRegistry.h"
 
 #include "../TranslationModel/Memory/PhraseTableMemory.h"
+#include "../TranslationModel/PhraseTableOnDisk.h"
 #include "../TranslationModel/ProbingPT.h"
 #include "../TranslationModel/UnknownWordPenalty.h"
 
@@ -50,6 +51,7 @@ FeatureRegistry::FeatureRegistry()
 #define MOSES_FNAME2(name, type) Add(name, new DefaultFeatureFactory< type >());
 
   MOSES_FNAME2("PhraseDictionaryMemory", PhraseTableMemory);
+  MOSES_FNAME2("PhraseDictionaryOnDisk", PhraseTableOnDisk);
   MOSES_FNAME(ProbingPT);
   MOSES_FNAME(UnknownWordPenalty);
 
