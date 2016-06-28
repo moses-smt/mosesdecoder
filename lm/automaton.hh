@@ -56,9 +56,9 @@ template <typename Value, typename Callback> class NGramAutomaton {
             MAX_ORDER(search_.Order()){}
 
         Status Step() {
-            if (status_ == Status::Done || ngram_order_ > MAX_ORDER){
+            /*if (status_ == Status::Done || ngram_order_ > MAX_ORDER){
                 return Status::Done;
-            }
+            }*/
 
             switch(ngram_order_) {
                 case 0:
@@ -90,6 +90,10 @@ template <typename Value, typename Callback> class NGramAutomaton {
             succ_ = nullptr;
             succ_finished_ = false;
             status_ = Status::Working;
+        }
+
+        bool Finished() {
+            return status_ == Status::Done;
         }
 
     private:
@@ -173,9 +177,6 @@ template <typename Value, typename Callback> class NGramAutomaton {
             succ_->in_state_.length = out_state_.length;
         }
 
-        bool Finished() {
-            return status_ == Status::Done;
-        }
 
         void SetSuccessor(NGramAutomaton<Value, Callback>* succ){
             succ_ = succ;
@@ -326,7 +327,7 @@ template <class Automaton> class Queue {
         void Drain() {
             std::size_t drained = 0;
             while (drained != size_) {
-                while (curr_->Step() != Status::Done) {}
+                while (!curr_->Finished()) {curr_->Step();}
                 Next();
                 ++drained;
             }
