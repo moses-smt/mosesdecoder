@@ -166,9 +166,9 @@ void StoreTarget::Append(const line_text &line, bool log_prob)
   m_coll.push_back(rule);
 }
 
-uint16_t StoreTarget::GetAlignId(const std::vector<unsigned char> &align)
+uint32_t StoreTarget::GetAlignId(const std::vector<unsigned char> &align)
 {
-  boost::unordered_map<std::vector<unsigned char>, uint16_t>::iterator iter =
+  boost::unordered_map<std::vector<unsigned char>, uint32_t>::iterator iter =
       m_aligns.find(align);
   if (iter == m_aligns.end()) {
     uint32_t ind = m_aligns.size();

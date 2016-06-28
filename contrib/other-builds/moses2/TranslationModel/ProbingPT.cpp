@@ -645,7 +645,7 @@ SCFG::TargetPhraseImpl *ProbingPT::CreateTargetPhraseSCFG(
   offset += sizeof(uint32_t);
 
   // align
-  uint16_t alignInd = tpInfo->alignInd;
+  uint32_t alignInd = tpInfo->alignInd;
   //cerr << "alignInd=" << alignInd << endl;
 
   UTIL_THROW_IF2(alignInd >= m_aligns.size(), "Unknown alignInd");
