@@ -84,6 +84,16 @@ public:
   TargetPhraseCollection::shared_ptr
   GetTargetPhraseCollectionNonCache(const OnDiskPt::PhraseNode *ptNode) const;
 
+  Moses::TargetPhraseCollection::shared_ptr
+  ConvertToMoses(
+  	const OnDiskPt::TargetPhraseCollection::shared_ptr targetPhrasesOnDisk
+  	, const std::vector<Moses::FactorType> &inputFactors
+      , const std::vector<Moses::FactorType> &outputFactors
+      , const Moses::PhraseDictionary &phraseDict
+      , const std::vector<float> &weightT
+      , OnDiskPt::Vocab &vocab
+      , bool isSyntax) const;
+
   void SetParameter(const std::string& key, const std::string& value);
 
 };

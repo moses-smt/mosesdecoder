@@ -206,12 +206,46 @@ GetTargetPhraseCollectionNonCache(const OnDiskPt::PhraseNode *ptNode) const
   OnDiskPt::TargetPhraseCollection::shared_ptr targetPhrasesOnDisk
   = ptNode->GetTargetPhraseCollection(m_tableLimit, wrapper);
   TargetPhraseCollection::shared_ptr targetPhrases
-  = targetPhrasesOnDisk->ConvertToMoses(m_input, m_output, *this,
+  = ConvertToMoses(targetPhrasesOnDisk, m_input, m_output, *this,
                                         weightT, vocab, false);
 
   // delete targetPhrasesOnDisk;
 
   return targetPhrases;
+}
+
+Moses::TargetPhraseCollection::shared_ptr
+PhraseDictionaryOnDisk::ConvertToMoses(
+	const OnDiskPt::TargetPhraseCollection::shared_ptr targetPhrasesOnDisk
+	, const std::vector<Moses::FactorType> &inputFactors
+    , const std::vector<Moses::FactorType> &outputFactors
+    , const Moses::PhraseDictionary &phraseDict
+    , const std::vector<float> &weightT
+    , OnDiskPt::Vocab &vocab
+    , bool isSyntax) const
+{
+	  Moses::TargetPhraseCollection::shared_ptr ret;
+	  ret.reset(new Moses::TargetPhraseCollection);
+
+	  for (size_t i = 0; i < targetPhrasesOnDisk->GetSize(); ++i) {
+	    const OnDiskPt::TargetPhrase &tp = targetPhrasesOnDisk->GetTargetPhrase(i);
+	    Moses::TargetPhrase *mosesPhrase
+	    = tp.ConvertToMoses(inputFactors, outputFactors, vocab,
+	                        phraseDict, weightT, isSyntax);
+
+	    /*
+	    // debugging output
+	    stringstream strme;
+	    strme << filePath << " " << *mosesPhrase;
+	    mosesPhrase->SetDebugOutput(strme.str());
+	    */
+
+	    ret->Add(mosesPhrase);
+	  }
+
+	  ret->Sort(true, phraseDict.GetTableLimit());
+
+	  return ret;
 }
 
 void PhraseDictionaryOnDisk::SetParameter(const std::string& key, const std::string& value)
