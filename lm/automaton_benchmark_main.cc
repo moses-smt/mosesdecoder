@@ -1,5 +1,7 @@
 #include "automaton.hh"
 #include "util/usage.hh"
+#include <iomanip>
+#include <limits>
 
 namespace {
 void CheckEqual(const lm::FullScoreReturn& lhs, const lm::FullScoreReturn& rhs) {
@@ -61,7 +63,7 @@ void ModelScore(const lm::ngram::ProbingModel& model, const Config& options){
     const lm::ngram::State *in_state = begin_state;
     std::array<Width, 1024> buff;
     lm::ngram::State states[3];
-    auto score = 0.0;
+    long double score = 0.0;
 
     //start timer
     auto time = util::CPUTime();
@@ -86,21 +88,21 @@ void ModelScore(const lm::ngram::ProbingModel& model, const Config& options){
     //stop timer
     time = util::CPUTime() - time;
     std::cout << time << " ";
-    std::cerr << "Score(model) : " << score << std::endl;
+    std::cerr << "Score(model) : " << std::setprecision(std::numeric_limits<long double>::digits10 + 1) << score << std::endl;
 }
 
 template<typename Width>
 void DispatchFunction(lm::ngram::ProbingModel& model, const Config& options){
     if (options.type == "probing") ModelScore<Width>(model, options);
     else if (options.type == "pipeline") {
-        auto score = 0.0;
+        long double score = 0.0;
         const auto callback = [&score](const lm::FullScoreReturn& r){score += r.prob;};
         typename lm::ngram::NGramAutomaton<lm::ngram::BackoffValue, decltype(callback)>::Construct construct{model.GetSearch(), callback};
         for (std::size_t pipeline_size = options.pipeline_size_start; pipeline_size <= options.pipeline_size_end; ++pipeline_size) {
             score = 0.0;
             lm::Pipeline<decltype(callback)> pipeline(pipeline_size, construct);
             PipelineScore<decltype(callback), Width>(pipeline, model, options);
-            std::cerr << "Score(pipeline): " << score << std::endl;
+            std::cerr << "Score(pipeline): " << std::setprecision(std::numeric_limits<long double>::digits10 + 1) << score << std::endl;
         }
     }
     std::cout << '\n';
