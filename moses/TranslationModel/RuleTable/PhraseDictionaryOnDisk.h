@@ -64,6 +64,14 @@ protected:
 
   void GetTargetPhraseCollectionBatch(InputPath &inputPath) const;
 
+  Moses::TargetPhrase *ConvertToMoses(const OnDiskPt::TargetPhrase &targetPhraseOnDisk
+		  	  	  	  	  	  	  	  , const std::vector<Moses::FactorType> &inputFactors
+                                      , const std::vector<Moses::FactorType> &outputFactors
+                                      , const OnDiskPt::Vocab &vocab
+                                      , const Moses::PhraseDictionary &phraseDict
+                                      , const std::vector<float> &weightT
+                                      , bool isSyntax) const;
+
 public:
   PhraseDictionaryOnDisk(const std::string &line);
   ~PhraseDictionaryOnDisk();

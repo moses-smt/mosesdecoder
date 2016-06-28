@@ -230,7 +230,7 @@ PhraseDictionaryOnDisk::ConvertToMoses(
 	  for (size_t i = 0; i < targetPhrasesOnDisk->GetSize(); ++i) {
 	    const OnDiskPt::TargetPhrase &tp = targetPhrasesOnDisk->GetTargetPhrase(i);
 	    Moses::TargetPhrase *mosesPhrase
-	    = tp.ConvertToMoses(inputFactors, outputFactors, vocab,
+	    = ConvertToMoses(tp, inputFactors, outputFactors, vocab,
 	                        phraseDict, weightT, isSyntax);
 
 	    /*
@@ -246,6 +246,75 @@ PhraseDictionaryOnDisk::ConvertToMoses(
 	  ret->Sort(true, phraseDict.GetTableLimit());
 
 	  return ret;
+}
+
+Moses::TargetPhrase *PhraseDictionaryOnDisk::ConvertToMoses(const OnDiskPt::TargetPhrase &targetPhraseOnDisk
+		  	  	  	  	  	  	  	  , const std::vector<Moses::FactorType> &inputFactors
+                                    , const std::vector<Moses::FactorType> &outputFactors
+                                    , const OnDiskPt::Vocab &vocab
+                                    , const Moses::PhraseDictionary &phraseDict
+                                    , const std::vector<float> &weightT
+                                    , bool isSyntax) const
+{
+  Moses::TargetPhrase *ret = new Moses::TargetPhrase(&phraseDict);
+
+  // words
+  size_t phraseSize = targetPhraseOnDisk.GetSize();
+  UTIL_THROW_IF2(phraseSize == 0, "Target phrase cannot be empty"); // last word is lhs
+  if (isSyntax) {
+	--phraseSize;
+  }
+
+  for (size_t pos = 0; pos < phraseSize; ++pos) {
+    targetPhraseOnDisk.GetWord(pos).ConvertToMoses(outputFactors, vocab, ret->AddWord());
+  }
+
+  // alignments
+  // int index = 0;
+  Moses::AlignmentInfo::CollType alignTerm, alignNonTerm;
+  std::set<std::pair<size_t, size_t> > alignmentInfo;
+  const OnDiskPt::PhrasePtr sp = targetPhraseOnDisk.GetSourcePhrase();
+  for (size_t ind = 0; ind < targetPhraseOnDisk.GetAlign().size(); ++ind) {
+	const std::pair<size_t, size_t> &entry = targetPhraseOnDisk.GetAlign()[ind];
+	alignmentInfo.insert(entry);
+	size_t sourcePos = entry.first;
+	size_t targetPos = entry.second;
+
+	if (targetPhraseOnDisk.GetWord(targetPos).IsNonTerminal()) {
+	  alignNonTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
+	} else {
+	  alignTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
+	}
+
+  }
+  ret->SetAlignTerm(alignTerm);
+  ret->SetAlignNonTerm(alignNonTerm);
+
+  if (isSyntax) {
+	Moses::Word *lhsTarget = new Moses::Word(true);
+	targetPhraseOnDisk.GetWord(targetPhraseOnDisk.GetSize() - 1).ConvertToMoses(outputFactors, vocab, *lhsTarget);
+	ret->SetTargetLHS(lhsTarget);
+  }
+
+  // set source phrase
+  Moses::Phrase mosesSP(Moses::Input);
+  for (size_t pos = 0; pos < sp->GetSize(); ++pos) {
+	sp->GetWord(pos).ConvertToMoses(inputFactors, vocab, mosesSP.AddWord());
+  }
+
+  // scores
+  ret->GetScoreBreakdown().Assign(&phraseDict, targetPhraseOnDisk.GetScores());
+
+  // sparse features
+  ret->GetScoreBreakdown().Assign(&phraseDict, targetPhraseOnDisk.GetSparseFeatures());
+
+  // property
+  ret->SetProperties(targetPhraseOnDisk.GetProperty());
+
+  ret->EvaluateInIsolation(mosesSP, phraseDict.GetFeaturesToApply());
+
+  return ret;
+
 }
 
 void PhraseDictionaryOnDisk::SetParameter(const std::string& key, const std::string& value)
