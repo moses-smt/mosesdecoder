@@ -150,7 +150,7 @@ void PhraseDictionaryOnDisk::GetTargetPhraseCollectionBatch(InputPath &inputPath
   if (prevPtNode) {
     Word lastWord = phrase.GetWord(phrase.GetSize() - 1);
     lastWord.OnlyTheseFactors(m_inputFactors);
-    OnDiskPt::Word *lastWordOnDisk = wrapper.ConvertFromMoses(m_input, lastWord);
+    OnDiskPt::Word *lastWordOnDisk = ConvertFromMoses(wrapper, m_input, lastWord);
 
     TargetPhraseCollection::shared_ptr tpc;
     if (lastWordOnDisk == NULL) {
@@ -342,6 +342,44 @@ void PhraseDictionaryOnDisk::ConvertToMoses(
     }
     UTIL_THROW_IF2(tok, "Too many factors in \"" << vocab.GetString(wordOnDisk.GetVocabId()) << "\"; was expecting " << outputFactorsVec.size());
   }
+}
+
+OnDiskPt::Word *PhraseDictionaryOnDisk::ConvertFromMoses(OnDiskPt::OnDiskWrapper &wrapper, const std::vector<Moses::FactorType> &factorsVec
+                       , const Moses::Word &origWord) const
+{
+  bool isNonTerminal = origWord.IsNonTerminal();
+  OnDiskPt::Word *newWord = new OnDiskPt::Word(isNonTerminal);
+
+  util::StringStream strme;
+
+  size_t factorType = factorsVec[0];
+  const Moses::Factor *factor = origWord.GetFactor(factorType);
+  UTIL_THROW_IF2(factor == NULL, "Expecting factor " << factorType);
+  strme << factor->GetString();
+
+  for (size_t ind = 1 ; ind < factorsVec.size() ; ++ind) {
+	size_t factorType = factorsVec[ind];
+	const Moses::Factor *factor = origWord.GetFactor(factorType);
+	if (factor == NULL) {
+	  // can have less factors than factorType.size()
+	  break;
+	}
+	UTIL_THROW_IF2(factor == NULL,
+				   "Expecting factor " << factorType << " at position " << ind);
+	strme << "|" << factor->GetString();
+  } // for (size_t factorType
+
+  bool found;
+  uint64_t vocabId = wrapper.GetVocab().GetVocabId(strme.str(), found);
+  if (!found) {
+	// factor not in phrase table -> phrse definately not in. exit
+	delete newWord;
+	return NULL;
+  } else {
+	newWord->SetVocabId(vocabId);
+	return newWord;
+  }
+
 }
 
 void PhraseDictionaryOnDisk::SetParameter(const std::string& key, const std::string& value)

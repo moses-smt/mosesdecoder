@@ -107,6 +107,9 @@ public:
       , OnDiskPt::Vocab &vocab
       , bool isSyntax) const;
 
+  OnDiskPt::Word *ConvertFromMoses(OnDiskPt::OnDiskWrapper &wrapper, const std::vector<Moses::FactorType> &factorsVec
+                         , const Moses::Word &origWord) const;
+
   void SetParameter(const std::string& key, const std::string& value);
 
 };
