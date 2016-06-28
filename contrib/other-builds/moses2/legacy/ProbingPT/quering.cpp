@@ -121,7 +121,7 @@ void QueryEngine::read_alignments(const std::string &alignPath)
     vector<string> toks = Moses2::Tokenize(line, "\t ");
     UTIL_THROW_IF2(toks.size() == 0, "Corrupt alignment file");
 
-    uint16_t alignInd = Scan<uint16_t>(toks[0]);
+    uint32_t alignInd = Scan<uint32_t>(toks[0]);
     if (alignInd >= alignColl.size()) {
       alignColl.resize(alignInd + 1);
     }

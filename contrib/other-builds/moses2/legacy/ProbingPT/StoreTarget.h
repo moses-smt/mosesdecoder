@@ -33,12 +33,12 @@ protected:
   std::fstream m_fileTargetColl;
   StoreVocab<uint32_t> m_vocab;
 
-  typedef boost::unordered_map<std::vector<unsigned char>, uint16_t> Alignments;
+  typedef boost::unordered_map<std::vector<unsigned char>, uint32_t> Alignments;
   Alignments m_aligns;
 
   std::vector<target_text*> m_coll;
 
-  uint16_t GetAlignId(const std::vector<unsigned char> &align);
+  uint32_t GetAlignId(const std::vector<unsigned char> &align);
   void Save(const target_text &rule);
 
   void AppendLexRO(std::string &prop, std::vector<float> &retvector,
