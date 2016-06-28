@@ -74,13 +74,14 @@ public:
       size_t vTPInd);
   void AddHypos(const Moses2::Hypotheses &hypos);
   void CreateHypo(
-      MemPool &pool,
+      MemPool &systemPool,
       SCFG::Manager &mgr,
       const SCFG::InputPath &path,
       const SCFG::SymbolBind &symbolBind);
 
   void CreateNext(
-      MemPool &pool,
+      MemPool &systemPool,
+      MemPool &mgrPool,
       SCFG::Manager &mgr,
       SCFG::Queue &queue,
       SeenPositions &seenPositions,

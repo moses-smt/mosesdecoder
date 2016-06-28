@@ -182,7 +182,7 @@ void Manager::Decode(SCFG::InputPath &path, Stack &stack)
     stack.Add(hypo, GetHypoRecycle(), arcLists);
     //cerr << "Added " << *hypo << " " << endl;
 
-    item->CreateNext(GetPool(), *this, m_queue, m_seenPositions, path);
+    item->CreateNext(GetSystemPool(), GetPool(), *this, m_queue, m_seenPositions, path);
     //cerr << "Created next " << endl;
     m_queueItemRecycler.push_back(item);
 
@@ -204,7 +204,7 @@ void Manager::CreateQueue(
       item->AddHypos(*ele.hypos);
     }
   }
-  item->CreateHypo(GetPool(), *this, path, symbolBind);
+  item->CreateHypo(GetSystemPool(), *this, path, symbolBind);
 
   cerr << "hypo" << item->hypo->Debug(system) << endl;
 

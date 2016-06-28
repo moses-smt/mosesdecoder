@@ -133,20 +133,21 @@ void QueueItem::AddHypos(const Moses2::Hypotheses &hypos)
 }
 
 void QueueItem::CreateHypo(
-    MemPool &pool,
+    MemPool &systemPool,
     SCFG::Manager &mgr,
     const SCFG::InputPath &path,
     const SCFG::SymbolBind &symbolBind)
 {
   const SCFG::TargetPhraseImpl &tp = (*tps)[tpInd];
 
-  hypo = SCFG::Hypothesis::Create(pool, mgr);
+  hypo = SCFG::Hypothesis::Create(systemPool, mgr);
   hypo->Init(mgr, path, symbolBind, tp, hypoIndColl);
   hypo->EvaluateWhenApplied();
 }
 
 void QueueItem::CreateNext(
-    MemPool &pool,
+    MemPool &systemPool,
+    MemPool &mgrPool,
     SCFG::Manager &mgr,
     SCFG::Queue &queue,
     SeenPositions &seenPositions,
@@ -156,15 +157,15 @@ void QueueItem::CreateNext(
   if (tpInd + 1 < tps->GetSize()) {
 
     const SCFG::TargetPhraseImpl &tp = (*tps)[tpInd + 1];
-    SeenPosition *seenItem = new (pool.Allocate<SeenPosition>()) SeenPosition(pool, tps, tpInd + 1, hypoIndColl);
+    SeenPosition *seenItem = new (mgrPool.Allocate<SeenPosition>()) SeenPosition(mgrPool, tps, tpInd + 1, hypoIndColl);
     bool unseen = seenPositions.Add(seenItem);
 
     if (unseen) {
-      QueueItem *item = QueueItem::Create(pool, mgr);
-      item->Init(pool, *symbolBind, *tps, tpInd + 1);
+      QueueItem *item = QueueItem::Create(mgrPool, mgr);
+      item->Init(mgrPool, *symbolBind, *tps, tpInd + 1);
       item->m_hyposColl = m_hyposColl;
       item->hypoIndColl = hypoIndColl;
-      item->CreateHypo(pool, mgr, path, *symbolBind);
+      item->CreateHypo(systemPool, mgr, path, *symbolBind);
 
       queue.push(item);
     }
@@ -177,18 +178,18 @@ void QueueItem::CreateNext(
     size_t hypoInd = hypoIndColl[i] + 1;
 
     if (hypoInd < hypos.size()) {
-      SeenPosition *seenItem = new (pool.Allocate<SeenPosition>()) SeenPosition(pool, tps, tpInd, hypoIndColl);
+      SeenPosition *seenItem = new (mgrPool.Allocate<SeenPosition>()) SeenPosition(mgrPool, tps, tpInd, hypoIndColl);
       seenItem->hypoIndColl[i] = hypoInd;
       bool unseen = seenPositions.Add(seenItem);
 
       if (unseen) {
-        QueueItem *item = QueueItem::Create(pool, mgr);
-        item->Init(pool, *symbolBind, *tps, tpInd);
+        QueueItem *item = QueueItem::Create(mgrPool, mgr);
+        item->Init(mgrPool, *symbolBind, *tps, tpInd);
 
         item->m_hyposColl = m_hyposColl;
         item->hypoIndColl = hypoIndColl;
         item->hypoIndColl[i] = hypoInd;
-        item->CreateHypo(pool, mgr, path, *symbolBind);
+        item->CreateHypo(systemPool, mgr, path, *symbolBind);
 
         queue.push(item);
       }

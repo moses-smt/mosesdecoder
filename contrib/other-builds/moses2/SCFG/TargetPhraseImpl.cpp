@@ -74,9 +74,9 @@ std::string TargetPhraseImpl::Debug(const System &system) const
   }
   out << "pt=" << pt.GetName();
   out << " SCORES:" << GetScores().Debug(system);
-  out << " ALIGN:";
+  out << " ALIGN-T:";
   out << GetAlignTerm().Debug(system);
-  out << " ";
+  out << " ALIGN-NT:";
   out << GetAlignNonTerm().Debug(system);
 
   return out.str();
