@@ -72,6 +72,11 @@ protected:
                                       , const std::vector<float> &weightT
                                       , bool isSyntax) const;
 
+  void ConvertToMoses(const OnDiskPt::Word &wordOnDisk,
+    const std::vector<Moses::FactorType> &outputFactorsVec,
+    const OnDiskPt::Vocab &vocab,
+    Moses::Word &overwrite) const;
+
 public:
   PhraseDictionaryOnDisk(const std::string &line);
   ~PhraseDictionaryOnDisk();

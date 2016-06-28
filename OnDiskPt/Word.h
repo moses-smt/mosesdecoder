@@ -67,14 +67,13 @@ public:
   size_t ReadFromMemory(const char *mem);
   size_t ReadFromFile(std::fstream &file);
 
-  void SetVocabId(uint32_t vocabId) {
-    m_vocabId = vocabId;
+  uint64_t GetVocabId() const {
+    return m_vocabId;
   }
 
-  void ConvertToMoses(
-    const std::vector<Moses::FactorType> &outputFactorsVec,
-    const Vocab &vocab,
-    Moses::Word &overwrite) const;
+  void SetVocabId(uint64_t vocabId) {
+    m_vocabId = vocabId;
+  }
 
   void DebugPrint(std::ostream &out, const Vocab &vocab) const;
   inline const std::string &GetString(const Vocab &vocab) const {

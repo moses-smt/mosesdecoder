@@ -30,6 +30,8 @@
 #include "OnDiskPt/OnDiskWrapper.h"
 #include "OnDiskPt/Word.h"
 
+#include "util/tokenize_piece.hh"
+
 using namespace std;
 
 
@@ -266,7 +268,8 @@ Moses::TargetPhrase *PhraseDictionaryOnDisk::ConvertToMoses(const OnDiskPt::Targ
   }
 
   for (size_t pos = 0; pos < phraseSize; ++pos) {
-    targetPhraseOnDisk.GetWord(pos).ConvertToMoses(outputFactors, vocab, ret->AddWord());
+	const OnDiskPt::Word &wordOnDisk = targetPhraseOnDisk.GetWord(pos);
+	ConvertToMoses(wordOnDisk, outputFactors, vocab, ret->AddWord());
   }
 
   // alignments
@@ -292,14 +295,15 @@ Moses::TargetPhrase *PhraseDictionaryOnDisk::ConvertToMoses(const OnDiskPt::Targ
 
   if (isSyntax) {
 	Moses::Word *lhsTarget = new Moses::Word(true);
-	targetPhraseOnDisk.GetWord(targetPhraseOnDisk.GetSize() - 1).ConvertToMoses(outputFactors, vocab, *lhsTarget);
+	const OnDiskPt::Word &lhsOnDisk = targetPhraseOnDisk.GetWord(targetPhraseOnDisk.GetSize() - 1);
+	ConvertToMoses(lhsOnDisk, outputFactors, vocab, *lhsTarget);
 	ret->SetTargetLHS(lhsTarget);
   }
 
   // set source phrase
   Moses::Phrase mosesSP(Moses::Input);
   for (size_t pos = 0; pos < sp->GetSize(); ++pos) {
-	sp->GetWord(pos).ConvertToMoses(inputFactors, vocab, mosesSP.AddWord());
+	ConvertToMoses(sp->GetWord(pos), inputFactors, vocab, mosesSP.AddWord());
   }
 
   // scores
@@ -314,7 +318,30 @@ Moses::TargetPhrase *PhraseDictionaryOnDisk::ConvertToMoses(const OnDiskPt::Targ
   ret->EvaluateInIsolation(mosesSP, phraseDict.GetFeaturesToApply());
 
   return ret;
+}
 
+void PhraseDictionaryOnDisk::ConvertToMoses(
+  const OnDiskPt::Word &wordOnDisk,
+  const std::vector<Moses::FactorType> &outputFactorsVec,
+  const OnDiskPt::Vocab &vocab,
+  Moses::Word &overwrite) const
+{
+  Moses::FactorCollection &factorColl = Moses::FactorCollection::Instance();
+  overwrite = Moses::Word(wordOnDisk.IsNonTerminal());
+
+  if (wordOnDisk.IsNonTerminal()) {
+    const std::string &tok = vocab.GetString(wordOnDisk.GetVocabId());
+    overwrite.SetFactor(0, factorColl.AddFactor(tok, wordOnDisk.IsNonTerminal()));
+  } else {
+    // TODO: this conversion should have been done at load time.
+    util::TokenIter<util::SingleCharacter> tok(vocab.GetString(wordOnDisk.GetVocabId()), '|');
+
+    for (std::vector<Moses::FactorType>::const_iterator t = outputFactorsVec.begin(); t != outputFactorsVec.end(); ++t, ++tok) {
+      UTIL_THROW_IF2(!tok, "Too few factors in \"" << vocab.GetString(wordOnDisk.GetVocabId()) << "\"; was expecting " << outputFactorsVec.size());
+      overwrite.SetFactor(*t, factorColl.AddFactor(*tok, wordOnDisk.IsNonTerminal()));
+    }
+    UTIL_THROW_IF2(tok, "Too many factors in \"" << vocab.GetString(wordOnDisk.GetVocabId()) << "\"; was expecting " << outputFactorsVec.size());
+  }
 }
 
 void PhraseDictionaryOnDisk::SetParameter(const std::string& key, const std::string& value)
