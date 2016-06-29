@@ -296,7 +296,7 @@ batch_run()
 
   FeatureFunction::Destroy();
 
-  IFVERBOSE(1) util::PrintUsage(std::cerr);
+  IFVERBOSE(0) util::PrintUsage(std::cerr);
 
 #ifndef EXIT_RETURN
   //This avoids that destructors are called (it can take a long time)
