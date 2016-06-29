@@ -56,10 +56,6 @@ template <typename Value, typename Callback> class NGramAutomaton {
             MAX_ORDER(search_.Order()){}
 
         Status Step() {
-            /*if (status_ == Status::Done || ngram_order_ > MAX_ORDER){
-                return Status::Done;
-            }*/
-
             switch(ngram_order_) {
                 case 0:
                     //prefetch unigram only
@@ -85,7 +81,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
             new_word_ = task.new_word;
             ngram_order_ = 0;
             node_ = 0;
-            out_state_.length = std::min(in_state_.length + 1, MAX_ORDER - 1);
+            out_state_.length = 0; 
             ret_ = FullScoreReturn();
             succ_ = nullptr;
             succ_finished_ = false;
@@ -110,6 +106,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
                 pred_finished_ = pred_->Finished();
 
                 //TODO: This IF statement does not need to be here although if removed then backoffs are copied uselessly
+                //The predecessor might be finished since to add to the queue some automaton must finish
                 if (pred_finished_) {
                     //copy backoffs
                     std::copy(pred_->out_state_.backoff, pred_->out_state_.backoff + pred_->out_state_.length, in_state_.backoff);
@@ -129,7 +126,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
 
         void CopyContextWordsFromPredecessor(){
             //pred_ might equal this, hence the copying order
-            auto length = std::min(pred_->out_state_.length, static_cast<unsigned char>(MAX_ORDER - 2));
+            auto length = MAX_ORDER - 2;
 
             auto from = pred_->in_state_.words + length - 1;
             auto to = in_state_.words + length;
@@ -194,8 +191,13 @@ template <typename Value, typename Callback> class NGramAutomaton {
             ret_.prob = uni.Prob();
             ret_.rest = uni.Rest();
             ret_.ngram_length = 1;
-            if (!HasExtension(uni.Backoff())) {
-                WriteOutLength(0);
+
+            if (HasExtension(uni.Backoff())) {
+                    out_state_.length = 1;
+                    //at this point successor can't be finished
+                    if (succ_) {
+                        succ_->in_state_.length = 1;
+                    }
             }
             if (in_state_.length == 0 || ret_.independent_left) {
                 Finish();
@@ -218,10 +220,12 @@ template <typename Value, typename Callback> class NGramAutomaton {
             ret_.rest = pointer.Rest();
             ret_.ngram_length = ngram_order_;
 
-            if (!HasExtension(pointer.Backoff())){
-                WriteOutLength(ngram_order_-1); 
+            if(HasExtension(pointer.Backoff())) {
+                out_state_.length = ngram_order_;
+                if (succ_ && !succ_finished_) {
+                    succ_->in_state_.length = out_state_.length;
+                }
             }
-
             if (ngram_order_ - 1 == in_state_.length || ret_.independent_left) {
                 Finish();
                 return;
@@ -236,7 +240,6 @@ template <typename Value, typename Callback> class NGramAutomaton {
         }
 
         void GetLongest(){
-            WriteOutLength(ngram_order_-1);
             ret_.independent_left = true;
             typename detail::HashedSearch<Value>::LongestPointer longest(search_.LookupLongestFromNode(node_));
             if (longest.Found()) {
@@ -253,17 +256,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
             }
         }
 
-        void WriteOutLength(const unsigned char length){
-            if (length < out_state_.length) {
-                out_state_.length = length;
-                if (succ_ && !succ_finished_) {
-                    succ_->in_state_.length = length;
-                }
-            }
-        }
-
         void Finish(){
-            WriteOutLength(std::min(ret_.ngram_length, static_cast<unsigned char>(MAX_ORDER - 1)));
             CheckPredecessorFinished();
             CheckSuccessorFinished();
             status_ = Status::Done;
@@ -324,12 +317,20 @@ template <class Automaton> class Queue {
             if (++curr_ == automata_.end()) curr_ = automata_.begin();
         }
 
+        // The order in which Step is invoked on automata must be the same as normally
+        // i.e. a1->Step(), a2->Step(), ... and NOT a1->Step(), a1->Step(), ..., a1->Step(), a2->Step(),...
         void Drain() {
             std::size_t drained = 0;
-            while (drained != size_) {
-                while (!curr_->Finished()) {curr_->Step();}
-                Next();
-                ++drained;
+            bool all_finished = false;
+            while(!all_finished){
+                all_finished = true;
+                for (auto i = 0; i < size_; i++) {
+                    if (!curr_->Finished()) {
+                        all_finished = false;
+                        curr_->Step();
+                    }
+                    Next();
+                }
             }
         }
 
