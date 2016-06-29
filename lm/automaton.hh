@@ -187,7 +187,6 @@ template <typename Value, typename Callback> class NGramAutomaton {
 
         void GetUnigramPrefetchNext(){
             typename detail::HashedSearch<Value>::UnigramPointer uni(search_.LookupUnigram(new_word_, node_, ret_.independent_left, ret_.extend_left));
-            WriteWordToSuccInState(new_word_);
             out_state_.backoff[0] = uni.Backoff(); //TODO: What if the word is not found?
             ret_.prob = uni.Prob();
             ret_.rest = uni.Rest();
@@ -216,7 +215,6 @@ template <typename Value, typename Callback> class NGramAutomaton {
                 Finish();
                 return;
             }
-            WriteWordToSuccInState(in_state_.words[ngram_order_-2]);
             out_state_.backoff[ngram_order_-1] = pointer.Backoff();
             ret_.prob = pointer.Prob();
             ret_.rest = pointer.Rest();
@@ -254,12 +252,6 @@ template <typename Value, typename Callback> class NGramAutomaton {
             Finish();
         }
         
-        void WriteWordToSuccInState(lm::WordIndex word){
-            if (!succ_finished_ && succ_) {
-                succ_->in_state_.words[ngram_order_-1];
-            }
-        }
-
         void Finish(){
             CheckPredecessorFinished();
             CheckSuccessorFinished();
