@@ -309,34 +309,33 @@ bool Manager::IncrPrevHypoIndices(
 
 std::string Manager::OutputBest() const
 {
-  string outStr;
+  string out;
   const Stack &lastStack = m_stacks.GetLastStack();
   const Hypothesis *bestHypo = lastStack.GetBestHypo(*this, const_cast<ArcLists&>(arcLists));
 
   if (bestHypo) {
     //cerr << "BEST TRANSLATION: " << bestHypo << bestHypo->Debug(system) << endl;
     //cerr << " " << out.str() << endl;
-    stringstream out;
-    bestHypo->OutputToStream(out);
+    stringstream outStrm;
+    bestHypo->OutputToStream(outStrm);
 
-    outStr = out.str();
-    outStr = outStr.substr(4);
-    outStr = outStr.substr(0, outStr.size() - 6);
+    out = outStrm.str();
+    out = out.substr(4, out.size() - 10);
 
     if (system.options.output.ReportHypoScore) {
-      outStr = SPrint(bestHypo->GetScores().GetTotalScore()) + " " + outStr;
+      out = SPrint(bestHypo->GetScores().GetTotalScore()) + " " + out;
     }
   }
   else {
     if (system.options.output.ReportHypoScore) {
-      outStr = "0 ";
+      out = "0 ";
     }
 
     //cerr << "NO TRANSLATION " << m_input->GetTranslationId() << endl;
   }
 
-  outStr += "\n";
-  return outStr;
+  out += "\n";
+  return out;
 }
 
 } // namespace
