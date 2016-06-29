@@ -8,8 +8,8 @@
 NBest::NBest(
     const std::string& srcPath,
     const std::string& nbestPath,
-    const std::shared_ptr<Vocab> srcVocab,
-    const std::shared_ptr<Vocab> trgVocab,
+    const boost::shared_ptr<Vocab> srcVocab,
+    const boost::shared_ptr<Vocab> trgVocab,
     const size_t maxBatchSize)
     : srcVocab_(srcVocab),
       trgVocab_(trgVocab),
@@ -19,21 +19,19 @@ NBest::NBest(
 }
 
 NBest::NBest(
+  const boost::shared_ptr<Vocab> srcVocab,
+  const boost::shared_ptr<Vocab> trgVocab,
   const std::vector<std::string>& nBestList,
-  const std::shared_ptr<Vocab> srcVocab,
-  const std::shared_ptr<Vocab> trgVocab,
   const size_t maxBatchSize)
     : srcVocab_(srcVocab),
       trgVocab_(trgVocab),
       maxBatchSize_(maxBatchSize) {
-    const std::vector<std::vector<std::string> >& splitted;
-    for (size_t i = 0; i < nBestList.size(); ++i) {
-      std::vector<std::string> tokens;
-      Split(nBestList[i], tokens);
-      splitted.push_back(tokens);
-    }
-    data_ = splitted;
+  for (size_t i = 0; i < nBestList.size(); ++i) {
+    std::vector<std::string> tokens;
+    Split(nBestList[i], tokens);
+    data_.push_back(tokens);
   }
+}
 
 void NBest::ParseInputFile(const std::string& path) {
     std::ifstream file(path);
@@ -93,20 +91,20 @@ inline std::vector< std::vector< std::string > > NBest::SplitBatch(std::vector<s
   return splittedBatch;
 }
 
-inline Batch NBest::EncodeBatch(const std::vector<std::vector<std::string>>& batch) const {
-  Batch encodedBatch;
+inline NBestBatch NBest::EncodeBatch(const std::vector<std::vector<std::string> >& batch) const {
+  NBestBatch encodedBatch;
   for (auto& sentence: batch) {
     encodedBatch.push_back(trgVocab_->Encode(sentence, true));
   }
   return encodedBatch;
 }
 
-inline Batch NBest::MaskAndTransposeBatch(const Batch& batch) const {
+inline NBestBatch NBest::MaskAndTransposeBatch(const NBestBatch& batch) const {
   size_t maxLength = 0;
   for (auto& sentence: batch) {
     maxLength = max(maxLength, sentence.size());
   }
-  Batch masked;
+  NBestBatch masked;
   for (size_t i = 0; i < maxLength; ++i) {
       masked.emplace_back(batch.size(), 0);
       for (size_t j = 0; j < batch.size(); ++j) {
@@ -119,16 +117,16 @@ inline Batch NBest::MaskAndTransposeBatch(const Batch& batch) const {
 }
 
 
-Batch NBest::ProcessBatch(std::vector<std::string>& batch) const {
+NBestBatch NBest::ProcessBatch(std::vector<std::string>& batch) const {
   return MaskAndTransposeBatch(EncodeBatch(SplitBatch(batch)));
 }
 
-Batch NBest::ProcessBatch(std::vector<std::vector<std::string> >& batch) const {
+NBestBatch NBest::ProcessBatch(std::vector<std::vector<std::string> >& batch) const {
   return MaskAndTransposeBatch(EncodeBatch(batch));
 }
 
-std::vector<Batch> NBest::GetBatches(const size_t index) const {
-  std::vector<Batch> batches;
+std::vector<NBestBatch> NBest::GetBatches(const size_t index) const {
+  std::vector<NBestBatch> batches;
   std::vector<std::string> sBatch;
   for (size_t i = indexes_[index]; i <= indexes_[index+1]; ++i) {
     if (sBatch.size() == maxBatchSize_ || i == indexes_[index+1]) {
@@ -143,8 +141,8 @@ std::vector<Batch> NBest::GetBatches(const size_t index) const {
   return batches;
 }
 
-std::vector<Batch> NBest::DivideNBestListIntoBatches() const {
-  std::vector<Batch> batches;
+std::vector<NBestBatch> NBest::DivideNBestListIntoBatches() const {
+  std::vector<NBestBatch> batches;
   std::vector<std::vector<std::string> > sBatch;
   for (size_t i = 0; i < data_.size(); ++i) {
     sBatch.push_back(data_[i]);

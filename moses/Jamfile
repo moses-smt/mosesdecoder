@@ -113,6 +113,8 @@ lib moses :
   FF/bilingual-lm/*.cpp
   FF/OSM-Feature/*.cpp
   FF/NMT/plugin/nmt.cu
+  FF/NMT/plugin/nbest.cu
+  FF/NMT/common/utils.cu
   FF/NMT/cnpy/cnpy.cpp
   FF/Dsg-Feature/*.cpp
   FF/LexicalReordering/*.cpp

@@ -29,6 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <limits>
 #include <map>
 #include <set>
+#include <iterator>
 #include "Manager.h"
 #include "TypeDef.h"
 #include "Util.h"
@@ -49,7 +50,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/LatticeMBR.h"
 #include "moses/SearchNormal.h"
 #include "moses/SearchCubePruning.h"
+#include "moses/FF/NeuralScoreFeature.h"
 #include <boost/foreach.hpp>
+#include <boost/algorithm/string/trim.hpp>
 
 #ifdef HAVE_PROTOBUF
 #include "hypergraph.pb.h"
@@ -1611,6 +1614,34 @@ OutputNBest(std::ostream& out, Moses::TrellisPathList const& nBestList) const
   bool includeWordAlignment = nbo.include_alignment_info;
 
   TrellisPathList::const_iterator iter;
+  std::vector<std::string> nbestvector;
+  for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
+    std::stringstream ss;
+
+    const TrellisPath &path = **iter;
+    const std::vector<const Hypothesis *> &edges = path.GetEdges();
+    for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
+      const Hypothesis &edge = *edges[currEdge];
+      OutputSurface(ss, edge);
+    }
+    std::string outputSentence = ss.str();
+    boost::trim_if(outputSentence, boost::is_any_of(" \t\n"));
+    nbestvector.push_back(outputSentence);
+  }
+
+  const std::vector<const StatefulFeatureFunction*> &ffs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  const StaticData &staticData = StaticData::Instance();
+  std::map<std::string, std::vector<double> > rescorerMap;
+
+  for (size_t i = 0; i < ffs.size(); ++i) {
+    const NeuralScoreFeature* nsf = dynamic_cast<const NeuralScoreFeature*>(ffs[i]);
+    if (nsf && !staticData.IsFeatureFunctionIgnored(*ffs[i])) {
+      std::string emptyString = "";
+      std::string name = nsf->GetFeatureName(emptyString).name();
+      rescorerMap[name.substr(0, name.find(FName::SEP))] = nsf->RescoreNBestList(nbestvector);
+    }
+  }
+
   for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
     const TrellisPath &path = **iter;
     const std::vector<const Hypothesis *> &edges = path.GetEdges();
@@ -1621,15 +1652,28 @@ OutputNBest(std::ostream& out, Moses::TrellisPathList const& nBestList) const
       const Hypothesis &edge = *edges[currEdge];
       OutputSurface(out, edge);
     }
-    out << " |||";
+    out << "|||";
 
     // print scores with feature names
     bool with_labels = options()->nbest.include_feature_labels;
-    path.GetScoreBreakdown()->OutputAllFeatureScores(out, with_labels);
+    std::stringstream scoreSString;
+    path.GetScoreBreakdown()->OutputAllFeatureScores(scoreSString, with_labels);
+    std::map<std::string, std::vector<double> >::iterator nmtFFNameIter;
+    std::string scoreString = scoreSString.str();
+    std::string modified;
+    for (nmtFFNameIter = rescorerMap.begin(); nmtFFNameIter != rescorerMap.end(); nmtFFNameIter++) {
+      modified = "";
+      size_t ffnameIndex = scoreString.find(nmtFFNameIter->first + "= ");
+      size_t ffscoreIndex = scoreString.find(" ", ffnameIndex + (nmtFFNameIter->first).size() + 2);
+      modified = scoreString.substr(0, ffnameIndex) +
+                 nmtFFNameIter->first + "= " + boost::lexical_cast<std::string>(nmtFFNameIter->second[std::distance(iter, nBestList.begin())]) +
+                 scoreString.substr(ffscoreIndex);
+      scoreString =  modified;
+    }
+    out << scoreString;
 
     // total
     out << " ||| " << path.GetFutureScore();
-
     //phrase-to-phrase segmentation
     if (includeSegmentation) {
       out << " |||";

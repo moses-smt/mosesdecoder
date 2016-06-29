@@ -76,10 +76,10 @@ void SearchNormal::ProcessStackForNeuro(HypothesisStackNormal*& stack) {
   const StaticData &staticData = StaticData::Instance();
   for (size_t i = 0; i < ffs.size(); ++i) {
     const NeuralScoreFeature* nsf = dynamic_cast<const NeuralScoreFeature*>(ffs[i]);
-    if (nsf && !staticData.IsFeatureFunctionIgnored(*ffs[i]))
+   if (nsf && !staticData.IsFeatureFunctionIgnored(*ffs[i]))
       const_cast<NeuralScoreFeature*>(nsf)->RescoreStack(temp, i);
   }
-  
+
   //for(int i = 0; i < temp.size(); i++)
     //stack->AddPrune(temp[i]);
 }

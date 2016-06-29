@@ -485,6 +485,10 @@ FFState* NeuralScoreFeature::EvaluateWhenApplied(
 {
   return new NeuralScoreState(StateInfoPtr());
 }
+std::vector<double> NeuralScoreFeature::RescoreNBestList(
+    std::vector<std::string> nbestList) const {
+  return m_nmt->RescoreNBestList(nbestList);
+}
 
 void NeuralScoreFeature::SetParameter(const std::string& key, const std::string& value)
 {
@@ -508,6 +512,5 @@ void NeuralScoreFeature::SetParameter(const std::string& key, const std::string&
     StatefulFeatureFunction::SetParameter(key, value);
   }
 }
-
 }
 

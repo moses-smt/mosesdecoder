@@ -5,6 +5,7 @@
 #include <boost/shared_ptr.hpp>
 
 #include "mblas/base_matrix.h"
+#include "nbest.h"
 
 class Weights;
 class Vocab;
@@ -78,7 +79,7 @@ class NMT {
     void ClearStates();
 
     std::vector<double> RescoreNBestList(
-        const std::vector<std::vector<std::string> >& nbest,
+        const std::vector<std::string>& nbest,
         const size_t maxBatchSize=64);
 
   private:

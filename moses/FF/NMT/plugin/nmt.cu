@@ -2,6 +2,8 @@
 #include <iostream>
 #include <algorithm>
 #include <string>
+#include <vector>
+#include <cmath>
 #include <boost/timer/timer.hpp>
 
 #include "nmt.h"
@@ -257,9 +259,10 @@ void NMT::MakeStep(
     //float p = probs(i, nextIds[i]);
     logProbs.push_back(log(p));
   }
+}
 
 std::vector<double> NMT::RescoreNBestList(
-    const std::vector<std::vector<std::string> >& nbest,
+    const std::vector<std::string>& nbest,
     const size_t maxBatchSize) {
 
   mblas::Matrix PrevState;
@@ -268,41 +271,42 @@ std::vector<double> NMT::RescoreNBestList(
   mblas::Matrix State;
   mblas::Matrix Embedding;
 
-  NBest nBest(srcVocab_, trgVocab_, nbest);
+  NBest nBest(src_, trg_, nbest);
 
-  std::vector<double> nbestScores;
+  std::vector<double> nBestScores;
   for (auto& batch: nBest.DivideNBestListIntoBatches()) {
     size_t batchSize = batch[0].size();
 
-    decoder_->EmptyState(PrevState, SourceContext_, batchSize);
+    decoder_->EmptyState(
+        PrevState,
+        *boost::static_pointer_cast<Matrix>(SourceContext_),
+        batchSize);
     decoder_->EmptyEmbedding(PrevEmbedding, batchSize);
 
     std::vector<float> scores(batch[0].size(), 0.0f);
     size_t lengthIndex = 0;
     for (auto& w : batch) {
-      decoder_->MakeStep(State, Probs,
-                          PrevState, PrevEmbedding, SourceContext_);
+      decoder_->MakeStep(State, Probs, PrevState, PrevEmbedding,
+          *boost::static_pointer_cast<Matrix>(SourceContext_));
 
       for (size_t j = 0; j < w.size(); ++j) {
         if (batch[lengthIndex][j]) {
-          float p = Probs_(j, w[j]);
-          scores[j] += p;
+          float p = Probs(j, w[j]);
+          scores[j] += log(p);
         }
       }
 
-      decoder_->Lookup(Embedding_, w);
+      decoder_->Lookup(Embedding, w);
 
-      mblas::Swap(State_, PrevState_);
-      mblas::Swap(Embedding_, PrevEmbedding_);
+      mblas::Swap(State, PrevState);
+      mblas::Swap(Embedding, PrevEmbedding);
       ++lengthIndex;
     }
 
-    for (const auto& score: batchScores) {
-      nBestScores.push_back(score);
+    for (int i = 0; i < scores.size(); ++i) {
+      nBestScores.push_back(scores[i]);
     }
   }
-  return scores;
+  return nBestScores;
 }
 
-
-}

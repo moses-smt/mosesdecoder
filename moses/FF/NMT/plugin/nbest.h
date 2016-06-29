@@ -3,28 +3,28 @@
 #include <string>
 #include <vector>
 #include <memory>
-#include <cmath>
 
+#include <boost/shared_ptr.hpp>
 class Vocab;
 
-typedef std::vector <std::vector < size_t > > Batch;
+typedef std::vector <std::vector < size_t > > NBestBatch;
 
 class NBest {
   public:
     NBest(
       const std::string& srcPath,
       const std::string& nbestPath,
-      const std::shared_ptr<Vocab> srcVocab,
-      const std::shared_ptr<Vocab> trgVocab,
+      const boost::shared_ptr<Vocab> srcVocab,
+      const boost::shared_ptr<Vocab> trgVocab,
       const size_t maxBatchSize=64);
 
     NBest(
+      const boost::shared_ptr<Vocab> srcVocab,
+      const boost::shared_ptr<Vocab> trgVocab,
       const std::vector<std::string>& nBestList,
-      const std::shared_ptr<Vocab> srcVocab,
-      const std::shared_ptr<Vocab> trgVocab,
-      const size_t maxBatchSize);
+      const size_t maxBatchSize=64);
 
-    std::vector<Batch> GetBatches(const size_t index) const;
+    std::vector<NBestBatch> GetBatches(const size_t index) const;
 
     size_t GetIndex(const size_t index) const {
       return indexes_[index];
@@ -41,25 +41,24 @@ class NBest {
     std::vector<std::string> GetTokens(const size_t index) const;
 
     std::vector<size_t> GetEncodedTokens(const size_t index) const;
-
-    std::vector<Batch> DivideNBestListIntoBatches() const;
+    std::vector<NBestBatch> DivideNBestListIntoBatches() const;
 
   private:
     void Parse_(const std::string& path);
-    std::vector<std::vector<std::string>> SplitBatch(std::vector<std::string>& batch) const;
+    std::vector<std::vector<std::string> > SplitBatch(std::vector<std::string>& batch) const;
     void ParseInputFile(const std::string& path);
 
-    Batch EncodeBatch(const std::vector<std::vector<std::string> >& batch) const;
+    NBestBatch EncodeBatch(const std::vector<std::vector<std::string> >& batch) const;
 
-    Batch MaskAndTransposeBatch(const Batch& batch) const;
+    NBestBatch MaskAndTransposeBatch(const NBestBatch& batch) const;
 
-    Batch ProcessBatch(std::vector<std::string>& batch) const;
-    Batch ProcessBatch(std::vector<std::vector<std::string> >& batch) const;
+    NBestBatch ProcessBatch(std::vector<std::string>& batch) const;
+    NBestBatch ProcessBatch(std::vector<std::vector<std::string> >& batch) const;
   private:
     std::vector<std::vector<std::string> > data_;
     std::vector<std::string> srcSentences_;
-    std::shared_ptr<Vocab> srcVocab_;
-    std::shared_ptr<Vocab> trgVocab_;
+    boost::shared_ptr<Vocab> srcVocab_;
+    boost::shared_ptr<Vocab> trgVocab_;
     std::vector<size_t> indexes_;
     const size_t maxBatchSize_;
 

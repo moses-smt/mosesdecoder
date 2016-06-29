@@ -84,6 +84,7 @@ public:
     ScoreComponentCollection* accumulator) const;
 
   void SetParameter(const std::string& key, const std::string& value);
+  std::vector<double> RescoreNBestList(std::vector<std::string> nbestList) const;
 
 private:
   std::string m_modelPath;

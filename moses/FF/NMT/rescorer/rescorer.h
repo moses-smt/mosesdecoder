@@ -28,7 +28,7 @@ class Rescorer {
 
     encoder_->GetContext(sIndexes, SourceContext_);
     size_t batchIndex = 0;
-    for (auto& batch: nbest_->GetBatches(index)) {
+    for(auto& batch: nbest_->GetBatches(index)) {
       const auto scores = ScoreBatch(batch);
       for (size_t j = 0; j < batch[0].size(); ++j) {
         std::cout
@@ -66,7 +66,7 @@ class Rescorer {
         }
 
         decoder_->Lookup(Embedding_, w);
-
+        
         mblas::Swap(State_, PrevState_);
         mblas::Swap(Embedding_, PrevEmbedding_);
         ++lengthIndex;
