@@ -93,10 +93,6 @@ template <typename Value, typename Callback> class NGramAutomaton {
         }
 
     private:
-        struct SuccessorData {
-            FullScoreReturn ret;
-        };
-
         void InitialPredecessorCheck(const Task& task) {
             assert(task.pred == nullptr ^ task.context_state == nullptr); //either predecessor is set or context_state
             pred_ = task.pred;
@@ -138,10 +134,10 @@ template <typename Value, typename Callback> class NGramAutomaton {
             if (succ_finished_) {
                 assert(succ_!=nullptr);
                 // apply backoffs to fullscorereturn and call callback
-                for(auto i = succ_data_.ret.ngram_length - 1; i < out_state_.length; i++){
-                    succ_data_.ret.prob += out_state_.backoff[i];
+                for(auto i = succ_data_.ngram_length - 1; i < out_state_.length; i++){
+                    succ_data_.prob += out_state_.backoff[i];
                 }
-                succ_->callback_(succ_data_.ret);
+                succ_->callback_(succ_data_);
             }
             else if (succ_) {
                 // transfer backoffs to successor so he can apply them himself
@@ -165,7 +161,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
 
         void NotifyPredecessorOfCompletion() {
             pred_->succ_finished_ = true;
-            pred_->succ_data_.ret = ret_;
+            pred_->succ_data_= ret_;
         }
 
         void NotifySuccessorOfCompletion() {
@@ -283,7 +279,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
         //Pointer to successor
         NGramAutomaton<Value, Callback>* succ_;
         //successor stores its data in its predecessor's succ_data_ so that once predecessor completes it can add backoffs
-        SuccessorData succ_data_; 
+        FullScoreReturn succ_data_; 
         WordIndex new_word_;
         FullScoreReturn ret_;
         State in_state_;
