@@ -53,21 +53,22 @@ template <typename Value, typename Callback> class NGramAutomaton {
             succ_data_(),
             new_word_(),
             ret_(),
+            next_action_(NextAction::NONE),
             MAX_ORDER(search_.Order()){}
 
         Status Step() {
-            switch(ngram_order_) {
-                case 0:
-                    //prefetch unigram only
-                    search_.PrefetchUnigram(new_word_);
+            //TODO would keeping a function pointer be faster?
+            switch(next_action_) {
+                case NextAction::NONE:
+                    return Status::Done;
+                case NextAction::GET_MIDDLE_PREFETCH_NEXT:
+                    GetMiddlePrefetchNext();
                     break;
-                case 1:
+                case NextAction::GET_UNIGRAM_PREFETCH_NEXT:
                     GetUnigramPrefetchNext();
                     break;
-                default:
-                    if (ngram_order_ == MAX_ORDER) GetLongest();
-                    else GetMiddlePrefetchNext();
-                    break;
+                case NextAction::GET_LONGEST:
+                    GetLongest();
             }
             ngram_order_ += 1;
             return status_;
@@ -79,13 +80,16 @@ template <typename Value, typename Callback> class NGramAutomaton {
             InitialPredecessorCheck(task);
 
             new_word_ = task.new_word;
-            ngram_order_ = 0;
             node_ = 0;
             out_state_.length = 0; 
             ret_ = FullScoreReturn();
             succ_ = nullptr;
             succ_finished_ = false;
             status_ = Status::Working;
+            //prefetch unigram
+            search_.PrefetchUnigram(new_word_);
+            next_action_ = NextAction::GET_UNIGRAM_PREFETCH_NEXT;
+            ngram_order_ = 1;
         }
 
         bool Finished() {
@@ -93,6 +97,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
         }
 
     private:
+        enum class NextAction {NONE, GET_UNIGRAM_PREFETCH_NEXT, GET_MIDDLE_PREFETCH_NEXT, GET_LONGEST};
         void InitialPredecessorCheck(const Task& task) {
             assert(task.pred == nullptr ^ task.context_state == nullptr); //either predecessor is set or context_state
             pred_ = task.pred;
@@ -201,6 +206,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
             else {
                 //bigrams are not supported
                 search_.PrefetchMiddle(0, in_state_.words[0], node_);
+                next_action_ = NextAction::GET_MIDDLE_PREFETCH_NEXT;
             }
         }
 
@@ -229,9 +235,11 @@ template <typename Value, typename Callback> class NGramAutomaton {
 
             if (ngram_order_ + 1 == MAX_ORDER){
                 search_.PrefetchLongest(in_state_.words[ngram_order_ - 1], node_);
+                next_action_ = NextAction::GET_LONGEST;
             }
             else {
                 search_.PrefetchMiddle(ngram_order_ - 1, in_state_.words[ngram_order_ - 1], node_);
+                //next_action_ is already GET_MIDDLE_PREFETCH_NEXT
             }
         }
 
@@ -256,6 +264,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
             CheckPredecessorFinished();
             CheckSuccessorFinished();
             status_ = Status::Done;
+            next_action_ = NextAction::NONE;
         }
 
 
@@ -286,6 +295,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
         //out_state_ stores the backoffs for its successor
         //out_state_.length starts as an upper bound for the context_length but is correct at latest when the automaton finishes
         State out_state_;
+        NextAction next_action_;
         //MAX_ORDER is the order of the language model being used by search_
         const unsigned short MAX_ORDER;
 };
@@ -299,11 +309,12 @@ template <class Automaton> class Queue {
         explicit Queue(std::size_t size, Construct construct) : size_(size), automata_(size, Automaton(construct)), curr_(automata_.begin()){}
 
         Automaton* Add(const Task task) {
+            // Don't run Step on automaton that is finished
             while (curr_->Step() != Status::Done) {
                 Next();
             }
             curr_->SetTask(task);
-            curr_->Step();
+            //curr_->Step();
             auto& ret = *curr_;
             Next();
             return &ret;
@@ -321,10 +332,7 @@ template <class Automaton> class Queue {
             while(!all_finished){
                 all_finished = true;
                 for (auto i = 0; i < size_; i++) {
-                    if (!curr_->Finished()) {
-                        all_finished = false;
-                        curr_->Step();
-                    }
+                    all_finished &= curr_->Step() == Status::Done;
                     Next();
                 }
             }
