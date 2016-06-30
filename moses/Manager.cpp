@@ -1642,6 +1642,7 @@ OutputNBest(std::ostream& out, Moses::TrellisPathList const& nBestList) const
     }
   }
 
+  size_t nBestListIndex = 0;
   for (iter = nBestList.begin() ; iter != nBestList.end() ; ++iter) {
     const TrellisPath &path = **iter;
     const std::vector<const Hypothesis *> &edges = path.GetEdges();
@@ -1666,7 +1667,7 @@ OutputNBest(std::ostream& out, Moses::TrellisPathList const& nBestList) const
       size_t ffnameIndex = scoreString.find(nmtFFNameIter->first + "= ");
       size_t ffscoreIndex = scoreString.find(" ", ffnameIndex + (nmtFFNameIter->first).size() + 2);
       modified = scoreString.substr(0, ffnameIndex) +
-                 nmtFFNameIter->first + "= " + boost::lexical_cast<std::string>(nmtFFNameIter->second[std::distance(iter, nBestList.begin())]) +
+                 nmtFFNameIter->first + "= " + boost::lexical_cast<std::string>(nmtFFNameIter->second[nBestListIndex]) +
                  scoreString.substr(ffscoreIndex);
       scoreString =  modified;
     }
@@ -1711,6 +1712,7 @@ OutputNBest(std::ostream& out, Moses::TrellisPathList const& nBestList) const
       out << " ||| ";
       OutputInput(out, edges[0]);
     }
+    ++nBestListIndex;
 
     out << endl;
   }
