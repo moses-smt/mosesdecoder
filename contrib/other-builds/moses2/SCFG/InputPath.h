@@ -26,6 +26,7 @@ class TargetPhraseImpl;
 class InputPath: public InputPathBase
 {
 public:
+  typedef std::pair<const PhraseTable*, SymbolBind> CollKey;
   typedef boost::unordered_map<SymbolBind,
       SCFG::TargetPhrases*,
       boost::hash<SymbolBind>,

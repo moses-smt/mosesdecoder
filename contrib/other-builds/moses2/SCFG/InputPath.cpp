@@ -74,11 +74,23 @@ void InputPath::AddTargetPhrasesToPath(
     const SCFG::TargetPhrases &tps,
     const SCFG::SymbolBind &symbolBind)
 {
+  SCFG::TargetPhrases *tpsNew;
+  Coll::iterator iterColl;
+  iterColl = targetPhrases->find(symbolBind);
+  if (iterColl == targetPhrases->end()) {
+    tpsNew = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool);
+    (*targetPhrases)[symbolBind] = tpsNew;
+  }
+  else {
+    tpsNew = iterColl->second;
+  }
+
+
   SCFG::TargetPhrases::const_iterator iter;
   for (iter = tps.begin(); iter != tps.end(); ++iter) {
     const SCFG::TargetPhraseImpl *tp = *iter;
     //cerr << "tpCast=" << *tp << endl;
-    AddTargetPhrase(pool, pt, symbolBind, tp);
+    tpsNew->AddTargetPhrase(*tp);
   }
 }
 
