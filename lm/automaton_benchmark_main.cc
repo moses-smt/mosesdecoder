@@ -53,7 +53,7 @@ void PipelineScore(lm::Pipeline<Callback>& pipeline, const lm::ngram::ProbingMod
     pipeline.Drain();
     //stop timer
     time = util::CPUTime() - time;
-    std::cout << time << '\n';
+    std::cout << time << ' ';
 }
 
 template<typename Width>
@@ -87,7 +87,7 @@ void ModelScore(const lm::ngram::ProbingModel& model, const Config& options){
     }
     //stop timer
     time = util::CPUTime() - time;
-    std::cout << time << " ";
+    std::cout << time << ' ';
     std::cerr << "Score(model) : " << std::setprecision(std::numeric_limits<long double>::digits10 + 1) << score << std::endl;
 }
 
@@ -105,7 +105,6 @@ void DispatchFunction(lm::ngram::ProbingModel& model, const Config& options){
             std::cerr << "Score(pipeline): " << std::setprecision(std::numeric_limits<long double>::digits10 + 1) << score << std::endl;
         }
     }
-    std::cout << '\n';
 }
 
 void DispatchWidth(lm::ngram::ProbingModel& model, const Config& options) {
