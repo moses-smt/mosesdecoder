@@ -32,7 +32,7 @@ template <typename Callback, typename Width>
 void PipelineScore(lm::Pipeline<Callback>& pipeline, const lm::ngram::ProbingModel& model, const Config& options){
     const Width kEOS = model.GetVocabulary().EndSentence();
     const lm::ngram::State begin_state = model.BeginSentenceState();
-    std::array<Width, 1024> buff;
+    std::array<Width, 49806> buff;
     util::SeekOrThrow(options.fd_in, 0);
 
     //start timer
@@ -61,7 +61,7 @@ void ModelScore(const lm::ngram::ProbingModel& model, const Config& options){
     const Width kEOS = model.GetVocabulary().EndSentence();
     const lm::ngram::State* const begin_state = &model.BeginSentenceState();
     const lm::ngram::State *in_state = begin_state;
-    std::array<Width, 1024> buff;
+    std::array<Width, 49806> buff;
     lm::ngram::State states[3];
     long double score = 0.0;
 
