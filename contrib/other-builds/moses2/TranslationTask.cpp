@@ -30,7 +30,7 @@ void TranslationTask::Run()
 
   string out;
 
-  out = m_mgr->OutputBest();
+  out = m_mgr->OutputBest() + "\n";
   m_mgr->system.bestCollector->Write(m_mgr->m_translationId, out);
 
   if (m_mgr->system.options.nbest.nbest_size) {
