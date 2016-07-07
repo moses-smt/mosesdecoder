@@ -200,7 +200,6 @@ std::string Manager::OutputBest() const
     }
     //cerr << "NO TRANSLATION " << m_input->GetTranslationId() << endl;
   }
-  out << "\n";
 
   return out.str();
   //cerr << endl;
