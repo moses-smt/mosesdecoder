@@ -224,6 +224,7 @@ while(my $line = <INI>) {
   elsif ($line =~ /LexicalReordering /) {
     print STDERR "ro:$line\n";
 		my ($source_factor, $t, $w, $file); # = ($1,$2,$3,$4);
+		my $dest_factor;
 
     for (my $i = 1; $i < scalar(@toks); ++$i) {
       my @args = split(/=/, $toks[$i]);
@@ -238,6 +239,7 @@ while(my $line = <INI>) {
 			}
 			elsif ($args[0] eq "output-factor") {
 			  #$t = chomp($args[1]);
+			  $dest_factor = $args[1];
 			}
 			elsif ($args[0] eq "type") {
 			  $t = $args[1];
@@ -254,6 +256,13 @@ while(my $line = <INI>) {
 		$file =~ s/^.*\/+([^\/]+)/$1/g;
 		my $new_name = "$dir/$file";
 		$new_name =~ s/\.gz//;
+
+		# avoid name collisions for multiple reordering tables; using phrase-table numbering scheme (except for TABLE_NUMBER)
+		$new_name .= ".$source_factor-$dest_factor";
+		my $cnt = 1;
+		$cnt ++ while (defined $new_name_used{"$new_name.$cnt"});
+		$new_name .= ".$cnt";
+		$new_name_used{$new_name} = 1;
 
 		#print INI_OUT "$source_factor $t $w $new_name\n";
 	  @toks = set_value(\@toks, "path", "$new_name");
@@ -336,29 +345,37 @@ for(my $i=0;$i<=$#TABLE;$i++) {
     my $new_file = $TABLE_NEW_NAME[$i];
     print STDERR "filtering $file -> $new_file...\n";
     my $mid_file = $new_file; # used when both filtering and binarizing
-    if (!$opt_filter) {
-      # check if original file was gzipped
-      if ($file !~ /\.gz$/ && -e "$file.gz") {
-        $file .= ".gz";
-      }
-      $mid_file .= ".gz" if $file =~ /\.gz$/;
-      $cmd = "ln -s $file $mid_file";
-      safesystem($cmd) or die "Failed to make symlink";
+ 
+    $mid_file .= ".gz"
+      if $mid_file !~ /\.gz/
+         && $binarizer && $binarizer =~ /processPhraseTable/;
+
+    my $openstring = mk_open_string($file);
+
+    my $mid_openstring;
+    if ($mid_file =~ /\.gz$/) {
+      $mid_openstring = "| gzip -c > $mid_file";
     } else {
-
-      $mid_file .= ".gz"
-        if $mid_file !~ /\.gz/
-           && $binarizer && $binarizer =~ /processPhraseTable/;
-
-      my $openstring = mk_open_string($file);
-
-      my $mid_openstring;
-      if ($mid_file =~ /\.gz$/) {
-        $mid_openstring = "| gzip -c > $mid_file";
+      $mid_openstring = ">$mid_file";
+    }
+ 
+    if (!$opt_filter) {
+      # not filtering
+      if (defined($min_score) and $KNOWN_TTABLE{$i}) {
+        # Threshold pruning
+        $cmd = "$openstring $RealBin/threshold-filter.perl $min_score $mid_openstring";
+        safesystem($cmd) or die "Threshold pruning of phrase table failed";
       } else {
-        $mid_openstring = ">$mid_file";
+        # If we are not filtering, or threshold pruning a phrase table, then
+        # we can just sym-link it.
+        # check if original file was gzipped
+        if ($file !~ /\.gz$/ && -e "$file.gz") {
+          $file .= ".gz";
+        }
+        $cmd = "ln -s $file $mid_file";
+        safesystem($cmd) or die "Failed to make symlink";
       }
-
+    } else {
 
       open(FILE_OUT,$mid_openstring) or die "Can't write to $mid_openstring";
 

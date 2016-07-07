@@ -23,16 +23,18 @@ $SCRIPTS_ROOTDIR =~ s/\/training$//;
 my ($binarizer, $input_config, $output_config);
 my $opt_hierarchical = 0;
 $binarizer = "$SCRIPTS_ROOTDIR/../bin/processPhraseTable";
+my $min_score = undef;
 GetOptions(
   "Hierarchical" => \$opt_hierarchical,
-  "Binarizer=s" => \$binarizer
+  "Binarizer=s" => \$binarizer,
+    "MinScore=s" => \$min_score,
 ) or exit(1);
 
 $input_config = shift;
 $output_config = shift;
 
 if (!defined $input_config || !defined $output_config) {
-  print STDERR "usage: binarize-model.perl input-config output-config [-Binarizer binarizer]\n";
+  print STDERR "usage: binarize-model.perl input-config output-config [-Binarizer binarizer] [-MinScore score-def]\n";
   exit 1;
 }
 
@@ -40,7 +42,9 @@ my $hierarchical = "";
 $hierarchical = "-Hierarchical" if $opt_hierarchical;
 my $targetdir = "$output_config.tables";
 
-safesystem("$RealBin/filter-model-given-input.pl  $targetdir $input_config /dev/null $hierarchical -nofilter -Binarizer \"$binarizer\"") || die "binarising failed";
+my $cmd = "$RealBin/filter-model-given-input.pl  $targetdir $input_config /dev/null $hierarchical -nofilter -Binarizer \"$binarizer\" ";
+$cmd .= "-MinScore $min_score" if defined($min_score);
+safesystem($cmd) || die "binarising failed";
 safesystem("rm -f $output_config; ln -s $targetdir/moses.ini $output_config") || die "failed to link new ini file";
 
 #FIXME: Why isn't this in a module?
