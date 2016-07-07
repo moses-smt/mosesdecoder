@@ -93,13 +93,13 @@ void Distortion::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
 
 void Distortion::EvaluateInIsolation(MemPool &pool, const System &system,
     const Phrase<Moses2::Word> &source, const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
-    SCORE *estimatedScore) const
+    SCORE &estimatedScore) const
 {
 }
 
 void Distortion::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
     const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
-    SCORE *estimatedScore) const
+    SCORE &estimatedScore) const
 {
 }
 

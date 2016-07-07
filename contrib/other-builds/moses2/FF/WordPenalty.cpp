@@ -28,7 +28,7 @@ WordPenalty::~WordPenalty()
 
 void WordPenalty::EvaluateInIsolation(MemPool &pool, const System &system,
     const Phrase<Moses2::Word> &source, const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
-    SCORE *estimatedScore) const
+    SCORE &estimatedScore) const
 {
   SCORE score = -(SCORE) targetPhrase.GetSize();
   scores.PlusEquals(system, *this, score);
@@ -36,7 +36,7 @@ void WordPenalty::EvaluateInIsolation(MemPool &pool, const System &system,
 
 void WordPenalty::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
     const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
-    SCORE *estimatedScore) const
+    SCORE &estimatedScore) const
 {
   size_t count = 0;
   for (size_t i = 0; i < targetPhrase.GetSize(); ++i) {
