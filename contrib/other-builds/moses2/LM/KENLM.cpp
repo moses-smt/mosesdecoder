@@ -172,7 +172,7 @@ void KENLM<Model>::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
 template<class Model>
 void KENLM<Model>::EvaluateInIsolation(MemPool &pool, const System &system,
     const Phrase<Moses2::Word> &source, const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
-    SCORE *estimatedScore) const
+    SCORE &estimatedScore) const
 {
   // contains factors used by this LM
   float fullScore, nGramScore;
@@ -193,21 +193,21 @@ void KENLM<Model>::EvaluateInIsolation(MemPool &pool, const System &system,
     estimateScoresVec[1] = 0;
     SCORE weightedScore = Scores::CalcWeightedScore(system, *this,
         estimateScoresVec);
-    (*estimatedScore) += weightedScore;
+    estimatedScore += weightedScore;
   }
   else {
     scores.PlusEquals(system, *this, nGramScore);
 
     SCORE weightedScore = Scores::CalcWeightedScore(system, *this,
         estimateScore);
-    (*estimatedScore) += weightedScore;
+    estimatedScore += weightedScore;
   }
 }
 
 template<class Model>
 void KENLM<Model>::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
     const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
-    SCORE *estimatedScore) const
+    SCORE &estimatedScore) const
 {
   /*
   // contains factors used by this LM
@@ -229,14 +229,14 @@ void KENLM<Model>::EvaluateInIsolation(MemPool &pool, const System &system, cons
     estimateScoresVec[1] = 0;
     SCORE weightedScore = Scores::CalcWeightedScore(system, *this,
         estimateScoresVec);
-    (*estimatedScore) += weightedScore;
+    estimatedScore += weightedScore;
   }
   else {
     scores.PlusEquals(system, *this, nGramScore);
 
     SCORE weightedScore = Scores::CalcWeightedScore(system, *this,
         estimateScore);
-    (*estimatedScore) += weightedScore;
+    estimatedScore += weightedScore;
   }
   */
 }

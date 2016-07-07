@@ -164,7 +164,7 @@ void FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
 
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions){
     Scores& scores = targetPhrase.GetScores();
-    ff->EvaluateInIsolation(pool, system, source, targetPhrase, scores, &estimatedScore);
+    ff->EvaluateInIsolation(pool, system, source, targetPhrase, scores, estimatedScore);
   }
 
   targetPhrase.SetEstimatedScore(estimatedScore);
@@ -180,7 +180,7 @@ void FeatureFunctions::EvaluateInIsolation(
 
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions){
     Scores& scores = targetPhrase.GetScores();
-    ff->EvaluateInIsolation(pool, system, source, targetPhrase, scores, &estimatedScore);
+    ff->EvaluateInIsolation(pool, system, source, targetPhrase, scores, estimatedScore);
   }
 
   targetPhrase.SetEstimatedScore(estimatedScore);

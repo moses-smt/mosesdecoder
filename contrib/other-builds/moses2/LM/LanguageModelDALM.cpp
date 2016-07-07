@@ -221,7 +221,7 @@ void LanguageModelDALM::EmptyHypothesisState(FFState &state,
 		 const Phrase &source,
 		 const TargetPhrase &targetPhrase,
          Scores &scores,
-		 SCORE *estimatedScore) const
+		 SCORE &estimatedScore) const
  {
 
  }

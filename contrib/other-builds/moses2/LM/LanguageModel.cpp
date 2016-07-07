@@ -143,7 +143,7 @@ void LanguageModel::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
 
 void LanguageModel::EvaluateInIsolation(MemPool &pool, const System &system,
     const Phrase<Moses2::Word> &source, const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
-    SCORE *estimatedScore) const
+    SCORE &estimatedScore) const
 {
   if (targetPhrase.GetSize() == 0) {
     return;
@@ -163,23 +163,21 @@ void LanguageModel::EvaluateInIsolation(MemPool &pool, const System &system,
       std::pair<SCORE, void*> fromScoring = Score(context);
       score += fromScoring.first;
     }
-    else if (estimatedScore) {
+    else {
       std::pair<SCORE, void*> fromScoring = Score(context);
       nonFullScore += fromScoring.first;
     }
   }
 
   scores.PlusEquals(system, *this, score);
-  if (estimatedScore) {
-    SCORE weightedScore = Scores::CalcWeightedScore(system, *this,
-        nonFullScore);
-    (*estimatedScore) += weightedScore;
-  }
+  SCORE weightedScore = Scores::CalcWeightedScore(system, *this, nonFullScore);
+  estimatedScore += weightedScore;
+
 }
 
 void LanguageModel::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
     const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
-    SCORE *estimatedScore) const
+    SCORE &estimatedScore) const
 {
 }
 

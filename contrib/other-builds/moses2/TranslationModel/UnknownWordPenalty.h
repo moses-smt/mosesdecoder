@@ -34,7 +34,7 @@ public:
   virtual void
   EvaluateInIsolation(const System &system, const Phrase<Moses2::Word> &source,
       const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
-      SCORE *estimatedScore) const;
+      SCORE &estimatedScore) const;
 
   virtual void InitActiveChart(
       MemPool &pool,

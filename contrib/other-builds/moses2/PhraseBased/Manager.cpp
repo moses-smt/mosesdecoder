@@ -239,6 +239,8 @@ std::string Manager::OutputNBest()
     }
 
     if (ok) {
+      ++bestInd;
+
       out << transId << " |||";
       path->OutputToStream(out, system);
       out << "\n";
@@ -248,8 +250,6 @@ std::string Manager::OutputNBest()
     path->CreateDeviantPaths(contenders, arcLists, GetPool(), system);
 
     delete path;
-
-    ++bestInd;
   }
 
   return out.str();

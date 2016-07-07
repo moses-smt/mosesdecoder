@@ -42,12 +42,12 @@ public:
   virtual void
   EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<Moses2::Word> &source,
       const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
-      SCORE *estimatedScore) const;
+      SCORE &estimatedScore) const;
 
   virtual void
   EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
       const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
-      SCORE *estimatedScore) const;
+      SCORE &estimatedScore) const;
 
   virtual void EvaluateWhenApplied(const ManagerBase &mgr,
       const Hypothesis &hypo, const FFState &prevState, Scores &scores,
