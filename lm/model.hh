@@ -102,6 +102,10 @@ template <class Search, class VocabularyT> class GenericModel : public base::Mod
       return Search::kDifferentRest ? InternalUnRest(pointers_begin, pointers_end, first_length) : 0.0;
     }
 
+    Search& GetSearch(){
+      return search_;
+    }
+
   private:
     FullScoreReturn ScoreExceptBackoff(const WordIndex *const context_rbegin, const WordIndex *const context_rend, const WordIndex new_word, State &out_state) const;
 

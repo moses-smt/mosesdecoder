@@ -188,6 +188,7 @@ template <class Model> void LanguageModelKen<Model>::CalcScore(const Phrase &phr
 
 template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
 {
+  std::cout << "Evaluating LM Ken\n";
   const lm::ngram::State &in_state = static_cast<const KenLMState&>(*ps).state;
 
   std::auto_ptr<KenLMState> ret(new KenLMState());

@@ -57,7 +57,7 @@ SearchCubePruning(Manager& manager, TranslationOptionCollection const& transOptC
 {
   std::vector < HypothesisStackCubePruning >::iterator iterStack;
   for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind) {
-    HypothesisStackCubePruning *sourceHypoColl = new HypothesisStackCubePruning(m_manager);
+    HypothesisStackCubePruning *sourceHypoColl = new HypothesisStackCubePruningPipelined(m_manager);
     sourceHypoColl->SetMaxHypoStackSize(m_options.search.stack_size);
     sourceHypoColl->SetBeamWidth(m_options.search.beam_width);
 

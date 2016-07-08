@@ -3,7 +3,7 @@
 
 #include <vector>
 #include "Search.h"
-#include "HypothesisStackCubePruning.h"
+#include "HypothesisStackCubePruningPipelined.h"
 #include "SentenceStats.h"
 
 namespace Moses

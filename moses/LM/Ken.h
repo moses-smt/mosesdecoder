@@ -50,6 +50,7 @@ LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, 
 template <class Model> class LanguageModelKen : public LanguageModel
 {
 public:
+  Model* GetModel() { return &(*m_ngram); }
   LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, util::LoadMethod load_method);
 
   virtual const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
