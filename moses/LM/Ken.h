@@ -94,6 +94,9 @@ private:
     for (; ; ++index, --position) {
       if (index == end) return index;
       if (position == -1) {
+          //we run out of words from the hypothesis
+          //but indices is still not full
+          //hence add the begin sentence index
         *index = m_ngram->GetVocabulary().BeginSentence();
         return index + 1;
       }

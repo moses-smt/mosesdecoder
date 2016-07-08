@@ -85,6 +85,7 @@ void SearchCubePruning::Decode()
   firstStack.AddInitial(hypo);
   // Call this here because the loop below starts at the second stack.
   firstStack.CleanupArcList();
+  //create new bitmaps from current and tell the later stacks
   CreateForwardTodos(firstStack);
 
   const size_t PopLimit = m_manager.options()->cube.pop_limit;
@@ -113,11 +114,16 @@ void SearchCubePruning::Decode()
     _BMType::const_iterator bmIter;
     const _BMType &accessor = sourceHypoColl.GetBitmapAccessor();
 
+    //initialize all backEdges of all bitmapContainers
+    //also put each bitmapContainer into a priority queue
     for(bmIter = accessor.begin(); bmIter != accessor.end(); ++bmIter) {
+      //bmIter->first is bitmap and bmIter->second is BitmapContainer
       // build the first hypotheses
       IFVERBOSE(2) {
         m_manager.GetSentenceStats().StartTimeOtherScore();
       }
+      //initialize every backEdge in the bitmapContainer
+      //every backEdge insets the top hypothesis into bitmapContainer's queue
       bmIter->second->InitializeEdges();
       IFVERBOSE(2) {
         m_manager.GetSentenceStats().StopTimeOtherScore();
@@ -142,6 +148,8 @@ void SearchCubePruning::Decode()
       IFVERBOSE(2) {
         m_manager.GetSentenceStats().StartTimeOtherScore();
       }
+      //put top hypothesis in the bitmapContainer into the stack
+      //also push neighbours into the queue of the bitmapContainer
       bc->ProcessBestHypothesis();
       IFVERBOSE(2) {
         m_manager.GetSentenceStats().StopTimeOtherScore();
@@ -191,6 +199,10 @@ void SearchCubePruning::Decode()
   }
 }
 
+//iterate over all bitmap containers of this stack and add bitmapContainers to 
+//later stacks. The new bitmapContainers are created as all allowed extensions
+//of the bitmap
+//at this point "stack" is already filled with hypotheses
 void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
 {
   const _BMType &bitmapAccessor = stack.GetBitmapAccessor();
@@ -250,12 +262,13 @@ CreateForwardTodos(Bitmap const& bitmap, Range const& range,
 
   size_t numCovered = newBitmap.GetNumWordsCovered();
   const TranslationOptionList* transOptList;
-  transOptList = m_transOptColl.GetTranslationOptionList(range);
+  transOptList = m_transOptColl.GetTranslationOptionList(range);//get the translations for this source span
   const SquareMatrix &estimatedScores = m_transOptColl.GetEstimatedScores();
 
   if (transOptList && transOptList->size() > 0) {
     HypothesisStackCubePruning& newStack
     = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl[numCovered]);
+    //creates a backward edge and adds it to appropriate bitmapContainer
     newStack.SetBitmapAccessor(newBitmap, newStack, range, bitmapContainer,
                                estimatedScores, *transOptList);
   }

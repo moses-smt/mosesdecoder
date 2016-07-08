@@ -101,6 +101,7 @@ bool HypothesisStackCubePruning::AddPrune(Hypothesis *hypo)
   // over threshold, try to add to collection
   std::pair<iterator, bool> addRet = Add(hypo);
   if (addRet.second) {
+    // we only get here if the insertion took place so there was no equivalent hypo which prevented insertion and thus no recombination is needed
     // nothing found. add to collection
     return true;
   }
