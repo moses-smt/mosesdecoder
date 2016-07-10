@@ -17,8 +17,6 @@
 
 namespace lm {
 
-enum class Status {Done, Working};
-
 namespace ngram {
 
 template <typename Value, typename Callback> class NGramAutomaton {
@@ -26,52 +24,51 @@ template <typename Value, typename Callback> class NGramAutomaton {
         struct NGramTask {
             NGramAutomaton<Value, Callback>* const pred;
             const WordIndex new_word;
-            const State* const context_state; // unused if pred != nullptr
+            const State* const context_state; // unused if pred != NULL
         };
 
         struct NGramConstruct {
             detail::HashedSearch<Value>& search;
             Callback callback;
+            NGramConstruct(detail::HashedSearch<Value>& s, Callback c) : search(s), callback(c){};
         };
 
-
-        using Task = NGramTask;
-        using Construct = NGramConstruct;
-        using Status = lm::Status;
+        typedef NGramTask Task;
+        typedef NGramConstruct Construct;
 
         explicit NGramAutomaton(Construct construct) :
             callback_(construct.callback),
             ngram_order_(0),
-            status_(Status::Done),
+            running_(false),
             search_(construct.search),
             node_(0),
             pred_finished_(false), 
             succ_finished_(false),
-            pred_(nullptr),
-            succ_(nullptr),
-            in_state_(),
+            pred_(NULL),
+            succ_(NULL),
             succ_data_(),
             new_word_(),
             ret_(),
-            next_action_(NextAction::NONE),
+            in_state_(),
+            next_action_(NONE),
             MAX_ORDER(search_.Order()){}
 
-        Status Step() {
+        bool Step() {
             //TODO would keeping a function pointer be faster?
             switch(next_action_) {
-                case NextAction::NONE:
-                    return Status::Done;
-                case NextAction::GET_MIDDLE_PREFETCH_NEXT:
+                case NONE:
+                    return false;
+                case GET_MIDDLE_PREFETCH_NEXT:
                     GetMiddlePrefetchNext();
                     break;
-                case NextAction::GET_UNIGRAM_PREFETCH_NEXT:
+                case GET_UNIGRAM_PREFETCH_NEXT:
                     GetUnigramPrefetchNext();
                     break;
-                case NextAction::GET_LONGEST:
+                case GET_LONGEST:
                     GetLongest();
             }
             ngram_order_ += 1;
-            return status_;
+            return running_;
 
         }
 
@@ -83,23 +80,23 @@ template <typename Value, typename Callback> class NGramAutomaton {
             node_ = 0;
             out_state_.length = 0; 
             ret_ = FullScoreReturn();
-            succ_ = nullptr;
+            succ_ = NULL;
             succ_finished_ = false;
-            status_ = Status::Working;
+            running_ = true;
             //prefetch unigram
             search_.PrefetchUnigram(new_word_);
-            next_action_ = NextAction::GET_UNIGRAM_PREFETCH_NEXT;
+            next_action_ = GET_UNIGRAM_PREFETCH_NEXT;
             ngram_order_ = 1;
         }
 
         bool Finished() {
-            return status_ == Status::Done;
+            return running_ == false;
         }
 
     private:
-        enum class NextAction {NONE, GET_UNIGRAM_PREFETCH_NEXT, GET_MIDDLE_PREFETCH_NEXT, GET_LONGEST};
+        enum NextAction {NONE, GET_UNIGRAM_PREFETCH_NEXT, GET_MIDDLE_PREFETCH_NEXT, GET_LONGEST};
         void InitialPredecessorCheck(const Task& task) {
-            assert(task.pred == nullptr ^ task.context_state == nullptr); //either predecessor is set or context_state
+            assert(task.pred == NULL ^ task.context_state == NULL); //either predecessor is set or context_state
             pred_ = task.pred;
             if (pred_) {
                 CopyContextWordsFromPredecessor();
@@ -127,19 +124,19 @@ template <typename Value, typename Callback> class NGramAutomaton {
 
         void CopyContextWordsFromPredecessor(){
             //pred_ might equal this, hence the copying order
-            auto length = MAX_ORDER - 2;
+            unsigned short length = MAX_ORDER - 2;
 
-            auto from = pred_->in_state_.words + length - 1;
-            auto to = in_state_.words + length;
+            WordIndex* from = pred_->in_state_.words + length - 1;
+            WordIndex* to = in_state_.words + length;
             for(; from >= pred_->in_state_.words; --from, --to){*to = *from;}
             in_state_.words[0] = pred_->new_word_;
         }
 
         void CheckSuccessorFinished(){
             if (succ_finished_) {
-                assert(succ_!=nullptr);
+                assert(succ_!=NULL);
                 // apply backoffs to fullscorereturn and call callback
-                for(auto i = succ_data_.ngram_length - 1; i < out_state_.length; i++){
+                for(int i = succ_data_.ngram_length - 1; i < out_state_.length; i++){
                     succ_data_.prob += out_state_.backoff[i];
                 }
                 succ_->callback_(succ_data_);
@@ -153,7 +150,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
         void CheckPredecessorFinished(){
             if (pred_finished_) {
                 // apply backoffs from predecessor and call callback
-                for(auto i = ret_.ngram_length - 1; i < in_state_.length; i++){
+                for(int i = ret_.ngram_length - 1; i < in_state_.length; i++){
                     ret_.prob += in_state_.backoff[i];
                 }
                 callback_(ret_);
@@ -180,10 +177,6 @@ template <typename Value, typename Callback> class NGramAutomaton {
             succ_ = succ;
         }
 
-        Status GetStatus() {
-            return status_;
-        }
-
 
         void GetUnigramPrefetchNext(){
             typename detail::HashedSearch<Value>::UnigramPointer uni(search_.LookupUnigram(new_word_, node_, ret_.independent_left, ret_.extend_left));
@@ -205,7 +198,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
             else {
                 //bigrams are not supported
                 search_.PrefetchMiddle(0, in_state_.words[0], node_);
-                next_action_ = NextAction::GET_MIDDLE_PREFETCH_NEXT;
+                next_action_ = GET_MIDDLE_PREFETCH_NEXT;
             }
         }
 
@@ -233,7 +226,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
 
             if (ngram_order_ + 1 == MAX_ORDER){
                 search_.PrefetchLongest(in_state_.words[ngram_order_ - 1], node_);
-                next_action_ = NextAction::GET_LONGEST;
+                next_action_ = GET_LONGEST;
             }
             else {
                 search_.PrefetchMiddle(ngram_order_ - 1, in_state_.words[ngram_order_ - 1], node_);
@@ -255,8 +248,8 @@ template <typename Value, typename Callback> class NGramAutomaton {
         void Finish(){
             CheckPredecessorFinished();
             CheckSuccessorFinished();
-            status_ = Status::Done;
-            next_action_ = NextAction::NONE;
+            running_ = false;
+            next_action_ = NONE;
         }
 
 
@@ -265,8 +258,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
         //ngram_order_ is equal to the ordger of the ngram that will be looked-up at the next invocation of Step()
         //ngram_order_ is initialized to 0 because first invocation of Step() only prefetches a unigram and doesn't do any lookups
         std::size_t ngram_order_;
-        //status_ indicatates whether the automaton has finished (Status::DONE) or not (Status::Working)
-        Status status_;
+        bool running_;
         //search_ performs all the prefetches and lookups of ngrams
         detail::HashedSearch<Value> &search_;
         //node_ stores the intermediate hash so that it does not have to be recomputed at every invocation of Step()
@@ -275,7 +267,7 @@ template <typename Value, typename Callback> class NGramAutomaton {
         bool pred_finished_;
         //Indicates whether successor is finished
         bool succ_finished_;
-        //Pointer to predecessor, can be nullptr only if context_state was provided in Task 
+        //Pointer to predecessor, can be NULL only if context_state was provided in Task 
         NGramAutomaton<Value, Callback>* pred_;
         //Pointer to successor
         NGramAutomaton<Value, Callback>* succ_;
@@ -295,19 +287,18 @@ template <typename Value, typename Callback> class NGramAutomaton {
 } // namespace ngram
 
 template <class Automaton> class Queue {
-    using Task = typename Automaton::Task;
-    using Construct = typename Automaton::Construct;
+    typedef typename Automaton::Task Task;
+    typedef typename Automaton::Construct Construct;
     public:
         explicit Queue(std::size_t size, Construct construct) : size_(size), automata_(size, Automaton(construct)), curr_(automata_.begin()){}
 
         Automaton* Add(const Task task) {
             // Don't run Step on automaton that is finished
-            while (curr_->Step() != Status::Done) {
+            while (curr_->Step()) {
                 Next();
             }
             curr_->SetTask(task);
-            //curr_->Step();
-            auto& ret = *curr_;
+            typename std::vector<Automaton>::iterator& ret = *curr_;
             Next();
             return &ret;
         }
@@ -323,8 +314,8 @@ template <class Automaton> class Queue {
             bool all_finished = false;
             while(!all_finished){
                 all_finished = true;
-                for (auto i = 0; i < size_; i++) {
-                    all_finished &= curr_->Step() == Status::Done;
+                for (std::size_t i = 0; i < size_; i++) {
+                    all_finished &= !curr_->Step();
                     Next();
                 }
             }
@@ -333,34 +324,32 @@ template <class Automaton> class Queue {
     private:
         std::size_t size_;
         std::vector<Automaton> automata_;
-        using It = decltype(automata_.begin());
-        It curr_;
+        typename std::vector<Automaton>::iterator curr_;
 };
 
 
 template<typename Callback>
 class Pipeline {
-
     public:
         Pipeline(std::size_t queue_size, typename ngram::NGramAutomaton<ngram::BackoffValue, Callback>::Construct construct) : queue_(queue_size, construct) {}
         void FullScore(const lm::ngram::State& context_state, const WordIndex word) {
-            pred_ = queue_.Add({nullptr, word, &context_state});
+            typename AutomatonT::Task task = {NULL, word, &context_state};
+            pred_ = queue_.Add(task);
         }
 
         void AppendWord(const WordIndex word){
             assert(pred_);
-            pred_ = queue_.Add({pred_, word, nullptr});
+            typename AutomatonT::Task task = {pred_, word, NULL};
+            pred_ = queue_.Add(task);
         }
 
         void Drain() {
             queue_.Drain();
         }
 
-
     private:
-        using Task = typename ngram::NGramAutomaton<ngram::BackoffValue, Callback>::Task;
-
-        Queue<ngram::NGramAutomaton<ngram::BackoffValue, Callback>> queue_;
+        typedef typename ngram::NGramAutomaton<ngram::BackoffValue, Callback> AutomatonT;
+        Queue<ngram::NGramAutomaton<ngram::BackoffValue, Callback> > queue_;
         ngram::NGramAutomaton<ngram::BackoffValue, Callback>* pred_;
 
 };
