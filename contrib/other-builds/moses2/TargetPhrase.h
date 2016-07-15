@@ -37,11 +37,7 @@ public:
   const Scores &GetScores() const
   {  return *m_scores; }
 
-  SCORE GetFutureScore() const
-  {  return m_scores->GetTotalScore() + m_estimatedScore; }
-
-  void SetEstimatedScore(const SCORE &value)
-  {  m_estimatedScore = value; }
+  virtual SCORE GetScoreForPruning() const = 0;
 
   SCORE *GetScoresProperty(int propertyInd) const
   {    return scoreProperties ? scoreProperties + propertyInd : NULL; }
@@ -57,35 +53,21 @@ public:
 
 protected:
   Scores *m_scores;
-  SCORE m_estimatedScore;
 };
 
 ///////////////////////////////////////////////////////////////////////
 template<typename TP>
-struct CompareFutureScore
+struct CompareScoreForPruning
 {
   bool operator()(const TP *a, const TP *b) const
   {
-    return a->GetFutureScore() > b->GetFutureScore();
+    return a->GetScoreForPruning() > b->GetScoreForPruning();
   }
 
   bool operator()(const TP &a, const TP &b) const
   {
-    return a.GetFutureScore() > b.GetFutureScore();
+    return a.GetScoreForPruning() > b.GetScoreForPruning();
   }
-};
-
-template<typename TP>
-struct CompareSortScore
-{
-  bool operator()(const TP *a, const TP *b) const
-  {
-    SCORE scoreA = a->sortScore;
-    SCORE scoreB = b->sortScore;
-
-    return scoreA > scoreB;
-  }
-
 };
 
 } /* namespace Moses2a */

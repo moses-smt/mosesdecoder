@@ -27,7 +27,7 @@ public:
 
   virtual void
   EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<Moses2::Word> &source,
-      const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
+      const TargetPhraseImpl &targetPhrase, Scores &scores,
       SCORE &estimatedScore) const;
 
   virtual void

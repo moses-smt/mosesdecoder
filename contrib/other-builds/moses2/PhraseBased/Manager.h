@@ -26,6 +26,7 @@ namespace Moses2
 class System;
 class TranslationTask;
 class PhraseImpl;
+class TargetPhraseImpl;
 class SearchNormal;
 class Search;
 class Hypothesis;
@@ -49,7 +50,7 @@ public:
   const InputPaths &GetInputPaths() const
   {  return m_inputPaths; }
 
-  const TargetPhrase<Moses2::Word> &GetInitPhrase() const
+  const TargetPhraseImpl &GetInitPhrase() const
   {  return *m_initPhrase; }
 
   void Decode();
@@ -61,7 +62,7 @@ protected:
   InputPaths m_inputPaths;
   Bitmaps *m_bitmaps;
   EstimatedScores *m_estimatedScores;
-  TargetPhrase<Moses2::Word> *m_initPhrase;
+  TargetPhraseImpl *m_initPhrase;
 
   Search *m_search;
 

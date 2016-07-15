@@ -22,6 +22,7 @@ namespace Moses2
 class Manager;
 class InputType;
 class StatefulFeatureFunction;
+class TargetPhraseImpl;
 
 class Hypothesis: public HypothesisBase
 {
@@ -33,11 +34,11 @@ public:
   virtual ~Hypothesis();
 
   // initial, empty hypo
-  void Init(Manager &mgr, const InputPathBase &path, const TargetPhrase<Moses2::Word> &tp,
+  void Init(Manager &mgr, const InputPathBase &path, const TargetPhraseImpl &tp,
       const Bitmap &bitmap);
 
   void Init(Manager &mgr, const Hypothesis &prevHypo, const InputPathBase &path,
-      const TargetPhrase<Moses2::Word> &tp, const Bitmap &bitmap, SCORE estimatedScore);
+      const TargetPhraseImpl &tp, const Bitmap &bitmap, SCORE estimatedScore);
 
   size_t hash() const;
   bool operator==(const Hypothesis &other) const;

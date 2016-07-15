@@ -68,11 +68,15 @@ public:
 
   void SetAlignmentInfo(const std::string &alignString);
 
+  virtual SCORE GetScoreForPruning() const
+  { return sortScore; }
+
   std::string Debug(const System &system) const;
 
   //mutable void *chartState;
 protected:
 };
+
 
 }
 }

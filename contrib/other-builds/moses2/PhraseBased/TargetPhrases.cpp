@@ -7,6 +7,7 @@
 #include <cassert>
 #include <boost/foreach.hpp>
 #include "TargetPhrases.h"
+#include "TargetPhraseImpl.h"
 #include "../Phrase.h"
 #include "../TargetPhrase.h"
 
@@ -41,7 +42,7 @@ TargetPhrases::~TargetPhrases()
 std::string TargetPhrases::Debug(const System &system) const
 {
   stringstream out;
-  BOOST_FOREACH(const TargetPhrase<Moses2::Word> *tp, *this){
+  BOOST_FOREACH(const TargetPhraseImpl *tp, *this){
     out << tp->Debug(system);
     out << endl;
   }
@@ -56,7 +57,7 @@ void TargetPhrases::SortAndPrune(size_t tableLimit)
           m_coll.end() : m_coll.begin() + tableLimit;
 
   std::partial_sort(m_coll.begin(), iterMiddle, m_coll.end(),
-      CompareFutureScore<TP>());
+		  CompareScoreForPruning<TP>());
 
   if (tableLimit && m_coll.size() > tableLimit) {
     m_coll.resize(tableLimit);

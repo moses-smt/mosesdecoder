@@ -19,6 +19,7 @@ class Bitmap;
 class Hypothesis;
 class InputPath;
 class TargetPhrases;
+class TargetPhraseImpl;
 
 namespace NSCubePruningMiniStack
 {

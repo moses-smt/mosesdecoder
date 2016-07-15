@@ -101,7 +101,7 @@ protected:
       InputPath &inputPath) const;
   TargetPhrases *CreateTargetPhrase(MemPool &pool, const System &system,
       const Phrase<Moses2::Word> &sourcePhrase, uint64_t key) const;
-  TargetPhrase<Moses2::Word> *CreateTargetPhrase(MemPool &pool, const System &system,
+  TargetPhraseImpl *CreateTargetPhrase(MemPool &pool, const System &system,
       const char *&offset) const;
 
   inline const std::pair<bool, const Factor*> *GetTargetFactor(uint32_t probingId) const

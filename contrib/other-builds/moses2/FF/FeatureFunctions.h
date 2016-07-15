@@ -26,6 +26,7 @@ class Manager;
 class MemPool;
 class PhraseImpl;
 class TargetPhrases;
+class TargetPhraseImpl;
 class Scores;
 class Hypothesis;
 class UnknownWordPenalty;
@@ -68,7 +69,7 @@ public:
 
   // the pool here must be the system pool if the rule was loaded during load, or the mgr pool if it was loaded on demand
   void EvaluateInIsolation(MemPool &pool, const System &system,
-      const Phrase<Moses2::Word> &source, TargetPhrase<Moses2::Word> &targetPhrase) const;
+      const Phrase<Moses2::Word> &source, TargetPhraseImpl &targetPhrase) const;
   void EvaluateInIsolation(MemPool &pool, const System &system,
       const Phrase<SCFG::Word> &source, TargetPhrase<SCFG::Word> &targetPhrase) const;
 

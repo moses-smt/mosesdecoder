@@ -16,10 +16,11 @@
 #include "../../PhraseBased/PhraseImpl.h"
 #include "../../PhraseBased/Manager.h"
 #include "../../PhraseBased/Hypothesis.h"
+#include "../../PhraseBased/TargetPhrases.h"
+#include "../../PhraseBased/TargetPhraseImpl.h"
 #include "../../legacy/InputFileStream.h"
 #include "../../legacy/Util2.h"
 #include "../../legacy/CompactPT/LexicalReorderingTableCompact.h"
-#include "../../PhraseBased/TargetPhrases.h"
 
 using namespace std;
 
@@ -124,7 +125,7 @@ void LexicalReordering::EmptyHypothesisState(FFState &state,
 }
 
 void LexicalReordering::EvaluateInIsolation(MemPool &pool, const System &system,
-    const Phrase<Moses2::Word> &source, const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
+    const Phrase<Moses2::Word> &source, const TargetPhraseImpl &targetPhrase, Scores &scores,
     SCORE &estimatedScore) const
 {
 }
@@ -140,13 +141,13 @@ void LexicalReordering::EvaluateInIsolation(MemPool &pool, const System &system,
 void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
     const TargetPhrases &tps, const Phrase<Moses2::Word> &sourcePhrase) const
 {
-  BOOST_FOREACH(const TargetPhrase<Moses2::Word> *tp, tps){
+  BOOST_FOREACH(const TargetPhraseImpl *tp, tps){
   EvaluateAfterTablePruning(pool, *tp, sourcePhrase);
 }
 }
 
 void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
-    const TargetPhrase<Moses2::Word> &targetPhrase, const Phrase<Moses2::Word> &sourcePhrase) const
+    const TargetPhraseImpl &targetPhrase, const Phrase<Moses2::Word> &sourcePhrase) const
 {
   if (m_propertyInd >= 0) {
     SCORE *scoreArr = targetPhrase.GetScoresProperty(m_propertyInd);

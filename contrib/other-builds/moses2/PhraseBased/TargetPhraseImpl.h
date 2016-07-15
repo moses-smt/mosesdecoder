@@ -35,9 +35,20 @@ public:
 
   virtual ~TargetPhraseImpl();
 
+  SCORE GetFutureScore() const
+  {  return m_scores->GetTotalScore() + m_estimatedScore; }
+
+  void SetEstimatedScore(const SCORE &value)
+  {  m_estimatedScore = value; }
+
+  virtual SCORE GetScoreForPruning() const
+  { return GetFutureScore(); }
+
   virtual std::string Debug(const System &system) const;
 
 protected:
+  SCORE m_estimatedScore;
+
 };
 
 }

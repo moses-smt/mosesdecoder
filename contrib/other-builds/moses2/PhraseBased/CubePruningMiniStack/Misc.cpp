@@ -67,7 +67,7 @@ void QueueItem::CreateHypothesis(Manager &mgr)
 {
   const Hypothesis *prevHypo =
       static_cast<const Hypothesis*>(edge->hypos[hypoIndex]);
-  const TargetPhrase<Moses2::Word> &tp = edge->tps[tpIndex];
+  const TargetPhraseImpl &tp = edge->tps[tpIndex];
 
   //cerr << "hypoIndex=" << hypoIndex << endl;
   //cerr << "edge.hypos=" << edge.hypos.size() << endl;

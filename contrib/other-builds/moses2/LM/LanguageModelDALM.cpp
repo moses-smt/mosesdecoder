@@ -219,7 +219,7 @@ void LanguageModelDALM::EmptyHypothesisState(FFState &state,
  void LanguageModelDALM::EvaluateInIsolation(MemPool &pool,
 		 const System &system,
 		 const Phrase &source,
-		 const TargetPhrase &targetPhrase,
+		 const TargetPhraseImpl &targetPhrase,
          Scores &scores,
 		 SCORE &estimatedScore) const
  {

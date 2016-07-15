@@ -10,6 +10,7 @@
 #include "../System.h"
 #include "../PhraseBased/Manager.h"
 #include "../PhraseBased/Hypothesis.h"
+#include "../PhraseBased/TargetPhraseImpl.h"
 #include "../legacy/Util2.h"
 #include "../legacy/InputFileStream.h"
 #include "../legacy/PointerState.h"
@@ -142,7 +143,7 @@ void LanguageModel::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
 }
 
 void LanguageModel::EvaluateInIsolation(MemPool &pool, const System &system,
-    const Phrase<Moses2::Word> &source, const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
+    const Phrase<Moses2::Word> &source, const TargetPhraseImpl &targetPhrase, Scores &scores,
     SCORE &estimatedScore) const
 {
   if (targetPhrase.GetSize() == 0) {

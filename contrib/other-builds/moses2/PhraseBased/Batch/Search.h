@@ -15,12 +15,10 @@
 
 namespace Moses2
 {
-template<typename WORD>
-class TargetPhrase;
-
 class Hypothesis;
 class InputPath;
 class TargetPhrases;
+class TargetPhraseImpl;
 
 namespace NSBatch
 {
@@ -46,7 +44,7 @@ protected:
   void Extend(const Hypothesis &hypo, const InputPath &path);
   void Extend(const Hypothesis &hypo, const TargetPhrases &tps,
       const InputPath &path, const Bitmap &newBitmap, SCORE estimatedScore);
-  void Extend(const Hypothesis &hypo, const TargetPhrase<Moses2::Word> &tp,
+  void Extend(const Hypothesis &hypo, const TargetPhraseImpl &tp,
       const InputPath &path, const Bitmap &newBitmap, SCORE estimatedScore);
 
 };

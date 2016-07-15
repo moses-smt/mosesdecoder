@@ -147,11 +147,30 @@ consolidate
 	pass-unless: trainer
 	template: $moses-script-dir/ems/support/consolidate-training-data.perl $input-extension $output-extension OUT IN
 	error: number of lines don't match
+train-input
+        in: tokenized-stem
+        out: truecase-model
+        rerun-on-change: trainer
+        pass-unless: trainer
+        ignore-if: output-truecaser
+        ignore-unless: input-truecaser
+        default-name: truecaser/truecase-model
+        template: $trainer -model OUT.$input-extension -corpus IN.$input-extension
+train-output
+        in: tokenized-stem
+        out: truecase-model
+        rerun-on-change: trainer
+        pass-unless: trainer
+        ignore-if: input-truecaser
+        ignore-unless: output-truecaser
+        default-name: truecaser/truecase-model
+        template: $trainer -model OUT.$output-extension -corpus IN.$output-extension
 train
 	in: tokenized-stem
 	out: truecase-model
 	rerun-on-change: trainer
 	pass-unless: trainer
+        ignore-unless: AND input-truecaser output-truecaser
 	default-name: truecaser/truecase-model
 	template: $trainer -model OUT.$input-extension -corpus IN.$input-extension ; $trainer -model OUT.$output-extension -corpus IN.$output-extension
 

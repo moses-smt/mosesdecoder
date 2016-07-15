@@ -21,6 +21,7 @@ class TargetPhrase;
 class System;
 class PhraseImpl;
 class TargetPhrases;
+class TargetPhraseImpl;
 class Scores;
 class ManagerBase;
 class MemPool;
@@ -75,7 +76,7 @@ public:
   // may have more factors than actually need, but not guaranteed.
   virtual void
   EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<Moses2::Word> &source,
-      const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
+      const TargetPhraseImpl &targetPhrase, Scores &scores,
       SCORE &estimatedScore) const = 0;
 
   // For SCFG decoding, the source can contain non-terminals, NOT the raw

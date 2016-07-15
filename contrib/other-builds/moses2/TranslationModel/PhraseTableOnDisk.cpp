@@ -98,7 +98,7 @@ TargetPhrases *PhraseTableOnDisk::Lookup(const Manager &mgr, MemPool &pool,
 }
 
 void PhraseTableOnDisk::EvaluateInIsolation(const System &system,
-    const Phrase<Moses2::Word> &source, const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
+    const Phrase<Moses2::Word> &source, const TargetPhraseImpl &targetPhrase, Scores &scores,
     SCORE &estimatedScore) const
 {
 

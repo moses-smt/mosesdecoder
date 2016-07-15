@@ -20,6 +20,7 @@
 #include "../System.h"
 #include "../PhraseBased/Hypothesis.h"
 #include "../PhraseBased/Manager.h"
+#include "../PhraseBased/TargetPhraseImpl.h"
 #include "util/exception.hh"
 #include "../legacy/FactorCollection.h"
 
@@ -99,7 +100,7 @@ void GPULM::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
 }
 
 void GPULM::EvaluateInIsolation(MemPool &pool, const System &system,
-    const Phrase<Moses2::Word> &source, const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
+    const Phrase<Moses2::Word> &source, const TargetPhraseImpl &targetPhrase, Scores &scores,
     SCORE &estimatedScore) const
 {
   if (targetPhrase.GetSize() == 0) {
