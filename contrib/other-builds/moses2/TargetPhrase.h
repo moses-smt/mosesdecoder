@@ -40,6 +40,8 @@ public:
   SCORE GetFutureScore() const
   {  return m_scores->GetTotalScore() + m_estimatedScore; }
 
+  virtual SCORE GetScoreForPruning() const = 0;
+
   void SetEstimatedScore(const SCORE &value)
   {  m_estimatedScore = value; }
 
@@ -62,16 +64,16 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////
 template<typename TP>
-struct CompareFutureScore
+struct CompareScoreForPruning
 {
   bool operator()(const TP *a, const TP *b) const
   {
-    return a->GetFutureScore() > b->GetFutureScore();
+    return a->GetScoreForPruning() > b->GetScoreForPruning();
   }
 
   bool operator()(const TP &a, const TP &b) const
   {
-    return a.GetFutureScore() > b.GetFutureScore();
+    return a.GetScoreForPruning() > b.GetScoreForPruning();
   }
 };
 

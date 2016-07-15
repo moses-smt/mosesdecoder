@@ -35,6 +35,9 @@ public:
 
   virtual ~TargetPhraseImpl();
 
+  virtual SCORE GetScoreForPruning() const
+  { return GetFutureScore(); }
+
   virtual std::string Debug(const System &system) const;
 
 protected:

@@ -68,24 +68,15 @@ public:
 
   void SetAlignmentInfo(const std::string &alignString);
 
+  virtual SCORE GetScoreForPruning() const
+  { return sortScore; }
+
   std::string Debug(const System &system) const;
 
   //mutable void *chartState;
 protected:
 };
 
-template<typename TP>
-struct CompareSortScore
-{
-  bool operator()(const TP *a, const TP *b) const
-  {
-    SCORE scoreA = a->sortScore;
-    SCORE scoreB = b->sortScore;
-
-    return scoreA > scoreB;
-  }
-
-};
 
 }
 }

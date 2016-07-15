@@ -56,7 +56,7 @@ void TargetPhrases::SortAndPrune(size_t tableLimit)
           m_coll.end() : m_coll.begin() + tableLimit;
 
   std::partial_sort(m_coll.begin(), iterMiddle, m_coll.end(),
-      CompareFutureScore<TP>());
+		  CompareScoreForPruning<TP>());
 
   if (tableLimit && m_coll.size() > tableLimit) {
     m_coll.resize(tableLimit);
