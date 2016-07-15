@@ -16,6 +16,7 @@
 #include "../TranslationModel/UnknownWordPenalty.h"
 #include "../SCFG/TargetPhraseImpl.h"
 #include "../SCFG/Word.h"
+#include "../PhraseBased/TargetPhraseImpl.h"
 #include "util/exception.hh"
 
 using namespace std;
@@ -158,7 +159,7 @@ const PhraseTable *FeatureFunctions::GetPhraseTableExcludeUnknownWordPenalty(siz
 }
 
 void FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
-    const Phrase<Moses2::Word> &source, TargetPhrase<Moses2::Word> &targetPhrase) const
+    const Phrase<Moses2::Word> &source, TargetPhraseImpl &targetPhrase) const
 {
   SCORE estimatedScore = 0;
 
@@ -183,7 +184,7 @@ void FeatureFunctions::EvaluateInIsolation(
     ff->EvaluateInIsolation(pool, system, source, targetPhrase, scores, estimatedScore);
   }
 
-  targetPhrase.SetEstimatedScore(estimatedScore);
+  //targetPhrase.SetEstimatedScore(estimatedScore);
 }
 
 void FeatureFunctions::EvaluateAfterTablePruning(MemPool &pool,

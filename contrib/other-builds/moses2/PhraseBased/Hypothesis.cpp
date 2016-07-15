@@ -50,7 +50,7 @@ Hypothesis::~Hypothesis()
 }
 
 void Hypothesis::Init(Manager &mgr, const InputPathBase &path,
-    const TargetPhrase<Moses2::Word> &tp, const Bitmap &bitmap)
+    const TargetPhraseImpl &tp, const Bitmap &bitmap)
 {
   m_mgr = &mgr;
   m_targetPhrase = &tp;
@@ -66,7 +66,7 @@ void Hypothesis::Init(Manager &mgr, const InputPathBase &path,
 }
 
 void Hypothesis::Init(Manager &mgr, const Hypothesis &prevHypo,
-    const InputPathBase &path, const TargetPhrase<Moses2::Word> &tp, const Bitmap &bitmap,
+    const InputPathBase &path, const TargetPhraseImpl &tp, const Bitmap &bitmap,
     SCORE estimatedScore)
 {
   m_mgr = &mgr;

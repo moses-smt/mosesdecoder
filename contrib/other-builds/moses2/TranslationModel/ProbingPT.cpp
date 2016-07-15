@@ -257,7 +257,7 @@ TargetPhrases *ProbingPT::CreateTargetPhrase(MemPool &pool,
 
     offset += sizeof(uint64_t);
     for (size_t i = 0; i < *numTP; ++i) {
-      TargetPhrase<Moses2::Word> *tp = CreateTargetPhrase(pool, system, offset);
+      TargetPhraseImpl *tp = CreateTargetPhrase(pool, system, offset);
       assert(tp);
       const FeatureFunctions &ffs = system.featureFunctions;
       ffs.EvaluateInIsolation(pool, system, sourcePhrase, *tp);
@@ -274,7 +274,7 @@ TargetPhrases *ProbingPT::CreateTargetPhrase(MemPool &pool,
   return tps;
 }
 
-TargetPhrase<Moses2::Word> *ProbingPT::CreateTargetPhrase(
+TargetPhraseImpl *ProbingPT::CreateTargetPhrase(
     MemPool &pool,
     const System &system,
     const char *&offset) const

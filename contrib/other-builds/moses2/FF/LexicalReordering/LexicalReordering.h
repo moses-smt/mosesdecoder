@@ -18,6 +18,7 @@ namespace Moses2
 
 class LexicalReorderingTableCompact;
 class LRModel;
+class TargetPhraseImpl;
 
 class LexicalReordering: public StatefulFeatureFunction
 {
@@ -40,7 +41,7 @@ public:
 
   virtual void
   EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<Moses2::Word> &source,
-      const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
+      const TargetPhraseImpl &targetPhrase, Scores &scores,
       SCORE &estimatedScore) const;
 
   virtual void
@@ -69,7 +70,7 @@ protected:
   LRModel *m_configuration;
 
   virtual void
-  EvaluateAfterTablePruning(MemPool &pool, const TargetPhrase<Moses2::Word> &targetPhrase,
+  EvaluateAfterTablePruning(MemPool &pool, const TargetPhraseImpl &targetPhrase,
       const Phrase<Moses2::Word> &sourcePhrase) const;
 
   // PROPERTY IN PT

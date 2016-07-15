@@ -11,15 +11,15 @@
 
 namespace Moses2
 {
-template<typename WORD>
-class TargetPhrase;
+
+class TargetPhraseImpl;
 
 class Word;
 class System;
 
 class TargetPhrases
 {
-  typedef TargetPhrase<Moses2::Word> TP;
+  typedef TargetPhraseImpl TP;
   typedef Array<const TP*> Coll;
 public:
   typedef Coll::iterator iterator;

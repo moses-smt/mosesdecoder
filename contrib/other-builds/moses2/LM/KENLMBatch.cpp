@@ -20,6 +20,7 @@
 #include "../System.h"
 #include "../PhraseBased/Hypothesis.h"
 #include "../PhraseBased/Manager.h"
+#include "../PhraseBased/TargetPhraseImpl.h"
 #include "lm/state.hh"
 #include "lm/left.hh"
 #include "util/exception.hh"
@@ -132,7 +133,7 @@ void KENLMBatch::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
 }
 
 void KENLMBatch::EvaluateInIsolation(MemPool &pool, const System &system,
-    const Phrase<Moses2::Word> &source, const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
+    const Phrase<Moses2::Word> &source, const TargetPhraseImpl &targetPhrase, Scores &scores,
     SCORE &estimatedScore) const
 {
   // contains factors used by this LM

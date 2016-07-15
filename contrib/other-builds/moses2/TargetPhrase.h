@@ -37,13 +37,7 @@ public:
   const Scores &GetScores() const
   {  return *m_scores; }
 
-  SCORE GetFutureScore() const
-  {  return m_scores->GetTotalScore() + m_estimatedScore; }
-
   virtual SCORE GetScoreForPruning() const = 0;
-
-  void SetEstimatedScore(const SCORE &value)
-  {  m_estimatedScore = value; }
 
   SCORE *GetScoresProperty(int propertyInd) const
   {    return scoreProperties ? scoreProperties + propertyInd : NULL; }
@@ -59,7 +53,6 @@ public:
 
 protected:
   Scores *m_scores;
-  SCORE m_estimatedScore;
 };
 
 ///////////////////////////////////////////////////////////////////////

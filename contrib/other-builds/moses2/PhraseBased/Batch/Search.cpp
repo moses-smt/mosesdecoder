@@ -127,12 +127,12 @@ void Search::Extend(const Hypothesis &hypo, const InputPath &path)
 void Search::Extend(const Hypothesis &hypo, const TargetPhrases &tps,
     const InputPath &path, const Bitmap &newBitmap, SCORE estimatedScore)
 {
-  BOOST_FOREACH(const TargetPhrase<Moses2::Word> *tp, tps){
+  BOOST_FOREACH(const TargetPhraseImpl *tp, tps){
     Extend(hypo, *tp, path, newBitmap, estimatedScore);
   }
 }
 
-void Search::Extend(const Hypothesis &hypo, const TargetPhrase<Moses2::Word> &tp,
+void Search::Extend(const Hypothesis &hypo, const TargetPhraseImpl &tp,
     const InputPath &path, const Bitmap &newBitmap, SCORE estimatedScore)
 {
   Hypothesis *newHypo = Hypothesis::Create(mgr.GetSystemPool(), mgr);

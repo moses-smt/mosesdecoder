@@ -11,6 +11,7 @@
 #include "../Phrase.h"
 #include "../TargetPhrase.h"
 #include "../SCFG/Word.h"
+#include "../PhraseBased/TargetPhraseImpl.h"
 
 namespace Moses2
 {
@@ -27,7 +28,7 @@ WordPenalty::~WordPenalty()
 }
 
 void WordPenalty::EvaluateInIsolation(MemPool &pool, const System &system,
-    const Phrase<Moses2::Word> &source, const TargetPhrase<Moses2::Word> &targetPhrase, Scores &scores,
+    const Phrase<Moses2::Word> &source, const TargetPhraseImpl &targetPhrase, Scores &scores,
     SCORE &estimatedScore) const
 {
   SCORE score = -(SCORE) targetPhrase.GetSize();
