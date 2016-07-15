@@ -74,6 +74,19 @@ public:
 protected:
 };
 
+template<typename TP>
+struct CompareSortScore
+{
+  bool operator()(const TP *a, const TP *b) const
+  {
+    SCORE scoreA = a->sortScore;
+    SCORE scoreB = b->sortScore;
+
+    return scoreA > scoreB;
+  }
+
+};
+
 }
 }
 

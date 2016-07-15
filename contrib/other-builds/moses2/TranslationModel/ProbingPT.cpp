@@ -591,6 +591,9 @@ SCFG::TargetPhraseImpl *ProbingPT::CreateTargetPhraseSCFG(
     // set pt score for rule
     tp->GetScores().PlusEquals(system, *this, scores);
 
+    // sort score. Just for scfg
+    tp->sortScore = (totalNumScores >= 3) ? scores[2] : 0;
+
     // save scores for other FF, eg. lex RO. Just give the offset
     if (m_engine->num_lex_scores) {
       tp->scoreProperties = scores + m_engine->num_scores;
