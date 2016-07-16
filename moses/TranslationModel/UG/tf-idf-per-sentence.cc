@@ -38,6 +38,7 @@ string bname, L1, L2;
 string ifile;
 
 string label_file;
+string weighting_scheme="tf-idf"; 
 
 void interpret_args(int ac, char* av[]);
 boost::shared_ptr<bitext_t> B(new bitext_t);
@@ -45,7 +46,8 @@ size_t numdocs=0;
 size_t min_occ=25;
 size_t min_len=5;
 size_t max_ngram_length=2;
-size_t max_columns = 1000000; // max number of columns 
+std::string max_cols="1M";
+size_t max_columns; // max number of columns 
 size_t num_threads;
 uint32_t next_row=0;
 // threading-related stuff
@@ -243,13 +245,18 @@ struct make_row
     TokenIndex& V = m.root == B->I1.get() ? *B->V1 : *B->V2;
     cpu_timer timer;
     if (!cnt.get()) 
-    {
-      cnt.reset(new vector<uchar>(B->T1->size(),0));
-      doc.reset(new vector<uint32_t>);
-      doc->reserve(B->T1->size());
-      buf.reset(new vector<char>(25*max_columns));
-    }
-    else doc->clear();
+      {
+	cnt.reset(new vector<uchar>(B->T1->size(),0));
+	doc.reset(new vector<uint32_t>);
+	doc->reserve(B->T1->size());
+	buf.reset(new vector<char>(25*max_columns));
+      }
+    else
+      {
+	BOOST_FOREACH(uint32_t sid, *doc)
+	  (*cnt)[sid] = 0;
+	doc->clear();
+      }
 
     tsa::ArrayEntry I(m.lower_bound(-1));
     size_t wcnt = 0;
@@ -263,24 +270,41 @@ struct make_row
     for (size_t i = 0; i < doc->size();)
       {
         uint32_t& sid = (*doc)[i];
-        (*cnt)[sid] = 0;
         if (sid2col[sid] && sid2col[sid] != SKIP_THIS) ++i;
         else
           {
+	    (*cnt)[sid] = 0;
             swap(sid, doc->back());
             doc->pop_back();
           }
       }
-
+    
     // skip tokens that don't occur in enough documents
-    if (doc->size() < min_occ) return;
+    if (doc->size() < min_occ)
+      return;
 
     sort(doc->begin(), doc->end());
     char* x = &(*buf)[0];
-    BOOST_FOREACH(uint32_t sid, (*doc))
-      x += sprintf(x, "%u:%.4f ", sid2col[sid], log(B->T1->size()) - log(df));
-    *--x = '\n';
-
+    if (weighting_scheme == "tf-idf")
+      {
+	float idf = log(B->T1->size()) - log(df);
+	BOOST_FOREACH(uint32_t sid, (*doc))
+	  x += sprintf(x, "%u:%.4f ", sid2col[sid],
+		       (1 + log((*cnt)[sid])) * idf);
+      }
+    else if (weighting_scheme == "raw-counts")
+      {
+	BOOST_FOREACH(uint32_t sid, (*doc))
+	  x += sprintf(x, "%u:%d ", sid2col[sid],
+		       (*cnt)[sid]);
+      }
+    else if (weighting_scheme == "binary")
+      {
+	BOOST_FOREACH(uint32_t sid, (*doc))
+	  x += sprintf(x, "%u:1.0 ", sid2col[sid]);
+      }
+    *(x-1) = '\n';
+    
     { // in brackets to create a scope for locking
       boost::unique_lock<boost::mutex> lock(write_lock);
       rlabels << row_idx << '\t'
@@ -294,7 +318,7 @@ struct make_row
 	   << m.str(&V) << '\t'
 	   << wcnt << " " << doc->size() << " " << df << endl;
       char const* p = &(*buf)[0];
-      fwrite(p, (++x-p), 1, stdout); // recall the --x earlier;
+      fwrite(p, (x-p), 1, stdout); 
       ++row_idx;
     }
   }
@@ -341,7 +365,8 @@ int main(int argc, char* argv[])
 
   select_sentences();
   rlabels.open((label_file+".rlabels").c_str());
-  rlabels << "# <row> <word id> <language> <word> <tf> <df in sample> <df in corpus>" << endl;
+  rlabels << "# <row> <language> <string> <tf> "
+	  << "<df in sample> <df in corpus>" << endl;
   uint32_t rowctr = process(B->I1.get(),0);
   process(B->I2.get(), rowctr);
   tpool->stop();
@@ -357,13 +382,16 @@ interpret_args(int ac, char* av[])
     ("help,h",  "print this message")
     ("min,m", po::value<size_t>(&min_occ)->default_value(min_occ), 
      "min. occurrences for word to be included")
-    ("cols,c", po::value<size_t>(&max_columns)->default_value(max_columns), 
+    ("cols,c", po::value<std::string>(&max_cols)->default_value(max_cols), 
      "max number of columns in the output")
     ("max-ngram-length,n",
      po::value<size_t>(&max_ngram_length)->default_value(max_ngram_length), 
      "max length of ngrams to consider")
     ("threads,t", po::value<size_t>(&num_threads)->default_value(num_threads), 
      "number of threads to use")
+    ("weighting-scheme,w",
+     po::value<std::string>(&weighting_scheme)->default_value(weighting_scheme), 
+     "weighting scheme (tf-idf, binary, or raw-counts)")
     ;
 
   po::options_description h("Hidden Options");
@@ -392,6 +420,7 @@ interpret_args(int ac, char* av[])
       std::cout << e.what() << std::endl;
       exit(1);
     }
+  
   if (vm.count("help"))
     {
       std::cout << "\nusage:\n\t" << av[0]
@@ -400,4 +429,9 @@ interpret_args(int ac, char* av[])
       std::cout << o << std::endl;
       exit(0);
     }
+
+  if(max_cols.back() == 'm') max_cols.back() = 'M';
+  if (sscanf(max_cols.c_str(), "%zuM", &max_columns) == 1)
+    max_columns *= 1000000;
+  else max_columns = atoi(max_cols.c_str());
 }
