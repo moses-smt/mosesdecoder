@@ -112,6 +112,7 @@ external-lib z ;
 #lib dl : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
 #requirements += <library>dl ;
 requirements += <cxxflags>-std=c++0x ;
+requirements += <cxxflags>-Wno-deprecated-declaration ;
 
 # Allow moses to report the git commit hash of the version used for compilation
 moses_githash = [ _shell "git describe --dirty" ] ;
