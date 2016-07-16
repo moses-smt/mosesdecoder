@@ -35,7 +35,7 @@ CXXFLAGS += -DMAX_NUM_FACTORS=4
 CXXFLAGS += -DKENLM_MAX_ORDER=5
 CXXFLAGS += -DWITH_THREADS
 CXXFLAGS += -DNO_MOSES
-CXXFLAGS += -std=c++0x
+CXXFLAGS += -std=c++0x -Wno-deprecated-declarations
 CXXFLAGS += -I$(dir ${MOSES_ROOT})mmt-only
 CXXFLAGS += -I${MOSES_ROOT} -I. -I${MOSES_ROOT}/opt/include -I${MOSES_ROOT}/opt/include/eigen3
 
@@ -119,7 +119,7 @@ skip += ug_splice_arglist.cc
 # objects from elsewhere in the moses tree that are needed
 extra  = ${MOSES_ROOT}/util/exception.cc 
 extra += ${MOSES_ROOT}/util/integer_to_string.cc
-extra += ${MOSES_ROOT}/moses/FF/LSA.cpp
+extra += ${MOSES_ROOT}/moses/FF/dalsa/LSA.cpp
 
 $(foreach f,$(skip),$(eval broken+=$(shell find -name $f)))
 broken += $(wildcard ./mm/stashed/*)
