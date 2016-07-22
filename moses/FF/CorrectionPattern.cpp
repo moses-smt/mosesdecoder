@@ -143,8 +143,8 @@ std::string CorrectionPattern::CreateSinglePattern(const Tokens &s1, const Token
     out << "del(«" << boost::join(s1, "·") << "»)";
     return out.str();
   } else {
-    typename Tokens::value_type v1 = boost::join(s1, "+");
-    typename Tokens::value_type v2 = boost::join(s2, "+");
+    Tokens::value_type v1 = boost::join(s1, "+");
+    Tokens::value_type v2 = boost::join(s2, "+");
     out << MakePair(v1, v2, m_general);
     return out.str();
   }
