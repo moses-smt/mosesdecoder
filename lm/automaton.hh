@@ -51,7 +51,9 @@ template <typename Value, typename Callback> class NGramAutomaton {
             ret_(),
             in_state_(),
             next_action_(NONE),
-            MAX_ORDER(search_.Order()){}
+            MAX_ORDER(search_.Order()){ 
+              UTIL_THROW_IF2(MAX_ORDER < 3, "Smallest order supported is 3, you gave me: " << MAX_ORDER);
+            }
 
         bool Step() {
             //TODO would keeping a function pointer be faster?
