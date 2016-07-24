@@ -218,6 +218,9 @@ public:
     }
     return *(m_scoreBreakdown.get());
   }
+
+  void AddResultOfPipelinedFeatureFunction(FeatureFunction* sp, float score);
+
   float GetFutureScore() const {
     return m_futureScore;
   }

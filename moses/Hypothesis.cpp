@@ -166,7 +166,9 @@ EvaluateWhenApplied(float estimatedScore)
 
   const vector<const StatefulFeatureFunction*>& ffs =
     StatefulFeatureFunction::GetStatefulFeatureFunctions();
-  for (unsigned i = 0; i < ffs.size(); ++i) {
+
+  //TODO: Temporary fix - the minus two ensures that LM0 and LM1 are ignored
+  for (unsigned i = 0; i < ffs.size() - 2; ++i) {
     const StatefulFeatureFunction &ff = *ffs[i];
     if(!staticData.IsFeatureFunctionIgnored(ff)) {
       FFState const* s = m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL;
@@ -330,6 +332,13 @@ GetTargetPhraseStringRep() const
   for(size_t i=0; i < MAX_NUM_FACTORS; i++)
     allFactors[i] = i;
   return GetTargetPhraseStringRep(allFactors);
+}
+
+void Hypothesis::AddResultOfPipelinedFeatureFunction(FeatureFunction* sp, float score) {
+  m_currScoreBreakdown.PlusEquals(sp, score);
+  const StaticData &staticData = StaticData::Instance();
+  m_futureScore += score*staticData.GetWeight(sp);
+  //TODO: what about m_scoreBreakdown?
 }
 
 size_t

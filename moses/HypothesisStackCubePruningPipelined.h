@@ -1,25 +1,23 @@
 #ifndef moses_HypothesisStackCubePruningPipelined_h
 #define moses_HypothesisStackCubePruningPipelined_h
 
-#include "HypothesisStackCubePruning.h"
-#include "FF/StatefulFeatureFunction.h"
-#include "LM/Ken.h"
-#include "lm/model.hh"
-#include <vector>
+#include "moses/HypothesisStackCubePruning.h"
+#include "moses/PipelinedLM.h"
+
 namespace Moses
 {
-  class HypothesisStackCubePruningPipelined : public HypothesisStackCubePruning 
+
+class HypothesisStackCubePruningPipelined : public HypothesisStackCubePruning
   {
-    typedef lm::ngram::detail::HashedSearch<lm::ngram::BackoffValue> Search;
-    Search& ExtractSearch();
-
     public:
-      HypothesisStackCubePruningPipelined(Manager& manager) : HypothesisStackCubePruning(manager){
-        //Extract model
-        ExtractSearch();
-      }
-
+      HypothesisStackCubePruningPipelined(Manager& manager);
       bool AddPrune(Hypothesis* hypo);
+      void Drain();
+      void AddScored(Hypothesis* hypo);
+
+    private:
+      PipelinedLM m_lm0;
+      PipelinedLM m_lm1;
   };
 }
 #endif

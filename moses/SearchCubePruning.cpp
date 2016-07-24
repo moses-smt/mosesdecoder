@@ -103,8 +103,8 @@ void SearchCubePruning::Decode()
     // BOOST_FOREACH(HypothesisStack* hstack, m_hypoStackColl) {
     if (this->out_of_time()) return;
 
-    HypothesisStackCubePruning &sourceHypoColl
-    = *static_cast<HypothesisStackCubePruning*>(*iterStack);
+    HypothesisStackCubePruningPipelined& sourceHypoColl
+    = *static_cast<HypothesisStackCubePruningPipelined*>(*iterStack);
 
     // priority queue which has a single entry for each bitmap
     // container, sorted by score of top hyp
@@ -175,6 +175,7 @@ void SearchCubePruning::Decode()
       }
     }
 
+    sourceHypoColl.Drain();
     // the stack is pruned before processing (lazy pruning):
     VERBOSE(3,"processing hypothesis from next stack");
     IFVERBOSE(2) {
