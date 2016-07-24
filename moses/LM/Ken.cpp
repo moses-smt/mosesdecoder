@@ -36,7 +36,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "Ken.h"
 #include "Base.h"
-#include "moses/FF/FFState.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
 #include "moses/FactorCollection.h"
@@ -55,19 +54,6 @@ namespace Moses
 namespace
 {
 
-struct KenLMState : public FFState {
-  lm::ngram::State state;
-  virtual size_t hash() const {
-    size_t ret = hash_value(state);
-    return ret;
-  }
-  virtual bool operator==(const FFState& o) const {
-    const KenLMState &other = static_cast<const KenLMState &>(o);
-    bool ret = state == other.state;
-    return ret;
-  }
-
-};
 
 class MappingBuilder : public lm::EnumerateVocab
 {
@@ -188,7 +174,6 @@ template <class Model> void LanguageModelKen<Model>::CalcScore(const Phrase &phr
 
 template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
 {
-  std::cout << "Evaluating LM Ken\n";
   const lm::ngram::State &in_state = static_cast<const KenLMState&>(*ps).state;
 
   std::auto_ptr<KenLMState> ret(new KenLMState());

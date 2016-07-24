@@ -32,12 +32,30 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/Hypothesis.h"
 #include "moses/TypeDef.h"
 #include "moses/Word.h"
+#include "moses/FF/FFState.h"
+#include "lm/state.hh"
 
 namespace Moses
 {
 
 //class LanguageModel;
 class FFState;
+
+struct KenLMState : public FFState {
+  lm::ngram::State state;
+  virtual size_t hash() const {
+    size_t ret = hash_value(state);
+    return ret;
+  }
+  virtual bool operator==(const FFState& o) const {
+    const KenLMState &other = static_cast<const KenLMState &>(o);
+    bool ret = state == other.state;
+    return ret;
+  }
+  virtual ~KenLMState() {
+  }
+
+};
 
 LanguageModel *ConstructKenLM(const std::string &line);
 
@@ -50,7 +68,7 @@ LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, 
 template <class Model> class LanguageModelKen : public LanguageModel
 {
 public:
-  Model* GetModel() { return &(*m_ngram); }
+  Model& GetModel() { return *m_ngram; }
   LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, util::LoadMethod load_method);
 
   virtual const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
@@ -68,24 +86,10 @@ public:
 
   virtual bool IsUseable(const FactorMask &mask) const;
 
-protected:
-  boost::shared_ptr<Model> m_ngram;
-
-  const Factor *m_beginSentenceFactor;
-
-  FactorType m_factorType;
-
-  void LoadModel(const std::string &file, util::LoadMethod load_method);
-
   lm::WordIndex TranslateID(const Word &word) const {
     std::size_t factor = word.GetFactor(m_factorType)->GetId();
     return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
   }
-
-  std::vector<lm::WordIndex> m_lmIdLookup;
-
-private:
-  LanguageModelKen(const LanguageModelKen<Model> &copy_from);
 
   // Convert last words of hypothesis into vocab ids, returning an end pointer.
   lm::WordIndex *LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const {
@@ -104,6 +108,21 @@ private:
       *index = TranslateID(hypo.GetWord(position));
     }
   }
+
+protected:
+  boost::shared_ptr<Model> m_ngram;
+
+  const Factor *m_beginSentenceFactor;
+
+  FactorType m_factorType;
+
+  void LoadModel(const std::string &file, util::LoadMethod load_method);
+
+
+  std::vector<lm::WordIndex> m_lmIdLookup;
+
+private:
+  LanguageModelKen(const LanguageModelKen<Model> &copy_from);
 
 
 protected:
