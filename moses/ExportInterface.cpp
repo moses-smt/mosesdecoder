@@ -227,6 +227,8 @@ batch_run()
 
   // main loop over set of input sentences
   boost::shared_ptr<InputType> source;
+
+  double begin_time = util::CPUTime();
   while ((source = ioWrapper->ReadInput(cw)) != NULL) {
     IFVERBOSE(1) ResetUserTime();
 
@@ -294,6 +296,8 @@ batch_run()
   pool.Stop(true); //flush remaining jobs
 #endif
 
+  double end_time = util::CPUTime();
+  std::cerr << "CPUTime (user+sys): " << (end_time-begin_time) << " seconds\n"; 
   FeatureFunction::Destroy();
 
   IFVERBOSE(0) util::PrintUsage(std::cerr);
