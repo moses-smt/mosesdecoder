@@ -25,6 +25,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include <string>
 #include <cstddef>
+#include <vector>
 
 #include "moses/FF/StatefulFeatureFunction.h"
 
@@ -43,12 +44,16 @@ class Phrase;
 //! Abstract base class which represent a language model on a contiguous phrase
 class LanguageModel : public StatefulFeatureFunction
 {
+  static std::vector<LanguageModel*> s_staticColl;
 protected:
   LanguageModel(const std::string &line);
 
   bool m_enableOOVFeature;
 
 public:
+  static const std::vector<LanguageModel*>& GetLMs(){
+    return s_staticColl;
+  }
   static const LanguageModel &GetFirstLM();
 
   virtual ~LanguageModel();

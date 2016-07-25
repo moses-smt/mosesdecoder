@@ -9,6 +9,7 @@ StatefulFeatureFunction
 ::StatefulFeatureFunction(const std::string &line, bool registerNow)
   : FeatureFunction(line, registerNow)
 {
+  this->m_stateIndex = m_statefulFFs.size();
   m_statefulFFs.push_back(this);
 }
 
@@ -16,8 +17,10 @@ StatefulFeatureFunction
 ::StatefulFeatureFunction(size_t numScoreComponents, const std::string &line)
   : FeatureFunction(numScoreComponents, line)
 {
+  this->m_stateIndex = m_statefulFFs.size();
   m_statefulFFs.push_back(this);
 }
+
 
 }
 

@@ -11,7 +11,7 @@ namespace Moses
 void PipelinedLM::EvaluateWhenApplied(Hypothesis &hypo) 
 {
   const Hypothesis* prevHypo = hypo.GetPrevHypo();
-  FFState const* ps = prevHypo ? prevHypo->GetFFState(m_state_index) : NULL;
+  FFState const* ps = prevHypo ? prevHypo->GetFFState(GetStateIndex()) : NULL;
   const lm::ngram::State &in_state = static_cast<const KenLMState&>(*ps).state;
   PipeLMState* out_state = new PipeLMState();
 
@@ -68,7 +68,7 @@ void PipelinedLM::EvaluateWhenApplied(Hypothesis &hypo)
 }
 
 void PipelinedLM::SetLMState(Hypothesis& hypo, PipeLMState* state) {
-  hypo.SetFFState(m_state_index, state);
+  hypo.SetFFState(GetStateIndex(), state);
 }
 
 void PipelinedLM::AddLMScore(Hypothesis& hypo, float score) {

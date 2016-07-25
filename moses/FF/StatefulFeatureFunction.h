@@ -21,6 +21,9 @@ class StatefulFeatureFunction: public FeatureFunction
   //All statefull FFs
   static std::vector<const StatefulFeatureFunction*> m_statefulFFs;
 
+  //Index of where state is stored
+  std::size_t m_stateIndex;
+
 public:
   static const std::vector<const StatefulFeatureFunction*>&
   GetStatefulFeatureFunctions() {
@@ -86,6 +89,10 @@ public:
   virtual void
   EvaluateTranslationOptionListWithSourceContext
   (const InputType &input, const TranslationOptionList &translationOptionList) const {}
+
+  size_t GetStateIndex() {
+    return m_stateIndex;
+  }
 
 };
 

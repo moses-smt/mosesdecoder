@@ -16,8 +16,8 @@ class HypothesisStackCubePruningPipelined : public HypothesisStackCubePruning
       void AddScored(Hypothesis* hypo);
 
     private:
-      PipelinedLM m_lm0;
-      PipelinedLM m_lm1;
+      PipelinedLM m_pipelinedLM0;
+      PipelinedLM m_pipelinedLM1;
   };
 }
 #endif

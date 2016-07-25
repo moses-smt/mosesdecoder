@@ -33,12 +33,15 @@ using namespace std;
 namespace Moses
 {
 
+ std::vector<LanguageModel*> LanguageModel::s_staticColl;
+
 LanguageModel::LanguageModel(const std::string &line) :
   StatefulFeatureFunction(line, /* registerNow = */ false),
   m_enableOOVFeature(false)
 {
   // load m_enableOOVFeature via SetParameter() first
   // ReadParameters();
+  s_staticColl.push_back(this);
   this->m_numScoreComponents = this->m_numTuneableComponents = m_enableOOVFeature ? 2 : 1;
   // register with the correct m_numScoreComponents
   // Register();

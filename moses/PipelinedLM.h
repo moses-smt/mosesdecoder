@@ -42,15 +42,14 @@ class PipelinedLM
   typedef LanguageModelKen<lm::ngram::ProbingModel> LM; 
 
   public:
-  PipelinedLM(LM& lm, HypothesisStackCubePruningPipelined* stack, std::size_t state_index) :
+  PipelinedLM(LM& lm, HypothesisStackCubePruningPipelined* stack) :
     m_lm(lm),
     m_pipeline(16, ConstructT(m_lm.GetModel().GetSearch())),
-    m_stack(stack),
-    m_state_index(state_index) {}
+    m_stack(stack) {}
 
   void EvaluateWhenApplied(Hypothesis&);
   void Drain() {m_pipeline.Drain();}
-  std::size_t GetStateIndex() {return m_state_index;}
+  std::size_t GetStateIndex() {return m_lm.GetStateIndex();}
 
   void AddLMScore(Hypothesis& hypo, float score);
   void SetLMState(Hypothesis& hypo, PipeLMState* state);
@@ -59,7 +58,6 @@ class PipelinedLM
   LM& m_lm;
   lm::Pipeline<EvaluateLM> m_pipeline;
   HypothesisStackCubePruningPipelined* m_stack;
-  std::size_t m_state_index;
 };
 } //namespace Moses
 #endif
