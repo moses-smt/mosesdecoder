@@ -42,11 +42,16 @@ class PipelinedLM
   typedef LanguageModelKen<lm::ngram::ProbingModel> LM; 
 
   public:
-  PipelinedLM(LM& lm, HypothesisStackCubePruningPipelined* stack) :
+  PipelinedLM(LM& lm) :
     m_lm(lm),
     m_pipeline(16, ConstructT(m_lm.GetModel().GetSearch())),
-    m_stack(stack) {}
+    m_stack(NULL) {}
 
+  // Needs to be called before the pipelined LM is used
+  // and then every time a different stack is being filled
+  void SetStack(HypothesisStackCubePruningPipelined* stack) {
+    m_stack = stack;
+  }
   void EvaluateWhenApplied(Hypothesis&);
   void Drain() {m_pipeline.Drain();}
   std::size_t GetStateIndex() {return m_lm.GetStateIndex();}

@@ -5,6 +5,7 @@
 #include "Search.h"
 #include "HypothesisStackCubePruningPipelined.h"
 #include "SentenceStats.h"
+#include "PipelinedLM.h"
 
 namespace Moses
 {
@@ -41,6 +42,9 @@ public:
 
   virtual const std::vector < HypothesisStack* >& GetHypothesisStacks() const;
   virtual const Hypothesis *GetBestHypothesis() const;
+private:
+  PipelinedLM m_pipelinedLM0;
+  PipelinedLM m_pipelinedLM1;
 };
 
 

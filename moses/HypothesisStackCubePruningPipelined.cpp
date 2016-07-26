@@ -24,10 +24,10 @@ namespace
 //}
 }
 
-HypothesisStackCubePruningPipelined::HypothesisStackCubePruningPipelined(Manager& manager) :
+HypothesisStackCubePruningPipelined::HypothesisStackCubePruningPipelined(Manager& manager, PipelinedLM& pipeline0, PipelinedLM& pipeline1) :
   HypothesisStackCubePruning(manager),
-  m_pipelinedLM0(*(static_cast<LanguageModelKen<lm::ngram::ProbingModel>* >(LanguageModel::GetLMs()[0])), this),
-  m_pipelinedLM1(*(static_cast<LanguageModelKen<lm::ngram::ProbingModel>* >(LanguageModel::GetLMs()[1])), this) {} 
+  m_pipelinedLM0(pipeline0),
+  m_pipelinedLM1(pipeline1) {} 
 
 bool HypothesisStackCubePruningPipelined::AddPrune(Hypothesis* hypo)
 {

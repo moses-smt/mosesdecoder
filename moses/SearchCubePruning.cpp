@@ -4,6 +4,7 @@
 #include "StaticData.h"
 #include "InputType.h"
 #include "TranslationOptionCollection.h"
+#include "LM/Ken.h"
 #include <boost/foreach.hpp>
 using namespace std;
 
@@ -54,10 +55,12 @@ SearchCubePruning(Manager& manager, TranslationOptionCollection const& transOptC
   : Search(manager)
   , m_hypoStackColl(manager.GetSource().GetSize() + 1)
   , m_transOptColl(transOptColl)
+  , m_pipelinedLM0(*(static_cast<LanguageModelKen<lm::ngram::ProbingModel>* >(LanguageModel::GetLMs()[0])))
+  , m_pipelinedLM1(*(static_cast<LanguageModelKen<lm::ngram::ProbingModel>* >(LanguageModel::GetLMs()[1])))
 {
   std::vector < HypothesisStackCubePruning >::iterator iterStack;
   for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind) {
-    HypothesisStackCubePruning *sourceHypoColl = new HypothesisStackCubePruningPipelined(m_manager);
+    HypothesisStackCubePruning *sourceHypoColl = new HypothesisStackCubePruningPipelined(m_manager, m_pipelinedLM0, m_pipelinedLM1);
     sourceHypoColl->SetMaxHypoStackSize(m_options.search.stack_size);
     sourceHypoColl->SetBeamWidth(m_options.search.beam_width);
 
@@ -105,6 +108,7 @@ void SearchCubePruning::Decode()
 
     HypothesisStackCubePruningPipelined& sourceHypoColl
     = *static_cast<HypothesisStackCubePruningPipelined*>(*iterStack);
+    sourceHypoColl.SetupPipelines();
 
     // priority queue which has a single entry for each bitmap
     // container, sorted by score of top hyp
