@@ -100,7 +100,7 @@ template <class Value> class HashedSearch {
       return ret;
     }
 
-    UnigramPointer PrefetchUnigram(WordIndex word) const {
+    void PrefetchUnigram(WordIndex word) const {
       unigram_.Prefetch(word);
     }
 
