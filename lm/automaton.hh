@@ -21,24 +21,46 @@ namespace ngram {
 
 template <typename Value, typename Callback> class NGramAutomaton {
     public:
+        struct NGramSession {
+
+          void Initialize(typename Callback::Argument a) {
+            ttl = 1;
+            state.length = 0;
+            score.prob = 0.0f;
+            score.rest = 0.0f;
+            arg = a;
+          }
+
+          void ExtendSession() {
+            ++ttl;
+          }
+
+          std::size_t ttl;
+          lm::ngram::State state;
+          lm::FullScoreReturn score;
+          typename Callback::Argument arg;
+        };
+
         struct NGramTask {
             NGramAutomaton<Value, Callback>* const pred;
             const WordIndex new_word;
             const State* const context_state; // unused if pred != NULL
-            Callback& callback;
+            NGramSession& session;
         };
 
         struct NGramConstruct {
             detail::HashedSearch<Value>& search;
-            //Callback callback;
-            NGramConstruct(detail::HashedSearch<Value>& s) : search(s) {};
+            Callback callback;
+            NGramConstruct(detail::HashedSearch<Value>& s, Callback c) : search(s), callback(c) {};
         };
+
 
         typedef NGramTask Task;
         typedef NGramConstruct Construct;
+        typedef NGramSession Session;
 
         explicit NGramAutomaton(Construct construct) :
-            callback_(),
+            callback_(construct.callback),
             ngram_order_(0),
             running_(false),
             search_(construct.search),
@@ -47,11 +69,12 @@ template <typename Value, typename Callback> class NGramAutomaton {
             succ_finished_(false),
             pred_(NULL),
             succ_(NULL),
-            succ_data_(),
+            succ_ngram_length_(),
             new_word_(),
             ret_(),
             in_state_(),
             next_action_(NONE),
+            session_(NULL),
             MAX_ORDER(search_.Order()){ 
               UTIL_THROW_IF2(MAX_ORDER < 3, "Smallest order supported is 3, you gave me: " << MAX_ORDER);
             }
@@ -72,14 +95,14 @@ template <typename Value, typename Callback> class NGramAutomaton {
             }
             ngram_order_ += 1;
             return running_;
-
         }
 
         void SetTask(const Task& task) {
             //InitialPredecessorCheck must be called first because pred_==this might be true
             InitialPredecessorCheck(task);
 
-            callback_ = task.callback;
+            last_ = true; //every automata thinks it is last until pipeline calls SetNotLast()
+            session_ = &task.session;
             new_word_ = task.new_word;
             node_ = 0;
             out_state_.length = 0; 
@@ -98,16 +121,15 @@ template <typename Value, typename Callback> class NGramAutomaton {
             return running_ == false;
         }
 
+        void SetNotLast() {
+          last_ = false;
+        }
+
     private:
-        struct SuccessorData {
-          FullScoreReturn ret;
-          State out_state;
-          Callback callback;
-        };
 
         enum NextAction {NONE, GET_UNIGRAM_PREFETCH_NEXT, GET_MIDDLE_PREFETCH_NEXT, GET_LONGEST};
         void InitialPredecessorCheck(const Task& task) {
-            assert(task.pred == NULL ^ task.context_state == NULL); //either predecessor is set or context_state
+            assert((task.pred == NULL) ^ (task.context_state == NULL)); //either predecessor is set or context_state
             pred_ = task.pred;
             if (pred_) {
                 CopyContextWordsFromPredecessor();
@@ -145,12 +167,11 @@ template <typename Value, typename Callback> class NGramAutomaton {
 
         void CheckSuccessorFinished(){
             if (succ_finished_) {
-                assert(succ_!=NULL);
-                // apply backoffs to fullscorereturn and call callback
-                for(int i = succ_data_.ret.ngram_length - 1; i < out_state_.length; i++){
-                    succ_data_.ret.prob += out_state_.backoff[i];
+                // apply the backoffs since the successor did not have them when he finished
+                // apply them to session directly
+                for(float* b = out_state_.backoff + succ_ngram_length_ - 1; b < out_state_.backoff + out_state_.length; b++){
+                    session_->score.prob += *b;
                 }
-                succ_data_.callback(succ_data_.ret, succ_data_.out_state);
             }
             else if (succ_) {
                 // transfer backoffs to successor so he can apply them himself
@@ -160,31 +181,28 @@ template <typename Value, typename Callback> class NGramAutomaton {
 
         void CheckPredecessorFinished(){
             if (pred_finished_) {
-                // apply backoffs from predecessor and call callback
-                for(int i = ret_.ngram_length - 1; i < in_state_.length; i++){
-                    ret_.prob += in_state_.backoff[i];
+                // apply backoffs from predecessor to session directly
+                for(float* b = in_state_.backoff + ret_.ngram_length - 1; b < in_state_.backoff + in_state_.length; ++b){
+                    session_->score.prob += *b;
                 }
-                callback_(ret_, out_state_);
             }
             else {
-                // Give callback and FullScoreReturn to predecessor
+                //tell predecessor how much I matched
                 NotifyPredecessorOfCompletion();
             }
         }
 
         void NotifyPredecessorOfCompletion() {
             pred_->succ_finished_ = true;
-            pred_->succ_data_.ret = ret_;
-            pred_->succ_data_.out_state = out_state_;
-            pred_->succ_data_.callback = callback_;
+            pred_->succ_ngram_length_ = ret_.ngram_length;
         }
 
         void NotifySuccessorOfCompletion() {
+            //successor is still running so give him the backoffs he might need
             succ_->pred_finished_ = true;
             std::copy(out_state_.backoff, out_state_.backoff + out_state_.length, succ_->in_state_.backoff);
             succ_->in_state_.length = out_state_.length;
         }
-
 
         void SetSuccessor(NGramAutomaton<Value, Callback>* succ){
             succ_ = succ;
@@ -257,19 +275,43 @@ template <typename Value, typename Callback> class NGramAutomaton {
             }
             Finish();
         }
-        void CopyWordsToOutState(){
-          if (out_state_.length > 0) {
-            out_state_.words[0] = new_word_;
-            std::copy(in_state_.words, in_state_.words + out_state_.length - 1, out_state_.words + 1);
-          }
+
+        void CopyOutStateToSession() {
+            session_->state.length = out_state_.length;
+            std::copy(out_state_.backoff, out_state_.backoff + out_state_.length, session_->state.backoff);
+
+            session_->state.words[0] = new_word_;
+            WordIndex* dest = session_->state.words + 1;
+            WordIndex* from = in_state_.words;
+            for(unsigned char i = 1; i < out_state_.length; ++i) *dest++ = *from++;
+        }
+
+        void CopyLastFullScoreData() {
+            //the rest costs and prob are handled by all automata, the last automaton sets the remaining stuff
+            session_->score.ngram_length = ret_.ngram_length;
+            session_->score.independent_left = ret_.independent_left;
+            session_->score.extend_left = ret_.extend_left;
         }
         
         void Finish(){
-            CopyWordsToOutState();
             CheckPredecessorFinished();
             CheckSuccessorFinished();
             running_ = false;
             next_action_ = NONE;
+
+            //add the accumulate prob and rest from ret to session
+            session_->score.prob += ret_.prob;
+            session_->score.rest += ret_.rest;
+
+            //the last automaton of a session is responsible for setting the LM state
+            if (last_) {
+              CopyOutStateToSession();
+              CopyLastFullScoreData();
+            }
+            //decrement life of session and if 0 then call callback
+            if (--(session_->ttl) == 0) {
+              callback_(session_->state, session_->score, session_->arg);
+            }
         }
 
 
@@ -291,15 +333,16 @@ template <typename Value, typename Callback> class NGramAutomaton {
         NGramAutomaton<Value, Callback>* pred_;
         //Pointer to successor
         NGramAutomaton<Value, Callback>* succ_;
-        //successor stores its data in its predecessor's succ_data_ so that once predecessor completes it can add backoffs
-        SuccessorData succ_data_; 
+        // succ_ngram_length_ stores the ngram_length matched by the successor so that the successor's predecessor can apply the backoffs if the predecessor finishes after the successor
+        unsigned short succ_ngram_length_; 
         WordIndex new_word_;
         FullScoreReturn ret_;
         State in_state_;
         //out_state_ stores the backoffs for its successor
-        //out_state_.length starts as an upper bound for the context_length but is correct at latest when the automaton finishes
         State out_state_;
         NextAction next_action_;
+        Session* session_;
+        bool last_;
         //MAX_ORDER is the order of the language model being used by search_
         const unsigned short MAX_ORDER;
 };
@@ -313,7 +356,6 @@ template <class Automaton> class Queue {
         explicit Queue(std::size_t size, Construct construct) : size_(size), automata_(size, Automaton(construct)), curr_(automata_.begin()){}
 
         Automaton* Add(const Task task) {
-            // Don't run Step on automaton that is finished
             while (curr_->Step()) {
                 Next();
             }
@@ -350,15 +392,21 @@ template <class Automaton> class Queue {
 template<typename Callback>
 class Pipeline {
     public:
-        Pipeline(std::size_t queue_size, typename ngram::NGramAutomaton<ngram::BackoffValue, Callback>::Construct construct) : queue_(queue_size, construct) {}
-        void BeginScore(const lm::ngram::State& context_state, const WordIndex word, Callback& callback) {
-            typename AutomatonT::Task task = {NULL, word, &context_state, callback};
+        Pipeline(std::size_t queue_size, typename ngram::NGramAutomaton<ngram::BackoffValue, Callback>::Construct construct) : 
+          queue_(queue_size, construct),
+          sessions_((queue_size-1)*KENLM_MAX_ORDER + 2),
+          curr_(sessions_.begin()) {}
+
+        void BeginScore(const lm::ngram::State& context_state, const WordIndex word, typename Callback::Argument arg) {
+            NewSession(arg); // we are starting a new session
+            typename AutomatonT::Task task = {NULL, word, &context_state, *curr_};
             pred_ = queue_.Add(task);
         }
 
-        void AppendWord(const WordIndex word, Callback& callback){
-            assert(pred_);
-            typename AutomatonT::Task task = {pred_, word, NULL, callback};
+        void AppendWord(const WordIndex word){
+            curr_->ExtendSession();
+            typename AutomatonT::Task task = {pred_, word, NULL, *curr_};
+            pred_->SetNotLast();
             pred_ = queue_.Add(task);
         }
 
@@ -367,9 +415,18 @@ class Pipeline {
         }
 
     private:
+
+        void NewSession(typename Callback::Argument arg) {
+          if (++curr_ == sessions_.end()) curr_ = sessions_.begin();
+          curr_->Initialize(arg);
+        }
+
         typedef typename ngram::NGramAutomaton<ngram::BackoffValue, Callback> AutomatonT;
         Queue<ngram::NGramAutomaton<ngram::BackoffValue, Callback> > queue_;
         ngram::NGramAutomaton<ngram::BackoffValue, Callback>* pred_;
+        std::vector<typename ngram::NGramAutomaton<ngram::BackoffValue, Callback>::Session> sessions_;
+        typedef typename std::vector<typename ngram::NGramAutomaton<ngram::BackoffValue, Callback>::Session>::iterator It;
+        It curr_;
 
 };
 

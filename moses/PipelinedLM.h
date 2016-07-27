@@ -9,36 +9,26 @@
 namespace Moses
 {
 
-class PipelinedLM;
 class HypothesisStackCubePruningPipelined;
+class PipelinedLM;
 
-struct PipeLMState : public KenLMState {
-  float score;
-  std::size_t callbacks_remaining;
-  virtual size_t hash() const {
-    size_t ret = hash_value(state);
-    return ret;
-  }
-  virtual bool operator==(const FFState& o) const {
-    const PipeLMState &other = static_cast<const PipeLMState &>(o);
-    bool ret = state == other.state;
-    return ret;
-  }
-};
+struct PipelinedCallback {
+  PipelinedLM& pipelinedLM;
 
-struct EvaluateLM {
-  Hypothesis* m_hypo;
-  HypothesisStackCubePruningPipelined* m_stack;
-  PipelinedLM* m_pipelined_lm;
-  PipeLMState* m_state;
-  bool m_should_set_ffstate;
+  PipelinedCallback(PipelinedLM& p) : pipelinedLM(p) {}
 
-  void operator()(lm::FullScoreReturn r, lm::ngram::State state);
+  struct Argument {
+    Hypothesis* hypo;
+    KenLMState* out_state;
+    bool pipeline_should_set_state; 
+  };
+  //this will be the callback called when a hypothesis is scored
+  void operator()(lm::ngram::State state, lm::FullScoreReturn score, Argument arg);
 };
 
 class PipelinedLM  
 {
-  typedef typename lm::ngram::NGramAutomaton<lm::ngram::BackoffValue, EvaluateLM>::Construct ConstructT;
+  typedef typename lm::ngram::NGramAutomaton<lm::ngram::BackoffValue, PipelinedCallback>::Construct ConstructT;
   typedef LanguageModelKen<lm::ngram::ProbingModel> LM; 
 
   public:
@@ -52,16 +42,24 @@ class PipelinedLM
   void SetStack(HypothesisStackCubePruningPipelined* stack) {
     m_stack = stack;
   }
+
+  HypothesisStackCubePruningPipelined* GetStack() { 
+    return m_stack;
+  }
+
+  const LM& GetLM(){
+    return m_lm;
+  }
+
   void EvaluateWhenApplied(Hypothesis&);
   void Drain() {m_pipeline.Drain();}
   std::size_t GetStateIndex() {return m_lm.GetStateIndex();}
 
-  void AddLMScore(Hypothesis& hypo, float score);
-  void SetLMState(Hypothesis& hypo, PipeLMState* state);
+
 
   private:
   LM& m_lm;
-  lm::Pipeline<EvaluateLM> m_pipeline;
+  lm::Pipeline<PipelinedCallback> m_pipeline;
   HypothesisStackCubePruningPipelined* m_stack;
 };
 } //namespace Moses

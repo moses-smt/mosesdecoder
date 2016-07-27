@@ -334,7 +334,7 @@ GetTargetPhraseStringRep() const
   return GetTargetPhraseStringRep(allFactors);
 }
 
-void Hypothesis::AddResultOfPipelinedFeatureFunction(FeatureFunction* sp, float score) {
+void Hypothesis::AddResultOfPipelinedFeatureFunction(const FeatureFunction* sp, float score) {
   m_currScoreBreakdown.PlusEquals(sp, score);
   const StaticData &staticData = StaticData::Instance();
   m_futureScore += score*staticData.GetWeight(sp);
