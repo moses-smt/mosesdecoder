@@ -22,6 +22,7 @@ namespace Moses
 		       DEFAULT_CUBE_PRUNING_DIVERSITY);
     param.SetParameter(lazy_scoring, "cube-pruning-lazy-scoring", false);
     param.SetParameter(deterministic_search, "cube-pruning-deterministic-search", false);
+    param.SetParameter(pipeline_size, "cube-pruning-pipeline-size", DEFAULT_CUBE_PRUNING_PIPELINE_SIZE);
     return true;
   }
 
@@ -37,6 +38,9 @@ namespace Moses
       
       si = params.find("cube-pruning-diversity");
       if (si != params.end()) diversity = xmlrpc_c::value_int(si->second);
+
+      si = params.find("cube-pruning-pipeline-size");
+      if (si != params.end()) pipeline_size = xmlrpc_c::value_int(si->second);
       
       si = params.find("cube-pruning-lazy-scoring");
       if (si != params.end())

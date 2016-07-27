@@ -6,6 +6,7 @@
 #include "lm/model.hh"
 #include "lm/automaton.hh"
 #include "moses/FF/FFState.h"
+#include "moses/StaticData.h"
 namespace Moses
 {
 
@@ -34,7 +35,7 @@ class PipelinedLM
   public:
   PipelinedLM(LM& lm) :
     m_lm(lm),
-    m_pipeline(16, ConstructT(m_lm.GetModel().GetSearch())),
+    m_pipeline(StaticData::Instance().options()->cube.pipeline_size, ConstructT(m_lm.GetModel().GetSearch(), PipelinedCallback(*this))),
     m_stack(NULL) {}
 
   // Needs to be called before the pipelined LM is used

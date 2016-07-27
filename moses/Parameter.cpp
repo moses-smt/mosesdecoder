@@ -123,6 +123,7 @@ Parameter::Parameter()
   AddParam(cube_opts,"cube-pruning-diversity", "cbd", "How many hypotheses should be created for each coverage. (default = 0)");
   AddParam(cube_opts,"cube-pruning-lazy-scoring", "cbls", "Don't fully score a hypothesis until it is popped");
   AddParam(cube_opts,"cube-pruning-deterministic-search", "cbds", "Break ties deterministically during search");
+  AddParam(cube_opts,"cube-pruning-pipeline-size", "cbps", "How large the pipeline for prefetching should be (default = 16)");
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // minimum bayes risk decoding

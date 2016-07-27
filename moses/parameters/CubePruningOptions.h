@@ -12,6 +12,7 @@ namespace Moses
     size_t  pop_limit;
     size_t  diversity;
     bool lazy_scoring;
+    size_t pipeline_size;
     bool deterministic_search;
 
     bool init(Parameter const& param);
