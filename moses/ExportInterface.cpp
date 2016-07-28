@@ -229,6 +229,7 @@ batch_run()
   boost::shared_ptr<InputType> source;
 
   double begin_time = util::CPUTime();
+  double begin_real_time = util::WallTime();
   while ((source = ioWrapper->ReadInput(cw)) != NULL) {
     IFVERBOSE(1) ResetUserTime();
 
@@ -297,7 +298,9 @@ batch_run()
 #endif
 
   double end_time = util::CPUTime();
+  double end_real_time = util::WallTime();
   std::cerr << "CPUTime (user+sys): " << (end_time-begin_time) << " seconds\n"; 
+  std::cerr << "RealTime (user+sys): " << (end_real_time-begin_real_time) << " seconds\n"; 
   FeatureFunction::Destroy();
 
   IFVERBOSE(0) util::PrintUsage(std::cerr);
