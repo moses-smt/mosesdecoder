@@ -9,6 +9,7 @@
 #include "HypothesisBase.h"
 #include "MemPool.h"
 #include "Recycler.h"
+#include "Array.h"
 #include "legacy/Util2.h"
 
 namespace Moses2

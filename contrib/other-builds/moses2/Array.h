@@ -1,5 +1,7 @@
 #pragma once
 #include <cassert>
+#include <boost/functional/hash.hpp>
+#include "MemPool.h"
 
 namespace Moses2
 {
