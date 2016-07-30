@@ -160,12 +160,17 @@ std::vector<size_t> AlignmentInfo::GetSourceIndex2PosMap() const
 std::string AlignmentInfo::Debug(const System &system) const
 {
   std::stringstream out;
+  out << *this;
+  return out.str();
+}
 
+std::ostream& operator<<(std::ostream& out, const AlignmentInfo& obj)
+{
   AlignmentInfo::const_iterator iter;
-  for (iter = begin(); iter != end(); ++iter) {
+  for (iter = obj.begin(); iter != obj.end(); ++iter) {
     out << iter->first << "-" << iter->second << " ";
   }
-  return out.str();
+  return out;
 }
 
 }

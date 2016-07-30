@@ -658,26 +658,8 @@ SCFG::TargetPhraseImpl *ProbingPT::CreateTargetPhraseSCFG(
   //cerr << "alignInd=" << alignInd << endl;
 
   UTIL_THROW_IF2(alignInd >= m_aligns.size(), "Unknown alignInd");
-  const AlignmentInfo *alignInfo = m_aligns[alignInd];
-  assert(alignInfo);
-
-  AlignmentInfo::CollType alignTerm, alignNonTerm;
-
-  BOOST_FOREACH(const AlignmentInfo::CollType::value_type  &val, *alignInfo) {
-    size_t sourcePos = val.first;
-    size_t targetPos = val.second;
-    //cerr << "val=" << sourcePos << " " << targetPos << endl;
-
-    if ((*tp)[targetPos].isNonTerminal) {
-      alignNonTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
-    }
-    else {
-      alignTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
-    }
-  }
-
-  tp->SetAlignTerm(alignTerm);
-  tp->SetAlignNonTerm(alignNonTerm);
+  tp->m_alignNonTerm = m_aligns[alignInd];
+  assert(tp->m_alignNonTerm);
 
   // properties TODO
 
