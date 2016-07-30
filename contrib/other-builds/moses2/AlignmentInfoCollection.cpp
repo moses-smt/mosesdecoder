@@ -19,6 +19,8 @@
 
 #include "AlignmentInfoCollection.h"
 
+using namespace std;
+
 namespace Moses2
 {
 
