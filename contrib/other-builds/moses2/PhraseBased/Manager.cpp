@@ -46,8 +46,10 @@ ManagerBase(sys, task, inputStr, translationId)
 
 Manager::~Manager()
 {
+  //cerr << "Start ~Manager " << this << endl;
   delete m_search;
   delete m_bitmaps;
+  //cerr << "Finish ~Manager " << this << endl;
 }
 
 void Manager::Init()
@@ -119,8 +121,12 @@ void Manager::Init()
 
 void Manager::Decode()
 {
+  //cerr << "Start Decode " << this << endl;
+
   Init();
   m_search->Decode();
+
+  //cerr << "Finished Decode " << this << endl;
 }
 
 void Manager::CalcFutureScore()
