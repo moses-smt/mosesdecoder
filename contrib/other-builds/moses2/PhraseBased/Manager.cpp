@@ -37,14 +37,15 @@ namespace Moses2
 {
 Manager::Manager(System &sys, const TranslationTask &task,
     const std::string &inputStr, long translationId) :
-    ManagerBase(sys, task, inputStr, translationId)
+ManagerBase(sys, task, inputStr, translationId)
+,m_search(NULL)
+,m_bitmaps(NULL)
 {
   //cerr << translationId << " inputStr=" << inputStr << endl;
 }
 
 Manager::~Manager()
 {
-
   delete m_search;
   delete m_bitmaps;
 }
