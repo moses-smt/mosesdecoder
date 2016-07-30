@@ -1,5 +1,6 @@
 #include "TranslationTask.h"
 #include "System.h"
+#include "InputType.h"
 #include "PhraseBased/Manager.h"
 #include "SCFG/Manager.h"
 
@@ -11,10 +12,13 @@ namespace Moses2
 TranslationTask::TranslationTask(System &system,
 		const std::string &line,
 		long translationId)
-:m_system(system)
-,m_line(line)
-,m_translationId(translationId)
 {
+  if (system.isPb) {
+	  m_mgr = new Manager(system, *this, line, translationId);
+  }
+  else {
+	  m_mgr = new SCFG::Manager(system, *this, line, translationId);
+  }
 }
 
 TranslationTask::~TranslationTask()
@@ -23,33 +27,20 @@ TranslationTask::~TranslationTask()
 
 void TranslationTask::Run()
 {
-  ManagerBase *mgr = GetManager();
 
-  mgr->Decode();
+  m_mgr->Decode();
 
   string out;
 
-  out = mgr->OutputBest() + "\n";
-  m_system.bestCollector->Write(m_translationId, out);
+  out = m_mgr->OutputBest() + "\n";
+  m_mgr->system.bestCollector->Write(m_mgr->GetInput().GetTranslationId(), out);
 
-  if (m_system.options.nbest.nbest_size) {
-    out = mgr->OutputNBest();
-    m_system.nbestCollector->Write(m_translationId, out);
+  if (m_mgr->system.options.nbest.nbest_size) {
+    out = m_mgr->OutputNBest();
+    m_mgr->system.nbestCollector->Write(m_mgr->GetInput().GetTranslationId(), out);
   }
 
-  delete mgr;
-}
-
-ManagerBase *TranslationTask::GetManager()
-{
-  ManagerBase *mgr;
-  if (m_system.isPb) {
-	  mgr = new Manager(m_system, *this, m_line, m_translationId);
-  }
-  else {
-	  mgr = new SCFG::Manager(m_system, *this, m_line, m_translationId);
-  }
-  return mgr;
+  delete m_mgr;
 }
 
 }
