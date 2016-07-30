@@ -18,7 +18,11 @@ public:
   virtual void Run();
 
 protected:
-  ManagerBase *m_mgr;
+  System &m_system;
+  const std::string m_line;
+  const long m_translationId;
+
+  ManagerBase *GetManager();
 };
 
 }

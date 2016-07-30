@@ -8,37 +8,48 @@ using namespace std;
 namespace Moses2
 {
 
-TranslationTask::TranslationTask(System &system, const std::string &line,
-    long translationId)
+TranslationTask::TranslationTask(System &system,
+		const std::string &line,
+		long translationId)
+:m_system(system)
+,m_line(line)
+,m_translationId(translationId)
 {
-  if (system.isPb) {
-    m_mgr = new Manager(system, *this, line, translationId);
-  }
-  else {
-    m_mgr = new SCFG::Manager(system, *this, line, translationId);
-  }
 }
 
 TranslationTask::~TranslationTask()
 {
-  delete m_mgr;
 }
 
 void TranslationTask::Run()
 {
-  m_mgr->Decode();
+  ManagerBase *mgr = GetManager();
+
+  mgr->Decode();
 
   string out;
 
-  out = m_mgr->OutputBest() + "\n";
-  m_mgr->system.bestCollector->Write(m_mgr->m_translationId, out);
+  out = mgr->OutputBest() + "\n";
+  m_system.bestCollector->Write(m_translationId, out);
 
-  if (m_mgr->system.options.nbest.nbest_size) {
-    out = m_mgr->OutputNBest();
-    m_mgr->system.nbestCollector->Write(m_mgr->m_translationId, out);
-
+  if (m_system.options.nbest.nbest_size) {
+    out = mgr->OutputNBest();
+    m_system.nbestCollector->Write(m_translationId, out);
   }
 
+  delete mgr;
+}
+
+ManagerBase *TranslationTask::GetManager()
+{
+  ManagerBase *mgr;
+  if (m_system.isPb) {
+	  mgr = new Manager(m_system, *this, m_line, m_translationId);
+  }
+  else {
+	  mgr = new SCFG::Manager(m_system, *this, m_line, m_translationId);
+  }
+  return mgr;
 }
 
 }

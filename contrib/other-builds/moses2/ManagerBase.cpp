@@ -21,16 +21,25 @@ using namespace std;
 namespace Moses2
 {
 ManagerBase::ManagerBase(System &sys, const TranslationTask &task,
-    const std::string &inputStr, long translationId) :
-    system(sys), task(task), m_inputStr(inputStr), m_translationId(
-        translationId)
+    const std::string &inputStr, long translationId)
+:system(sys)
+,task(task)
+,m_inputStr(inputStr)
+,m_translationId(translationId)
+,m_pool(NULL)
+,m_systemPool(NULL)
+,m_hypoRecycle(NULL)
 {
 }
 
 ManagerBase::~ManagerBase()
 {
-  GetPool().Reset();
-  GetHypoRecycle().Clear();
+  if (m_pool) {
+	  GetPool().Reset();
+  }
+  if (m_hypoRecycle) {
+	  GetHypoRecycle().Clear();
+  }
 }
 
 void ManagerBase::InitPools()

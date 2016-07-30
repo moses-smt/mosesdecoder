@@ -10,7 +10,6 @@
 #include <string>
 #include "TypeDef.h"
 #include "MemPool.h"
-#include "Vector.h"
 
 namespace Moses2
 {
@@ -47,9 +46,6 @@ public:
 
   void PlusEquals(const System &system, const FeatureFunction &featureFunction,
       const std::vector<SCORE> &scores);
-
-  void PlusEquals(const System &system, const FeatureFunction &featureFunction,
-      const Vector<SCORE> &scores);
 
   void PlusEquals(const System &system, const FeatureFunction &featureFunction,
       SCORE scores[]);

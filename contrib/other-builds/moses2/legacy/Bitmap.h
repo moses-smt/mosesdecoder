@@ -29,7 +29,7 @@
 #include <cmath>
 #include <cstdlib>
 #include "Range.h"
-#include "../Vector.h"
+#include "../Array.h"
 
 namespace Moses2
 {

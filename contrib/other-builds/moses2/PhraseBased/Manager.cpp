@@ -37,16 +37,19 @@ namespace Moses2
 {
 Manager::Manager(System &sys, const TranslationTask &task,
     const std::string &inputStr, long translationId) :
-    ManagerBase(sys, task, inputStr, translationId)
+ManagerBase(sys, task, inputStr, translationId)
+,m_search(NULL)
+,m_bitmaps(NULL)
 {
   //cerr << translationId << " inputStr=" << inputStr << endl;
 }
 
 Manager::~Manager()
 {
-
+  //cerr << "Start ~Manager " << this << endl;
   delete m_search;
   delete m_bitmaps;
+  //cerr << "Finish ~Manager " << this << endl;
 }
 
 void Manager::Init()
@@ -118,8 +121,12 @@ void Manager::Init()
 
 void Manager::Decode()
 {
+  //cerr << "Start Decode " << this << endl;
+
   Init();
   m_search->Decode();
+
+  //cerr << "Finished Decode " << this << endl;
 }
 
 void Manager::CalcFutureScore()

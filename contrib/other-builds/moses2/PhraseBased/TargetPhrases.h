@@ -7,7 +7,7 @@
 
 #pragma once
 #include <vector>
-#include "../Vector.h"
+#include "../Array.h"
 
 namespace Moses2
 {
