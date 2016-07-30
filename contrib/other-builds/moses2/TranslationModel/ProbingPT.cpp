@@ -206,8 +206,8 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr, MemPool &pool,
   }
 
   // check in cache
-  Cache::const_iterator iter = m_cache.find(keyStruct.second);
-  if (iter != m_cache.end()) {
+  CachePb::const_iterator iter = m_cachePb.find(keyStruct.second);
+  if (iter != m_cachePb.end()) {
     TargetPhrases *tps = iter->second;
     return tps;
   }
@@ -390,20 +390,26 @@ void ProbingPT::CreateCache(System &system)
   while (getline(strme, line) && lineCount < m_maxCacheSize) {
     vector<string> toks = Tokenize(line, "\t");
     assert(toks.size() == 2);
-    PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system,
-        toks[1]);
 
-    std::pair<bool, uint64_t> retStruct = GetKey(*sourcePhrase);
-    if (!retStruct.first) {
-      return;
+    if (system.isPb) {
+		PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system,
+			toks[1]);
+
+		std::pair<bool, uint64_t> retStruct = GetKey(*sourcePhrase);
+		if (!retStruct.first) {
+		  return;
+		}
+
+		TargetPhrases *tps = CreateTargetPhrase(pool, system, *sourcePhrase,
+			retStruct.second);
+		assert(tps);
+
+		m_cachePb[retStruct.second] = tps;
     }
+    else {
+    	// SCFG
 
-    TargetPhrases *tps = CreateTargetPhrase(pool, system, *sourcePhrase,
-        retStruct.second);
-    assert(tps);
-
-    m_cache[retStruct.second] = tps;
-
+    }
     ++lineCount;
   }
 
