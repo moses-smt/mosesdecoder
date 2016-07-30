@@ -43,12 +43,10 @@ void
 TranslationRequest::
 Run()
 {
-  ManagerBase *mgr = GetManager();
-
-  mgr->Decode();
+  m_mgr->Decode();
 
   string out;
-  out = mgr->OutputBest();
+  out = m_mgr->OutputBest();
   m_retData["text"] = xmlrpc_c::value_string(out);
 
   {
@@ -57,7 +55,7 @@ Run()
   }
   m_cond.notify_one();
 
-  delete mgr;
+  delete m_mgr;
 }
 
 void TranslationRequest::pack_hypothesis(const Manager& manager, Hypothesis const* h,
