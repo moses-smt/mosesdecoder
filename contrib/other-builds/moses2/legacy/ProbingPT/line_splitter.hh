@@ -30,7 +30,8 @@ struct target_text
 {
   std::vector<unsigned int> target_phrase;
   std::vector<float> prob;
-  std::vector<unsigned char> word_all1;
+  std::vector<size_t> word_align_term;
+  std::vector<size_t> word_align_non_term;
   std::vector<char> counts;
   std::vector<char> sparse_score;
   std::vector<char> property;

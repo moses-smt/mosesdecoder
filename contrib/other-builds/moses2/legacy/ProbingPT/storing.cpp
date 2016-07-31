@@ -122,11 +122,11 @@ void createProbingPT(const std::string &phrasetable_path,
       if (prevSource.empty()) {
         // 1st line
         prevSource = line.source_phrase.as_string();
-        storeTarget.Append(line, log_prob);
+        storeTarget.Append(line, log_prob, scfg);
       }
       else if (prevSource == line.source_phrase) {
         //If we still have the same line, just append to it:
-        storeTarget.Append(line, log_prob);
+        storeTarget.Append(line, log_prob, scfg);
       }
       else {
         assert(prevSource != line.source_phrase);
@@ -137,7 +137,7 @@ void createProbingPT(const std::string &phrasetable_path,
         uint64_t targetInd = storeTarget.Save();
 
         // next line
-        storeTarget.Append(line, log_prob);
+        storeTarget.Append(line, log_prob, scfg);
 
         //Create an entry for the previous source phrase:
         Entry sourceEntry;

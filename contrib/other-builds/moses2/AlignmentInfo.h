@@ -44,6 +44,8 @@ class AlignmentInfo
   friend class AlignmentInfoCollection;
   friend class VW;
 
+  friend std::ostream& operator<<(std::ostream& out, const AlignmentInfo& obj);
+
 public:
   typedef std::set<std::pair<size_t,size_t> > CollType;
   typedef std::vector<size_t> NonTermIndexMap;

@@ -206,8 +206,8 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr, MemPool &pool,
   }
 
   // check in cache
-  Cache::const_iterator iter = m_cache.find(keyStruct.second);
-  if (iter != m_cache.end()) {
+  CachePb::const_iterator iter = m_cachePb.find(keyStruct.second);
+  if (iter != m_cachePb.end()) {
     TargetPhrases *tps = iter->second;
     return tps;
   }
@@ -390,20 +390,26 @@ void ProbingPT::CreateCache(System &system)
   while (getline(strme, line) && lineCount < m_maxCacheSize) {
     vector<string> toks = Tokenize(line, "\t");
     assert(toks.size() == 2);
-    PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system,
-        toks[1]);
 
-    std::pair<bool, uint64_t> retStruct = GetKey(*sourcePhrase);
-    if (!retStruct.first) {
-      return;
+    if (system.isPb) {
+		PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system,
+			toks[1]);
+
+		std::pair<bool, uint64_t> retStruct = GetKey(*sourcePhrase);
+		if (!retStruct.first) {
+		  return;
+		}
+
+		TargetPhrases *tps = CreateTargetPhrase(pool, system, *sourcePhrase,
+			retStruct.second);
+		assert(tps);
+
+		m_cachePb[retStruct.second] = tps;
     }
+    else {
+    	// SCFG
 
-    TargetPhrases *tps = CreateTargetPhrase(pool, system, *sourcePhrase,
-        retStruct.second);
-    assert(tps);
-
-    m_cache[retStruct.second] = tps;
-
+    }
     ++lineCount;
   }
 
@@ -648,30 +654,17 @@ SCFG::TargetPhraseImpl *ProbingPT::CreateTargetPhraseSCFG(
   offset += sizeof(uint32_t);
 
   // align
-  uint32_t alignInd = tpInfo->alignInd;
-  //cerr << "alignInd=" << alignInd << endl;
+  uint32_t alignTerm = tpInfo->alignTerm;
+  //cerr << "alignTerm=" << alignTerm << endl;
+  UTIL_THROW_IF2(alignTerm >= m_aligns.size(), "Unknown alignInd");
+  tp->m_alignTerm = m_aligns[alignTerm];
+  assert(tp->m_alignTerm);
 
-  UTIL_THROW_IF2(alignInd >= m_aligns.size(), "Unknown alignInd");
-  const AlignmentInfo *alignInfo = m_aligns[alignInd];
-  assert(alignInfo);
-
-  AlignmentInfo::CollType alignTerm, alignNonTerm;
-
-  BOOST_FOREACH(const AlignmentInfo::CollType::value_type  &val, *alignInfo) {
-    size_t sourcePos = val.first;
-    size_t targetPos = val.second;
-    //cerr << "val=" << sourcePos << " " << targetPos << endl;
-
-    if ((*tp)[targetPos].isNonTerminal) {
-      alignNonTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
-    }
-    else {
-      alignTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
-    }
-  }
-
-  tp->SetAlignTerm(alignTerm);
-  tp->SetAlignNonTerm(alignNonTerm);
+  uint32_t alignNonTerm = tpInfo->alignNonTerm;
+  //cerr << "alignTerm=" << alignTerm << endl;
+  UTIL_THROW_IF2(alignNonTerm >= m_aligns.size(), "Unknown alignInd");
+  tp->m_alignNonTerm = m_aligns[alignNonTerm];
+  assert(tp->m_alignNonTerm);
 
   // properties TODO
 

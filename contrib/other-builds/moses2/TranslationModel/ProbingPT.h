@@ -120,8 +120,11 @@ protected:
   uint64_t GetSourceProbingId(const Word &word) const;
 
   // caching
-  typedef boost::unordered_map<uint64_t, TargetPhrases*> Cache;
-  Cache m_cache;
+  typedef boost::unordered_map<uint64_t, TargetPhrases*> CachePb;
+  CachePb m_cachePb;
+
+  typedef boost::unordered_map<uint64_t, TargetPhrases*> CacheSCFG;
+  CacheSCFG m_cacheSCFG;
 
   void CreateCache(System &system);
 
