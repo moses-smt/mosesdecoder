@@ -654,11 +654,16 @@ SCFG::TargetPhraseImpl *ProbingPT::CreateTargetPhraseSCFG(
   offset += sizeof(uint32_t);
 
   // align
-  uint32_t alignInd = tpInfo->alignInd;
-  //cerr << "alignInd=" << alignInd << endl;
+  uint32_t alignTerm = tpInfo->alignTerm;
+  //cerr << "alignTerm=" << alignTerm << endl;
+  UTIL_THROW_IF2(alignTerm >= m_aligns.size(), "Unknown alignInd");
+  tp->m_alignTerm = m_aligns[alignTerm];
+  assert(tp->m_alignTerm);
 
-  UTIL_THROW_IF2(alignInd >= m_aligns.size(), "Unknown alignInd");
-  tp->m_alignNonTerm = m_aligns[alignInd];
+  uint32_t alignNonTerm = tpInfo->alignNonTerm;
+  //cerr << "alignTerm=" << alignTerm << endl;
+  UTIL_THROW_IF2(alignNonTerm >= m_aligns.size(), "Unknown alignInd");
+  tp->m_alignNonTerm = m_aligns[alignNonTerm];
   assert(tp->m_alignNonTerm);
 
   // properties TODO

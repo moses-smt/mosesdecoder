@@ -44,7 +44,8 @@ uint64_t getKey(const uint64_t source_phrase[], size_t size);
 
 struct TargetPhraseInfo
 {
-  uint32_t alignInd;
+  uint32_t alignTerm;
+  uint32_t alignNonTerm;
   uint16_t numWords;
   uint16_t propLength;
   uint16_t filler;
