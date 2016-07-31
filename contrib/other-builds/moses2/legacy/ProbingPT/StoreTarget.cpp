@@ -62,7 +62,8 @@ void StoreTarget::Save(const target_text &rule)
 {
   // metadata for each tp
   TargetPhraseInfo tpInfo;
-  tpInfo.alignInd = GetAlignId(rule.word_all1);
+  tpInfo.alignTerm = GetAlignId(rule.word_align_term);
+  tpInfo.alignNonTerm = GetAlignId(rule.word_align_non_term);
   tpInfo.numWords = rule.target_phrase.size();
   tpInfo.propLength = rule.property.size();
 
@@ -93,8 +94,8 @@ void StoreTarget::SaveAlignment()
   BOOST_FOREACH(Alignments::value_type &valPair, m_aligns) {
     file << valPair.second << "\t";
 
-    const std::vector<unsigned char> &aligns = valPair.first;
-    BOOST_FOREACH(unsigned char align, aligns) {
+    const std::vector<size_t> &aligns = valPair.first;
+    BOOST_FOREACH(size_t align, aligns) {
       file << align << " ";
     }
     file << endl;
@@ -102,17 +103,29 @@ void StoreTarget::SaveAlignment()
 
 }
 
-void StoreTarget::Append(const line_text &line, bool log_prob)
+void StoreTarget::Append(const line_text &line, bool log_prob, bool scfg)
 {
   target_text *rule = new target_text;
+  //cerr << "line.target_phrase=" << line.target_phrase << endl;
 
   // target_phrase
+  vector<bool> nonTerms;
   util::TokenIter<util::SingleCharacter> it;
   it = util::TokenIter<util::SingleCharacter>(line.target_phrase,
       util::SingleCharacter(' '));
   while (it) {
     string tok = it->as_string();
+    //cerr << "tok=" << tok << endl;
     uint32_t vocabId = m_vocab.GetVocabId(tok);
+
+    if (scfg) {
+      bool nonTerm = false;
+      if (scfg && tok[0] == '[' && tok.back() == ']') {
+        //cerr << "NON-TERM=" << tok << " " << nonTerms.size() << endl;
+        nonTerm = true;
+      }
+      nonTerms.push_back(nonTerm);
+    }
 
     rule->target_phrase.push_back(vocabId);
     it++;
@@ -134,6 +147,14 @@ void StoreTarget::Append(const line_text &line, bool log_prob)
     it++;
   }
 
+  /*
+  cerr << "nonTerms=";
+  for (size_t i = 0; i < nonTerms.size(); ++i) {
+    cerr << nonTerms[i] << " ";
+  }
+  cerr << endl;
+  */
+
   // alignment
   it = util::TokenIter<util::SingleCharacter>(line.word_align,
       util::SingleCharacter(' '));
@@ -143,10 +164,28 @@ void StoreTarget::Append(const line_text &line, bool log_prob)
       break;
     }
 
-    vector<unsigned char> alignPair = Tokenize<unsigned char>(tokPair, "-");
+    vector<size_t> alignPair = Tokenize<size_t>(tokPair, "-");
     assert(alignPair.size() == 2);
-    rule->word_all1.push_back(alignPair[0]);
-    rule->word_all1.push_back(alignPair[1]);
+
+    bool nonTerm = false;
+    size_t sourcePos = alignPair[0];
+    size_t targetPos = alignPair[1];
+    if (scfg) {
+      nonTerm = nonTerms[targetPos];
+    }
+
+    //cerr << targetPos << "=" << nonTerm << endl;
+
+    if (nonTerm) {
+      rule->word_align_non_term.push_back(sourcePos);
+      rule->word_align_non_term.push_back(targetPos);
+      //cerr << (int) rule->word_all1.back() << " ";
+    }
+    else {
+      rule->word_align_term.push_back(sourcePos);
+      rule->word_align_term.push_back(targetPos);
+    }
+
     it++;
   }
 
@@ -166,9 +205,9 @@ void StoreTarget::Append(const line_text &line, bool log_prob)
   m_coll.push_back(rule);
 }
 
-uint32_t StoreTarget::GetAlignId(const std::vector<unsigned char> &align)
+uint32_t StoreTarget::GetAlignId(const std::vector<size_t> &align)
 {
-  boost::unordered_map<std::vector<unsigned char>, uint32_t>::iterator iter =
+  boost::unordered_map<std::vector<size_t>, uint32_t>::iterator iter =
       m_aligns.find(align);
   if (iter == m_aligns.end()) {
     uint32_t ind = m_aligns.size();
