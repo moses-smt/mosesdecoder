@@ -120,7 +120,7 @@ void StoreTarget::Append(const line_text &line, bool log_prob, bool scfg)
 
     if (scfg) {
       bool nonTerm = false;
-      if (scfg && tok[0] == '[' && tok.back() == ']') {
+      if (scfg && tok[0] == '[' && tok[tok.size() - 1] == ']') {
         //cerr << "NON-TERM=" << tok << " " << nonTerms.size() << endl;
         nonTerm = true;
       }
