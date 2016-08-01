@@ -527,26 +527,46 @@ void ProbingPT::LookupGivenNode(
 
   const Phrase<SCFG::Word> &sourcePhrase = outPath.subPhrase;
 
-  std::pair<bool, SCFG::TargetPhrases*> tpsPair = CreateTargetPhrasesSCFG(pool, mgr.system, sourcePhrase, key.second);
-  assert(tpsPair.first && tpsPair.second);
+  // check in cache
+  CacheSCFG::const_iterator iter = m_cacheSCFG.find(key.second);
+  if (iter != m_cacheSCFG.end()) {
+	//cerr << "FOUND IN CACHE " << key.second << " " << sourcePhrase.Debug(mgr.system) << endl;
+    SCFG::TargetPhrases *tps = iter->second;
 
-  if (tpsPair.first) {
-	    // new entries
-	    ActiveChartEntryProbing *chartEntry = new (pool.Allocate<ActiveChartEntryProbing>()) ActiveChartEntryProbing(pool, prevEntryCast);
-	    //cerr << "AFTER chartEntry" << endl;
+    ActiveChartEntryProbing *chartEntry = new (pool.Allocate<ActiveChartEntryProbing>()) ActiveChartEntryProbing(pool, prevEntryCast);
+    //cerr << "AFTER chartEntry" << endl;
 
-	    chartEntry->AddSymbolBindElement(subPhraseRange, wordSought, hypos, *this);
-	    //cerr << "AFTER AddSymbolBindElement" << endl;
+    chartEntry->AddSymbolBindElement(subPhraseRange, wordSought, hypos, *this);
+    //cerr << "AFTER AddSymbolBindElement" << endl;
 
-	    size_t ptInd = GetPtInd();
-	    outPath.AddActiveChartEntry(ptInd, chartEntry);
-	    //cerr << "AFTER AddActiveChartEntry" << endl;
+    size_t ptInd = GetPtInd();
+    outPath.AddActiveChartEntry(ptInd, chartEntry);
 
-	    if (tpsPair.second) {
-	    	// there are some rules
-	        //cerr << "symbolbind=" << chartEntry->GetSymbolBind().Debug(mgr.system) << endl;
-	        outPath.AddTargetPhrasesToPath(pool, *this, *tpsPair.second, chartEntry->GetSymbolBind());
-	    }
+    outPath.AddTargetPhrasesToPath(pool, *this, *tps, chartEntry->GetSymbolBind());
+  }
+  else {
+	  // not in cache. Lookup
+	  std::pair<bool, SCFG::TargetPhrases*> tpsPair = CreateTargetPhrasesSCFG(pool, mgr.system, sourcePhrase, key.second);
+	  assert(tpsPair.first && tpsPair.second);
+
+	  if (tpsPair.first) {
+			// new entries
+			ActiveChartEntryProbing *chartEntry = new (pool.Allocate<ActiveChartEntryProbing>()) ActiveChartEntryProbing(pool, prevEntryCast);
+			//cerr << "AFTER chartEntry" << endl;
+
+			chartEntry->AddSymbolBindElement(subPhraseRange, wordSought, hypos, *this);
+			//cerr << "AFTER AddSymbolBindElement" << endl;
+
+			size_t ptInd = GetPtInd();
+			outPath.AddActiveChartEntry(ptInd, chartEntry);
+			//cerr << "AFTER AddActiveChartEntry" << endl;
+
+			if (tpsPair.second) {
+				// there are some rules
+				//cerr << "symbolbind=" << chartEntry->GetSymbolBind().Debug(mgr.system) << endl;
+				outPath.AddTargetPhrasesToPath(pool, *this, *tpsPair.second, chartEntry->GetSymbolBind());
+			}
+	  }
   }
 }
 
