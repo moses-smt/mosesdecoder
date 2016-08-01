@@ -525,65 +525,28 @@ void ProbingPT::LookupGivenNode(
     return;
   }
 
-  std::pair<bool, uint64_t> query_result; // 1st=found, 2nd=target file offset
-  query_result = m_engine->query(key.second);
-  //cerr << "query_result=" << query_result.first << endl;
+  const Phrase<SCFG::Word> &sourcePhrase = outPath.subPhrase;
 
-  /*
-  if (outPath.range.GetStartPos() == 1 || outPath.range.GetStartPos() == 2) {
-    cerr  << "range=" << outPath.range
-          << " prevEntry=" << prevEntry.GetSymbolBind().Debug(mgr.system) << " " << prevEntryCast.GetKey()
-          << " wordSought=" << wordSought.Debug(mgr.system)
-          << " key=" << key.first << " " << key.second
-          << " query_result=" << query_result.first << " " << (query_result.second == NONE)
-          << endl;
-  }
-  */
+  std::pair<bool, SCFG::TargetPhrases*> tpsPair = CreateTargetPhrasesSCFG(pool, mgr.system, sourcePhrase, key.second);
+  assert(tpsPair.first && tpsPair.second);
 
-  if (query_result.first) {
-    size_t ptInd = GetPtInd();
+  if (tpsPair.first) {
+	    // new entries
+	    ActiveChartEntryProbing *chartEntry = new (pool.Allocate<ActiveChartEntryProbing>()) ActiveChartEntryProbing(pool, prevEntryCast);
+	    //cerr << "AFTER chartEntry" << endl;
 
-    // new entries
-    ActiveChartEntryProbing *chartEntry = new (pool.Allocate<ActiveChartEntryProbing>()) ActiveChartEntryProbing(pool, prevEntryCast);
-    //cerr << "AFTER chartEntry" << endl;
+	    chartEntry->AddSymbolBindElement(subPhraseRange, wordSought, hypos, *this);
+	    //cerr << "AFTER AddSymbolBindElement" << endl;
 
-    chartEntry->AddSymbolBindElement(subPhraseRange, wordSought, hypos, *this);
-    //cerr << "AFTER AddSymbolBindElement" << endl;
+	    size_t ptInd = GetPtInd();
+	    outPath.AddActiveChartEntry(ptInd, chartEntry);
+	    //cerr << "AFTER AddActiveChartEntry" << endl;
 
-    outPath.AddActiveChartEntry(ptInd, chartEntry);
-    //cerr << "AFTER AddActiveChartEntry" << endl;
-
-    if (query_result.second != NONE) {
-      // there are some rules
-      const FeatureFunctions &ffs = mgr.system.featureFunctions;
-
-      const char *offset = data + query_result.second;
-      uint64_t *numTP = (uint64_t*) offset;
-      //cerr << "numTP=" << *numTP << endl;
-
-      const Phrase<SCFG::Word> &sourcePhrase = outPath.subPhrase;
-
-      SCFG::TargetPhrases *tps = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool, *numTP);
-
-      offset += sizeof(uint64_t);
-      for (size_t i = 0; i < *numTP; ++i) {
-        SCFG::TargetPhraseImpl *tp = CreateTargetPhraseSCFG(pool, mgr.system, offset);
-        assert(tp);
-        //cerr << "tp=" << tp->Debug(mgr.system) << endl;
-
-        ffs.EvaluateInIsolation(pool, mgr.system, sourcePhrase, *tp);
-
-        tps->AddTargetPhrase(*tp);
-
-      }
-
-      tps->SortAndPrune(m_tableLimit);
-      ffs.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
-      //cerr << "tps=" << tps->GetSize() << endl;
-
-      //cerr << "symbolbind=" << chartEntry->GetSymbolBind().Debug(mgr.system) << endl;
-      outPath.AddTargetPhrasesToPath(pool, *this, *tps, chartEntry->GetSymbolBind());
-    }
+	    if (tpsPair.second) {
+	    	// there are some rules
+	        //cerr << "symbolbind=" << chartEntry->GetSymbolBind().Debug(mgr.system) << endl;
+	        outPath.AddTargetPhrasesToPath(pool, *this, *tpsPair.second, chartEntry->GetSymbolBind());
+	    }
   }
 }
 
