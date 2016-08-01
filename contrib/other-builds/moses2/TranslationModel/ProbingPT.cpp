@@ -23,7 +23,6 @@
 #include "../SCFG/InputPath.h"
 #include "../SCFG/Manager.h"
 #include "../SCFG/TargetPhraseImpl.h"
-#include "../SCFG/PhraseImpl.h"
 
 using namespace std;
 
@@ -393,35 +392,22 @@ void ProbingPT::CreateCache(System &system)
     assert(toks.size() == 2);
 
     if (system.isPb) {
-      PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system,
-        toks[1]);
+		PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system,
+			toks[1]);
 
-      std::pair<bool, uint64_t> retStruct = GetKey(*sourcePhrase);
-      if (!retStruct.first) {
-        return;
-      }
+		std::pair<bool, uint64_t> retStruct = GetKey(*sourcePhrase);
+		if (!retStruct.first) {
+		  return;
+		}
 
-      TargetPhrases *tps = CreateTargetPhrase(pool, system, *sourcePhrase,
-        retStruct.second);
-      assert(tps);
+		TargetPhrases *tps = CreateTargetPhrase(pool, system, *sourcePhrase,
+			retStruct.second);
+		assert(tps);
 
-      m_cachePb[retStruct.second] = tps;
+		m_cachePb[retStruct.second] = tps;
     }
     else {
     	// SCFG
-      SCFG::PhraseImpl *sourcePhrase = SCFG::PhraseImpl::CreateFromString(pool, vocab, system,
-        toks[1]);
-
-      std::pair<bool, uint64_t> retStruct = GetKey(*sourcePhrase);
-      if (!retStruct.first) {
-        return;
-      }
-
-      SCFG::TargetPhrases *tps = CreateTargetPhrase(pool, system, *sourcePhrase,
-        retStruct.second);
-      assert(tps);
-
-      m_cacheSCFG[retStruct.second] = tps;
 
     }
     ++lineCount;
@@ -683,82 +669,6 @@ SCFG::TargetPhraseImpl *ProbingPT::CreateTargetPhraseSCFG(
   // properties TODO
 
   return tp;
-}
-
-std::pair<bool, uint64_t> ProbingPT::GetKey(const Phrase<SCFG::Word> &sourcePhrase) const
-{
-  std::pair<bool, uint64_t> ret;
-
-  // create a target phrase from the 1st word of the source, prefix with 'ProbingPT:'
-  size_t sourceSize = sourcePhrase.GetSize();
-  assert(sourceSize);
-
-  uint64_t probingSource[sourceSize];
-  GetSourceProbingIds(sourcePhrase, ret.first, probingSource);
-  if (!ret.first) {
-    // source phrase contains a word unknown in the pt.
-    // We know immediately there's no translation for it
-  }
-  else {
-    ret.second = m_engine->getKey(probingSource, sourceSize);
-  }
-
-  return ret;
-
-}
-
-void ProbingPT::GetSourceProbingIds(const Phrase<SCFG::Word> &sourcePhrase,
-    bool &ok, uint64_t probingSource[]) const
-{
-
-  size_t size = sourcePhrase.GetSize();
-  for (size_t i = 0; i < size; ++i) {
-    const Word &word = sourcePhrase[i];
-    uint64_t probingId = GetSourceProbingId(word);
-    if (probingId == m_unkId) {
-      ok = false;
-      return;
-    }
-    else {
-      probingSource[i] = probingId;
-    }
-  }
-
-  ok = true;
-}
-
-SCFG::TargetPhrases *ProbingPT::CreateTargetPhrase(MemPool &pool, const System &system,
-    const Phrase<SCFG::Word> &sourcePhrase, uint64_t key) const
-{
-  SCFG::TargetPhrases *tps = NULL;
-
-  //Actual lookup
-  std::pair<bool, uint64_t> query_result; // 1st=found, 2nd=target file offset
-  query_result = m_engine->query(key);
-
-  if (query_result.first) {
-    const char *offset = data + query_result.second;
-    uint64_t *numTP = (uint64_t*) offset;
-
-    tps = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool, *numTP);
-
-    offset += sizeof(uint64_t);
-    for (size_t i = 0; i < *numTP; ++i) {
-      SCFG::TargetPhraseImpl *tp = CreateTargetPhraseSCFG(pool, system, offset);
-      assert(tp);
-      const FeatureFunctions &ffs = system.featureFunctions;
-      ffs.EvaluateInIsolation(pool, system, sourcePhrase, *tp);
-
-      tps->AddTargetPhrase(*tp);
-
-    }
-
-    tps->SortAndPrune(m_tableLimit);
-    system.featureFunctions.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
-    //cerr << *tps << endl;
-  }
-
-  return tps;
 }
 
 } // namespace

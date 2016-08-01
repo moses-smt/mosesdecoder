@@ -70,10 +70,6 @@ public:
 
   void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
 
-  uint64_t GetUnk() const
-  { return m_unkId; }
-
-  // SCFG
   void InitActiveChart(
       MemPool &pool,
       const SCFG::Manager &mgr,
@@ -84,6 +80,9 @@ public:
       size_t maxChartSpan,
       const SCFG::Stacks &stacks,
       SCFG::InputPath &path) const;
+
+  uint64_t GetUnk() const
+  { return m_unkId; }
 
 protected:
   std::vector<uint64_t> m_sourceVocab; // factor id -> pt id
@@ -124,7 +123,7 @@ protected:
   typedef boost::unordered_map<uint64_t, TargetPhrases*> CachePb;
   CachePb m_cachePb;
 
-  typedef boost::unordered_map<uint64_t, SCFG::TargetPhrases*> CacheSCFG;
+  typedef boost::unordered_map<uint64_t, TargetPhrases*> CacheSCFG;
   CacheSCFG m_cacheSCFG;
 
   void CreateCache(System &system);
@@ -145,14 +144,6 @@ protected:
       MemPool &pool,
       const System &system,
       const char *&offset) const;
-
-  std::pair<bool, uint64_t> GetKey(const Phrase<SCFG::Word> &sourcePhrase) const;
-
-  void GetSourceProbingIds(const Phrase<SCFG::Word> &sourcePhrase, bool &ok,
-      uint64_t probingSource[]) const;
-
-  SCFG::TargetPhrases *CreateTargetPhrase(MemPool &pool, const System &system,
-      const Phrase<SCFG::Word> &sourcePhrase, uint64_t key) const;
 
 };
 
