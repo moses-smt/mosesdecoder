@@ -209,7 +209,7 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr, MemPool &pool,
   // check in cache
   CachePb::const_iterator iter = m_cachePb.find(keyStruct.second);
   if (iter != m_cachePb.end()) {
-	cerr << "FOUND IN CACHE " << keyStruct.second << " " << sourcePhrase.Debug(mgr.system) << endl;
+    //cerr << "FOUND IN CACHE " << keyStruct.second << " " << sourcePhrase.Debug(mgr.system) << endl;
     TargetPhrases *tps = iter->second;
     return tps;
   }
