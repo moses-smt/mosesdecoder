@@ -28,6 +28,7 @@ class RecycleData;
 namespace SCFG
 {
 class TargetPhraseImpl;
+class TargetPhrases;
 }
 
 class ProbingPT: public Moses2::PhraseTable
@@ -70,6 +71,10 @@ public:
 
   void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
 
+  uint64_t GetUnk() const
+  { return m_unkId; }
+
+  // SCFG
   void InitActiveChart(
       MemPool &pool,
       const SCFG::Manager &mgr,
@@ -81,8 +86,6 @@ public:
       const SCFG::Stacks &stacks,
       SCFG::InputPath &path) const;
 
-  uint64_t GetUnk() const
-  { return m_unkId; }
 
 protected:
   std::vector<uint64_t> m_sourceVocab; // factor id -> pt id
@@ -99,7 +102,7 @@ protected:
 
   TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
       InputPath &inputPath) const;
-  TargetPhrases *CreateTargetPhrase(MemPool &pool, const System &system,
+  TargetPhrases *CreateTargetPhrases(MemPool &pool, const System &system,
       const Phrase<Moses2::Word> &sourcePhrase, uint64_t key) const;
   TargetPhraseImpl *CreateTargetPhrase(MemPool &pool, const System &system,
       const char *&offset) const;
@@ -123,14 +126,14 @@ protected:
   typedef boost::unordered_map<uint64_t, TargetPhrases*> CachePb;
   CachePb m_cachePb;
 
-  typedef boost::unordered_map<uint64_t, TargetPhrases*> CacheSCFG;
+  typedef boost::unordered_map<uint64_t, SCFG::TargetPhrases*> CacheSCFG;
   CacheSCFG m_cacheSCFG;
 
   void CreateCache(System &system);
 
   void ReformatWord(System &system, std::string &wordStr, bool &isNT);
 
-  // scfg
+  // SCFG
   void LookupGivenNode(
       MemPool &pool,
       const SCFG::Manager &mgr,
@@ -140,10 +143,15 @@ protected:
       const Moses2::Range &subPhraseRange,
       SCFG::InputPath &outPath) const;
 
+  std::pair<bool, SCFG::TargetPhrases*> CreateTargetPhrasesSCFG(MemPool &pool, const System &system,
+      const Phrase<SCFG::Word> &sourcePhrase, uint64_t key) const;
+  // return value: 1st = there are actual rules, not just a empty cell for prefix
+
   SCFG::TargetPhraseImpl *CreateTargetPhraseSCFG(
       MemPool &pool,
       const System &system,
       const char *&offset) const;
+
 
 };
 
