@@ -146,9 +146,8 @@ void createProbingPT(const std::string &phrasetable_path,
         //Probably not entirerly correct, but fast and seems to work fine in practise.
         std::vector<uint64_t> vocabid_source = getVocabIDs(prevSource);
         if (scfg) {
-          // don't store the last non-term in the source phrase
-          //vocabid_source.erase(vocabid_source.begin() + vocabid_source.size() - 1);
-          sourcePhrases.Add(sourceEntries, vocabid_source);
+          // storing prefixes?
+       	  sourcePhrases.Add(sourceEntries, vocabid_source);
         }
         sourceEntry.key = getKey(vocabid_source);
 

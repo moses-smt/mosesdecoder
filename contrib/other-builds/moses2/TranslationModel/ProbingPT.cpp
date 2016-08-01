@@ -399,17 +399,17 @@ void ProbingPT::CreateCache(System &system)
     if (system.isPb) {
     	PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system, toks[2]);
 
+    	/*
 		std::pair<bool, uint64_t> retStruct = GetKey(*sourcePhrase);
 		if (!retStruct.first) {
 			UTIL_THROW2("Unknown cache entry");
 		}
-		//cerr << "key=" << retStruct.second << " " << key << endl;
-
-		TargetPhrases *tps = CreateTargetPhrases(pool, system, *sourcePhrase,
-			retStruct.second);
+		cerr << "key=" << retStruct.second << " " << key << endl;
+		*/
+		TargetPhrases *tps = CreateTargetPhrases(pool, system, *sourcePhrase, key);
 		assert(tps);
 
-		m_cachePb[retStruct.second] = tps;
+		m_cachePb[key] = tps;
     }
     else {
     	// SCFG
