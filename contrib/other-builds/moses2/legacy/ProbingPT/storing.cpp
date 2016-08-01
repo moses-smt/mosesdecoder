@@ -170,7 +170,10 @@ void createProbingPT(const std::string &phrasetable_path,
             if (toks.size() >= 2) {
               totalSourceCount += toks[1];
               CacheItem *item = new CacheItem(
-                  Trim(line.source_phrase.as_string()), toks[1]);
+                  Trim(line.source_phrase.as_string()),
+				  sourceEntry.key,
+				  sourceEntry.value,
+				  toks[1]);
               cache.push(item);
 
               if (max_cache_size > 0 && cache.size() > max_cache_size) {
@@ -269,7 +272,7 @@ void serialize_cache(
   os << totalSourceCount << std::endl;
   for (size_t i = 0; i < vec.size(); ++i) {
     const CacheItem *item = vec[i];
-    os << item->count << "\t" << item->source << std::endl;
+    os << item->count << "\t" << item->sourceKey << "\t" << item->sourceValue << "\t" << item->source << std::endl;
     delete item;
   }
 

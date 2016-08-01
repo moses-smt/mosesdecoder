@@ -23,6 +23,7 @@
 #include "../SCFG/InputPath.h"
 #include "../SCFG/Manager.h"
 #include "../SCFG/TargetPhraseImpl.h"
+#include "../SCFG/PhraseImpl.h"
 
 using namespace std;
 
@@ -213,7 +214,7 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr, MemPool &pool,
   }
 
   // query pt
-  TargetPhrases *tps = CreateTargetPhrase(pool, mgr.system, sourcePhrase,
+  TargetPhrases *tps = CreateTargetPhrases(pool, mgr.system, sourcePhrase,
       keyStruct.second);
   return tps;
 }
@@ -240,7 +241,7 @@ std::pair<bool, uint64_t> ProbingPT::GetKey(const Phrase<Moses2::Word> &sourcePh
 
 }
 
-TargetPhrases *ProbingPT::CreateTargetPhrase(MemPool &pool,
+TargetPhrases *ProbingPT::CreateTargetPhrases(MemPool &pool,
     const System &system, const Phrase<Moses2::Word> &sourcePhrase, uint64_t key) const
 {
   TargetPhrases *tps = NULL;
@@ -248,6 +249,7 @@ TargetPhrases *ProbingPT::CreateTargetPhrase(MemPool &pool,
   //Actual lookup
   std::pair<bool, uint64_t> query_result; // 1st=found, 2nd=target file offset
   query_result = m_engine->query(key);
+  cerr << "key2=" << query_result.second << endl;
 
   if (query_result.first) {
     const char *offset = data + query_result.second;
@@ -389,18 +391,22 @@ void ProbingPT::CreateCache(System &system)
   size_t lineCount = 0;
   while (getline(strme, line) && lineCount < m_maxCacheSize) {
     vector<string> toks = Tokenize(line, "\t");
-    assert(toks.size() == 2);
+    assert(toks.size() == 3);
+	uint64_t key = Scan<uint64_t>(toks[1]);
+	cerr << "line=" << line << endl;
 
     if (system.isPb) {
-		PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system,
-			toks[1]);
+
+    	PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system,
+			toks[2]);
 
 		std::pair<bool, uint64_t> retStruct = GetKey(*sourcePhrase);
 		if (!retStruct.first) {
 		  return;
 		}
+		cerr << "key=" << retStruct.second << " " << key << endl;
 
-		TargetPhrases *tps = CreateTargetPhrase(pool, system, *sourcePhrase,
+		TargetPhrases *tps = CreateTargetPhrases(pool, system, *sourcePhrase,
 			retStruct.second);
 		assert(tps);
 
@@ -408,7 +414,12 @@ void ProbingPT::CreateCache(System &system)
     }
     else {
     	// SCFG
+		SCFG::PhraseImpl *sourcePhrase = SCFG::PhraseImpl::CreateFromString(pool, vocab, system,
+			toks[2]);
+		cerr << "sourcePhrase=" << sourcePhrase->Debug(system) << endl;
 
+		//SCFG::TargetPhrases *tps = CreateTargetPhraseSCFG(pool, system, *sourcePhrase, key);
+		//assert(tps);
     }
     ++lineCount;
   }
@@ -669,6 +680,63 @@ SCFG::TargetPhraseImpl *ProbingPT::CreateTargetPhraseSCFG(
   // properties TODO
 
   return tp;
+}
+
+std::pair<bool, SCFG::TargetPhrases*> ProbingPT::CreateTargetPhrasesSCFG(MemPool &pool, const System &system,
+    const Phrase<SCFG::Word> &sourcePhrase, uint64_t key) const
+{
+  std::pair<bool, SCFG::TargetPhrases*> ret(false, NULL);
+
+  std::pair<bool, uint64_t> query_result; // 1st=found, 2nd=target file offset
+  query_result = m_engine->query(key);
+  //cerr << "query_result=" << query_result.first << endl;
+
+  /*
+  if (outPath.range.GetStartPos() == 1 || outPath.range.GetStartPos() == 2) {
+	cerr  << "range=" << outPath.range
+		  << " prevEntry=" << prevEntry.GetSymbolBind().Debug(mgr.system) << " " << prevEntryCast.GetKey()
+		  << " wordSought=" << wordSought.Debug(mgr.system)
+		  << " key=" << key.first << " " << key.second
+		  << " query_result=" << query_result.first << " " << (query_result.second == NONE)
+		  << endl;
+  }
+  */
+
+  if (query_result.first) {
+    ret.first = true;
+	size_t ptInd = GetPtInd();
+
+	if (query_result.second != NONE) {
+	  // there are some rules
+	  const FeatureFunctions &ffs = system.featureFunctions;
+
+	  const char *offset = data + query_result.second;
+	  uint64_t *numTP = (uint64_t*) offset;
+	  //cerr << "numTP=" << *numTP << endl;
+
+	  SCFG::TargetPhrases *tps = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool, *numTP);
+	  ret.second = tps;
+
+	  offset += sizeof(uint64_t);
+	  for (size_t i = 0; i < *numTP; ++i) {
+		SCFG::TargetPhraseImpl *tp = CreateTargetPhraseSCFG(pool, system, offset);
+		assert(tp);
+		//cerr << "tp=" << tp->Debug(mgr.system) << endl;
+
+		ffs.EvaluateInIsolation(pool, system, sourcePhrase, *tp);
+
+		tps->AddTargetPhrase(*tp);
+
+	  }
+
+	  tps->SortAndPrune(m_tableLimit);
+	  ffs.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
+	  //cerr << "tps=" << tps->GetSize() << endl;
+
+	}
+  }
+
+  return ret;
 }
 
 } // namespace

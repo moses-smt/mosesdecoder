@@ -63,9 +63,13 @@ class CacheItem
 {
 public:
   std::string source;
+  uint64_t sourceKey, sourceValue;
   float count;
-  CacheItem(const std::string &source, float count) :
-      source(source), count(count)
+  CacheItem(const std::string &vSource, uint64_t vSourceKey, uint64_t vSourceValue, float vCount)
+  :source(vSource)
+  ,sourceKey(vSourceKey)
+  ,sourceValue(vSourceValue)
+  ,count(vCount)
   {
   }
 
