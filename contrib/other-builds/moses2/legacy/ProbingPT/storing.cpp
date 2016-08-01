@@ -151,28 +151,33 @@ void createProbingPT(const std::string &phrasetable_path,
           sourcePhrases.Add(sourceEntries, vocabid_source);
         }
         sourceEntry.key = getKey(vocabid_source);
+
         /*
         cerr << "prevSource=" << prevSource << flush
             << " vocabids=" << Debug(vocabid_source) << flush
             << " key=" << sourceEntry.key << endl;
-        */
-
+		*/
         //Put into table
         sourceEntries.Insert(sourceEntry);
 
-        // update cache
+        // update cache - CURRENT source phrase, not prev
         if (max_cache_size) {
           std::string countStr = line.counts.as_string();
           countStr = Trim(countStr);
           if (!countStr.empty()) {
             std::vector<float> toks = Tokenize<float>(countStr);
+            //cerr << "CACHE:" << line.source_phrase << " " << countStr << " " << toks[1] << endl;
 
             if (toks.size() >= 2) {
               totalSourceCount += toks[1];
+
+              // compute key for CURRENT source
+              std::vector<uint64_t> currVocabidSource = getVocabIDs(line.source_phrase.as_string());
+              uint64_t currKey = getKey(currVocabidSource);
+
               CacheItem *item = new CacheItem(
                   Trim(line.source_phrase.as_string()),
-				  sourceEntry.key,
-				  sourceEntry.value,
+				  currKey,
 				  toks[1]);
               cache.push(item);
 
@@ -272,7 +277,7 @@ void serialize_cache(
   os << totalSourceCount << std::endl;
   for (size_t i = 0; i < vec.size(); ++i) {
     const CacheItem *item = vec[i];
-    os << item->count << "\t" << item->sourceKey << "\t" << item->sourceValue << "\t" << item->source << std::endl;
+    os << item->count << "\t" << item->sourceKey << "\t" << item->source << std::endl;
     delete item;
   }
 

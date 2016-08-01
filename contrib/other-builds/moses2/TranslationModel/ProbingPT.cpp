@@ -209,6 +209,7 @@ TargetPhrases* ProbingPT::Lookup(const Manager &mgr, MemPool &pool,
   // check in cache
   CachePb::const_iterator iter = m_cachePb.find(keyStruct.second);
   if (iter != m_cachePb.end()) {
+	cerr << "FOUND IN CACHE " << keyStruct.second << " " << sourcePhrase.Debug(mgr.system) << endl;
     TargetPhrases *tps = iter->second;
     return tps;
   }
@@ -249,7 +250,7 @@ TargetPhrases *ProbingPT::CreateTargetPhrases(MemPool &pool,
   //Actual lookup
   std::pair<bool, uint64_t> query_result; // 1st=found, 2nd=target file offset
   query_result = m_engine->query(key);
-  cerr << "key2=" << query_result.second << endl;
+  //cerr << "key2=" << query_result.second << endl;
 
   if (query_result.first) {
     const char *offset = data + query_result.second;
@@ -391,20 +392,18 @@ void ProbingPT::CreateCache(System &system)
   size_t lineCount = 0;
   while (getline(strme, line) && lineCount < m_maxCacheSize) {
     vector<string> toks = Tokenize(line, "\t");
-    assert(toks.size() == 4);
+    assert(toks.size() == 3);
 	uint64_t key = Scan<uint64_t>(toks[1]);
-	cerr << "line=" << line << endl;
+	//cerr << "line=" << line << endl;
 
     if (system.isPb) {
-
-    	PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system,
-			toks[3]);
+    	PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system, toks[2]);
 
 		std::pair<bool, uint64_t> retStruct = GetKey(*sourcePhrase);
 		if (!retStruct.first) {
-		  return;
+			UTIL_THROW2("Unknown cache entry");
 		}
-		cerr << "key=" << retStruct.second << " " << key << endl;
+		//cerr << "key=" << retStruct.second << " " << key << endl;
 
 		TargetPhrases *tps = CreateTargetPhrases(pool, system, *sourcePhrase,
 			retStruct.second);
@@ -414,7 +413,7 @@ void ProbingPT::CreateCache(System &system)
     }
     else {
     	// SCFG
-		SCFG::PhraseImpl *sourcePhrase = SCFG::PhraseImpl::CreateFromString(pool, vocab, system, toks[3], false);
+		SCFG::PhraseImpl *sourcePhrase = SCFG::PhraseImpl::CreateFromString(pool, vocab, system, toks[2], false);
 		cerr << "sourcePhrase=" << sourcePhrase->Debug(system) << endl;
 
 		//SCFG::TargetPhrases *tps = CreateTargetPhraseSCFG(pool, system, *sourcePhrase, key);
