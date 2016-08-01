@@ -28,6 +28,7 @@ class RecycleData;
 namespace SCFG
 {
 class TargetPhraseImpl;
+class TargetPhrases;
 }
 
 class ProbingPT: public Moses2::PhraseTable
@@ -125,7 +126,7 @@ protected:
   typedef boost::unordered_map<uint64_t, TargetPhrases*> CachePb;
   CachePb m_cachePb;
 
-  typedef boost::unordered_map<uint64_t, TargetPhrases*> CacheSCFG;
+  typedef boost::unordered_map<uint64_t, SCFG::TargetPhrases*> CacheSCFG;
   CacheSCFG m_cacheSCFG;
 
   void CreateCache(System &system);

@@ -414,10 +414,12 @@ void ProbingPT::CreateCache(System &system)
     else {
     	// SCFG
 		SCFG::PhraseImpl *sourcePhrase = SCFG::PhraseImpl::CreateFromString(pool, vocab, system, toks[2], false);
-		cerr << "sourcePhrase=" << sourcePhrase->Debug(system) << endl;
+		//cerr << "sourcePhrase=" << sourcePhrase->Debug(system) << endl;
 
-		//SCFG::TargetPhrases *tps = CreateTargetPhraseSCFG(pool, system, *sourcePhrase, key);
-		//assert(tps);
+		std::pair<bool, SCFG::TargetPhrases*> tpsPair = CreateTargetPhrasesSCFG(pool, system, *sourcePhrase, key);
+		assert(tpsPair.first && tpsPair.second);
+
+		m_cacheSCFG[key] = tpsPair.second;
     }
     ++lineCount;
   }
