@@ -37,10 +37,12 @@ public:
   const SCFG::InputPath &GetInputPath() const
   {  return *m_path; }
 
+  const Vector<const Hypothesis*> &GetPrevHypos() const
+  {  return m_prevHypos; }
+
   //! get a particular previous hypos
-  const Hypothesis* GetPrevHypo(size_t ind) const {
-    return m_prevHypos[ind];
-  }
+  const Hypothesis* GetPrevHypo(size_t ind) const
+  {  return m_prevHypos[ind]; }
 
   void OutputToStream(std::ostream &out) const;
 

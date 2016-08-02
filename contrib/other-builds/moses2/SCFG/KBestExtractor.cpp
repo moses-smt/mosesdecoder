@@ -25,7 +25,8 @@ KBestExtractor::KBestExtractor(const SCFG::Manager &mgr)
   const Hypothesis *bestHypo = lastStack.GetBestHypo(mgr, arcLists);
 
   if (bestHypo) {
-    TrellisPath *path = new TrellisPath(*bestHypo);
+    TrellisPath *path = new TrellisPath(mgr, *bestHypo);
+    m_coll.push_back(path);
   }
 }
 
