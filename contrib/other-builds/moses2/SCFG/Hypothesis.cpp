@@ -134,35 +134,30 @@ void Hypothesis::OutputToStream(std::ostream &out) const
 std::string Hypothesis::Debug(const System &system) const
 {
   stringstream out;
-  cerr << this << flush;
+  out << this << flush;
 
-  cerr << " RANGE:";
-  cerr << m_path->range << flush;
+  out << " RANGE:";
+  out << m_path->range << flush;
 
   // score
-  cerr << " SCORE:" << GetScores().Debug(GetManager().system) << flush;
+  out << " SCORE:" << GetScores().Debug(GetManager().system) << flush;
+
+  out << m_targetPhrase->Debug(GetManager().system);
+
+  out << "PREV:";
+  for (size_t i = 0; i < m_prevHypos.size(); ++i) {
+    const Hypothesis *prevHypo = m_prevHypos[i];
+    out << prevHypo << " ";
+  }
+  out << endl;
 
   /*
-  out << " m_prevHypos=" << m_prevHypos.size() << " ";
-  for (size_t i = 0; i < m_prevHypos.size(); ++i) {
-    out << m_prevHypos[i] << " ";
-  }
-  */
-
-  cerr << m_targetPhrase->Debug(GetManager().system);
-
-  cerr << "PREV:";
-  for (size_t i = 0; i < m_prevHypos.size(); ++i) {
-    const Hypothesis &prevHypo = *m_prevHypos[i];
-    cerr << &prevHypo << " ";
-  }
-
   // recursive
   for (size_t i = 0; i < m_prevHypos.size(); ++i) {
-    const Hypothesis &prevHypo = *m_prevHypos[i];
-    cerr << endl;
-    cerr << prevHypo.Debug(system);
+    const Hypothesis *prevHypo = m_prevHypos[i];
+    out << prevHypo->Debug(GetManager().system) << " ";
   }
+  */
 
   return out.str();
 }

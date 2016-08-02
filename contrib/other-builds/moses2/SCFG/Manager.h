@@ -34,14 +34,16 @@ public:
   virtual ~Manager();
   void Decode();
   std::string OutputBest() const;
-  std::string OutputNBest()
-  { return ""; }
+  std::string OutputNBest();
 
   const InputPaths &GetInputPaths() const
   { return m_inputPaths; }
 
   QueueItemRecycler &GetQueueItemRecycler()
   { return m_queueItemRecycler; }
+
+  const Stacks &GetStacks() const
+  { return m_stacks; }
 
 protected:
   Stacks m_stacks;

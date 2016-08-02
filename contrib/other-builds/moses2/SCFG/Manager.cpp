@@ -17,6 +17,8 @@
 #include "ActiveChart.h"
 #include "Sentence.h"
 
+#include "KBestExtractor.h"
+
 using namespace std;
 
 namespace Moses2
@@ -86,7 +88,7 @@ void Manager::Decode()
     }
   }
 
-  //m_stacks.OutputStacks();
+  m_stacks.OutputStacks();
 }
 
 void Manager::InitActiveChart(SCFG::InputPath &path)
@@ -314,7 +316,7 @@ std::string Manager::OutputBest() const
   const Hypothesis *bestHypo = lastStack.GetBestHypo(*this, const_cast<ArcLists&>(arcLists));
 
   if (bestHypo) {
-    //cerr << "BEST TRANSLATION: " << bestHypo << bestHypo->Debug(system) << endl;
+    cerr << "BEST TRANSLATION: " << bestHypo << bestHypo->Debug(system) << endl;
     //cerr << " " << out.str() << endl;
     stringstream outStrm;
     bestHypo->OutputToStream(outStrm);
@@ -331,8 +333,17 @@ std::string Manager::OutputBest() const
       out = "0 ";
     }
 
-    //cerr << "NO TRANSLATION " << m_input->GetTranslationId() << endl;
+    cerr << "NO TRANSLATION " << m_input->GetTranslationId() << endl;
   }
+
+  return out;
+}
+
+std::string Manager::OutputNBest()
+{
+  string out;
+
+  KBestExtractor extractor(*this);
 
   return out;
 }
