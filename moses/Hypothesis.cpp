@@ -182,6 +182,12 @@ EvaluateWhenApplied(float estimatedScore)
   if (m_prevHypo) m_futureScore += m_prevHypo->GetScore();
 }
 
+void Hypothesis::Recalc() {
+  // TOTAL
+  m_futureScore = m_currScoreBreakdown.GetWeightedScore() + m_estimatedScore;
+  if (m_prevHypo) m_futureScore += m_prevHypo->GetScore();
+}
+
 const Hypothesis* Hypothesis::GetPrevHypo()const
 {
   return m_prevHypo;

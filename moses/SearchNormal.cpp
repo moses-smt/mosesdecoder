@@ -2,6 +2,7 @@
 #include "Timer.h"
 #include "SearchNormal.h"
 #include "SentenceStats.h"
+#include "FF/NeuralScoreFeature.h"
 
 #include <boost/foreach.hpp>
 
@@ -9,6 +10,20 @@ using namespace std;
 
 namespace Moses
 {
+  
+void ExpanderNormal::operator()(const Hypothesis &hypothesis, size_t startPos, size_t endPos) {
+  m_search->ExpandAllHypotheses(hypothesis, startPos, endPos);
+}  
+
+void CollectorNormal::operator()(const Hypothesis &hypothesis, size_t startPos, size_t endPos) {
+  const TranslationOptionList* tol
+    = m_search->m_transOptColl.GetTranslationOptionList(startPos, endPos);
+  if (!tol) return;
+  if(m_options.count(hypothesis.GetId()) == 0)
+      m_hypotheses.push_back(&hypothesis);
+  m_options[hypothesis.GetId()].push_back(tol);
+}
+
 /**
  * Organizing main function
  *
@@ -39,29 +54,60 @@ SearchNormal::~SearchNormal()
   RemoveAllInColl(m_hypoStackColl);
 }
 
+void SearchNormal::CacheForNeural(Collector& collector) {
+  const std::vector<const StatefulFeatureFunction*> &ffs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  const StaticData &staticData = StaticData::Instance();
+  for (size_t i = 0; i < ffs.size(); ++i) {
+    const NeuralScoreFeature* nsf = dynamic_cast<const NeuralScoreFeature*>(ffs[i]);
+    if (nsf && !staticData.IsFeatureFunctionIgnored(*ffs[i]))
+      const_cast<NeuralScoreFeature*>(nsf)->ProcessStack(collector, i);
+  }
+}
+
+void SearchNormal::ProcessStackForNeuro(HypothesisStackNormal*& stack) {
+  HypothesisStackNormal::iterator h;
+  std::vector<Hypothesis*> temp;
+  for (h = stack->begin(); h != stack->end(); ++h) {
+    temp.push_back(*h);
+    //stack->Detach(h);
+  }
+  
+  const std::vector<const StatefulFeatureFunction*> &ffs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  const StaticData &staticData = StaticData::Instance();
+  for (size_t i = 0; i < ffs.size(); ++i) {
+    const NeuralScoreFeature* nsf = dynamic_cast<const NeuralScoreFeature*>(ffs[i]);
+   if (nsf && !staticData.IsFeatureFunctionIgnored(*ffs[i]))
+      const_cast<NeuralScoreFeature*>(nsf)->RescoreStack(temp, i);
+  }
+
+  //for(int i = 0; i < temp.size(); i++)
+    //stack->AddPrune(temp[i]);
+}
 
 bool
 SearchNormal::
-ProcessOneStack(HypothesisStack* hstack)
+ProcessOneStack(HypothesisStack* hstack, FunctorNormal* functor)
 {
   if (this->out_of_time()) return false;
   SentenceStats &stats = m_manager.GetSentenceStats();
-  HypothesisStackNormal &sourceHypoColl
-  = *static_cast<HypothesisStackNormal*>(hstack);
+  HypothesisStackNormal* sourceHypoColl
+  = static_cast<HypothesisStackNormal*>(hstack);
 
   // the stack is pruned before processing (lazy pruning):
   VERBOSE(3,"processing hypothesis from next stack");
   IFVERBOSE(2) stats.StartTimeStack();
-  sourceHypoColl.PruneToSize(m_options.search.stack_size);
+  sourceHypoColl->PruneToSize(m_options.search.stack_size);
   VERBOSE(3,std::endl);
-  sourceHypoColl.CleanupArcList();
+  sourceHypoColl->CleanupArcList();
   IFVERBOSE(2)  stats.StopTimeStack();
 
+  ProcessStackForNeuro(sourceHypoColl);
+  
   // go through each hypothesis on the stack and try to expand it
   // BOOST_FOREACH(Hypothesis* h, sourceHypoColl)
   HypothesisStackNormal::const_iterator h;
-  for (h = sourceHypoColl.begin(); h != sourceHypoColl.end(); ++h)
-    ProcessOneHypothesis(**h);
+  for (h = sourceHypoColl->begin(); h != sourceHypoColl->end(); ++h)
+    ProcessOneHypothesis(**h, functor);
   return true;
 }
 
@@ -80,7 +126,12 @@ void SearchNormal::Decode()
 
   // go through each stack
   BOOST_FOREACH(HypothesisStack* hstack, m_hypoStackColl) {
-    if (!ProcessOneStack(hstack)) return;
+    //CollectorNormal collector(this);
+    //if (!ProcessOneStack(hstack, &collector)) return;
+    //CacheForNeural(collector);
+
+    ExpanderNormal expander(this);
+    if (!ProcessOneStack(hstack, &expander)) return;
     IFVERBOSE(2) OutputHypoStackSize();
     actual_hypoStack = static_cast<HypothesisStackNormal*>(hstack);
   }
@@ -94,7 +145,7 @@ void SearchNormal::Decode()
  */
 void
 SearchNormal::
-ProcessOneHypothesis(const Hypothesis &hypothesis)
+ProcessOneHypothesis(const Hypothesis &hypothesis, FunctorNormal* functor)
 {
   // since we check for reordering limits, its good to have that limit handy
   bool isWordLattice = m_source.GetType() == WordLatticeInput;
@@ -122,7 +173,7 @@ ProcessOneHypothesis(const Hypothesis &hypothesis)
         }
 
         //TODO: does this method include incompatible WordLattice hypotheses?
-        ExpandAllHypotheses(hypothesis, startPos, endPos);
+        (*functor)(hypothesis, startPos, endPos);
       }
     }
     return; // done with special case (no reordering limit)
@@ -199,7 +250,7 @@ ProcessOneHypothesis(const Hypothesis &hypothesis)
 
       if (isLeftMostEdge) {
         // any length extension is okay if starting at left-most edge
-        ExpandAllHypotheses(hypothesis, startPos, endPos);
+        (*functor)(hypothesis, startPos, endPos);
       } else { // starting somewhere other than left-most edge, use caution
         // the basic idea is this: we would like to translate a phrase
         // starting from a position further right than the left-most
@@ -215,7 +266,7 @@ ProcessOneHypothesis(const Hypothesis &hypothesis)
             > m_options.reordering.max_distortion) continue;
 
         // everything is fine, we're good to go
-        ExpandAllHypotheses(hypothesis, startPos, endPos);
+        (*functor)(hypothesis, startPos, endPos);
       }
     }
   }

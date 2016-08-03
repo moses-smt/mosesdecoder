@@ -137,6 +137,8 @@
 #include "moses/LM/oxlm/SourceOxLM.h"
 #endif
 
+#include "moses/FF/NeuralScoreFeature.h"
+
 #include "util/exception.hh"
 
 #include <vector>
@@ -233,6 +235,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhraseDictionaryOnDisk);
   MOSES_FNAME(PhraseDictionaryMemory);
   MOSES_FNAME(PhraseDictionaryScope3);
+  MOSES_FNAME(NeuralScoreFeature);
   MOSES_FNAME(PhraseDictionaryMultiModel);
   MOSES_FNAME(PhraseDictionaryMultiModelCounts);
   MOSES_FNAME(PhraseDictionaryGroup);

@@ -13,6 +13,49 @@ namespace Moses
 class Manager;
 class TranslationOptionCollection;
 
+class SearchNormal;
+
+class FunctorNormal {
+  public:
+    FunctorNormal(SearchNormal* search) : m_search(search) {}
+    
+    virtual void operator()(const Hypothesis &hypothesis,
+                       size_t startPos, size_t endPos) = 0;
+    
+    virtual SearchNormal* GetSearch() {
+      return m_search;
+    }
+    
+  protected:
+    SearchNormal* m_search;
+};
+
+class ExpanderNormal : public FunctorNormal {
+  public:
+    ExpanderNormal(SearchNormal* search) : FunctorNormal(search) {}
+    virtual void operator()(const Hypothesis &hypothesis,
+                       size_t startPos, size_t endPos);
+};
+
+class CollectorNormal : public FunctorNormal, public Collector {
+  public:
+    CollectorNormal(SearchNormal* search) : FunctorNormal(search) {}
+    virtual void operator()(const Hypothesis &hypothesis,
+                       size_t startPos, size_t endPos);
+
+    std::vector<const Hypothesis*> GetHypotheses() {
+      return m_hypotheses;                   
+    }
+    
+    std::vector<const TranslationOptionList*>& GetOptions(int hypId) {
+      return m_options[hypId];
+    }
+    
+  private:
+    std::vector<const Hypothesis*> m_hypotheses;
+    std::map<size_t, std::vector<const TranslationOptionList*> > m_options;
+};
+
 /** Functions and variables you need to decoder an input using the
  *  phrase-based decoder (NO cube-pruning)
  *  Instantiated by the Manager class
@@ -20,6 +63,9 @@ class TranslationOptionCollection;
 class SearchNormal: public Search
 {
 protected:
+  friend ExpanderNormal;
+  friend CollectorNormal;
+    
   //! stacks to store hypotheses (partial translations)
   // no of elements = no of words in source + 1
   std::vector < HypothesisStack* > m_hypoStackColl;
@@ -32,11 +78,14 @@ protected:
 
   // functions for creating hypotheses
 
+  void ProcessStackForNeuro(HypothesisStackNormal*& stack);
+  void CacheForNeural(Collector& collector);
+  
   virtual bool
-  ProcessOneStack(HypothesisStack* hstack);
+  ProcessOneStack(HypothesisStack* hstack, FunctorNormal* functor);
 
   virtual void
-  ProcessOneHypothesis(const Hypothesis &hypothesis);
+  ProcessOneHypothesis(const Hypothesis &hypothesis, FunctorNormal* functor);
 
   virtual void
   ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos);

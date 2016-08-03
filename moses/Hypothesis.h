@@ -92,6 +92,18 @@ public:
   Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Bitmap &bitmap, int id);
   ~Hypothesis();
 
+  /** return the subclass of Hypothesis most appropriate to the given translation option */
+  static Hypothesis* Create(const Hypothesis &prevHypo, const TranslationOption &transOpt);
+
+  static Hypothesis* Create(Manager& manager, const Bitmap &initialCoverage);
+
+  /** return the subclass of Hypothesis most appropriate to the given target phrase */
+  static Hypothesis* Create(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt);
+
+  /** return the subclass of Hypothesis most appropriate to the given translation option */
+  Hypothesis* CreateNext(const TranslationOption &transOpt) const;
+
+  void Recalc();
   void PrintHypothesis() const;
 
   const InputType& GetInput() const {
@@ -218,6 +230,11 @@ public:
     }
     return *(m_scoreBreakdown.get());
   }
+
+  ScoreComponentCollection& GetCurrScoreBreakdown() {
+    return m_currScoreBreakdown;
+  }
+
   float GetFutureScore() const {
     return m_futureScore;
   }

@@ -53,7 +53,10 @@ current ?= "" ;
 path-constant LM-LOG : bin/lm.log ;
 update-if-changed $(LM-LOG) $(current) ;
 
-obj FF_Factory.o : FF/Factory.cpp LM//macros headers ../lm//kenlm mmlib : <dependency>$(LM-LOG) ;
+obj FF_Factory.o : FF/Factory.cpp LM//macros headers ../lm//kenlm mmlib :
+<include>$(TOP)/moses/FF/NMT
+<include>$(TOP)/moses/FF/NMT/common
+<dependency>$(LM-LOG) ;
 
 # check if we have xmlrpc-c's abyss server available
 # if yes, include server capabilities in the moses executable
@@ -109,6 +112,10 @@ lib moses :
   FF/*.cpp
   FF/bilingual-lm/*.cpp
   FF/OSM-Feature/*.cpp
+  FF/NMT/plugin/nmt.cu
+  FF/NMT/plugin/nbest.cu
+  FF/NMT/common/utils.cu
+  FF/NMT/cnpy/cnpy.cpp
   FF/Dsg-Feature/*.cpp
   FF/LexicalReordering/*.cpp
   PP/*.cpp
@@ -117,11 +124,11 @@ lib moses :
   SyntacticLanguageModel.cpp
   *Test.cpp Mock*.cpp FF/*Test.cpp
   FF/Factory.cpp
-] 
+]
 vwfiles synlm mmlib mserver headers 
 FF_Factory.o 
 LM//LM 
-TranslationModel/CompactPT//CompactPT 
+TranslationModel/CompactPT//CompactPT
 TranslationModel/ProbingPT//ProbingPT 
 ThreadPool
 ..//search 
@@ -131,6 +138,8 @@ ThreadPool
 $(TOP)//boost_filesystem 
 $(TOP)//boost_iostreams 
 :
+<include>$(TOP)/moses/FF/NMT
+<include>$(TOP)/moses/FF/NMT/common
 <threading>single:<source>../util//rt
 ;
 

@@ -19,6 +19,12 @@ class TranslationOptionCollection;
 class Manager;
 class Phrase;
 
+class Collector {
+  public:
+    virtual std::vector<const Hypothesis*> GetHypotheses() = 0;
+    virtual std::vector<const TranslationOptionList*>& GetOptions(int hypId) = 0;
+};
+
 /** Base search class used in the phrase-based decoder.
  *
  * Actual search class that implement the cube pruning algorithm (SearchCubePruning)

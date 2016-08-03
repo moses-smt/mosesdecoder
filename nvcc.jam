@@ -1,0 +1,14 @@
+import type ;
+import toolset ;
+
+type.register CUDA : cu ;
+
+import generators ;
+generators.register-standard nvcc.compile : CUDA : OBJ ;
+
+toolset.flags nvcc.compile INCLUDES <include> ;
+
+actions compile
+{
+    "/usr/local/cuda/bin/nvcc" -I"$(INCLUDES)" --default-stream per-thread -std=c++11 -O3 -g -o $(<) -c $(>)
+}

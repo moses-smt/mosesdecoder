@@ -83,6 +83,7 @@ path-constant TOP : . ;
 
 include $(TOP)/jam-files/sanity.jam ;
 
+
 home = [ os.environ "HOME" ] ;
 if [ path.exists $(home)/moses-environment.jam ] 
 { 
@@ -109,6 +110,13 @@ if ! [ option.get "max-kenlm-order" ]
 boost 104400 ;
 external-lib z ;
 
+import nvcc ;
+external-lib cuda ;
+external-lib cudart ;
+external-lib cublas ;
+requirements += <library>cuda <library>cudart <library>cublas <library-path>/usr/local/cuda/lib64 ;
+
+    
 #lib dl : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
 #requirements += <library>dl ;
 #requirements += <cxxflags>-std=c++0x ;

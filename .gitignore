@@ -1,3 +1,4 @@
+test_cuda
 tools
 *.d
 *.pyc
