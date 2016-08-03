@@ -99,10 +99,21 @@ TrellisPath::TrellisPath(const SCFG::Manager &mgr, const SCFG::Hypothesis &hypo)
 }
 
 TrellisPath::TrellisPath(const SCFG::Manager &mgr, const SCFG::TrellisPath &origPath, const TrellisNode &nodeToChange)
+:m_node(NULL)
+,m_scores(NULL)
+,m_prevNodeChanged(NULL)
 {
-	if (origPath.m_node == &nodeToChange) {
-		m_node = new TrellisNode(mgr.arcLists, nodeToChange.arcList, nodeToChange.ind + 1);
-	}
+  MemPool &pool = mgr.GetPool();
+
+  m_scores = new (pool.Allocate<Scores>())
+			  Scores(mgr.system,  pool, mgr.system.featureFunctions.GetNumScores(), origPath.GetScores());
+  m_scores->MinusEquals(mgr.system, nodeToChange.GetHypothesis().GetScores());
+
+  if (origPath.m_node == &nodeToChange) {
+	  m_node = new TrellisNode(mgr.arcLists, nodeToChange.arcList, nodeToChange.ind + 1);
+	  m_prevNodeChanged= m_node;
+	  m_scores->PlusEquals(mgr.system, m_node->GetHypothesis().GetScores());
+  }
 }
 
 void TrellisPath::OutputToStream(std::stringstream &strm)

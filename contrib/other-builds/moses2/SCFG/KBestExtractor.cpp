@@ -37,7 +37,7 @@ KBestExtractor::KBestExtractor(const SCFG::Manager &mgr)
   }
 
   cerr << "nbest_size=" << mgr.system.options.nbest.nbest_size << endl;
-  size_t bestInd = 1;
+  size_t bestInd = 0;
   while (bestInd < mgr.system.options.nbest.nbest_size && !contenders.empty()) {
 	cerr << "bestInd=" << bestInd << endl;
 	currPath->CreateDeviantPaths(contenders, mgr);
@@ -56,7 +56,7 @@ KBestExtractor::~KBestExtractor()
 
 void KBestExtractor::OutputToStream(std::stringstream &strm)
 {
-	cerr << "m_coll=" << m_coll.size() << endl;
+	//cerr << "m_coll=" << m_coll.size() << endl;
 	BOOST_FOREACH(SCFG::TrellisPath *path, m_coll) {
 		strm << m_mgr.GetTranslationId() << " ||| ";
 		path->OutputToStream(strm);
