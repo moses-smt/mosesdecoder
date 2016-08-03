@@ -4,13 +4,15 @@
  *  Created on: 2 Aug 2016
  *      Author: hieu
  */
-
+#include <boost/foreach.hpp>
 #include "KBestExtractor.h"
 #include "Manager.h"
 #include "Hypothesis.h"
 #include "Stacks.h"
 #include "Stack.h"
 #include "TrellisPath.h"
+
+using namespace std;
 
 namespace Moses2
 {
@@ -33,6 +35,15 @@ KBestExtractor::KBestExtractor(const SCFG::Manager &mgr)
 KBestExtractor::~KBestExtractor()
 {
   // TODO Auto-generated destructor stub
+}
+
+void KBestExtractor::Output(std::stringstream &strm)
+{
+	BOOST_FOREACH(SCFG::TrellisPath *path, m_coll) {
+		strm << m_mgr.GetTranslationId() << " ||| ";
+		path->Output(strm);
+		strm << endl;
+	}
 }
 
 }

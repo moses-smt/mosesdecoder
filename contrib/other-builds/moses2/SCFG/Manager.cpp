@@ -341,11 +341,11 @@ std::string Manager::OutputBest() const
 
 std::string Manager::OutputNBest()
 {
-  string out;
+  stringstream out;
 
   KBestExtractor extractor(*this);
 
-  return out;
+  return out.str();
 }
 
 } // namespace

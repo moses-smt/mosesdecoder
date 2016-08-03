@@ -6,6 +6,7 @@
  */
 #pragma once
 #include <vector>
+#include <sstream>
 
 namespace Moses2
 {
@@ -20,6 +21,7 @@ public:
   KBestExtractor(const SCFG::Manager &mgr);
   virtual ~KBestExtractor();
 
+  void Output(std::stringstream &strm);
 protected:
   const SCFG::Manager &m_mgr;
 

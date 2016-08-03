@@ -37,6 +37,10 @@ TrellisPath::TrellisPath(const SCFG::Manager &mgr, const SCFG::Hypothesis &hypo)
   m_node = new TrellisNode(mgr.arcLists, hypo);
 }
 
+void TrellisPath::Output(std::stringstream &strm)
+{
+
+}
 
 }
 }

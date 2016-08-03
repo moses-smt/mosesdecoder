@@ -39,6 +39,7 @@ class TrellisPath
 {
 public:
   TrellisPath(const SCFG::Manager &mgr, const SCFG::Hypothesis &hypo);
+  void Output(std::stringstream &strm);
 
 protected:
   const Scores *m_scores;

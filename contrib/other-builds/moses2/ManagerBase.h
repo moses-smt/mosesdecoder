@@ -56,6 +56,9 @@ public:
   const InputType &GetInput() const
   {  return *m_input; }
 
+  long GetTranslationId() const
+  {  return m_translationId; }
+
 protected:
   std::string m_inputStr;
   long m_translationId;
