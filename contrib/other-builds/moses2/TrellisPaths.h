@@ -8,7 +8,7 @@
 
 #include <vector>
 #include <queue>
-#include "TrellisPath.h"
+#include "PhraseBased/TrellisPath.h"
 
 namespace Moses2
 {
@@ -24,8 +24,15 @@ struct CompareTrellisPathCollection
 class TrellisPaths
 {
 public:
-  TrellisPaths();
-  virtual ~TrellisPaths();
+  TrellisPaths() {}
+
+  virtual ~TrellisPaths()
+  {
+    while (!empty()) {
+      TrellisPath *path = Get();
+      delete path;
+    }
+  }
 
   bool empty() const
   {
@@ -33,7 +40,10 @@ public:
   }
 
   //! add a new entry into collection
-  void Add(TrellisPath *trellisPath);
+  void Add(TrellisPath *trellisPath)
+  {
+    m_collection.push(trellisPath);
+  }
 
   TrellisPath *Get()
   {

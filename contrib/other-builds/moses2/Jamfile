@@ -19,6 +19,7 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
    System.cpp 
    TargetPhrase.cpp
    TranslationTask.cpp
+   TrellisPaths.cpp
    TypeDef.cpp
    Vector.cpp
    Weights.cpp 
@@ -75,14 +76,13 @@ alias deps :  ../../..//z ../../..//boost_iostreams ../../..//boost_filesystem .
  	 	PhraseBased/InputPath.cpp
  	 	PhraseBased/InputPaths.cpp
 		PhraseBased/Manager.cpp 
-    PhraseBased/PhraseImpl.cpp
+    	PhraseBased/PhraseImpl.cpp
 		PhraseBased/ReorderingConstraint.cpp 
-	  PhraseBased/TargetPhrases.cpp
+		PhraseBased/TargetPhrases.cpp
  	 	PhraseBased/Search.cpp
-    PhraseBased/Sentence.cpp
+	    PhraseBased/Sentence.cpp
 		PhraseBased/TargetPhraseImpl.cpp 
  	 	PhraseBased/TrellisPath.cpp
- 	 	PhraseBased/TrellisPaths.cpp
 
 		PhraseBased/Normal/Search.cpp
  	 	PhraseBased/Normal/Stack.cpp 

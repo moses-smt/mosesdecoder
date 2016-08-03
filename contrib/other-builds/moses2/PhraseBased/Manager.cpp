@@ -10,7 +10,6 @@
 #include "Manager.h"
 #include "TargetPhraseImpl.h"
 #include "InputPath.h"
-#include "TrellisPaths.h"
 #include "Sentence.h"
 
 #include "Normal/Search.h"
@@ -23,6 +22,7 @@
  #include "CubePruningCardinalStack/Search.h"
  #include "CubePruningBitmapStack/Search.h"
  */
+#include "../TrellisPaths.h"
 #include "../System.h"
 #include "../Phrase.h"
 #include "../InputPathsBase.h"

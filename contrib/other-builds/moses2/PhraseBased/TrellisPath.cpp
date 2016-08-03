@@ -7,7 +7,7 @@
 #include <cassert>
 #include <sstream>
 #include "TrellisPath.h"
-#include "TrellisPaths.h"
+#include "../TrellisPaths.h"
 #include "Hypothesis.h"
 #include "../System.h"
 
