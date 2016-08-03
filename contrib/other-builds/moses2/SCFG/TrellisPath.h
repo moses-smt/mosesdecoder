@@ -29,6 +29,8 @@ public:
   {
   }
 
+  void OutputToStream(std::stringstream &strm) const;
+
 protected:
   std::vector<const TrellisNode*> m_prevNodes;
 
@@ -39,7 +41,7 @@ class TrellisPath
 {
 public:
   TrellisPath(const SCFG::Manager &mgr, const SCFG::Hypothesis &hypo);
-  void Output(std::stringstream &strm);
+  void OutputToStream(std::stringstream &strm);
 
 protected:
   const Scores *m_scores;

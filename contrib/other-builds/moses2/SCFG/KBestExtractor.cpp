@@ -37,11 +37,11 @@ KBestExtractor::~KBestExtractor()
   // TODO Auto-generated destructor stub
 }
 
-void KBestExtractor::Output(std::stringstream &strm)
+void KBestExtractor::OutputToStream(std::stringstream &strm)
 {
 	BOOST_FOREACH(SCFG::TrellisPath *path, m_coll) {
 		strm << m_mgr.GetTranslationId() << " ||| ";
-		path->Output(strm);
+		path->OutputToStream(strm);
 		strm << endl;
 	}
 }

@@ -344,6 +344,7 @@ std::string Manager::OutputNBest()
   stringstream out;
 
   KBestExtractor extractor(*this);
+  extractor.OutputToStream(out);
 
   return out.str();
 }

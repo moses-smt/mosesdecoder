@@ -21,7 +21,7 @@ public:
   KBestExtractor(const SCFG::Manager &mgr);
   virtual ~KBestExtractor();
 
-  void Output(std::stringstream &strm);
+  void OutputToStream(std::stringstream &strm);
 protected:
   const SCFG::Manager &m_mgr;
 
