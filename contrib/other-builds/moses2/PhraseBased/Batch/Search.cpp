@@ -161,7 +161,7 @@ const Hypothesis *Search::GetBestHypothesis() const
   return best;
 }
 
-void Search::AddInitialTrellisPaths(TrellisPaths &paths) const
+void Search::AddInitialTrellisPaths(TrellisPaths<TrellisPath> &paths) const
 {
   const Stack &lastStack = m_stacks.Back();
   BOOST_FOREACH(const HypothesisBase *hypoBase, lastStack){

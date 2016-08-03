@@ -16,6 +16,8 @@ class Scores;
 class MemPool;
 class Hypothesis;
 class System;
+
+template<typename T>
 class TrellisPaths;
 
 class TrellisNode
@@ -70,7 +72,7 @@ public:
   std::string OutputTargetPhrase(const System &system) const;
 
   //! create a set of next best paths by wiggling 1 of the node at a time.
-  void CreateDeviantPaths(TrellisPaths &paths, const ArcLists &arcLists,
+  void CreateDeviantPaths(TrellisPaths<TrellisPath> &paths, const ArcLists &arcLists,
       MemPool &pool, const System &system) const;
 
 protected:

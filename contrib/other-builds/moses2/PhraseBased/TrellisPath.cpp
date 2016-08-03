@@ -116,7 +116,7 @@ std::string TrellisPath::OutputTargetPhrase(const System &system) const
   return out.str();
 }
 
-void TrellisPath::CreateDeviantPaths(TrellisPaths &paths,
+void TrellisPath::CreateDeviantPaths(TrellisPaths<TrellisPath> &paths,
     const ArcLists &arcLists, MemPool &pool, const System &system) const
 {
   const size_t sizePath = nodes.size();

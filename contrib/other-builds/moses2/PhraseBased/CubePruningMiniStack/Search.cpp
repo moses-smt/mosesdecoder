@@ -230,7 +230,7 @@ const Hypothesis *Search::GetBestHypothesis() const
   return best;
 }
 
-void Search::AddInitialTrellisPaths(TrellisPaths &paths) const
+void Search::AddInitialTrellisPaths(TrellisPaths<TrellisPath> &paths) const
 {
   const Stack::Coll &coll = m_stack.GetColl();
   BOOST_FOREACH(const Stack::Coll::value_type &val, coll){

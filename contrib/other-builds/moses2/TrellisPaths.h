@@ -13,14 +13,16 @@
 namespace Moses2
 {
 
-struct CompareTrellisPathCollection
+template<typename T>
+struct CompareTrellisPath
 {
-  bool operator()(const TrellisPath* pathA, const TrellisPath* pathB) const
+  bool operator()(const T* pathA, const T* pathB) const
   {
     return (pathA->GetFutureScore() < pathB->GetFutureScore());
   }
 };
 
+template<typename T>
 class TrellisPaths
 {
 public:
@@ -56,7 +58,7 @@ public:
 
 protected:
   typedef std::priority_queue<TrellisPath*, std::vector<TrellisPath*>,
-      CompareTrellisPathCollection> CollectionType;
+      CompareTrellisPath<TrellisPath> > CollectionType;
   CollectionType m_collection;
 };
 

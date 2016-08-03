@@ -217,7 +217,7 @@ std::string Manager::OutputNBest()
 
   set<string> distinctHypos;
 
-  TrellisPaths contenders;
+  TrellisPaths<TrellisPath> contenders;
   //cerr << "START AddInitialTrellisPaths" << endl;
   m_search->AddInitialTrellisPaths(contenders);
   //cerr << "END AddInitialTrellisPaths" << endl;
