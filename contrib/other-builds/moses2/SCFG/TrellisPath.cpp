@@ -18,20 +18,20 @@ namespace Moses2
 namespace SCFG
 {
 TrellisNode::TrellisNode(const ArcLists &arcLists, const SCFG::Hypothesis &hypo)
+:arcList(arcLists.GetArcList(&hypo))
 {
-  arcList = &arcLists.GetArcList(&hypo);
-  UTIL_THROW_IF2(arcList->size() == 0, "Empty arclist");
+  UTIL_THROW_IF2(arcList.size() == 0, "Empty arclist");
   ind = 0;
 
   CreateTail(arcLists, hypo);
 }
 
 TrellisNode::TrellisNode(const ArcLists &arcLists, const ArcList &varcList, size_t vind)
-:arcList(&varcList)
+:arcList(varcList)
  ,ind(vind)
 {
-  UTIL_THROW_IF2(vind >= arcList->size(), "arclist out of bound" << ind << " >= " << arcList->size());
-  const SCFG::Hypothesis &hypo = (*arcList)[ind]->Cast<SCFG::Hypothesis>();
+  UTIL_THROW_IF2(vind >= arcList.size(), "arclist out of bound" << ind << " >= " << arcList.size());
+  const SCFG::Hypothesis &hypo = arcList[ind]->Cast<SCFG::Hypothesis>();
   CreateTail(arcLists, hypo);
 }
 
@@ -49,8 +49,8 @@ void TrellisNode::CreateTail(const ArcLists &arcLists, const SCFG::Hypothesis &h
 
 const SCFG::Hypothesis &TrellisNode::GetHypothesis() const
 {
-  UTIL_THROW_IF2(arcList->size() < ind, "Arcs requested out of bound. " << arcList->size() << "<" << ind);
-  const SCFG::Hypothesis &hypo = (*arcList)[ind]->Cast<SCFG::Hypothesis>();
+  UTIL_THROW_IF2(ind >= arcList.size(), "Arcs requested out of bound. " << arcList.size() << "<" << ind);
+  const SCFG::Hypothesis &hypo = arcList[ind]->Cast<SCFG::Hypothesis>();
   return hypo;
 }
 
@@ -81,7 +81,7 @@ void TrellisNode::OutputToStream(std::stringstream &strm) const
 
 bool TrellisNode::HasMore() const
 {
-	bool ret = arcList->size() > (ind + 1);
+	bool ret = arcList.size() > (ind + 1);
 	return ret;
 }
 
@@ -101,7 +101,7 @@ TrellisPath::TrellisPath(const SCFG::Manager &mgr, const SCFG::Hypothesis &hypo)
 TrellisPath::TrellisPath(const SCFG::Manager &mgr, const SCFG::TrellisPath &origPath, const TrellisNode &nodeToChange)
 {
 	if (origPath.m_node == &nodeToChange) {
-		m_node = new TrellisNode(mgr.arcLists, *nodeToChange.arcList, nodeToChange.ind + 1);
+		m_node = new TrellisNode(mgr.arcLists, nodeToChange.arcList, nodeToChange.ind + 1);
 	}
 }
 

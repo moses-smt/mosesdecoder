@@ -25,7 +25,7 @@ class Hypothesis;
 class TrellisNode
 {
 public:
-  const ArcList *arcList;
+  const ArcList &arcList;
   size_t ind;
 
   TrellisNode(const ArcLists &arcLists, const SCFG::Hypothesis &hypo);
