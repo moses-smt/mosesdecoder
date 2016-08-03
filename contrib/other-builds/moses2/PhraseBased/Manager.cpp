@@ -58,8 +58,7 @@ void Manager::Init()
   InitPools();
 
   FactorCollection &vocab = system.GetVocab();
-  m_input = Moses2::Sentence::CreateFromString(GetPool(), vocab, system, m_inputStr,
-      m_translationId);
+  m_input = Moses2::Sentence::CreateFromString(GetPool(), vocab, system, m_inputStr);
 
   m_bitmaps = new Bitmaps(GetPool());
 
@@ -223,7 +222,7 @@ std::string Manager::OutputNBest()
   m_search->AddInitialTrellisPaths(contenders);
   //cerr << "END AddInitialTrellisPaths" << endl;
 
-  long transId = m_input->GetTranslationId();
+  long transId = GetTranslationId();
 
   // MAIN LOOP
   stringstream out;

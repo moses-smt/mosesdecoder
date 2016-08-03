@@ -43,15 +43,10 @@ public:
 
   //////////////////////////////////////////////////////////////////////////////
 
-  InputType(long translationId, MemPool &pool);
+  InputType(MemPool &pool);
   virtual ~InputType();
 
   virtual void Init(const System &system, size_t size, int max_distortion);
-
-  long GetTranslationId() const
-  {
-    return m_translationId;
-  }
 
   ReorderingConstraint &GetReorderingConstraint()
   { return m_reorderingConstraint; }
@@ -68,7 +63,6 @@ public:
   bool XmlOverlap(size_t startPos, size_t endPos) const;
 
 protected:
-  long m_translationId; 	//< contiguous Id
   ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
   Vector<const XMLOption*> m_xmlOptions;
   Vector<bool> m_xmlCoverageMap;

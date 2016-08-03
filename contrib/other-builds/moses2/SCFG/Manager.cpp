@@ -333,7 +333,7 @@ std::string Manager::OutputBest() const
       out = "0 ";
     }
 
-    cerr << "NO TRANSLATION " << m_input->GetTranslationId() << endl;
+    cerr << "NO TRANSLATION " << GetTranslationId() << endl;
   }
 
   return out;

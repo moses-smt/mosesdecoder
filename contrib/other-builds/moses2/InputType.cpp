@@ -35,9 +35,8 @@ void InputType::XMLOption::Debug(std::ostream &out, const System &system) const
 
 //////////////////////////////////////////////////////////////////////////////
 
-InputType::InputType(long translationId, MemPool &pool)
-:m_translationId(translationId)
-,m_reorderingConstraint(pool)
+InputType::InputType(MemPool &pool)
+:m_reorderingConstraint(pool)
 ,m_xmlOptions(pool)
 ,m_xmlCoverageMap(pool)
 {

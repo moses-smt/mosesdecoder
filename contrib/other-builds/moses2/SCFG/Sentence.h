@@ -26,8 +26,8 @@ public:
   static Sentence *CreateFromString(MemPool &pool, FactorCollection &vocab,
       const System &system, const std::string &str, long translationId);
 
-  Sentence(long translationId, MemPool &pool, size_t size)
-  :InputType(translationId, pool)
+  Sentence(MemPool &pool, size_t size)
+  :InputType(pool)
   ,PhraseImpl(pool, size)
   {}
 

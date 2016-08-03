@@ -18,13 +18,13 @@ namespace Moses2
 {
 
 Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
-    const System &system, const std::string &str, long translationId)
+    const System &system, const std::string &str)
 {
   Sentence *ret;
 
   if (system.options.input.xml_policy) {
     // xml
-	ret = CreateFromStringXML(pool, vocab, system, str, translationId);
+	ret = CreateFromStringXML(pool, vocab, system, str);
   }
   else {
     // no xml
@@ -32,7 +32,7 @@ Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
     std::vector<std::string> toks = Tokenize(str);
 
     size_t size = toks.size();
-    ret = new (pool.Allocate<Sentence>()) Sentence(translationId, pool, size);
+    ret = new (pool.Allocate<Sentence>()) Sentence(pool, size);
     ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks, false);
   }
 
@@ -42,7 +42,7 @@ Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
 }
 
 Sentence *Sentence::CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
-    const System &system, const std::string &str, long translationId)
+    const System &system, const std::string &str)
 {
   Sentence *ret;
 
@@ -66,7 +66,7 @@ Sentence *Sentence::CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
 
     // create words
     size_t size = toks.size();
-    ret = new (pool.Allocate<Sentence>()) Sentence(translationId, pool, size);
+    ret = new (pool.Allocate<Sentence>()) Sentence(pool, size);
     ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks, false);
 
     // xml

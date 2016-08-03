@@ -24,7 +24,7 @@ Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
 
   Sentence *ret;
 
-  ret = new (pool.Allocate<Sentence>()) Sentence(translationId, pool, size);
+  ret = new (pool.Allocate<Sentence>()) Sentence(pool, size);
 
   ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks, true);
 

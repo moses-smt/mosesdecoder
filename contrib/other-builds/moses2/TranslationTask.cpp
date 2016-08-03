@@ -33,11 +33,11 @@ void TranslationTask::Run()
   string out;
 
   out = m_mgr->OutputBest() + "\n";
-  m_mgr->system.bestCollector->Write(m_mgr->GetInput().GetTranslationId(), out);
+  m_mgr->system.bestCollector->Write(m_mgr->GetTranslationId(), out);
 
   if (m_mgr->system.options.nbest.nbest_size) {
     out = m_mgr->OutputNBest();
-    m_mgr->system.nbestCollector->Write(m_mgr->GetInput().GetTranslationId(), out);
+    m_mgr->system.nbestCollector->Write(m_mgr->GetTranslationId(), out);
   }
 
   delete m_mgr;
