@@ -343,6 +343,8 @@ std::string Manager::OutputNBest()
 {
   stringstream out;
 
+  arcLists.Sort();
+
   KBestExtractor extractor(*this);
   extractor.OutputToStream(out);
 

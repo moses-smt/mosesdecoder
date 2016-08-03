@@ -42,6 +42,10 @@ void KBestExtractor::OutputToStream(std::stringstream &strm)
 	BOOST_FOREACH(SCFG::TrellisPath *path, m_coll) {
 		strm << m_mgr.GetTranslationId() << " ||| ";
 		path->OutputToStream(strm);
+		path->GetScores().OutputBreakdown(strm, m_mgr.system);
+		strm << "||| ";
+		strm << path->GetScores().GetTotalScore();
+
 		strm << endl;
 	}
 }

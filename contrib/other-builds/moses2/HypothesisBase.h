@@ -29,6 +29,10 @@ public:
     return *m_mgr;
   }
 
+  template<typename T>
+  const T &Cast() const
+  { return static_cast<const T&>(*this); }
+
   const Scores &GetScores() const
   { return *m_scores; }
   Scores &GetScores()

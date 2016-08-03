@@ -29,6 +29,8 @@ public:
   {
   }
 
+  const SCFG::Hypothesis &GetHypothesis() const;
+
   void OutputToStream(std::stringstream &strm) const;
 
 protected:
@@ -43,8 +45,13 @@ public:
   TrellisPath(const SCFG::Manager &mgr, const SCFG::Hypothesis &hypo);
   void OutputToStream(std::stringstream &strm);
 
+  const Scores &GetScores() const
+  { return *m_scores; }
+  Scores &GetScores()
+  { return *m_scores; }
+
 protected:
-  const Scores *m_scores;
+  Scores *m_scores;
   TrellisNode *m_node;
 
 };
