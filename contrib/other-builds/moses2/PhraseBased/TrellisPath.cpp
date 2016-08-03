@@ -46,9 +46,9 @@ TrellisPath::TrellisPath(const TrellisPath &origPath, size_t edgeIndex,
   nodes.push_back(newNode);
 
   // rest of path comes from following best path backwards
-  const Hypothesis &arc = newNode.GetHypo()->Cast<Hypothesis>();
+  const Hypothesis *arc = static_cast<const Hypothesis*>(newNode.GetHypo());
 
-  const Hypothesis *prevHypo = arc.GetPrevHypo();
+  const Hypothesis *prevHypo = arc->GetPrevHypo();
   while (prevHypo != NULL) {
     const ArcList &arcList = arcLists.GetArcList(prevHypo);
     assert(arcList);
@@ -108,9 +108,9 @@ std::string TrellisPath::OutputTargetPhrase(const System &system) const
   std::stringstream out;
   for (int i = nodes.size() - 1; i >= 0; --i) {
     const TrellisNode &node = nodes[i];
-    const Hypothesis &hypo = node.GetHypo()->Cast<Hypothesis>();
+    const Hypothesis *hypo = static_cast<const Hypothesis*>(node.GetHypo());
     //cerr << "hypo=" << hypo << " " << *hypo << endl;
-    hypo.GetTargetPhrase().OutputToStream(out);
+    hypo->GetTargetPhrase().OutputToStream(out);
     out << " ";
   }
   return out.str();

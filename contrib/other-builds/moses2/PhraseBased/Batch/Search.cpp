@@ -79,7 +79,7 @@ void Search::Decode(size_t stackInd)
 
   BOOST_FOREACH(const InputPathBase *path, paths){
     BOOST_FOREACH(const HypothesisBase *hypo, hypos) {
-      Extend(hypo->Cast<Hypothesis>(), *static_cast<const InputPath*>(path));
+      Extend(*static_cast<const Hypothesis*>(hypo), *static_cast<const InputPath*>(path));
     }
   }
 
@@ -156,7 +156,7 @@ const Hypothesis *Search::GetBestHypothesis() const
 
   const Hypothesis *best = NULL;
   if (sortedHypos.size()) {
-    best = &sortedHypos[0]->Cast<Hypothesis>();
+    best = static_cast<const Hypothesis*>(sortedHypos[0]);
   }
   return best;
 }
@@ -165,8 +165,8 @@ void Search::AddInitialTrellisPaths(TrellisPaths<TrellisPath> &paths) const
 {
   const Stack &lastStack = m_stacks.Back();
   BOOST_FOREACH(const HypothesisBase *hypoBase, lastStack){
-    const Hypothesis &hypo = hypoBase->Cast<Hypothesis>();
-    TrellisPath *path = new TrellisPath(&hypo, mgr.arcLists);
+    const Hypothesis *hypo = static_cast<const Hypothesis*>(hypoBase);
+    TrellisPath *path = new TrellisPath(hypo, mgr.arcLists);
     paths.Add(path);
   }
 }

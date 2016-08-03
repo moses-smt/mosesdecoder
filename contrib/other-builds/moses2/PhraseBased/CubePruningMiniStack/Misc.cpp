@@ -65,7 +65,8 @@ void QueueItem::Init(Manager &mgr, CubeEdge &edge, size_t hypoIndex,
 
 void QueueItem::CreateHypothesis(Manager &mgr)
 {
-  const Hypothesis &prevHypo = edge->hypos[hypoIndex]->Cast<Hypothesis>();
+  const Hypothesis *prevHypo =
+      static_cast<const Hypothesis*>(edge->hypos[hypoIndex]);
   const TargetPhraseImpl &tp = edge->tps[tpIndex];
 
   //cerr << "hypoIndex=" << hypoIndex << endl;
@@ -74,7 +75,7 @@ void QueueItem::CreateHypothesis(Manager &mgr)
   //cerr << *prevHypo << endl;
 
   hypo = Hypothesis::Create(mgr.GetSystemPool(), mgr);
-  hypo->Init(mgr, prevHypo, edge->path, tp, edge->newBitmap,
+  hypo->Init(mgr, *prevHypo, edge->path, tp, edge->newBitmap,
       edge->estimatedScore);
 
   if (!mgr.system.options.cube.lazy_scoring) {

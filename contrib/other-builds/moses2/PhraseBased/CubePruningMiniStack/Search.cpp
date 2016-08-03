@@ -236,8 +236,8 @@ void Search::AddInitialTrellisPaths(TrellisPaths<TrellisPath> &paths) const
   BOOST_FOREACH(const Stack::Coll::value_type &val, coll){
     const Moses2::HypothesisColl &hypos = *val.second;
     BOOST_FOREACH(const HypothesisBase *hypoBase, hypos) {
-      const Hypothesis &hypo = hypoBase->Cast<Hypothesis>();
-      TrellisPath *path = new TrellisPath(&hypo, mgr.arcLists);
+      const Hypothesis *hypo = static_cast<const Hypothesis*>(hypoBase);
+      TrellisPath *path = new TrellisPath(hypo, mgr.arcLists);
       paths.Add(path);
     }
   }

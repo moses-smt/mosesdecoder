@@ -33,10 +33,6 @@ public:
   const T &Cast() const
   { return static_cast<const T&>(*this); }
 
-  template<typename T>
-  T &Cast()
-  { return static_cast<T&>(*this); }
-
   const Scores &GetScores() const
   { return *m_scores; }
   Scores &GetScores()
