@@ -26,14 +26,14 @@ public:
   void Sort();
   void Delete(const HypothesisBase *hypo);
 
-  const ArcList *GetArcList(const HypothesisBase *hypo) const;
+  const ArcList &GetArcList(const HypothesisBase *hypo) const;
 
 protected:
   typedef boost::unordered_map<const HypothesisBase*, ArcList*> Coll;
   Coll m_coll;
 
-  ArcList *GetArcList(const HypothesisBase *hypo);
-  ArcList *GetAndDetachArcList(const HypothesisBase *hypo);
+  ArcList &GetArcList(const HypothesisBase *hypo);
+  ArcList &GetAndDetachArcList(const HypothesisBase *hypo);
 
 };
 

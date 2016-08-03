@@ -18,7 +18,7 @@ namespace SCFG
 {
 TrellisNode::TrellisNode(const ArcLists &arcLists, const SCFG::Hypothesis &hypo)
 {
-  arcList = arcLists.GetArcList(&hypo);
+  arcList = &arcLists.GetArcList(&hypo);
   ind = 0;
 
   const Vector<const Hypothesis*> &prevHypos = hypo.GetPrevHypos();

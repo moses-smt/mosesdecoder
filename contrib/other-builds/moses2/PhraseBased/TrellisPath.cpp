@@ -50,9 +50,9 @@ TrellisPath::TrellisPath(const TrellisPath &origPath, size_t edgeIndex,
 
   const Hypothesis *prevHypo = arc->GetPrevHypo();
   while (prevHypo != NULL) {
-    const ArcList *arcList = arcLists.GetArcList(prevHypo);
+    const ArcList &arcList = arcLists.GetArcList(prevHypo);
     assert(arcList);
-    TrellisNode node(*arcList, 0);
+    TrellisNode node(arcList, 0);
     nodes.push_back(node);
 
     prevHypo = prevHypo->GetPrevHypo();
@@ -158,9 +158,8 @@ void TrellisPath::AddNodes(const Hypothesis *hypo, const ArcLists &arcLists)
     // add this hypo
     //cerr << "hypo=" << hypo << " " << flush;
     //cerr << *hypo << endl;
-    const ArcList *list = arcLists.GetArcList(hypo);
-    assert(list);
-    TrellisNode node(*list, 0);
+    const ArcList &list = arcLists.GetArcList(hypo);
+    TrellisNode node(list, 0);
     nodes.push_back(node);
 
     // add prev hypos

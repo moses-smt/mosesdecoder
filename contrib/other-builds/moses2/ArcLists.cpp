@@ -39,7 +39,7 @@ void ArcLists::AddArc(bool added, const HypothesisBase *currHypo,
     // we're winners!
     if (otherHypo) {
       // there was a existing losing hypo
-      arcList = GetAndDetachArcList(otherHypo);
+      arcList = &GetAndDetachArcList(otherHypo);
     }
     else {
       // there was no existing hypo
@@ -51,34 +51,34 @@ void ArcLists::AddArc(bool added, const HypothesisBase *currHypo,
     // we're losers!
     // there should be a winner, we're not doing beam pruning
     UTIL_THROW_IF2(otherHypo == NULL, "There must have been a winning hypo");
-    arcList = GetArcList(otherHypo);
+    arcList = &GetArcList(otherHypo);
   }
 
   // in any case, add the curr hypo
   arcList->push_back(currHypo);
 }
 
-ArcList *ArcLists::GetArcList(const HypothesisBase *hypo)
+ArcList &ArcLists::GetArcList(const HypothesisBase *hypo)
 {
   Coll::iterator iter = m_coll.find(hypo);
   UTIL_THROW_IF2(iter == m_coll.end(), "Can't find arc list");
-  ArcList *arcList = iter->second;
+  ArcList &arcList = *iter->second;
   return arcList;
 }
 
-const ArcList *ArcLists::GetArcList(const HypothesisBase *hypo) const
+const ArcList &ArcLists::GetArcList(const HypothesisBase *hypo) const
 {
   Coll::const_iterator iter = m_coll.find(hypo);
   UTIL_THROW_IF2(iter == m_coll.end(), "Can't find arc list");
-  ArcList *arcList = iter->second;
+  ArcList &arcList = *iter->second;
   return arcList;
 }
 
-ArcList *ArcLists::GetAndDetachArcList(const HypothesisBase *hypo)
+ArcList &ArcLists::GetAndDetachArcList(const HypothesisBase *hypo)
 {
   Coll::iterator iter = m_coll.find(hypo);
   UTIL_THROW_IF2(iter == m_coll.end(), "Can't find arc list");
-  ArcList *arcList = iter->second;
+  ArcList &arcList = *iter->second;
 
   m_coll.erase(iter);
 
