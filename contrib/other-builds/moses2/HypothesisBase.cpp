@@ -35,8 +35,8 @@ HypothesisBase::HypothesisBase(MemPool &pool, const System &system)
   m_ffStates = (FFState **) pool.Allocate(sizeof(FFState*) * numStatefulFFs);
 
   BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs){
-  size_t statefulInd = sfff->GetStatefulInd();
-  FFState *state = sfff->BlankState(pool, system);
+	  size_t statefulInd = sfff->GetStatefulInd();
+	  FFState *state = sfff->BlankState(pool, system);
   m_ffStates[statefulInd] = state;
 }
 }

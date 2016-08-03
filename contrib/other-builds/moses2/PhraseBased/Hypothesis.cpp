@@ -27,7 +27,7 @@ Hypothesis *Hypothesis::Create(MemPool &pool, Manager &mgr)
   Hypothesis *ret;
 
   Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
-  ret = static_cast<Hypothesis*>(recycler.Get());
+  ret = &recycler.Get()->Cast<Hypothesis>();
   if (ret) {
     // got new hypo from recycler. Do nothing
   }

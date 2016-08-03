@@ -18,11 +18,11 @@ namespace SCFG
 Hypothesis *Hypothesis::Create(MemPool &pool, Manager &mgr)
 {
   //  ++g_numHypos;
-    Hypothesis *ret;
+	SCFG::Hypothesis *ret;
     //ret = new (pool.Allocate<Hypothesis>()) Hypothesis(pool, mgr.system);
 
     Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
-    ret = static_cast<Hypothesis*>(recycler.Get());
+    ret = &recycler.Get()->Cast<SCFG::Hypothesis>();
     if (ret) {
       // got new hypo from recycler. Do nothing
     }
@@ -71,10 +71,10 @@ void Hypothesis::Init(SCFG::Manager &mgr,
       size_t prevHyposInd = prevHyposIndices[currInd];
       assert(prevHyposInd < sortedHypos.size());
 
-      const Hypothesis *prevHypo = static_cast<const SCFG::Hypothesis*>(sortedHypos[prevHyposInd]);
-      m_prevHypos[currInd] = prevHypo;
+      const Hypothesis &prevHypo = sortedHypos[prevHyposInd]->Cast<SCFG::Hypothesis>();
+      m_prevHypos[currInd] = &prevHypo;
 
-      m_scores->PlusEquals(mgr.system, prevHypo->GetScores());
+      m_scores->PlusEquals(mgr.system, prevHypo.GetScores());
 
       ++currInd;
     }

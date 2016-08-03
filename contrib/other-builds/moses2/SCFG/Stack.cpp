@@ -94,10 +94,10 @@ const Hypothesis *Stack::GetBestHypo(
   BOOST_FOREACH (const Coll::value_type &valPair, m_coll) {
     Moses2::HypothesisColl &hypos = *valPair.second;
     const Hypotheses &sortedHypos = hypos.GetSortedAndPruneHypos(mgr, arcLists);
-    const Hypothesis *bestHypoColl = static_cast<const Hypothesis*>(sortedHypos[0]);
+    const Hypothesis &bestHypoColl = sortedHypos[0]->Cast<SCFG::Hypothesis>();
 
-    if (ret == NULL || ret->GetFutureScore() < bestHypoColl->GetFutureScore()) {
-      ret = bestHypoColl;
+    if (ret == NULL || ret->GetFutureScore() < bestHypoColl.GetFutureScore()) {
+      ret = &bestHypoColl;
     }
   }
 

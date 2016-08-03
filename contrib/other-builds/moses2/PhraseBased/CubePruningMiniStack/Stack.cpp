@@ -71,7 +71,7 @@ std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
 
   ret.reserve(ret.size() + hypos.size());
   BOOST_FOREACH(const HypothesisBase *hypo, hypos) {
-    ret.push_back(static_cast<const Hypothesis*>(hypo));
+    ret.push_back(&hypo->Cast<Hypothesis>());
   }
 }
 
