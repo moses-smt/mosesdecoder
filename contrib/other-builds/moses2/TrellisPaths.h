@@ -31,7 +31,7 @@ public:
   virtual ~TrellisPaths()
   {
     while (!empty()) {
-      TrellisPath *path = Get();
+      T *path = Get();
       delete path;
     }
   }
@@ -42,14 +42,14 @@ public:
   }
 
   //! add a new entry into collection
-  void Add(TrellisPath *trellisPath)
+  void Add(T *trellisPath)
   {
     m_collection.push(trellisPath);
   }
 
-  TrellisPath *Get()
+  T *Get()
   {
-    TrellisPath *top = m_collection.top();
+    T *top = m_collection.top();
 
     // Detach
     m_collection.pop();
@@ -57,8 +57,8 @@ public:
   }
 
 protected:
-  typedef std::priority_queue<TrellisPath*, std::vector<TrellisPath*>,
-      CompareTrellisPath<TrellisPath> > CollectionType;
+  typedef std::priority_queue<T*, std::vector<T*>,
+      CompareTrellisPath<T> > CollectionType;
   CollectionType m_collection;
 };
 

@@ -6,6 +6,7 @@
  */
 #pragma once
 #include "../ArcLists.h"
+#include "../TypeDef.h"
 
 namespace Moses2
 {
@@ -49,6 +50,8 @@ public:
   { return *m_scores; }
   Scores &GetScores()
   { return *m_scores; }
+
+  SCORE GetFutureScore() const;
 
 protected:
   Scores *m_scores;

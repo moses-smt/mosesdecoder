@@ -11,6 +11,8 @@
 #include "Stacks.h"
 #include "Stack.h"
 #include "TrellisPath.h"
+#include "../TrellisPaths.h"
+#include "../System.h"
 
 using namespace std;
 
@@ -26,8 +28,17 @@ KBestExtractor::KBestExtractor(const SCFG::Manager &mgr)
   const Stack &lastStack = mgr.GetStacks().GetLastStack();
   const Hypothesis *bestHypo = lastStack.GetBestHypo(mgr, arcLists);
 
+  TrellisPaths<SCFG::TrellisPath> contenders;
+
   if (bestHypo) {
     TrellisPath *path = new TrellisPath(mgr, *bestHypo);
+    contenders.Add(path);
+  }
+
+  size_t bestInd = 0;
+  while (bestInd < mgr.system.options.nbest.nbest_size && !contenders.empty()) {
+    //cerr << "bestInd=" << bestInd << endl;
+    SCFG::TrellisPath *path = contenders.Get();
     m_coll.push_back(path);
   }
 }

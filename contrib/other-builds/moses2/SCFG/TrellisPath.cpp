@@ -82,6 +82,11 @@ void TrellisPath::OutputToStream(std::stringstream &strm)
 	m_node->OutputToStream(strm);
 }
 
+SCORE TrellisPath::GetFutureScore() const
+{
+  return m_scores->GetTotalScore();
+}
+
 }
 }
 
