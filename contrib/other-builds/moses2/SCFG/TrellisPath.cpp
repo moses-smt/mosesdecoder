@@ -119,8 +119,11 @@ SCORE TrellisPath::GetFutureScore() const
 void TrellisPath::CreateDeviantPaths(TrellisPaths<SCFG::TrellisPath> &paths, const SCFG::Manager &mgr) const
 {
 	if (m_prevNodeChanged->HasMore()) {
+		cerr << "BEGIN deviantPath" << endl;
 		SCFG::TrellisPath *deviantPath = new TrellisPath(mgr, *this, *m_prevNodeChanged);
+		cerr << "END deviantPath" << endl;
 		paths.Add(deviantPath);
+		cerr << "ADDED deviantPath" << endl;
 	}
 }
 
