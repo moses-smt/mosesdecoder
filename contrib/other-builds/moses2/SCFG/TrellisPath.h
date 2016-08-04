@@ -62,6 +62,8 @@ public:
   //! create a set of next best paths by wiggling 1 of the node at a time.
   void CreateDeviantPaths(TrellisPaths<SCFG::TrellisPath> &paths, const SCFG::Manager &mgr) const;
 
+  std::string Debug(const System &system) const;
+
 protected:
   Scores *m_scores;
   TrellisNode *m_node;

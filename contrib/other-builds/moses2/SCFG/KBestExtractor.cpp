@@ -30,20 +30,21 @@ KBestExtractor::KBestExtractor(const SCFG::Manager &mgr)
 
   TrellisPaths<SCFG::TrellisPath> contenders;
 
-  SCFG::TrellisPath *currPath;
   if (bestHypo) {
-	currPath = new SCFG::TrellisPath(mgr, *bestHypo);
-    contenders.Add(currPath);
+    SCFG::TrellisPath *path = new SCFG::TrellisPath(mgr, *bestHypo);
+    contenders.Add(path);
   }
 
   cerr << "nbest_size=" << mgr.system.options.nbest.nbest_size << endl;
   size_t bestInd = 0;
   while (bestInd < mgr.system.options.nbest.nbest_size && !contenders.empty()) {
-	cerr << "bestInd=" << bestInd << endl;
-	currPath->CreateDeviantPaths(contenders, mgr);
+    SCFG::TrellisPath *path = contenders.Get();
+    cerr << "bestInd=" << bestInd << endl;
+    cerr << "currPath=" << path->Debug(m_mgr.system) << endl;
 
-	currPath = contenders.Get();
-    m_coll.push_back(currPath);
+    path->CreateDeviantPaths(contenders, mgr);
+
+    m_coll.push_back(path);
 
     ++bestInd;
   }
@@ -58,8 +59,11 @@ void KBestExtractor::OutputToStream(std::stringstream &strm)
 {
 	//cerr << "m_coll=" << m_coll.size() << endl;
 	BOOST_FOREACH(SCFG::TrellisPath *path, m_coll) {
+	  cerr << path << " " << path->Debug(m_mgr.system) << endl;
+
 		strm << m_mgr.GetTranslationId() << " ||| ";
 		path->OutputToStream(strm);
+    strm << "||| ";
 		path->GetScores().OutputBreakdown(strm, m_mgr.system);
 		strm << "||| ";
 		strm << path->GetScores().GetTotalScore();

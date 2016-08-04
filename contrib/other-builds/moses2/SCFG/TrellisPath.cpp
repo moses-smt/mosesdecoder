@@ -4,6 +4,7 @@
  *  Created on: 2 Aug 2016
  *      Author: hieu
  */
+#include <sstream>
 #include "TrellisPath.h"
 #include "Hypothesis.h"
 #include "Manager.h"
@@ -109,6 +110,9 @@ TrellisPath::TrellisPath(const SCFG::Manager &mgr, const SCFG::TrellisPath &orig
 			  Scores(mgr.system,  pool, mgr.system.featureFunctions.GetNumScores(), origPath.GetScores());
   m_scores->MinusEquals(mgr.system, nodeToChange.GetHypothesis().GetScores());
 
+  const SCFG::Hypothesis &nextHypo = nodeToChange.arcList[nodeToChange.ind + 1]->Cast<SCFG::Hypothesis>();
+  m_scores->PlusEquals(mgr.system, nextHypo.GetScores());
+
   if (origPath.m_node == &nodeToChange) {
 	  m_node = new TrellisNode(mgr.arcLists, nodeToChange.arcList, nodeToChange.ind + 1);
 	  m_prevNodeChanged= m_node;
@@ -130,12 +134,22 @@ SCORE TrellisPath::GetFutureScore() const
 void TrellisPath::CreateDeviantPaths(TrellisPaths<SCFG::TrellisPath> &paths, const SCFG::Manager &mgr) const
 {
 	if (m_prevNodeChanged->HasMore()) {
-		cerr << "BEGIN deviantPath" << endl;
+		//cerr << "BEGIN deviantPath" << endl;
 		SCFG::TrellisPath *deviantPath = new TrellisPath(mgr, *this, *m_prevNodeChanged);
-		cerr << "END deviantPath" << endl;
+		//cerr << "END deviantPath" << endl;
 		paths.Add(deviantPath);
-		cerr << "ADDED deviantPath" << endl;
+		//cerr << "ADDED deviantPath" << endl;
 	}
+}
+
+std::string TrellisPath::Debug(const System &system) const
+{
+  stringstream out;
+  out << "path=" << this << " "
+      << "node=" << m_node << " "
+      << "arclist=" << &m_node->arcList << " "
+      << "ind=" << m_node->ind << endl;
+  return out.str();
 }
 
 } // namespace
