@@ -92,7 +92,7 @@ void batch_run(Moses2::Parameter &params, Moses2::System &system, Moses2::Thread
     delete &inStream;
   }
 
-  util::PrintUsage(std::cerr);
+  //util::PrintUsage(std::cerr);
 
 }
 ////////////////////////////////////////////////////////////////////////////////////////////////

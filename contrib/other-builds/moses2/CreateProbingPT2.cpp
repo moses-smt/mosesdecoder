@@ -68,7 +68,7 @@ int main(int argc, char* argv[])
 
   Moses2::createProbingPT(inPath, outPath, num_scores, num_lex_scores, log_prob, max_cache_size, scfg);
 
-  util::PrintUsage(std::cout);
+  //util::PrintUsage(std::cout);
   return 0;
 }
 
