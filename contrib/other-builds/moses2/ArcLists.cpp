@@ -24,10 +24,10 @@ ArcLists::ArcLists()
 
 ArcLists::~ArcLists()
 {
-  BOOST_FOREACH(const Coll::value_type &collPair, m_coll){
-  const ArcList *arcList = collPair.second;
-  delete arcList;
-}
+	BOOST_FOREACH(const Coll::value_type &collPair, m_coll){
+	  const ArcList *arcList = collPair.second;
+	  delete arcList;
+	}
 }
 
 void ArcLists::AddArc(bool added, const HypothesisBase *currHypo,
@@ -69,7 +69,16 @@ ArcList &ArcLists::GetArcList(const HypothesisBase *hypo)
 const ArcList &ArcLists::GetArcList(const HypothesisBase *hypo) const
 {
   Coll::const_iterator iter = m_coll.find(hypo);
-  UTIL_THROW_IF2(iter == m_coll.end(), "Can't find arc list");
+
+  if (iter == m_coll.end()) {
+	cerr << "looking for:" << hypo << " have:";
+	BOOST_FOREACH(const Coll::value_type &collPair, m_coll){
+		const HypothesisBase *hypo = collPair.first;
+		cerr << hypo << " ";
+	}
+  }
+
+  UTIL_THROW_IF2(iter == m_coll.end(), "Can't find arc list for " << hypo);
   ArcList &arcList = *iter->second;
   return arcList;
 }
