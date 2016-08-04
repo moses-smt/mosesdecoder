@@ -7,6 +7,7 @@
 #pragma once
 #include "../ArcLists.h"
 #include "../TypeDef.h"
+#include "../Vector.h"
 
 namespace Moses2
 {
@@ -25,15 +26,15 @@ class Hypothesis;
 class TrellisNode
 {
 public:
-  typedef std::vector<const TrellisNode*> Children;
+  typedef Vector<const TrellisNode*> Children;
 
   const ArcList &arcList;
   size_t ind;
 
-  TrellisNode(const ArcLists &arcLists, const SCFG::Hypothesis &hypo);
-  TrellisNode(const ArcLists &arcLists, const ArcList &varcList, size_t vind);
+  TrellisNode(MemPool &pool, const ArcLists &arcLists, const SCFG::Hypothesis &hypo);
+  TrellisNode(MemPool &pool, const ArcLists &arcLists, const ArcList &varcList, size_t vind);
 
-  TrellisNode(const ArcLists &arcLists, const TrellisNode &orig, const TrellisNode &nodeToChange);
+  TrellisNode(MemPool &pool, const ArcLists &arcLists, const TrellisNode &orig, const TrellisNode &nodeToChange);
 
   const SCFG::Hypothesis &GetHypothesis() const;
   bool HasMore() const;
@@ -45,7 +46,7 @@ public:
 protected:
   Children m_prevNodes;
 
-  void CreateTail(const ArcLists &arcLists, const SCFG::Hypothesis &hypo);
+  void CreateTail(MemPool &pool, const ArcLists &arcLists, const SCFG::Hypothesis &hypo);
 };
 
 /////////////////////////////////////////////////////////////////////
