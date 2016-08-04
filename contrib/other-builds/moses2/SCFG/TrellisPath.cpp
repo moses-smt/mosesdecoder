@@ -4,6 +4,7 @@
  *  Created on: 2 Aug 2016
  *      Author: hieu
  */
+#include <boost/foreach.hpp>
 #include <sstream>
 #include "TrellisPath.h"
 #include "Hypothesis.h"
@@ -34,6 +35,29 @@ TrellisNode::TrellisNode(const ArcLists &arcLists, const ArcList &varcList, size
   UTIL_THROW_IF2(vind >= arcList.size(), "arclist out of bound" << ind << " >= " << arcList.size());
   const SCFG::Hypothesis &hypo = arcList[ind]->Cast<SCFG::Hypothesis>();
   CreateTail(arcLists, hypo);
+}
+
+TrellisNode::TrellisNode(const ArcLists &arcLists, const TrellisNode &orig, const TrellisNode &nodeToChange)
+:arcList(orig.arcList)
+ ,ind(orig.ind)
+{
+  const TrellisNode::Children &origChildren = orig.GetChildren();
+  m_prevNodes.resize(origChildren.size());
+
+  for (size_t i = 0; i < origChildren.size(); ++i) {
+    TrellisNode *newChild;
+    const TrellisNode *origChild = origChildren[i];
+    if (origChild != &nodeToChange) {
+      // recurse
+      newChild = new TrellisNode(arcLists, *origChild, nodeToChange);
+    }
+    else {
+      size_t nextInd = nodeToChange.ind + 1;
+      newChild = new TrellisNode(arcLists, nodeToChange.arcList, nextInd);
+    }
+
+    m_prevNodes[i] = newChild;
+  }
 }
 
 void TrellisNode::CreateTail(const ArcLists &arcLists, const SCFG::Hypothesis &hypo)
@@ -106,6 +130,7 @@ TrellisPath::TrellisPath(const SCFG::Manager &mgr, const SCFG::TrellisPath &orig
 {
   MemPool &pool = mgr.GetPool();
 
+  // calc scores
   m_scores = new (pool.Allocate<Scores>())
 			  Scores(mgr.system,  pool, mgr.system.featureFunctions.GetNumScores(), origPath.GetScores());
   m_scores->MinusEquals(mgr.system, nodeToChange.GetHypothesis().GetScores());
@@ -116,7 +141,11 @@ TrellisPath::TrellisPath(const SCFG::Manager &mgr, const SCFG::TrellisPath &orig
   if (origPath.m_node == &nodeToChange) {
 	  m_node = new TrellisNode(mgr.arcLists, nodeToChange.arcList, nodeToChange.ind + 1);
 	  m_prevNodeChanged= m_node;
-	  m_scores->PlusEquals(mgr.system, m_node->GetHypothesis().GetScores());
+  }
+  else {
+    // recursively copy nodes until we find the node that needs to change
+    m_node = new TrellisNode(mgr.arcLists, *origPath.m_node, nodeToChange);
+    m_prevNodeChanged= m_node;
   }
 }
 
@@ -140,6 +169,27 @@ void TrellisPath::CreateDeviantPaths(TrellisPaths<SCFG::TrellisPath> &paths, con
 		paths.Add(deviantPath);
 		//cerr << "ADDED deviantPath" << endl;
 	}
+
+	// recursively wiggle all of it's child nodes
+	CreateDeviantPaths(paths, mgr, *m_prevNodeChanged);
+}
+
+void TrellisPath::CreateDeviantPaths(
+    TrellisPaths<SCFG::TrellisPath> &paths,
+    const SCFG::Manager &mgr,
+    const TrellisNode &parentNode) const
+{
+  const TrellisNode::Children &children = parentNode.GetChildren();
+  BOOST_FOREACH(const TrellisNode *child, children) {
+    if (child->HasMore()) {
+      SCFG::TrellisPath *deviantPath = new TrellisPath(mgr, *this, *child);
+      paths.Add(deviantPath);
+    }
+
+    // recurse
+    CreateDeviantPaths(paths, mgr, *child);
+
+  }
 }
 
 std::string TrellisPath::Debug(const System &system) const

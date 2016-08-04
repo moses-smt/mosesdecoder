@@ -25,19 +25,25 @@ class Hypothesis;
 class TrellisNode
 {
 public:
+  typedef std::vector<const TrellisNode*> Children;
+
   const ArcList &arcList;
   size_t ind;
 
   TrellisNode(const ArcLists &arcLists, const SCFG::Hypothesis &hypo);
   TrellisNode(const ArcLists &arcLists, const ArcList &varcList, size_t vind);
 
+  TrellisNode(const ArcLists &arcLists, const TrellisNode &orig, const TrellisNode &nodeToChange);
+
   const SCFG::Hypothesis &GetHypothesis() const;
   bool HasMore() const;
+  const Children &GetChildren() const
+  { return m_prevNodes; }
 
   void OutputToStream(std::stringstream &strm) const;
 
 protected:
-  std::vector<const TrellisNode*> m_prevNodes;
+  Children m_prevNodes;
 
   void CreateTail(const ArcLists &arcLists, const SCFG::Hypothesis &hypo);
 };
@@ -68,6 +74,11 @@ protected:
   Scores *m_scores;
   TrellisNode *m_node;
   TrellisNode *m_prevNodeChanged;
+
+  void CreateDeviantPaths(
+      TrellisPaths<SCFG::TrellisPath> &paths,
+      const SCFG::Manager &mgr,
+      const TrellisNode &parentNode) const;
 
 };
 
