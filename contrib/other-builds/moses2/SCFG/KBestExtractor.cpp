@@ -52,18 +52,20 @@ KBestExtractor::KBestExtractor(const SCFG::Manager &mgr)
 
 KBestExtractor::~KBestExtractor()
 {
-  // TODO Auto-generated destructor stub
+	BOOST_FOREACH(SCFG::TrellisPath *path, m_coll) {
+		delete path;
+	}
 }
 
 void KBestExtractor::OutputToStream(std::stringstream &strm)
 {
 	//cerr << "m_coll=" << m_coll.size() << endl;
 	BOOST_FOREACH(SCFG::TrellisPath *path, m_coll) {
-	  cerr << path << " " << path->Debug(m_mgr.system) << endl;
+		cerr << path << " " << path->Debug(m_mgr.system) << endl;
 
 		strm << m_mgr.GetTranslationId() << " ||| ";
 		strm << path->Output();
-    strm << " ||| ";
+		strm << " ||| ";
 		path->GetScores().OutputBreakdown(strm, m_mgr.system);
 		strm << "||| ";
 		strm << path->GetScores().GetTotalScore();
