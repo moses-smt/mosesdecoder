@@ -149,9 +149,15 @@ TrellisPath::TrellisPath(const SCFG::Manager &mgr, const SCFG::TrellisPath &orig
   }
 }
 
-void TrellisPath::OutputToStream(std::stringstream &strm)
+std::string TrellisPath::Output() const
 {
-	m_node->OutputToStream(strm);
+  stringstream tmpStrm;
+	m_node->OutputToStream(tmpStrm);
+
+	string out = tmpStrm.str();
+  out = out.substr(4, out.size() - 10);
+
+	return out;
 }
 
 SCORE TrellisPath::GetFutureScore() const

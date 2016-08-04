@@ -56,7 +56,7 @@ public:
   TrellisPath(const SCFG::Manager &mgr, const SCFG::Hypothesis &hypo); // create best path
   TrellisPath(const SCFG::Manager &mgr, const SCFG::TrellisPath &origPath, const TrellisNode &nodeToChange); // create original path
 
-  void OutputToStream(std::stringstream &strm);
+  std::string Output() const;
 
   const Scores &GetScores() const
   { return *m_scores; }

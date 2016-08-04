@@ -62,8 +62,8 @@ void KBestExtractor::OutputToStream(std::stringstream &strm)
 	  cerr << path << " " << path->Debug(m_mgr.system) << endl;
 
 		strm << m_mgr.GetTranslationId() << " ||| ";
-		path->OutputToStream(strm);
-    strm << "||| ";
+		strm << path->Output();
+    strm << " ||| ";
 		path->GetScores().OutputBreakdown(strm, m_mgr.system);
 		strm << "||| ";
 		strm << path->GetScores().GetTotalScore();
