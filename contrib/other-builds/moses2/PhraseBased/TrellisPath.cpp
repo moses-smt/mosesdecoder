@@ -51,7 +51,6 @@ TrellisPath::TrellisPath(const TrellisPath &origPath, size_t edgeIndex,
   const Hypothesis *prevHypo = arc->GetPrevHypo();
   while (prevHypo != NULL) {
     const ArcList &arcList = arcLists.GetArcList(prevHypo);
-    assert(arcList);
     TrellisNode node(arcList, 0);
     nodes.push_back(node);
 
