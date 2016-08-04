@@ -389,37 +389,39 @@ void ProbingPT::CreateCache(System &system)
   MemPool &pool = system.GetSystemPool();
   FactorCollection &vocab = system.GetVocab();
 
+  MemPool tmpSourcePool;
+
   size_t lineCount = 0;
   while (getline(strme, line) && lineCount < m_maxCacheSize) {
     vector<string> toks = Tokenize(line, "\t");
     assert(toks.size() == 3);
-	uint64_t key = Scan<uint64_t>(toks[1]);
-	//cerr << "line=" << line << endl;
+    uint64_t key = Scan<uint64_t>(toks[1]);
+    //cerr << "line=" << line << endl;
 
     if (system.isPb) {
-    	PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(pool, vocab, system, toks[2]);
+    	PhraseImpl *sourcePhrase = PhraseImpl::CreateFromString(tmpSourcePool, vocab, system, toks[2]);
 
-    	/*
-		std::pair<bool, uint64_t> retStruct = GetKey(*sourcePhrase);
-		if (!retStruct.first) {
-			UTIL_THROW2("Unknown cache entry");
-		}
-		cerr << "key=" << retStruct.second << " " << key << endl;
-		*/
-		TargetPhrases *tps = CreateTargetPhrases(pool, system, *sourcePhrase, key);
-		assert(tps);
+        /*
+      std::pair<bool, uint64_t> retStruct = GetKey(*sourcePhrase);
+      if (!retStruct.first) {
+        UTIL_THROW2("Unknown cache entry");
+      }
+      cerr << "key=" << retStruct.second << " " << key << endl;
+      */
+      TargetPhrases *tps = CreateTargetPhrases(pool, system, *sourcePhrase, key);
+      assert(tps);
 
-		m_cachePb[key] = tps;
+      m_cachePb[key] = tps;
     }
     else {
     	// SCFG
-		SCFG::PhraseImpl *sourcePhrase = SCFG::PhraseImpl::CreateFromString(pool, vocab, system, toks[2], false);
-		//cerr << "sourcePhrase=" << sourcePhrase->Debug(system) << endl;
+      SCFG::PhraseImpl *sourcePhrase = SCFG::PhraseImpl::CreateFromString(tmpSourcePool, vocab, system, toks[2], false);
+      //cerr << "sourcePhrase=" << sourcePhrase->Debug(system) << endl;
 
-		std::pair<bool, SCFG::TargetPhrases*> tpsPair = CreateTargetPhrasesSCFG(pool, system, *sourcePhrase, key);
-		assert(tpsPair.first && tpsPair.second);
+      std::pair<bool, SCFG::TargetPhrases*> tpsPair = CreateTargetPhrasesSCFG(pool, system, *sourcePhrase, key);
+      assert(tpsPair.first && tpsPair.second);
 
-		m_cacheSCFG[key] = tpsPair.second;
+      m_cacheSCFG[key] = tpsPair.second;
     }
     ++lineCount;
   }
