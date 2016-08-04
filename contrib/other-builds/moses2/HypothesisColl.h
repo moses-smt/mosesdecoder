@@ -41,7 +41,10 @@ public:
 
   HypothesisColl(const ManagerBase &mgr);
 
-  StackAdd Add(const HypothesisBase *hypo);
+  void Add(const System &system,
+		  HypothesisBase *hypo,
+		  Recycler<HypothesisBase*> &hypoRecycle,
+		  ArcLists &arcLists);
 
   _HCType &GetColl()
   {
@@ -70,6 +73,7 @@ protected:
   _HCType m_coll;
   mutable Hypotheses *m_sortedHypos;
 
+  StackAdd Add(const HypothesisBase *hypo);
   void SortAndPruneHypos(const ManagerBase &mgr, ArcLists &arcLists) const;
 
 };

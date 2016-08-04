@@ -71,7 +71,7 @@ const ArcList &ArcLists::GetArcList(const HypothesisBase *hypo) const
   Coll::const_iterator iter = m_coll.find(hypo);
 
   if (iter == m_coll.end()) {
-	cerr << "looking for:" << hypo << " have:";
+	cerr << "looking for:" << hypo << " have " << m_coll.size() << " :";
 	BOOST_FOREACH(const Coll::value_type &collPair, m_coll){
 		const HypothesisBase *hypo = collPair.first;
 		cerr << hypo << " ";

@@ -47,20 +47,7 @@ void Stack::Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
 {
   HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
   Moses2::HypothesisColl &coll = GetMiniStack(key);
-  StackAdd added = coll.Add(hypo);
-
-  size_t nbestSize = m_mgr.system.options.nbest.nbest_size;
-  if (nbestSize) {
-    arcLists.AddArc(added.added, hypo, added.other);
-  }
-  else {
-    if (!added.added) {
-      hypoRecycle.Recycle(hypo);
-    }
-    else if (added.other) {
-      hypoRecycle.Recycle(added.other);
-    }
-  }
+  coll.Add(m_mgr.system, hypo, hypoRecycle, arcLists);
 }
 
 std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const

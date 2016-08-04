@@ -33,20 +33,7 @@ void Stack::Add(SCFG::Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
   //cerr << "lhs=" << lhs << endl;
 
   HypothesisColl &coll = GetMiniStack(lhs);
-  StackAdd added = coll.Add(hypo);
-
-  size_t nbestSize = m_mgr.system.options.nbest.nbest_size;
-  if (nbestSize) {
-    arcLists.AddArc(added.added, hypo, added.other);
-  }
-  else {
-    if (!added.added) {
-      hypoRecycle.Recycle(hypo);
-    }
-    else if (added.other) {
-      hypoRecycle.Recycle(added.other);
-    }
-  }
+  coll.Add(m_mgr.system, hypo, hypoRecycle, arcLists);
 }
 
 Moses2::HypothesisColl &Stack::GetMiniStack(const SCFG::Word &key)

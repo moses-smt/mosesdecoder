@@ -23,6 +23,29 @@ HypothesisColl::HypothesisColl(const ManagerBase &mgr) :
 {
 }
 
+void HypothesisColl::Add(
+	const System &system,
+	HypothesisBase *hypo,
+	Recycler<HypothesisBase*> &hypoRecycle,
+    ArcLists &arcLists)
+{
+  StackAdd added = Add(hypo);
+
+  size_t nbestSize = system.options.nbest.nbest_size;
+  if (nbestSize) {
+	arcLists.AddArc(added.added, hypo, added.other);
+  }
+  else {
+	if (!added.added) {
+	  hypoRecycle.Recycle(hypo);
+	}
+	else if (added.other) {
+	  hypoRecycle.Recycle(added.other);
+	}
+  }
+
+}
+
 StackAdd HypothesisColl::Add(const HypothesisBase *hypo)
 {
   std::pair<_HCType::iterator, bool> addRet = m_coll.insert(hypo);

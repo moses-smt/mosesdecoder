@@ -60,20 +60,7 @@ void Stacks::Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
   size_t numWordsCovered = hypo->GetBitmap().GetNumWordsCovered();
   //cerr << "numWordsCovered=" << numWordsCovered << endl;
   Stack &stack = *m_stacks[numWordsCovered];
-  StackAdd added = stack.Add(hypo);
-
-  size_t nbestSize = m_mgr.system.options.nbest.nbest_size;
-  if (nbestSize) {
-    arcLists.AddArc(added.added, hypo, added.other);
-  }
-  else {
-    if (!added.added) {
-      hypoRecycle.Recycle(hypo);
-    }
-    else if (added.other) {
-      hypoRecycle.Recycle(added.other);
-    }
-  }
+  stack.Add(m_mgr.system, hypo, hypoRecycle, arcLists);
 }
 
 }
