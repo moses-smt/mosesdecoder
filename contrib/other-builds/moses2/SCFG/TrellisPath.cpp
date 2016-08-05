@@ -199,7 +199,7 @@ void TrellisPath::CreateDeviantPaths(TrellisPaths<SCFG::TrellisPath> &paths, con
 	}
 
 	// recursively wiggle all of it's child nodes
-	//CreateDeviantPaths(paths, mgr, *m_prevNodeChanged);
+	CreateDeviantPaths(paths, mgr, *m_prevNodeChanged);
 }
 
 void TrellisPath::CreateDeviantPaths(
