@@ -31,10 +31,10 @@ public:
   const ArcList &arcList;
   size_t ind;
 
-  TrellisNode(MemPool &pool, const ArcLists &arcLists, const SCFG::Hypothesis &hypo);
-  TrellisNode(MemPool &pool, const ArcLists &arcLists, const ArcList &varcList, size_t vind);
+  TrellisNode(const SCFG::Manager &mgr, const ArcLists &arcLists, const SCFG::Hypothesis &hypo);
+  TrellisNode(const SCFG::Manager &mgr, const ArcLists &arcLists, const ArcList &varcList, size_t vind);
+  TrellisNode(const SCFG::Manager &mgr, const ArcLists &arcLists, const TrellisNode &orig, const TrellisNode &nodeToChange);
 
-  TrellisNode(MemPool &pool, const ArcLists &arcLists, const TrellisNode &orig, const TrellisNode &nodeToChange);
   virtual ~TrellisNode();
 
   const SCFG::Hypothesis &GetHypothesis() const;
@@ -42,12 +42,12 @@ public:
   const Children &GetChildren() const
   { return m_prevNodes; }
 
-  void OutputToStream(std::stringstream &strm) const;
+  void OutputToStream(const System &system, std::stringstream &strm) const;
 
 protected:
   Children m_prevNodes;
 
-  void CreateTail(MemPool &pool, const ArcLists &arcLists, const SCFG::Hypothesis &hypo);
+  void CreateTail(const SCFG::Manager &mgr, const ArcLists &arcLists, const SCFG::Hypothesis &hypo);
 };
 
 /////////////////////////////////////////////////////////////////////
@@ -59,7 +59,7 @@ public:
   TrellisPath(const SCFG::Manager &mgr, const SCFG::TrellisPath &origPath, const TrellisNode &nodeToChange); // create original path
   ~TrellisPath();
 
-  std::string Output() const;
+  std::string Output(const System &system) const;
 
   const Scores &GetScores() const
   { return *m_scores; }

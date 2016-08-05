@@ -11,6 +11,7 @@
 #include "Manager.h"
 #include "TargetPhraseImpl.h"
 #include "../TrellisPaths.h"
+#include "util/exception.hh"
 
 using namespace std;
 
@@ -19,44 +20,48 @@ namespace Moses2
 
 namespace SCFG
 {
-TrellisNode::TrellisNode(MemPool &pool, const ArcLists &arcLists, const SCFG::Hypothesis &hypo)
+TrellisNode::TrellisNode(const SCFG::Manager &mgr, const ArcLists &arcLists, const SCFG::Hypothesis &hypo)
 :arcList(arcLists.GetArcList(&hypo))
 ,ind(0)
 //,m_prevNodes(pool)
 {
   UTIL_THROW_IF2(arcList.size() == 0, "Empty arclist");
 
-  CreateTail(pool, arcLists, hypo);
+  // usually the same as hypo, except when scores are equal
+  const SCFG::Hypothesis &thisHypo = GetHypothesis();
+
+  CreateTail(mgr, arcLists, thisHypo);
 }
 
-TrellisNode::TrellisNode(MemPool &pool, const ArcLists &arcLists, const ArcList &varcList, size_t vind)
+TrellisNode::TrellisNode(const SCFG::Manager &mgr, const ArcLists &arcLists, const ArcList &varcList, size_t vind)
 :arcList(varcList)
 ,ind(vind)
 //,m_prevNodes(pool)
 {
   UTIL_THROW_IF2(vind >= arcList.size(), "arclist out of bound" << ind << " >= " << arcList.size());
   const SCFG::Hypothesis &hypo = arcList[ind]->Cast<SCFG::Hypothesis>();
-  CreateTail(pool, arcLists, hypo);
+  CreateTail(mgr, arcLists, hypo);
 }
 
-TrellisNode::TrellisNode(MemPool &pool, const ArcLists &arcLists, const TrellisNode &orig, const TrellisNode &nodeToChange)
+TrellisNode::TrellisNode(const SCFG::Manager &mgr, const ArcLists &arcLists, const TrellisNode &orig, const TrellisNode &nodeToChange)
 :arcList(orig.arcList)
 ,ind(orig.ind)
 //,m_prevNodes(pool)
 {
   const TrellisNode::Children &origChildren = orig.GetChildren();
-  m_prevNodes.resize(origChildren.size());
+  m_prevNodes.resize(origChildren.size(), NULL);
 
   for (size_t i = 0; i < origChildren.size(); ++i) {
     TrellisNode *newChild;
     const TrellisNode *origChild = origChildren[i];
     if (origChild != &nodeToChange) {
-      // recurse
-      newChild = new TrellisNode(pool, arcLists, *origChild, nodeToChange);
+      // recurse. The child node is not the 1 we need to change
+      newChild = new TrellisNode(mgr, arcLists, *origChild, nodeToChange);
     }
     else {
+      // need to change the child node
       size_t nextInd = nodeToChange.ind + 1;
-      newChild = new TrellisNode(pool, arcLists, nodeToChange.arcList, nextInd);
+      newChild = new TrellisNode(mgr, arcLists, nodeToChange.arcList, nextInd);
     }
 
     m_prevNodes[i] = newChild;
@@ -71,14 +76,14 @@ TrellisNode::~TrellisNode()
 }
 
 
-void TrellisNode::CreateTail(MemPool &pool, const ArcLists &arcLists, const SCFG::Hypothesis &hypo)
+void TrellisNode::CreateTail(const SCFG::Manager &mgr, const ArcLists &arcLists, const SCFG::Hypothesis &hypo)
 {
   const Vector<const Hypothesis*> &prevHypos = hypo.GetPrevHypos();
   m_prevNodes.resize(prevHypos.size(), NULL);
 
   for (size_t i = 0; i < hypo.GetPrevHypos().size(); ++i) {
 	const SCFG::Hypothesis &prevHypo = *prevHypos[i];
-	TrellisNode *prevNode = new TrellisNode(pool, arcLists, prevHypo);
+	TrellisNode *prevNode = new TrellisNode(mgr, arcLists, prevHypo);
 	m_prevNodes[i] = prevNode;
   }
 }
@@ -90,7 +95,7 @@ const SCFG::Hypothesis &TrellisNode::GetHypothesis() const
   return hypo;
 }
 
-void TrellisNode::OutputToStream(std::stringstream &strm) const
+void TrellisNode::OutputToStream(const System &system, std::stringstream &strm) const
 {
   const SCFG::Hypothesis &hypo = GetHypothesis();
   const SCFG::TargetPhraseImpl &tp = hypo.GetTargetPhrase();
@@ -103,9 +108,18 @@ void TrellisNode::OutputToStream(std::stringstream &strm) const
 	  //cerr << "is nt" << endl;
 	  // non-term. fill out with prev hypo
 	  size_t nonTermInd = tp.GetAlignNonTerm().GetNonTermIndexMap()[pos];
-	  const TrellisNode *prevNode = m_prevNodes[nonTermInd];
 
-	  prevNode->OutputToStream(strm);
+	  if (nonTermInd >= m_prevNodes.size()) {
+		  cerr << endl << "tp=" << tp.Debug(system) << endl;
+		  cerr << "ant alignment=" << tp.GetAlignNonTerm().Debug(system) << endl;
+		  cerr << "pos=" << pos << endl;
+	  }
+	  UTIL_THROW_IF2(nonTermInd >= m_prevNodes.size(), "Out of bounds:" << nonTermInd << ">=" << m_prevNodes.size());
+
+	  const TrellisNode *prevNode = m_prevNodes[nonTermInd];
+	  UTIL_THROW_IF2(prevNode == NULL, "prevNode == NULL");
+
+	  prevNode->OutputToStream(system, strm);
 	}
 	else {
 	  //cerr << "not nt" << endl;
@@ -125,13 +139,13 @@ bool TrellisNode::HasMore() const
 
 TrellisPath::TrellisPath(const SCFG::Manager &mgr, const SCFG::Hypothesis &hypo)
 {
-  cerr << "create2 " << this << endl;
+  //cerr << "create2 " << this << endl;
   MemPool &pool = mgr.GetPool();
 
   // 1st
   m_scores =   m_scores = new (pool.Allocate<Scores>())
 		  Scores(mgr.system,  pool, mgr.system.featureFunctions.GetNumScores(), hypo.GetScores());
-  m_node = new TrellisNode(pool, mgr.arcLists, hypo);
+  m_node = new TrellisNode(mgr, mgr.arcLists, hypo);
   m_prevNodeChanged = m_node;
 }
 
@@ -140,7 +154,7 @@ TrellisPath::TrellisPath(const SCFG::Manager &mgr, const SCFG::TrellisPath &orig
 ,m_scores(NULL)
 ,m_prevNodeChanged(NULL)
 {
-  cerr << "create1 " << this << endl;
+  //cerr << "create1 " << this << endl;
 
   MemPool &pool = mgr.GetPool();
 
@@ -153,26 +167,27 @@ TrellisPath::TrellisPath(const SCFG::Manager &mgr, const SCFG::TrellisPath &orig
   m_scores->PlusEquals(mgr.system, nextHypo.GetScores());
 
   if (origPath.m_node == &nodeToChange) {
-	  m_node = new TrellisNode(pool, mgr.arcLists, nodeToChange.arcList, nodeToChange.ind + 1);
+	  m_node = new TrellisNode(mgr, mgr.arcLists, nodeToChange.arcList, nodeToChange.ind + 1);
 	  m_prevNodeChanged= m_node;
   }
   else {
 	  // recursively copy nodes until we find the node that needs to change
-	  m_node = new TrellisNode(pool, mgr.arcLists, *origPath.m_node, nodeToChange);
+	  m_node = new TrellisNode(mgr, mgr.arcLists, *origPath.m_node, nodeToChange);
 	  m_prevNodeChanged= m_node;
   }
 }
 
 TrellisPath::~TrellisPath()
 {
-	cerr << "delete " << this << endl;
+	//cerr << "delete " << this << endl;
 	delete m_node;
 }
 
-std::string TrellisPath::Output() const
+std::string TrellisPath::Output(const System &system) const
 {
   stringstream tmpStrm;
-  m_node->OutputToStream(tmpStrm);
+  UTIL_THROW_IF2(m_node == NULL, "m_node == NULL");
+  m_node->OutputToStream(system, tmpStrm);
 
   string out = tmpStrm.str();
   out = out.substr(4, out.size() - 10);

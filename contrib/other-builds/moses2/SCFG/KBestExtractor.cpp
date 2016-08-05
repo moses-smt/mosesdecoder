@@ -48,13 +48,12 @@ KBestExtractor::KBestExtractor(const SCFG::Manager &mgr)
 
     ++bestInd;
   }
-  cerr << "contenders=" << contenders.GetSize() << endl;
+  //cerr << "contenders=" << contenders.GetSize() << endl;
 }
 
 KBestExtractor::~KBestExtractor()
 {
-    cerr << "m_coll=" << m_coll.size() << endl;
-
+    //cerr << "m_coll=" << m_coll.size() << endl;
 	BOOST_FOREACH(SCFG::TrellisPath *path, m_coll) {
 		delete path;
 	}
@@ -62,24 +61,24 @@ KBestExtractor::~KBestExtractor()
 
 void KBestExtractor::OutputToStream(std::stringstream &strm)
 {
-	cerr << "START OutputToStream m_coll=" << m_coll.size() << endl;
+	//cerr << "START OutputToStream m_coll=" << m_coll.size() << endl;
 	BOOST_FOREACH(SCFG::TrellisPath *path, m_coll) {
 		//cerr << path << " " << path->Debug(m_mgr.system) << endl;
 
 		strm << m_mgr.GetTranslationId() << " ||| ";
-		cerr << "1" << flush;
-		strm << path->Output();
-		cerr << "2" << flush;
+		//cerr << "1" << flush;
+		strm << path->Output(m_mgr.system);
+		//cerr << "2" << flush;
 		strm << " ||| ";
 		path->GetScores().OutputBreakdown(strm, m_mgr.system);
-		cerr << "3" << flush;
+		//cerr << "3" << flush;
 		strm << "||| ";
 		strm << path->GetScores().GetTotalScore();
-		cerr << "4" << flush;
+		//cerr << "4" << flush;
 
 		strm << endl;
 	}
-	cerr << "FINISH OutputToStream " << endl;
+	//cerr << "FINISH OutputToStream " << endl;
 }
 
 }

@@ -73,6 +73,8 @@ public:
 
   std::string Debug(const System &system) const;
 
+  size_t GetNumNonTerms() const;
+
   //mutable void *chartState;
 protected:
 };

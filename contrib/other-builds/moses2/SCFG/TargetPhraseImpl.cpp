@@ -110,5 +110,17 @@ void TargetPhraseImpl::SetAlignmentInfo(const std::string &alignString)
 
 }
 
+size_t TargetPhraseImpl::GetNumNonTerms() const
+{
+	size_t ret = 0;
+	for (size_t i = 0; i < GetSize(); ++i) {
+		if ((*this)[i].isNonTerminal) {
+			++ret;
+		}
+	}
+	return ret;
+}
+
+
 }
 }
