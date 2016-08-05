@@ -27,18 +27,6 @@ public:
       UnorderedComparer<HypothesisBase>, UnorderedComparer<HypothesisBase>,
       MemPoolAllocator<const HypothesisBase*> > _HCType;
 
-  typedef _HCType::iterator iterator;
-  typedef _HCType::const_iterator const_iterator;
-  //! iterators
-  const_iterator begin() const
-  {
-    return m_coll.begin();
-  }
-  const_iterator end() const
-  {
-    return m_coll.end();
-  }
-
   HypothesisColl(const ManagerBase &mgr);
 
   void Add(const System &system,
@@ -47,11 +35,6 @@ public:
 		  ArcLists &arcLists);
 
   _HCType &GetColl()
-  {
-    return m_coll;
-  }
-
-  const _HCType &GetColl() const
   {
     return m_coll;
   }
