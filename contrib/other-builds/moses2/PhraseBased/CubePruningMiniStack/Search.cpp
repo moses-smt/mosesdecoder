@@ -221,13 +221,8 @@ void Search::PostDecode(size_t stackInd)
 
 const Hypothesis *Search::GetBestHypothesis() const
 {
-	std::vector<const Hypothesis*> sortedHypos = m_stack.GetBestHypos(1);
-
-	const Hypothesis *best = NULL;
-	if (sortedHypos.size()) {
-		best = sortedHypos[0];
-	}
-	return best;
+	const Hypothesis *bestHypo = m_stack.GetBestHypo();
+	return bestHypo;
 }
 
 void Search::AddInitialTrellisPaths(TrellisPaths<TrellisPath> &paths) const

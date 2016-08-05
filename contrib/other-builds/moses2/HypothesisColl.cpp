@@ -23,6 +23,26 @@ HypothesisColl::HypothesisColl(const ManagerBase &mgr) :
 {
 }
 
+const HypothesisBase *HypothesisColl::GetBestHypo() const
+{
+	if (GetSize() == 0) {
+		return NULL;
+	}
+	if (m_sortedHypos) {
+		return (*m_sortedHypos)[0];
+	}
+
+	SCORE bestScore = -std::numeric_limits<SCORE>::infinity();
+	const HypothesisBase *bestHypo;
+	BOOST_FOREACH(const HypothesisBase *hypo, m_coll) {
+		if (hypo->GetFutureScore() > bestScore) {
+			bestScore = hypo->GetFutureScore();
+			bestHypo = hypo;
+		}
+	}
+	return bestHypo;
+}
+
 void HypothesisColl::Add(
 		const System &system,
 		HypothesisBase *hypo,

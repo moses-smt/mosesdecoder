@@ -23,10 +23,6 @@ typedef Array<const HypothesisBase*> Hypotheses;
 class HypothesisColl
 {
 public:
-  typedef boost::unordered_set<const HypothesisBase*,
-      UnorderedComparer<HypothesisBase>, UnorderedComparer<HypothesisBase>,
-      MemPoolAllocator<const HypothesisBase*> > _HCType;
-
   HypothesisColl(const ManagerBase &mgr);
 
   void Add(const System &system,
@@ -34,15 +30,8 @@ public:
 		  Recycler<HypothesisBase*> &hypoRecycle,
 		  ArcLists &arcLists);
 
-  _HCType &GetColl()
-  {
-    return m_coll;
-  }
-
   size_t GetSize() const
-  {
-    return m_coll.size();
-  }
+  { return m_coll.size(); }
 
   void Clear();
 
@@ -50,9 +39,15 @@ public:
       const ManagerBase &mgr,
       ArcLists &arcLists) const;
 
+  const HypothesisBase *GetBestHypo() const;
+
   std::string Debug(const System &system) const;
 
 protected:
+  typedef boost::unordered_set<const HypothesisBase*,
+      UnorderedComparer<HypothesisBase>, UnorderedComparer<HypothesisBase>,
+      MemPoolAllocator<const HypothesisBase*> > _HCType;
+
   _HCType m_coll;
   mutable Hypotheses *m_sortedHypos;
 

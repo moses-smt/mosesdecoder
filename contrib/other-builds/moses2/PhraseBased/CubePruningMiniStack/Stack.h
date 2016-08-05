@@ -57,7 +57,7 @@ public:
 
   Moses2::HypothesisColl &GetMiniStack(const HypoCoverage &key);
 
-  std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
+  const Hypothesis *GetBestHypo() const;
   void Clear();
 
   void DebugCounts();

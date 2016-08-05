@@ -50,25 +50,20 @@ void Stack::Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
 	coll.Add(m_mgr.system, hypo, hypoRecycle, arcLists);
 }
 
-std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
+const Hypothesis *Stack::GetBestHypo() const
 {
-	std::vector<const Hypothesis*> ret;
+	SCORE bestScore = -std::numeric_limits<SCORE>::infinity();
+	const HypothesisBase *bestHypo;
 	BOOST_FOREACH(const Coll::value_type &val, m_coll){
-		const Moses2::HypothesisColl::_HCType &hypos = val.second->GetColl();
+		const Moses2::HypothesisColl &hypos = *val.second;
+		const Moses2::HypothesisBase *hypo = hypos.GetBestHypo();
 
-		ret.reserve(ret.size() + hypos.size());
-		BOOST_FOREACH(const HypothesisBase *hypo, hypos) {
-			ret.push_back(static_cast<const Hypothesis*>(hypo));
+		if (hypo->GetFutureScore() > bestScore) {
+			bestScore = hypo->GetFutureScore();
+			bestHypo = hypo;
 		}
 	}
-
-	std::vector<const Hypothesis*>::iterator iterMiddle;
-	iterMiddle = (num == 0 || ret.size() < num) ? ret.end() : ret.begin() + num;
-
-	std::partial_sort(ret.begin(), iterMiddle, ret.end(),
-			HypothesisFutureScoreOrderer());
-
-	return ret;
+	return &bestHypo->Cast<Hypothesis>();
 }
 
 size_t Stack::GetHypoSize() const
