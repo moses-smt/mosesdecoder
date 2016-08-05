@@ -59,7 +59,8 @@ public:
   TrellisPath(const SCFG::Manager &mgr, const SCFG::TrellisPath &origPath, const TrellisNode &nodeToChange); // create original path
   ~TrellisPath();
 
-  std::string Output(const System &system) const;
+  const std::string &Output() const
+  { return m_out; }
 
   const Scores &GetScores() const
   { return *m_scores; }
@@ -77,11 +78,14 @@ protected:
   Scores *m_scores;
   TrellisNode *m_node;
   TrellisNode *m_prevNodeChanged;
+  std::string m_out;
 
   void CreateDeviantPaths(
       TrellisPaths<SCFG::TrellisPath> &paths,
       const SCFG::Manager &mgr,
       const TrellisNode &parentNode) const;
+
+  void ComputeStr(const System &system);
 
 };
 

@@ -24,6 +24,8 @@ namespace SCFG
 KBestExtractor::KBestExtractor(const SCFG::Manager &mgr)
 :m_mgr(mgr)
 {
+  set<string> distinctHypos;
+
   ArcLists &arcLists = mgr.arcLists;
   const Stack &lastStack = mgr.GetStacks().GetLastStack();
   const Hypothesis *bestHypo = lastStack.GetBestHypo(mgr, arcLists);
@@ -42,11 +44,28 @@ KBestExtractor::KBestExtractor(const SCFG::Manager &mgr)
     //cerr << "bestInd=" << bestInd << endl;
     //cerr << "currPath=" << path->Debug(m_mgr.system) << endl;
 
+	bool ok = false;
+	if (mgr.system.options.nbest.only_distinct) {
+		string tgtPhrase = path->Output();
+		//cerr << "tgtPhrase=" << tgtPhrase << endl;
+
+		if (distinctHypos.insert(tgtPhrase).second) {
+			ok = true;
+		}
+	}
+	else {
+		ok = true;
+	}
+
     path->CreateDeviantPaths(contenders, mgr);
 
-    m_coll.push_back(path);
-
-    ++bestInd;
+	if (ok) {
+		++bestInd;
+	    m_coll.push_back(path);
+	}
+	else {
+		delete path;
+	}
   }
   //cerr << "contenders=" << contenders.GetSize() << endl;
 }
@@ -67,7 +86,7 @@ void KBestExtractor::OutputToStream(std::stringstream &strm)
 
 		strm << m_mgr.GetTranslationId() << " ||| ";
 		//cerr << "1" << flush;
-		strm << path->Output(m_mgr.system);
+		strm << path->Output();
 		//cerr << "2" << flush;
 		strm << " ||| ";
 		path->GetScores().OutputBreakdown(strm, m_mgr.system);

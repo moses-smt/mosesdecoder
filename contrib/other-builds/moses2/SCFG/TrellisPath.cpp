@@ -147,6 +147,8 @@ TrellisPath::TrellisPath(const SCFG::Manager &mgr, const SCFG::Hypothesis &hypo)
 		  Scores(mgr.system,  pool, mgr.system.featureFunctions.GetNumScores(), hypo.GetScores());
   m_node = new TrellisNode(mgr, mgr.arcLists, hypo);
   m_prevNodeChanged = m_node;
+
+  ComputeStr(mgr.system);
 }
 
 TrellisPath::TrellisPath(const SCFG::Manager &mgr, const SCFG::TrellisPath &origPath, const TrellisNode &nodeToChange)
@@ -175,6 +177,8 @@ TrellisPath::TrellisPath(const SCFG::Manager &mgr, const SCFG::TrellisPath &orig
 	  m_node = new TrellisNode(mgr, mgr.arcLists, *origPath.m_node, nodeToChange);
 	  m_prevNodeChanged= m_node;
   }
+
+  ComputeStr(mgr.system);
 }
 
 TrellisPath::~TrellisPath()
@@ -183,16 +187,14 @@ TrellisPath::~TrellisPath()
 	delete m_node;
 }
 
-std::string TrellisPath::Output(const System &system) const
+void TrellisPath::ComputeStr(const System &system)
 {
   stringstream tmpStrm;
   UTIL_THROW_IF2(m_node == NULL, "m_node == NULL");
   m_node->OutputToStream(system, tmpStrm);
 
-  string out = tmpStrm.str();
-  out = out.substr(4, out.size() - 10);
-
-  return out;
+  m_out = tmpStrm.str();
+  m_out = m_out.substr(4, m_out.size() - 10);
 }
 
 SCORE TrellisPath::GetFutureScore() const
