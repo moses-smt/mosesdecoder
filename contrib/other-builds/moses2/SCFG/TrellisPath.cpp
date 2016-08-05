@@ -22,7 +22,7 @@ namespace SCFG
 TrellisNode::TrellisNode(MemPool &pool, const ArcLists &arcLists, const SCFG::Hypothesis &hypo)
 :arcList(arcLists.GetArcList(&hypo))
 ,ind(0)
-,m_prevNodes(pool)
+//,m_prevNodes(pool)
 {
   UTIL_THROW_IF2(arcList.size() == 0, "Empty arclist");
 
@@ -32,7 +32,7 @@ TrellisNode::TrellisNode(MemPool &pool, const ArcLists &arcLists, const SCFG::Hy
 TrellisNode::TrellisNode(MemPool &pool, const ArcLists &arcLists, const ArcList &varcList, size_t vind)
 :arcList(varcList)
 ,ind(vind)
-,m_prevNodes(pool)
+//,m_prevNodes(pool)
 {
   UTIL_THROW_IF2(vind >= arcList.size(), "arclist out of bound" << ind << " >= " << arcList.size());
   const SCFG::Hypothesis &hypo = arcList[ind]->Cast<SCFG::Hypothesis>();
@@ -42,7 +42,7 @@ TrellisNode::TrellisNode(MemPool &pool, const ArcLists &arcLists, const ArcList 
 TrellisNode::TrellisNode(MemPool &pool, const ArcLists &arcLists, const TrellisNode &orig, const TrellisNode &nodeToChange)
 :arcList(orig.arcList)
 ,ind(orig.ind)
-,m_prevNodes(pool)
+//,m_prevNodes(pool)
 {
   const TrellisNode::Children &origChildren = orig.GetChildren();
   m_prevNodes.resize(origChildren.size());
@@ -52,16 +52,24 @@ TrellisNode::TrellisNode(MemPool &pool, const ArcLists &arcLists, const TrellisN
     const TrellisNode *origChild = origChildren[i];
     if (origChild != &nodeToChange) {
       // recurse
-      newChild = new (pool.Allocate<TrellisNode>()) TrellisNode(pool, arcLists, *origChild, nodeToChange);
+      newChild = new TrellisNode(pool, arcLists, *origChild, nodeToChange);
     }
     else {
       size_t nextInd = nodeToChange.ind + 1;
-      newChild = new (pool.Allocate<TrellisNode>()) TrellisNode(pool, arcLists, nodeToChange.arcList, nextInd);
+      newChild = new TrellisNode(pool, arcLists, nodeToChange.arcList, nextInd);
     }
 
     m_prevNodes[i] = newChild;
   }
 }
+
+TrellisNode::~TrellisNode()
+{
+	BOOST_FOREACH(const TrellisNode *child, m_prevNodes) {
+		delete child;
+	}
+}
+
 
 void TrellisNode::CreateTail(MemPool &pool, const ArcLists &arcLists, const SCFG::Hypothesis &hypo)
 {
@@ -70,7 +78,7 @@ void TrellisNode::CreateTail(MemPool &pool, const ArcLists &arcLists, const SCFG
 
   for (size_t i = 0; i < hypo.GetPrevHypos().size(); ++i) {
 	const SCFG::Hypothesis &prevHypo = *prevHypos[i];
-	TrellisNode *prevNode = new (pool.Allocate<TrellisNode>()) TrellisNode(pool, arcLists, prevHypo);
+	TrellisNode *prevNode = new TrellisNode(pool, arcLists, prevHypo);
 	m_prevNodes[i] = prevNode;
   }
 }
@@ -117,12 +125,13 @@ bool TrellisNode::HasMore() const
 
 TrellisPath::TrellisPath(const SCFG::Manager &mgr, const SCFG::Hypothesis &hypo)
 {
+  cerr << "create2 " << this << endl;
   MemPool &pool = mgr.GetPool();
 
   // 1st
   m_scores =   m_scores = new (pool.Allocate<Scores>())
 		  Scores(mgr.system,  pool, mgr.system.featureFunctions.GetNumScores(), hypo.GetScores());
-  m_node = new (pool.Allocate<TrellisNode>()) TrellisNode(pool, mgr.arcLists, hypo);
+  m_node = new TrellisNode(pool, mgr.arcLists, hypo);
   m_prevNodeChanged = m_node;
 }
 
@@ -131,6 +140,8 @@ TrellisPath::TrellisPath(const SCFG::Manager &mgr, const SCFG::TrellisPath &orig
 ,m_scores(NULL)
 ,m_prevNodeChanged(NULL)
 {
+  cerr << "create1 " << this << endl;
+
   MemPool &pool = mgr.GetPool();
 
   // calc scores
@@ -142,14 +153,20 @@ TrellisPath::TrellisPath(const SCFG::Manager &mgr, const SCFG::TrellisPath &orig
   m_scores->PlusEquals(mgr.system, nextHypo.GetScores());
 
   if (origPath.m_node == &nodeToChange) {
-	  m_node = new (pool.Allocate<TrellisNode>()) TrellisNode(pool, mgr.arcLists, nodeToChange.arcList, nodeToChange.ind + 1);
+	  m_node = new TrellisNode(pool, mgr.arcLists, nodeToChange.arcList, nodeToChange.ind + 1);
 	  m_prevNodeChanged= m_node;
   }
   else {
 	  // recursively copy nodes until we find the node that needs to change
-	  m_node = new (pool.Allocate<TrellisNode>()) TrellisNode(pool, mgr.arcLists, *origPath.m_node, nodeToChange);
+	  m_node = new TrellisNode(pool, mgr.arcLists, *origPath.m_node, nodeToChange);
 	  m_prevNodeChanged= m_node;
   }
+}
+
+TrellisPath::~TrellisPath()
+{
+	cerr << "delete " << this << endl;
+	delete m_node;
 }
 
 std::string TrellisPath::Output() const
@@ -182,7 +199,7 @@ void TrellisPath::CreateDeviantPaths(TrellisPaths<SCFG::TrellisPath> &paths, con
 	}
 
 	// recursively wiggle all of it's child nodes
-	CreateDeviantPaths(paths, mgr, *m_prevNodeChanged);
+	//CreateDeviantPaths(paths, mgr, *m_prevNodeChanged);
 }
 
 void TrellisPath::CreateDeviantPaths(

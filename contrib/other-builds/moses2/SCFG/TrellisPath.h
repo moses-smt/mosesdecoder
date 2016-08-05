@@ -26,7 +26,7 @@ class Hypothesis;
 class TrellisNode
 {
 public:
-  typedef Vector<const TrellisNode*> Children;
+  typedef std::vector<const TrellisNode*> Children;
 
   const ArcList &arcList;
   size_t ind;
@@ -35,6 +35,7 @@ public:
   TrellisNode(MemPool &pool, const ArcLists &arcLists, const ArcList &varcList, size_t vind);
 
   TrellisNode(MemPool &pool, const ArcLists &arcLists, const TrellisNode &orig, const TrellisNode &nodeToChange);
+  virtual ~TrellisNode();
 
   const SCFG::Hypothesis &GetHypothesis() const;
   bool HasMore() const;
@@ -56,6 +57,7 @@ public:
 
   TrellisPath(const SCFG::Manager &mgr, const SCFG::Hypothesis &hypo); // create best path
   TrellisPath(const SCFG::Manager &mgr, const SCFG::TrellisPath &origPath, const TrellisNode &nodeToChange); // create original path
+  ~TrellisPath();
 
   std::string Output() const;
 

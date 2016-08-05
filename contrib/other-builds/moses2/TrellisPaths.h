@@ -38,28 +38,31 @@ public:
 
   bool empty() const
   {
-    return m_collection.empty();
+    return m_coll.empty();
   }
 
   //! add a new entry into collection
   void Add(T *trellisPath)
   {
-    m_collection.push(trellisPath);
+    m_coll.push(trellisPath);
   }
 
   T *Get()
   {
-    T *top = m_collection.top();
+    T *top = m_coll.top();
 
     // Detach
-    m_collection.pop();
+    m_coll.pop();
     return top;
   }
+
+  size_t GetSize() const
+  { return m_coll.size(); }
 
 protected:
   typedef std::priority_queue<T*, std::vector<T*>,
       CompareTrellisPath<T> > CollectionType;
-  CollectionType m_collection;
+  CollectionType m_coll;
 };
 
 } /* namespace Moses2 */

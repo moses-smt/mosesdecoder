@@ -35,11 +35,11 @@ KBestExtractor::KBestExtractor(const SCFG::Manager &mgr)
     contenders.Add(path);
   }
 
-  cerr << "nbest_size=" << mgr.system.options.nbest.nbest_size << endl;
+  //cerr << "nbest_size=" << mgr.system.options.nbest.nbest_size << endl;
   size_t bestInd = 0;
   while (bestInd < mgr.system.options.nbest.nbest_size && !contenders.empty()) {
     SCFG::TrellisPath *path = contenders.Get();
-    cerr << "bestInd=" << bestInd << endl;
+    //cerr << "bestInd=" << bestInd << endl;
     //cerr << "currPath=" << path->Debug(m_mgr.system) << endl;
 
     path->CreateDeviantPaths(contenders, mgr);
@@ -48,10 +48,13 @@ KBestExtractor::KBestExtractor(const SCFG::Manager &mgr)
 
     ++bestInd;
   }
+  cerr << "contenders=" << contenders.GetSize() << endl;
 }
 
 KBestExtractor::~KBestExtractor()
 {
+    cerr << "m_coll=" << m_coll.size() << endl;
+
 	BOOST_FOREACH(SCFG::TrellisPath *path, m_coll) {
 		delete path;
 	}
