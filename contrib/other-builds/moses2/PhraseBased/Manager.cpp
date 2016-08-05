@@ -225,8 +225,13 @@ std::string Manager::OutputNBest()
 
 	// MAIN LOOP
 	stringstream out;
+	size_t maxIter = system.options.nbest.nbest_size * system.options.nbest.factor;
 	size_t bestInd = 0;
-	while (bestInd < system.options.nbest.nbest_size && !contenders.empty()) {
+	for (size_t i = 0; i < maxIter; ++i) {
+		if (bestInd > system.options.nbest.nbest_size || contenders.empty()) {
+			break;
+		}
+
 		//cerr << "bestInd=" << bestInd << endl;
 		TrellisPath *path = contenders.Get();
 
