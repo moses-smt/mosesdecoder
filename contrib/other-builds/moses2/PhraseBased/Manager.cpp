@@ -67,7 +67,7 @@ void Manager::Init()
 			GetPool(), firstPt, system, 0);
 
 	const Sentence &sentence = static_cast<const Sentence&>(GetInput());
-	cerr << "sentence=" << sentence.GetSize() << " " << sentence.Debug(system) << endl;
+	//cerr << "sentence=" << sentence.GetSize() << " " << sentence.Debug(system) << endl;
 
 	m_inputPaths.Init(sentence, *this);
 
