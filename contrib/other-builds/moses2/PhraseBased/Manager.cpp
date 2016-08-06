@@ -192,7 +192,7 @@ void Manager::CalcFutureScore()
 std::string Manager::OutputBest() const
 {
 	stringstream out;
-	const Hypothesis *bestHypo = m_search->GetBestHypothesis();
+	const Hypothesis *bestHypo = m_search->GetBestHypo();
 	if (bestHypo) {
 		if (system.options.output.ReportHypoScore) {
 			out << bestHypo->GetScores().GetTotalScore() << " ";

@@ -199,7 +199,7 @@ void Search::CreateSearchGraph(size_t stackInd)
 }
 
 
-const Hypothesis *Search::GetBestHypothesis() const
+const Hypothesis *Search::GetBestHypo() const
 {
 	const NSCubePruningMiniStack::Stack &lastStack = m_stacks.Back();
 	std::vector<const Hypothesis*> sortedHypos = lastStack.GetBestHypos(1);

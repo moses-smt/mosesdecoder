@@ -41,6 +41,13 @@ public:
 
   const HypothesisBase *GetBestHypo() const;
 
+  template<typename T>
+  const T *GetBestHypo() const
+  {
+    const HypothesisBase *hypo = GetBestHypo();
+    return hypo ? &hypo->Cast<T>() : NULL;
+  }
+
   std::string Debug(const System &system) const;
 
 protected:

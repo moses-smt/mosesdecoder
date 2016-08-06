@@ -188,7 +188,7 @@ void Search::PostDecode(size_t stackInd)
 
 }
 
-const Hypothesis *Search::GetBestHypothesis() const
+const Hypothesis *Search::GetBestHypo() const
 {
 	std::vector<const Hypothesis*> sortedHypos = m_stack.GetBestHypos(1);
 

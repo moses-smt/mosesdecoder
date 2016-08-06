@@ -313,7 +313,7 @@ std::string Manager::OutputBest() const
 {
   string out;
   const Stack &lastStack = m_stacks.GetLastStack();
-  const Hypothesis *bestHypo = lastStack.GetBestHypo(*this, const_cast<ArcLists&>(arcLists));
+  const SCFG::Hypothesis *bestHypo = lastStack.GetBestHypo();
 
   if (bestHypo) {
     //cerr << "BEST TRANSLATION: " << bestHypo << bestHypo->Debug(system) << endl;

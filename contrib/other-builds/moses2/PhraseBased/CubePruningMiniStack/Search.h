@@ -31,7 +31,7 @@ public:
   virtual ~Search();
 
   virtual void Decode();
-  const Hypothesis *GetBestHypothesis() const;
+  const Hypothesis *GetBestHypo() const;
 
   void AddInitialTrellisPaths(TrellisPaths<TrellisPath> &paths) const;
 

@@ -53,12 +53,12 @@ void Stack::Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
 const Hypothesis *Stack::GetBestHypo() const
 {
 	SCORE bestScore = -std::numeric_limits<SCORE>::infinity();
-	const HypothesisBase *bestHypo;
+	const HypothesisBase *bestHypo = NULL;
 	BOOST_FOREACH(const Coll::value_type &val, m_coll){
 		const Moses2::HypothesisColl &hypos = *val.second;
 		const Moses2::HypothesisBase *hypo = hypos.GetBestHypo();
 
-		if (hypo->GetFutureScore() > bestScore) {
+		if (hypo && hypo->GetFutureScore() > bestScore) {
 			bestScore = hypo->GetFutureScore();
 			bestHypo = hypo;
 		}

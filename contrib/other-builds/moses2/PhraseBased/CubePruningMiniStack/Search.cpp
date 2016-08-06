@@ -219,7 +219,7 @@ void Search::PostDecode(size_t stackInd)
 	}
 }
 
-const Hypothesis *Search::GetBestHypothesis() const
+const Hypothesis *Search::GetBestHypo() const
 {
 	const Hypothesis *bestHypo = m_stack.GetBestHypo();
 	return bestHypo;

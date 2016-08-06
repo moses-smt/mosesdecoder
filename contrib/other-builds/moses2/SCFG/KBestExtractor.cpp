@@ -28,7 +28,7 @@ KBestExtractor::KBestExtractor(const SCFG::Manager &mgr)
 
 	ArcLists &arcLists = mgr.arcLists;
 	const Stack &lastStack = mgr.GetStacks().GetLastStack();
-	const Hypothesis *bestHypo = lastStack.GetBestHypo(mgr, arcLists);
+	const Hypothesis *bestHypo = lastStack.GetBestHypo();
 
 	TrellisPaths<SCFG::TrellisPath> contenders;
 

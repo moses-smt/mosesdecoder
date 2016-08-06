@@ -148,17 +148,10 @@ void Search::Extend(const Hypothesis &hypo, const TargetPhraseImpl &tp,
 
 }
 
-const Hypothesis *Search::GetBestHypothesis() const
+const Hypothesis *Search::GetBestHypo() const
 {
 	const Stack &lastStack = m_stacks.Back();
-	const Hypotheses &sortedHypos = lastStack.GetSortedAndPruneHypos(mgr,
-			mgr.arcLists);
-
-	const Hypothesis *best = NULL;
-	if (sortedHypos.size()) {
-		best = static_cast<const Hypothesis*>(sortedHypos[0]);
-	}
-	return best;
+  return lastStack.GetBestHypo<Hypothesis>();
 }
 
 void Search::AddInitialTrellisPaths(TrellisPaths<TrellisPath> &paths) const

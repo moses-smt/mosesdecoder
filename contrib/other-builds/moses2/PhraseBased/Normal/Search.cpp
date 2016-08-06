@@ -137,7 +137,7 @@ void Search::Extend(const Hypothesis &hypo, const TargetPhraseImpl &tp,
 
 }
 
-const Hypothesis *Search::GetBestHypothesis() const
+const Hypothesis *Search::GetBestHypo() const
 {
 	const Stack &lastStack = m_stacks.Back();
 	const Hypotheses &sortedHypos = lastStack.GetSortedAndPruneHypos(mgr,

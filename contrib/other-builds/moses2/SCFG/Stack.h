@@ -35,9 +35,7 @@ public:
   void Add(SCFG::Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
       ArcLists &arcLists);
 
-  const Hypothesis *GetBestHypo(
-      const Manager &mgr,
-      ArcLists &arcLists) const;
+  const Hypothesis *GetBestHypo() const;
 
   std::string Debug(const System &system) const;
 

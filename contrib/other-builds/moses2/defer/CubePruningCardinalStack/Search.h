@@ -30,7 +30,7 @@ public:
 	virtual ~Search();
 
 	virtual void Decode();
-	const Hypothesis *GetBestHypothesis() const;
+	const Hypothesis *GetBestHypo() const;
 
 protected:
 	Stack m_stack;

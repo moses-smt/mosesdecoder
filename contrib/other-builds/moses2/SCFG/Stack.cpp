@@ -73,22 +73,20 @@ const Moses2::HypothesisColl *Stack::GetColl(SCFG::Word &nt) const
   }
 }
 
-const Hypothesis *Stack::GetBestHypo(
-    const Manager &mgr,
-    ArcLists &arcLists) const
+const Hypothesis *Stack::GetBestHypo() const
 {
-  const Hypothesis *ret = NULL;
-  BOOST_FOREACH (const Coll::value_type &valPair, m_coll) {
-    Moses2::HypothesisColl &hypos = *valPair.second;
-    const Hypotheses &sortedHypos = hypos.GetSortedAndPruneHypos(mgr, arcLists);
-    const Hypothesis *bestHypoColl = static_cast<const Hypothesis*>(sortedHypos[0]);
+  SCORE bestScore = -std::numeric_limits<SCORE>::infinity();
+  const HypothesisBase *bestHypo;
+  BOOST_FOREACH(const Coll::value_type &val, m_coll){
+    const Moses2::HypothesisColl &hypos = *val.second;
+    const Moses2::HypothesisBase *hypo = hypos.GetBestHypo();
 
-    if (ret == NULL || ret->GetFutureScore() < bestHypoColl->GetFutureScore()) {
-      ret = bestHypoColl;
+    if (hypo->GetFutureScore() > bestScore) {
+      bestScore = hypo->GetFutureScore();
+      bestHypo = hypo;
     }
   }
-
-  return ret;
+  return &bestHypo->Cast<SCFG::Hypothesis>();
 }
 
 std::string Stack::Debug(const System &system) const
