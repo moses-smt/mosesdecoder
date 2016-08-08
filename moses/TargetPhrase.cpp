@@ -333,6 +333,29 @@ SetExtraScores(FeatureFunction const* ff,
   m_cached_scores[ff] = s;
 }
 
+vector<vector<float> const*> const&
+TargetPhrase::
+GetCoordList(size_t const spaceID) const
+{
+  UTIL_THROW_IF2(!m_cached_coord,
+                 "No coordinates known for target phrase");
+  CoordCache_t::const_iterator m = m_cached_coord->find(spaceID);
+  UTIL_THROW_IF2(m == m_cached_coord->end(),
+                 "No coordinates known in given space for target phrase");
+  return m->second;
+}
+
+void
+TargetPhrase::
+PushCoord(size_t const spaceID,
+          vector<float> const* coord)
+{
+  if (!m_cached_coord) {
+    m_cached_coord.reset(new CoordCache_t);
+  }
+  vector<vector<float> const *>& coordList = (*m_cached_coord)[spaceID];
+  coordList.push_back(coord);
+}
 
 void TargetPhrase::SetProperties(const StringPiece &str)
 {

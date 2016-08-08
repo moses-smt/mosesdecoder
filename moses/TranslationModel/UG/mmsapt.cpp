@@ -286,16 +286,17 @@ namespace Moses
         BOOST_FOREACH(std::string instance, coord_instances)
           {
             vector<string> toks = Moses::Tokenize(instance, ":");
-            string name = toks[0];
+            string space = toks[0];
             string file = toks[1];
-            //TODO: register this space for this model
+            // Register that this model uses the given space
+            m_coord_spaces.push_back(StaticData::InstanceNonConst().MapCoordSpace(space));
             // Load sid coordinates from file
             m_sid_coord_list.push_back(vector<vector<float> >());
             vector<vector<float> >& sid_coord = m_sid_coord_list[m_sid_coord_list.size() - 1];
             //TODO: support extra data for btdyn, here? extra?
             sid_coord.reserve(btfix->T1->size());
             string line;
-            cerr << "Loading coordinate lines for space \"" << name << "\" from " << file << endl;
+            cerr << "Loading coordinate lines for space \"" << space << "\" from " << file << endl;
             iostreams::filtering_istream in;
             ugdiss::open_input_stream(file, in);
             while(getline(in, line))
@@ -648,19 +649,27 @@ namespace Moses
       }
 #endif
 
-    // Track stats for rescoring non-cacheable phrases as needed
+    // Track coordinates if requested
     if (m_track_coord)
     {
-      cerr << btfix->toString(pool.p1, 0) << " ::: " << btfix->toString(pool.p2, 1) << endl;
       BOOST_FOREACH(uint32_t const sid, *pool.sids)
         {
-          BOOST_FOREACH(vector<vector<float> > coord, m_sid_coord_list)
+          for(size_t i = 0; i < m_coord_spaces.size(); ++i)
             {
-              //TODO: store coord[sid] in tp
-              cerr << " : " << Join(" ", coord[sid]);
+              tp->PushCoord(m_coord_spaces[i], &m_sid_coord_list[i][sid]);
             }
-          cerr << endl;
         }
+      /*
+      cerr << btfix->toString(pool.p1, 0) << " ::: " << btfix->toString(pool.p2, 1);
+      BOOST_FOREACH(size_t id, m_coord_spaces)
+        {
+          cerr << " [" << id << "]";
+          vector<vector<float> const*> const& coordList = tp->GetCoordList(id);
+          BOOST_FOREACH(vector<float> const* coord, coordList)
+            cerr << " : " << Join(" ", *coord);
+        }
+      cerr << endl;
+      */
     }
 
     return tp;

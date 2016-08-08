@@ -68,13 +68,8 @@ public:
   size_t m_frontSpanCoveredLength;
   // how many words from the beginning are covered
 
-  // Coordinates in user-defined spaces, indexed by phrase dictionary pointer
-  // Looking up PD* returns a vector of the input's coordinates in each space
-  // known to the PD, in order (vector of pointers to float vectors).  This
-  // allows different models to use different subsets of all named spaces.
-  typedef std::vector<boost::shared_ptr<std::vector<float> > > INCOORD;
-  typedef std::map<PhraseDictionary const*, INCOORD> PD2IC;
-  boost::shared_ptr<PD2IC> m_pd2InputCoord;
+  // Coordinates in user-defined spaces (see "coord" XML tag)
+  SPTR<std::map<size_t const, std::vector<float> > > m_coordMap;
 
   InputType(AllOptions::ptr const& opts, long translationId = 0);
   virtual ~InputType();

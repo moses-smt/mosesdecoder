@@ -56,9 +56,16 @@ public:
   Scores const* GetExtraScores(FeatureFunction const* ff) const;
   void SetExtraScores(FeatureFunction const* ff,boost::shared_ptr<Scores> const& scores);
 
+  typedef std::map<size_t const, std::vector<std::vector<float> const*> > CoordCache_t;
+  std::vector<std::vector<float> const*> const& GetCoordList(size_t const spaceID) const;
+  void PushCoord(size_t const spaceID, std::vector<float> const* coord);
 
 private:
   ScoreCache_t m_cached_scores;
+  // The coordinate cache stores vectors of pointers to vectors.  The coordinate
+  // vectors referenced by the pointers should be owned by the phrase dictionary
+  // implementation.
+  SPTR<CoordCache_t> m_cached_coord;
   WPTR<ContextScope> m_scope;
 
 private:
