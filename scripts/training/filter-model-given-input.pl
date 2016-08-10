@@ -228,6 +228,10 @@ while ( my $line = <INI> ) {
                 $phrase_table_impl = "PhraseDictionaryOnDisk";
                 @toks = set_value( \@toks, "path", "$new_name.bin$table_flag" );
             }
+            elsif ( $binarizer =~ /CreateProbingPT2/ ) {
+                $phrase_table_impl = "ProbingPT";
+                @toks = set_value( \@toks, "path", "$new_name.probing$table_flag" );
+            }
             else {
                 $phrase_table_impl = "PhraseDictionaryBinary";
                 @toks = set_value( \@toks, "path", "$new_name$table_flag" );
@@ -473,15 +477,7 @@ for ( my $i = 0 ; $i <= $#TABLE ; $i++ ) {
 
         # translation model
         if ( $KNOWN_TTABLE{$i} ) {
-
-            # ... hierarchical translation model
-            if ($opt_hierarchical) {
-                my $cmd = "$binarizer $mid_file $new_file.bin";
-                safesystem($cmd) or die "Can't binarize";
-            }
-
-            # ... phrase translation model
-            elsif ( $binarizer =~ /processPhraseTableMin/ ) {
+            if ( $binarizer =~ /processPhraseTableMin/ ) {
 
                 #compact phrase table
                 my $cmd =
@@ -490,6 +486,14 @@ for ( my $i = 0 ; $i <= $#TABLE ; $i++ ) {
             }
             elsif ( $binarizer =~ /CreateOnDiskPt/ ) {
                 my $cmd = "$binarizer $mid_file $new_file.bin";
+                safesystem($cmd) or die "Can't binarize";
+            }
+            elsif ( $binarizer =~ /CreateProbingPT2/ ) {
+                my $cmd = "$binarizer --input-pt $mid_file --output-dir $new_file.probing";
+                if ($opt_hierarchical) {
+		    $cmd .= " --scfg";
+		}
+                print STDERR "EEEEEEEXEC: $cmd \n";
                 safesystem($cmd) or die "Can't binarize";
             }
             else {
