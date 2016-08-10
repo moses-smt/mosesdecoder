@@ -5,11 +5,10 @@
  *      Author: hieu
  */
 
-#include <contrib/other-builds/moses2/HypothesisBase.h>
-
 #include <boost/foreach.hpp>
 #include <stdlib.h>
 #include <deque>
+#include "HypothesisBase.h"
 #include "System.h"
 #include "Scores.h"
 #include "ManagerBase.h"
