@@ -101,16 +101,15 @@ GetScore(const std::string& f, const std::string& e, const std::string& c)
 
     BitWrapper<> bitStream(scoresString);
     for(size_t i = 0; i < m_numScoreComponent; i++) {
-			float prob = m_scoreTrees[m_multipleScoreTrees ? i : 0]->Read(bitStream);
-			prob = exp(prob);
+      float prob = m_scoreTrees[m_multipleScoreTrees ? i : 0]->Read(bitStream);
+      prob = exp(prob);
       probs.push_back(prob);
     }
 
     return probs;
+  } else {
+    // return empty vector;
   }
-  else {
-     // return empty vector;
-  } 
 
   return probs;
 }
@@ -122,46 +121,46 @@ int main(int argc, char** argv)
   string ptPath(argv[1]);
   string roPath(argv[2]);
 
-	// lex reordering model
-	m_factorsF.push_back(0);
-	m_factorsE.push_back(0);
+  // lex reordering model
+  m_factorsF.push_back(0);
+  m_factorsE.push_back(0);
 
   Load(roPath);
 
   // phrase table
   InputFileStream ptStrm(ptPath);
 
-	string line;
-	while (getline(ptStrm, line)) {
-		//cerr << line << endl;
+  string line;
+  while (getline(ptStrm, line)) {
+    //cerr << line << endl;
     std::vector<std::string> columns(7);
-		std::vector<std::string> toks = TokenizeMultiCharSeparator(line, "|||");
-		assert(toks.size() >= 2);
+    std::vector<std::string> toks = TokenizeMultiCharSeparator(line, "|||");
+    assert(toks.size() >= 2);
 
-		for (size_t i = 0; i < toks.size(); ++i) {
-			columns[i] = Trim(toks[i]);
+    for (size_t i = 0; i < toks.size(); ++i) {
+      columns[i] = Trim(toks[i]);
     }
 
-		std::vector<float> scores = GetScore(columns[0], columns[1], "");
+    std::vector<float> scores = GetScore(columns[0], columns[1], "");
     // key-value pairs
     if (scores.size()) {
-		  if (!columns[6].empty()) {
-				columns[6] += " ";
-		  }
-			columns[6] += "{{LexRO ";
-			for (size_t i = 0; i < scores.size() - 1; ++i) {
-				columns[6] += Moses::SPrint(scores[i]);
-				columns[6] += " ";
-		  }
-			columns[6] += Moses::SPrint(scores[scores.size() - 1]);
-		  columns[6] += "}}";
-		}
-
-		// output
-		for (size_t i = 0; i < columns.size() - 1; ++i) {
-			cout << columns[i] << " ||| ";
+      if (!columns[6].empty()) {
+        columns[6] += " ";
+      }
+      columns[6] += "{{LexRO ";
+      for (size_t i = 0; i < scores.size() - 1; ++i) {
+        columns[6] += Moses::SPrint(scores[i]);
+        columns[6] += " ";
+      }
+      columns[6] += Moses::SPrint(scores[scores.size() - 1]);
+      columns[6] += "}}";
     }
-		cout << columns[columns.size() - 1] << endl;
+
+    // output
+    for (size_t i = 0; i < columns.size() - 1; ++i) {
+      cout << columns[i] << " ||| ";
+    }
+    cout << columns[columns.size() - 1] << endl;
   }
 
 }
