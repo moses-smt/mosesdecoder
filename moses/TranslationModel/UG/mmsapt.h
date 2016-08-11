@@ -121,7 +121,8 @@ namespace Moses
 
     bool m_track_coord = false; // track coordinates?  Track sids when sampling
                                 // from bitext, append coords to target phrases
-    std::vector<std::vector<std::vector<float> > > m_sid_coord_list;
+    // Space < Sid < sptr sentence coords > >
+    std::vector<std::vector<SPTR<std::vector<float> > > > m_sid_coord_list;
     std::vector<size_t> m_coord_spaces;
 
     void

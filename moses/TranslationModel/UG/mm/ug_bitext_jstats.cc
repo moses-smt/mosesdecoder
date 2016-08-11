@@ -20,7 +20,6 @@ namespace sapt
     for (int i = 0; i <= LRModel::NONE; ++i)
       ofwd[i] = obwd[i] = 0;
     my_aln.reserve(1);
-    sids.reset(new std::vector<uint32_t>);
   }
 
   jstats::
@@ -81,7 +80,11 @@ namespace sapt
     ++obwd[bwd_orient];
     // Record sentence id if requested
     if (track_sid)
-      sids->push_back(sid);
+      {
+        if (!sids)
+          sids.reset(new std::vector<uint32_t>);
+        sids->push_back(sid);
+      }
     if (docid >= 0)
       {
         // while (int(indoc.size()) <= docid) indoc.push_back(0);

@@ -291,8 +291,8 @@ namespace Moses
             // Register that this model uses the given space
             m_coord_spaces.push_back(StaticData::InstanceNonConst().MapCoordSpace(space));
             // Load sid coordinates from file
-            m_sid_coord_list.push_back(vector<vector<float> >());
-            vector<vector<float> >& sid_coord = m_sid_coord_list[m_sid_coord_list.size() - 1];
+            m_sid_coord_list.push_back(vector<SPTR<vector<float> > >());
+            vector<SPTR<vector<float> > >& sid_coord = m_sid_coord_list[m_sid_coord_list.size() - 1];
             //TODO: support extra data for btdyn, here? extra?
             sid_coord.reserve(btfix->T1->size());
             string line;
@@ -301,7 +301,9 @@ namespace Moses
             ugdiss::open_input_stream(file, in);
             while(getline(in, line))
               {
-                sid_coord.push_back(Scan<float>(Tokenize(line)));
+                SPTR<vector<float> > coord(new vector<float>);
+                Scan<float>(*coord, Tokenize(line));
+                sid_coord.push_back(coord);
               }
             cerr << "Loaded " << sid_coord.size() << " lines" << endl;
           }
@@ -656,7 +658,7 @@ namespace Moses
         {
           for(size_t i = 0; i < m_coord_spaces.size(); ++i)
             {
-              tp->PushCoord(m_coord_spaces[i], &m_sid_coord_list[i][sid]);
+              tp->PushCoord(m_coord_spaces[i], m_sid_coord_list[i][sid]);
             }
         }
       /*
@@ -664,8 +666,8 @@ namespace Moses
       BOOST_FOREACH(size_t id, m_coord_spaces)
         {
           cerr << " [" << id << "]";
-          vector<vector<float> const*> const& coordList = tp->GetCoordList(id);
-          BOOST_FOREACH(vector<float> const* coord, coordList)
+          vector<vector<float> const*> const* coordList = tp->GetCoordList(id);
+          BOOST_FOREACH(vector<float> const* coord, *coordList)
             cerr << " : " << Join(" ", *coord);
         }
       cerr << endl;

@@ -405,7 +405,8 @@ ProcessAndStripXMLTags(AllOptions const& opts, string &line,
         // Coord: coordinates of the input sentence in a user-defined space
         // <coord space="NAME" coord="X Y Z ..." />
         // where NAME is the name of the space and X Y Z ... are floats.  See
-        // TODO for an example of using this information for feature scoring.
+        // PhraseDistanceFeature for an example of using this information for
+        // feature scoring.
         else if (tagName == "coord") {
           // Parse tag
           string space = ParseXmlTagAttribute(tagContent, "space");
@@ -416,7 +417,7 @@ ProcessAndStripXMLTags(AllOptions const& opts, string &line,
           } else {
             // Init if needed
             if (!input.m_coordMap) {
-              input.m_coordMap.reset(new std::map<size_t const, std::vector<float> >);
+              input.m_coordMap.reset(new map<size_t const, vector<float> >);
             }
             vector<float>& coord = (*input.m_coordMap)[id];
             Scan<float>(coord, tok);
