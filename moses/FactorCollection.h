@@ -41,6 +41,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/pool.hh"
 #include "Factor.h"
 
+class System;
+
 namespace Moses
 {
 
@@ -66,6 +68,7 @@ struct FactorFriend {
 class FactorCollection
 {
   friend std::ostream& operator<<(std::ostream&, const FactorCollection&);
+  friend class ::System;
 
   struct HashFactor : public std::unary_function<const FactorFriend &, std::size_t> {
     std::size_t operator()(const FactorFriend &factor) const {

@@ -41,8 +41,6 @@ using namespace std;
 namespace Moses
 {
 
-extern bool g_mosesDebug;
-
 /* constructor. Initialize everything prior to decoding a particular sentence.
  * \param source the sentence to be decoded
  * \param system which particular set of models to use.

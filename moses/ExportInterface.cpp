@@ -71,6 +71,8 @@ using namespace Moses;
 
 namespace Moses
 {
+//extern size_t g_numHypos;
+
 void OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream)
 {
   outputSearchGraphStream.setf(std::ios::fixed);
@@ -293,6 +295,8 @@ batch_run()
 #ifdef WITH_THREADS
   pool.Stop(true); //flush remaining jobs
 #endif
+
+//  cerr << "g_numHypos=" << Moses::g_numHypos << endl;
 
   FeatureFunction::Destroy();
 
