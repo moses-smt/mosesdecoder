@@ -210,5 +210,30 @@ void FeatureFunctions::EvaluateWhenAppliedBatch(const Batch &batch) const
   }
 }
 
+void FeatureFunctions::ShowWeights()
+{
+  /*
+  const vector<const StatelessFeatureFunction*>& slf = StatelessFeatureFunction::GetStatelessFeatureFunctions();
+  const vector<const StatefulFeatureFunction*>& sff = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+
+  for (size_t i = 0; i < sff.size(); ++i) {
+    const StatefulFeatureFunction *ff = sff[i];
+    if (ff->IsTuneable()) {
+      PrintFeatureWeight(ff);
+    } else {
+      cout << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
+    }
+  }
+  for (size_t i = 0; i < slf.size(); ++i) {
+    const StatelessFeatureFunction *ff = slf[i];
+    if (ff->IsTuneable()) {
+      PrintFeatureWeight(ff);
+    } else {
+      cout << ff->GetScoreProducerDescription() << " UNTUNEABLE" << endl;
+    }
+  }
+  */
+}
+
 }
 

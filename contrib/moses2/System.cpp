@@ -40,6 +40,13 @@ System::System(const Parameter &paramsArg) :
 
   featureFunctions.Create();
   LoadWeights();
+
+  if (params.GetParam("show-weights")) {
+    cerr << "Showing weights then exit" << endl;
+    featureFunctions.ShowWeights();
+    exit(1);
+  }
+
   cerr << "START featureFunctions.Load()" << endl;
   featureFunctions.Load();
   cerr << "START LoadMappings()" << endl;
@@ -182,6 +189,7 @@ void System::IsPb()
     break;
   }
 }
+
 
 }
 

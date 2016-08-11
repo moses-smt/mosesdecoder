@@ -80,6 +80,8 @@ public:
 
   void EvaluateWhenAppliedBatch(const Batch &batch) const;
 
+  void ShowWeights();
+
 protected:
   std::vector<const FeatureFunction*> m_featureFunctions;
   std::vector<const StatefulFeatureFunction*> m_statefulFeatureFunctions;
