@@ -41,6 +41,7 @@ System::System(const Parameter &paramsArg) :
   featureFunctions.Create();
   LoadWeights();
 
+  cerr << "HH1" << endl;
   if (params.GetParam("show-weights")) {
     cerr << "Showing weights then exit" << endl;
     featureFunctions.ShowWeights(weights);
