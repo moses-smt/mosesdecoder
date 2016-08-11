@@ -31,6 +31,8 @@ public:
 
   void CreateFromString(const FeatureFunctions &ffs, const std::string &line);
 
+  std::vector<SCORE> GetWeights(const FeatureFunction &ff) const;
+
 protected:
   std::vector<SCORE> m_weights;
 };

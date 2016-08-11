@@ -30,6 +30,7 @@ class TargetPhraseImpl;
 class Scores;
 class Hypothesis;
 class UnknownWordPenalty;
+class Weights;
 
 namespace SCFG
 {
@@ -80,7 +81,7 @@ public:
 
   void EvaluateWhenAppliedBatch(const Batch &batch) const;
 
-  void ShowWeights();
+  void ShowWeights(const Weights &allWeights);
 
 protected:
   std::vector<const FeatureFunction*> m_featureFunctions;

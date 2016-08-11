@@ -71,5 +71,11 @@ void Weights::CreateFromString(const FeatureFunctions &ffs,
   }
 }
 
+std::vector<SCORE> Weights::GetWeights(const FeatureFunction &ff) const
+{
+  std::vector<SCORE> ret(m_weights.begin() + ff.GetStartInd(), m_weights.begin() + ff.GetStartInd() + ff.GetNumScores());
+  return ret;
+}
+
 }
 
