@@ -73,6 +73,14 @@ public:
     return m_PhraseTableInd;
   }
 
+  //! if false, then this feature is not displayed in the n-best list.
+  // use with care
+  virtual bool IsTuneable() const
+  {
+    return m_tuneable;
+  }
+
+
   // may have more factors than actually need, but not guaranteed.
   virtual void
   EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<Moses2::Word> &source,

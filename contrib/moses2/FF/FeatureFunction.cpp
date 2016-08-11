@@ -16,12 +16,15 @@ using namespace std;
 namespace Moses2
 {
 
-FeatureFunction::FeatureFunction(size_t startInd, const std::string &line) :
-    m_startInd(startInd), m_numScores(1), m_PhraseTableInd(NOT_FOUND)
-    {
-      ParseLine(line);
-      cerr << GetName() << " " << m_startInd << "-" << (m_startInd + m_numScores - 1) << endl;
-    }
+FeatureFunction::FeatureFunction(size_t startInd, const std::string &line)
+:m_startInd(startInd)
+,m_numScores(1)
+,m_PhraseTableInd(NOT_FOUND)
+,m_tuneable(true)
+{
+  ParseLine(line);
+  cerr << GetName() << " " << m_startInd << "-" << (m_startInd + m_numScores - 1) << endl;
+}
 
 FeatureFunction::~FeatureFunction()
 {
