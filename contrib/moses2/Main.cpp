@@ -30,6 +30,10 @@ int main(int argc, char** argv)
 	Moses2::System system(params);
 	timer.check("Loaded");
 
+  if (params.GetParam("show-weights")) {
+    return 0;
+  }
+
 	//cerr << "system.numThreads=" << system.options.server.numThreads << endl;
 
 	Moses2::ThreadPool pool(system.options.server.numThreads, system.cpuAffinityOffset, system.cpuAffinityOffsetIncr);
