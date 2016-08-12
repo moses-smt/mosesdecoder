@@ -238,9 +238,11 @@ void Scores::OutputBreakdown(std::ostream &out, const System &system) const
 {
   if (system.options.nbest.nbest_size) {
     BOOST_FOREACH(const FeatureFunction *ff, system.featureFunctions.GetFeatureFunctions()){
-      out << ff->GetName() << "= ";
-      for (size_t i = ff->GetStartInd(); i < (ff->GetStartInd() + ff->GetNumScores()); ++i) {
-        out << m_scores[i] << " ";
+      if (ff->IsTuneable()) {
+        out << ff->GetName() << "= ";
+        for (size_t i = ff->GetStartInd(); i < (ff->GetStartInd() + ff->GetNumScores()); ++i) {
+          out << m_scores[i] << " ";
+        }
       }
     }
   }
