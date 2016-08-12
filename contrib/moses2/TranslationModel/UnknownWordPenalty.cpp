@@ -27,6 +27,7 @@ namespace Moses2
 UnknownWordPenalty::UnknownWordPenalty(size_t startInd, const std::string &line) :
     PhraseTable(startInd, line)
 {
+  m_tuneable = false;
   ReadParameters();
 }
 
