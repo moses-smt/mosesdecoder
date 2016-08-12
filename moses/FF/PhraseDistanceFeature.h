@@ -7,8 +7,7 @@ namespace Moses
 
 class PhraseDistanceFeature : public StatelessFeatureFunction
 {
-  enum Measure
-  {
+  enum Measure {
     EuclideanDistance,
     TotalVariationDistance,
   };

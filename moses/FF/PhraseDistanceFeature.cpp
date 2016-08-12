@@ -21,11 +21,11 @@ PhraseDistanceFeature::PhraseDistanceFeature(const string &line)
 }
 
 void PhraseDistanceFeature::EvaluateWithSourceContext(const InputType &input
-                                               , const InputPath &inputPath
-                                               , const TargetPhrase &targetPhrase
-                                               , const StackVec *stackVec
-                                               , ScoreComponentCollection &scoreBreakdown
-                                               , ScoreComponentCollection *estimatedScores) const
+    , const InputPath &inputPath
+    , const TargetPhrase &targetPhrase
+    , const StackVec *stackVec
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection *estimatedScores) const
 {
   vector<float> scores(m_numScoreComponents, 0);
   bool broken = false;
