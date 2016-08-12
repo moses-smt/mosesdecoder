@@ -130,7 +130,6 @@ namespace sapt
     mutable pplist_cache_t m_pplist_cache1, m_pplist_cache2;
     // caches for unbiased sampling; biased sampling uses the caches that
     // are stored locally on the translation task
-
   public:
     SPTR<Ttrack<char> >  Tx; // word alignments
     SPTR<Ttrack<Token> > T1; // token track
@@ -164,7 +163,8 @@ namespace sapt
 
 #ifndef NO_MOSES
     SPTR<pstats>
-    prep2(ttasksptr const& ttask, iter const& phrase, int max_sample = -1) const;
+    prep2(ttasksptr const& ttask, iter const& phrase, bool const track_sids,
+          int max_sample = -1) const;
 #endif 
 
   protected:
@@ -189,7 +189,7 @@ namespace sapt
     SPTR<pstats>
     lookup(ttasksptr const& ttask, iter const& phrase, int max_sample = -1) const;
 
-    void prep(ttasksptr const& ttask, iter const& phrase) const;
+    void prep(ttasksptr const& ttask, iter const& phrase, bool const track_sids) const;
 #endif
 
     void   setDefaultSampleSize(size_t const max_samples);

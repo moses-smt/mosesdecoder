@@ -37,8 +37,8 @@ namespace sapt
 
     void
     operator()(Bitext<Token> const& bt,
-	       PhrasePair<Token>& pp,
-	       std::vector<float> * dest = NULL) const
+         PhrasePair<Token>& pp,
+         std::vector<float> * dest = NULL) const
     {
       if (!dest) dest = &pp.fvals;
       // uint32_t sid1=0,sid2=0,off1=0,off2=0,len1=0,len2=0;

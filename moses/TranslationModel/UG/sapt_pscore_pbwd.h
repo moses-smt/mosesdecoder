@@ -38,8 +38,8 @@ namespace sapt
 
     void
     operator()(Bitext<Token> const& bt,
-	       PhrasePair<Token>& pp,
-	       std::vector<float> * dest = NULL) const
+         PhrasePair<Token>& pp,
+         std::vector<float> * dest = NULL) const
     {
       if (!dest) dest = &pp.fvals;
       // we use the denominator specification to scale the raw counts on the

@@ -90,7 +90,7 @@ Bitext<Token>::agenda
 		  size_t raw2 = b->approxOccurrenceCount();
 		  float bwgt = j->m_bias ? (*j->m_bias)[sid] : 1;
 		  j->stats->add(tpid, sample_weight, bwgt, aln, raw2,
-				po_fwd, po_bwd, docid);
+				po_fwd, po_bwd, docid, sid);
 		  bool ok = (i == e2) || b->extend(o[i].id());
 		  UTIL_THROW_IF2(!ok, "Could not extend target phrase.");
 		}
