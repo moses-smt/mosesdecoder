@@ -1319,6 +1319,16 @@
 			<name>FF/PhraseBoundaryFeature.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseBoundaryFeature.h</locationURI>
+        </link>
+		<link>
+			<name>FF/PhraseDistanceFeature.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseDistanceFeature.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/PhraseDistanceFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseDistanceFeature.h</locationURI>
 		</link>
 		<link>
 			<name>FF/PhraseLengthFeature.cpp</name>
@@ -3654,7 +3664,7 @@
 			<name>TranslationModel/UG/sapt_pscore_coherence.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/sapt_pscore_coherence.h</locationURI>
-		</link>
+        </link>
 		<link>
 			<name>TranslationModel/UG/sapt_pscore_lex1.h</name>
 			<type>1</type>
@@ -3699,7 +3709,7 @@
 			<name>TranslationModel/UG/sapt_pscore_wordcount.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/sapt_pscore_wordcount.h</locationURI>
-		</link>
+        </link>
 		<link>
 			<name>TranslationModel/UG/sim-pe.cc</name>
 			<type>1</type>
