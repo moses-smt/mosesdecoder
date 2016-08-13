@@ -40,6 +40,8 @@ public:
 
   uint8_t *Allocate(std::size_t size)
   {
+    size = (size + 3) & 0xfffffffc;
+
     uint8_t *ret = current_;
     current_ += size;
 
