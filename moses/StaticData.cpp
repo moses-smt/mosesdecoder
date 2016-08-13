@@ -939,7 +939,7 @@ void StaticData::ResetWeights(const std::string &denseWeights, const std::string
 
 size_t StaticData::GetCoordSpace(string space) const
 {
-  map<string, size_t>::const_iterator m = m_coordSpaceMap.find(space);
+  map<string const, size_t>::const_iterator m = m_coordSpaceMap.find(space);
   if(m == m_coordSpaceMap.end()) {
     return 0;
   }
@@ -948,7 +948,7 @@ size_t StaticData::GetCoordSpace(string space) const
 
 size_t StaticData::MapCoordSpace(string space)
 {
-  map<string, size_t>::const_iterator m = m_coordSpaceMap.find(space);
+  map<string const, size_t>::const_iterator m = m_coordSpaceMap.find(space);
   if (m != m_coordSpaceMap.end()) {
     return m->second;
   }
