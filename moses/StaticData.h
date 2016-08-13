@@ -156,7 +156,7 @@ protected:
   // Coordinate space name map for matching spaces across XML input ("coord"
   // tag) and feature functions that assign or use coordinates on target phrases
   std::map< std::string const, size_t > m_coordSpaceMap;
-  size_t m_coordSpaceNextID = 1;
+  size_t m_coordSpaceNextID;
 
 public:
 

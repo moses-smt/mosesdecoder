@@ -69,6 +69,7 @@ StaticData::StaticData()
   , m_requireSortingAfterSourceContext(false)
   , m_currentWeightSetting("default")
   , m_treeStructure(NULL)
+  , m_coordSpaceNextID(1)
 {
   Phrase::InitializeMemPool();
 }
