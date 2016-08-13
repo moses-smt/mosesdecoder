@@ -215,6 +215,7 @@ void FeatureFunctions::ShowWeights(const Weights &allWeights)
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
     cout << ff->GetName();
     if (ff->IsTuneable()) {
+      cout << "=";
       vector<SCORE> weights = allWeights.GetWeights(*ff);
       for (size_t i = 0; i < weights.size(); ++i) {
         cout << " " << weights[i];
