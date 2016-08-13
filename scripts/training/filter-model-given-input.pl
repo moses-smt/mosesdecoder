@@ -510,6 +510,9 @@ for ( my $i = 0 ; $i <= $#TABLE ; $i++ ) {
             if ( $binarizer =~ /CreateOnDiskPt/ ) {
                 $lexbin =~ s/CreateOnDiskPt/processLexicalTable/;
             }
+            elsif ( $binarizer =~ /CreateProbingPT2/ ) {
+                $lexbin =~ s/CreateProbingPT2/processLexicalTableMin/;
+            }
 
             $lexbin =~ s/PhraseTable/LexicalTable/;
             my $cmd;
