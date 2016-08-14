@@ -493,7 +493,6 @@ for ( my $i = 0 ; $i <= $#TABLE ; $i++ ) {
                 if ($opt_hierarchical) {
 		    $cmd .= " --scfg";
 		}
-                print STDERR "Executing: $cmd \n";
                 safesystem($cmd) or die "Can't binarize";
             }
             else {
@@ -509,6 +508,9 @@ for ( my $i = 0 ; $i <= $#TABLE ; $i++ ) {
             $lexbin = $binarizer;
             if ( $binarizer =~ /CreateOnDiskPt/ ) {
                 $lexbin =~ s/CreateOnDiskPt/processLexicalTable/;
+            }
+            elsif ( $binarizer =~ /CreateProbingPT2/ ) {
+                $lexbin =~ s/CreateProbingPT2/processLexicalTableMin/;
             }
 
             $lexbin =~ s/PhraseTable/LexicalTable/;
