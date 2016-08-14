@@ -340,5 +340,12 @@ S& Container(std::priority_queue<T, S, C>& q)
 
 #define HERE __FILE__ << ":" << __LINE__
 
+/** Enforce rounding */
+inline void FixPrecision(std::ostream& stream, size_t size = 3)
+{
+  stream.setf(std::ios::fixed);
+  stream.precision(size);
+}
+
 }
 

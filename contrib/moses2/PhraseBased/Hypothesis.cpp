@@ -158,7 +158,7 @@ void Hypothesis::OutputToStream(std::ostream &out) const
       out << m_path->range.GetStartPos() << "-" << m_path->range.GetEndPos() << ",";
 
       // score breakdown
-      out << m_scores->Debug(m_mgr->system);
+      m_scores->OutputBreakdown(out, m_mgr->system);
 
       out << "| ";
     }
