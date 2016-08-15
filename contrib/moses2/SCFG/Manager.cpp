@@ -88,22 +88,7 @@ void Manager::Decode()
     }
   }
 
-  Stack &stack = m_stacks.GetStack(4, 5);
-  cerr << "stack=" << stack.Debug(system) << endl;
-
-  Stack &stack2 = m_stacks.GetStack(9, 2);
-  cerr << "stack2=" << stack2.Debug(system) << endl;
-
-  Stack &stack3 = m_stacks.GetStack(0, 9);
-  cerr << "stack3=" << stack3.Debug(system) << endl;
-
-  Stack &stack4 = m_stacks.GetStack(0, 11);
-  cerr << "stack4=" << stack4.Debug(system) << endl;
-
-  Stack &stack5 = m_stacks.GetStack(0, 12);
-  cerr << "stack5=" << stack5.Debug(system) << endl;
-
-  m_stacks.OutputStacks();
+  //m_stacks.OutputStacks();
 }
 
 void Manager::InitActiveChart(SCFG::InputPath &path)
