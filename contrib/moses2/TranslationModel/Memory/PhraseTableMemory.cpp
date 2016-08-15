@@ -243,6 +243,7 @@ void PhraseTableMemory::LookupGivenNode(
     if (tps) {
       // there are some rules
       cerr << "outPath=" << outPath.range
+    		  << " bind=" << chartEntry->GetSymbolBind().Debug(mgr.system)
     		  << " pt=" << GetPtInd()
 			  << " tps=" << tps->Debug(mgr.system) << endl;
       outPath.AddTargetPhrasesToPath(pool, *this, *tps, chartEntry->GetSymbolBind());
