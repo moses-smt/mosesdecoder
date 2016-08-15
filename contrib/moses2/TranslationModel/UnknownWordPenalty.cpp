@@ -133,6 +133,7 @@ void UnknownWordPenalty::EvaluateInIsolation(const System &system,
 
 }
 
+// SCFG ///////////////////////////////////////////////////////////////////////////////////////////
 void UnknownWordPenalty::InitActiveChart(
     MemPool &pool,
     const SCFG::Manager &mgr,
@@ -155,13 +156,16 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
   }
 
   if (path.GetNumRules()) {
+	// only create rules if no other rules
     return;
   }
 
-  // don't do 1st of last word
+  // don't do 1st if 1st word
   if (path.range.GetStartPos() == 0) {
     return;
   }
+
+  // don't do 1st if last word
   const SCFG::Sentence &sentence = static_cast<const SCFG::Sentence&>(mgr.GetInput());
   if (path.range.GetStartPos() + 1 == sentence.GetSize()) {
     return;
