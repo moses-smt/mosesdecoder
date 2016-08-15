@@ -354,6 +354,21 @@ std::string Manager::OutputNBest()
   return out.str();
 }
 
+std::string Manager::OutputTransOpt()
+{
+  const Stack &lastStack = m_stacks.GetLastStack();
+  const SCFG::Hypothesis *bestHypo = lastStack.GetBestHypo();
+
+  if (bestHypo) {
+      stringstream outStrm;
+	  bestHypo->OutputTransOpt(outStrm);
+	  return outStrm.str();
+  }
+  else {
+	  return "";
+  }
+}
+
 } // namespace
 }
 

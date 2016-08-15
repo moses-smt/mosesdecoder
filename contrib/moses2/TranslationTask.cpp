@@ -40,6 +40,11 @@ void TranslationTask::Run()
     m_mgr->system.nbestCollector->Write(m_mgr->GetTranslationId(), out);
   }
 
+  if (!m_mgr->system.options.output.detailed_transrep_filepath.empty()) {
+    out = m_mgr->OutputTransOpt();
+    m_mgr->system.detailedTranslationCollector->Write(m_mgr->GetTranslationId(), out);
+  }
+
   delete m_mgr;
 }
 

@@ -46,7 +46,7 @@ public:
   std::vector<size_t> maxChartSpans;
   bool isPb;
 
-  mutable boost::shared_ptr<OutputCollector> bestCollector, nbestCollector;
+  mutable boost::shared_ptr<OutputCollector> bestCollector, nbestCollector, detailedTranslationCollector;
 
   // moses.ini params
   int cpuAffinityOffset;

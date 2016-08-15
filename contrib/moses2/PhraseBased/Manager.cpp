@@ -268,5 +268,10 @@ std::string Manager::OutputNBest()
 	return out.str();
 }
 
+std::string Manager::OutputTransOpt()
+{
+	return "";
+}
+
 }
 
