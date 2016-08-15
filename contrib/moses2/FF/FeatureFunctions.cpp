@@ -175,7 +175,7 @@ void FeatureFunctions::EvaluateInIsolation(
     MemPool &pool,
     const System &system,
     const Phrase<SCFG::Word> &source,
-    TargetPhrase<SCFG::Word> &targetPhrase) const
+    SCFG::TargetPhraseImpl &targetPhrase) const
 {
   SCORE estimatedScore = 0;
 
@@ -184,7 +184,7 @@ void FeatureFunctions::EvaluateInIsolation(
     ff->EvaluateInIsolation(pool, system, source, targetPhrase, scores, estimatedScore);
   }
 
-  //targetPhrase.SetEstimatedScore(estimatedScore);
+  targetPhrase.SetEstimatedScore(estimatedScore);
 }
 
 void FeatureFunctions::EvaluateAfterTablePruning(MemPool &pool,
