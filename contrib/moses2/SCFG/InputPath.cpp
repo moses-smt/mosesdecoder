@@ -22,9 +22,8 @@ InputPath::InputPath(MemPool &pool, const SubPhrase<SCFG::Word> &subPhrase,
     const Range &range, size_t numPt, const InputPath *prefixPath)
 :InputPathBase(pool, range, numPt, prefixPath)
 ,subPhrase(subPhrase)
+,targetPhrases(MemPoolAllocator< std::pair<SymbolBind, SCFG::TargetPhrases*> >(pool))
 {
-  MemPoolAllocator< std::pair<SymbolBind, SCFG::TargetPhrases> > collAlloc(pool);
-  targetPhrases = new (pool.Allocate<Coll>()) Coll(collAlloc);
   m_activeChart = pool.Allocate<ActiveChart>(numPt);
   for (size_t i = 0; i < numPt; ++i) {
     ActiveChart &memAddr = m_activeChart[i];
@@ -54,10 +53,10 @@ std::string InputPath::Debug(const System &system) const
   }
 
   // tps
-  out << "tps=" << targetPhrases->size();
+  out << "tps=" << targetPhrases.size();
 
   out << " ";
-  BOOST_FOREACH(const SCFG::InputPath::Coll::value_type &valPair, *targetPhrases) {
+  BOOST_FOREACH(const SCFG::InputPath::Coll::value_type &valPair, targetPhrases) {
     const SymbolBind &symbolBind = valPair.first;
     const SCFG::TargetPhrases &tps = *valPair.second;
     out << symbolBind.Debug(system);
@@ -76,10 +75,10 @@ void InputPath::AddTargetPhrasesToPath(
 {
   SCFG::TargetPhrases *tpsNew;
   Coll::iterator iterColl;
-  iterColl = targetPhrases->find(symbolBind);
-  if (iterColl == targetPhrases->end()) {
+  iterColl = targetPhrases.find(symbolBind);
+  if (iterColl == targetPhrases.end()) {
     tpsNew = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool);
-    (*targetPhrases)[symbolBind] = tpsNew;
+    targetPhrases[symbolBind] = tpsNew;
   }
   else {
     tpsNew = iterColl->second;
@@ -104,7 +103,7 @@ void InputPath::AddActiveChartEntry(size_t ptInd, ActiveChartEntry *chartEntry)
 size_t InputPath::GetNumRules() const
 {
   size_t ret = 0;
-  BOOST_FOREACH(const Coll::value_type &valPair, *targetPhrases) {
+  BOOST_FOREACH(const Coll::value_type &valPair, targetPhrases) {
     const SCFG::TargetPhrases &tps = *valPair.second;
     ret += tps.GetSize();
   }

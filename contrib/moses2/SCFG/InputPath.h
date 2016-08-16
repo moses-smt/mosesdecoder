@@ -33,7 +33,7 @@ public:
       std::equal_to<SymbolBind>,
       MemPoolAllocator< std::pair<SymbolBind, SCFG::TargetPhrases*> >
       > Coll;
-  Coll *targetPhrases;
+  Coll targetPhrases;
   SubPhrase<SCFG::Word> subPhrase;
 
   InputPath(MemPool &pool, const SubPhrase<SCFG::Word> &subPhrase, const Range &range,

@@ -164,7 +164,7 @@ void Manager::Decode(SCFG::InputPath &path, Stack &stack)
   m_seenPositions.clear();
 
   // init queue
-  BOOST_FOREACH(const InputPath::Coll::value_type &valPair, *path.targetPhrases) {
+  BOOST_FOREACH(const InputPath::Coll::value_type &valPair, path.targetPhrases) {
     const SymbolBind &symbolBind = valPair.first;
     const SCFG::TargetPhrases &tps = *valPair.second;
     CreateQueue(path, symbolBind, tps);
