@@ -94,26 +94,6 @@ void InputPath::AddTargetPhrasesToPath(
   }
 }
 
-void InputPath::AddTargetPhrase(
-    MemPool &pool,
-    const PhraseTable &pt,
-    const SCFG::SymbolBind &symbolBind,
-    const SCFG::TargetPhraseImpl *tp)
-{
-  SCFG::TargetPhrases *tps;
-  Coll::iterator iter;
-  iter = targetPhrases->find(symbolBind);
-  if (iter == targetPhrases->end()) {
-    tps = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool);
-    (*targetPhrases)[symbolBind] = tps;
-  }
-  else {
-    tps = iter->second;
-  }
-
-  tps->AddTargetPhrase(*tp);
-}
-
 void InputPath::AddActiveChartEntry(size_t ptInd, ActiveChartEntry *chartEntry)
 {
   //cerr << "      added " << chartEntry << " " << range << " " << ptInd << endl;

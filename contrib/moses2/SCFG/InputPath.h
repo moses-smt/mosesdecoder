@@ -51,12 +51,6 @@ public:
       const SCFG::TargetPhrases &tps,
       const SCFG::SymbolBind &symbolBind);
 
-  void AddTargetPhrase(
-      MemPool &pool,
-      const PhraseTable &pt,
-      const SCFG::SymbolBind &symbolBind,
-      const SCFG::TargetPhraseImpl *tp);
-
   size_t GetNumRules() const;
 
   std::string Debug(const System &system) const;

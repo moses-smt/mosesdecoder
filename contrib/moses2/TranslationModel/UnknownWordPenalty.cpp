@@ -195,7 +195,10 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
   const SubPhrase<SCFG::Word> &source = path.subPhrase;
   system.featureFunctions.EvaluateInIsolation(memPool, system, source, *tp);
 
-  path.AddTargetPhrase(pool, *this, symbolBind, tp);
+  SCFG::TargetPhrases *tps = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool);
+  tps->AddTargetPhrase(*tp);
+
+  path.AddTargetPhrasesToPath(pool, *this, *tps, symbolBind);
 }
 
 void UnknownWordPenalty::LookupUnary(MemPool &pool,
