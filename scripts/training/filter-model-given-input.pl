@@ -493,7 +493,6 @@ for ( my $i = 0 ; $i <= $#TABLE ; $i++ ) {
                 if ($opt_hierarchical) {
 		    $cmd .= " --scfg";
 		}
-                print STDERR "Executing: $cmd \n";
                 safesystem($cmd) or die "Can't binarize";
             }
             else {

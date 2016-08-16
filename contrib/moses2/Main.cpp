@@ -11,6 +11,7 @@
 #include "legacy/Parameter.h"
 #include "legacy/ThreadPool.h"
 #include "legacy/Timer.h"
+#include "legacy/Util2.h"
 #include "util/usage.hh"
 
 using namespace std;

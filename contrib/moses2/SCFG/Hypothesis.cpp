@@ -162,6 +162,15 @@ std::string Hypothesis::Debug(const System &system) const
   return out.str();
 }
 
+void Hypothesis::OutputTransOpt(std::ostream &out) const
+{
+	out << GetInputPath().range << " " << GetTargetPhrase().Debug(m_mgr->system) << endl;
+
+	BOOST_FOREACH(const Hypothesis *prevHypo, m_prevHypos) {
+		prevHypo->OutputTransOpt(out);
+	}
+}
+
 } // namespaces
 }
 

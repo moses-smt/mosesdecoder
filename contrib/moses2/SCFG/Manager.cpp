@@ -319,6 +319,8 @@ std::string Manager::OutputBest() const
     //cerr << "BEST TRANSLATION: " << bestHypo << bestHypo->Debug(system) << endl;
     //cerr << " " << out.str() << endl;
     stringstream outStrm;
+    Moses2::FixPrecision(outStrm);
+
     bestHypo->OutputToStream(outStrm);
 
     out = outStrm.str();
@@ -342,6 +344,7 @@ std::string Manager::OutputBest() const
 std::string Manager::OutputNBest()
 {
   stringstream out;
+  Moses2::FixPrecision(out);
 
   arcLists.Sort();
 
@@ -349,6 +352,21 @@ std::string Manager::OutputNBest()
   extractor.OutputToStream(out);
 
   return out.str();
+}
+
+std::string Manager::OutputTransOpt()
+{
+  const Stack &lastStack = m_stacks.GetLastStack();
+  const SCFG::Hypothesis *bestHypo = lastStack.GetBestHypo();
+
+  if (bestHypo) {
+      stringstream outStrm;
+	  bestHypo->OutputTransOpt(outStrm);
+	  return outStrm.str();
+  }
+  else {
+	  return "";
+  }
 }
 
 } // namespace

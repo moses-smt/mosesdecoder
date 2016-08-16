@@ -192,6 +192,8 @@ void Manager::CalcFutureScore()
 std::string Manager::OutputBest() const
 {
 	stringstream out;
+  Moses2::FixPrecision(out);
+
 	const Hypothesis *bestHypo = m_search->GetBestHypo();
 	if (bestHypo) {
 		if (system.options.output.ReportHypoScore) {
@@ -225,6 +227,8 @@ std::string Manager::OutputNBest()
 
 	// MAIN LOOP
 	stringstream out;
+  Moses2::FixPrecision(out);
+
 	size_t maxIter = system.options.nbest.nbest_size * system.options.nbest.factor;
 	size_t bestInd = 0;
 	for (size_t i = 0; i < maxIter; ++i) {
@@ -262,6 +266,11 @@ std::string Manager::OutputNBest()
 	}
 
 	return out.str();
+}
+
+std::string Manager::OutputTransOpt()
+{
+	return "";
 }
 
 }

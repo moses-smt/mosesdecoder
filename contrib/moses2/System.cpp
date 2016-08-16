@@ -38,6 +38,10 @@ System::System(const Parameter &paramsArg) :
     nbestCollector.reset(new OutputCollector(options.nbest.output_file_path));
   }
 
+  if (!options.output.detailed_transrep_filepath.empty()) {
+	  detailedTranslationCollector.reset(new OutputCollector(options.output.detailed_transrep_filepath));
+  }
+
   featureFunctions.Create();
   LoadWeights();
 

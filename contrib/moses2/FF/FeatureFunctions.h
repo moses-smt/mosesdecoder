@@ -34,7 +34,7 @@ class Weights;
 
 namespace SCFG
 {
-class TargetPhrase;
+class TargetPhraseImpl;
 class TargetPhrases;
 class Word;
 }
@@ -72,7 +72,7 @@ public:
   void EvaluateInIsolation(MemPool &pool, const System &system,
       const Phrase<Moses2::Word> &source, TargetPhraseImpl &targetPhrase) const;
   void EvaluateInIsolation(MemPool &pool, const System &system,
-      const Phrase<SCFG::Word> &source, TargetPhrase<SCFG::Word> &targetPhrase) const;
+      const Phrase<SCFG::Word> &source, SCFG::TargetPhraseImpl &targetPhrase) const;
 
   void EvaluateAfterTablePruning(MemPool &pool, const TargetPhrases &tps,
       const Phrase<Moses2::Word> &sourcePhrase) const;

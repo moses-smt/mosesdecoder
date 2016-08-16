@@ -43,6 +43,7 @@ public:
   virtual void Decode() = 0;
   virtual std::string OutputBest() const = 0;
   virtual std::string OutputNBest() = 0;
+  virtual std::string OutputTransOpt() = 0;
 
   MemPool &GetPool() const
   {  return *m_pool; }

@@ -210,14 +210,17 @@ void KENLM<Model>::EvaluateInIsolation(MemPool &pool, const System &system, cons
     const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
     SCORE &estimatedScore) const
 {
-  /*
   // contains factors used by this LM
   float fullScore, nGramScore;
   size_t oovCount;
 
   CalcScore(targetPhrase, fullScore, nGramScore, oovCount);
 
-  float estimateScore = fullScore - nGramScore;
+  //float estimateScore = fullScore - nGramScore;
+
+  // all LM scores are estimated
+  float estimateScore = fullScore;
+  nGramScore = 0;
 
   bool GetLMEnableOOVFeature = false;
   if (GetLMEnableOOVFeature) {
@@ -239,7 +242,6 @@ void KENLM<Model>::EvaluateInIsolation(MemPool &pool, const System &system, cons
         estimateScore);
     estimatedScore += weightedScore;
   }
-  */
 }
 
 template<class Model>
