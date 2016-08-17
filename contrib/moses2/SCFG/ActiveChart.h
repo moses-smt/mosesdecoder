@@ -21,16 +21,15 @@ class Word;
 class SymbolBindElement
 {
 public:
-  const Range *range;
   const SCFG::Word *word;
   const Moses2::Hypotheses *hypos;
 
   SymbolBindElement();
-  SymbolBindElement(const Range *range, const SCFG::Word *word, const Moses2::Hypotheses *hypos);
+  SymbolBindElement(const SCFG::Word *word, const Moses2::Hypotheses *hypos);
 
   bool operator==(const SymbolBindElement &compare) const
   {
-    bool ret = range == compare.range
+    bool ret = hypos == compare.hypos
             && word == compare.word;
     return ret;
   }
