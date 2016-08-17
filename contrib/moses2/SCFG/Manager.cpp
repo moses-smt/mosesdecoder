@@ -232,7 +232,7 @@ void Manager::CreateQueue(
 {
   MemPool &pool = GetPool();
 
-  SeenPosition *seenItem = new (pool.Allocate<SeenPosition>()) SeenPosition(pool, symbolBind, &tps, symbolBind.numNT);
+  SeenPosition *seenItem = new (pool.Allocate<SeenPosition>()) SeenPosition(pool, symbolBind, tps, symbolBind.numNT);
   bool unseen = m_seenPositions.Add(seenItem);
   assert(unseen);
 

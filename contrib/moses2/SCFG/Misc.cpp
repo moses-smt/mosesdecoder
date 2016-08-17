@@ -21,7 +21,7 @@ namespace SCFG
 ////////////////////////////////////////////////////////
 SeenPosition::SeenPosition(MemPool &pool,
 		  const SymbolBind &vSymbolBind,
-		  const SCFG::TargetPhrases *vtps,
+		  const SCFG::TargetPhrases &vtps,
 		  size_t numNT)
 :symbolBind(vSymbolBind)
 ,tps(vtps)
@@ -32,7 +32,7 @@ SeenPosition::SeenPosition(MemPool &pool,
 
 SeenPosition::SeenPosition(MemPool &pool,
 		const SymbolBind &vSymbolBind,
-		const SCFG::TargetPhrases *vtps,
+		const SCFG::TargetPhrases &vtps,
 		size_t vtpInd,
 		const Vector<size_t> &vhypoIndColl)
 :symbolBind(vSymbolBind)
@@ -48,7 +48,7 @@ SeenPosition::SeenPosition(MemPool &pool,
 std::string SeenPosition::Debug(const System &system) const
 {
   stringstream out;
-  out << tps << " " << tpInd << " ";
+  out << &tps << " " << tpInd << " ";
 
   for (size_t i = 0; i < hypoIndColl.size(); ++i) {
     out << hypoIndColl[i] << " ";
@@ -63,7 +63,7 @@ bool SeenPosition::operator==(const SeenPosition &compare) const
 	return false;
   }
 
-  if (tps != compare.tps) {
+  if (&tps != &compare.tps) {
     return false;
   }
 
@@ -81,7 +81,7 @@ bool SeenPosition::operator==(const SeenPosition &compare) const
 size_t SeenPosition::hash() const
 {
   size_t ret = (size_t) &symbolBind;
-  boost::hash_combine(ret, tps);
+  boost::hash_combine(ret, &tps);
   boost::hash_combine(ret, tpInd);
   boost::hash_combine(ret, hypoIndColl);
   return ret;
@@ -175,7 +175,7 @@ void QueueItem::CreateNext(
   if (tpInd + 1 < tps->GetSize()) {
 
     const SCFG::TargetPhraseImpl &tp = (*tps)[tpInd + 1];
-    SeenPosition *seenItem = new (mgrPool.Allocate<SeenPosition>()) SeenPosition(mgrPool, *symbolBind, tps, tpInd + 1, *m_hypoIndColl);
+    SeenPosition *seenItem = new (mgrPool.Allocate<SeenPosition>()) SeenPosition(mgrPool, *symbolBind, *tps, tpInd + 1, *m_hypoIndColl);
     bool unseen = seenPositions.Add(seenItem);
 
     if (unseen) {
@@ -196,7 +196,7 @@ void QueueItem::CreateNext(
     size_t hypoInd = (*m_hypoIndColl)[i] + 1; // increment hypo
 
     if (hypoInd < hypos.size()) {
-      SeenPosition *seenItem = new (mgrPool.Allocate<SeenPosition>()) SeenPosition(mgrPool, *symbolBind, tps, tpInd, *m_hypoIndColl);
+      SeenPosition *seenItem = new (mgrPool.Allocate<SeenPosition>()) SeenPosition(mgrPool, *symbolBind, *tps, tpInd, *m_hypoIndColl);
       seenItem->hypoIndColl[i] = hypoInd;
       bool unseen = seenPositions.Add(seenItem);
 

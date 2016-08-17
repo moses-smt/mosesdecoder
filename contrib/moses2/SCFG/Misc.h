@@ -27,17 +27,17 @@ class SeenPosition
 {
 public:
   const SymbolBind &symbolBind;
-  const SCFG::TargetPhrases *tps;
+  const SCFG::TargetPhrases &tps;
   size_t tpInd;
   Vector<size_t> hypoIndColl;
 
   SeenPosition(MemPool &pool,
 		  const SymbolBind &vSymbolBind,
-		  const SCFG::TargetPhrases *vtps,
+		  const SCFG::TargetPhrases &vtps,
 		  size_t numNT);
   SeenPosition(MemPool &pool,
 		  const SymbolBind &vSymbolBind,
-		  const SCFG::TargetPhrases *vtps,
+		  const SCFG::TargetPhrases &vtps,
 		  size_t vtpInd,
 		  const Vector<size_t> &vhypoIndColl);
 
