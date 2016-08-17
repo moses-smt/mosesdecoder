@@ -230,6 +230,12 @@ void Manager::CreateQueue(
     const SymbolBind &symbolBind,
     const SCFG::TargetPhrases &tps)
 {
+  MemPool &pool = GetPool();
+
+  SeenPosition *seenItem = new (pool.Allocate<SeenPosition>()) SeenPosition(pool, symbolBind, &tps, symbolBind.numNT);
+  bool unseen = m_seenPositions.Add(seenItem);
+  assert(unseen);
+
   QueueItem *item = QueueItem::Create(GetPool(), *this);
   item->Init(GetPool(), symbolBind, tps);
   for (size_t i = 0; i < symbolBind.coll.size(); ++i) {
@@ -239,6 +245,7 @@ void Manager::CreateQueue(
       item->AddHypos(*hypos);
     }
   }
+
   item->CreateHypo(GetSystemPool(), *this, path, symbolBind);
 
   //cerr << "hypo=" << item->hypo->Debug(system) << endl;

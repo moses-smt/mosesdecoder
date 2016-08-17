@@ -20,6 +20,17 @@ namespace SCFG
 
 ////////////////////////////////////////////////////////
 SeenPosition::SeenPosition(MemPool &pool,
+		  const SymbolBind &vSymbolBind,
+		  const SCFG::TargetPhrases *vtps,
+		  size_t numNT)
+:symbolBind(vSymbolBind)
+,tps(vtps)
+,tpInd(0)
+,hypoIndColl(pool, numNT, 0)
+{
+}
+
+SeenPosition::SeenPosition(MemPool &pool,
 		const SymbolBind &vSymbolBind,
 		const SCFG::TargetPhrases *vtps,
 		size_t vtpInd,

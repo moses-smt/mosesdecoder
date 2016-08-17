@@ -34,6 +34,10 @@ public:
   SeenPosition(MemPool &pool,
 		  const SymbolBind &vSymbolBind,
 		  const SCFG::TargetPhrases *vtps,
+		  size_t numNT);
+  SeenPosition(MemPool &pool,
+		  const SymbolBind &vSymbolBind,
+		  const SCFG::TargetPhrases *vtps,
 		  size_t vtpInd,
 		  const Vector<size_t> &vhypoIndColl);
 
