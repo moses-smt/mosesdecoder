@@ -237,7 +237,7 @@ void Manager::CreateQueue(
   assert(unseen);
 
   QueueItem *item = QueueItem::Create(GetPool(), *this);
-  item->Init(GetPool(), symbolBind, tps);
+  item->Init(GetPool(), symbolBind, tps, seenItem->hypoIndColl);
   for (size_t i = 0; i < symbolBind.coll.size(); ++i) {
     const SymbolBindElement &ele = symbolBind.coll[i];
     if (ele.hypos) {

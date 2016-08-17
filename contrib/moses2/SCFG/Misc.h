@@ -76,12 +76,14 @@ public:
   void Init(
       MemPool &pool,
       const SymbolBind &symbolBind,
-      const SCFG::TargetPhrases &tps);
+      const SCFG::TargetPhrases &tps,
+	  const Vector<size_t> &hypoIndColl);
   void Init(
       MemPool &pool,
       const SymbolBind &symbolBind,
       const SCFG::TargetPhrases &tps,
-      size_t vTPInd);
+      size_t vTPInd,
+	  const Vector<size_t> &hypoIndColl);
   void AddHypos(const Moses2::Hypotheses &hypos);
   void CreateHypo(
       MemPool &systemPool,
