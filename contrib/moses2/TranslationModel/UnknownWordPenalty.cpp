@@ -18,6 +18,7 @@
 #include "../SCFG/TargetPhraseImpl.h"
 #include "../SCFG/Manager.h"
 #include "../SCFG/Sentence.h"
+#include "../SCFG/ActiveChart.h"
 
 using namespace std;
 
@@ -185,8 +186,9 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
   size_t endPos = path.range.GetEndPos();
   const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(endPos, 1);
 
-  SCFG::SymbolBind symbolBind(pool);
-  symbolBind.Add(subPhrasePath.range, lastWord, NULL);
+  SCFG::ActiveChartEntry *chartEntry = new (pool.Allocate<SCFG::ActiveChartEntry>()) SCFG::ActiveChartEntry(pool);
+  chartEntry->AddSymbolBindElement(subPhrasePath.range, lastWord, NULL, *this);
+  path.AddActiveChartEntry(GetPtInd(), chartEntry);
 
   Scores &scores = tp->GetScores();
   scores.PlusEquals(mgr.system, *this, -100);
@@ -198,7 +200,7 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
   SCFG::TargetPhrases *tps = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool);
   tps->AddTargetPhrase(*tp);
 
-  path.AddTargetPhrasesToPath(pool, mgr.system, *this, *tps, symbolBind);
+  path.AddTargetPhrasesToPath(pool, mgr.system, *this, *tps, chartEntry->GetSymbolBind());
 }
 
 void UnknownWordPenalty::LookupUnary(MemPool &pool,
