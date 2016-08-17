@@ -17,6 +17,7 @@ namespace Moses2
 
 namespace SCFG
 {
+class SymbolBind;
 class TargetPhrases;
 class Queue;
 class SeenPositions;
@@ -25,11 +26,16 @@ class SeenPositions;
 class SeenPosition
 {
 public:
+  const SymbolBind &symbolBind;
   const SCFG::TargetPhrases *tps;
   size_t tpInd;
   Vector<size_t> hypoIndColl;
 
-  SeenPosition(MemPool &pool, const SCFG::TargetPhrases *vtps, size_t vtpInd, const Vector<size_t> &vhypoIndColl);
+  SeenPosition(MemPool &pool,
+		  const SymbolBind &vSymbolBind,
+		  const SCFG::TargetPhrases *vtps,
+		  size_t vtpInd,
+		  const Vector<size_t> &vhypoIndColl);
 
   bool operator==(const SeenPosition &compare) const;
   size_t hash() const;
@@ -97,7 +103,7 @@ protected:
   const SCFG::TargetPhrases *tps;
   size_t tpInd;
 
-  Vector<size_t> hypoIndColl;
+  Vector<size_t> m_hypoIndColl;
     // hypos and ind to the 1 we're using
 
   QueueItem(MemPool &pool);

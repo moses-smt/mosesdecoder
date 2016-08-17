@@ -147,7 +147,7 @@ std::string Hypothesis::Debug(const System &system) const
   out << "PREV:";
   for (size_t i = 0; i < m_prevHypos.size(); ++i) {
     const Hypothesis *prevHypo = m_prevHypos[i];
-    out << prevHypo << " ";
+    out << prevHypo << prevHypo->GetInputPath().range << "(" << prevHypo->GetFutureScore() << ") ";
   }
   out << endl;
 
@@ -164,7 +164,9 @@ std::string Hypothesis::Debug(const System &system) const
 
 void Hypothesis::OutputTransOpt(std::ostream &out) const
 {
-	out << GetInputPath().range << " " << GetTargetPhrase().Debug(m_mgr->system) << endl;
+	out << GetInputPath().range << " "
+			<< "score=" << GetScores().GetTotalScore() << " "
+			<< GetTargetPhrase().Debug(m_mgr->system) << endl;
 
 	BOOST_FOREACH(const Hypothesis *prevHypo, m_prevHypos) {
 		prevHypo->OutputTransOpt(out);

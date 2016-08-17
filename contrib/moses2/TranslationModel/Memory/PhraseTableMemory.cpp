@@ -248,7 +248,7 @@ void PhraseTableMemory::LookupGivenNode(
     		  << " pt=" << GetPtInd()
 			  << " tps=" << tps->Debug(mgr.system) << endl;
 	  */
-      outPath.AddTargetPhrasesToPath(pool, *this, *tps, chartEntry->GetSymbolBind());
+      outPath.AddTargetPhrasesToPath(pool, mgr.system, *this, *tps, chartEntry->GetSymbolBind());
 
     }
 

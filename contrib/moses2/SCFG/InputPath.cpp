@@ -69,21 +69,22 @@ std::string InputPath::Debug(const System &system) const
 
 void InputPath::AddTargetPhrasesToPath(
     MemPool &pool,
+	const System &system,
     const PhraseTable &pt,
     const SCFG::TargetPhrases &tps,
     const SCFG::SymbolBind &symbolBind)
 {
-  SCFG::TargetPhrases *tpsNew;
   Coll::iterator iterColl;
   iterColl = targetPhrases.find(symbolBind);
-  if (iterColl == targetPhrases.end()) {
-    tpsNew = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool);
-    targetPhrases[symbolBind] = tpsNew;
-  }
-  else {
-    tpsNew = iterColl->second;
-  }
+  assert(iterColl == targetPhrases.end());
 
+  targetPhrases[symbolBind] = &tps;
+  //cerr << "range=" << range << " symbolBind=" << symbolBind.Debug(system) << " tps=" << tps.Debug(system);
+
+  /*
+  SCFG::TargetPhrases *tpsNew;
+  tpsNew = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool);
+  targetPhrases[symbolBind] = tpsNew;
 
   SCFG::TargetPhrases::const_iterator iter;
   for (iter = tps.begin(); iter != tps.end(); ++iter) {
@@ -91,6 +92,8 @@ void InputPath::AddTargetPhrasesToPath(
     //cerr << "tpCast=" << *tp << endl;
     tpsNew->AddTargetPhrase(*tp);
   }
+  cerr << "range=" << range << " symbolBind=" << symbolBind.Debug(system) << " tpsNew=" << tpsNew->Debug(system);
+  */
 }
 
 void InputPath::AddActiveChartEntry(size_t ptInd, ActiveChartEntry *chartEntry)

@@ -23,6 +23,7 @@ using namespace std;
 
 namespace Moses2
 {
+
 namespace SCFG
 {
 
@@ -71,6 +72,7 @@ void Manager::Decode()
     int maxPhraseSize = inputSize - startPos + 1;
     for (int phraseSize = 1; phraseSize < maxPhraseSize; ++phraseSize) {
       //cerr << endl << "phraseSize=" << phraseSize << endl;
+
       SCFG::InputPath &path = *m_inputPaths.GetMatrix().GetValue(startPos, phraseSize);
 
       Stack &stack = m_stacks.GetStack(startPos, phraseSize);
@@ -88,6 +90,35 @@ void Manager::Decode()
     }
   }
 
+  const Stack *stack;
+  /*
+  stack = &m_stacks.GetStack(9, 2);
+  cerr << "stack 9,2:" << stack->Debug(system) << endl;
+
+  stack = &m_stacks.GetStack(6, 3);
+  cerr << "stack 6,3:" << stack->Debug(system) << endl;
+
+  stack = &m_stacks.GetStack(5, 1);
+  cerr << "stack 5,1:" << stack->Debug(system) << endl;
+
+  stack = &m_stacks.GetStack(1, 4);
+  cerr << "stack 1,4:" << stack->Debug(system) << endl;
+
+  stack = &m_stacks.GetStack(0, 5);
+  cerr << "stack 0,5:" << stack->Debug(system) << endl;
+
+  stack = &m_stacks.GetStack(0, 6);
+  cerr << "stack 0,6:" << stack->Debug(system) << endl;
+
+  stack = &m_stacks.GetStack(0, 9);
+  cerr << "stack 0,9:" << stack->Debug(system) << endl;
+
+  stack = &m_stacks.GetStack(0, 11);
+  cerr << "stack 0,11:" << stack->Debug(system) << endl;
+
+  stack = &m_stacks.GetStack(0, 12);
+  cerr << "stack 0,12:" << stack->Debug(system) << endl;
+  */
   //m_stacks.OutputStacks();
 }
 
@@ -167,6 +198,7 @@ void Manager::Decode(SCFG::InputPath &path, Stack &stack)
   BOOST_FOREACH(const InputPath::Coll::value_type &valPair, path.targetPhrases) {
     const SymbolBind &symbolBind = valPair.first;
     const SCFG::TargetPhrases &tps = *valPair.second;
+
     CreateQueue(path, symbolBind, tps);
   }
 
@@ -203,7 +235,8 @@ void Manager::CreateQueue(
   for (size_t i = 0; i < symbolBind.coll.size(); ++i) {
     const SymbolBindElement &ele = symbolBind.coll[i];
     if (ele.hypos) {
-      item->AddHypos(*ele.hypos);
+      const Moses2::Hypotheses *hypos = ele.hypos;
+      item->AddHypos(*hypos);
     }
   }
   item->CreateHypo(GetSystemPool(), *this, path, symbolBind);

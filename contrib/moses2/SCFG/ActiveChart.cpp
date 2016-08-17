@@ -3,6 +3,7 @@
 #include "ActiveChart.h"
 #include "InputPath.h"
 #include "Word.h"
+#include "Hypothesis.h"
 #include "../Vector.h"
 
 using namespace std;
@@ -69,7 +70,14 @@ std::string SymbolBind::Debug(const System &system) const
 {
   stringstream out;
   BOOST_FOREACH(const SymbolBindElement &ele, coll) {
-    out << "("<< ele.hypos;
+	out << "(";
+
+	if (ele.word->isNonTerminal) {
+		const HypothesisBase &hypoBase = *(*ele.hypos)[0];
+		const SCFG::Hypothesis &hypo = static_cast<const SCFG::Hypothesis&>(hypoBase);
+		out << hypo.GetInputPath().range;
+	}
+
     out << ele.word->Debug(system);
     out << ") ";
   }

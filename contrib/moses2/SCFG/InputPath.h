@@ -28,7 +28,7 @@ class InputPath: public InputPathBase
 public:
   typedef std::pair<const PhraseTable*, SymbolBind> CollKey;
   typedef boost::unordered_map<SymbolBind,
-      SCFG::TargetPhrases*,
+      const SCFG::TargetPhrases*,
       boost::hash<SymbolBind>,
       std::equal_to<SymbolBind>,
       MemPoolAllocator< std::pair<SymbolBind, SCFG::TargetPhrases*> >
@@ -47,6 +47,7 @@ public:
 
   void AddTargetPhrasesToPath(
       MemPool &pool,
+  	  const System &system,
       const PhraseTable &pt,
       const SCFG::TargetPhrases &tps,
       const SCFG::SymbolBind &symbolBind);

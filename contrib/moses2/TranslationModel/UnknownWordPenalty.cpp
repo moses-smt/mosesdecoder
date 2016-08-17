@@ -198,7 +198,7 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
   SCFG::TargetPhrases *tps = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool);
   tps->AddTargetPhrase(*tp);
 
-  path.AddTargetPhrasesToPath(pool, *this, *tps, symbolBind);
+  path.AddTargetPhrasesToPath(pool, mgr.system, *this, *tps, symbolBind);
 }
 
 void UnknownWordPenalty::LookupUnary(MemPool &pool,
