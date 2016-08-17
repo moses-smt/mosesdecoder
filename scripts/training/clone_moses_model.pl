@@ -123,7 +123,7 @@ sub clone_file_or_die {
   my $src = shift;
   my $tgt = shift;
 
-  my $src = resolve($src); # resolve symlinks
+  $src = resolve($src); # resolve symlinks
 
   my $ok = 0;
   if ($symlink) {

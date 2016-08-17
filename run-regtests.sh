@@ -13,7 +13,7 @@ eval set -- "$args"
 noserver=false; 
 full=false;
 j=$(getconf _NPROCESSORS_ONLN)
-irstlm=$opt
+irstlm=$opt/irstlm-5.80.08
 boost=$opt
 cmph=$opt
 xmlrpc=--with-xmlrpc-c\=$opt 

@@ -97,7 +97,6 @@ void SearchCubePruning::Decode()
 
   // go through each stack
   size_t stackNo = 1;
-  int timelimit = m_options.search.timeout;
   std::vector < HypothesisStack* >::iterator iterStack;
   for (iterStack = m_hypoStackColl.begin() + 1 ; iterStack != m_hypoStackColl.end() ; ++iterStack) {
     // BOOST_FOREACH(HypothesisStack* hstack, m_hypoStackColl) {

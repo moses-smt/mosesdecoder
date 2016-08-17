@@ -3,6 +3,7 @@
 #include "moses/Util.h"
 #include <iostream>
 #include <queue>
+#include <set>
 #include <ostream>
 
 namespace Moses

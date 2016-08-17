@@ -25,6 +25,7 @@ namespace Moses
     float beam_width;
 
     int timeout;
+    int segment_timeout;
 
     bool consensus; //! Use Consensus decoding  (DeNero et al 2009)
     

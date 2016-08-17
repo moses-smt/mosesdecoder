@@ -23,7 +23,7 @@
 #include <sys/stat.h>
 #include <string>
 #include "OnDiskWrapper.h"
-#include "moses/Factor.h"
+#include "moses/Util.h"
 #include "util/exception.hh"
 #include "util/string_stream.hh"
 
@@ -217,43 +217,6 @@ uint64_t OnDiskWrapper::GetMisc(const std::string &key) const
                 );
 
   return iter->second;
-}
-
-Word *OnDiskWrapper::ConvertFromMoses(const std::vector<Moses::FactorType> &factorsVec
-                                      , const Moses::Word &origWord) const
-{
-  bool isNonTerminal = origWord.IsNonTerminal();
-  Word *newWord = new Word(isNonTerminal);
-
-  util::StringStream strme;
-
-  size_t factorType = factorsVec[0];
-  const Moses::Factor *factor = origWord.GetFactor(factorType);
-  UTIL_THROW_IF2(factor == NULL, "Expecting factor " << factorType);
-  strme << factor->GetString();
-
-  for (size_t ind = 1 ; ind < factorsVec.size() ; ++ind) {
-    size_t factorType = factorsVec[ind];
-    const Moses::Factor *factor = origWord.GetFactor(factorType);
-    if (factor == NULL) {
-      // can have less factors than factorType.size()
-      break;
-    }
-    UTIL_THROW_IF2(factor == NULL,
-                   "Expecting factor " << factorType << " at position " << ind);
-    strme << "|" << factor->GetString();
-  } // for (size_t factorType
-
-  bool found;
-  uint64_t vocabId = m_vocab.GetVocabId(strme.str(), found);
-  if (!found) {
-    // factor not in phrase table -> phrse definately not in. exit
-    delete newWord;
-    return NULL;
-  } else {
-    newWord->SetVocabId(vocabId);
-    return newWord;
-  }
 }
 
 

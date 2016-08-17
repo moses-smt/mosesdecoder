@@ -54,8 +54,8 @@ void ReorderingConstraint::SetWall( size_t pos, bool value )
 void ReorderingConstraint::FinalizeWalls()
 {
   for(size_t z = 0; z < m_zone.size(); z++ ) {
-    const size_t startZone = m_zone[z][0];
-    const size_t endZone = m_zone[z][1];// note: wall after endZone is not local
+    const size_t startZone = m_zone[z].first;
+    const size_t endZone = m_zone[z].second;// note: wall after endZone is not local
     for( size_t pos = startZone; pos < endZone; pos++ ) {
       if (m_wall[ pos ]) {
         m_localWall[ pos ] = z;
@@ -65,8 +65,8 @@ void ReorderingConstraint::FinalizeWalls()
       // enforce that local walls only apply to innermost zone
       else if (m_localWall[ pos ] != NOT_A_ZONE) {
         size_t assigned_z = m_localWall[ pos ];
-        if ((m_zone[assigned_z][0] < startZone) ||
-            (m_zone[assigned_z][1] > endZone)) {
+        if ((m_zone[assigned_z].first < startZone) ||
+            (m_zone[assigned_z].second > endZone)) {
           m_localWall[ pos ] = z;
         }
       }
@@ -97,9 +97,9 @@ void ReorderingConstraint::SetMonotoneAtPunctuation( const Phrase &sentence )
 void ReorderingConstraint::SetZone( size_t startPos, size_t endPos )
 {
   VERBOSE(3,"SETTING zone " << startPos << "-" << endPos << std::endl);
-  std::vector< size_t > newZone;
-  newZone.push_back( startPos );
-  newZone.push_back( endPos );
+  std::pair<size_t,size_t> newZone;
+  newZone.first = startPos;
+  newZone.second = endPos;
   m_zone.push_back( newZone );
   m_active = true;
 }
@@ -138,8 +138,8 @@ bool ReorderingConstraint::Check( const Bitmap &bitmap, size_t startPos, size_t 
 
   // check zones
   for(size_t z = 0; z < m_zone.size(); z++ ) {
-    const size_t startZone = m_zone[z][0];
-    const size_t endZone = m_zone[z][1];
+    const size_t startZone = m_zone[z].first;
+    const size_t endZone = m_zone[z].second;
 
     // fine, if translation has not reached zone yet and phrase outside zone
     if (lastPos < startZone && ( endPos < startZone || startPos > endZone ) ) {
@@ -234,6 +234,27 @@ bool ReorderingConstraint::Check( const Bitmap &bitmap, size_t startPos, size_t 
   // passed all checks, no violations
   VERBOSE(3," fine." << std::endl);
   return true;
+}
+
+std::ostream& operator<<(std::ostream& out, const ReorderingConstraint &obj)
+{
+  out << "Zones:";
+  for (size_t i = 0; i < obj.m_zone.size(); ++i) {
+    const std::pair<size_t,size_t> &zone1 = obj.m_zone[i];
+    out << zone1.first << "-" << zone1.second << " ";
+  }
+
+  out << "Walls:";
+  for (size_t i = 0; i < obj.m_size; ++i) {
+    out << obj.m_wall[i];
+  }
+
+  out << " Local walls:";
+  for (size_t i = 0; i < obj.m_size; ++i) {
+    out << obj.m_localWall[i] << " ";
+  }
+
+  return out;
 }
 
 }

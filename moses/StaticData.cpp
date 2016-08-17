@@ -62,8 +62,6 @@ using namespace boost::algorithm;
 
 namespace Moses
 {
-bool g_mosesDebug = false;
-
 StaticData StaticData::s_instance;
 
 StaticData::StaticData()
@@ -71,6 +69,7 @@ StaticData::StaticData()
   , m_requireSortingAfterSourceContext(false)
   , m_currentWeightSetting("default")
   , m_treeStructure(NULL)
+  , m_coordSpaceNextID(1)
 {
   Phrase::InitializeMemPool();
 }
@@ -936,6 +935,27 @@ void StaticData::ResetWeights(const std::string &denseWeights, const std::string
     const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(names[0]);
     m_allWeights.Assign(&ff, names[1], Scan<float>(toks[1]));
   }
+}
+
+size_t StaticData::GetCoordSpace(string space) const
+{
+  map<string const, size_t>::const_iterator m = m_coordSpaceMap.find(space);
+  if(m == m_coordSpaceMap.end()) {
+    return 0;
+  }
+  return m->second;
+}
+
+size_t StaticData::MapCoordSpace(string space)
+{
+  map<string const, size_t>::const_iterator m = m_coordSpaceMap.find(space);
+  if (m != m_coordSpaceMap.end()) {
+    return m->second;
+  }
+  size_t id = m_coordSpaceNextID;
+  m_coordSpaceNextID += 1;
+  m_coordSpaceMap[space] = id;
+  return id;
 }
 
 } // namespace

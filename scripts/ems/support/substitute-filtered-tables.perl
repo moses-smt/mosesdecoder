@@ -22,7 +22,7 @@ while(my $line = <FILTERED>) {
     $feature_section = ($1 eq "feature");
   }
   next unless $feature_section;
-  if ($line =~ /PhraseDictionary/ || $line =~ /RuleTable/) {
+  if ($line =~ /PhraseDictionary/ || $line =~ /RuleTable/ || $line =~ /ProbingPT/ ) {
     print STDERR "pt:$line \n";
     push(@arr, $line);
   }
@@ -41,7 +41,7 @@ while(my $line = <STDIN>) {
   if ($line =~ /^\[(.+)\]/) {
     $feature_section = ($1 eq "feature");
   }
-  if ($feature_section && ($line =~ /PhraseDictionary/ || $line =~ /RuleTable/)) {
+  if ($feature_section && ($line =~ /PhraseDictionary/ || $line =~ /RuleTable/ || $line =~ /ProbingPT/ )) {
     print $arr[$ind]."\n";
     ++$ind;
   }

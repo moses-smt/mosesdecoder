@@ -257,6 +257,14 @@ inline bool operator>=(const StringPiece& x, const StringPiece& y) {
   return !(x < y);
 }
 
+inline StringPiece Trim(const StringPiece& str, const std::string dropChars = " \t\n\r")
+{
+  StringPiece::size_type startPos = str.find_first_not_of(dropChars);
+  StringPiece::size_type endPos = str.find_last_not_of(dropChars);
+  StringPiece ret = str.substr(startPos, endPos - startPos + 1);
+  return ret;
+}
+
 // allow StringPiece to be logged (needed for unit testing).
 inline std::ostream& operator<<(std::ostream& o, const StringPiece& piece) {
   return o.write(piece.data(), static_cast<std::streamsize>(piece.size()));

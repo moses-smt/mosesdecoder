@@ -29,6 +29,13 @@ int main(int argc, char const* argv[])
   // Only lookup each phrase once
   unordered_set<string> seen;
 
+  string context_weight_spec;
+  params.SetParameter(context_weight_spec,"context-weights",string(""));
+  boost::shared_ptr<ContextScope> scope(new ContextScope);
+  boost::shared_ptr<IOWrapper> none;
+  if (context_weight_spec.size())
+    scope->SetContextWeights(context_weight_spec);
+
   string line;
   while (true) {
     // Input line
@@ -57,7 +64,8 @@ int main(int argc, char const* argv[])
 
         // Setup task for phrase
         boost::shared_ptr<TranslationTask> ttask;
-        ttask = TranslationTask::create(phrase);
+        ttask = TranslationTask::create(phrase, none, scope);
+	
         // Support model combinations (PhraseDictionaryGroup)
         BOOST_FOREACH(PhraseDictionary* p, PhraseDictionary::GetColl()) {
           p->InitializeForInput(ttask);
