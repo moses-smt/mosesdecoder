@@ -1,5 +1,3 @@
-// $Id$\
-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -111,8 +109,8 @@ template <class Model> void LanguageModelKen<Model>::LoadModel(const std::string
 
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, util::LoadMethod load_method)
   :LanguageModel(line)
-  ,m_factorType(factorType)
   ,m_beginSentenceFactor(FactorCollection::Instance().AddFactor(BOS_))
+  ,m_factorType(factorType)
 {
   ReadParameters();
   LoadModel(file, load_method);
