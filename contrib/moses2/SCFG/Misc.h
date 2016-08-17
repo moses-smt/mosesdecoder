@@ -107,7 +107,7 @@ protected:
   const SCFG::TargetPhrases *tps;
   size_t tpInd;
 
-  Vector<size_t> m_hypoIndColl;
+  const Vector<size_t> *m_hypoIndColl; // pointer to variable in seen position
     // hypos and ind to the 1 we're using
 
   QueueItem(MemPool &pool);

@@ -117,7 +117,7 @@ QueueItem *QueueItem::Create(MemPool &pool, SCFG::Manager &mgr)
 }
 
 QueueItem::QueueItem(MemPool &pool)
-:m_hypoIndColl(pool)
+:m_hypoIndColl(NULL)
 {
 
 }
@@ -131,7 +131,6 @@ void QueueItem::Init(
   tps = &vTPS;
   tpInd = 0;
   m_hyposColl = new (pool.Allocate<HyposColl>()) HyposColl(pool);
-  m_hypoIndColl.clear();
 }
 
 void QueueItem::Init(
@@ -144,13 +143,11 @@ void QueueItem::Init(
   tps = &vTPS;
   tpInd = vTPInd;
   m_hyposColl = NULL;
-  m_hypoIndColl.clear();
 }
 
 void QueueItem::AddHypos(const Moses2::Hypotheses &hypos)
 {
   m_hyposColl->push_back(&hypos);
-  m_hypoIndColl.push_back(0);
 }
 
 void QueueItem::CreateHypo(
@@ -162,7 +159,7 @@ void QueueItem::CreateHypo(
   const SCFG::TargetPhraseImpl &tp = (*tps)[tpInd];
 
   hypo = SCFG::Hypothesis::Create(systemPool, mgr);
-  hypo->Init(mgr, path, symbolBind, tp, m_hypoIndColl);
+  hypo->Init(mgr, path, symbolBind, tp, *m_hypoIndColl);
   hypo->EvaluateWhenApplied();
 }
 
@@ -178,7 +175,7 @@ void QueueItem::CreateNext(
   if (tpInd + 1 < tps->GetSize()) {
 
     const SCFG::TargetPhraseImpl &tp = (*tps)[tpInd + 1];
-    SeenPosition *seenItem = new (mgrPool.Allocate<SeenPosition>()) SeenPosition(mgrPool, *symbolBind, tps, tpInd + 1, m_hypoIndColl);
+    SeenPosition *seenItem = new (mgrPool.Allocate<SeenPosition>()) SeenPosition(mgrPool, *symbolBind, tps, tpInd + 1, *m_hypoIndColl);
     bool unseen = seenPositions.Add(seenItem);
 
     if (unseen) {
@@ -192,14 +189,14 @@ void QueueItem::CreateNext(
     }
   }
 
-  assert(m_hyposColl->size() == m_hypoIndColl.size());
+  assert(m_hyposColl->size() == m_hypoIndColl->size());
   const SCFG::TargetPhraseImpl &tp = (*tps)[tpInd];
   for (size_t i = 0; i < m_hyposColl->size(); ++i) {
     const Moses2::Hypotheses &hypos = *(*m_hyposColl)[i];
-    size_t hypoInd = m_hypoIndColl[i] + 1;
+    size_t hypoInd = (*m_hypoIndColl)[i] + 1; // increment hypo
 
     if (hypoInd < hypos.size()) {
-      SeenPosition *seenItem = new (mgrPool.Allocate<SeenPosition>()) SeenPosition(mgrPool, *symbolBind, tps, tpInd, m_hypoIndColl);
+      SeenPosition *seenItem = new (mgrPool.Allocate<SeenPosition>()) SeenPosition(mgrPool, *symbolBind, tps, tpInd, *m_hypoIndColl);
       seenItem->hypoIndColl[i] = hypoInd;
       bool unseen = seenPositions.Add(seenItem);
 
@@ -208,8 +205,7 @@ void QueueItem::CreateNext(
         item->Init(mgrPool, *symbolBind, *tps, tpInd);
 
         item->m_hyposColl = m_hyposColl;
-        item->m_hypoIndColl = m_hypoIndColl;
-        item->m_hypoIndColl[i] = hypoInd;
+        item->m_hypoIndColl = &seenItem->hypoIndColl;
         item->CreateHypo(systemPool, mgr, path, *symbolBind);
 
         queue.push(item);
@@ -222,8 +218,8 @@ std::string QueueItem::Debug(const System &system) const
 {
   stringstream out;
   out << hypo << " " << &(*tps)[tpInd] << "(" << tps << " " << tpInd << ") ";
-  for (size_t i = 0; i < m_hypoIndColl.size(); ++i) {
-    out << m_hypoIndColl[i] << " ";
+  for (size_t i = 0; i < m_hypoIndColl->size(); ++i) {
+    out << (*m_hypoIndColl)[i] << " ";
   }
 
   return out.str();
