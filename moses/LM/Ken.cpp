@@ -444,7 +444,13 @@ LanguageModel *ConstructKenLM(const std::string &lineOrig)
       filePath.assign(value.data(), value.size());
     } else if (name == "lazyken") {
       // deprecated: use load instead.
-      load_method = boost::lexical_cast<bool>(value) ? util::LAZY : util::POPULATE_OR_READ;
+      if (value == "0" || value == "false") {
+        load_method = util::POPULATE_OR_READ;
+      } else if (value == "1" || value == "true") {
+        load_method = util::LAZY;
+      } else {
+        UTIL_THROW2("Can't parse lazyken argument " << value << ".  Also, lazyken is deprecated.  Use load with one of the arguments lazy, populate_or_lazy, populate_or_read, read, or parallel_read.");
+      }
     } else if (name == "load") {
       if (value == "lazy") {
         load_method = util::LAZY;
