@@ -22,7 +22,7 @@ InputPath::InputPath(MemPool &pool, const SubPhrase<SCFG::Word> &subPhrase,
     const Range &range, size_t numPt, const InputPath *prefixPath)
 :InputPathBase(pool, range, numPt, prefixPath)
 ,subPhrase(subPhrase)
-,targetPhrases(MemPoolAllocator< std::pair<SymbolBind, SCFG::TargetPhrases*> >(pool))
+,targetPhrases(MemPoolAllocator<Element>(pool))
 {
   m_activeChart = pool.Allocate<ActiveChart>(numPt);
   for (size_t i = 0; i < numPt; ++i) {
@@ -74,13 +74,15 @@ void InputPath::AddTargetPhrasesToPath(
     const SCFG::TargetPhrases &tps,
     const SCFG::SymbolBind &symbolBind)
 {
+  targetPhrases.push_back(Element(symbolBind, &tps));
+	/*
   Coll::iterator iterColl;
   iterColl = targetPhrases.find(symbolBind);
   assert(iterColl == targetPhrases.end());
 
   targetPhrases[symbolBind] = &tps;
   //cerr << "range=" << range << " symbolBind=" << symbolBind.Debug(system) << " tps=" << tps.Debug(system);
-
+  */
   /*
   SCFG::TargetPhrases *tpsNew;
   tpsNew = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool);

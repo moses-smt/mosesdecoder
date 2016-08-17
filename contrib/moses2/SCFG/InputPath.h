@@ -8,6 +8,7 @@
 #pragma once
 
 #include <iostream>
+#include <list>
 #include <boost/unordered_map.hpp>
 #include "../InputPathBase.h"
 #include "TargetPhrases.h"
@@ -26,14 +27,10 @@ class TargetPhraseImpl;
 class InputPath: public InputPathBase
 {
 public:
-  typedef std::pair<const PhraseTable*, SymbolBind> CollKey;
-  typedef boost::unordered_map<SymbolBind,
-      const SCFG::TargetPhrases*,
-      boost::hash<SymbolBind>,
-      std::equal_to<SymbolBind>,
-      MemPoolAllocator< std::pair<SymbolBind, SCFG::TargetPhrases*> >
-      > Coll;
+  typedef std::pair<SymbolBind, const SCFG::TargetPhrases*> Element;
+  typedef std::list<Element, MemPoolAllocator<Element> > Coll;
   Coll targetPhrases;
+
   SubPhrase<SCFG::Word> subPhrase;
 
   InputPath(MemPool &pool, const SubPhrase<SCFG::Word> &subPhrase, const Range &range,
