@@ -46,35 +46,25 @@ std::ostream &Weights::Debug(std::ostream &out, const System &system) const
 
 }
 
-
-void Weights::CreateFromString(const FeatureFunctions &ffs,
-    const std::string &line)
-{
-  std::vector<std::string> toks = Tokenize(line);
-  assert(toks.size());
-
-  string ffName = toks[0];
-  assert(ffName[ffName.size() - 1] == '=');
-
-  ffName = ffName.substr(0, ffName.size() - 1);
-  //cerr << "ffName=" << ffName << endl;
-
-  const FeatureFunction *ff = ffs.FindFeatureFunction(ffName);
-  assert(ff);
-  size_t startInd = ff->GetStartInd();
-  size_t numScores = ff->GetNumScores();
-  assert(numScores == toks.size() - 1);
-
-  for (size_t i = 0; i < numScores; ++i) {
-    SCORE score = Scan<SCORE>(toks[i + 1]);
-    m_weights[i + startInd] = score;
-  }
-}
-
 std::vector<SCORE> Weights::GetWeights(const FeatureFunction &ff) const
 {
   std::vector<SCORE> ret(m_weights.begin() + ff.GetStartInd(), m_weights.begin() + ff.GetStartInd() + ff.GetNumScores());
   return ret;
+}
+
+void Weights::SetWeights(const FeatureFunctions &ffs, const std::string &ffName, const std::vector<float> &weights)
+{
+  const FeatureFunction *ff = ffs.FindFeatureFunction(ffName);
+  UTIL_THROW_IF2(ff == NULL, "Feature function not found:" << ffName);
+
+  size_t startInd = ff->GetStartInd();
+  size_t numScores = ff->GetNumScores();
+  UTIL_THROW_IF2(weights.size() != numScores, "Wrong number of weights. " << weights.size() << "!=" << numScores);
+
+  for (size_t i = 0; i < numScores; ++i) {
+	SCORE weight = weights[i];
+	m_weights[startInd + i] = weight;
+  }
 }
 
 }

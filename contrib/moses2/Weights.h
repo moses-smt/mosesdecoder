@@ -29,9 +29,9 @@ public:
 
   std::ostream &Debug(std::ostream &out, const System &system) const;
 
-  void CreateFromString(const FeatureFunctions &ffs, const std::string &line);
-
   std::vector<SCORE> GetWeights(const FeatureFunction &ff) const;
+
+  void SetWeights(const FeatureFunctions &ffs, const std::string &ffName, const std::vector<float> &weights);
 
 protected:
   std::vector<SCORE> m_weights;
