@@ -229,7 +229,7 @@ std::string Manager::OutputNBest()
 
 	// MAIN LOOP
 	stringstream out;
-	Moses2::FixPrecision(out);
+	//Moses2::FixPrecision(out);
 
 	size_t maxIter = system.options.nbest.nbest_size * system.options.nbest.factor;
 	size_t bestInd = 0;

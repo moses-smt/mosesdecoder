@@ -384,7 +384,7 @@ std::string Manager::OutputBest() const
 std::string Manager::OutputNBest()
 {
   stringstream out;
-  Moses2::FixPrecision(out);
+  //Moses2::FixPrecision(out);
 
   arcLists.Sort();
 
