@@ -40,7 +40,7 @@ protected:
   const Manager &m_mgr;
   Coll m_coll;
 
-  Moses2::HypothesisColl &GetMiniStack(const SCFG::Word &key);
+  Moses2::HypothesisColl &GetColl(const SCFG::Word &nt);
 
 };
 
