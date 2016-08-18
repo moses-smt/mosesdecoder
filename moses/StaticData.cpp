@@ -680,8 +680,8 @@ void StaticData::LoadSparseWeightsFromConfig()
     featureNames.insert(descr);
   }
 
-  std::map<std::string, std::vector<float> > weights = m_parameter->GetAllWeights();
-  std::map<std::string, std::vector<float> >::iterator iter;
+  const std::map<std::string, std::vector<float> > &weights = m_parameter->GetAllWeights();
+  std::map<std::string, std::vector<float> >::const_iterator iter;
   for (iter = weights.begin(); iter != weights.end(); ++iter) {
     // this indicates that it is sparse feature
     if (featureNames.find(iter->first) == featureNames.end()) {
