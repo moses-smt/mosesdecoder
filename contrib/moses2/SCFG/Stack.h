@@ -22,9 +22,6 @@ public:
   Stack(const Manager &mgr);
   virtual ~Stack();
 
-  Coll &GetColl()
-  {  return m_coll; }
-
   const Coll &GetColl() const
   {  return m_coll; }
 
