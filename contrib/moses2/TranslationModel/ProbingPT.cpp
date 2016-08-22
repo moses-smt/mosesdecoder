@@ -544,7 +544,7 @@ void ProbingPT::LookupGivenNode(
     size_t ptInd = GetPtInd();
     outPath.AddActiveChartEntry(ptInd, chartEntry);
 
-    outPath.AddTargetPhrasesToPath(pool, *this, *tps, chartEntry->GetSymbolBind());
+    outPath.AddTargetPhrasesToPath(pool, mgr.system, *this, *tps, chartEntry->GetSymbolBind());
   }
   else {
 	  // not in cache. Lookup
@@ -566,7 +566,7 @@ void ProbingPT::LookupGivenNode(
 			if (tpsPair.second) {
 				// there are some rules
 				//cerr << "symbolbind=" << chartEntry->GetSymbolBind().Debug(mgr.system) << endl;
-				outPath.AddTargetPhrasesToPath(pool, *this, *tpsPair.second, chartEntry->GetSymbolBind());
+				outPath.AddTargetPhrasesToPath(pool, mgr.system, *this, *tpsPair.second, chartEntry->GetSymbolBind());
 			}
 	  }
   }
@@ -593,9 +593,6 @@ SCFG::TargetPhraseImpl *ProbingPT::CreateTargetPhraseSCFG(
     // set pt score for rule
     tp->GetScores().PlusEquals(system, *this, scores);
 
-    // sort score. Just for scfg
-    tp->sortScore = (totalNumScores >= 3) ? scores[2] : 0;
-
     // save scores for other FF, eg. lex RO. Just give the offset
     if (m_engine->num_lex_scores) {
       tp->scoreProperties = scores + m_engine->num_scores;
@@ -610,9 +607,6 @@ SCFG::TargetPhraseImpl *ProbingPT::CreateTargetPhraseSCFG(
 
     // set pt score for rule
     tp->GetScores().PlusEquals(system, *this, logScores);
-
-    // sort score. Just for scfg
-    tp->sortScore = (totalNumScores >= 3) ? logScores[2] : 0;
 
     // save scores for other FF, eg. lex RO.
     tp->scoreProperties = pool.Allocate<SCORE>(m_engine->num_lex_scores);

@@ -24,7 +24,7 @@ namespace SCFG
 KBestExtractor::KBestExtractor(const SCFG::Manager &mgr)
 :m_mgr(mgr)
 {
-	set<string> distinctHypos;
+	boost::unordered_set<size_t> distinctHypos;
 
 	ArcLists &arcLists = mgr.arcLists;
 	const Stack &lastStack = mgr.GetStacks().GetLastStack();
@@ -53,8 +53,10 @@ KBestExtractor::KBestExtractor(const SCFG::Manager &mgr)
 		if (mgr.system.options.nbest.only_distinct) {
 			string tgtPhrase = path->Output();
 			//cerr << "tgtPhrase=" << tgtPhrase << endl;
+			boost::hash<std::string> string_hash;
+			size_t hash = string_hash(tgtPhrase);
 
-			if (distinctHypos.insert(tgtPhrase).second) {
+			if (distinctHypos.insert(hash).second) {
 				ok = true;
 			}
 		}

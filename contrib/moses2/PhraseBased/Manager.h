@@ -56,6 +56,7 @@ public:
   void Decode();
   std::string OutputBest() const;
   std::string OutputNBest();
+  std::string OutputTransOpt();
 
 protected:
 

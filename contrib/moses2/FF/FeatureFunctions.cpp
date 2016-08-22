@@ -68,7 +68,7 @@ void FeatureFunctions::Create()
   UTIL_THROW_IF2(ffParams == NULL, "Must have [feature] section");
 
   BOOST_FOREACH(const std::string &line, *ffParams){
-  cerr << "line=" << line << endl;
+  //cerr << "line=" << line << endl;
   FeatureFunction *ff = Create(line);
 
   m_featureFunctions.push_back(ff);
@@ -134,11 +134,11 @@ const FeatureFunction *FeatureFunctions::FindFeatureFunction(
     const std::string &name) const
 {
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions){
-  if (ff->GetName() == name) {
-    return ff;
-  }
-}
-return NULL;
+	  if (ff->GetName() == name) {
+		return ff;
+	  }
+	}
+	return NULL;
 }
 
 const PhraseTable *FeatureFunctions::GetPhraseTableExcludeUnknownWordPenalty(size_t ptInd)
@@ -175,7 +175,7 @@ void FeatureFunctions::EvaluateInIsolation(
     MemPool &pool,
     const System &system,
     const Phrase<SCFG::Word> &source,
-    TargetPhrase<SCFG::Word> &targetPhrase) const
+    SCFG::TargetPhraseImpl &targetPhrase) const
 {
   SCORE estimatedScore = 0;
 
@@ -184,7 +184,7 @@ void FeatureFunctions::EvaluateInIsolation(
     ff->EvaluateInIsolation(pool, system, source, targetPhrase, scores, estimatedScore);
   }
 
-  //targetPhrase.SetEstimatedScore(estimatedScore);
+  targetPhrase.SetEstimatedScore(estimatedScore);
 }
 
 void FeatureFunctions::EvaluateAfterTablePruning(MemPool &pool,

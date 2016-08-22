@@ -45,6 +45,7 @@ public:
   {  return m_prevHypos[ind]; }
 
   void OutputToStream(std::ostream &out) const;
+  void OutputTransOpt(std::ostream &out) const;
 
   std::string Debug(const System &system) const;
 

@@ -32,23 +32,8 @@ void Stack::Add(SCFG::Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
   const SCFG::Word &lhs = tp.lhs;
   //cerr << "lhs=" << lhs << endl;
 
-  HypothesisColl &coll = GetMiniStack(lhs);
+  HypothesisColl &coll = GetColl(lhs);
   coll.Add(m_mgr.system, hypo, hypoRecycle, arcLists);
-}
-
-Moses2::HypothesisColl &Stack::GetMiniStack(const SCFG::Word &key)
-{
-  Moses2::HypothesisColl *ret;
-  Coll::iterator iter;
-  iter = m_coll.find(key);
-  if (iter == m_coll.end()) {
-    ret = new Moses2::HypothesisColl(m_mgr);
-    m_coll[key] = ret;
-  }
-  else {
-    ret = iter->second;
-  }
-  return *ret;
 }
 
 size_t Stack::GetSize() const
@@ -71,6 +56,21 @@ const Moses2::HypothesisColl *Stack::GetColl(const SCFG::Word &nt) const
   else {
     return iter->second;
   }
+}
+
+Moses2::HypothesisColl &Stack::GetColl(const SCFG::Word &nt)
+{
+  Moses2::HypothesisColl *ret;
+  Coll::iterator iter;
+  iter = m_coll.find(nt);
+  if (iter == m_coll.end()) {
+    ret = new Moses2::HypothesisColl(m_mgr);
+    m_coll[nt] = ret;
+  }
+  else {
+    ret = iter->second;
+  }
+  return *ret;
 }
 
 const Hypothesis *Stack::GetBestHypo() const

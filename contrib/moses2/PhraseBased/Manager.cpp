@@ -5,6 +5,8 @@
  *      Author: hieu
  */
 #include <boost/foreach.hpp>
+#include <boost/functional/hash.hpp>
+#include <boost/unordered_set.hpp>
 #include <vector>
 #include <sstream>
 #include "Manager.h"
@@ -192,6 +194,8 @@ void Manager::CalcFutureScore()
 std::string Manager::OutputBest() const
 {
 	stringstream out;
+  Moses2::FixPrecision(out);
+
 	const Hypothesis *bestHypo = m_search->GetBestHypo();
 	if (bestHypo) {
 		if (system.options.output.ReportHypoScore) {
@@ -216,7 +220,7 @@ std::string Manager::OutputNBest()
 {
 	arcLists.Sort();
 
-	set<string> distinctHypos;
+	boost::unordered_set<size_t> distinctHypos;
 
 	TrellisPaths<TrellisPath> contenders;
 	m_search->AddInitialTrellisPaths(contenders);
@@ -225,6 +229,8 @@ std::string Manager::OutputNBest()
 
 	// MAIN LOOP
 	stringstream out;
+	//Moses2::FixPrecision(out);
+
 	size_t maxIter = system.options.nbest.nbest_size * system.options.nbest.factor;
 	size_t bestInd = 0;
 	for (size_t i = 0; i < maxIter; ++i) {
@@ -239,8 +245,10 @@ std::string Manager::OutputNBest()
 		if (system.options.nbest.only_distinct) {
 			string tgtPhrase = path->OutputTargetPhrase(system);
 			//cerr << "tgtPhrase=" << tgtPhrase << endl;
+			boost::hash<std::string> string_hash;
+			size_t hash = string_hash(tgtPhrase);
 
-			if (distinctHypos.insert(tgtPhrase).second) {
+			if (distinctHypos.insert(hash).second) {
 				ok = true;
 			}
 		}
@@ -262,6 +270,11 @@ std::string Manager::OutputNBest()
 	}
 
 	return out.str();
+}
+
+std::string Manager::OutputTransOpt()
+{
+	return "";
 }
 
 }

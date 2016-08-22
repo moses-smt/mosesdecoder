@@ -17,6 +17,7 @@ namespace Moses2
 
 namespace SCFG
 {
+class SymbolBind;
 class TargetPhrases;
 class Queue;
 class SeenPositions;
@@ -25,11 +26,20 @@ class SeenPositions;
 class SeenPosition
 {
 public:
-  const SCFG::TargetPhrases *tps;
+  const SymbolBind &symbolBind;
+  const SCFG::TargetPhrases &tps;
   size_t tpInd;
   Vector<size_t> hypoIndColl;
 
-  SeenPosition(MemPool &pool, const SCFG::TargetPhrases *vtps, size_t vtpInd, const Vector<size_t> &vhypoIndColl);
+  SeenPosition(MemPool &pool,
+		  const SymbolBind &vSymbolBind,
+		  const SCFG::TargetPhrases &vtps,
+		  size_t numNT);
+  SeenPosition(MemPool &pool,
+		  const SymbolBind &vSymbolBind,
+		  const SCFG::TargetPhrases &vtps,
+		  size_t vtpInd,
+		  const Vector<size_t> &vhypoIndColl);
 
   bool operator==(const SeenPosition &compare) const;
   size_t hash() const;
@@ -66,12 +76,14 @@ public:
   void Init(
       MemPool &pool,
       const SymbolBind &symbolBind,
-      const SCFG::TargetPhrases &tps);
+      const SCFG::TargetPhrases &tps,
+	  const Vector<size_t> &hypoIndColl);
   void Init(
       MemPool &pool,
       const SymbolBind &symbolBind,
       const SCFG::TargetPhrases &tps,
-      size_t vTPInd);
+      size_t vTPInd,
+	  const Vector<size_t> &hypoIndColl);
   void AddHypos(const Moses2::Hypotheses &hypos);
   void CreateHypo(
       MemPool &systemPool,
@@ -97,7 +109,7 @@ protected:
   const SCFG::TargetPhrases *tps;
   size_t tpInd;
 
-  Vector<size_t> hypoIndColl;
+  const Vector<size_t> *m_hypoIndColl; // pointer to variable in seen position
     // hypos and ind to the 1 we're using
 
   QueueItem(MemPool &pool);

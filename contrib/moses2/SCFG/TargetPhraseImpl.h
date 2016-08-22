@@ -32,7 +32,6 @@ class TargetPhraseImpl: public Moses2::TargetPhrase<SCFG::Word>
 public:
   SCFG::Word lhs;
   const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
-  SCORE sortScore;
 
   static TargetPhraseImpl *CreateFromString(MemPool &pool,
       const PhraseTable &pt, const System &system, const std::string &str);
@@ -68,8 +67,14 @@ public:
 
   void SetAlignmentInfo(const std::string &alignString);
 
+  SCORE GetFutureScore() const
+  {  return m_scores->GetTotalScore() + m_estimatedScore; }
+
   virtual SCORE GetScoreForPruning() const
-  { return sortScore; }
+  { return GetFutureScore(); }
+
+  void SetEstimatedScore(const SCORE &value)
+  {  m_estimatedScore = value; }
 
   std::string Debug(const System &system) const;
 
@@ -77,6 +82,8 @@ public:
 
   //mutable void *chartState;
 protected:
+  SCORE m_estimatedScore;
+
 };
 
 

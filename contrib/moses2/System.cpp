@@ -38,6 +38,10 @@ System::System(const Parameter &paramsArg) :
     nbestCollector.reset(new OutputCollector(options.nbest.output_file_path));
   }
 
+  if (!options.output.detailed_transrep_filepath.empty()) {
+	  detailedTranslationCollector.reset(new OutputCollector(options.output.detailed_transrep_filepath));
+  }
+
   featureFunctions.Create();
   LoadWeights();
 
@@ -80,14 +84,23 @@ System::~System()
 
 void System::LoadWeights()
 {
-  const PARAM_VEC *vec = params.GetParam("weight");
-  UTIL_THROW_IF2(vec == NULL, "Must have [weight] section");
-
   weights.Init(featureFunctions);
-  BOOST_FOREACH(const std::string &line, *vec){
-  cerr << "line=" << line << endl;
-  weights.CreateFromString(featureFunctions, line);
-}
+
+  //cerr << "Weights:" << endl;
+  typedef std::map<std::string, std::vector<float> > WeightMap;
+  const WeightMap &allWeights = params.GetAllWeights();
+  BOOST_FOREACH(const WeightMap::value_type &valPair, allWeights) {
+	  const string &ffName = valPair.first;
+	  const std::vector<float> &ffWeights = valPair.second;
+	  /*
+	  cerr << ffName << "=";
+	  for (size_t i = 0; i < ffWeights.size(); ++i) {
+		  cerr << ffWeights[i] << " ";
+	  }
+	  cerr << endl;
+	  */
+	  weights.SetWeights(featureFunctions, ffName, ffWeights);
+  }
 }
 
 void System::LoadMappings()

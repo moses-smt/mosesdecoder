@@ -18,6 +18,7 @@
 #include "../SCFG/TargetPhraseImpl.h"
 #include "../SCFG/Manager.h"
 #include "../SCFG/Sentence.h"
+#include "../SCFG/ActiveChart.h"
 
 using namespace std;
 
@@ -133,6 +134,7 @@ void UnknownWordPenalty::EvaluateInIsolation(const System &system,
 
 }
 
+// SCFG ///////////////////////////////////////////////////////////////////////////////////////////
 void UnknownWordPenalty::InitActiveChart(
     MemPool &pool,
     const SCFG::Manager &mgr,
@@ -155,13 +157,16 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
   }
 
   if (path.GetNumRules()) {
+	// only create rules if no other rules
     return;
   }
 
-  // don't do 1st of last word
+  // don't do 1st if 1st word
   if (path.range.GetStartPos() == 0) {
     return;
   }
+
+  // don't do 1st if last word
   const SCFG::Sentence &sentence = static_cast<const SCFG::Sentence&>(mgr.GetInput());
   if (path.range.GetStartPos() + 1 == sentence.GetSize()) {
     return;
@@ -181,8 +186,9 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
   size_t endPos = path.range.GetEndPos();
   const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(endPos, 1);
 
-  SCFG::SymbolBind symbolBind(pool);
-  symbolBind.Add(subPhrasePath.range, lastWord, NULL);
+  SCFG::ActiveChartEntry *chartEntry = new (pool.Allocate<SCFG::ActiveChartEntry>()) SCFG::ActiveChartEntry(pool);
+  chartEntry->AddSymbolBindElement(subPhrasePath.range, lastWord, NULL, *this);
+  path.AddActiveChartEntry(GetPtInd(), chartEntry);
 
   Scores &scores = tp->GetScores();
   scores.PlusEquals(mgr.system, *this, -100);
@@ -191,7 +197,10 @@ void UnknownWordPenalty::Lookup(MemPool &pool,
   const SubPhrase<SCFG::Word> &source = path.subPhrase;
   system.featureFunctions.EvaluateInIsolation(memPool, system, source, *tp);
 
-  path.AddTargetPhrase(pool, *this, symbolBind, tp);
+  SCFG::TargetPhrases *tps = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool);
+  tps->AddTargetPhrase(*tp);
+
+  path.AddTargetPhrasesToPath(pool, mgr.system, *this, *tps, chartEntry->GetSymbolBind());
 }
 
 void UnknownWordPenalty::LookupUnary(MemPool &pool,

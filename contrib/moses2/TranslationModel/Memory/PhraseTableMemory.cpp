@@ -112,8 +112,8 @@ void PhraseTableMemory::Load(System &system)
       target->GetScores().CreateFromString(toks[2], *this, system, true);
       //cerr << "created scores:" << *target << endl;
 
-      vector<SCORE> scores = Tokenize<SCORE>(toks[2]);
-      target->sortScore = (scores.size() >= 3) ? TransformScore(scores[2]) : 0;
+      //vector<SCORE> scores = Tokenize<SCORE>(toks[2]);
+      //target->sortScore = (scores.size() >= 3) ? TransformScore(scores[2]) : 0;
 
       // properties
       if (toks.size() == 7) {
@@ -242,7 +242,13 @@ void PhraseTableMemory::LookupGivenNode(
     const SCFG::TargetPhrases *tps = nextNode->GetTargetPhrases();
     if (tps) {
       // there are some rules
-      outPath.AddTargetPhrasesToPath(pool, *this, *tps, chartEntry->GetSymbolBind());
+      /*
+      cerr << "outPath=" << outPath.range
+    		  << " bind=" << chartEntry->GetSymbolBind().Debug(mgr.system)
+    		  << " pt=" << GetPtInd()
+			  << " tps=" << tps->Debug(mgr.system) << endl;
+	  */
+      outPath.AddTargetPhrasesToPath(pool, mgr.system, *this, *tps, chartEntry->GetSymbolBind());
 
     }
 

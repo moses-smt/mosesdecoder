@@ -70,6 +70,7 @@ namespace Moses
     , bias_key(((char*)this)+3)
     , cache_key(((char*)this)+2)
     , context_key(((char*)this)+1)
+    , m_track_coord(false)
       // , m_tpc_ctr(0)
       // , m_ifactor(1,0)
       // , m_ofactor(1,0)
