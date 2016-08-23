@@ -22,6 +22,7 @@ class Hypothesis;
 class NBestColl;
 class NBests;
 
+/////////////////////////////////////////////////////////////
 class NBest
 {
 public:
@@ -52,13 +53,18 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////
-class NBests : public std::vector<NBest>
-{};
+class NBests : public std::vector<NBest*>
+{
+public:
+	virtual ~NBests();
+};
 
 /////////////////////////////////////////////////////////////
 class NBestColl
 {
 public:
+	virtual ~NBestColl();
+
 	void Add(const SCFG::Manager &mgr, const ArcList &arcList);
 	const NBests &GetNBests(const ArcList &arcList) const;
 

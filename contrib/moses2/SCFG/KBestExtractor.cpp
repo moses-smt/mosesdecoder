@@ -77,7 +77,7 @@ void NBest::OutputToStream(
 	  UTIL_THROW_IF2(child.first == NULL, "ArcList == NULL");
 
 	  const NBests &nbests = *child.first;
-	  const NBest &nbest = nbests[child.second];
+	  const NBest &nbest = *nbests[child.second];
 	  nbest.OutputToStream(mgr, strm, nbestColl);
 	}
 	else {
@@ -90,10 +90,40 @@ void NBest::OutputToStream(
 }
 
 /////////////////////////////////////////////////////////////
+NBests::~NBests()
+{
+	BOOST_FOREACH(NBest *nbest, *this) {
+		delete nbest;
+	}
+}
+
+/////////////////////////////////////////////////////////////
+NBestColl::~NBestColl()
+{
+	BOOST_FOREACH(const Coll::value_type &valPair, m_candidates) {
+		NBests *nbests = valPair.second;
+		delete nbests;
+	}
+}
+
 void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 {
-	NBest best(mgr, *this, arcList, 0);
-	GetOrCreateNBests(arcList).push_back(best);
+	NBests &nbests = GetOrCreateNBests(arcList);
+
+	//priority_queue<NBest*> contenders;
+
+	NBest *best = new NBest(mgr, *this, arcList, 0);
+	nbests.push_back(best);
+
+	size_t maxIter = mgr.system.options.nbest.nbest_size * mgr.system.options.nbest.factor;
+	size_t bestInd = 0;
+	for (size_t i = 0; i < maxIter; ++i) {
+		/*
+		if (bestInd > mgr.system.options.nbest.nbest_size || contenders.empty()) {
+			break;
+		}
+		*/
+	}
 }
 
 const NBests &NBestColl::GetNBests(const ArcList &arcList) const
@@ -167,16 +197,16 @@ void KBestExtractor::OutputToStream(std::stringstream &strm)
 	const ArcList &arcList = arcLists.GetArcList(hypo);
 	const NBests &nbestVec = m_nbestColl.GetNBests(arcList);
 
-	BOOST_FOREACH(const NBest &deriv, nbestVec) {
+	BOOST_FOREACH(const NBest *deriv, nbestVec) {
 		strm << m_mgr.GetTranslationId() << " ||| ";
 		//cerr << "1" << flush;
-		deriv.OutputToStream(m_mgr, strm, m_nbestColl);
+		deriv->OutputToStream(m_mgr, strm, m_nbestColl);
 		//cerr << "2" << flush;
 		strm << "||| ";
-		deriv.GetScores().OutputBreakdown(strm, m_mgr.system);
+		deriv->GetScores().OutputBreakdown(strm, m_mgr.system);
 		//cerr << "3" << flush;
 		strm << "||| ";
-		strm << deriv.GetScores().GetTotalScore();
+		strm << deriv->GetScores().GetTotalScore();
 		//cerr << "4" << flush;
 
 		strm << endl;
