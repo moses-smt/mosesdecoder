@@ -50,7 +50,15 @@ NBestCandidate::NBestCandidate(const SCFG::Manager &mgr, const ArcList &varcList
 void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 {
 	NBestCandidate candidate(mgr, arcList, 0);
-	candidates[&arcList].push_back(candidate);
+	m_candidates[&arcList].push_back(candidate);
+}
+
+const NBestCandidates &NBestColl::GetNBestCandidates(const ArcList &arcList)
+{
+	Coll::const_iterator iter = m_candidates.find(&arcList);
+	UTIL_THROW_IF2(iter == m_candidates.end(), "Can't find arclist");
+	const NBestCandidates &ret = iter->second;
+	return ret;
 }
 
 /////////////////////////////////////////////////////////////
@@ -100,19 +108,22 @@ void KBestExtractor::OutputToStream(std::stringstream &strm)
 
 	const ArcLists &arcLists = m_mgr.arcLists;
 	const ArcList &arcList = arcLists.GetArcList(hypo);
+	const NBestCandidates &nbestVec = m_nbestColl.GetNBestCandidates(arcList);
 
-	strm << m_mgr.GetTranslationId() << " ||| ";
-	//cerr << "1" << flush;
-	//strm << path->Output();
-	//cerr << "2" << flush;
-	strm << " ||| ";
-	path->GetScores().OutputBreakdown(strm, m_mgr.system);
-	//cerr << "3" << flush;
-	strm << "||| ";
-	strm << path->GetScores().GetTotalScore();
-	//cerr << "4" << flush;
+	BOOST_FOREACH(const NBestCandidate &deriv, nbestVec) {
+		strm << m_mgr.GetTranslationId() << " ||| ";
+		//cerr << "1" << flush;
+		//strm << path->Output();
+		//cerr << "2" << flush;
+		strm << " ||| ";
+		deriv.GetScores().OutputBreakdown(strm, m_mgr.system);
+		//cerr << "3" << flush;
+		strm << "||| ";
+		strm << deriv.GetScores().GetTotalScore();
+		//cerr << "4" << flush;
 
-	strm << endl;
+		strm << endl;
+	}
 }
 
 }

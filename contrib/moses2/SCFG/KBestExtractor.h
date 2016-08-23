@@ -46,9 +46,11 @@ class NBestColl
 {
 public:
 	void Add(const SCFG::Manager &mgr, const ArcList &arcList);
+	const NBestCandidates &GetNBestCandidates(const ArcList &arcList);
 
 protected:
-	boost::unordered_map<const ArcList*, NBestCandidates> candidates;
+	typedef boost::unordered_map<const ArcList*, NBestCandidates> Coll;
+	Coll m_candidates;
 };
 
 /////////////////////////////////////////////////////////////
