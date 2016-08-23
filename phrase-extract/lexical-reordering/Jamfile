@@ -1,0 +1,2 @@
+exe lexical-reordering-score : InputFileStream.cpp reordering_classes.cpp score.cpp ../OutputFileStream.cpp ../..//boost_iostreams ../..//boost_filesystem ../../util//kenutil ../..//z ;
+

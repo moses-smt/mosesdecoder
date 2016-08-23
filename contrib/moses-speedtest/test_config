@@ -1,0 +1,3 @@
+Command: moses -f ... -i fff #Looks for the command in the /bin directory of the repo specified in the testsuite_config
+LDPRE: ldpreloads #Comma separated LD_LIBRARY_PATH:/, 
+Variants: vanilla, cached, ldpre #Can't have cached without ldpre or vanilla

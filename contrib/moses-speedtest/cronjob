@@ -1,0 +1,7 @@
+#!/bin/sh
+cd /home/moses-speedtest/phrase_tables
+
+python3 runtests.py -c testsuite_config #Run the tests.
+python3 html_gen.py testsuite_config #Generate html
+
+cp index.html /fs/thor4/html/www/speed-test/ #Update the html

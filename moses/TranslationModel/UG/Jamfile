@@ -1,0 +1,158 @@
+exe ptable-sigtest-filter : 
+filter-pt.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil
+;
+exe try-align : 
+try-align.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_filesystem
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil 
+; 
+
+exe try-align2 : 
+try-align2.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)/moses/TranslationModel/UG/generic//stringdist 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_filesystem
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil 
+; 
+
+exe ptable-describe-features : 
+ptable-describe-features.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_filesystem
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil 
+; 
+
+exe count-ptable-features : 
+count-ptable-features.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_filesystem
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil 
+; 
+
+exe ptable-lookup : 
+ptable-lookup.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_filesystem
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil 
+; 
+
+exe ptable-lookup-corpus :
+ptable-lookup-corpus.cc
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic
+$(TOP)//boost_iostreams
+$(TOP)//boost_filesystem
+$(TOP)//boost_program_options
+$(TOP)/moses/TranslationModel/UG/mm//mm
+$(TOP)/moses/TranslationModel/UG//mmsapt
+$(TOP)/util//kenutil
+;
+
+exe check-coverage : 
+check-coverage.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_filesystem
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil 
+; 
+
+exe sim-pe : 
+sim-pe.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_filesystem
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil 
+; 
+
+exe spe-check-coverage : 
+spe-check-coverage.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_filesystem
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil 
+; 
+
+exe spe-check-coverage2 : 
+spe-check-coverage2.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_filesystem
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil 
+; 
+
+exe bitext-find : 
+bitext-find.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_filesystem
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+# $(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil 
+; 
+
+
+exe spe-check-coverage3 : 
+spe-check-coverage3.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_filesystem
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG//mmsapt 
+$(TOP)/util//kenutil 
+; 
+install $(PREFIX)/bin : try-align try-align2 ; 
+
+fakelib mmsapt : [ glob *.cpp TargetPhrase*.cc mmsapt*.cc sapt*.cc ] ;

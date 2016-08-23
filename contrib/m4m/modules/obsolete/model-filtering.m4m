@@ -1,0 +1,37 @@
+# -*- Makefile -*-
+#
+# This module deals with model filtering (if necessary).
+# It produces the moses.ini files for filtered models for 
+# tuning and evaluation.
+
+ifndef ${moses_ini_for_tuning}
+  moses_ini_for_tuning = # WHAT'S THE DEFAULT LOCATION FOR THIS IN EMS?
+endif
+
+ifndef ${moses_ini_for_eval}
+  moses_ini_for_eval = # WHAT'S THE DEFAULT LOCATION FOR THIS IN EMS?
+endif
+
+# filter models if suggested by set-up
+ifneq (${moses_ini_for_tuning}, ${untuned_moses_ini})
+  ${moses_ini_for_tuning}: | ${untuned_moses_ini}
+  ${moses_ini_for_tuning}: | ${tuning_input_ready}
+
+  # phrase table in text format? 
+  ifeq ($(shell grep -v '^ *\#' ${untuned_moses_ini} \
+          | grep -A1 '\[ttable-file\]' | tail -n +2 \
+          | head -n1 | awk '{print $$1}'),0)
+    # ADD PHRASE TABLE FILTERING COMMAND HERE
+  endif
+
+  # how does moses know if a lexicalized distortion table is binary or not?
+  # ADD LEXICAL DISTORTION TABLE FILTERING COMMAND HERE
+
+ifneq (${moses_ini_for_eval),$(tuned_moses_ini))
+  # add code for model filtering for eval here
+endif
+
+
+
+
+

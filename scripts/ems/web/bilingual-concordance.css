@@ -1,0 +1,98 @@
+.pp_head {
+  font-size: 90%;
+  font-weight: bold;
+  text-align: center;
+}
+
+.pp_target_header {
+  font-size: 80%;
+  font-weight: bold;
+  text-align: center;
+}
+
+.pp_singleton_header {
+  font-size: 80%;
+  font-variant: small-caps;
+  font-weight: bold;
+  text-align: center;
+}
+
+table.biconcor {
+  table-layout: fixed;
+  padding: 0px;
+  margin: 0px;
+}
+
+tr.biconcor {
+  padding: 0px;
+  margin: 0px;
+}
+
+td.biconcor {
+  white-space: nowrap;
+  overflow: hidden;
+  padding: 0px;
+  margin: 0px;
+}
+
+td.pp_source_left {
+  font-size: 70%;
+  text-align: right;
+}
+
+td.pp_target_left {
+  font-size: 70%;
+  text-align: right;
+}
+
+td.pp_source {
+  font-size: 70%;
+  font-weight: bold;
+}
+
+td.pp_target {
+  font-size: 70%;
+  font-weight: bold;
+}
+
+td.mismatch_target {
+  font-size: 70%;
+  text-align: center;
+}
+
+td.pp_source_right {
+  font-size: 70%;
+  border-style:solid;
+  border-width:0px 2px 0px 0px ;
+  border-color: black;
+}
+
+td.pp_target_right {
+  font-size: 70%;
+}
+
+span.null_aligned {
+  color: blue;
+}
+
+span.mismatch_pre_aligned {
+  color: purple;
+}
+
+span.mismatch_post_aligned {
+  color: olive;
+}
+
+span.mismatch_misaligned {
+  color: red;
+}
+
+span.mismatch_aligned {
+  font-weight: bold;
+}
+
+td.pp_more {
+  font-size: 70%;
+  color: navy;
+  text-align: center;
+}

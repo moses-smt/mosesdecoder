@@ -1,0 +1,10 @@
+Instructions for building and installing Moses are online:
+
+   http://www.statmt.org/moses/?n=Development.GetStarted
+
+Some of the code is not originally part of Moses, but is periodically copied
+into the source tree from elsewhere:
+
+ * "bjam-files" is taken from Boost.
+ * "util" and "lm" are taken from KenLM: https://github.com/kpu/kenlm
+

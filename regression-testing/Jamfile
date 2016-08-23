@@ -1,0 +1,79 @@
+import option path ;
+
+with-regtest = [ option.get "with-regtest" ] ;
+skip-compact = [ option.get "regtest-skip-compactpt" : : "yes" ] ;
+with-xmlrpc  = [ option.get "with-xmlrpc-c" ] ;
+
+if $(with-regtest) {
+  with-regtest = [ path.root $(with-regtest) [ path.pwd ] ] ;
+} else if [ option.get "with-regtest" : : "yes" ] {
+  shell_or_fail "git submodule init" ;
+  shell_or_fail "git submodule update" ;
+  with-regtest = $(TOP)/regression-testing/tests ;
+}
+
+if $(with-regtest) {
+  test-dir = $(with-regtest)/tests ;
+
+  rule reg_test ( name : tests * : programs * : action ) {
+    alias $(name) : $(tests:D=).passed ;
+    for test in $(tests) {
+      make $(test:D=).passed : $(programs) : $(action) ;
+      alias $(test) : $(test:D=).passed ;
+    }
+  }
+
+  actions reg_test_decode {
+    $(TOP)/regression-testing/run-single-test.perl --decoder=$(>) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(test-dir) && touch $(<)
+  }
+
+  if $(with-xmlrpc)  {
+    actions reg_test_decode_server {
+      $(TOP)/regression-testing/run-single-test.perl --server --decoder=$(>) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(test-dir) && touch $(<)
+    }
+    reg_test phrase-server : [ glob $(test-dir)/phrase-server.* ] : ../moses-cmd//moses : @reg_test_decode_server ;
+  }
+
+  if $(skip-compact) {
+    reg_test phrase : [ glob $(test-dir)/phrase.* : $(test-dir)/*withDALM $(test-dir)/*compactptable ] : ../moses-cmd//moses : @reg_test_decode ;
+    reg_test chart  : [ glob $(test-dir)/chart.*  : $(test-dir)/*withDALM $(test-dir)/*compactptable ] : ../moses-cmd//moses : @reg_test_decode ;
+  } else {
+    reg_test phrase : [ glob $(test-dir)/phrase.* : $(test-dir)/*withDALM ] : ../moses-cmd//moses : @reg_test_decode ;
+    reg_test chart  : [ glob $(test-dir)/chart.*  : $(test-dir)/*withDALM ] : ../moses-cmd//moses : @reg_test_decode ;
+  }
+
+  if [ option.get "with-dalm" : : "yes" ] {
+    reg_test dalm : [ glob $(test-dir)/*withDALM ] : ../moses-cmd//moses : @reg_test_decode ;
+  } else { 
+    alias dalm ; 
+  }
+  actions reg_test_score {
+    $(TOP)/regression-testing/run-test-scorer.perl --scorer=$(>) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(test-dir) && touch $(<)
+  }
+  reg_test score : [ glob $(test-dir)/score.* :  ] : ../phrase-extract//score : @reg_test_score ;
+
+  actions reg_test_extract {
+    $(TOP)/regression-testing/run-test-extract.perl --extractor=$(>) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(test-dir) && touch $(<)
+  }
+  reg_test extract : [ glob $(test-dir)/extract.* ] : ../phrase-extract//extract : @reg_test_extract ;
+
+
+  actions reg_test_extractrules {
+    $(TOP)/regression-testing/run-test-extract.perl --extractor=$(>) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(test-dir) && touch $(<)
+  }
+  reg_test extractrules : [ glob $(test-dir)/extract-rules.* : $(with-regtest)/extract-rules.hierarchical ] : ../phrase-extract//extract-rules : @reg_test_extractrules ;
+
+  pwd = [ path.pwd ] ;
+  actions reg_test_mert {
+    $(TOP)/regression-testing/run-test-mert.perl --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(test-dir) --bin-dir=$(pwd)/$(>:D) && touch $(<)
+  }
+  reg_test mert : [ glob $(test-dir)/mert.* ] : ../mert//mert ../mert//extractor ../mert//pro ../mert//hgdecode : @reg_test_mert ;
+
+  actions reg_test_misc {
+    $(TOP)/regression-testing/run-test-misc.perl --moses-root=$(TOP) --moses-bin=$(BINDIR) --test=$(<:B) --data-dir=$(with-regtest) --test-dir=$(test-dir) && touch $(<)
+  }
+  reg_test misc : [ glob $(test-dir)/misc.* : $(test-dir)/misc.mml*  ] : ..//prefix-bin ..//prefix-lib : @reg_test_misc ;
+  reg_test misc-mml : [ glob $(test-dir)/misc.mml*  ] : $(TOP)/scripts/ems/support/mml-filter.py $(TOP)/scripts/ems/support/defaultconfig.py  : @reg_test_misc ;
+
+   alias all : phrase chart mert score extract extractrules misc misc-mml dalm ;
+}

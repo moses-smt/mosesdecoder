@@ -1,0 +1,94 @@
+# -*- Makefile -*-
+
+# unless specified elsewhere, we assume that the moses.ini file for the untuned 
+# system is model/mose.ini.0
+
+untuned_model ?= model/moses.ini.0
+tune.dir      ?= ${basedir}/tune
+
+# FUNCTIONS FOR COMPUTING REFERENCE FILE DEPENDENCIES 
+# AND INPUT TYPE FROM INPUT FILE PATH FOR TUNING AND EVAL
+
+# get basenames (with path) of all files belonging 
+# to a particular set (e.g. dev / tst)
+get_set = $(addprefix $(patsubst %/,%,$1)/,\
+$(shell find -L $(patsubst %/,%,$(dir $1)) -regex '.*${L1}\(.gz\)?'\
+| perl -pe 's/.*\/(.*?).${L1}(\.gz)?$$/$$1/' | sort | uniq))
+
+# $1: moses input file 
+# ->: base name of corresponding reference files
+refbase  = $(notdir $(patsubst %.${L1},%.${L2},%,$(patsubst %.gz,%,$1)))
+
+# $1: moses input file 
+# $2: root of directory tree for search
+# ->: list of full paths to reference files
+reffiles = $(addprefix $(patsubst %/,%,$2)/cased/,\
+$(shell find -L $2 -regex '.*$(call refbase,$1)[0-9]*\(.gz\)?'\
+| perl -pe 's/.*\/(.*?)(\.gz)?$$/$$1/' | sort | uniq))
+
+# $1: moses input file 
+# ->: 0 for plain text, 1 for confusion network
+guess-inputtype = $(if $(findstring /cfn,$1),1,0)
+
+############################################################################
+# TUNE SYSTEM
+#
+# $1: untuned moses.ini
+# $2:   tuned moses.ini 
+# $3:   moses input (ref files and input type are computed automatically)
+# ->: Makefile snippet for tuning system on input file given
+#
+define tune_system
+
+TUNED_SYSTEMS += $(strip $2)
+tune.reffiles  = $$(call reffiles,$3,$(dir $(patsubst %/,%,$(dir $3))))
+#.INTERMEDIATE: $1
+$(strip $2): $${PTABLES} $${DTABLES} $${LMODELS} $${MOSES_INI_PREREQ}
+$(strip $2): mert.wdir  = $(dir $(abspath $2))tmp
+$(strip $2): tune.src   = $3
+$(strip $2): tune.ref   = $$(shell echo $(patsubst %.${L1},%.${L2},$3) | perl -pe 's?/cfn[^/]+/?/cased/?')
+$(strip $2): tune.itype = $$(call guess-inputtype,$3)
+$(strip $2): | $1 $3 $${tune.reffiles}
+$(strip $2): 
+	$$(lock)
+	$$(info REFFILES = $${tune.reffiles})
+	mkdir -p $${mert.wdir}
+	$(if $(findstring -continue,${mert.extra-flags}),,rm -f $${mert.wdir}/*)
+	${mert} ${mert.extra-flags} \
+	--nbest ${mert.nbest} \
+	--mertdir ${MOSES_BIN} \
+	--rootdir ${MOSES_SCRIPTS} \
+	--working-dir $${mert.wdir} \
+	--decoder-flags "$${mert.decoder-flags}" \
+	--inputtype $${tune.itype} \
+	$${tune.src} $${tune.ref} $${moses} $1
+	${apply-weights} $1 $${mert.wdir}/moses.ini $$@_ && mv $$@_ $$@
+	$$(unlock)
+
+endef
+
+define copy_weights
+
+TUNED_SYSTEMS += $(strip $3)
+$(strip $3): $1 $2
+	$$(lock)
+	${apply-weights} $1 $2 $$@_ && mv $$@_ $$@
+	$$(unlock)
+
+endef
+
+tune.sets ?= $(patsubst %.${L1}.gz,%,$(subst /raw/,/cased/,$(wildcard ${WDIR}/crp/dev/raw/*.${L1}.gz)))
+
+ifdef tune.runs
+define tune_all_systems
+
+$(foreach system,${SYSTEMS},\
+$(foreach tuneset, ${tune.sets},\
+$(foreach run,$(shell seq ${tune.runs}),\
+  $(eval $(call tune_system,${system}/moses.ini.0,\
+  ${system}/tuned/$(notdir ${tuneset})/${run}/moses.ini,\
+  ${tuneset}.${L1},${tuneset}.${L2},0)))))
+
+endef
+endif
+

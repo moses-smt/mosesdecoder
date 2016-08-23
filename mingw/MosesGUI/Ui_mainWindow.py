@@ -1,0 +1,191 @@
+# -*- coding: utf-8 -*-
+
+# Form implementation generated from reading ui file 'C:\work\eric4workspace\MosesGUI\mainWindow.ui'
+#
+# Created: Thu Jul 11 13:38:46 2013
+#      by: PyQt4 UI code generator 4.10.2
+#
+# WARNING! All changes made in this file will be lost!
+
+from PyQt4 import QtCore, QtGui
+
+
+_fromUtf8 = getattr(QtCore.QString, 'fromUtf8', lambda s: s)
+
+
+def _translate(context, text, disambig):
+    return QtGui.QApplication.translate(
+        context, text, disambig,
+        getattr(
+            QtGui.QApplication, 'UnicodeUTF8',
+            QtCore.QCoreApplication.Encoding))
+
+
+class Ui_MainWindow(object):
+    def setupUi(self, MainWindow):
+        MainWindow.setObjectName(_fromUtf8("MainWindow"))
+        MainWindow.resize(705, 491)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(MainWindow.sizePolicy().hasHeightForWidth())
+        MainWindow.setSizePolicy(sizePolicy)
+        icon = QtGui.QIcon()
+        icon.addPixmap(QtGui.QPixmap(_fromUtf8(":/icon/moses.ico")), QtGui.QIcon.Normal, QtGui.QIcon.Off)
+        MainWindow.setWindowIcon(icon)
+        MainWindow.setLayoutDirection(QtCore.Qt.LeftToRight)
+        MainWindow.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedKingdom))
+        self.centralWidget = QtGui.QWidget(MainWindow)
+        sizePolicy = QtGui.QSizePolicy(QtGui.QSizePolicy.Preferred, QtGui.QSizePolicy.Preferred)
+        sizePolicy.setHorizontalStretch(0)
+        sizePolicy.setVerticalStretch(0)
+        sizePolicy.setHeightForWidth(self.centralWidget.sizePolicy().hasHeightForWidth())
+        self.centralWidget.setSizePolicy(sizePolicy)
+        self.centralWidget.setObjectName(_fromUtf8("centralWidget"))
+        self.verticalLayout_3 = QtGui.QVBoxLayout(self.centralWidget)
+        self.verticalLayout_3.setObjectName(_fromUtf8("verticalLayout_3"))
+        self.tabWidget = QtGui.QTabWidget(self.centralWidget)
+        self.tabWidget.setAutoFillBackground(True)
+        self.tabWidget.setObjectName(_fromUtf8("tabWidget"))
+        self.tab = QtGui.QWidget()
+        self.tab.setAutoFillBackground(True)
+        self.tab.setObjectName(_fromUtf8("tab"))
+        self.verticalLayout_2 = QtGui.QVBoxLayout(self.tab)
+        self.verticalLayout_2.setObjectName(_fromUtf8("verticalLayout_2"))
+        self.groupBox = QtGui.QGroupBox(self.tab)
+        self.groupBox.setObjectName(_fromUtf8("groupBox"))
+        self.gridLayout = QtGui.QGridLayout(self.groupBox)
+        self.gridLayout.setObjectName(_fromUtf8("gridLayout"))
+        self.label = QtGui.QLabel(self.groupBox)
+        self.label.setObjectName(_fromUtf8("label"))
+        self.gridLayout.addWidget(self.label, 2, 0, 1, 1)
+        self.editSrcLang = QtGui.QLineEdit(self.groupBox)
+        self.editSrcLang.setReadOnly(True)
+        self.editSrcLang.setObjectName(_fromUtf8("editSrcLang"))
+        self.gridLayout.addWidget(self.editSrcLang, 2, 1, 1, 1)
+        self.editTrgLang = QtGui.QLineEdit(self.groupBox)
+        self.editTrgLang.setReadOnly(True)
+        self.editTrgLang.setObjectName(_fromUtf8("editTrgLang"))
+        self.gridLayout.addWidget(self.editTrgLang, 2, 4, 1, 1)
+        self.label_3 = QtGui.QLabel(self.groupBox)
+        self.label_3.setObjectName(_fromUtf8("label_3"))
+        self.gridLayout.addWidget(self.label_3, 2, 3, 1, 1)
+        self.btnTranslate = QtGui.QPushButton(self.groupBox)
+        self.btnTranslate.setEnabled(True)
+        self.btnTranslate.setMinimumSize(QtCore.QSize(120, 30))
+        self.btnTranslate.setFlat(False)
+        self.btnTranslate.setObjectName(_fromUtf8("btnTranslate"))
+        self.gridLayout.addWidget(self.btnTranslate, 3, 2, 1, 1)
+        self.editModelName = QtGui.QLineEdit(self.groupBox)
+        self.editModelName.setReadOnly(True)
+        self.editModelName.setObjectName(_fromUtf8("editModelName"))
+        self.gridLayout.addWidget(self.editModelName, 1, 2, 1, 1)
+        self.label_2 = QtGui.QLabel(self.groupBox)
+        self.label_2.setAlignment(
+            QtCore.Qt.AlignRight |
+            QtCore.Qt.AlignTrailing |
+            QtCore.Qt.AlignVCenter)
+        self.label_2.setObjectName(_fromUtf8("label_2"))
+        self.gridLayout.addWidget(self.label_2, 1, 1, 1, 1)
+        self.verticalLayout_2.addWidget(self.groupBox)
+        self.splitter = QtGui.QSplitter(self.tab)
+        self.splitter.setOrientation(QtCore.Qt.Horizontal)
+        self.splitter.setObjectName(_fromUtf8("splitter"))
+        self.editSrc = QtGui.QTextEdit(self.splitter)
+        self.editSrc.setObjectName(_fromUtf8("editSrc"))
+        self.editTrg = QtGui.QTextEdit(self.splitter)
+        self.editTrg.setReadOnly(True)
+        self.editTrg.setObjectName(_fromUtf8("editTrg"))
+        self.verticalLayout_2.addWidget(self.splitter)
+        self.verticalLayout_2.setStretch(0, 2)
+        self.verticalLayout_2.setStretch(1, 8)
+        self.tabWidget.addTab(self.tab, _fromUtf8(""))
+        self.tab_2 = QtGui.QWidget()
+        self.tab_2.setAutoFillBackground(True)
+        self.tab_2.setObjectName(_fromUtf8("tab_2"))
+        self.verticalLayout = QtGui.QVBoxLayout(self.tab_2)
+        self.verticalLayout.setObjectName(_fromUtf8("verticalLayout"))
+        self.label_5 = QtGui.QLabel(self.tab_2)
+        self.label_5.setAutoFillBackground(True)
+        self.label_5.setObjectName(_fromUtf8("label_5"))
+        self.verticalLayout.addWidget(self.label_5)
+        self.splitter_4 = QtGui.QSplitter(self.tab_2)
+        self.splitter_4.setOrientation(QtCore.Qt.Horizontal)
+        self.splitter_4.setObjectName(_fromUtf8("splitter_4"))
+        self.groupBox_3 = QtGui.QGroupBox(self.splitter_4)
+        self.groupBox_3.setMinimumSize(QtCore.QSize(200, 0))
+        self.groupBox_3.setMaximumSize(QtCore.QSize(200, 16777215))
+        self.groupBox_3.setAutoFillBackground(True)
+        self.groupBox_3.setObjectName(_fromUtf8("groupBox_3"))
+        self.formLayout = QtGui.QFormLayout(self.groupBox_3)
+        self.formLayout.setObjectName(_fromUtf8("formLayout"))
+        self.newModelBtn = QtGui.QPushButton(self.groupBox_3)
+        self.newModelBtn.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedKingdom))
+        self.newModelBtn.setObjectName(_fromUtf8("newModelBtn"))
+        self.formLayout.setWidget(0, QtGui.QFormLayout.SpanningRole, self.newModelBtn)
+        self.delModelBtn = QtGui.QPushButton(self.groupBox_3)
+        self.delModelBtn.setObjectName(_fromUtf8("delModelBtn"))
+        self.formLayout.setWidget(1, QtGui.QFormLayout.SpanningRole, self.delModelBtn)
+        self.tableView = QtGui.QTableView(self.splitter_4)
+        font = QtGui.QFont()
+        font.setPointSize(7)
+        self.tableView.setFont(font)
+        self.tableView.setMouseTracking(False)
+        self.tableView.setContextMenuPolicy(QtCore.Qt.DefaultContextMenu)
+        self.tableView.setAutoFillBackground(True)
+        self.tableView.setLocale(QtCore.QLocale(QtCore.QLocale.English, QtCore.QLocale.UnitedKingdom))
+        self.tableView.setFrameShape(QtGui.QFrame.StyledPanel)
+        self.tableView.setFrameShadow(QtGui.QFrame.Plain)
+        self.tableView.setEditTriggers(QtGui.QAbstractItemView.NoEditTriggers)
+        self.tableView.setSelectionMode(QtGui.QAbstractItemView.SingleSelection)
+        self.tableView.setSelectionBehavior(QtGui.QAbstractItemView.SelectRows)
+        self.tableView.setGridStyle(QtCore.Qt.DashLine)
+        self.tableView.setSortingEnabled(True)
+        self.tableView.setWordWrap(False)
+        self.tableView.setCornerButtonEnabled(False)
+        self.tableView.setObjectName(_fromUtf8("tableView"))
+        self.tableView.verticalHeader().setVisible(False)
+        self.tableView.verticalHeader().setSortIndicatorShown(True)
+        self.verticalLayout.addWidget(self.splitter_4)
+        self.verticalLayout.setStretch(1, 1000)
+        self.tabWidget.addTab(self.tab_2, _fromUtf8(""))
+        self.verticalLayout_3.addWidget(self.tabWidget)
+        self.labelInfo = QtGui.QLabel(self.centralWidget)
+        self.labelInfo.setTextFormat(QtCore.Qt.AutoText)
+        self.labelInfo.setAlignment(
+            QtCore.Qt.AlignRight |
+            QtCore.Qt.AlignTrailing |
+            QtCore.Qt.AlignVCenter)
+        self.labelInfo.setObjectName(_fromUtf8("labelInfo"))
+        self.verticalLayout_3.addWidget(self.labelInfo)
+        MainWindow.setCentralWidget(self.centralWidget)
+
+        self.retranslateUi(MainWindow)
+        self.tabWidget.setCurrentIndex(0)
+        QtCore.QMetaObject.connectSlotsByName(MainWindow)
+
+    def retranslateUi(self, MainWindow):
+        MainWindow.setWindowTitle(_translate("MainWindow", "Moses Machine Translation System", None))
+        self.groupBox.setTitle(_translate("MainWindow", "Current MT Model", None))
+        self.label.setText(_translate("MainWindow", "Translate From:", None))
+        self.label_3.setText(_translate("MainWindow", "Translate Into:", None))
+        self.btnTranslate.setText(_translate("MainWindow", "Translate", None))
+        self.label_2.setText(_translate("MainWindow", "Model Name:", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab), _translate("MainWindow", "Machine Translation", None))
+        self.label_5.setText(_translate("MainWindow", "TextLabel", None))
+        self.groupBox_3.setTitle(_translate("MainWindow", "Management", None))
+        self.newModelBtn.setText(_translate("MainWindow", "Install New Model ...", None))
+        self.delModelBtn.setText(_translate("MainWindow", "Uninstall Selected Model ...", None))
+        self.tabWidget.setTabText(self.tabWidget.indexOf(self.tab_2), _translate("MainWindow", "Model Management", None))
+        self.labelInfo.setText(_translate("MainWindow", "<qt><a href=\"www\">Credits and Support</a></qt>", None))
+
+import icons_rc
+
+if __name__ == "__main__":
+    import sys
+    app = QtGui.QApplication(sys.argv)
+    MainWindow = QtGui.QMainWindow()
+    ui = Ui_MainWindow()
+    ui.setupUi(MainWindow)
+    MainWindow.show()
+    sys.exit(app.exec_())

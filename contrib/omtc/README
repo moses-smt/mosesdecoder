@@ -1,0 +1,22 @@
+Open Machine Translation Core (OMTC)
+====================================
+
+OMTC is a proposed open standard for machine translation systems. This work has been done as part of the MosesCore FP7 project (http://www.statmt.org/mosescore/) and is released using the LGPL v3 license.
+
+The OMTC Github repository contains the proposed standard documentation and a reference implemenation in Java. If you have any comments, or find any bugs please report to ian.johnson@capita-ti.com .
+
+
+Initialise the OMTC submodule
+-----------------------------
+
+If you have not initialised the Git submodules, then return to the top level directory and issue the following command:
+
+$ git submodule update --init --recursive
+
+This shall clone *all* the submodules for the mosesdecoder project.
+
+Returning to the OMTC clone using:
+
+$ cd contrib/omtc/omtc
+
+You'll find a documentation directory that contains the proposed standard and src directory which contains the reference implementation. The reference implementation can be built with Maven v2.2.1 (http://maven.apache.org/) or newer. Java v1.7 is required to build OMTC.

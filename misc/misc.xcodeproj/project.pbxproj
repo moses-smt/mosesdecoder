@@ -1,0 +1,323 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 45;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1EF455C41227C4BB0022403A /* processLexicalTable.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1EF455991227C4050022403A /* processLexicalTable.cpp */; };
+		1EF455D01227C4F40022403A /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EF455CD1227C4D60022403A /* libmoses.a */; };
+		1EF455D91227C5140022403A /* libOnDiskPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1EF455D81227C50C0022403A /* libOnDiskPt.a */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1EF455CC1227C4D60022403A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF455C81227C4D60022403A /* moses.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = moses;
+		};
+		1EF455D71227C50C0022403A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF455D31227C50C0022403A /* OnDiskPt.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = OnDiskPt;
+		};
+		1EF456211227C8A30022403A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF455C81227C4D60022403A /* moses.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = moses;
+		};
+		1EF456231227C8A80022403A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1EF455D31227C50C0022403A /* OnDiskPt.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D;
+			remoteInfo = OnDiskPt;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		1EF455991227C4050022403A /* processLexicalTable.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = processLexicalTable.cpp; sourceTree = "<group>"; };
+		1EF455BA1227C4760022403A /* processLexicalTable */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = processLexicalTable; sourceTree = BUILT_PRODUCTS_DIR; };
+		1EF455C81227C4D60022403A /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
+		1EF455D31227C50C0022403A /* OnDiskPt.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OnDiskPt.xcodeproj; path = ../OnDiskPt/OnDiskPt.xcodeproj; sourceTree = SOURCE_ROOT; };
+		C6859E8B029090EE04C91782 /* misc.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = misc.1; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		1EF455B81227C4760022403A /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1EF455D91227C5140022403A /* libOnDiskPt.a in Frameworks */,
+				1EF455D01227C4F40022403A /* libmoses.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* misc */ = {
+			isa = PBXGroup;
+			children = (
+				1EF455D31227C50C0022403A /* OnDiskPt.xcodeproj */,
+				1EF455C81227C4D60022403A /* moses.xcodeproj */,
+				08FB7795FE84155DC02AAC07 /* Source */,
+				C6859E8C029090F304C91782 /* Documentation */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = misc;
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				1EF455991227C4050022403A /* processLexicalTable.cpp */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1EF455BA1227C4760022403A /* processLexicalTable */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1EF455C91227C4D60022403A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1EF455CD1227C4D60022403A /* libmoses.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1EF455D41227C50C0022403A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1EF455D81227C50C0022403A /* libOnDiskPt.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C6859E8C029090F304C91782 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+				C6859E8B029090EE04C91782 /* misc.1 */,
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1EF455B91227C4760022403A /* processLexicalTable */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1EF455C11227C4A70022403A /* Build configuration list for PBXNativeTarget "processLexicalTable" */;
+			buildPhases = (
+				1EF455B71227C4760022403A /* Sources */,
+				1EF455B81227C4760022403A /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1EF456221227C8A30022403A /* PBXTargetDependency */,
+				1EF456241227C8A80022403A /* PBXTargetDependency */,
+			);
+			name = processLexicalTable;
+			productName = processLexicalTable;
+			productReference = 1EF455BA1227C4760022403A /* processLexicalTable */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "misc" */;
+			compatibilityVersion = "Xcode 3.1";
+			hasScannedForEncodings = 1;
+			mainGroup = 08FB7794FE84155DC02AAC07 /* misc */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 1EF455C91227C4D60022403A /* Products */;
+					ProjectRef = 1EF455C81227C4D60022403A /* moses.xcodeproj */;
+				},
+				{
+					ProductGroup = 1EF455D41227C50C0022403A /* Products */;
+					ProjectRef = 1EF455D31227C50C0022403A /* OnDiskPt.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				1EF455B91227C4760022403A /* processLexicalTable */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		1EF455CD1227C4D60022403A /* libmoses.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libmoses.a;
+			remoteRef = 1EF455CC1227C4D60022403A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1EF455D81227C50C0022403A /* libOnDiskPt.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libOnDiskPt.a;
+			remoteRef = 1EF455D71227C50C0022403A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXSourcesBuildPhase section */
+		1EF455B71227C4760022403A /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1EF455C41227C4BB0022403A /* processLexicalTable.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1EF456221227C8A30022403A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = moses;
+			targetProxy = 1EF456211227C8A30022403A /* PBXContainerItemProxy */;
+		};
+		1EF456241227C8A80022403A /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = OnDiskPt;
+			targetProxy = 1EF456231227C8A80022403A /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB923608733DC60010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PREBINDING = NO;
+				SDKROOT = macosx10.6;
+			};
+			name = Debug;
+		};
+		1DEB923708733DC60010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				PREBINDING = NO;
+				SDKROOT = macosx10.6;
+			};
+			name = Release;
+		};
+		1EF455BC1227C4760022403A /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				HEADER_SEARCH_PATHS = ../moses/src;
+				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					../irstlm/lib/i386,
+					../srilm/lib/macosx,
+					../kenlm/lm,
+					../randlm/lib,
+				);
+				OTHER_LDFLAGS = (
+					"-lflm",
+					"-lmisc",
+					"-loolm",
+					"-ldstruct",
+					"-lz",
+					"-lirstlm",
+					"-lkenlm",
+					"-lrandlm",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = processLexicalTable;
+			};
+			name = Debug;
+		};
+		1EF455BD1227C4760022403A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = YES;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_ENABLE_FIX_AND_CONTINUE = NO;
+				GCC_MODEL_TUNING = G5;
+				HEADER_SEARCH_PATHS = ../moses/src;
+				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					../irstlm/lib/i386,
+					../srilm/lib/macosx,
+					../kenlm/lm,
+					../randlm/lib,
+				);
+				OTHER_LDFLAGS = (
+					"-lflm",
+					"-lmisc",
+					"-loolm",
+					"-ldstruct",
+					"-lz",
+					"-lirstlm",
+					"-lkenlm",
+					"-lrandlm",
+				);
+				PREBINDING = NO;
+				PRODUCT_NAME = processLexicalTable;
+				ZERO_LINK = NO;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "misc" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB923608733DC60010E9CD /* Debug */,
+				1DEB923708733DC60010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1EF455C11227C4A70022403A /* Build configuration list for PBXNativeTarget "processLexicalTable" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1EF455BC1227C4760022403A /* Debug */,
+				1EF455BD1227C4760022403A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

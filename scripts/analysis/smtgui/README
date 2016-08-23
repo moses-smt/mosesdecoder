@@ -1,0 +1,42 @@
+Readme for SMTGUI
+Philipp Koehn, Evan Herbst
+7 / 31 / 06
+-----------------------------------
+
+SMTGUI is Philipp's and my code to analyze a decoder's output (the decoder doesn't have to be moses, but most of SMTGUI's features relate to factors, so it probably will be). You can view a list of available corpora by running <newsmtgui.cgi?ACTION=> on any web server. When you're viewing a corpus, click the checkboxes and Compare to see sentences from various sources on one screen. Currently they're in an annoying format; feel free to make the display nicer and more useful. There are per-sentence stats stored in a Corpus object; they just aren't used yet. See compare2() in newsmtgui and Corpus::printSingleSentenceComparison() for a start to better display code. For now it's mostly the view-corpus screen that's useful.
+
+newsmtgui.cgi is the main program. Corpus.pm is my module; Error.pm is a standard part of Perl but appears to not always be distributed. The accompanying version is Error.pm v1.15.
+
+The program requires file 'file-factors', which gives the list of factors included in each corpus (see the example file for details). Only corpi included in 'file-factors' are displayed. The file 'file-descriptions' is optional and associates a descriptive string with each included filename. These are used only for display. Again an example is provided.
+
+For the corpus with name CORPUS, there should be present the files:
+- CORPUS.f, the foreign input
+- CORPUS.e, the truth (aka reference translation)
+- CORPUS.SYSTEM_TRANSLATION for each system to be analyzed
+- CORPUS.pt_FACTORNAME for each factor that requires a phrase table (these are currently used only to count unknown source words)
+
+The .f, .e and system-output files should have the usual pipe-delimited format, one sentence per line. Phrase tables should also have standard three-pipe format.
+
+A list of standard factor names is available in @Corpus::FACTORNAMES. Feel free to add, but woe betide you if you muck with 'surf', 'pos' and 'lemma'; those are hardcoded all over the place.
+
+Currently the program assumes you've included factors 'surf', 'pos' and 'lemma', in whatever order; if not you'll want to edit view_corpus() in newsmtgui.cgi to not automatically display all info. To get English POS tags and lemmas from a words-only corpus and put together factors into one file:
+
+$ $BIN/tag-english < CORPUS.lc > CORPUS.pos-tmp                                 (call Brill)
+$ $BIN/morph < CORPUS.pos-tmp > CORPUS.morph
+$ $DATA/test/factor-stem.en.perl < CORPUS.morph > CORPUS.lemma
+$ cat CORPUS.pos-tmp | perl -n -e 's/_/\|/g; print;' > CORPUS.lc+pos            (replace _ with |)
+$ $DATA/test/combine-features.perl CORPUS lc+pos lemma > CORPUS.lc+pos+lemma
+$ rm CORPUS.pos-tmp                                                             (cleanup)
+
+where $BIN=/export/ws06osmt/bin, $DATA=/export/ws06osmt/data.
+
+To get German POS tags and lemmas from a words-only corpus (the first step must be run on linux):
+
+$ $BIN/recase.perl --in CORPUS.lc --model $MODELS/en-de/recaser/pharaoh.ini > CORPUS.recased              (call pharaoh with a lowercase->uppercase model)
+$ $BIN/run-lopar-tagger-lowercase.perl CORPUS.recased CORPUS.recased.lopar                                (call LOPAR)
+$ $DATA/test/factor-stem.de.perl < CORPUS.recased.lopar > CORPUS.stem
+$ $BIN/lowercase.latin1.perl < CORPUS.stem > CORPUS.lcstem                                                (as you might guess, assumes latin-1 encoding)
+$ $DATA/test/factor-pos.de.perl < CORPUS.recased.lopar > CORPUS.pos
+$ $DATA/test/combine-features.perl CORPUS lc pos lcstem > CORPUS.lc+pos+lcstem
+
+where $MODELS=/export/ws06osmt/models.

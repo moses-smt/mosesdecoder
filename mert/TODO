@@ -1,0 +1,21 @@
+- check that mert-moses.pl emits devset score after every iteration
+  - correctly for whichever metric we are optimizing
+  - even when using --pairwise-ranked (PRO)
+    - this may make use of 'evaluator', soon to be added by Matous Machacek
+
+- check that --pairwise-ranked is compatible with all optimization metrics
+
+- Use better random generators in util/random.cc, e.g. boost::mt19937.
+  - Support plugging of custom random generators.
+
+  Pros:
+  - In MERT, you might want to use the random restarting technique to avoid
+    local optima.
+  - PRO uses a sampling technique to choose candidate translation pairs
+    from N-best lists, which means the choice of random generators seems to
+    be important.
+
+  Cons:
+  - This change will require us to re-create the truth results for regression
+    testing related to MERT and PRO because the new random generator will
+    generate different numbers from the current generator does.

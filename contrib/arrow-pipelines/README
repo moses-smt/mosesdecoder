@@ -1,0 +1,58 @@
+Arrow Based Moses Training Pipeline
+===================================
+
+This demonstration implements a training pipeline that is shown in the Dia diagram in documentation/training-pipeline/moses-pypeline.dia.
+
+The demo has been tested with:
+
+ - Moses v1.0
+ - Giza++ v1.0.7
+ - IRSTLM v5.70.04
+
+
+Setup
+-----
+
+To use the demonstration you must first initialise the git submodules for this clone. Return to the top level directory and issue the following command:
+
+$ git submodule update --init --recursive
+
+This will clone PCL, available at Github (git://github.com/ianj-als/pcl.git), and Pypeline submodules, available at GitHub (git://github.com/ianj-als/pypeline.git).
+
+Return to the arrow-pipelines contrib directory:
+
+$ cd contrib/arrow-pipelines
+
+To use the PCL compiler and run-time set the following environment variables (assuming Bash shell):
+
+$ export PATH=$PATH:`pwd`/python/pcl/src/pclc:`pwd`/python/pcl/src/pcl-run
+$ export PYTHONPATH=$PYTHONPATH:`pwd`/python/pcl/libs/pypeline/src
+$ export PCL_IMPORT_PATH=`pwd`/python/pcl/src/runtime:`pwd`/pcl
+
+Three environment variables need to be set before the pipeline can be run, they are:
+
+ - MOSES_HOME : The directory where Moses has been cloned, or installed,
+ - IRSTLM : The installation directory of your IRSTLM, and
+ - GIZA_HOME : The installation directory of GIZA++.
+
+
+Building the example training pipeline
+--------------------------------------
+
+$ cd pcl
+$ make
+
+
+Running the example training pipeline
+-------------------------------------
+
+To execute the training pipeline run the following command:
+
+$ pcl-run.py training_pipeline
+
+Once complete the output of the pipeline can be found in the directories:
+
+ - training/tokenisation
+ - training/model
+ - training/lm
+ - training/mert

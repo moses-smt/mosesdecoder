@@ -1,0 +1,401 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 45;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		1E141A311243527800123194 /* Perceptron.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E141A2F1243527800123194 /* Perceptron.cpp */; };
+		1E56EBF51243B91600E8315C /* MiraOptimiser.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E56EBF41243B91600E8315C /* MiraOptimiser.cpp */; };
+		1E9DC63C1242602F0059001A /* Decoder.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DC6391242602F0059001A /* Decoder.cpp */; };
+		1E9DC63D1242602F0059001A /* Main.cpp in Sources */ = {isa = PBXBuildFile; fileRef = 1E9DC63B1242602F0059001A /* Main.cpp */; };
+		1E9DC6DA1242684C0059001A /* libmoses-chart.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E9DC6D1124268310059001A /* libmoses-chart.a */; };
+		1E9DC6DB124268510059001A /* libmoses.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E9DC6CB124268270059001A /* libmoses.a */; };
+		1E9DC6DC124268580059001A /* libOnDiskPt.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 1E9DC6D9124268440059001A /* libOnDiskPt.a */; };
+		8DD76F6A0486A84900D96B5E /* mira.1 in CopyFiles */ = {isa = PBXBuildFile; fileRef = C6859E8B029090EE04C91782 /* mira.1 */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		1E9DC6CA124268270059001A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E9DC6C6124268270059001A /* moses.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = moses;
+		};
+		1E9DC6D0124268310059001A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E9DC6CC124268310059001A /* moses-chart.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = "moses-chart";
+		};
+		1E9DC6D8124268440059001A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E9DC6D4124268440059001A /* OnDiskPt.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = D2AAC046055464E500DB518D;
+			remoteInfo = OnDiskPt;
+		};
+		1EF4E84C12440612006233A0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E9DC6C6124268270059001A /* moses.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D /* moses */;
+			remoteInfo = moses;
+		};
+		1EF4E84E12440612006233A0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E9DC6CC124268310059001A /* moses-chart.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D /* moses-chart */;
+			remoteInfo = "moses-chart";
+		};
+		1EF4E85012440612006233A0 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = 1E9DC6D4124268440059001A /* OnDiskPt.xcodeproj */;
+			proxyType = 1;
+			remoteGlobalIDString = D2AAC045055464E500DB518D /* OnDiskPt */;
+			remoteInfo = OnDiskPt;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXCopyFilesBuildPhase section */
+		8DD76F690486A84900D96B5E /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 8;
+			dstPath = /usr/share/man/man1/;
+			dstSubfolderSpec = 0;
+			files = (
+				8DD76F6A0486A84900D96B5E /* mira.1 in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 1;
+		};
+/* End PBXCopyFilesBuildPhase section */
+
+/* Begin PBXFileReference section */
+		1E141A2F1243527800123194 /* Perceptron.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Perceptron.cpp; sourceTree = "<group>"; };
+		1E56EBF41243B91600E8315C /* MiraOptimiser.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = MiraOptimiser.cpp; sourceTree = "<group>"; };
+		1E9DC6391242602F0059001A /* Decoder.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Decoder.cpp; sourceTree = "<group>"; };
+		1E9DC63A1242602F0059001A /* Decoder.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Decoder.h; sourceTree = "<group>"; };
+		1E9DC63B1242602F0059001A /* Main.cpp */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.cpp.cpp; path = Main.cpp; sourceTree = "<group>"; };
+		1E9DC63E124260370059001A /* Optimiser.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Optimiser.h; sourceTree = "<group>"; };
+		1E9DC6C6124268270059001A /* moses.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = moses.xcodeproj; path = ../moses/moses.xcodeproj; sourceTree = SOURCE_ROOT; };
+		1E9DC6CC124268310059001A /* moses-chart.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = "moses-chart.xcodeproj"; path = "../moses-chart/moses-chart.xcodeproj"; sourceTree = SOURCE_ROOT; };
+		1E9DC6D4124268440059001A /* OnDiskPt.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = OnDiskPt.xcodeproj; path = ../OnDiskPt/OnDiskPt.xcodeproj; sourceTree = SOURCE_ROOT; };
+		1E9DC76712426FC60059001A /* Main.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = Main.h; sourceTree = "<group>"; };
+		8DD76F6C0486A84900D96B5E /* mira */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.executable"; includeInIndex = 0; path = mira; sourceTree = BUILT_PRODUCTS_DIR; };
+		C6859E8B029090EE04C91782 /* mira.1 */ = {isa = PBXFileReference; lastKnownFileType = text.man; path = mira.1; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		8DD76F660486A84900D96B5E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E9DC6DC124268580059001A /* libOnDiskPt.a in Frameworks */,
+				1E9DC6DB124268510059001A /* libmoses.a in Frameworks */,
+				1E9DC6DA1242684C0059001A /* libmoses-chart.a in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		08FB7794FE84155DC02AAC07 /* mira */ = {
+			isa = PBXGroup;
+			children = (
+				1E9DC6D4124268440059001A /* OnDiskPt.xcodeproj */,
+				1E9DC6CC124268310059001A /* moses-chart.xcodeproj */,
+				1E9DC6C6124268270059001A /* moses.xcodeproj */,
+				08FB7795FE84155DC02AAC07 /* Source */,
+				C6859E8C029090F304C91782 /* Documentation */,
+				1AB674ADFE9D54B511CA2CBB /* Products */,
+			);
+			name = mira;
+			sourceTree = "<group>";
+		};
+		08FB7795FE84155DC02AAC07 /* Source */ = {
+			isa = PBXGroup;
+			children = (
+				1E56EBF41243B91600E8315C /* MiraOptimiser.cpp */,
+				1E141A2F1243527800123194 /* Perceptron.cpp */,
+				1E9DC63E124260370059001A /* Optimiser.h */,
+				1E9DC6391242602F0059001A /* Decoder.cpp */,
+				1E9DC63A1242602F0059001A /* Decoder.h */,
+				1E9DC63B1242602F0059001A /* Main.cpp */,
+				1E9DC76712426FC60059001A /* Main.h */,
+			);
+			name = Source;
+			sourceTree = "<group>";
+		};
+		1AB674ADFE9D54B511CA2CBB /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				8DD76F6C0486A84900D96B5E /* mira */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1E9DC6C7124268270059001A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1E9DC6CB124268270059001A /* libmoses.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1E9DC6CD124268310059001A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1E9DC6D1124268310059001A /* libmoses-chart.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		1E9DC6D5124268440059001A /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				1E9DC6D9124268440059001A /* libOnDiskPt.a */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		C6859E8C029090F304C91782 /* Documentation */ = {
+			isa = PBXGroup;
+			children = (
+				C6859E8B029090EE04C91782 /* mira.1 */,
+			);
+			name = Documentation;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		8DD76F620486A84900D96B5E /* mira */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 1DEB923108733DC60010E9CD /* Build configuration list for PBXNativeTarget "mira" */;
+			buildPhases = (
+				8DD76F640486A84900D96B5E /* Sources */,
+				8DD76F660486A84900D96B5E /* Frameworks */,
+				8DD76F690486A84900D96B5E /* CopyFiles */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				1EF4E84D12440612006233A0 /* PBXTargetDependency */,
+				1EF4E84F12440612006233A0 /* PBXTargetDependency */,
+				1EF4E85112440612006233A0 /* PBXTargetDependency */,
+			);
+			name = mira;
+			productInstallPath = "$(HOME)/bin";
+			productName = mira;
+			productReference = 8DD76F6C0486A84900D96B5E /* mira */;
+			productType = "com.apple.product-type.tool";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		08FB7793FE84155DC02AAC07 /* Project object */ = {
+			isa = PBXProject;
+			buildConfigurationList = 1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "mira" */;
+			compatibilityVersion = "Xcode 3.1";
+			hasScannedForEncodings = 1;
+			mainGroup = 08FB7794FE84155DC02AAC07 /* mira */;
+			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = 1E9DC6CD124268310059001A /* Products */;
+					ProjectRef = 1E9DC6CC124268310059001A /* moses-chart.xcodeproj */;
+				},
+				{
+					ProductGroup = 1E9DC6C7124268270059001A /* Products */;
+					ProjectRef = 1E9DC6C6124268270059001A /* moses.xcodeproj */;
+				},
+				{
+					ProductGroup = 1E9DC6D5124268440059001A /* Products */;
+					ProjectRef = 1E9DC6D4124268440059001A /* OnDiskPt.xcodeproj */;
+				},
+			);
+			projectRoot = "";
+			targets = (
+				8DD76F620486A84900D96B5E /* mira */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		1E9DC6CB124268270059001A /* libmoses.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libmoses.a;
+			remoteRef = 1E9DC6CA124268270059001A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1E9DC6D1124268310059001A /* libmoses-chart.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = "libmoses-chart.a";
+			remoteRef = 1E9DC6D0124268310059001A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		1E9DC6D9124268440059001A /* libOnDiskPt.a */ = {
+			isa = PBXReferenceProxy;
+			fileType = archive.ar;
+			path = libOnDiskPt.a;
+			remoteRef = 1E9DC6D8124268440059001A /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
+
+/* Begin PBXSourcesBuildPhase section */
+		8DD76F640486A84900D96B5E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				1E9DC63C1242602F0059001A /* Decoder.cpp in Sources */,
+				1E9DC63D1242602F0059001A /* Main.cpp in Sources */,
+				1E141A311243527800123194 /* Perceptron.cpp in Sources */,
+				1E56EBF51243B91600E8315C /* MiraOptimiser.cpp in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		1EF4E84D12440612006233A0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = moses;
+			targetProxy = 1EF4E84C12440612006233A0 /* PBXContainerItemProxy */;
+		};
+		1EF4E84F12440612006233A0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = "moses-chart";
+			targetProxy = 1EF4E84E12440612006233A0 /* PBXContainerItemProxy */;
+		};
+		1EF4E85112440612006233A0 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			name = OnDiskPt;
+			targetProxy = 1EF4E85012440612006233A0 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		1DEB923208733DC60010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				COPY_PHASE_STRIP = NO;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_ENABLE_FIX_AND_CONTINUE = YES;
+				GCC_MODEL_TUNING = G5;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					../irstlm/lib/i386,
+					../srilm/lib/macosx,
+				);
+				OTHER_LDFLAGS = (
+					"-lboost_program_options",
+					"-lz",
+					"-lirstlm",
+					"-lmisc",
+					"-ldstruct",
+					"-loolm",
+					"-lflm",
+					"-llattice",
+				);
+				PRODUCT_NAME = mira;
+			};
+			name = Debug;
+		};
+		1DEB923308733DC60010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				GCC_MODEL_TUNING = G5;
+				INSTALL_PATH = /usr/local/bin;
+				LIBRARY_SEARCH_PATHS = (
+					../irstlm/lib/i386,
+					../srilm/lib/macosx,
+				);
+				OTHER_LDFLAGS = (
+					"-lboost_program_options",
+					"-lz",
+					"-lirstlm",
+					"-lmisc",
+					"-ldstruct",
+					"-loolm",
+					"-lflm",
+					"-llattice",
+				);
+				PRODUCT_NAME = mira;
+			};
+			name = Release;
+		};
+		1DEB923608733DC60010E9CD /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include,
+					"../moses-chart/src",
+					../moses/src,
+					../irstlm/include,
+				);
+				ONLY_ACTIVE_ARCH = YES;
+				PREBINDING = NO;
+				SDKROOT = macosx10.6;
+			};
+			name = Debug;
+		};
+		1DEB923708733DC60010E9CD /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ARCHS = "$(ARCHS_STANDARD_32_64_BIT)";
+				GCC_C_LANGUAGE_STANDARD = gnu99;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				HEADER_SEARCH_PATHS = (
+					/usr/local/include,
+					"../moses-chart/src",
+					../moses/src,
+					../irstlm/include,
+				);
+				PREBINDING = NO;
+				SDKROOT = macosx10.6;
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1DEB923108733DC60010E9CD /* Build configuration list for PBXNativeTarget "mira" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB923208733DC60010E9CD /* Debug */,
+				1DEB923308733DC60010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		1DEB923508733DC60010E9CD /* Build configuration list for PBXProject "mira" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				1DEB923608733DC60010E9CD /* Debug */,
+				1DEB923708733DC60010E9CD /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+/* End XCConfigurationList section */
+	};
+	rootObject = 08FB7793FE84155DC02AAC07 /* Project object */;
+}

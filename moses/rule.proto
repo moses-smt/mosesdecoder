@@ -1,0 +1,10 @@
+package hgmert;
+
+message Rule {
+  // [[A-Z]+,[1-9]] defines a non-terminal, everything else is a terminal
+  repeated string trg_words = 1;
+  // [[A-Z]+,[1-9]] defines a non-terminal, everything else is a terminal
+  repeated string src_words = 2;
+  optional string category = 3;
+}
+

@@ -1,0 +1,473 @@
+################################################
+### CONFIGURATION FILE FOR AN SMT EXPERIMENT ###
+################################################
+
+[GENERAL]
+
+### directory in which experiment is run
+#
+working-dir = WORKDIR/ems_workdir
+
+# Giza and friends
+external-bin-dir = WORKDIR/giza-pp/bin/
+
+# specification of the language pair
+input-extension = fr
+output-extension = en
+pair-extension = fr-en
+
+### directories that contain tools and data
+# 
+# moses
+moses-src-dir = WORKDIR
+#
+# moses scripts
+moses-script-dir = WORKDIR/scripts
+#
+# srilm
+srilm-dir = SRILMDIR/bin/MACHINE_TYPE
+#
+# data
+toy-data = $moses-script-dir/ems/example/data
+
+### basic tools
+#
+# moses decoder
+decoder = $moses-src-dir/bin/moses
+
+# conversion of phrase table into binary on-disk format
+ttable-binarizer = $moses-src-dir/bin/processPhraseTable
+
+# conversion of rule table into binary on-disk format
+#ttable-binarizer = "$moses-src-dir/CreateOnDisk/src/CreateOnDiskPt 1 1 5 100 2"
+
+# tokenizers - comment out if all your data is already tokenized
+input-tokenizer = "$moses-script-dir/tokenizer/tokenizer.perl -a -l $input-extension"
+output-tokenizer = "$moses-script-dir/tokenizer/tokenizer.perl -a -l $output-extension"
+
+# truecasers - comment out if you do not use the truecaser
+input-truecaser = $moses-script-dir/recaser/truecase.perl
+output-truecaser = $moses-script-dir/recaser/truecase.perl
+detruecaser = $moses-script-dir/recaser/detruecase.perl
+
+### generic parallelizer for cluster and multi-core machines
+# you may specify a script that allows the parallel execution
+# parallizable steps (see meta file). you also need specify 
+# the number of jobs (cluster) or cores (multicore)
+#
+#generic-parallelizer = $moses-script-dir/ems/support/generic-parallelizer.perl
+#generic-parallelizer = $moses-script-dir/ems/support/generic-multicore-parallelizer.perl
+
+### cluster settings (if run on a cluster machine)
+# number of jobs to be submitted in parallel
+#
+#jobs = 10
+
+# arguments to qsub when scheduling a job
+#qsub-settings = ""
+
+# project for priviledges and usage accounting 
+#qsub-project = iccs_smt
+
+# memory and time 
+#qsub-memory = 4
+#qsub-hours = 48
+
+### multi-core settings
+# when the generic parallelizer is used, the number of cores
+# specified here 
+cores = 8
+
+#################################################################
+# PARALLEL CORPUS PREPARATION: 
+# create a tokenized, sentence-aligned corpus, ready for training
+
+[CORPUS]
+
+### long sentences are filtered out, since they slow down GIZA++ 
+# and are a less reliable source of data. set here the maximum
+# length of a sentence
+#
+max-sentence-length = 80
+
+[CORPUS:toy]
+
+### command to run to get raw corpus files
+#
+# get-corpus-script = 
+
+### raw corpus files (untokenized, but sentence aligned)
+# 
+raw-stem = $toy-data/nc-5k
+
+### tokenized corpus files (may contain long sentences)
+#
+#tokenized-stem =
+
+### if sentence filtering should be skipped,
+# point to the clean training data
+#
+#clean-stem = 
+
+### if corpus preparation should be skipped,
+# point to the prepared training data
+#
+#lowercased-stem = 
+
+#################################################################
+# LANGUAGE MODEL TRAINING
+
+[LM]
+
+### tool to be used for language model training
+# for instance: ngram-count (SRILM), train-lm-on-disk.perl (Edinburgh) 
+# 
+lm-training = $srilm-dir/ngram-count
+settings = "-interpolate -kndiscount -unk"
+order = 5
+
+### tool to be used for training randomized language model from scratch
+# (more commonly, a SRILM is trained)
+#
+#rlm-training = "$moses-src-dir/randlm/bin/buildlm -falsepos 8 -values 8"
+
+### script to use for binary table format for irstlm or kenlm
+# (default: no binarization)
+
+# irstlm
+#lm-binarizer = $moses-src-dir/irstlm/bin/compile-lm
+
+# kenlm, also set type to 8
+#lm-binarizer = $moses-src-dir/kenlm/build_binary
+type = 8
+
+### script to create quantized language model format (irstlm)
+# (default: no quantization)
+# 
+#lm-quantizer = $moses-src-dir/irstlm/bin/quantize-lm
+
+### script to use for converting into randomized table format
+# (default: no randomization)
+#
+#lm-randomizer = "$moses-src-dir/randlm/bin/buildlm -falsepos 8 -values 8"
+
+### each language model to be used has its own section here
+
+[LM:toy]
+
+### command to run to get raw corpus files
+#
+#get-corpus-script = ""
+
+type = 8
+
+### raw corpus (untokenized)
+#
+raw-corpus = $toy-data/nc-5k.$output-extension
+
+### tokenized corpus files (may contain long sentences)
+#
+#tokenized-corpus = 
+
+### if corpus preparation should be skipped, 
+# point to the prepared language model
+#
+#lm = 
+
+
+[TRAINING]
+
+### training script to be used: either a legacy script or 
+# current moses training script (default) 
+# 
+script = $moses-script-dir/training/train-model.perl
+
+### general options
+#
+#training-options = ""
+
+### factored training: specify here which factors used
+# if none specified, single factor training is assumed
+# (one translation step, surface to surface)
+#
+#input-factors = word lemma pos morph
+#output-factors = word lemma pos
+#alignment-factors = "word -> word"
+#translation-factors = "word -> word"
+#reordering-factors = "word -> word"
+#generation-factors = "word -> pos"
+#decoding-steps = "t0, g0"
+
+### pre-computation for giza++
+# giza++ has a more efficient data structure that needs to be
+# initialized with snt2cooc. if run in parallel, this may reduces
+# memory requirements. set here the number of parts
+#
+run-giza-in-parts = 5
+
+### symmetrization method to obtain word alignments from giza output
+# (commonly used: grow-diag-final-and)
+#
+alignment-symmetrization-method = grow-diag-final-and
+
+### use of berkeley aligner for word alignment
+#
+#use-berkeley = true
+#alignment-symmetrization-method = berkeley
+#berkeley-train = $moses-script-dir/ems/support/berkeley-train.sh
+#berkeley-process =  $moses-script-dir/ems/support/berkeley-process.sh
+#berkeley-jar = /your/path/to/berkeleyaligner-1.1/berkeleyaligner.jar
+#berkeley-java-options = "-server -mx30000m -ea"
+#berkeley-training-options = "-Main.iters 5 5 -EMWordAligner.numThreads 8"
+#berkeley-process-options = "-EMWordAligner.numThreads 8"
+#berkeley-posterior = 0.5
+
+### if word alignment should be skipped,
+# point to word alignment files
+#
+#word-alignment = $working-dir/model/aligned.1
+
+### create a bilingual concordancer for the model
+#
+#biconcor = $moses-script-dir/ems/biconcor/biconcor
+
+### lexicalized reordering: specify orientation type
+# (default: only distance-based reordering model)
+#
+lexicalized-reordering = msd-bidirectional-fe
+
+### hierarchical rule set
+#
+#hierarchical-rule-set = true
+
+### settings for rule extraction
+#
+#extract-settings = ""
+
+### unknown word labels (target syntax only)
+# enables use of unknown word labels during decoding
+# label file is generated during rule extraction
+#
+#use-unknown-word-labels = true
+
+### if phrase extraction should be skipped,
+# point to stem for extract files
+#
+# extracted-phrases = 
+
+### settings for rule scoring
+#
+score-settings = "--GoodTuring"
+
+### include word alignment in phrase table
+#
+#include-word-alignment-in-rules = yes
+
+### if phrase table training should be skipped,
+# point to phrase translation table
+#
+# phrase-translation-table = 
+
+### if reordering table training should be skipped,
+# point to reordering table
+#
+# reordering-table = 
+
+### if training should be skipped, 
+# point to a configuration file that contains
+# pointers to all relevant model files
+#
+#config = 
+
+#####################################################
+### TUNING: finding good weights for model components
+
+[TUNING]
+
+### instead of tuning with this setting, old weights may be recycled
+# specify here an old configuration file with matching weights
+#
+weight-config = $toy-data/weight.ini
+
+### tuning script to be used
+#
+tuning-script = $moses-script-dir/training/mert-moses.pl
+tuning-settings = "-mertdir $moses-src-dir/mert"
+
+### specify the corpus used for tuning 
+# it should contain 1000s of sentences
+#
+#input-sgm = 
+#raw-input = 
+#tokenized-input = 
+#factorized-input = 
+#input =
+# 
+#reference-sgm = 
+#raw-reference = 
+#tokenized-reference = 
+#factorized-reference = 
+#reference = 
+
+### size of n-best list used (typically 100)
+#
+nbest = 100
+
+### ranges for weights for random initialization
+# if not specified, the tuning script will use generic ranges
+# it is not clear, if this matters
+#
+# lambda = 
+
+### additional flags for the filter script
+#
+filter-settings = ""
+
+### additional flags for the decoder
+#
+decoder-settings = ""
+
+### if tuning should be skipped, specify this here
+# and also point to a configuration file that contains
+# pointers to all relevant model files
+#
+#config = 
+
+#########################################################
+## RECASER: restore case, this part only trains the model
+
+[RECASING]
+
+#decoder = $moses-src-dir/moses-cmd/src/moses.1521.srilm
+
+### training data
+# raw input needs to be still tokenized,
+# also also tokenized input may be specified
+#
+#tokenized = [LM:europarl:tokenized-corpus]
+
+# recase-config = 
+
+#lm-training = $srilm-dir/ngram-count
+
+#######################################################
+## TRUECASER: train model to truecase corpora and input
+
+[TRUECASER]
+
+### script to train truecaser models
+#
+trainer = $moses-script-dir/recaser/train-truecaser.perl
+
+### training data
+# data on which truecaser is trained
+# if no training data is specified, parallel corpus is used
+#
+# raw-stem = 
+# tokenized-stem =
+
+### trained model
+#
+# truecase-model = 
+
+######################################################################
+## EVALUATION: translating a test set using the tuned system and score it
+
+[EVALUATION]
+
+### additional flags for the filter script
+#
+#filter-settings = ""
+
+### additional decoder settings
+# switches for the Moses decoder
+#
+decoder-settings = "-search-algorithm 1 -cube-pruning-pop-limit 5000 -s 5000"
+
+### specify size of n-best list, if produced
+#
+#nbest = 100
+
+### multiple reference translations
+#
+#multiref = yes
+
+### prepare system output for scoring 
+# this may include detokenization and wrapping output in sgm 
+# (needed for nist-bleu, ter, meteor)
+#
+detokenizer = "$moses-script-dir/tokenizer/detokenizer.perl -l $output-extension"
+#recaser = $moses-script-dir/recaser/recase.perl
+wrapping-script = "$moses-script-dir/ems/support/wrap-xml.perl $output-extension"
+#output-sgm = 
+
+### BLEU
+#
+nist-bleu = $moses-script-dir/generic/mteval-v12.pl
+nist-bleu-c = "$moses-script-dir/generic/mteval-v12.pl -c"
+#multi-bleu = $moses-script-dir/generic/multi-bleu.perl
+#ibm-bleu =
+
+### TER: translation error rate (BBN metric) based on edit distance
+# not yet integrated
+#
+# ter = 
+
+### METEOR: gives credit to stem / worknet synonym matches
+# not yet integrated
+#
+# meteor = 
+
+### Analysis: carry out various forms of analysis on the output
+#
+analysis = $moses-script-dir/ems/support/analysis.perl
+#
+# also report on input coverage
+analyze-coverage = yes
+#
+# also report on phrase mappings used
+report-segmentation = yes
+#
+# report precision of translations for each input word, broken down by
+# count of input word in corpus and model
+#report-precision-by-coverage = yes
+#
+# further precision breakdown by factor
+#precision-by-coverage-factor = pos
+
+[EVALUATION:test]
+
+### input data
+#
+input-sgm = $toy-data/test-src.$input-extension.sgm
+# raw-input = 
+# tokenized-input = 
+# factorized-input =
+# input = 
+
+### reference data
+#
+reference-sgm = $toy-data/test-ref.$output-extension.sgm
+# raw-reference =
+# tokenized-reference = 
+# reference = 
+
+### analysis settings 
+# may contain any of the general evaluation analysis settings
+# specific setting: base coverage statistics on earlier run
+#
+#precision-by-coverage-base = $working-dir/evaluation/test.analysis.5
+
+### wrapping frame
+# for nist-bleu and other scoring scripts, the output needs to be wrapped 
+# in sgm markup (typically like the input sgm)
+#
+wrapping-frame = $input-sgm
+
+##########################################
+### REPORTING: summarize evaluation scores
+
+[REPORTING]
+
+### currently no parameters for reporting section
+

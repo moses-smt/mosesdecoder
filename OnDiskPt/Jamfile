@@ -1,0 +1,5 @@
+fakelib OnDiskPt : OnDiskWrapper.cpp SourcePhrase.cpp TargetPhrase.cpp Word.cpp Phrase.cpp PhraseNode.cpp TargetPhraseCollection.cpp Vocab.cpp OnDiskQuery.cpp ../moses//headers ;
+
+exe CreateOnDiskPt : Main.cpp ..//boost_filesystem ../moses//moses OnDiskPt ;
+exe queryOnDiskPt : queryOnDiskPt.cpp ..//boost_filesystem ../moses//moses OnDiskPt ;
+

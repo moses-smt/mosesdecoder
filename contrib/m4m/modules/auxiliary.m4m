@@ -1,0 +1,69 @@
+# -*- Makefile -*-
+#
+# AS A REGULAR M4M USER, YOU SHOULD NOT HAVE TO CHANGE ANYTHING IN THIS FILE 
+#
+
+################################################################################
+# Auxiliary functions                                                          #
+################################################################################
+
+# lock/unlock
+# $(lock) creates a directory $@.lock to signal that the respective resource 
+# is under construction. The lock is removed upon successful resource creation.
+# mkdir is defined as an atomic operation under POSIX, so directory creation 
+# is a safe way of creating a lock. We create a file with 'owner' information, 
+# so that we can check if the creating process is still 
+# call as: $(lock) 
+
+ifneq ($(filter n,${MAKEFLAGS}),n)
+define lock
+@mkdir -p ${@D};
+@mkdir $@.lock
+@echo "Started at $(shell date) by process $(shell echo $$PPID) on host $(shell hostname)" \
+	> $@.lock/owner
+endef
+else
+lock := 
+endif
+
+ifneq ($(filter n, ${MAKEFLAGS}),n)
+define unlock
+@rm $@.lock/owner;
+@rmdir $@.lock
+endef
+else
+unlock := 
+endif
+
+# clear_variable allows us to clear a variable from within a function
+# the whitespace before and after appears to be necessary to ensure 
+# things happen at the beginning of a new line, and there's a new line after
+define clear_variable
+
+$1 :=
+
+endef
+
+define clear-ptables
+
+PTABLES :=
+PTABLE_ENTRIES :=
+
+endef
+
+define clear-dtables
+
+DTABLES :=
+DTABLE_ENTRIES :=
+
+endef
+
+define clear-lmodels
+
+LMODELS :=
+LMODEL_ENTRIES :=
+
+endef
+clear-locks: | $(shell find -L -type d -name '*.lock')
+	rm -rf $|
+

@@ -1,0 +1,24 @@
+M4M - Makefiles for Moses
+
+Makefiles for Moses (M4M) is a collection of make file modules designed to
+facilitate building and experimenting with Moses MT systems. The long story is
+in the paper (m4m.pdf).
+
+You'll need the following additional tools (in your PATH):
+- wget if you want to use m4m to download and install WMT data sets 
+- Gnu parallel: http://www.gnu.org/software/parallel/
+- a word aligner (mgiza or fastalign or Berkeley Aligner)
+
+******************************************************************************
+*        MAKEFILES FOR MOSES IS STILL UNDER INTENSIVE DEVELOPMENT.           *
+*  BEAR WITH ME WHILE BUGS ARE BEING FIXED AND FUNCTIONALITY IS ADDED.       *
+******************************************************************************
+
+KNOWN ISSUES: 
+
+- giza phrase table creation sometimes fails when make is run in
+  multi-threaded mode. Running make without the -j switch seems to work.
+
+
+
+Ulrich Germann
