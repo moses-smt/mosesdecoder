@@ -24,16 +24,15 @@ NBestCandidate::NBestCandidate(const SCFG::Manager &mgr, const ArcList &varcList
 :arcList(&varcList)
 ,ind(vind)
 {
-	const HypothesisBase *hypoBase = varcList[ind];
+	const SCFG::Hypothesis &hypo = GetHypo();
 
 	// copy scores from best hypo
 	MemPool &pool = mgr.GetPool();
 	m_scores = new (pool.Allocate<Scores>())
-				Scores(mgr.system,  pool, mgr.system.featureFunctions.GetNumScores(), hypoBase->GetScores());
+				Scores(mgr.system,  pool, mgr.system.featureFunctions.GetNumScores(), hypo.GetScores());
 
 	// children
 	const ArcLists &arcLists = mgr.arcLists;
-	const SCFG::Hypothesis &hypo = *static_cast<const SCFG::Hypothesis*>(hypoBase);
 	//const SCFG::TargetPhraseImpl &tp = hypo.GetTargetPhrase();
 
 	const Vector<const Hypothesis*> &prevHypos = hypo.GetPrevHypos();
@@ -45,8 +44,43 @@ NBestCandidate::NBestCandidate(const SCFG::Manager &mgr, const ArcList &varcList
 	}
 }
 
-void NBestCandidate::OutputToStream(const SCFG::Manager &mgr, std::stringstream &strm)
+const SCFG::Hypothesis &NBestCandidate::GetHypo() const
 {
+	const HypothesisBase *hypoBase = (*arcList)[ind];
+	const SCFG::Hypothesis &hypo = *static_cast<const SCFG::Hypothesis*>(hypoBase);
+	return hypo;
+}
+
+void NBestCandidate::OutputToStream(
+		const SCFG::Manager &mgr,
+		std::stringstream &strm,
+		const NBestColl &nbestColl) const
+{
+  const SCFG::TargetPhraseImpl &tp = GetHypo().GetTargetPhrase();
+
+  for (size_t pos = 0; pos < tp.GetSize(); ++pos) {
+	const SCFG::Word &word = tp[pos];
+	//cerr << "word " << pos << "=" << word << endl;
+	if (word.isNonTerminal) {
+	  //cerr << "is nt" << endl;
+	  // non-term. fill out with prev hypo
+	  size_t nonTermInd = tp.GetAlignNonTerm().GetNonTermIndexMap()[pos];
+
+	  UTIL_THROW_IF2(nonTermInd >= children.size(), "Out of bounds:" << nonTermInd << ">=" << children.size());
+
+	  const Child &child = children[nonTermInd];
+	  UTIL_THROW_IF2(child.first == NULL, "ArcList == NULL");
+
+	  const NBestCandidates &nbests = nbestColl.GetNBestCandidates(*child.first);
+	  const NBestCandidate &nbest = nbests[child.second];
+	  nbest.OutputToStream(mgr, strm, nbestColl);
+	}
+	else {
+	  //cerr << "not nt" << endl;
+	  word.OutputToStream(strm);
+	  strm << " ";
+	}
+  }
 
 }
 
@@ -57,7 +91,7 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 	m_candidates[&arcList].push_back(candidate);
 }
 
-const NBestCandidates &NBestColl::GetNBestCandidates(const ArcList &arcList)
+const NBestCandidates &NBestColl::GetNBestCandidates(const ArcList &arcList) const
 {
 	Coll::const_iterator iter = m_candidates.find(&arcList);
 	UTIL_THROW_IF2(iter == m_candidates.end(), "Can't find arclist");
@@ -117,9 +151,9 @@ void KBestExtractor::OutputToStream(std::stringstream &strm)
 	BOOST_FOREACH(const NBestCandidate &deriv, nbestVec) {
 		strm << m_mgr.GetTranslationId() << " ||| ";
 		//cerr << "1" << flush;
-		//strm << path->Output();
+		deriv.OutputToStream(m_mgr, strm, m_nbestColl);
 		//cerr << "2" << flush;
-		strm << " ||| ";
+		strm << "||| ";
 		deriv.GetScores().OutputBreakdown(strm, m_mgr.system);
 		//cerr << "3" << flush;
 		strm << "||| ";

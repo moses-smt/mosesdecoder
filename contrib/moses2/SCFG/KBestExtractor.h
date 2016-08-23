@@ -9,6 +9,7 @@
 #include <sstream>
 #include <boost/unordered_map.hpp>
 #include "../ArcLists.h"
+#include "TargetPhraseImpl.h"
 
 namespace Moses2
 {
@@ -18,6 +19,7 @@ namespace SCFG
 {
 class Manager;
 class Hypothesis;
+class NBestColl;
 
 class NBestCandidate
 {
@@ -34,10 +36,15 @@ public:
 	const Scores &GetScores() const
 	{ return *m_scores; }
 
-    void OutputToStream(const SCFG::Manager &mgr, std::stringstream &strm);
+    void OutputToStream(
+    		const SCFG::Manager &mgr,
+			std::stringstream &strm,
+			const NBestColl &nbestColl) const;
 
 protected:
 	Scores *m_scores;
+
+	const SCFG::Hypothesis &GetHypo() const;
 };
 
 /////////////////////////////////////////////////////////////
@@ -48,7 +55,7 @@ class NBestColl
 {
 public:
 	void Add(const SCFG::Manager &mgr, const ArcList &arcList);
-	const NBestCandidates &GetNBestCandidates(const ArcList &arcList);
+	const NBestCandidates &GetNBestCandidates(const ArcList &arcList) const;
 
 protected:
 	typedef boost::unordered_map<const ArcList*, NBestCandidates> Coll;
