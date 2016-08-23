@@ -13,7 +13,6 @@ namespace Moses2
 namespace SCFG
 {
 class Manager;
-class TrellisPath;
 
 class KBestExtractor
 {
@@ -24,9 +23,6 @@ public:
   void OutputToStream(std::stringstream &strm);
 protected:
   const SCFG::Manager &m_mgr;
-
-  typedef std::vector<SCFG::TrellisPath*> Coll;
-  Coll m_coll;
 };
 
 }
