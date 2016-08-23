@@ -5,6 +5,7 @@
  *      Author: hieu
  */
 #include <iostream>
+#include <sstream>
 #include <algorithm>
 #include <boost/foreach.hpp>
 #include "ArcLists.h"
@@ -112,6 +113,16 @@ void ArcLists::Delete(const HypothesisBase *hypo)
 
 	m_coll.erase(iter);
 	delete arcList;
+}
+
+std::string ArcLists::Debug(const System &system) const
+{
+	stringstream strm;
+	BOOST_FOREACH(const Coll::value_type &collPair, m_coll){
+		const ArcList *arcList = collPair.second;
+		strm << arcList << "(" << arcList->size() << ") ";
+	}
+	return strm.str();
 }
 
 }

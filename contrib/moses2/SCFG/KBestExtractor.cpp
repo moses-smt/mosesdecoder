@@ -288,6 +288,8 @@ KBestExtractor::KBestExtractor(const SCFG::Manager &mgr)
 				break;
 			}
 
+			cerr << "RANGE=" << startPos << " " << phraseSize << endl;
+
 			const Stack &stack = stacks.GetStack(startPos, phraseSize);
 			const Stack::Coll &allHypoColl = stack.GetColl();
 			BOOST_FOREACH(const Stack::Coll::value_type &valPair, allHypoColl) {

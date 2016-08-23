@@ -387,6 +387,7 @@ std::string Manager::OutputNBest()
   //Moses2::FixPrecision(out);
 
   arcLists.Sort();
+  //cerr << "arcs=" << arcLists.Debug(system) << endl;
 
   KBestExtractor extractor(*this);
   extractor.OutputToStream(out);

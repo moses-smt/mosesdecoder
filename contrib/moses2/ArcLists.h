@@ -10,6 +10,7 @@
 
 namespace Moses2
 {
+class System;
 
 class HypothesisBase;
 
@@ -28,6 +29,7 @@ public:
 
   const ArcList &GetArcList(const HypothesisBase *hypo) const;
 
+  std::string Debug(const System &system) const;
 protected:
   typedef boost::unordered_map<const HypothesisBase*, ArcList*> Coll;
   Coll m_coll;
