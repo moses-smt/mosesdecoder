@@ -39,6 +39,8 @@ public:
       const ManagerBase &mgr,
       ArcLists &arcLists) const;
 
+  const Hypotheses &GetSortedAndPrunedHypos() const;
+
   const HypothesisBase *GetBestHypo() const;
 
   template<typename T>

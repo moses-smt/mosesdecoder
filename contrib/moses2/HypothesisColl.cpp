@@ -117,6 +117,12 @@ const Hypotheses &HypothesisColl::GetSortedAndPruneHypos(
 	return *m_sortedHypos;
 }
 
+const Hypotheses &HypothesisColl::GetSortedAndPrunedHypos() const
+{
+	UTIL_THROW_IF2(m_sortedHypos == NULL, "m_sortedHypos must be sorted beforehand");
+	return *m_sortedHypos;
+}
+
 void HypothesisColl::SortAndPruneHypos(const ManagerBase &mgr,
 		ArcLists &arcLists) const
 {
