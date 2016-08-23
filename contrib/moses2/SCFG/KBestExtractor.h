@@ -21,17 +21,17 @@ class Manager;
 class Hypothesis;
 class NBestColl;
 
-class NBestCandidate
+class NBest
 {
 public:
 	const ArcList *arcList;
 	size_t ind;
 
-	typedef std::pair<const ArcList *, size_t> Child; // key to another NBestCandidate
+	typedef std::pair<const ArcList *, size_t> Child; // key to another NBest
 	typedef std::vector<Child> Children;
 	Children children;
 
-	NBestCandidate(const SCFG::Manager &mgr, const ArcList &varcList, size_t vind);
+	NBest(const SCFG::Manager &mgr, const ArcList &varcList, size_t vind);
 
 	const Scores &GetScores() const
 	{ return *m_scores; }
@@ -48,18 +48,20 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////
-typedef std::vector<NBestCandidate> NBestCandidates;
+typedef std::vector<NBest> NBests;
 
 /////////////////////////////////////////////////////////////
 class NBestColl
 {
 public:
 	void Add(const SCFG::Manager &mgr, const ArcList &arcList);
-	const NBestCandidates &GetNBestCandidates(const ArcList &arcList) const;
+	const NBests &GetNBests(const ArcList &arcList) const;
 
 protected:
-	typedef boost::unordered_map<const ArcList*, NBestCandidates> Coll;
+	typedef boost::unordered_map<const ArcList*, NBests*> Coll;
 	Coll m_candidates;
+
+	NBests &GetOrCreateNBests(const ArcList &arcList);
 };
 
 /////////////////////////////////////////////////////////////

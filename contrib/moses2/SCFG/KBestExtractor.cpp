@@ -20,7 +20,7 @@ namespace Moses2
 {
 namespace SCFG
 {
-NBestCandidate::NBestCandidate(const SCFG::Manager &mgr, const ArcList &varcList, size_t vind)
+NBest::NBest(const SCFG::Manager &mgr, const ArcList &varcList, size_t vind)
 :arcList(&varcList)
 ,ind(vind)
 {
@@ -44,14 +44,14 @@ NBestCandidate::NBestCandidate(const SCFG::Manager &mgr, const ArcList &varcList
 	}
 }
 
-const SCFG::Hypothesis &NBestCandidate::GetHypo() const
+const SCFG::Hypothesis &NBest::GetHypo() const
 {
 	const HypothesisBase *hypoBase = (*arcList)[ind];
 	const SCFG::Hypothesis &hypo = *static_cast<const SCFG::Hypothesis*>(hypoBase);
 	return hypo;
 }
 
-void NBestCandidate::OutputToStream(
+void NBest::OutputToStream(
 		const SCFG::Manager &mgr,
 		std::stringstream &strm,
 		const NBestColl &nbestColl) const
@@ -71,8 +71,8 @@ void NBestCandidate::OutputToStream(
 	  const Child &child = children[nonTermInd];
 	  UTIL_THROW_IF2(child.first == NULL, "ArcList == NULL");
 
-	  const NBestCandidates &nbests = nbestColl.GetNBestCandidates(*child.first);
-	  const NBestCandidate &nbest = nbests[child.second];
+	  const NBests &nbests = nbestColl.GetNBests(*child.first);
+	  const NBest &nbest = nbests[child.second];
 	  nbest.OutputToStream(mgr, strm, nbestColl);
 	}
 	else {
@@ -87,16 +87,30 @@ void NBestCandidate::OutputToStream(
 /////////////////////////////////////////////////////////////
 void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 {
-	NBestCandidate candidate(mgr, arcList, 0);
-	m_candidates[&arcList].push_back(candidate);
+	NBest best(mgr, arcList, 0);
+	GetOrCreateNBests(arcList).push_back(best);
 }
 
-const NBestCandidates &NBestColl::GetNBestCandidates(const ArcList &arcList) const
+const NBests &NBestColl::GetNBests(const ArcList &arcList) const
 {
 	Coll::const_iterator iter = m_candidates.find(&arcList);
 	UTIL_THROW_IF2(iter == m_candidates.end(), "Can't find arclist");
-	const NBestCandidates &ret = iter->second;
+	const NBests &ret = *iter->second;
 	return ret;
+}
+
+NBests &NBestColl::GetOrCreateNBests(const ArcList &arcList)
+{
+	NBests *ret;
+	Coll::const_iterator iter = m_candidates.find(&arcList);
+	if(iter == m_candidates.end()) {
+		ret = new NBests();
+		m_candidates[&arcList] = ret;
+	}
+	else {
+		ret = iter->second;
+	}
+	return *ret;
 }
 
 /////////////////////////////////////////////////////////////
@@ -146,9 +160,9 @@ void KBestExtractor::OutputToStream(std::stringstream &strm)
 
 	const ArcLists &arcLists = m_mgr.arcLists;
 	const ArcList &arcList = arcLists.GetArcList(hypo);
-	const NBestCandidates &nbestVec = m_nbestColl.GetNBestCandidates(arcList);
+	const NBests &nbestVec = m_nbestColl.GetNBests(arcList);
 
-	BOOST_FOREACH(const NBestCandidate &deriv, nbestVec) {
+	BOOST_FOREACH(const NBest &deriv, nbestVec) {
 		strm << m_mgr.GetTranslationId() << " ||| ";
 		//cerr << "1" << flush;
 		deriv.OutputToStream(m_mgr, strm, m_nbestColl);
