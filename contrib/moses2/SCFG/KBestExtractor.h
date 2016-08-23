@@ -63,6 +63,8 @@ public:
 			std::stringstream &strm,
 			const NBestColl &nbestColl) const;
 
+    std::string Debug(const System &system) const;
+
 protected:
 	Scores *m_scores;
 

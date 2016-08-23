@@ -5,6 +5,7 @@
  *      Author: hieu
  */
 #include <boost/foreach.hpp>
+#include <sstream>
 #include "KBestExtractor.h"
 #include "Manager.h"
 #include "Hypothesis.h"
@@ -99,8 +100,11 @@ void NBest::CreateDeviants(
 		const NBestColl &nbestColl,
 		Contenders &contenders) const
 {
+	cerr << endl << "ORIG:" << Debug(mgr.system) << endl;
+
 	if (ind + 1 < arcList->size()) {
 		NBest *next = new NBest(mgr, nbestColl, *arcList, ind + 1);
+		cerr << "NEW1:" << next->Debug(mgr.system) << endl;
 		contenders.push(next);
 	}
 
@@ -109,6 +113,7 @@ void NBest::CreateDeviants(
 		if (child.second + 1 < child.first->size()) {
 			//cerr << "HH1 " << childInd << endl;
 			NBest *next = new NBest(mgr, *this, childInd);
+			cerr << "NEW2:" << next->Debug(mgr.system) << endl;
 			//cerr << "HH2 " << childInd << endl;
 			contenders.push(next);
 			//cerr << "HH3 " << childInd << endl;
@@ -146,7 +151,22 @@ void NBest::OutputToStream(
 	  strm << " ";
 	}
   }
+}
 
+std::string NBest::Debug(const System &system) const
+{
+	stringstream strm;
+	strm << GetScores().GetTotalScore() << " "
+			<< arcList << "("
+			<< arcList->size() << ")["
+			<< ind << "] ";
+	for (size_t i = 0; i < children.size(); ++i) {
+		const Child &child = children[i];
+		strm << child.first << "("
+				<< child.first->size() << ")["
+				<< child.second << "] ";
+	}
+	return strm.str();
 }
 
 /////////////////////////////////////////////////////////////
