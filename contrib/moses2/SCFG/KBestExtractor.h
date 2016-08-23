@@ -39,10 +39,19 @@ public:
 			const ArcList &varcList,
 			size_t vind);
 
-	void CreateDeviants(std::priority_queue<NBest*> &contenders);
+	NBest(const SCFG::Manager &mgr,
+			const NBest &orig,
+			size_t childInd);
+
+	void CreateDeviants(
+			const SCFG::Manager &mgr,
+			const NBestColl &nbestColl,
+			std::priority_queue<NBest*> &contenders);
 
 	const Scores &GetScores() const
 	{ return *m_scores; }
+
+	const NBest &GetChild(size_t ind) const;
 
     void OutputToStream(
     		const SCFG::Manager &mgr,

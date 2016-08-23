@@ -49,6 +49,34 @@ NBest::NBest(
 	}
 }
 
+NBest::NBest(const SCFG::Manager &mgr,
+		const NBest &orig,
+		size_t childInd)
+:arcList(orig.arcList)
+,ind(orig.ind)
+,children(orig.children)
+{
+	Child &child = children[childInd];
+	size_t &ind = child.second;
+	++ind;
+	UTIL_THROW_IF2(ind >= child.first->size(), "out of bound:" << ind << ">=" << child.first->size());
+
+	// scores
+	MemPool &pool = mgr.GetPool();
+	m_scores = new (pool.Allocate<Scores>())
+				Scores(mgr.system,
+						pool,
+						mgr.system.featureFunctions.GetNumScores(),
+						orig.GetScores());
+
+	const Scores &origScores = orig.GetChild(childInd).GetScores();
+	const Scores &newScores = GetChild(childInd).GetScores();
+
+	m_scores->MinusEquals(mgr.system, origScores);
+	m_scores->PlusEquals(mgr.system, newScores);
+
+}
+
 const SCFG::Hypothesis &NBest::GetHypo() const
 {
 	const HypothesisBase *hypoBase = (*arcList)[ind];
@@ -56,9 +84,35 @@ const SCFG::Hypothesis &NBest::GetHypo() const
 	return hypo;
 }
 
-void NBest::CreateDeviants(std::priority_queue<NBest*> &contenders)
+const NBest &NBest::GetChild(size_t ind) const
 {
+	const Child &child = children[ind];
+	const NBests &nbests = *child.first;
+	const NBest &origNBest = *nbests[child.second];
+	return origNBest;
+}
 
+
+void NBest::CreateDeviants(
+		const SCFG::Manager &mgr,
+		const NBestColl &nbestColl,
+		std::priority_queue<NBest*> &contenders)
+{
+	if (ind + 1 < arcList->size()) {
+		NBest *next = new NBest(mgr, nbestColl, *arcList, ind + 1);
+		contenders.push(next);
+	}
+
+	for (size_t childInd = 0; childInd < children.size(); ++childInd) {
+		const Child &child = children[childInd];
+		if (child.second + 1 < child.first->size()) {
+			//cerr << "HH1 " << childInd << endl;
+			NBest *next = new NBest(mgr, *this, childInd);
+			//cerr << "HH2 " << childInd << endl;
+			contenders.push(next);
+			//cerr << "HH3 " << childInd << endl;
+		}
+	}
 }
 
 void NBest::OutputToStream(
@@ -133,7 +187,7 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 		contenders.pop();
 		nbests.push_back(best);
 
-		best->CreateDeviants(contenders);
+		best->CreateDeviants(mgr, *this, contenders);
 
 	}
 }
@@ -197,6 +251,7 @@ KBestExtractor::~KBestExtractor()
 
 void KBestExtractor::OutputToStream(std::stringstream &strm)
 {
+	//cerr << "1" << flush;
 	const Stack &lastStack = m_mgr.GetStacks().GetLastStack();
 	UTIL_THROW_IF2(lastStack.GetColl().size() != 1, "Only suppose to be 1 hypo coll in last stack");
 	UTIL_THROW_IF2(lastStack.GetColl().begin()->second == NULL, "NULL hypo collection");
