@@ -25,7 +25,7 @@ public:
 	const ArcList *arcList;
 	size_t ind;
 
-	typedef std::pair<const ArcList *, size_t> Child;
+	typedef std::pair<const ArcList *, size_t> Child; // key to another NBestCandidate
 	typedef std::vector<Child> Children;
 	Children children;
 
@@ -33,6 +33,8 @@ public:
 
 	const Scores &GetScores() const
 	{ return *m_scores; }
+
+    void OutputToStream(const SCFG::Manager &mgr, std::stringstream &strm);
 
 protected:
 	Scores *m_scores;

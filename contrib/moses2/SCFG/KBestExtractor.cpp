@@ -45,6 +45,10 @@ NBestCandidate::NBestCandidate(const SCFG::Manager &mgr, const ArcList &varcList
 	}
 }
 
+void NBestCandidate::OutputToStream(const SCFG::Manager &mgr, std::stringstream &strm)
+{
+
+}
 
 /////////////////////////////////////////////////////////////
 void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
