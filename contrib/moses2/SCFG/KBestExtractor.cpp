@@ -96,7 +96,7 @@ const NBest &NBest::GetChild(size_t ind) const
 void NBest::CreateDeviants(
 		const SCFG::Manager &mgr,
 		const NBestColl &nbestColl,
-		std::priority_queue<NBest*> &contenders)
+		Contenders &contenders)
 {
 	if (ind + 1 < arcList->size()) {
 		NBest *next = new NBest(mgr, nbestColl, *arcList, ind + 1);
@@ -169,7 +169,8 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 {
 	NBests &nbests = GetOrCreateNBests(arcList);
 
-	priority_queue<NBest*> contenders;
+	Contenders contenders;
+	boost::unordered_set<size_t> distinctHypos;
 
 	NBest *contender;
 
@@ -185,10 +186,27 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 
 		NBest *best = contenders.top();
 		contenders.pop();
-		nbests.push_back(best);
 
 		best->CreateDeviants(mgr, *this, contenders);
 
+		bool ok = false;
+		if (mgr.system.options.nbest.only_distinct) {
+			string tgtPhrase = path->OutputTargetPhrase(system);
+			//cerr << "tgtPhrase=" << tgtPhrase << endl;
+			boost::hash<std::string> string_hash;
+			size_t hash = string_hash(tgtPhrase);
+
+			if (distinctHypos.insert(hash).second) {
+				ok = true;
+			}
+		}
+		else {
+			ok = true;
+		}
+
+		if (ok) {
+			nbests.push_back(best);
+		}
 	}
 }
 

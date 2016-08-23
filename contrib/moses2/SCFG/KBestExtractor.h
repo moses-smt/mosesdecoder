@@ -22,6 +22,11 @@ class Manager;
 class Hypothesis;
 class NBestColl;
 class NBests;
+class NBest;
+class NBestScoreOrderer;
+
+/////////////////////////////////////////////////////////////
+typedef std::priority_queue<NBest*, std::vector<NBest*>, NBestScoreOrderer> Contenders;
 
 /////////////////////////////////////////////////////////////
 class NBest
@@ -46,7 +51,7 @@ public:
 	void CreateDeviants(
 			const SCFG::Manager &mgr,
 			const NBestColl &nbestColl,
-			std::priority_queue<NBest*> &contenders);
+			Contenders &contenders);
 
 	const Scores &GetScores() const
 	{ return *m_scores; }
@@ -62,6 +67,16 @@ protected:
 	Scores *m_scores;
 
 	const SCFG::Hypothesis &GetHypo() const;
+};
+
+/////////////////////////////////////////////////////////////
+class NBestScoreOrderer
+{
+public:
+  bool operator()(const NBest* a, const NBest* b) const
+  {
+    return a->GetScores().GetTotalScore() > b->GetScores().GetTotalScore();
+  }
 };
 
 /////////////////////////////////////////////////////////////
