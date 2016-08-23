@@ -97,7 +97,7 @@ const NBest &NBest::GetChild(size_t ind) const
 void NBest::CreateDeviants(
 		const SCFG::Manager &mgr,
 		const NBestColl &nbestColl,
-		Contenders &contenders)
+		Contenders &contenders) const
 {
 	if (ind + 1 < arcList->size()) {
 		NBest *next = new NBest(mgr, nbestColl, *arcList, ind + 1);

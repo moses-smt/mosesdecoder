@@ -51,7 +51,7 @@ public:
 	void CreateDeviants(
 			const SCFG::Manager &mgr,
 			const NBestColl &nbestColl,
-			Contenders &contenders);
+			Contenders &contenders) const;
 
 	const Scores &GetScores() const
 	{ return *m_scores; }
