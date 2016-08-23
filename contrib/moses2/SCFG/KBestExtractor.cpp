@@ -20,7 +20,11 @@ namespace Moses2
 {
 namespace SCFG
 {
-NBest::NBest(const SCFG::Manager &mgr, const ArcList &varcList, size_t vind)
+NBest::NBest(
+		const SCFG::Manager &mgr,
+		const NBestColl &nbestColl,
+		const ArcList &varcList,
+		size_t vind)
 :arcList(&varcList)
 ,ind(vind)
 {
@@ -39,7 +43,8 @@ NBest::NBest(const SCFG::Manager &mgr, const ArcList &varcList, size_t vind)
 	for (size_t i = 0; i < prevHypos.size(); ++i) {
 		const SCFG::Hypothesis *prevHypo = prevHypos[i];
 		const ArcList &childArc = arcLists.GetArcList(prevHypo);
-		Child child(&childArc, 0);
+		const NBests &childNBests = nbestColl.GetNBests(childArc);
+		Child child(&childNBests, 0);
 		children.push_back(child);
 	}
 }
@@ -71,7 +76,7 @@ void NBest::OutputToStream(
 	  const Child &child = children[nonTermInd];
 	  UTIL_THROW_IF2(child.first == NULL, "ArcList == NULL");
 
-	  const NBests &nbests = nbestColl.GetNBests(*child.first);
+	  const NBests &nbests = *child.first;
 	  const NBest &nbest = nbests[child.second];
 	  nbest.OutputToStream(mgr, strm, nbestColl);
 	}
@@ -87,7 +92,7 @@ void NBest::OutputToStream(
 /////////////////////////////////////////////////////////////
 void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 {
-	NBest best(mgr, arcList, 0);
+	NBest best(mgr, *this, arcList, 0);
 	GetOrCreateNBests(arcList).push_back(best);
 }
 

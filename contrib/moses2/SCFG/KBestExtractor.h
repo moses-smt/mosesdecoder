@@ -20,6 +20,7 @@ namespace SCFG
 class Manager;
 class Hypothesis;
 class NBestColl;
+class NBests;
 
 class NBest
 {
@@ -27,11 +28,14 @@ public:
 	const ArcList *arcList;
 	size_t ind;
 
-	typedef std::pair<const ArcList *, size_t> Child; // key to another NBest
+	typedef std::pair<const NBests*, size_t> Child; // key to another NBest
 	typedef std::vector<Child> Children;
 	Children children;
 
-	NBest(const SCFG::Manager &mgr, const ArcList &varcList, size_t vind);
+	NBest(const SCFG::Manager &mgr,
+			const NBestColl &nbestColl,
+			const ArcList &varcList,
+			size_t vind);
 
 	const Scores &GetScores() const
 	{ return *m_scores; }
@@ -48,7 +52,8 @@ protected:
 };
 
 /////////////////////////////////////////////////////////////
-typedef std::vector<NBest> NBests;
+class NBests : public std::vector<NBest>
+{};
 
 /////////////////////////////////////////////////////////////
 class NBestColl
