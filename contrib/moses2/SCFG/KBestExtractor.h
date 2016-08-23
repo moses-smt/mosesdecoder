@@ -75,7 +75,7 @@ class NBestScoreOrderer
 public:
   bool operator()(const NBest* a, const NBest* b) const
   {
-    return a->GetScores().GetTotalScore() > b->GetScores().GetTotalScore();
+    return a->GetScores().GetTotalScore() < b->GetScores().GetTotalScore();
   }
 };
 

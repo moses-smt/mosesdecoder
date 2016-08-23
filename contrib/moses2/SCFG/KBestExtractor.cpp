@@ -13,6 +13,7 @@
 #include "Sentence.h"
 #include "../System.h"
 #include "../Scores.h"
+#include "../legacy/Util2.h"
 
 using namespace std;
 
@@ -170,6 +171,7 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 	NBests &nbests = GetOrCreateNBests(arcList);
 
 	Contenders contenders;
+
 	boost::unordered_set<size_t> distinctHypos;
 
 	NBest *contender;
@@ -187,8 +189,24 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 		NBest *best = contenders.top();
 		contenders.pop();
 
+		/*
+		cerr << "contenders: " << best->GetScores().GetTotalScore() << " ";
+		vector<NBest*> temp;
+		while (!contenders.empty()) {
+			NBest *t2 = contenders.top();
+			contenders.pop();
+			temp.push_back(t2);
+			cerr << t2->GetScores().GetTotalScore() << " ";
+		}
+		cerr << endl;
+		for (size_t t3 = 0; t3 < temp.size(); ++t3) {
+			contenders.push(temp[t3]);
+		}
+		*/
+
 		best->CreateDeviants(mgr, *this, contenders);
 
+		/*
 		bool ok = false;
 		if (mgr.system.options.nbest.only_distinct) {
 			string tgtPhrase = path->OutputTargetPhrase(system);
@@ -203,6 +221,8 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 		else {
 			ok = true;
 		}
+		*/
+		bool ok = true;
 
 		if (ok) {
 			nbests.push_back(best);
