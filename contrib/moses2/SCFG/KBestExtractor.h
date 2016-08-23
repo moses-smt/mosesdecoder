@@ -7,6 +7,7 @@
 #pragma once
 #include <vector>
 #include <sstream>
+#include <queue>
 #include <boost/unordered_map.hpp>
 #include "../ArcLists.h"
 #include "TargetPhraseImpl.h"
@@ -37,6 +38,8 @@ public:
 			const NBestColl &nbestColl,
 			const ArcList &varcList,
 			size_t vind);
+
+	void CreateDeviants(std::priority_queue<NBest*> &contenders);
 
 	const Scores &GetScores() const
 	{ return *m_scores; }

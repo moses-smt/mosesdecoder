@@ -56,6 +56,11 @@ const SCFG::Hypothesis &NBest::GetHypo() const
 	return hypo;
 }
 
+void NBest::CreateDeviants(std::priority_queue<NBest*> &contenders)
+{
+
+}
+
 void NBest::OutputToStream(
 		const SCFG::Manager &mgr,
 		std::stringstream &strm,
@@ -110,19 +115,26 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 {
 	NBests &nbests = GetOrCreateNBests(arcList);
 
-	//priority_queue<NBest*> contenders;
+	priority_queue<NBest*> contenders;
 
-	NBest *best = new NBest(mgr, *this, arcList, 0);
-	nbests.push_back(best);
+	NBest *contender;
+
+	// best
+	contender = new NBest(mgr, *this, arcList, 0);
+	contenders.push(contender);
 
 	size_t maxIter = mgr.system.options.nbest.nbest_size * mgr.system.options.nbest.factor;
-	size_t bestInd = 0;
 	for (size_t i = 0; i < maxIter; ++i) {
-		/*
-		if (bestInd > mgr.system.options.nbest.nbest_size || contenders.empty()) {
+		if (nbests.size() >= mgr.system.options.nbest.nbest_size || contenders.empty()) {
 			break;
 		}
-		*/
+
+		NBest *best = contenders.top();
+		contenders.pop();
+		nbests.push_back(best);
+
+		best->CreateDeviants(contenders);
+
 	}
 }
 
