@@ -68,7 +68,8 @@ NBest::NBest(const SCFG::Manager &mgr,
 	Child &child = children[childInd];
 	size_t &ind = child.second;
 	++ind;
-	UTIL_THROW_IF2(ind >= child.first->size(), "out of bound:" << ind << ">=" << child.first->size());
+	UTIL_THROW_IF2(ind >= child.first->GetSize(),
+			"out of bound:" << ind << ">=" << child.first->GetSize());
 
 	// scores
 	MemPool &pool = mgr.GetPool();
@@ -100,8 +101,8 @@ const NBest &NBest::GetChild(size_t ind) const
 {
 	const Child &child = children[ind];
 	const NBests &nbests = *child.first;
-	const NBest &origNBest = *nbests[child.second];
-	return origNBest;
+	const NBest &nbest = nbests.Get(child.second);
+	return nbest;
 }
 
 
@@ -128,7 +129,7 @@ void NBest::CreateDeviants(
 
 	for (size_t childInd = 0; childInd < children.size(); ++childInd) {
 		const Child &child = children[childInd];
-		if (child.second + 1 < child.first->size()) {
+		if (child.second + 1 < child.first->GetSize()) {
 			//cerr << "HH1 " << childInd << endl;
 			NBest *next = new NBest(mgr, nbestColl, *this, childInd);
 
@@ -159,11 +160,7 @@ void NBest::OutputToStream(
 
 	  UTIL_THROW_IF2(nonTermInd >= children.size(), "Out of bounds:" << nonTermInd << ">=" << children.size());
 
-	  const Child &child = children[nonTermInd];
-	  UTIL_THROW_IF2(child.first == NULL, "ArcList == NULL");
-
-	  const NBests &nbests = *child.first;
-	  const NBest &nbest = *nbests[child.second];
+	  const NBest &nbest = GetChild(nonTermInd);
 	  strm << nbest.GetString();
 	}
 	else {
@@ -183,10 +180,10 @@ std::string NBest::Debug(const System &system) const
 			<< ind << "] ";
 	for (size_t i = 0; i < children.size(); ++i) {
 		const Child &child = children[i];
-		const NBest &childNBest = *(*child.first)[child.second];
+		const NBest &childNBest = child.first->Get(child.second);
 
 		strm << child.first << "("
-				<< child.first->size() << ")["
+				<< child.first->GetSize() << ")["
 				<< child.second << "]";
 		strm << childNBest.GetScores().GetTotalScore() << " ";
 	}
@@ -196,7 +193,7 @@ std::string NBest::Debug(const System &system) const
 /////////////////////////////////////////////////////////////
 NBests::~NBests()
 {
-	BOOST_FOREACH(NBest *nbest, *this) {
+	BOOST_FOREACH(const NBest *nbest, m_coll) {
 		delete nbest;
 	}
 }
@@ -227,7 +224,7 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 
 	size_t maxIter = mgr.system.options.nbest.nbest_size * mgr.system.options.nbest.factor;
 	for (size_t i = 0; i < maxIter; ++i) {
-		if (nbests.size() >= mgr.system.options.nbest.nbest_size || contenders.empty()) {
+		if (nbests.GetSize() >= mgr.system.options.nbest.nbest_size || contenders.empty()) {
 			break;
 		}
 
@@ -267,7 +264,7 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 		}
 
 		if (ok) {
-			nbests.push_back(best);
+			nbests.Add(best);
 			//cerr << best->GetScores().GetTotalScore() << " ";
 			//cerr << best->Debug(mgr.system) << endl;
 		}
@@ -358,18 +355,19 @@ void KBestExtractor::OutputToStream(std::stringstream &strm)
 
 	const ArcLists &arcLists = m_mgr.arcLists;
 	const ArcList &arcList = arcLists.GetArcList(hypo);
-	const NBests &nbestVec = m_nbestColl.GetNBests(arcList);
+	const NBests &nbests = m_nbestColl.GetNBests(arcList);
 
-	BOOST_FOREACH(const NBest *deriv, nbestVec) {
+	for (size_t i = 0; i < nbests.GetSize(); ++i) {
+		const NBest &deriv = nbests.Get(i);
 		strm << m_mgr.GetTranslationId() << " ||| ";
 		//cerr << "1" << flush;
-		strm << deriv->GetString();
+		strm << deriv.GetString();
 		//cerr << "2" << flush;
 		strm << "||| ";
-		deriv->GetScores().OutputBreakdown(strm, m_mgr.system);
+		deriv.GetScores().OutputBreakdown(strm, m_mgr.system);
 		//cerr << "3" << flush;
 		strm << "||| ";
-		strm << deriv->GetScores().GetTotalScore();
+		strm << deriv.GetScores().GetTotalScore();
 		//cerr << "4" << flush;
 
 		strm << endl;

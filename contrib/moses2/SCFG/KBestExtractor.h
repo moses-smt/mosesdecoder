@@ -87,10 +87,23 @@ public:
 };
 
 /////////////////////////////////////////////////////////////
-class NBests : public std::vector<NBest*>
+class NBests
 {
 public:
 	virtual ~NBests();
+
+	size_t GetSize() const
+	{ return m_coll.size(); }
+
+	const NBest &Get(size_t ind) const
+	{ return *m_coll[ind]; }
+
+	void Add(const NBest *nbest)
+	{
+		m_coll.push_back(nbest);
+	}
+protected:
+	std::vector<const NBest*> m_coll;
 };
 
 /////////////////////////////////////////////////////////////
