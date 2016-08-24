@@ -271,6 +271,9 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 			//cerr << best->GetScores().GetTotalScore() << " ";
 			//cerr << best->Debug(mgr.system) << endl;
 		}
+		else {
+			delete best;
+		}
 	}
 
 	// delete bad contenders left in queue
