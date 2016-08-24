@@ -31,7 +31,7 @@ public:
 	void CreateDeviants(
 			const SCFG::Manager &mgr,
 			const ArcList &arcList,
-			const NBestColl &nbestColl);
+			NBestColl &nbestColl);
 
 protected:
 	std::vector<const NBest*> m_coll;

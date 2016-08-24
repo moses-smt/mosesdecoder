@@ -34,20 +34,13 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 	nbests.CreateDeviants(mgr, arcList, *this);
 }
 
-const NBests &NBestColl::GetNBests(const ArcList &arcList) const
-{
-	Coll::const_iterator iter = m_candidates.find(&arcList);
-	UTIL_THROW_IF2(iter == m_candidates.end(), "Can't find arclist");
-	const NBests &ret = *iter->second;
-	return ret;
-}
-
 NBests &NBestColl::GetOrCreateNBests(const SCFG::Manager &mgr, const ArcList &arcList)
 {
 	NBests *ret;
-	Coll::const_iterator iter = m_candidates.find(&arcList);
+	Coll::iterator iter = m_candidates.find(&arcList);
 	if(iter == m_candidates.end()) {
 		ret = new NBests();
+		ret->CreateDeviants(mgr, arcList, *this);
 		m_candidates[&arcList] = ret;
 	}
 	else {

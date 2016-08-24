@@ -28,35 +28,7 @@ namespace SCFG
 KBestExtractor::KBestExtractor(const SCFG::Manager &mgr)
 :m_mgr(mgr)
 {
-	const ArcLists &arcLists = mgr.arcLists;
-	size_t inputSize = static_cast<const Sentence&>(mgr.GetInput()).GetSize();
-	const Stacks &stacks = mgr.GetStacks();
 
-	// set up n-best list for each hypo state
-	for (size_t phraseSize = 1; phraseSize <= inputSize; ++phraseSize) {
-		for (size_t startPos = 0; ; ++startPos) {
-			size_t endPos = startPos + phraseSize - 1;
-			if (endPos >= inputSize) {
-				break;
-			}
-
-			//cerr << "RANGE=" << startPos << " " << phraseSize << endl;
-			//g_debug = startPos == 0 && phraseSize == 3;
-			//g_debug = true;
-
-			const Stack &stack = stacks.GetStack(startPos, phraseSize);
-			const Stack::Coll &allHypoColl = stack.GetColl();
-			BOOST_FOREACH(const Stack::Coll::value_type &valPair, allHypoColl) {
-				const HypothesisColl *hypoColl = valPair.second;
-				const Hypotheses &sortedHypos = hypoColl->GetSortedAndPruneHypos(mgr, mgr.arcLists);
-				BOOST_FOREACH(const HypothesisBase *hypoBase, sortedHypos) {
-					const ArcList &arcList = arcLists.GetArcList(hypoBase);
-
-					m_nbestColl.Add(mgr, arcList);
-				}
-			}
-		}
-	}
 }
 
 KBestExtractor::~KBestExtractor()
@@ -76,7 +48,7 @@ void KBestExtractor::OutputToStream(std::stringstream &strm)
 
 	const ArcLists &arcLists = m_mgr.arcLists;
 	const ArcList &arcList = arcLists.GetArcList(hypo);
-	const NBests &nbests = m_nbestColl.GetNBests(arcList);
+	const NBests &nbests = m_nbestColl.GetOrCreateNBests(m_mgr, arcList);
 
 	for (size_t i = 0; i < nbests.GetSize(); ++i) {
 		const NBest &deriv = nbests.Get(i);

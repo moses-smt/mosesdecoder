@@ -42,18 +42,19 @@ public:
 	Children children;
 
 	NBest(const SCFG::Manager &mgr,
-			const NBestColl &nbestColl,
 			const ArcList &varcList,
-			size_t vind);
+			size_t vind,
+			NBestColl &nbestColl);
 
 	NBest(const SCFG::Manager &mgr,
-			const NBestColl &nbestColl,
 			const NBest &orig,
-			size_t childInd);
+			size_t childInd,
+			NBestColl &nbestColl);
+
 
 	void CreateDeviants(
 			const SCFG::Manager &mgr,
-			const NBestColl &nbestColl,
+			NBestColl &nbestColl,
 			Contenders &contenders) const;
 
 	const Scores &GetScores() const

@@ -23,9 +23,9 @@ namespace SCFG
 
 NBest::NBest(
 		const SCFG::Manager &mgr,
-		const NBestColl &nbestColl,
 		const ArcList &varcList,
-		size_t vind)
+		size_t vind,
+		NBestColl &nbestColl)
 :arcList(&varcList)
 ,ind(vind)
 {
@@ -44,7 +44,7 @@ NBest::NBest(
 	for (size_t i = 0; i < prevHypos.size(); ++i) {
 		const SCFG::Hypothesis *prevHypo = prevHypos[i];
 		const ArcList &childArc = arcLists.GetArcList(prevHypo);
-		const NBests &childNBests = nbestColl.GetNBests(childArc);
+		const NBests &childNBests = nbestColl.GetOrCreateNBests(mgr, childArc);
 		Child child(&childNBests, 0);
 		children.push_back(child);
 	}
@@ -55,9 +55,9 @@ NBest::NBest(
 }
 
 NBest::NBest(const SCFG::Manager &mgr,
-		const NBestColl &nbestColl,
 		const NBest &orig,
-		size_t childInd)
+		size_t childInd,
+		NBestColl &nbestColl)
 :arcList(orig.arcList)
 ,ind(orig.ind)
 ,children(orig.children)
@@ -105,7 +105,7 @@ const NBest &NBest::GetChild(size_t ind) const
 
 void NBest::CreateDeviants(
 		const SCFG::Manager &mgr,
-		const NBestColl &nbestColl,
+		NBestColl &nbestColl,
 		Contenders &contenders) const
 {
 	if (ind + 1 < arcList->size()) {
@@ -119,7 +119,7 @@ void NBest::CreateDeviants(
 		}
 
 		if (ok) {
-			NBest *next = new NBest(mgr, nbestColl, *arcList, ind + 1);
+			NBest *next = new NBest(mgr, *arcList, ind + 1, nbestColl);
 			contenders.push(next);
 		}
 	}
@@ -128,7 +128,7 @@ void NBest::CreateDeviants(
 		const Child &child = children[childInd];
 		if (child.second + 1 < child.first->GetSize()) {
 			//cerr << "HH1 " << childInd << endl;
-			NBest *next = new NBest(mgr, nbestColl, *this, childInd);
+			NBest *next = new NBest(mgr, *this, childInd, nbestColl);
 
 			//cerr << "HH2 " << childInd << endl;
 			contenders.push(next);

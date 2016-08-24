@@ -22,7 +22,6 @@ public:
 	virtual ~NBestColl();
 
 	void Add(const SCFG::Manager &mgr, const ArcList &arcList);
-	const NBests &GetNBests(const ArcList &arcList) const;
 	NBests &GetOrCreateNBests(const SCFG::Manager &mgr, const ArcList &arcList);
 
 protected:

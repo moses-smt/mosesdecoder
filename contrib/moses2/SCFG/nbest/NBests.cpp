@@ -35,12 +35,12 @@ NBests::~NBests()
 void NBests::CreateDeviants(
 		const SCFG::Manager &mgr,
 		const ArcList &arcList,
-		const NBestColl &nbestColl)
+		NBestColl &nbestColl)
 {
 	NBest *contender;
 
 	// best
-	contender = new NBest(mgr, nbestColl, arcList, 0);
+	contender = new NBest(mgr, arcList, 0, nbestColl);
 	contenders.push(contender);
 
 	size_t maxIter = mgr.system.options.nbest.nbest_size * mgr.system.options.nbest.factor;
