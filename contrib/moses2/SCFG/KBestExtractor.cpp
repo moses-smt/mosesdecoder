@@ -272,6 +272,13 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 			//cerr << best->Debug(mgr.system) << endl;
 		}
 	}
+
+	// delete bad contenders left in queue
+	while (!contenders.empty()) {
+		NBest *contender = contenders.top();
+		contenders.pop();
+		delete contender;
+	}
 }
 
 const NBests &NBestColl::GetNBests(const ArcList &arcList) const
