@@ -23,12 +23,12 @@ public:
 
 	void Add(const SCFG::Manager &mgr, const ArcList &arcList);
 	const NBests &GetNBests(const ArcList &arcList) const;
+	NBests &GetOrCreateNBests(const SCFG::Manager &mgr, const ArcList &arcList);
 
 protected:
 	typedef boost::unordered_map<const ArcList*, NBests*> Coll;
 	Coll m_candidates;
 
-	NBests &GetOrCreateNBests(const ArcList &arcList);
 };
 
 }

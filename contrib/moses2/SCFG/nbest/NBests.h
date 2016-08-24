@@ -28,12 +28,18 @@ public:
 	const NBest &Get(size_t ind) const
 	{ return *m_coll[ind]; }
 
+	void CreateDeviants(
+			const SCFG::Manager &mgr,
+			const ArcList &arcList,
+			const NBestColl &nbestColl);
+
+protected:
+	std::vector<const NBest*> m_coll;
+
 	void Add(const NBest *nbest)
 	{
 		m_coll.push_back(nbest);
 	}
-protected:
-	std::vector<const NBest*> m_coll;
 };
 
 
