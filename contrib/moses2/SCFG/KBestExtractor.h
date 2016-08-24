@@ -45,6 +45,7 @@ public:
 			size_t vind);
 
 	NBest(const SCFG::Manager &mgr,
+			const NBestColl &nbestColl,
 			const NBest &orig,
 			size_t childInd);
 
@@ -58,17 +59,21 @@ public:
 
 	const NBest &GetChild(size_t ind) const;
 
-    void OutputToStream(
-    		const SCFG::Manager &mgr,
-			std::stringstream &strm,
-			const NBestColl &nbestColl) const;
+	const std::string &GetString() const
+	{ return m_str; }
 
     std::string Debug(const System &system) const;
 
 protected:
 	Scores *m_scores;
+	std::string m_str;
 
 	const SCFG::Hypothesis &GetHypo() const;
+
+    void OutputToStream(
+    		const SCFG::Manager &mgr,
+			std::stringstream &strm,
+			const NBestColl &nbestColl) const;
 };
 
 /////////////////////////////////////////////////////////////

@@ -20,7 +20,6 @@ namespace SCFG
 class SymbolBind;
 class TargetPhrases;
 class Queue;
-class SeenPositions;
 
 ///////////////////////////////////////////
 class SeenPosition

@@ -20,6 +20,8 @@ using namespace std;
 
 namespace Moses2
 {
+//bool g_debug = false;
+
 namespace SCFG
 {
 NBest::NBest(
@@ -49,9 +51,14 @@ NBest::NBest(
 		Child child(&childNBests, 0);
 		children.push_back(child);
 	}
+
+	stringstream strm;
+	OutputToStream(mgr, strm, nbestColl);
+	m_str = strm.str();
 }
 
 NBest::NBest(const SCFG::Manager &mgr,
+		const NBestColl &nbestColl,
 		const NBest &orig,
 		size_t childInd)
 :arcList(orig.arcList)
@@ -77,6 +84,9 @@ NBest::NBest(const SCFG::Manager &mgr,
 	m_scores->MinusEquals(mgr.system, origScores);
 	m_scores->PlusEquals(mgr.system, newScores);
 
+	stringstream strm;
+	OutputToStream(mgr, strm, nbestColl);
+	m_str = strm.str();
 }
 
 const SCFG::Hypothesis &NBest::GetHypo() const
@@ -100,20 +110,28 @@ void NBest::CreateDeviants(
 		const NBestColl &nbestColl,
 		Contenders &contenders) const
 {
-	//cerr << endl << "ORIG:" << Debug(mgr.system) << endl;
-
 	if (ind + 1 < arcList->size()) {
-		NBest *next = new NBest(mgr, nbestColl, *arcList, ind + 1);
-		//cerr << "NEW1:" << next->Debug(mgr.system) << endl;
-		contenders.push(next);
+		// to use next arclist, all children must be 1st. Not sure if this is correct
+		bool ok = true;
+		BOOST_FOREACH(const Child &child, children) {
+			if (child.second) {
+				ok = false;
+				break;
+			}
+		}
+
+		if (ok) {
+			NBest *next = new NBest(mgr, nbestColl, *arcList, ind + 1);
+			contenders.push(next);
+		}
 	}
 
 	for (size_t childInd = 0; childInd < children.size(); ++childInd) {
 		const Child &child = children[childInd];
 		if (child.second + 1 < child.first->size()) {
 			//cerr << "HH1 " << childInd << endl;
-			NBest *next = new NBest(mgr, *this, childInd);
-			//cerr << "NEW2:" << next->Debug(mgr.system) << endl;
+			NBest *next = new NBest(mgr, nbestColl, *this, childInd);
+
 			//cerr << "HH2 " << childInd << endl;
 			contenders.push(next);
 			//cerr << "HH3 " << childInd << endl;
@@ -146,7 +164,7 @@ void NBest::OutputToStream(
 
 	  const NBests &nbests = *child.first;
 	  const NBest &nbest = *nbests[child.second];
-	  nbest.OutputToStream(mgr, strm, nbestColl);
+	  strm << nbest.GetString();
 	}
 	else {
 	  //cerr << "not nt" << endl;
@@ -195,7 +213,7 @@ NBestColl::~NBestColl()
 void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 {
 	NBests &nbests = GetOrCreateNBests(arcList);
-	cerr << "nbests for " << &nbests << ":";
+	//cerr << "nbests for " << &nbests << ":";
 
 	Contenders contenders;
 
@@ -233,10 +251,9 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 
 		best->CreateDeviants(mgr, *this, contenders);
 
-		/*
 		bool ok = false;
 		if (mgr.system.options.nbest.only_distinct) {
-			string tgtPhrase = path->OutputTargetPhrase(system);
+			const string &tgtPhrase = best->GetString();
 			//cerr << "tgtPhrase=" << tgtPhrase << endl;
 			boost::hash<std::string> string_hash;
 			size_t hash = string_hash(tgtPhrase);
@@ -248,18 +265,13 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 		else {
 			ok = true;
 		}
-		*/
-		bool ok = true;
 
 		if (ok) {
 			nbests.push_back(best);
 			//cerr << best->GetScores().GetTotalScore() << " ";
-			cerr << best->Debug(mgr.system) << endl;
+			//cerr << best->Debug(mgr.system) << endl;
 		}
 	}
-
-	cerr << endl;
-
 }
 
 const NBests &NBestColl::GetNBests(const ArcList &arcList) const
@@ -300,7 +312,9 @@ KBestExtractor::KBestExtractor(const SCFG::Manager &mgr)
 				break;
 			}
 
-			cerr << "RANGE=" << startPos << " " << phraseSize << endl;
+			//cerr << "RANGE=" << startPos << " " << phraseSize << endl;
+			//g_debug = startPos == 0 && phraseSize == 3;
+			//g_debug = true;
 
 			const Stack &stack = stacks.GetStack(startPos, phraseSize);
 			const Stack::Coll &allHypoColl = stack.GetColl();
@@ -339,7 +353,7 @@ void KBestExtractor::OutputToStream(std::stringstream &strm)
 	BOOST_FOREACH(const NBest *deriv, nbestVec) {
 		strm << m_mgr.GetTranslationId() << " ||| ";
 		//cerr << "1" << flush;
-		deriv->OutputToStream(m_mgr, strm, m_nbestColl);
+		strm << deriv->GetString();
 		//cerr << "2" << flush;
 		strm << "||| ";
 		deriv->GetScores().OutputBreakdown(strm, m_mgr.system);
