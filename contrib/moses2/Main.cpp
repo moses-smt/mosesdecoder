@@ -26,19 +26,21 @@ int main(int argc, char** argv)
   timer.start();
 	//Temp();
 
-	Moses2::Parameter params;
-	params.LoadParam(argc, argv);
-	Moses2::System system(params);
-	timer.check("Loaded");
+  Moses2::Parameter params;
+  if (!params.LoadParam(argc, argv)) {
+	return EXIT_FAILURE;
+  }
+  Moses2::System system(params);
+  timer.check("Loaded");
 
   if (params.GetParam("show-weights")) {
-    return 0;
+    return EXIT_SUCCESS;
   }
 
-	//cerr << "system.numThreads=" << system.options.server.numThreads << endl;
+  //cerr << "system.numThreads=" << system.options.server.numThreads << endl;
 
-	Moses2::ThreadPool pool(system.options.server.numThreads, system.cpuAffinityOffset, system.cpuAffinityOffsetIncr);
-	//cerr << "CREATED POOL" << endl;
+  Moses2::ThreadPool pool(system.options.server.numThreads, system.cpuAffinityOffset, system.cpuAffinityOffsetIncr);
+  //cerr << "CREATED POOL" << endl;
 
   if (params.GetParam("server")) {
     std::cerr << "RUN SERVER" << std::endl;
@@ -49,9 +51,10 @@ int main(int argc, char** argv)
     batch_run(params, system, pool);
   }
 
-	cerr << "Decoding took " << timer.get_elapsed_time() << endl;
-//	cerr << "g_numHypos=" << g_numHypos << endl;
-	cerr << "Finished" << endl;
+  cerr << "Decoding took " << timer.get_elapsed_time() << endl;
+  //	cerr << "g_numHypos=" << g_numHypos << endl;
+  cerr << "Finished" << endl;
+  return EXIT_SUCCESS;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
