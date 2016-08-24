@@ -100,11 +100,11 @@ void NBest::CreateDeviants(
 		const NBestColl &nbestColl,
 		Contenders &contenders) const
 {
-	cerr << endl << "ORIG:" << Debug(mgr.system) << endl;
+	//cerr << endl << "ORIG:" << Debug(mgr.system) << endl;
 
 	if (ind + 1 < arcList->size()) {
 		NBest *next = new NBest(mgr, nbestColl, *arcList, ind + 1);
-		cerr << "NEW1:" << next->Debug(mgr.system) << endl;
+		//cerr << "NEW1:" << next->Debug(mgr.system) << endl;
 		contenders.push(next);
 	}
 
@@ -113,7 +113,7 @@ void NBest::CreateDeviants(
 		if (child.second + 1 < child.first->size()) {
 			//cerr << "HH1 " << childInd << endl;
 			NBest *next = new NBest(mgr, *this, childInd);
-			cerr << "NEW2:" << next->Debug(mgr.system) << endl;
+			//cerr << "NEW2:" << next->Debug(mgr.system) << endl;
 			//cerr << "HH2 " << childInd << endl;
 			contenders.push(next);
 			//cerr << "HH3 " << childInd << endl;
@@ -126,7 +126,10 @@ void NBest::OutputToStream(
 		std::stringstream &strm,
 		const NBestColl &nbestColl) const
 {
-  const SCFG::TargetPhraseImpl &tp = GetHypo().GetTargetPhrase();
+  const SCFG::Hypothesis &hypo = GetHypo();
+  //strm << &hypo << " ";
+
+  const SCFG::TargetPhraseImpl &tp = hypo.GetTargetPhrase();
 
   for (size_t pos = 0; pos < tp.GetSize(); ++pos) {
 	const SCFG::Word &word = tp[pos];
@@ -162,9 +165,12 @@ std::string NBest::Debug(const System &system) const
 			<< ind << "] ";
 	for (size_t i = 0; i < children.size(); ++i) {
 		const Child &child = children[i];
+		const NBest &childNBest = *(*child.first)[child.second];
+
 		strm << child.first << "("
 				<< child.first->size() << ")["
-				<< child.second << "] ";
+				<< child.second << "]";
+		strm << childNBest.GetScores().GetTotalScore() << " ";
 	}
 	return strm.str();
 }
@@ -189,6 +195,7 @@ NBestColl::~NBestColl()
 void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 {
 	NBests &nbests = GetOrCreateNBests(arcList);
+	cerr << "nbests for " << &nbests << ":";
 
 	Contenders contenders;
 
@@ -246,8 +253,13 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 
 		if (ok) {
 			nbests.push_back(best);
+			//cerr << best->GetScores().GetTotalScore() << " ";
+			cerr << best->Debug(mgr.system) << endl;
 		}
 	}
+
+	cerr << endl;
+
 }
 
 const NBests &NBestColl::GetNBests(const ArcList &arcList) const
