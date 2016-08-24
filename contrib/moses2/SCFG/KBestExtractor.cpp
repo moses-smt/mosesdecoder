@@ -196,6 +196,13 @@ NBests::~NBests()
 	BOOST_FOREACH(const NBest *nbest, m_coll) {
 		delete nbest;
 	}
+
+	// delete bad contenders left in queue
+	while (!contenders.empty()) {
+		NBest *contender = contenders.top();
+		contenders.pop();
+		delete contender;
+	}
 }
 
 /////////////////////////////////////////////////////////////
@@ -212,24 +219,20 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 	NBests &nbests = GetOrCreateNBests(arcList);
 	//cerr << "nbests for " << &nbests << ":";
 
-	Contenders contenders;
-
-	boost::unordered_set<size_t> distinctHypos;
-
 	NBest *contender;
 
 	// best
 	contender = new NBest(mgr, *this, arcList, 0);
-	contenders.push(contender);
+	nbests.contenders.push(contender);
 
 	size_t maxIter = mgr.system.options.nbest.nbest_size * mgr.system.options.nbest.factor;
 	for (size_t i = 0; i < maxIter; ++i) {
-		if (nbests.GetSize() >= mgr.system.options.nbest.nbest_size || contenders.empty()) {
+		if (nbests.GetSize() >= mgr.system.options.nbest.nbest_size || nbests.contenders.empty()) {
 			break;
 		}
 
-		NBest *best = contenders.top();
-		contenders.pop();
+		NBest *best = nbests.contenders.top();
+		nbests.contenders.pop();
 
 		/*
 		cerr << "contenders: " << best->GetScores().GetTotalScore() << " ";
@@ -246,7 +249,7 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 		}
 		*/
 
-		best->CreateDeviants(mgr, *this, contenders);
+		best->CreateDeviants(mgr, *this, nbests.contenders);
 
 		bool ok = false;
 		if (mgr.system.options.nbest.only_distinct) {
@@ -255,7 +258,7 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 			boost::hash<std::string> string_hash;
 			size_t hash = string_hash(tgtPhrase);
 
-			if (distinctHypos.insert(hash).second) {
+			if (nbests.distinctHypos.insert(hash).second) {
 				ok = true;
 			}
 		}
@@ -271,13 +274,6 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 		else {
 			delete best;
 		}
-	}
-
-	// delete bad contenders left in queue
-	while (!contenders.empty()) {
-		NBest *contender = contenders.top();
-		contenders.pop();
-		delete contender;
 	}
 }
 

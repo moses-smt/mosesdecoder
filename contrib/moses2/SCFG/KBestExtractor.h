@@ -90,6 +90,9 @@ public:
 class NBests
 {
 public:
+	Contenders contenders;
+	boost::unordered_set<size_t> distinctHypos;
+
 	virtual ~NBests();
 
 	size_t GetSize() const
