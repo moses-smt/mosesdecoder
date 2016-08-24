@@ -17,7 +17,6 @@ namespace Moses2
 namespace SCFG
 {
 
-/////////////////////////////////////////////////////////////
 NBests::~NBests()
 {
 	BOOST_FOREACH(const NBest *nbest, m_coll) {
@@ -32,6 +31,16 @@ NBests::~NBests()
 	}
 }
 
+bool NBests::Extend(size_t ind)
+{
+	if (ind < m_coll.size()) {
+		return true;
+	}
+
+	assert(ind == m_coll.size());
+
+}
+
 void NBests::CreateDeviants(
 		const SCFG::Manager &mgr,
 		const ArcList &arcList,
@@ -44,7 +53,7 @@ void NBests::CreateDeviants(
 	contenders.push(contender);
 
 	size_t maxIter = mgr.system.options.nbest.nbest_size * mgr.system.options.nbest.factor;
-	for (size_t i = 0; i < maxIter; ++i) {
+	for (indIter = 0; indIter < maxIter; ++indIter) {
 		if (GetSize() >= mgr.system.options.nbest.nbest_size || contenders.empty()) {
 			break;
 		}
