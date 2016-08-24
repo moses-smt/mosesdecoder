@@ -144,7 +144,6 @@ alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../mose
     SCFG/Hypothesis.cpp
     SCFG/InputPath.cpp
     SCFG/InputPaths.cpp
-    SCFG/KBestExtractor.cpp
     SCFG/Manager.cpp
     SCFG/Misc.cpp
     SCFG/PhraseImpl.cpp
@@ -154,6 +153,10 @@ alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../mose
     SCFG/TargetPhraseImpl.cpp
     SCFG/TargetPhrases.cpp
     SCFG/Word.cpp
+    SCFG/nbest/KBestExtractor.cpp
+    SCFG/nbest/NBest.cpp
+    SCFG/nbest/NBests.cpp
+    SCFG/nbest/NBestColl.cpp
 
 	server/Server.cpp
 	server/Translator.cpp

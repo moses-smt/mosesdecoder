@@ -17,7 +17,7 @@
 #include "ActiveChart.h"
 #include "Sentence.h"
 
-#include "KBestExtractor.h"
+#include "nbest/KBestExtractor.h"
 
 using namespace std;
 
