@@ -7,7 +7,9 @@
 #include <boost/foreach.hpp>
 #include "util/exception.hh"
 #include "NBestColl.h"
+#include "NBests.h"
 #include "../Manager.h"
+#include "../../System.h"
 
 using namespace std;
 
