@@ -38,7 +38,7 @@ bool NBests::Extend(size_t ind)
 	}
 
 	assert(ind == m_coll.size());
-
+	return false;
 }
 
 void NBests::CreateDeviants(

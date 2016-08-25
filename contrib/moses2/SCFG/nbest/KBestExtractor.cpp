@@ -48,10 +48,11 @@ void KBestExtractor::OutputToStream(std::stringstream &strm)
 
 	const ArcLists &arcLists = m_mgr.arcLists;
 	const ArcList &arcList = arcLists.GetArcList(hypo);
-	const NBests &nbests = m_nbestColl.GetOrCreateNBests(m_mgr, arcList);
+	NBests &nbests = m_nbestColl.GetOrCreateNBests(m_mgr, arcList);
 
-	for (size_t i = 0; i < nbests.GetSize(); ++i) {
-		const NBest &deriv = nbests.Get(i);
+	size_t ind = 0;
+	while (nbests.Extend(ind)) {
+		const NBest &deriv = nbests.Get(ind);
 		strm << m_mgr.GetTranslationId() << " ||| ";
 		//cerr << "1" << flush;
 		strm << deriv.GetString();
@@ -64,6 +65,8 @@ void KBestExtractor::OutputToStream(std::stringstream &strm)
 		//cerr << "4" << flush;
 
 		strm << endl;
+
+		++ind;
 	}
 }
 
