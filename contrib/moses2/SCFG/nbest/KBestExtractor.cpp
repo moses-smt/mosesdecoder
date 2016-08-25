@@ -51,7 +51,7 @@ void KBestExtractor::OutputToStream(std::stringstream &strm)
 	NBests &nbests = m_nbestColl.GetOrCreateNBests(m_mgr, arcList);
 
 	size_t ind = 0;
-	while (nbests.Extend(ind)) {
+	while (nbests.Extend(m_mgr, m_nbestColl, ind)) {
 		const NBest &deriv = nbests.Get(ind);
 		strm << m_mgr.GetTranslationId() << " ||| ";
 		//cerr << "1" << flush;

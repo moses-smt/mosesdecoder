@@ -44,7 +44,7 @@ NBest::NBest(
 	for (size_t i = 0; i < prevHypos.size(); ++i) {
 		const SCFG::Hypothesis *prevHypo = prevHypos[i];
 		const ArcList &childArc = arcLists.GetArcList(prevHypo);
-		const NBests &childNBests = nbestColl.GetOrCreateNBests(mgr, childArc);
+		NBests &childNBests = nbestColl.GetOrCreateNBests(mgr, childArc);
 		Child child(&childNBests, 0);
 		children.push_back(child);
 	}
@@ -126,7 +126,9 @@ void NBest::CreateDeviants(
 
 	for (size_t childInd = 0; childInd < children.size(); ++childInd) {
 		const Child &child = children[childInd];
-		if (child.second + 1 < child.first->GetSize()) {
+		NBests &childNBests = *child.first;
+		bool extended = childNBests.Extend(mgr, nbestColl, child.second + 1);
+		if (extended) {
 			//cerr << "HH1 " << childInd << endl;
 			NBest *next = new NBest(mgr, *this, childInd, nbestColl);
 

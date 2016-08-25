@@ -31,7 +31,6 @@ void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 {
 	NBests &nbests = GetOrCreateNBests(mgr, arcList);
 	//cerr << "nbests for " << &nbests << ":";
-	nbests.CreateDeviants(mgr, arcList, *this);
 }
 
 NBests &NBestColl::GetOrCreateNBests(const SCFG::Manager &mgr, const ArcList &arcList)
@@ -39,8 +38,7 @@ NBests &NBestColl::GetOrCreateNBests(const SCFG::Manager &mgr, const ArcList &ar
 	NBests *ret;
 	Coll::iterator iter = m_candidates.find(&arcList);
 	if(iter == m_candidates.end()) {
-		ret = new NBests();
-		ret->CreateDeviants(mgr, arcList, *this);
+		ret = new NBests(mgr, arcList, *this);
 		m_candidates[&arcList] = ret;
 	}
 	else {

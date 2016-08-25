@@ -16,6 +16,17 @@ namespace Moses2
 {
 namespace SCFG
 {
+NBests::NBests(const SCFG::Manager &mgr,
+		const ArcList &arcList,
+		NBestColl &nbestColl)
+:indIter(0)
+{
+	// best
+	NBest *contender = new NBest(mgr, arcList, 0, nbestColl);
+	contenders.push(contender);
+	bool extended = Extend(mgr, nbestColl, 0);
+	assert(extended);
+}
 
 NBests::~NBests()
 {
@@ -31,54 +42,42 @@ NBests::~NBests()
 	}
 }
 
-bool NBests::Extend(size_t ind)
+bool NBests::Extend(const SCFG::Manager &mgr,
+		NBestColl &nbestColl,
+		size_t ind)
 {
 	if (ind < m_coll.size()) {
+		// asking for 1 we've dont already
 		return true;
 	}
 
 	assert(ind == m_coll.size());
-	return false;
-}
 
-void NBests::CreateDeviants(
-		const SCFG::Manager &mgr,
-		const ArcList &arcList,
-		NBestColl &nbestColl)
-{
-	NBest *contender;
-
-	// best
-	contender = new NBest(mgr, arcList, 0, nbestColl);
-	contenders.push(contender);
+	// checks
+	if (ind >= mgr.system.options.nbest.nbest_size) {
+		return false;
+	}
 
 	size_t maxIter = mgr.system.options.nbest.nbest_size * mgr.system.options.nbest.factor;
-	for (indIter = 0; indIter < maxIter; ++indIter) {
-		if (GetSize() >= mgr.system.options.nbest.nbest_size || contenders.empty()) {
-			break;
+
+	// MAIN LOOP, create 1 new deriv.
+	// The loop is for distinct nbest
+	bool ok = false;
+	while (!ok) {
+		++indIter;
+		if (indIter > maxIter) {
+			return false;
 		}
 
-		contender = contenders.top();
+		if (contenders.empty()) {
+			return false;
+		}
+
+		NBest *contender = contenders.top();
 		contenders.pop();
-
-		/*
-		cerr << "contenders: " << best->GetScores().GetTotalScore() << " ";
-		vector<NBest*> temp;
-		while (!contenders.empty()) {
-			NBest *t2 = contenders.top();
-			contenders.pop();
-			temp.push_back(t2);
-			cerr << t2->GetScores().GetTotalScore() << " ";
-		}
-		cerr << endl;
-		for (size_t t3 = 0; t3 < temp.size(); ++t3) {
-			contenders.push(temp[t3]);
-		}
-		*/
 
 		contender->CreateDeviants(mgr, nbestColl, contenders);
 
-		bool ok = false;
 		if (mgr.system.options.nbest.only_distinct) {
 			const string &tgtPhrase = contender->GetString();
 			//cerr << "tgtPhrase=" << tgtPhrase << endl;
@@ -97,13 +96,15 @@ void NBests::CreateDeviants(
 			Add(contender);
 			//cerr << best->GetScores().GetTotalScore() << " ";
 			//cerr << best->Debug(mgr.system) << endl;
+			return true;
 		}
 		else {
 			delete contender;
 		}
 	}
-}
 
+	return false;
+}
 
 }
 }

@@ -20,6 +20,10 @@ public:
 	Contenders contenders;
 	boost::unordered_set<size_t> distinctHypos;
 
+	NBests(const SCFG::Manager &mgr,
+			const ArcList &arcList,
+			NBestColl &nbestColl);
+
 	virtual ~NBests();
 
 	size_t GetSize() const
@@ -28,12 +32,9 @@ public:
 	const NBest &Get(size_t ind) const
 	{ return *m_coll[ind]; }
 
-	bool Extend(size_t ind);
-
-	void CreateDeviants(
-			const SCFG::Manager &mgr,
-			const ArcList &arcList,
-			NBestColl &nbestColl);
+	bool Extend(const SCFG::Manager &mgr,
+			NBestColl &nbestColl,
+			size_t ind);
 
 protected:
 	std::vector<const NBest*> m_coll;
