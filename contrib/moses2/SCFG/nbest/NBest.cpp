@@ -27,7 +27,7 @@ NBest::NBest(
 		size_t vind,
 		NBestColl &nbestColl)
 :arcList(&varcList)
-,ind(vind)
+,arcInd(vind)
 {
 	const SCFG::Hypothesis &hypo = GetHypo();
 
@@ -59,7 +59,7 @@ NBest::NBest(const SCFG::Manager &mgr,
 		size_t childInd,
 		NBestColl &nbestColl)
 :arcList(orig.arcList)
-,ind(orig.ind)
+,arcInd(orig.arcInd)
 ,children(orig.children)
 {
 	Child &child = children[childInd];
@@ -89,7 +89,7 @@ NBest::NBest(const SCFG::Manager &mgr,
 
 const SCFG::Hypothesis &NBest::GetHypo() const
 {
-	const HypothesisBase *hypoBase = (*arcList)[ind];
+	const HypothesisBase *hypoBase = (*arcList)[arcInd];
 	const SCFG::Hypothesis &hypo = *static_cast<const SCFG::Hypothesis*>(hypoBase);
 	return hypo;
 }
@@ -108,7 +108,7 @@ void NBest::CreateDeviants(
 		NBestColl &nbestColl,
 		Contenders &contenders) const
 {
-	if (ind + 1 < arcList->size()) {
+	if (arcInd + 1 < arcList->size()) {
 		// to use next arclist, all children must be 1st. Not sure if this is correct
 		bool ok = true;
 		BOOST_FOREACH(const Child &child, children) {
@@ -119,7 +119,7 @@ void NBest::CreateDeviants(
 		}
 
 		if (ok) {
-			NBest *next = new NBest(mgr, *arcList, ind + 1, nbestColl);
+			NBest *next = new NBest(mgr, *arcList, arcInd + 1, nbestColl);
 			contenders.push(next);
 		}
 	}
@@ -174,7 +174,7 @@ std::string NBest::Debug(const System &system) const
 	strm << GetScores().GetTotalScore() << " "
 			<< arcList << "("
 			<< arcList->size() << ")["
-			<< ind << "] ";
+			<< arcInd << "] ";
 	for (size_t i = 0; i < children.size(); ++i) {
 		const Child &child = children[i];
 		const NBest &childNBest = child.first->Get(child.second);

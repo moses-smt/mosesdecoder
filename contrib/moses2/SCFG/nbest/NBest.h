@@ -35,7 +35,7 @@ class NBest
 {
 public:
 	const ArcList *arcList;
-	size_t ind;
+	size_t arcInd;
 
 	typedef std::pair<const NBests*, size_t> Child; // key to another NBest
 	typedef std::vector<Child> Children;
