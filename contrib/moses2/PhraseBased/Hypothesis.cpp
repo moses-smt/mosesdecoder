@@ -139,9 +139,9 @@ void Hypothesis::OutputToStream(std::ostream &out) const
   }
   //cerr << *this << endl;
 
-  if (GetTargetPhrase().GetSize()) {
-    const Phrase<Moses2::Word> &phrase = GetTargetPhrase();
-    phrase.OutputToStream(out);
+  const TargetPhrase<Moses2::Word> &tp = GetTargetPhrase();
+  if (tp.GetSize()) {
+    tp.OutputToStream(*this, out);
     out << " ";
   }
 

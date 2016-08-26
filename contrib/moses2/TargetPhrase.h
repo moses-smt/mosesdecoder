@@ -42,6 +42,19 @@ public:
   SCORE *GetScoresProperty(int propertyInd) const
   {    return scoreProperties ? scoreProperties + propertyInd : NULL; }
 
+  void OutputToStream(const Hypothesis &hypo, std::ostream &out) const
+  {
+	size_t size = PhraseImplTemplate<WORD>::GetSize();
+	if (size) {
+	  (*this)[0].OutputToStream(out);
+	  for (size_t i = 1; i < size; ++i) {
+		const WORD &word = (*this)[i];
+		out << " BOO:";
+		word.OutputToStream(out);
+	  }
+	}
+  }
+
   virtual std::string Debug(const System &system) const
   {
     std::stringstream out;
