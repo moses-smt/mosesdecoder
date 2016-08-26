@@ -64,6 +64,17 @@ size_t Word::hash() const
   return ret;
 }
 
+size_t Word::hash(const std::vector<FactorType> &factors) const
+{
+  size_t seed = isNonTerminal;
+  for (size_t i = 0; i < factors.size(); ++i) {
+	  FactorType factorType = factors[i];
+	  const Factor *factor = m_factors[factorType];
+	  boost::hash_combine(seed, factor);
+  }
+  return seed;
+}
+
 void Word::OutputToStream(std::ostream &out) const
 {
   if (isNonTerminal) {

@@ -58,10 +58,12 @@ Sentence *Sentence::CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
     XMLParse(pool, system, 0, topNode, toks, xmlOptions);
 
     // debug
+    /*
     cerr << "xmloptions:" << endl;
     for (size_t i = 0; i < xmlOptions.size(); ++i) {
       cerr << xmlOptions[i]->Debug(system) << endl;
     }
+	*/
 
     // create words
     size_t size = toks.size();
@@ -105,8 +107,7 @@ Sentence *Sentence::CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
     }
     reorderingConstraint.FinalizeWalls();
 
-	cerr << "ret=" << ret->Debug(system) << endl;
-
+	//cerr << "ret=" << ret->Debug(system) << endl;
     return ret;
 }
 

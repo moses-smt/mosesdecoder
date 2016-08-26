@@ -27,6 +27,8 @@ public:
       const std::string &str);
 
   virtual size_t hash() const;
+  virtual size_t hash(const std::vector<FactorType> &factors) const;
+
   int Compare(const Word &compare) const;
 
   virtual bool operator==(const Word &compare) const

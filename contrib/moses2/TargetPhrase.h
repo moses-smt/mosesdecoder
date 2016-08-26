@@ -117,13 +117,13 @@ public:
   {
     FactorType placeholderFactor = system.options.input.placeholder_factor;
     std::map<size_t, const Factor*> ret;
-    std::cerr << "inputPhrase=" << inputPhrase.Debug(system) << std::endl;
+    //std::cerr << "inputPhrase=" << inputPhrase.Debug(system) << std::endl;
 
     for (size_t sourcePos = 0; sourcePos < inputPhrase.GetSize(); ++sourcePos) {
       const Factor *factor = inputPhrase[sourcePos][placeholderFactor];
       if (factor) {
-    	std::cerr << "factor=" << *factor << std::endl;
-    	std::cerr << "tp=" << Debug(system) << std::endl;
+    	//std::cerr << "factor=" << *factor << std::endl;
+    	//std::cerr << "tp=" << Debug(system) << std::endl;
         std::set<size_t> targetPos = GetAlignTerm().GetAlignmentsForSource(sourcePos);
         UTIL_THROW_IF2(targetPos.size() != 1,
                        "Placeholder should be aligned to 1, and only 1, word:" << targetPos.size() << "!=1");

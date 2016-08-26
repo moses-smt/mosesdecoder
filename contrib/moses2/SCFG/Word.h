@@ -38,6 +38,7 @@ public:
   }
 
   size_t hash() const;
+  virtual size_t hash(const std::vector<FactorType> &factors) const;
 
   virtual void OutputToStream(std::ostream &out) const;
   virtual std::string Debug(const System &system) const;
