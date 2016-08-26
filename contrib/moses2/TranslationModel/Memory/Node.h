@@ -33,12 +33,12 @@ public:
   ~Node()
   {}
 
-  void AddRule(SP &source, TP *target)
+  void AddRule(const std::vector<FactorType> &input, SP &source, TP *target)
   {
-    AddRule(source, target, 0);
+    AddRule(input, source, target, 0);
   }
 
-  TPS *Find(const SP &source, size_t pos = 0) const
+  TPS *Find(const std::vector<FactorType> &input, const SP &source, size_t pos = 0) const
   {
     assert(source.GetSize());
     if (pos == source.GetSize()) {
@@ -53,12 +53,12 @@ public:
       }
       else {
         const Node &child = iter->second;
-        return child.Find(source, pos + 1);
+        return child.Find(input, source, pos + 1);
       }
     }
   }
 
-  const Node *Find(const WORD &word) const
+  const Node *Find(const std::vector<FactorType> &input, const WORD &word) const
   {
     typename Children::const_iterator iter = m_children.find(word);
     if (iter == m_children.end()) {
@@ -111,7 +111,7 @@ protected:
   Phrase<WORD> *m_source;
   std::vector<TP*> *m_unsortedTPS;
 
-  Node &AddRule(SP &source, TP *target, size_t pos)
+  Node &AddRule(const std::vector<FactorType> &input, SP &source, TP *target, size_t pos)
   {
     if (pos == source.GetSize()) {
       if (m_unsortedTPS == NULL) {
@@ -127,7 +127,7 @@ protected:
       Node &child = m_children[word];
       //std::cerr << "added " << word << " " << &child << " from " << this << std::endl;
 
-      return child.AddRule(source, target, pos + 1);
+      return child.AddRule(input, source, target, pos + 1);
     }
   }
 

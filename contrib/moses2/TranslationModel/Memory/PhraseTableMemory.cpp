@@ -100,7 +100,7 @@ void PhraseTableMemory::Load(System &system)
       system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
           *target);
       //cerr << "EvaluateInIsolation:" << *target << endl;
-      m_rootPb->AddRule(*source, target);
+      m_rootPb->AddRule(m_input, *source, target);
 
       //cerr << "target=" << target->Debug(system) << endl;
     }
@@ -130,7 +130,7 @@ void PhraseTableMemory::Load(System &system)
       system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
           *target);
       //cerr << "EvaluateInIsolation:" << *target << endl;
-      m_rootSCFG->AddRule(*source, target);
+      m_rootSCFG->AddRule(m_input, *source, target);
     }
   }
 
@@ -155,7 +155,7 @@ TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool,
     InputPath &inputPath) const
 {
   const SubPhrase<Moses2::Word> &phrase = inputPath.subPhrase;
-  TargetPhrases *tps = m_rootPb->Find(phrase);
+  TargetPhrases *tps = m_rootPb->Find(m_input, phrase);
   return tps;
 }
 
@@ -225,7 +225,7 @@ void PhraseTableMemory::LookupGivenNode(
   UTIL_THROW_IF2(&prevNode == NULL, "node == NULL");
 
   size_t ptInd = GetPtInd();
-  const SCFGNODE *nextNode = prevNode.Find(wordSought);
+  const SCFGNODE *nextNode = prevNode.Find(m_input, wordSought);
 
   /*
   if (outPath.range.GetStartPos() == 1 || outPath.range.GetStartPos() == 2) {

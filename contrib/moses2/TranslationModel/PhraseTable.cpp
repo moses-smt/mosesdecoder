@@ -25,6 +25,8 @@ PhraseTable::PhraseTable(size_t startInd, const std::string &line) :
     StatelessFeatureFunction(startInd, line), m_tableLimit(20) // default
         , m_maxCacheSize(DEFAULT_MAX_TRANS_OPT_CACHE_SIZE)
 {
+  m_input.push_back(0);
+
   ReadParameters();
 }
 
@@ -42,7 +44,7 @@ void PhraseTable::SetParameter(const std::string& key, const std::string& value)
     m_path = value;
   }
   else if (key == "input-factor") {
-
+	m_input = Tokenize<FactorType>(value, ",");
   }
   else if (key == "output-factor") {
 
