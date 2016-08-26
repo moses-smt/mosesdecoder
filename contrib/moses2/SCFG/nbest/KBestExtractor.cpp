@@ -55,9 +55,9 @@ void KBestExtractor::OutputToStream(std::stringstream &strm)
 		const NBest &deriv = nbests.Get(ind);
 		strm << m_mgr.GetTranslationId() << " ||| ";
 		//cerr << "1" << flush;
-		strm << deriv.GetString();
+		strm << deriv.GetStringExclSentenceMarkers();
 		//cerr << "2" << flush;
-		strm << "||| ";
+		strm << " ||| ";
 		deriv.GetScores().OutputBreakdown(strm, m_mgr.system);
 		//cerr << "3" << flush;
 		strm << "||| ";

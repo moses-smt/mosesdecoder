@@ -65,6 +65,12 @@ public:
 	const std::string &GetString() const
 	{ return m_str; }
 
+	std::string GetStringExclSentenceMarkers() const
+	{
+		std::string ret = m_str.substr(4, m_str.size() - 10);
+		return ret;
+	}
+
     std::string Debug(const System &system) const;
 
 protected:
