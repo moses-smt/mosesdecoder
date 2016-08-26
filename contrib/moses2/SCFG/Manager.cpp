@@ -96,7 +96,7 @@ void Manager::Decode()
   stack = &m_stacks.GetStack(0, 5);
   cerr << "stack 0,12:" << stack->Debug(system) << endl;
   */
-  m_stacks.OutputStacks();
+  //m_stacks.OutputStacks();
 }
 
 void Manager::InitActiveChart(SCFG::InputPath &path)
