@@ -10,14 +10,17 @@
 #include "PhraseImplTemplate.h"
 #include "System.h"
 #include "Scores.h"
+#include "AlignmentInfoCollection.h"
 
 namespace Moses2
 {
+class AlignmentInfo;
 
 template<typename WORD>
 class TargetPhrase: public PhraseImplTemplate<WORD>
 {
 public:
+  typedef PhraseImplTemplate<WORD> Parent;
   const PhraseTable &pt;
   mutable void **ffData;
   SCORE *scoreProperties;
@@ -26,6 +29,7 @@ public:
   : PhraseImplTemplate<WORD>(pool, size)
   , pt(pt)
   , scoreProperties(NULL)
+  , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
   {
     m_scores = new (pool.Allocate<Scores>()) Scores(system, pool,
       system.featureFunctions.GetNumScores());
@@ -41,6 +45,14 @@ public:
 
   SCORE *GetScoresProperty(int propertyInd) const
   {    return scoreProperties ? scoreProperties + propertyInd : NULL; }
+
+  const AlignmentInfo &GetAlignTerm() const {
+    return *m_alignTerm;
+  }
+
+  void SetAlignTerm(const AlignmentInfo &alignInfo) {
+    m_alignTerm = &alignInfo;
+  }
 
   void OutputToStream(const Hypothesis &hypo, std::ostream &out) const
   {
@@ -66,6 +78,7 @@ public:
 
 protected:
   Scores *m_scores;
+  const AlignmentInfo *m_alignTerm;
 };
 
 ///////////////////////////////////////////////////////////////////////

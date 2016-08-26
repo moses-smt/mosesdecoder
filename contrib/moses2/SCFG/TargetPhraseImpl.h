@@ -30,6 +30,8 @@ namespace SCFG
 class TargetPhraseImpl: public Moses2::TargetPhrase<SCFG::Word>
 {
 public:
+  typedef Moses2::TargetPhrase<SCFG::Word> Parent;
+
   SCFG::Word lhs;
 
   static TargetPhraseImpl *CreateFromString(MemPool &pool,
@@ -49,15 +51,8 @@ public:
     m_alignTerm = AlignmentInfoCollection::Instance().Add(coll);
   }
 
-  const AlignmentInfo &GetAlignTerm() const {
-    return *m_alignTerm;
-  }
   const AlignmentInfo &GetAlignNonTerm() const {
     return *m_alignNonTerm;
-  }
-
-  void SetAlignTerm(const AlignmentInfo &alignInfo) {
-    m_alignTerm = &alignInfo;
   }
 
   void SetAlignNonTerm(const AlignmentInfo &alignInfo) {
@@ -83,7 +78,7 @@ public:
 protected:
   SCORE m_estimatedScore;
 
-  const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
+  const AlignmentInfo *m_alignNonTerm;
 
   // ALNREP = alignment representation,
   // see AlignmentInfo constructors for supported representations
