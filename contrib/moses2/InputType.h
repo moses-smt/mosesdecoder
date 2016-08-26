@@ -32,12 +32,17 @@ public:
 	const char *GetTranslation() const
 	{ return m_translation; }
 
-	void SetTranslation(MemPool &pool, const std::string &val);
+	const char *GetEntity() const
+	{ return m_entity; }
 
-	void Debug(std::ostream &out, const System &system) const;
+	void SetTranslation(MemPool &pool, const std::string &val);
+	void SetEntity(MemPool &pool, const std::string &val);
+
+	std::string Debug(const System &system) const;
   public:
 	char *m_nodeName;
 	char *m_translation;
+	char *m_entity;
 
   };
 

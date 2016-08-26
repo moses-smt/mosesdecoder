@@ -14,6 +14,7 @@ namespace Moses2
 InputType::XMLOption::XMLOption(MemPool &pool, const std::string &nodeName, size_t vStartPos)
 :startPos(vStartPos)
 ,prob(0)
+,m_entity(NULL)
 {
 	m_nodeName = pool.Allocate<char>(nodeName.size() + 1);
 	strcpy(m_nodeName, nodeName.c_str());
@@ -25,12 +26,23 @@ void InputType::XMLOption::SetTranslation(MemPool &pool, const std::string &val)
 	strcpy(m_translation, val.c_str());
 }
 
-void InputType::XMLOption::Debug(std::ostream &out, const System &system) const
+void InputType::XMLOption::SetEntity(MemPool &pool, const std::string &val)
 {
+	m_entity = pool.Allocate<char>(val.size() + 1);
+	strcpy(m_entity, val.c_str());
+}
+
+std::string InputType::XMLOption::Debug(const System &system) const
+{
+  std::stringstream out;
   out << "[" << startPos << "," << phraseSize << "]="
 	<< m_nodeName << ","
 	<< m_translation << ","
 	<< prob;
+  if (m_entity) {
+	  out << "," << m_entity;
+  }
+  return out.str();
 }
 
 //////////////////////////////////////////////////////////////////////////////

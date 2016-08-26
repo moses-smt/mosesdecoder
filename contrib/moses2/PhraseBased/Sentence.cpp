@@ -58,11 +58,10 @@ Sentence *Sentence::CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
     XMLParse(pool, system, 0, topNode, toks, xmlOptions);
 
     // debug
-    /*
+    cerr << "xmloptions:" << endl;
     for (size_t i = 0; i < xmlOptions.size(); ++i) {
-      cerr << *xmlOptions[i] << endl;
+      cerr << xmlOptions[i]->Debug(system) << endl;
     }
-    */
 
     // create words
     size_t size = toks.size();
@@ -89,12 +88,24 @@ Sentence *Sentence::CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
       else if (strcmp(xmlOption->GetNodeName(), "zone") == 0) {
         reorderingConstraint.SetZone( xmlOption->startPos, xmlOption->startPos + xmlOption->phraseSize -1 );
       }
+      else if (strcmp(xmlOption->GetNodeName(), "ne") == 0) {
+    	  FactorType placeholderFactor = system.options.input.placeholder_factor;
+    	  UTIL_THROW_IF2(placeholderFactor == NOT_FOUND,
+    			  "Must have argument -placeholder-factor [NUM]");
+    	  UTIL_THROW_IF2(xmlOption->phraseSize != 1,
+    			  "Placeholder must only cover 1 word");
+
+    	  const Factor *factor = vocab.AddFactor(xmlOption->GetEntity(), system, false);
+    	  (*ret)[xmlOption->startPos][placeholderFactor] = factor;
+      }
       else {
     	// default - forced translation. Add to class variable
     	  ret->AddXMLOption(system, xmlOption);
       }
     }
     reorderingConstraint.FinalizeWalls();
+
+	cerr << "ret=" << ret->Debug(system) << endl;
 
     return ret;
 }
@@ -125,9 +136,15 @@ void Sentence::XMLParse(
     if (!nodeName.empty()) {
       XMLOption *xmlOption = new (pool.Allocate<XMLOption>()) XMLOption(pool, nodeName, startPos);
 
-      pugi::xml_attribute attr = childNode.attribute("translation");
+      pugi::xml_attribute attr;
+      attr = childNode.attribute("translation");
       if (!attr.empty()) {
     	  xmlOption->SetTranslation(pool, attr.as_string());
+      }
+
+      attr = childNode.attribute("entity");
+      if (!attr.empty()) {
+    	  xmlOption->SetEntity(pool, attr.as_string());
       }
 
       attr = childNode.attribute("prob");
