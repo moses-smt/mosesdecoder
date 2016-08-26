@@ -336,6 +336,12 @@ TargetPhraseImpl *ProbingPT::CreateTargetPhrase(
     offset += sizeof(uint32_t);
   }
 
+  // align
+  uint32_t alignTerm = tpInfo->alignTerm;
+  //cerr << "alignTerm=" << alignTerm << endl;
+  UTIL_THROW_IF2(alignTerm >= m_aligns.size(), "Unknown alignInd");
+  tp->Parent::SetAlignTerm(*m_aligns[alignTerm]);
+
   // properties TODO
 
   return tp;

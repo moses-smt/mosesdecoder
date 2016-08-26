@@ -54,6 +54,14 @@ public:
     m_alignTerm = &alignInfo;
   }
 
+  // ALNREP = alignment representation,
+  // see AlignmentInfo constructors for supported representations
+  template<typename ALNREP>
+  void
+  SetAlignTerm(const ALNREP &coll) {
+    m_alignTerm = AlignmentInfoCollection::Instance().Add(coll);
+  }
+
   void OutputToStream(const Hypothesis &hypo, std::ostream &out) const
   {
 	size_t size = PhraseImplTemplate<WORD>::GetSize();

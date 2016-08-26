@@ -43,14 +43,6 @@ public:
 
   virtual ~TargetPhraseImpl();
 
-  // ALNREP = alignment representation,
-  // see AlignmentInfo constructors for supported representations
-  template<typename ALNREP>
-  void
-  SetAlignTerm(const ALNREP &coll) {
-    m_alignTerm = AlignmentInfoCollection::Instance().Add(coll);
-  }
-
   const AlignmentInfo &GetAlignNonTerm() const {
     return *m_alignNonTerm;
   }

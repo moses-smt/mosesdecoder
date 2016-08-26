@@ -26,6 +26,7 @@ class PhraseTable;
 class TargetPhraseImpl: public TargetPhrase<Moses2::Word>
 {
 public:
+  typedef TargetPhrase<Moses2::Word> Parent;
 
   static TargetPhraseImpl *CreateFromString(MemPool &pool,
       const PhraseTable &pt, const System &system, const std::string &str);
