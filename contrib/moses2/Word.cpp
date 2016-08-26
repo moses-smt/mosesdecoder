@@ -42,6 +42,11 @@ void Word::CreateFromString(FactorCollection &vocab, const System &system,
     const Factor *factor = vocab.AddFactor(tok, system, false);
     m_factors[i] = factor;
   }
+
+  // null the rest
+  for (size_t i = toks.size(); i < MAX_NUM_FACTORS; ++i) {
+	m_factors[i] = NULL;
+  }
 }
 
 size_t Word::hash() const

@@ -45,8 +45,6 @@ public:
   virtual SCORE GetScoreForPruning() const
   { return GetFutureScore(); }
 
-  virtual std::string Debug(const System &system) const;
-
 protected:
   SCORE m_estimatedScore;
 

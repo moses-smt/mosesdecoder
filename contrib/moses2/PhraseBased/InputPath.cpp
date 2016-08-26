@@ -50,7 +50,7 @@ std::string InputPath::Debug(const System &system) const
 {
   stringstream out;
 
-  out << range << " ";
+  out << range << " " << flush;
   out << subPhrase.Debug(system);
   return out.str();
 }

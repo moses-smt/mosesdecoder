@@ -49,12 +49,4 @@ TargetPhraseImpl::~TargetPhraseImpl()
   // TODO Auto-generated destructor stub
 }
 
-std::string TargetPhraseImpl::Debug(const System &system) const
-{
-  stringstream out;
-  out << Phrase<Moses2::Word>::Debug(system);
-  out << " SCORES:" << GetScores().Debug(system);
-  return out.str();
-}
-
 }

@@ -11,6 +11,7 @@
 #include "System.h"
 #include "Scores.h"
 #include "AlignmentInfoCollection.h"
+#include "TranslationModel/PhraseTable.h"
 
 namespace Moses2
 {
@@ -85,46 +86,63 @@ public:
 
   }
 
-  void OutputToStream(const Phrase<Moses2::Word> &inputPhrase, FactorType placeholderFactor, std::ostream &out) const
+  void OutputToStream(const System &system, const Phrase<Moses2::Word> &inputPhrase, std::ostream &out) const
   {
+	  // get placeholders
+	  FactorType placeholderFactor = system.options.input.placeholder_factor;
 	  std::map<size_t, const Factor*> placeholders;
 	  if (placeholderFactor != NOT_FOUND) {
 	    // creates map of target position -> factor for placeholders
-	    placeholders = GetPlaceholders(inputPhrase, placeholderFactor);
+	    placeholders = GetPlaceholders(system, inputPhrase);
 	  }
 
 	  size_t size = PhraseImplTemplate<WORD>::GetSize();
 	  for (size_t i = 0; i < size; ++i) {
-		const WORD &word = (*this)[i];
-		word.OutputToStream(out);
-		out << " ";
+		  // output placeholder, if any
+	      std::map<size_t, const Factor*>::const_iterator iter = placeholders.find(i);
+	      if (iter == placeholders.end()) {
+		      const WORD &word = (*this)[i];
+		      word.OutputToStream(out);
+	      }
+	      else {
+	    	  const Factor *factor = iter->second;
+		      out << *factor;
+	      }
+
+	      out << " ";
 	  }
+  }
+
+  std::map<size_t, const Factor*> GetPlaceholders(const System &system, const Phrase<WORD> &inputPhrase) const
+  {
+    FactorType placeholderFactor = system.options.input.placeholder_factor;
+    std::map<size_t, const Factor*> ret;
+    std::cerr << "inputPhrase=" << inputPhrase.Debug(system) << std::endl;
+
+    for (size_t sourcePos = 0; sourcePos < inputPhrase.GetSize(); ++sourcePos) {
+      const Factor *factor = inputPhrase[sourcePos][placeholderFactor];
+      if (factor) {
+    	std::cerr << "factor=" << factor << std::endl;
+        std::set<size_t> targetPos = GetAlignTerm().GetAlignmentsForSource(sourcePos);
+        UTIL_THROW_IF2(targetPos.size() != 1,
+                       "Placeholder should be aligned to 1, and only 1, word:" << targetPos.size() << "!=1");
+        ret[*targetPos.begin()] = factor;
+      }
+    }
+
+    return ret;
   }
 
   virtual std::string Debug(const System &system) const
   {
     std::stringstream out;
     out << Phrase<WORD>::Debug(system);
+    out << " pt=" << pt.GetName() << " ";
     out << " SCORES:" << GetScores().Debug(system);
+    out << " ALIGN-T:";
+    out << GetAlignTerm().Debug(system);
 
     return out.str();
-  }
-
-  std::map<size_t, const Factor*> GetPlaceholders(const Phrase<WORD> &inputPhrase, FactorType placeholderFactor) const
-  {
-    std::map<size_t, const Factor*> ret;
-
-    for (size_t sourcePos = 0; sourcePos < inputPhrase.GetSize(); ++sourcePos) {
-      const Factor *factor = inputPhrase[sourcePos][placeholderFactor];
-      if (factor) {
-        std::set<size_t> targetPos = GetAlignTerm().GetAlignmentsForSource(sourcePos);
-        UTIL_THROW_IF2(targetPos.size() != 1,
-                       "Placeholder should be aligned to 1, and only 1, word");
-        ret[*targetPos.begin()] = factor;
-      }
-    }
-
-    return ret;
   }
 
 protected:

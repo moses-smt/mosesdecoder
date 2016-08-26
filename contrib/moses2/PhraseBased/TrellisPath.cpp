@@ -105,15 +105,17 @@ void TrellisPath::OutputToStream(std::ostream &out, const System &system) const
 
 std::string TrellisPath::OutputTargetPhrase(const System &system) const
 {
-  //cerr << "path=" << this << " " << nodes.size() << endl;
   std::stringstream out;
-  for (int i = nodes.size() - 1; i >= 0; --i) {
-    const TrellisNode &node = nodes[i];
-    const Hypothesis *hypo = static_cast<const Hypothesis*>(node.GetHypo());
-    //cerr << "hypo=" << hypo << " " << *hypo << endl;
-    const SubPhrase<Moses2::Word> &subPhrase = static_cast<const InputPath&>(hypo->GetInputPath()).subPhrase;
+  for (int i = nodes.size() - 2; i >= 0; --i) {
+	const TrellisNode &node = nodes[i];
 
-    hypo->GetTargetPhrase().OutputToStream(subPhrase, system.options.input.placeholder_factor, out);
+    const Hypothesis *hypo = static_cast<const Hypothesis*>(node.GetHypo());
+    const TargetPhrase<Moses2::Word> &tp = hypo->GetTargetPhrase();
+
+    const InputPath &path = static_cast<const InputPath&>(hypo->GetInputPath());
+    const SubPhrase<Moses2::Word> &subPhrase = path.subPhrase;
+
+    tp.OutputToStream(system, subPhrase, out);
   }
   return out.str();
 }

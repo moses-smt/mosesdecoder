@@ -137,13 +137,15 @@ void Hypothesis::OutputToStream(std::ostream &out) const
   if (m_prevHypo) {
     m_prevHypo->OutputToStream(out);
   }
-  //cerr << *this << endl;
+  //cerr << "range=" << GetInputPath().range << endl;
 
   const TargetPhrase<Moses2::Word> &tp = GetTargetPhrase();
   if (tp.GetSize()) {
     const SubPhrase<Moses2::Word> &subPhrase = static_cast<const InputPath&>(GetInputPath()).subPhrase;
+    //cerr << "tp=" << tp.Debug(m_mgr->system) << endl;
+    //cerr << "subPhrase=" << subPhrase.Debug(m_mgr->system) << endl;
 
-    tp.OutputToStream(subPhrase, m_mgr->system.options.input.placeholder_factor, out);
+    tp.OutputToStream(m_mgr->system, subPhrase, out);
   }
 
   if (m_path->range.GetStartPos() != NOT_FOUND) {
