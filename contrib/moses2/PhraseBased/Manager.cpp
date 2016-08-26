@@ -258,7 +258,7 @@ std::string Manager::OutputNBest()
 
 		if (ok) {
 			++bestInd;
-			out << transId << " |||";
+			out << transId << " ||| ";
 			path->OutputToStream(out, system);
 			out << "\n";
 		}

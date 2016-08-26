@@ -141,8 +141,9 @@ void Hypothesis::OutputToStream(std::ostream &out) const
 
   const TargetPhrase<Moses2::Word> &tp = GetTargetPhrase();
   if (tp.GetSize()) {
-    tp.OutputToStream(*this, out);
-    out << " ";
+    const SubPhrase<Moses2::Word> &subPhrase = static_cast<const InputPath&>(GetInputPath()).subPhrase;
+
+    tp.OutputToStream(subPhrase, m_mgr->system.options.input.placeholder_factor, out);
   }
 
   if (m_path->range.GetStartPos() != NOT_FOUND) {

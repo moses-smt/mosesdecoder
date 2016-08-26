@@ -7,9 +7,11 @@
 #include <cassert>
 #include <sstream>
 #include "TrellisPath.h"
-#include "../TrellisPaths.h"
 #include "Hypothesis.h"
+#include "InputPath.h"
+#include "../TrellisPaths.h"
 #include "../System.h"
+#include "../SubPhrase.h"
 
 using namespace std;
 
@@ -109,8 +111,9 @@ std::string TrellisPath::OutputTargetPhrase(const System &system) const
     const TrellisNode &node = nodes[i];
     const Hypothesis *hypo = static_cast<const Hypothesis*>(node.GetHypo());
     //cerr << "hypo=" << hypo << " " << *hypo << endl;
-    hypo->GetTargetPhrase().OutputToStream(*hypo, out);
-    out << " ";
+    const SubPhrase<Moses2::Word> &subPhrase = static_cast<const InputPath&>(hypo->GetInputPath()).subPhrase;
+
+    hypo->GetTargetPhrase().OutputToStream(subPhrase, system.options.input.placeholder_factor, out);
   }
   return out.str();
 }

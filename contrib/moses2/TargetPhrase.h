@@ -85,17 +85,20 @@ public:
 
   }
 
-  void OutputToStream(const Hypothesis &hypo, std::ostream &out) const
+  void OutputToStream(const Phrase<Moses2::Word> &inputPhrase, FactorType placeholderFactor, std::ostream &out) const
   {
-	size_t size = PhraseImplTemplate<WORD>::GetSize();
-	if (size) {
-	  (*this)[0].OutputToStream(out);
-	  for (size_t i = 1; i < size; ++i) {
-		const WORD &word = (*this)[i];
-		out << " ";
-		word.OutputToStream(out);
+	  std::map<size_t, const Factor*> placeholders;
+	  if (placeholderFactor != NOT_FOUND) {
+	    // creates map of target position -> factor for placeholders
+	    placeholders = GetPlaceholders(inputPhrase, placeholderFactor);
 	  }
-	}
+
+	  size_t size = PhraseImplTemplate<WORD>::GetSize();
+	  for (size_t i = 0; i < size; ++i) {
+		const WORD &word = (*this)[i];
+		word.OutputToStream(out);
+		out << " ";
+	  }
   }
 
   virtual std::string Debug(const System &system) const
@@ -105,6 +108,23 @@ public:
     out << " SCORES:" << GetScores().Debug(system);
 
     return out.str();
+  }
+
+  std::map<size_t, const Factor*> GetPlaceholders(const Phrase<WORD> &inputPhrase, FactorType placeholderFactor) const
+  {
+    std::map<size_t, const Factor*> ret;
+
+    for (size_t sourcePos = 0; sourcePos < inputPhrase.GetSize(); ++sourcePos) {
+      const Factor *factor = inputPhrase[sourcePos][placeholderFactor];
+      if (factor) {
+        std::set<size_t> targetPos = GetAlignTerm().GetAlignmentsForSource(sourcePos);
+        UTIL_THROW_IF2(targetPos.size() != 1,
+                       "Placeholder should be aligned to 1, and only 1, word");
+        ret[*targetPos.begin()] = factor;
+      }
+    }
+
+    return ret;
   }
 
 protected:
