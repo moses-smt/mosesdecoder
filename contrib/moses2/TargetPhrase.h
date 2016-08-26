@@ -117,7 +117,7 @@ public:
   {
     FactorType placeholderFactor = system.options.input.placeholder_factor;
     std::map<size_t, const Factor*> ret;
-    std::cerr << "inputPhrase=" << inputPhrase.Debug(system) << std::endl;
+    //std::cerr << "inputPhrase=" << inputPhrase.Debug(system) << std::endl;
 
     for (size_t sourcePos = 0; sourcePos < inputPhrase.GetSize(); ++sourcePos) {
       const Factor *factor = inputPhrase[sourcePos][placeholderFactor];

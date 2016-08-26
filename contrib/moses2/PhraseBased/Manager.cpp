@@ -234,7 +234,6 @@ std::string Manager::OutputNBest()
 	size_t maxIter = system.options.nbest.nbest_size * system.options.nbest.factor;
 	size_t bestInd = 0;
 	for (size_t i = 0; i < maxIter; ++i) {
-		cerr << "nbest i=" << i << endl;
 		if (bestInd > system.options.nbest.nbest_size || contenders.empty()) {
 			break;
 		}

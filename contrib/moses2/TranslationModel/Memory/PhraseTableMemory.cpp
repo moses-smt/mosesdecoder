@@ -88,7 +88,7 @@ void PhraseTableMemory::Load(System &system)
       target->GetScores().CreateFromString(toks[2], *this, system, true);
       //cerr << "created scores:" << *target << endl;
 
-      cerr << "alignstr=" << toks[3] << endl;
+      //cerr << "alignstr=" << toks[3] << endl;
       target->SetAlignmentInfo(toks[3]);
 
       // properties
@@ -102,7 +102,7 @@ void PhraseTableMemory::Load(System &system)
       //cerr << "EvaluateInIsolation:" << *target << endl;
       m_rootPb->AddRule(*source, target);
 
-      cerr << "target=" << target->Debug(system) << endl;
+      //cerr << "target=" << target->Debug(system) << endl;
     }
     else {
       SCFG::PhraseImpl *source = SCFG::PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
@@ -136,11 +136,11 @@ void PhraseTableMemory::Load(System &system)
 
   if (system.isPb) {
     m_rootPb->SortAndPrune(m_tableLimit, systemPool, system);
-    cerr << "root=" << &m_rootPb << endl;
+    //cerr << "root=" << &m_rootPb << endl;
   }
   else {
     m_rootSCFG->SortAndPrune(m_tableLimit, systemPool, system);
-    cerr << "root=" << &m_rootPb << endl;
+    //cerr << "root=" << &m_rootPb << endl;
   }
   /*
   BOOST_FOREACH(const PtMem::Node<Word>::Children::value_type &valPair, m_rootPb.GetChildren()) {
