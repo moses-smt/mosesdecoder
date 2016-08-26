@@ -92,6 +92,7 @@ public:
 	  (*this)[0].OutputToStream(out);
 	  for (size_t i = 1; i < size; ++i) {
 		const WORD &word = (*this)[i];
+		out << " ";
 		word.OutputToStream(out);
 	  }
 	}
