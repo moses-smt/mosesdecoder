@@ -88,6 +88,8 @@ void PhraseTableMemory::Load(System &system)
       target->GetScores().CreateFromString(toks[2], *this, system, true);
       //cerr << "created scores:" << *target << endl;
 
+      target->SetAlignmentInfo(toks[3]);
+
       // properties
       if (toks.size() == 7) {
         //target->properties = (char*) system.systemPool.Allocate(toks[6].size() + 1);
@@ -106,7 +108,7 @@ void PhraseTableMemory::Load(System &system)
       //cerr << "created source:" << *source << endl;
       SCFG::TargetPhraseImpl *target = SCFG::TargetPhraseImpl::CreateFromString(systemPool, *this,
           system, toks[1]);
-      target->SetAlignmentInfo(toks[3]);
+
       //cerr << "created target " << *target << " source=" << *source << endl;
 
       target->GetScores().CreateFromString(toks[2], *this, system, true);
@@ -114,6 +116,8 @@ void PhraseTableMemory::Load(System &system)
 
       //vector<SCORE> scores = Tokenize<SCORE>(toks[2]);
       //target->sortScore = (scores.size() >= 3) ? TransformScore(scores[2]) : 0;
+
+      target->SetAlignmentInfo(toks[3]);
 
       // properties
       if (toks.size() == 7) {

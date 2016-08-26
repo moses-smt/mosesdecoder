@@ -62,6 +62,29 @@ public:
     m_alignTerm = AlignmentInfoCollection::Instance().Add(coll);
   }
 
+  virtual void SetAlignmentInfo(const std::string &alignString)
+  {
+    AlignmentInfo::CollType alignTerm;
+
+    std::vector<std::string> toks = Tokenize(alignString);
+    for (size_t i = 0; i < toks.size(); ++i) {
+      std::vector<size_t> alignPair = Tokenize<size_t>(toks[i], "-");
+      UTIL_THROW_IF2(alignPair.size() != 2, "Wrong alignment format");
+
+      size_t sourcePos = alignPair[0];
+      size_t targetPos = alignPair[1];
+
+      alignTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
+    }
+
+    SetAlignTerm(alignTerm);
+    //    cerr << "TargetPhrase::SetAlignmentInfo(const StringPiece &alignString) this:|" << *this << "|\n";
+
+    //cerr << "alignTerm=" << alignTerm.size() << endl;
+    //cerr << "alignNonTerm=" << alignNonTerm.size() << endl;
+
+  }
+
   void OutputToStream(const Hypothesis &hypo, std::ostream &out) const
   {
 	size_t size = PhraseImplTemplate<WORD>::GetSize();
@@ -69,7 +92,6 @@ public:
 	  (*this)[0].OutputToStream(out);
 	  for (size_t i = 1; i < size; ++i) {
 		const WORD &word = (*this)[i];
-		out << " BOO:";
 		word.OutputToStream(out);
 	  }
 	}
