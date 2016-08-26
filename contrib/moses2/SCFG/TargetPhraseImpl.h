@@ -31,7 +31,6 @@ class TargetPhraseImpl: public Moses2::TargetPhrase<SCFG::Word>
 {
 public:
   SCFG::Word lhs;
-  const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
 
   static TargetPhraseImpl *CreateFromString(MemPool &pool,
       const PhraseTable &pt, const System &system, const std::string &str);
@@ -57,12 +56,12 @@ public:
     return *m_alignNonTerm;
   }
 
-  // ALNREP = alignment representation,
-  // see AlignmentInfo constructors for supported representations
-  template<typename ALNREP>
-  void
-  SetAlignNonTerm(const ALNREP &coll) {
-    m_alignNonTerm = AlignmentInfoCollection::Instance().Add(coll);
+  void SetAlignTerm(const AlignmentInfo &alignInfo) {
+    m_alignTerm = &alignInfo;
+  }
+
+  void SetAlignNonTerm(const AlignmentInfo &alignInfo) {
+	m_alignNonTerm = &alignInfo;
   }
 
   void SetAlignmentInfo(const std::string &alignString);
@@ -83,6 +82,16 @@ public:
   //mutable void *chartState;
 protected:
   SCORE m_estimatedScore;
+
+  const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
+
+  // ALNREP = alignment representation,
+  // see AlignmentInfo constructors for supported representations
+  template<typename ALNREP>
+  void
+  SetAlignNonTerm(const ALNREP &coll) {
+    m_alignNonTerm = AlignmentInfoCollection::Instance().Add(coll);
+  }
 
 };
 
