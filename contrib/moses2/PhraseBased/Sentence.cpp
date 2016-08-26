@@ -9,7 +9,6 @@
 #include "Sentence.h"
 #include "../System.h"
 #include "../parameters/AllOptions.h"
-#include "../pugixml.hpp"
 #include "../legacy/Util2.h"
 
 using namespace std;
@@ -93,7 +92,7 @@ Sentence *Sentence::CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
       else if (strcmp(xmlOption->GetNodeName(), "ne") == 0) {
     	  FactorType placeholderFactor = system.options.input.placeholder_factor;
     	  UTIL_THROW_IF2(placeholderFactor == NOT_FOUND,
-    			  "Must have argument -placeholder-factor [NUM]");
+    			  "Placeholder XML in input. Must have argument -placeholder-factor [NUM]");
     	  UTIL_THROW_IF2(xmlOption->phraseSize != 1,
     			  "Placeholder must only cover 1 word");
 

@@ -11,6 +11,7 @@
 #include "../InputType.h"
 #include "../MemPool.h"
 #include "../legacy/Util2.h"
+#include "../pugixml.hpp"
 
 namespace Moses2
 {
@@ -33,6 +34,18 @@ public:
 
   virtual ~Sentence()
   {}
+
+protected:
+  static Sentence *CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
+      const System &system, const std::string &str);
+
+  static void XMLParse(
+	  MemPool &pool,
+	  const System &system,
+      size_t depth,
+      const pugi::xml_node &parentNode,
+      std::vector<std::string> &toks,
+      std::vector<XMLOption*> &xmlOptions);
 
 };
 

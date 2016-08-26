@@ -91,35 +91,12 @@ void Manager::Decode()
   }
 
   const Stack *stack;
+
   /*
-  stack = &m_stacks.GetStack(9, 2);
-  cerr << "stack 9,2:" << stack->Debug(system) << endl;
-
-  stack = &m_stacks.GetStack(6, 3);
-  cerr << "stack 6,3:" << stack->Debug(system) << endl;
-
-  stack = &m_stacks.GetStack(5, 1);
-  cerr << "stack 5,1:" << stack->Debug(system) << endl;
-
-  stack = &m_stacks.GetStack(1, 4);
-  cerr << "stack 1,4:" << stack->Debug(system) << endl;
-
   stack = &m_stacks.GetStack(0, 5);
-  cerr << "stack 0,5:" << stack->Debug(system) << endl;
-
-  stack = &m_stacks.GetStack(0, 6);
-  cerr << "stack 0,6:" << stack->Debug(system) << endl;
-
-  stack = &m_stacks.GetStack(0, 9);
-  cerr << "stack 0,9:" << stack->Debug(system) << endl;
-
-  stack = &m_stacks.GetStack(0, 11);
-  cerr << "stack 0,11:" << stack->Debug(system) << endl;
-
-  stack = &m_stacks.GetStack(0, 12);
   cerr << "stack 0,12:" << stack->Debug(system) << endl;
   */
-  //m_stacks.OutputStacks();
+  m_stacks.OutputStacks();
 }
 
 void Manager::InitActiveChart(SCFG::InputPath &path)
