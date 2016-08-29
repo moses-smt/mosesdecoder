@@ -106,18 +106,16 @@ std::string Word::Debug(const System &system) const
   return out.str();
 }
 
-void Word::OutputToStream(std::ostream &out) const
+void Word::OutputToStream(const System &system, std::ostream &out) const
 {
-  bool outputAlready = false;
-  for (size_t i = 0; i < MAX_NUM_FACTORS; ++i) {
-    const Factor *factor = m_factors[i];
-    if (factor) {
-      if (outputAlready) {
-        out << "|";
-      }
-      out << *factor;
-      outputAlready = true;
-    }
+  const std::vector<FactorType> &factorTypes = system.options.output.factor_order;
+  out << *m_factors[ factorTypes[0] ];
+
+  for (size_t i = 1; i < factorTypes.size(); ++i) {
+	FactorType factorType = factorTypes[i];
+    const Factor *factor = m_factors[factorType];
+
+    out << "|" << *factor;
   }
 }
 

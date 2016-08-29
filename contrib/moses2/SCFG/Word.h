@@ -43,7 +43,7 @@ public:
   size_t hash() const;
   virtual size_t hash(const std::vector<FactorType> &factors) const;
 
-  virtual void OutputToStream(std::ostream &out) const;
+  virtual void OutputToStream(const System &system, std::ostream &out) const;
   virtual void OutputToStream(
 		  const ManagerBase &mgr,
 		  size_t targetPos,

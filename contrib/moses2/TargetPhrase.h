@@ -102,7 +102,7 @@ public:
 	      std::map<size_t, const Factor*>::const_iterator iter = placeholders.find(i);
 	      if (iter == placeholders.end()) {
 		      const WORD &word = (*this)[i];
-		      word.OutputToStream(out);
+		      word.OutputToStream(system, out);
 	      }
 	      else {
 	    	  const Factor *factor = iter->second;

@@ -82,12 +82,12 @@ size_t Word::hash(const std::vector<FactorType> &factors) const
   return seed;
 }
 
-void Word::OutputToStream(std::ostream &out) const
+void Word::OutputToStream(const System &system, std::ostream &out) const
 {
   if (isNonTerminal) {
     out << "[";
   }
-  Moses2::Word::OutputToStream(out);
+  Moses2::Word::OutputToStream(system, out);
   if (isNonTerminal) {
       out << "]";
   }
@@ -127,7 +127,7 @@ void Word::OutputToStream(
     }
 
     if (outputWord){
-  	  OutputToStream(out);
+  	  OutputToStream(mgr.system, out);
     }
 }
 
