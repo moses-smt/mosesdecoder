@@ -1,4 +1,7 @@
+#include <iostream>
 #include "hash.hh"
+
+using namespace std;
 
 namespace Moses2
 {
@@ -15,11 +18,23 @@ std::vector<uint64_t> getVocabIDs(const StringPiece &textin)
   //Tokenize
   std::vector<uint64_t> output;
 
-  util::TokenIter<util::SingleCharacter> it(textin, util::SingleCharacter(' '));
+  util::TokenIter<util::SingleCharacter> itWord(textin, util::SingleCharacter(' '));
 
-  while (it) {
-    output.push_back(getHash(*it));
-    it++;
+  while (itWord) {
+	StringPiece word = *itWord;
+	uint64_t id = 0;
+
+	util::TokenIter<util::SingleCharacter> itFactor(word, util::SingleCharacter('|'));
+    while (itFactor) {
+    	StringPiece factor = *itFactor;
+    	//cerr << "factor=" << factor << endl;
+
+    	id += getHash(factor);
+        itFactor++;
+    }
+
+    output.push_back(id);
+    itWord++;
   }
 
   return output;

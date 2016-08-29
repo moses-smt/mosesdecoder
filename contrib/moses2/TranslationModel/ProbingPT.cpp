@@ -369,14 +369,20 @@ void ProbingPT::GetSourceProbingIds(const Phrase<Moses2::Word> &sourcePhrase,
 
 uint64_t ProbingPT::GetSourceProbingId(const Word &word) const
 {
-  const Factor *factor = word[0];
+  uint64_t ret = 0;
 
-  size_t factorId = factor->GetId();
-  if (factorId >= m_sourceVocab.size()) {
-    return m_unkId;
+  for (size_t i = 0; i < m_input.size(); ++i) {
+	  FactorType factorType = m_input[i];
+	  const Factor *factor = word[factorType];
+
+	  size_t factorId = factor->GetId();
+	  if (factorId >= m_sourceVocab.size()) {
+		return m_unkId;
+	  }
+	  ret += m_sourceVocab[factorId];
   }
-  return m_sourceVocab[factorId];
 
+  return ret;
 }
 
 void ProbingPT::CreateCache(System &system)

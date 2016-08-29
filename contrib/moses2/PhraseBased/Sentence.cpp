@@ -36,6 +36,7 @@ Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
   }
 
   //cerr << "REORDERING CONSTRAINTS:" << ret->GetReorderingConstraint() << endl;
+  //cerr << "ret=" << ret->Debug(system) << endl;
 
   return ret;
 }
@@ -106,7 +107,6 @@ Sentence *Sentence::CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
     }
     reorderingConstraint.FinalizeWalls();
 
-	//cerr << "ret=" << ret->Debug(system) << endl;
     return ret;
 }
 

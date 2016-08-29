@@ -10,11 +10,19 @@ void add_to_map(StoreVocab<uint64_t> &sourceVocab,
     const StringPiece &textin)
 {
   //Tokenize
-  util::TokenIter<util::SingleCharacter> it(textin, util::SingleCharacter(' '));
+  util::TokenIter<util::SingleCharacter> itWord(textin, util::SingleCharacter(' '));
 
-  while (it) {
-    sourceVocab.Insert(getHash(*it), it->as_string());
-    it++;
+  while (itWord) {
+	StringPiece word = *itWord;
+
+	util::TokenIter<util::SingleCharacter> itFactor(word, util::SingleCharacter('|'));
+    while (itFactor) {
+    	StringPiece factor = *itFactor;
+
+        sourceVocab.Insert(getHash(factor), factor.as_string());
+        itFactor++;
+    }
+    itWord++;
   }
 }
 
