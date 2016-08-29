@@ -52,7 +52,7 @@ public:
 protected:
   const SCFG::TargetPhraseImpl *m_targetPhrase;
   const SCFG::InputPath *m_path;
-
+  const SCFG::SymbolBind *m_symbolBind;
 
   Vector<const Hypothesis*> m_prevHypos; // always sorted by source position?
 

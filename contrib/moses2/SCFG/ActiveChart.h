@@ -21,11 +21,12 @@ class Word;
 class SymbolBindElement
 {
 public:
-  const SCFG::Word *word;
-  const Moses2::Hypotheses *hypos;
+  const SCFG::Word *word; // can be term or non-term
+
+  const Moses2::Hypotheses *hypos; // NULL if terminal
 
   SymbolBindElement();
-  SymbolBindElement(const SCFG::Word *word, const Moses2::Hypotheses *hypos);
+  SymbolBindElement(const Moses2::Range &range, const SCFG::Word &word, const Moses2::Hypotheses *hypos);
 
   bool operator==(const SymbolBindElement &compare) const
   {
@@ -33,6 +34,12 @@ public:
             && word == compare.word;
     return ret;
   }
+
+  std::string Debug(const System &system) const;
+
+protected:
+  const Moses2::Range *m_range;
+
 };
 
 size_t hash_value(const SymbolBindElement &obj);

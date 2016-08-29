@@ -17,12 +17,14 @@ SymbolBindElement::SymbolBindElement()
 }
 
 SymbolBindElement::SymbolBindElement(
-    const SCFG::Word *word,
+	const Moses2::Range &range,
+    const SCFG::Word &word,
     const Moses2::Hypotheses *hypos)
-:word(word)
+:m_range(&range)
+,word(&word)
 ,hypos(hypos)
 {
-  assert( (word->isNonTerminal && hypos) || (!word->isNonTerminal && hypos == NULL));
+  assert( (word.isNonTerminal && hypos) || (!word.isNonTerminal && hypos == NULL));
 }
 
 size_t hash_value(const SymbolBindElement &obj)
@@ -31,6 +33,17 @@ size_t hash_value(const SymbolBindElement &obj)
   boost::hash_combine(ret, obj.word);
 
   return ret;
+}
+
+std::string SymbolBindElement::Debug(const System &system) const
+{
+	stringstream out;
+	out << "(";
+	out << *m_range;
+    out << word->Debug(system);
+    out << ")";
+
+  return out.str();
 }
 
 ////////////////////////////////////////////////////////////////////////////
@@ -42,7 +55,7 @@ SymbolBind::SymbolBind(MemPool &pool)
 
 void SymbolBind::Add(const Range &range, const SCFG::Word &word, const Moses2::Hypotheses *hypos)
 {
-  SymbolBindElement ele(&word, hypos);
+  SymbolBindElement ele(range, word, hypos);
   coll.push_back(ele);
 
   if (word.isNonTerminal) {
@@ -70,16 +83,7 @@ std::string SymbolBind::Debug(const System &system) const
 {
   stringstream out;
   BOOST_FOREACH(const SymbolBindElement &ele, coll) {
-	out << "(";
-
-	if (ele.word->isNonTerminal) {
-		const HypothesisBase &hypoBase = *(*ele.hypos)[0];
-		const SCFG::Hypothesis &hypo = static_cast<const SCFG::Hypothesis&>(hypoBase);
-		out << hypo.GetInputPath().range;
-	}
-
-    out << ele.word->Debug(system);
-    out << ") ";
+	out << ele.Debug(system) << " ";
   }
   return out.str();
 }
