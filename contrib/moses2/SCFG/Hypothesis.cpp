@@ -113,18 +113,20 @@ void Hypothesis::OutputToStream(std::ostream &out) const
   const SCFG::TargetPhraseImpl &tp = GetTargetPhrase();
   //cerr << "tp=" << tp.Debug(m_mgr->system) << endl;
 
-  for (size_t pos = 0; pos < tp.GetSize(); ++pos) {
-    const SCFG::Word &word = tp[pos];
-    //cerr << "word " << pos << "=" << word << endl;
+  for (size_t targetPos = 0; targetPos < tp.GetSize(); ++targetPos) {
+    const SCFG::Word &word = tp[targetPos];
+    //cerr << "word " << targetPos << "=" << word << endl;
     if (word.isNonTerminal) {
       //cerr << "is nt" << endl;
       // non-term. fill out with prev hypo
-      size_t nonTermInd = tp.GetAlignNonTerm().GetNonTermIndexMap()[pos];
+      size_t nonTermInd = tp.GetAlignNonTerm().GetNonTermIndexMap()[targetPos];
       const Hypothesis *prevHypo = m_prevHypos[nonTermInd];
       prevHypo->OutputToStream(out);
     }
     else {
       //cerr << "not nt" << endl;
+
+
       word.OutputToStream(out);
       out << " ";
     }
