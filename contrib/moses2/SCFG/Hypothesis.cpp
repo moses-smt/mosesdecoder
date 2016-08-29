@@ -4,6 +4,7 @@
 #include "Manager.h"
 #include "ActiveChart.h"
 #include "TargetPhraseImpl.h"
+#include "Sentence.h"
 #include "../System.h"
 #include "../Scores.h"
 #include "../InputPathBase.h"
@@ -108,7 +109,7 @@ void Hypothesis::EvaluateWhenApplied(const StatefulFeatureFunction &sfff)
 
 }
 
-void Hypothesis::OutputToStream(std::ostream &out) const
+void Hypothesis::OutputToStream(std::ostream &strm) const
 {
   const SCFG::TargetPhraseImpl &tp = GetTargetPhrase();
   //cerr << "tp=" << tp.Debug(m_mgr->system) << endl;
@@ -121,14 +122,11 @@ void Hypothesis::OutputToStream(std::ostream &out) const
       // non-term. fill out with prev hypo
       size_t nonTermInd = tp.GetAlignNonTerm().GetNonTermIndexMap()[targetPos];
       const Hypothesis *prevHypo = m_prevHypos[nonTermInd];
-      prevHypo->OutputToStream(out);
+      prevHypo->OutputToStream(strm);
     }
     else {
-      //cerr << "not nt" << endl;
-
-
-      word.OutputToStream(out);
-      out << " ";
+      word.OutputToStream(*m_mgr, targetPos, *this, strm);
+      strm << " ";
     }
 
   }

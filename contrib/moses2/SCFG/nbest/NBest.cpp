@@ -149,13 +149,13 @@ void NBest::OutputToStream(
 
   const SCFG::TargetPhraseImpl &tp = hypo.GetTargetPhrase();
 
-  for (size_t pos = 0; pos < tp.GetSize(); ++pos) {
-	const SCFG::Word &word = tp[pos];
+  for (size_t targetPos = 0; targetPos < tp.GetSize(); ++targetPos) {
+	const SCFG::Word &word = tp[targetPos];
 	//cerr << "word " << pos << "=" << word << endl;
 	if (word.isNonTerminal) {
 	  //cerr << "is nt" << endl;
 	  // non-term. fill out with prev hypo
-	  size_t nonTermInd = tp.GetAlignNonTerm().GetNonTermIndexMap()[pos];
+	  size_t nonTermInd = tp.GetAlignNonTerm().GetNonTermIndexMap()[targetPos];
 
 	  UTIL_THROW_IF2(nonTermInd >= children.size(), "Out of bounds:" << nonTermInd << ">=" << children.size());
 
@@ -164,7 +164,8 @@ void NBest::OutputToStream(
 	}
 	else {
 	  //cerr << "not nt" << endl;
-	  word.OutputToStream(strm);
+      word.OutputToStream(hypo.GetManager(), targetPos, hypo, strm);
+
 	  strm << " ";
 	}
   }

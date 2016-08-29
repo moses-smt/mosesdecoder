@@ -24,7 +24,7 @@ Sentence *Sentence::CreateFromString(MemPool &pool, FactorCollection &vocab,
   if (system.options.input.xml_policy) {
     // xml
 	ret = CreateFromStringXML(pool, vocab, system, str);
-	cerr << "ret=" << ret->Debug(system) << endl;
+	//cerr << "ret=" << ret->Debug(system) << endl;
   }
   else {
 	  std::vector<std::string> toks = Tokenize(str);
@@ -78,7 +78,7 @@ Sentence *Sentence::CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
     			  "Placeholder must only cover 1 word");
 
     	  const Factor *factor = vocab.AddFactor(xmlOption->GetEntity(), system, false);
-    	  (*ret)[xmlOption->startPos][placeholderFactor] = factor;
+    	  (*ret)[xmlOption->startPos + 1][placeholderFactor] = factor;
       }
       else {
     	// default - forced translation. Add to class variable

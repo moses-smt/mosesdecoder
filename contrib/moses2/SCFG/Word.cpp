@@ -6,7 +6,14 @@
  */
 #include <boost/functional/hash.hpp>
 #include "Word.h"
+#include "Hypothesis.h"
+#include "ActiveChart.h"
+#include "TargetPhraseImpl.h"
+#include "Sentence.h"
 #include "../legacy/Util2.h"
+#include "../System.h"
+#include "../AlignmentInfo.h"
+#include "../ManagerBase.h"
 
 using namespace std;
 
@@ -84,6 +91,44 @@ void Word::OutputToStream(std::ostream &out) const
   if (isNonTerminal) {
       out << "]";
   }
+}
+
+void Word::OutputToStream(
+		  const ManagerBase &mgr,
+		  size_t targetPos,
+		  const SCFG::Hypothesis &hypo,
+		  std::ostream &out) const
+{
+  const SCFG::TargetPhraseImpl &tp = hypo.GetTargetPhrase();
+  const SCFG::SymbolBind &symbolBind = hypo.GetSymbolBind();
+
+    bool outputWord = true;
+    if (mgr.system.options.input.placeholder_factor != NOT_FOUND) {
+		const AlignmentInfo &alignInfo = tp.GetAlignTerm();
+		std::set<size_t> sourceAligns = alignInfo.GetAlignmentsForTarget(targetPos);
+		if (sourceAligns.size() == 1) {
+			size_t sourcePos = *sourceAligns.begin();
+			/*
+			cerr << "sourcePos=" << sourcePos << endl;
+			cerr << "tp=" << tp.Debug(mgr.system) << endl;
+			cerr << "m_symbolBind=" << symbolBind.Debug(mgr.system) << endl;
+			*/
+			assert(sourcePos < symbolBind.GetSize());
+			const Range &inputRange = symbolBind.coll[sourcePos].GetRange();
+			assert(inputRange.GetNumWordsCovered() == 1);
+			const SCFG::Sentence &sentence = static_cast<const SCFG::Sentence &>(mgr.GetInput());
+			const SCFG::Word &sourceWord = sentence[inputRange.GetStartPos()];
+			const Factor *factor = sourceWord[mgr.system.options.input.placeholder_factor];
+			if (factor) {
+				out << factor->GetString();
+				outputWord = false;
+			}
+		}
+    }
+
+    if (outputWord){
+  	  OutputToStream(out);
+    }
 }
 
 std::string Word::Debug(const System &system) const

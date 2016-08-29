@@ -37,6 +37,9 @@ public:
   const SCFG::InputPath &GetInputPath() const
   {  return *m_path; }
 
+  const SCFG::SymbolBind &GetSymbolBind() const
+  { return *m_symbolBind; }
+
   const Vector<const Hypothesis*> &GetPrevHypos() const
   {  return m_prevHypos; }
 
@@ -44,8 +47,8 @@ public:
   const Hypothesis* GetPrevHypo(size_t ind) const
   {  return m_prevHypos[ind]; }
 
-  void OutputToStream(std::ostream &out) const;
-  void OutputTransOpt(std::ostream &out) const;
+  void OutputToStream(std::ostream &strm) const;
+  void OutputTransOpt(std::ostream &strm) const;
 
   std::string Debug(const System &system) const;
 

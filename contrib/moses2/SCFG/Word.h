@@ -11,8 +11,11 @@
 
 namespace Moses2
 {
+class ManagerBase;
+
 namespace SCFG
 {
+class Hypothesis;
 
 class Word: public Moses2::Word
 {
@@ -41,6 +44,12 @@ public:
   virtual size_t hash(const std::vector<FactorType> &factors) const;
 
   virtual void OutputToStream(std::ostream &out) const;
+  virtual void OutputToStream(
+		  const ManagerBase &mgr,
+		  size_t targetPos,
+		  const SCFG::Hypothesis &hypo,
+		  std::ostream &out) const;
+
   virtual std::string Debug(const System &system) const;
 
 protected:

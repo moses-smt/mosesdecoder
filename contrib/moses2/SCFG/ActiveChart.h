@@ -28,6 +28,9 @@ public:
   SymbolBindElement();
   SymbolBindElement(const Moses2::Range &range, const SCFG::Word &word, const Moses2::Hypotheses *hypos);
 
+  const Range &GetRange() const
+  { return *m_range; }
+
   bool operator==(const SymbolBindElement &compare) const
   {
     bool ret = hypos == compare.hypos
@@ -58,6 +61,9 @@ public:
   :coll(copy.coll)
   ,numNT(copy.numNT)
   {}
+
+  size_t GetSize() const
+  { return coll.size(); }
 
   std::vector<const SymbolBindElement*> GetNTElements() const;
 
