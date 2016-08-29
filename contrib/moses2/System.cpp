@@ -68,11 +68,13 @@ System::System(const Parameter &paramsArg) :
       maxChartSpans = Scan<size_t>(*section);
       maxChartSpans.resize(mappings.size(), DEFAULT_MAX_CHART_SPAN);
 
+      /*
       cerr << "maxChartSpans=" << maxChartSpans.size();
       for (size_t i = 0; i < maxChartSpans.size(); ++i) {
           cerr << " " << mappings[i]->GetName() << "=" << maxChartSpans[i];
       }
       cerr << endl;
+      */
     }
   }
 
