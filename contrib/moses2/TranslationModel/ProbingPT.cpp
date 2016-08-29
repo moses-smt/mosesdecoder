@@ -283,9 +283,11 @@ TargetPhraseImpl *ProbingPT::CreateTargetPhrase(
     const char *&offset) const
 {
   TargetPhraseInfo *tpInfo = (TargetPhraseInfo*) offset;
+  size_t numRealWords = tpInfo->numWords / m_output.size();
+
   TargetPhraseImpl *tp =
       new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, *this,
-          system, tpInfo->numWords);
+          system, numRealWords);
 
   offset += sizeof(TargetPhraseInfo);
 
@@ -323,17 +325,21 @@ TargetPhraseImpl *ProbingPT::CreateTargetPhrase(
   offset += sizeof(SCORE) * totalNumScores;
 
   // words
-  for (size_t i = 0; i < tpInfo->numWords; ++i) {
-    uint32_t *probingId = (uint32_t*) offset;
+  for (size_t targetPos = 0; targetPos < numRealWords; ++targetPos) {
+	for (size_t i = 0; i < m_output.size(); ++i) {
+		FactorType factorType = m_output[i];
 
-    const std::pair<bool, const Factor *> *factorPair = GetTargetFactor(*probingId);
-    assert(factorPair);
-    assert(!factorPair->first);
+		uint32_t *probingId = (uint32_t*) offset;
 
-    Word &word = (*tp)[i];
-    word[0] = factorPair->second;
+		const std::pair<bool, const Factor *> *factorPair = GetTargetFactor(*probingId);
+		assert(factorPair);
+		assert(!factorPair->first);
 
-    offset += sizeof(uint32_t);
+		Word &word = (*tp)[targetPos];
+		word[factorType] = factorPair->second;
+
+		offset += sizeof(uint32_t);
+	}
   }
 
   // align

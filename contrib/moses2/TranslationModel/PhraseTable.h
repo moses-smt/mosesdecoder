@@ -86,7 +86,7 @@ protected:
   std::string m_path;
   size_t m_ptInd; // in the order that it is list in [feature], NOT order of [mapping]
   size_t m_tableLimit;
-  std::vector<FactorType> m_input;
+  std::vector<FactorType> m_input, m_output;
 
   // cache
   size_t m_maxCacheSize; // 0 = no caching

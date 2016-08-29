@@ -114,20 +114,33 @@ void StoreTarget::Append(const line_text &line, bool log_prob, bool scfg)
   it = util::TokenIter<util::SingleCharacter>(line.target_phrase,
       util::SingleCharacter(' '));
   while (it) {
-    string tok = it->as_string();
-    //cerr << "tok=" << tok << endl;
-    uint32_t vocabId = m_vocab.GetVocabId(tok);
+	StringPiece word = *it;
+	//cerr << "word=" << word << endl;
 
+    bool nonTerm = false;
     if (scfg) {
-      bool nonTerm = false;
-      if (scfg && tok[0] == '[' && tok[tok.size() - 1] == ']') {
+      // not really sure how to handle factored SCFG and NT
+      if (scfg && word[0] == '[' && word[word.size() - 1] == ']') {
         //cerr << "NON-TERM=" << tok << " " << nonTerms.size() << endl;
         nonTerm = true;
       }
       nonTerms.push_back(nonTerm);
     }
 
-    rule->target_phrase.push_back(vocabId);
+    util::TokenIter<util::SingleCharacter> itFactor;
+    itFactor = util::TokenIter<util::SingleCharacter>(word,
+        util::SingleCharacter('|'));
+    while (itFactor) {
+    	StringPiece factor = *itFactor;
+
+    	string factorStr = factor.as_string();
+    	uint32_t vocabId = m_vocab.GetVocabId(factorStr);
+
+    	rule->target_phrase.push_back(vocabId);
+
+    	itFactor++;
+    }
+
     it++;
   }
 

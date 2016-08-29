@@ -47,7 +47,7 @@ void PhraseTable::SetParameter(const std::string& key, const std::string& value)
 	m_input = Tokenize<FactorType>(value, ",");
   }
   else if (key == "output-factor") {
-
+	m_output = Tokenize<FactorType>(value, ",");
   }
   else if (key == "table-limit") {
     m_tableLimit = Scan<size_t>(value);
