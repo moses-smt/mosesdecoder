@@ -107,6 +107,7 @@ lib moses :
   TranslationModel/CYKPlusParser/*.cpp
   ../phrase-extract/PhraseOrientation.cpp
   FF/*.cpp
+  FF/dalsa/*.cpp
   FF/bilingual-lm/*.cpp
   FF/OSM-Feature/*.cpp
   FF/Dsg-Feature/*.cpp

@@ -122,6 +122,19 @@ namespace sapt
 
     std::string pid2str(TokenIndex const* V, uint64_t pid) const;
 
+    void
+    pid2vec(uint64_t pid, std::vector<id_type>& v) const
+    {
+      uint32_t len = pid % (1<<16);
+      v.resize(len);
+      pid >>= 16;
+      uint32_t off = pid % (1<<16);
+      uint32_t sid = pid >> 16;
+      TKN const* t = sntStart(sid) + off;
+      for (size_t i = 0; i < len; t = t->next())
+        v[i++] = t->id();
+    }
+
     // /** @return string representation of sentence /sid/
     //  *  Currently only defined for Ttrack<id_type> */
     // string str(id_type sid, Vocab const& V) const;
@@ -395,21 +408,22 @@ namespace sapt
     std::ostringstream buf;
     TKN const* t    = sntStart(sid) + off;
     TKN const* stop = t + len;
+    size_t i = 0;
     if (V)
       {
-	while (t < stop)
-	  {
-	    buf << (*V)[t->id()];
-	    if ((t = t->next()) != stop) buf << " ";
-	  }
+        for (size_t i = 0; i++ < len; t = t->next())
+          {
+            buf << (*V)[t->id()];
+            if (i < len) buf << " ";
+          }
       }
     else
       {
-	while (t < stop)
-	  {
-	    buf << t->id();
-	    if ((t = t->next()) != stop) buf << " ";
-	  }
+        for (size_t i = 0; i++ < len; t = t->next())
+          {
+            buf << t->id();
+            if (i < len) buf << " ";
+          }
       }
     return buf.str();
   }

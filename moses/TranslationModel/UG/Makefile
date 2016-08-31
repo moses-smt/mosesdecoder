@@ -38,6 +38,7 @@ CXXFLAGS += -DNO_MOSES
 CXXFLAGS += -std=c++0x -Wno-deprecated-declarations
 CXXFLAGS += -I$(dir ${MOSES_ROOT})mmt-only
 CXXFLAGS += -I${MOSES_ROOT} -I. -I${MOSES_ROOT}/opt/include -I${MOSES_ROOT}/opt/include/eigen3
+CXXFLAGS += -I${MOSES_ROOT}/moses/FF/dalsa
 
 ifeq ($(variant),debug)
 CXXFLAGS += -ggdb -O0
@@ -120,6 +121,7 @@ skip += ug_splice_arglist.cc
 extra  = ${MOSES_ROOT}/util/exception.cc 
 extra += ${MOSES_ROOT}/util/integer_to_string.cc
 extra += ${MOSES_ROOT}/moses/FF/dalsa/LSA.cpp
+extra += ${MOSES_ROOT}/moses/Parameter.cpp
 
 $(foreach f,$(skip),$(eval broken+=$(shell find -name $f)))
 broken += $(wildcard ./mm/stashed/*)

@@ -1,4 +1,5 @@
 #include "moses/TranslationTask.h"
+#include "moses/Parameter.h"
 
 #include <boost/foreach.hpp>
 #include <boost/format.hpp>

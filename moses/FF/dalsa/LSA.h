@@ -74,25 +74,40 @@ public:
   }
   
   void 
-  open(std::string const& bname, std::string const& L1, std::string const& L2,
+  open(std::string const& bname,
+       std::string const& L1,
+       std::string const& L2,
        uint32_t const total_docs);
 
-  uint32_t row1(std::string const& key) const
+  uint32_t
+  row1(std::string const& key) const
   {
     str2row_map::const_iterator m = m_str2row1.find(key);
     return m != m_str2row1.end() ? m->second : uint32_t(m_T.size());
   };
 
-  uint32_t row2(std::string const& key) const
+  uint32_t
+  row2(std::string const& key) const
   {
     str2row_map::const_iterator m = m_str2row2.find(key);
     return m != m_str2row2.end() ? m->second : uint32_t(m_T.size());
   };
+
+  uint32_t
+  count_rows() const
+  {
+    return m_T.size(); 
+  }
   
+  uint32_t
+  count_cols() const
+  {
+    return m_T.size(1); 
+  }
+
   float
   term_similarity(uint32_t const row1, uint32_t const row2)
   {
-    // for (
     if (row1 >= m_T.size() || row2 >= m_T.size()) return 0;
     float ret=0;
     float a=0, b=0;
@@ -109,8 +124,9 @@ public:
   }
 
   float
-  term_doc_sim(uint32_t const r, std::vector<float> const& doc)
+  term_doc_sim(uint32_t const r, std::vector<float> const& doc) const
   {
+    if (r >= m_T.size()) return 0;
     float const* x = &m_T[r][0];
     float a=0, b=0, c = 0;
     for (size_t i = 0; i < m_S.size(); ++i)
@@ -122,25 +138,43 @@ public:
     return a ? a / (sqrt(b) * sqrt(c)) : 0;
   }
 
-  void
-  fold_in(uint32_t const row_id, uint32_t const count, std::vector<float>& vec)
+  float
+  term_doc_sim(std::vector<float> const& term, std::vector<float> const& doc) const
   {
-    if (row_id >= m_T.size()) return;
-    if (vec.size() != m_T.size(1)) throw "Dimensions do not match!";
-    ug::mmTable::SubTable<float,1> row = m_T[row_id];
-    float w = (1 + log(count)) * m_idf[row_id];
-    for (size_t i = 0; i < m_T.size(1); ++i)
-      vec[i] += w * row[i];
+    float const* x = &term[0];
+    float a=0, b=0, c = 0;
+    for (size_t i = 0; i < m_S.size(); ++i)
+      {
+        a += m_S[i] * x[i] * doc[i];
+        b += m_S[i] * x[i] * x[i];
+        c += m_S[i] * doc[i] * doc[i];
+      }
+    return a ? a / (sqrt(b) * sqrt(c)) : 0;
   }
 
   void
-  fold_in_raw_counts(uint32_t const row_id, uint32_t const count, std::vector<float>& vec)
+  fold_in(uint32_t const row_id,
+          uint32_t const count,
+          std::vector<float>& dest) const
   {
     if (row_id >= m_T.size()) return;
-    if (vec.size() != m_T.size(1)) throw "Dimensions do not match!";
+    if (dest.size() != m_T.size(1)) throw "Dimensions do not match!";
+    ug::mmTable::SubTable<float,1> row = m_T[row_id];
+    float w = (1 + log(count)) * m_idf[row_id];
+
+    for (size_t i = 0; i < m_T.size(1); ++i)
+      dest[i] += w * row[i];
+  }
+
+  void
+  fold_in_raw_counts(uint32_t const row_id, uint32_t const count,
+                     std::vector<float>& dest)
+  {
+    if (row_id >= m_T.size()) return;
+    if (dest.size() != m_T.size(1)) throw "Dimensions do not match!";
     ug::mmTable::SubTable<float,1> row = m_T[row_id];
     for (size_t i = 0; i < m_T.size(1); ++i)
-      vec[i] += count * row[i];
+      dest[i] += count * row[i];
   }
 
   // void
@@ -186,11 +220,35 @@ public:
   
 };
 
-class LsaTermMatcher{
+class LsaTermMatcher
+{
+  
+  LsaModel const* m_model;
+  std::vector<float> m_document_vector;
+  
+public:
+  float
+  operator()(std::string const& word) const;
 
-//   LsaModel const* m_model;
-//   std::vector<float> m_document_vector;
-// public:
+  float
+  operator()(std::string const& word, std::vector<float> const& v) const;
+
+  std::vector<float> const& 
+  fold_in(LsaModel const* model, std::vector<std::string> const& doc);
+  
+  std::vector<float> const& 
+  fold_in(LsaModel const* model, std::string const& line);
+  
+  std::vector<float> const& 
+  fold_in_word(LsaModel const* model, std::string const& w);
+
+  std::vector<float> const&
+  embedding() const
+  {
+    return m_document_vector;
+  }
+  
+  // public:
 //   LsaTermMatcher() : m_model(NULL) {};
 
 //   void init(LsaModel const* model, 

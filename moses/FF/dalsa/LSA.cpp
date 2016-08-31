@@ -42,7 +42,8 @@ read_row_labels(std::string const& fname)
 void
 LsaModel::
 open(std::string const& bname,
-     std::string const& L1, std::string const& L2,
+     std::string const& L1,
+     std::string const& L2,
      uint32_t const total_docs)
 {
   m_log_total_docs = log(total_docs); // needed for computation of IDF
@@ -178,26 +179,60 @@ open(std::string const& bname,
 //   m_document_vector.resize(model->cols());
 //   model->adapt(wordcounts, &m_document_vector[0]);
 // }
+  
+std::vector<float> const&
+LsaTermMatcher::
+fold_in_word(LsaModel const* model, std::string const& w)
+{
+  m_model = model;
+  if (m_document_vector.size() == 0)
+    m_document_vector.assign(model->count_cols(), 0);
 
-// void
-// LsaTermMatcher::
-// init(LsaModel const* model, std::vector<std::string> const& doc)
-// {
-//   m_model = model;
-//   m_document_vector.resize(model->cols());
-//   model->adapt(doc, &m_document_vector[0]);
-// }
+  // to do: avoid istringstream, use StringPiece-s as keys
+  model->fold_in(model->row1(w),1,m_document_vector);
+  return m_document_vector;
+}
 
-// float
-// LsaTermMatcher::
-// operator()(uint32_t const id) const
-// {
-//   float const* t = m_model->tvec2(id);
-//   if (t == NULL) return log(0.5);
-//   float score = 1;
-//   for (size_t i = 0; i < m_model->cols(); ++i)
-//     score += m_document_vector[i] * t[i];
-//   return log(score/2);
-// }
+std::vector<float> const&
+LsaTermMatcher::
+fold_in(LsaModel const* model, std::string const& line)
+{
+  m_model = model;
+  if (m_document_vector.size() == 0)
+    m_document_vector.assign(model->count_cols(), 0);
+
+  // to do: avoid istringstream, use StringPiece-s as keys
+  std::istringstream buf(line); std::string w;
+  while (buf>>w)
+    model->fold_in(model->row1(w),1,m_document_vector);
+  return m_document_vector;
+}
+
+  std::vector<float> const&
+LsaTermMatcher::
+fold_in(LsaModel const* model, std::vector<std::string> const& doc)
+{
+  BOOST_FOREACH(std::string const& line, doc)
+    fold_in(model, line);
+  return m_document_vector;
+}
+
+float
+LsaTermMatcher::
+operator()(std::string const& word) const
+{
+  float ret = m_model->term_doc_sim(m_model->row2(word), m_document_vector);
+  // to do: various scoring methods (either here or in the FF)
+  return ret;
+}
+
+float
+LsaTermMatcher::
+operator()(std::string const& word, std::vector<float> const& v) const
+{
+  float ret = m_model->term_doc_sim(m_model->row2(word), v);
+  // to do: various scoring methods (either here or in the FF)
+  return ret;
+}
 
 } // end of namespace

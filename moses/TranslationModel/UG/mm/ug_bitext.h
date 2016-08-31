@@ -112,6 +112,7 @@ namespace sapt
     typedef typename lru_cache::LRU_Cache<uint64_t, vec_ppair> pplist_cache_t;
     typedef TSA<Token> tsa;
     friend class Moses::Mmsapt;
+    virtual ~Bitext() { }
   protected:
     mutable boost::shared_mutex m_lock; // for thread-safe operation
 

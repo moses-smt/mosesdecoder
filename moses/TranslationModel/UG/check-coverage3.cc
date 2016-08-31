@@ -12,6 +12,8 @@
 #include "mm/ug_bitext_sampler.h"
 
 #include <boost/program_options.hpp>
+#include <boost/math/distributions/binomial.hpp>
+
 namespace po=boost::program_options;
 using namespace Moses;
 using namespace sapt;
@@ -53,21 +55,47 @@ basename(string const path)
 }
 
 void 
-print_evidence_list(bitext_t const& B, std::map<uint32_t, uint32_t> const& indoc)
+print_evidence_list(bitext_t const& B, 
+                    sapt::pstats::indoc_map_t const& indoc_src,
+                    PhrasePair<Token> const& ppair)
 {
+  typedef boost::math::binomial_distribution<> binomial;
+
   typedef std::map<uint32_t, uint32_t>::const_iterator iter;
-  typedef pair<size_t,string> item;
+  typedef pair<size_t,size_t> item;
+
+  float pfwd = float(ppair.joint)/ppair.good1;
+  
+  std::map<uint32_t, uint32_t> const& indoc = ppair.indoc;
+
   vector<item> where; 
   where.reserve(indoc.size());
   
   for (iter d = indoc.begin(); d != indoc.end(); ++d)
-    where.push_back(item(d->second, B.docid2name(d->first)));
+    where.push_back(item(d->second, d->first));
   sort(where.begin(),where.end(),greater<item>());
   BOOST_FOREACH(item const& doc, where)
-    if (domain_name == doc.second)
-      cout << (boost::format("\t\t%4d ! %s") % doc.first % doc.second) << endl;
-    else
-      cout << (boost::format("\t\t%4d   %s") % doc.first % doc.second) << endl;
+    {
+      if (domain_name == B.docid2name(doc.second))
+        cout << (boost::format("\t\t%4d ! %s") % doc.first % B.docid2name(doc.second));
+      else
+        cout << (boost::format("\t\t%4d   %s") % doc.first % B.docid2name(doc.second));
+
+      size_t N = indoc_src.find(doc.second)->second;
+      float p0;
+      if (doc.first > pfwd * N)
+        p0 = cdf(complement(binomial(N, pfwd), doc.first));
+      else
+        p0 = cdf(binomial(N, pfwd), doc.first);
+
+      // for (size_t j = 0; j < N; ++j)
+      //   printf("%5d %.2f %.2f\n", int(j),
+      //          cdf(complement(binomial(N, pfwd), j)),
+      //          cdf(binomial(N, pfwd), j));
+               
+      // cout << (boost::format(" (%d: %.2f %.1f)") % N % (float(doc.first)/N) % p0) << endl;
+      cout << (boost::format(" (%.1f %f)") % (pfwd * N) % p0) << endl;
+    }
 }
 
 int main(int argc, char* argv[])
@@ -148,7 +176,7 @@ int main(int argc, char* argv[])
                            % (float(ppair.joint)/ppair.good1)
                            % (float(ppair.joint)/ppair.good2)
                            ) << "\n";
-                  print_evidence_list(*B, ppair.indoc);
+                  print_evidence_list(*B, s.stats()->indoc, ppair);
                   cout << endl;
 #else
                   cout << "\t" 

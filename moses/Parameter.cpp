@@ -458,7 +458,9 @@ LoadParam(const string &filePath)
 void show_version()
 {
   std::cout << "\nMoses code version (git tag or commit hash):\n   "
+#ifndef NO_MOSES
             << MOSES_VERSION_ID << std::endl
+#endif
             << "Libraries used:" << std::endl
             << "      Boost  version "
             << BOOST_VERSION / 100000     << "."  // major version
