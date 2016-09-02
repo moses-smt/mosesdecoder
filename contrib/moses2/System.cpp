@@ -48,7 +48,7 @@ System::System(const Parameter &paramsArg) :
   if (params.GetParam("show-weights")) {
     cerr << "Showing weights then exit" << endl;
     featureFunctions.ShowWeights(weights);
-    return;
+    //return;
   }
 
   cerr << "START featureFunctions.Load()" << endl;
