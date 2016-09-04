@@ -54,7 +54,7 @@ LMResult NeuralLMWrapper::GetValue(const vector<const Word*> &contextFactor, Sta
     //TODO: config option?
     m_neuralLM->set_cache(1000000);
   }
-  
+
   vector<int> words(contextFactor.size());
   const size_t n = contextFactor.size();
   for (size_t i=0; i<n; i++) {
