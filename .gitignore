@@ -60,6 +60,8 @@ scripts/training/phrase-extract/relax-parse
 scripts/training/phrase-extract/score
 scripts/training/phrase-extract/statistics
 scripts/training/symal/symal
+scripts/tokenizer/temp_post_tokenization.txt
+scripts/tokenizer/temp_pre_tokenization.txt
 dist
 bin
 previous.sh
