@@ -83,6 +83,7 @@ my($_EXTERNAL_BINDIR,
    	$_CONFIG,
    	$_OSM,
    	$_OSM_FACTORS,
+   	$_OSM_LOAD_METHOD,
    	$_POST_DECODING_TRANSLIT,
    	$_TRANSLITERATION_PHRASE_TABLE,
    	$_HIERARCHICAL,
@@ -238,6 +239,7 @@ $_HELP = 1
 		       'config=s' => \$_CONFIG,
 		       'osm-model=s' => \$_OSM,
 		       'osm-setting=s' => \$_OSM_FACTORS,
+		       'osm-load-method=s' => \$_OSM_LOAD_METHOD,
 		       'post-decoding-translit=s' => \$_POST_DECODING_TRANSLIT,
 		       'transliteration-phrase-table=s' => \$_TRANSLITERATION_PHRASE_TABLE,
 		       'mmsapt' => \$_MMSAPT,
@@ -1678,7 +1680,7 @@ sub score_phrase_phrase_extract {
 
     # distinguish between score and consolidation options
     my $ONLY_DIRECT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/);
-    my $PHRASE_COUNT = (!defined($_SCORE_OPTIONS) || $_SCORE_OPTIONS !~ /NoPhraseCount/);
+    my $PHRASE_COUNT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /PhraseCount/);
     my $LOW_COUNT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /LowCountFeature/);
     my ($SPARSE_COUNT_BIN,$COUNT_BIN,$DOMAIN) = ("","","");
     $SPARSE_COUNT_BIN = $1 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /SparseCountBinFeature ([\s\d]*\d)/;
@@ -1812,7 +1814,7 @@ sub score_phrase_phrase_extract {
     $cmd .= " --LogProb" if $LOG_PROB;
     $cmd .= " --NegLogProb" if $NEG_LOG_PROB;
     $cmd .= " --OnlyDirect" if $ONLY_DIRECT;
-    $cmd .= " --NoPhraseCount" unless $PHRASE_COUNT;
+    $cmd .= " --PhraseCount" if $PHRASE_COUNT;
     $cmd .= " --LowCountFeature" if $LOW_COUNT;
     $cmd .= " --CountBinFeature $COUNT_BIN" if $COUNT_BIN;
     $cmd .= " --SparseCountBinFeature $SPARSE_COUNT_BIN" if $SPARSE_COUNT_BIN;
@@ -2249,6 +2251,8 @@ sub create_ini {
 
   if($_OSM)
   {
+    my $load_method = "";
+    $load_method = " load=$_OSM_LOAD_METHOD" if defined($_OSM_LOAD_METHOD);
     if (defined($_OSM_FACTORS))
     {
 	my $count = 0;
@@ -2258,11 +2262,11 @@ sub create_ini {
 		my ($factor_f,$factor_e) = split(/\-/,$factor_val);
 
 		if($count == 0){
-		$feature_spec .= "OpSequenceModel name=OpSequenceModel$count num-features=5 path=". $_OSM . $factor_val . "/operationLM.bin" . " input-factor=". $factor_f . " output-factor=". $factor_e . " support-features=yes \n";
+		$feature_spec .= "OpSequenceModel$load_method name=OpSequenceModel$count num-features=5 path=". $_OSM . $factor_val . "/operationLM.bin" . " input-factor=". $factor_f . " output-factor=". $factor_e . " support-features=yes \n";
 	       $weight_spec  .= "OpSequenceModel$count= 0.08 -0.02 0.02 -0.001 0.03\n";
 		}
 		else{
-			$feature_spec .= "OpSequenceModel name=OpSequenceModel$count num-features=1 path=". $_OSM . $factor_val . "/operationLM.bin" . " input-factor=". $factor_f . " output-factor=". $factor_e . " support-features=no \n";
+			$feature_spec .= "OpSequenceModel$load_method name=OpSequenceModel$count num-features=1 path=". $_OSM . $factor_val . "/operationLM.bin" . " input-factor=". $factor_f . " output-factor=". $factor_e . " support-features=no \n";
 	       	$weight_spec  .= "OpSequenceModel$count= 0.08 \n";
 
 		}
@@ -2271,7 +2275,7 @@ sub create_ini {
     }
     else
     {
-      $feature_spec .= "OpSequenceModel name=OpSequenceModel0 num-features=5 path=". $_OSM . " \n";
+      $feature_spec .= "OpSequenceModel$load_method name=OpSequenceModel0 num-features=5 path=". $_OSM . " \n";
       $weight_spec  .= "OpSequenceModel0= 0.08 -0.02 0.02 -0.001 0.03\n";
     }
   }
@@ -2292,7 +2296,9 @@ sub create_ini {
     }
     $type = "KENLM" unless defined $type; # default to KENLM if no type given
 
-    if ($type =~ /^\d+$/) {
+    if ($type =~ /^8-(.+)/) {
+      $type = "KENLM load=$1";
+    } elsif ($type =~ /^\d+$/) {
       # backwards compatibility if the type is given not as string but as a number
       if ($type == 0) {
         $type = "SRILM";

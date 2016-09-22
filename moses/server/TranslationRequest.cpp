@@ -3,7 +3,6 @@
 #include "moses/ContextScope.h"
 #include <boost/foreach.hpp>
 #include "moses/Util.h"
-#include "moses/TreeInput.h"
 #include "moses/Hypothesis.h"
 
 namespace MosesServer
@@ -25,7 +24,6 @@ using Moses::FValue;
 using Moses::PhraseDictionaryMultiModel;
 using Moses::FindPhraseDictionary;
 using Moses::Sentence;
-using Moses::TreeInput;
 
 boost::shared_ptr<TranslationRequest>
 TranslationRequest::
@@ -324,9 +322,7 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
   // 	  m_bias[xmlrpc_c::value_int(tmp[i-1])] = xmlrpc_c::value_double(tmp[i]);
   //   }
   if (is_syntax(m_options->search.algo)) {
-    m_source.reset(new TreeInput(m_options));
-    istringstream in(m_source_string + "\n");
-    m_source->Read(in);
+    m_source.reset(new Sentence(m_options,0,m_source_string));
   } else {
     m_source.reset(new Sentence(m_options,0,m_source_string));
   }
@@ -337,10 +333,6 @@ void
 TranslationRequest::
 run_chart_decoder()
 {
-  Moses::TreeInput tinput(m_options);
-  istringstream buf(m_source_string + "\n");
-  tinput.Read(buf);
-  
   Moses::ChartManager manager(this->self());
   manager.Decode();
 

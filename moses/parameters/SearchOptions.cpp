@@ -38,6 +38,7 @@ namespace Moses
     param.SetParameter(early_discarding_threshold, "early-discarding-threshold", 
                        DEFAULT_EARLY_DISCARDING_THRESHOLD);
     param.SetParameter(timeout, "time-out", 0);
+    param.SetParameter(segment_timeout, "segment-time-out", 0);
     param.SetParameter(max_phrase_length, "max-phrase-length", 
                        DEFAULT_MAX_PHRASE_LENGTH);
     param.SetParameter(trans_opt_threshold, "translation-option-threshold", 

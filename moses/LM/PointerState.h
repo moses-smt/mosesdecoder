@@ -7,6 +7,11 @@ namespace Moses
 
 struct PointerState : public FFState {
   const void* lmstate;
+
+  explicit PointerState() {
+    // uninitialised
+  }
+
   PointerState(const void* lms) {
     lmstate = lms;
   }

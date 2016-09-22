@@ -3,10 +3,11 @@
 namespace Moses
 {
 
-OSMLM* ConstructOSMLM(const char *file)
+OSMLM* ConstructOSMLM(const char *file, util::LoadMethod load_method)
 {
   lm::ngram::ModelType model_type;
   lm::ngram::Config config;
+  config.load_method = load_method;
   if (lm::ngram::RecognizeBinary(file, model_type)) {
     switch(model_type) {
     case lm::ngram::PROBING:

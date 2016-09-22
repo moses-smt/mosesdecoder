@@ -11,6 +11,7 @@
 #include "SemposScorer.h"
 #include "PermutationScorer.h"
 #include "MeteorScorer.h"
+#include "M2Scorer.h"
 #include "HwcmScorer.h"
 #include "Reference.h"
 
@@ -34,6 +35,7 @@ vector<string> ScorerFactory::getTypes()
   types.push_back(string("LRSCORE"));
   types.push_back(string("METEOR"));
   types.push_back(string("HWCM"));
+  types.push_back(string("M2SCORER"));
   return types;
 }
 
@@ -54,6 +56,8 @@ Scorer* ScorerFactory::getScorer(const string& type, const string& config)
     return new CderScorer(config, false);
   } else if (type == "SEMPOS") {
     return new SemposScorer(config);
+  } else if (type == "M2SCORER") {
+    return new M2Scorer(config);
   } else if ((type == "HAMMING") || (type == "KENDALL")) {
     return (PermutationScorer*) new PermutationScorer(type, config);
   } else if (type == "METEOR") {

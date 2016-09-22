@@ -240,6 +240,10 @@ ExpandAllHypotheses(const Hypothesis &hypothesis, size_t startPos, size_t endPos
   const Bitmap &sourceCompleted = hypothesis.GetWordsBitmap();
   float estimatedScore = m_transOptColl.GetEstimatedScores().CalcEstimatedScore( sourceCompleted, startPos, endPos );
 
+  const Range &hypoRange = hypothesis.GetCurrSourceWordsRange();
+  //cerr << "DOING " << sourceCompleted << " [" << hypoRange.GetStartPos() << " " << hypoRange.GetEndPos() << "]"
+  //		  " [" << startPos << " " << endPos << "]" << endl;
+
   if (m_options.search.UseEarlyDiscarding()) {
     // expected score is based on score of current hypothesis
     expectedScore = hypothesis.GetScore();

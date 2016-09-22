@@ -21,8 +21,6 @@
 #include <algorithm>
 #include <iostream>
 #include "moses/Util.h"
-#include "moses/TargetPhrase.h"
-#include "moses/TranslationModel/PhraseDictionary.h"
 #include "TargetPhrase.h"
 #include "OnDiskWrapper.h"
 #include "util/exception.hh"
@@ -249,74 +247,6 @@ size_t TargetPhrase::WriteScoresToMemory(char *mem) const
 
   size_t memUsed = sizeof(float) * m_scores.size();
   return memUsed;
-}
-
-
-Moses::TargetPhrase *TargetPhrase::ConvertToMoses(const std::vector<Moses::FactorType> & inputFactors
-    , const std::vector<Moses::FactorType> &outputFactors
-    , const Vocab &vocab
-    , const Moses::PhraseDictionary &phraseDict
-    , const std::vector<float> &weightT
-    , bool isSyntax) const
-{
-  Moses::TargetPhrase *ret = new Moses::TargetPhrase(&phraseDict);
-
-  // words
-  size_t phraseSize = GetSize();
-  UTIL_THROW_IF2(phraseSize == 0, "Target phrase cannot be empty"); // last word is lhs
-  if (isSyntax) {
-    --phraseSize;
-  }
-
-  for (size_t pos = 0; pos < phraseSize; ++pos) {
-    GetWord(pos).ConvertToMoses(outputFactors, vocab, ret->AddWord());
-  }
-
-  // alignments
-  // int index = 0;
-  Moses::AlignmentInfo::CollType alignTerm, alignNonTerm;
-  std::set<std::pair<size_t, size_t> > alignmentInfo;
-  const PhrasePtr sp = GetSourcePhrase();
-  for (size_t ind = 0; ind < m_align.size(); ++ind) {
-    const std::pair<size_t, size_t> &entry = m_align[ind];
-    alignmentInfo.insert(entry);
-    size_t sourcePos = entry.first;
-    size_t targetPos = entry.second;
-
-    if (GetWord(targetPos).IsNonTerminal()) {
-      alignNonTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
-    } else {
-      alignTerm.insert(std::pair<size_t,size_t>(sourcePos, targetPos));
-    }
-
-  }
-  ret->SetAlignTerm(alignTerm);
-  ret->SetAlignNonTerm(alignNonTerm);
-
-  if (isSyntax) {
-    Moses::Word *lhsTarget = new Moses::Word(true);
-    GetWord(GetSize() - 1).ConvertToMoses(outputFactors, vocab, *lhsTarget);
-    ret->SetTargetLHS(lhsTarget);
-  }
-
-  // set source phrase
-  Moses::Phrase mosesSP(Moses::Input);
-  for (size_t pos = 0; pos < sp->GetSize(); ++pos) {
-    sp->GetWord(pos).ConvertToMoses(inputFactors, vocab, mosesSP.AddWord());
-  }
-
-  // scores
-  ret->GetScoreBreakdown().Assign(&phraseDict, m_scores);
-
-  // sparse features
-  ret->GetScoreBreakdown().Assign(&phraseDict, m_sparseFeatures);
-
-  // property
-  ret->SetProperties(m_property);
-
-  ret->EvaluateInIsolation(mosesSP, phraseDict.GetFeaturesToApply());
-
-  return ret;
 }
 
 uint64_t TargetPhrase::ReadOtherInfoFromFile(uint64_t filePos, std::fstream &fileTPColl)

@@ -56,9 +56,13 @@ public:
   Scores const* GetExtraScores(FeatureFunction const* ff) const;
   void SetExtraScores(FeatureFunction const* ff,boost::shared_ptr<Scores> const& scores);
 
+  typedef std::map<size_t const, std::vector<SPTR<std::vector<float> > > > CoordCache_t;
+  std::vector<SPTR<std::vector<float> > > const* GetCoordList(size_t const spaceID) const;
+  void PushCoord(size_t const spaceID, SPTR<std::vector<float> > const coord);
 
 private:
   ScoreCache_t m_cached_scores;
+  SPTR<CoordCache_t> m_cached_coord;
   WPTR<ContextScope> m_scope;
 
 private:

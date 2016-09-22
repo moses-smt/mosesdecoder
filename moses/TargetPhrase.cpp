@@ -125,6 +125,7 @@ TargetPhrase::TargetPhrase(const Phrase &phrase, const PhraseDictionary *pt)
 
 TargetPhrase::TargetPhrase(const TargetPhrase &copy)
   : Phrase(copy)
+  , m_cached_coord(copy.m_cached_coord)
   , m_cached_scores(copy.m_cached_scores)
   , m_scope(copy.m_scope)
   , m_futureScore(copy.m_futureScore)
@@ -333,6 +334,31 @@ SetExtraScores(FeatureFunction const* ff,
   m_cached_scores[ff] = s;
 }
 
+vector<SPTR<vector<float> > > const*
+TargetPhrase::
+GetCoordList(size_t const spaceID) const
+{
+  if(!m_cached_coord) {
+    return NULL;
+  }
+  CoordCache_t::const_iterator m = m_cached_coord->find(spaceID);
+  if(m == m_cached_coord->end()) {
+    return NULL;
+  }
+  return &m->second;
+}
+
+void
+TargetPhrase::
+PushCoord(size_t const spaceID,
+          SPTR<vector<float> > const coord)
+{
+  if (!m_cached_coord) {
+    m_cached_coord.reset(new CoordCache_t);
+  }
+  vector<SPTR<vector<float> > >& coordList = (*m_cached_coord)[spaceID];
+  coordList.push_back(coord);
+}
 
 void TargetPhrase::SetProperties(const StringPiece &str)
 {

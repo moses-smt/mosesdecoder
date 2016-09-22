@@ -70,6 +70,7 @@ namespace Moses
     , bias_key(((char*)this)+3)
     , cache_key(((char*)this)+2)
     , context_key(((char*)this)+1)
+    , m_track_coord(false)
       // , m_tpc_ctr(0)
       // , m_ifactor(1,0)
       // , m_ofactor(1,0)
@@ -275,6 +276,40 @@ namespace Moses
     m = param.find("name");
     if (m != param.end()) m_name = m->second;
 
+    // Optional coordinates for training corpus
+    // Takes form coord=name1:file1.gz,name2:file2.gz,...
+    // Names should match with XML input (coord tag)
+    param.insert(pair<string,string>("coord","0"));
+    if(param["coord"] != "0")
+      {
+        m_track_coord = true;
+        vector<string> coord_instances = Tokenize(param["coord"], ",");
+        BOOST_FOREACH(std::string instance, coord_instances)
+          {
+            vector<string> toks = Moses::Tokenize(instance, ":");
+            string space = toks[0];
+            string file = toks[1];
+            // Register that this model uses the given space
+            m_coord_spaces.push_back(StaticData::InstanceNonConst().MapCoordSpace(space));
+            // Load sid coordinates from file
+            m_sid_coord_list.push_back(vector<SPTR<vector<float> > >());
+            vector<SPTR<vector<float> > >& sid_coord = m_sid_coord_list[m_sid_coord_list.size() - 1];
+            //TODO: support extra data for btdyn, here? extra?
+            sid_coord.reserve(btfix->T1->size());
+            string line;
+            cerr << "Loading coordinate lines for space \"" << space << "\" from " << file << endl;
+            iostreams::filtering_istream in;
+            ugdiss::open_input_stream(file, in);
+            while(getline(in, line))
+              {
+                SPTR<vector<float> > coord(new vector<float>);
+                Scan<float>(*coord, Tokenize(line));
+                sid_coord.push_back(coord);
+              }
+            cerr << "Loaded " << sid_coord.size() << " lines" << endl;
+          }
+      }
+
     // check for unknown parameters
     vector<string> known_parameters; known_parameters.reserve(50);
     known_parameters.push_back("L1");
@@ -290,6 +325,7 @@ namespace Moses
     known_parameters.push_back("cache");
     known_parameters.push_back("coh");
     known_parameters.push_back("config");
+    known_parameters.push_back("coord");
     known_parameters.push_back("cumb");
     known_parameters.push_back("extra");
     known_parameters.push_back("feature-sets");
@@ -616,6 +652,29 @@ namespace Moses
       }
 #endif
 
+    // Track coordinates if requested
+    if (m_track_coord)
+    {
+      BOOST_FOREACH(uint32_t const sid, *pool.sids)
+        {
+          for(size_t i = 0; i < m_coord_spaces.size(); ++i)
+            {
+              tp->PushCoord(m_coord_spaces[i], m_sid_coord_list[i][sid]);
+            }
+        }
+      /*
+      cerr << btfix->toString(pool.p1, 0) << " ::: " << btfix->toString(pool.p2, 1);
+      BOOST_FOREACH(size_t id, m_coord_spaces)
+        {
+          cerr << " [" << id << "]";
+          vector<vector<float> const*> const* coordList = tp->GetCoordList(id);
+          BOOST_FOREACH(vector<float> const* coord, *coordList)
+            cerr << " : " << Join(" ", *coord);
+        }
+      cerr << endl;
+      */
+    }
+
     return tp;
   }
 
@@ -691,7 +750,7 @@ namespace Moses
     SPTR<ContextScope> const& scope = ttask->GetScope();
     SPTR<TPCollCache> cache = scope->get<TPCollCache>(cache_key);
     if (!cache) cache = m_cache; // no context-specific cache, use global one
-      
+
     ret = cache->get(phrasekey, dyn->revision());
     // TO DO: we should revise the revision mechanism: we take the
     // length of the dynamic bitext (in sentences) at the time the PT
@@ -705,12 +764,12 @@ namespace Moses
     // std::cerr << ret << " with " << ret->refCount << " references at " 
     // << HERE << std::endl;
     boost::upgrade_lock<boost::shared_mutex> rlock(ret->lock);
-    if (ret->GetSize()) return ret; 
+    if (ret->GetSize()) return ret;
 
     // new TPC (not found or old one was not up to date)
     boost::upgrade_to_unique_lock<boost::shared_mutex> wlock(rlock);
     // maybe another thread did the work while we waited for the lock ?
-    if (ret->GetSize()) return ret; 
+    if (ret->GetSize()) return ret;
 
     // OK: pt entry NOT found or NOT up to date
     // lookup and expansion could be done in parallel threads,
@@ -730,7 +789,8 @@ namespace Moses
             BitextSampler<Token> s(btfix, mfix, context->bias, 
                                    m_min_sample_size, 
                                    m_default_sample_size, 
-                                   m_sampling_method);
+                                   m_sampling_method,
+                                   m_track_coord);
             s();
             sfix = s.stats();
           }
@@ -918,7 +978,7 @@ namespace Moses
           {
             BitextSampler<Token> s(btfix, mfix, context->bias, 
                                    m_min_sample_size, m_default_sample_size, 
-                                   m_sampling_method);
+                                   m_sampling_method, m_track_coord);
             if (*context->cache1->get(pid, s.stats()) == s.stats())
               m_thread_pool->add(s);
           }
@@ -939,7 +999,7 @@ namespace Moses
         for (size_t i = 0; mdyn.size() == i && i < myphrase.size(); ++i)
           mdyn.extend(myphrase[i]);
         // let's assume a uniform bias over the foreground corpus
-        if (mdyn.size() == myphrase.size()) dyn->prep(ttask, mdyn);
+        if (mdyn.size() == myphrase.size()) dyn->prep(ttask, mdyn, m_track_coord);
       }
     return mdyn.size() == myphrase.size();
   }

@@ -1625,7 +1625,7 @@ sub create_config {
   }
 
   # write all additional parameters
-  foreach my $parameter (keys %P) {
+  foreach my $parameter (sort keys %P) {
     print $out "\n[$parameter]\n";
     foreach (@{$P{$parameter}}) {
       print $out $_."\n";
