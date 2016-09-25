@@ -48,7 +48,7 @@ PhraseDictionaryCompact::SentenceCache PhraseDictionaryCompact::m_sentenceCache;
 
 PhraseDictionaryCompact::PhraseDictionaryCompact(const std::string &line)
   :PhraseDictionary(line, true)
-  ,m_inMemory(true)//(s_inMemoryByDefault)
+  ,m_inMemory(s_inMemoryByDefault)
   ,m_useAlignmentInfo(true)
   ,m_hash(10, 16)
   ,m_phraseDecoder(0)
@@ -187,7 +187,7 @@ void
 PhraseDictionaryCompact::
 SetStaticDefaultParameters(Parameter const& param)
 {
-  param.SetParameter(s_inMemoryByDefault, "minphr-memory", true);
+  param.SetParameter(s_inMemoryByDefault, "minphr-memory", false);
 }
 }
 
