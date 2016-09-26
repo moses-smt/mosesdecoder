@@ -1,4 +1,6 @@
 #include "../StatefulFeatureFunction.h"
+#include "util/mmap.hh"
+#include "KenOSM.h"
 
 namespace Moses2
 {
@@ -7,8 +9,17 @@ namespace Moses2
 class OpSequenceModel : public StatefulFeatureFunction
 {
 public:
+  OSMLM* OSM;
+
+  int numFeatures;   // Number of features used ...
+  int sFactor;  // Source Factor ...
+  int tFactor;  // Target Factor ...
+  util::LoadMethod load_method; // method to load model
+
 	OpSequenceModel(size_t startInd, const std::string &line);
   virtual ~OpSequenceModel();
+
+  virtual void Load(System &system);
 
   virtual FFState* BlankState(MemPool &pool, const System &sys) const;
   virtual void EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
@@ -31,6 +42,13 @@ public:
   virtual void EvaluateWhenApplied(const SCFG::Manager &mgr,
       const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
       FFState &state) const;
+
+  void SetParameter(const std::string& key, const std::string& value);
+
+protected:
+  std::string m_lmPath;
+
+  void readLanguageModel(const char *);
 
 };
 

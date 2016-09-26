@@ -41,12 +41,23 @@ public:
 OpSequenceModel::OpSequenceModel(size_t startInd, const std::string &line) :
     StatefulFeatureFunction(startInd, line)
 {
+  sFactor = 0;
+  tFactor = 0;
+  numFeatures = 5;
+  ReadParameters();
+  load_method = util::READ;
+
   ReadParameters();
 }
 
 OpSequenceModel::~OpSequenceModel()
 {
   // TODO Auto-generated destructor stub
+}
+
+void OpSequenceModel::Load(System &system)
+{
+  readLanguageModel(m_lmPath.c_str());
 }
 
 FFState* OpSequenceModel::BlankState(MemPool &pool, const System &sys) const
@@ -88,6 +99,51 @@ void OpSequenceModel::EvaluateWhenApplied(const SCFG::Manager &mgr,
     FFState &state) const
 {
   UTIL_THROW2("Not implemented");
+}
+
+void OpSequenceModel::SetParameter(const std::string& key, const std::string& value)
+{
+
+  if (key == "path") {
+    m_lmPath = value;
+  } else if (key == "support-features") {
+    if(value == "no")
+      numFeatures = 1;
+    else
+      numFeatures = 5;
+  } else if (key == "input-factor") {
+    sFactor = Scan<int>(value);
+  } else if (key == "output-factor") {
+    tFactor = Scan<int>(value);
+  } else if (key == "load") {
+    if (value == "lazy") {
+      load_method = util::LAZY;
+    } else if (value == "populate_or_lazy") {
+      load_method = util::POPULATE_OR_LAZY;
+    } else if (value == "populate_or_read" || value == "populate") {
+      load_method = util::POPULATE_OR_READ;
+    } else if (value == "read") {
+      load_method = util::READ;
+    } else if (value == "parallel_read") {
+      load_method = util::PARALLEL_READ;
+    } else {
+      UTIL_THROW2("Unknown KenLM load method " << value);
+    }
+  } else {
+    StatefulFeatureFunction::SetParameter(key, value);
+  }
+}
+
+void OpSequenceModel :: readLanguageModel(const char *lmFile)
+{
+  string unkOp = "_TRANS_SLF_";
+  OSM = ConstructOSMLM(m_lmPath.c_str(), load_method);
+
+  /*
+  State startState = OSM->NullContextState();
+  State endState;
+  unkOpProb = OSM->Score(startState,unkOp,endState);
+  */
 }
 
 }

@@ -45,6 +45,7 @@ alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../mose
     FF/LexicalReordering/ReorderingStack.cpp
 
     FF/OSM/OpSequenceModel.cpp
+    FF/OSM/KenOSM.cpp
     
  #   LM/LanguageModelDALM.cpp
     LM/LanguageModel.cpp
