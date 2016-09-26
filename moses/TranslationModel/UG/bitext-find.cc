@@ -82,7 +82,7 @@ int main(int argc, char* argv[])
 
       if (!check[sid]) continue;
       size_t r = (N - i) * rnd()/(rnd.max()+1.) + k;
-      if (maxhits != N && r >= maxhits) continue;
+      if (maxhits && maxhits != N && r >= maxhits) continue;
       ++k;
 
       size_t s1,s2,e1,e2; int po_fwd=-1,po_bwd=-1;
