@@ -45,7 +45,6 @@ OpSequenceModel::OpSequenceModel(size_t startInd, const std::string &line) :
   sFactor = 0;
   tFactor = 0;
   numFeatures = 5;
-  ReadParameters();
   load_method = util::READ;
 
   ReadParameters();
