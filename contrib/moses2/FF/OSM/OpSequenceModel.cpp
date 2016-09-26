@@ -2,6 +2,7 @@
 #include "OpSequenceModel.h"
 #include "../../PhraseBased/Manager.h"
 #include "../../PhraseBased/Hypothesis.h"
+#include "lm/state.hh"
 
 using namespace std;
 
@@ -139,11 +140,9 @@ void OpSequenceModel :: readLanguageModel(const char *lmFile)
   string unkOp = "_TRANS_SLF_";
   OSM = ConstructOSMLM(m_lmPath.c_str(), load_method);
 
-  /*
-  State startState = OSM->NullContextState();
-  State endState;
+  lm::ngram::State startState = OSM->NullContextState();
+  lm::ngram::State endState;
   unkOpProb = OSM->Score(startState,unkOp,endState);
-  */
 }
 
 }
