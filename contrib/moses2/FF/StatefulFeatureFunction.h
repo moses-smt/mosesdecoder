@@ -9,7 +9,7 @@
 #define STATEFULFEATUREFUNCTION_H_
 
 #include "FeatureFunction.h"
-#include "../legacy/FFState.h"
+#include "FFState.h"
 #include "../MemPool.h"
 
 namespace Moses2
