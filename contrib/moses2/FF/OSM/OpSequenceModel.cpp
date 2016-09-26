@@ -1,5 +1,6 @@
 #include <sstream>
 #include "OpSequenceModel.h"
+#include "osmHyp.h"
 #include "../../PhraseBased/Manager.h"
 #include "../../PhraseBased/Hypothesis.h"
 #include "lm/state.hh"
@@ -78,9 +79,9 @@ void OpSequenceModel::EvaluateInIsolation(MemPool &pool,
     const TargetPhraseImpl &targetPhrase, Scores &scores,
     SCORE &estimatedScore) const
 {
-  /*
   osmHypothesis obj;
   obj.setState(OSM->NullContextState());
+  /*
   Bitmap myBitmap(source.GetSize());
   vector <string> mySourcePhrase;
   vector <string> myTargetPhrase;
