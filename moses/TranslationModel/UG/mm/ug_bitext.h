@@ -254,7 +254,7 @@ namespace sapt
   Bitext<Token>::
   sid2docname(id_type const sid) const
   {
-    if (sid < m_sid2docid->size() && (*m_sid2docid)[sid] < m_docname.size())
+    if (m_sid2docid && sid < m_sid2docid->size() && (*m_sid2docid)[sid] < m_docname.size())
       return m_docname[(*m_sid2docid)[sid]];
     else
       return "";
