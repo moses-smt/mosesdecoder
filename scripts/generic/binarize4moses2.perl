@@ -12,12 +12,14 @@ my $mosesDir = "$RealBin/../..";
 my $ptPath;
 my $lexRoPath;
 my $outPath;
+my $numScores = 4;
 my $numLexScores;
 my $pruneNum = 0;
 
 GetOptions("phrase-table=s"  => \$ptPath,
            "lex-ro=s"   => \$lexRoPath,
            "output-dir=s" => \$outPath,
+           "num-scores=s" => \$numScores,
            "num-lex-scores=i" => \$numLexScores,
            "prune=i" => \$pruneNum
 	   ) or exit 1;
@@ -41,7 +43,7 @@ systemCheck($cmd);
 $cmd = "$mosesDir/bin/addLexROtoPT $tempPath/pt.gz $tempPath/lex-ro.minlexr  | gzip -c > $tempPath/pt.withLexRO.gz";
 systemCheck($cmd);
 
-$cmd = "$mosesDir/bin/CreateProbingPT2 --num-lex-scores $numLexScores --log-prob --input-pt $tempPath/pt.withLexRO.gz --output-dir $outPath";
+$cmd = "$mosesDir/bin/CreateProbingPT2 --num-scores $numScores --num-lex-scores $numLexScores --log-prob --input-pt $tempPath/pt.withLexRO.gz --output-dir $outPath";
 systemCheck($cmd);
 
 exit(0);
