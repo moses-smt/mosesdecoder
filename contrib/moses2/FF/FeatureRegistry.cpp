@@ -13,6 +13,7 @@
 #include "LexicalReordering/LexicalReordering.h"
 #include "PhrasePenalty.h"
 #include "WordPenalty.h"
+#include "OSM/OpSequenceModel.h"
 
 #include "SkeletonStatefulFF.h"
 #include "SkeletonStatelessFF.h"
@@ -64,6 +65,8 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(LexicalReordering);
   MOSES_FNAME(PhrasePenalty);
   MOSES_FNAME(WordPenalty);
+  MOSES_FNAME(OpSequenceModel);
+
   MOSES_FNAME(SkeletonStatefulFF);
   MOSES_FNAME(SkeletonStatelessFF);
 }
