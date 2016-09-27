@@ -19,6 +19,8 @@
 #include "../SCFG/Manager.h"
 #include "../SCFG/Sentence.h"
 #include "../SCFG/ActiveChart.h"
+#include "util/tempfile.hh"
+#include "../legacy/Util2.h"
 
 using namespace std;
 
@@ -28,8 +30,12 @@ namespace Moses2
 Transliteration::Transliteration(size_t startInd, const std::string &line) :
     PhraseTable(startInd, line)
 {
-  m_tuneable = false;
   ReadParameters();
+  UTIL_THROW_IF2(m_mosesDir.empty() ||
+                 m_scriptDir.empty() ||
+                 m_externalDir.empty() ||
+                 m_inputLang.empty() ||
+                 m_outputLang.empty(), "Must specify all arguments");
 }
 
 Transliteration::~Transliteration()
@@ -37,33 +43,23 @@ Transliteration::~Transliteration()
   // TODO Auto-generated destructor stub
 }
 
-void Transliteration::ProcessXML(
-		const Manager &mgr,
-		MemPool &pool,
-		const Sentence &sentence,
-		InputPaths &inputPaths) const
+void
+Transliteration::
+SetParameter(const std::string& key, const std::string& value)
 {
-	const Vector<const InputType::XMLOption*> &xmlOptions = sentence.GetXMLOptions();
-	BOOST_FOREACH(const InputType::XMLOption *xmlOption, xmlOptions) {
-		TargetPhraseImpl *target = TargetPhraseImpl::CreateFromString(pool, *this, mgr.system, xmlOption->GetTranslation());
-
-    if (xmlOption->prob) {
-      Scores &scores = target->GetScores();
-      scores.PlusEquals(mgr.system, *this, Moses2::TransformScore(xmlOption->prob));
-    }
-
-    InputPath *path = inputPaths.GetMatrix().GetValue(xmlOption->startPos, xmlOption->phraseSize - 1);
-    const SubPhrase<Moses2::Word> &source = path->subPhrase;
-
-    mgr.system.featureFunctions.EvaluateInIsolation(pool, mgr.system, source, *target);
-
-    TargetPhrases *tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, 1);
-
-    tps->AddTargetPhrase(*target);
-    mgr.system.featureFunctions.EvaluateAfterTablePruning(pool, *tps, source);
-
-    path->AddTargetPhrases(*this, tps);
-	}
+  if (key == "moses-dir") {
+    m_mosesDir = value;
+  } else if (key == "script-dir") {
+    m_scriptDir = value;
+  } else if (key == "external-dir") {
+    m_externalDir = value;
+  } else if (key == "input-lang") {
+    m_inputLang = value;
+  } else if (key == "output-lang") {
+    m_outputLang = value;
+  } else {
+    PhraseTable::SetParameter(key, value);
+  }
 }
 
 void Transliteration::Lookup(const Manager &mgr,
@@ -85,53 +81,87 @@ void Transliteration::Lookup(const Manager &mgr,
 TargetPhrases *Transliteration::Lookup(const Manager &mgr, MemPool &pool,
     InputPath &inputPath) const
 {
-  const System &system = mgr.system;
+  const SubPhrase<Moses2::Word> &sourcePhrase = inputPath.subPhrase;
+  size_t hash = sourcePhrase.hash();
+
+  // TRANSLITERATE
+  const util::temp_file inFile;
+  const util::temp_dir outDir;
+
+  ofstream inStream(inFile.path().c_str());
+  inStream << sourcePhrase.Debug(mgr.system) << endl;
+  inStream.close();
+
+  string cmd = m_scriptDir + "/Transliteration/prepare-transliteration-phrase-table.pl" +
+               " --transliteration-model-dir " + m_filePath +
+               " --moses-src-dir " + m_mosesDir +
+               " --external-bin-dir " + m_externalDir +
+               " --input-extension " + m_inputLang +
+               " --output-extension " + m_outputLang +
+               " --oov-file " + inFile.path() +
+               " --out-dir " + outDir.path();
+
+  int ret = system(cmd.c_str());
+  UTIL_THROW_IF2(ret != 0, "Transliteration script error");
+
   TargetPhrases *tps = NULL;
-
-  // any other pt translate this?
-  size_t numPt = mgr.system.mappings.size();
-  const TargetPhrases **allTPS =
-      static_cast<InputPath&>(inputPath).targetPhrases;
-  for (size_t i = 0; i < numPt; ++i) {
-    const TargetPhrases *otherTps = allTPS[i];
-
-    if (otherTps && otherTps->GetSize()) {
-      return tps;
-    }
-  }
-
-  const SubPhrase<Moses2::Word> &source = inputPath.subPhrase;
-  const Moses2::Word &sourceWord = source[0];
-  const Factor *factor = sourceWord[0];
-
   tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, 1);
 
-  TargetPhraseImpl *target =
-      new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, *this,
-          system, 1);
-  Moses2::Word &word = (*target)[0];
+  vector<TargetPhraseImpl*> targetPhrases
+  = CreateTargetPhrases(mgr, pool, sourcePhrase, outDir.path());
 
-  //FactorCollection &fc = system.vocab;
-  //const Factor *factor = fc.AddFactor("SSS", false);
-  word[0] = factor;
+  vector<TargetPhraseImpl*>::const_iterator iter;
+  for (iter = targetPhrases.begin(); iter != targetPhrases.end(); ++iter) {
+    TargetPhraseImpl *tp = *iter;
+    tps->AddTargetPhrase(*tp);
+  }
+  mgr.system.featureFunctions.EvaluateAfterTablePruning(pool, *tps, sourcePhrase);
 
-  Scores &scores = target->GetScores();
-  scores.PlusEquals(mgr.system, *this, -100);
-
-  MemPool &memPool = mgr.GetPool();
-  system.featureFunctions.EvaluateInIsolation(memPool, system, source, *target);
-
-  tps->AddTargetPhrase(*target);
-  system.featureFunctions.EvaluateAfterTablePruning(memPool, *tps, source);
-
-  return tps;
+  inputPath.AddTargetPhrases(*this, tps);
 }
+
+std::vector<TargetPhraseImpl*> Transliteration::CreateTargetPhrases(
+    const Manager &mgr,
+    MemPool &pool,
+    const SubPhrase<Moses2::Word> &sourcePhrase,
+    const std::string &outDir) const
+{
+  std::vector<TargetPhraseImpl*> ret;
+
+  string outPath = outDir + "/out.txt";
+  ifstream outStream(outPath.c_str());
+
+  string line;
+  while (getline(outStream, line)) {
+    vector<string> toks = Moses2::Tokenize(line, "\t");
+    UTIL_THROW_IF2(toks.size() != 2, "Error in transliteration output file. Expecting word\tscore");
+
+    TargetPhraseImpl *tp =
+        new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, *this, mgr.system, 1);
+    Moses2::Word &word = (*tp)[0];
+    word.CreateFromString(mgr.system.GetVocab(), mgr.system, toks[0]);
+
+    float score = Scan<float>(toks[1]);
+    tp->GetScores().PlusEquals(mgr.system, *this, score);
+
+    // score of all other ff when this rule is being loaded
+    mgr.system.featureFunctions.EvaluateInIsolation(pool, mgr.system, sourcePhrase, *tp);
+
+    ret.push_back(tp);
+  }
+
+  outStream.close();
+
+  return ret;
+
+}
+
 
 void Transliteration::EvaluateInIsolation(const System &system,
     const Phrase<Moses2::Word> &source, const TargetPhraseImpl &targetPhrase, Scores &scores,
     SCORE &estimatedScore) const
 {
-
+  UTIL_THROW2("Not implemented");
 }
 
 // SCFG ///////////////////////////////////////////////////////////////////////////////////////////
@@ -140,6 +170,7 @@ void Transliteration::InitActiveChart(
     const SCFG::Manager &mgr,
     SCFG::InputPath &path) const
 {
+  UTIL_THROW2("Not implemented");
 }
 
 void Transliteration::Lookup(MemPool &pool,
@@ -148,59 +179,7 @@ void Transliteration::Lookup(MemPool &pool,
     const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
-  const System &system = mgr.system;
-
-  size_t numWords = path.range.GetNumWordsCovered();
-  if (numWords > 1) {
-    // only create 1 word phrases
-    return;
-  }
-
-  if (path.GetNumRules()) {
-	// only create rules if no other rules
-    return;
-  }
-
-  // don't do 1st if 1st word
-  if (path.range.GetStartPos() == 0) {
-    return;
-  }
-
-  // don't do 1st if last word
-  const SCFG::Sentence &sentence = static_cast<const SCFG::Sentence&>(mgr.GetInput());
-  if (path.range.GetStartPos() + 1 == sentence.GetSize()) {
-    return;
-  }
-
-  // terminal
-  const SCFG::Word &lastWord = path.subPhrase.Back();
-  //cerr << "Transliteration lastWord=" << lastWord << endl;
-
-  const Factor *factor = lastWord[0];
-  SCFG::TargetPhraseImpl *tp = new (pool.Allocate<SCFG::TargetPhraseImpl>()) SCFG::TargetPhraseImpl(pool, *this, system, 1);
-  SCFG::Word &word = (*tp)[0];
-  word.CreateFromString(system.GetVocab(), system, factor->GetString().as_string());
-
-  tp->lhs.CreateFromString(system.GetVocab(), system, "[X]");
-
-  size_t endPos = path.range.GetEndPos();
-  const SCFG::InputPath &subPhrasePath = *mgr.GetInputPaths().GetMatrix().GetValue(endPos, 1);
-
-  SCFG::ActiveChartEntry *chartEntry = new (pool.Allocate<SCFG::ActiveChartEntry>()) SCFG::ActiveChartEntry(pool);
-  chartEntry->AddSymbolBindElement(subPhrasePath.range, lastWord, NULL, *this);
-  path.AddActiveChartEntry(GetPtInd(), chartEntry);
-
-  Scores &scores = tp->GetScores();
-  scores.PlusEquals(mgr.system, *this, -100);
-
-  MemPool &memPool = mgr.GetPool();
-  const SubPhrase<SCFG::Word> &source = path.subPhrase;
-  system.featureFunctions.EvaluateInIsolation(memPool, system, source, *tp);
-
-  SCFG::TargetPhrases *tps = new (pool.Allocate<SCFG::TargetPhrases>()) SCFG::TargetPhrases(pool);
-  tps->AddTargetPhrase(*tp);
-
-  path.AddTargetPhrasesToPath(pool, mgr.system, *this, *tps, chartEntry->GetSymbolBind());
+  UTIL_THROW2("Not implemented");
 }
 
 void Transliteration::LookupUnary(MemPool &pool,
@@ -208,6 +187,7 @@ void Transliteration::LookupUnary(MemPool &pool,
     const SCFG::Stacks &stacks,
     SCFG::InputPath &path) const
 {
+  UTIL_THROW2("Not implemented");
 }
 
 void Transliteration::LookupNT(

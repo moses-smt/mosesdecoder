@@ -25,12 +25,6 @@ public:
   virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
       InputPath &inputPath) const;
 
-  void ProcessXML(
-		  const Manager &mgr,
-		  MemPool &pool,
-		  const Sentence &sentence,
-		  InputPaths &inputPaths) const;
-
   virtual void
   EvaluateInIsolation(const System &system, const Phrase<Moses2::Word> &source,
       const TargetPhraseImpl &targetPhrase, Scores &scores,
@@ -78,6 +72,19 @@ protected:
       const Moses2::Hypotheses *hypos,
       const Moses2::Range &subPhraseRange,
       SCFG::InputPath &outPath) const;
+
+  void SetParameter(const std::string& key, const std::string& value);
+
+protected:
+  std::string m_filePath;
+  std::string m_mosesDir, m_scriptDir, m_externalDir, m_inputLang, m_outputLang;
+
+  std::vector<TargetPhraseImpl*> CreateTargetPhrases(
+      const Manager &mgr,
+      MemPool &pool,
+      const SubPhrase<Moses2::Word> &sourcePhrase,
+      const std::string &outDir) const;
+
 };
 
 }
