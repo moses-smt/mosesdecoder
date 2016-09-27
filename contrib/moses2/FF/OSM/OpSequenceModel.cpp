@@ -5,7 +5,9 @@
 #include "../../PhraseBased/Manager.h"
 #include "../../PhraseBased/Hypothesis.h"
 #include "../../PhraseBased/TargetPhraseImpl.h"
+#include "../../PhraseBased/Sentence.h"
 #include "../../TranslationModel/UnknownWordPenalty.h"
+#include "../../System.h"
 
 using namespace std;
 
@@ -129,14 +131,93 @@ void OpSequenceModel::EvaluateInIsolation(MemPool &pool, const System &system, c
     const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
     SCORE &estimatedScore) const
 {
+  UTIL_THROW2("Not implemented");
 }
 
 void OpSequenceModel::EvaluateWhenApplied(const ManagerBase &mgr,
     const Hypothesis &hypo, const FFState &prevState, Scores &scores,
     FFState &state) const
 {
-  OSMState &stateCast = static_cast<OSMState&>(state);
-  stateCast.targetLen = hypo.GetTargetPhrase().GetSize();
+  const TargetPhrase<Moses2::Word> &target = hypo.GetTargetPhrase();
+  const Bitmap &bitmap = hypo.GetBitmap();
+  Bitmap myBitmap(bitmap);
+  const ManagerBase &manager = hypo.GetManager();
+  const InputType &source = manager.GetInput();
+  const Sentence &sourceSentence = static_cast<const Sentence&>(source);
+
+  osmHypothesis obj;
+  vector <string> mySourcePhrase;
+  vector <string> myTargetPhrase;
+  vector<float> scoresVec;
+
+
+  //target.GetWord(0)
+
+  //cerr << target <<" --- "<<target.GetSourcePhrase()<< endl;  // English ...
+
+  //cerr << align << endl;   // Alignments ...
+  //cerr << cur_hypo.GetCurrSourceWordsRange() << endl;
+
+  //cerr << source <<endl;
+
+// int a = sourceRange.GetStartPos();
+// cerr << source.GetWord(a);
+  //cerr <<a<<endl;
+
+  //const Sentence &sentence = static_cast<const Sentence&>(curr_hypo.GetManager().GetSource());
+
+
+  const Range & sourceRange = hypo.GetInputPath().range;
+  int startIndex  = sourceRange.GetStartPos();
+  int endIndex = sourceRange.GetEndPos();
+  const AlignmentInfo &align = hypo.GetTargetPhrase().GetAlignTerm();
+  // osmState * statePtr;
+
+  vector <int> alignments;
+
+
+
+  AlignmentInfo::const_iterator iter;
+
+  for (iter = align.begin(); iter != align.end(); ++iter) {
+    //cerr << iter->first << "----" << iter->second << " ";
+    alignments.push_back(iter->first);
+    alignments.push_back(iter->second);
+  }
+
+
+  //cerr<<bitmap<<endl;
+  //cerr<<startIndex<<" "<<endIndex<<endl;
+
+
+  for (int i = startIndex; i <= endIndex; i++) {
+    myBitmap.SetValue(i,0); // resetting coverage of this phrase ...
+    mySourcePhrase.push_back(sourceSentence[i][sFactor]->GetString().as_string());
+    // cerr<<mySourcePhrase[i]<<endl;
+  }
+
+  for (size_t i = 0; i < target.GetSize(); i++) {
+    if (&target.pt == mgr.system.featureFunctions.GetUnknownWordPenalty() && sFactor == 0 && tFactor == 0)
+      myTargetPhrase.push_back("_TRANS_SLF_");
+    else
+      myTargetPhrase.push_back(target[i][tFactor]->GetString().as_string());
+
+  }
+
+
+  //cerr<<myBitmap<<endl;
+
+  obj.setState(&prevState);
+  obj.constructCepts(alignments,startIndex,endIndex,target.GetSize());
+  obj.setPhrases(mySourcePhrase , myTargetPhrase);
+  obj.computeOSMFeature(startIndex,myBitmap);
+  obj.calculateOSMProb(*OSM);
+  obj.populateScores(scoresVec,numFeatures);
+  //obj.print();
+
+  scores.PlusEquals(mgr.system, *this, scoresVec);
+
+  //return obj.saveState();
 }
 
 void OpSequenceModel::EvaluateWhenApplied(const SCFG::Manager &mgr,
