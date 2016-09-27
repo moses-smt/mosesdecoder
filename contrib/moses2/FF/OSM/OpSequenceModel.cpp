@@ -1,9 +1,11 @@
 #include <sstream>
 #include "OpSequenceModel.h"
 #include "osmHyp.h"
+#include "lm/state.hh"
 #include "../../PhraseBased/Manager.h"
 #include "../../PhraseBased/Hypothesis.h"
-#include "lm/state.hh"
+#include "../../PhraseBased/TargetPhraseImpl.h"
+#include "../../TranslationModel/UnknownWordPenalty.h"
 
 using namespace std;
 
@@ -81,11 +83,13 @@ void OpSequenceModel::EvaluateInIsolation(MemPool &pool,
 {
   osmHypothesis obj;
   obj.setState(OSM->NullContextState());
-  /*
-  Bitmap myBitmap(source.GetSize());
+
+  Bitmap myBitmap (pool, source.GetSize());
+  myBitmap.Init(std::vector<bool>());
+
   vector <string> mySourcePhrase;
   vector <string> myTargetPhrase;
-  vector<float> scores;
+  vector<float> scoresVec;
   vector <int> alignments;
   int startIndex = 0;
   int endIndex = source.GetSize();
@@ -99,23 +103,26 @@ void OpSequenceModel::EvaluateInIsolation(MemPool &pool,
   }
 
   for (size_t i = 0; i < targetPhrase.GetSize(); i++) {
-    if (targetPhrase.GetWord(i).IsOOV() && sFactor == 0 && tFactor == 0)
+    if (&targetPhrase.pt == system.featureFunctions.GetUnknownWordPenalty() && sFactor == 0 && tFactor == 0)
       myTargetPhrase.push_back("_TRANS_SLF_");
     else
-      myTargetPhrase.push_back(targetPhrase.GetWord(i).GetFactor(tFactor)->GetString().as_string());
+      myTargetPhrase.push_back(targetPhrase[i][tFactor]->GetString().as_string());
   }
 
   for (size_t i = 0; i < source.GetSize(); i++) {
-    mySourcePhrase.push_back(source.GetWord(i).GetFactor(sFactor)->GetString().as_string());
+    mySourcePhrase.push_back(source[i][sFactor]->GetString().as_string());
   }
 
   obj.setPhrases(mySourcePhrase , myTargetPhrase);
   obj.constructCepts(alignments,startIndex,endIndex-1,targetPhrase.GetSize());
   obj.computeOSMFeature(startIndex,myBitmap);
   obj.calculateOSMProb(*OSM);
-  obj.populateScores(scores,numFeatures);
-  estimatedScores.PlusEquals(this, scores);
-  */
+  obj.populateScores(scoresVec,numFeatures);
+
+  SCORE weightedScore = Scores::CalcWeightedScore(system, *this,
+      scoresVec.data());
+  estimatedScore += weightedScore;
+
 }
 
 void OpSequenceModel::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
