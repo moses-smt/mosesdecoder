@@ -8,14 +8,14 @@
 
 #include <iostream>
 #include <cstddef>
-#include "../legacy/FFState.h"
+#include "../FF/FFState.h"
 #include "../legacy/Bitmap.h"
+#include "../legacy/Range.h"
 #include "../Scores.h"
 #include "../Phrase.h"
 #include "../TargetPhrase.h"
 #include "../InputPathBase.h"
 #include "../HypothesisBase.h"
-#include "../legacy/Range.h"
 
 namespace Moses2
 {
