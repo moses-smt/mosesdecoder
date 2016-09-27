@@ -3,6 +3,7 @@
 #include "../TranslationModel/Memory/PhraseTableMemory.h"
 #include "../TranslationModel/ProbingPT.h"
 #include "../TranslationModel/UnknownWordPenalty.h"
+#include "../TranslationModel/Transliteration.h"
 
 #include "../LM/KENLM.h"
 #include "../LM/KENLMBatch.h"
@@ -52,6 +53,7 @@ FeatureRegistry::FeatureRegistry()
 
   MOSES_FNAME2("PhraseDictionaryMemory", PhraseTableMemory);
   MOSES_FNAME(ProbingPT);
+  MOSES_FNAME2("PhraseDictionaryTransliteration", Transliteration);
   MOSES_FNAME(UnknownWordPenalty);
 
   Add("KENLM", new KenFactory());
