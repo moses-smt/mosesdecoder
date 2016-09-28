@@ -48,7 +48,7 @@ Sentence *Sentence::CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
 
     string str2 = "<xml>" + str + "</xml>";
     pugi::xml_parse_result result = doc.load(str2.c_str(),
-                                    pugi::parse_default | pugi::parse_comments);
+                                      pugi::parse_cdata | pugi::parse_wconv_attribute | pugi::parse_eol | pugi::parse_comments);
     pugi::xml_node topNode = doc.child("xml");
 
     std::vector<std::string> toks;
