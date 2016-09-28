@@ -14,7 +14,11 @@ namespace Moses2
 class osmState : public FFState
 {
 public:
-  osmState(const lm::ngram::State & val);
+  osmState()
+  {}
+
+  void setState(const lm::ngram::State & val);
+
   virtual size_t hash() const;
   virtual bool operator==(const FFState& other) const;
 
@@ -92,7 +96,7 @@ public:
     currE = val2;
   }
   void setState(const FFState* prev_state);
-  osmState * saveState();
+  void saveState(osmState &state);
   void print();
   void populateScores(std::vector <float> & scores , const int numFeatures);
   void setState(const lm::ngram::State & val) {

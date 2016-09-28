@@ -6,12 +6,11 @@ using namespace lm::ngram;
 
 namespace Moses2
 {
-osmState::osmState(const State & val)
-  :j(0)
-  ,E(0)
+void osmState::setState(const lm::ngram::State & val)
 {
+  j = 0;
+  E = 0;
   lmState = val;
-
 }
 
 void osmState::saveState(int jVal, int eVal, map <int , string> & gapVal)
@@ -81,12 +80,10 @@ void osmHypothesis :: setState(const FFState* prev_state)
   }
 }
 
-osmState * osmHypothesis :: saveState()
+void osmHypothesis :: saveState(osmState &state)
 {
-
-  osmState * statePtr = new osmState(lmState);
-  statePtr->saveState(j,E,gap);
-  return statePtr;
+  state.setState(lmState);
+  state.saveState(j,E,gap);
 }
 
 int osmHypothesis :: isTranslationOperation(int x)

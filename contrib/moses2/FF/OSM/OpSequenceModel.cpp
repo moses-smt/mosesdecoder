@@ -13,34 +13,6 @@ using namespace std;
 
 namespace Moses2
 {
-class OSMState: public FFState
-{
-public:
-  int targetLen;
-
-  OSMState()
-  {
-    // uninitialised
-  }
-
-  virtual size_t hash() const
-  {
-    return (size_t) targetLen;
-  }
-  virtual bool operator==(const FFState& o) const
-  {
-    const OSMState& other = static_cast<const OSMState&>(o);
-    return targetLen == other.targetLen;
-  }
-
-  virtual std::string ToString() const
-  {
-    stringstream sb;
-    sb << targetLen;
-    return sb.str();
-  }
-
-};
 
 ////////////////////////////////////////////////////////////////////////////////////////
 
@@ -67,15 +39,17 @@ void OpSequenceModel::Load(System &system)
 
 FFState* OpSequenceModel::BlankState(MemPool &pool, const System &sys) const
 {
-  return new (pool.Allocate<OSMState>()) OSMState();
+  return new (pool.Allocate<osmState>()) osmState();
 }
 
 void OpSequenceModel::EmptyHypothesisState(FFState &state,
     const ManagerBase &mgr, const InputType &input,
     const Hypothesis &hypo) const
 {
-  OSMState &stateCast = static_cast<OSMState&>(state);
-  stateCast.targetLen = 0;
+  lm::ngram::State startState = OSM->BeginSentenceState();
+
+  osmState &stateCast = static_cast<osmState&>(state);
+  stateCast.setState(startState);
 }
 
 void OpSequenceModel::EvaluateInIsolation(MemPool &pool,
@@ -217,7 +191,8 @@ void OpSequenceModel::EvaluateWhenApplied(const ManagerBase &mgr,
 
   scores.PlusEquals(mgr.system, *this, scoresVec);
 
-  //return obj.saveState();
+  osmState &stateCast = static_cast<osmState&>(state);
+  obj.saveState(stateCast);
 }
 
 void OpSequenceModel::EvaluateWhenApplied(const SCFG::Manager &mgr,
