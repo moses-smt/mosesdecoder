@@ -22,7 +22,7 @@
 
 #include "LexicalReorderingTableCompact.h"
 #include "../../SubPhrase.h"
-#include "../Util2.h"
+#include "../../legacy/Util2.h"
 
 namespace Moses2
 {

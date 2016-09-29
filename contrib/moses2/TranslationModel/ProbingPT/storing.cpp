@@ -4,8 +4,8 @@
 #include "storing.hh"
 #include "StoreTarget.h"
 #include "StoreVocab.h"
-#include "../Util2.h"
-#include "../InputFileStream.h"
+#include "../../legacy/Util2.h"
+#include "../../legacy/InputFileStream.h"
 
 using namespace std;
 

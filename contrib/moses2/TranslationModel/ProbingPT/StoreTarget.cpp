@@ -8,8 +8,8 @@
 #include "StoreTarget.h"
 #include "line_splitter.hh"
 #include "probing_hash_utils.hh"
-#include "../OutputFileStream.h"
-#include "../Util2.h"
+#include "../../legacy/OutputFileStream.h"
+#include "../../legacy/Util2.h"
 
 using namespace std;
 

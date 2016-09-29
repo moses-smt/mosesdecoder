@@ -7,8 +7,8 @@
 #pragma once
 #include <string>
 #include <boost/unordered_map.hpp>
-#include "../OutputFileStream.h"
-#include "../Util2.h"
+#include "../../legacy/OutputFileStream.h"
+#include "../../legacy/Util2.h"
 
 namespace Moses2
 {
