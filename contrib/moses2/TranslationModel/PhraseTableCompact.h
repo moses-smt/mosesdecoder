@@ -26,6 +26,9 @@ public:
       SCFG::InputPath &path) const;
 
 protected:
+  friend class PhraseDecoder;
+  //PhraseDecoder* m_phraseDecoder;
+
   virtual void LookupGivenNode(
       MemPool &pool,
       const SCFG::Manager &mgr,

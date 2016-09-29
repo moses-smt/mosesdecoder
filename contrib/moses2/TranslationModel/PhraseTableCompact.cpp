@@ -1,4 +1,9 @@
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/thread/tss.hpp>
 #include "PhraseTableCompact.h"
+
+using namespace std;
+using namespace boost::algorithm;
 
 namespace Moses2
 {
@@ -15,6 +20,15 @@ PhraseTableCompact::~PhraseTableCompact()
 
 void PhraseTableCompact::Load(System &system)
 {
+  std::string tFilePath = m_path;
+
+  std::string suffix = ".minphr";
+  if (!ends_with(tFilePath, suffix)) tFilePath += suffix;
+  if (!FileExists(tFilePath))
+    throw runtime_error("Error: File " + tFilePath + " does not exist.");
+
+  //m_phraseDecoder
+  //= new PhraseDecoder(*this, &m_input, &m_output, GetNumScores());
 
 }
 
