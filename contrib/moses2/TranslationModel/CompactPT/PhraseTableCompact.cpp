@@ -33,39 +33,31 @@ void PhraseTableCompact::Load(System &system)
   if (!ends_with(tFilePath, suffix)) tFilePath += suffix;
   if (!FileExists(tFilePath))
     throw runtime_error("Error: File " + tFilePath + " does not exist.");
-  cerr << "tFilePath=" << tFilePath << endl;
 
   m_phraseDecoder
   = new PhraseDecoder(*this, &m_input, &m_output, GetNumScores());
-  cerr << "m_phraseDecoder=" << m_phraseDecoder << endl;
 
   std::FILE* pFile = std::fopen(tFilePath.c_str() , "r");
-  cerr << "pFile=" << pFile << endl;
 
   size_t indexSize;
   //if(m_inMemory)
   // Load source phrase index into memory
   indexSize = m_hash.Load(pFile);
-  cerr << "indexSize=" << indexSize << endl;
   // else
   // Keep source phrase index on disk
   //indexSize = m_hash.LoadIndex(pFile);
 
   size_t coderSize = m_phraseDecoder->Load(pFile);
-  cerr << "coderSize=" << coderSize << endl;
 
   size_t phraseSize;
   if(m_inMemory) {
     // Load target phrase collections into memory
-    cerr << "m_inMemory=" << phraseSize << endl;
     phraseSize = m_targetPhrasesMemory.load(pFile, false);
   }
   else {
     // Keep target phrase collections on disk
-    cerr << "not m_inMemory=" << phraseSize << endl;
     phraseSize = m_targetPhrasesMapped.load(pFile, true);
   }
-  cerr << "phraseSize=" << phraseSize << endl;
 
   UTIL_THROW_IF2(indexSize == 0 || coderSize == 0 || phraseSize == 0,
                  "Not successfully loaded");
