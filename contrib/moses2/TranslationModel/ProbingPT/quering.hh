@@ -8,7 +8,7 @@
 #include "probing_hash_utils.hh"
 #include "hash.hh" //Includes line splitter
 #include "line_splitter.hh"
-#include "../Util2.h"
+#include "../../legacy/Util2.h"
 
 namespace Moses2
 {

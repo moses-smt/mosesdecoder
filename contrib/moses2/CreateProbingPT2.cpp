@@ -1,7 +1,7 @@
 #include <string>
 #include <boost/program_options.hpp>
 #include "util/usage.hh"
-#include "legacy/ProbingPT/storing.hh"
+#include "TranslationModel/ProbingPT/storing.hh"
 #include "legacy/InputFileStream.h"
 #include "legacy/OutputFileStream.h"
 #include "legacy/Util2.h"

@@ -1,6 +1,6 @@
 #include "quering.hh"
 #include "util/exception.hh"
-#include "../Util2.h"
+#include "../../legacy/Util2.h"
 
 using namespace std;
 
