@@ -276,7 +276,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
   unsigned phraseStopSymbol = 0;
   AlignPoint alignStopSymbol(-1, -1);
 
-  std::vector<Word> words;
+  std::vector<Word> targetWords;
   std::vector<float> scores;
   std::set<AlignPointSizeT> alignment;
 
@@ -288,7 +288,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
 
     if(state == New) {
       // Creating new TargetPhrase on the heap
-      words.clear();
+      targetWords.clear();
       alignment.clear();
       scores.clear();
 
@@ -316,12 +316,12 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
 
             wordString = GetTargetSymbol(GetTranslation(sourceWords[srcPos], rank));
             if(m_phraseDictionary.m_useAlignmentInfo) {
-              size_t trgPos = words.size();
+              size_t trgPos = targetWords.size();
               alignment.insert(AlignPoint(srcPos, trgPos));
             }
           } else if(type == 3) {
             size_t rank = DecodeREncSymbol3(symbol);
-            size_t srcPos = words.size();
+            size_t srcPos = targetWords.size();
 
             if(srcPos >= sourceWords.size())
               return TargetPhraseVectorPtr();
@@ -335,7 +335,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
 
           Word word;
           word.CreateFromString(vocab, system, wordString);
-          words.push_back(word);
+          targetWords.push_back(word);
         } else if(m_coding == PREnc) {
           // if the symbol is just a word
           if(GetPREncType(symbol) == 1) {
@@ -343,7 +343,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
 
             Word word;
             word.CreateFromString(vocab, system, GetTargetSymbol(decodedSymbol));
-            words.push_back(word);
+            targetWords.push_back(word);
           }
           // if the symbol is a subphrase pointer
           else {
@@ -351,7 +351,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
             int right = DecodePREncSymbol2Right(symbol);
             unsigned rank = DecodePREncSymbol2Rank(symbol);
 
-            int srcStart = left + words.size();
+            int srcStart = left + targetWords.size();
             int srcEnd   = srcSize - right - 1;
 
             // false positive consistency check
@@ -384,12 +384,12 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
                 for(AlignmentInfo::const_iterator it = subTp.GetAlignTerm().begin();
                     it != subTp.GetAlignTerm().end(); it++) {
                   alignment.insert(AlignPointSizeT(srcStart + it->first,
-                                                   words.size() + it->second));
+                                                   targetWords.size() + it->second));
                 }
               }
 
               for (size_t i = 0; i < subTp.GetSize(); ++i) {
-                words.push_back(subTp[i]);
+                targetWords.push_back(subTp[i]);
               }
             } else
               return TargetPhraseVectorPtr();
@@ -397,7 +397,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
         } else {
           Word word;
           word.CreateFromString(vocab, system, GetTargetSymbol(symbol));
-          words.push_back(word);
+          targetWords.push_back(word);
         }
       }
     } else if(state == Score) {
@@ -422,8 +422,12 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
     }
 
     if(state == Add) {
-      size_t targetSize = words.size();
-      TargetPhraseImpl *targetPhrase = new TargetPhraseImpl(mgr.GetPool(), m_phraseDictionary, system, targetSize);
+      size_t targetSize = targetWords.size();
+      TargetPhraseImpl *targetPhrase = new (mgr.GetPool().Allocate<TargetPhraseImpl>()) TargetPhraseImpl(mgr.GetPool(), m_phraseDictionary, system, targetSize);
+
+      for (size_t i = 0; i < targetWords.size(); ++i) {
+        (*targetPhrase)[i] = targetWords[i];
+      }
 
       if(m_phraseDictionary.m_useAlignmentInfo) {
         size_t sourceSize = sourcePhrase.GetSize();
