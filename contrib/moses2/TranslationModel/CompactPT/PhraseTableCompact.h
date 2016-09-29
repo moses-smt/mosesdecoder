@@ -1,6 +1,6 @@
 #pragma once
-#include "PhraseTable.h"
-#include "CompactPT/BlockHashIndex.h"
+#include "../PhraseTable.h"
+#include "BlockHashIndex.h"
 
 namespace Moses2
 {
