@@ -12,6 +12,7 @@
 #include "PhraseBasedReorderingState.h"
 #include "BidirectionalReorderingState.h"
 #include "../../TranslationModel/PhraseTable.h"
+#include "../../TranslationModel/CompactPT/LexicalReorderingTableCompact.h"
 #include "../../System.h"
 #include "../../PhraseBased/PhraseImpl.h"
 #include "../../PhraseBased/Manager.h"
@@ -20,7 +21,6 @@
 #include "../../PhraseBased/TargetPhraseImpl.h"
 #include "../../legacy/InputFileStream.h"
 #include "../../legacy/Util2.h"
-#include "../../legacy/CompactPT/LexicalReorderingTableCompact.h"
 
 using namespace std;
 

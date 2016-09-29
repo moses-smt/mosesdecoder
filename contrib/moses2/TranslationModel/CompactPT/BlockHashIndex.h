@@ -37,7 +37,7 @@
 #include "util/string_stream.hh"
 
 #ifdef WITH_THREADS
-#include "../ThreadPool.h"
+#include "../../legacy/ThreadPool.h"
 #else
 #include <ctime>
 #endif
