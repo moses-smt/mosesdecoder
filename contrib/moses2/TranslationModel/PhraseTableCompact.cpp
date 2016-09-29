@@ -7,8 +7,14 @@ using namespace boost::algorithm;
 
 namespace Moses2
 {
+bool PhraseTableCompact::s_inMemoryByDefault = false;
+
 PhraseTableCompact::PhraseTableCompact(size_t startInd, const std::string &line)
 :PhraseTable(startInd, line)
+,m_inMemory(s_inMemoryByDefault)
+,m_useAlignmentInfo(true)
+,m_hash(10, 16)
+//,m_phraseDecoder(0)
 {
   ReadParameters();
 }

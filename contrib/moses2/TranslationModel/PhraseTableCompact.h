@@ -1,5 +1,6 @@
 #pragma once
 #include "PhraseTable.h"
+#include "CompactPT/BlockHashIndex.h"
 
 namespace Moses2
 {
@@ -26,6 +27,15 @@ public:
       SCFG::InputPath &path) const;
 
 protected:
+  static bool s_inMemoryByDefault;
+  bool m_inMemory;
+  bool m_useAlignmentInfo;
+
+  BlockHashIndex m_hash;
+
+  StringVector<unsigned char, size_t, MmapAllocator>  m_targetPhrasesMapped;
+  StringVector<unsigned char, size_t, std::allocator> m_targetPhrasesMemory;
+
   friend class PhraseDecoder;
   //PhraseDecoder* m_phraseDecoder;
 

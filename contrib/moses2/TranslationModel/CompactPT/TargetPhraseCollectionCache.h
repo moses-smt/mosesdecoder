@@ -29,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/shared_ptr.hpp>
 
 #include "../../PhraseBased/TargetPhraseImpl.h"
-#include "../../PhraseBased/PhraseImpl.h"
+#include "../../Phrase.h"
 
 namespace Moses2
 {
@@ -56,7 +56,10 @@ private:
       : m_clock(clock), m_tpv(tpv), m_bitsLeft(bitsLeft) {}
   };
 
-  typedef boost::unordered_map<const PhraseImpl*, LastUsed, UnorderedComparer<PhraseImpl>, UnorderedComparer<PhraseImpl> > CacheMap;
+  typedef boost::unordered_map<
+      const Phrase<Word>*,
+      LastUsed, UnorderedComparer< Phrase<Word> >,
+      UnorderedComparer< Phrase<Word> > > CacheMap;
   static boost::thread_specific_ptr<CacheMap> m_phraseCache;
 
 public:
@@ -93,7 +96,7 @@ public:
   }
 
   /** retrieve translations for source phrase from persistent cache **/
-  void Cache(const PhraseImpl &sourcePhrase, TargetPhraseVectorPtr tpv,
+  void Cache(const Phrase<Word> &sourcePhrase, TargetPhraseVectorPtr tpv,
              size_t bitsLeft = 0, size_t maxRank = 0) {
     if(!m_phraseCache.get())
       m_phraseCache.reset(new CacheMap());
@@ -114,7 +117,7 @@ public:
     }
   }
 
-  std::pair<TargetPhraseVectorPtr, size_t> Retrieve(const PhraseImpl &sourcePhrase) {
+  std::pair<TargetPhraseVectorPtr, size_t> Retrieve(const Phrase<Word> &sourcePhrase) {
     if(!m_phraseCache.get())
       m_phraseCache.reset(new CacheMap());
     iterator it = m_phraseCache->find(&sourcePhrase);
@@ -131,7 +134,7 @@ public:
     if(!m_phraseCache.get())
       m_phraseCache.reset(new CacheMap());
     if(m_phraseCache->size() > m_max * (1 + m_tolerance)) {
-      typedef boost::unordered_set<std::pair<clock_t, const PhraseImpl*> > Cands;
+      typedef boost::unordered_set<std::pair<clock_t, const Phrase<Word>*> > Cands;
       Cands cands;
       for(CacheMap::iterator it = m_phraseCache->begin();
           it != m_phraseCache->end(); it++) {
@@ -140,7 +143,7 @@ public:
       }
 
       for(Cands::iterator it = cands.begin(); it != cands.end(); it++) {
-        const PhraseImpl *p = it->second;
+        const Phrase<Word> *p = it->second;
         m_phraseCache->erase(p);
 
         if(m_phraseCache->size() < (m_max * (1 - m_tolerance)))
