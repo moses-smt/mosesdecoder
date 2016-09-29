@@ -54,10 +54,11 @@ alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../mose
     LM/KENLMBatch.cpp
     LM/GPULM.cpp
     
- 	 	TranslationModel/PhraseTable.cpp 
- 	 	TranslationModel/ProbingPT.cpp 
- 	 	TranslationModel/Transliteration.cpp 
- 	 	TranslationModel/UnknownWordPenalty.cpp 
+ 	TranslationModel/PhraseTable.cpp 
+ 	TranslationModel/PhraseTableCompact.cpp 
+ 	TranslationModel/ProbingPT.cpp 
+ 	TranslationModel/Transliteration.cpp 
+ 	TranslationModel/UnknownWordPenalty.cpp 
     TranslationModel/Memory/PhraseTableMemory.cpp 
    	
    	parameters/AllOptions.cpp
