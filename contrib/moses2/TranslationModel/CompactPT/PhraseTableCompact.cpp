@@ -1,6 +1,7 @@
 #include <boost/algorithm/string/predicate.hpp>
 #include <boost/thread/tss.hpp>
 #include "PhraseTableCompact.h"
+#include "PhraseDecoder.h"
 
 using namespace std;
 using namespace boost::algorithm;
@@ -14,7 +15,7 @@ PhraseTableCompact::PhraseTableCompact(size_t startInd, const std::string &line)
 ,m_inMemory(s_inMemoryByDefault)
 ,m_useAlignmentInfo(true)
 ,m_hash(10, 16)
-//,m_phraseDecoder(0)
+,m_phraseDecoder(0)
 {
   ReadParameters();
 }

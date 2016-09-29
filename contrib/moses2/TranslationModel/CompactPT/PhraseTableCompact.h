@@ -4,6 +4,8 @@
 
 namespace Moses2
 {
+class PhraseDecoder;
+
 class PhraseTableCompact: public PhraseTable
 {
 public:
@@ -37,7 +39,7 @@ protected:
   StringVector<unsigned char, size_t, std::allocator> m_targetPhrasesMemory;
 
   friend class PhraseDecoder;
-  //PhraseDecoder* m_phraseDecoder;
+  PhraseDecoder* m_phraseDecoder;
 
   virtual void LookupGivenNode(
       MemPool &pool,
