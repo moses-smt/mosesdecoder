@@ -19,7 +19,7 @@ class Word
 {
 public:
   explicit Word();
-  explicit Word(const Word &copy);
+  Word(const Word &copy);
 
   virtual ~Word();
 
