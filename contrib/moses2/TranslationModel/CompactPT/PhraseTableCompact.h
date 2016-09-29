@@ -14,6 +14,8 @@ public:
   void Load(System &system);
   virtual void SetParameter(const std::string& key, const std::string& value);
 
+  virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
+      InputPath &inputPath) const;
 
   // scfg
   virtual void InitActiveChart(

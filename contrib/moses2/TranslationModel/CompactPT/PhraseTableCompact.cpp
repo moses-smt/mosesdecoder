@@ -73,6 +73,14 @@ void PhraseTableCompact::SetParameter(const std::string& key, const std::string&
   }
 }
 
+// pb
+TargetPhrases *PhraseTableCompact::Lookup(const Manager &mgr, MemPool &pool,
+    InputPath &inputPath) const
+{
+  return NULL;
+}
+
+
 // scfg
 void PhraseTableCompact::InitActiveChart(
     MemPool &pool,
