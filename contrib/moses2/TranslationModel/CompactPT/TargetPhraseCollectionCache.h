@@ -33,6 +33,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 namespace Moses2
 {
+typedef std::pair<size_t, size_t> AlignPointSizeT;
+
+struct TPCompact
+{
+  std::vector<Word> words;
+  std::set<AlignPointSizeT> alignment;
+  std::vector<float> scores;
+
+};
 
 // Avoid using new due to locking
 typedef std::vector<const TargetPhraseImpl*> TargetPhraseVector;

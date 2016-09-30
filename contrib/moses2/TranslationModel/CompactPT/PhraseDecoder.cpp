@@ -261,8 +261,6 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
   bool extending = tpv->size();
   size_t bitsLeft = encodedBitStream.TellFromEnd();
 
-  typedef std::pair<size_t, size_t> AlignPointSizeT;
-
   std::vector<int> sourceWords;
   if(m_coding == REnc) {
     for(size_t i = 0; i < sourcePhrase.GetSize(); i++) {
@@ -276,9 +274,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
   unsigned phraseStopSymbol = 0;
   AlignPoint alignStopSymbol(-1, -1);
 
-  std::vector<Word> targetWords;
-  std::vector<float> scores;
-  std::set<AlignPointSizeT> alignment;
+  TPCompact tpCompact;
 
   enum DecodeState { New, Symbol, Score, Alignment, Add } state = New;
 
@@ -288,9 +284,9 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
 
     if(state == New) {
       // Creating new TargetPhrase on the heap
-      targetWords.clear();
-      alignment.clear();
-      scores.clear();
+      tpCompact.words.clear();
+      tpCompact.alignment.clear();
+      tpCompact.scores.clear();
 
       state = Symbol;
     }
@@ -316,12 +312,12 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
 
             wordString = GetTargetSymbol(GetTranslation(sourceWords[srcPos], rank));
             if(m_phraseDictionary.m_useAlignmentInfo) {
-              size_t trgPos = targetWords.size();
-              alignment.insert(AlignPoint(srcPos, trgPos));
+              size_t trgPos = tpCompact.words.size();
+              tpCompact.alignment.insert(AlignPoint(srcPos, trgPos));
             }
           } else if(type == 3) {
             size_t rank = DecodeREncSymbol3(symbol);
-            size_t srcPos = targetWords.size();
+            size_t srcPos = tpCompact.words.size();
 
             if(srcPos >= sourceWords.size())
               return TargetPhraseVectorPtr();
@@ -329,13 +325,13 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
             wordString = GetTargetSymbol(GetTranslation(sourceWords[srcPos], rank));
             if(m_phraseDictionary.m_useAlignmentInfo) {
               size_t trgPos = srcPos;
-              alignment.insert(AlignPoint(srcPos, trgPos));
+              tpCompact.alignment.insert(AlignPoint(srcPos, trgPos));
             }
           }
 
           Word word;
           word.CreateFromString(vocab, system, wordString);
-          targetWords.push_back(word);
+          tpCompact.words.push_back(word);
         } else if(m_coding == PREnc) {
           // if the symbol is just a word
           if(GetPREncType(symbol) == 1) {
@@ -343,7 +339,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
 
             Word word;
             word.CreateFromString(vocab, system, GetTargetSymbol(decodedSymbol));
-            targetWords.push_back(word);
+            tpCompact.words.push_back(word);
           }
           // if the symbol is a subphrase pointer
           else {
@@ -351,7 +347,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
             int right = DecodePREncSymbol2Right(symbol);
             unsigned rank = DecodePREncSymbol2Rank(symbol);
 
-            int srcStart = left + targetWords.size();
+            int srcStart = left + tpCompact.words.size();
             int srcEnd   = srcSize - right - 1;
 
             // false positive consistency check
@@ -383,13 +379,13 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
                 // reconstruct the alignment data based on the alignment of the subphrase
                 for(AlignmentInfo::const_iterator it = subTp.GetAlignTerm().begin();
                     it != subTp.GetAlignTerm().end(); it++) {
-                  alignment.insert(AlignPointSizeT(srcStart + it->first,
-                                                   targetWords.size() + it->second));
+                  tpCompact.alignment.insert(AlignPointSizeT(srcStart + it->first,
+                                                   tpCompact.words.size() + it->second));
                 }
               }
 
               for (size_t i = 0; i < subTp.GetSize(); ++i) {
-                targetWords.push_back(subTp[i]);
+                tpCompact.words.push_back(subTp[i]);
               }
             } else
               return TargetPhraseVectorPtr();
@@ -397,15 +393,15 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
         } else {
           Word word;
           word.CreateFromString(vocab, system, GetTargetSymbol(symbol));
-          targetWords.push_back(word);
+          tpCompact.words.push_back(word);
         }
       }
     } else if(state == Score) {
-      size_t idx = m_multipleScoreTrees ? scores.size() : 0;
+      size_t idx = m_multipleScoreTrees ? tpCompact.scores.size() : 0;
       float score = m_scoreTrees[idx]->Read(encodedBitStream);
-      scores.push_back(score);
+      tpCompact.scores.push_back(score);
 
-      if(scores.size() == m_numScoreComponent) {
+      if(tpCompact.scores.size() == m_numScoreComponent) {
         if(m_containsAlignmentInfo)
           state = Alignment;
         else
@@ -417,25 +413,25 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
         state = Add;
       } else {
         if(m_phraseDictionary.m_useAlignmentInfo)
-          alignment.insert(AlignPointSizeT(alignPoint));
+          tpCompact.alignment.insert(AlignPointSizeT(alignPoint));
       }
     }
 
     if(state == Add) {
-      size_t targetSize = targetWords.size();
+      size_t targetSize = tpCompact.words.size();
       TargetPhraseImpl *targetPhrase = new (mgr.GetPool().Allocate<TargetPhraseImpl>()) TargetPhraseImpl(mgr.GetPool(), m_phraseDictionary, system, targetSize);
 
-      for (size_t i = 0; i < targetWords.size(); ++i) {
-        (*targetPhrase)[i] = targetWords[i];
+      for (size_t i = 0; i < tpCompact.words.size(); ++i) {
+        (*targetPhrase)[i] = tpCompact.words[i];
       }
 
       if(m_phraseDictionary.m_useAlignmentInfo) {
         size_t sourceSize = sourcePhrase.GetSize();
-        for(std::set<AlignPointSizeT>::iterator it = alignment.begin(); it != alignment.end(); it++) {
+        for(std::set<AlignPointSizeT>::iterator it = tpCompact.alignment.begin(); it != tpCompact.alignment.end(); it++) {
           if(it->first >= sourceSize || it->second >= targetSize)
             return TargetPhraseVectorPtr();
         }
-        targetPhrase->SetAlignTerm(alignment);
+        targetPhrase->SetAlignTerm(tpCompact.alignment);
       }
 
       if(eval) {
