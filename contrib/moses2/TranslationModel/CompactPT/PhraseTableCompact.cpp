@@ -90,8 +90,9 @@ void PhraseTableCompact::Lookup(const Manager &mgr, InputPathsBase &inputPaths) 
 		  if (endPos >= inputSize) {
 			  break;
 		  }
-		  const InputPath *path = inputPathsCast.GetMatrix().GetValue(startPos, i);
+		  InputPath *path = inputPathsCast.GetMatrix().GetValue(startPos, i);
 		  cerr << "path=" << path->Debug(mgr.system) << endl;
+		  Lookup(mgr, mgr.GetPool(), *path);
 	  }
   }
 }

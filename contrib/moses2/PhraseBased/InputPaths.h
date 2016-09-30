@@ -28,10 +28,11 @@ public:
     return *m_blank;
   }
 
+  Matrix<InputPath*> &GetMatrix()
+  { return *m_matrix; }
+
   const Matrix<InputPath*> &GetMatrix() const
-  {
-    return *m_matrix;
-  }
+  { return *m_matrix; }
 
 protected:
   InputPath *m_blank;
