@@ -92,14 +92,19 @@ TargetPhrases *PhraseTableCompact::Lookup(const Manager &mgr, MemPool &pool,
   // Retrieve target phrase collection from phrase table
   TargetPhraseVectorPtr decodedPhraseColl
   = m_phraseDecoder->CreateTargetPhraseCollection(mgr, sourcePhrase, true, true);
+  cerr << "decodedPhraseColl=" << decodedPhraseColl->size() << endl;
+
+  return NULL;
 
   if(decodedPhraseColl != NULL && decodedPhraseColl->size()) {
     TargetPhraseVectorPtr tpv(new TargetPhraseVector(*decodedPhraseColl));
     //TargetPhraseCollection::shared_ptr  phraseColl(new TargetPhraseCollection);
     ret = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, decodedPhraseColl->size());
+    cerr << "ret=" << ret->GetSize() << endl;
 
     for (size_t i = 0; i < decodedPhraseColl->size(); ++i) {
       const TargetPhraseImpl *tp = decodedPhraseColl->at(i);
+      cerr << "tp=" << tp << endl;
       ret->AddTargetPhrase(*tp);
     }
     ret->SortAndPrune(m_tableLimit);
