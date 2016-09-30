@@ -44,7 +44,7 @@ struct TPCompact
 };
 
 // Avoid using new due to locking
-typedef std::vector<const TargetPhraseImpl*> TargetPhraseVector;
+typedef std::vector<TPCompact> TargetPhraseVector;
 typedef boost::shared_ptr<TargetPhraseVector> TargetPhraseVectorPtr;
 
 /** Implementation of Persistent Cache **/

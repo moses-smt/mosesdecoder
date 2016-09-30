@@ -103,9 +103,9 @@ TargetPhrases *PhraseTableCompact::Lookup(const Manager &mgr, MemPool &pool,
     cerr << "ret=" << ret->GetSize() << endl;
 
     for (size_t i = 0; i < decodedPhraseColl->size(); ++i) {
-      const TargetPhraseImpl *tp = decodedPhraseColl->at(i);
-      cerr << "tp=" << tp << endl;
-      ret->AddTargetPhrase(*tp);
+      //const TargetPhraseImpl *tp = decodedPhraseColl->at(i);
+      //cerr << "tp=" << tp << endl;
+      //ret->AddTargetPhrase(*tp);
     }
     ret->SortAndPrune(m_tableLimit);
 

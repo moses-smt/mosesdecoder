@@ -374,18 +374,18 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
             // false positive consistency check
             if(subTpv != NULL && rank < subTpv->size()) {
               // insert the subphrase into the main target phrase
-              const TargetPhraseImpl& subTp = *subTpv->at(rank);
+              const TPCompact& subTp = subTpv->at(rank);
               if(m_phraseDictionary.m_useAlignmentInfo) {
                 // reconstruct the alignment data based on the alignment of the subphrase
-                for(AlignmentInfo::const_iterator it = subTp.GetAlignTerm().begin();
-                    it != subTp.GetAlignTerm().end(); it++) {
+                for(std::set<AlignPointSizeT>::const_iterator it = subTp.alignment.begin();
+                    it != subTp.alignment.end(); it++) {
                   tpCompact.alignment.insert(AlignPointSizeT(srcStart + it->first,
                                                    tpCompact.words.size() + it->second));
                 }
               }
 
-              for (size_t i = 0; i < subTp.GetSize(); ++i) {
-                tpCompact.words.push_back(subTp[i]);
+              for (size_t i = 0; i < subTp.words.size(); ++i) {
+                tpCompact.words.push_back(subTp.words[i]);
               }
             } else
               return TargetPhraseVectorPtr();
