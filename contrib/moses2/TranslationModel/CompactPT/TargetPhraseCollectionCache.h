@@ -28,12 +28,18 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <boost/thread/tss.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "../../PhraseBased/TargetPhraseImpl.h"
+#include "../../Word.h"
 #include "../../Phrase.h"
 
 namespace Moses2
 {
 typedef std::pair<size_t, size_t> AlignPointSizeT;
+
+struct PhraseCompact : public std::vector<Word>
+{
+public:
+  PhraseCompact(const Phrase<Word> &copy);
+};
 
 struct TPCompact
 {
@@ -65,10 +71,7 @@ private:
       : m_clock(clock), m_tpv(tpv), m_bitsLeft(bitsLeft) {}
   };
 
-  typedef boost::unordered_map<
-      const Phrase<Word>*,
-      LastUsed, UnorderedComparer< Phrase<Word> >,
-      UnorderedComparer< Phrase<Word> > > CacheMap;
+  typedef std::map<PhraseCompact, LastUsed> CacheMap;
   static boost::thread_specific_ptr<CacheMap> m_phraseCache;
 
 public:
@@ -110,7 +113,7 @@ public:
     if(!m_phraseCache.get())
       m_phraseCache.reset(new CacheMap());
     // check if source phrase is already in cache
-    iterator it = m_phraseCache->find(&sourcePhrase);
+    iterator it = m_phraseCache->find(sourcePhrase);
     if(it != m_phraseCache->end())
       // if found, just update clock
       it->second.m_clock = clock();
@@ -120,16 +123,16 @@ public:
         TargetPhraseVectorPtr tpv_temp(new TargetPhraseVector());
         tpv_temp->resize(maxRank);
         std::copy(tpv->begin(), tpv->begin() + maxRank, tpv_temp->begin());
-        (*m_phraseCache)[&sourcePhrase] = LastUsed(clock(), tpv_temp, bitsLeft);
+        (*m_phraseCache)[sourcePhrase] = LastUsed(clock(), tpv_temp, bitsLeft);
       } else
-        (*m_phraseCache)[&sourcePhrase] = LastUsed(clock(), tpv, bitsLeft);
+        (*m_phraseCache)[sourcePhrase] = LastUsed(clock(), tpv, bitsLeft);
     }
   }
 
   std::pair<TargetPhraseVectorPtr, size_t> Retrieve(const Phrase<Word> &sourcePhrase) {
     if(!m_phraseCache.get())
       m_phraseCache.reset(new CacheMap());
-    iterator it = m_phraseCache->find(&sourcePhrase);
+    iterator it = m_phraseCache->find(sourcePhrase);
     if(it != m_phraseCache->end()) {
       LastUsed &lu = it->second;
       lu.m_clock = clock();
@@ -143,7 +146,7 @@ public:
     if(!m_phraseCache.get())
       m_phraseCache.reset(new CacheMap());
     if(m_phraseCache->size() > m_max * (1 + m_tolerance)) {
-      typedef boost::unordered_set<std::pair<clock_t, const Phrase<Word>*> > Cands;
+      typedef std::set<std::pair<clock_t, PhraseCompact > > Cands;
       Cands cands;
       for(CacheMap::iterator it = m_phraseCache->begin();
           it != m_phraseCache->end(); it++) {
@@ -152,7 +155,7 @@ public:
       }
 
       for(Cands::iterator it = cands.begin(); it != cands.end(); it++) {
-        const Phrase<Word> *p = it->second;
+        const PhraseCompact& p = it->second;
         m_phraseCache->erase(p);
 
         if(m_phraseCache->size() < (m_max * (1 - m_tolerance)))

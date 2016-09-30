@@ -24,9 +24,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses2
 {
 
-
 boost::thread_specific_ptr<TargetPhraseCollectionCache::CacheMap>
 TargetPhraseCollectionCache::m_phraseCache;
+
+PhraseCompact::PhraseCompact(const Phrase<Word> &copy)
+{
+  for (size_t i = 0; i < copy.GetSize(); ++i) {
+    const Word &word = copy[i];
+    push_back(word);
+  }
+}
 
 }
 

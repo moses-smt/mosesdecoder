@@ -30,18 +30,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <algorithm>
 #include <sys/stat.h>
 
-#include "moses/TypeDef.h"
-#include "moses/FactorCollection.h"
-#include "moses/Word.h"
-#include "moses/Util.h"
-#include "moses/InputFileStream.h"
-#include "moses/StaticData.h"
-#include "moses/Range.h"
-
 #include "PhraseTableCompact.h"
 #include "StringVector.h"
 #include "CanonicalHuffman.h"
 #include "TargetPhraseCollectionCache.h"
+
+#include "../../Phrase.h"
+#include "../../ManagerBase.h"
 
 namespace Moses2
 {
@@ -116,7 +111,7 @@ protected:
 public:
 
   PhraseDecoder(
-      PhraseTableCompact &phraseDictionary,
+    PhraseTableCompact &phraseDictionary,
     const std::vector<FactorType>* input,
     const std::vector<FactorType>* output,
     size_t numScoreComponent
