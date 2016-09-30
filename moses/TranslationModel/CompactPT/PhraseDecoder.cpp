@@ -219,6 +219,9 @@ TargetPhraseVectorPtr PhraseDecoder::CreateTargetPhraseCollection(const Phrase &
   // Retrieve source phrase identifier
   std::string sourcePhraseString = sourcePhrase.GetStringRep(*m_input);
   size_t sourcePhraseId = m_phraseDictionary.m_hash[MakeSourceKey(sourcePhraseString)];
+  cerr << "sourcePhraseString=" << sourcePhraseString << " "
+		  << sourcePhraseId
+		  << endl;
 
   if(sourcePhraseId != m_phraseDictionary.m_hash.GetSize()) {
     // Retrieve compressed and encoded target phrase collection

@@ -6,6 +6,7 @@
 #include "../../PhraseBased/Manager.h"
 #include "../../PhraseBased/TargetPhrases.h"
 #include "../../PhraseBased/TargetPhraseImpl.h"
+#include "../../PhraseBased/Sentence.h"
 
 using namespace std;
 using namespace boost::algorithm;
@@ -78,12 +79,31 @@ void PhraseTableCompact::SetParameter(const std::string& key, const std::string&
 }
 
 // pb
+void PhraseTableCompact::Lookup(const Manager &mgr, InputPathsBase &inputPaths) const
+{
+  size_t inputSize = static_cast<const Sentence&>(mgr.GetInput()).GetSize();
+  InputPaths &inputPathsCast = static_cast<InputPaths&>(inputPaths);
+
+  for (size_t i = 0; i < inputSize; ++i) {
+	  for (size_t startPos = 0; startPos < inputSize; ++startPos) {
+		  size_t endPos = startPos + i;
+		  if (endPos >= inputSize) {
+			  break;
+		  }
+		  const InputPath *path = inputPathsCast.GetMatrix().GetValue(startPos, i);
+		  cerr << "path=" << path->Debug(mgr.system) << endl;
+	  }
+  }
+}
+
 TargetPhrases *PhraseTableCompact::Lookup(const Manager &mgr, MemPool &pool,
     InputPath &inputPath) const
 {
   TargetPhrases *ret = NULL;
 
   const Phrase<Word> &sourcePhrase = inputPath.subPhrase;
+  cerr << "sourcePhrase=" << sourcePhrase.Debug(mgr.system) << endl;
+
   // There is no souch source phrase if source phrase is longer than longest
   // observed source phrase during compilation
   if(sourcePhrase.GetSize() > m_phraseDecoder->GetMaxSourcePhraseLength())

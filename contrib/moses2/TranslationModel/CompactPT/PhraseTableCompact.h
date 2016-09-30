@@ -23,6 +23,8 @@ public:
       const SCFG::Manager &mgr,
       SCFG::InputPath &path) const;
 
+  virtual void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
+
   virtual void Lookup(
       MemPool &pool,
       const SCFG::Manager &mgr,
