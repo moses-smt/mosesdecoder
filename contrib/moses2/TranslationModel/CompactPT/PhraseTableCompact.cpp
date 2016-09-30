@@ -2,6 +2,10 @@
 #include <boost/thread/tss.hpp>
 #include "PhraseTableCompact.h"
 #include "PhraseDecoder.h"
+#include "../../PhraseBased/InputPath.h"
+#include "../../PhraseBased/Manager.h"
+#include "../../PhraseBased/TargetPhrases.h"
+#include "../../PhraseBased/TargetPhraseImpl.h"
 
 using namespace std;
 using namespace boost::algorithm;
@@ -77,7 +81,39 @@ void PhraseTableCompact::SetParameter(const std::string& key, const std::string&
 TargetPhrases *PhraseTableCompact::Lookup(const Manager &mgr, MemPool &pool,
     InputPath &inputPath) const
 {
-  return NULL;
+  TargetPhrases *ret = NULL;
+
+  const Phrase<Word> &sourcePhrase = inputPath.subPhrase;
+  // There is no souch source phrase if source phrase is longer than longest
+  // observed source phrase during compilation
+  if(sourcePhrase.GetSize() > m_phraseDecoder->GetMaxSourcePhraseLength())
+    return ret;
+
+  // Retrieve target phrase collection from phrase table
+  TargetPhraseVectorPtr decodedPhraseColl
+  = m_phraseDecoder->CreateTargetPhraseCollection(mgr, sourcePhrase, true, true);
+
+  if(decodedPhraseColl != NULL && decodedPhraseColl->size()) {
+    TargetPhraseVectorPtr tpv(new TargetPhraseVector(*decodedPhraseColl));
+    //TargetPhraseCollection::shared_ptr  phraseColl(new TargetPhraseCollection);
+    ret = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, decodedPhraseColl->size());
+
+    for (size_t i = 0; i < decodedPhraseColl->size(); ++i) {
+      const TargetPhraseImpl *tp = decodedPhraseColl->at(i);
+      ret->AddTargetPhrase(*tp);
+    }
+    ret->SortAndPrune(m_tableLimit);
+
+    /*
+    // Cache phrase pair for clean-up or retrieval with PREnc
+    const_cast<PhraseDictionaryCompact*>(this)->CacheForCleanup(phraseColl);
+
+    return phraseColl;
+    */
+  }
+
+  return ret;
+
 }
 
 
