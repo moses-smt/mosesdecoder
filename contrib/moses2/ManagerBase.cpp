@@ -34,6 +34,8 @@ ManagerBase::ManagerBase(System &sys, const TranslationTask &task,
 
 ManagerBase::~ManagerBase()
 {
+  system.featureFunctions.CleanUpAfterSentenceProcessing();
+
   if (m_pool) {
 	  GetPool().Reset();
   }
