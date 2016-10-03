@@ -44,6 +44,10 @@ alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../mose
     FF/LexicalReordering/PhraseBasedReorderingState.cpp
     FF/LexicalReordering/ReorderingStack.cpp
 
+    FF/OSM/OpSequenceModel.cpp
+    FF/OSM/KenOSM.cpp
+    FF/OSM/osmHyp.cpp
+    
  #   LM/LanguageModelDALM.cpp
     LM/LanguageModel.cpp
     LM/KENLM.cpp
@@ -52,6 +56,7 @@ alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../mose
     
  	 	TranslationModel/PhraseTable.cpp 
  	 	TranslationModel/ProbingPT.cpp 
+ 	 	TranslationModel/Transliteration.cpp 
  	 	TranslationModel/UnknownWordPenalty.cpp 
     TranslationModel/Memory/PhraseTableMemory.cpp 
    	

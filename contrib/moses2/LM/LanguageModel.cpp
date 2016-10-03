@@ -11,9 +11,9 @@
 #include "../PhraseBased/Manager.h"
 #include "../PhraseBased/Hypothesis.h"
 #include "../PhraseBased/TargetPhraseImpl.h"
+#include "../FF/PointerState.h"
 #include "../legacy/Util2.h"
 #include "../legacy/InputFileStream.h"
-#include "../legacy/PointerState.h"
 #include "../legacy/Bitmap.h"
 #include "../legacy/Util2.h"
 

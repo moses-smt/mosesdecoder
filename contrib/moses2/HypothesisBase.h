@@ -8,7 +8,7 @@
 
 #include <iostream>
 #include <cstddef>
-#include "legacy/FFState.h"
+#include "FF/FFState.h"
 #include "Scores.h"
 
 namespace Moses2
