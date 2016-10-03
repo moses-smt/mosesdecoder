@@ -78,6 +78,16 @@ void PhraseTableCompact::SetParameter(const std::string& key, const std::string&
   }
 }
 
+void PhraseTableCompact::CleanUpAfterSentenceProcessing() const
+{
+  //if(!m_sentenceCache.get())
+  //	m_sentenceCache.reset(new PhraseCache());
+
+  m_phraseDecoder->PruneCache();
+  //m_sentenceCache->clear();
+}
+
+
 // pb
 void PhraseTableCompact::Lookup(const Manager &mgr, InputPathsBase &inputPaths) const
 {

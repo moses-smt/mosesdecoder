@@ -122,11 +122,6 @@ void PhraseTable::EvaluateInIsolation(MemPool &pool, const System &system, const
 
 }
 
-
-void PhraseTable::CleanUpAfterSentenceProcessing()
-{
-}
-
 // scfg
 void PhraseTable::LookupUnary(MemPool &pool,
     const SCFG::Manager &mgr,

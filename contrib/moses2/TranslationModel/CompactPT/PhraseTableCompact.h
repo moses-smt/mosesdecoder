@@ -15,6 +15,8 @@ public:
   void Load(System &system);
   virtual void SetParameter(const std::string& key, const std::string& value);
 
+  virtual void CleanUpAfterSentenceProcessing() const;
+
   virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
       InputPath &inputPath) const;
 

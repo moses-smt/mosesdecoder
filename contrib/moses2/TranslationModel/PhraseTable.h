@@ -62,8 +62,6 @@ public:
       const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
       SCORE &estimatedScore) const;
 
-  virtual void CleanUpAfterSentenceProcessing();
-
   // scfg
   virtual void InitActiveChart(
       MemPool &pool,
