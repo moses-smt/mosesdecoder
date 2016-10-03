@@ -3,6 +3,7 @@
 #include "moses/StaticData.h"
 #include "moses/FactorCollection.h"
 #include "moses/TargetPhraseCollection.h"
+#include "moses/InputFileStream.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
 #include "quering.hh"
 
@@ -34,44 +35,94 @@ void ProbingPT::Load(AllOptions::ptr const& opts)
 
   m_unkId = 456456546456;
 
+  FactorCollection &vocab = FactorCollection::Instance();
+
   // source vocab
-  const std::map<uint64_t, std::string> &sourceVocab = m_engine->getSourceVocab();
+  const std::map<uint64_t, std::string> &sourceVocab =
+      m_engine->getSourceVocab();
   std::map<uint64_t, std::string>::const_iterator iterSource;
-  for (iterSource = sourceVocab.begin(); iterSource != sourceVocab.end(); ++iterSource) {
-    const string &wordStr = iterSource->second;
-    const Factor *factor = FactorCollection::Instance().AddFactor(wordStr);
+  for (iterSource = sourceVocab.begin(); iterSource != sourceVocab.end();
+      ++iterSource) {
+    string wordStr = iterSource->second;
+    //cerr << "wordStr=" << wordStr << endl;
+
+    const Factor *factor = vocab.AddFactor(wordStr);
 
     uint64_t probingId = iterSource->first;
+    size_t factorId = factor->GetId();
 
-    SourceVocabMap::value_type entry(factor, probingId);
-    m_sourceVocabMap.insert(entry);
-
+    if (factorId >= m_sourceVocab.size()) {
+      m_sourceVocab.resize(factorId + 1, m_unkId);
+    }
+    m_sourceVocab[factorId] = probingId;
   }
 
   // target vocab
-  const std::map<unsigned int, std::string> &probingVocab = m_engine->getVocab();
-  std::map<unsigned int, std::string>::const_iterator iter;
-  for (iter = probingVocab.begin(); iter != probingVocab.end(); ++iter) {
-    const string &wordStr = iter->second;
-    const Factor *factor = FactorCollection::Instance().AddFactor(wordStr);
+  InputFileStream targetVocabStrme(m_filePath + "/TargetVocab.dat");
+  string line;
+  while (getline(targetVocabStrme, line)) {
+    vector<string> toks = Tokenize(line, "\t");
+    UTIL_THROW_IF2(toks.size() != 2, string("Incorrect format:") + line + "\n");
 
-    unsigned int probingId = iter->first;
+    //cerr << "wordStr=" << toks[0] << endl;
 
-    TargetVocabMap::value_type entry(factor, probingId);
-    m_vocabMap.insert(entry);
+    const Factor *factor = vocab.AddFactor(toks[0]);
+    uint32_t probingId = Scan<uint32_t>(toks[1]);
 
+    if (probingId >= m_targetVocab.size()) {
+      m_targetVocab.resize(probingId + 1);
+    }
+
+    m_targetVocab[probingId] = factor;
+  }
+
+  // alignments
+  CreateAlignmentMap(m_filePath + "/Alignments.dat");
+
+  // memory mapped file to tps
+  string filePath = m_filePath + "/TargetColl.dat";
+  file.open(filePath.c_str());
+  if (!file.is_open()) {
+    throw "Couldn't open file ";
+  }
+
+  data = file.data();
+  //size_t size = file.size();
+
+  // cache
+  //CreateCache(system);
+
+}
+
+void ProbingPT::CreateAlignmentMap(const std::string path)
+{
+  const std::vector< std::vector<unsigned char> > &probingAlignColl = m_engine->getAlignments();
+  m_aligns.resize(probingAlignColl.size(), NULL);
+
+  for (size_t i = 0; i < probingAlignColl.size(); ++i) {
+    AlignmentInfo::CollType aligns;
+
+    const std::vector<unsigned char> &probingAligns = probingAlignColl[i];
+    for (size_t j = 0; j < probingAligns.size(); j += 2) {
+      size_t startPos = probingAligns[j];
+      size_t endPos = probingAligns[j+1];
+      //cerr << "startPos=" << startPos << " " << endPos << endl;
+      aligns.insert(std::pair<size_t,size_t>(startPos, endPos));
+    }
+
+    const AlignmentInfo *align = AlignmentInfoCollection::Instance().Add(aligns);
+    m_aligns[i] = align;
+    //cerr << "align=" << align->Debug(system) << endl;
   }
 }
 
 void ProbingPT::InitializeForInput(ttasksptr const& ttask)
 {
-  ReduceCache();
+
 }
 
 void ProbingPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
-  CacheColl &cache = GetCache();
-
   InputPathList::const_iterator iter;
   for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
     InputPath &inputPath = **iter;
@@ -82,12 +133,6 @@ void ProbingPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQue
     }
 
     TargetPhraseCollection::shared_ptr tpColl = CreateTargetPhrase(sourcePhrase);
-
-    // add target phrase to phrase-table cache
-    size_t hash = hash_value(sourcePhrase);
-    std::pair<TargetPhraseCollection::shared_ptr , clock_t> value(tpColl, clock());
-    cache[hash] = value;
-
     inputPath.SetTargetPhrases(*this, tpColl, NULL);
   }
 }

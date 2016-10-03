@@ -1,5 +1,8 @@
 #include "probing_hash_utils.hh"
 
+namespace Moses
+{
+
 //Read table from disk, return memory map location
 char * readTable(const char * filename, size_t size)
 {
@@ -13,7 +16,7 @@ char * readTable(const char * filename, size_t size)
     exit(EXIT_FAILURE);
   }
 
-  map = (char *)mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
+  map = (char *) mmap(0, size, PROT_READ, MAP_SHARED, fd, 0);
 
   if (map == MAP_FAILED) {
     close(fd);
@@ -24,11 +27,24 @@ char * readTable(const char * filename, size_t size)
   return map;
 }
 
-
-void serialize_table(char *mem, size_t size, const char * filename)
+void serialize_table(char *mem, size_t size, const std::string &filename)
 {
-  std::ofstream os (filename, std::ios::binary);
-  os.write((const char*)&mem[0], size);
+  std::ofstream os(filename.c_str(), std::ios::binary);
+  os.write((const char*) &mem[0], size);
   os.close();
 
 }
+
+uint64_t getKey(const uint64_t source_phrase[], size_t size)
+{
+  //TOO SLOW
+  //uint64_t key = util::MurmurHashNative(&source_phrase[0], source_phrase.size());
+  uint64_t key = 0;
+  for (size_t i = 0; i < size; i++) {
+    key += (source_phrase[i] << i);
+  }
+  return key;
+}
+
+}
+
