@@ -26,7 +26,7 @@ public:
 
   SubPhrase GetSubPhrase(size_t start, size_t size) const
   {
-    SubPhrase ret(*m_origPhrase, m_start + start, m_size);
+    SubPhrase ret(*m_origPhrase, m_start + start, size);
     return ret;
   }
 
