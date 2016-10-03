@@ -5,6 +5,7 @@
 namespace Moses2
 {
 class PhraseDecoder;
+class TPCompact;
 
 class PhraseTableCompact: public PhraseTable
 {
@@ -45,6 +46,12 @@ protected:
   friend class PhraseDecoder;
   PhraseDecoder* m_phraseDecoder;
 
+  const TargetPhraseImpl *CreateTargetPhrase(
+		  const Manager &mgr,
+		  const TPCompact &tpCompact,
+		  const Phrase<Word> &sourcePhrase) const;
+
+  // SCFG
   virtual void LookupGivenNode(
       MemPool &pool,
       const SCFG::Manager &mgr,

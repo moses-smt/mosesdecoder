@@ -91,8 +91,9 @@ void PhraseTableCompact::Lookup(const Manager &mgr, InputPathsBase &inputPaths) 
 			  break;
 		  }
 		  InputPath *path = inputPathsCast.GetMatrix().GetValue(startPos, i);
-		  cerr << "path=" << path->Debug(mgr.system) << endl;
-		  Lookup(mgr, mgr.GetPool(), *path);
+		  //cerr << "path=" << path->Debug(mgr.system) << endl;
+		  TargetPhrases *tps = Lookup(mgr, mgr.GetPool(), *path);
+		  path->AddTargetPhrases(*this, tps);
 	  }
   }
 }
@@ -103,7 +104,7 @@ TargetPhrases *PhraseTableCompact::Lookup(const Manager &mgr, MemPool &pool,
   TargetPhrases *ret = NULL;
 
   const Phrase<Word> &sourcePhrase = inputPath.subPhrase;
-  cerr << "sourcePhrase=" << sourcePhrase.Debug(mgr.system) << endl;
+  //cerr << "sourcePhrase=" << sourcePhrase.Debug(mgr.system) << endl;
 
   // There is no souch source phrase if source phrase is longer than longest
   // observed source phrase during compilation
@@ -113,23 +114,23 @@ TargetPhrases *PhraseTableCompact::Lookup(const Manager &mgr, MemPool &pool,
   // Retrieve target phrase collection from phrase table
   TargetPhraseVectorPtr decodedPhraseColl
   = m_phraseDecoder->CreateTargetPhraseCollection(mgr, sourcePhrase, true, true);
-  cerr << "decodedPhraseColl=" << decodedPhraseColl->size() << endl;
-
-  return NULL;
 
   if(decodedPhraseColl != NULL && decodedPhraseColl->size()) {
     TargetPhraseVectorPtr tpv(new TargetPhraseVector(*decodedPhraseColl));
     //TargetPhraseCollection::shared_ptr  phraseColl(new TargetPhraseCollection);
     ret = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, decodedPhraseColl->size());
-    cerr << "ret=" << ret->GetSize() << endl;
 
     for (size_t i = 0; i < decodedPhraseColl->size(); ++i) {
-      //const TargetPhraseImpl *tp = decodedPhraseColl->at(i);
-      //cerr << "tp=" << tp << endl;
-      //ret->AddTargetPhrase(*tp);
-    }
-    ret->SortAndPrune(m_tableLimit);
+      const TPCompact &tpCompact = decodedPhraseColl->at(i);
+      const TargetPhraseImpl *tp = CreateTargetPhrase(mgr, tpCompact, sourcePhrase);
 
+      ret->AddTargetPhrase(*tp);
+    }
+
+    ret->SortAndPrune(m_tableLimit);
+    mgr.system.featureFunctions.EvaluateAfterTablePruning(pool, *ret, sourcePhrase);
+
+    //cerr << "RET2=" << ret->Debug(mgr.system) << endl;
     /*
     // Cache phrase pair for clean-up or retrieval with PREnc
     const_cast<PhraseDictionaryCompact*>(this)->CacheForCleanup(phraseColl);
@@ -140,6 +141,40 @@ TargetPhrases *PhraseTableCompact::Lookup(const Manager &mgr, MemPool &pool,
 
   return ret;
 
+}
+
+const TargetPhraseImpl *PhraseTableCompact::CreateTargetPhrase(
+		const Manager &mgr,
+		const TPCompact &tpCompact,
+		const Phrase<Word> &sourcePhrase) const
+{
+	MemPool &pool = mgr.GetPool();
+
+	size_t size = tpCompact.words.size();
+	TargetPhraseImpl *ret = new TargetPhraseImpl(pool, *this, mgr.system, size);
+
+	// words
+	for (size_t i = 0; i < size; ++i) {
+		const Word &compactWord = tpCompact.words[i];
+		Word &tpWord = (*ret)[i];
+		tpWord = compactWord;
+	}
+
+	// scores
+	Scores &scores = ret->GetScores();
+	scores.Assign(mgr.system, *this, tpCompact.scores);
+
+	// align
+	ret->SetAlignTerm(tpCompact.alignment);
+
+	// score
+    mgr.system.featureFunctions.EvaluateInIsolation(pool, mgr.system, sourcePhrase, *ret);
+
+    // Cache phrase pair for clean-up or retrieval with PREnc
+    //const_cast<PhraseDictionaryCompact*>(this)->CacheForCleanup(phraseColl);
+
+	//cerr << "ret=" << ret->Debug(mgr.system) << endl;
+	return ret;
 }
 
 
