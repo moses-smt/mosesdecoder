@@ -85,7 +85,7 @@ void PhraseTable::Lookup(const Manager &mgr, InputPathsBase &inputPaths) const
 {
   BOOST_FOREACH(InputPathBase *pathBase, inputPaths){
     InputPath *path = static_cast<InputPath*>(pathBase);
-    cerr << "path=" << path->range << " ";
+    //cerr << "path=" << path->range << " ";
 
     if (SatisfyBackoff(mgr, *path)) {
       TargetPhrases *tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
