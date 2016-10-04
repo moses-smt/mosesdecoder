@@ -2,6 +2,7 @@
 #pragma once
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/bimap.hpp>
+#include <boost/unordered_map.hpp>
 #include "../PhraseDictionary.h"
 
 
@@ -48,14 +49,24 @@ protected:
   boost::iostreams::mapped_file_source file;
   const char *data;
 
+  // caching
+  typedef boost::unordered_map<uint64_t, TargetPhraseCollection*> CachePb;
+  CachePb m_cachePb;
+
   void CreateAlignmentMap(const std::string path);
 
   TargetPhraseCollection::shared_ptr CreateTargetPhrase(const Phrase &sourcePhrase) const;
-  TargetPhrase *CreateTargetPhrase(const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const;
-  const Factor *GetTargetFactor(uint64_t probingId) const;
   uint64_t GetSourceProbingId(const Factor *factor) const;
 
   std::vector<uint64_t> ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok) const;
+
+  std::pair<bool, uint64_t> GetKey(const Phrase &sourcePhrase) const;
+  void GetSourceProbingIds(const Phrase &sourcePhrase, bool &ok,
+      uint64_t probingSource[]) const;
+  uint64_t GetSourceProbingId(const Word &word) const;
+
+  TargetPhraseCollection *CreateTargetPhrases(
+      const Phrase &sourcePhrase, uint64_t key) const;
 
 };
 

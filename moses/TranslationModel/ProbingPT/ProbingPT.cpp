@@ -161,98 +161,93 @@ TargetPhraseCollection::shared_ptr ProbingPT::CreateTargetPhrase(const Phrase &s
   // create a target phrase from the 1st word of the source, prefix with 'ProbingPT:'
   assert(sourcePhrase.GetSize());
 
-  TargetPhraseCollection::shared_ptr tpColl;
-  bool ok;
-  vector<uint64_t> probingSource = ConvertToProbingSourcePhrase(sourcePhrase, ok);
-  if (!ok) {
+  std::pair<bool, uint64_t> keyStruct = GetKey(sourcePhrase);
+  if (!keyStruct.first) {
+    return TargetPhraseCollection::shared_ptr();
+  }
+
+  // check in cache
+  CachePb::const_iterator iter = m_cachePb.find(keyStruct.second);
+  if (iter != m_cachePb.end()) {
+    //cerr << "FOUND IN CACHE " << keyStruct.second << " " << sourcePhrase.Debug(mgr.system) << endl;
+    TargetPhraseCollection *tps = iter->second;
+    return TargetPhraseCollection::shared_ptr(tps);
+  }
+
+  // query pt
+  TargetPhraseCollection *tps = CreateTargetPhrases(sourcePhrase,
+      keyStruct.second);
+  return TargetPhraseCollection::shared_ptr(tps);
+}
+
+std::pair<bool, uint64_t> ProbingPT::GetKey(const Phrase &sourcePhrase) const
+{
+  std::pair<bool, uint64_t> ret;
+
+  // create a target phrase from the 1st word of the source, prefix with 'ProbingPT:'
+  size_t sourceSize = sourcePhrase.GetSize();
+  assert(sourceSize);
+
+  uint64_t probingSource[sourceSize];
+  GetSourceProbingIds(sourcePhrase, ret.first, probingSource);
+  if (!ret.first) {
     // source phrase contains a word unknown in the pt.
     // We know immediately there's no translation for it
-    return tpColl;
+  }
+  else {
+    ret.second = m_engine->getKey(probingSource, sourceSize);
   }
 
-  std::pair<bool, std::vector<target_text> > query_result;
+  return ret;
 
-  //Actual lookup
-  query_result = m_engine->query(probingSource);
-
-  if (query_result.first) {
-    //m_engine->printTargetInfo(query_result.second);
-    tpColl.reset(new TargetPhraseCollection());
-
-    const std::vector<target_text> &probingTargetPhrases = query_result.second;
-    for (size_t i = 0; i < probingTargetPhrases.size(); ++i) {
-      const target_text &probingTargetPhrase = probingTargetPhrases[i];
-      TargetPhrase *tp = CreateTargetPhrase(sourcePhrase, probingTargetPhrase);
-
-      tpColl->Add(tp);
-    }
-
-    tpColl->Prune(true, m_tableLimit);
-  }
-
-  return tpColl;
 }
 
-TargetPhrase *ProbingPT::CreateTargetPhrase(const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const
+void ProbingPT::GetSourceProbingIds(const Phrase &sourcePhrase,
+    bool &ok, uint64_t probingSource[]) const
 {
-  const std::vector<unsigned int> &probingPhrase = probingTargetPhrase.target_phrase;
-  size_t size = probingPhrase.size();
 
-  TargetPhrase *tp = new TargetPhrase(this);
-
-  // words
+  size_t size = sourcePhrase.GetSize();
   for (size_t i = 0; i < size; ++i) {
-    uint64_t probingId = probingPhrase[i];
-    const Factor *factor = GetTargetFactor(probingId);
-    assert(factor);
-
-    Word &word = tp->AddWord();
-    word.SetFactor(m_output[0], factor);
+    const Word &word = sourcePhrase.GetWord(i);
+    uint64_t probingId = GetSourceProbingId(word);
+    if (probingId == m_unkId) {
+      ok = false;
+      return;
+    }
+    else {
+      probingSource[i] = probingId;
+    }
   }
 
-  // score for this phrase table
-  vector<float> scores = probingTargetPhrase.prob;
-  std::transform(scores.begin(), scores.end(), scores.begin(),TransformScore);
-  tp->GetScoreBreakdown().PlusEquals(this, scores);
-
-  // alignment
-  /*
-  const std::vector<unsigned char> &alignments = probingTargetPhrase.word_all1;
-
-  AlignmentInfo &aligns = tp->GetAlignTerm();
-  for (size_t i = 0; i < alignS.size(); i += 2 ) {
-    aligns.Add((size_t) alignments[i], (size_t) alignments[i+1]);
-  }
-  */
-
-  // score of all other ff when this rule is being loaded
-  tp->EvaluateInIsolation(sourcePhrase, GetFeaturesToApply());
-  return tp;
+  ok = true;
 }
 
-const Factor *ProbingPT::GetTargetFactor(uint64_t probingId) const
+uint64_t ProbingPT::GetSourceProbingId(const Word &word) const
 {
-  TargetVocabMap::right_map::const_iterator iter;
-  iter = m_vocabMap.right.find(probingId);
-  if (iter != m_vocabMap.right.end()) {
-    return iter->second;
-  } else {
-    // not in mapping. Must be UNK
-    return NULL;
-  }
-}
+  uint64_t ret = 0;
 
-uint64_t ProbingPT::GetSourceProbingId(const Factor *factor) const
-{
-  SourceVocabMap::left_map::const_iterator iter;
-  iter = m_sourceVocabMap.left.find(factor);
-  if (iter != m_sourceVocabMap.left.end()) {
-    return iter->second;
-  } else {
-    // not in mapping. Must be UNK
+  for (size_t i = 0; i < m_input.size(); ++i) {
+    FactorType factorType = m_input[i];
+    const Factor *factor = word[factorType];
+
+    size_t factorId = factor->GetId();
+    if (factorId >= m_sourceVocab.size()) {
     return m_unkId;
+    }
+    ret += m_sourceVocab[factorId];
   }
+
+  return ret;
 }
+
+TargetPhraseCollection *ProbingPT::CreateTargetPhrases(
+    const Phrase &sourcePhrase, uint64_t key) const
+{
+
+}
+
+//////////////////////////////////////////////////////////////////
+
 
 ChartRuleLookupManager *ProbingPT::CreateRuleLookupManager(
   const ChartParser &,
