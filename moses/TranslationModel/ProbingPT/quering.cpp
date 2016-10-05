@@ -96,7 +96,7 @@ uint64_t QueryEngine::getKey(uint64_t source_phrase[], size_t size) const
 {
   //TOO SLOW
   //uint64_t key = util::MurmurHashNative(&source_phrase[0], source_phrase.size());
-  return getKey(source_phrase, size);
+  return Moses::getKey(source_phrase, size);
 }
 
 std::pair<bool, uint64_t> QueryEngine::query(uint64_t key)
