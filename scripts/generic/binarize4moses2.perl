@@ -12,6 +12,7 @@ my $mosesDir = "$RealBin/../..";
 my $ptPath;
 my $lexRoPath;
 my $outPath;
+my $numScores = 4;
 my $numLexScores;
 my $pruneNum = 0;
 my $scfg = 0;
@@ -19,6 +20,7 @@ my $scfg = 0;
 GetOptions("phrase-table=s"  => \$ptPath,
            "lex-ro=s"   => \$lexRoPath,
            "output-dir=s" => \$outPath,
+           "num-scores=s" => \$numScores,
            "num-lex-scores=i" => \$numLexScores,
            "prune=i" => \$pruneNum,
            "scfg" => \$scfg
@@ -55,7 +57,7 @@ else {
     systemCheck($cmd);
 }
 
-$cmd = "$mosesDir/bin/CreateProbingPT2 --log-prob --input-pt $tempPath/pt.txt.gz --output-dir $outPath";
+$cmd = "$mosesDir/bin/CreateProbingPT2 --num-scores $numScores --log-prob --input-pt $tempPath/pt.txt.gz --output-dir $outPath";
 
 if (defined($lexRoPath)) {
     $cmd .= " --num-lex-scores $numLexScores";
