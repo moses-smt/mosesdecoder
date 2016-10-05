@@ -230,6 +230,14 @@ public:
     //std::cerr << "destroy " << p << " " << n << std::endl;
   }
 
+  // return address of values
+  pointer address (reference value) const {
+    return &value;
+  }
+  const_pointer address (const_reference value) const {
+    return &value;
+  }
+
   MemPool &m_pool;
 protected:
 };
