@@ -11,9 +11,14 @@ QueryEngine::QueryEngine(const char * filepath)
 
   //Create filepaths
   std::string basepath(filepath);
+  std::string path_to_config = basepath + "/config";
   std::string path_to_hashtable = basepath + "/probing_hash.dat";
   std::string path_to_source_vocabid = basepath + "/source_vocabids";
   std::string alignPath = basepath + "/Alignments.dat";
+
+  if (!FileExists(path_to_config)) {
+    UTIL_THROW2("Binary table doesn't exist is didn't finish binarizing: " << path_to_config);
+  }
 
   ///Source phrase vocabids
   read_map(source_vocabids, path_to_source_vocabid.c_str());
@@ -24,7 +29,7 @@ QueryEngine::QueryEngine(const char * filepath)
   //Read config file
   boost::unordered_map<std::string, std::string> keyValue;
 
-  std::ifstream config((basepath + "/config").c_str());
+  std::ifstream config(path_to_config.c_str());
   std::string line;
   while (getline(config, line)) {
     std::vector<std::string> toks = Tokenize(line, "\t");
