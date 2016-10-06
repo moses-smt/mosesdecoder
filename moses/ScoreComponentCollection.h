@@ -247,8 +247,7 @@ public:
     }
   }
 
-  void PlusEquals(const FeatureFunction* sp, float scores[])
-  {
+  void PlusEquals(const FeatureFunction* sp, float scores[]) {
     size_t numScores = sp->GetNumScoreComponents();
     size_t offset = sp->GetIndex();
     for (size_t i = 0; i < numScores; ++i) {

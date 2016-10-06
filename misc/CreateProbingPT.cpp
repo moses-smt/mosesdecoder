@@ -12,12 +12,12 @@ std::string ReformatSCFGFile(const std::string &path);
 
 int main(int argc, char* argv[])
 {
-	string inPath, outPath; 
-	int num_scores = 4;
-	int num_lex_scores = 0;
-	bool log_prob = false;
-	bool scfg = false;
-	int max_cache_size = 50000;
+  string inPath, outPath;
+  int num_scores = 4;
+  int num_lex_scores = 0;
+  bool log_prob = false;
+  bool scfg = false;
+  int max_cache_size = 50000;
 
   namespace po = boost::program_options;
   po::options_description desc("Options");
@@ -31,7 +31,7 @@ int main(int argc, char* argv[])
   ("max-cache-size", po::value<int>()->default_value(max_cache_size), "Maximum number of high-count source lines to write to cache file. 0=no cache, negative=no limit")
   ("scfg", "Rules are SCFG in Moses format (ie. with non-terms and LHS")
 
-	;
+  ;
 
   po::variables_map vm;
   try {
@@ -102,7 +102,7 @@ std::string ReformatSCFGFile(const std::string &path)
   string sortedPath = path + ".reformat.sorted.gz";
   string tmpPath = path + ".tmp ";
   string cmd = "mkdir " + tmpPath
-      + " && gzip -dc " + reformattedPath + " | LC_ALL=C sort -T " + tmpPath + " | gzip -c > " + sortedPath;
+               + " && gzip -dc " + reformattedPath + " | LC_ALL=C sort -T " + tmpPath + " | gzip -c > " + sortedPath;
   system(cmd.c_str());
 
   cmd = "rm -rf " + tmpPath + " " + reformattedPath;

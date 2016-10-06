@@ -39,10 +39,10 @@ void ProbingPT::Load(AllOptions::ptr const& opts)
 
   // source vocab
   const std::map<uint64_t, std::string> &sourceVocab =
-      m_engine->getSourceVocab();
+    m_engine->getSourceVocab();
   std::map<uint64_t, std::string>::const_iterator iterSource;
   for (iterSource = sourceVocab.begin(); iterSource != sourceVocab.end();
-      ++iterSource) {
+       ++iterSource) {
     string wordStr = iterSource->second;
     //cerr << "wordStr=" << wordStr << endl;
 
@@ -157,7 +157,7 @@ TargetPhraseCollection::shared_ptr ProbingPT::CreateTargetPhrase(const Phrase &s
 
   // query pt
   TargetPhraseCollection *tps = CreateTargetPhrases(sourcePhrase,
-      keyStruct.second);
+                                keyStruct.second);
   return TargetPhraseCollection::shared_ptr(tps);
 }
 
@@ -174,8 +174,7 @@ std::pair<bool, uint64_t> ProbingPT::GetKey(const Phrase &sourcePhrase) const
   if (!ret.first) {
     // source phrase contains a word unknown in the pt.
     // We know immediately there's no translation for it
-  }
-  else {
+  } else {
     ret.second = m_engine->getKey(probingSource, sourceSize);
   }
 
@@ -184,7 +183,7 @@ std::pair<bool, uint64_t> ProbingPT::GetKey(const Phrase &sourcePhrase) const
 }
 
 void ProbingPT::GetSourceProbingIds(const Phrase &sourcePhrase,
-    bool &ok, uint64_t probingSource[]) const
+                                    bool &ok, uint64_t probingSource[]) const
 {
 
   size_t size = sourcePhrase.GetSize();
@@ -194,8 +193,7 @@ void ProbingPT::GetSourceProbingIds(const Phrase &sourcePhrase,
     if (probingId == m_unkId) {
       ok = false;
       return;
-    }
-    else {
+    } else {
       probingSource[i] = probingId;
     }
   }
@@ -213,7 +211,7 @@ uint64_t ProbingPT::GetSourceProbingId(const Word &word) const
 
     size_t factorId = factor->GetId();
     if (factorId >= m_sourceVocab.size()) {
-    return m_unkId;
+      return m_unkId;
     }
     ret += m_sourceVocab[factorId];
   }
@@ -222,7 +220,7 @@ uint64_t ProbingPT::GetSourceProbingId(const Word &word) const
 }
 
 TargetPhraseCollection *ProbingPT::CreateTargetPhrases(
-    const Phrase &sourcePhrase, uint64_t key) const
+  const Phrase &sourcePhrase, uint64_t key) const
 {
   TargetPhraseCollection *tps = NULL;
 
@@ -256,7 +254,7 @@ TargetPhraseCollection *ProbingPT::CreateTargetPhrases(
 }
 
 TargetPhrase *ProbingPT::CreateTargetPhrase(
-    const char *&offset) const
+  const char *&offset) const
 {
   TargetPhraseInfo *tpInfo = (TargetPhraseInfo*) offset;
   size_t numRealWords = tpInfo->numWords / m_output.size();
@@ -280,8 +278,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(
       tp->scoreProperties = scores + m_engine->num_scores;
     }
     */
-  }
-  else {
+  } else {
     // log score 1st
     float logScores[totalNumScores];
     for (size_t i = 0; i < totalNumScores; ++i) {
@@ -304,7 +301,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(
 
   // words
   for (size_t targetPos = 0; targetPos < numRealWords; ++targetPos) {
-	Word &word = tp->AddWord();
+    Word &word = tp->AddWord();
     for (size_t i = 0; i < m_output.size(); ++i) {
       FactorType factorType = m_output[i];
 

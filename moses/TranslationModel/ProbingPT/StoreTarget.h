@@ -43,7 +43,7 @@ protected:
   void Save(const target_text &rule);
 
   void AppendLexRO(std::string &prop, std::vector<float> &retvector,
-      bool log_prob) const;
+                   bool log_prob) const;
 
 };
 

@@ -59,17 +59,16 @@ protected:
 
   std::pair<bool, uint64_t> GetKey(const Phrase &sourcePhrase) const;
   void GetSourceProbingIds(const Phrase &sourcePhrase, bool &ok,
-      uint64_t probingSource[]) const;
+                           uint64_t probingSource[]) const;
   uint64_t GetSourceProbingId(const Word &word) const;
   uint64_t GetSourceProbingId(const Factor *factor) const;
 
   TargetPhraseCollection *CreateTargetPhrases(
-      const Phrase &sourcePhrase, uint64_t key) const;
+    const Phrase &sourcePhrase, uint64_t key) const;
   TargetPhrase *CreateTargetPhrase(
-      const char *&offset) const;
+    const char *&offset) const;
 
-  inline const Factor *GetTargetFactor(uint32_t probingId) const
-  {
+  inline const Factor *GetTargetFactor(uint32_t probingId) const {
     if (probingId >= m_targetVocab.size()) {
       return NULL;
     }
