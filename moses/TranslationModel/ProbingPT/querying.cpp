@@ -1,4 +1,4 @@
-#include "quering.hh"
+#include "querying.hh"
 #include "util/exception.hh"
 
 using namespace std;
