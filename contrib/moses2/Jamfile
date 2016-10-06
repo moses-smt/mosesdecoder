@@ -173,11 +173,10 @@ alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../mose
     deps ;
 
 exe moses2 : Main.cpp moses2_lib ;
-exe CreateProbingPT2 : CreateProbingPT2.cpp moses2_lib ;
 
 if [ xmlrpc ] {
   echo "Building Moses2" ;
-  alias programs : moses2 CreateProbingPT2 ;
+  alias programs : moses2 ;
 }
 else {
   echo "Not building Moses2" ;
