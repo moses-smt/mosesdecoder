@@ -7,27 +7,27 @@ namespace Moses
 {
 
 void add_to_map(StoreVocab<uint64_t> &sourceVocab,
-    const StringPiece &textin)
+                const StringPiece &textin)
 {
   //Tokenize
   util::TokenIter<util::SingleCharacter> itWord(textin, util::SingleCharacter(' '));
 
   while (itWord) {
-	StringPiece word = *itWord;
+    StringPiece word = *itWord;
 
-	util::TokenIter<util::SingleCharacter> itFactor(word, util::SingleCharacter('|'));
+    util::TokenIter<util::SingleCharacter> itFactor(word, util::SingleCharacter('|'));
     while (itFactor) {
-    	StringPiece factor = *itFactor;
+      StringPiece factor = *itFactor;
 
-        sourceVocab.Insert(getHash(factor), factor.as_string());
-        itFactor++;
+      sourceVocab.Insert(getHash(factor), factor.as_string());
+      itFactor++;
     }
     itWord++;
   }
 }
 
 void serialize_map(const std::map<uint64_t, std::string> &karta,
-    const std::string &filename)
+                   const std::string &filename)
 {
   std::ofstream os(filename.c_str());
 

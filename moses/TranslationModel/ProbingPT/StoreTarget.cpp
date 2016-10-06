@@ -17,12 +17,12 @@ namespace Moses
 {
 
 StoreTarget::StoreTarget(const std::string &basepath)
-:m_basePath(basepath)
-,m_vocab(basepath + "/TargetVocab.dat")
+  :m_basePath(basepath)
+  ,m_vocab(basepath + "/TargetVocab.dat")
 {
   std::string path = basepath + "/TargetColl.dat";
   m_fileTargetColl.open(path.c_str(),
-      std::ios::out | std::ios::binary | std::ios::ate | std::ios::trunc);
+                        std::ios::out | std::ios::binary | std::ios::ate | std::ios::trunc);
   if (!m_fileTargetColl.is_open()) {
     throw "can't create file ";
   }
@@ -112,10 +112,10 @@ void StoreTarget::Append(const line_text &line, bool log_prob, bool scfg)
   vector<bool> nonTerms;
   util::TokenIter<util::SingleCharacter> it;
   it = util::TokenIter<util::SingleCharacter>(line.target_phrase,
-      util::SingleCharacter(' '));
+       util::SingleCharacter(' '));
   while (it) {
-	StringPiece word = *it;
-	//cerr << "word=" << word << endl;
+    StringPiece word = *it;
+    //cerr << "word=" << word << endl;
 
     bool nonTerm = false;
     if (scfg) {
@@ -129,16 +129,16 @@ void StoreTarget::Append(const line_text &line, bool log_prob, bool scfg)
 
     util::TokenIter<util::SingleCharacter> itFactor;
     itFactor = util::TokenIter<util::SingleCharacter>(word,
-        util::SingleCharacter('|'));
+               util::SingleCharacter('|'));
     while (itFactor) {
-    	StringPiece factor = *itFactor;
+      StringPiece factor = *itFactor;
 
-    	string factorStr = factor.as_string();
-    	uint32_t vocabId = m_vocab.GetVocabId(factorStr);
+      string factorStr = factor.as_string();
+      uint32_t vocabId = m_vocab.GetVocabId(factorStr);
 
-    	rule->target_phrase.push_back(vocabId);
+      rule->target_phrase.push_back(vocabId);
 
-    	itFactor++;
+      itFactor++;
     }
 
     it++;
@@ -146,7 +146,7 @@ void StoreTarget::Append(const line_text &line, bool log_prob, bool scfg)
 
   // probs
   it = util::TokenIter<util::SingleCharacter>(line.prob,
-      util::SingleCharacter(' '));
+       util::SingleCharacter(' '));
   while (it) {
     string tok = it->as_string();
     float prob = Scan<float>(tok);
@@ -170,7 +170,7 @@ void StoreTarget::Append(const line_text &line, bool log_prob, bool scfg)
 
   // alignment
   it = util::TokenIter<util::SingleCharacter>(line.word_align,
-      util::SingleCharacter(' '));
+       util::SingleCharacter(' '));
   while (it) {
     string tokPair = Trim(it->as_string());
     if (tokPair.empty()) {
@@ -193,8 +193,7 @@ void StoreTarget::Append(const line_text &line, bool log_prob, bool scfg)
       rule->word_align_non_term.push_back(sourcePos);
       rule->word_align_non_term.push_back(targetPos);
       //cerr << (int) rule->word_all1.back() << " ";
-    }
-    else {
+    } else {
       rule->word_align_term.push_back(sourcePos);
       rule->word_align_term.push_back(targetPos);
     }
@@ -221,19 +220,18 @@ void StoreTarget::Append(const line_text &line, bool log_prob, bool scfg)
 uint32_t StoreTarget::GetAlignId(const std::vector<size_t> &align)
 {
   boost::unordered_map<std::vector<size_t>, uint32_t>::iterator iter =
-      m_aligns.find(align);
+    m_aligns.find(align);
   if (iter == m_aligns.end()) {
     uint32_t ind = m_aligns.size();
     m_aligns[align] = ind;
     return ind;
-  }
-  else {
+  } else {
     return iter->second;
   }
 }
 
 void StoreTarget::AppendLexRO(std::string &prop, std::vector<float> &retvector,
-    bool log_prob) const
+                              bool log_prob) const
 {
   size_t startPos = prop.find("{{LexRO ");
 
@@ -258,7 +256,7 @@ void StoreTarget::AppendLexRO(std::string &prop, std::vector<float> &retvector,
 
     // exclude LexRO property from property column
     prop = prop.substr(0, startPos)
-        + prop.substr(endPos + 2, prop.size() - endPos - 2);
+           + prop.substr(endPos + 2, prop.size() - endPos - 2);
     //cerr << "line.property_to_be_binarized=" << line.property_to_be_binarized << "AAAA" << endl;
   }
 }

@@ -32,7 +32,7 @@ public:
   bool done;
 
   Node()
-  :done(false)
+    :done(false)
   {}
 
   void Add(Table &table, const SourcePhrase &sourcePhrase, size_t pos = 0);
@@ -41,8 +41,8 @@ public:
 
 
 void createProbingPT(const std::string &phrasetable_path,
-    const std::string &basepath, int num_scores, int num_lex_scores,
-    bool log_prob, int max_cache_size, bool scfg);
+                     const std::string &basepath, int num_scores, int num_lex_scores,
+                     bool log_prob, int max_cache_size, bool scfg);
 uint64_t getKey(const std::vector<uint64_t> &source_phrase);
 
 std::vector<uint64_t> CreatePrefix(const std::vector<uint64_t> &vocabid_source, size_t endPos);
@@ -66,14 +66,12 @@ public:
   uint64_t sourceKey;
   float count;
   CacheItem(const std::string &vSource, uint64_t vSourceKey, float vCount)
-  :source(vSource)
-  ,sourceKey(vSourceKey)
-  ,count(vCount)
-  {
+    :source(vSource)
+    ,sourceKey(vSourceKey)
+    ,count(vCount) {
   }
 
-  bool operator<(const CacheItem &other) const
-  {
+  bool operator<(const CacheItem &other) const {
     return count > other.count;
   }
 };
@@ -81,15 +79,14 @@ public:
 class CacheItemOrderer
 {
 public:
-  bool operator()(const CacheItem* a, const CacheItem* b) const
-  {
+  bool operator()(const CacheItem* a, const CacheItem* b) const {
     return (*a) < (*b);
   }
 };
 
 void serialize_cache(
-    std::priority_queue<CacheItem*, std::vector<CacheItem*>, CacheItemOrderer> &cache,
-    const std::string &path, float totalSourceCount);
+  std::priority_queue<CacheItem*, std::vector<CacheItem*>, CacheItemOrderer> &cache,
+  const std::string &path, float totalSourceCount);
 
 }
 
