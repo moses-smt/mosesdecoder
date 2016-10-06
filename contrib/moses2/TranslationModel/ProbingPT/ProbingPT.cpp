@@ -6,7 +6,7 @@
  */
 #include <boost/foreach.hpp>
 #include "ProbingPT.h"
-#include "quering.hh"
+#include "querying.hh"
 #include "probing_hash_utils.hh"
 #include "util/exception.hh"
 #include "../../System.h"
