@@ -304,6 +304,7 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(
 
   // words
   for (size_t targetPos = 0; targetPos < numRealWords; ++targetPos) {
+	Word &word = tp->AddWord();
     for (size_t i = 0; i < m_output.size(); ++i) {
       FactorType factorType = m_output[i];
 
@@ -312,7 +313,6 @@ TargetPhrase *ProbingPT::CreateTargetPhrase(
       const Factor *factor = GetTargetFactor(*probingId);
       assert(factor);
 
-      Word &word = tp->GetWord(targetPos);
       word[factorType] = factor;
 
       offset += sizeof(uint32_t);
