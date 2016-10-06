@@ -72,7 +72,7 @@ alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../mose
     TranslationModel/ProbingPT/hash.cpp
     TranslationModel/ProbingPT/line_splitter.cpp
     TranslationModel/ProbingPT/probing_hash_utils.cpp
-    TranslationModel/ProbingPT/quering.cpp
+    TranslationModel/ProbingPT/querying.cpp
     TranslationModel/ProbingPT/storing.cpp
     TranslationModel/ProbingPT/StoreVocab.cpp
     TranslationModel/ProbingPT/StoreTarget.cpp

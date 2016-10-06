@@ -1,4 +1,4 @@
-#include "quering.hh"
+#include "querying.hh"
 #include "util/exception.hh"
 #include "../../legacy/Util2.h"
 

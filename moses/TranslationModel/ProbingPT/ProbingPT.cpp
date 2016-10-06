@@ -5,7 +5,7 @@
 #include "moses/TargetPhraseCollection.h"
 #include "moses/InputFileStream.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
-#include "quering.hh"
+#include "querying.hh"
 
 using namespace std;
 
