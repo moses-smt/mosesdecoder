@@ -88,8 +88,10 @@ void PhraseTableMemory::Load(System &system)
       target->GetScores().CreateFromString(toks[2], *this, system, true);
       //cerr << "created scores:" << *target << endl;
 
-      //cerr << "alignstr=" << toks[3] << endl;
-      target->SetAlignmentInfo(toks[3]);
+      if (toks.size() >= 4) {
+		  //cerr << "alignstr=" << toks[3] << endl;
+		  target->SetAlignmentInfo(toks[3]);
+      }
 
       // properties
       if (toks.size() == 7) {

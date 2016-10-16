@@ -106,7 +106,7 @@ public:
   }
 
   // clean up temporary memory, called after processing each sentence
-  virtual void CleanUpAfterSentenceProcessing()
+  virtual void CleanUpAfterSentenceProcessing() const
   {
   }
 

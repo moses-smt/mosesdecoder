@@ -119,7 +119,6 @@ void Word::OutputToStream(const System &system, std::ostream &out) const
   }
 }
 
-
 std::string Word::GetString(const FactorList &factorTypes) const
 {
   assert(factorTypes.size());

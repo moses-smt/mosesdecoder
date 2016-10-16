@@ -7,10 +7,10 @@
 #pragma once
 #include <string>
 #include <boost/unordered_map.hpp>
-#include "../OutputFileStream.h"
-#include "../Util2.h"
+#include "moses/OutputFileStream.h"
+#include "moses/Util.h"
 
-namespace Moses2
+namespace Moses
 {
 
 template<typename VOCABID>
@@ -24,31 +24,27 @@ protected:
 
 public:
   StoreVocab(const std::string &path)
-  :m_path(path)
+    :m_path(path)
   {}
 
   virtual ~StoreVocab() {}
 
-  VOCABID GetVocabId(const std::string &word)
-  {
+  VOCABID GetVocabId(const std::string &word) {
     typename Coll::iterator iter = m_vocab.find(word);
     if (iter == m_vocab.end()) {
       VOCABID ind = m_vocab.size() + 1;
       m_vocab[word] = ind;
       return ind;
-    }
-    else {
+    } else {
       return iter->second;
     }
   }
 
-  void Insert(VOCABID id, const std::string &word)
-  {
+  void Insert(VOCABID id, const std::string &word) {
     m_vocab[word] = id;
   }
 
-  void Save()
-  {
+  void Save() {
     OutputFileStream strme(m_path);
 
     typename Coll::const_iterator iter;

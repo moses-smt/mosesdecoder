@@ -1,29 +1,113 @@
+#include <string>
+#include <boost/program_options.hpp>
 #include "util/usage.hh"
 #include "moses/TranslationModel/ProbingPT/storing.hh"
+#include "moses/InputFileStream.h"
+#include "moses/OutputFileStream.h"
+#include "moses/Util.h"
 
+using namespace std;
 
+std::string ReformatSCFGFile(const std::string &path);
 
 int main(int argc, char* argv[])
 {
+  string inPath, outPath;
+  int num_scores = 4;
+  int num_lex_scores = 0;
+  bool log_prob = false;
+  bool scfg = false;
+  int max_cache_size = 50000;
 
-  const char * is_reordering = "false";
+  namespace po = boost::program_options;
+  po::options_description desc("Options");
+  desc.add_options()
+  ("help", "Print help messages")
+  ("input-pt", po::value<string>()->required(), "Text pt")
+  ("output-dir", po::value<string>()->required(), "Directory when binary files will be written")
+  ("num-scores", po::value<int>()->default_value(num_scores), "Number of pt scores")
+  ("num-lex-scores", po::value<int>()->default_value(num_lex_scores), "Number of lexicalized reordering scores")
+  ("log-prob", "log (and floor) probabilities before storing")
+  ("max-cache-size", po::value<int>()->default_value(max_cache_size), "Maximum number of high-count source lines to write to cache file. 0=no cache, negative=no limit")
+  ("scfg", "Rules are SCFG in Moses format (ie. with non-terms and LHS")
 
-  if (!(argc == 5 || argc == 4)) {
-    // Tell the user how to run the program
-    std::cerr << "Provided " << argc << " arguments, needed 4 or 5." << std::endl;
-    std::cerr << "Usage: " << argv[0] << " path_to_phrasetable output_dir num_scores is_reordering" << std::endl;
-    std::cerr << "is_reordering should be either true or false, but it is currently a stub feature." << std::endl;
-    //std::cerr << "Usage: " << argv[0] << " path_to_phrasetable number_of_uniq_lines output_bin_file output_hash_table output_vocab_id" << std::endl;
-    return 1;
+  ;
+
+  po::variables_map vm;
+  try {
+    po::store(po::parse_command_line(argc, argv, desc),
+              vm); // can throw
+
+    /** --help option
+     */
+    if ( vm.count("help")) {
+      std::cout << desc << std::endl;
+      return EXIT_SUCCESS;
+    }
+
+    po::notify(vm); // throws on error, so do after help in case
+    // there are any problems
+  } catch(po::error& e) {
+    std::cerr << "ERROR: " << e.what() << std::endl << std::endl;
+    std::cerr << desc << std::endl;
+    return EXIT_FAILURE;
   }
 
-  if (argc == 5) {
-    is_reordering = argv[4];
+  if (vm.count("input-pt")) inPath = vm["input-pt"].as<string>();
+  if (vm.count("output-dir")) outPath = vm["output-dir"].as<string>();
+  if (vm.count("num-scores")) num_scores = vm["num-scores"].as<int>();
+  if (vm.count("num-lex-scores")) num_lex_scores = vm["num-lex-scores"].as<int>();
+  if (vm.count("max-cache-size")) max_cache_size = vm["max-cache-size"].as<int>();
+  if (vm.count("log-prob")) log_prob = true;
+  if (vm.count("scfg")) scfg = true;
+
+
+  if (scfg) {
+    inPath = ReformatSCFGFile(inPath);
   }
 
-  createProbingPT(argv[1], argv[2], argv[3], is_reordering);
+  Moses::createProbingPT(inPath, outPath, num_scores, num_lex_scores, log_prob, max_cache_size, scfg);
 
-  util::PrintUsage(std::cout);
+  //util::PrintUsage(std::cout);
   return 0;
+}
+
+std::string ReformatSCFGFile(const std::string &path)
+{
+  Moses::InputFileStream inFile(path);
+  string reformattedPath = path + ".reformat.gz";
+  Moses::OutputFileStream outFile(reformattedPath);
+
+  string line;
+  while (getline(inFile, line)) {
+    vector<string> toks = Moses::TokenizeMultiCharSeparator(line, "|||");
+    assert(toks.size() >= 3);
+
+    // source
+    vector<string> sourceToks = Moses::Tokenize(toks[0], " ");
+    for (size_t i = 0; i < sourceToks.size() - 1; ++i) {
+      outFile << sourceToks[i] << " ";
+    }
+
+    // other columns
+    for (size_t i = 1; i < toks.size(); ++i) {
+      outFile << "|||" << toks[i];
+    }
+    outFile << endl;
+  }
+
+  inFile.Close();
+  outFile.Close();
+
+  string sortedPath = path + ".reformat.sorted.gz";
+  string tmpPath = path + ".tmp ";
+  string cmd = "mkdir " + tmpPath
+               + " && gzip -dc " + reformattedPath + " | LC_ALL=C sort -T " + tmpPath + " | gzip -c > " + sortedPath;
+  system(cmd.c_str());
+
+  cmd = "rm -rf " + tmpPath + " " + reformattedPath;
+  system(cmd.c_str());
+
+  return sortedPath;
 }
 

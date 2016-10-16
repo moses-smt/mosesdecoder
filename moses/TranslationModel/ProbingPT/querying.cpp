@@ -1,10 +1,9 @@
-#include "quering.hh"
+#include "querying.hh"
 #include "util/exception.hh"
-#include "../Util2.h"
 
 using namespace std;
 
-namespace Moses2
+namespace Moses
 {
 
 QueryEngine::QueryEngine(const char * filepath)
@@ -12,9 +11,14 @@ QueryEngine::QueryEngine(const char * filepath)
 
   //Create filepaths
   std::string basepath(filepath);
+  std::string path_to_config = basepath + "/config";
   std::string path_to_hashtable = basepath + "/probing_hash.dat";
   std::string path_to_source_vocabid = basepath + "/source_vocabids";
   std::string alignPath = basepath + "/Alignments.dat";
+
+  if (!FileExists(path_to_config)) {
+    UTIL_THROW2("Binary table doesn't exist is didn't finish binarizing: " << path_to_config);
+  }
 
   ///Source phrase vocabids
   read_map(source_vocabids, path_to_source_vocabid.c_str());
@@ -25,10 +29,10 @@ QueryEngine::QueryEngine(const char * filepath)
   //Read config file
   boost::unordered_map<std::string, std::string> keyValue;
 
-  std::ifstream config((basepath + "/config").c_str());
+  std::ifstream config(path_to_config.c_str());
   std::string line;
   while (getline(config, line)) {
-    std::vector<std::string> toks = Moses2::Tokenize(line, "\t");
+    std::vector<std::string> toks = Tokenize(line, "\t");
     UTIL_THROW_IF2(toks.size() != 2, "Wrong config format:" << line);
     keyValue[ toks[0] ] = toks[1];
   }
@@ -39,10 +43,9 @@ QueryEngine::QueryEngine(const char * filepath)
   found = Get(keyValue, "API_VERSION", version);
   if (!found) {
     std::cerr << "Old or corrupted version of ProbingPT. Please rebinarize your phrase tables." << std::endl;
-  }
-  else if (version != API_VERSION) {
+  } else if (version != API_VERSION) {
     std::cerr << "The ProbingPT API has changed. " << version << "!="
-        << API_VERSION << " Please rebinarize your phrase tables." << std::endl;
+              << API_VERSION << " Please rebinarize your phrase tables." << std::endl;
     exit(EXIT_FAILURE);
   }
 
@@ -97,7 +100,7 @@ uint64_t QueryEngine::getKey(uint64_t source_phrase[], size_t size) const
 {
   //TOO SLOW
   //uint64_t key = util::MurmurHashNative(&source_phrase[0], source_phrase.size());
-  return Moses2::getKey(source_phrase, size);
+  return Moses::getKey(source_phrase, size);
 }
 
 std::pair<bool, uint64_t> QueryEngine::query(uint64_t key)
@@ -118,7 +121,7 @@ void QueryEngine::read_alignments(const std::string &alignPath)
 
   string line;
   while (getline(strm, line)) {
-    vector<string> toks = Moses2::Tokenize(line, "\t ");
+    vector<string> toks = Tokenize(line, "\t ");
     UTIL_THROW_IF2(toks.size() == 0, "Corrupt alignment file");
 
     uint32_t alignInd = Scan<uint32_t>(toks[0]);

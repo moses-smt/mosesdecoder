@@ -247,6 +247,14 @@ public:
     }
   }
 
+  void PlusEquals(const FeatureFunction* sp, float scores[]) {
+    size_t numScores = sp->GetNumScoreComponents();
+    size_t offset = sp->GetIndex();
+    for (size_t i = 0; i < numScores; ++i) {
+      m_scores[i + offset] += scores[i];
+    }
+  }
+
   //! Special version PlusEquals(ScoreProducer, vector<float>)
   //! to add the score from a single ScoreProducer that produces
   //! a single value

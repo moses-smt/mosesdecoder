@@ -1319,7 +1319,7 @@
 			<name>FF/PhraseBoundaryFeature.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/PhraseBoundaryFeature.h</locationURI>
-        </link>
+		</link>
 		<link>
 			<name>FF/PhraseDistanceFeature.cpp</name>
 			<type>1</type>
@@ -3341,6 +3341,26 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/ProbingPT.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/ProbingPT/StoreTarget.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/StoreTarget.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/StoreTarget.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/StoreTarget.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/StoreVocab.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/StoreVocab.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT/StoreVocab.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/StoreVocab.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/ProbingPT/hash.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/hash.cpp</locationURI>
@@ -3349,16 +3369,6 @@
 			<name>TranslationModel/ProbingPT/hash.hh</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/hash.hh</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/huffmanish.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/huffmanish.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/huffmanish.hh</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/huffmanish.hh</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/ProbingPT/line_splitter.cpp</name>
@@ -3381,14 +3391,14 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/probing_hash_utils.hh</locationURI>
 		</link>
 		<link>
-			<name>TranslationModel/ProbingPT/quering.cpp</name>
+			<name>TranslationModel/ProbingPT/querying.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/quering.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/querying.cpp</locationURI>
 		</link>
 		<link>
-			<name>TranslationModel/ProbingPT/quering.hh</name>
+			<name>TranslationModel/ProbingPT/querying.hh</name>
 			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/quering.hh</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/querying.hh</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/ProbingPT/storing.cpp</name>
@@ -3664,7 +3674,7 @@
 			<name>TranslationModel/UG/sapt_pscore_coherence.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/sapt_pscore_coherence.h</locationURI>
-        </link>
+		</link>
 		<link>
 			<name>TranslationModel/UG/sapt_pscore_lex1.h</name>
 			<type>1</type>
@@ -3709,7 +3719,7 @@
 			<name>TranslationModel/UG/sapt_pscore_wordcount.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/UG/sapt_pscore_wordcount.h</locationURI>
-        </link>
+		</link>
 		<link>
 			<name>TranslationModel/UG/sim-pe.cc</name>
 			<type>1</type>

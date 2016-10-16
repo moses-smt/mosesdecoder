@@ -101,6 +101,7 @@ TargetPhraseCollection::shared_ptr
 PhraseDictionaryCompact::
 GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &sourcePhrase) const
 {
+  //cerr << "sourcePhrase=" << sourcePhrase << endl;
 
   TargetPhraseCollection::shared_ptr ret;
   // There is no souch source phrase if source phrase is longer than longest

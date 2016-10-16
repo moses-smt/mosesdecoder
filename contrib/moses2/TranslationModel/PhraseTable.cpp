@@ -85,20 +85,19 @@ void PhraseTable::Lookup(const Manager &mgr, InputPathsBase &inputPaths) const
 {
   BOOST_FOREACH(InputPathBase *pathBase, inputPaths){
     InputPath *path = static_cast<InputPath*>(pathBase);
+    //cerr << "path=" << path->range << " ";
 
     if (SatisfyBackoff(mgr, *path)) {
-		TargetPhrases *tpsPtr = tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
+      TargetPhrases *tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
+      cerr << "tpsPtr=" << tpsPtr << " ";
+      /*
+       if (tps.get()) {
+       cerr << tps.get()->GetSize();
+       }
+       cerr << endl;
+       */
 
-		/*
-		 cerr << "path=" << path.GetRange() << " ";
-		 cerr << "tps=" << tps << " ";
-		 if (tps.get()) {
-		 cerr << tps.get()->GetSize();
-		 }
-		 cerr << endl;
-		 */
-
-		path->AddTargetPhrases(*this, tpsPtr);
+      path->AddTargetPhrases(*this, tpsPtr);
     }
   }
 
@@ -121,11 +120,6 @@ void PhraseTable::EvaluateInIsolation(MemPool &pool, const System &system, const
     SCORE &estimatedScore) const
 {
 
-}
-
-
-void PhraseTable::CleanUpAfterSentenceProcessing()
-{
 }
 
 // scfg

@@ -8,9 +8,9 @@
 #include "probing_hash_utils.hh"
 #include "hash.hh" //Includes line splitter
 #include "line_splitter.hh"
-#include "../Util2.h"
+#include "moses//Util.h"
 
-namespace Moses2
+namespace Moses
 {
 
 class QueryEngine
@@ -38,17 +38,18 @@ public:
 
   std::pair<bool, uint64_t> query(uint64_t key);
 
-  const std::map<uint64_t, std::string> &getSourceVocab() const
-  {  return source_vocabids; }
+  const std::map<uint64_t, std::string> &getSourceVocab() const {
+    return source_vocabids;
+  }
 
-  const std::vector<Alignments> &getAlignments() const
-  {  return alignColl; }
+  const std::vector<Alignments> &getAlignments() const {
+    return alignColl;
+  }
 
   uint64_t getKey(uint64_t source_phrase[], size_t size) const;
 
   template<typename T>
-  inline bool Get(const boost::unordered_map<std::string, std::string> &keyValue, const std::string &sought, T &found) const
-  {
+  inline bool Get(const boost::unordered_map<std::string, std::string> &keyValue, const std::string &sought, T &found) const {
     boost::unordered_map<std::string, std::string>::const_iterator iter = keyValue.find(sought);
     if (iter == keyValue.end()) {
       return false;

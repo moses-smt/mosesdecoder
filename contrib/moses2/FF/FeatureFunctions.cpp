@@ -210,6 +210,13 @@ void FeatureFunctions::EvaluateWhenAppliedBatch(const Batch &batch) const
   }
 }
 
+void FeatureFunctions::CleanUpAfterSentenceProcessing() const
+{
+  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
+	ff->CleanUpAfterSentenceProcessing();
+  }
+}
+
 void FeatureFunctions::ShowWeights(const Weights &allWeights)
 {
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {

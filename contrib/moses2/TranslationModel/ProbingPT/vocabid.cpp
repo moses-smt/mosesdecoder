@@ -1,7 +1,7 @@
 #include <boost/foreach.hpp>
 #include "vocabid.hh"
 #include "StoreVocab.h"
-#include "../Util2.h"
+#include "../../legacy/Util2.h"
 
 namespace Moses2
 {

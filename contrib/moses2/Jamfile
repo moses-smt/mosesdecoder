@@ -44,17 +44,40 @@ alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../mose
     FF/LexicalReordering/PhraseBasedReorderingState.cpp
     FF/LexicalReordering/ReorderingStack.cpp
 
+    FF/OSM/OpSequenceModel.cpp
+    FF/OSM/KenOSM.cpp
+    FF/OSM/osmHyp.cpp
+    
  #   LM/LanguageModelDALM.cpp
     LM/LanguageModel.cpp
     LM/KENLM.cpp
     LM/KENLMBatch.cpp
     LM/GPULM.cpp
     
- 	 	TranslationModel/PhraseTable.cpp 
- 	 	TranslationModel/ProbingPT.cpp 
- 	 	TranslationModel/UnknownWordPenalty.cpp 
+ 	TranslationModel/PhraseTable.cpp 
+ 	TranslationModel/Transliteration.cpp 
+ 	TranslationModel/UnknownWordPenalty.cpp 
     TranslationModel/Memory/PhraseTableMemory.cpp 
    	
+ 	TranslationModel/CompactPT/PhraseTableCompact.cpp 
+    TranslationModel/CompactPT/BlockHashIndex.cpp
+    TranslationModel/CompactPT/CmphStringVectorAdapter.cpp
+    TranslationModel/CompactPT/LexicalReorderingTableCompact.cpp
+    TranslationModel/CompactPT/MurmurHash3.cpp
+    TranslationModel/CompactPT/PhraseDecoder.cpp
+    TranslationModel/CompactPT/TargetPhraseCollectionCache.cpp
+    TranslationModel/CompactPT/ThrowingFwrite.cpp
+
+ 	TranslationModel/ProbingPT/ProbingPT.cpp 
+    TranslationModel/ProbingPT/hash.cpp
+    TranslationModel/ProbingPT/line_splitter.cpp
+    TranslationModel/ProbingPT/probing_hash_utils.cpp
+    TranslationModel/ProbingPT/querying.cpp
+    TranslationModel/ProbingPT/storing.cpp
+    TranslationModel/ProbingPT/StoreVocab.cpp
+    TranslationModel/ProbingPT/StoreTarget.cpp
+    TranslationModel/ProbingPT/vocabid.cpp
+
    	parameters/AllOptions.cpp
    	parameters/BookkeepingOptions.cpp
    	parameters/ContextParameters.cpp
@@ -125,21 +148,6 @@ alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../mose
 		legacy/Timer.cpp
 		legacy/Util2.cpp
 
-    legacy/ProbingPT/hash.cpp
-    legacy/ProbingPT/line_splitter.cpp
-    legacy/ProbingPT/probing_hash_utils.cpp
-    legacy/ProbingPT/quering.cpp
-    legacy/ProbingPT/storing.cpp
-    legacy/ProbingPT/StoreVocab.cpp
-    legacy/ProbingPT/StoreTarget.cpp
-    legacy/ProbingPT/vocabid.cpp
-
-    legacy/CompactPT/BlockHashIndex.cpp
-    legacy/CompactPT/CmphStringVectorAdapter.cpp
-    legacy/CompactPT/LexicalReorderingTableCompact.cpp
-    legacy/CompactPT/MurmurHash3.cpp
-    legacy/CompactPT/ThrowingFwrite.cpp
-
     SCFG/ActiveChart.cpp
     SCFG/Hypothesis.cpp
     SCFG/InputPath.cpp
@@ -165,11 +173,10 @@ alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../mose
     deps ;
 
 exe moses2 : Main.cpp moses2_lib ;
-exe CreateProbingPT2 : CreateProbingPT2.cpp moses2_lib ;
 
 if [ xmlrpc ] {
   echo "Building Moses2" ;
-  alias programs : moses2 CreateProbingPT2 ;
+  alias programs : moses2 ;
 }
 else {
   echo "Not building Moses2" ;

@@ -1,32 +1,59 @@
+#include <boost/foreach.hpp>
 #include "vocabid.hh"
+#include "StoreVocab.h"
+#include "moses/Util.h"
 
-void add_to_map(std::map<uint64_t, std::string> *karta, StringPiece textin)
+namespace Moses
+{
+
+void add_to_map(StoreVocab<uint64_t> &sourceVocab,
+                const StringPiece &textin)
 {
   //Tokenize
-  util::TokenIter<util::SingleCharacter> it(textin, util::SingleCharacter(' '));
+  util::TokenIter<util::SingleCharacter> itWord(textin, util::SingleCharacter(' '));
 
-  while(it) {
-    karta->insert(std::pair<uint64_t, std::string>(getHash(*it), it->as_string()));
-    it++;
+  while (itWord) {
+    StringPiece word = *itWord;
+
+    util::TokenIter<util::SingleCharacter> itFactor(word, util::SingleCharacter('|'));
+    while (itFactor) {
+      StringPiece factor = *itFactor;
+
+      sourceVocab.Insert(getHash(factor), factor.as_string());
+      itFactor++;
+    }
+    itWord++;
   }
 }
 
-void serialize_map(std::map<uint64_t, std::string> *karta, const char* filename)
+void serialize_map(const std::map<uint64_t, std::string> &karta,
+                   const std::string &filename)
 {
-  std::ofstream os (filename, std::ios::binary);
-  boost::archive::text_oarchive oarch(os);
+  std::ofstream os(filename.c_str());
 
-  oarch << *karta;  //Serialise map
+  std::map<uint64_t, std::string>::const_iterator iter;
+  for (iter = karta.begin(); iter != karta.end(); ++iter) {
+    os << iter->first << '\t' << iter->second << std::endl;
+  }
+
   os.close();
 }
 
-void read_map(std::map<uint64_t, std::string> *karta, const char* filename)
+void read_map(std::map<uint64_t, std::string> &karta, const char* filename)
 {
-  std::ifstream is (filename, std::ios::binary);
-  boost::archive::text_iarchive iarch(is);
+  std::ifstream is(filename);
 
-  iarch >> *karta;
+  std::string line;
+  while (getline(is, line)) {
+    std::vector<std::string> toks = Tokenize(line, "\t");
+    assert(toks.size() == 2);
+    uint64_t ind = Scan<uint64_t>(toks[1]);
+    karta[ind] = toks[0];
+  }
 
   //Close the stream after we are done.
   is.close();
 }
+
+}
+

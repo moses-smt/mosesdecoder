@@ -34,7 +34,7 @@ int main(int argc, char* argv[])
     return 1;
   }
 
-  QueryEngine queries(argv[1]);
+  Moses::QueryEngine queries(argv[1]);
 
   //Interactive search
   std::cout << "Please enter a string to be searched, or exit to exit." << std::endl;

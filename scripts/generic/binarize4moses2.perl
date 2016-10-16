@@ -15,19 +15,22 @@ my $outPath;
 my $numScores = 4;
 my $numLexScores;
 my $pruneNum = 0;
+my $scfg = 0;
 
 GetOptions("phrase-table=s"  => \$ptPath,
            "lex-ro=s"   => \$lexRoPath,
            "output-dir=s" => \$outPath,
            "num-scores=s" => \$numScores,
            "num-lex-scores=i" => \$numLexScores,
-           "prune=i" => \$pruneNum
+           "prune=i" => \$pruneNum,
+           "scfg" => \$scfg
 	   ) or exit 1;
 
+#print STDERR "scfg=$scfg \n";
 die("ERROR: please set --phrase-table") unless defined($ptPath);
-die("ERROR: please set --lex-ro") unless defined($lexRoPath);
+#die("ERROR: please set --lex-ro") unless defined($lexRoPath);
 die("ERROR: please set --output-dir") unless defined($outPath);
-die("ERROR: please set --num-lex-scores") unless defined($numLexScores);
+#die("ERROR: please set --num-lex-scores") unless defined($numLexScores);
 
 my $cmd;
 
@@ -37,13 +40,33 @@ my $tempPath = dirname($outPath)  ."/tmp.$$";
 $cmd = "gzip -dc $ptPath |  $mosesDir/contrib/sigtest-filter/filter-pt -n $pruneNum | gzip -c > $tempPath/pt.gz";
 systemCheck($cmd);
 
-$cmd = "$mosesDir/bin/processLexicalTableMin  -in $lexRoPath -out $tempPath/lex-ro -T . -threads all";
-systemCheck($cmd);
+if (defined($lexRoPath)) {
+  die("ERROR: please set --num-lex-scores") unless defined($numLexScores);                                            
 
-$cmd = "$mosesDir/bin/addLexROtoPT $tempPath/pt.gz $tempPath/lex-ro.minlexr  | gzip -c > $tempPath/pt.withLexRO.gz";
-systemCheck($cmd);
+  $cmd = "$mosesDir/bin/processLexicalTableMin  -in $lexRoPath -out $tempPath/lex-ro -T . -threads all";
+  systemCheck($cmd);
 
-$cmd = "$mosesDir/bin/CreateProbingPT2 --num-scores $numScores --num-lex-scores $numLexScores --log-prob --input-pt $tempPath/pt.withLexRO.gz --output-dir $outPath";
+  $cmd = "$mosesDir/bin/addLexROtoPT $tempPath/pt.gz $tempPath/lex-ro.minlexr  | gzip -c > $tempPath/pt.withLexRO.gz";
+  systemCheck($cmd);
+
+  $cmd = "ln -s pt.withLexRO.gz $tempPath/pt.txt.gz";
+  systemCheck($cmd);
+}
+else {
+    $cmd = "ln -s pt.gz $tempPath/pt.txt.gz";
+    systemCheck($cmd);
+}
+
+$cmd = "$mosesDir/bin/CreateProbingPT2 --num-scores $numScores --log-prob --input-pt $tempPath/pt.txt.gz --output-dir $outPath";
+
+if (defined($lexRoPath)) {
+    $cmd .= " --num-lex-scores $numLexScores";
+}
+
+if ($scfg) {
+    $cmd .= " --scfg";
+}
+
 systemCheck($cmd);
 
 exit(0);

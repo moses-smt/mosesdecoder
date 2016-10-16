@@ -11,10 +11,10 @@
 #include <boost/thread/tss.hpp>
 #include <boost/bimap.hpp>
 #include <deque>
-#include "PhraseTable.h"
-#include "../Vector.h"
-#include "../Phrase.h"
-#include "../SCFG/ActiveChart.h"
+#include "../PhraseTable.h"
+#include "../../Vector.h"
+#include "../../Phrase.h"
+#include "../../SCFG/ActiveChart.h"
 
 namespace Moses2
 {

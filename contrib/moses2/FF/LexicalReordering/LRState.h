@@ -1,5 +1,5 @@
 #pragma once
-#include "../../legacy/FFState.h"
+#include "../FFState.h"
 #include "LRModel.h"
 
 namespace Moses2

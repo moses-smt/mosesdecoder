@@ -1,8 +1,10 @@
 #include "FeatureRegistry.h"
 
 #include "../TranslationModel/Memory/PhraseTableMemory.h"
-#include "../TranslationModel/ProbingPT.h"
+#include "../TranslationModel/CompactPT/PhraseTableCompact.h"
+#include "../TranslationModel/ProbingPT/ProbingPT.h"
 #include "../TranslationModel/UnknownWordPenalty.h"
+#include "../TranslationModel/Transliteration.h"
 
 #include "../LM/KENLM.h"
 #include "../LM/KENLMBatch.h"
@@ -13,6 +15,7 @@
 #include "LexicalReordering/LexicalReordering.h"
 #include "PhrasePenalty.h"
 #include "WordPenalty.h"
+#include "OSM/OpSequenceModel.h"
 
 #include "SkeletonStatefulFF.h"
 #include "SkeletonStatelessFF.h"
@@ -49,8 +52,10 @@ FeatureRegistry::FeatureRegistry()
   // Feature with different name than class.
 #define MOSES_FNAME2(name, type) Add(name, new DefaultFeatureFactory< type >());
 
+  MOSES_FNAME2("PhraseDictionaryCompact", PhraseTableCompact);
   MOSES_FNAME2("PhraseDictionaryMemory", PhraseTableMemory);
   MOSES_FNAME(ProbingPT);
+  MOSES_FNAME2("PhraseDictionaryTransliteration", Transliteration);
   MOSES_FNAME(UnknownWordPenalty);
 
   Add("KENLM", new KenFactory());
@@ -64,6 +69,8 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(LexicalReordering);
   MOSES_FNAME(PhrasePenalty);
   MOSES_FNAME(WordPenalty);
+  MOSES_FNAME(OpSequenceModel);
+
   MOSES_FNAME(SkeletonStatefulFF);
   MOSES_FNAME(SkeletonStatelessFF);
 }
