@@ -6,7 +6,7 @@ This fork of Moses project adds pipelined evaluation of language model scores of
 
 Pipelined LM runs 1.35x faster for large n-gram models. Translation speed in Moses improves by factor of 1.05x.
 
-More details can be found [here](jmokry.com/pipelineddecoder.pdf)
+More details can be found [here](http://www.jmokry.com/pipelineddecoder.pdf)
 
 
 
