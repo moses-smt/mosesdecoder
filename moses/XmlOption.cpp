@@ -486,7 +486,8 @@ ProcessAndStripXMLTags(AllOptions const& opts, string &line,
               // system would have "word", a two-factor system would have
               // "word|class", and so on.
               vector<FactorType> fakeOutputFactorOrder;
-              size_t factorsInAltText = Tokenize(altTexts[i], StaticData::Instance().GetFactorDelimiter()).size();
+              // Factors in first word of alt text
+              size_t factorsInAltText = TokenizeMultiCharSeparator(Tokenize(altTexts[i])[0], StaticData::Instance().GetFactorDelimiter()).size();
               for (size_t f = 0; f < factorsInAltText; ++f) {
                 fakeOutputFactorOrder.push_back(f);
               }
