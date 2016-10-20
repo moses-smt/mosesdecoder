@@ -479,8 +479,19 @@ ProcessAndStripXMLTags(AllOptions const& opts, string &line,
 
               Range range(startPos + offset,endPos-1 + offset); // span covered by phrase
               TargetPhrase targetPhrase(firstPt);
-              // targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
-              targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i], NULL);
+              // Target factors may be used by intermediate models (example: a
+              // generation model produces a factor used by a class-based LM
+              // but NOT output.  Fake the output factor order to match the
+              // number of factors specified in the alt text.  A one-factor
+              // system would have "word", a two-factor system would have
+              // "word|class", and so on.
+              vector<FactorType> fakeOutputFactorOrder;
+              // Factors in first word of alt text
+              size_t factorsInAltText = TokenizeMultiCharSeparator(Tokenize(altTexts[i])[0], StaticData::Instance().GetFactorDelimiter()).size();
+              for (size_t f = 0; f < factorsInAltText; ++f) {
+                fakeOutputFactorOrder.push_back(f);
+              }
+              targetPhrase.CreateFromString(Output, fakeOutputFactorOrder, altTexts[i], NULL);
 
               // lhs
               const UnknownLHSList &lhsList = opts.syntax.unknown_lhs; // staticData.GetUnknownLHS();
