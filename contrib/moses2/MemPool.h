@@ -238,6 +238,14 @@ public:
     return &value;
   }
 
+  bool operator==(const MemPoolAllocator<T> &allocator) const {
+    return true;
+  }
+
+  bool operator!=(const MemPoolAllocator<T> &allocator) const {
+    return false;
+  }
+		  
   MemPool &m_pool;
 protected:
 };
