@@ -11,6 +11,7 @@
 #include "HypothesisColl.h"
 #include "ManagerBase.h"
 #include "System.h"
+#include "MemPoolAllocator.h"
 
 using namespace std;
 

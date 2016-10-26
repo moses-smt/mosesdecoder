@@ -12,6 +12,7 @@
 #include "../../TypeDef.h"
 #include "../../Vector.h"
 #include "../../MemPool.h"
+#include "../../MemPoolAllocator.h"
 #include "../../Recycler.h"
 #include "../../HypothesisColl.h"
 #include "../../legacy/Util2.h"

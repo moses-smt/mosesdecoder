@@ -14,6 +14,7 @@
 #include "../Hypothesis.h"
 #include "../../TypeDef.h"
 #include "../../Vector.h"
+#include "../../MemPoolAllocator.h"
 #include "Stack.h"
 
 namespace Moses2
