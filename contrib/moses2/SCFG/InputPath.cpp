@@ -9,7 +9,7 @@
 #include "TargetPhrases.h"
 #include "ActiveChart.h"
 #include "../TranslationModel/PhraseTable.h"
-#include "../MemPool.h"
+#include "../MemPoolAllocator.h"
 
 using namespace std;
 

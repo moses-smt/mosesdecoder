@@ -7,7 +7,7 @@
 #pragma once
 #include <boost/unordered_set.hpp>
 #include "HypothesisBase.h"
-#include "MemPool.h"
+#include "MemPoolAllocator.h"
 #include "Recycler.h"
 #include "Array.h"
 #include "legacy/Util2.h"

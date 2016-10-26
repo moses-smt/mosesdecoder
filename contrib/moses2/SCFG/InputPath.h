@@ -11,6 +11,7 @@
 #include <list>
 #include <boost/unordered_map.hpp>
 #include "../InputPathBase.h"
+#include "../MemPoolAllocator.h"
 #include "TargetPhrases.h"
 #include "ActiveChart.h"
 #include "Word.h"

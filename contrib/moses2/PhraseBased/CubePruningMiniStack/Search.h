@@ -11,6 +11,7 @@
 #include "Misc.h"
 #include "Stack.h"
 #include "../../legacy/Range.h"
+#include "../../MemPoolAllocator.h"
 
 namespace Moses2
 {

@@ -7,7 +7,7 @@
 
 #pragma once
 #include <cassert>
-#include "MemPool.h"
+#include "MemPoolAllocator.h"
 
 namespace Moses2
 {
