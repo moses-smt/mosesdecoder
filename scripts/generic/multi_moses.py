@@ -95,9 +95,9 @@ def run_instance(cmd_base, threads, tasks, cpu_affinity, cpu_offset, n_best=Fals
        cmd.append('--cpu-affinity-offset')
        cmd.append(str(cpu_offset))
 
-    print 'BEFORE'
-    print cmd
-    print 'AFTER\n'
+    #print 'BEFORE'
+    #print cmd
+    #print 'AFTER\n'
 
     try:
         # Queue of tasks instance is currently working on, limited to the number
