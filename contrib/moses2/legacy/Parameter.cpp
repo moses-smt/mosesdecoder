@@ -297,6 +297,17 @@ Parameter::Parameter()
   AddParam(server_opts, "serial",
       "Run server in serial mode, processing only one request at a time.");
 
+  AddParam(server_opts,"server-maxconn",
+           "Max. No of simultaneous HTTP transactions allowed by the server.");
+  AddParam(server_opts,"server-maxconn-backlog",
+           "Max. No. of requests the OS will queue if the server is busy.");
+  AddParam(server_opts,"server-keepalive-maxconn",
+           "Max. No. of requests the server will accept on a single TCP connection.");
+  AddParam(server_opts,"server-keepalive-timeout",
+           "Max. number of seconds the server will keep a persistent connection alive.");
+  AddParam(server_opts,"server-timeout",
+           "Max. number of seconds the server will wait for a client to submit a request once a connection has been established.");
+
   po::options_description irstlm_opts("IRSTLM Options");
   AddParam(irstlm_opts, "clean-lm-cache",
       "clean language model caches after N translations (default N=1)");
