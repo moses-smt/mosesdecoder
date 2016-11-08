@@ -43,6 +43,8 @@ using namespace std;
 
 namespace Moses
 {
+//size_t g_numHypos = 0;
+
 Hypothesis::
 Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const Bitmap &bitmap, int id)
   : m_prevHypo(NULL)
@@ -61,6 +63,7 @@ Hypothesis(Manager& manager, InputType const& source, const TranslationOption &i
   , m_manager(manager)
   , m_id(id)
 {
+//	++g_numHypos;
   // used for initial seeding of trans process
   // initialize scores
   //_hash_computed = false;
@@ -91,6 +94,8 @@ Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const 
   , m_manager(prevHypo.GetManager())
   , m_id(id)
 {
+//	++g_numHypos;
+
   m_currScoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
   m_wordDeleted = transOpt.IsDeletionOption();
 }

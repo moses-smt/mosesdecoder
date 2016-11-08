@@ -33,7 +33,8 @@ public:
   SPTR<pstats>
   add_job(Bitext<Token> const* const theBitext,
 	  typename TSA<Token>::tree_iterator const& phrase,
-	  size_t const max_samples, SPTR<SamplingBias const> const& bias);
+	  size_t const max_samples, SPTR<SamplingBias const> const& bias,
+    bool const track_sids);
     // add_job(Bitext<Token> const* const theBitext,
     // 	  typename TSA<Token>::tree_iterator const& phrase,
     // 	  size_t const max_samples, SamplingBias const* const bias);
@@ -93,13 +94,14 @@ SPTR<pstats> Bitext<Token>
 ::agenda
 ::add_job(Bitext<Token> const* const theBitext,
 	  typename TSA<Token>::tree_iterator const& phrase,
-	  size_t const max_samples, SPTR<SamplingBias const> const& bias)
+	  size_t const max_samples, SPTR<SamplingBias const> const& bias,
+	  bool const track_sids)
 {
   boost::unique_lock<boost::mutex> lk(this->lock);
   static boost::posix_time::time_duration nodelay(0,0,0,0);
   bool fwd = phrase.root == bt.I1.get();
   SPTR<job> j(new job(theBitext, phrase, fwd ? bt.I1 : bt.I2,
-		      max_samples, fwd, bias));
+		      max_samples, fwd, bias, track_sids));
   j->stats->register_worker();
 
   joblist.push_back(j);

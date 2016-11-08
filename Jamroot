@@ -316,6 +316,8 @@ rephraser
 contrib/c++tokenizer//tokenizer
 contrib/expected-bleu-training//train-expected-bleu
 contrib/expected-bleu-training//prepare-expected-bleu-training
+
+contrib/moses2//programs
 ;
 
 
@@ -339,3 +341,5 @@ if [ path.exists $(TOP)/dist ] && $(prefix) != dist {
 local temp = [ _shell "mkdir -p $(TOP)/bin" ] ;
 local temp = [ _shell "rm -f $(TOP)/bin/moses_chart" ] ;
 local temp = [ _shell "cd $(TOP)/bin && ln -s moses moses_chart" ] ;
+local temp = [ _shell "cd $(TOP)/bin && ln -s CreateProbingPT CreateProbingPT2" ] ;
+

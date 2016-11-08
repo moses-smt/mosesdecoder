@@ -1,5 +1,3 @@
-// $Id$\
-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -111,8 +109,8 @@ template <class Model> void LanguageModelKen<Model>::LoadModel(const std::string
 
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, util::LoadMethod load_method)
   :LanguageModel(line)
-  ,m_factorType(factorType)
   ,m_beginSentenceFactor(FactorCollection::Instance().AddFactor(BOS_))
+  ,m_factorType(factorType)
 {
   ReadParameters();
   LoadModel(file, load_method);
@@ -445,7 +443,13 @@ LanguageModel *ConstructKenLM(const std::string &lineOrig)
       filePath.assign(value.data(), value.size());
     } else if (name == "lazyken") {
       // deprecated: use load instead.
-      load_method = boost::lexical_cast<bool>(value) ? util::LAZY : util::POPULATE_OR_READ;
+      if (value == "0" || value == "false") {
+        load_method = util::POPULATE_OR_READ;
+      } else if (value == "1" || value == "true") {
+        load_method = util::LAZY;
+      } else {
+        UTIL_THROW2("Can't parse lazyken argument " << value << ".  Also, lazyken is deprecated.  Use load with one of the arguments lazy, populate_or_lazy, populate_or_read, read, or parallel_read.");
+      }
     } else if (name == "load") {
       if (value == "lazy") {
         load_method = util::LAZY;

@@ -1,17 +1,18 @@
 
 #pragma once
-
+#include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/bimap.hpp>
+#include <boost/unordered_map.hpp>
 #include "../PhraseDictionary.h"
 
-class QueryEngine;
-class target_text;
 
 namespace Moses
 {
 class ChartParser;
 class ChartCellCollectionBase;
 class ChartRuleLookupManager;
+class QueryEngine;
+class target_text;
 
 class ProbingPT : public PhraseDictionary
 {
@@ -39,21 +40,41 @@ public:
 
 protected:
   QueryEngine *m_engine;
+  uint64_t m_unkId;
 
-  typedef boost::bimap<const Factor *, uint64_t> SourceVocabMap;
-  mutable SourceVocabMap m_sourceVocabMap;
+  std::vector<uint64_t> m_sourceVocab; // factor id -> pt id
+  std::vector<const Factor*> m_targetVocab; // pt id -> factor*
+  std::vector<const AlignmentInfo*> m_aligns;
 
-  typedef boost::bimap<const Factor *, unsigned int> TargetVocabMap;
-  mutable TargetVocabMap m_vocabMap;
+  boost::iostreams::mapped_file_source file;
+  const char *data;
+
+  // caching
+  typedef boost::unordered_map<uint64_t, TargetPhraseCollection*> CachePb;
+  CachePb m_cachePb;
+
+  void CreateAlignmentMap(const std::string path);
 
   TargetPhraseCollection::shared_ptr CreateTargetPhrase(const Phrase &sourcePhrase) const;
-  TargetPhrase *CreateTargetPhrase(const Phrase &sourcePhrase, const target_text &probingTargetPhrase) const;
-  const Factor *GetTargetFactor(uint64_t probingId) const;
+
+  std::pair<bool, uint64_t> GetKey(const Phrase &sourcePhrase) const;
+  void GetSourceProbingIds(const Phrase &sourcePhrase, bool &ok,
+                           uint64_t probingSource[]) const;
+  uint64_t GetSourceProbingId(const Word &word) const;
   uint64_t GetSourceProbingId(const Factor *factor) const;
 
-  std::vector<uint64_t> ConvertToProbingSourcePhrase(const Phrase &sourcePhrase, bool &ok) const;
+  TargetPhraseCollection *CreateTargetPhrases(
+    const Phrase &sourcePhrase, uint64_t key) const;
+  TargetPhrase *CreateTargetPhrase(
+    const char *&offset) const;
 
-  uint64_t m_unkId;
+  inline const Factor *GetTargetFactor(uint32_t probingId) const {
+    if (probingId >= m_targetVocab.size()) {
+      return NULL;
+    }
+    return m_targetVocab[probingId];
+  }
+
 };
 
 }  // namespace Moses

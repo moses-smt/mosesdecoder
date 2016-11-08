@@ -13,8 +13,17 @@
 #include "util/string_piece.hh"  //Tokenization and work with StringPiece
 #include "util/tokenize_piece.hh"
 
-void add_to_map(std::map<uint64_t, std::string> *karta, StringPiece textin);
+namespace Moses
+{
+template<typename VOCABID>
+class StoreVocab;
 
-void serialize_map(std::map<uint64_t, std::string> *karta, const char* filename);
+void add_to_map(StoreVocab<uint64_t> &sourceVocab,
+                const StringPiece &textin);
 
-void read_map(std::map<uint64_t, std::string> *karta, const char* filename);
+void serialize_map(const std::map<uint64_t, std::string> &karta,
+                   const std::string &filename);
+
+void read_map(std::map<uint64_t, std::string> &karta, const char* filename);
+
+}

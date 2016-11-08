@@ -28,6 +28,7 @@ namespace sapt
     uint32_t obwd[LRModel::NONE+1]; // backward distortion type counts
 
   public:
+    SPTR<std::vector<uint32_t> > sids; // list of sentence ids in this sample
     std::map<uint32_t,uint32_t> indoc;
     // std::vector<uint32_t> indoc; // counts origin of samples (for biased sampling)
     jstats();
@@ -41,7 +42,8 @@ namespace sapt
 
     size_t 
     add(float w, float b, std::vector<unsigned char> const& a, uint32_t const cnt2, 
-	uint32_t fwd_orient, uint32_t bwd_orient, int const docid);
+	uint32_t fwd_orient, uint32_t bwd_orient, int const docid, uint32_t const sid,
+	bool const track_sid);
 
     void invalidate();
     void validate();

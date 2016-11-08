@@ -31,6 +31,7 @@
 #include "moses/FF/TargetBigramFeature.h"
 #include "moses/FF/TargetNgramFeature.h"
 #include "moses/FF/PhraseBoundaryFeature.h"
+#include "moses/FF/PhraseDistanceFeature.h"
 #include "moses/FF/PhrasePairFeature.h"
 #include "moses/FF/RulePairUnlexicalizedSource.h"
 #include "moses/FF/PhraseLengthFeature.h"
@@ -254,6 +255,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SourceWordDeletionFeature);
   MOSES_FNAME(TargetWordInsertionFeature);
   MOSES_FNAME(PhraseBoundaryFeature);
+  MOSES_FNAME(PhraseDistanceFeature);
   MOSES_FNAME(PhraseLengthFeature);
   MOSES_FNAME(WordTranslationFeature);
   MOSES_FNAME(TargetBigramFeature);

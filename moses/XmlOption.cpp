@@ -163,7 +163,8 @@ ProcessAndStripXMLTags(AllOptions const& opts, string &line,
                        vector<XmlOption const*> &res,
                        ReorderingConstraint &reorderingConstraint,
                        vector< size_t > &walls,
-                       std::vector< std::pair<size_t, std::string> > &placeholders)
+                       std::vector< std::pair<size_t, std::string> > &placeholders,
+                       InputType &input)
 {
   //parse XML markup in translation line
 
@@ -401,6 +402,28 @@ ProcessAndStripXMLTags(AllOptions const& opts, string &line,
           StaticData::InstanceNonConst().SetAllWeights(allWeights);
         }
 
+        // Coord: coordinates of the input sentence in a user-defined space
+        // <coord space="NAME" coord="X Y Z ..." />
+        // where NAME is the name of the space and X Y Z ... are floats.  See
+        // PhraseDistanceFeature for an example of using this information for
+        // feature scoring.
+        else if (tagName == "coord") {
+          // Parse tag
+          string space = ParseXmlTagAttribute(tagContent, "space");
+          vector<string> tok = Tokenize(ParseXmlTagAttribute(tagContent, "coord"));
+          size_t id = StaticData::Instance().GetCoordSpace(space);
+          if (!id) {
+            TRACE_ERR("ERROR: no models use space " << space << ", will be ignored" << endl);
+          } else {
+            // Init if needed
+            if (!input.m_coordMap) {
+              input.m_coordMap.reset(new map<size_t const, vector<float> >);
+            }
+            vector<float>& coord = (*input.m_coordMap)[id];
+            Scan<float>(coord, tok);
+          }
+        }
+
         // default: opening tag that specifies translation options
         else {
           if (startPos > endPos) {
@@ -456,8 +479,19 @@ ProcessAndStripXMLTags(AllOptions const& opts, string &line,
 
               Range range(startPos + offset,endPos-1 + offset); // span covered by phrase
               TargetPhrase targetPhrase(firstPt);
-              // targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
-              targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i], NULL);
+              // Target factors may be used by intermediate models (example: a
+              // generation model produces a factor used by a class-based LM
+              // but NOT output.  Fake the output factor order to match the
+              // number of factors specified in the alt text.  A one-factor
+              // system would have "word", a two-factor system would have
+              // "word|class", and so on.
+              vector<FactorType> fakeOutputFactorOrder;
+              // Factors in first word of alt text
+              size_t factorsInAltText = TokenizeMultiCharSeparator(Tokenize(altTexts[i])[0], StaticData::Instance().GetFactorDelimiter()).size();
+              for (size_t f = 0; f < factorsInAltText; ++f) {
+                fakeOutputFactorOrder.push_back(f);
+              }
+              targetPhrase.CreateFromString(Output, fakeOutputFactorOrder, altTexts[i], NULL);
 
               // lhs
               const UnknownLHSList &lhsList = opts.syntax.unknown_lhs; // staticData.GetUnknownLHS();

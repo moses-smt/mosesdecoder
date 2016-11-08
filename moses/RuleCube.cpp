@@ -33,7 +33,6 @@ using namespace std;
 
 namespace Moses
 {
-extern bool g_mosesDebug;
 
 // initialise the RuleCube by creating the top-left corner item
 RuleCube::RuleCube(const ChartTranslationOptions &transOpt,

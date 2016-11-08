@@ -60,7 +60,7 @@ class PhraseDictionaryDynamicCacheBased;
 typedef std::pair<std::string, float> UnknownLHSEntry;
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
 
-/** Contains global variables and contants.
+/** Contains global variables and constants.
  *  Only 1 object of this class should be instantiated.
  *  A const object of this class is accessible by any function during decoding by calling StaticData::Instance();
  */
@@ -152,6 +152,12 @@ protected:
   bool ini_performance_options();
 
   void initialize_features();
+
+  // Coordinate space name map for matching spaces across XML input ("coord"
+  // tag) and feature functions that assign or use coordinates on target phrases
+  std::map< std::string const, size_t > m_coordSpaceMap;
+  size_t m_coordSpaceNextID;
+
 public:
 
   //! destructor
@@ -394,6 +400,9 @@ public:
     return m_requireSortingAfterSourceContext;
   }
 
+  // Coordinate spaces
+  size_t GetCoordSpace(std::string space) const;
+  size_t MapCoordSpace(std::string space);
 };
 
 }
