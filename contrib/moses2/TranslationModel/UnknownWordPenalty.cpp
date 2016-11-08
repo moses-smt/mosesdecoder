@@ -37,6 +37,19 @@ UnknownWordPenalty::~UnknownWordPenalty()
   // TODO Auto-generated destructor stub
 }
 
+void UnknownWordPenalty::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "prefix") {
+    m_prefix = value;
+  }
+  else if (key == "suffix") {
+    m_suffix = value;
+  }
+  else {
+    PhraseTable::SetParameter(key, value);
+  }
+}
+
 void UnknownWordPenalty::ProcessXML(
 		const Manager &mgr,
 		MemPool &pool,
@@ -111,9 +124,23 @@ TargetPhrases *UnknownWordPenalty::Lookup(const Manager &mgr, MemPool &pool,
           system, 1);
   Moses2::Word &word = (*target)[0];
 
-  //FactorCollection &fc = system.vocab;
-  //const Factor *factor = fc.AddFactor("SSS", false);
-  word[0] = factor;
+  if (m_prefix.empty() && m_suffix.empty()) {
+    word[0] = factor;
+  }
+  else {
+    stringstream strm;
+    if (!m_prefix.empty()) {
+      strm << m_prefix;
+    }
+    strm << factor->GetString();
+    if (!m_suffix.empty()) {
+      strm << m_suffix;
+    }
+
+    FactorCollection &fc = system.GetVocab();
+    const Factor *targetFactor = fc.AddFactor(strm.str(), system, false);
+    word[0] = targetFactor;
+  }
 
   Scores &scores = target->GetScores();
   scores.PlusEquals(mgr.system, *this, -100);
