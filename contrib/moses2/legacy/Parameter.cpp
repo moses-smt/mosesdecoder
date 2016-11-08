@@ -142,8 +142,8 @@ Parameter::Parameter()
       "How many hypotheses should be created for each coverage. (default = 0)");
   AddParam(cube_opts, "cube-pruning-lazy-scoring", "cbls",
       "Don't fully score a hypothesis until it is popped");
-  AddParam(cube_opts, "cube-pruning-deterministic-search", "cbds",
-      "Break ties deterministically during search");
+  //AddParam(cube_opts, "cube-pruning-deterministic-search", "cbds",
+  //    "Break ties deterministically during search");
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // minimum bayes risk decoding
@@ -157,21 +157,21 @@ Parameter::Parameter()
   AddParam(mbr_opts, "mbr-scale",
       "scaling factor to convert log linear score probability in MBR decoding (default 1.0)");
 
-  AddParam(mbr_opts, "lminimum-bayes-risk", "lmbr",
-      "use lattice miminum Bayes risk to determine best translation");
+  //AddParam(mbr_opts, "lminimum-bayes-risk", "lmbr",
+  //    "use lattice miminum Bayes risk to determine best translation");
   AddParam(mbr_opts, "consensus-decoding", "con",
       "use consensus decoding (De Nero et. al. 2009)");
 
   po::options_description lmbr_opts("Options specific to Lattic MBR");
-  AddParam(lmbr_opts, "lmbr-p", "unigram precision value for lattice mbr");
-  AddParam(lmbr_opts, "lmbr-r", "ngram precision decay value for lattice mbr");
-  AddParam(lmbr_opts, "lmbr-thetas", "theta(s) for lattice mbr calculation");
-  AddParam(mbr_opts, "lmbr-map-weight",
-      "weight given to map solution when doing lattice MBR (default 0)");
-  AddParam(mbr_opts, "lmbr-pruning-factor",
-      "average number of nodes/word wanted in pruned lattice");
-  AddParam(mbr_opts, "lattice-hypo-set",
-      "to use lattice as hypo set during lattice MBR");
+  //AddParam(lmbr_opts, "lmbr-p", "unigram precision value for lattice mbr");
+  //AddParam(lmbr_opts, "lmbr-r", "ngram precision decay value for lattice mbr");
+  //AddParam(lmbr_opts, "lmbr-thetas", "theta(s) for lattice mbr calculation");
+  //AddParam(mbr_opts, "lmbr-map-weight",
+  //    "weight given to map solution when doing lattice MBR (default 0)");
+  //AddParam(mbr_opts, "lmbr-pruning-factor",
+  //    "average number of nodes/word wanted in pruned lattice");
+  //AddParam(mbr_opts, "lattice-hypo-set",
+  //    "to use lattice as hypo set during lattice MBR");
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // OOV handling options
@@ -194,12 +194,12 @@ Parameter::Parameter()
   // input options
   po::options_description input_opts("Input Format Options");
   AddParam(input_opts, "input-factors", "list of factors in the input");
-  AddParam(input_opts, "inputtype",
-      "text (0), confusion network (1), word lattice (2), tree (3) (default = 0)");
+  //AddParam(input_opts, "inputtype",
+  //    "text (0), confusion network (1), word lattice (2), tree (3) (default = 0)");
   AddParam(input_opts, "xml-input", "xi",
       "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'constraint', 'ignore'");
-  AddParam(input_opts, "xml-brackets", "xb",
-      "specify strings to be used as xml tags opening and closing, e.g. \"{{ }}\" (default \"< >\"). Avoid square brackets because of configuration file format. Valid only with text input mode");
+  //AddParam(input_opts, "xml-brackets", "xb",
+  //    "specify strings to be used as xml tags opening and closing, e.g. \"{{ }}\" (default \"< >\"). Avoid square brackets because of configuration file format. Valid only with text input mode");
   AddParam(input_opts, "start-translation-id", "Id of 1st input. Default = 0");
   AddParam(input_opts, "alternate-weight-setting", "aws",
       "alternate set of weights to used per xml specification");
@@ -228,10 +228,10 @@ Parameter::Parameter()
       "Output stack info as word graph. Takes filename, 0=only hypos in stack, 1=stack + nbest hypos");
   AddParam(output_opts, "tree-translation-details", "Ttree",
       "for each hypothesis, report translation details with tree fragment info to given file");
-  AddParam(output_opts, "print-alignment-info",
-      "Output word-to-word alignment to standard out, separated from translation by |||. Word-to-word alignments are takne from the phrase table if any. Default is false");
-  AddParam(output_opts, "alignment-output-file",
-      "print output word alignments into given file");
+  //AddParam(output_opts, "print-alignment-info",
+  //    "Output word-to-word alignment to standard out, separated from translation by |||. Word-to-word alignments are takne from the phrase table if any. Default is false");
+  //AddParam(output_opts, "alignment-output-file",
+  //    "print output word alignments into given file");
   AddParam(output_opts, "sort-word-alignment",
       "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
   AddParam(output_opts, "report-segmentation", "t",
@@ -280,8 +280,8 @@ Parameter::Parameter()
       "generate samples from lattice, in same format as nbest list. Uses the file and size arguments, as in n-best-list");
   AddParam(nbest_opts, "include-segmentation-in-n-best",
       "include phrasal segmentation in the n-best list. default is false");
-  AddParam(nbest_opts, "print-alignment-info-in-n-best",
-      "Include word-to-word alignment in the n-best list. Word-to-word alignments are taken from the phrase table if any. Default is false");
+  //AddParam(nbest_opts, "print-alignment-info-in-n-best",
+  //    "Include word-to-word alignment in the n-best list. Word-to-word alignments are taken from the phrase table if any. Default is false");
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // server options
@@ -350,12 +350,12 @@ Parameter::Parameter()
       "Override feature name (NOT arguments). Eg. SRILM-->KENLM, PhraseDictionaryMemory-->PhraseDictionaryScope3");
 
   AddParam(misc_opts, "feature", "All the feature functions should be here");
-  AddParam(misc_opts, "context-string",
-      "A (tokenized) string containing context words for context-sensitive translation.");
-  AddParam(misc_opts, "context-weights",
-      "A key-value map for context-sensitive translation.");
-  AddParam(misc_opts, "context-window",
-      "Context window (in words) for context-sensitive translation: {+|-|+-}<number>.");
+  //AddParam(misc_opts, "context-string",
+  //    "A (tokenized) string containing context words for context-sensitive translation.");
+  //AddParam(misc_opts, "context-weights",
+  //    "A key-value map for context-sensitive translation.");
+  //AddParam(misc_opts, "context-window",
+  //    "Context window (in words) for context-sensitive translation: {+|-|+-}<number>.");
   AddParam(misc_opts, "cpu-affinity-offset", "CPU Affinity. Default = -1 (no affinity)");
   AddParam(misc_opts, "cpu-affinity-increment",
       "Set to 1 (default) to put each thread on different cores. 0 to run all threads on one core");
