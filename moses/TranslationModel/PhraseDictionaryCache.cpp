@@ -84,6 +84,9 @@ void PhraseDictionaryCache::CleanUpAfterSentenceProcessing(const InputType& sour
 
 void PhraseDictionaryCache::InitializeForInput(ttasksptr const& ttask)
 {
+#ifdef WITH_THREADS
+  boost::unique_lock<boost::shared_mutex> lock(m_cacheLock);
+#endif
 	long tID = ttask->GetSource()->GetTranslationId();
 	TargetPhraseCollection::shared_ptr tpc;
 	if (m_cacheTM.find(tID) == m_cacheTM.end()) return;
@@ -103,6 +106,9 @@ void PhraseDictionaryCache::InitializeForInput(ttasksptr const& ttask)
 
 void PhraseDictionaryCache::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
+#ifdef WITH_THREADS
+  boost::shared_lock<boost::shared_mutex> read_lock(m_cacheLock);
+#endif
 	InputPathList::const_iterator iter;
 	for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
 		InputPath &inputPath = **iter;
@@ -154,168 +160,6 @@ ChartRuleLookupManager* PhraseDictionaryCache::CreateRuleLookupManager(const Cha
 ostream& operator<<(ostream& out, const PhraseDictionaryCache& phraseDict)
 {
   return out;
-}
-
-void PhraseDictionaryCache::ClearEntries(std::string &entries, long tID)
-{
-  if (entries != "" && m_cacheTM.find(tID) != m_cacheTM.end()) {
-    VERBOSE(3,"entries:|" << entries << "|" << std::endl);
-    std::vector<std::string> elements = TokenizeMultiCharSeparator(entries, "||||");
-    VERBOSE(3,"elements.size() after:|" << elements.size() << "|" << std::endl);
-    ClearEntries(elements, tID);
-  }
-}
-
-void PhraseDictionaryCache::ClearEntries(std::vector<std::string> entries, long tID)
-{
-  VERBOSE(3,"PhraseDictionaryCache::ClearEntries(std::vector<std::string> entries)" << std::endl);
-  std::vector<std::string> pp;
-
-  std::vector<std::string>::iterator it;
-  for(it = entries.begin(); it!=entries.end(); it++) {
-    pp.clear();
-    pp = TokenizeMultiCharSeparator((*it), "|||");
-    VERBOSE(3,"pp[0]:|" << pp[0] << "|" << std::endl);
-    VERBOSE(3,"pp[1]:|" << pp[1] << "|" << std::endl);
-
-    ClearEntries(pp[0], pp[1], tID);
-  }
-}
-
-void PhraseDictionaryCache::ClearEntries(std::string sourcePhraseString, std::string targetPhraseString, long tID)
-{
-  VERBOSE(3,"PhraseDictionaryCache::ClearEntries(std::string sourcePhraseString, std::string targetPhraseString)" << std::endl);
-  const StaticData &staticData = StaticData::Instance();
-  Phrase sourcePhrase(0);
-  Phrase targetPhrase(0);
-
-  //target
-  targetPhrase.Clear();
-  VERBOSE(3, "targetPhraseString:|" << targetPhraseString << "|" << std::endl);
-  targetPhrase.CreateFromString(Output, m_outputFactorsVec,
-                                targetPhraseString, /*factorDelimiter,*/ NULL);
-  VERBOSE(3, "targetPhrase:|" << targetPhrase << "|" << std::endl);
-
-  //TODO: Would be better to reuse source phrases, but ownership has to be
-  //consistent across phrase table implementations
-  sourcePhrase.Clear();
-  VERBOSE(3, "sourcePhraseString:|" << sourcePhraseString << "|" << std::endl);
-  sourcePhrase.CreateFromString(Input, m_inputFactorsVec,
-                                sourcePhraseString, /*factorDelimiter,*/ NULL);
-  VERBOSE(3, "sourcePhrase:|" << sourcePhrase << "|" << std::endl);
-  ClearEntries(sourcePhrase, targetPhrase, tID);
-
-}
-
-void PhraseDictionaryCache::ClearEntries(Phrase sp, Phrase tp, long tID)
-{
-  VERBOSE(3,"PhraseDictionaryCache::ClearEntries(Phrase sp, Phrase tp)" << std::endl);
-#ifdef WITH_THREADS
-  boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
-#endif
-  VERBOSE(3, "PhraseDictionaryCache deleting sp:|" << sp << "| tp:|" << tp << "|" << std::endl);
-
-  cacheMap::const_iterator it = m_cacheTM.at(tID).find(sp);
-  VERBOSE(3,"sp:|" << sp << "|" << std::endl);
-  if(it!=m_cacheTM.at(tID).end()) {
-    VERBOSE(3,"sp:|" << sp << "| FOUND" << std::endl);
-    // sp is found
-
-    TargetCollectionPair TgtCollPair = it->second;
-    TargetPhraseCollection::shared_ptr  tpc = TgtCollPair.first;
-    Scores* sc = TgtCollPair.second;
-    const Phrase* p_ptr = NULL;
-    TargetPhrase* tp_ptr = NULL;
-    bool found = false;
-    size_t tp_pos=0;
-    while (!found && tp_pos < tpc->GetSize()) {
-      tp_ptr = (TargetPhrase*) tpc->GetTargetPhrase(tp_pos);
-      p_ptr = (const Phrase*) tp_ptr;
-      if (tp == *p_ptr) {
-        found = true;
-        continue;
-      }
-      tp_pos++;
-    }
-    if (!found) {
-      VERBOSE(3,"tp:|" << tp << "| NOT FOUND" << std::endl);
-      //do nothing
-    } else {
-      VERBOSE(3,"tp:|" << tp << "| FOUND" << std::endl);
-
-      tpc->Remove(tp_pos); //delete entry in the Target Phrase Collection
-//      sc->clear();
-      // no need to delete scores here
-      m_entries--;
-      VERBOSE(3,"tpc size:|" << tpc->GetSize() << "|" << std::endl);
-      VERBOSE(3,"sc size:|" << sc->size() << "|" << std::endl);
-      VERBOSE(3,"tp:|" << tp << "| DELETED" << std::endl);
-    }
-    if (tpc->GetSize() == 0) {
-      sc->clear();
-      tpc.reset();
-      delete sc;
-      m_cacheTM.at(tID).erase(sp);
-    }
-
-  } else {
-    VERBOSE(3,"sp:|" << sp << "| NOT FOUND" << std::endl);
-    //do nothing
-  }
-}
-
-void PhraseDictionaryCache::ClearSource(std::string &entries, long tID)
-{
-  if (entries != "" && m_cacheTM.find(tID) != m_cacheTM.end()) {
-    VERBOSE(3,"entries:|" << entries << "|" << std::endl);
-    std::vector<std::string> elements = TokenizeMultiCharSeparator(entries, "||||");
-    VERBOSE(3,"elements.size() after:|" << elements.size() << "|" << std::endl);
-    ClearEntries(elements, tID);
-  }
-}
-
-void PhraseDictionaryCache::ClearSource(std::vector<std::string> entries, long tID)
-{
-  VERBOSE(3,"entries.size():|" << entries.size() << "|" << std::endl);
-  const StaticData &staticData = StaticData::Instance();
-  Phrase sourcePhrase(0);
-
-  std::vector<std::string>::iterator it;
-  for(it = entries.begin(); it!=entries.end(); it++) {
-
-    sourcePhrase.Clear();
-    VERBOSE(3, "sourcePhraseString:|" << (*it) << "|" << std::endl);
-    sourcePhrase.CreateFromString(Input, m_inputFactorsVec,
-                                  *it, /*factorDelimiter,*/ NULL);
-    VERBOSE(3, "sourcePhrase:|" << sourcePhrase << "|" << std::endl);
-
-    ClearSource(sourcePhrase, tID);
-  }
-
-  IFVERBOSE(2) Print();
-}
-
-void PhraseDictionaryCache::ClearSource(Phrase sp, long tID)
-{
-  VERBOSE(3,"void PhraseDictionaryCache::ClearSource(Phrase sp) sp:|" << sp << "|" << std::endl);
-  cacheMap::const_iterator it = m_cacheTM.at(tID).find(sp);
-  if (it != m_cacheTM.at(tID).end()) {
-    VERBOSE(3,"found:|" << sp << "|" << std::endl);
-    //sp is found
-
-    TargetCollectionPair TgtCollPair = it->second;
-    TargetPhraseCollection::shared_ptr  tpc = TgtCollPair.first;
-    Scores* sc = TgtCollPair.second;
-
-    m_entries-=tpc->GetSize(); //reduce the total amount of entries of the cache
-
-    sc->clear();
-    tpc.reset();
-    delete sc;
-    m_cacheTM.at(tID).erase(sp);
-  } else {
-    //do nothing
-  }
 }
 
 void PhraseDictionaryCache::Insert(std::string &entries, long tID)
@@ -403,10 +247,10 @@ void PhraseDictionaryCache::Update(long tID, Phrase sp, TargetPhrase tp, Scores 
 {
   VERBOSE(3,"PhraseDictionaryCache::Update(Phrase sp, TargetPhrase tp, Scores scores, std::string waString)" << std::endl);
 #ifdef WITH_THREADS
-  boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
+  boost::unique_lock<boost::shared_mutex> lock(m_cacheLock);
 #endif
   VERBOSE(3, "PhraseDictionaryCache inserting sp:|" << sp << "| tp:|" << tp << "| word-alignment |" << waString << "|" << std::endl);
-
+  // if there is no cache for the sentence tID, create one.
   cacheMap::const_iterator it = m_cacheTM[tID].find(sp);
   VERBOSE(3,"sp:|" << sp << "|" << std::endl);
   if(it!=m_cacheTM.at(tID).end()) {
@@ -529,7 +373,7 @@ void PhraseDictionaryCache::Clear(){
 void PhraseDictionaryCache::Clear(long tID)
 {
 #ifdef WITH_THREADS
-  boost::shared_lock<boost::shared_mutex> lock(m_cacheLock);
+  boost::unique_lock<boost::shared_mutex> lock(m_cacheLock);
 #endif
   if (m_cacheTM.find(tID) == m_cacheTM.end()) return;
   cacheMap::iterator it;
@@ -550,12 +394,6 @@ void PhraseDictionaryCache::ExecuteDlt(std::map<std::string, std::string> dlt_me
   }
   if (dlt_meta.find("cbtm-command") != dlt_meta.end()) {
     Execute(dlt_meta["cbtm-command"], tID);
-  }
-  if (dlt_meta.find("cbtm-clear-source") != dlt_meta.end()) {
-    ClearSource(dlt_meta["cbtm-clear-source"], tID);
-  }
-  if (dlt_meta.find("cbtm-clear-entries") != dlt_meta.end()) {
-    ClearEntries(dlt_meta["cbtm-clear-entries"], tID);
   }
   if (dlt_meta.find("cbtm-clear-all") != dlt_meta.end()) {
     Clear();
