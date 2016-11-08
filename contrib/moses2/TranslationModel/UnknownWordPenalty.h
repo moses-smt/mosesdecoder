@@ -81,6 +81,7 @@ protected:
       const Moses2::Range &subPhraseRange,
       SCFG::InputPath &outPath) const;
 protected:
+  bool m_drop;
   std::string m_prefix, m_suffix;
 };
 
