@@ -52,14 +52,14 @@ Parameter::Parameter()
 
   AddParam(main_opts, "verbose", "v", "verbosity level of the logging");
   AddParam(main_opts, "show-weights", "print feature weights and exit");
-  AddParam(main_opts, "time-out",
-      "seconds after which is interrupted (-1=no time-out, default is -1)");
+  //AddParam(main_opts, "time-out",
+  //    "seconds after which is interrupted (-1=no time-out, default is -1)");
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // factorization options
   po::options_description factor_opts("General Factorization Options");
-  AddParam(factor_opts, "factor-delimiter", "fd",
-      "specify a different factor delimiter than the default");
+  //AddParam(factor_opts, "factor-delimiter", "fd",
+  //    "specify a different factor delimiter than the default");
   // one should be able to specify different factor delimiters for intput and output
   AddParam(factor_opts, "mapping", "description of decoding steps"); // whatever that means ...
   AddParam(factor_opts, "placeholder-factor",
@@ -79,23 +79,23 @@ Parameter::Parameter()
   desc += "8=tree-to-string (SCFG-based)\n";
   desc += "9=forest-to-string";
   AddParam(search_opts, "search-algorithm", desc);
-  AddParam(search_opts, "beam-threshold", "b",
-      "threshold for threshold pruning");
-  AddParam(search_opts, "early-discarding-threshold", "edt",
-      "threshold for constructing hypotheses based on estimate cost");
+  //AddParam(search_opts, "beam-threshold", "b",
+  //    "threshold for threshold pruning");
+  //AddParam(search_opts, "early-discarding-threshold", "edt",
+  //    "threshold for constructing hypotheses based on estimate cost");
   AddParam(search_opts, "stack", "s",
       "maximum stack size for histogram pruning. 0 = unlimited stack size");
-  AddParam(search_opts, "stack-diversity", "sd",
-      "minimum number of hypothesis of each coverage in stack (default 0)");
+  //AddParam(search_opts, "stack-diversity", "sd",
+  //    "minimum number of hypothesis of each coverage in stack (default 0)");
 
   // feature weight-related options
-  AddParam(search_opts, "weight-file", "wf",
-      "feature weights file. Do *not* put weights for 'core' features in here - they go in moses.ini");
+  //AddParam(search_opts, "weight-file", "wf",
+  //    "feature weights file. Do *not* put weights for 'core' features in here - they go in moses.ini");
   AddParam(search_opts, "weight",
       "weights for ALL models, 1 per line 'WeightName value'. Weight names can be repeated");
 
-  AddParam(search_opts, "feature-overwrite",
-      "Override arguments in a particular feature function with a particular key. Format: -feature-overwrite \"FeatureName key=value\"");
+  //AddParam(search_opts, "feature-overwrite",
+  //    "Override arguments in a particular feature function with a particular key. Format: -feature-overwrite \"FeatureName key=value\"");
 
   po::options_description tune_opts("Options used in tuning.");
   AddParam(tune_opts, "weight-overwrite",
@@ -106,20 +106,20 @@ Parameter::Parameter()
       "Add weight for FF if it doesn't exist, i.e weights here are added 1st, and can be override by the ini file or on the command line. Used to specify initial weights for FF that was also specified on the copmmand line");
 
   // phrase table limitations:
-  AddParam(search_opts, "max-partial-trans-opt",
-      "maximum number of partial translation options per input span (during mapping steps)");
-  AddParam(search_opts, "max-trans-opt-per-coverage",
-      "maximum number of translation options per input span (after applying mapping steps)");
+  //AddParam(search_opts, "max-partial-trans-opt",
+  //    "maximum number of partial translation options per input span (during mapping steps)");
+  //AddParam(search_opts, "max-trans-opt-per-coverage",
+  //    "maximum number of translation options per input span (after applying mapping steps)");
   AddParam(search_opts, "max-phrase-length",
       "maximum phrase length (default 20)");
-  AddParam(search_opts, "translation-option-threshold", "tot",
-      "threshold for translation options relative to best for input phrase");
+  //AddParam(search_opts, "translation-option-threshold", "tot",
+  //    "threshold for translation options relative to best for input phrase");
 
   // miscellaneous search options
-  AddParam(search_opts, "disable-discarding", "dd",
-      "disable hypothesis discarding"); // ??? memory management? UG
-  AddParam(search_opts, "phrase-drop-allowed", "da",
-      "if present, allow dropping of source words"); //da = drop any (word); see -du for comparison
+  //AddParam(search_opts, "disable-discarding", "dd",
+  //    "disable hypothesis discarding"); // ??? memory management? UG
+  //AddParam(search_opts, "phrase-drop-allowed", "da",
+  //    "if present, allow dropping of source words"); //da = drop any (word); see -du for comparison
   AddParam(search_opts, "threads", "th",
       "number of threads to use in decoding (defaults to single-threaded)");
 
@@ -129,8 +129,8 @@ Parameter::Parameter()
       "distortion (reordering) limit in maximum number of words (0 = monotone, -1 = unlimited)");
   AddParam(disto_opts, "monotone-at-punctuation", "mp",
       "do not reorder over punctuation");
-  AddParam(disto_opts, "early-distortion-cost", "edc",
-      "include estimate of distortion cost yet to be incurred in the score [Moore & Quirk 2007]. Default is no");
+  //AddParam(disto_opts, "early-distortion-cost", "edc",
+  //    "include estimate of distortion cost yet to be incurred in the score [Moore & Quirk 2007]. Default is no");
   AddParam(disto_opts, "distortion",
       "configurations for each factorized/lexicalized reordering model."); // zombie parameter?
 
@@ -150,17 +150,17 @@ Parameter::Parameter()
   po::options_description mbr_opts(
       "Minimum Bayes Risk (MBR), Lattice MBR, and Consensus decoding");
 
-  AddParam(mbr_opts, "minimum-bayes-risk", "mbr",
-      "use miminum Bayes risk to determine best translation");
-  AddParam(mbr_opts, "mbr-size",
-      "number of translation candidates considered in MBR decoding (default 200)");
-  AddParam(mbr_opts, "mbr-scale",
-      "scaling factor to convert log linear score probability in MBR decoding (default 1.0)");
+  //AddParam(mbr_opts, "minimum-bayes-risk", "mbr",
+  //    "use miminum Bayes risk to determine best translation");
+  //AddParam(mbr_opts, "mbr-size",
+  //    "number of translation candidates considered in MBR decoding (default 200)");
+  //AddParam(mbr_opts, "mbr-scale",
+  //    "scaling factor to convert log linear score probability in MBR decoding (default 1.0)");
 
   //AddParam(mbr_opts, "lminimum-bayes-risk", "lmbr",
   //    "use lattice miminum Bayes risk to determine best translation");
-  AddParam(mbr_opts, "consensus-decoding", "con",
-      "use consensus decoding (De Nero et. al. 2009)");
+  //AddParam(mbr_opts, "consensus-decoding", "con",
+  //    "use consensus decoding (De Nero et. al. 2009)");
 
   po::options_description lmbr_opts("Options specific to Lattic MBR");
   //AddParam(lmbr_opts, "lmbr-p", "unigram precision value for lattice mbr");
@@ -187,53 +187,53 @@ Parameter::Parameter()
       "add language model oov feature, one per model");
   AddParam(oov_opts, "output-unknowns",
       "Output the unknown (OOV) words to the given file, one line per sentence");
-  AddParam(oov_opts, "always-create-direct-transopt",
-      "Always create a translation that translates the source word ad-verbatim");
+  //AddParam(oov_opts, "always-create-direct-transopt",
+  //    "Always create a translation that translates the source word ad-verbatim");
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // input options
   po::options_description input_opts("Input Format Options");
   AddParam(input_opts, "input-factors", "list of factors in the input");
-  //AddParam(input_opts, "inputtype",
-  //    "text (0), confusion network (1), word lattice (2), tree (3) (default = 0)");
+  AddParam(input_opts, "inputtype",
+      "text (0), confusion network (1), word lattice (2), tree (3) (default = 0)");
   AddParam(input_opts, "xml-input", "xi",
       "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'constraint', 'ignore'");
   //AddParam(input_opts, "xml-brackets", "xb",
   //    "specify strings to be used as xml tags opening and closing, e.g. \"{{ }}\" (default \"< >\"). Avoid square brackets because of configuration file format. Valid only with text input mode");
-  AddParam(input_opts, "start-translation-id", "Id of 1st input. Default = 0");
+  //AddParam(input_opts, "start-translation-id", "Id of 1st input. Default = 0");
   AddParam(input_opts, "alternate-weight-setting", "aws",
       "alternate set of weights to used per xml specification");
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // output options
   po::options_description output_opts("Output Options");
-  AddParam(output_opts, "report-all-factors",
-      "report all factors in output, not just first");
+  //AddParam(output_opts, "report-all-factors",
+  //    "report all factors in output, not just first");
   AddParam(output_opts, "output-factors", "list if factors in the output");
-  AddParam(output_opts, "print-id",
-      "prefix translations with id. Default if false");
-  AddParam(output_opts, "print-passthrough",
-      "output the sgml tag <passthrough> without any computation on that. Default is false");
-  AddParam(output_opts, "print-passthrough-in-n-best",
-      "output the sgml tag <passthrough> without any computation on that in each entry of the n-best-list. Default is false");
+  //AddParam(output_opts, "print-id",
+  //    "prefix translations with id. Default if false");
+  //AddParam(output_opts, "print-passthrough",
+  //    "output the sgml tag <passthrough> without any computation on that. Default is false");
+  //AddParam(output_opts, "print-passthrough-in-n-best",
+  //    "output the sgml tag <passthrough> without any computation on that in each entry of the n-best-list. Default is false");
   AddParam(output_opts, "output-factors", "list of factors in the output");
-  AddParam(output_opts, "print-all-derivations",
-      "to print all derivations in search graph");
+  //AddParam(output_opts, "print-all-derivations",
+  //    "to print all derivations in search graph");
   AddParam(output_opts, "translation-details", "T",
       "for each best hypothesis, report translation details to the given file");
 
   AddParam(output_opts, "output-hypo-score",
       "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
-  AddParam(output_opts, "output-word-graph", "owg",
-      "Output stack info as word graph. Takes filename, 0=only hypos in stack, 1=stack + nbest hypos");
-  AddParam(output_opts, "tree-translation-details", "Ttree",
-      "for each hypothesis, report translation details with tree fragment info to given file");
+  //AddParam(output_opts, "output-word-graph", "owg",
+  //    "Output stack info as word graph. Takes filename, 0=only hypos in stack, 1=stack + nbest hypos");
+  //AddParam(output_opts, "tree-translation-details", "Ttree",
+  //    "for each hypothesis, report translation details with tree fragment info to given file");
   //AddParam(output_opts, "print-alignment-info",
   //    "Output word-to-word alignment to standard out, separated from translation by |||. Word-to-word alignments are takne from the phrase table if any. Default is false");
   //AddParam(output_opts, "alignment-output-file",
   //    "print output word alignments into given file");
-  AddParam(output_opts, "sort-word-alignment",
-      "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
+  //AddParam(output_opts, "sort-word-alignment",
+  //    "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
   AddParam(output_opts, "report-segmentation", "t",
       "report phrase segmentation in the output");
   AddParam(output_opts, "report-segmentation-enriched", "tt",
@@ -241,25 +241,25 @@ Parameter::Parameter()
 
   // translation-all-details was introduced in the context of DIMwid: Decoder Inspection for Moses (using Widgets)
   // see here: https://ufal.mff.cuni.cz/pbml/100/art-kurtz-seemann-braune-maletti.pdf
-  AddParam(output_opts, "translation-all-details", "Tall",
-      "for all hypotheses, report translation details to the given file");
+  //AddParam(output_opts, "translation-all-details", "Tall",
+  //    "for all hypotheses, report translation details to the given file");
 
   po::options_description osg_opts("Options for outputting search graphs");
-  AddParam(osg_opts, "output-search-graph", "osg",
-      "Output connected hypotheses of search into specified filename");
-  AddParam(osg_opts, "output-search-graph-extended", "osgx",
-      "Output connected hypotheses of search into specified filename, in extended format");
-  AddParam(osg_opts, "unpruned-search-graph", "usg",
-      "When outputting chart search graph, do not exclude dead ends. Note: stack pruning may have eliminated some hypotheses");
-  AddParam(osg_opts, "output-search-graph-slf", "slf",
-      "Output connected hypotheses of search into specified directory, one file per sentence, in HTK standard lattice format (SLF) - the flag should be followed by a directory name, which must exist");
-  AddParam(output_opts, "include-lhs-in-search-graph", "lhssg",
-      "When outputting chart search graph, include the label of the LHS of the rule (useful when using syntax)");
+  //AddParam(osg_opts, "output-search-graph", "osg",
+  //    "Output connected hypotheses of search into specified filename");
+  //AddParam(osg_opts, "output-search-graph-extended", "osgx",
+  //    "Output connected hypotheses of search into specified filename, in extended format");
+  //AddParam(osg_opts, "unpruned-search-graph", "usg",
+  //    "When outputting chart search graph, do not exclude dead ends. Note: stack pruning may have eliminated some hypotheses");
+  //AddParam(osg_opts, "output-search-graph-slf", "slf",
+  //    "Output connected hypotheses of search into specified directory, one file per sentence, in HTK standard lattice format (SLF) - the flag should be followed by a directory name, which must exist");
+  //AddParam(output_opts, "include-lhs-in-search-graph", "lhssg",
+  //    "When outputting chart search graph, include the label of the LHS of the rule (useful when using syntax)");
 #ifdef HAVE_PROTOBUF
-  AddParam(osg_opts,"output-search-graph-pb", "pb", "Write phrase lattice to protocol buffer objects in the specified path.");
+  //AddParam(osg_opts,"output-search-graph-pb", "pb", "Write phrase lattice to protocol buffer objects in the specified path.");
 #endif
-  AddParam(osg_opts, "output-search-graph-hypergraph",
-      "DEPRECATED! Output connected hypotheses of search into specified directory, one file per sentence, in a hypergraph format (see Kenneth Heafield's lazy hypergraph decoder). This flag is followed by 3 values: 'true (gz|txt|bz) directory-name'");
+  //AddParam(osg_opts, "output-search-graph-hypergraph",
+  //    "DEPRECATED! Output connected hypotheses of search into specified directory, one file per sentence, in a hypergraph format (see Kenneth Heafield's lazy hypergraph decoder). This flag is followed by 3 values: 'true (gz|txt|bz) directory-name'");
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // nbest-options
@@ -268,18 +268,18 @@ Parameter::Parameter()
       "file and size of n-best-list to be generated; specify - as the file in order to write to STDOUT");
   // AddParam(nbest_opts,"n-best-list-file", "file of n-best-list to be generated; specify - as the file in order to write to STDOUT");
   // AddParam(nbest_opts,"n-best-list-size", "size of n-best-list to be generated; specify - as the file in order to write to STDOUT");
-  AddParam(nbest_opts, "labeled-n-best-list",
-      "print out labels for each weight type in n-best list. default is true");
+  //AddParam(nbest_opts, "labeled-n-best-list",
+  //    "print out labels for each weight type in n-best list. default is true");
   AddParam(nbest_opts, "n-best-trees",
       "Write n-best target-side trees to n-best-list");
   AddParam(nbest_opts, "n-best-factor",
       "factor to compute the maximum number of contenders (=factor*nbest-size). value 0 means infinity, i.e. no threshold. default is 0");
-  AddParam(nbest_opts, "report-all-factors-in-n-best",
-      "Report all factors in n-best-lists. Default is false");
-  AddParam(nbest_opts, "lattice-samples",
-      "generate samples from lattice, in same format as nbest list. Uses the file and size arguments, as in n-best-list");
-  AddParam(nbest_opts, "include-segmentation-in-n-best",
-      "include phrasal segmentation in the n-best list. default is false");
+  //AddParam(nbest_opts, "report-all-factors-in-n-best",
+  //    "Report all factors in n-best-lists. Default is false");
+  //AddParam(nbest_opts, "lattice-samples",
+  //    "generate samples from lattice, in same format as nbest list. Uses the file and size arguments, as in n-best-list");
+  //AddParam(nbest_opts, "include-segmentation-in-n-best",
+  //    "include phrasal segmentation in the n-best list. default is false");
   //AddParam(nbest_opts, "print-alignment-info-in-n-best",
   //    "Include word-to-word alignment in the n-best list. Word-to-word alignments are taken from the phrase table if any. Default is false");
 
@@ -289,8 +289,8 @@ Parameter::Parameter()
   AddParam(server_opts, "server", "Run moses as a translation server.");
   AddParam(server_opts, "server-port", "Port for moses server");
   AddParam(server_opts, "server-log", "Log destination for moses server");
-  AddParam(server_opts, "session-timeout",
-      "Timeout for sessions, e.g. '2h30m' or 1d (=24h)");
+  //AddParam(server_opts, "session-timeout",
+  //    "Timeout for sessions, e.g. '2h30m' or 1d (=24h)");
   AddParam(server_opts, "session-cache-size",
       string("Max. number of sessions cached.")
           + "Least recently used session is dumped first.");
@@ -317,12 +317,12 @@ Parameter::Parameter()
       "maximum num. of source word chart rules can consume (default 10)");
   AddParam(chart_opts, "non-terminals",
       "list of non-term symbols, space separated");
-  AddParam(chart_opts, "rule-limit",
-      "a little like table limit. But for chart decoding rules. Default is DEFAULT_MAX_TRANS_OPT_SIZE");
-  AddParam(chart_opts, "source-label-overlap",
-      "What happens if a span already has a label. 0=add more. 1=replace. 2=discard. Default is 0");
-  AddParam(chart_opts, "unknown-lhs",
-      "file containing target lhs of unknown words. 1 per line: LHS prob");
+  //AddParam(chart_opts, "rule-limit",
+  //    "a little like table limit. But for chart decoding rules. Default is DEFAULT_MAX_TRANS_OPT_SIZE");
+  //AddParam(chart_opts, "source-label-overlap",
+  //    "What happens if a span already has a label. 0=add more. 1=replace. 2=discard. Default is 0");
+  //AddParam(chart_opts, "unknown-lhs",
+  //    "file containing target lhs of unknown words. 1 per line: LHS prob");
 
   po::options_description misc_opts("Miscellaneous Options");
   AddParam(misc_opts, "mira", "do mira training");
@@ -330,18 +330,18 @@ Parameter::Parameter()
       "Source language, target language, description");
   AddParam(misc_opts, "no-cache",
       "Disable all phrase-table caching. Default = false (ie. enable caching)");
-  AddParam(misc_opts, "default-non-term-for-empty-range-only",
-      "Don't add [X] to all ranges, just ranges where there isn't a source non-term. Default = false (ie. add [X] everywhere)");
-  AddParam(misc_opts, "s2t-parsing-algorithm",
-      "Which S2T parsing algorithm to use. 0=recursive CYK+, 1=scope-3 (default = 0)");
+  //AddParam(misc_opts, "default-non-term-for-empty-range-only",
+  //    "Don't add [X] to all ranges, just ranges where there isn't a source non-term. Default = false (ie. add [X] everywhere)");
+  //AddParam(misc_opts, "s2t-parsing-algorithm",
+  //    "Which S2T parsing algorithm to use. 0=recursive CYK+, 1=scope-3 (default = 0)");
 
   //AddParam(o,"continue-partial-translation", "cpt", "start from nonempty hypothesis");
   AddParam(misc_opts, "decoding-graph-backoff", "dpb",
       "only use subsequent decoding paths for unknown spans of given length");
   AddParam(misc_opts, "references",
       "Reference file(s) - used for bleu score feature");
-  AddParam(misc_opts, "recover-input-path", "r",
-      "(conf net/word lattice only) - recover input path corresponding to the best translation");
+  //AddParam(misc_opts, "recover-input-path", "r",
+  //    "(conf net/word lattice only) - recover input path corresponding to the best translation");
   AddParam(misc_opts, "link-param-count",
       "Number of parameters on word links when using confusion networks or lattices (default = 1)");
   AddParam(misc_opts, "description",
