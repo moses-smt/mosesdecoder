@@ -360,15 +360,15 @@ Parameter::Parameter()
   // Compact phrase table and reordering table.
   po::options_description cpt_opts(
       "Options when using compact phrase and reordering tables.");
-  AddParam(cpt_opts, "minphr-memory",
-      "Load phrase table in minphr format into memory");
-  AddParam(cpt_opts, "minlexr-memory",
-      "Load lexical reordering table in minlexr format into memory");
+  //AddParam(cpt_opts, "minphr-memory",
+  //    "Load phrase table in minphr format into memory");
+  //AddParam(cpt_opts, "minlexr-memory",
+  //    "Load lexical reordering table in minlexr format into memory");
 
   po::options_description spe_opts("Simulated Post-editing Options");
-  AddParam(spe_opts, "spe-src", "Simulated post-editing. Source filename");
-  AddParam(spe_opts, "spe-trg", "Simulated post-editing. Target filename");
-  AddParam(spe_opts, "spe-aln", "Simulated post-editing. Alignment filename");
+  //AddParam(spe_opts, "spe-src", "Simulated post-editing. Source filename");
+  //AddParam(spe_opts, "spe-trg", "Simulated post-editing. Target filename");
+  //AddParam(spe_opts, "spe-aln", "Simulated post-editing. Alignment filename");
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // DEPRECATED options
@@ -455,16 +455,16 @@ Parameter::Parameter()
   //AddParam(zombie_opts, "distortion-file",
   //    "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
 
-  mbr_opts.add(lmbr_opts);
+  //mbr_opts.add(lmbr_opts);
   search_opts.add(cube_opts);
-  search_opts.add(mbr_opts);
+  //search_opts.add(mbr_opts);
   search_opts.add(disto_opts);
   search_opts.add(chart_opts);
 
-  input_opts.add(spe_opts);
+  //input_opts.add(spe_opts);
 
   output_opts.add(nbest_opts);
-  output_opts.add(osg_opts);
+  //output_opts.add(osg_opts);
 
   m_options.add(main_opts);
   m_options.add(server_opts);
@@ -473,12 +473,12 @@ Parameter::Parameter()
   m_options.add(output_opts);
   m_options.add(oov_opts);
   m_options.add(factor_opts);
-  m_options.add(cpt_opts);
-  m_options.add(irstlm_opts);
+  //m_options.add(cpt_opts);
+  //m_options.add(irstlm_opts);
   m_options.add(tune_opts);
   m_options.add(misc_opts);
-  m_options.add(deprec_opts);
-  m_options.add(zombie_opts);
+  //m_options.add(deprec_opts);
+  //m_options.add(zombie_opts);
 
 }
 
