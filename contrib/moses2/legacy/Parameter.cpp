@@ -131,8 +131,8 @@ Parameter::Parameter()
       "do not reorder over punctuation");
   //AddParam(disto_opts, "early-distortion-cost", "edc",
   //    "include estimate of distortion cost yet to be incurred in the score [Moore & Quirk 2007]. Default is no");
-  AddParam(disto_opts, "distortion",
-      "configurations for each factorized/lexicalized reordering model."); // zombie parameter?
+  //AddParam(disto_opts, "distortion",
+  //    "configurations for each factorized/lexicalized reordering model."); // zombie parameter?
 
   // cube pruning
   po::options_description cube_opts("Cube pruning options.");
@@ -183,10 +183,10 @@ Parameter::Parameter()
       "prefix to unknwon word when marked (default: 'UNK')");
   AddParam(oov_opts, "unknown-word-suffix",
       "suffix to unknwon word when marked (default: '')");
-  AddParam(oov_opts, "lmodel-oov-feature",
-      "add language model oov feature, one per model");
-  AddParam(oov_opts, "output-unknowns",
-      "Output the unknown (OOV) words to the given file, one line per sentence");
+  //AddParam(oov_opts, "lmodel-oov-feature",
+  //    "add language model oov feature, one per model");
+  //AddParam(oov_opts, "output-unknowns",
+  //    "Output the unknown (OOV) words to the given file, one line per sentence");
   //AddParam(oov_opts, "always-create-direct-transopt",
   //    "Always create a translation that translates the source word ad-verbatim");
 
@@ -201,8 +201,8 @@ Parameter::Parameter()
   //AddParam(input_opts, "xml-brackets", "xb",
   //    "specify strings to be used as xml tags opening and closing, e.g. \"{{ }}\" (default \"< >\"). Avoid square brackets because of configuration file format. Valid only with text input mode");
   //AddParam(input_opts, "start-translation-id", "Id of 1st input. Default = 0");
-  AddParam(input_opts, "alternate-weight-setting", "aws",
-      "alternate set of weights to used per xml specification");
+  //AddParam(input_opts, "alternate-weight-setting", "aws",
+  //    "alternate set of weights to used per xml specification");
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // output options
@@ -216,7 +216,6 @@ Parameter::Parameter()
   //    "output the sgml tag <passthrough> without any computation on that. Default is false");
   //AddParam(output_opts, "print-passthrough-in-n-best",
   //    "output the sgml tag <passthrough> without any computation on that in each entry of the n-best-list. Default is false");
-  AddParam(output_opts, "output-factors", "list of factors in the output");
   //AddParam(output_opts, "print-all-derivations",
   //    "to print all derivations in search graph");
   AddParam(output_opts, "translation-details", "T",
@@ -270,8 +269,8 @@ Parameter::Parameter()
   // AddParam(nbest_opts,"n-best-list-size", "size of n-best-list to be generated; specify - as the file in order to write to STDOUT");
   //AddParam(nbest_opts, "labeled-n-best-list",
   //    "print out labels for each weight type in n-best list. default is true");
-  AddParam(nbest_opts, "n-best-trees",
-      "Write n-best target-side trees to n-best-list");
+  //AddParam(nbest_opts, "n-best-trees",
+  //    "Write n-best target-side trees to n-best-list");
   AddParam(nbest_opts, "n-best-factor",
       "factor to compute the maximum number of contenders (=factor*nbest-size). value 0 means infinity, i.e. no threshold. default is 0");
   //AddParam(nbest_opts, "report-all-factors-in-n-best",
@@ -291,9 +290,9 @@ Parameter::Parameter()
   AddParam(server_opts, "server-log", "Log destination for moses server");
   //AddParam(server_opts, "session-timeout",
   //    "Timeout for sessions, e.g. '2h30m' or 1d (=24h)");
-  AddParam(server_opts, "session-cache-size",
-      string("Max. number of sessions cached.")
-          + "Least recently used session is dumped first.");
+  //AddParam(server_opts, "session-cache-size",
+  //    string("Max. number of sessions cached.")
+  //        + "Least recently used session is dumped first.");
   AddParam(server_opts, "serial",
       "Run server in serial mode, processing only one request at a time.");
 
@@ -309,14 +308,14 @@ Parameter::Parameter()
            "Max. number of seconds the server will wait for a client to submit a request once a connection has been established.");
 
   po::options_description irstlm_opts("IRSTLM Options");
-  AddParam(irstlm_opts, "clean-lm-cache",
-      "clean language model caches after N translations (default N=1)");
+  //AddParam(irstlm_opts, "clean-lm-cache",
+  //    "clean language model caches after N translations (default N=1)");
 
   po::options_description chart_opts("Chart Decoding Options");
   AddParam(chart_opts, "max-chart-span",
       "maximum num. of source word chart rules can consume (default 10)");
-  AddParam(chart_opts, "non-terminals",
-      "list of non-term symbols, space separated");
+  //AddParam(chart_opts, "non-terminals",
+  //    "list of non-term symbols, space separated");
   //AddParam(chart_opts, "rule-limit",
   //    "a little like table limit. But for chart decoding rules. Default is DEFAULT_MAX_TRANS_OPT_SIZE");
   //AddParam(chart_opts, "source-label-overlap",
@@ -325,11 +324,11 @@ Parameter::Parameter()
   //    "file containing target lhs of unknown words. 1 per line: LHS prob");
 
   po::options_description misc_opts("Miscellaneous Options");
-  AddParam(misc_opts, "mira", "do mira training");
-  AddParam(misc_opts, "description",
-      "Source language, target language, description");
-  AddParam(misc_opts, "no-cache",
-      "Disable all phrase-table caching. Default = false (ie. enable caching)");
+  //AddParam(misc_opts, "mira", "do mira training");
+  //AddParam(misc_opts, "description",
+  //    "Source language, target language, description");
+  //AddParam(misc_opts, "no-cache",
+  //    "Disable all phrase-table caching. Default = false (ie. enable caching)");
   //AddParam(misc_opts, "default-non-term-for-empty-range-only",
   //    "Don't add [X] to all ranges, just ranges where there isn't a source non-term. Default = false (ie. add [X] everywhere)");
   //AddParam(misc_opts, "s2t-parsing-algorithm",
@@ -338,16 +337,14 @@ Parameter::Parameter()
   //AddParam(o,"continue-partial-translation", "cpt", "start from nonempty hypothesis");
   AddParam(misc_opts, "decoding-graph-backoff", "dpb",
       "only use subsequent decoding paths for unknown spans of given length");
-  AddParam(misc_opts, "references",
-      "Reference file(s) - used for bleu score feature");
+  //AddParam(misc_opts, "references",
+  //    "Reference file(s) - used for bleu score feature");
   //AddParam(misc_opts, "recover-input-path", "r",
   //    "(conf net/word lattice only) - recover input path corresponding to the best translation");
-  AddParam(misc_opts, "link-param-count",
-      "Number of parameters on word links when using confusion networks or lattices (default = 1)");
-  AddParam(misc_opts, "description",
-      "Source language, target language, description");
-  AddParam(misc_opts, "feature-name-overwrite",
-      "Override feature name (NOT arguments). Eg. SRILM-->KENLM, PhraseDictionaryMemory-->PhraseDictionaryScope3");
+  //AddParam(misc_opts, "link-param-count",
+  //    "Number of parameters on word links when using confusion networks or lattices (default = 1)");
+  //AddParam(misc_opts, "feature-name-overwrite",
+  //    "Override feature name (NOT arguments). Eg. SRILM-->KENLM, PhraseDictionaryMemory-->PhraseDictionaryScope3");
 
   AddParam(misc_opts, "feature", "All the feature functions should be here");
   //AddParam(misc_opts, "context-string",
@@ -376,6 +373,7 @@ Parameter::Parameter()
   ///////////////////////////////////////////////////////////////////////////////////////
   // DEPRECATED options
   po::options_description deprec_opts("Deprecated Options");
+  /*
   AddParam(deprec_opts, "link-param-count",
       "DEPRECATED. DO NOT USE. Number of parameters on word links when using confusion networks or lattices (default = 1)");
   AddParam(deprec_opts, "weight-slm", "slm",
@@ -451,10 +449,11 @@ Parameter::Parameter()
       "DEPRECATED. DO NOT USE. Count feature for each unaligned source word");
   AddParam(deprec_opts, "word-translation-feature",
       "DEPRECATED. DO NOT USE. Count feature for word translation according to word alignment");
+  */
 
   po::options_description zombie_opts("Zombie Options");
-  AddParam(zombie_opts, "distortion-file",
-      "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
+  //AddParam(zombie_opts, "distortion-file",
+  //    "source factors (0 if table independent of source), target factors, location of the factorized/lexicalized reordering tables");
 
   mbr_opts.add(lmbr_opts);
   search_opts.add(cube_opts);
