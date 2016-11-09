@@ -314,8 +314,8 @@ Parameter::Parameter()
   po::options_description chart_opts("Chart Decoding Options");
   AddParam(chart_opts, "max-chart-span",
       "maximum num. of source word chart rules can consume (default 10)");
-  //AddParam(chart_opts, "non-terminals",
-  //    "list of non-term symbols, space separated");
+  AddParam(chart_opts, "non-terminals",
+      "list of non-term symbols, space separated");
   //AddParam(chart_opts, "rule-limit",
   //    "a little like table limit. But for chart decoding rules. Default is DEFAULT_MAX_TRANS_OPT_SIZE");
   //AddParam(chart_opts, "source-label-overlap",
