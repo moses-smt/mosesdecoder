@@ -25,8 +25,9 @@ using namespace std;
 namespace Moses2
 {
 
-UnknownWordPenalty::UnknownWordPenalty(size_t startInd, const std::string &line) :
-    PhraseTable(startInd, line)
+UnknownWordPenalty::UnknownWordPenalty(size_t startInd, const std::string &line)
+:PhraseTable(startInd, line)
+,m_drop(false)
 {
   m_tuneable = false;
   ReadParameters();
@@ -35,6 +36,22 @@ UnknownWordPenalty::UnknownWordPenalty(size_t startInd, const std::string &line)
 UnknownWordPenalty::~UnknownWordPenalty()
 {
   // TODO Auto-generated destructor stub
+}
+
+void UnknownWordPenalty::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "drop") {
+    m_drop = Scan<bool>(value);
+  }
+  else if (key == "prefix") {
+    m_prefix = value;
+  }
+  else if (key == "suffix") {
+    m_suffix = value;
+  }
+  else {
+    PhraseTable::SetParameter(key, value);
+  }
 }
 
 void UnknownWordPenalty::ProcessXML(
@@ -106,14 +123,33 @@ TargetPhrases *UnknownWordPenalty::Lookup(const Manager &mgr, MemPool &pool,
 
   tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, 1);
 
+  size_t numWords = m_drop ? 0 : 1;
+
   TargetPhraseImpl *target =
       new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, *this,
-          system, 1);
-  Moses2::Word &word = (*target)[0];
+          system, numWords);
 
-  //FactorCollection &fc = system.vocab;
-  //const Factor *factor = fc.AddFactor("SSS", false);
-  word[0] = factor;
+  if (!m_drop) {
+    Moses2::Word &word = (*target)[0];
+
+    if (m_prefix.empty() && m_suffix.empty()) {
+      word[0] = factor;
+    }
+    else {
+      stringstream strm;
+      if (!m_prefix.empty()) {
+        strm << m_prefix;
+      }
+      strm << factor->GetString();
+      if (!m_suffix.empty()) {
+        strm << m_suffix;
+      }
+
+      FactorCollection &fc = system.GetVocab();
+      const Factor *targetFactor = fc.AddFactor(strm.str(), system, false);
+      word[0] = targetFactor;
+    }
+  }
 
   Scores &scores = target->GetScores();
   scores.PlusEquals(mgr.system, *this, -100);

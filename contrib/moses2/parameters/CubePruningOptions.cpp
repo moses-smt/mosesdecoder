@@ -23,7 +23,7 @@ namespace Moses2
     param.SetParameter(diversity, "cube-pruning-diversity",
 		       DEFAULT_CUBE_PRUNING_DIVERSITY);
     param.SetParameter(lazy_scoring, "cube-pruning-lazy-scoring", false);
-    param.SetParameter(deterministic_search, "cube-pruning-deterministic-search", false);
+    //param.SetParameter(deterministic_search, "cube-pruning-deterministic-search", false);
     return true;
   }
 

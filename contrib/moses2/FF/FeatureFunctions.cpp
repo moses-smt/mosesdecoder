@@ -68,34 +68,43 @@ void FeatureFunctions::Create()
   UTIL_THROW_IF2(ffParams == NULL, "Must have [feature] section");
 
   BOOST_FOREACH(const std::string &line, *ffParams){
-  //cerr << "line=" << line << endl;
-  FeatureFunction *ff = Create(line);
+    //cerr << "line=" << line << endl;
+    FeatureFunction *ff = Create(line);
 
-  m_featureFunctions.push_back(ff);
+    m_featureFunctions.push_back(ff);
 
-  StatefulFeatureFunction *sfff = dynamic_cast<StatefulFeatureFunction*>(ff);
-  if (sfff) {
-    sfff->SetStatefulInd(m_statefulFeatureFunctions.size());
-    m_statefulFeatureFunctions.push_back(sfff);
+    StatefulFeatureFunction *sfff = dynamic_cast<StatefulFeatureFunction*>(ff);
+    if (sfff) {
+      sfff->SetStatefulInd(m_statefulFeatureFunctions.size());
+      m_statefulFeatureFunctions.push_back(sfff);
+    }
+
+    if (ff->HasPhraseTableInd()) {
+      ff->SetPhraseTableInd(m_withPhraseTableInd.size());
+      m_withPhraseTableInd.push_back(ff);
+    }
+
+    PhraseTable *pt = dynamic_cast<PhraseTable*>(ff);
+    if (pt) {
+      pt->SetPtInd(m_phraseTables.size());
+      m_phraseTables.push_back(pt);
+    }
+
+    UnknownWordPenalty *unkWP = dynamic_cast<UnknownWordPenalty *>(pt);
+    if (unkWP) {
+      m_unkWP = unkWP;
+
+      // legacy support
+      if (m_system.options.unk.drop) {
+        unkWP->SetParameter("drop", "true");
+      }
+      if (m_system.options.unk.mark) {
+        unkWP->SetParameter("prefix", m_system.options.unk.prefix);
+        unkWP->SetParameter("suffix", m_system.options.unk.suffix);
+      }
+    }
+
   }
-
-  if (ff->HasPhraseTableInd()) {
-    ff->SetPhraseTableInd(m_withPhraseTableInd.size());
-    m_withPhraseTableInd.push_back(ff);
-  }
-
-  PhraseTable *pt = dynamic_cast<PhraseTable*>(ff);
-  if (pt) {
-    pt->SetPtInd(m_phraseTables.size());
-    m_phraseTables.push_back(pt);
-  }
-
-  const UnknownWordPenalty *unkWP = dynamic_cast<const UnknownWordPenalty *>(pt);
-  if (unkWP) {
-	  m_unkWP = unkWP;
-  }
-
-}
 }
 
 FeatureFunction *FeatureFunctions::Create(const std::string &line)
