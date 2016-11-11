@@ -44,10 +44,11 @@ protected:
    */
   virtual statscore_t calculateScore(const std::vector<ScoreStatsType>& totals) const = 0;
 
-  virtual float getReferenceLength(const std::vector<ScoreStatsType>& totals) const {
-    UTIL_THROW(util::Exception, "getReferenceLength not implemented for this scorer type.");
-    return 0;
-  }
+  virtual float getReferenceLength(const std::vector<ScoreStatsType>& totals) const{}
+//  {
+//    UTIL_THROW(util::Exception, "getReferenceLength not implemented for this scorer type.");
+//    return 0;
+//  }
 
   // regularisation
   RegularisationType m_regularization_type;

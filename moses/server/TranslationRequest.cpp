@@ -326,6 +326,7 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
   } else {
     m_source.reset(new Sentence(m_options,0,m_source_string));
   }
+	interpret_dlt();
 } // end of Translationtask::parse_request()
 
 

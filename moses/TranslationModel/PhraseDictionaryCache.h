@@ -145,8 +145,6 @@ public:
   void Clear();           // clears the cache
   void Clear(long tID);		// clears cache of a sentence
 
-  void ClearEntries(std::string &entries, long tID);
-  void ClearSource(std::string &entries, long tID);
   void Insert(std::string &entries, long tID);
   void Execute(std::string command, long tID);
   void ExecuteDlt(std::map<std::string, std::string> dlt_meta, long tID);
@@ -162,13 +160,6 @@ protected:
   void Update(long tID, std::vector<std::string> entries);
   void Update(long tID, std::string sourceString, std::string targetString, std::string ScoreString="", std::string waString="");
   void Update(long tID, Phrase p, TargetPhrase tp, Scores scores, std::string waString="");
-
-  void ClearEntries(std::vector<std::string> entries, long tID);
-  void ClearEntries(std::string sourceString, std::string targetString, long tID);
-  void ClearEntries(Phrase p, Phrase tp, long tID);
-
-  void ClearSource(std::vector<std::string> entries, long tID);
-  void ClearSource(Phrase sp, long tID);
 
   void Execute(std::vector<std::string> commands, long tID);
   void Execute_Single_Command(std::string command);
