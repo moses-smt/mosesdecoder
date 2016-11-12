@@ -24,6 +24,8 @@ using Moses::FValue;
 using Moses::PhraseDictionaryMultiModel;
 using Moses::FindPhraseDictionary;
 using Moses::Sentence;
+using Moses::TokenizeMultiCharSeparator;
+using Moses::FeatureFunction;
 
 boost::shared_ptr<TranslationRequest>
 TranslationRequest::
@@ -310,6 +312,44 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
       string context = xmlrpc_c::value_string(si->second);
       VERBOSE(1,"CONTEXT " << context);
       m_context.reset(new std::vector<std::string>(1,context));
+    }
+
+  si = params.find("context-scope");
+  if (si != params.end())
+    {
+
+      string context = xmlrpc_c::value_string(si->second);
+
+      string groupSeparator("Moses::ContextScope::GroupSeparator");
+      string recordSeparator("Moses::ContextScope::RecordSeparator");
+
+      // Here, we assume that any XML-RPC value
+      //       associated with the key "context-scope"
+      //       has the following format:
+      //
+      // FeatureFunctionName followed by recordSeparator
+      //                     followed by the value of interest
+      //                     followed by groupSeparator
+      //
+      // In the following code, the value of interest will be stored
+      //        in contextScope under the key FeatureFunctionName,
+      //        where FeatureFunctionName is the actual name of the feature function
+
+      boost::shared_ptr<Moses::ContextScope> contextScope = GetScope();
+
+      BOOST_FOREACH(string group, TokenizeMultiCharSeparator(context, groupSeparator)) {
+
+	vector<string> record = TokenizeMultiCharSeparator(group, recordSeparator);
+
+	// Use the feature function whose name is record[0] as a key
+	FeatureFunction& ff = Moses::FeatureFunction::FindFeatureFunction(record[0]);
+	void const* key = static_cast<void const*>(&ff);
+
+	// Store (in the context scope) record[1] as the value associated with that key
+	boost::shared_ptr<string> value = contextScope->get<string>(key,true);
+	value->replace(value->begin(), value->end(), record[1]);
+
+      }
     }
 
 
