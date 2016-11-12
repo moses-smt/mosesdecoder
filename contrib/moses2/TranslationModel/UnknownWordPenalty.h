@@ -21,6 +21,8 @@ public:
   UnknownWordPenalty(size_t startInd, const std::string &line);
   virtual ~UnknownWordPenalty();
 
+  virtual void SetParameter(const std::string& key, const std::string& value);
+
   void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
   virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
       InputPath &inputPath) const;
@@ -78,6 +80,9 @@ protected:
       const Moses2::Hypotheses *hypos,
       const Moses2::Range &subPhraseRange,
       SCFG::InputPath &outPath) const;
+protected:
+  bool m_drop;
+  std::string m_prefix, m_suffix;
 };
 
 }
