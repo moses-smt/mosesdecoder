@@ -16,6 +16,7 @@
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
 #include "moses/TranslationModel/ProbingPT/ProbingPT.h"
 #include "moses/TranslationModel/PhraseDictionaryMemoryPerSentence.h"
+#include "moses/TranslationModel/PhraseDictionaryMemoryPerSentenceOnDemand.h"
 
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
 
@@ -244,6 +245,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhraseDictionaryFuzzyMatch);
   MOSES_FNAME(ProbingPT);
   MOSES_FNAME(PhraseDictionaryMemoryPerSentence);
+  MOSES_FNAME(PhraseDictionaryMemoryPerSentenceOnDemand);
   MOSES_FNAME2("RuleTable", Syntax::RuleTableFF);
   MOSES_FNAME2("SyntaxInputWeight", Syntax::InputWeightFF);
 
