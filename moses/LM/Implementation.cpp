@@ -41,7 +41,8 @@ using namespace std;
 namespace Moses
 {
 LanguageModelImplementation::LanguageModelImplementation(const std::string &line)
-  :LanguageModel(line)
+:LanguageModel(line)
+,m_nGramOrder(NOT_FOUND)
 {
 }
 
