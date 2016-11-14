@@ -26,6 +26,7 @@ using Moses::FindPhraseDictionary;
 using Moses::Sentence;
 using Moses::TokenizeMultiCharSeparator;
 using Moses::FeatureFunction;
+using Moses::Scan;
 
 boost::shared_ptr<TranslationRequest>
 TranslationRequest::
@@ -350,6 +351,62 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
 	value->replace(value->begin(), value->end(), record[1]);
 
       }
+    }
+
+  si = params.find("weights");
+  if (si != params.end())
+    {
+
+      boost::unordered_map<string, FeatureFunction*> map;
+      {
+	const vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+	BOOST_FOREACH(FeatureFunction* const& ff, ffs) {
+	  map[ff->GetScoreProducerDescription()] = ff;
+	}
+      }
+
+      string allValues = xmlrpc_c::value_string(si->second);
+
+      BOOST_FOREACH(string values, TokenizeMultiCharSeparator(allValues, "\t")) {
+
+	vector<string> record = TokenizeMultiCharSeparator(values, "=");
+
+	if (record.size() == 2) {
+	  string featureName = record[0];
+	  string featureWeights = record[1];
+
+	  boost::unordered_map<string, FeatureFunction*>::iterator ffi = map.find(featureName);
+
+	  if (ffi != map.end()) {
+	    FeatureFunction* ff = ffi->second;
+
+	    size_t prevNumWeights = ff->GetNumScoreComponents();
+
+	    vector<float> ffWeights;
+	    BOOST_FOREACH(string weight, TokenizeMultiCharSeparator(featureWeights, " ")) {
+	      ffWeights.push_back(Scan<float>(weight));
+	    }
+
+	    if (ffWeights.size() == ff->GetNumScoreComponents()) {
+
+	      // XXX: This is NOT thread-safe
+	      Moses::StaticData::InstanceNonConst().SetWeights(ff, ffWeights);
+	      VERBOSE(1, "WARNING: THIS IS NOT THREAD-SAFE!\tUpdating weights for " << featureName << " to " << featureWeights << "\n");
+
+	    } else {
+	      TRACE_ERR("ERROR: Unable to update weights for " << featureName << " because " << ff->GetNumScoreComponents() << " weights are required but only " << ffWeights.size() << " were provided\n");
+	    }
+
+	  } else {
+	    TRACE_ERR("ERROR: No FeatureFunction with name " << featureName << ", no weight update\n");
+	  }
+
+	} else {
+	  TRACE_ERR("WARNING: XML-RPC weights update was improperly formatted:\t" << values << "\n");
+	}
+
+      }
+
     }
 
 

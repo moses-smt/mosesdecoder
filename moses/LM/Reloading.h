@@ -48,6 +48,32 @@ public:
   virtual void InitializeForInput(ttasksptr const& ttask) {
     VERBOSE(1, "ReloadingLM InitializeForInput" << std::endl);
 
+    // The context scope object for this translation task
+    //     contains a map of translation task-specific data
+    boost::shared_ptr<Moses::ContextScope> contextScope = ttask->GetScope();
+
+    // The key to the map is this object
+    void const* key = static_cast<void const*>(this);
+
+    // The value stored in the map is a string representing a phrase table
+    boost::shared_ptr<string> value = contextScope->get<string>(key);
+
+    // Create a stream to read the phrase table data
+    stringstream strme(*(value.get()));
+
+    ofstream tmp;
+    tmp.open(m_file.c_str());
+
+    // Read the phrase table data, one line at a time
+    string line;
+    while (getline(strme, line)) {
+
+      tmp << line << "\n";
+
+    }
+
+    tmp.close();
+
     LanguageModelKen<Model>::LoadModel(m_file, m_lazy ? util::LAZY : util::POPULATE_OR_READ);
   };
 
