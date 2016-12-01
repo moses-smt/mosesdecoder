@@ -79,8 +79,8 @@ Parameter::Parameter()
   desc += "8=tree-to-string (SCFG-based)\n";
   desc += "9=forest-to-string";
   AddParam(search_opts, "search-algorithm", desc);
-  //AddParam(search_opts, "beam-threshold", "b",
-  //    "threshold for threshold pruning");
+  AddParam(search_opts, "beam-threshold", "b",
+      "threshold for threshold pruning");
   //AddParam(search_opts, "early-discarding-threshold", "edt",
   //    "threshold for constructing hypotheses based on estimate cost");
   AddParam(search_opts, "stack", "s",

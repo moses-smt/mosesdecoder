@@ -22,6 +22,8 @@ HypothesisColl::HypothesisColl(const ManagerBase &mgr) :
     		m_coll(MemPoolAllocator<const HypothesisBase*>(mgr.GetPool())), m_sortedHypos(
     				NULL)
 {
+  m_bestScore = -std::numeric_limits<float>::infinity();
+  m_worstScore = -std::numeric_limits<float>::infinity();
 }
 
 const HypothesisBase *HypothesisColl::GetBestHypo() const
@@ -50,6 +52,23 @@ void HypothesisColl::Add(
 		Recycler<HypothesisBase*> &hypoRecycle,
 		ArcLists &arcLists)
 {
+  SCORE futureScore = hypo->GetFutureScore();
+  if (futureScore < m_worstScore) {
+    // beam threshold
+    hypoRecycle.Recycle(hypo);
+    return;
+  }
+
+  if (futureScore > m_bestScore) {
+    m_bestScore = hypo->GetFutureScore();
+
+    // this may also affect the worst score
+    SCORE beamWidth = system.options.search.beam_width;
+    if ( m_bestScore + beamWidth > m_worstScore ) {
+      m_worstScore = m_bestScore + beamWidth;
+    }
+  }
+
 	StackAdd added = Add(hypo);
 
 	size_t nbestSize = system.options.nbest.nbest_size;
