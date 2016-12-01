@@ -24,6 +24,7 @@ HypothesisColl::HypothesisColl(const ManagerBase &mgr)
 {
   m_bestScore = -std::numeric_limits<float>::infinity();
   m_minBeamScore = -std::numeric_limits<float>::infinity();
+  m_worseScore = std::numeric_limits<float>::infinity();
 }
 
 const HypothesisBase *HypothesisColl::GetBestHypo() const
@@ -52,6 +53,7 @@ void HypothesisColl::Add(
 		Recycler<HypothesisBase*> &hypoRecycle,
 		ArcLists &arcLists)
 {
+  size_t stackSize = system.options.search.stack_size;
   SCORE futureScore = hypo->GetFutureScore();
   /*
   cerr << "scores:"
@@ -61,8 +63,10 @@ void HypothesisColl::Add(
       << GetSize() << " "
       << endl;
   */
-  if (futureScore < m_minBeamScore) {
-    // beam threshold
+  if (futureScore < m_minBeamScore
+      || (GetSize() >= stackSize) && futureScore < m_worseScore ) {
+    // beam threshold or really bad hypo that won't make the pruning cut
+    // as more hypos are added, the m_worseScore stat gets out of date and isn't the optimum cut-off point
     //cerr << "Discard:" << hypo->Debug(system) << endl;
     hypoRecycle.Recycle(hypo);
     return;
@@ -104,6 +108,10 @@ StackAdd HypothesisColl::Add(const HypothesisBase *hypo)
 	// CHECK RECOMBINATION
 	if (addRet.second) {
 		// equiv hypo doesn't exists
+	  if (hypo->GetFutureScore() < m_worseScore) {
+	    m_worseScore = hypo->GetFutureScore();
+	  }
+
 		return StackAdd(true, NULL);
 	}
 	else {
@@ -205,6 +213,7 @@ void HypothesisColl::Clear()
 	m_coll.clear();
   m_bestScore = -std::numeric_limits<float>::infinity();
   m_minBeamScore = -std::numeric_limits<float>::infinity();
+  m_worseScore = std::numeric_limits<float>::infinity();
 }
 
 std::string HypothesisColl::Debug(const System &system) const
