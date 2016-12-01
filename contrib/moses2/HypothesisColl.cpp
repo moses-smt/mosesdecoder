@@ -23,7 +23,7 @@ HypothesisColl::HypothesisColl(const ManagerBase &mgr)
 ,m_sortedHypos(NULL)
 {
   m_bestScore = -std::numeric_limits<float>::infinity();
-  m_worstScore = -std::numeric_limits<float>::infinity();
+  m_minBeamScore = -std::numeric_limits<float>::infinity();
 }
 
 const HypothesisBase *HypothesisColl::GetBestHypo() const
@@ -57,11 +57,11 @@ void HypothesisColl::Add(
   cerr << "scores:"
       << futureScore << " "
       << m_bestScore << " "
-      << m_worstScore << " "
+      << m_minBeamScore << " "
       << GetSize() << " "
       << endl;
   */
-  if (futureScore < m_worstScore) {
+  if (futureScore < m_minBeamScore) {
     // beam threshold
     //cerr << "Discard:" << hypo->Debug(system) << endl;
     hypoRecycle.Recycle(hypo);
@@ -75,8 +75,8 @@ void HypothesisColl::Add(
     // this may also affect the worst score
     SCORE beamWidth = system.options.search.beam_width;
     //cerr << "beamWidth=" << beamWidth << endl;
-    if ( m_bestScore + beamWidth > m_worstScore ) {
-      m_worstScore = m_bestScore + beamWidth;
+    if ( m_bestScore + beamWidth > m_minBeamScore ) {
+      m_minBeamScore = m_bestScore + beamWidth;
     }
   }
 
@@ -204,7 +204,7 @@ void HypothesisColl::Clear()
 	m_sortedHypos = NULL;
 	m_coll.clear();
   m_bestScore = -std::numeric_limits<float>::infinity();
-  m_worstScore = -std::numeric_limits<float>::infinity();
+  m_minBeamScore = -std::numeric_limits<float>::infinity();
 }
 
 std::string HypothesisColl::Debug(const System &system) const
