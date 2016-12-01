@@ -18,9 +18,9 @@ using namespace std;
 namespace Moses2
 {
 
-HypothesisColl::HypothesisColl(const ManagerBase &mgr) :
-    		m_coll(MemPoolAllocator<const HypothesisBase*>(mgr.GetPool())), m_sortedHypos(
-    				NULL)
+HypothesisColl::HypothesisColl(const ManagerBase &mgr)
+:m_coll(MemPoolAllocator<const HypothesisBase*>(mgr.GetPool()))
+,m_sortedHypos(NULL)
 {
   m_bestScore = -std::numeric_limits<float>::infinity();
   m_worstScore = -std::numeric_limits<float>::infinity();
@@ -53,17 +53,28 @@ void HypothesisColl::Add(
 		ArcLists &arcLists)
 {
   SCORE futureScore = hypo->GetFutureScore();
+  /*
+  cerr << "scores:"
+      << futureScore << " "
+      << m_bestScore << " "
+      << m_worstScore << " "
+      << GetSize() << " "
+      << endl;
+  */
   if (futureScore < m_worstScore) {
     // beam threshold
+    //cerr << "Discard:" << hypo->Debug(system) << endl;
     hypoRecycle.Recycle(hypo);
     return;
   }
+  //cerr << "OK:" << hypo->Debug(system) << endl;
 
   if (futureScore > m_bestScore) {
     m_bestScore = hypo->GetFutureScore();
 
     // this may also affect the worst score
     SCORE beamWidth = system.options.search.beam_width;
+    //cerr << "beamWidth=" << beamWidth << endl;
     if ( m_bestScore + beamWidth > m_worstScore ) {
       m_worstScore = m_bestScore + beamWidth;
     }
@@ -112,7 +123,7 @@ StackAdd HypothesisColl::Add(const HypothesisBase *hypo)
 		}
 	}
 
-	assert(false);
+	//assert(false);
 }
 
 const Hypotheses &HypothesisColl::GetSortedAndPruneHypos(
@@ -192,6 +203,8 @@ void HypothesisColl::Clear()
 {
 	m_sortedHypos = NULL;
 	m_coll.clear();
+  m_bestScore = -std::numeric_limits<float>::infinity();
+  m_worstScore = -std::numeric_limits<float>::infinity();
 }
 
 std::string HypothesisColl::Debug(const System &system) const

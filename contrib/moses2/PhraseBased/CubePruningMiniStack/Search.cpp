@@ -73,10 +73,9 @@ void Search::Decode()
 		//cerr << "stackInd=" << stackInd << endl;
 		m_stack.Clear();
 		Decode(stackInd);
-		PostDecode(stackInd);
+    PostDecode(stackInd);
 
 		//m_stack.DebugCounts();
-		//cerr << m_stacks << endl;
 	}
 
 }
