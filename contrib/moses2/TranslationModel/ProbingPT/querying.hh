@@ -27,13 +27,15 @@ class QueryEngine
   bool is_reordering;
 
   void read_alignments(const std::string &alignPath);
+  void file_exits(const std::string &basePath);
+  void cat_files(const std::string &basePath);
 
 public:
   int num_scores;
   int num_lex_scores;
   bool logProb;
 
-  QueryEngine(const char *);
+  QueryEngine(const char *, util::LoadMethod load_method);
   ~QueryEngine();
 
   std::pair<bool, uint64_t> query(uint64_t key);

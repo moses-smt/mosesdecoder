@@ -15,6 +15,7 @@
 #include "../../Vector.h"
 #include "../../Phrase.h"
 #include "../../SCFG/ActiveChart.h"
+#include "util/mmap.hh"
 
 namespace Moses2
 {
@@ -69,6 +70,7 @@ public:
   virtual ~ProbingPT();
   void Load(System &system);
 
+  virtual void SetParameter(const std::string& key, const std::string& value);
   void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
 
   uint64_t GetUnk() const
@@ -91,6 +93,7 @@ protected:
   std::vector<uint64_t> m_sourceVocab; // factor id -> pt id
   std::vector< std::pair<bool, const Factor*> > m_targetVocab; // pt id -> factor*
   std::vector<const AlignmentInfo*> m_aligns;
+  util::LoadMethod load_method;
 
   uint64_t m_unkId;
   QueryEngine *m_engine;
