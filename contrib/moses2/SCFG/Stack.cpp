@@ -33,7 +33,7 @@ void Stack::Add(SCFG::Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
   //cerr << "lhs=" << lhs << endl;
 
   HypothesisColl &coll = GetColl(lhs);
-  coll.Add(m_mgr.system, hypo, hypoRecycle, arcLists);
+  coll.Add(m_mgr, hypo, hypoRecycle, arcLists);
 }
 
 size_t Stack::GetSize() const

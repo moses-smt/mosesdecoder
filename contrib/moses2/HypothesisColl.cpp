@@ -48,13 +48,17 @@ const HypothesisBase *HypothesisColl::GetBestHypo() const
 }
 
 void HypothesisColl::Add(
-		const System &system,
+    const ManagerBase &mgr,
 		HypothesisBase *hypo,
 		Recycler<HypothesisBase*> &hypoRecycle,
 		ArcLists &arcLists)
 {
-  size_t maxStackSize = system.options.search.stack_size;
-  //cerr << "stackSize=" << stackSize << endl;
+  size_t maxStackSize = mgr.system.options.search.stack_size;
+  //cerr << "maxStackSize=" << maxStackSize << endl;
+
+  if (GetSize() * 2 > maxStackSize) {
+    PruneHypos(mgr, mgr.arcLists);
+  }
 
   SCORE futureScore = hypo->GetFutureScore();
   /*
@@ -96,7 +100,7 @@ void HypothesisColl::Add(
 
 	StackAdd added = Add(hypo);
 
-	size_t nbestSize = system.options.nbest.nbest_size;
+	size_t nbestSize = mgr.system.options.nbest.nbest_size;
 	if (nbestSize) {
 		arcLists.AddArc(added.added, hypo, added.other);
 	}
@@ -217,6 +221,60 @@ void HypothesisColl::SortAndPruneHypos(const ManagerBase &mgr,
    }
    cerr << endl;
 	 */
+}
+
+void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists) const
+{
+  size_t stackSize = mgr.system.options.search.stack_size;
+  Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
+
+  /*
+   cerr << "UNSORTED hypos: ";
+   BOOST_FOREACH(const HypothesisBase *hypo, m_coll) {
+     cerr << hypo << "(" << hypo->GetFutureScore() << ")" << " ";
+   }
+   cerr << endl;
+   */
+  vector<const HypothesisBase*> sortedHypos;
+  size_t ind = 0;
+  BOOST_FOREACH(const HypothesisBase *hypo, m_coll){
+    sortedHypos[ind] = hypo;
+    ++ind;
+  }
+
+  vector<const HypothesisBase*>::iterator iterMiddle;
+  iterMiddle =
+      (stackSize == 0 || sortedHypos.size() < stackSize) ?
+          sortedHypos.end() : sortedHypos.begin() + stackSize;
+
+  std::partial_sort(sortedHypos.begin(), iterMiddle, sortedHypos.end(),
+      HypothesisFutureScoreOrderer());
+
+  // prune
+  if (stackSize && sortedHypos.size() > stackSize) {
+    for (size_t i = stackSize; i < sortedHypos.size(); ++i) {
+      HypothesisBase *hypo = const_cast<HypothesisBase*>((sortedHypos)[i]);
+      recycler.Recycle(hypo);
+
+      // delete from arclist
+      if (mgr.system.options.nbest.nbest_size) {
+        arcLists.Delete(hypo);
+      }
+
+      // delete from collection
+      //Delete(hypo);
+    }
+    sortedHypos.resize(stackSize);
+  }
+
+  /*
+   cerr << "sorted hypos: ";
+   for (size_t i = 0; i < sortedHypos.size(); ++i) {
+     const HypothesisBase *hypo = sortedHypos[i];
+     cerr << hypo << " ";
+   }
+   cerr << endl;
+   */
 }
 
 void HypothesisColl::Clear()

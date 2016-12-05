@@ -47,7 +47,7 @@ void Stack::Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
 {
 	HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
 	Moses2::HypothesisColl &coll = GetMiniStack(key);
-	coll.Add(m_mgr.system, hypo, hypoRecycle, arcLists);
+	coll.Add(m_mgr, hypo, hypoRecycle, arcLists);
 }
 
 const Hypothesis *Stack::GetBestHypo() const

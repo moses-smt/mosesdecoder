@@ -25,7 +25,7 @@ class HypothesisColl
 public:
   HypothesisColl(const ManagerBase &mgr);
 
-  void Add(const System &system,
+  void Add(const ManagerBase &mgr,
 		  HypothesisBase *hypo,
 		  Recycler<HypothesisBase*> &hypoRecycle,
 		  ArcLists &arcLists);
@@ -66,6 +66,8 @@ protected:
 
   StackAdd Add(const HypothesisBase *hypo);
   void SortAndPruneHypos(const ManagerBase &mgr, ArcLists &arcLists) const;
+
+  void PruneHypos(const ManagerBase &mgr, ArcLists &arcLists) const;
 
 };
 
