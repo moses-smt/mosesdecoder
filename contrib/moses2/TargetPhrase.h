@@ -86,7 +86,7 @@ public:
 
   }
 
-  void OutputToStream(const System &system, const Phrase<Moses2::Word> &inputPhrase, std::ostream &out) const
+  void OutputToStream(const System &system, const Phrase<WORD> &inputPhrase, std::ostream &out) const
   {
 	  // get placeholders
 	  FactorType placeholderFactor = system.options.input.placeholder_factor;
