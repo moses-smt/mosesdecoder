@@ -16,7 +16,6 @@
 
 #include "Normal/Search.h"
 #include "CubePruningMiniStack/Search.h"
-#include "Batch/Search.h"
 
 /*
  #include "CubePruningPerMiniStack/Search.h"
@@ -95,7 +94,8 @@ void Manager::Init()
 		m_search = new NSNormal::Search(*this);
 		break;
 	case NormalBatch:
-		m_search = new NSBatch::Search(*this);
+		//m_search = new NSBatch::Search(*this);
+	  UTIL_THROW2("Not implemented");
 		break;
 	case CubePruning:
 	case CubePruningMiniStack:
@@ -116,8 +116,7 @@ void Manager::Init()
      break;
 		 */
 	default:
-		cerr << "Unknown search algorithm" << endl;
-		abort();
+    UTIL_THROW2("Unknown search algorithm");
 	}
 }
 
