@@ -81,7 +81,7 @@ ProbingPT::~ProbingPT()
 
 void ProbingPT::Load(System &system)
 {
-  m_engine = new QueryEngine(m_path.c_str());
+  m_engine = new QueryEngine(m_path.c_str(), load_method);
 
   m_unkId = 456456546456;
 
@@ -162,6 +162,9 @@ void ProbingPT::SetParameter(const std::string& key, const std::string& value)
 		else {
 			UTIL_THROW2("load method not supported" << value);
 		}
+	}
+	else {
+		PhraseTable::SetParameter(key, value);
 	}
 }
 
