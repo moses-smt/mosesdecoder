@@ -53,7 +53,9 @@ void HypothesisColl::Add(
 		Recycler<HypothesisBase*> &hypoRecycle,
 		ArcLists &arcLists)
 {
-  size_t stackSize = system.options.search.stack_size;
+  size_t maxStackSize = system.options.search.stack_size;
+  //cerr << "stackSize=" << stackSize << endl;
+
   SCORE futureScore = hypo->GetFutureScore();
   /*
   cerr << "scores:"
@@ -63,7 +65,7 @@ void HypothesisColl::Add(
       << GetSize() << " "
       << endl;
   */
-  if (GetSize() >= stackSize && futureScore < m_worseScore) {
+  if (GetSize() >= maxStackSize && futureScore < m_worseScore) {
     // beam threshold or really bad hypo that won't make the pruning cut
     // as more hypos are added, the m_worseScore stat gets out of date and isn't the optimum cut-off point
     //cerr << "Discard, really bad score:" << hypo->Debug(system) << endl;
@@ -102,8 +104,14 @@ void HypothesisColl::Add(
 		if (!added.added) {
 			hypoRecycle.Recycle(hypo);
 		}
-		else if (added.other) {
-			hypoRecycle.Recycle(added.other);
+		else {
+		  if (added.other) {
+		    hypoRecycle.Recycle(added.other);
+		  }
+
+      if (GetSize() <= maxStackSize && hypo->GetFutureScore() < m_worseScore) {
+        m_worseScore = futureScore;
+      }
 		}
 	}
 
@@ -116,10 +124,6 @@ StackAdd HypothesisColl::Add(const HypothesisBase *hypo)
 	// CHECK RECOMBINATION
 	if (addRet.second) {
 		// equiv hypo doesn't exists
-	  if (hypo->GetFutureScore() < m_worseScore) {
-	    m_worseScore = hypo->GetFutureScore();
-	  }
-
 		return StackAdd(true, NULL);
 	}
 	else {
