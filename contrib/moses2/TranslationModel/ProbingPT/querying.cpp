@@ -17,9 +17,14 @@ QueryEngine::QueryEngine(const char * filepath)
   std::string path_to_source_vocabid = basepath + "/source_vocabids";
   std::string alignPath = basepath + "/Alignments.dat";
 
-  if (!FileExists(path_to_config)) {
+  if (!FileExists(path_to_config) || !FileExists(path_to_hashtable) ||
+	  !FileExists(path_to_source_vocabid) || !FileExists(alignPath) ||
+	  !FileExists(basepath + "TargetColl.dat") || !FileExists(basepath + "TargetVocab.dat") ||
+	  !FileExists(basepath + "cache")) {
     UTIL_THROW2("Binary table doesn't exist is didn't finish binarizing: " << path_to_config);
   }
+
+
 
   ///Source phrase vocabids
   read_map(source_vocabids, path_to_source_vocabid.c_str());
