@@ -50,6 +50,8 @@ public:
     return hypo ? &hypo->Cast<T>() : NULL;
   }
 
+  void Delete(const HypothesisBase *hypo);
+
   std::string Debug(const System &system) const;
 
 protected:
@@ -67,7 +69,7 @@ protected:
   StackAdd Add(const HypothesisBase *hypo);
   void SortAndPruneHypos(const ManagerBase &mgr, ArcLists &arcLists) const;
 
-  void PruneHypos(const ManagerBase &mgr, ArcLists &arcLists) const;
+  void PruneHypos(const ManagerBase &mgr, ArcLists &arcLists);
 
 };
 

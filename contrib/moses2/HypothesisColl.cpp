@@ -54,9 +54,9 @@ void HypothesisColl::Add(
 		ArcLists &arcLists)
 {
   size_t maxStackSize = mgr.system.options.search.stack_size;
-  //cerr << "maxStackSize=" << maxStackSize << endl;
 
-  if (GetSize() * 2 > maxStackSize) {
+  if (GetSize() > maxStackSize * 2) {
+    //cerr << "maxStackSize=" << maxStackSize << " " << GetSize() << endl;
     PruneHypos(mgr, mgr.arcLists);
   }
 
@@ -223,9 +223,9 @@ void HypothesisColl::SortAndPruneHypos(const ManagerBase &mgr,
 	 */
 }
 
-void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists) const
+void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists)
 {
-  size_t stackSize = mgr.system.options.search.stack_size;
+  size_t maxStackSize = mgr.system.options.search.stack_size;
   Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
 
   /*
@@ -235,7 +235,7 @@ void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists) cons
    }
    cerr << endl;
    */
-  vector<const HypothesisBase*> sortedHypos;
+  vector<const HypothesisBase*> sortedHypos(GetSize());
   size_t ind = 0;
   BOOST_FOREACH(const HypothesisBase *hypo, m_coll){
     sortedHypos[ind] = hypo;
@@ -244,17 +244,16 @@ void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists) cons
 
   vector<const HypothesisBase*>::iterator iterMiddle;
   iterMiddle =
-      (stackSize == 0 || sortedHypos.size() < stackSize) ?
-          sortedHypos.end() : sortedHypos.begin() + stackSize;
+      (maxStackSize == 0 || sortedHypos.size() < maxStackSize) ?
+          sortedHypos.end() : sortedHypos.begin() + maxStackSize;
 
   std::partial_sort(sortedHypos.begin(), iterMiddle, sortedHypos.end(),
       HypothesisFutureScoreOrderer());
 
   // prune
-  if (stackSize && sortedHypos.size() > stackSize) {
-    for (size_t i = stackSize; i < sortedHypos.size(); ++i) {
+  if (maxStackSize && sortedHypos.size() > maxStackSize) {
+    for (size_t i = maxStackSize; i < sortedHypos.size(); ++i) {
       HypothesisBase *hypo = const_cast<HypothesisBase*>((sortedHypos)[i]);
-      recycler.Recycle(hypo);
 
       // delete from arclist
       if (mgr.system.options.nbest.nbest_size) {
@@ -262,9 +261,11 @@ void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists) cons
       }
 
       // delete from collection
-      //Delete(hypo);
+      Delete(hypo);
+
+      //recycler.Recycle(hypo);
     }
-    sortedHypos.resize(stackSize);
+
   }
 
   /*
@@ -275,6 +276,16 @@ void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists) cons
    }
    cerr << endl;
    */
+}
+
+void HypothesisColl::Delete(const HypothesisBase *hypo)
+{
+  cerr << "hypo=" << hypo << " " << m_coll.size() << endl;
+
+  _HCType::const_iterator iter = m_coll.find(hypo);
+  UTIL_THROW_IF2(iter == m_coll.end(), "Can't find hypo");
+
+  m_coll.erase(iter);
 }
 
 void HypothesisColl::Clear()
