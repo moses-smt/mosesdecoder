@@ -22,8 +22,8 @@ HypothesisColl::HypothesisColl(const ManagerBase &mgr)
 :m_coll(MemPoolAllocator<const HypothesisBase*>(mgr.GetPool()))
 ,m_sortedHypos(NULL)
 {
-  m_bestScore = -std::numeric_limits<float>::infinity();
-  m_minBeamScore = -std::numeric_limits<float>::infinity();
+  //m_bestScore = -std::numeric_limits<float>::infinity();
+  //m_minBeamScore = -std::numeric_limits<float>::infinity();
   m_worseScore = std::numeric_limits<float>::infinity();
 }
 
@@ -63,15 +63,21 @@ void HypothesisColl::Add(
       << GetSize() << " "
       << endl;
   */
-  if (futureScore < m_minBeamScore
-      || (GetSize() >= stackSize) && futureScore < m_worseScore ) {
+  if (GetSize() >= stackSize && futureScore < m_worseScore) {
     // beam threshold or really bad hypo that won't make the pruning cut
     // as more hypos are added, the m_worseScore stat gets out of date and isn't the optimum cut-off point
-    //cerr << "Discard:" << hypo->Debug(system) << endl;
+    //cerr << "Discard, really bad score:" << hypo->Debug(system) << endl;
     hypoRecycle.Recycle(hypo);
     return;
   }
-  //cerr << "OK:" << hypo->Debug(system) << endl;
+  /*
+  if (futureScore < m_minBeamScore) {
+      // beam threshold or really bad hypo that won't make the pruning cut
+      // as more hypos are added, the m_worseScore stat gets out of date and isn't the optimum cut-off point
+      //cerr << "Discard, below beam:" << hypo->Debug(system) << endl;
+      hypoRecycle.Recycle(hypo);
+      return;
+  }
 
   if (futureScore > m_bestScore) {
     m_bestScore = hypo->GetFutureScore();
@@ -83,6 +89,8 @@ void HypothesisColl::Add(
       m_minBeamScore = m_bestScore + beamWidth;
     }
   }
+  //cerr << "OK:" << hypo->Debug(system) << endl;
+  */
 
 	StackAdd added = Add(hypo);
 
@@ -211,8 +219,9 @@ void HypothesisColl::Clear()
 {
 	m_sortedHypos = NULL;
 	m_coll.clear();
-  m_bestScore = -std::numeric_limits<float>::infinity();
-  m_minBeamScore = -std::numeric_limits<float>::infinity();
+
+  //m_bestScore = -std::numeric_limits<float>::infinity();
+  //m_minBeamScore = -std::numeric_limits<float>::infinity();
   m_worseScore = std::numeric_limits<float>::infinity();
 }
 
