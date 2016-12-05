@@ -50,7 +50,7 @@ NBest::NBest(
 	}
 
 	stringstream strm;
-	OutputToStream(mgr, strm, nbestColl);
+	OutputToStream(mgr, strm);
 	m_str = strm.str();
 }
 
@@ -83,7 +83,7 @@ NBest::NBest(const SCFG::Manager &mgr,
 	m_scores->PlusEquals(mgr.system, newScores);
 
 	stringstream strm;
-	OutputToStream(mgr, strm, nbestColl);
+	OutputToStream(mgr, strm);
 	m_str = strm.str();
 }
 
@@ -141,8 +141,7 @@ void NBest::CreateDeviants(
 
 void NBest::OutputToStream(
 		const SCFG::Manager &mgr,
-		std::stringstream &strm,
-		const NBestColl &nbestColl) const
+		std::stringstream &strm) const
 {
   const SCFG::Hypothesis &hypo = GetHypo();
   //strm << &hypo << " ";
