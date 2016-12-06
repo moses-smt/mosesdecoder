@@ -263,7 +263,7 @@ void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists)
       // delete from collection
       Delete(hypo);
 
-      //recycler.Recycle(hypo);
+      recycler.Recycle(hypo);
     }
 
   }
@@ -280,7 +280,7 @@ void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists)
 
 void HypothesisColl::Delete(const HypothesisBase *hypo)
 {
-  cerr << "hypo=" << hypo << " " << m_coll.size() << endl;
+  //cerr << "hypo=" << hypo << " " << m_coll.size() << endl;
 
   _HCType::const_iterator iter = m_coll.find(hypo);
   UTIL_THROW_IF2(iter == m_coll.end(), "Can't find hypo");
