@@ -282,10 +282,8 @@ void HypothesisColl::Delete(const HypothesisBase *hypo)
 {
   //cerr << "hypo=" << hypo << " " << m_coll.size() << endl;
 
-  _HCType::const_iterator iter = m_coll.find(hypo);
-  UTIL_THROW_IF2(iter == m_coll.end(), "Can't find hypo");
-
-  m_coll.erase(iter);
+  size_t erased = m_coll.erase(hypo);
+  UTIL_THROW_IF2(erased != 1, "couldn't erase hypo " << hypo);
 }
 
 void HypothesisColl::Clear()
