@@ -62,9 +62,8 @@ protected:
   _HCType m_coll;
   mutable Hypotheses *m_sortedHypos;
 
-  //SCORE m_bestScore;
-  SCORE m_worseScore;
-  //SCORE m_minBeamScore;
+  SCORE m_bestScore;
+  SCORE m_worstScore;
 
   StackAdd Add(const HypothesisBase *hypo);
   void SortAndPruneHypos(const ManagerBase &mgr, ArcLists &arcLists) const;

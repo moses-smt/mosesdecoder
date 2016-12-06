@@ -22,9 +22,8 @@ HypothesisColl::HypothesisColl(const ManagerBase &mgr)
 :m_coll(MemPoolAllocator<const HypothesisBase*>(mgr.GetPool()))
 ,m_sortedHypos(NULL)
 {
-  //m_bestScore = -std::numeric_limits<float>::infinity();
-  //m_minBeamScore = -std::numeric_limits<float>::infinity();
-  m_worseScore = std::numeric_limits<float>::infinity();
+  m_bestScore = -std::numeric_limits<float>::infinity();
+  m_worstScore = std::numeric_limits<float>::infinity();
 }
 
 const HypothesisBase *HypothesisColl::GetBestHypo() const
@@ -69,9 +68,9 @@ void HypothesisColl::Add(
       << GetSize() << " "
       << endl;
   */
-  if (GetSize() >= maxStackSize && futureScore < m_worseScore) {
+  if (GetSize() >= maxStackSize && futureScore < m_worstScore) {
     // beam threshold or really bad hypo that won't make the pruning cut
-    // as more hypos are added, the m_worseScore stat gets out of date and isn't the optimum cut-off point
+    // as more hypos are added, the m_worstScore stat gets out of date and isn't the optimum cut-off point
     //cerr << "Discard, really bad score:" << hypo->Debug(system) << endl;
     hypoRecycle.Recycle(hypo);
     return;
@@ -79,7 +78,7 @@ void HypothesisColl::Add(
   /*
   if (futureScore < m_minBeamScore) {
       // beam threshold or really bad hypo that won't make the pruning cut
-      // as more hypos are added, the m_worseScore stat gets out of date and isn't the optimum cut-off point
+      // as more hypos are added, the m_worstScore stat gets out of date and isn't the optimum cut-off point
       //cerr << "Discard, below beam:" << hypo->Debug(system) << endl;
       hypoRecycle.Recycle(hypo);
       return;
@@ -113,8 +112,16 @@ void HypothesisColl::Add(
 		    hypoRecycle.Recycle(added.other);
 		  }
 
-      if (GetSize() <= maxStackSize && hypo->GetFutureScore() < m_worseScore) {
-        m_worseScore = futureScore;
+		  // update beam variables
+	    if (futureScore > m_bestScore) {
+	      m_bestScore = futureScore;
+	      float beamWidth = mgr.system.options.search.beam_width;
+	      if ( m_bestScore + beamWidth > m_worstScore ) {
+	        m_worstScore = m_bestScore + beamWidth;
+	      }
+		  }
+		  else if (GetSize() <= maxStackSize && hypo->GetFutureScore() < m_worstScore) {
+        m_worstScore = futureScore;
       }
 		}
 	}
@@ -251,7 +258,7 @@ void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists)
       HypothesisFutureScoreOrderer());
 
   // update worse score
-  m_worseScore = sortedHypos[maxStackSize - 1]->GetFutureScore();
+  m_worstScore = sortedHypos[maxStackSize - 1]->GetFutureScore();
 
   // prune
   if (maxStackSize && sortedHypos.size() > maxStackSize) {
@@ -294,9 +301,8 @@ void HypothesisColl::Clear()
 	m_sortedHypos = NULL;
 	m_coll.clear();
 
-  //m_bestScore = -std::numeric_limits<float>::infinity();
-  //m_minBeamScore = -std::numeric_limits<float>::infinity();
-  m_worseScore = std::numeric_limits<float>::infinity();
+  m_bestScore = -std::numeric_limits<float>::infinity();
+  m_worstScore = std::numeric_limits<float>::infinity();
 }
 
 std::string HypothesisColl::Debug(const System &system) const
