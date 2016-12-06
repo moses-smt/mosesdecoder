@@ -84,7 +84,7 @@ Parameter::Parameter()
   //AddParam(search_opts, "early-discarding-threshold", "edt",
   //    "threshold for constructing hypotheses based on estimate cost");
   AddParam(search_opts, "stack", "s",
-      "maximum stack size for histogram pruning. 0 = unlimited stack size");
+      "maximum stack size for histogram pruning. CANNOT USE 0 = unlimited stack size");
   //AddParam(search_opts, "stack-diversity", "sd",
   //    "minimum number of hypothesis of each coverage in stack (default 0)");
 

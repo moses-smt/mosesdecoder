@@ -68,7 +68,8 @@ protected:
   StackAdd Add(const HypothesisBase *hypo);
   void SortAndPruneHypos(const ManagerBase &mgr, ArcLists &arcLists) const;
 
-  void PruneHypos(const ManagerBase &mgr, ArcLists &arcLists, const HypothesisBase **sortedHypos);
+  void PruneHypos(const ManagerBase &mgr, ArcLists &arcLists);
+  void PruneHypos(const ManagerBase &mgr, ArcLists &arcLists, const HypothesisBase **sortedHypos) const;
 
 };
 
