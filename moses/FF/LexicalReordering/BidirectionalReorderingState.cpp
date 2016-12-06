@@ -15,7 +15,7 @@ size_t BidirectionalReorderingState::hash() const
 
 bool BidirectionalReorderingState::operator==(const FFState& o) const
 {
-  if (&o == this) return 0;
+  if (&o == this) return true;
 
   BidirectionalReorderingState const &other
   = static_cast<BidirectionalReorderingState const&>(o);
