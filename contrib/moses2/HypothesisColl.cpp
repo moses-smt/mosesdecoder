@@ -56,7 +56,8 @@ void HypothesisColl::Add(
 
   if (GetSize() > maxStackSize * 2) {
     //cerr << "maxStackSize=" << maxStackSize << " " << GetSize() << endl;
-    PruneHypos(mgr, mgr.arcLists);
+    const HypothesisBase *sortedHypos[GetSize()];
+    PruneHypos(mgr, mgr.arcLists, sortedHypos);
   }
 
   SCORE futureScore = hypo->GetFutureScore();
@@ -210,9 +211,13 @@ void HypothesisColl::SortAndPruneHypos(const ManagerBase &mgr,
 	 */
 }
 
-void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists)
+void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists, const HypothesisBase **sortedHypos)
 {
   size_t maxStackSize = mgr.system.options.search.stack_size;
+  assert(maxStackSize); // can't do stack=0 - unlimited stack size. No-one ever uses that
+  assert(GetSize() > maxStackSize);
+  //assert(sortedHypos.size() == GetSize());
+
   Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
 
   /*
@@ -222,40 +227,36 @@ void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists)
    }
    cerr << endl;
    */
-  vector<const HypothesisBase*> sortedHypos(GetSize());
   size_t ind = 0;
   BOOST_FOREACH(const HypothesisBase *hypo, m_coll){
     sortedHypos[ind] = hypo;
     ++ind;
   }
 
-  vector<const HypothesisBase*>::iterator iterMiddle;
-  iterMiddle =
-      (maxStackSize == 0 || sortedHypos.size() < maxStackSize) ?
-          sortedHypos.end() : sortedHypos.begin() + maxStackSize;
+  const HypothesisBase **iterMiddle = sortedHypos + maxStackSize;
 
-  std::partial_sort(sortedHypos.begin(), iterMiddle, sortedHypos.end(),
+  std::partial_sort(
+      sortedHypos,
+      iterMiddle,
+      sortedHypos + GetSize(),
       HypothesisFutureScoreOrderer());
 
   // update worse score
   m_worstScore = sortedHypos[maxStackSize - 1]->GetFutureScore();
 
   // prune
-  if (maxStackSize && sortedHypos.size() > maxStackSize) {
-    for (size_t i = maxStackSize; i < sortedHypos.size(); ++i) {
-      HypothesisBase *hypo = const_cast<HypothesisBase*>(sortedHypos[i]);
+  for (size_t i = maxStackSize; i < GetSize(); ++i) {
+    HypothesisBase *hypo = const_cast<HypothesisBase*>(sortedHypos[i]);
 
-      // delete from arclist
-      if (mgr.system.options.nbest.nbest_size) {
-        arcLists.Delete(hypo);
-      }
-
-      // delete from collection
-      Delete(hypo);
-
-      recycler.Recycle(hypo);
+    // delete from arclist
+    if (mgr.system.options.nbest.nbest_size) {
+      arcLists.Delete(hypo);
     }
 
+    // delete from collection
+    Delete(hypo);
+
+    recycler.Recycle(hypo);
   }
 
   /*
