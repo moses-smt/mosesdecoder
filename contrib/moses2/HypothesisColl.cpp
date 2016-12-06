@@ -251,7 +251,7 @@ void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists)
       HypothesisFutureScoreOrderer());
 
   // update worse score
-  m_worseScore = sortedHypos[maxStackSize]->GetFutureScore();
+  m_worseScore = sortedHypos[maxStackSize - 1]->GetFutureScore();
 
   // prune
   if (maxStackSize && sortedHypos.size() > maxStackSize) {
