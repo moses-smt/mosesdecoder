@@ -75,27 +75,6 @@ void HypothesisColl::Add(
     hypoRecycle.Recycle(hypo);
     return;
   }
-  /*
-  if (futureScore < m_minBeamScore) {
-      // beam threshold or really bad hypo that won't make the pruning cut
-      // as more hypos are added, the m_worstScore stat gets out of date and isn't the optimum cut-off point
-      //cerr << "Discard, below beam:" << hypo->Debug(system) << endl;
-      hypoRecycle.Recycle(hypo);
-      return;
-  }
-
-  if (futureScore > m_bestScore) {
-    m_bestScore = hypo->GetFutureScore();
-
-    // this may also affect the worst score
-    SCORE beamWidth = system.options.search.beam_width;
-    //cerr << "beamWidth=" << beamWidth << endl;
-    if ( m_bestScore + beamWidth > m_minBeamScore ) {
-      m_minBeamScore = m_bestScore + beamWidth;
-    }
-  }
-  //cerr << "OK:" << hypo->Debug(system) << endl;
-  */
 
 	StackAdd added = Add(hypo);
 
@@ -104,28 +83,29 @@ void HypothesisColl::Add(
 		arcLists.AddArc(added.added, hypo, added.other);
 	}
 	else {
-		if (!added.added) {
-			hypoRecycle.Recycle(hypo);
+		if (added.added) {
+      if (added.other) {
+        hypoRecycle.Recycle(added.other);
+      }
 		}
 		else {
-		  if (added.other) {
-		    hypoRecycle.Recycle(added.other);
-		  }
-
-		  // update beam variables
-	    if (futureScore > m_bestScore) {
-	      m_bestScore = futureScore;
-	      float beamWidth = mgr.system.options.search.beam_width;
-	      if ( m_bestScore + beamWidth > m_worstScore ) {
-	        m_worstScore = m_bestScore + beamWidth;
-	      }
-		  }
-		  else if (GetSize() <= maxStackSize && hypo->GetFutureScore() < m_worstScore) {
-        m_worstScore = futureScore;
-      }
+      hypoRecycle.Recycle(hypo);
 		}
 	}
 
+  // update beam variables
+	if (added.added) {
+    if (futureScore > m_bestScore) {
+      m_bestScore = futureScore;
+      float beamWidth = mgr.system.options.search.beam_width;
+      if ( m_bestScore + beamWidth > m_worstScore ) {
+        m_worstScore = m_bestScore + beamWidth;
+      }
+    }
+    else if (GetSize() <= maxStackSize && futureScore < m_worstScore) {
+      m_worstScore = futureScore;
+    }
+	}
 }
 
 StackAdd HypothesisColl::Add(const HypothesisBase *hypo)
