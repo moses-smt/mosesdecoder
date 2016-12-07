@@ -35,11 +35,9 @@ public:
 
   void Clear();
 
-  const Hypotheses &GetSortedAndPruneHypos(
+  const Hypotheses &GetSortedAndPrunedHypos(
       const ManagerBase &mgr,
       ArcLists &arcLists) const;
-
-  const Hypotheses &GetSortedAndPrunedHypos() const;
 
   const HypothesisBase *GetBestHypo() const;
 

@@ -154,7 +154,7 @@ void PhraseTable::LookupNT(
   BOOST_FOREACH (const SCFG::Stack::Coll::value_type &valPair, stackColl) {
     const SCFG::Word &ntSought = valPair.first;
     const Moses2::HypothesisColl *hypos = valPair.second;
-    const Moses2::Hypotheses &sortedHypos = hypos->GetSortedAndPruneHypos(mgr, mgr.arcLists);
+    const Moses2::Hypotheses &sortedHypos = hypos->GetSortedAndPrunedHypos(mgr, mgr.arcLists);
     //cerr << "ntSought=" << ntSought << ntSought.isNonTerminal << endl;
     LookupGivenWord(pool, mgr, prevPath, ntSought, &sortedHypos, subPhraseRange, outPath);
   }

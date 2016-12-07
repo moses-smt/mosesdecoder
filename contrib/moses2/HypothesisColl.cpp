@@ -137,7 +137,7 @@ StackAdd HypothesisColl::Add(const HypothesisBase *hypo)
 	//assert(false);
 }
 
-const Hypotheses &HypothesisColl::GetSortedAndPruneHypos(
+const Hypotheses &HypothesisColl::GetSortedAndPrunedHypos(
 		const ManagerBase &mgr,
 		ArcLists &arcLists) const
 {
@@ -168,12 +168,6 @@ const Hypotheses &HypothesisColl::GetSortedAndPruneHypos(
 
 	}
 
-	return *m_sortedHypos;
-}
-
-const Hypotheses &HypothesisColl::GetSortedAndPrunedHypos() const
-{
-	UTIL_THROW_IF2(m_sortedHypos == NULL, "m_sortedHypos must be sorted beforehand");
 	return *m_sortedHypos;
 }
 

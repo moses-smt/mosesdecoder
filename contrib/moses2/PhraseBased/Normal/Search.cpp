@@ -73,7 +73,7 @@ void Search::Decode(size_t stackInd)
 		return;
 	}
 
-	const Hypotheses &hypos = stack.GetSortedAndPruneHypos(mgr, mgr.arcLists);
+	const Hypotheses &hypos = stack.GetSortedAndPrunedHypos(mgr, mgr.arcLists);
 	//cerr << "hypos=" << hypos.size() << endl;
 
 	const InputPaths &paths = mgr.GetInputPaths();
@@ -147,7 +147,7 @@ const Hypothesis *Search::GetBestHypo() const
 void Search::AddInitialTrellisPaths(TrellisPaths<TrellisPath> &paths) const
 {
 	const Stack &lastStack = m_stacks.Back();
-	const Hypotheses &hypos = lastStack.GetSortedAndPruneHypos(mgr, mgr.arcLists);
+	const Hypotheses &hypos = lastStack.GetSortedAndPrunedHypos(mgr, mgr.arcLists);
 
 	BOOST_FOREACH(const HypothesisBase *hypoBase, hypos){
 		const Hypothesis *hypo = static_cast<const Hypothesis*>(hypoBase);

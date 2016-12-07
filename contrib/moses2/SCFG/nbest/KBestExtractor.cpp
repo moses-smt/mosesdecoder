@@ -42,7 +42,7 @@ void KBestExtractor::OutputToStream(std::stringstream &strm)
 	UTIL_THROW_IF2(lastStack.GetColl().size() != 1, "Only suppose to be 1 hypo coll in last stack");
 	UTIL_THROW_IF2(lastStack.GetColl().begin()->second == NULL, "NULL hypo collection");
 
-	const Hypotheses &hypos = lastStack.GetColl().begin()->second->GetSortedAndPrunedHypos();
+	const Hypotheses &hypos = lastStack.GetColl().begin()->second->GetSortedAndPrunedHypos(m_mgr, m_mgr.arcLists);
 	UTIL_THROW_IF2(hypos.size() != 1, "Only suppose to be 1 hypo in collection");
 	const HypothesisBase *hypo = hypos[0];
 

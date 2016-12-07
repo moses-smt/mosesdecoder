@@ -206,7 +206,7 @@ void Search::PostDecode(size_t stackInd)
 				CubeEdges &edges = *m_cubeEdges[numWords];
 
 				// sort hypo for a particular bitmap and hypoEndPos
-				const Hypotheses &sortedHypos = hypos.GetSortedAndPruneHypos(mgr, mgr.arcLists);
+				const Hypotheses &sortedHypos = hypos.GetSortedAndPrunedHypos(mgr, mgr.arcLists);
 
 				size_t numPt = mgr.system.mappings.size();
 				for (size_t i = 0; i < numPt; ++i) {
@@ -232,7 +232,7 @@ void Search::AddInitialTrellisPaths(TrellisPaths<TrellisPath> &paths) const
 	const Stack::Coll &coll = m_stack.GetColl();
 	BOOST_FOREACH(const Stack::Coll::value_type &val, coll){
 		Moses2::HypothesisColl &hypos = *val.second;
-		const Hypotheses &sortedHypos = hypos.GetSortedAndPruneHypos(mgr, mgr.arcLists);
+		const Hypotheses &sortedHypos = hypos.GetSortedAndPrunedHypos(mgr, mgr.arcLists);
 
 		BOOST_FOREACH(const HypothesisBase *hypoBase, sortedHypos) {
 			const Hypothesis *hypo = static_cast<const Hypothesis*>(hypoBase);
