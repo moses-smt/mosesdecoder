@@ -242,8 +242,8 @@ void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists)
 void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists, const HypothesisBase **sortedHypos) const
 {
   size_t maxStackSize = mgr.system.options.search.stack_size;
-  assert(maxStackSize); // can't do stack=0 - unlimited stack size. No-one ever uses that
-  assert(GetSize() > maxStackSize);
+  //assert(maxStackSize); // can't do stack=0 - unlimited stack size. No-one ever uses that
+  //assert(GetSize() > maxStackSize);
   //assert(sortedHypos.size() == GetSize());
 
   /*
@@ -259,7 +259,19 @@ void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists, cons
     ++ind;
   }
 
-  const HypothesisBase **iterMiddle = sortedHypos + maxStackSize;
+  size_t indMiddle;
+  if (maxStackSize == 0) {
+    indMiddle = GetSize();
+  }
+  else if (GetSize() > maxStackSize) {
+    indMiddle = maxStackSize;
+  }
+  else {
+    // GetSize() <= maxStackSize
+    indMiddle = GetSize();
+  }
+
+  const HypothesisBase **iterMiddle = sortedHypos + indMiddle;
 
   std::partial_sort(
       sortedHypos,
