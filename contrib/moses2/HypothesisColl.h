@@ -66,10 +66,9 @@ protected:
   SCORE m_worstScore;
 
   StackAdd Add(const HypothesisBase *hypo);
-  void SortAndPruneHypos(const ManagerBase &mgr, ArcLists &arcLists) const;
 
   void PruneHypos(const ManagerBase &mgr, ArcLists &arcLists);
-  void PruneHypos(const ManagerBase &mgr, ArcLists &arcLists, const HypothesisBase **sortedHypos) const;
+  void SortHypos(const ManagerBase &mgr, const HypothesisBase **sortedHypos) const;
 
 };
 

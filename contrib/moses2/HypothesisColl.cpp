@@ -147,13 +147,25 @@ const Hypotheses &HypothesisColl::GetSortedAndPruneHypos(
 		m_sortedHypos = new (pool.Allocate<Hypotheses>()) Hypotheses(pool,
 				m_coll.size());
 
-		size_t ind = 0;
-		BOOST_FOREACH(const HypothesisBase *hypo, m_coll){
-			(*m_sortedHypos)[ind] = hypo;
-			++ind;
-		}
+		SortHypos(mgr, m_sortedHypos->GetArray());
 
-		SortAndPruneHypos(mgr, arcLists);
+	  // prune
+	  Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
+
+	  size_t maxStackSize = mgr.system.options.search.stack_size;
+	  if (maxStackSize && m_sortedHypos->size() > maxStackSize) {
+	    for (size_t i = maxStackSize; i < m_sortedHypos->size(); ++i) {
+	      HypothesisBase *hypo = const_cast<HypothesisBase*>((*m_sortedHypos)[i]);
+	      recycler.Recycle(hypo);
+
+	      // delete from arclist
+	      if (mgr.system.options.nbest.nbest_size) {
+	        arcLists.Delete(hypo);
+	      }
+	    }
+	    m_sortedHypos->resize(maxStackSize);
+	  }
+
 	}
 
 	return *m_sortedHypos;
@@ -165,51 +177,6 @@ const Hypotheses &HypothesisColl::GetSortedAndPrunedHypos() const
 	return *m_sortedHypos;
 }
 
-void HypothesisColl::SortAndPruneHypos(const ManagerBase &mgr,
-		ArcLists &arcLists) const
-{
-	size_t stackSize = mgr.system.options.search.stack_size;
-	Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
-
-	/*
-   cerr << "UNSORTED hypos: ";
-   BOOST_FOREACH(const HypothesisBase *hypo, m_coll) {
-	   cerr << hypo << "(" << hypo->GetFutureScore() << ")" << " ";
-   }
-   cerr << endl;
-	 */
-	Hypotheses::iterator iterMiddle;
-	iterMiddle =
-			(stackSize == 0 || m_sortedHypos->size() < stackSize) ?
-					m_sortedHypos->end() : m_sortedHypos->begin() + stackSize;
-
-	std::partial_sort(m_sortedHypos->begin(), iterMiddle, m_sortedHypos->end(),
-			HypothesisFutureScoreOrderer());
-
-	// prune
-	if (stackSize && m_sortedHypos->size() > stackSize) {
-		for (size_t i = stackSize; i < m_sortedHypos->size(); ++i) {
-			HypothesisBase *hypo = const_cast<HypothesisBase*>((*m_sortedHypos)[i]);
-			recycler.Recycle(hypo);
-
-			// delete from arclist
-			if (mgr.system.options.nbest.nbest_size) {
-				arcLists.Delete(hypo);
-			}
-		}
-		m_sortedHypos->resize(stackSize);
-	}
-
-	/*
-   cerr << "sorted hypos: ";
-   for (size_t i = 0; i < m_sortedHypos->size(); ++i) {
-   const HypothesisBase *hypo = (*m_sortedHypos)[i];
-   	   cerr << hypo << " ";
-   }
-   cerr << endl;
-	 */
-}
-
 void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists)
 {
   size_t maxStackSize = mgr.system.options.search.stack_size;
@@ -217,7 +184,7 @@ void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists)
   Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
 
   const HypothesisBase *sortedHypos[GetSize()];
-  PruneHypos(mgr, mgr.arcLists, sortedHypos);
+  SortHypos(mgr, sortedHypos);
 
   // update worse score
   m_worstScore = sortedHypos[maxStackSize - 1]->GetFutureScore();
@@ -239,7 +206,7 @@ void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists)
 
 }
 
-void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists, const HypothesisBase **sortedHypos) const
+void HypothesisColl::SortHypos(const ManagerBase &mgr, const HypothesisBase **sortedHypos) const
 {
   size_t maxStackSize = mgr.system.options.search.stack_size;
   //assert(maxStackSize); // can't do stack=0 - unlimited stack size. No-one ever uses that
