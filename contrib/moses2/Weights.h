@@ -27,8 +27,6 @@ public:
     return m_weights[ind];
   }
 
-  std::ostream &Debug(std::ostream &out, const System &system) const;
-
   std::vector<SCORE> GetWeights(const FeatureFunction &ff) const;
 
   void SetWeights(const FeatureFunctions &ffs, const std::string &ffName, const std::vector<float> &weights);

@@ -36,16 +36,6 @@ void Weights::Init(const FeatureFunctions &ffs)
   m_weights.resize(totalNumScores, 1);
 }
 
-std::ostream &Weights::Debug(std::ostream &out, const System &system) const
-{
-  const FeatureFunctions &ffs  = system.featureFunctions;
-  size_t numScores = ffs.GetNumScores();
-  for (size_t i = 0; i < numScores; ++i) {
-    out << m_weights[i] << " ";
-  }
-
-}
-
 std::vector<SCORE> Weights::GetWeights(const FeatureFunction &ff) const
 {
   std::vector<SCORE> ret(m_weights.begin() + ff.GetStartInd(), m_weights.begin() + ff.GetStartInd() + ff.GetNumScores());
