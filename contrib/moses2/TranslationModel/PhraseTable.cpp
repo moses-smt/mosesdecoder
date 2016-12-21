@@ -87,8 +87,8 @@ void PhraseTable::Lookup(const Manager &mgr, InputPathsBase &inputPaths) const
 
     if (SatisfyBackoff(mgr, *path)) {
       TargetPhrases *tpsPtr = Lookup(mgr, mgr.GetPool(), *path);
-      cerr << "tpsPtr=" << tpsPtr << " ";
       /*
+      cerr << "tpsPtr=" << tpsPtr << " ";
        if (tps.get()) {
        cerr << tps.get()->GetSize();
        }

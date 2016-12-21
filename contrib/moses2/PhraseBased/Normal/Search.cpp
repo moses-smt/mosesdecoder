@@ -60,7 +60,7 @@ void Search::Decode()
 		if (stackInd < m_stacks.GetSize() - 1) {
 			m_stacks.Delete(stackInd);
 		}
-		//cerr << m_stacks << endl;
+		//cerr << m_stacks.Debug(mgr.system) << endl;
 	}
 }
 
