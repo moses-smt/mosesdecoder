@@ -60,18 +60,18 @@ void HypothesisColl::Add(
   }
 
   SCORE futureScore = hypo->GetFutureScore();
+
   /*
   cerr << "scores:"
       << futureScore << " "
       << m_bestScore << " "
-      << m_minBeamScore << " "
       << GetSize() << " "
       << endl;
   */
   if (GetSize() >= maxStackSize && futureScore < m_worstScore) {
     // beam threshold or really bad hypo that won't make the pruning cut
     // as more hypos are added, the m_worstScore stat gets out of date and isn't the optimum cut-off point
-    //cerr << "Discard, really bad score:" << hypo->Debug(system) << endl;
+    cerr << "Discard, really bad score:" << hypo->Debug(mgr.system) << endl;
     hypoRecycle.Recycle(hypo);
     return;
   }
@@ -111,14 +111,18 @@ void HypothesisColl::Add(
 StackAdd HypothesisColl::Add(const HypothesisBase *hypo)
 {
 	std::pair<_HCType::iterator, bool> addRet = m_coll.insert(hypo);
+	//cerr << endl << "new=" << hypo->Debug(hypo->GetManager().system) << endl;
 
 	// CHECK RECOMBINATION
 	if (addRet.second) {
 		// equiv hypo doesn't exists
+    //cerr << "Added " << hypo << endl;
 		return StackAdd(true, NULL);
 	}
 	else {
 		HypothesisBase *hypoExisting = const_cast<HypothesisBase*>(*addRet.first);
+	  //cerr << "hypoExisting=" << hypoExisting->Debug(hypo->GetManager().system) << endl;
+
 		if (hypo->GetFutureScore() > hypoExisting->GetFutureScore()) {
 			// incoming hypo is better than the one we have
 			const HypothesisBase * const &hypoExisting1 = *addRet.first;
@@ -126,10 +130,12 @@ StackAdd HypothesisColl::Add(const HypothesisBase *hypo)
 					const_cast<const HypothesisBase *&>(hypoExisting1);
 			hypoExisting2 = hypo;
 
+      //cerr << "Added " << hypo << " dicard existing " << hypoExisting2 << endl;
 			return StackAdd(true, hypoExisting);
 		}
 		else {
 			// already storing the best hypo. discard incoming hypo
+      //cerr << "Keep existing " << hypoExisting << " dicard new " << hypo << endl;
 			return StackAdd(false, hypoExisting);
 		}
 	}

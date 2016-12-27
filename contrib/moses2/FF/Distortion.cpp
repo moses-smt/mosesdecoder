@@ -118,6 +118,8 @@ void Distortion::EvaluateWhenApplied(const ManagerBase &mgr,
   DistortionState_traditional &stateCast =
       static_cast<DistortionState_traditional&>(state);
   stateCast.Set(hypo.GetInputPath().range, hypo.GetBitmap().GetFirstGapPos());
+
+  //cerr << "hypo=" << hypo.Debug(mgr.system) << endl;
 }
 
 SCORE Distortion::CalculateDistortionScore(const Range &prev, const Range &curr,

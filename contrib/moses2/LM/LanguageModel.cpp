@@ -146,6 +146,7 @@ void LanguageModel::EvaluateInIsolation(MemPool &pool, const System &system,
     const Phrase<Moses2::Word> &source, const TargetPhraseImpl &targetPhrase, Scores &scores,
     SCORE &estimatedScore) const
 {
+  cerr << "start LanguageModel::EvaluateInIsolation" << endl;
   if (targetPhrase.GetSize() == 0) {
     return;
   }
@@ -174,6 +175,7 @@ void LanguageModel::EvaluateInIsolation(MemPool &pool, const System &system,
   SCORE weightedScore = Scores::CalcWeightedScore(system, *this, nonFullScore);
   estimatedScore += weightedScore;
 
+  cerr << "end LanguageModel::EvaluateInIsolation" << endl;
 }
 
 void LanguageModel::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
