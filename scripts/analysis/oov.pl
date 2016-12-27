@@ -176,6 +176,13 @@ sub ngrams {
     return { md5(encode_utf8($sent)) => 1  };
   } else {
     my @words = split /\s+/, $sent;
+    
+    #factors
+    if ( $sent =~ m/[|]/) {
+      my $use_index = 0; # default factor is the first one
+      @words = map { ( split /[|]/, $_ ) [$use_index]  } @words;
+    }
+    
     my $out;
     if ($n == 1) {
       foreach my $w (@words) {
