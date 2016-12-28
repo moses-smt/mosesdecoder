@@ -71,7 +71,7 @@ void HypothesisColl::Add(
   if (GetSize() >= maxStackSize && futureScore < m_worstScore) {
     // beam threshold or really bad hypo that won't make the pruning cut
     // as more hypos are added, the m_worstScore stat gets out of date and isn't the optimum cut-off point
-    cerr << "Discard, really bad score:" << hypo->Debug(mgr.system) << endl;
+    //cerr << "Discard, really bad score:" << hypo->Debug(mgr.system) << endl;
     hypoRecycle.Recycle(hypo);
     return;
   }
