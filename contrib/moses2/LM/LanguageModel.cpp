@@ -173,7 +173,6 @@ void LanguageModel::EvaluateInIsolation(MemPool &pool, const System &system,
   scores.PlusEquals(system, *this, score);
   SCORE weightedScore = Scores::CalcWeightedScore(system, *this, nonFullScore);
   estimatedScore += weightedScore;
-
 }
 
 void LanguageModel::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
