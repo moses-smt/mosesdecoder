@@ -60,6 +60,7 @@ void ReorderingConstraint::FinalizeWalls()
 void ReorderingConstraint::SetWall( size_t pos, bool value )
 {
   //cerr << "SETTING reordering wall at position " << pos << std::endl;
+  UTIL_THROW_IF2(pos >= m_size, "Wall over length of sentence: " << pos << " >= " << m_size);
   m_wall[pos] = value;
   m_active = true;
 }
