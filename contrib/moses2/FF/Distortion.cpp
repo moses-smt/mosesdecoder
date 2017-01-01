@@ -57,12 +57,23 @@ struct DistortionState_traditional: public FFState
 Distortion::Distortion(size_t startInd, const std::string &line) :
     StatefulFeatureFunction(startInd, line)
 {
+  m_completedHypo = false;
   ReadParameters();
 }
 
 Distortion::~Distortion()
 {
   // TODO Auto-generated destructor stub
+}
+
+void Distortion::SetParameter(const std::string& key, const std::string& value)
+{
+  if (key == "completed-hypo") {
+    m_completedHypo = Scan<bool>(value);
+  }
+  else {
+    StatefulFeatureFunction::SetParameter(key, value);
+  }
 }
 
 FFState* Distortion::BlankState(MemPool &pool, const System &sys) const
@@ -110,7 +121,7 @@ void Distortion::EvaluateWhenApplied(const ManagerBase &mgr,
   const DistortionState_traditional &prev =
       static_cast<const DistortionState_traditional&>(prevState);
   SCORE distortionScore = CalculateDistortionScore(prev.range,
-      hypo.GetInputPath().range, prev.first_gap);
+      hypo.GetInputPath().range, prev.first_gap, hypo.GetBitmap());
   //cerr << "distortionScore=" << distortionScore << endl;
 
   scores.PlusEquals(mgr.system, *this, distortionScore);
@@ -123,11 +134,11 @@ void Distortion::EvaluateWhenApplied(const ManagerBase &mgr,
 }
 
 SCORE Distortion::CalculateDistortionScore(const Range &prev, const Range &curr,
-    const int FirstGap) const
+    const int FirstGap, const Bitmap &coverage) const
 {
   bool useEarlyDistortionCost = false;
   if (!useEarlyDistortionCost) {
-    return -(SCORE) ComputeDistortionDistance(prev, curr);
+    return -(SCORE) ComputeDistortionDistance(prev, curr, coverage);
   }
   else {
     /* Pay distortion score as soon as possible, from Moore and Quirk MT Summit 2007
@@ -168,7 +179,7 @@ SCORE Distortion::CalculateDistortionScore(const Range &prev, const Range &curr,
 }
 
 int Distortion::ComputeDistortionDistance(const Range& prev,
-    const Range& current) const
+    const Range& current, const Bitmap &coverage) const
 {
   int dist = 0;
   if (prev.GetNumWordsCovered() == 0) {
@@ -176,8 +187,18 @@ int Distortion::ComputeDistortionDistance(const Range& prev,
   }
   else {
     dist = (int) prev.GetEndPos() - (int) current.GetStartPos() + 1;
+    dist = abs(dist);
+
+    if (m_completedHypo && coverage.IsComplete()) {
+      dist += coverage.GetSize() - current.GetEndPos() - 1;
+      /*
+      cerr << "completed=" << coverage << " " << coverage.GetSize() << " "
+          << prev << " "
+          << current << " " << dist << endl;
+      */
+    }
   }
-  return abs(dist);
+  return dist;
 }
 
 void Distortion::EvaluateWhenApplied(const SCFG::Manager &mgr,

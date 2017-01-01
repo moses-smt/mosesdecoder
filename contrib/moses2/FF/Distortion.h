@@ -14,12 +14,15 @@
 
 namespace Moses2
 {
+class Bitmap;
 
 class Distortion: public StatefulFeatureFunction
 {
 public:
   Distortion(size_t startInd, const std::string &line);
   virtual ~Distortion();
+
+  virtual void SetParameter(const std::string& key, const std::string& value);
 
   virtual FFState* BlankState(MemPool &pool, const System &sys) const;
   virtual void EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
@@ -48,10 +51,12 @@ public:
       FFState &state) const;
 
 protected:
-  SCORE CalculateDistortionScore(const Range &prev, const Range &curr,
-      const int FirstGap) const;
+  bool m_completedHypo;
 
-  int ComputeDistortionDistance(const Range& prev, const Range& current) const;
+  SCORE CalculateDistortionScore(const Range &prev, const Range &curr,
+      const int FirstGap, const Bitmap &coverage) const;
+
+  int ComputeDistortionDistance(const Range& prev, const Range& current, const Bitmap &coverage) const;
 
 };
 
