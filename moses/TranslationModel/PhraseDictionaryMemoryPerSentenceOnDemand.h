@@ -39,6 +39,8 @@ protected:
   typedef boost::unordered_map<Phrase, TargetPhraseCollection::shared_ptr> Coll;
   mutable boost::thread_specific_ptr<Coll> m_coll;
 
+  bool m_valuesAreProbabilities;
+
   Coll &GetColl() const;
 
 };
