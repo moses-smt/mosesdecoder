@@ -138,7 +138,7 @@ if $(with-dalm) {
 
 #Top-level LM library.  If you've added a file that doesn't depend on external
 #libraries, put it here.  
-alias LM : Backward.cpp BackwardLMState.cpp Base.cpp BilingualLM.cpp Implementation.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp SkeletonLM.cpp 
+alias LM : Backward.cpp BackwardLMState.cpp Base.cpp BilingualLM.cpp Implementation.cpp InMemoryPerSentenceOnDemandLM.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp SkeletonLM.cpp
   ../../lm//kenlm ..//headers $(dependencies) ;
 
 alias macros : : : : <define>$(lmmacros) ;
