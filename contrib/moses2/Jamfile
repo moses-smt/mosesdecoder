@@ -114,10 +114,6 @@ alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../mose
  	 	PhraseBased/CubePruningMiniStack/Search.cpp
  	 	PhraseBased/CubePruningMiniStack/Stack.cpp 
 
-		PhraseBased/Batch/Search.cpp
- 	 	PhraseBased/Batch/Stack.cpp 
- 	 	PhraseBased/Batch/Stacks.cpp 
-
 #	 	PhraseBased/CubePruningCardinalStack/Misc.cpp
 # 	 	PhraseBased/CubePruningCardinalStack/Search.cpp
 # 	 	PhraseBased/CubePruningCardinalStack/Stack.cpp

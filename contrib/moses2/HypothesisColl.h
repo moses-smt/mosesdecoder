@@ -25,7 +25,7 @@ class HypothesisColl
 public:
   HypothesisColl(const ManagerBase &mgr);
 
-  void Add(const System &system,
+  void Add(const ManagerBase &mgr,
 		  HypothesisBase *hypo,
 		  Recycler<HypothesisBase*> &hypoRecycle,
 		  ArcLists &arcLists);
@@ -35,11 +35,9 @@ public:
 
   void Clear();
 
-  const Hypotheses &GetSortedAndPruneHypos(
+  const Hypotheses &GetSortedAndPrunedHypos(
       const ManagerBase &mgr,
       ArcLists &arcLists) const;
-
-  const Hypotheses &GetSortedAndPrunedHypos() const;
 
   const HypothesisBase *GetBestHypo() const;
 
@@ -49,6 +47,8 @@ public:
     const HypothesisBase *hypo = GetBestHypo();
     return hypo ? &hypo->Cast<T>() : NULL;
   }
+
+  void Delete(const HypothesisBase *hypo);
 
   std::string Debug(const System &system) const;
 
@@ -60,8 +60,13 @@ protected:
   _HCType m_coll;
   mutable Hypotheses *m_sortedHypos;
 
+  SCORE m_bestScore;
+  SCORE m_worstScore;
+
   StackAdd Add(const HypothesisBase *hypo);
-  void SortAndPruneHypos(const ManagerBase &mgr, ArcLists &arcLists) const;
+
+  void PruneHypos(const ManagerBase &mgr, ArcLists &arcLists);
+  void SortHypos(const ManagerBase &mgr, const HypothesisBase **sortedHypos) const;
 
 };
 

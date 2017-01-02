@@ -29,6 +29,7 @@
 #include <queue>
 #include <cstring>
 #include <cstdio>
+#include <boost/thread.hpp>
 
 #include "MurmurHash3.h"
 #include "StringVector.h"

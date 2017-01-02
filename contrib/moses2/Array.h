@@ -56,6 +56,9 @@ public:
     return m_arr[ind];
   }
 
+  T *GetArray()
+  { return m_arr; }
+
   size_t hash() const
   {
     size_t seed = 0;

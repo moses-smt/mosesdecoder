@@ -18,10 +18,12 @@ using namespace std;
 namespace Moses2
 {
 
-HypothesisColl::HypothesisColl(const ManagerBase &mgr) :
-    		m_coll(MemPoolAllocator<const HypothesisBase*>(mgr.GetPool())), m_sortedHypos(
-    				NULL)
+HypothesisColl::HypothesisColl(const ManagerBase &mgr)
+:m_coll(MemPoolAllocator<const HypothesisBase*>(mgr.GetPool()))
+,m_sortedHypos(NULL)
 {
+  m_bestScore = -std::numeric_limits<float>::infinity();
+  m_worstScore = std::numeric_limits<float>::infinity();
 }
 
 const HypothesisBase *HypothesisColl::GetBestHypo() const
@@ -45,39 +47,82 @@ const HypothesisBase *HypothesisColl::GetBestHypo() const
 }
 
 void HypothesisColl::Add(
-		const System &system,
+    const ManagerBase &mgr,
 		HypothesisBase *hypo,
 		Recycler<HypothesisBase*> &hypoRecycle,
 		ArcLists &arcLists)
 {
+  size_t maxStackSize = mgr.system.options.search.stack_size;
+
+  if (GetSize() > maxStackSize * 2) {
+    //cerr << "maxStackSize=" << maxStackSize << " " << GetSize() << endl;
+    PruneHypos(mgr, mgr.arcLists);
+  }
+
+  SCORE futureScore = hypo->GetFutureScore();
+
+  /*
+  cerr << "scores:"
+      << futureScore << " "
+      << m_bestScore << " "
+      << GetSize() << " "
+      << endl;
+  */
+  if (GetSize() >= maxStackSize && futureScore < m_worstScore) {
+    // beam threshold or really bad hypo that won't make the pruning cut
+    // as more hypos are added, the m_worstScore stat gets out of date and isn't the optimum cut-off point
+    //cerr << "Discard, really bad score:" << hypo->Debug(mgr.system) << endl;
+    hypoRecycle.Recycle(hypo);
+    return;
+  }
+
 	StackAdd added = Add(hypo);
 
-	size_t nbestSize = system.options.nbest.nbest_size;
+	size_t nbestSize = mgr.system.options.nbest.nbest_size;
 	if (nbestSize) {
 		arcLists.AddArc(added.added, hypo, added.other);
 	}
 	else {
-		if (!added.added) {
-			hypoRecycle.Recycle(hypo);
+		if (added.added) {
+      if (added.other) {
+        hypoRecycle.Recycle(added.other);
+      }
 		}
-		else if (added.other) {
-			hypoRecycle.Recycle(added.other);
+		else {
+      hypoRecycle.Recycle(hypo);
 		}
 	}
 
+  // update beam variables
+	if (added.added) {
+    if (futureScore > m_bestScore) {
+      m_bestScore = futureScore;
+      float beamWidth = mgr.system.options.search.beam_width;
+      if ( m_bestScore + beamWidth > m_worstScore ) {
+        m_worstScore = m_bestScore + beamWidth;
+      }
+    }
+    else if (GetSize() <= maxStackSize && futureScore < m_worstScore) {
+      m_worstScore = futureScore;
+    }
+	}
 }
 
 StackAdd HypothesisColl::Add(const HypothesisBase *hypo)
 {
 	std::pair<_HCType::iterator, bool> addRet = m_coll.insert(hypo);
+	//cerr << endl << "new=" << hypo->Debug(hypo->GetManager().system) << endl;
 
 	// CHECK RECOMBINATION
 	if (addRet.second) {
 		// equiv hypo doesn't exists
+    //cerr << "Added " << hypo << endl;
 		return StackAdd(true, NULL);
 	}
 	else {
 		HypothesisBase *hypoExisting = const_cast<HypothesisBase*>(*addRet.first);
+	  //cerr << "hypoExisting=" << hypoExisting->Debug(hypo->GetManager().system) << endl;
+
 		if (hypo->GetFutureScore() > hypoExisting->GetFutureScore()) {
 			// incoming hypo is better than the one we have
 			const HypothesisBase * const &hypoExisting1 = *addRet.first;
@@ -85,18 +130,20 @@ StackAdd HypothesisColl::Add(const HypothesisBase *hypo)
 					const_cast<const HypothesisBase *&>(hypoExisting1);
 			hypoExisting2 = hypo;
 
+      //cerr << "Added " << hypo << " dicard existing " << hypoExisting2 << endl;
 			return StackAdd(true, hypoExisting);
 		}
 		else {
 			// already storing the best hypo. discard incoming hypo
+      //cerr << "Keep existing " << hypoExisting << " dicard new " << hypo << endl;
 			return StackAdd(false, hypoExisting);
 		}
 	}
 
-	assert(false);
+	//assert(false);
 }
 
-const Hypotheses &HypothesisColl::GetSortedAndPruneHypos(
+const Hypotheses &HypothesisColl::GetSortedAndPrunedHypos(
 		const ManagerBase &mgr,
 		ArcLists &arcLists) const
 {
@@ -106,73 +153,124 @@ const Hypotheses &HypothesisColl::GetSortedAndPruneHypos(
 		m_sortedHypos = new (pool.Allocate<Hypotheses>()) Hypotheses(pool,
 				m_coll.size());
 
-		size_t ind = 0;
-		BOOST_FOREACH(const HypothesisBase *hypo, m_coll){
-			(*m_sortedHypos)[ind] = hypo;
-			++ind;
-		}
+		SortHypos(mgr, m_sortedHypos->GetArray());
 
-		SortAndPruneHypos(mgr, arcLists);
+	  // prune
+	  Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
+
+	  size_t maxStackSize = mgr.system.options.search.stack_size;
+	  if (maxStackSize && m_sortedHypos->size() > maxStackSize) {
+	    for (size_t i = maxStackSize; i < m_sortedHypos->size(); ++i) {
+	      HypothesisBase *hypo = const_cast<HypothesisBase*>((*m_sortedHypos)[i]);
+	      recycler.Recycle(hypo);
+
+	      // delete from arclist
+	      if (mgr.system.options.nbest.nbest_size) {
+	        arcLists.Delete(hypo);
+	      }
+	    }
+	    m_sortedHypos->resize(maxStackSize);
+	  }
+
 	}
 
 	return *m_sortedHypos;
 }
 
-const Hypotheses &HypothesisColl::GetSortedAndPrunedHypos() const
+void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists)
 {
-	UTIL_THROW_IF2(m_sortedHypos == NULL, "m_sortedHypos must be sorted beforehand");
-	return *m_sortedHypos;
+  size_t maxStackSize = mgr.system.options.search.stack_size;
+
+  Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
+
+  const HypothesisBase *sortedHypos[GetSize()];
+  SortHypos(mgr, sortedHypos);
+
+  // update worse score
+  m_worstScore = sortedHypos[maxStackSize - 1]->GetFutureScore();
+
+  // prune
+  for (size_t i = maxStackSize; i < GetSize(); ++i) {
+    HypothesisBase *hypo = const_cast<HypothesisBase*>(sortedHypos[i]);
+
+    // delete from arclist
+    if (mgr.system.options.nbest.nbest_size) {
+      arcLists.Delete(hypo);
+    }
+
+    // delete from collection
+    Delete(hypo);
+
+    recycler.Recycle(hypo);
+  }
+
 }
 
-void HypothesisColl::SortAndPruneHypos(const ManagerBase &mgr,
-		ArcLists &arcLists) const
+void HypothesisColl::SortHypos(const ManagerBase &mgr, const HypothesisBase **sortedHypos) const
 {
-	size_t stackSize = mgr.system.options.search.stack_size;
-	Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
+  size_t maxStackSize = mgr.system.options.search.stack_size;
+  //assert(maxStackSize); // can't do stack=0 - unlimited stack size. No-one ever uses that
+  //assert(GetSize() > maxStackSize);
+  //assert(sortedHypos.size() == GetSize());
 
-	/*
+  /*
    cerr << "UNSORTED hypos: ";
    BOOST_FOREACH(const HypothesisBase *hypo, m_coll) {
-	   cerr << hypo << "(" << hypo->GetFutureScore() << ")" << " ";
+     cerr << hypo << "(" << hypo->GetFutureScore() << ")" << " ";
    }
    cerr << endl;
-	 */
-	Hypotheses::iterator iterMiddle;
-	iterMiddle =
-			(stackSize == 0 || m_sortedHypos->size() < stackSize) ?
-					m_sortedHypos->end() : m_sortedHypos->begin() + stackSize;
+   */
+  size_t ind = 0;
+  BOOST_FOREACH(const HypothesisBase *hypo, m_coll){
+    sortedHypos[ind] = hypo;
+    ++ind;
+  }
 
-	std::partial_sort(m_sortedHypos->begin(), iterMiddle, m_sortedHypos->end(),
-			HypothesisFutureScoreOrderer());
+  size_t indMiddle;
+  if (maxStackSize == 0) {
+    indMiddle = GetSize();
+  }
+  else if (GetSize() > maxStackSize) {
+    indMiddle = maxStackSize;
+  }
+  else {
+    // GetSize() <= maxStackSize
+    indMiddle = GetSize();
+  }
 
-	// prune
-	if (stackSize && m_sortedHypos->size() > stackSize) {
-		for (size_t i = stackSize; i < m_sortedHypos->size(); ++i) {
-			HypothesisBase *hypo = const_cast<HypothesisBase*>((*m_sortedHypos)[i]);
-			recycler.Recycle(hypo);
+  const HypothesisBase **iterMiddle = sortedHypos + indMiddle;
 
-			// delete from arclist
-			if (mgr.system.options.nbest.nbest_size) {
-				arcLists.Delete(hypo);
-			}
-		}
-		m_sortedHypos->resize(stackSize);
-	}
+  std::partial_sort(
+      sortedHypos,
+      iterMiddle,
+      sortedHypos + GetSize(),
+      HypothesisFutureScoreOrderer());
 
-	/*
+  /*
    cerr << "sorted hypos: ";
-   for (size_t i = 0; i < m_sortedHypos->size(); ++i) {
-   const HypothesisBase *hypo = (*m_sortedHypos)[i];
-   	   cerr << hypo << " ";
+   for (size_t i = 0; i < sortedHypos.size(); ++i) {
+     const HypothesisBase *hypo = sortedHypos[i];
+     cerr << hypo << " ";
    }
    cerr << endl;
-	 */
+   */
+}
+
+void HypothesisColl::Delete(const HypothesisBase *hypo)
+{
+  //cerr << "hypo=" << hypo << " " << m_coll.size() << endl;
+
+  size_t erased = m_coll.erase(hypo);
+  UTIL_THROW_IF2(erased != 1, "couldn't erase hypo " << hypo);
 }
 
 void HypothesisColl::Clear()
 {
 	m_sortedHypos = NULL;
 	m_coll.clear();
+
+  m_bestScore = -std::numeric_limits<float>::infinity();
+  m_worstScore = std::numeric_limits<float>::infinity();
 }
 
 std::string HypothesisColl::Debug(const System &system) const

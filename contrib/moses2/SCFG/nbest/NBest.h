@@ -81,8 +81,7 @@ protected:
 
     void OutputToStream(
     		const SCFG::Manager &mgr,
-			std::stringstream &strm,
-			const NBestColl &nbestColl) const;
+			std::stringstream &strm) const;
 };
 
 /////////////////////////////////////////////////////////////

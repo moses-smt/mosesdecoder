@@ -22,7 +22,8 @@ void PhraseDictionaryMemoryPerSentenceOnDemand::Load(AllOptions::ptr const& opts
 }
 
 
-TargetPhraseCollection::shared_ptr PhraseDictionaryMemoryPerSentenceOnDemand::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &source) const {
+TargetPhraseCollection::shared_ptr PhraseDictionaryMemoryPerSentenceOnDemand::GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &source) const
+{
 
   Coll &coll = GetColl();
 

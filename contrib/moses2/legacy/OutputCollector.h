@@ -30,6 +30,7 @@
 #include <iostream>
 #include <map>
 #include <ostream>
+#include <fstream>
 #include <string>
 #include "util/exception.hh"
 

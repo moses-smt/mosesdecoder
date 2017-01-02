@@ -11,6 +11,9 @@ SkeletonLM::SkeletonLM(const std::string &line)
 {
   ReadParameters();
 
+  UTIL_THROW_IF2(m_nGramOrder == NOT_FOUND, "Must set order");
+  UTIL_THROW_IF2(m_nGramOrder <= 1, "Ngram order must be more than 1");
+
   FactorCollection &factorCollection = FactorCollection::Instance();
 
   // needed by parent language model classes. Why didn't they set these themselves?

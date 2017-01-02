@@ -39,6 +39,10 @@ bool Search::CanExtend(const Bitmap &hypoBitmap, size_t hypoRangeEndPos,
     return false;
   }
 
+  if (mgr.system.options.reordering.max_distortion == -1) {
+    return true;
+  }
+
   if (mgr.system.options.reordering.max_distortion >= 0) {
     // distortion limit
     int distortion = ComputeDistortionDistance(hypoRangeEndPos,

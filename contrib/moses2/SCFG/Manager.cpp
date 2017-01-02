@@ -90,9 +90,8 @@ void Manager::Decode()
     }
   }
 
-  const Stack *stack;
-
   /*
+  const Stack *stack;
   stack = &m_stacks.GetStack(0, 5);
   cerr << "stack 0,12:" << stack->Debug(system) << endl;
   */

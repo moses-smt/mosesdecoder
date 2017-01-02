@@ -7,7 +7,7 @@ using namespace std;
 namespace Moses2
 {
 
-QueryEngine::QueryEngine(const char * filepath)
+QueryEngine::QueryEngine(const char * filepath, util::LoadMethod load_method)
 {
 
   //Create filepaths
@@ -17,8 +17,10 @@ QueryEngine::QueryEngine(const char * filepath)
   std::string path_to_source_vocabid = basepath + "/source_vocabids";
   std::string alignPath = basepath + "/Alignments.dat";
 
-  if (!FileExists(path_to_config)) {
-    UTIL_THROW2("Binary table doesn't exist is didn't finish binarizing: " << path_to_config);
+  file_exits(basepath);
+
+  if (load_method == util::POPULATE_OR_READ) {
+	  cat_files(basepath);
   }
 
   ///Source phrase vocabids
@@ -137,6 +139,47 @@ void QueryEngine::read_alignments(const std::string &alignPath)
       aligns.push_back(pos);
     }
   }
+}
+
+void QueryEngine::file_exits(const std::string &basePath)
+{
+	if (!FileExists(basePath + "/Alignments.dat")) {
+	    UTIL_THROW2("Require file does not exist in: " << basePath << "/Alignments.dat");
+	}
+	if (!FileExists(basePath + "/TargetColl.dat")) {
+	    UTIL_THROW2("Require file does not exist in: " << basePath << "/TargetColl.dat");
+	}
+	if (!FileExists(basePath + "/TargetVocab.dat")) {
+	    UTIL_THROW2("Require file does not exist in: " << basePath << "/TargetVocab.dat");
+	}
+	if (!FileExists(basePath + "/cache")) {
+	    UTIL_THROW2("Require file does not exist in: " << basePath << "/cache");
+	}
+	if (!FileExists(basePath + "/config")) {
+	    UTIL_THROW2("Require file does not exist in: " << basePath << "/config");
+	}
+	if (!FileExists(basePath + "/probing_hash.dat")) {
+	    UTIL_THROW2("Require file does not exist in: " << basePath << "/probing_hash.dat");
+	}
+	if (!FileExists(basePath + "/source_vocabids")) {
+	    UTIL_THROW2("Require file does not exist in: " << basePath << "/source_vocabids");
+	}
+
+	/*
+
+	  if (!FileExists(path_to_config) || !FileExists(path_to_hashtable) ||
+		  !FileExists(path_to_source_vocabid) || !FileExists(basepath + alignPath) ||
+		  !FileExists(basepath + "/TargetColl.dat") || !FileExists(basepath + "/TargetVocab.dat") ||
+		  !FileExists(basepath + "/cache")) {
+	    UTIL_THROW2("A required table doesn't exist in: " << basepath);
+	  }
+	*/
+}
+
+void QueryEngine::cat_files(const std::string &basePath)
+{
+	system((string("cat ") + basePath + "/TargetColl.dat > /dev/null").c_str());
+	system((string("cat ") + basePath + "/probing_hash.dat > /dev/null").c_str());
 }
 
 }

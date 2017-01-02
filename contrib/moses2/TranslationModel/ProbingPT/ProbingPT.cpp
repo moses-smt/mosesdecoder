@@ -69,6 +69,7 @@ std::pair<bool, uint64_t> ProbingPT::ActiveChartEntryProbing::GetKey(const SCFG:
 ////////////////////////////////////////////////////////////////////////////
 ProbingPT::ProbingPT(size_t startInd, const std::string &line)
 :PhraseTable(startInd, line)
+,load_method(util::POPULATE_OR_READ)
 {
   ReadParameters();
 }
@@ -80,7 +81,7 @@ ProbingPT::~ProbingPT()
 
 void ProbingPT::Load(System &system)
 {
-  m_engine = new QueryEngine(m_path.c_str());
+  m_engine = new QueryEngine(m_path.c_str(), load_method);
 
   m_unkId = 456456546456;
 
@@ -147,6 +148,24 @@ void ProbingPT::Load(System &system)
 
   // cache
   CreateCache(system);
+}
+
+void ProbingPT::SetParameter(const std::string& key, const std::string& value)
+{
+	if (key == "load") {
+		if (value == "lazy") {
+			load_method = util::LAZY;
+		}
+		else if (value == "populate") {
+			load_method  = util::POPULATE_OR_READ;
+		}
+		else {
+			UTIL_THROW2("load method not supported" << value);
+		}
+	}
+	else {
+		PhraseTable::SetParameter(key, value);
+	}
 }
 
 void ProbingPT::CreateAlignmentMap(System &system, const std::string path)

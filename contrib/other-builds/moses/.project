@@ -566,6 +566,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/OutputCollector.h</locationURI>
 		</link>
 		<link>
+			<name>OutputFileStream.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/OutputFileStream.cpp</locationURI>
+		</link>
+		<link>
+			<name>OutputFileStream.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/OutputFileStream.h</locationURI>
+		</link>
+		<link>
 			<name>PCNTools.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/PCNTools.cpp</locationURI>
@@ -2174,6 +2184,16 @@
 			<name>TranslationModel/PhraseDictionaryMemoryPerSentence.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMemoryPerSentence.h</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryMemoryPerSentenceOnDemand.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMemoryPerSentenceOnDemand.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryMemoryPerSentenceOnDemand.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryMemoryPerSentenceOnDemand.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/PhraseDictionaryMultiModel.cpp</name>
