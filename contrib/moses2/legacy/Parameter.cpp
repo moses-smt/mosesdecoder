@@ -373,6 +373,9 @@ Parameter::Parameter()
   ///////////////////////////////////////////////////////////////////////////////////////
   // DEPRECATED options
   po::options_description deprec_opts("Deprecated Options");
+  AddParam(deprec_opts, "text-type",
+	   "DEPRECATED. DO NOT USE. should be one of dev/devtest/test, used for domain adaptation features");
+
   /*
   AddParam(deprec_opts, "link-param-count",
       "DEPRECATED. DO NOT USE. Number of parameters on word links when using confusion networks or lattices (default = 1)");
@@ -412,8 +415,6 @@ Parameter::Parameter()
       "DEPRECATED. DO NOT USE. weight for unknown word penalty");
   AddParam(deprec_opts, "weight-e", "e",
       "DEPRECATED. DO NOT USE. weight for word deletion");
-  AddParam(deprec_opts, "text-type",
-      "DEPRECATED. DO NOT USE. should be one of dev/devtest/test, used for domain adaptation features");
   AddParam(deprec_opts, "input-scores",
       "DEPRECATED. DO NOT USE. 2 numbers on 2 lines - [1] of scores on each edge of a confusion network or lattice input (default=1). [2] Number of 'real' word scores (0 or 1. default=0)");
   AddParam(deprec_opts, "dlm-model",
