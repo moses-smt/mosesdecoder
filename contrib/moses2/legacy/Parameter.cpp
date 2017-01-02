@@ -94,8 +94,8 @@ Parameter::Parameter()
   AddParam(search_opts, "weight",
       "weights for ALL models, 1 per line 'WeightName value'. Weight names can be repeated");
 
-  //AddParam(search_opts, "feature-overwrite",
-  //    "Override arguments in a particular feature function with a particular key. Format: -feature-overwrite \"FeatureName key=value\"");
+  AddParam(search_opts, "feature-overwrite",
+      "Override arguments in a particular feature function with a particular key. Format: -feature-overwrite \"FeatureName key=value\"");
 
   po::options_description tune_opts("Options used in tuning.");
   AddParam(tune_opts, "weight-overwrite",
