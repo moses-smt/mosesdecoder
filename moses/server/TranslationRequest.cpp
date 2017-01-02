@@ -214,6 +214,9 @@ insertTranslationOptions(Moses::Manager& manager,
         for (size_t j = 0; j < scores.size(); ++j)
           scoresXml.push_back(xmlrpc_c::value_double(scores[j]));
         toptXml["scores"] = xmlrpc_c::value_array(scoresXml);
+	ostringstream buf;
+	topt->GetScoreBreakdown().OutputAllFeatureScores(buf, true);
+	toptXml["labelledScores"] = PackScores(topt->GetScoreBreakdown());
         toptsXml.push_back(xmlrpc_c::value_struct(toptXml));
       }
     }
