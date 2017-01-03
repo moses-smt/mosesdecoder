@@ -89,7 +89,7 @@ public:
   virtual void sync() {
     GetPerThreadLM().sync();
   }
- 
+
   virtual void SetFFStateIdx(int state_idx) {
     if (initialized) {
       GetPerThreadLM().SetFFStateIdx(state_idx);
@@ -107,7 +107,7 @@ public:
       GetPerThreadLM().ReportHistoryOrder(out, phrase);
     }
   }
-  
+
   virtual void EvaluateInIsolation(const Phrase &source
                                    , const TargetPhrase &targetPhrase
                                    , ScoreComponentCollection &scoreBreakdown
