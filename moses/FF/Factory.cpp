@@ -68,6 +68,7 @@
 #include "moses/FF/SkeletonStatelessFF.h"
 #include "moses/FF/SkeletonStatefulFF.h"
 #include "moses/LM/SkeletonLM.h"
+#include "moses/LM/InMemoryPerSentenceOnDemandLM.h"
 #include "moses/FF/SkeletonTranslationOptionListFeature.h"
 #include "moses/LM/BilingualLM.h"
 #include "moses/TranslationModel/SkeletonPT.h"
@@ -299,6 +300,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(SkeletonStatelessFF);
   MOSES_FNAME(SkeletonStatefulFF);
   MOSES_FNAME(SkeletonLM);
+  MOSES_FNAME(InMemoryPerSentenceOnDemandLM);
   MOSES_FNAME(SkeletonTranslationOptionListFeature);
   MOSES_FNAME(SkeletonPT);
 

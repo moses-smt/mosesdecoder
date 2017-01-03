@@ -8,7 +8,7 @@ using namespace std;
 namespace Moses
 {
 PhraseDictionaryMemoryPerSentenceOnDemand::PhraseDictionaryMemoryPerSentenceOnDemand(const std::string &line)
-  : PhraseDictionary(line, true)
+  : PhraseDictionary(line, true), m_valuesAreProbabilities(true)
 {
   ReadParameters();
 }
@@ -67,8 +67,10 @@ void PhraseDictionaryMemoryPerSentenceOnDemand::InitializeForInput(ttasksptr con
 
     // score for this phrase table
     vector<float> scores = Tokenize<float>(toks[2]);
-    std::transform(scores.begin(), scores.end(), scores.begin(),TransformScore);
-    std::transform(scores.begin(), scores.end(), scores.begin(),FloorScore);
+    if (m_valuesAreProbabilities) {
+      std::transform(scores.begin(), scores.end(), scores.begin(),TransformScore);
+      std::transform(scores.begin(), scores.end(), scores.begin(),FloorScore);
+    }
     target->GetScoreBreakdown().PlusEquals(this, scores);
 
     // score of all other ff when this rule is being loaded
@@ -129,6 +131,8 @@ PhraseDictionaryMemoryPerSentenceOnDemand::SetParameter(const std::string& key, 
 {
   if (key == "path") {
     UTIL_THROW(util::Exception, "PhraseDictionaryMemoryPerSentenceOnDemand does not support key \"path\".");
+  } else if (key == "valuesAreProbabilities") {
+    m_valuesAreProbabilities = Scan<bool>(value);
   } else {
     PhraseDictionary::SetParameter(key, value);
   }

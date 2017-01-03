@@ -105,6 +105,7 @@ template <class Model> void LanguageModelKen<Model>::LoadModel(const std::string
   config.load_method = load_method;
 
   m_ngram.reset(new Model(file.c_str(), config));
+  VERBOSE(2, "LanguageModelKen " << m_description << " reset to " << file << "\n");
 }
 
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, util::LoadMethod load_method)
@@ -115,6 +116,15 @@ template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::stri
   ReadParameters();
   LoadModel(file, load_method);
 }
+
+template <class Model> LanguageModelKen<Model>::LanguageModelKen()
+  :LanguageModel("KENLM")
+  ,m_beginSentenceFactor(FactorCollection::Instance().AddFactor(BOS_))
+  ,m_factorType(0)
+{
+  ReadParameters();
+}
+
 
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const LanguageModelKen<Model> &copy_from)
   :LanguageModel(copy_from.GetArgLine()),
