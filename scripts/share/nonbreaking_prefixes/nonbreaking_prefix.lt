@@ -43,12 +43,11 @@ Y
 Z
 Ž
 
-# Abbreviations m. menesis d. diena  g. gimes
+# Day and month abbreviations
+# m. menesis d. diena  g. gimes
 m
 d
 g
-
-# Day and month abbreviations
 # Pirmadienis Penktadienis
 Pr
 Pn
@@ -71,6 +70,278 @@ Rugs
 Spal
 Lapkr
 Gruod
+
+# Technical terms, abbreviations used in guidebooks, advertisments, etc.
+# Generally lower-case.
+air
+# airiškai
+amer
+# amerikanizmas
+anat
+# anatomija
+arab
+# arabų
+archeol
+archit
+asm
+# asmuo
+astr
+# astronomija
+austral
+# australiškai
+aut
+# automobilis
+av
+# aviacija
+bažn
+bdv
+# būdvardis
+bibl
+# Biblija
+biol
+# biologija
+bot
+# botanika
+buh
+# buhalterija
+chem
+# chemija
+d
+# didysis
+dgs
+# daugiskaita
+dial
+# dialektizmas
+dipl
+dktv
+# daiktavardis
+džn
+# dažnai
+ekon
+el
+# elektra
+esam
+# esamasis laikas
+euf
+# eufemizmas
+fam
+# familiariai
+farm
+# farmacija
+filos
+# filosofija
+fin
+# finansai
+fiz
+# fizika
+fiziol
+flk
+# folkloras
+fon
+# fonetika
+fot
+# fotografija
+geod
+# geodezija
+geogr
+geol
+# geologija
+geom
+# geometrija
+glžk
+gr
+# graikų
+gram
+her
+# heraldika
+hidr
+# hidrotechnika
+ind
+# Indų
+iron
+# ironiškai
+isp
+# ispanų
+ist
+# istorija
+it
+# italų
+įv
+reikšm
+įv.reikšm
+# įvairiomis reikšmėmis
+jap
+# japonų
+juok
+# juokaujamai
+jūr
+# jūrininkystė
+kalb
+# kalbotyra
+kar
+# karyba
+kas
+# kasyba
+kin
+# kinematografija
+klaus
+# klausiamasis
+knyg
+# knyginis
+kom
+# komercija
+komp
+# kompiuteris
+kosm
+# kosmonautika
+kt
+# kitas
+kul
+# kulinarija
+kuop
+# kuopine
+l
+# laikas
+lit
+# literatūrinis
+log
+# logika
+lot
+# lotynų
+mat
+# matematika
+maž
+# mažybinis
+med
+# medicina
+medž
+# medžioklė
+men
+# menas
+menk
+# menkinamai
+metal
+# metalurgija
+meteor
+min
+# mineralogija
+mit
+# mitologija
+mok
+# mokyklinis
+muz
+# muzikinis
+n
+# naujasis
+neig
+# neigiamasis
+niek
+# niekinamai
+ofic
+# oficialus
+opt
+# optika
+p
+# pietūs
+pan
+# panašiai
+parl
+# parlamentas
+pat
+# patarlė
+paž
+# pažodžiui
+plg
+# palygink
+poet
+# poetizmas
+poligr
+# poligrafija
+polit
+# politika
+ppr
+# paprastai
+pr
+# prancūzų
+prk
+# perkeltine
+psn
+# pasenęs žodis
+psich
+# psichologija
+pvz
+# pavyzdžiui
+r
+# rytai
+rad
+# radiotechnika
+rel
+# religija
+ret
+# retai
+rus
+# rusų
+sen
+# senasis
+sl
+# slengas
+spec
+# specialus
+sport
+stat
+# statyba
+sudurt
+# sudurtinis
+sutr
+# sutrumpintas
+š
+# šiaurė
+šach
+# šachmatai
+šiaur
+škot
+# škotiškai
+šnek
+# šnekamoji
+teatr
+tech
+# technika
+teig
+# teigiamas
+teis
+# teisė
+tekst
+# tekstilė
+tel
+v
+# tik vyriškosios, vakarai
+t.p
+t
+p
+# taip pat
+vaik
+# vaikų
+vart
+# vartojama
+vet
+# veterinarija
+vid
+# vidurinis
+vksm
+# veiksmažodis
+vns
+# vienaskaita
+vok
+# vokiečių
+vulg
+# vulgariai
+zool
+žr
+# žiūrėk
+ž.ū
+ž
+ū
+# žemės ūkis
 
 # List of titles. These are often followed by upper-case names, but do
 # not indicate sentence breaks
