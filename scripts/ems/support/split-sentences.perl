@@ -2,8 +2,8 @@
 #
 # This file is part of moses.  Its use is licensed under the GNU Lesser General
 # Public License version 2.1 or, at your option, any later version.
-
-# Based on Preprocessor written by Philipp Koehn
+#
+# Based on a preprocessor written by Philipp Koehn.
 
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
@@ -12,8 +12,9 @@ binmode(STDERR, ":utf8");
 use warnings;
 use FindBin qw($RealBin);
 use strict;
+use utf8;
 
-my $mydir = "$RealBin/../../share/nonbreaking_prefixes";
+my $mydir = "$RealBin/nonbreaking_prefixes";
 
 my %NONBREAKING_PREFIX = ();
 my $language = "en";
@@ -29,7 +30,7 @@ while (@ARGV) {
 }
 
 if ($HELP) {
-	print "Usage ./split-sentences.perl (-l [en|de|...]) [-q] [-b] < textfile > splitfile\n";
+	print "Usage ./split-sentences.pl (-l [en|de|...]) [-q] [-b] < textfile > splitfile\n";
 	print "-q: quiet mode\n";
 	print "-b: no output buffering (for use in bidirectional pipes)\n";
 	exit;
@@ -41,7 +42,7 @@ if (!$QUIET) {
 
 my $prefixfile = "$mydir/nonbreaking_prefix.$language";
 
-#default back to English if we don't have a language-specific prefix file
+# Default to English, if we don't have a language-specific prefix file.
 if (!(-e $prefixfile)) {
 	$prefixfile = "$mydir/nonbreaking_prefix.en";
 	print STDERR "WARNING: No known abbreviations for language '$language', attempting fall-back to English version...\n";
@@ -69,13 +70,13 @@ my $text = "";
 while (<STDIN>) {
 	chop;
 	if (/^<.+>$/ || /^\s*$/) {
-		#time to process this block, we've hit a blank or <p>
-		&do_it_for($text,$_);
-		print "<P>\n" if (/^\s*$/ && $text); ##if we have text followed by <P>
+		# Time to process this block; we've hit a blank or <p>
+		&do_it_for($text, $_);
+		print "<P>\n" if (/^\s*$/ && $text); ## If we have text followed by <P>
 		$text = "";
 	}
 	else {
-		#append the text, with a space
+		# Append the text, with a space.
 		$text .= $_. " ";
 	}
 }
@@ -91,7 +92,7 @@ sub do_it_for {
 }
 
 sub preprocess {
-	# This is one paragraph.
+	# Argument is one paragraph.
 	my($text) = @_;
 
 	# Clean up spaces at head and tail of each line, as well as
@@ -119,31 +120,46 @@ sub preprocess {
 	# and are followed by a sentence starter punctuation and upper case.
 	$text =~ s/([?!\.]) +([\'\"\(\[\¿\¡\p{IsPi}]+[\ ]*[\p{IsUpper}])/$1\n$2/g;
 
-	# special punctuation cases are covered. Check all remaining periods.
+	# Chinese uses unusual end-of-sentence markers. These are NOT
+	# followed by whitespace.  Nor is there any idea of capitalization.
+	# There does not appear to be any unicode category for full-stops
+	# in general, so list them here.  U+3002 U+FF0E U+FF1F U+FF01
+	$text =~ s/([。．？！♪])/$1\n/g;
+
+	# Chinese does not use any sort of white-space between ideographs.
+	# Nominally, each single ideograph corresponds to one word. Add
+	# spaces here, so that later processing stages can tokenize readily.
+	# Note that this handles mixed latinate+CJK.
+	$text =~ s/(\p{InCJK})/ $1 /g;
+	$text =~ s/ +/ /g;
+
+	# Special punctuation cases are covered. Check all remaining periods.
 	my $word;
 	my $i;
 	my @words = split(/ /,$text);
 	$text = "";
 	for ($i=0;$i<(scalar(@words)-1);$i++) {
 		if ($words[$i] =~ /([\p{IsAlnum}\.\-]*)([\'\"\)\]\%\p{IsPf}]*)(\.+)$/) {
-			#check if $1 is a known honorific and $2 is empty, never break
+			# Check if $1 is a known honorific and $2 is empty, never break.
 			my $prefix = $1;
 			my $starting_punct = $2;
-			if($prefix && $NONBREAKING_PREFIX{$prefix} && $NONBREAKING_PREFIX{$prefix} == 1 && !$starting_punct) {
-				#not breaking;
+			if ($prefix && $NONBREAKING_PREFIX{$prefix} && $NONBREAKING_PREFIX{$prefix} == 1 && !$starting_punct) {
+				# Not breaking;
 			} elsif ($words[$i] =~ /(\.)[\p{IsUpper}\-]+(\.+)$/) {
-				#not breaking - upper case acronym
+				# Not breaking - upper case acronym
 			} elsif($words[$i+1] =~ /^([ ]*[\'\"\(\[\¿\¡\p{IsPi}]*[ ]*[\p{IsUpper}0-9])/) {
 				# The next word has a bunch of initial quotes, maybe a
 				# space, then either upper case or a number
 				$words[$i] = $words[$i]."\n" unless ($prefix && $NONBREAKING_PREFIX{$prefix} && $NONBREAKING_PREFIX{$prefix} == 2 && !$starting_punct && ($words[$i+1] =~ /^[0-9]+/));
-				#we always add a return for these unless we have a numeric non-breaker and a number start
+				# We always add a return for these, unless we have a
+				# numeric non-breaker and a number start.
 			}
 		}
 		$text = $text.$words[$i]." ";
 	}
 
-	# We stopped one token from the end to allow for easy look-ahead. Append it now.
+	# We stopped one token from the end to allow for easy look-ahead.
+	# Append it now.
 	$text = $text.$words[$i];
 
 	# Clean up spaces at head and tail of each line as well as any double-spacing
