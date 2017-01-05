@@ -29,7 +29,7 @@ while (@ARGV) {
 }
 
 if ($HELP) {
-	print "Usage ./split-sentences.pl (-l [en|de|...]) [-q] [-b] < textfile > splitfile\n";
+	print "Usage ./split-sentences.perl (-l [en|de|...]) [-q] [-b] < textfile > splitfile\n";
 	print "-q: quiet mode\n";
 	print "-b: no output buffering (for use in bidirectional pipes)\n";
 	exit;
