@@ -1,6 +1,7 @@
 // $Id$
 #pragma once
 
+#include <string>
 #include <vector>
 #include "SingleFactor.h"
 #include <boost/thread/tss.hpp>
@@ -38,7 +39,7 @@ public:
   }
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const {
-    if (initialized) {
+    if (isInitialized()) {
       return GetPerThreadLM().EmptyHypothesisState(input);
     } else {
       return new InMemoryPerSentenceOnDemandLMState();
@@ -46,7 +47,7 @@ public:
   }
 
   virtual FFState *EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const {
-    if (initialized) {
+    if (isInitialized()) {
       return GetPerThreadLM().EvaluateWhenApplied(hypo, ps, out);
     } else {
       UTIL_THROW(util::Exception, "Can't evaluate an uninitialized LM\n");
@@ -54,7 +55,7 @@ public:
   }
 
   virtual FFState *EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const {
-    if (initialized) {
+    if (isInitialized()) {
       return GetPerThreadLM().EvaluateWhenApplied(cur_hypo, featureID, accumulator);
     } else {
       UTIL_THROW(util::Exception, "Can't evaluate an uninitialized LM\n");
@@ -62,7 +63,7 @@ public:
   }
 
   virtual FFState *EvaluateWhenApplied(const Syntax::SHyperedge& hyperedge, int featureID, ScoreComponentCollection *accumulator) const {
-    if (initialized) {
+    if (isInitialized()) {
       return GetPerThreadLM().EvaluateWhenApplied(hyperedge, featureID, accumulator);
     } else {
       UTIL_THROW(util::Exception, "Can't evaluate an uninitialized LM\n");
@@ -71,40 +72,58 @@ public:
 
 
   virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const {
-    if (initialized) {
+    if (isInitialized()) {
       GetPerThreadLM().CalcScore(phrase, fullScore, ngramScore, oovCount);
+    } else {
+      UTIL_THROW(util::Exception, "WARNING: InMemoryPerSentenceOnDemand::CalcScore called prior to being initialized");
     }
   }
 
   virtual void CalcScoreFromCache(const Phrase &phrase, float &fullScore, float &ngramScore, std::size_t &oovCount) const {
-    if (initialized) {
+    if (isInitialized()) {
       GetPerThreadLM().CalcScoreFromCache(phrase, fullScore, ngramScore, oovCount);
+    } else {
+      UTIL_THROW(util::Exception, "WARNING: InMemoryPerSentenceOnDemand::CalcScoreFromCache called prior to being initialized");
     }
   }
 
   virtual void IssueRequestsFor(Hypothesis& hypo, const FFState* input_state) {
-    GetPerThreadLM().IssueRequestsFor(hypo, input_state);
+    if (isInitialized()) {
+      GetPerThreadLM().IssueRequestsFor(hypo, input_state);
+    } else {
+      UTIL_THROW(util::Exception, "WARNING: InMemoryPerSentenceOnDemand::IssueRequestsFor called prior to being initialized");
+    }
   }
 
   virtual void sync() {
-    GetPerThreadLM().sync();
+    if (isInitialized()) {
+      GetPerThreadLM().sync();
+    } else {
+      UTIL_THROW(util::Exception, "WARNING: InMemoryPerSentenceOnDemand::sync called prior to being initialized");
+    }
   }
  
   virtual void SetFFStateIdx(int state_idx) {
-    if (initialized) {
+    if (isInitialized()) {
       GetPerThreadLM().SetFFStateIdx(state_idx);
+    } else {
+      UTIL_THROW(util::Exception, "WARNING: InMemoryPerSentenceOnDemand::SetFFStateIdx called prior to being initialized");
     }
   }
 
   virtual void IncrementalCallback(Incremental::Manager &manager) const {
-    if (initialized) {
+    if (isInitialized()) {
       GetPerThreadLM().IncrementalCallback(manager);
+    } else {
+      UTIL_THROW(util::Exception, "WARNING: InMemoryPerSentenceOnDemand::IncrementalCallback called prior to being initialized");
     }
   }
 
   virtual void ReportHistoryOrder(std::ostream &out,const Phrase &phrase) const {
-    if (initialized) {
+    if (isInitialized()) {
       GetPerThreadLM().ReportHistoryOrder(out, phrase);
+    } else {
+      UTIL_THROW(util::Exception, "WARNING: InMemoryPerSentenceOnDemand::ReportHistoryOrder called prior to being initialized");
     }
   }
   
@@ -112,13 +131,16 @@ public:
                                    , const TargetPhrase &targetPhrase
                                    , ScoreComponentCollection &scoreBreakdown
                                    , ScoreComponentCollection &estimatedScores) const {
-    if (initialized) {
+    if (isInitialized()) {
       GetPerThreadLM().EvaluateInIsolation(source, targetPhrase, scoreBreakdown, estimatedScores);
+    } else {
+      //      UTIL_THROW(util::Exception, "WARNING: InMemoryPerSentenceOnDemand::EvaluateInIsolation called prior to being initialized");
     }
   }
 
   bool IsUseable(const FactorMask &mask) const {
-    return GetPerThreadLM().IsUseable(mask);
+    bool ret = mask[m_factorType];
+    return ret;
   }
 
 
@@ -126,8 +148,17 @@ protected:
   LanguageModelKen<lm::ngram::ProbingModel> & GetPerThreadLM() const;
 
   mutable boost::thread_specific_ptr<LanguageModelKen<lm::ngram::ProbingModel> > m_perThreadLM;
+  mutable boost::thread_specific_ptr<std::string> m_tmpFilename;
 
-  bool initialized;
+  FactorType m_factorType;
+
+  bool isInitialized() const {
+    if (m_tmpFilename.get() == NULL) { 
+      return false;
+    } else {
+      return true;
+    }
+  }
 
 };
 

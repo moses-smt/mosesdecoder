@@ -17,7 +17,7 @@ using namespace std;
 
 namespace Moses
 {
-  InMemoryPerSentenceOnDemandLM::InMemoryPerSentenceOnDemandLM(const std::string &line) : LanguageModel(line), initialized(false)
+  InMemoryPerSentenceOnDemandLM::InMemoryPerSentenceOnDemandLM(const std::string &line) : LanguageModel(line), m_factorType(0)
 {
   ReadParameters();
 }
@@ -25,7 +25,7 @@ namespace Moses
 InMemoryPerSentenceOnDemandLM::~InMemoryPerSentenceOnDemandLM()
 {
 }
-
+  
 void InMemoryPerSentenceOnDemandLM::InitializeForInput(ttasksptr const& ttask) {
 
   // The context scope object for this translation task
@@ -56,15 +56,11 @@ void InMemoryPerSentenceOnDemandLM::InitializeForInput(ttasksptr const& ttask) {
 
   tmp.close();
 
-  LanguageModelKen<lm::ngram::ProbingModel> & lm = GetPerThreadLM();
-  lm.LoadModel("/home/lanes/mosesdecoder/tiny.with_per_sentence/europarl.en.srilm", util::POPULATE_OR_READ);
+  //  m_tmpFilename.reset(new std::string("/home/lanes/mosesdecoder/tiny.with_per_sentence/europarl.en.srilm"));
+  m_tmpFilename.reset(new std::string(filename));
 
-  initialized = true;
-
-  VERBOSE(1, filename);
-  if (initialized) {
-    VERBOSE(1, "\tLM initialized\n"); 
-  }
+  //LanguageModelKen<lm::ngram::ProbingModel> & lm = 
+  GetPerThreadLM();
 
   //  std::remove(filename);
 
@@ -76,9 +72,21 @@ LanguageModelKen<lm::ngram::ProbingModel>& InMemoryPerSentenceOnDemandLM::GetPer
   lm = m_perThreadLM.get();
   if (lm == NULL) {
     lm = new LanguageModelKen<lm::ngram::ProbingModel>();
+
+    string* filename = m_tmpFilename.get();
+    if (filename == NULL) {
+      UTIL_THROW(util::Exception, "Can't get a thread-specific LM because no temporary filename has been set for this thread\n");
+    } else {
+      lm->LoadModel(*filename, util::POPULATE_OR_READ);
+    }
+
+    VERBOSE(1, filename);
+    VERBOSE(1, "\tLM initialized\n"); 
+
     m_perThreadLM.reset(lm);
   }
   assert(lm);
+
   return *lm;
 
 }
