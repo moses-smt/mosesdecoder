@@ -14,7 +14,7 @@ use FindBin qw($RealBin);
 use strict;
 use utf8;
 
-my $mydir = "$RealBin/nonbreaking_prefixes";
+my $mydir = "$RealBin/../../share/nonbreaking_prefixes";
 
 my %NONBREAKING_PREFIX = ();
 my $language = "en";
@@ -30,7 +30,7 @@ while (@ARGV) {
 }
 
 if ($HELP) {
-	print "Usage ./split-sentences.pl (-l [en|de|...]) [-q] [-b] < textfile > splitfile\n";
+	print "Usage ./split-sentences.perl (-l [en|de|...]) [-q] [-b] < textfile > splitfile\n";
 	print "-q: quiet mode\n";
 	print "-b: no output buffering (for use in bidirectional pipes)\n";
 	exit;
