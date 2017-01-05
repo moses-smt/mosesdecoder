@@ -103,8 +103,9 @@ void FeatureFunctions::Create()
         unkWP->SetParameter("suffix", m_system.options.unk.suffix);
       }
     }
-
   }
+
+  OverrideFeatures();
 }
 
 FeatureFunction *FeatureFunctions::Create(const std::string &line)
@@ -148,6 +149,17 @@ const FeatureFunction *FeatureFunctions::FindFeatureFunction(
 	  }
 	}
 	return NULL;
+}
+
+FeatureFunction *FeatureFunctions::FindFeatureFunction(
+    const std::string &name)
+{
+  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions){
+    if (ff->GetName() == name) {
+    return const_cast<FeatureFunction *>(ff);
+    }
+  }
+  return NULL;
 }
 
 const PhraseTable *FeatureFunctions::GetPhraseTableExcludeUnknownWordPenalty(size_t ptInd)
@@ -241,6 +253,34 @@ void FeatureFunctions::ShowWeights(const Weights &allWeights)
       cout << " UNTUNEABLE" << endl;
     }
   }
+}
+
+void FeatureFunctions::OverrideFeatures()
+{
+  const Parameter &parameter = m_system.params;
+
+  const PARAM_VEC *params = parameter.GetParam("feature-overwrite");
+  for (size_t i = 0; params && i < params->size(); ++i) {
+    const string &str = params->at(i);
+    vector<string> toks = Tokenize(str);
+    UTIL_THROW_IF2(toks.size() <= 1, "Incorrect format for feature override: " << str);
+
+    FeatureFunction *ff = FindFeatureFunction(toks[0]);
+    UTIL_THROW_IF2(ff == NULL, "Feature function not found: " << toks[0]);
+
+    for (size_t j = 1; j < toks.size(); ++j) {
+      const string &keyValStr = toks[j];
+      vector<string> keyVal = Tokenize(keyValStr, "=");
+      UTIL_THROW_IF2(keyVal.size() != 2, "Incorrect format for parameter override: " << keyValStr);
+
+      cerr << "Override " << ff->GetName() << " "
+              << keyVal[0] << "=" << keyVal[1] << endl;
+
+      ff->SetParameter(keyVal[0], keyVal[1]);
+
+    }
+  }
+
 }
 
 }

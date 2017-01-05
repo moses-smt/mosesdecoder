@@ -95,10 +95,13 @@ protected:
   System &m_system;
   size_t m_ffStartInd;
 
+  FeatureRegistry m_registry;
+
   FeatureFunction *Create(const std::string &line);
   std::string GetDefaultName(const std::string &stub);
+  void OverrideFeatures();
+  FeatureFunction *FindFeatureFunction(const std::string &name);
 
-  FeatureRegistry m_registry;
 };
 
 }

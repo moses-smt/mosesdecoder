@@ -188,4 +188,3 @@ void Distortion::EvaluateWhenApplied(const SCFG::Manager &mgr,
 }
 
 }
-

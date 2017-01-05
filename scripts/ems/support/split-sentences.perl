@@ -29,10 +29,10 @@ while (@ARGV) {
 }
 
 if ($HELP) {
-    print "Usage ./split-sentences.perl (-l [en|de|...]) [-q] [-b] < textfile > splitfile\n";
-    print "-q: quiet mode\n";
-    print "-b: no output buffering (for use in bidirectional pipes)\n";
-    exit;
+	print "Usage ./split-sentences.perl (-l [en|de|...]) [-q] [-b] < textfile > splitfile\n";
+	print "-q: quiet mode\n";
+	print "-b: no output buffering (for use in bidirectional pipes)\n";
+	exit;
 }
 if (!$QUIET) {
 	print STDERR "Sentence Splitter v3\n";
@@ -64,9 +64,9 @@ if (-e "$prefixfile") {
 	close(PREFIX);
 }
 
-##loop text, add lines together until we get a blank line or a <p>
+## Loop over text, add lines together until we get a blank line or a <p>
 my $text = "";
-while(<STDIN>) {
+while (<STDIN>) {
 	chop;
 	if (/^<.+>$/ || /^\s*$/) {
 		#time to process this block, we've hit a blank or <p>
@@ -79,7 +79,7 @@ while(<STDIN>) {
 		$text .= $_. " ";
 	}
 }
-#do the leftover text
+# Do the leftover text.
 &do_it_for($text,"") if $text;
 
 
@@ -91,28 +91,32 @@ sub do_it_for {
 }
 
 sub preprocess {
-	#this is one paragraph
+	# This is one paragraph.
 	my($text) = @_;
 
-	# clean up spaces at head and tail of each line as well as any double-spacing
+	# Clean up spaces at head and tail of each line, as well as
+	# any double-spacing.
 	$text =~ s/ +/ /g;
 	$text =~ s/\n /\n/g;
 	$text =~ s/ \n/\n/g;
 	$text =~ s/^ //g;
 	$text =~ s/ $//g;
 
-	#####add sentence breaks as needed#####
+	##### Add sentence breaks as needed #####
 
-	#non-period end of sentence markers (?!) followed by sentence starters.
+	# Non-period end of sentence markers (?!) followed by sentence starters.
 	$text =~ s/([?!]) +([\'\"\(\[\¿\¡\p{IsPi}]*[\p{IsUpper}])/$1\n$2/g;
 
-	#multi-dots followed by sentence starters
+	# Multi-dots followed by sentence starters.
 	$text =~ s/(\.[\.]+) +([\'\"\(\[\¿\¡\p{IsPi}]*[\p{IsUpper}])/$1\n$2/g;
 
-	# add breaks for sentences that end with some sort of punctuation inside a quote or parenthetical and are followed by a possible sentence starter punctuation and upper case
+	# Add breaks for sentences that end with some sort of punctuation
+	# inside a quote or parenthetical and are followed by a possible
+	# sentence starter punctuation and upper case.
 	$text =~ s/([?!\.][\ ]*[\'\"\)\]\p{IsPf}]+) +([\'\"\(\[\¿\¡\p{IsPi}]*[\ ]*[\p{IsUpper}])/$1\n$2/g;
 
-	# add breaks for sentences that end with some sort of punctuation are followed by a sentence starter punctuation and upper case
+	# Add breaks for sentences that end with some sort of punctuation,
+	# and are followed by a sentence starter punctuation and upper case.
 	$text =~ s/([?!\.]) +([\'\"\(\[\¿\¡\p{IsPi}]+[\ ]*[\p{IsUpper}])/$1\n$2/g;
 
 	# special punctuation cases are covered. Check all remaining periods.
@@ -130,30 +134,27 @@ sub preprocess {
 			} elsif ($words[$i] =~ /(\.)[\p{IsUpper}\-]+(\.+)$/) {
 				#not breaking - upper case acronym
 			} elsif($words[$i+1] =~ /^([ ]*[\'\"\(\[\¿\¡\p{IsPi}]*[ ]*[\p{IsUpper}0-9])/) {
-				#the next word has a bunch of initial quotes, maybe a space, then either upper case or a number
+				# The next word has a bunch of initial quotes, maybe a
+				# space, then either upper case or a number
 				$words[$i] = $words[$i]."\n" unless ($prefix && $NONBREAKING_PREFIX{$prefix} && $NONBREAKING_PREFIX{$prefix} == 2 && !$starting_punct && ($words[$i+1] =~ /^[0-9]+/));
 				#we always add a return for these unless we have a numeric non-breaker and a number start
 			}
-
 		}
 		$text = $text.$words[$i]." ";
 	}
 
-	#we stopped one token from the end to allow for easy look-ahead. Append it now.
+	# We stopped one token from the end to allow for easy look-ahead. Append it now.
 	$text = $text.$words[$i];
 
-	# clean up spaces at head and tail of each line as well as any double-spacing
+	# Clean up spaces at head and tail of each line as well as any double-spacing
 	$text =~ s/ +/ /g;
 	$text =~ s/\n /\n/g;
 	$text =~ s/ \n/\n/g;
 	$text =~ s/^ //g;
 	$text =~ s/ $//g;
 
-	#add trailing break
+	# Add trailing break.
 	$text .= "\n" unless $text =~ /\n$/;
 
 	return $text;
-
 }
-
-

@@ -80,6 +80,7 @@ public:
     return m_tuneable;
   }
 
+  virtual void SetParameter(const std::string& key, const std::string& value);
 
   // may have more factors than actually need, but not guaranteed.
   virtual void
@@ -118,7 +119,6 @@ protected:
   std::vector<std::vector<std::string> > m_args;
   bool m_tuneable;
 
-  virtual void SetParameter(const std::string& key, const std::string& value);
   virtual void ReadParameters();
   void ParseLine(const std::string &line);
 };

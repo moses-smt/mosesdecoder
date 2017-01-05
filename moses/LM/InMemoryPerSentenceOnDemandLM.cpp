@@ -17,7 +17,7 @@ using namespace std;
 
 namespace Moses
 {
-  InMemoryPerSentenceOnDemandLM::InMemoryPerSentenceOnDemandLM(const std::string &line) : LanguageModel(line), m_factorType(0)
+InMemoryPerSentenceOnDemandLM::InMemoryPerSentenceOnDemandLM(const std::string &line) : LanguageModel(line), initialized(false)
 {
   ReadParameters();
 }
@@ -26,7 +26,8 @@ InMemoryPerSentenceOnDemandLM::~InMemoryPerSentenceOnDemandLM()
 {
 }
   
-void InMemoryPerSentenceOnDemandLM::InitializeForInput(ttasksptr const& ttask) {
+void InMemoryPerSentenceOnDemandLM::InitializeForInput(ttasksptr const& ttask)
+{
 
   // The context scope object for this translation task
   //     contains a map of translation task-specific data
@@ -66,7 +67,8 @@ void InMemoryPerSentenceOnDemandLM::InitializeForInput(ttasksptr const& ttask) {
 
 }
 
-LanguageModelKen<lm::ngram::ProbingModel>& InMemoryPerSentenceOnDemandLM::GetPerThreadLM() const {
+LanguageModelKen<lm::ngram::ProbingModel>& InMemoryPerSentenceOnDemandLM::GetPerThreadLM() const
+{
 
   LanguageModelKen<lm::ngram::ProbingModel> *lm;
   lm = m_perThreadLM.get();

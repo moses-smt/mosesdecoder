@@ -1196,7 +1196,7 @@ tune
 	default-name: tuning/moses.ini
 	tmp-name: tuning/tmp
 	final-model: yes
-	rerun-on-change: decoder-settings tuning-settings nbest lambda async
+	rerun-on-change: decoder decoder-settings tuning-settings nbest lambda async
 	not-error: trans: No such file or directory
 thot-tune
 	in: TRAINING:config input reference

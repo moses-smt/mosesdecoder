@@ -102,7 +102,7 @@ public:
       UTIL_THROW(util::Exception, "WARNING: InMemoryPerSentenceOnDemand::sync called prior to being initialized");
     }
   }
- 
+
   virtual void SetFFStateIdx(int state_idx) {
     if (isInitialized()) {
       GetPerThreadLM().SetFFStateIdx(state_idx);
@@ -126,7 +126,7 @@ public:
       UTIL_THROW(util::Exception, "WARNING: InMemoryPerSentenceOnDemand::ReportHistoryOrder called prior to being initialized");
     }
   }
-  
+
   virtual void EvaluateInIsolation(const Phrase &source
                                    , const TargetPhrase &targetPhrase
                                    , ScoreComponentCollection &scoreBreakdown
