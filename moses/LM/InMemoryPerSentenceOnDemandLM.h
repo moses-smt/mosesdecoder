@@ -153,7 +153,7 @@ protected:
   FactorType m_factorType;
 
   bool isInitialized() const {
-    if (m_tmpFilename.get() == NULL) { 
+    if (m_tmpFilename.get() == NULL) {
       return false;
     } else {
       return true;

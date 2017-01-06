@@ -25,7 +25,7 @@ InMemoryPerSentenceOnDemandLM::InMemoryPerSentenceOnDemandLM(const std::string &
 InMemoryPerSentenceOnDemandLM::~InMemoryPerSentenceOnDemandLM()
 {
 }
-  
+
 void InMemoryPerSentenceOnDemandLM::InitializeForInput(ttasksptr const& ttask)
 {
 
@@ -60,7 +60,7 @@ void InMemoryPerSentenceOnDemandLM::InitializeForInput(ttasksptr const& ttask)
   //  m_tmpFilename.reset(new std::string("/home/lanes/mosesdecoder/tiny.with_per_sentence/europarl.en.srilm"));
   m_tmpFilename.reset(new std::string(filename));
 
-  //LanguageModelKen<lm::ngram::ProbingModel> & lm = 
+  //LanguageModelKen<lm::ngram::ProbingModel> & lm =
   GetPerThreadLM();
 
   //  std::remove(filename);
@@ -83,7 +83,7 @@ LanguageModelKen<lm::ngram::ProbingModel>& InMemoryPerSentenceOnDemandLM::GetPer
     }
 
     VERBOSE(1, filename);
-    VERBOSE(1, "\tLM initialized\n"); 
+    VERBOSE(1, "\tLM initialized\n");
 
     m_perThreadLM.reset(lm);
   }
