@@ -126,6 +126,10 @@ sub preprocess {
 	# in general, so list them here.  U+3002 U+FF0E U+FF1F U+FF01
 	$text =~ s/([。．？！♪])/$1\n/g;
 
+	# A normal full-stop or other Western sentence enders followed
+	# by an ideograph is an and-of-sentence, always.
+	$text =~ s/([\.?!]) *(\p{InCJK})/$1\n$2/g;
+
 	# Chinese does not use any sort of white-space between ideographs.
 	# Nominally, each single ideograph corresponds to one word. Add
 	# spaces here, so that later processing stages can tokenize readily.
