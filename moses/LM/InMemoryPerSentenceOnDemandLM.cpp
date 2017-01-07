@@ -17,7 +17,7 @@ using namespace std;
 
 namespace Moses
 {
-InMemoryPerSentenceOnDemandLM::InMemoryPerSentenceOnDemandLM(const std::string &line) : LanguageModel(line), initialized(false)
+InMemoryPerSentenceOnDemandLM::InMemoryPerSentenceOnDemandLM(const std::string &line) : LanguageModel(line)
 {
   ReadParameters();
 }
