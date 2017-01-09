@@ -17,6 +17,7 @@
 #include "../../Phrase.h"
 #include "../../System.h"
 #include "../../PhraseBased/TargetPhrases.h"
+#include "../../TranslationModel/StatefulPhraseTable.h"
 
 using namespace std;
 
@@ -75,6 +76,10 @@ void Search::Decode(size_t stackInd)
 
 	const Hypotheses &hypos = stack.GetSortedAndPrunedHypos(mgr, mgr.arcLists);
 	//cerr << "hypos=" << hypos.size() << endl;
+
+  BOOST_FOREACH(const StatefulPhraseTable *sfpt, mgr.system.featureFunctions.statefulPhraseTables) {
+    sfpt->BeforeExtending(hypos);
+  }
 
 	const InputPaths &paths = mgr.GetInputPaths();
 

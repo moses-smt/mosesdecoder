@@ -33,6 +33,8 @@ public:
       const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
       FFState &state) const;
 
+  virtual void BeforeExtending(const Hypotheses &hypos) const;
+
 };
 
 }

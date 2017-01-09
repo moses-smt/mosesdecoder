@@ -82,7 +82,7 @@ void FeatureFunctions::Create()
 
     StatefulPhraseTable *sfpt = dynamic_cast<StatefulPhraseTable*>(ff);
     if (sfpt) {
-      m_statefulPhraseTables.push_back(sfpt);
+      statefulPhraseTables.push_back(sfpt);
     }
 
     if (ff->HasPhraseTableInd()) {

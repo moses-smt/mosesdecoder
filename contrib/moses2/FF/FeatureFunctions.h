@@ -44,6 +44,7 @@ class FeatureFunctions
 {
 public:
   std::vector<const PhraseTable*> phraseTables;
+  std::vector<const StatefulPhraseTable*> statefulPhraseTables;
 
   FeatureFunctions(System &system);
   virtual ~FeatureFunctions();
@@ -91,7 +92,6 @@ protected:
   std::vector<const StatefulFeatureFunction*> m_statefulFeatureFunctions;
   std::vector<const FeatureFunction*> m_withPhraseTableInd;
   const UnknownWordPenalty *m_unkWP;
-  std::vector<const StatefulPhraseTable*> m_statefulPhraseTables;
 
 
   boost::unordered_map<std::string, size_t> m_defaultNames;

@@ -34,5 +34,9 @@ void NeuralPT::EvaluateWhenApplied(const SCFG::Manager &mgr,
 
 }
 
+void NeuralPT::BeforeExtending(const Hypotheses &hypos) const
+{
+
+}
 
 }
