@@ -52,7 +52,7 @@ void FeatureFunctions::Load()
 }
 
 // load pt
-BOOST_FOREACH(const PhraseTable *pt, m_phraseTables) {
+BOOST_FOREACH(const PhraseTable *pt, phraseTables) {
   PhraseTable *nonConstPT = const_cast<PhraseTable*>(pt);
   cerr << "Loading " << nonConstPT->GetName() << endl;
   nonConstPT->Load(m_system);
@@ -86,8 +86,8 @@ void FeatureFunctions::Create()
 
     PhraseTable *pt = dynamic_cast<PhraseTable*>(ff);
     if (pt) {
-      pt->SetPtInd(m_phraseTables.size());
-      m_phraseTables.push_back(pt);
+      pt->SetPtInd(phraseTables.size());
+      phraseTables.push_back(pt);
     }
 
     UnknownWordPenalty *unkWP = dynamic_cast<UnknownWordPenalty *>(pt);
@@ -165,7 +165,7 @@ FeatureFunction *FeatureFunctions::FindFeatureFunction(
 const PhraseTable *FeatureFunctions::GetPhraseTableExcludeUnknownWordPenalty(size_t ptInd)
 {
   // assume only 1 unk wp
-  std::vector<const PhraseTable*> tmpVec(m_phraseTables);
+  std::vector<const PhraseTable*> tmpVec(phraseTables);
   std::vector<const PhraseTable*>::iterator iter;
   for (iter = tmpVec.begin(); iter != tmpVec.end(); ++iter) {
     const PhraseTable *pt = *iter;

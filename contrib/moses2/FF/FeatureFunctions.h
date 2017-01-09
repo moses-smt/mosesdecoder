@@ -42,7 +42,7 @@ class Word;
 class FeatureFunctions
 {
 public:
-  std::vector<const PhraseTable*> m_phraseTables;
+  std::vector<const PhraseTable*> phraseTables;
 
   FeatureFunctions(System &system);
   virtual ~FeatureFunctions();
