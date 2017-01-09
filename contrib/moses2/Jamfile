@@ -54,6 +54,8 @@ alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../mose
     LM/KENLMBatch.cpp
     LM/GPULM.cpp
     
+ 	TranslationModel/StatefulPhraseTable.cpp
+ 	TranslationModel/NeuralPT.cpp
  	TranslationModel/PhraseTable.cpp 
  	TranslationModel/Transliteration.cpp 
  	TranslationModel/UnknownWordPenalty.cpp 

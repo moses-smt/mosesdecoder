@@ -5,6 +5,7 @@
 #include "../TranslationModel/ProbingPT/ProbingPT.h"
 #include "../TranslationModel/UnknownWordPenalty.h"
 #include "../TranslationModel/Transliteration.h"
+#include "../TranslationModel/NeuralPT.h"
 
 #include "../LM/KENLM.h"
 #include "../LM/KENLMBatch.h"
@@ -73,6 +74,8 @@ FeatureRegistry::FeatureRegistry()
 
   MOSES_FNAME(SkeletonStatefulFF);
   MOSES_FNAME(SkeletonStatelessFF);
+
+  MOSES_FNAME(NeuralPT);
 }
 
 FeatureRegistry::~FeatureRegistry()
