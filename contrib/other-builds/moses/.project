@@ -1716,6 +1716,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/Implementation.h</locationURI>
 		</link>
 		<link>
+			<name>LM/InMemoryPerSentenceOnDemandLM.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/InMemoryPerSentenceOnDemandLM.cpp</locationURI>
+		</link>
+		<link>
+			<name>LM/InMemoryPerSentenceOnDemandLM.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/InMemoryPerSentenceOnDemandLM.h</locationURI>
+		</link>
+		<link>
 			<name>LM/Jamfile</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/Jamfile</locationURI>
