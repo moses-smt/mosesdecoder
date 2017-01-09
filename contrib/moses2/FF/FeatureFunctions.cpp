@@ -13,6 +13,7 @@
 #include "../MemPool.h"
 
 #include "../TranslationModel/PhraseTable.h"
+#include "../TranslationModel/StatefulPhraseTable.h"
 #include "../TranslationModel/UnknownWordPenalty.h"
 #include "../SCFG/TargetPhraseImpl.h"
 #include "../SCFG/Word.h"
@@ -77,6 +78,11 @@ void FeatureFunctions::Create()
     if (sfff) {
       sfff->SetStatefulInd(m_statefulFeatureFunctions.size());
       m_statefulFeatureFunctions.push_back(sfff);
+    }
+
+    StatefulPhraseTable *sfpt = dynamic_cast<StatefulPhraseTable*>(ff);
+    if (sfpt) {
+      m_statefulPhraseTables.push_back(sfpt);
     }
 
     if (ff->HasPhraseTableInd()) {

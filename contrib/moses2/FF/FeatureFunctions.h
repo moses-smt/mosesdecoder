@@ -21,6 +21,7 @@ class TargetPhrase;
 class System;
 class FeatureFunction;
 class StatefulFeatureFunction;
+class StatefulPhraseTable;
 class PhraseTable;
 class Manager;
 class MemPool;
@@ -90,6 +91,8 @@ protected:
   std::vector<const StatefulFeatureFunction*> m_statefulFeatureFunctions;
   std::vector<const FeatureFunction*> m_withPhraseTableInd;
   const UnknownWordPenalty *m_unkWP;
+  std::vector<const StatefulPhraseTable*> m_statefulPhraseTables;
+
 
   boost::unordered_map<std::string, size_t> m_defaultNames;
   System &m_system;
