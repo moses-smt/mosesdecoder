@@ -7,10 +7,10 @@
 #include <boost/timer/timer.hpp>
 
 #include "nmt.h"
-#include "mblas/matrix.h"
-#include "dl4mt.h"
-#include "common/vocab.h"
-#include "common/states.h"
+#include "../mblas/matrix.h"
+#include "../dl4mt.h"
+#include "../common/vocab.h"
+#include "../common/states.h"
 
 using namespace mblas;
 

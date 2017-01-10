@@ -2,8 +2,8 @@
 
 #include <algorithm>
 
-#include "utils.h"
-#include "vocab.h"
+#include "../common/utils.h"
+#include "../common/vocab.h"
 
 NBest::NBest(
     const std::string& srcPath,

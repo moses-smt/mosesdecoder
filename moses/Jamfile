@@ -117,6 +117,7 @@ lib moses :
   SyntacticLanguageModel.cpp
   *Test.cpp Mock*.cpp FF/*Test.cpp
   FF/Factory.cpp
+  #FF/NMT/plugin/nmt.cu
 ] 
 vwfiles synlm mmlib mserver headers 
 FF_Factory.o 
