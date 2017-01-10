@@ -1,6 +1,7 @@
 #pragma once
 #include "StatefulPhraseTable.h"
 #include "../legacy/Range.h"
+#include "NMT/plugin/nmt.h"
 
 namespace Moses2
 {
@@ -62,6 +63,10 @@ protected:
 
   size_t m_threadId;
   boost::mutex m_mutex;
+
+  std::vector<boost::shared_ptr<Weights> > m_models;
+  boost::shared_ptr<Vocab> m_sourceVocab;
+  boost::shared_ptr<Vocab> m_targetVocab;
 
   void BeforeExtending(Hypothesis &hypo, const Manager &mgr) const;
   std::vector<NeuralPhrase> Lookup(const NeuralPTState &state) const;
