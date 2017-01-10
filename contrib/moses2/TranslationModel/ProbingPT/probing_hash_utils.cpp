@@ -6,14 +6,15 @@ namespace Moses2
 {
 
 //Read table from disk, return memory map location
-char * readTable(const char * filename, size_t size)
+char * readTable(const char * filename, size_t size, util::scoped_fd &file, util::scoped_memory &memory)
 {
   std::cerr << "filename=" << filename << std::endl;
-  util::scoped_fd file_(util::OpenReadOrThrow(filename));
-  uint64_t total_size_ = util::SizeFile(file_.get());
+  file.reset(util::OpenReadOrThrow(filename));
+  uint64_t total_size_ = util::SizeFile(file.get());
 
-  util::scoped_memory memory;
-  MapRead(util::LAZY, file_.get(), 0, total_size_, memory);
+  MapRead(util::LAZY, file.get(), 0, total_size_, memory);
+
+  //return memory.begin();
 
   //Initial position of the file is the end of the file, thus we know the size
   int fd;

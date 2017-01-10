@@ -86,7 +86,7 @@ QueryEngine::QueryEngine(const char * filepath, util::LoadMethod load_method)
 
   //Read hashtable
   table_filesize = Table::Size(tablesize, 1.2);
-  mem = readTable(path_to_hashtable.c_str(), table_filesize);
+  mem = readTable(path_to_hashtable.c_str(), table_filesize, file_, memory_);
   Table table_init(mem, table_filesize);
   table = table_init;
 

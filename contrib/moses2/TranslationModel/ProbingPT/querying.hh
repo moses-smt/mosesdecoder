@@ -26,6 +26,9 @@ class QueryEngine
   size_t table_filesize;
   bool is_reordering;
 
+  util::scoped_fd file_;
+  util::scoped_memory memory_;
+
   void read_alignments(const std::string &alignPath);
   void file_exits(const std::string &basePath);
   void cat_files(const std::string &basePath);
