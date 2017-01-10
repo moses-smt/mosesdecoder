@@ -93,14 +93,14 @@ void NeuralPT::BeforeExtending(Hypothesis &hypo, const Manager &mgr) const
 
   std::vector<NeuralPhrase> tps = Lookup(*stateCast);
   BOOST_FOREACH(const NeuralPhrase &tp, tps) {
-
+    // TODO merge with existing pt
   }
 }
 
 std::vector<NeuralPhrase> NeuralPT::Lookup(const NeuralPTState &state) const
 {
   std::vector<NeuralPhrase> ret;
-
+  // TODO get phrases from NMT
   return ret;
 }
 
