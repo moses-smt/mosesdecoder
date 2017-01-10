@@ -3,6 +3,8 @@
 #include "../PhraseBased/Hypothesis.h"
 #include "NMT/plugin/nmt.h"
 
+using namespace std;
+
 namespace Moses2
 {
 class NeuralPTState: public FFState
@@ -40,8 +42,9 @@ void NeuralPT::Load(System &system)
 {
   size_t devices = NMT::GetDevices(m_maxDevices);
   std::cerr << devices << std::endl;
-  for(size_t device = 0; device < devices; ++device)
+  for(size_t device = 0; device < devices; ++device) {
     m_models.push_back(NMT::NewModel(m_modelPath, device));
+  }
 
   m_sourceVocab = NMT::NewVocab(m_sourceVocabPath);
   m_targetVocab = NMT::NewVocab(m_targetVocabPath);
