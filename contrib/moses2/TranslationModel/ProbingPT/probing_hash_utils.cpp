@@ -1,4 +1,6 @@
+#include <iostream>
 #include "probing_hash_utils.hh"
+#include "util/file.hh"
 
 namespace Moses2
 {
@@ -6,6 +8,13 @@ namespace Moses2
 //Read table from disk, return memory map location
 char * readTable(const char * filename, size_t size)
 {
+  std::cerr << "filename=" << filename << std::endl;
+  util::scoped_fd file_(util::OpenReadOrThrow(filename));
+  uint64_t total_size_ = util::SizeFile(file_.get());
+
+  util::scoped_memory memory;
+  MapRead(util::LAZY, file_.get(), 0, total_size_, memory);
+
   //Initial position of the file is the end of the file, thus we know the size
   int fd;
   char * map;
