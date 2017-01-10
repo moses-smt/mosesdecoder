@@ -310,3 +310,12 @@ std::vector<double> NMT::RescoreNBestList(
   return nBestScores;
 }
 
+void NMT::GeneratePhrases(
+  const std::string& lastWord,
+  StateInfoPtr& inputState,
+  int numPhrases,
+  std::vector<NMTPhase>& phrases)
+{
+  
+}
+

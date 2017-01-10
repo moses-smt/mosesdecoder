@@ -23,6 +23,13 @@ typedef std::vector<StateInfoPtr> StateInfos;
 typedef std::vector<float> Scores;
 typedef std::vector<size_t> LastWords;
 
+struct NMTPhase
+{
+  std::vector<std::string> words;
+  float score;
+  size_t startPos, endPos;
+};
+
 
 class NMT {
   public:
@@ -76,6 +83,12 @@ class NMT {
       std::vector<double>& logProbs,
       std::vector<StateInfoPtr>& nextStates,
       std::vector<bool>& unks);
+
+    void GeneratePhrases(
+      const std::string& lastWord,
+      StateInfoPtr& inputState,
+      int numPhrases,
+      std::vector<NMTPhase>& phrases);
 
     void ClearStates();
 

@@ -10,6 +10,7 @@ namespace Moses2
 class NeuralPTState: public FFState
 {
 public:
+  size_t lastWord;
 
   virtual size_t hash() const
   { return 0; }
@@ -97,10 +98,12 @@ void NeuralPT::BeforeExtending(Hypothesis &hypo, const Manager &mgr) const
   }
 }
 
-std::vector<NeuralPhrase> NeuralPT::Lookup(const NeuralPTState &state) const
+std::vector<NeuralPhrase> NeuralPT::Lookup(const NeuralPTState &prevState) const
 {
   std::vector<NeuralPhrase> ret;
   // TODO get phrases from NMT
+  //prevState
+
   return ret;
 }
 

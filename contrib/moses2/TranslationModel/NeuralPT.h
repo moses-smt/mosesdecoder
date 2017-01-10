@@ -69,7 +69,7 @@ protected:
   boost::shared_ptr<Vocab> m_targetVocab;
 
   void BeforeExtending(Hypothesis &hypo, const Manager &mgr) const;
-  std::vector<NeuralPhrase> Lookup(const NeuralPTState &state) const;
+  std::vector<NeuralPhrase> Lookup(const NeuralPTState &prevState) const;
 
 };
 
