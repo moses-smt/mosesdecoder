@@ -136,16 +136,6 @@ void ProbingPT::Load(System &system)
   // alignments
   CreateAlignmentMap(system, m_path + "/Alignments.dat");
 
-  // memory mapped file to tps
-  string filePath = m_path + "/TargetColl.dat";
-  file.open(filePath.c_str());
-  if (!file.is_open()) {
-    throw "Couldn't open file ";
-  }
-
-  data = file.data();
-  //size_t size = file.size();
-
   // cache
   CreateCache(system);
 }
@@ -272,7 +262,7 @@ TargetPhrases *ProbingPT::CreateTargetPhrases(MemPool &pool,
   //cerr << "key2=" << query_result.second << endl;
 
   if (query_result.first) {
-    const char *offset = data + query_result.second;
+    const char *offset = m_engine->data + query_result.second;
     uint64_t *numTP = (uint64_t*) offset;
 
     tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, *numTP);
@@ -724,7 +714,7 @@ std::pair<bool, SCFG::TargetPhrases*> ProbingPT::CreateTargetPhrasesSCFG(MemPool
 	  // there are some rules
 	  const FeatureFunctions &ffs = system.featureFunctions;
 
-	  const char *offset = data + query_result.second;
+	  const char *offset = m_engine->data + query_result.second;
 	  uint64_t *numTP = (uint64_t*) offset;
 	  //cerr << "numTP=" << *numTP << endl;
 

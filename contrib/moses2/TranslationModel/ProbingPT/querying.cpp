@@ -29,6 +29,17 @@ QueryEngine::QueryEngine(const char * filepath, util::LoadMethod load_method)
   // alignments
   read_alignments(alignPath);
 
+  // target phrase
+  string filePath = basepath + "/TargetColl.dat";
+  file.open(filePath.c_str());
+  if (!file.is_open()) {
+    throw "Couldn't open file ";
+  }
+
+  data = file.data();
+  //size_t size = file.size();
+
+
   //Read config file
   boost::unordered_map<std::string, std::string> keyValue;
 
