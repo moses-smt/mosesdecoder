@@ -54,14 +54,14 @@ alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../mose
     LM/KENLMBatch.cpp
     LM/GPULM.cpp
     
- 	TranslationModel/StatefulPhraseTable.cpp
- 	TranslationModel/NeuralPT.cpp
- 	TranslationModel/PhraseTable.cpp 
- 	TranslationModel/Transliteration.cpp 
- 	TranslationModel/UnknownWordPenalty.cpp 
+ 		TranslationModel/StatefulPhraseTable.cpp
+ 		TranslationModel/NeuralPT.cpp
+	 	TranslationModel/PhraseTable.cpp 
+ 		TranslationModel/Transliteration.cpp 
+ 		TranslationModel/UnknownWordPenalty.cpp 
     TranslationModel/Memory/PhraseTableMemory.cpp 
    	
- 	TranslationModel/CompactPT/PhraseTableCompact.cpp 
+ 		TranslationModel/CompactPT/PhraseTableCompact.cpp 
     TranslationModel/CompactPT/BlockHashIndex.cpp
     TranslationModel/CompactPT/CmphStringVectorAdapter.cpp
     TranslationModel/CompactPT/LexicalReorderingTableCompact.cpp
@@ -70,7 +70,7 @@ alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../mose
     TranslationModel/CompactPT/TargetPhraseCollectionCache.cpp
     TranslationModel/CompactPT/ThrowingFwrite.cpp
 
- 	TranslationModel/ProbingPT/ProbingPT.cpp 
+ 		TranslationModel/ProbingPT/ProbingPT.cpp 
     TranslationModel/ProbingPT/hash.cpp
     TranslationModel/ProbingPT/line_splitter.cpp
     TranslationModel/ProbingPT/probing_hash_utils.cpp
@@ -80,6 +80,8 @@ alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../mose
     TranslationModel/ProbingPT/StoreTarget.cpp
     TranslationModel/ProbingPT/vocabid.cpp
 
+		TranslationModel/NMT/plugin/nmt.cu
+		
    	parameters/AllOptions.cpp
    	parameters/BookkeepingOptions.cpp
    	parameters/ContextParameters.cpp

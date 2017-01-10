@@ -1,6 +1,7 @@
 #include <boost/foreach.hpp>
 #include "NeuralPT.h"
 #include "../PhraseBased/Hypothesis.h"
+#include "NMT/plugin/nmt.h"
 
 namespace Moses2
 {
@@ -37,7 +38,7 @@ NeuralPT::NeuralPT(size_t startInd, const std::string &line)
 
 void NeuralPT::Load(System &system)
 {
-  //size_t devices = NMT::GetDevices(m_maxDevices);
+  size_t devices = NMT::GetDevices(m_maxDevices);
 
 }
 
