@@ -86,7 +86,7 @@ QueryEngine::QueryEngine(const char * filepath, util::LoadMethod load_method)
 
   //Read hashtable
   table_filesize = Table::Size(tablesize, 1.2);
-  mem = readTable(path_to_hashtable.c_str(), table_filesize, file_, memory_);
+  mem = readTable(path_to_hashtable.c_str(), load_method, file_, memory_);
   Table table_init(mem, table_filesize);
   table = table_init;
 
@@ -96,7 +96,7 @@ QueryEngine::QueryEngine(const char * filepath, util::LoadMethod load_method)
 QueryEngine::~QueryEngine()
 {
   //Clear mmap content from memory.
-  munmap(mem, table_filesize);
+  //munmap(mem, table_filesize);
 
 }
 
