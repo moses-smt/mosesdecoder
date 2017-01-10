@@ -1,8 +1,18 @@
 #pragma once
 #include "StatefulPhraseTable.h"
+#include "../legacy/Range.h"
 
 namespace Moses2
 {
+class NeuralPTState;
+
+struct NeuralPhrase
+{
+  std::vector<const Factor*> words;
+  SCORE score;
+  Range range;
+};
+
 class NeuralPT : public StatefulPhraseTable
 {
 public:
@@ -33,7 +43,11 @@ public:
       const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
       FFState &state) const;
 
-  virtual void BeforeExtending(const Hypotheses &hypos) const;
+  virtual void BeforeExtending(const Hypotheses &hypos, const Manager &mgr) const;
+
+protected:
+  void BeforeExtending(Hypothesis &hypo, const Manager &mgr) const;
+  std::vector<NeuralPhrase> Lookup(const NeuralPTState &state) const;
 
 };
 
