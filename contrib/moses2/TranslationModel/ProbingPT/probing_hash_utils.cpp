@@ -8,7 +8,7 @@ namespace Moses2
 //Read table from disk, return memory map location
 char * readTable(const char * filename, util::LoadMethod load_method, util::scoped_fd &file, util::scoped_memory &memory)
 {
-  std::cerr << "filename=" << filename << std::endl;
+  //std::cerr << "filename=" << filename << std::endl;
   file.reset(util::OpenReadOrThrow(filename));
   uint64_t total_size_ = util::SizeFile(file.get());
 

@@ -143,12 +143,21 @@ void ProbingPT::Load(System &system)
 void ProbingPT::SetParameter(const std::string& key, const std::string& value)
 {
 	if (key == "load") {
-		if (value == "lazy") {
-			load_method = util::LAZY;
-		}
-		else if (value == "populate") {
-			load_method  = util::POPULATE_OR_READ;
-		}
+    if (value == "lazy") {
+      load_method = util::LAZY;
+    }
+    else if (value == "populate_or_lazy") {
+      load_method = util::POPULATE_OR_LAZY;
+    }
+    else if (value == "populate_or_read" || value == "populate") {
+      load_method = util::POPULATE_OR_READ;
+    }
+    else if (value == "read") {
+      load_method = util::READ;
+    }
+    else if (value == "parallel_read") {
+      load_method = util::PARALLEL_READ;
+    }
 		else {
 			UTIL_THROW2("load method not supported" << value);
 		}
