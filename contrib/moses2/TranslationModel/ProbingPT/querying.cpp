@@ -19,10 +19,6 @@ QueryEngine::QueryEngine(const char * filepath, util::LoadMethod load_method)
 
   file_exits(basepath);
 
-  if (load_method == util::POPULATE_OR_READ) {
-	  cat_files(basepath);
-  }
-
   ///Source phrase vocabids
   read_map(source_vocabids, path_to_source_vocabid.c_str());
 
@@ -30,15 +26,8 @@ QueryEngine::QueryEngine(const char * filepath, util::LoadMethod load_method)
   read_alignments(alignPath);
 
   // target phrase
-  string filePath = basepath + "/TargetColl.dat";
-  file.open(filePath.c_str());
-  if (!file.is_open()) {
-    throw "Couldn't open file ";
-  }
-
-  data = file.data();
-  //size_t size = file.size();
-
+  string targetCollPath = basepath + "/TargetColl.dat";
+  memTPS = readTable(targetCollPath.c_str(), load_method, fileTPS_, memoryTPS_);
 
   //Read config file
   boost::unordered_map<std::string, std::string> keyValue;
@@ -185,12 +174,6 @@ void QueryEngine::file_exits(const std::string &basePath)
 	    UTIL_THROW2("A required table doesn't exist in: " << basepath);
 	  }
 	*/
-}
-
-void QueryEngine::cat_files(const std::string &basePath)
-{
-	system((string("cat ") + basePath + "/TargetColl.dat > /dev/null").c_str());
-	system((string("cat ") + basePath + "/probing_hash.dat > /dev/null").c_str());
 }
 
 }

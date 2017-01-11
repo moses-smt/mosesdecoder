@@ -38,13 +38,12 @@ class QueryEngine
 
   void read_alignments(const std::string &alignPath);
   void file_exits(const std::string &basePath);
-  void cat_files(const std::string &basePath);
 
 public:
   int num_scores;
   int num_lex_scores;
   bool logProb;
-  const char *data;
+  const char *memTPS;
 
   QueryEngine(const char *, util::LoadMethod load_method);
   ~QueryEngine();
