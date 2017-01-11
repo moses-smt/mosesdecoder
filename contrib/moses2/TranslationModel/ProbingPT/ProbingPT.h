@@ -98,9 +98,6 @@ protected:
   uint64_t m_unkId;
   QueryEngine *m_engine;
 
-  boost::iostreams::mapped_file_source file;
-  const char *data;
-
   void CreateAlignmentMap(System &system, const std::string path);
 
   TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,

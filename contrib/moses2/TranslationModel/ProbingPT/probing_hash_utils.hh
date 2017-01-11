@@ -38,7 +38,7 @@ typedef util::ProbingHashTable<Entry, boost::hash<uint64_t> > Table;
 
 void serialize_table(char *mem, size_t size, const std::string &filename);
 
-char * readTable(const char * filename, size_t size);
+char * readTable(const char * filename, util::LoadMethod load_method, util::scoped_fd &file, util::scoped_memory &memory);
 
 uint64_t getKey(const uint64_t source_phrase[], size_t size);
 
