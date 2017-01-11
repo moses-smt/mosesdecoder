@@ -18,6 +18,7 @@ my $mydir = "$RealBin/../../share/nonbreaking_prefixes";
 
 my %NONBREAKING_PREFIX = ();
 my $language = "en";
+my $is_cjk = 0;
 my $QUIET = 0;
 my $HELP = 0;
 
@@ -38,6 +39,11 @@ if ($HELP) {
 if (!$QUIET) {
 	print STDERR "Sentence Splitter v3\n";
 	print STDERR "Language: $language\n";
+}
+
+# Is it Chinese, Japanese, Korean?
+if ($language eq "yue" || $language eq "zh") {
+	$is_cjk = 1;
 }
 
 my $prefixfile = "$mydir/nonbreaking_prefix.$language";
@@ -120,28 +126,30 @@ sub preprocess {
 	# and are followed by a sentence starter punctuation and upper case.
 	$text =~ s/([?!\.]) +([\'\"\(\[\¿\¡\p{IsPi}]+[\ ]*[\p{IsUpper}])/$1\n$2/g;
 
-	# Chinese uses unusual end-of-sentence markers. These are NOT
-	# followed by whitespace.  Nor is there any idea of capitalization.
-	# There does not appear to be any unicode category for full-stops
-	# in general, so list them here.  U+3002 U+FF0E U+FF1F U+FF01
-	$text =~ s/([。．？！♪])/$1\n/g;
+	if ($is_cjk == 1) {
+		# Chinese uses unusual end-of-sentence markers. These are NOT
+		# followed by whitespace.  Nor is there any idea of capitalization.
+		# There does not appear to be any unicode category for full-stops
+		# in general, so list them here.  U+3002 U+FF0E U+FF1F U+FF01
+		$text =~ s/([。．？！♪])/$1\n/g;
 
-	# A normal full-stop or other Western sentence enders followed
-	# by an ideograph is an and-of-sentence, always.
-	$text =~ s/([\.?!]) *(\p{CJK})/$1\n$2/g;
+		# A normal full-stop or other Western sentence enders followed
+		# by an ideograph is an end-of-sentence, always.
+		$text =~ s/([\.?!]) *(\p{CJK})/$1\n$2/g;
 
-	# Split close-paren-then-comma into two.
-	$text =~ s/(\p{Punctuation}) *(\p{Punctuation})/ $1 $2 /g;
+		# Split close-paren-then-comma into two.
+		$text =~ s/(\p{Punctuation}) *(\p{Punctuation})/ $1 $2 /g;
 
-	# Chinese does not use any sort of white-space between ideographs.
-	# Nominally, each single ideograph corresponds to one word. Add
-	# spaces here, so that later processing stages can tokenize readily.
-	# Note that this handles mixed latinate+CJK.
-	# TODO: perhaps also CJKExtA CJKExtB etc ??? CJK_Radicals_Sup ?
-	$text =~ s/(\p{Punctuation}) *(\p{CJK})/ $1 $2/g
-	$text =~ s/(\p{CJK}) *(\p{Punctuation})/$1 $2 /g;
-	$text =~ s/([\p{CJK}\p{CJKSymbols}])/ $1 /g;
-	$text =~ s/ +/ /g;
+		# Chinese does not use any sort of white-space between ideographs.
+		# Nominally, each single ideograph corresponds to one word. Add
+		# spaces here, so that later processing stages can tokenize readily.
+		# Note that this handles mixed latinate+CJK.
+		# TODO: perhaps also CJKExtA CJKExtB etc ??? CJK_Radicals_Sup ?
+		$text =~ s/(\p{Punctuation}) *(\p{CJK})/ $1 $2/g;
+		$text =~ s/(\p{CJK}) *(\p{Punctuation})/$1 $2 /g;
+		$text =~ s/([\p{CJK}\p{CJKSymbols}])/ $1 /g;
+		$text =~ s/ +/ /g;
+	}
 
 	# Special punctuation cases are covered. Check all remaining periods.
 	my $word;
