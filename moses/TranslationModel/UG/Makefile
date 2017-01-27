@@ -35,7 +35,7 @@ CXXFLAGS += -DMAX_NUM_FACTORS=4
 CXXFLAGS += -DKENLM_MAX_ORDER=5
 CXXFLAGS += -DWITH_THREADS
 CXXFLAGS += -DNO_MOSES
-CXXFLAGS += -DMMT
+# CXXFLAGS += -DMMT
 CXXFLAGS += -I$(dir ${MOSES_ROOT})mmt-only
 CXXFLAGS += -I${MOSES_ROOT} -I. -I${MOSES_ROOT}/opt/include 
 
@@ -47,7 +47,7 @@ else ifeq ($(variant),syntax)
 CXXFLAGS += -fsyntax-only
 endif
 
-LDFLAGS  = -L${MOSES_ROOT}/opt/lib64 -L./lib/ 
+LDFLAGS  = -L${MOSES_ROOT}/opt/lib -L./lib/ 
 
 # WDIR = build/$(variant)/${HOSTTYPE}/${KERNEL}
 WDIR = build/$(variant)
@@ -73,7 +73,7 @@ DYNAMIC_LIBS  = pthread
 #DYNAMIC_LIBS  += tcmalloc
 
 LIBS  = -Wl,-B$(link) 
-LIBS += -L${MOSES_ROOT}/opt/lib64 ${BOOSTLIBS}
+LIBS += -L${MOSES_ROOT}/opt/lib ${BOOSTLIBS}
 LIBS += $(addprefix -l,${STATIC_LIBS})
 LIBS += -Wl,-Bdynamic
 LIBS += $(addprefix -l,${DYNAMIC_LIBS})

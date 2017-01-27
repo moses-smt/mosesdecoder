@@ -1,5 +1,6 @@
 #pragma once
 
+#include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/unordered_map.hpp>
 #include <sys/stat.h> //For finding size of file
 #include "vocabid.hh"
@@ -26,14 +27,23 @@ class QueryEngine
   size_t table_filesize;
   bool is_reordering;
 
+  util::scoped_fd file_;
+  util::scoped_memory memory_;
+
+  // target phrases
+  boost::iostreams::mapped_file_source file;
+
+  util::scoped_fd fileTPS_;
+  util::scoped_memory memoryTPS_;
+
   void read_alignments(const std::string &alignPath);
   void file_exits(const std::string &basePath);
-  void cat_files(const std::string &basePath);
 
 public:
   int num_scores;
   int num_lex_scores;
   bool logProb;
+  const char *memTPS;
 
   QueryEngine(const char *, util::LoadMethod load_method);
   ~QueryEngine();

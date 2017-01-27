@@ -91,11 +91,11 @@ $(call safepath,$(IRSTLM_PREFIX)/bin/build-lm.sh):
 	rm -rf ${TMP}
 
 # boost 
-boost: URL=http://sourceforge.net/projects/boost/files/boost/1.59.0/boost_1_59_0.tar.gz/download
+boost: URL=http://sourceforge.net/projects/boost/files/boost/1.63.0/boost_1_63_0.tar.gz/download
 boost: TMP=$(CWD)/build/boost
 boost: override PREFIX=${BOOST_PREFIX}
 boost: | $(call safepath,${BOOST_PREFIX}/include/boost)
 $(call safepath,${BOOST_PREFIX}/include/boost):
 	$(sfget)
-	cd '${TMP}/boost_1_59_0' && ./bootstrap.sh && ./b2 --prefix=${PREFIX} -j${nproc} install
+	cd '${TMP}/boost_1_63_0' && ./bootstrap.sh && ./b2 --prefix=${PREFIX} -j${nproc} install
 	rm -rf ${TMP}

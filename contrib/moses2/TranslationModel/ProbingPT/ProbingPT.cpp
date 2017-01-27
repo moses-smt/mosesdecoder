@@ -136,16 +136,6 @@ void ProbingPT::Load(System &system)
   // alignments
   CreateAlignmentMap(system, m_path + "/Alignments.dat");
 
-  // memory mapped file to tps
-  string filePath = m_path + "/TargetColl.dat";
-  file.open(filePath.c_str());
-  if (!file.is_open()) {
-    throw "Couldn't open file ";
-  }
-
-  data = file.data();
-  //size_t size = file.size();
-
   // cache
   CreateCache(system);
 }
@@ -153,12 +143,21 @@ void ProbingPT::Load(System &system)
 void ProbingPT::SetParameter(const std::string& key, const std::string& value)
 {
 	if (key == "load") {
-		if (value == "lazy") {
-			load_method = util::LAZY;
-		}
-		else if (value == "populate") {
-			load_method  = util::POPULATE_OR_READ;
-		}
+    if (value == "lazy") {
+      load_method = util::LAZY;
+    }
+    else if (value == "populate_or_lazy") {
+      load_method = util::POPULATE_OR_LAZY;
+    }
+    else if (value == "populate_or_read" || value == "populate") {
+      load_method = util::POPULATE_OR_READ;
+    }
+    else if (value == "read") {
+      load_method = util::READ;
+    }
+    else if (value == "parallel_read") {
+      load_method = util::PARALLEL_READ;
+    }
 		else {
 			UTIL_THROW2("load method not supported" << value);
 		}
@@ -272,7 +271,7 @@ TargetPhrases *ProbingPT::CreateTargetPhrases(MemPool &pool,
   //cerr << "key2=" << query_result.second << endl;
 
   if (query_result.first) {
-    const char *offset = data + query_result.second;
+    const char *offset = m_engine->memTPS + query_result.second;
     uint64_t *numTP = (uint64_t*) offset;
 
     tps = new (pool.Allocate<TargetPhrases>()) TargetPhrases(pool, *numTP);
@@ -724,7 +723,7 @@ std::pair<bool, SCFG::TargetPhrases*> ProbingPT::CreateTargetPhrasesSCFG(MemPool
 	  // there are some rules
 	  const FeatureFunctions &ffs = system.featureFunctions;
 
-	  const char *offset = data + query_result.second;
+	  const char *offset = m_engine->memTPS + query_result.second;
 	  uint64_t *numTP = (uint64_t*) offset;
 	  //cerr << "numTP=" << *numTP << endl;
 
