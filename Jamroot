@@ -215,6 +215,12 @@ if [ option.get "with-icu" : : "yes" ]
 external-lib boost_serialization ;
 requirements += <library>boost_serialization/<runtime-link>static ;
 
+# for neural pt
+if [ option.get "with-amunmt" ] {
+  external-lib boost_timer ;
+  external-lib boost_chrono ;
+}
+
 if [ option.get "with-vw" ] {
   requirements += <define>HAVE_VW ;
 }

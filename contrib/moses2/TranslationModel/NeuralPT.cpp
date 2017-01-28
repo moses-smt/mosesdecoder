@@ -1,7 +1,7 @@
 #include <boost/foreach.hpp>
 #include "NeuralPT.h"
 #include "../PhraseBased/Hypothesis.h"
-#include "NMT/plugin/nmt.h"
+#include "plugin/nmt.h"
 
 using namespace std;
 
@@ -41,14 +41,14 @@ NeuralPT::NeuralPT(size_t startInd, const std::string &line)
 
 void NeuralPT::Load(System &system)
 {
-  size_t devices = NMT::GetDevices(m_maxDevices);
-  std::cerr << devices << std::endl;
-  for(size_t device = 0; device < devices; ++device) {
-    m_models.push_back(NMT::NewModel(m_modelPath, device));
-  }
+  m_plugin = new amunmt::MosesPlugin();
+  m_plugin->initGod(m_modelPath);
 
-  m_sourceVocab = NMT::NewVocab(m_sourceVocabPath);
-  m_targetVocab = NMT::NewVocab(m_targetVocabPath);
+  size_t devices = amunmt::MosesPlugin::GetDevices(m_maxDevices);
+  std::cerr << devices << std::endl;
+
+  //m_sourceVocab = NMT::NewVocab(m_sourceVocabPath);
+  //m_targetVocab = NMT::NewVocab(m_targetVocabPath);
 
 }
 
@@ -92,15 +92,15 @@ void NeuralPT::BeforeExtending(Hypothesis &hypo, const Manager &mgr) const
   FFState *state = hypo.GetState(GetStartInd());
   NeuralPTState *stateCast = static_cast<NeuralPTState*>(state);
 
-  std::vector<NeuralPhrase> tps = Lookup(*stateCast);
-  BOOST_FOREACH(const NeuralPhrase &tp, tps) {
+  std::vector<AmunPhrase> tps = Lookup(*stateCast);
+  BOOST_FOREACH(const AmunPhrase &tp, tps) {
     // TODO merge with existing pt
   }
 }
 
-std::vector<NeuralPhrase> NeuralPT::Lookup(const NeuralPTState &prevState) const
+std::vector<AmunPhrase> NeuralPT::Lookup(const NeuralPTState &prevState) const
 {
-  std::vector<NeuralPhrase> ret;
+  std::vector<AmunPhrase> ret;
   // TODO get phrases from NMT
   //prevState
 

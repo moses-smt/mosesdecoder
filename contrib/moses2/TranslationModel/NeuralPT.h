@@ -1,13 +1,17 @@
 #pragma once
 #include "StatefulPhraseTable.h"
 #include "../legacy/Range.h"
-#include "NMT/plugin/nmt.h"
+
+namespace amunmt
+{
+ class MosesPlugin;
+}
 
 namespace Moses2
 {
 class NeuralPTState;
 
-struct NeuralPhrase
+struct AmunPhrase
 {
   std::vector<const Factor*> words;
   SCORE score;
@@ -64,12 +68,10 @@ protected:
   size_t m_threadId;
   boost::mutex m_mutex;
 
-  std::vector<boost::shared_ptr<Weights> > m_models;
-  boost::shared_ptr<Vocab> m_sourceVocab;
-  boost::shared_ptr<Vocab> m_targetVocab;
+  amunmt::MosesPlugin *m_plugin;
 
   void BeforeExtending(Hypothesis &hypo, const Manager &mgr) const;
-  std::vector<NeuralPhrase> Lookup(const NeuralPTState &prevState) const;
+  std::vector<AmunPhrase> Lookup(const NeuralPTState &prevState) const;
 
 };
 
