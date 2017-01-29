@@ -71,11 +71,13 @@ std::vector<float> LexicalReorderingTableCompact::GetScore(const Phrase& f,
   size_t index = m_hash[key];
   if(m_hash.GetSize() != index) {
     std::string scoresString;
-    if(m_inMemory)
-      scoresString = m_scoresMemory[index];
-    else
-      scoresString = m_scoresMapped[index];
-
+    if(m_inMemory) {
+      scoresString = m_scoresMemory[index].str();
+    }
+    else {
+      scoresString = m_scoresMapped[index].str();
+    }
+    
     BitWrapper<> bitStream(scoresString);
     for(size_t i = 0; i < m_numScoreComponent; i++)
       scores.push_back(m_scoreTrees[m_multipleScoreTrees ? i : 0]->Read(bitStream));

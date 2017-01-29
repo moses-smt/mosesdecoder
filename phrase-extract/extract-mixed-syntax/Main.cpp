@@ -149,11 +149,11 @@ int main(int argc, char** argv)
     }
 
     bool success;
-    success = getline(strmSource, lineSource);
+    success = !getline(strmSource, lineSource).eof();
     if (!success) {
       throw "Couldn't read source";
     }
-    success = getline(strmAlignment, lineAlignment);
+    success = !getline(strmAlignment, lineAlignment).eof();
     if (!success) {
       throw "Couldn't read alignment";
     }
