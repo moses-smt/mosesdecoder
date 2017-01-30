@@ -110,10 +110,16 @@ boost 104400 ;
 external-lib z ;
 
 import nvcc ;
-external-lib cuda ;
-external-lib cudart ;
-external-lib cublas ;
-requirements += <library>cuda <library>cudart <library>cublas <library-path>/usr/local/cuda/lib64 ;
+
+# for neural pt
+if [ option.get "with-amunmt" ] {
+  external-lib cuda ;
+  external-lib cudart ;
+  external-lib cublas ;
+  external-lib boost_timer ;
+  external-lib boost_chrono ;
+  requirements += <library>cuda <library>cudart <library>cublas <library-path>/usr/local/cuda/lib64 ;
+}
 
 #lib dl : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
 #requirements += <library>dl ;
@@ -214,12 +220,6 @@ if [ option.get "with-icu" : : "yes" ]
 # for probing pt
 external-lib boost_serialization ;
 requirements += <library>boost_serialization/<runtime-link>static ;
-
-# for neural pt
-if [ option.get "with-amunmt" ] {
-  external-lib boost_timer ;
-  external-lib boost_chrono ;
-}
 
 if [ option.get "with-vw" ] {
   requirements += <define>HAVE_VW ;

@@ -1,6 +1,20 @@
-alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../..//boost_timer ../..//boost_chrono ../../moses/TranslationModel/CompactPT//cmph ../../moses//moses ;
+alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../moses/TranslationModel/CompactPT//cmph ../../moses//moses ;
 
 local dependencies = ;
+
+#Neural pt
+local with-amunmt = [ option.get "with-amunmt" ] ;
+if $(with-amunmt) {
+  lib mosesplugin : : <search>$(with-amunmt)/build/src ;
+  obj NeuralPT.o : TranslationModel/NeuralPT.cpp : <include>$(with-amunmt)/src <include>$(with-amunmt)/src/3rd_party ;
+ 	alias amunmt : NeuralPT.o mosesplugin : : : <define>NEURAL_PT ;
+  dependencies += amunmt ../..//boost_timer ../..//boost_chrono ;
+
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+  echo "!!! You are linking with the AmunMT library                                    !!!" ;
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+
+}
 
  lib moses2_lib :
    AlignmentInfo.cpp
@@ -176,21 +190,6 @@ local dependencies = ;
 	
     deps 
   ;
-
-#Neural pt
-local with-amunmt = [ option.get "with-amunmt" ] ;
-if $(with-amunmt) {
-  lib mosesplugin : : <search>$(with-amunmt)/build/src ;
-  obj NeuralPT.o : TranslationModel/NeuralPT.cpp : <include>$(with-amunmt)/src <include>$(with-amunmt)/src/3rd_party ;
- 	alias amunmt : NeuralPT.o mosesplugin : : : <define>NEURAL_PT ;
-  dependencies += amunmt ;
-  moses2_lib += amunmt ;
-
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
-  echo "!!! You are linking with the AmunMT library                                    !!!" ;
-  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
-
-}
 
 
 exe moses2 : Main.cpp moses2_lib $(dependencies) ;
