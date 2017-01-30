@@ -55,20 +55,12 @@ public:
   virtual void EvaluateBeforeExtending(const Hypotheses &hypos, const Manager &mgr) const;
 
 protected:
-  std::string m_modelPath;
-  std::string m_sourceVocabPath;
-  std::string m_targetVocabPath;
-  size_t m_batchSize;
-  size_t m_stateLength;
   size_t m_factor;
+
+  std::string m_modelPath;
   size_t m_maxDevices;
-  size_t m_filteredSoftmax;
-  std::string m_mode;
-
-  size_t m_threadId;
-  boost::mutex m_mutex;
-
   amunmt::MosesPlugin *m_plugin;
+
 
   void EvaluateBeforeExtending(Hypothesis &hypo, const Manager &mgr) const;
   std::vector<AmunPhrase> Lookup(const NeuralPTState &prevState) const;
