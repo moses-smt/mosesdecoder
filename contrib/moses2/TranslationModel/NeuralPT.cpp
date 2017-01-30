@@ -35,16 +35,19 @@ NeuralPT::NeuralPT(size_t startInd, const std::string &line)
 
 void NeuralPT::Load(System &system)
 {
+  cerr << "NeuralPT::Load start" << endl;
   m_plugin = new amunmt::MosesPlugin();
   m_plugin->initGod(m_modelPath);
 
   size_t devices = amunmt::MosesPlugin::GetDevices(m_maxDevices);
   std::cerr << devices << std::endl;
 
-  //m_sourceVocab = NMT::NewVocab(m_sourceVocabPath);
-  //m_targetVocab = NMT::NewVocab(m_targetVocabPath);
+  const amunmt::God &god = m_plugin->GetGod();
 
-  cerr << "NeuralPT::Load" << endl;
+  CreateVocabMapping(system, god.GetSourceVocab(), m_sourceA2M, m_sourceM2A);
+  CreateVocabMapping(system, god.GetTargetVocab(), m_targetA2M, m_targetM2A);
+
+  cerr << "NeuralPT::Load end" << endl;
 }
 
 FFState* NeuralPT::BlankState(MemPool &pool, const System &sys) const
@@ -115,6 +118,23 @@ void NeuralPT::SetParameter(const std::string& key, const std::string& value)
     m_maxDevices = Scan<size_t>(value);
   } else {
     StatefulPhraseTable::SetParameter(key, value);
+  }
+}
+
+void NeuralPT::CreateVocabMapping(
+    System &system,
+    const amunmt::Vocab &vocab,
+    VocabAmun2Moses &a2m,
+    VocabMoses2Amun &m2a) const
+{
+  FactorCollection &fc = system.GetVocab();
+
+  a2m.resize(vocab.size());
+  for (size_t i = 0; i < vocab.size(); ++i) {
+    const string &str = vocab[i];
+    const Factor *factor = fc.AddFactor(str, system, false);
+    a2m[i] = factor;
+    m2a[factor] = i;
   }
 }
 

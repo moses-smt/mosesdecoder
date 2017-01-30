@@ -1,10 +1,12 @@
 #pragma once
+#include <unordered_map>
 #include "StatefulPhraseTable.h"
 #include "../legacy/Range.h"
 
 namespace amunmt
 {
  class MosesPlugin;
+ class Vocab;
 }
 
 namespace Moses2
@@ -61,10 +63,19 @@ protected:
   size_t m_maxDevices;
   amunmt::MosesPlugin *m_plugin;
 
+  typedef std::vector<const Factor*> VocabAmun2Moses;
+  typedef std::unordered_map<const Factor*, size_t> VocabMoses2Amun;
+  VocabAmun2Moses m_sourceA2M, m_targetA2M;
+  VocabMoses2Amun m_sourceM2A, m_targetM2A;
 
   void EvaluateBeforeExtending(Hypothesis &hypo, const Manager &mgr) const;
   std::vector<AmunPhrase> Lookup(const NeuralPTState &prevState) const;
 
+  void CreateVocabMapping(
+      System &system,
+      const amunmt::Vocab &vocab,
+      VocabAmun2Moses &a2m,
+      VocabMoses2Amun &m2a) const;
 };
 
 }
