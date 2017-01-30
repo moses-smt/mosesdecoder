@@ -52,7 +52,7 @@ public:
       const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
       FFState &state) const;
 
-  virtual void BeforeExtending(const Hypotheses &hypos, const Manager &mgr) const;
+  virtual void EvaluateBeforeExtending(const Hypotheses &hypos, const Manager &mgr) const;
 
 protected:
   std::string m_modelPath;
@@ -70,7 +70,7 @@ protected:
 
   amunmt::MosesPlugin *m_plugin;
 
-  void BeforeExtending(Hypothesis &hypo, const Manager &mgr) const;
+  void EvaluateBeforeExtending(Hypothesis &hypo, const Manager &mgr) const;
   std::vector<AmunPhrase> Lookup(const NeuralPTState &prevState) const;
 
 };

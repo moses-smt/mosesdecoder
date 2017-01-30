@@ -77,17 +77,17 @@ void NeuralPT::EvaluateWhenApplied(const SCFG::Manager &mgr,
 
 }
 
-void NeuralPT::BeforeExtending(const Hypotheses &hypos, const Manager &mgr) const
+void NeuralPT::EvaluateBeforeExtending(const Hypotheses &hypos, const Manager &mgr) const
 {
   BOOST_FOREACH(const HypothesisBase *hypo, hypos) {
     HypothesisBase *h1 = const_cast<HypothesisBase*>(hypo);
     Hypothesis &h2 = *static_cast<Hypothesis*>(h1);
-    BeforeExtending(h2, mgr);
+    EvaluateBeforeExtending(h2, mgr);
   }
 
 }
 
-void NeuralPT::BeforeExtending(Hypothesis &hypo, const Manager &mgr) const
+void NeuralPT::EvaluateBeforeExtending(Hypothesis &hypo, const Manager &mgr) const
 {
   FFState *state = hypo.GetState(GetStartInd());
   NeuralPTState *stateCast = static_cast<NeuralPTState*>(state);
