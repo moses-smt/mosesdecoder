@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include "StatefulPhraseTable.h"
 #include "../legacy/Range.h"
+#include "../TypeDef.h"
 
 namespace amunmt
 {
@@ -57,7 +58,7 @@ public:
   virtual void EvaluateBeforeExtending(const Hypotheses &hypos, const Manager &mgr) const;
 
 protected:
-  size_t m_factor;
+  FactorType m_factorType;
 
   std::string m_modelPath;
   size_t m_maxDevices;
@@ -76,6 +77,8 @@ protected:
       const amunmt::Vocab &vocab,
       VocabAmun2Moses &a2m,
       VocabMoses2Amun &m2a) const;
+
+  std::vector<size_t> Moses2Amun(const Phrase<Word> &phrase, const VocabMoses2Amun &vocabMapping) const;
 };
 
 }

@@ -1,6 +1,7 @@
 #include <boost/foreach.hpp>
 #include "NeuralPT.h"
 #include "../PhraseBased/Hypothesis.h"
+#include "../PhraseBased/Sentence.h"
 #include "plugin/nmt.h"
 
 using namespace std;
@@ -28,6 +29,7 @@ public:
 NeuralPT::NeuralPT(size_t startInd, const std::string &line)
 :StatefulPhraseTable(startInd, line)
 , m_maxDevices(1)
+, m_factorType(0)
 {
   ReadParameters();
   cerr << "NeuralPT::NeuralPT:" << GetNumScores() << endl;
@@ -59,8 +61,12 @@ FFState* NeuralPT::BlankState(MemPool &pool, const System &sys) const
 void NeuralPT::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
     const InputType &input, const Hypothesis &hypo) const
 {
-  cerr << "NeuralPT::EmptyHypothesisState" << endl;
+  cerr << "NeuralPT::EmptyHypothesisState start" << endl;
+  const Sentence &inputCast = static_cast< const Sentence& >(input);
+  std::vector<size_t> amunPhrase = Moses2Amun(inputCast, m_sourceM2A);
+  cerr << "amunPhrase=" << amunPhrase.size() << " " << amunPhrase[0] << endl;
 
+  cerr << "NeuralPT::EmptyHypothesisState end" << endl;
 }
 
 void NeuralPT::EvaluateWhenApplied(const ManagerBase &mgr,
@@ -81,13 +87,13 @@ void NeuralPT::EvaluateWhenApplied(const SCFG::Manager &mgr,
 
 void NeuralPT::EvaluateBeforeExtending(const Hypotheses &hypos, const Manager &mgr) const
 {
-  cerr << "NeuralPT::EvaluateBeforeExtending start" << endl;
+  //cerr << "NeuralPT::EvaluateBeforeExtending start" << endl;
   BOOST_FOREACH(const HypothesisBase *hypo, hypos) {
     HypothesisBase *h1 = const_cast<HypothesisBase*>(hypo);
     Hypothesis &h2 = *static_cast<Hypothesis*>(h1);
     EvaluateBeforeExtending(h2, mgr);
   }
-  cerr << "NeuralPT::EvaluateBeforeExtending end" << endl;
+  //cerr << "NeuralPT::EvaluateBeforeExtending end" << endl;
 }
 
 void NeuralPT::EvaluateBeforeExtending(Hypothesis &hypo, const Manager &mgr) const
@@ -114,9 +120,14 @@ void NeuralPT::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "model") {
     m_modelPath = value;
-  } else if (key == "devices") {
+  }
+  else if (key == "devices") {
     m_maxDevices = Scan<size_t>(value);
-  } else {
+  }
+  else if (key == "factor") {
+      m_factorType = Scan<FactorType>(value);
+  }
+  else {
     StatefulPhraseTable::SetParameter(key, value);
   }
 }
@@ -136,6 +147,28 @@ void NeuralPT::CreateVocabMapping(
     a2m[i] = factor;
     m2a[factor] = i;
   }
+}
+
+
+std::vector<size_t> NeuralPT::Moses2Amun(const Phrase<Word> &phrase, const VocabMoses2Amun &vocabMapping) const
+{
+  size_t size = phrase.GetSize();
+  std::vector<size_t> ret(size);
+
+  for (size_t i = 0; i < size; ++i) {
+    const Word &word = phrase[i];
+    const Factor *factor = word[m_factorType];
+    VocabMoses2Amun::const_iterator iter = vocabMapping.find(factor);
+    if (iter == vocabMapping.end()) {
+      // unk
+      ret[i] = 1;
+    }
+    else {
+      ret[i] = iter->second;
+    }
+  }
+
+  return ret;
 }
 
 }
