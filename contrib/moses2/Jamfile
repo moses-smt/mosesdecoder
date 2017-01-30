@@ -95,11 +95,6 @@ if $(with-amunmt) {
     TranslationModel/ProbingPT/StoreTarget.cpp
     TranslationModel/ProbingPT/vocabid.cpp
 
-#    TranslationModel/NMT/plugin/nmt.cu
-#    TranslationModel/NMT/plugin/nbest.cu
-#    TranslationModel/NMT/common/utils.cu
-#    TranslationModel/NMT/cnpy/cnpy.cpp
-
    	parameters/AllOptions.cpp
    	parameters/BookkeepingOptions.cpp
    	parameters/ContextParameters.cpp
