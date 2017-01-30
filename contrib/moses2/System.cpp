@@ -91,6 +91,19 @@ void System::LoadWeights()
   //cerr << "Weights:" << endl;
   typedef std::map<std::string, std::vector<float> > WeightMap;
   const WeightMap &allWeights = params.GetAllWeights();
+
+  // check all weights are there for all FF
+  const std::vector<const FeatureFunction*> &ffs = featureFunctions.GetFeatureFunctions();
+  BOOST_FOREACH(const FeatureFunction *ff, ffs) {
+    if (ff->IsTuneable()) {
+      const std::string &ffName = ff->GetName();
+      WeightMap::const_iterator iterWeight = allWeights.find(ffName);
+      UTIL_THROW_IF2(iterWeight == allWeights.end(), "Must specify weight for " << ffName);
+    }
+  }
+
+
+  // set weight
   BOOST_FOREACH(const WeightMap::value_type &valPair, allWeights) {
 	  const string &ffName = valPair.first;
 	  const std::vector<float> &ffWeights = valPair.second;
@@ -100,7 +113,7 @@ void System::LoadWeights()
 		  cerr << ffWeights[i] << " ";
 	  }
 	  cerr << endl;
-	  */
+    */
 	  weights.SetWeights(featureFunctions, ffName, ffWeights);
   }
 }
