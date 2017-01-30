@@ -109,10 +109,9 @@ if ! [ option.get "max-kenlm-order" ]
 boost 104400 ;
 external-lib z ;
 
-import nvcc ;
-
 # for neural pt
 if [ option.get "with-amunmt" ] {
+  import nvcc ;
   external-lib cuda ;
   external-lib cudart ;
   external-lib cublas ;
