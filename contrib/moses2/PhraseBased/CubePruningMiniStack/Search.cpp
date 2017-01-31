@@ -18,6 +18,7 @@
 #include "../../TranslationTask.h"
 #include "../../legacy/Util2.h"
 #include "../../PhraseBased/TargetPhrases.h"
+#include "../../TranslationModel/StatefulPhraseTable.h"
 
 using namespace std;
 
@@ -73,7 +74,7 @@ void Search::Decode()
 		//cerr << "stackInd=" << stackInd << endl;
 		m_stack.Clear();
 		Decode(stackInd);
-    PostDecode(stackInd);
+		PostDecode(stackInd);
 
 		//m_stack.DebugCounts();
 	}
@@ -156,6 +157,14 @@ void Search::Decode(size_t stackInd)
 				m_stack.Add(hypo, hypoRecycler, mgr.arcLists);
 			}
 		}
+	}
+
+	BOOST_FOREACH(const Stack::Coll::value_type &p, m_stack.GetColl()) {
+      const HypothesisColl &coll = *p.second;
+	  const Hypotheses &hypos = coll.GetSortedAndPrunedHypos(mgr, mgr.arcLists);
+	  BOOST_FOREACH(const StatefulPhraseTable *sfpt, mgr.system.featureFunctions.statefulPhraseTables) {
+		sfpt->EvaluateBeforeExtending(stackInd, hypos, mgr);
+	  }
 	}
 }
 
