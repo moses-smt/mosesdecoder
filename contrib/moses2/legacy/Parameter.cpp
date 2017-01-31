@@ -26,12 +26,14 @@
 #include <sstream>
 #include <algorithm>
 #include <boost/algorithm/string/predicate.hpp>
+#include <boost/program_options.hpp>
+
 #include "Parameter.h"
 #include "InputFileStream.h"
+#include "../FF/FeatureRegistry.h"
 #include "util/string_stream.hh"
 #include "util/exception.hh"
 #include "util/random.hh"
-#include <boost/program_options.hpp>
 
 using namespace std;
 using namespace boost::algorithm;
@@ -582,7 +584,7 @@ bool Parameter::LoadParam(int argc, char* xargv[])
       FindParam("-config", argc, argv)) == "") {
     PrintCredit();
     Explain();
-    PrintFF();
+    FeatureRegistry::Instance().PrintFF();
 
     cerr << endl;
     cerr << "No configuration file was specified.  Use -config or -f";
@@ -1636,11 +1638,6 @@ void Parameter::OverwriteParam(const string &paramName, PARAM_VEC values)
     cerr << " " << *iter;
   }
   cerr << std::endl;
-}
-
-void Parameter::PrintFF() const
-{
-  //StaticData::Instance().GetFeatureRegistry().PrintFF();
 }
 
 std::set<std::string> Parameter::GetWeightNames() const
