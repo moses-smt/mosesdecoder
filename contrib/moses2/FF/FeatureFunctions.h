@@ -7,10 +7,10 @@
 
 #pragma once
 
+#include <boost/unordered_map.hpp>
 #include <vector>
 #include <string>
 #include "../legacy/Parameter.h"
-#include "FeatureRegistry.h"
 #include "../Phrase.h"
 
 namespace Moses2
@@ -97,8 +97,6 @@ protected:
   boost::unordered_map<std::string, size_t> m_defaultNames;
   System &m_system;
   size_t m_ffStartInd;
-
-  FeatureRegistry m_registry;
 
   FeatureFunction *Create(const std::string &line);
   std::string GetDefaultName(const std::string &stub);
