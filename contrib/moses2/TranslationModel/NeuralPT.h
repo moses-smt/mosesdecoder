@@ -8,13 +8,17 @@ namespace amunmt
 {
  class MosesPlugin;
  class Vocab;
+
+ typedef size_t Word;
+ typedef std::vector<Word> Words;
+
 }
 
 namespace Moses2
 {
 class NeuralPTState;
 
-struct AmunPhrase
+struct SimplifiedPhrase
 {
   std::vector<const Factor*> words;
   SCORE score;
@@ -55,7 +59,7 @@ public:
       const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
       FFState &state) const;
 
-  virtual void EvaluateBeforeExtending(const Hypotheses &hypos, const Manager &mgr) const;
+  virtual void EvaluateBeforeExtending(size_t stackInd, const Hypotheses &hypos, const Manager &mgr) const;
 
 protected:
   FactorType m_factorType;
@@ -69,16 +73,15 @@ protected:
   VocabAmun2Moses m_sourceA2M, m_targetA2M;
   VocabMoses2Amun m_sourceM2A, m_targetM2A;
 
-  void EvaluateBeforeExtending(Hypothesis &hypo, const Manager &mgr) const;
-  std::vector<AmunPhrase> Lookup(const NeuralPTState &prevState) const;
-
   void CreateVocabMapping(
       System &system,
       const amunmt::Vocab &vocab,
       VocabAmun2Moses &a2m,
       VocabMoses2Amun &m2a) const;
 
-  std::vector<size_t> Moses2Amun(const Phrase<Word> &phrase, const VocabMoses2Amun &vocabMapping) const;
+  amunmt::Words Moses2Amun(const Phrase<Word> &phrase, const VocabMoses2Amun &vocabMapping) const;
+  size_t Moses2Amun(const Word &word, const VocabMoses2Amun &vocabMapping) const;
+
 };
 
 }

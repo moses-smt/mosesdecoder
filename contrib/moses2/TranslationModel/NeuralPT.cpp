@@ -54,7 +54,7 @@ void NeuralPT::Load(System &system)
 
 FFState* NeuralPT::BlankState(MemPool &pool, const System &sys) const
 {
-  cerr << "NeuralPT::BlankState" << endl;
+  //cerr << "NeuralPT::BlankState" << endl;
   return new NeuralPTState();
 }
 
@@ -89,35 +89,41 @@ void NeuralPT::EvaluateWhenApplied(const SCFG::Manager &mgr,
 
 }
 
-void NeuralPT::EvaluateBeforeExtending(const Hypotheses &hypos, const Manager &mgr) const
+void NeuralPT::EvaluateBeforeExtending(size_t stackInd, const Hypotheses &hypos, const Manager &mgr) const
 {
-  //cerr << "NeuralPT::EvaluateBeforeExtending start" << endl;
+  cerr << "NeuralPT::EvaluateBeforeExtending start:" << stackInd << " " << hypos.size() << " " << endl;
+
+  if (stackInd == 0) {
+    // 0th stack with 1 empty hypo. Already scored using EmptyHypothesisState()
+    return;
+  }
+
+  amunmt::AmunInputs amunInputs;
+
   BOOST_FOREACH(const HypothesisBase *hypo, hypos) {
     HypothesisBase *h1 = const_cast<HypothesisBase*>(hypo);
-    Hypothesis &h2 = *static_cast<Hypothesis*>(h1);
-    EvaluateBeforeExtending(h2, mgr);
+    Hypothesis &hypoPB = *static_cast<Hypothesis*>(h1);
+    const Hypothesis &prevHypo = *hypoPB.GetPrevHypo();
+    cerr << "hypoPB=" << &hypoPB << " " << &prevHypo << endl;
+
+    amunmt::AmunInput amunInput;
+
+    // current phrase
+    const TargetPhrase<Moses2::Word> &tp = hypoPB.GetTargetPhrase();
+    amunmt::Words amunPhrase = Moses2Amun(tp, m_targetM2A);
+    amunInput.phrase = amunPhrase;
+
+    // previous state info
+    const FFState *prevState = prevHypo.GetState(GetStatefulInd());
+    const NeuralPTState *prevStateCast = static_cast<const NeuralPTState*>(prevState);
+    amunInput.prevStates = prevStateCast->hypoInfo.prevStates;
+    amunInput.nextStates = prevStateCast->hypoInfo.nextStates;
+    amunInput.prevHyps = prevStateCast->hypoInfo.prevHyps;
+
+    amunInputs.push_back(amunInput);
   }
+
   //cerr << "NeuralPT::EvaluateBeforeExtending end" << endl;
-}
-
-void NeuralPT::EvaluateBeforeExtending(Hypothesis &hypo, const Manager &mgr) const
-{
-  FFState *state = hypo.GetState(GetStartInd());
-  NeuralPTState *stateCast = static_cast<NeuralPTState*>(state);
-
-  std::vector<AmunPhrase> tps = Lookup(*stateCast);
-  BOOST_FOREACH(const AmunPhrase &tp, tps) {
-    // TODO merge with existing pt
-  }
-}
-
-std::vector<AmunPhrase> NeuralPT::Lookup(const NeuralPTState &prevState) const
-{
-  std::vector<AmunPhrase> ret;
-  // TODO get phrases from NMT
-  //prevState
-
-  return ret;
 }
 
 void NeuralPT::SetParameter(const std::string& key, const std::string& value)
@@ -154,25 +160,30 @@ void NeuralPT::CreateVocabMapping(
 }
 
 
-std::vector<size_t> NeuralPT::Moses2Amun(const Phrase<Word> &phrase, const VocabMoses2Amun &vocabMapping) const
+amunmt::Words NeuralPT::Moses2Amun(const Phrase<Word> &phrase, const VocabMoses2Amun &vocabMapping) const
 {
   size_t size = phrase.GetSize();
-  std::vector<size_t> ret(size);
+  amunmt::Words ret(size);
 
   for (size_t i = 0; i < size; ++i) {
     const Word &word = phrase[i];
-    const Factor *factor = word[m_factorType];
-    VocabMoses2Amun::const_iterator iter = vocabMapping.find(factor);
-    if (iter == vocabMapping.end()) {
-      // unk
-      ret[i] = 1;
-    }
-    else {
-      ret[i] = iter->second;
-    }
+    ret[i] = Moses2Amun(word, vocabMapping);
   }
 
   return ret;
+}
+
+size_t NeuralPT::Moses2Amun(const Word &word, const VocabMoses2Amun &vocabMapping) const
+{
+  const Factor *factor = word[m_factorType];
+  VocabMoses2Amun::const_iterator iter = vocabMapping.find(factor);
+  if (iter == vocabMapping.end()) {
+    // unk
+    return 1;
+  }
+  else {
+    return iter->second;
+  }
 }
 
 }

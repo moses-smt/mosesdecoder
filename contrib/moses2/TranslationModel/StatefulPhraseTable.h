@@ -14,7 +14,7 @@ class StatefulPhraseTable : public StatefulFeatureFunction
 public:
   StatefulPhraseTable(size_t startInd, const std::string &line);
 
-  virtual void EvaluateBeforeExtending(const Hypotheses &hypos, const Manager &mgr) const = 0;
+  virtual void EvaluateBeforeExtending(size_t stackInd, const Hypotheses &hypos, const Manager &mgr) const = 0;
 
 };
 

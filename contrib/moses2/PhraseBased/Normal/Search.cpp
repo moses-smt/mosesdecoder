@@ -78,7 +78,7 @@ void Search::Decode(size_t stackInd)
 	//cerr << "hypos=" << hypos.size() << endl;
 
   BOOST_FOREACH(const StatefulPhraseTable *sfpt, mgr.system.featureFunctions.statefulPhraseTables) {
-    sfpt->EvaluateBeforeExtending(hypos, mgr);
+    sfpt->EvaluateBeforeExtending(stackInd, hypos, mgr);
   }
 
 	const InputPaths &paths = mgr.GetInputPaths();
