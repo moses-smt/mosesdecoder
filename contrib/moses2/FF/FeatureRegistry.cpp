@@ -28,7 +28,7 @@ template<class F>
 class DefaultFeatureFactory: public FeatureFactory
 {
 public:
-  FeatureFunction *Create(size_t startInd, const std::string &line)
+  FeatureFunction *Create(size_t startInd, const std::string &line) const
   {
     return new F(startInd, line);
   }
@@ -38,7 +38,7 @@ public:
 class KenFactory: public FeatureFactory
 {
 public:
-  FeatureFunction *Create(size_t startInd, const std::string &line)
+  FeatureFunction *Create(size_t startInd, const std::string &line) const
   {
     ConstructKenLM(startInd, line);
   }
@@ -91,9 +91,9 @@ void FeatureRegistry::Add(const std::string &name, FeatureFactory *factory)
 }
 
 FeatureFunction *FeatureRegistry::Construct(size_t startInd,
-    const std::string &name, const std::string &line)
+    const std::string &name, const std::string &line) const
 {
-  Map::iterator i = registry_.find(name);
+  Map::const_iterator i = registry_.find(name);
   if (i == registry_.end()) {
     cerr << "Feature name " << name << " is not registered.";
     abort();

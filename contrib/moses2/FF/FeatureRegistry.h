@@ -14,7 +14,7 @@ public:
   {
   }
 
-  virtual FeatureFunction *Create(size_t startInd, const std::string &line) = 0;
+  virtual FeatureFunction *Create(size_t startInd, const std::string &line) const = 0;
 
 protected:
   FeatureFactory()
@@ -31,7 +31,7 @@ public:
   ~FeatureRegistry();
 
   FeatureFunction *Construct(size_t startInd, const std::string &name,
-      const std::string &line);
+      const std::string &line) const;
   void PrintFF() const;
 
 private:
