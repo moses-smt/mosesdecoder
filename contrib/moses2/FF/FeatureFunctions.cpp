@@ -6,6 +6,7 @@
  */
 
 #include <boost/foreach.hpp>
+#include "FeatureRegistry.h"
 #include "FeatureFunctions.h"
 #include "StatefulFeatureFunction.h"
 #include "../System.h"
@@ -26,7 +27,6 @@ namespace Moses2
 FeatureFunctions::FeatureFunctions(System &system) :
     m_system(system), m_ffStartInd(0)
 {
-  //m_registry.PrintFF();
 }
 
 FeatureFunctions::~FeatureFunctions()
@@ -112,7 +112,7 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 {
   vector<string> toks = Tokenize(line);
 
-  FeatureFunction *ff = m_registry.Construct(m_ffStartInd, toks[0], line);
+  FeatureFunction *ff = FeatureRegistry::Instance().Construct(m_ffStartInd, toks[0], line);
   UTIL_THROW_IF2(ff == NULL, "Feature function not created");
 
   // name

@@ -22,8 +22,11 @@
 
 using namespace std;
 
+
 namespace Moses2
 {
+FeatureRegistry FeatureRegistry::s_instance;
+
 template<class F>
 class DefaultFeatureFactory: public FeatureFactory
 {

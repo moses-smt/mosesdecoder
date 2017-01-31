@@ -26,7 +26,9 @@ protected:
 class FeatureRegistry
 {
 public:
-  FeatureRegistry();
+  static const FeatureRegistry &Instance() {
+    return s_instance;
+  }
 
   ~FeatureRegistry();
 
@@ -35,11 +37,15 @@ public:
   void PrintFF() const;
 
 private:
-  void Add(const std::string &name, FeatureFactory *factory);
+  static FeatureRegistry s_instance;
 
   typedef boost::unordered_map<std::string, boost::shared_ptr<FeatureFactory> > Map;
-
   Map registry_;
+
+  FeatureRegistry();
+
+  void Add(const std::string &name, FeatureFactory *factory);
+
 };
 
 ////////////////////////////////////////////////////////////////////
