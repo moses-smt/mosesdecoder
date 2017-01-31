@@ -32,12 +32,12 @@
 		<link>
 			<name>Main.cpp</name>
 			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/moses2/Main.cpp</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses2/Main.cpp</locationURI>
 		</link>
 		<link>
 			<name>Main.h</name>
 			<type>1</type>
-			<locationURI>PARENT-1-PROJECT_LOC/moses2/Main.h</locationURI>
+			<locationURI>PARENT-3-PROJECT_LOC/moses2/Main.h</locationURI>
 		</link>
 	</linkedResources>
 </projectDescription>
