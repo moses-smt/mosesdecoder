@@ -11,7 +11,7 @@ namespace Moses2
 class NeuralPTState: public FFState
 {
 public:
-  size_t lastWord;
+  amunmt::HypoInfo hypoInfo;
 
   virtual size_t hash() const
   { return 0; }
@@ -65,6 +65,10 @@ void NeuralPT::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
   const Sentence &inputCast = static_cast< const Sentence& >(input);
   std::vector<size_t> amunPhrase = Moses2Amun(inputCast, m_sourceM2A);
   cerr << "amunPhrase=" << amunPhrase.size() << " " << amunPhrase[0] << endl;
+  amunmt::HypoInfo hypoInfo = m_plugin->SetSource(amunPhrase);
+
+  NeuralPTState &stateCast = static_cast<NeuralPTState&>(state);
+  stateCast.hypoInfo = hypoInfo;
 
   cerr << "NeuralPT::EmptyHypothesisState end" << endl;
 }
