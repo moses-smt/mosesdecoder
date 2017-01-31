@@ -123,6 +123,8 @@ void NeuralPT::EvaluateBeforeExtending(size_t stackInd, const Hypotheses &hypos,
     amunInputs.push_back(amunInput);
   }
 
+  amunmt::AmunOutputs amunOutputs = m_plugin->Score(amunInputs);
+
   //cerr << "NeuralPT::EvaluateBeforeExtending end" << endl;
 }
 
