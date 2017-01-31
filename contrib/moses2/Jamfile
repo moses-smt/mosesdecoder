@@ -183,11 +183,11 @@ if $(with-amunmt) {
 	server/Translator.cpp
 	server/TranslationRequest.cpp
 	
-    deps 
+    deps $(dependencies)
   ;
 
 
-exe moses2 : Main.cpp moses2_lib $(dependencies) ;
+exe moses2 : Main.cpp moses2_lib ;
 
 if [ xmlrpc ] {
   echo "Building Moses2" ;

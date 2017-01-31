@@ -4,7 +4,7 @@
 #include "../PhraseBased/Sentence.h"
 #include "plugin/nmt.h"
 
-using namespace std;
+ using namespace std;
 
 namespace Moses2
 {

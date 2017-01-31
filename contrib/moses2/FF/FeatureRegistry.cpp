@@ -80,7 +80,7 @@ FeatureRegistry::FeatureRegistry()
 
 #ifdef NEURAL_PT
   MOSES_FNAME(NeuralPT);
-#endif
+ #endif
 }
 
 FeatureRegistry::~FeatureRegistry()
