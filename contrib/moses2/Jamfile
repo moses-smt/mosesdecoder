@@ -1,6 +1,4 @@
-alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../moses/TranslationModel/CompactPT//cmph ../../moses//moses ;
-
-local dependencies = ;
+local dependencies = ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../moses/TranslationModel/CompactPT//cmph ../../moses//moses ;
 
 #Neural pt
 local with-amunmt = [ option.get "with-amunmt" ] ;
@@ -183,7 +181,7 @@ if $(with-amunmt) {
 	server/Translator.cpp
 	server/TranslationRequest.cpp
 	
-    deps $(dependencies)
+    $(dependencies)
   ;
 
 
