@@ -11,7 +11,7 @@ namespace Moses2
 class NeuralPTState: public FFState
 {
 public:
-  amunmt::HypoInfo hypoInfo;
+  amunmt::AmunOutput amunOut;
 
   virtual size_t hash() const
   { return 0; }
@@ -65,10 +65,10 @@ void NeuralPT::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
   const Sentence &inputCast = static_cast< const Sentence& >(input);
   std::vector<size_t> amunPhrase = Moses2Amun(inputCast, m_sourceM2A);
   cerr << "amunPhrase=" << amunPhrase.size() << " " << amunPhrase[0] << endl;
-  amunmt::HypoInfo hypoInfo = m_plugin->SetSource(amunPhrase);
+  amunmt::AmunOutput amunOut = m_plugin->SetSource(amunPhrase);
 
   NeuralPTState &stateCast = static_cast<NeuralPTState&>(state);
-  stateCast.hypoInfo = hypoInfo;
+  stateCast.amunOut = amunOut;
 
   cerr << "NeuralPT::EmptyHypothesisState end" << endl;
 }
@@ -116,9 +116,9 @@ void NeuralPT::EvaluateBeforeExtending(size_t stackInd, const Hypotheses &hypos,
     // previous state info
     const FFState *prevState = prevHypo.GetState(GetStatefulInd());
     const NeuralPTState *prevStateCast = static_cast<const NeuralPTState*>(prevState);
-    amunInput.prevStates = prevStateCast->hypoInfo.prevStates;
-    amunInput.nextStates = prevStateCast->hypoInfo.nextStates;
-    amunInput.prevHyps = prevStateCast->hypoInfo.prevHyps;
+    amunInput.prevStates = prevStateCast->amunOut.prevStates;
+    amunInput.nextStates = prevStateCast->amunOut.nextStates;
+    amunInput.prevHyps = prevStateCast->amunOut.prevHyps;
 
     amunInputs.push_back(amunInput);
   }
