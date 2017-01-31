@@ -1,4 +1,4 @@
-alias deps :  ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../moses/TranslationModel/CompactPT//cmph ../../moses//moses ;
+alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses/TranslationModel/CompactPT//cmph ../moses//moses ;
 
  lib moses2_lib :
    AlignmentInfo.cpp
