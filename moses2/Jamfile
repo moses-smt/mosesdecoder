@@ -1,4 +1,4 @@
-local dependencies = ../..//z ../..//boost_iostreams ../..//boost_filesystem ../../moses/TranslationModel/CompactPT//cmph ../../moses//moses ;
+local dependencies = ..//z ..//boost_iostreams ..//boost_filesystem ../moses/TranslationModel/CompactPT//cmph ../moses//moses ;
 
 #Neural pt
 local with-amunmt = [ option.get "with-amunmt" ] ;
@@ -6,7 +6,7 @@ if $(with-amunmt) {
   lib mosesplugin : : <search>$(with-amunmt)/build/src ;
   obj NeuralPT.o : TranslationModel/NeuralPT.cpp : <include>$(with-amunmt)/src <include>$(with-amunmt)/src/3rd_party ;
  	alias amunmt : NeuralPT.o mosesplugin : : : <define>NEURAL_PT ;
-  dependencies += amunmt ../..//boost_timer ../..//boost_chrono ;
+  dependencies += amunmt ..//boost_timer ..//boost_chrono ;
 
   echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
   echo "!!! You are linking with the AmunMT library                                    !!!" ;
