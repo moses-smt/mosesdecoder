@@ -14,7 +14,7 @@ public:
   {
   }
 
-  virtual FeatureFunction *Create(size_t startInd, const std::string &line) = 0;
+  virtual FeatureFunction *Create(size_t startInd, const std::string &line) const = 0;
 
 protected:
   FeatureFactory()
@@ -26,20 +26,26 @@ protected:
 class FeatureRegistry
 {
 public:
-  FeatureRegistry();
+  static const FeatureRegistry &Instance() {
+    return s_instance;
+  }
 
   ~FeatureRegistry();
 
   FeatureFunction *Construct(size_t startInd, const std::string &name,
-      const std::string &line);
+      const std::string &line) const;
   void PrintFF() const;
 
 private:
-  void Add(const std::string &name, FeatureFactory *factory);
+  static FeatureRegistry s_instance;
 
   typedef boost::unordered_map<std::string, boost::shared_ptr<FeatureFactory> > Map;
-
   Map registry_;
+
+  FeatureRegistry();
+
+  void Add(const std::string &name, FeatureFactory *factory);
+
 };
 
 ////////////////////////////////////////////////////////////////////
