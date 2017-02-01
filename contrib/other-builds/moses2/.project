@@ -808,6 +808,16 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/NeuralPT.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses2/TranslationModel/NeuralPT.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/NeuralPT.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses2/TranslationModel/NeuralPT.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/PhraseTable.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses2/TranslationModel/PhraseTable.cpp</locationURI>
@@ -821,6 +831,16 @@
 			<name>TranslationModel/ProbingPT</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/StatefulPhraseTable.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses2/TranslationModel/StatefulPhraseTable.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/StatefulPhraseTable.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses2/TranslationModel/StatefulPhraseTable.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/Transliteration.cpp</name>
