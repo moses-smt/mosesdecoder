@@ -117,7 +117,7 @@ if [ option.get "with-amunmt" ] {
   external-lib cublas ;
   external-lib boost_timer ;
   external-lib boost_chrono ;
-  requirements += <library>cuda <library>cudart <library>cublas <library-path>/usr/local/cuda/lib64 ;
+  requirements += <library>cuda <library>cudart <library>cublas <library-path>/usr/local/cuda/lib64 <library-path>/Developer/NVIDIA/CUDA-8.0/lib ;
 }
 
 #lib dl : : <runtime-link>static:<link>static <runtime-link>shared:<link>shared ;
