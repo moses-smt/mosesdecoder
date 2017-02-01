@@ -2,6 +2,7 @@
 #include "NeuralPT.h"
 #include "../PhraseBased/Hypothesis.h"
 #include "../PhraseBased/Sentence.h"
+#include "../PhraseBased/Manager.h"
 #include "plugin/nmt.h"
 
 using namespace std;
@@ -126,12 +127,11 @@ void NeuralPT::EvaluateBeforeExtending(size_t stackInd, const Hypotheses &hypos,
   // call amun
   amunmt::AmunOutputs amunOutputs = m_plugin->Score(amunInputs);
 
-
   assert(amunInputs.size() == amunOutputs.size());
   assert(hypos.size() == amunOutputs.size());
   // assume its in the same order
 
-  // set moses' hypo score and state
+  // set moses' hypo state and score
   for (size_t i = 0; i < hypos.size(); ++i) {
     const HypothesisBase *hypo = hypos[i];
     HypothesisBase *h1 = const_cast<HypothesisBase*>(hypo);
@@ -139,6 +139,12 @@ void NeuralPT::EvaluateBeforeExtending(size_t stackInd, const Hypotheses &hypos,
 
     const amunmt::AmunOutput &amunOutput = amunOutputs[i];
 
+    const FFState *state = hypoPB.GetState(GetStatefulInd());
+    NeuralPTState *stateCast = const_cast<NeuralPTState*>(static_cast<const NeuralPTState*>(state));
+    stateCast->amunOut = amunOutput;
+
+    Scores &scores = hypoPB.GetScores();
+    scores.PlusEquals(mgr.system, *this, amunOutput.score);
   }
 
   //cerr << "NeuralPT::EvaluateBeforeExtending end" << endl;
