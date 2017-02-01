@@ -160,10 +160,10 @@ void Search::Decode(size_t stackInd)
   }
 
   BOOST_FOREACH(const Stack::Coll::value_type &p, m_stack.GetColl()) {
-  const HypothesisColl &coll = *p.second;
+    const HypothesisColl &coll = *p.second;
     const Hypotheses &hypos = coll.GetSortedAndPrunedHypos(mgr, mgr.arcLists);
     BOOST_FOREACH(const StatefulPhraseTable *sfpt, mgr.system.featureFunctions.statefulPhraseTables) {
-    sfpt->EvaluateBeforeExtending(stackInd, hypos, mgr);
+      sfpt->EvaluateBeforeExtending(stackInd, hypos, mgr);
     }
   }
 }

@@ -21,7 +21,7 @@
 #include "SkeletonStatelessFF.h"
 
 #ifdef NEURAL_PT
-  #include "../TranslationModel/NeuralPT.h"
+#include "../TranslationModel/NeuralPT.h"
 #endif
 
 using namespace std;

@@ -13,13 +13,14 @@ class NeuralPTState: public FFState
 public:
   amunmt::AmunOutput amunOut;
 
-  virtual size_t hash() const
-  { return 0; }
-  virtual bool operator==(const FFState& o) const
-  { return true; }
+  virtual size_t hash() const {
+    return 0;
+  }
+  virtual bool operator==(const FFState& o) const {
+    return true;
+  }
 
-  virtual std::string ToString() const
-  {
+  virtual std::string ToString() const {
     return "NeuralPTState";
   }
 };
@@ -27,9 +28,9 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////////////
 NeuralPT::NeuralPT(size_t startInd, const std::string &line)
-:StatefulPhraseTable(startInd, line)
-, m_maxDevices(1)
-, m_factorType(0)
+  :StatefulPhraseTable(startInd, line)
+  , m_maxDevices(1)
+  , m_factorType(0)
 {
   ReadParameters();
   cerr << "NeuralPT::NeuralPT:" << GetNumScores() << endl;
@@ -59,7 +60,7 @@ FFState* NeuralPT::BlankState(MemPool &pool, const System &sys) const
 }
 
 void NeuralPT::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
-    const InputType &input, const Hypothesis &hypo) const
+                                    const InputType &input, const Hypothesis &hypo) const
 {
   cerr << "NeuralPT::EmptyHypothesisState start" << endl;
   const Sentence &inputCast = static_cast< const Sentence& >(input);
@@ -74,16 +75,16 @@ void NeuralPT::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
 }
 
 void NeuralPT::EvaluateWhenApplied(const ManagerBase &mgr,
-    const Hypothesis &hypo, const FFState &prevState, Scores &scores,
-    FFState &state) const
+                                   const Hypothesis &hypo, const FFState &prevState, Scores &scores,
+                                   FFState &state) const
 {
   //cerr << "NeuralPT::EvaluateWhenApplied1" << endl;
 
 }
 
 void NeuralPT::EvaluateWhenApplied(const SCFG::Manager &mgr,
-    const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
-    FFState &state) const
+                                   const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
+                                   FFState &state) const
 {
   //cerr << "NeuralPT::EvaluateWhenApplied2" << endl;
 
@@ -132,23 +133,20 @@ void NeuralPT::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "model") {
     m_modelPath = value;
-  }
-  else if (key == "devices") {
+  } else if (key == "devices") {
     m_maxDevices = Scan<size_t>(value);
-  }
-  else if (key == "factor") {
-      m_factorType = Scan<FactorType>(value);
-  }
-  else {
+  } else if (key == "factor") {
+    m_factorType = Scan<FactorType>(value);
+  } else {
     StatefulPhraseTable::SetParameter(key, value);
   }
 }
 
 void NeuralPT::CreateVocabMapping(
-    System &system,
-    const amunmt::Vocab &vocab,
-    VocabAmun2Moses &a2m,
-    VocabMoses2Amun &m2a) const
+  System &system,
+  const amunmt::Vocab &vocab,
+  VocabAmun2Moses &a2m,
+  VocabMoses2Amun &m2a) const
 {
   FactorCollection &fc = system.GetVocab();
 
@@ -182,8 +180,7 @@ size_t NeuralPT::Moses2Amun(const Word &word, const VocabMoses2Amun &vocabMappin
   if (iter == vocabMapping.end()) {
     // unk
     return 1;
-  }
-  else {
+  } else {
     return iter->second;
   }
 }

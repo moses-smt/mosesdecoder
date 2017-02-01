@@ -67,27 +67,27 @@ void Search::Decode()
 
 void Search::Decode(size_t stackInd)
 {
-	//cerr << "stackInd=" << stackInd << endl;
-	Stack &stack = m_stacks[stackInd];
-	if (&stack == &m_stacks.Back()) {
-		// last stack. don't do anythin
-		return;
-	}
+  //cerr << "stackInd=" << stackInd << endl;
+  Stack &stack = m_stacks[stackInd];
+  if (&stack == &m_stacks.Back()) {
+    // last stack. don't do anythin
+    return;
+  }
 
-	const Hypotheses &hypos = stack.GetSortedAndPrunedHypos(mgr, mgr.arcLists);
-	//cerr << "hypos=" << hypos.size() << endl;
+  const Hypotheses &hypos = stack.GetSortedAndPrunedHypos(mgr, mgr.arcLists);
+  //cerr << "hypos=" << hypos.size() << endl;
 
   BOOST_FOREACH(const StatefulPhraseTable *sfpt, mgr.system.featureFunctions.statefulPhraseTables) {
     sfpt->EvaluateBeforeExtending(stackInd, hypos, mgr);
   }
 
-	const InputPaths &paths = mgr.GetInputPaths();
+  const InputPaths &paths = mgr.GetInputPaths();
 
-	BOOST_FOREACH(const InputPathBase *path, paths){
-		BOOST_FOREACH(const HypothesisBase *hypo, hypos) {
-			Extend(*static_cast<const Hypothesis*>(hypo), *static_cast<const InputPath*>(path));
-		}
-	}
+  BOOST_FOREACH(const InputPathBase *path, paths) {
+    BOOST_FOREACH(const HypothesisBase *hypo, hypos) {
+      Extend(*static_cast<const Hypothesis*>(hypo), *static_cast<const InputPath*>(path));
+    }
+  }
 }
 
 void Search::Extend(const Hypothesis &hypo, const InputPath &path)
