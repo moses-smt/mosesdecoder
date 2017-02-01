@@ -37,9 +37,9 @@ namespace Moses2
 ////////////////////////////////////////////////////////////////////////
 
 PhraseTableMemory::PhraseTableMemory(size_t startInd, const std::string &line)
-:PhraseTable(startInd, line)
-,m_rootPb(NULL)
-,m_rootSCFG(NULL)
+  :PhraseTable(startInd, line)
+  ,m_rootPb(NULL)
+  ,m_rootSCFG(NULL)
 {
   ReadParameters();
 }
@@ -58,8 +58,7 @@ void PhraseTableMemory::Load(System &system)
 
   if (system.isPb) {
     m_rootPb = new PBNODE();
-  }
-  else {
+  } else {
     m_rootSCFG = new SCFGNODE();
     //cerr << "m_rootSCFG=" << m_rootSCFG << endl;
   }
@@ -80,17 +79,17 @@ void PhraseTableMemory::Load(System &system)
 
     if (system.isPb) {
       PhraseImpl *source = PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
-          toks[0]);
+                           toks[0]);
       //cerr << "created soure" << endl;
       TargetPhraseImpl *target = TargetPhraseImpl::CreateFromString(systemPool, *this, system,
-          toks[1]);
+                                 toks[1]);
       //cerr << "created target" << endl;
       target->GetScores().CreateFromString(toks[2], *this, system, true);
       //cerr << "created scores:" << *target << endl;
 
       if (toks.size() >= 4) {
-		  //cerr << "alignstr=" << toks[3] << endl;
-		  target->SetAlignmentInfo(toks[3]);
+        //cerr << "alignstr=" << toks[3] << endl;
+        target->SetAlignmentInfo(toks[3]);
       }
 
       // properties
@@ -105,13 +104,12 @@ void PhraseTableMemory::Load(System &system)
       m_rootPb->AddRule(m_input, *source, target);
 
       //cerr << "target=" << target->Debug(system) << endl;
-    }
-    else {
+    } else {
       SCFG::PhraseImpl *source = SCFG::PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
-          toks[0]);
+                                 toks[0]);
       //cerr << "created source:" << *source << endl;
       SCFG::TargetPhraseImpl *target = SCFG::TargetPhraseImpl::CreateFromString(systemPool, *this,
-          system, toks[1]);
+                                       system, toks[1]);
 
       //cerr << "created target " << *target << " source=" << *source << endl;
 
@@ -139,8 +137,7 @@ void PhraseTableMemory::Load(System &system)
   if (system.isPb) {
     m_rootPb->SortAndPrune(m_tableLimit, systemPool, system);
     //cerr << "root=" << &m_rootPb << endl;
-  }
-  else {
+  } else {
     m_rootSCFG->SortAndPrune(m_tableLimit, systemPool, system);
     //cerr << "root=" << &m_rootPb << endl;
   }
@@ -162,9 +159,9 @@ TargetPhrases* PhraseTableMemory::Lookup(const Manager &mgr, MemPool &pool,
 }
 
 void PhraseTableMemory::InitActiveChart(
-    MemPool &pool,
-    const SCFG::Manager &mgr,
-    SCFG::InputPath &path) const
+  MemPool &pool,
+  const SCFG::Manager &mgr,
+  SCFG::InputPath &path) const
 {
   size_t ptInd = GetPtInd();
   ActiveChartEntryMem *chartEntry = new (pool.Allocate<ActiveChartEntryMem>()) ActiveChartEntryMem(pool, *m_rootSCFG);
@@ -173,10 +170,10 @@ void PhraseTableMemory::InitActiveChart(
 }
 
 void PhraseTableMemory::Lookup(MemPool &pool,
-    const SCFG::Manager &mgr,
-    size_t maxChartSpan,
-    const SCFG::Stacks &stacks,
-    SCFG::InputPath &path) const
+                               const SCFG::Manager &mgr,
+                               size_t maxChartSpan,
+                               const SCFG::Stacks &stacks,
+                               SCFG::InputPath &path) const
 {
   if (path.range.GetNumWordsCovered() > maxChartSpan) {
     return;
@@ -213,13 +210,13 @@ void PhraseTableMemory::Lookup(MemPool &pool,
 }
 
 void PhraseTableMemory::LookupGivenNode(
-    MemPool &pool,
-    const SCFG::Manager &mgr,
-    const SCFG::ActiveChartEntry &prevEntry,
-    const SCFG::Word &wordSought,
-    const Moses2::Hypotheses *hypos,
-    const Moses2::Range &subPhraseRange,
-    SCFG::InputPath &outPath) const
+  MemPool &pool,
+  const SCFG::Manager &mgr,
+  const SCFG::ActiveChartEntry &prevEntry,
+  const SCFG::Word &wordSought,
+  const Moses2::Hypotheses *hypos,
+  const Moses2::Range &subPhraseRange,
+  SCFG::InputPath &outPath) const
 {
   const ActiveChartEntryMem &prevEntryCast = static_cast<const ActiveChartEntryMem&>(prevEntry);
 
@@ -252,10 +249,10 @@ void PhraseTableMemory::LookupGivenNode(
       // there are some rules
       /*
       cerr << "outPath=" << outPath.range
-    		  << " bind=" << chartEntry->GetSymbolBind().Debug(mgr.system)
-    		  << " pt=" << GetPtInd()
-			  << " tps=" << tps->Debug(mgr.system) << endl;
-	  */
+      	  << " bind=" << chartEntry->GetSymbolBind().Debug(mgr.system)
+      	  << " pt=" << GetPtInd()
+        << " tps=" << tps->Debug(mgr.system) << endl;
+      */
       outPath.AddTargetPhrasesToPath(pool, mgr.system, *this, *tps, chartEntry->GetSymbolBind());
 
     }

@@ -6,22 +6,21 @@
 
 namespace Moses2
 {
-  struct 
-  OOVHandlingOptions : public OptionsBaseClass
-  {
-    bool drop;
-    bool mark;
-    std::string prefix;
-    std::string suffix;
-    
-    bool word_deletion_enabled;
-    bool always_create_direct_transopt;
-    OOVHandlingOptions();
+struct
+    OOVHandlingOptions : public OptionsBaseClass {
+  bool drop;
+  bool mark;
+  std::string prefix;
+  std::string suffix;
 
-    bool init(Parameter const& param);
-    bool update(std::map<std::string,xmlrpc_c::value>const& param);
+  bool word_deletion_enabled;
+  bool always_create_direct_transopt;
+  OOVHandlingOptions();
 
-  };
+  bool init(Parameter const& param);
+  bool update(std::map<std::string,xmlrpc_c::value>const& param);
+
+};
 
 }
 

@@ -11,7 +11,7 @@ using namespace std;
 namespace Moses2
 {
 PhraseImpl *PhraseImpl::CreateFromString(MemPool &pool, FactorCollection &vocab,
-                                        const System &system, const std::string &str)
+    const System &system, const std::string &str)
 {
   std::vector<std::string> toks = Moses2::Tokenize(str);
   size_t size = toks.size();

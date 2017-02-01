@@ -18,7 +18,7 @@ namespace Moses2
 
 PhraseBasedReorderingState::PhraseBasedReorderingState(const LRModel &config,
     LRModel::Direction dir, size_t offset) :
-    LRState(config, dir, offset)
+  LRState(config, dir, offset)
 {
   // uninitialised
   prevPath = NULL;
@@ -26,8 +26,8 @@ PhraseBasedReorderingState::PhraseBasedReorderingState(const LRModel &config,
 }
 
 void PhraseBasedReorderingState::Init(const LRState *prev,
-    const TargetPhrase<Moses2::Word> &topt, const InputPathBase &path, bool first,
-    const Bitmap *coverage)
+                                      const TargetPhrase<Moses2::Word> &topt, const InputPathBase &path, bool first,
+                                      const Bitmap *coverage)
 {
   prevTP = &topt;
   prevPath = &path;
@@ -48,39 +48,37 @@ bool PhraseBasedReorderingState::operator==(const FFState& o) const
   if (&o == this) return true;
 
   const PhraseBasedReorderingState &other =
-      static_cast<const PhraseBasedReorderingState&>(o);
+    static_cast<const PhraseBasedReorderingState&>(o);
   if (&prevPath->range == &other.prevPath->range) {
     if (m_direction == LRModel::Forward) {
       int compareScore = ComparePrevScores(other.prevTP);
       return compareScore == 0;
-    }
-    else {
+    } else {
       return true;
     }
-  }
-  else {
+  } else {
     return false;
   }
 }
 
 void PhraseBasedReorderingState::Expand(const ManagerBase &mgr,
-    const LexicalReordering &ff, const Hypothesis &hypo, size_t phraseTableInd,
-    Scores &scores, FFState &state) const
+                                        const LexicalReordering &ff, const Hypothesis &hypo, size_t phraseTableInd,
+                                        Scores &scores, FFState &state) const
 {
   if ((m_direction != LRModel::Forward) || !m_first) {
     LRModel const& lrmodel = m_configuration;
     Range const &cur = hypo.GetInputPath().range;
     LRModel::ReorderingType reoType = (
-        m_first ?
-            lrmodel.GetOrientation(cur) :
-            lrmodel.GetOrientation(prevPath->range, cur));
+                                        m_first ?
+                                        lrmodel.GetOrientation(cur) :
+                                        lrmodel.GetOrientation(prevPath->range, cur));
     CopyScores(mgr.system, scores, hypo.GetTargetPhrase(), reoType);
   }
 
   PhraseBasedReorderingState &stateCast =
-      static_cast<PhraseBasedReorderingState&>(state);
+    static_cast<PhraseBasedReorderingState&>(state);
   stateCast.Init(this, hypo.GetTargetPhrase(), hypo.GetInputPath(), false,
-      NULL);
+                 NULL);
 }
 
 } /* namespace Moses2 */

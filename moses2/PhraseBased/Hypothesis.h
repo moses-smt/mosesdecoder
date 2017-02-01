@@ -35,36 +35,31 @@ public:
 
   // initial, empty hypo
   void Init(Manager &mgr, const InputPathBase &path, const TargetPhraseImpl &tp,
-      const Bitmap &bitmap);
+            const Bitmap &bitmap);
 
   void Init(Manager &mgr, const Hypothesis &prevHypo, const InputPathBase &path,
-      const TargetPhraseImpl &tp, const Bitmap &bitmap, SCORE estimatedScore);
+            const TargetPhraseImpl &tp, const Bitmap &bitmap, SCORE estimatedScore);
 
   size_t hash() const;
   bool operator==(const Hypothesis &other) const;
 
-  inline const Bitmap &GetBitmap() const
-  {
+  inline const Bitmap &GetBitmap() const {
     return *m_sourceCompleted;
   }
 
-  inline const InputPathBase &GetInputPath() const
-  {
+  inline const InputPathBase &GetInputPath() const {
     return *m_path;
   }
 
-  inline const Range &GetCurrTargetWordsRange() const
-  {
+  inline const Range &GetCurrTargetWordsRange() const {
     return m_currTargetWordsRange;
   }
 
-  SCORE GetFutureScore() const
-  {
+  SCORE GetFutureScore() const {
     return GetScores().GetTotalScore() + m_estimatedScore;
   }
 
-  const TargetPhrase<Moses2::Word> &GetTargetPhrase() const
-  {
+  const TargetPhrase<Moses2::Word> &GetTargetPhrase() const {
     return *m_targetPhrase;
   }
 
@@ -77,16 +72,14 @@ public:
   void EvaluateWhenApplied();
   void EvaluateWhenApplied(const StatefulFeatureFunction &sfff);
 
-  const Hypothesis* GetPrevHypo() const
-  {
+  const Hypothesis* GetPrevHypo() const {
     return m_prevHypo;
   }
 
   /** curr - pos is relative from CURRENT hypothesis's starting index
    * (ie, start of sentence would be some negative number, which is
    * not allowed- USE WITH CAUTION) */
-  inline const Word &GetCurrWord(size_t pos) const
-  {
+  inline const Word &GetCurrWord(size_t pos) const {
     return GetTargetPhrase()[pos];
   }
 
@@ -108,8 +101,7 @@ protected:
 class HypothesisTargetPhraseOrderer
 {
 public:
-  bool operator()(const Hypothesis* a, const Hypothesis* b) const
-  {
+  bool operator()(const Hypothesis* a, const Hypothesis* b) const {
     PhraseOrdererLexical<Moses2::Word> phraseCmp;
     bool ret = phraseCmp(a->GetTargetPhrase(), b->GetTargetPhrase());
     /*

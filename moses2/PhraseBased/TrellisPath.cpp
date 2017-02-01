@@ -27,16 +27,16 @@ std::string TrellisNode::Debug(const System &system) const
 
 /////////////////////////////////////////////////////////////////////////////////
 TrellisPath::TrellisPath(const Hypothesis *hypo, const ArcLists &arcLists) :
-    prevEdgeChanged(-1)
+  prevEdgeChanged(-1)
 {
   AddNodes(hypo, arcLists);
   m_scores = &hypo->GetScores();
 }
 
 TrellisPath::TrellisPath(const TrellisPath &origPath, size_t edgeIndex,
-    const TrellisNode &newNode, const ArcLists &arcLists, MemPool &pool,
-    const System &system) :
-    prevEdgeChanged(edgeIndex)
+                         const TrellisNode &newNode, const ArcLists &arcLists, MemPool &pool,
+                         const System &system) :
+  prevEdgeChanged(edgeIndex)
 {
   nodes.reserve(origPath.nodes.size());
   for (size_t currEdge = 0; currEdge < edgeIndex; currEdge++) {
@@ -64,7 +64,7 @@ TrellisPath::TrellisPath(const TrellisPath &origPath, size_t edgeIndex,
   const HypothesisBase *newHypo = newNode.GetHypo();
 
   CalcScores(origPath.GetScores(), origHypo->GetScores(), newHypo->GetScores(),
-      pool, system);
+             pool, system);
 }
 
 TrellisPath::~TrellisPath()
@@ -107,7 +107,7 @@ std::string TrellisPath::OutputTargetPhrase(const System &system) const
 {
   std::stringstream out;
   for (int i = nodes.size() - 2; i >= 0; --i) {
-	const TrellisNode &node = nodes[i];
+    const TrellisNode &node = nodes[i];
 
     const Hypothesis *hypo = static_cast<const Hypothesis*>(node.GetHypo());
     const TargetPhrase<Moses2::Word> &tp = hypo->GetTargetPhrase();
@@ -121,7 +121,7 @@ std::string TrellisPath::OutputTargetPhrase(const System &system) const
 }
 
 void TrellisPath::CreateDeviantPaths(TrellisPaths<TrellisPath> &paths,
-    const ArcLists &arcLists, MemPool &pool, const System &system) const
+                                     const ArcLists &arcLists, MemPool &pool, const System &system) const
 {
   const size_t sizePath = nodes.size();
 
@@ -145,8 +145,8 @@ void TrellisPath::CreateDeviantPaths(TrellisPaths<TrellisPath> &paths,
 }
 
 void TrellisPath::CalcScores(const Scores &origScores,
-    const Scores &origHypoScores, const Scores &newHypoScores, MemPool &pool,
-    const System &system)
+                             const Scores &origHypoScores, const Scores &newHypoScores, MemPool &pool,
+                             const System &system)
 {
   Scores *scores = new (pool.Allocate<Scores>()) Scores(system, pool,
       system.featureFunctions.GetNumScores(), origScores);

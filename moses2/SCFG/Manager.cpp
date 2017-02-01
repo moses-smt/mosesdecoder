@@ -28,8 +28,8 @@ namespace SCFG
 {
 
 Manager::Manager(System &sys, const TranslationTask &task,
-    const std::string &inputStr, long translationId)
-:ManagerBase(sys, task, inputStr, translationId)
+                 const std::string &inputStr, long translationId)
+  :ManagerBase(sys, task, inputStr, translationId)
 {
 
 }
@@ -48,7 +48,7 @@ void Manager::Decode()
 
   FactorCollection &vocab = system.GetVocab();
   m_input = Sentence::CreateFromString(GetPool(), vocab, system, m_inputStr,
-      m_translationId);
+                                       m_translationId);
 
   const SCFG::Sentence &sentence = static_cast<const SCFG::Sentence&>(GetInput());
 
@@ -100,15 +100,15 @@ void Manager::Decode()
 
 void Manager::InitActiveChart(SCFG::InputPath &path)
 {
-   size_t numPt = system.mappings.size();
-   //cerr << "numPt=" << numPt << endl;
+  size_t numPt = system.mappings.size();
+  //cerr << "numPt=" << numPt << endl;
 
-   for (size_t i = 0; i < numPt; ++i) {
-     const PhraseTable &pt = *system.mappings[i];
-     //cerr << "START InitActiveChart" << endl;
-     pt.InitActiveChart(GetPool(), *this, path);
-     //cerr << "FINISHED InitActiveChart" << endl;
-   }
+  for (size_t i = 0; i < numPt; ++i) {
+    const PhraseTable &pt = *system.mappings[i];
+    //cerr << "START InitActiveChart" << endl;
+    pt.InitActiveChart(GetPool(), *this, path);
+    //cerr << "FINISHED InitActiveChart" << endl;
+  }
 }
 
 void Manager::Lookup(SCFG::InputPath &path)
@@ -202,9 +202,9 @@ void Manager::Decode(SCFG::InputPath &path, Stack &stack)
 }
 
 void Manager::CreateQueue(
-    const SCFG::InputPath &path,
-    const SymbolBind &symbolBind,
-    const SCFG::TargetPhrases &tps)
+  const SCFG::InputPath &path,
+  const SymbolBind &symbolBind,
+  const SCFG::TargetPhrases &tps)
 {
   MemPool &pool = GetPool();
 
@@ -255,10 +255,10 @@ void Manager::Decode(SCFG::InputPath &path, Stack &stack)
 */
 
 void Manager::ExpandHypo(
-    const SCFG::InputPath &path,
-    const SCFG::SymbolBind &symbolBind,
-    const SCFG::TargetPhraseImpl &tp,
-    Stack &stack)
+  const SCFG::InputPath &path,
+  const SCFG::SymbolBind &symbolBind,
+  const SCFG::TargetPhraseImpl &tp,
+  Stack &stack)
 {
   Recycler<HypothesisBase*> &hypoRecycler = GetHypoRecycle();
 
@@ -280,9 +280,9 @@ void Manager::ExpandHypo(
 }
 
 bool Manager::IncrPrevHypoIndices(
-    Vector<size_t> &prevHyposIndices,
-    size_t ind,
-    const std::vector<const SymbolBindElement*> ntEles)
+  Vector<size_t> &prevHyposIndices,
+  size_t ind,
+  const std::vector<const SymbolBindElement*> ntEles)
 {
   if (ntEles.size() == 0) {
     // no nt. Do the 1st
@@ -319,8 +319,7 @@ bool Manager::IncrPrevHypoIndices(
 
   if (ind >= numHypos) {
     return false;
-  }
-  else {
+  } else {
     return true;
   }
 }
@@ -345,8 +344,7 @@ std::string Manager::OutputBest() const
     if (system.options.output.ReportHypoScore) {
       out = SPrint(bestHypo->GetScores().GetTotalScore()) + " " + out;
     }
-  }
-  else {
+  } else {
     if (system.options.output.ReportHypoScore) {
       out = "0 ";
     }
@@ -377,12 +375,11 @@ std::string Manager::OutputTransOpt()
   const SCFG::Hypothesis *bestHypo = lastStack.GetBestHypo();
 
   if (bestHypo) {
-      stringstream outStrm;
-	  bestHypo->OutputTransOpt(outStrm);
-	  return outStrm.str();
-  }
-  else {
-	  return "";
+    stringstream outStrm;
+    bestHypo->OutputTransOpt(outStrm);
+    return outStrm.str();
+  } else {
+    return "";
   }
 }
 

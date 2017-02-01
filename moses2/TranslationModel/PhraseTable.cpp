@@ -22,8 +22,8 @@ namespace Moses2
 
 ////////////////////////////////////////////////////////////////////////////
 PhraseTable::PhraseTable(size_t startInd, const std::string &line) :
-    StatelessFeatureFunction(startInd, line), m_tableLimit(20) // default
-        , m_maxCacheSize(DEFAULT_MAX_TRANS_OPT_CACHE_SIZE)
+  StatelessFeatureFunction(startInd, line), m_tableLimit(20) // default
+  , m_maxCacheSize(DEFAULT_MAX_TRANS_OPT_CACHE_SIZE)
 {
   m_input.push_back(0);
 }
@@ -37,20 +37,15 @@ void PhraseTable::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "cache-size") {
     m_maxCacheSize = Scan<size_t>(value);
-  }
-  else if (key == "path") {
+  } else if (key == "path") {
     m_path = value;
-  }
-  else if (key == "input-factor") {
-	m_input = Tokenize<FactorType>(value, ",");
-  }
-  else if (key == "output-factor") {
-	m_output = Tokenize<FactorType>(value, ",");
-  }
-  else if (key == "table-limit") {
+  } else if (key == "input-factor") {
+    m_input = Tokenize<FactorType>(value, ",");
+  } else if (key == "output-factor") {
+    m_output = Tokenize<FactorType>(value, ",");
+  } else if (key == "table-limit") {
     m_tableLimit = Scan<size_t>(value);
-  }
-  else {
+  } else {
     StatelessFeatureFunction::SetParameter(key, value);
   }
 }
@@ -59,29 +54,27 @@ bool PhraseTable::SatisfyBackoff(const Manager &mgr, const InputPath &path) cons
 {
   const InputType &input = mgr.GetInput();
   if ((mgr.system.options.input.xml_policy == XmlExclusive)
-	  && input.XmlOverlap(path.range.GetStartPos(), path.range.GetEndPos())) {
-	  return false;
+      && input.XmlOverlap(path.range.GetStartPos(), path.range.GetEndPos())) {
+    return false;
   }
 
-	//cerr << GetName() << "=" << GetPtInd() << "=" << decodeGraphBackoff << endl;
-	if (decodeGraphBackoff == 0) {
-			// always lookup
-			return true;
-	}
-	else if (decodeGraphBackoff == -1) {
-			// lookup only if there's no existing rules
-			return path.GetNumRules() ? false : true;
-	}
-	else if (path.range.GetNumWordsCovered() <= decodeGraphBackoff) {
-			return path.GetNumRules() ? false : true;
-	}
+  //cerr << GetName() << "=" << GetPtInd() << "=" << decodeGraphBackoff << endl;
+  if (decodeGraphBackoff == 0) {
+    // always lookup
+    return true;
+  } else if (decodeGraphBackoff == -1) {
+    // lookup only if there's no existing rules
+    return path.GetNumRules() ? false : true;
+  } else if (path.range.GetNumWordsCovered() <= decodeGraphBackoff) {
+    return path.GetNumRules() ? false : true;
+  }
 
-	return false;
+  return false;
 }
 
 void PhraseTable::Lookup(const Manager &mgr, InputPathsBase &inputPaths) const
 {
-  BOOST_FOREACH(InputPathBase *pathBase, inputPaths){
+  BOOST_FOREACH(InputPathBase *pathBase, inputPaths) {
     InputPath *path = static_cast<InputPath*>(pathBase);
     //cerr << "path=" << path->range << " ";
 
@@ -102,29 +95,29 @@ void PhraseTable::Lookup(const Manager &mgr, InputPathsBase &inputPaths) const
 }
 
 TargetPhrases *PhraseTable::Lookup(const Manager &mgr, MemPool &pool,
-    InputPath &inputPath) const
+                                   InputPath &inputPath) const
 {
   UTIL_THROW2("Not implemented");
 }
 
 void PhraseTable::EvaluateInIsolation(MemPool &pool, const System &system,
-    const Phrase<Moses2::Word> &source, const TargetPhraseImpl &targetPhrase, Scores &scores,
-    SCORE &estimatedScore) const
+                                      const Phrase<Moses2::Word> &source, const TargetPhraseImpl &targetPhrase, Scores &scores,
+                                      SCORE &estimatedScore) const
 {
 }
 
 void PhraseTable::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
-    const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
-    SCORE &estimatedScore) const
+                                      const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
+                                      SCORE &estimatedScore) const
 {
 
 }
 
 // scfg
 void PhraseTable::LookupUnary(MemPool &pool,
-    const SCFG::Manager &mgr,
-    const SCFG::Stacks &stacks,
-    SCFG::InputPath &path) const
+                              const SCFG::Manager &mgr,
+                              const SCFG::Stacks &stacks,
+                              SCFG::InputPath &path) const
 {
   //cerr << "BEFORE LookupUnary" << path.Debug(mgr.system) << endl;
   size_t startPos = path.range.GetStartPos();
@@ -134,12 +127,12 @@ void PhraseTable::LookupUnary(MemPool &pool,
 }
 
 void PhraseTable::LookupNT(
-    MemPool &pool,
-    const SCFG::Manager &mgr,
-    const Moses2::Range &subPhraseRange,
-    const SCFG::InputPath &prevPath,
-    const SCFG::Stacks &stacks,
-    SCFG::InputPath &outPath) const
+  MemPool &pool,
+  const SCFG::Manager &mgr,
+  const Moses2::Range &subPhraseRange,
+  const SCFG::InputPath &prevPath,
+  const SCFG::Stacks &stacks,
+  SCFG::InputPath &outPath) const
 {
   size_t endPos = outPath.range.GetEndPos();
 
@@ -161,13 +154,13 @@ void PhraseTable::LookupNT(
 }
 
 void PhraseTable::LookupGivenWord(
-    MemPool &pool,
-    const SCFG::Manager &mgr,
-    const SCFG::InputPath &prevPath,
-    const SCFG::Word &wordSought,
-    const Moses2::Hypotheses *hypos,
-    const Moses2::Range &subPhraseRange,
-    SCFG::InputPath &outPath) const
+  MemPool &pool,
+  const SCFG::Manager &mgr,
+  const SCFG::InputPath &prevPath,
+  const SCFG::Word &wordSought,
+  const Moses2::Hypotheses *hypos,
+  const Moses2::Range &subPhraseRange,
+  SCFG::InputPath &outPath) const
 {
   size_t ptInd = GetPtInd();
 

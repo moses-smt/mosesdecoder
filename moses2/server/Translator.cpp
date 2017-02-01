@@ -16,10 +16,10 @@ namespace Moses2
 {
 
 Translator::Translator(Server& server, System &system)
-: m_server(server),
-  m_threadPool(server.options().numThreads),
-  m_system(system),
-  m_translationId(0)
+  : m_server(server),
+    m_threadPool(server.options().numThreads),
+    m_system(system),
+    m_translationId(0)
 {
   // signature and help strings are documentation -- the client
   // can query this information with a system.methodSignature and
@@ -34,7 +34,7 @@ Translator::~Translator()
 }
 
 void Translator::execute(xmlrpc_c::paramList const& paramList,
-    xmlrpc_c::value *const  retvalP)
+                         xmlrpc_c::value *const  retvalP)
 {
   typedef std::map<std::string,xmlrpc_c::value> param_t;
   param_t const& params = paramList.getStruct(0);

@@ -13,25 +13,25 @@ class SubPhrase: public Phrase<WORD>
 {
 public:
   SubPhrase(const Phrase<WORD> &origPhrase, size_t start, size_t size)
-  :m_origPhrase(&origPhrase)
-  ,m_start(start)
-  ,m_size(size)
+    :m_origPhrase(&origPhrase)
+    ,m_start(start)
+    ,m_size(size)
   {}
 
-  virtual const WORD& operator[](size_t pos) const
-  {  return (*m_origPhrase)[pos + m_start]; }
+  virtual const WORD& operator[](size_t pos) const {
+    return (*m_origPhrase)[pos + m_start];
+  }
 
-  virtual size_t GetSize() const
-  {  return m_size; }
+  virtual size_t GetSize() const {
+    return m_size;
+  }
 
-  SubPhrase GetSubPhrase(size_t start, size_t size) const
-  {
+  SubPhrase GetSubPhrase(size_t start, size_t size) const {
     SubPhrase ret(*m_origPhrase, m_start + start, size);
     return ret;
   }
 
-  virtual std::string Debug(const System &system) const
-  {
+  virtual std::string Debug(const System &system) const {
     std::stringstream out;
     if (GetSize()) {
       out << (*this)[0].Debug(system);

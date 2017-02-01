@@ -35,14 +35,12 @@ namespace Moses2
 {
 typedef std::pair<size_t, size_t> AlignPointSizeT;
 
-struct PhraseCompact : public std::vector<Word>
-{
+struct PhraseCompact : public std::vector<Word> {
 public:
   PhraseCompact(const Phrase<Word> &copy);
 };
 
-struct TPCompact
-{
+struct TPCompact {
   std::vector<Word> words;
   std::set<AlignPointSizeT> alignment;
   std::vector<float> scores;

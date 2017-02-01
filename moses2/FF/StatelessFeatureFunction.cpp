@@ -12,7 +12,7 @@ namespace Moses2
 
 StatelessFeatureFunction::StatelessFeatureFunction(size_t startInd,
     const std::string &line) :
-    FeatureFunction(startInd, line)
+  FeatureFunction(startInd, line)
 {
   // TODO Auto-generated constructor stub
 

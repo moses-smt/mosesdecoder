@@ -38,27 +38,32 @@ public:
   mutable ArcLists arcLists;
 
   ManagerBase(System &sys, const TranslationTask &task,
-      const std::string &inputStr, long translationId);
+              const std::string &inputStr, long translationId);
   virtual ~ManagerBase();
   virtual void Decode() = 0;
   virtual std::string OutputBest() const = 0;
   virtual std::string OutputNBest() = 0;
   virtual std::string OutputTransOpt() = 0;
 
-  MemPool &GetPool() const
-  {  return *m_pool; }
+  MemPool &GetPool() const {
+    return *m_pool;
+  }
 
-  MemPool &GetSystemPool() const
-  {  return *m_systemPool; }
+  MemPool &GetSystemPool() const {
+    return *m_systemPool;
+  }
 
-  Recycler<HypothesisBase*> &GetHypoRecycle() const
-  {  return *m_hypoRecycle; }
+  Recycler<HypothesisBase*> &GetHypoRecycle() const {
+    return *m_hypoRecycle;
+  }
 
-  const InputType &GetInput() const
-  {  return *m_input; }
+  const InputType &GetInput() const {
+    return *m_input;
+  }
 
-  long GetTranslationId() const
-  {  return m_translationId; }
+  long GetTranslationId() const {
+    return m_translationId;
+  }
 
 protected:
   std::string m_inputStr;

@@ -11,7 +11,7 @@
 namespace Moses2
 {
 ReorderingStack::ReorderingStack(MemPool &pool) :
-    m_stack(pool)
+  m_stack(pool)
 {
 
 }
@@ -50,8 +50,7 @@ int ReorderingStack::ShiftReduce(const Range &input_span)
   //calculate the distance we are returning
   if (input_span.GetStartPos() > prev_span.GetStartPos()) {
     distance = input_span.GetStartPos() - prev_span.GetEndPos();
-  }
-  else {
+  } else {
     distance = input_span.GetEndPos() - prev_span.GetStartPos();
   }
 
@@ -59,13 +58,11 @@ int ReorderingStack::ShiftReduce(const Range &input_span)
     m_stack.pop_back();
     Range new_span(prev_span.GetStartPos(), input_span.GetEndPos());
     Reduce(new_span);
-  }
-  else if (distance == -1) { //swap
+  } else if (distance == -1) { //swap
     m_stack.pop_back();
     Range new_span(input_span.GetStartPos(), prev_span.GetEndPos());
     Reduce(new_span);
-  }
-  else {      // discontinuous
+  } else {    // discontinuous
     m_stack.push_back(input_span);
   }
 
@@ -85,13 +82,11 @@ void ReorderingStack::Reduce(Range current)
       m_stack.pop_back();
       Range t(previous.GetStartPos(), current.GetEndPos());
       current = t;
-    }
-    else if (previous.GetStartPos() - current.GetEndPos() == 1) { //swap&merge
+    } else if (previous.GetStartPos() - current.GetEndPos() == 1) { //swap&merge
       m_stack.pop_back();
       Range t(current.GetStartPos(), previous.GetEndPos());
       current = t;
-    }
-    else { // discontinuous, no more merging
+    } else { // discontinuous, no more merging
       cont_loop = false;
     }
   } // finished reducing, exit

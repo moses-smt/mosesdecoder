@@ -29,28 +29,23 @@ using namespace std;
 namespace Moses2
 {
 
-struct GPULMState: public FFState
-{
-  virtual std::string ToString() const
-  {
+struct GPULMState: public FFState {
+  virtual std::string ToString() const {
     return "GPULMState";
   }
 
-  virtual size_t hash() const
-  {
+  virtual size_t hash() const {
     return boost::hash_value(lastWords);
   }
 
-  virtual bool operator==(const FFState& other) const
-  {
+  virtual bool operator==(const FFState& other) const {
     const GPULMState &otherCast = static_cast<const GPULMState&>(other);
     bool ret = lastWords == otherCast.lastWords;
 
     return ret;
   }
 
-  void SetContext(const Context &context)
-  {
+  void SetContext(const Context &context) {
     lastWords = context;
     if (lastWords.size()) {
       lastWords.resize(lastWords.size() - 1);
@@ -63,7 +58,7 @@ struct GPULMState: public FFState
 
 /////////////////////////////////////////////////////////////////
 GPULM::GPULM(size_t startInd, const std::string &line)
-:StatefulFeatureFunction(startInd, line)
+  :StatefulFeatureFunction(startInd, line)
 {
   cerr << "GPULM::GPULM" << endl;
   ReadParameters();
@@ -93,15 +88,15 @@ FFState* GPULM::BlankState(MemPool &pool, const System &sys) const
 
 //! return the state associated with the empty hypothesis for a given sentence
 void GPULM::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
-    const InputType &input, const Hypothesis &hypo) const
+                                 const InputType &input, const Hypothesis &hypo) const
 {
   GPULMState &stateCast = static_cast<GPULMState&>(state);
   stateCast.lastWords.push_back(m_bos);
 }
 
 void GPULM::EvaluateInIsolation(MemPool &pool, const System &system,
-    const Phrase<Moses2::Word> &source, const TargetPhraseImpl &targetPhrase, Scores &scores,
-    SCORE &estimatedScore) const
+                                const Phrase<Moses2::Word> &source, const TargetPhraseImpl &targetPhrase, Scores &scores,
+                                SCORE &estimatedScore) const
 {
   if (targetPhrase.GetSize() == 0) {
     return;
@@ -120,8 +115,7 @@ void GPULM::EvaluateInIsolation(MemPool &pool, const System &system,
     if (context.size() == m_order) {
       //std::pair<SCORE, void*> fromScoring = Score(context);
       //score += fromScoring.first;
-    }
-    else {
+    } else {
       //std::pair<SCORE, void*> fromScoring = Score(context);
       //nonFullScore += fromScoring.first;
     }
@@ -130,33 +124,30 @@ void GPULM::EvaluateInIsolation(MemPool &pool, const System &system,
 }
 
 void GPULM::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
-    const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
-    SCORE &estimatedScore) const
+                                const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
+                                SCORE &estimatedScore) const
 {
   UTIL_THROW2("Not implemented");
 }
 
 void GPULM::EvaluateWhenApplied(const ManagerBase &mgr,
-    const Hypothesis &hypo, const FFState &prevState, Scores &scores,
-    FFState &state) const
+                                const Hypothesis &hypo, const FFState &prevState, Scores &scores,
+                                FFState &state) const
 {
   UTIL_THROW2("Not implemented");
 }
 
 void GPULM::SetParameter(const std::string& key,
-    const std::string& value)
+                         const std::string& value)
 {
   //cerr << "key=" << key << " " << value << endl;
   if (key == "path") {
     m_path = value;
-  }
-  else if (key == "order") {
+  } else if (key == "order") {
     m_order = Scan<size_t>(value);
-  }
-  else if (key == "factor") {
+  } else if (key == "factor") {
     m_factorType = Scan<FactorType>(value);
-  }
-  else {
+  } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
 
@@ -164,8 +155,8 @@ void GPULM::SetParameter(const std::string& key,
 }
 
 void GPULM::EvaluateWhenAppliedBatch(
-    const System &system,
-    const Batch &batch) const
+  const System &system,
+  const Batch &batch) const
 {
   // create list of ngrams
   std::vector<std::pair<Hypothesis*, Context> > contexts;
@@ -219,7 +210,7 @@ void GPULM::CreateNGram(std::vector<std::pair<Hypothesis*, Context> > &contexts,
 }
 
 void GPULM::ShiftOrPush(std::vector<const Factor*> &context,
-    const Factor *factor) const
+                        const Factor *factor) const
 {
   if (context.size() < m_order) {
     context.resize(context.size() + 1);
@@ -239,8 +230,8 @@ SCORE GPULM::Score(const Context &context) const
 }
 
 void GPULM::EvaluateWhenApplied(const SCFG::Manager &mgr,
-    const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
-    FFState &state) const
+                                const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
+                                FFState &state) const
 {
   UTIL_THROW2("Not implemented");
 }

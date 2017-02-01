@@ -21,7 +21,7 @@ namespace Moses2
 {
 
 System::System(const Parameter &paramsArg) :
-    params(paramsArg), featureFunctions(*this)
+  params(paramsArg), featureFunctions(*this)
 {
   options.init(paramsArg);
   IsPb();
@@ -39,7 +39,7 @@ System::System(const Parameter &paramsArg) :
   }
 
   if (!options.output.detailed_transrep_filepath.empty()) {
-	  detailedTranslationCollector.reset(new OutputCollector(options.output.detailed_transrep_filepath));
+    detailedTranslationCollector.reset(new OutputCollector(options.output.detailed_transrep_filepath));
   }
 
   featureFunctions.Create();
@@ -105,16 +105,16 @@ void System::LoadWeights()
 
   // set weight
   BOOST_FOREACH(const WeightMap::value_type &valPair, allWeights) {
-	  const string &ffName = valPair.first;
-	  const std::vector<float> &ffWeights = valPair.second;
-	  /*
-	  cerr << ffName << "=";
-	  for (size_t i = 0; i < ffWeights.size(); ++i) {
-		  cerr << ffWeights[i] << " ";
-	  }
-	  cerr << endl;
+    const string &ffName = valPair.first;
+    const std::vector<float> &ffWeights = valPair.second;
+    /*
+    cerr << ffName << "=";
+    for (size_t i = 0; i < ffWeights.size(); ++i) {
+      cerr << ffWeights[i] << " ";
+    }
+    cerr << endl;
     */
-	  weights.SetWeights(featureFunctions, ffName, ffWeights);
+    weights.SetWeights(featureFunctions, ffName, ffWeights);
   }
 }
 
@@ -123,20 +123,19 @@ void System::LoadMappings()
   const PARAM_VEC *vec = params.GetParam("mapping");
   UTIL_THROW_IF2(vec == NULL, "Must have [mapping] section");
 
-  BOOST_FOREACH(const std::string &line, *vec){
-  vector<string> toks = Tokenize(line);
-  assert( (toks.size() == 2 && toks[0] == "T") || (toks.size() == 3 && toks[1] == "T") );
+  BOOST_FOREACH(const std::string &line, *vec) {
+    vector<string> toks = Tokenize(line);
+    assert( (toks.size() == 2 && toks[0] == "T") || (toks.size() == 3 && toks[1] == "T") );
 
-  size_t ptInd;
-  if (toks.size() == 2) {
-    ptInd = Scan<size_t>(toks[1]);
+    size_t ptInd;
+    if (toks.size() == 2) {
+      ptInd = Scan<size_t>(toks[1]);
+    } else {
+      ptInd = Scan<size_t>(toks[2]);
+    }
+    const PhraseTable *pt = featureFunctions.GetPhraseTableExcludeUnknownWordPenalty(ptInd);
+    mappings.push_back(pt);
   }
-  else {
-    ptInd = Scan<size_t>(toks[2]);
-  }
-  const PhraseTable *pt = featureFunctions.GetPhraseTableExcludeUnknownWordPenalty(ptInd);
-  mappings.push_back(pt);
-}
 
 // unk pt
   const UnknownWordPenalty *unkWP = featureFunctions.GetUnknownWordPenalty();
@@ -150,17 +149,15 @@ void System::LoadDecodeGraphBackoff()
   const PARAM_VEC *vec = params.GetParam("decoding-graph-backoff");
 
   for (size_t i = 0; i < mappings.size(); ++i) {
-	  PhraseTable *pt = const_cast<PhraseTable*>(mappings[i]);
+    PhraseTable *pt = const_cast<PhraseTable*>(mappings[i]);
 
-	  if (vec && vec->size() < i) {
-		  pt->decodeGraphBackoff = Scan<int>((*vec)[i]);
-	  }
-	  else if (pt == featureFunctions.GetUnknownWordPenalty()) {
-		  pt->decodeGraphBackoff = 1;
-	  }
-	  else {
-		  pt->decodeGraphBackoff = 0;
-	  }
+    if (vec && vec->size() < i) {
+      pt->decodeGraphBackoff = Scan<int>((*vec)[i]);
+    } else if (pt == featureFunctions.GetUnknownWordPenalty()) {
+      pt->decodeGraphBackoff = 1;
+    } else {
+      pt->decodeGraphBackoff = 0;
+    }
   }
 }
 

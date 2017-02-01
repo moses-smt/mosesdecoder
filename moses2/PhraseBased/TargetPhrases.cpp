@@ -17,7 +17,7 @@ namespace Moses2
 {
 
 TargetPhrases::TargetPhrases(MemPool &pool, size_t size) :
-    m_coll(pool, size), m_currInd(0)
+  m_coll(pool, size), m_currInd(0)
 {
 }
 
@@ -42,7 +42,7 @@ TargetPhrases::~TargetPhrases()
 std::string TargetPhrases::Debug(const System &system) const
 {
   stringstream out;
-  BOOST_FOREACH(const TargetPhraseImpl *tp, *this){
+  BOOST_FOREACH(const TargetPhraseImpl *tp, *this) {
     out << tp->Debug(system);
     out << endl;
   }
@@ -53,11 +53,11 @@ void TargetPhrases::SortAndPrune(size_t tableLimit)
 {
   iterator iterMiddle;
   iterMiddle =
-      (tableLimit == 0 || m_coll.size() < tableLimit) ?
-          m_coll.end() : m_coll.begin() + tableLimit;
+    (tableLimit == 0 || m_coll.size() < tableLimit) ?
+    m_coll.end() : m_coll.begin() + tableLimit;
 
   std::partial_sort(m_coll.begin(), iterMiddle, m_coll.end(),
-		  CompareScoreForPruning<TP>());
+                    CompareScoreForPruning<TP>());
 
   if (tableLimit && m_coll.size() > tableLimit) {
     m_coll.resize(tableLimit);

@@ -14,12 +14,12 @@ class BidirectionalReorderingState: public LRState
 {
 public:
   BidirectionalReorderingState(const LRModel &config, LRState *bw, LRState *fw,
-      size_t offset);
+                               size_t offset);
 
   virtual ~BidirectionalReorderingState();
 
   void Init(const LRState *prev, const TargetPhrase<Moses2::Word> &topt,
-      const InputPathBase &path, bool first, const Bitmap *coverage);
+            const InputPathBase &path, bool first, const Bitmap *coverage);
 
   size_t hash() const;
   virtual bool operator==(const FFState& other) const;
@@ -27,8 +27,8 @@ public:
   virtual std::string ToString() const;
 
   void Expand(const ManagerBase &mgr, const LexicalReordering &ff,
-      const Hypothesis &hypo, size_t phraseTableInd, Scores &scores,
-      FFState &state) const;
+              const Hypothesis &hypo, size_t phraseTableInd, Scores &scores,
+              FFState &state) const;
 
 protected:
   LRState *m_backward;

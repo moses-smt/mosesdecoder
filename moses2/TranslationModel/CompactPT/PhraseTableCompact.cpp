@@ -16,11 +16,11 @@ namespace Moses2
 bool PhraseTableCompact::s_inMemoryByDefault = false;
 
 PhraseTableCompact::PhraseTableCompact(size_t startInd, const std::string &line)
-:PhraseTable(startInd, line)
-,m_inMemory(s_inMemoryByDefault)
-,m_useAlignmentInfo(true)
-,m_hash(10, 16)
-,m_phraseDecoder(0)
+  :PhraseTable(startInd, line)
+  ,m_inMemory(s_inMemoryByDefault)
+  ,m_useAlignmentInfo(true)
+  ,m_hash(10, 16)
+  ,m_phraseDecoder(0)
 {
   ReadParameters();
 }
@@ -58,8 +58,7 @@ void PhraseTableCompact::Load(System &system)
   if(m_inMemory) {
     // Load target phrase collections into memory
     phraseSize = m_targetPhrasesMemory.load(pFile, false);
-  }
-  else {
+  } else {
     // Keep target phrase collections on disk
     phraseSize = m_targetPhrasesMapped.load(pFile, true);
   }
@@ -72,8 +71,7 @@ void PhraseTableCompact::SetParameter(const std::string& key, const std::string&
 {
   if (key == "blah") {
 
-  }
-  else {
+  } else {
     PhraseTable::SetParameter(key, value);
   }
 }
@@ -95,16 +93,16 @@ void PhraseTableCompact::Lookup(const Manager &mgr, InputPathsBase &inputPaths) 
   InputPaths &inputPathsCast = static_cast<InputPaths&>(inputPaths);
 
   for (size_t i = 0; i < inputSize; ++i) {
-	  for (size_t startPos = 0; startPos < inputSize; ++startPos) {
-		  size_t endPos = startPos + i;
-		  if (endPos >= inputSize) {
-			  break;
-		  }
-		  InputPath *path = inputPathsCast.GetMatrix().GetValue(startPos, i);
-		  //cerr << "path=" << path->Debug(mgr.system) << endl;
-		  TargetPhrases *tps = Lookup(mgr, mgr.GetPool(), *path);
-		  path->AddTargetPhrases(*this, tps);
-	  }
+    for (size_t startPos = 0; startPos < inputSize; ++startPos) {
+      size_t endPos = startPos + i;
+      if (endPos >= inputSize) {
+        break;
+      }
+      InputPath *path = inputPathsCast.GetMatrix().GetValue(startPos, i);
+      //cerr << "path=" << path->Debug(mgr.system) << endl;
+      TargetPhrases *tps = Lookup(mgr, mgr.GetPool(), *path);
+      path->AddTargetPhrases(*this, tps);
+    }
   }
 }
 
@@ -154,67 +152,67 @@ TargetPhrases *PhraseTableCompact::Lookup(const Manager &mgr, MemPool &pool,
 }
 
 const TargetPhraseImpl *PhraseTableCompact::CreateTargetPhrase(
-		const Manager &mgr,
-		const TPCompact &tpCompact,
-		const Phrase<Word> &sourcePhrase) const
+  const Manager &mgr,
+  const TPCompact &tpCompact,
+  const Phrase<Word> &sourcePhrase) const
 {
-	MemPool &pool = mgr.GetPool();
+  MemPool &pool = mgr.GetPool();
 
-	size_t size = tpCompact.words.size();
-	TargetPhraseImpl *ret = new TargetPhraseImpl(pool, *this, mgr.system, size);
+  size_t size = tpCompact.words.size();
+  TargetPhraseImpl *ret = new TargetPhraseImpl(pool, *this, mgr.system, size);
 
-	// words
-	for (size_t i = 0; i < size; ++i) {
-		const Word &compactWord = tpCompact.words[i];
-		Word &tpWord = (*ret)[i];
-		tpWord = compactWord;
-	}
+  // words
+  for (size_t i = 0; i < size; ++i) {
+    const Word &compactWord = tpCompact.words[i];
+    Word &tpWord = (*ret)[i];
+    tpWord = compactWord;
+  }
 
-	// scores
-	Scores &scores = ret->GetScores();
-	scores.Assign(mgr.system, *this, tpCompact.scores);
+  // scores
+  Scores &scores = ret->GetScores();
+  scores.Assign(mgr.system, *this, tpCompact.scores);
 
-	// align
-	ret->SetAlignTerm(tpCompact.alignment);
+  // align
+  ret->SetAlignTerm(tpCompact.alignment);
 
-	// score
-    mgr.system.featureFunctions.EvaluateInIsolation(pool, mgr.system, sourcePhrase, *ret);
+  // score
+  mgr.system.featureFunctions.EvaluateInIsolation(pool, mgr.system, sourcePhrase, *ret);
 
-    // Cache phrase pair for clean-up or retrieval with PREnc
-    //const_cast<PhraseDictionaryCompact*>(this)->CacheForCleanup(phraseColl);
+  // Cache phrase pair for clean-up or retrieval with PREnc
+  //const_cast<PhraseDictionaryCompact*>(this)->CacheForCleanup(phraseColl);
 
-	//cerr << "ret=" << ret->Debug(mgr.system) << endl;
-	return ret;
+  //cerr << "ret=" << ret->Debug(mgr.system) << endl;
+  return ret;
 }
 
 
 // scfg
 void PhraseTableCompact::InitActiveChart(
-    MemPool &pool,
-    const SCFG::Manager &mgr,
-    SCFG::InputPath &path) const
+  MemPool &pool,
+  const SCFG::Manager &mgr,
+  SCFG::InputPath &path) const
 {
   UTIL_THROW2("Not implemented");
 }
 
 void PhraseTableCompact::Lookup(
-    MemPool &pool,
-    const SCFG::Manager &mgr,
-    size_t maxChartSpan,
-    const SCFG::Stacks &stacks,
-    SCFG::InputPath &path) const
+  MemPool &pool,
+  const SCFG::Manager &mgr,
+  size_t maxChartSpan,
+  const SCFG::Stacks &stacks,
+  SCFG::InputPath &path) const
 {
   UTIL_THROW2("Not implemented");
 }
 
 void PhraseTableCompact::LookupGivenNode(
-    MemPool &pool,
-    const SCFG::Manager &mgr,
-    const SCFG::ActiveChartEntry &prevEntry,
-    const SCFG::Word &wordSought,
-    const Moses2::Hypotheses *hypos,
-    const Moses2::Range &subPhraseRange,
-    SCFG::InputPath &outPath) const
+  MemPool &pool,
+  const SCFG::Manager &mgr,
+  const SCFG::ActiveChartEntry &prevEntry,
+  const SCFG::Word &wordSought,
+  const Moses2::Hypotheses *hypos,
+  const Moses2::Range &subPhraseRange,
+  SCFG::InputPath &outPath) const
 {
   UTIL_THROW2("Not implemented");
 }

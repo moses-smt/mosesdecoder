@@ -24,33 +24,29 @@ public:
   virtual ~Word();
 
   void CreateFromString(FactorCollection &vocab, const System &system,
-      const std::string &str);
+                        const std::string &str);
 
   virtual size_t hash() const;
   virtual size_t hash(const std::vector<FactorType> &factors) const;
 
   int Compare(const Word &compare) const;
 
-  virtual bool operator==(const Word &compare) const
-  {
+  virtual bool operator==(const Word &compare) const {
     int cmp = Compare(compare);
     return cmp == 0;
   }
 
-  virtual bool operator!=(const Word &compare) const
-  {
+  virtual bool operator!=(const Word &compare) const {
     return !((*this) == compare);
   }
 
   virtual bool operator<(const Word &compare) const;
 
-  const Factor* operator[](size_t ind) const
-  {
+  const Factor* operator[](size_t ind) const {
     return m_factors[ind];
   }
 
-  const Factor*& operator[](size_t ind)
-  {
+  const Factor*& operator[](size_t ind) {
     return m_factors[ind];
   }
 

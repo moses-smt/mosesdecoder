@@ -29,7 +29,7 @@ class Manager: public Moses2::ManagerBase
 {
 public:
   Manager(System &sys, const TranslationTask &task, const std::string &inputStr,
-      long translationId);
+          long translationId);
 
   virtual ~Manager();
   void Decode();
@@ -37,14 +37,17 @@ public:
   std::string OutputNBest();
   std::string OutputTransOpt();
 
-  const InputPaths &GetInputPaths() const
-  { return m_inputPaths; }
+  const InputPaths &GetInputPaths() const {
+    return m_inputPaths;
+  }
 
-  QueueItemRecycler &GetQueueItemRecycler()
-  { return m_queueItemRecycler; }
+  QueueItemRecycler &GetQueueItemRecycler() {
+    return m_queueItemRecycler;
+  }
 
-  const Stacks &GetStacks() const
-  { return m_stacks; }
+  const Stacks &GetStacks() const {
+    return m_stacks;
+  }
 
 protected:
   Stacks m_stacks;
@@ -56,15 +59,15 @@ protected:
   void Decode(SCFG::InputPath &path, Stack &stack);
 
   void ExpandHypo(
-      const SCFG::InputPath &path,
-      const SCFG::SymbolBind &symbolBind,
-      const SCFG::TargetPhraseImpl &tp,
-      Stack &stack);
+    const SCFG::InputPath &path,
+    const SCFG::SymbolBind &symbolBind,
+    const SCFG::TargetPhraseImpl &tp,
+    Stack &stack);
 
   bool IncrPrevHypoIndices(
-      Vector<size_t> &prevHyposIndices,
-      size_t ind,
-      const std::vector<const SymbolBindElement*> ntEles);
+    Vector<size_t> &prevHyposIndices,
+    size_t ind,
+    const std::vector<const SymbolBindElement*> ntEles);
 
   // cube pruning
   Queue m_queue;
@@ -73,9 +76,9 @@ protected:
   QueueItemRecycler m_queueItemRecycler;
 
   void CreateQueue(
-      const SCFG::InputPath &path,
-      const SymbolBind &symbolBind,
-      const SCFG::TargetPhrases &tps);
+    const SCFG::InputPath &path,
+    const SymbolBind &symbolBind,
+    const SCFG::TargetPhrases &tps);
 };
 
 }

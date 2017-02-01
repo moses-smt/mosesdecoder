@@ -19,10 +19,10 @@ namespace SCFG
 {
 
 InputPath::InputPath(MemPool &pool, const SubPhrase<SCFG::Word> &subPhrase,
-    const Range &range, size_t numPt, const InputPath *prefixPath)
-:InputPathBase(pool, range, numPt, prefixPath)
-,subPhrase(subPhrase)
-,targetPhrases(MemPoolAllocator<Element>(pool))
+                     const Range &range, size_t numPt, const InputPath *prefixPath)
+  :InputPathBase(pool, range, numPt, prefixPath)
+  ,subPhrase(subPhrase)
+  ,targetPhrases(MemPoolAllocator<Element>(pool))
 {
   m_activeChart = pool.Allocate<ActiveChart>(numPt);
   for (size_t i = 0; i < numPt; ++i) {
@@ -68,14 +68,14 @@ std::string InputPath::Debug(const System &system) const
 }
 
 void InputPath::AddTargetPhrasesToPath(
-    MemPool &pool,
-	const System &system,
-    const PhraseTable &pt,
-    const SCFG::TargetPhrases &tps,
-    const SCFG::SymbolBind &symbolBind)
+  MemPool &pool,
+  const System &system,
+  const PhraseTable &pt,
+  const SCFG::TargetPhrases &tps,
+  const SCFG::SymbolBind &symbolBind)
 {
   targetPhrases.push_back(Element(symbolBind, &tps));
-	/*
+  /*
   Coll::iterator iterColl;
   iterColl = targetPhrases.find(symbolBind);
   assert(iterColl == targetPhrases.end());

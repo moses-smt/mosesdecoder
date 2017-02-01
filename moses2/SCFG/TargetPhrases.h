@@ -27,17 +27,14 @@ public:
   typedef Coll::iterator iterator;
   typedef Coll::const_iterator const_iterator;
   //! iterators
-  const_iterator begin() const
-  {
+  const_iterator begin() const {
     return m_coll.begin();
   }
-  const_iterator end() const
-  {
+  const_iterator end() const {
     return m_coll.end();
   }
 
-  const SCFG::TargetPhraseImpl& operator[](size_t ind) const
-  {
+  const SCFG::TargetPhraseImpl& operator[](size_t ind) const {
     return *m_coll[ind];
   }
 
@@ -45,11 +42,11 @@ public:
   TargetPhrases(MemPool &pool, size_t size);
   virtual ~TargetPhrases();
 
-  size_t GetSize() const
-  { return m_coll.size(); }
+  size_t GetSize() const {
+    return m_coll.size();
+  }
 
-  void AddTargetPhrase(const SCFG::TargetPhraseImpl &targetPhrase)
-  {
+  void AddTargetPhrase(const SCFG::TargetPhraseImpl &targetPhrase) {
     m_coll.push_back(&targetPhrase);
   }
 

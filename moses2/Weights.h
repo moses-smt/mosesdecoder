@@ -22,8 +22,7 @@ public:
   virtual ~Weights();
   void Init(const FeatureFunctions &ffs);
 
-  SCORE operator[](size_t ind) const
-  {
+  SCORE operator[](size_t ind) const {
     return m_weights[ind];
   }
 

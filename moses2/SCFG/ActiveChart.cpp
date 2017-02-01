@@ -17,12 +17,12 @@ SymbolBindElement::SymbolBindElement()
 }
 
 SymbolBindElement::SymbolBindElement(
-	const Moses2::Range &range,
-    const SCFG::Word &word,
-    const Moses2::Hypotheses *hypos)
-:m_range(&range)
-,word(&word)
-,hypos(hypos)
+  const Moses2::Range &range,
+  const SCFG::Word &word,
+  const Moses2::Hypotheses *hypos)
+  :m_range(&range)
+  ,word(&word)
+  ,hypos(hypos)
 {
   assert( (word.isNonTerminal && hypos) || (!word.isNonTerminal && hypos == NULL));
 }
@@ -37,19 +37,19 @@ size_t hash_value(const SymbolBindElement &obj)
 
 std::string SymbolBindElement::Debug(const System &system) const
 {
-	stringstream out;
-	out << "(";
-	out << *m_range;
-    out << word->Debug(system);
-    out << ")";
+  stringstream out;
+  out << "(";
+  out << *m_range;
+  out << word->Debug(system);
+  out << ")";
 
   return out.str();
 }
 
 ////////////////////////////////////////////////////////////////////////////
 SymbolBind::SymbolBind(MemPool &pool)
-:coll(pool)
-,numNT(0)
+  :coll(pool)
+  ,numNT(0)
 {
 }
 
@@ -83,19 +83,19 @@ std::string SymbolBind::Debug(const System &system) const
 {
   stringstream out;
   BOOST_FOREACH(const SymbolBindElement &ele, coll) {
-	out << ele.Debug(system) << " ";
+    out << ele.Debug(system) << " ";
   }
   return out.str();
 }
 ////////////////////////////////////////////////////////////////////////////
 ActiveChartEntry::ActiveChartEntry(MemPool &pool)
-:m_symbolBind(pool)
+  :m_symbolBind(pool)
 {
 }
 
 ////////////////////////////////////////////////////////////////////////////
 ActiveChart::ActiveChart(MemPool &pool)
-:entries(pool)
+  :entries(pool)
 {
 }
 

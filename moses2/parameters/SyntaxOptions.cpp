@@ -11,10 +11,10 @@
 namespace Moses2
 {
 SyntaxOptions::SyntaxOptions()
-: s2t_parsing_algo(RecursiveCYKPlus)
-, default_non_term_only_for_empty_range(false)
-, source_label_overlap(SourceLabelOverlapAdd)
-, rule_limit(DEFAULT_MAX_TRANS_OPT_SIZE)
+  : s2t_parsing_algo(RecursiveCYKPlus)
+  , default_non_term_only_for_empty_range(false)
+  , source_label_overlap(SourceLabelOverlapAdd)
+  , rule_limit(DEFAULT_MAX_TRANS_OPT_SIZE)
 {}
 
 bool SyntaxOptions::init(Parameter const& param)

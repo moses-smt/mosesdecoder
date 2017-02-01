@@ -19,14 +19,14 @@ class Manager;
 class NBestColl
 {
 public:
-	virtual ~NBestColl();
+  virtual ~NBestColl();
 
-	void Add(const SCFG::Manager &mgr, const ArcList &arcList);
-	NBests &GetOrCreateNBests(const SCFG::Manager &mgr, const ArcList &arcList);
+  void Add(const SCFG::Manager &mgr, const ArcList &arcList);
+  NBests &GetOrCreateNBests(const SCFG::Manager &mgr, const ArcList &arcList);
 
 protected:
-	typedef boost::unordered_map<const ArcList*, NBests*> Coll;
-	Coll m_candidates;
+  typedef boost::unordered_map<const ArcList*, NBests*> Coll;
+  Coll m_candidates;
 
 };
 

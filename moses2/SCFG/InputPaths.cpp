@@ -56,7 +56,7 @@ void InputPaths::Init(const InputType &input, const ManagerBase &mgr)
       Range range(startPos, endPos);
 
       SCFG::InputPath *path = new (pool.Allocate<SCFG::InputPath>())
-          SCFG::InputPath(pool, subPhrase, range, numPt, prefixPath);
+      SCFG::InputPath(pool, subPhrase, range, numPt, prefixPath);
       //cerr << "path=" << *path << endl;
       m_inputPaths.push_back(path);
 

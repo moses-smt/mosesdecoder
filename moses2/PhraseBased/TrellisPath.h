@@ -27,12 +27,10 @@ public:
   size_t ind;
 
   TrellisNode(const ArcList &varcList, size_t vind) :
-      arcList(&varcList), ind(vind)
-  {
+    arcList(&varcList), ind(vind) {
   }
 
-  const HypothesisBase *GetHypo() const
-  {
+  const HypothesisBase *GetHypo() const {
     return (*arcList)[ind];
   }
 
@@ -55,13 +53,12 @@ public:
    * which may change other hypo back from there
    */
   TrellisPath(const TrellisPath &origPath, size_t edgeIndex,
-      const TrellisNode &newNode, const ArcLists &arcLists, MemPool &pool,
-      const System &system);
+              const TrellisNode &newNode, const ArcLists &arcLists, MemPool &pool,
+              const System &system);
 
   virtual ~TrellisPath();
 
-  const Scores &GetScores() const
-  {
+  const Scores &GetScores() const {
     return *m_scores;
   }
   SCORE GetFutureScore() const;
@@ -73,14 +70,14 @@ public:
 
   //! create a set of next best paths by wiggling 1 of the node at a time.
   void CreateDeviantPaths(TrellisPaths<TrellisPath> &paths, const ArcLists &arcLists,
-      MemPool &pool, const System &system) const;
+                          MemPool &pool, const System &system) const;
 
 protected:
   const Scores *m_scores;
 
   void AddNodes(const Hypothesis *hypo, const ArcLists &arcLists);
   void CalcScores(const Scores &origScores, const Scores &origHypoScores,
-      const Scores &newHypoScores, MemPool &pool, const System &system);
+                  const Scores &newHypoScores, MemPool &pool, const System &system);
 };
 
 } /* namespace Moses2 */

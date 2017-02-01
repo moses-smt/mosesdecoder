@@ -17,51 +17,42 @@ public:
   typedef std::ptrdiff_t difference_type;
 
   template<class U>
-  struct rebind
-  {
+  struct rebind {
     typedef MemPoolAllocator<U> other;
   };
 
   MemPoolAllocator(Moses2::MemPool &pool) :
-      m_pool(pool)
-  {
+    m_pool(pool) {
   }
   MemPoolAllocator(const MemPoolAllocator &other) :
-      m_pool(other.m_pool)
-  {
+    m_pool(other.m_pool) {
   }
 
   template<class U>
   MemPoolAllocator(const MemPoolAllocator<U>& other) :
-      m_pool(other.m_pool)
-  {
+    m_pool(other.m_pool) {
   }
 
-  size_type max_size() const
-  {
+  size_type max_size() const {
     return std::numeric_limits<size_type>::max();
   }
 
-  void deallocate(pointer p, size_type n)
-  {
+  void deallocate(pointer p, size_type n) {
     //std::cerr << "deallocate " << p << " " << n << std::endl;
   }
 
-  pointer allocate(size_type n, std::allocator<void>::const_pointer hint = 0)
-  {
+  pointer allocate(size_type n, std::allocator<void>::const_pointer hint = 0) {
     //std::cerr << "allocate " << n << " " << hint << std::endl;
     pointer ret = m_pool.Allocate<T>(n);
     return ret;
   }
 
-  void construct(pointer p, const_reference val)
-  {
+  void construct(pointer p, const_reference val) {
     //std::cerr << "construct " << p << " " << n << std::endl;
     new ((void *) p) T(val);
   }
 
-  void destroy(pointer p)
-  {
+  void destroy(pointer p) {
     //std::cerr << "destroy " << p << " " << n << std::endl;
   }
 

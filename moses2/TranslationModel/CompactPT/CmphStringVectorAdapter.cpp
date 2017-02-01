@@ -42,7 +42,7 @@ void CmphStringVectorAdapterRewind(void *data)
 cmph_io_adapter_t *CmphVectorAdapterNew(std::vector<std::string>& v)
 {
   cmph_io_adapter_t * key_source = (cmph_io_adapter_t *) malloc(
-      sizeof(cmph_io_adapter_t));
+                                     sizeof(cmph_io_adapter_t));
   cmph_vector_t * cmph_vector = (cmph_vector_t *) malloc(sizeof(cmph_vector_t));
   assert(key_source);
   assert(cmph_vector);

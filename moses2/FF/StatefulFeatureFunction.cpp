@@ -20,7 +20,7 @@ namespace Moses2
 
 StatefulFeatureFunction::StatefulFeatureFunction(size_t startInd,
     const std::string &line) :
-    FeatureFunction(startInd, line)
+  FeatureFunction(startInd, line)
 {
 }
 
@@ -30,10 +30,10 @@ StatefulFeatureFunction::~StatefulFeatureFunction()
 }
 
 void StatefulFeatureFunction::EvaluateWhenAppliedBatch(
-    const System &system,
-    const Batch &batch) const
+  const System &system,
+  const Batch &batch) const
 {
-   //cerr << "EvaluateWhenAppliedBatch:" << m_name << endl;
+  //cerr << "EvaluateWhenAppliedBatch:" << m_name << endl;
 #ifdef __linux
   /*
    pthread_t handle;

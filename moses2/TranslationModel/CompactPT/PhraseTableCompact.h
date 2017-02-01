@@ -18,22 +18,22 @@ public:
   virtual void CleanUpAfterSentenceProcessing() const;
 
   virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
-      InputPath &inputPath) const;
+                                InputPath &inputPath) const;
 
   // scfg
   virtual void InitActiveChart(
-      MemPool &pool,
-      const SCFG::Manager &mgr,
-      SCFG::InputPath &path) const;
+    MemPool &pool,
+    const SCFG::Manager &mgr,
+    SCFG::InputPath &path) const;
 
   virtual void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
 
   virtual void Lookup(
-      MemPool &pool,
-      const SCFG::Manager &mgr,
-      size_t maxChartSpan,
-      const SCFG::Stacks &stacks,
-      SCFG::InputPath &path) const;
+    MemPool &pool,
+    const SCFG::Manager &mgr,
+    size_t maxChartSpan,
+    const SCFG::Stacks &stacks,
+    SCFG::InputPath &path) const;
 
 protected:
   static bool s_inMemoryByDefault;
@@ -49,19 +49,19 @@ protected:
   PhraseDecoder* m_phraseDecoder;
 
   const TargetPhraseImpl *CreateTargetPhrase(
-		  const Manager &mgr,
-		  const TPCompact &tpCompact,
-		  const Phrase<Word> &sourcePhrase) const;
+    const Manager &mgr,
+    const TPCompact &tpCompact,
+    const Phrase<Word> &sourcePhrase) const;
 
   // SCFG
   virtual void LookupGivenNode(
-      MemPool &pool,
-      const SCFG::Manager &mgr,
-      const SCFG::ActiveChartEntry &prevEntry,
-      const SCFG::Word &wordSought,
-      const Moses2::Hypotheses *hypos,
-      const Moses2::Range &subPhraseRange,
-      SCFG::InputPath &outPath) const;
+    MemPool &pool,
+    const SCFG::Manager &mgr,
+    const SCFG::ActiveChartEntry &prevEntry,
+    const SCFG::Word &wordSought,
+    const Moses2::Hypotheses *hypos,
+    const Moses2::Range &subPhraseRange,
+    SCFG::InputPath &outPath) const;
 
 };
 

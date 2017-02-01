@@ -39,16 +39,14 @@ protected:
   //ArcLists m_arcLists;
 
   bool CanExtend(const Bitmap &hypoBitmap, size_t hypoRangeEndPos,
-      const Range &pathRange);
+                 const Range &pathRange);
 
   inline int ComputeDistortionDistance(size_t prevEndPos,
-      size_t currStartPos) const
-  {
+                                       size_t currStartPos) const {
     int dist = 0;
     if (prevEndPos == NOT_FOUND) {
       dist = currStartPos;
-    }
-    else {
+    } else {
       dist = (int)prevEndPos - (int)currStartPos + 1;
     }
     return abs(dist);

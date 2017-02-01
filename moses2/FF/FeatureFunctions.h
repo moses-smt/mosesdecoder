@@ -47,17 +47,21 @@ public:
   FeatureFunctions(System &system);
   virtual ~FeatureFunctions();
 
-  const std::vector<const FeatureFunction*> &GetFeatureFunctions() const
-  { return m_featureFunctions; }
+  const std::vector<const FeatureFunction*> &GetFeatureFunctions() const {
+    return m_featureFunctions;
+  }
 
-  const std::vector<const StatefulFeatureFunction*> &GetStatefulFeatureFunctions() const
-  { return m_statefulFeatureFunctions; }
+  const std::vector<const StatefulFeatureFunction*> &GetStatefulFeatureFunctions() const {
+    return m_statefulFeatureFunctions;
+  }
 
-  const std::vector<const FeatureFunction*> &GetWithPhraseTableInd() const
-  { return m_withPhraseTableInd; }
+  const std::vector<const FeatureFunction*> &GetWithPhraseTableInd() const {
+    return m_withPhraseTableInd;
+  }
 
-  size_t GetNumScores() const
-  { return m_ffStartInd; }
+  size_t GetNumScores() const {
+    return m_ffStartInd;
+  }
 
   void Create();
   void Load();
@@ -65,19 +69,20 @@ public:
   const FeatureFunction *FindFeatureFunction(const std::string &name) const;
 
   const PhraseTable *GetPhraseTableExcludeUnknownWordPenalty(size_t ptInd);
-  const UnknownWordPenalty *GetUnknownWordPenalty() const
-  { return m_unkWP; }
+  const UnknownWordPenalty *GetUnknownWordPenalty() const {
+    return m_unkWP;
+  }
 
   // the pool here must be the system pool if the rule was loaded during load, or the mgr pool if it was loaded on demand
   void EvaluateInIsolation(MemPool &pool, const System &system,
-      const Phrase<Moses2::Word> &source, TargetPhraseImpl &targetPhrase) const;
+                           const Phrase<Moses2::Word> &source, TargetPhraseImpl &targetPhrase) const;
   void EvaluateInIsolation(MemPool &pool, const System &system,
-      const Phrase<SCFG::Word> &source, SCFG::TargetPhraseImpl &targetPhrase) const;
+                           const Phrase<SCFG::Word> &source, SCFG::TargetPhraseImpl &targetPhrase) const;
 
   void EvaluateAfterTablePruning(MemPool &pool, const TargetPhrases &tps,
-      const Phrase<Moses2::Word> &sourcePhrase) const;
+                                 const Phrase<Moses2::Word> &sourcePhrase) const;
   void EvaluateAfterTablePruning(MemPool &pool, const SCFG::TargetPhrases &tps,
-      const Phrase<SCFG::Word> &sourcePhrase) const;
+                                 const Phrase<SCFG::Word> &sourcePhrase) const;
 
   void EvaluateWhenAppliedBatch(const Batch &batch) const;
 
