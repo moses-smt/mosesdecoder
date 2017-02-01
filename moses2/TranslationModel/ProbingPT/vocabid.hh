@@ -19,10 +19,10 @@ template<typename VOCABID>
 class StoreVocab;
 
 void add_to_map(StoreVocab<uint64_t> &sourceVocab,
-    const StringPiece &textin);
+                const StringPiece &textin);
 
 void serialize_map(const std::map<uint64_t, std::string> &karta,
-    const std::string &filename);
+                   const std::string &filename);
 
 void read_map(std::map<uint64_t, std::string> &karta, const char* filename);
 
