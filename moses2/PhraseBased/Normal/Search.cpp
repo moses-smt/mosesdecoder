@@ -67,7 +67,6 @@ void Search::Decode()
 
 void Search::Decode(size_t stackInd)
 {
-<<<<<<< HEAD
 	//cerr << "stackInd=" << stackInd << endl;
 	Stack &stack = m_stacks[stackInd];
 	if (&stack == &m_stacks.Back()) {
@@ -89,25 +88,6 @@ void Search::Decode(size_t stackInd)
 			Extend(*static_cast<const Hypothesis*>(hypo), *static_cast<const InputPath*>(path));
 		}
 	}
-=======
-  //cerr << "stackInd=" << stackInd << endl;
-  Stack &stack = m_stacks[stackInd];
-  if (&stack == &m_stacks.Back()) {
-    // last stack. don't do anythin
-    return;
-  }
-
-  const Hypotheses &hypos = stack.GetSortedAndPrunedHypos(mgr, mgr.arcLists);
-  //cerr << "hypos=" << hypos.size() << endl;
-
-  const InputPaths &paths = mgr.GetInputPaths();
-
-  BOOST_FOREACH(const InputPathBase *path, paths) {
-    BOOST_FOREACH(const HypothesisBase *hypo, hypos) {
-      Extend(*static_cast<const Hypothesis*>(hypo), *static_cast<const InputPath*>(path));
-    }
-  }
->>>>>>> 84b918b389e5a2d5e31cca993e1e53ff1354f1b1
 }
 
 void Search::Extend(const Hypothesis &hypo, const InputPath &path)

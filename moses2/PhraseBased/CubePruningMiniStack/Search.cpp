@@ -50,33 +50,6 @@ Search::~Search()
 
 void Search::Decode()
 {
-<<<<<<< HEAD
-	const Sentence &sentence = static_cast<const Sentence&>(mgr.GetInput());
-
-	// init cue edges
-	m_cubeEdges.resize(sentence.GetSize() + 1);
-	for (size_t i = 0; i < m_cubeEdges.size(); ++i) {
-		m_cubeEdges[i] = new (mgr.GetPool().Allocate<CubeEdges>()) CubeEdges(
-				m_cubeEdgeAlloc);
-	}
-
-	const Bitmap &initBitmap = mgr.GetBitmaps().GetInitialBitmap();
-	Hypothesis *initHypo = Hypothesis::Create(mgr.GetSystemPool(), mgr);
-	initHypo->Init(mgr, mgr.GetInputPaths().GetBlank(), mgr.GetInitPhrase(),
-			initBitmap);
-	initHypo->EmptyHypothesisState(mgr.GetInput());
-	//cerr << "initHypo=" << *initHypo << endl;
-
-	m_stack.Add(initHypo, mgr.GetHypoRecycle(), mgr.arcLists);
-	PostDecode(0);
-
-	for (size_t stackInd = 1; stackInd < sentence.GetSize() + 1;
-			++stackInd) {
-		//cerr << "stackInd=" << stackInd << endl;
-		m_stack.Clear();
-		Decode(stackInd);
-		PostDecode(stackInd);
-=======
   const Sentence &sentence = static_cast<const Sentence&>(mgr.GetInput());
 
   // init cue edges
@@ -102,7 +75,6 @@ void Search::Decode()
     m_stack.Clear();
     Decode(stackInd);
     PostDecode(stackInd);
->>>>>>> 84b918b389e5a2d5e31cca993e1e53ff1354f1b1
 
     //m_stack.DebugCounts();
   }
@@ -111,91 +83,6 @@ void Search::Decode()
 
 void Search::Decode(size_t stackInd)
 {
-<<<<<<< HEAD
-	Recycler<HypothesisBase*> &hypoRecycler = mgr.GetHypoRecycle();
-
-	// reuse queue from previous stack. Clear it first
-	std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > &container = Container(
-			m_queue);
-	//cerr << "container=" << container.size() << endl;
-	BOOST_FOREACH(QueueItem *item, container){
-		// recycle unused hypos from queue
-		Hypothesis *hypo = item->hypo;
-		hypoRecycler.Recycle(hypo);
-
-		// recycle queue item
-		m_queueItemRecycler.push_back(item);
-	}
-	container.clear();
-
-	m_seenPositions.clear();
-
-	// add top hypo from every edge into queue
-	CubeEdges &edges = *m_cubeEdges[stackInd];
-
-	BOOST_FOREACH(CubeEdge *edge, edges){
-		//cerr << *edge << " ";
-		edge->CreateFirst(mgr, m_queue, m_seenPositions, m_queueItemRecycler);
-	}
-
-	/*
- cerr << "edges: ";
- boost::unordered_set<const Bitmap*> uniqueBM;
- BOOST_FOREACH(CubeEdge *edge, edges) {
- uniqueBM.insert(&edge->newBitmap);
- //cerr << *edge << " ";
- }
- cerr << edges.size() << " " << uniqueBM.size();
- cerr << endl;
-	 */
-
-	size_t pops = 0;
-	while (!m_queue.empty() && pops < mgr.system.options.cube.pop_limit) {
-		// get best hypo from queue, add to stack
-		//cerr << "queue=" << queue.size() << endl;
-		QueueItem *item = m_queue.top();
-		m_queue.pop();
-
-		CubeEdge *edge = item->edge;
-
-		// add hypo to stack
-		Hypothesis *hypo = item->hypo;
-
-		if (mgr.system.options.cube.lazy_scoring) {
-			hypo->EvaluateWhenApplied();
-		}
-
-		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
-		m_stack.Add(hypo, hypoRecycler, mgr.arcLists);
-
-		edge->CreateNext(mgr, item, m_queue, m_seenPositions, m_queueItemRecycler);
-
-		++pops;
-	}
-
-	// create hypo from every edge. Increase diversity
-	if (mgr.system.options.cube.diversity) {
-		while (!m_queue.empty()) {
-			QueueItem *item = m_queue.top();
-			m_queue.pop();
-
-			if (item->hypoIndex == 0 && item->tpIndex == 0) {
-				// add hypo to stack
-				Hypothesis *hypo = item->hypo;
-				//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
-				m_stack.Add(hypo, hypoRecycler, mgr.arcLists);
-			}
-		}
-	}
-
-	BOOST_FOREACH(const Stack::Coll::value_type &p, m_stack.GetColl()) {
-      const HypothesisColl &coll = *p.second;
-	  const Hypotheses &hypos = coll.GetSortedAndPrunedHypos(mgr, mgr.arcLists);
-	  BOOST_FOREACH(const StatefulPhraseTable *sfpt, mgr.system.featureFunctions.statefulPhraseTables) {
-		sfpt->EvaluateBeforeExtending(stackInd, hypos, mgr);
-	  }
-	}
-=======
   Recycler<HypothesisBase*> &hypoRecycler = mgr.GetHypoRecycle();
 
   // reuse queue from previous stack. Clear it first
@@ -271,7 +158,14 @@ void Search::Decode(size_t stackInd)
       }
     }
   }
->>>>>>> 84b918b389e5a2d5e31cca993e1e53ff1354f1b1
+
+  BOOST_FOREACH(const Stack::Coll::value_type &p, m_stack.GetColl()) {
+  const HypothesisColl &coll = *p.second;
+    const Hypotheses &hypos = coll.GetSortedAndPrunedHypos(mgr, mgr.arcLists);
+    BOOST_FOREACH(const StatefulPhraseTable *sfpt, mgr.system.featureFunctions.statefulPhraseTables) {
+    sfpt->EvaluateBeforeExtending(stackInd, hypos, mgr);
+    }
+  }
 }
 
 void Search::PostDecode(size_t stackInd)
