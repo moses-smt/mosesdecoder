@@ -33,7 +33,7 @@ Word::~Word()
 }
 
 void Word::CreateFromString(FactorCollection &vocab, const System &system,
-    const std::string &str)
+                            const std::string &str)
 {
   vector<string> toks = Tokenize(str, "|");
   for (size_t i = 0; i < toks.size(); ++i) {
@@ -45,7 +45,7 @@ void Word::CreateFromString(FactorCollection &vocab, const System &system,
 
   // null the rest
   for (size_t i = toks.size(); i < MAX_NUM_FACTORS; ++i) {
-	m_factors[i] = NULL;
+    m_factors[i] = NULL;
   }
 }
 
@@ -53,7 +53,7 @@ size_t Word::hash() const
 {
   uint64_t seed = 0;
   size_t ret = util::MurmurHashNative(m_factors,
-      sizeof(Factor*) * MAX_NUM_FACTORS, seed);
+                                      sizeof(Factor*) * MAX_NUM_FACTORS, seed);
   return ret;
 }
 
@@ -61,9 +61,9 @@ size_t Word::hash(const std::vector<FactorType> &factors) const
 {
   size_t seed = 0;
   for (size_t i = 0; i < factors.size(); ++i) {
-	  FactorType factorType = factors[i];
-	  const Factor *factor = m_factors[factorType];
-	  boost::hash_combine(seed, factor);
+    FactorType factorType = factors[i];
+    const Factor *factor = m_factors[factorType];
+    boost::hash_combine(seed, factor);
   }
   return seed;
 }
@@ -73,7 +73,7 @@ int Word::Compare(const Word &compare) const
 {
 
   int cmp = memcmp(m_factors, compare.m_factors,
-      sizeof(Factor*) * MAX_NUM_FACTORS);
+                   sizeof(Factor*) * MAX_NUM_FACTORS);
   return cmp;
 
   /*
@@ -112,7 +112,7 @@ void Word::OutputToStream(const System &system, std::ostream &out) const
   out << *m_factors[ factorTypes[0] ];
 
   for (size_t i = 1; i < factorTypes.size(); ++i) {
-	FactorType factorType = factorTypes[i];
+    FactorType factorType = factorTypes[i];
     const Factor *factor = m_factors[factorType];
 
     out << "|" << *factor;

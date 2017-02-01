@@ -13,7 +13,7 @@ namespace SCFG
 {
 
 Stack::Stack(const Manager &mgr)
-:m_mgr(mgr)
+  :m_mgr(mgr)
 {
 }
 
@@ -26,7 +26,7 @@ Stack::~Stack()
 }
 
 void Stack::Add(SCFG::Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
-    ArcLists &arcLists)
+                ArcLists &arcLists)
 {
   const SCFG::TargetPhraseImpl &tp = hypo->GetTargetPhrase();
   const SCFG::Word &lhs = tp.lhs;
@@ -52,8 +52,7 @@ const Moses2::HypothesisColl *Stack::GetColl(const SCFG::Word &nt) const
   Coll::const_iterator iter = m_coll.find(nt);
   if (iter != m_coll.end()) {
     return NULL;
-  }
-  else {
+  } else {
     return iter->second;
   }
 }
@@ -66,8 +65,7 @@ Moses2::HypothesisColl &Stack::GetColl(const SCFG::Word &nt)
   if (iter == m_coll.end()) {
     ret = new Moses2::HypothesisColl(m_mgr);
     m_coll[nt] = ret;
-  }
-  else {
+  } else {
     ret = iter->second;
   }
   return *ret;
@@ -77,7 +75,7 @@ const Hypothesis *Stack::GetBestHypo() const
 {
   SCORE bestScore = -std::numeric_limits<SCORE>::infinity();
   const HypothesisBase *bestHypo = NULL;
-  BOOST_FOREACH(const Coll::value_type &val, m_coll){
+  BOOST_FOREACH(const Coll::value_type &val, m_coll) {
     const Moses2::HypothesisColl &hypos = *val.second;
     const Moses2::HypothesisBase *hypo = hypos.GetBestHypo();
 

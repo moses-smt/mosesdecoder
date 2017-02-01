@@ -11,8 +11,8 @@
 namespace Moses2
 {
 InputPathBase::InputPathBase(MemPool &pool,
-    const Range &range, size_t numPt, const InputPathBase *prefixPath) :
-    range(range), prefixPath(prefixPath)
+                             const Range &range, size_t numPt, const InputPathBase *prefixPath) :
+  range(range), prefixPath(prefixPath)
 {
 
 }

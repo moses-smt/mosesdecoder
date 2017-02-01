@@ -15,7 +15,7 @@ namespace Moses2
 {
 
 Search::Search(Manager &mgr) :
-    mgr(mgr)
+  mgr(mgr)
 {
   // TODO Auto-generated constructor stub
 
@@ -27,7 +27,7 @@ Search::~Search()
 }
 
 bool Search::CanExtend(const Bitmap &hypoBitmap, size_t hypoRangeEndPos,
-    const Range &pathRange)
+                       const Range &pathRange)
 {
   const size_t hypoFirstGapPos = hypoBitmap.GetFirstGapPos();
 
@@ -46,7 +46,7 @@ bool Search::CanExtend(const Bitmap &hypoBitmap, size_t hypoRangeEndPos,
   if (mgr.system.options.reordering.max_distortion >= 0) {
     // distortion limit
     int distortion = ComputeDistortionDistance(hypoRangeEndPos,
-        pathRange.GetStartPos());
+                     pathRange.GetStartPos());
     if (distortion > mgr.system.options.reordering.max_distortion) {
       //cerr << " NO" << endl;
       return false;
@@ -88,8 +88,7 @@ bool Search::CanExtend(const Bitmap &hypoBitmap, size_t hypoRangeEndPos,
   if (isLeftMostEdge) {
     // any length extension is okay if starting at left-most edge
 
-  }
-  else { // starting somewhere other than left-most edge, use caution
+  } else { // starting somewhere other than left-most edge, use caution
     // the basic idea is this: we would like to translate a phrase
     // starting from a position further right than the left-most
     // open gap. The distortion penalty for the following phrase
@@ -101,7 +100,7 @@ bool Search::CanExtend(const Bitmap &hypoBitmap, size_t hypoRangeEndPos,
     Range bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
 
     if (ComputeDistortionDistance(pathRange.GetEndPos(),
-        bestNextExtension.GetStartPos()) > mgr.system.options.reordering.max_distortion) {
+                                  bestNextExtension.GetStartPos()) > mgr.system.options.reordering.max_distortion) {
       //cerr << " NO" << endl;
       return false;
     }

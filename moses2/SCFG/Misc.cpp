@@ -20,25 +20,25 @@ namespace SCFG
 
 ////////////////////////////////////////////////////////
 SeenPosition::SeenPosition(MemPool &pool,
-		  const SymbolBind &vSymbolBind,
-		  const SCFG::TargetPhrases &vtps,
-		  size_t numNT)
-:symbolBind(vSymbolBind)
-,tps(vtps)
-,tpInd(0)
-,hypoIndColl(pool, numNT, 0)
+                           const SymbolBind &vSymbolBind,
+                           const SCFG::TargetPhrases &vtps,
+                           size_t numNT)
+  :symbolBind(vSymbolBind)
+  ,tps(vtps)
+  ,tpInd(0)
+  ,hypoIndColl(pool, numNT, 0)
 {
 }
 
 SeenPosition::SeenPosition(MemPool &pool,
-		const SymbolBind &vSymbolBind,
-		const SCFG::TargetPhrases &vtps,
-		size_t vtpInd,
-		const Vector<size_t> &vhypoIndColl)
-:symbolBind(vSymbolBind)
-,tps(vtps)
-,tpInd(vtpInd)
-,hypoIndColl(pool, vhypoIndColl.size())
+                           const SymbolBind &vSymbolBind,
+                           const SCFG::TargetPhrases &vtps,
+                           size_t vtpInd,
+                           const Vector<size_t> &vhypoIndColl)
+  :symbolBind(vSymbolBind)
+  ,tps(vtps)
+  ,tpInd(vtpInd)
+  ,hypoIndColl(pool, vhypoIndColl.size())
 {
   for (size_t i = 0; i < hypoIndColl.size(); ++i) {
     hypoIndColl[i] = vhypoIndColl[i];
@@ -60,7 +60,7 @@ std::string SeenPosition::Debug(const System &system) const
 bool SeenPosition::operator==(const SeenPosition &compare) const
 {
   if (&symbolBind != &compare.symbolBind) {
-	return false;
+    return false;
   }
 
   if (&tps != &compare.tps) {
@@ -106,8 +106,7 @@ QueueItem *QueueItem::Create(MemPool &pool, SCFG::Manager &mgr)
     // use item from recycle bin
     ret = queueItemRecycler.back();
     queueItemRecycler.pop_back();
-  }
-  else {
+  } else {
     // create new item
     ret = new (pool.Allocate<QueueItem>()) QueueItem(pool);
   }
@@ -117,16 +116,16 @@ QueueItem *QueueItem::Create(MemPool &pool, SCFG::Manager &mgr)
 }
 
 QueueItem::QueueItem(MemPool &pool)
-:m_hypoIndColl(NULL)
+  :m_hypoIndColl(NULL)
 {
 
 }
 
 void QueueItem::Init(
-    MemPool &pool,
-    const SymbolBind &vSymbolBind,
-    const SCFG::TargetPhrases &vTPS,
-    const Vector<size_t> &hypoIndColl)
+  MemPool &pool,
+  const SymbolBind &vSymbolBind,
+  const SCFG::TargetPhrases &vTPS,
+  const Vector<size_t> &hypoIndColl)
 {
   symbolBind = &vSymbolBind;
   tps = &vTPS;
@@ -136,11 +135,11 @@ void QueueItem::Init(
 }
 
 void QueueItem::Init(
-    MemPool &pool,
-    const SymbolBind &vSymbolBind,
-    const SCFG::TargetPhrases &vTPS,
-    size_t vTPInd,
-    const Vector<size_t> &hypoIndColl)
+  MemPool &pool,
+  const SymbolBind &vSymbolBind,
+  const SCFG::TargetPhrases &vTPS,
+  size_t vTPInd,
+  const Vector<size_t> &hypoIndColl)
 {
   symbolBind = &vSymbolBind;
   tps = &vTPS;
@@ -155,10 +154,10 @@ void QueueItem::AddHypos(const Moses2::Hypotheses &hypos)
 }
 
 void QueueItem::CreateHypo(
-    MemPool &systemPool,
-    SCFG::Manager &mgr,
-    const SCFG::InputPath &path,
-    const SCFG::SymbolBind &symbolBind)
+  MemPool &systemPool,
+  SCFG::Manager &mgr,
+  const SCFG::InputPath &path,
+  const SCFG::SymbolBind &symbolBind)
 {
   const SCFG::TargetPhraseImpl &tp = (*tps)[tpInd];
 
@@ -168,12 +167,12 @@ void QueueItem::CreateHypo(
 }
 
 void QueueItem::CreateNext(
-    MemPool &systemPool,
-    MemPool &mgrPool,
-    SCFG::Manager &mgr,
-    SCFG::Queue &queue,
-    SeenPositions &seenPositions,
-    const SCFG::InputPath &path)
+  MemPool &systemPool,
+  MemPool &mgrPool,
+  SCFG::Manager &mgr,
+  SCFG::Queue &queue,
+  SeenPositions &seenPositions,
+  const SCFG::InputPath &path)
 {
   //cerr << "tpInd=" << tpInd << " " << tps->GetSize() << endl;
   if (tpInd + 1 < tps->GetSize()) {

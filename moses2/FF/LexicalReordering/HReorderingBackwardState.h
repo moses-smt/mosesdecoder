@@ -20,7 +20,7 @@ public:
   HReorderingBackwardState(MemPool &pool, const LRModel &config, size_t offset);
 
   virtual void Init(const LRState *prev, const TargetPhrase<Moses2::Word> &topt,
-      const InputPathBase &path, bool first, const Bitmap *coverage);
+                    const InputPathBase &path, bool first, const Bitmap *coverage);
 
   virtual ~HReorderingBackwardState();
 
@@ -28,8 +28,8 @@ public:
   virtual bool operator==(const FFState& other) const;
   virtual std::string ToString() const;
   void Expand(const ManagerBase &mgr, const LexicalReordering &ff,
-      const Hypothesis &hypo, size_t phraseTableInd, Scores &scores,
-      FFState &state) const;
+              const Hypothesis &hypo, size_t phraseTableInd, Scores &scores,
+              FFState &state) const;
 
 };
 

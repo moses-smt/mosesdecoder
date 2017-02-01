@@ -17,7 +17,7 @@ namespace Moses2
 class InputType;
 
 LRState::LRState(const LRModel &config, LRModel::Direction dir, size_t offset) :
-    m_configuration(config), m_direction(dir), m_offset(offset)
+  m_configuration(config), m_direction(dir), m_offset(offset)
 {
 }
 
@@ -43,15 +43,15 @@ int LRState::ComparePrevScores(const TargetPhrase<Moses2::Word> *other) const
 }
 
 void LRState::CopyScores(const System &system, Scores &accum,
-    const TargetPhrase<Moses2::Word> &topt, ReorderingType reoType) const
+                         const TargetPhrase<Moses2::Word> &topt, ReorderingType reoType) const
 {
   // don't call this on a bidirectional object
   UTIL_THROW_IF2(
-      m_direction != LRModel::Backward && m_direction != LRModel::Forward,
-      "Unknown direction: " << m_direction);
+    m_direction != LRModel::Backward && m_direction != LRModel::Forward,
+    "Unknown direction: " << m_direction);
 
   TargetPhrase<Moses2::Word> const* relevantOpt = (
-      (m_direction == LRModel::Backward) ? &topt : prevTP);
+        (m_direction == LRModel::Backward) ? &topt : prevTP);
 
   LexicalReordering* producer = m_configuration.GetScoreProducer();
   size_t phraseTableInd = producer->GetPhraseTableInd();
@@ -65,7 +65,7 @@ void LRState::CopyScores(const System &system, Scores &accum,
   size_t off_local = m_configuration.CollapseScores() ? m_offset : off_remote;
 
   UTIL_THROW_IF2(off_local >= producer->GetNumScores(),
-      "offset out of vector bounds!");
+                 "offset out of vector bounds!");
 
   // look up applicable score from vector of scores
   //UTIL_THROW_IF2(off_remote >= cached->size(), "offset out of vector bounds!");

@@ -58,46 +58,46 @@ protected:
 
   std::string FindParam(const std::string &paramSwitch, int argc, char* argv[]);
   void OverwriteParam(const std::string &paramSwitch,
-      const std::string &paramName, int argc, char* argv[]);
+                      const std::string &paramName, int argc, char* argv[]);
   bool ReadConfigFile(const std::string &filePath);
   bool FilesExist(const std::string &paramName, int fieldNo,
-      std::vector<std::string> const& fileExtension = std::vector<std::string>(
-          1, ""));
+                  std::vector<std::string> const& fileExtension = std::vector<std::string>(
+                        1, ""));
   bool isOption(const char* token);
   bool Validate();
 
   void
   AddParam(options_description& optgroup, value_semantic const* optvalue,
-      std::string const& paramName, std::string const& description);
+           std::string const& paramName, std::string const& description);
 
   void
   AddParam(options_description& optgroup, std::string const &paramName,
-      std::string const &description);
+           std::string const &description);
 
   void
   AddParam(options_description& optgroup, value_semantic const* optvalue,
-      std::string const& paramName, std::string const& abbrevName,
-      std::string const& description);
+           std::string const& paramName, std::string const& abbrevName,
+           std::string const& description);
 
   void
   AddParam(options_description& optgroup, std::string const& paramName,
-      std::string const& abbrevName, std::string const& description);
+           std::string const& abbrevName, std::string const& description);
 
   void PrintCredit();
 
   void SetWeight(const std::string &name, size_t ind, float weight);
   void SetWeight(const std::string &name, size_t ind,
-      const std::vector<float> &weights);
+                 const std::vector<float> &weights);
   void AddWeight(const std::string &name, size_t ind,
-      const std::vector<float> &weights);
+                 const std::vector<float> &weights);
   void ConvertWeightArgs();
   void ConvertWeightArgsSingleWeight(const std::string &oldWeightName,
-      const std::string &newWeightName);
+                                     const std::string &newWeightName);
   void ConvertWeightArgsPhraseModel(const std::string &oldWeightName);
   void ConvertWeightArgsLM();
   void ConvertWeightArgsDistortion();
   void ConvertWeightArgsGeneration(const std::string &oldWeightName,
-      const std::string &newWeightName);
+                                   const std::string &newWeightName);
   void ConvertWeightArgsPhrasePenalty();
   void ConvertWeightArgsWordPenalty();
   void ConvertPhrasePenalty();
@@ -118,22 +118,19 @@ public:
   const PARAM_VEC *GetParam(const std::string &paramName) const;
 
   /** check if parameter is defined (either in moses.ini or as switch) */
-  bool isParamSpecified(const std::string &paramName) const
-  {
+  bool isParamSpecified(const std::string &paramName) const {
     return m_setting.find(paramName) != m_setting.end();
   }
 
   void OverwriteParam(const std::string &paramName, PARAM_VEC values);
 
   std::vector<float> GetWeights(const std::string &name);
-  const std::map<std::string, std::vector<float> > &GetAllWeights() const
-  {
+  const std::map<std::string, std::vector<float> > &GetAllWeights() const {
     return m_weights;
   }
   std::set<std::string> GetWeightNames() const;
 
-  const PARAM_MAP &GetParams() const
-  {
+  const PARAM_MAP &GetParams() const {
     return m_setting;
   }
 
@@ -141,21 +138,18 @@ public:
 
   template<typename T>
   void SetParameter(T &var, const std::string &name,
-      const T &defaultValue) const
-  {
+                    const T &defaultValue) const {
     const PARAM_VEC *params = GetParam(name);
     if (params && params->size()) {
       var = Scan<T>(params->at(0));
-    }
-    else {
+    } else {
       var = defaultValue;
     }
   }
 
   void SetParameter(bool& var, std::string const& name);
 
-  bool SetBooleanSwitch(bool& val, std::string const name)
-  {
+  bool SetBooleanSwitch(bool& val, std::string const name) {
     // issues a warning if format is wrong
     const PARAM_VEC *params = GetParam(name);
     val = (params && params->size());
@@ -170,7 +164,7 @@ public:
 
 template<>
 void Parameter::SetParameter<bool>(bool &var, const std::string &name,
-    const bool &defaultValue) const;
+                                   const bool &defaultValue) const;
 
 }
 

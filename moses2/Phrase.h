@@ -32,17 +32,16 @@ template<typename WORD>
 class Phrase
 {
 public:
-  virtual ~Phrase()
-  {
+  virtual ~Phrase() {
   }
   virtual const WORD& operator[](size_t pos) const = 0;
   virtual size_t GetSize() const = 0;
 
-  virtual const WORD& Back() const
-  { return (*this)[GetSize() - 1]; }
+  virtual const WORD& Back() const {
+    return (*this)[GetSize() - 1];
+  }
 
-  virtual size_t hash() const
-  {
+  virtual size_t hash() const {
     size_t seed = 0;
 
     for (size_t i = 0; i < GetSize(); ++i) {
@@ -54,8 +53,7 @@ public:
     return seed;
   }
 
-  virtual bool operator==(const Phrase &compare) const
-  {
+  virtual bool operator==(const Phrase &compare) const {
     if (GetSize() != compare.GetSize()) {
       return false;
     }
@@ -71,13 +69,11 @@ public:
     return true;
   }
 
-  virtual bool operator!=(const Phrase &compare) const
-  {
+  virtual bool operator!=(const Phrase &compare) const {
     return !((*this) == compare);
   }
 
-  virtual std::string GetString(const FactorList &factorTypes) const
-  {
+  virtual std::string GetString(const FactorList &factorTypes) const {
     if (GetSize() == 0) {
       return "";
     }
@@ -95,8 +91,7 @@ public:
 
   virtual SubPhrase<WORD> GetSubPhrase(size_t start, size_t size) const = 0;
 
-  virtual std::string Debug(const System &system) const
-  {
+  virtual std::string Debug(const System &system) const {
     std::stringstream out;
     size_t size = GetSize();
     if (size) {
@@ -110,8 +105,7 @@ public:
     return out.str();
   }
 
-  virtual void OutputToStream(const System &system, std::ostream &out) const
-  {
+  virtual void OutputToStream(const System &system, std::ostream &out) const {
     size_t size = GetSize();
     if (size) {
       (*this)[0].OutputToStream(system, out);
@@ -131,8 +125,7 @@ template<typename WORD>
 class PhraseOrdererLexical
 {
 public:
-  bool operator()(const Phrase<WORD> &a, const Phrase<WORD> &b) const
-  {
+  bool operator()(const Phrase<WORD> &a, const Phrase<WORD> &b) const {
     size_t minSize = std::min(a.GetSize(), b.GetSize());
     for (size_t i = 0; i < minSize; ++i) {
       const Word &aWord = a[i];

@@ -32,14 +32,12 @@ void Node::Add(Table &table, const SourcePhrase &sourcePhrase, size_t pos)
       child = &m_children[vocabId];
       assert(!child->done);
       child->key = key + (vocabId << pos);
-    }
-    else {
+    } else {
       child = &iter->second;
     }
 
     child->Add(table, sourcePhrase, pos + 1);
-  }
-  else {
+  } else {
     // this node was written previously 'cos it has rules
     done = true;
   }
@@ -66,8 +64,8 @@ void Node::Write(Table &table)
 
 ///////////////////////////////////////////////////////////////////////
 void createProbingPT(const std::string &phrasetable_path,
-    const std::string &basepath, int num_scores, int num_lex_scores,
-    bool log_prob, int max_cache_size, bool scfg)
+                     const std::string &basepath, int num_scores, int num_lex_scores,
+                     bool log_prob, int max_cache_size, bool scfg)
 {
   std::cerr << "Starting..." << std::endl;
 
@@ -123,12 +121,10 @@ void createProbingPT(const std::string &phrasetable_path,
         // 1st line
         prevSource = line.source_phrase.as_string();
         storeTarget.Append(line, log_prob, scfg);
-      }
-      else if (prevSource == line.source_phrase) {
+      } else if (prevSource == line.source_phrase) {
         //If we still have the same line, just append to it:
         storeTarget.Append(line, log_prob, scfg);
-      }
-      else {
+      } else {
         assert(prevSource != line.source_phrase);
 
         //Create a new entry even
@@ -147,7 +143,7 @@ void createProbingPT(const std::string &phrasetable_path,
         std::vector<uint64_t> vocabid_source = getVocabIDs(prevSource);
         if (scfg) {
           // storing prefixes?
-       	  sourcePhrases.Add(sourceEntries, vocabid_source);
+          sourcePhrases.Add(sourceEntries, vocabid_source);
         }
         sourceEntry.key = getKey(vocabid_source);
 
@@ -155,7 +151,7 @@ void createProbingPT(const std::string &phrasetable_path,
         cerr << "prevSource=" << prevSource << flush
             << " vocabids=" << Debug(vocabid_source) << flush
             << " key=" << sourceEntry.key << endl;
-		*/
+        */
         //Put into table
         sourceEntries.Insert(sourceEntry);
 
@@ -175,9 +171,9 @@ void createProbingPT(const std::string &phrasetable_path,
               uint64_t currKey = getKey(currVocabidSource);
 
               CacheItem *item = new CacheItem(
-                  Trim(line.source_phrase.as_string()),
-				  currKey,
-				  toks[1]);
+                Trim(line.source_phrase.as_string()),
+                currKey,
+                toks[1]);
               cache.push(item);
 
               if (max_cache_size > 0 && cache.size() > max_cache_size) {
@@ -191,8 +187,7 @@ void createProbingPT(const std::string &phrasetable_path,
         prevSource = line.source_phrase.as_string();
       }
 
-    }
-    catch (util::EndOfFileException e) {
+    } catch (util::EndOfFileException e) {
       std::cerr
           << "Reading phrase table finished, writing remaining files to disk."
           << std::endl;
@@ -258,8 +253,8 @@ size_t countUniqueSource(const std::string &path)
 }
 
 void serialize_cache(
-    std::priority_queue<CacheItem*, std::vector<CacheItem*>, CacheItemOrderer> &cache,
-    const std::string &path, float totalSourceCount)
+  std::priority_queue<CacheItem*, std::vector<CacheItem*>, CacheItemOrderer> &cache,
+  const std::string &path, float totalSourceCount)
 {
   std::vector<const CacheItem*> vec(cache.size());
 

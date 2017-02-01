@@ -14,27 +14,23 @@ namespace Moses2
 // If none of 'dhms' is given, it is assumed that it's seconds.
 // Specs can be combined, e.g. 2h30m, although it's probably nonsense
 // to be so specific.
-size_t 
+size_t
 parse_timespec(std::string const& spec)
 {
   size_t t = 0, timeout = 0;
-  BOOST_FOREACH(char const& c, spec)
-    {
-      if (c >= '0' && c <= '9') 
-	{
-	  t = t * 10 + c - '0';
-	}
-      else 
-	{
-	  if (c == 'd')      timeout  = t * 24 * 3600;
-	  else if (c == 'h') timeout += t * 3600;
-	  else if (c == 'm') timeout += t * 60;
-	  else if (c == 's') timeout += t;
-	  else UTIL_THROW2("Can't parse specification '" << spec 
-			   << " at " << HERE);
-	  t = 0;
-	}
+  BOOST_FOREACH(char const& c, spec) {
+    if (c >= '0' && c <= '9') {
+      t = t * 10 + c - '0';
+    } else {
+      if (c == 'd')      timeout  = t * 24 * 3600;
+      else if (c == 'h') timeout += t * 3600;
+      else if (c == 'm') timeout += t * 60;
+      else if (c == 's') timeout += t;
+      else UTIL_THROW2("Can't parse specification '" << spec
+                         << " at " << HERE);
+      t = 0;
     }
+  }
   return timeout;
 }
 
@@ -54,7 +50,7 @@ ServerOptions()
 
 ServerOptions::
 ServerOptions(Parameter const& P)
-{ 
+{
   init(P);
 }
 

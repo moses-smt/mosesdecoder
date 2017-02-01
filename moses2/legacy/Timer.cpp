@@ -8,7 +8,7 @@ namespace Moses2
 {
 
 Timer::Timer() :
-    running(false), stopped(false)
+  running(false), stopped(false)
 {
   start_time = 0;
 }
@@ -46,8 +46,7 @@ void Timer::start(const char* msg)
   if (stopped) {
     start_time = util::WallTime() - (stop_time - start_time);
     stopped = false;
-  }
-  else {
+  } else {
     start_time = util::WallTime();
     running = true;
   }

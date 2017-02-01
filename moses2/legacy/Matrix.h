@@ -39,16 +39,14 @@ protected:
 
 public:
   Matrix(MemPool &pool, size_t rows, size_t cols) :
-      m_rows(rows), m_cols(cols)
-  {
+    m_rows(rows), m_cols(cols) {
     m_array = pool.Allocate<T>(rows * cols);
   }
 
   ~Matrix(); // not implemented
 
   // set upper triangle
-  void InitTriangle(const T &val)
-  {
+  void InitTriangle(const T &val) {
     assert(m_rows == m_cols);
     for (size_t row = 0; row < m_rows; row++) {
       for (size_t col = row; col < m_cols; col++) {
@@ -58,8 +56,7 @@ public:
   }
 
   // everything
-  void Init(const T &val)
-  {
+  void Init(const T &val) {
     for (size_t row = 0; row < m_rows; row++) {
       for (size_t col = 0; col < m_cols; col++) {
         SetValue(row, col, val);
@@ -68,36 +65,30 @@ public:
   }
 
   /** Returns length of the square: typically the sentence length */
-  inline size_t GetSize() const
-  {
+  inline size_t GetSize() const {
     assert(m_rows == m_cols);
     return m_rows;
   }
 
-  inline size_t GetRows() const
-  {
+  inline size_t GetRows() const {
     return m_rows;
   }
 
-  inline size_t GetCols() const
-  {
+  inline size_t GetCols() const {
     return m_cols;
   }
 
   /** Get a future cost score for a span */
-  inline const T &GetValue(size_t row, size_t col) const
-  {
+  inline const T &GetValue(size_t row, size_t col) const {
     return m_array[row * m_cols + col];
   }
 
-  inline T &GetValue(size_t row, size_t col)
-  {
+  inline T &GetValue(size_t row, size_t col) {
     return m_array[row * m_cols + col];
   }
 
   /** Set a future cost score for a span */
-  inline void SetValue(size_t row, size_t col, const T &value)
-  {
+  inline void SetValue(size_t row, size_t col, const T &value) {
     m_array[row * m_cols + col] = value;
   }
 };

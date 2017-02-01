@@ -22,28 +22,24 @@ using namespace std;
 namespace Moses2
 {
 
-struct LMState: public PointerState
-{
+struct LMState: public PointerState {
   LMState() :
-      PointerState()
-  {
+    PointerState() {
     // uninitialised
   }
 
-  void Set(MemPool &pool, void *lms, const std::vector<const Factor*> &context)
-  {
+  void Set(MemPool &pool, void *lms, const std::vector<const Factor*> &context) {
     lmstate = lms;
 
     numWords = context.size();
     lastWords = (const Factor**) pool.Allocate(
-        sizeof(const Factor*) * numWords);
+                  sizeof(const Factor*) * numWords);
     for (size_t i = 0; i < numWords; ++i) {
       lastWords[i] = context[i];
     }
   }
 
-  void Init(MemPool &pool, const Factor *factor)
-  {
+  void Init(MemPool &pool, const Factor *factor) {
     lmstate = NULL;
     numWords = 1;
     lastWords = (const Factor**) pool.Allocate(sizeof(const Factor*));
@@ -56,7 +52,7 @@ struct LMState: public PointerState
 
 ////////////////////////////////////////////////////////////////////////////////////////
 LanguageModel::LanguageModel(size_t startInd, const std::string &line) :
-    StatefulFeatureFunction(startInd, line), m_oov(-100)
+  StatefulFeatureFunction(startInd, line), m_oov(-100)
 {
   ReadParameters();
 }
@@ -112,18 +108,15 @@ void LanguageModel::Load(System &system)
 }
 
 void LanguageModel::SetParameter(const std::string& key,
-    const std::string& value)
+                                 const std::string& value)
 {
   if (key == "path") {
     m_path = value;
-  }
-  else if (key == "factor") {
+  } else if (key == "factor") {
     m_factorType = Scan<FactorType>(value);
-  }
-  else if (key == "order") {
+  } else if (key == "order") {
     m_order = Scan<size_t>(value);
-  }
-  else {
+  } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
 }
@@ -143,8 +136,8 @@ void LanguageModel::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
 }
 
 void LanguageModel::EvaluateInIsolation(MemPool &pool, const System &system,
-    const Phrase<Moses2::Word> &source, const TargetPhraseImpl &targetPhrase, Scores &scores,
-    SCORE &estimatedScore) const
+                                        const Phrase<Moses2::Word> &source, const TargetPhraseImpl &targetPhrase, Scores &scores,
+                                        SCORE &estimatedScore) const
 {
   if (targetPhrase.GetSize() == 0) {
     return;
@@ -163,8 +156,7 @@ void LanguageModel::EvaluateInIsolation(MemPool &pool, const System &system,
     if (context.size() == m_order) {
       std::pair<SCORE, void*> fromScoring = Score(context);
       score += fromScoring.first;
-    }
-    else {
+    } else {
       std::pair<SCORE, void*> fromScoring = Score(context);
       nonFullScore += fromScoring.first;
     }
@@ -176,14 +168,14 @@ void LanguageModel::EvaluateInIsolation(MemPool &pool, const System &system,
 }
 
 void LanguageModel::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
-    const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
-    SCORE &estimatedScore) const
+                                        const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
+                                        SCORE &estimatedScore) const
 {
 }
 
 void LanguageModel::EvaluateWhenApplied(const ManagerBase &mgr,
-    const Hypothesis &hypo, const FFState &prevState, Scores &scores,
-    FFState &state) const
+                                        const Hypothesis &hypo, const FFState &prevState, Scores &scores,
+                                        FFState &state) const
 {
   const LMState &prevLMState = static_cast<const LMState &>(prevState);
   size_t numWords = prevLMState.numWords;
@@ -214,8 +206,7 @@ void LanguageModel::EvaluateWhenApplied(const ManagerBase &mgr,
     score += fromScoring.first;
     fromScoring.second = NULL;
     context.clear();
-  }
-  else {
+  } else {
     assert(context.size());
     if (context.size() == m_order) {
       context.resize(context.size() - 1);
@@ -233,7 +224,7 @@ void LanguageModel::EvaluateWhenApplied(const ManagerBase &mgr,
 }
 
 void LanguageModel::ShiftOrPush(std::vector<const Factor*> &context,
-    const Factor *factor) const
+                                const Factor *factor) const
 {
   if (context.size() < m_order) {
     context.resize(context.size() + 1);
@@ -248,7 +239,7 @@ void LanguageModel::ShiftOrPush(std::vector<const Factor*> &context,
 }
 
 std::pair<SCORE, void*> LanguageModel::Score(
-    const std::vector<const Factor*> &context) const
+  const std::vector<const Factor*> &context) const
 {
   //cerr << "context=";
   //DebugContext(context);
@@ -260,8 +251,7 @@ std::pair<SCORE, void*> LanguageModel::Score(
   if (node) {
     ret.first = node->getValue().prob;
     ret.second = (void*) node;
-  }
-  else {
+  } else {
     SCORE backoff = 0;
     std::vector<const Factor*> backOffContext(context.begin() + 1,
         context.end());
@@ -282,7 +272,7 @@ std::pair<SCORE, void*> LanguageModel::Score(
 }
 
 SCORE LanguageModel::BackoffScore(
-    const std::vector<const Factor*> &context) const
+  const std::vector<const Factor*> &context) const
 {
   //cerr << "backoff=";
   //DebugContext(context);
@@ -295,19 +285,17 @@ SCORE LanguageModel::BackoffScore(
   if (stoppedAtInd == context.size()) {
     // found entire ngram
     ret = node.getValue().backoff;
-  }
-  else {
+  } else {
     if (stoppedAtInd == 0) {
       ret = m_oov;
       stoppedAtInd = 1;
-    }
-    else {
+    } else {
       ret = node.getValue().backoff;
     }
 
     // recursive
     std::vector<const Factor*> backoff(context.begin() + stoppedAtInd,
-        context.end());
+                                       context.end());
     ret += BackoffScore(backoff);
   }
 
@@ -315,7 +303,7 @@ SCORE LanguageModel::BackoffScore(
 }
 
 void LanguageModel::DebugContext(
-    const std::vector<const Factor*> &context) const
+  const std::vector<const Factor*> &context) const
 {
   for (size_t i = 0; i < context.size(); ++i) {
     cerr << context[i]->GetString() << " ";
@@ -324,8 +312,8 @@ void LanguageModel::DebugContext(
 }
 
 void LanguageModel::EvaluateWhenApplied(const SCFG::Manager &mgr,
-    const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
-    FFState &state) const
+                                        const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
+                                        FFState &state) const
 {
   UTIL_THROW2("Not implemented");
 }

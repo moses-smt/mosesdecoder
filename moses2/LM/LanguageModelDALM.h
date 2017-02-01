@@ -36,20 +36,20 @@ public:
 
   virtual FFState* BlankState(MemPool &pool, const System &sys) const;
   virtual void EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
-      const InputType &input, const Hypothesis &hypo) const;
+                                    const InputType &input, const Hypothesis &hypo) const;
 
   virtual void
   EvaluateInIsolation(MemPool &pool, const System &system, const Phrase &source,
-      const TargetPhraseImpl &targetPhrase, Scores &scores,
-      SCORE &estimatedScore) const;
+                      const TargetPhraseImpl &targetPhrase, Scores &scores,
+                      SCORE &estimatedScore) const;
 
   virtual void EvaluateWhenApplied(const ManagerBase &mgr,
-      const Hypothesis &hypo, const FFState &prevState, Scores &scores,
-      FFState &state) const;
+                                   const Hypothesis &hypo, const FFState &prevState, Scores &scores,
+                                   FFState &state) const;
 
   virtual void EvaluateWhenApplied(const SCFG::Manager &mgr,
-      const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
-      FFState &state) const;
+                                   const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
+                                   FFState &state) const;
 
 protected:
   FactorType m_factorType;

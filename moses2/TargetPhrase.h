@@ -27,25 +27,27 @@ public:
   SCORE *scoreProperties;
 
   TargetPhrase(MemPool &pool, const PhraseTable &pt, const System &system, size_t size)
-  : PhraseImplTemplate<WORD>(pool, size)
-  , pt(pt)
-  , scoreProperties(NULL)
-  , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
-  {
+    : PhraseImplTemplate<WORD>(pool, size)
+    , pt(pt)
+    , scoreProperties(NULL)
+    , m_alignTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo()) {
     m_scores = new (pool.Allocate<Scores>()) Scores(system, pool,
-      system.featureFunctions.GetNumScores());
+        system.featureFunctions.GetNumScores());
   }
 
-  Scores &GetScores()
-  {  return *m_scores; }
+  Scores &GetScores() {
+    return *m_scores;
+  }
 
-  const Scores &GetScores() const
-  {  return *m_scores; }
+  const Scores &GetScores() const {
+    return *m_scores;
+  }
 
   virtual SCORE GetScoreForPruning() const = 0;
 
-  SCORE *GetScoresProperty(int propertyInd) const
-  {    return scoreProperties ? scoreProperties + propertyInd : NULL; }
+  SCORE *GetScoresProperty(int propertyInd) const {
+    return scoreProperties ? scoreProperties + propertyInd : NULL;
+  }
 
   const AlignmentInfo &GetAlignTerm() const {
     return *m_alignTerm;
@@ -63,8 +65,7 @@ public:
     m_alignTerm = AlignmentInfoCollection::Instance().Add(coll);
   }
 
-  virtual void SetAlignmentInfo(const std::string &alignString)
-  {
+  virtual void SetAlignmentInfo(const std::string &alignString) {
     AlignmentInfo::CollType alignTerm;
 
     std::vector<std::string> toks = Tokenize(alignString);
@@ -86,35 +87,32 @@ public:
 
   }
 
-  void OutputToStream(const System &system, const Phrase<WORD> &inputPhrase, std::ostream &out) const
-  {
-	  // get placeholders
-	  FactorType placeholderFactor = system.options.input.placeholder_factor;
-	  std::map<size_t, const Factor*> placeholders;
-	  if (placeholderFactor != NOT_FOUND) {
-	    // creates map of target position -> factor for placeholders
-	    placeholders = GetPlaceholders(system, inputPhrase);
-	  }
+  void OutputToStream(const System &system, const Phrase<WORD> &inputPhrase, std::ostream &out) const {
+    // get placeholders
+    FactorType placeholderFactor = system.options.input.placeholder_factor;
+    std::map<size_t, const Factor*> placeholders;
+    if (placeholderFactor != NOT_FOUND) {
+      // creates map of target position -> factor for placeholders
+      placeholders = GetPlaceholders(system, inputPhrase);
+    }
 
-	  size_t size = PhraseImplTemplate<WORD>::GetSize();
-	  for (size_t i = 0; i < size; ++i) {
-		  // output placeholder, if any
-	      std::map<size_t, const Factor*>::const_iterator iter = placeholders.find(i);
-	      if (iter == placeholders.end()) {
-		      const WORD &word = (*this)[i];
-		      word.OutputToStream(system, out);
-	      }
-	      else {
-	    	  const Factor *factor = iter->second;
-		      out << *factor;
-	      }
+    size_t size = PhraseImplTemplate<WORD>::GetSize();
+    for (size_t i = 0; i < size; ++i) {
+      // output placeholder, if any
+      std::map<size_t, const Factor*>::const_iterator iter = placeholders.find(i);
+      if (iter == placeholders.end()) {
+        const WORD &word = (*this)[i];
+        word.OutputToStream(system, out);
+      } else {
+        const Factor *factor = iter->second;
+        out << *factor;
+      }
 
-	      out << " ";
-	  }
+      out << " ";
+    }
   }
 
-  std::map<size_t, const Factor*> GetPlaceholders(const System &system, const Phrase<WORD> &inputPhrase) const
-  {
+  std::map<size_t, const Factor*> GetPlaceholders(const System &system, const Phrase<WORD> &inputPhrase) const {
     FactorType placeholderFactor = system.options.input.placeholder_factor;
     std::map<size_t, const Factor*> ret;
     //std::cerr << "inputPhrase=" << inputPhrase.Debug(system) << std::endl;
@@ -122,8 +120,8 @@ public:
     for (size_t sourcePos = 0; sourcePos < inputPhrase.GetSize(); ++sourcePos) {
       const Factor *factor = inputPhrase[sourcePos][placeholderFactor];
       if (factor) {
-    	//std::cerr << "factor=" << *factor << std::endl;
-    	//std::cerr << "tp=" << Debug(system) << std::endl;
+        //std::cerr << "factor=" << *factor << std::endl;
+        //std::cerr << "tp=" << Debug(system) << std::endl;
         std::set<size_t> targetPos = GetAlignTerm().GetAlignmentsForSource(sourcePos);
         UTIL_THROW_IF2(targetPos.size() != 1,
                        "Placeholder should be aligned to 1, and only 1, word:" << targetPos.size() << "!=1");
@@ -134,8 +132,7 @@ public:
     return ret;
   }
 
-  virtual std::string Debug(const System &system) const
-  {
+  virtual std::string Debug(const System &system) const {
     std::stringstream out;
     out << Phrase<WORD>::Debug(system);
     out << " pt=" << pt.GetName() << " ";
@@ -153,15 +150,12 @@ protected:
 
 ///////////////////////////////////////////////////////////////////////
 template<typename TP>
-struct CompareScoreForPruning
-{
-  bool operator()(const TP *a, const TP *b) const
-  {
+struct CompareScoreForPruning {
+  bool operator()(const TP *a, const TP *b) const {
     return a->GetScoreForPruning() > b->GetScoreForPruning();
   }
 
-  bool operator()(const TP &a, const TP &b) const
-  {
+  bool operator()(const TP &a, const TP &b) const {
     return a.GetScoreForPruning() > b.GetScoreForPruning();
   }
 };

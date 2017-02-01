@@ -17,10 +17,10 @@ namespace Moses2
 {
 
 FeatureFunction::FeatureFunction(size_t startInd, const std::string &line)
-:m_startInd(startInd)
-,m_numScores(1)
-,m_PhraseTableInd(NOT_FOUND)
-,m_tuneable(true)
+  :m_startInd(startInd)
+  ,m_numScores(1)
+  ,m_PhraseTableInd(NOT_FOUND)
+  ,m_tuneable(true)
 {
   ParseLine(line);
   //cerr << GetName() << " " << m_startInd << "-" << (m_startInd + m_numScores - 1) << endl;
@@ -43,18 +43,16 @@ void FeatureFunction::ParseLine(const std::string &line)
   for (size_t i = 1; i < toks.size(); ++i) {
     vector<string> args = TokenizeFirstOnly(toks[i], "=");
     UTIL_THROW_IF2(args.size() != 2,
-        "Incorrect format for feature function arg: " << toks[i]);
+                   "Incorrect format for feature function arg: " << toks[i]);
 
     pair<set<string>::iterator, bool> ret = keys.insert(args[0]);
     UTIL_THROW_IF2(!ret.second, "Duplicate key in line " << line);
 
     if (args[0] == "num-features") {
       m_numScores = Scan<size_t>(args[1]);
-    }
-    else if (args[0] == "name") {
+    } else if (args[0] == "name") {
       m_name = args[1];
-    }
-    else {
+    } else {
       m_args.push_back(args);
     }
   }
@@ -71,12 +69,11 @@ void FeatureFunction::ReadParameters()
 }
 
 void FeatureFunction::SetParameter(const std::string& key,
-    const std::string& value)
+                                   const std::string& value)
 {
   if (key == "tuneable") {
     m_tuneable = Scan<bool>(value);
-  }
-  else {
+  } else {
     UTIL_THROW2(GetName() << ": Unknown argument " << key << "=" << value);
   }
 }

@@ -25,7 +25,7 @@ using namespace std;
 namespace Moses2
 {
 FeatureFunctions::FeatureFunctions(System &system) :
-    m_system(system), m_ffStartInd(0)
+  m_system(system), m_ffStartInd(0)
 {
 }
 
@@ -37,27 +37,26 @@ FeatureFunctions::~FeatureFunctions()
 void FeatureFunctions::Load()
 {
   // load, everything but pts
-  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions){
-  FeatureFunction *nonConstFF = const_cast<FeatureFunction*>(ff);
-  PhraseTable *pt = dynamic_cast<PhraseTable*>(nonConstFF);
+  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
+    FeatureFunction *nonConstFF = const_cast<FeatureFunction*>(ff);
+    PhraseTable *pt = dynamic_cast<PhraseTable*>(nonConstFF);
 
-  if (pt) {
-    // do nothing. load pt last
+    if (pt) {
+      // do nothing. load pt last
+    } else {
+      cerr << "Loading " << nonConstFF->GetName() << endl;
+      nonConstFF->Load(m_system);
+      cerr << "Finished loading " << nonConstFF->GetName() << endl;
+    }
   }
-  else {
-    cerr << "Loading " << nonConstFF->GetName() << endl;
-    nonConstFF->Load(m_system);
-    cerr << "Finished loading " << nonConstFF->GetName() << endl;
-  }
-}
 
 // load pt
-BOOST_FOREACH(const PhraseTable *pt, phraseTables) {
-  PhraseTable *nonConstPT = const_cast<PhraseTable*>(pt);
-  cerr << "Loading " << nonConstPT->GetName() << endl;
-  nonConstPT->Load(m_system);
-  cerr << "Finished loading " << nonConstPT->GetName() << endl;
-}
+  BOOST_FOREACH(const PhraseTable *pt, phraseTables) {
+    PhraseTable *nonConstPT = const_cast<PhraseTable*>(pt);
+    cerr << "Loading " << nonConstPT->GetName() << endl;
+    nonConstPT->Load(m_system);
+    cerr << "Finished loading " << nonConstPT->GetName() << endl;
+  }
 }
 
 void FeatureFunctions::Create()
@@ -67,7 +66,7 @@ void FeatureFunctions::Create()
   const PARAM_VEC *ffParams = params.GetParam("feature");
   UTIL_THROW_IF2(ffParams == NULL, "Must have [feature] section");
 
-  BOOST_FOREACH(const std::string &line, *ffParams){
+  BOOST_FOREACH(const std::string &line, *ffParams) {
     //cerr << "line=" << line << endl;
     FeatureFunction *ff = Create(line);
 
@@ -129,34 +128,33 @@ std::string FeatureFunctions::GetDefaultName(const std::string &stub)
 {
   size_t ind;
   boost::unordered_map<std::string, size_t>::iterator iter =
-      m_defaultNames.find(stub);
+    m_defaultNames.find(stub);
   if (iter == m_defaultNames.end()) {
     m_defaultNames[stub] = 0;
     ind = 0;
-  }
-  else {
+  } else {
     ind = ++(iter->second);
   }
   return stub + SPrint(ind);
 }
 
 const FeatureFunction *FeatureFunctions::FindFeatureFunction(
-    const std::string &name) const
+  const std::string &name) const
 {
-  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions){
-	  if (ff->GetName() == name) {
-		return ff;
-	  }
-	}
-	return NULL;
+  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
+    if (ff->GetName() == name) {
+      return ff;
+    }
+  }
+  return NULL;
 }
 
 FeatureFunction *FeatureFunctions::FindFeatureFunction(
-    const std::string &name)
+  const std::string &name)
 {
-  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions){
+  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
     if (ff->GetName() == name) {
-    return const_cast<FeatureFunction *>(ff);
+      return const_cast<FeatureFunction *>(ff);
     }
   }
   return NULL;
@@ -184,7 +182,7 @@ void FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
 {
   SCORE estimatedScore = 0;
 
-  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions){
+  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
     Scores& scores = targetPhrase.GetScores();
     ff->EvaluateInIsolation(pool, system, source, targetPhrase, scores, estimatedScore);
   }
@@ -193,14 +191,14 @@ void FeatureFunctions::EvaluateInIsolation(MemPool &pool, const System &system,
 }
 
 void FeatureFunctions::EvaluateInIsolation(
-    MemPool &pool,
-    const System &system,
-    const Phrase<SCFG::Word> &source,
-    SCFG::TargetPhraseImpl &targetPhrase) const
+  MemPool &pool,
+  const System &system,
+  const Phrase<SCFG::Word> &source,
+  SCFG::TargetPhraseImpl &targetPhrase) const
 {
   SCORE estimatedScore = 0;
 
-  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions){
+  BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
     Scores& scores = targetPhrase.GetScores();
     ff->EvaluateInIsolation(pool, system, source, targetPhrase, scores, estimatedScore);
   }
@@ -234,7 +232,7 @@ void FeatureFunctions::EvaluateWhenAppliedBatch(const Batch &batch) const
 void FeatureFunctions::CleanUpAfterSentenceProcessing() const
 {
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
-	ff->CleanUpAfterSentenceProcessing();
+    ff->CleanUpAfterSentenceProcessing();
   }
 }
 
@@ -274,7 +272,7 @@ void FeatureFunctions::OverrideFeatures()
       UTIL_THROW_IF2(keyVal.size() != 2, "Incorrect format for parameter override: " << keyValStr);
 
       cerr << "Override " << ff->GetName() << " "
-              << keyVal[0] << "=" << keyVal[1] << endl;
+           << keyVal[0] << "=" << keyVal[1] << endl;
 
       ff->SetParameter(keyVal[0], keyVal[1]);
 

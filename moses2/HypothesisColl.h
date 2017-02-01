@@ -26,24 +26,24 @@ public:
   HypothesisColl(const ManagerBase &mgr);
 
   void Add(const ManagerBase &mgr,
-		  HypothesisBase *hypo,
-		  Recycler<HypothesisBase*> &hypoRecycle,
-		  ArcLists &arcLists);
+           HypothesisBase *hypo,
+           Recycler<HypothesisBase*> &hypoRecycle,
+           ArcLists &arcLists);
 
-  size_t GetSize() const
-  { return m_coll.size(); }
+  size_t GetSize() const {
+    return m_coll.size();
+  }
 
   void Clear();
 
   const Hypotheses &GetSortedAndPrunedHypos(
-      const ManagerBase &mgr,
-      ArcLists &arcLists) const;
+    const ManagerBase &mgr,
+    ArcLists &arcLists) const;
 
   const HypothesisBase *GetBestHypo() const;
 
   template<typename T>
-  const T *GetBestHypo() const
-  {
+  const T *GetBestHypo() const {
     const HypothesisBase *hypo = GetBestHypo();
     return hypo ? &hypo->Cast<T>() : NULL;
   }
@@ -54,8 +54,8 @@ public:
 
 protected:
   typedef boost::unordered_set<const HypothesisBase*,
-      UnorderedComparer<HypothesisBase>, UnorderedComparer<HypothesisBase>,
-      MemPoolAllocator<const HypothesisBase*> > _HCType;
+          UnorderedComparer<HypothesisBase>, UnorderedComparer<HypothesisBase>,
+          MemPoolAllocator<const HypothesisBase*> > _HCType;
 
   _HCType m_coll;
   mutable Hypotheses *m_sortedHypos;

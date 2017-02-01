@@ -7,7 +7,7 @@ namespace Moses2
 
 ContextParameters::
 ContextParameters()
-  : look_ahead(0), look_back(0) 
+  : look_ahead(0), look_back(0)
 { }
 
 bool
@@ -21,18 +21,17 @@ init(Parameter const& params)
 
   if (context_window == "")
     return true;
-  
-  if (context_window.substr(0,3) == "all")
-    {
-      look_back = look_ahead = std::numeric_limits<size_t>::max();
-      return true;
-    }
- 
+
+  if (context_window.substr(0,3) == "all") {
+    look_back = look_ahead = std::numeric_limits<size_t>::max();
+    return true;
+  }
+
   size_t p = context_window.find_first_of("0123456789");
   if (p == 0)
     look_back = look_ahead = atoi(context_window.c_str());
- 
- if (p == 1) {
+
+  if (p == 1) {
     if (context_window[0] == '-')
       look_back  = atoi(context_window.substr(1).c_str());
     else if (context_window[0] == '+')

@@ -5,8 +5,7 @@
 namespace Moses2
 {
 
-struct NBestOptions : public OptionsBaseClass
-{
+struct NBestOptions : public OptionsBaseClass {
   size_t nbest_size;
   size_t factor;
   bool enabled;

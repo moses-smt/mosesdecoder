@@ -33,10 +33,10 @@ namespace Moses2
 {
 #ifdef WITH_THREADS
 BlockHashIndex::BlockHashIndex(size_t orderBits, size_t fingerPrintBits,
-    size_t threadsNum) :
-    m_orderBits(orderBits), m_fingerPrintBits(fingerPrintBits), m_fileHandle(0), m_fileHandleStart(
-        0), m_landmarks(true), m_size(0), m_lastSaved(-1), m_lastDropped(-1), m_numLoadedRanges(
-        0), m_threadPool(threadsNum)
+                               size_t threadsNum) :
+  m_orderBits(orderBits), m_fingerPrintBits(fingerPrintBits), m_fileHandle(0), m_fileHandleStart(
+    0), m_landmarks(true), m_size(0), m_lastSaved(-1), m_lastDropped(-1), m_numLoadedRanges(
+      0), m_threadPool(threadsNum)
 {
 #ifndef HAVE_CMPH
   std::cerr << "minphr: CMPH support not compiled in." << std::endl;
@@ -45,9 +45,9 @@ BlockHashIndex::BlockHashIndex(size_t orderBits, size_t fingerPrintBits,
 }
 #else
 BlockHashIndex::BlockHashIndex(size_t orderBits, size_t fingerPrintBits)
-: m_orderBits(orderBits), m_fingerPrintBits(fingerPrintBits),
-m_fileHandle(0), m_fileHandleStart(0), m_size(0),
-m_lastSaved(-1), m_lastDropped(-1), m_numLoadedRanges(0)
+  : m_orderBits(orderBits), m_fingerPrintBits(fingerPrintBits),
+    m_fileHandle(0), m_fileHandleStart(0), m_size(0),
+    m_lastSaved(-1), m_lastDropped(-1), m_numLoadedRanges(0)
 {
 #ifndef HAVE_CMPH
   std::cerr << "minphr: CMPH support not compiled in." << std::endl;
@@ -60,11 +60,11 @@ BlockHashIndex::~BlockHashIndex()
 {
 #ifdef HAVE_CMPH
   for (std::vector<void*>::iterator it = m_hashes.begin(); it != m_hashes.end();
-      it++)
+       it++)
     if (*it != 0) cmph_destroy((cmph_t*) *it);
 
   for (std::vector<PairedPackedArray<>*>::iterator it = m_arrays.begin();
-      it != m_arrays.end(); it++)
+       it != m_arrays.end(); it++)
     if (*it != 0) delete *it;
 #endif
 }
@@ -73,7 +73,7 @@ size_t BlockHashIndex::GetHash(const char* key)
 {
   std::string keyStr(key);
   size_t i = std::distance(m_landmarks.begin(),
-      std::upper_bound(m_landmarks.begin(), m_landmarks.end(), keyStr)) - 1;
+                           std::upper_bound(m_landmarks.begin(), m_landmarks.end(), keyStr)) - 1;
 
   if (i == 0ul - 1) return GetSize();
 
@@ -99,14 +99,14 @@ size_t BlockHashIndex::GetHash(size_t i, const char* key)
   //LoadRange(i);
 #ifdef HAVE_CMPH
   size_t idx = cmph_search((cmph_t*) m_hashes[i], key,
-      (cmph_uint32) strlen(key));
+                           (cmph_uint32) strlen(key));
 #else
   assert(0);
   size_t idx = 0;
 #endif
 
   std::pair<size_t, size_t> orderPrint = m_arrays[i]->Get(idx, m_orderBits,
-      m_fingerPrintBits);
+                                         m_fingerPrintBits);
   m_clocks[i] = clock();
 
   if (GetFprint(key) == orderPrint.second) return orderPrint.first;
@@ -229,7 +229,7 @@ size_t BlockHashIndex::FinalizeSave()
 
   size_t fileHandleStop = std::ftell(m_fileHandle);
   return fileHandleStop - m_fileHandleStart + sizeof(m_orderBits)
-      + sizeof(m_fingerPrintBits);
+         + sizeof(m_fingerPrintBits);
 }
 
 size_t BlockHashIndex::Save(std::FILE * mphf)
@@ -262,7 +262,7 @@ size_t BlockHashIndex::LoadIndex(std::FILE* mphf)
   read += std::fread(&seekIndexSize, sizeof(size_t), 1, m_fileHandle);
   m_seekIndex.resize(seekIndexSize);
   read += std::fread(&m_seekIndex[0], sizeof(size_t), seekIndexSize,
-      m_fileHandle);
+                     m_fileHandle);
   m_hashes.resize(seekIndexSize, 0);
   m_clocks.resize(seekIndexSize, 0);
   m_arrays.resize(seekIndexSize, 0);
@@ -403,13 +403,13 @@ void* BlockHashIndex::vectorAdapter(std::vector<std::string>& v)
 }
 
 void* BlockHashIndex::vectorAdapter(
-    StringVector<unsigned, size_t, std::allocator>& sv)
+  StringVector<unsigned, size_t, std::allocator>& sv)
 {
   return (void*) CmphStringVectorAdapter(sv);
 }
 
 void* BlockHashIndex::vectorAdapter(
-    StringVector<unsigned, size_t, MmapAllocator>& sv)
+  StringVector<unsigned, size_t, MmapAllocator>& sv)
 {
   return (void*) CmphStringVectorAdapter(sv);
 }

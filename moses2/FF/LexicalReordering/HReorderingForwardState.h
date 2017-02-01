@@ -20,14 +20,14 @@ public:
   virtual ~HReorderingForwardState();
 
   void Init(const LRState *prev, const TargetPhrase<Moses2::Word> &topt,
-      const InputPathBase &path, bool first, const Bitmap *coverage);
+            const InputPathBase &path, bool first, const Bitmap *coverage);
 
   size_t hash() const;
   virtual bool operator==(const FFState& other) const;
   virtual std::string ToString() const;
   void Expand(const ManagerBase &mgr, const LexicalReordering &ff,
-      const Hypothesis &hypo, size_t phraseTableInd, Scores &scores,
-      FFState &state) const;
+              const Hypothesis &hypo, size_t phraseTableInd, Scores &scores,
+              FFState &state) const;
 
 protected:
   bool m_first;

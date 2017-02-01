@@ -12,7 +12,7 @@ namespace Moses2
 {
 
 PhrasePenalty::PhrasePenalty(size_t startInd, const std::string &line) :
-    StatelessFeatureFunction(startInd, line)
+  StatelessFeatureFunction(startInd, line)
 {
   ReadParameters();
 }
@@ -23,15 +23,15 @@ PhrasePenalty::~PhrasePenalty()
 }
 
 void PhrasePenalty::EvaluateInIsolation(MemPool &pool, const System &system,
-    const Phrase<Moses2::Word> &source, const TargetPhraseImpl &targetPhrase, Scores &scores,
-    SCORE &estimatedScore) const
+                                        const Phrase<Moses2::Word> &source, const TargetPhraseImpl &targetPhrase, Scores &scores,
+                                        SCORE &estimatedScore) const
 {
   scores.PlusEquals(system, *this, 1);
 }
 
 void PhrasePenalty::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
-    const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
-    SCORE &estimatedScore) const
+                                        const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
+                                        SCORE &estimatedScore) const
 {
   scores.PlusEquals(system, *this, 1);
 }

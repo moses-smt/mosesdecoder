@@ -55,14 +55,13 @@ const Factor *FactorCollection::AddFactor(const StringPiece &factorString,
   std::pair<Set::iterator, bool> ret(set.insert(to_ins));
   if (ret.second) {
     ret.first->in.m_string.set(
-        memcpy(m_string_backing.Allocate(factorString.size()),
-            factorString.data(), factorString.size()), factorString.size());
+      memcpy(m_string_backing.Allocate(factorString.size()),
+             factorString.data(), factorString.size()), factorString.size());
     if (isNonTerminal) {
       m_factorIdNonTerminal++;
       UTIL_THROW_IF2(m_factorIdNonTerminal >= moses_MaxNumNonterminals,
-          "Number of non-terminals exceeds maximum size reserved. Adjust parameter moses_MaxNumNonterminals, then recompile");
-    }
-    else {
+                     "Number of non-terminals exceeds maximum size reserved. Adjust parameter moses_MaxNumNonterminals, then recompile");
+    } else {
       m_factorId++;
     }
   }
@@ -101,7 +100,7 @@ ostream& operator<<(ostream& out, const FactorCollection& factorCollection)
   boost::shared_lock<boost::shared_mutex> lock(factorCollection.m_accessLock);
 #endif
   for (FactorCollection::Set::const_iterator i = factorCollection.m_set.begin();
-      i != factorCollection.m_set.end(); ++i) {
+       i != factorCollection.m_set.end(); ++i) {
     out << i->in;
   }
   return out;

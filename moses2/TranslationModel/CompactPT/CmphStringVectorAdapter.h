@@ -33,18 +33,17 @@
 namespace Moses2
 {
 
-typedef struct
-{
+typedef struct {
   void *vector;
   cmph_uint32 position;
 } cmph_vector_t;
 
 template<typename ValueT, typename PosT, template<typename > class Allocator>
 cmph_io_adapter_t *CmphStringVectorAdapterNew(
-    StringVector<ValueT, PosT, Allocator>& sv)
+  StringVector<ValueT, PosT, Allocator>& sv)
 {
   cmph_io_adapter_t * key_source = (cmph_io_adapter_t *) malloc(
-      sizeof(cmph_io_adapter_t));
+                                     sizeof(cmph_io_adapter_t));
   cmph_vector_t * cmph_vector = (cmph_vector_t *) malloc(sizeof(cmph_vector_t));
   assert(key_source);
   assert(cmph_vector);
@@ -79,7 +78,7 @@ void CmphStringVectorAdapterRewind(void *data);
 
 template<typename ValueT, typename PosT, template<typename > class Allocator>
 cmph_io_adapter_t* CmphStringVectorAdapter(
-    StringVector<ValueT, PosT, Allocator>& sv)
+  StringVector<ValueT, PosT, Allocator>& sv)
 {
   cmph_io_adapter_t * key_source = CmphStringVectorAdapterNew(sv);
 

@@ -10,15 +10,13 @@ class FeatureFunction;
 class FeatureFactory
 {
 public:
-  virtual ~FeatureFactory()
-  {
+  virtual ~FeatureFactory() {
   }
 
   virtual FeatureFunction *Create(size_t startInd, const std::string &line) const = 0;
 
 protected:
-  FeatureFactory()
-  {
+  FeatureFactory() {
   }
 };
 
@@ -33,7 +31,7 @@ public:
   ~FeatureRegistry();
 
   FeatureFunction *Construct(size_t startInd, const std::string &name,
-      const std::string &line) const;
+                             const std::string &line) const;
   void PrintFF() const;
 
 private:

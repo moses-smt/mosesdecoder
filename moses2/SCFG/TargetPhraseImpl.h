@@ -38,7 +38,7 @@ public:
       const PhraseTable &pt, const System &system, const std::string &str);
 
   TargetPhraseImpl(MemPool &pool, const PhraseTable &pt, const System &system,
-      size_t size);
+                   size_t size);
   //TargetPhraseImpl(MemPool &pool, const System &system, const TargetPhraseImpl &copy);
 
   virtual ~TargetPhraseImpl();
@@ -48,19 +48,22 @@ public:
   }
 
   void SetAlignNonTerm(const AlignmentInfo &alignInfo) {
-	m_alignNonTerm = &alignInfo;
+    m_alignNonTerm = &alignInfo;
   }
 
   void SetAlignmentInfo(const std::string &alignString);
 
-  SCORE GetFutureScore() const
-  {  return m_scores->GetTotalScore() + m_estimatedScore; }
+  SCORE GetFutureScore() const {
+    return m_scores->GetTotalScore() + m_estimatedScore;
+  }
 
-  virtual SCORE GetScoreForPruning() const
-  { return GetFutureScore(); }
+  virtual SCORE GetScoreForPruning() const {
+    return GetFutureScore();
+  }
 
-  void SetEstimatedScore(const SCORE &value)
-  {  m_estimatedScore = value; }
+  void SetEstimatedScore(const SCORE &value) {
+    m_estimatedScore = value;
+  }
 
   std::string Debug(const System &system) const;
 

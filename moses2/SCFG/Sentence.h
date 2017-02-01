@@ -25,11 +25,11 @@ class Sentence: public InputType, public PhraseImpl
 {
 public:
   static Sentence *CreateFromString(MemPool &pool, FactorCollection &vocab,
-      const System &system, const std::string &str, long translationId);
+                                    const System &system, const std::string &str, long translationId);
 
   Sentence(MemPool &pool, size_t size)
-  :InputType(pool)
-  ,PhraseImpl(pool, size)
+    :InputType(pool)
+    ,PhraseImpl(pool, size)
   {}
 
   virtual ~Sentence()
@@ -37,15 +37,15 @@ public:
 
 protected:
   static Sentence *CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
-      const System &system, const std::string &str);
+                                       const System &system, const std::string &str);
 
   static void XMLParse(
-	  MemPool &pool,
-	  const System &system,
-      size_t depth,
-      const pugi::xml_node &parentNode,
-      std::vector<std::string> &toks,
-      std::vector<XMLOption*> &xmlOptions);
+    MemPool &pool,
+    const System &system,
+    size_t depth,
+    const pugi::xml_node &parentNode,
+    std::vector<std::string> &toks,
+    std::vector<XMLOption*> &xmlOptions);
 
 };
 

@@ -37,15 +37,15 @@ namespace Moses2
   do { errno = en; perror(msg); exit(EXIT_FAILURE); } while (0)
 
 ThreadPool::ThreadPool(size_t numThreads, int cpuAffinityOffset,
-    int cpuAffinityIncr) :
-    m_stopped(false), m_stopping(false), m_queueLimit(0)
+                       int cpuAffinityIncr) :
+  m_stopped(false), m_stopping(false), m_queueLimit(0)
 {
   size_t numCPU = sysconf(_SC_NPROCESSORS_ONLN);
   int cpuInd = cpuAffinityOffset % numCPU;
 
   for (size_t i = 0; i < numThreads; ++i) {
     boost::thread *thread = m_threads.create_thread(
-        boost::bind(&ThreadPool::Execute, this));
+                              boost::bind(&ThreadPool::Execute, this));
 
 #ifdef __linux
     if (cpuAffinityOffset >= 0) {
@@ -104,8 +104,7 @@ void ThreadPool::Execute()
       task->Run();
     }
     m_threadAvailable.notify_all();
-  }
-  while (!m_stopped);
+  } while (!m_stopped);
 }
 
 void ThreadPool::Submit(boost::shared_ptr<Task> task)

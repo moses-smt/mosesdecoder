@@ -22,13 +22,14 @@ namespace NSCubePruningCardinalStack
 
 ///////////////////////////////////////////////////////////////
 Stack::Stack(const Manager &mgr)
-:m_mgr(mgr)
-,m_coll()
+  :m_mgr(mgr)
+  ,m_coll()
 {
 }
 
-Stack::~Stack() {
-	// TODO Auto-generated destructor stub
+Stack::~Stack()
+{
+  // TODO Auto-generated destructor stub
 }
 
 void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
@@ -37,24 +38,22 @@ void Stack::Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle)
 
   // CHECK RECOMBINATION
   if (addRet.second) {
-	// equiv hypo doesn't exists
-  }
-  else {
-	  const Hypothesis *hypoExisting = *addRet.first;
-	  if (hypo->GetScores().GetTotalScore() > hypoExisting->GetScores().GetTotalScore()) {
-		  // incoming hypo is better than the one we have
-		  const Hypothesis *const &hypoExisting1 = *addRet.first;
-		  const Hypothesis *&hypoExisting2 = const_cast<const Hypothesis *&>(hypoExisting1);
-		  hypoExisting2 = hypo;
+    // equiv hypo doesn't exists
+  } else {
+    const Hypothesis *hypoExisting = *addRet.first;
+    if (hypo->GetScores().GetTotalScore() > hypoExisting->GetScores().GetTotalScore()) {
+      // incoming hypo is better than the one we have
+      const Hypothesis *const &hypoExisting1 = *addRet.first;
+      const Hypothesis *&hypoExisting2 = const_cast<const Hypothesis *&>(hypoExisting1);
+      hypoExisting2 = hypo;
 
-		  Hypothesis *hypoToBeDeleted = const_cast<Hypothesis*>(hypoExisting);
-		  hypoRecycle.Recycle(hypoToBeDeleted);
-	  }
-	  else {
-		  // already storing the best hypo. discard incoming hypo
-		  Hypothesis *hypoToBeDeleted = const_cast<Hypothesis*>(hypo);
-		  hypoRecycle.Recycle(hypoToBeDeleted);
-	  }
+      Hypothesis *hypoToBeDeleted = const_cast<Hypothesis*>(hypoExisting);
+      hypoRecycle.Recycle(hypoToBeDeleted);
+    } else {
+      // already storing the best hypo. discard incoming hypo
+      Hypothesis *hypoToBeDeleted = const_cast<Hypothesis*>(hypo);
+      hypoRecycle.Recycle(hypoToBeDeleted);
+    }
   }
 }
 
@@ -65,24 +64,24 @@ std::vector<const Hypothesis*> Stack::GetBestHypos(size_t num) const
 
   std::vector<const Hypothesis*>::iterator iterMiddle;
   iterMiddle = (num == 0 || ret.size() < num)
-			   ? ret.end()
-			   : ret.begin()+num;
+               ? ret.end()
+               : ret.begin()+num;
 
   std::partial_sort(ret.begin(), iterMiddle, ret.end(),
-		  HypothesisFutureScoreOrderer());
+                    HypothesisFutureScoreOrderer());
 
   return ret;
 }
 
 size_t Stack::GetHypoSize() const
 {
-	return m_coll.size();
+  return m_coll.size();
 }
 
 void Stack::Clear()
 {
 
-	m_coll.clear();
+  m_coll.clear();
 }
 
 Stack::SortedHypos Stack::GetSortedAndPruneHypos(const Manager &mgr) const
@@ -95,25 +94,24 @@ Stack::SortedHypos Stack::GetSortedAndPruneHypos(const Manager &mgr) const
   Hypotheses *allHypos = new (pool.Allocate<Hypotheses>()) Hypotheses(pool, GetHypoSize());
   size_t i = 0;
   BOOST_FOREACH(const Hypothesis *hypo, m_coll) {
-	  (*allHypos)[i++] = hypo;
+    (*allHypos)[i++] = hypo;
   }
   SortAndPruneHypos(mgr, *allHypos);
 
   // divide hypos by [bitmap, last end pos]
   BOOST_FOREACH(const Hypothesis *hypo, *allHypos) {
-	  HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
+    HypoCoverage key(&hypo->GetBitmap(), hypo->GetInputPath().range.GetEndPos());
 
-	  Hypotheses *hypos;
-	  SortedHypos::iterator iter;
-	  iter = ret.find(key);
-	  if (iter == ret.end()) {
-		  hypos = new (pool.Allocate<Hypotheses>()) Hypotheses(pool);
-		  ret[key] = hypos;
-	  }
-	  else {
-		  hypos = iter->second;
-	  }
-	  hypos->push_back(hypo);
+    Hypotheses *hypos;
+    SortedHypos::iterator iter;
+    iter = ret.find(key);
+    if (iter == ret.end()) {
+      hypos = new (pool.Allocate<Hypotheses>()) Hypotheses(pool);
+      ret[key] = hypos;
+    } else {
+      hypos = iter->second;
+    }
+    hypos->push_back(hypo);
   }
 
   return ret;
@@ -160,33 +158,33 @@ void Stack::SortAndPruneHypos(const Manager &mgr, Hypotheses &hypos) const
   /*
   cerr << "UNSORTED hypos:" << endl;
   for (size_t i = 0; i < hypos.size(); ++i) {
-	  const Hypothesis *hypo = hypos[i];
-	  cerr << *hypo << endl;
+    const Hypothesis *hypo = hypos[i];
+    cerr << *hypo << endl;
   }
   cerr << endl;
   */
   Hypotheses::iterator iterMiddle;
   iterMiddle = (stackSize == 0 || hypos.size() < stackSize)
-			   ? hypos.end()
-			   : hypos.begin() + stackSize;
+               ? hypos.end()
+               : hypos.begin() + stackSize;
 
   std::partial_sort(hypos.begin(), iterMiddle, hypos.end(),
-		  HypothesisFutureScoreOrderer());
+                    HypothesisFutureScoreOrderer());
 
   // prune
   if (stackSize && hypos.size() > stackSize) {
-	  for (size_t i = stackSize; i < hypos.size(); ++i) {
-		  Hypothesis *hypo = const_cast<Hypothesis*>(hypos[i]);
-		  recycler.Recycle(hypo);
-	  }
-	  hypos.resize(stackSize);
+    for (size_t i = stackSize; i < hypos.size(); ++i) {
+      Hypothesis *hypo = const_cast<Hypothesis*>(hypos[i]);
+      recycler.Recycle(hypo);
+    }
+    hypos.resize(stackSize);
   }
 
   /*
   cerr << "sorted hypos:" << endl;
   for (size_t i = 0; i < hypos.size(); ++i) {
-	  const Hypothesis *hypo = hypos[i];
-	  cerr << hypo << " " << *hypo << endl;
+    const Hypothesis *hypo = hypos[i];
+    cerr << hypo << " " << *hypo << endl;
   }
   cerr << endl;
   */

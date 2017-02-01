@@ -42,43 +42,45 @@ public:
   virtual void SetParameter(const std::string& key, const std::string& value);
   virtual void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
   virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
-      InputPath &inputPath) const;
+                                InputPath &inputPath) const;
 
-  void SetPtInd(size_t ind)
-  {  m_ptInd = ind; }
+  void SetPtInd(size_t ind) {
+    m_ptInd = ind;
+  }
 
-  size_t GetPtInd() const
-  {  return m_ptInd; }
+  size_t GetPtInd() const {
+    return m_ptInd;
+  }
 
   bool SatisfyBackoff(const Manager &mgr, const InputPath &path) const;
 
   virtual void
   EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<Moses2::Word> &source,
-      const TargetPhraseImpl &targetPhrase, Scores &scores,
-      SCORE &estimatedScore) const;
+                      const TargetPhraseImpl &targetPhrase, Scores &scores,
+                      SCORE &estimatedScore) const;
 
   virtual void
   EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
-      const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
-      SCORE &estimatedScore) const;
+                      const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
+                      SCORE &estimatedScore) const;
 
   // scfg
   virtual void InitActiveChart(
-      MemPool &pool,
-      const SCFG::Manager &mgr,
-      SCFG::InputPath &path) const = 0;
+    MemPool &pool,
+    const SCFG::Manager &mgr,
+    SCFG::InputPath &path) const = 0;
 
   virtual void Lookup(
-      MemPool &pool,
-      const SCFG::Manager &mgr,
-      size_t maxChartSpan,
-      const SCFG::Stacks &stacks,
-      SCFG::InputPath &path) const = 0;
+    MemPool &pool,
+    const SCFG::Manager &mgr,
+    size_t maxChartSpan,
+    const SCFG::Stacks &stacks,
+    SCFG::InputPath &path) const = 0;
 
   virtual void LookupUnary(MemPool &pool,
-      const SCFG::Manager &mgr,
-      const SCFG::Stacks &stacks,
-      SCFG::InputPath &path) const;
+                           const SCFG::Manager &mgr,
+                           const SCFG::Stacks &stacks,
+                           SCFG::InputPath &path) const;
 
 protected:
   std::string m_path;
@@ -89,38 +91,37 @@ protected:
   // cache
   size_t m_maxCacheSize; // 0 = no caching
 
-  struct CacheCollEntry2
-  {
+  struct CacheCollEntry2 {
     TargetPhrases *tpsPtr;
     clock_t clock;
   };
 
   // scfg
   virtual void LookupNT(
-      MemPool &pool,
-      const SCFG::Manager &mgr,
-      const Moses2::Range &subPhraseRange,
-      const SCFG::InputPath &prevPath,
-      const SCFG::Stacks &stacks,
-      SCFG::InputPath &outPath) const;
+    MemPool &pool,
+    const SCFG::Manager &mgr,
+    const Moses2::Range &subPhraseRange,
+    const SCFG::InputPath &prevPath,
+    const SCFG::Stacks &stacks,
+    SCFG::InputPath &outPath) const;
 
   virtual void LookupGivenWord(
-      MemPool &pool,
-      const SCFG::Manager &mgr,
-      const SCFG::InputPath &prevPath,
-      const SCFG::Word &wordSought,
-      const Moses2::Hypotheses *hypos,
-      const Moses2::Range &subPhraseRange,
-      SCFG::InputPath &outPath) const;
+    MemPool &pool,
+    const SCFG::Manager &mgr,
+    const SCFG::InputPath &prevPath,
+    const SCFG::Word &wordSought,
+    const Moses2::Hypotheses *hypos,
+    const Moses2::Range &subPhraseRange,
+    SCFG::InputPath &outPath) const;
 
   virtual void LookupGivenNode(
-      MemPool &pool,
-      const SCFG::Manager &mgr,
-      const SCFG::ActiveChartEntry &prevEntry,
-      const SCFG::Word &wordSought,
-      const Moses2::Hypotheses *hypos,
-      const Moses2::Range &subPhraseRange,
-      SCFG::InputPath &outPath) const = 0;
+    MemPool &pool,
+    const SCFG::Manager &mgr,
+    const SCFG::ActiveChartEntry &prevEntry,
+    const SCFG::Word &wordSought,
+    const Moses2::Hypotheses *hypos,
+    const Moses2::Range &subPhraseRange,
+    SCFG::InputPath &outPath) const = 0;
 
 };
 

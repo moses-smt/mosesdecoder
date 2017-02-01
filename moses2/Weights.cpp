@@ -52,8 +52,8 @@ void Weights::SetWeights(const FeatureFunctions &ffs, const std::string &ffName,
   UTIL_THROW_IF2(weights.size() != numScores, "Wrong number of weights. " << weights.size() << "!=" << numScores);
 
   for (size_t i = 0; i < numScores; ++i) {
-	SCORE weight = weights[i];
-	m_weights[startInd + i] = weight;
+    SCORE weight = weights[i];
+    m_weights[startInd + i] = weight;
   }
 }
 

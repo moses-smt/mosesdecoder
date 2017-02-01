@@ -51,12 +51,10 @@ class Task
 {
 public:
   virtual void Run() = 0;
-  virtual bool DeleteAfterExecution()
-  {
+  virtual bool DeleteAfterExecution() {
     return true;
   }
-  virtual ~Task()
-  {
+  virtual ~Task() {
   }
 };
 
@@ -67,10 +65,9 @@ public:
    * Construct a thread pool of a fixed size.
    **/
   explicit ThreadPool(size_t numThreads, int cpuAffinityOffset = -1,
-      int cpuAffinityIncr = 1);
+                      int cpuAffinityIncr = 1);
 
-  ~ThreadPool()
-  {
+  ~ThreadPool() {
     Stop();
   }
 
@@ -88,8 +85,7 @@ public:
   /**
    * Set maximum number of queued threads (otherwise Submit blocks)
    **/
-  void SetQueueLimit(size_t limit)
-  {
+  void SetQueueLimit(size_t limit) {
     m_queueLimit = limit;
   }
 
@@ -113,12 +109,10 @@ class TestTask: public Task
 {
 public:
   TestTask(int id) :
-      m_id(id)
-  {
+    m_id(id) {
   }
 
-  virtual void Run()
-  {
+  virtual void Run() {
 #ifdef BOOST_HAS_PTHREADS
     pthread_t tid = pthread_self();
 #else
@@ -128,8 +122,7 @@ public:
     std::cerr << "Executing " << m_id << " in thread id " << tid << std::endl;
   }
 
-  virtual ~TestTask()
-  {
+  virtual ~TestTask() {
   }
 
 private:

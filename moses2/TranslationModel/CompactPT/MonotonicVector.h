@@ -43,7 +43,7 @@ namespace Moses2
 {
 
 template<typename PosT = size_t, typename NumT = size_t, PosT stepSize = 32,
-    template<typename > class Allocator = std::allocator>
+         template<typename > class Allocator = std::allocator>
 class MonotonicVector
 {
 private:
@@ -62,17 +62,14 @@ public:
   typedef PosT value_type;
 
   MonotonicVector() :
-      m_size(0), m_last(0), m_final(false)
-  {
+    m_size(0), m_last(0), m_final(false) {
   }
 
-  size_t size() const
-  {
+  size_t size() const {
     return m_size + m_tempDiffs.size();
   }
 
-  PosT at(size_t i) const
-  {
+  PosT at(size_t i) const {
     PosT s = stepSize;
     PosT j = m_anchors[i / s];
     PosT r = i % s;
@@ -83,23 +80,20 @@ public:
     k += VarInt32::DecodeAndSum(it, m_diffs.end(), 1);
     if (i < m_size) k += Simple9::DecodeAndSum(it, m_diffs.end(), r);
     else if (i < m_size + m_tempDiffs.size()) for (size_t l = 0; l < r; l++)
-      k += m_tempDiffs[l];
+        k += m_tempDiffs[l];
 
     return k;
   }
 
-  PosT operator[](PosT i) const
-  {
+  PosT operator[](PosT i) const {
     return at(i);
   }
 
-  PosT back() const
-  {
+  PosT back() const {
     return at(size() - 1);
   }
 
-  void push_back(PosT i)
-  {
+  void push_back(PosT i) {
     assert(m_final != true);
 
     if (m_anchors.size() == 0 && m_tempDiffs.size() == 0) {
@@ -113,14 +107,13 @@ public:
 
     if (m_tempDiffs.size() == stepSize - 1) {
       Simple9::Encode(m_tempDiffs.begin(), m_tempDiffs.end(),
-          std::back_inserter(m_diffs));
+                      std::back_inserter(m_diffs));
       m_anchors.push_back(m_diffs.size());
       VarInt32::Encode(&i, &i + 1, std::back_inserter(m_diffs));
 
       m_size += m_tempDiffs.size() + 1;
       m_tempDiffs.clear();
-    }
-    else {
+    } else {
       PosT last = m_last;
       PosT diff = i - last;
       m_tempDiffs.push_back(diff);
@@ -128,24 +121,21 @@ public:
     m_last = i;
   }
 
-  void commit()
-  {
+  void commit() {
     assert(m_final != true);
     Simple9::Encode(m_tempDiffs.begin(), m_tempDiffs.end(),
-        std::back_inserter(m_diffs));
+                    std::back_inserter(m_diffs));
     m_size += m_tempDiffs.size();
     m_tempDiffs.clear();
     m_final = true;
   }
 
-  size_t usage()
-  {
+  size_t usage() {
     return m_diffs.size() * sizeof(unsigned int)
-        + m_anchors.size() * sizeof(NumT);
+           + m_anchors.size() * sizeof(NumT);
   }
 
-  size_t load(std::FILE* in, bool map = false)
-  {
+  size_t load(std::FILE* in, bool map = false) {
     size_t byteSize = 0;
 
     byteSize += fread(&m_final, sizeof(bool), 1, in) * sizeof(bool);
@@ -160,8 +150,7 @@ public:
 
   template<typename ValueT>
   size_t loadVector(std::vector<ValueT, std::allocator<ValueT> >& v,
-      std::FILE* in, bool map = false)
-  {
+                    std::FILE* in, bool map = false) {
     // Can only be read into memory. Mapping not possible with std:allocator.
     assert(map == false);
 
@@ -178,8 +167,7 @@ public:
 
   template<typename ValueT>
   size_t loadVector(std::vector<ValueT, MmapAllocator<ValueT> >& v,
-      std::FILE* in, bool map = false)
-  {
+                    std::FILE* in, bool map = false) {
     size_t byteSize = 0;
 
     size_t valSize;
@@ -191,9 +179,8 @@ public:
 
       v.resize(valSize, 0);
       byteSize += std::fread(&v[0], sizeof(ValueT), valSize, in)
-          * sizeof(ValueT);
-    }
-    else {
+                  * sizeof(ValueT);
+    } else {
       // Map it directly on specified region of file "in" starting at valPos
       // with length valSize * sizeof(ValueT). Mapped region cannot be resized.
 
@@ -211,31 +198,29 @@ public:
     return byteSize;
   }
 
-  size_t save(std::FILE* out)
-  {
+  size_t save(std::FILE* out) {
     if (!m_final) commit();
 
     bool byteSize = 0;
     byteSize += ThrowingFwrite(&m_final, sizeof(bool), 1, out) * sizeof(bool);
     byteSize += ThrowingFwrite(&m_size, sizeof(size_t), 1, out)
-        * sizeof(size_t);
+                * sizeof(size_t);
     byteSize += ThrowingFwrite(&m_last, sizeof(PosT), 1, out) * sizeof(PosT);
 
     size_t size = m_diffs.size();
     byteSize += ThrowingFwrite(&size, sizeof(size_t), 1, out) * sizeof(size_t);
     byteSize += ThrowingFwrite(&m_diffs[0], sizeof(unsigned int), size, out)
-        * sizeof(unsigned int);
+                * sizeof(unsigned int);
 
     size = m_anchors.size();
     byteSize += ThrowingFwrite(&size, sizeof(size_t), 1, out) * sizeof(size_t);
     byteSize += ThrowingFwrite(&m_anchors[0], sizeof(NumT), size, out)
-        * sizeof(NumT);
+                * sizeof(NumT);
 
     return byteSize;
   }
 
-  void swap(MonotonicVector<PosT, NumT, stepSize, Allocator> &mv)
-  {
+  void swap(MonotonicVector<PosT, NumT, stepSize, Allocator> &mv) {
     if (!m_final) commit();
 
     m_diffs.swap(mv.m_diffs);
