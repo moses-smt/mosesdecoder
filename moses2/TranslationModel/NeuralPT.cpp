@@ -72,6 +72,11 @@ void NeuralPT::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
   NeuralPTState &stateCast = static_cast<NeuralPTState&>(state);
   stateCast.amunOut = amunOut;
 
+  Hypothesis &hypoCast = const_cast<Hypothesis&>(hypo);
+
+  Scores &scores = hypoCast.GetScores();
+  scores.PlusEquals(mgr.system, *this, amunOut.score);
+
   cerr << "NeuralPT::EmptyHypothesisState end" << endl;
 }
 
