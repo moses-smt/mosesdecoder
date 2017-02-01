@@ -10,14 +10,12 @@ namespace Moses2
 class FFState
 {
 public:
-  virtual ~FFState()
-  {
+  virtual ~FFState() {
   }
   virtual size_t hash() const = 0;
   virtual bool operator==(const FFState& other) const = 0;
 
-  virtual bool operator!=(const FFState& other) const
-  {
+  virtual bool operator!=(const FFState& other) const {
     return !(*this == other);
   }
 
@@ -35,17 +33,14 @@ inline std::ostream& operator<<(std::ostream& out, const FFState& obj)
 class DummyState: public FFState
 {
 public:
-  DummyState()
-  {
+  DummyState() {
   }
 
-  virtual size_t hash() const
-  {
+  virtual size_t hash() const {
     return 0;
   }
 
-  virtual bool operator==(const FFState& other) const
-  {
+  virtual bool operator==(const FFState& other) const {
     return true;
   }
 

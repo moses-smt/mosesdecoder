@@ -237,12 +237,12 @@ std::ostream &ReorderingConstraint::Debug(std::ostream &out, const System &syste
 
   out << "Walls:";
   for (size_t i = 0; i < m_size; ++i) {
-      out << m_wall[i];
+    out << m_wall[i];
   }
 
   out << " Local walls:";
   for (size_t i = 0; i < m_size; ++i) {
-      out << m_localWall[i] << " ";
+    out << m_localWall[i] << " ";
   }
 
   return out;

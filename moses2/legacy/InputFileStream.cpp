@@ -29,12 +29,11 @@ namespace Moses2
 {
 
 InputFileStream::InputFileStream(const std::string &filePath) :
-    std::istream(NULL), m_streambuf(NULL)
+  std::istream(NULL), m_streambuf(NULL)
 {
   if (filePath.size() > 3 && filePath.substr(filePath.size() - 3, 3) == ".gz") {
     m_streambuf = new gzfilebuf(filePath.c_str());
-  }
-  else {
+  } else {
     std::filebuf* fb = new std::filebuf();
     fb = fb->open(filePath.c_str(), std::ios::in);
     if (!fb) {

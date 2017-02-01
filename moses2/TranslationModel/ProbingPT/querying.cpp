@@ -46,10 +46,9 @@ QueryEngine::QueryEngine(const char * filepath, util::LoadMethod load_method)
   found = Get(keyValue, "API_VERSION", version);
   if (!found) {
     std::cerr << "Old or corrupted version of ProbingPT. Please rebinarize your phrase tables." << std::endl;
-  }
-  else if (version != API_VERSION) {
+  } else if (version != API_VERSION) {
     std::cerr << "The ProbingPT API has changed. " << version << "!="
-        << API_VERSION << " Please rebinarize your phrase tables." << std::endl;
+              << API_VERSION << " Please rebinarize your phrase tables." << std::endl;
     exit(EXIT_FAILURE);
   }
 
@@ -143,37 +142,37 @@ void QueryEngine::read_alignments(const std::string &alignPath)
 
 void QueryEngine::file_exits(const std::string &basePath)
 {
-	if (!FileExists(basePath + "/Alignments.dat")) {
-	    UTIL_THROW2("Require file does not exist in: " << basePath << "/Alignments.dat");
-	}
-	if (!FileExists(basePath + "/TargetColl.dat")) {
-	    UTIL_THROW2("Require file does not exist in: " << basePath << "/TargetColl.dat");
-	}
-	if (!FileExists(basePath + "/TargetVocab.dat")) {
-	    UTIL_THROW2("Require file does not exist in: " << basePath << "/TargetVocab.dat");
-	}
-	if (!FileExists(basePath + "/cache")) {
-	    UTIL_THROW2("Require file does not exist in: " << basePath << "/cache");
-	}
-	if (!FileExists(basePath + "/config")) {
-	    UTIL_THROW2("Require file does not exist in: " << basePath << "/config");
-	}
-	if (!FileExists(basePath + "/probing_hash.dat")) {
-	    UTIL_THROW2("Require file does not exist in: " << basePath << "/probing_hash.dat");
-	}
-	if (!FileExists(basePath + "/source_vocabids")) {
-	    UTIL_THROW2("Require file does not exist in: " << basePath << "/source_vocabids");
-	}
+  if (!FileExists(basePath + "/Alignments.dat")) {
+    UTIL_THROW2("Require file does not exist in: " << basePath << "/Alignments.dat");
+  }
+  if (!FileExists(basePath + "/TargetColl.dat")) {
+    UTIL_THROW2("Require file does not exist in: " << basePath << "/TargetColl.dat");
+  }
+  if (!FileExists(basePath + "/TargetVocab.dat")) {
+    UTIL_THROW2("Require file does not exist in: " << basePath << "/TargetVocab.dat");
+  }
+  if (!FileExists(basePath + "/cache")) {
+    UTIL_THROW2("Require file does not exist in: " << basePath << "/cache");
+  }
+  if (!FileExists(basePath + "/config")) {
+    UTIL_THROW2("Require file does not exist in: " << basePath << "/config");
+  }
+  if (!FileExists(basePath + "/probing_hash.dat")) {
+    UTIL_THROW2("Require file does not exist in: " << basePath << "/probing_hash.dat");
+  }
+  if (!FileExists(basePath + "/source_vocabids")) {
+    UTIL_THROW2("Require file does not exist in: " << basePath << "/source_vocabids");
+  }
 
-	/*
+  /*
 
-	  if (!FileExists(path_to_config) || !FileExists(path_to_hashtable) ||
-		  !FileExists(path_to_source_vocabid) || !FileExists(basepath + alignPath) ||
-		  !FileExists(basepath + "/TargetColl.dat") || !FileExists(basepath + "/TargetVocab.dat") ||
-		  !FileExists(basepath + "/cache")) {
-	    UTIL_THROW2("A required table doesn't exist in: " << basepath);
-	  }
-	*/
+    if (!FileExists(path_to_config) || !FileExists(path_to_hashtable) ||
+  	  !FileExists(path_to_source_vocabid) || !FileExists(basepath + alignPath) ||
+  	  !FileExists(basepath + "/TargetColl.dat") || !FileExists(basepath + "/TargetVocab.dat") ||
+  	  !FileExists(basepath + "/cache")) {
+      UTIL_THROW2("A required table doesn't exist in: " << basepath);
+    }
+  */
 }
 
 }

@@ -15,9 +15,9 @@ namespace Moses2
 {
 
 BidirectionalReorderingState::BidirectionalReorderingState(
-    const LRModel &config, LRState *bw, LRState *fw, size_t offset) :
-    LRState(config, LRModel::Bidirectional, offset), m_backward(bw), m_forward(
-        fw)
+  const LRModel &config, LRState *bw, LRState *fw, size_t offset) :
+  LRState(config, LRModel::Bidirectional, offset), m_backward(bw), m_forward(
+    fw)
 {
 }
 
@@ -27,8 +27,8 @@ BidirectionalReorderingState::~BidirectionalReorderingState()
 }
 
 void BidirectionalReorderingState::Init(const LRState *prev,
-    const TargetPhrase<Moses2::Word> &topt, const InputPathBase &path, bool first,
-    const Bitmap *coverage)
+                                        const TargetPhrase<Moses2::Word> &topt, const InputPathBase &path, bool first,
+                                        const Bitmap *coverage)
 {
   if (m_backward) {
     m_backward->Init(prev, topt, path, first, coverage);
@@ -41,7 +41,7 @@ void BidirectionalReorderingState::Init(const LRState *prev,
 std::string BidirectionalReorderingState::ToString() const
 {
   return "BidirectionalReorderingState " + SPrint(this) + " "
-      + SPrint(m_backward) + " " + SPrint(m_forward);
+         + SPrint(m_backward) + " " + SPrint(m_forward);
 }
 
 size_t BidirectionalReorderingState::hash() const
@@ -57,10 +57,10 @@ bool BidirectionalReorderingState::operator==(const FFState& o) const
   if (&o == this) return true;
 
   BidirectionalReorderingState const &other =
-      static_cast<BidirectionalReorderingState const&>(o);
+    static_cast<BidirectionalReorderingState const&>(o);
 
   bool ret = (*m_backward == *other.m_backward)
-      && (*m_forward == *other.m_forward);
+             && (*m_forward == *other.m_forward);
   return ret;
 }
 
@@ -69,11 +69,11 @@ void BidirectionalReorderingState::Expand(const ManagerBase &mgr,
     Scores &scores, FFState &state) const
 {
   BidirectionalReorderingState &stateCast =
-      static_cast<BidirectionalReorderingState&>(state);
+    static_cast<BidirectionalReorderingState&>(state);
   m_backward->Expand(mgr, ff, hypo, phraseTableInd, scores,
-      *stateCast.m_backward);
+                     *stateCast.m_backward);
   m_forward->Expand(mgr, ff, hypo, phraseTableInd, scores,
-      *stateCast.m_forward);
+                    *stateCast.m_forward);
 }
 
 } /* namespace Moses2 */

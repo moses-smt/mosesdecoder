@@ -52,8 +52,7 @@ class System;
  * FactorFriend's public copy constructor and everybody else sees Factor's
  * private copy constructor.
  */
-struct FactorFriend
-{
+struct FactorFriend {
   Factor in;
 };
 
@@ -71,19 +70,15 @@ class FactorCollection
   friend class System;
 
   struct HashFactor: public std::unary_function<const FactorFriend &,
-      std::size_t>
-  {
-    std::size_t operator()(const FactorFriend &factor) const
-    {
+      std::size_t> {
+    std::size_t operator()(const FactorFriend &factor) const {
       return util::MurmurHashNative(factor.in.m_string.data(),
-          factor.in.m_string.size());
+                                    factor.in.m_string.size());
     }
   };
   struct EqualsFactor: public std::binary_function<const FactorFriend &,
-      const FactorFriend &, bool>
-  {
-    bool operator()(const FactorFriend &left, const FactorFriend &right) const
-    {
+      const FactorFriend &, bool> {
+    bool operator()(const FactorFriend &left, const FactorFriend &right) const {
       return left.in.GetString() == right.in.GetString();
     }
   };
@@ -103,8 +98,7 @@ class FactorCollection
 
   //! constructor. only the 1 static variable can be created
   FactorCollection() :
-      m_factorIdNonTerminal(0), m_factorId(moses_MaxNumNonterminals)
-  {
+    m_factorIdNonTerminal(0), m_factorId(moses_MaxNumNonterminals) {
   }
 
 public:
@@ -114,15 +108,14 @@ public:
    *	If a factor already exist in the collection, return the existing factor, if not create a new 1
    */
   const Factor *AddFactor(const StringPiece &factorString, const System &system,
-      bool isNonTerminal);
+                          bool isNonTerminal);
 
-  size_t GetNumNonTerminals()
-  {
+  size_t GetNumNonTerminals() {
     return m_factorIdNonTerminal;
   }
 
   const Factor *GetFactor(const StringPiece &factorString, bool isNonTerminal =
-      false);
+                            false);
 
 };
 

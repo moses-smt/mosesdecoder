@@ -14,7 +14,7 @@ namespace Moses2
 
 HReorderingBackwardState::HReorderingBackwardState(MemPool &pool,
     const LRModel &config, size_t offset) :
-    LRState(config, LRModel::Backward, offset), reoStack(pool)
+  LRState(config, LRModel::Backward, offset), reoStack(pool)
 {
   // TODO Auto-generated constructor stub
 
@@ -26,8 +26,8 @@ HReorderingBackwardState::~HReorderingBackwardState()
 }
 
 void HReorderingBackwardState::Init(const LRState *prev,
-    const TargetPhrase<Moses2::Word> &topt, const InputPathBase &path, bool first,
-    const Bitmap *coverage)
+                                    const TargetPhrase<Moses2::Word> &topt, const InputPathBase &path, bool first,
+                                    const Bitmap *coverage)
 {
   prevTP = &topt;
   reoStack.Init();
@@ -42,7 +42,7 @@ size_t HReorderingBackwardState::hash() const
 bool HReorderingBackwardState::operator==(const FFState& o) const
 {
   const HReorderingBackwardState& other =
-      static_cast<const HReorderingBackwardState&>(o);
+    static_cast<const HReorderingBackwardState&>(o);
   bool ret = reoStack == other.reoStack;
   return ret;
 }
@@ -53,13 +53,13 @@ std::string HReorderingBackwardState::ToString() const
 }
 
 void HReorderingBackwardState::Expand(const ManagerBase &mgr,
-    const LexicalReordering &ff, const Hypothesis &hypo, size_t phraseTableInd,
-    Scores &scores, FFState &state) const
+                                      const LexicalReordering &ff, const Hypothesis &hypo, size_t phraseTableInd,
+                                      Scores &scores, FFState &state) const
 {
   HReorderingBackwardState &nextState =
-      static_cast<HReorderingBackwardState&>(state);
+    static_cast<HReorderingBackwardState&>(state);
   nextState.Init(this, hypo.GetTargetPhrase(), hypo.GetInputPath(), false,
-      NULL);
+                 NULL);
   nextState.reoStack = reoStack;
 
   const Range &swrange = hypo.GetInputPath().range;

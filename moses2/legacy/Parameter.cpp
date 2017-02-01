@@ -50,7 +50,7 @@ Parameter::Parameter()
   po::options_description main_opts("Main Options");
   AddParam(main_opts, "config", "f", "location of the configuration file");
   AddParam(main_opts, "input-file", "i",
-      "location of the input file to be translated");
+           "location of the input file to be translated");
 
   AddParam(main_opts, "verbose", "v", "verbosity level of the logging");
   AddParam(main_opts, "show-weights", "print feature weights and exit");
@@ -65,7 +65,7 @@ Parameter::Parameter()
   // one should be able to specify different factor delimiters for intput and output
   AddParam(factor_opts, "mapping", "description of decoding steps"); // whatever that means ...
   AddParam(factor_opts, "placeholder-factor",
-      "Which source factor to use to store the original text for placeholders. The factor must not be used by a translation or gen model");
+           "Which source factor to use to store the original text for placeholders. The factor must not be used by a translation or gen model");
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // general search options
@@ -82,11 +82,11 @@ Parameter::Parameter()
   desc += "9=forest-to-string";
   AddParam(search_opts, "search-algorithm", desc);
   AddParam(search_opts, "beam-threshold", "b",
-      "threshold for threshold pruning");
+           "threshold for threshold pruning");
   //AddParam(search_opts, "early-discarding-threshold", "edt",
   //    "threshold for constructing hypotheses based on estimate cost");
   AddParam(search_opts, "stack", "s",
-      "maximum stack size for histogram pruning. 0 = unlimited stack size");
+           "maximum stack size for histogram pruning. 0 = unlimited stack size");
   //AddParam(search_opts, "stack-diversity", "sd",
   //    "minimum number of hypothesis of each coverage in stack (default 0)");
 
@@ -94,18 +94,18 @@ Parameter::Parameter()
   //AddParam(search_opts, "weight-file", "wf",
   //    "feature weights file. Do *not* put weights for 'core' features in here - they go in moses.ini");
   AddParam(search_opts, "weight",
-      "weights for ALL models, 1 per line 'WeightName value'. Weight names can be repeated");
+           "weights for ALL models, 1 per line 'WeightName value'. Weight names can be repeated");
 
   AddParam(search_opts, "feature-overwrite",
-      "Override arguments in a particular feature function with a particular key. Format: -feature-overwrite \"FeatureName key=value\"");
+           "Override arguments in a particular feature function with a particular key. Format: -feature-overwrite \"FeatureName key=value\"");
 
   po::options_description tune_opts("Options used in tuning.");
   AddParam(tune_opts, "weight-overwrite",
-      "special parameter for mert. All on 1 line. Overrides weights specified in 'weights' argument");
+           "special parameter for mert. All on 1 line. Overrides weights specified in 'weights' argument");
   AddParam(tune_opts, "feature-add",
-      "Add a feature function on the command line. Used by mira to add BLEU feature");
+           "Add a feature function on the command line. Used by mira to add BLEU feature");
   AddParam(tune_opts, "weight-add",
-      "Add weight for FF if it doesn't exist, i.e weights here are added 1st, and can be override by the ini file or on the command line. Used to specify initial weights for FF that was also specified on the copmmand line");
+           "Add weight for FF if it doesn't exist, i.e weights here are added 1st, and can be override by the ini file or on the command line. Used to specify initial weights for FF that was also specified on the copmmand line");
 
   // phrase table limitations:
   //AddParam(search_opts, "max-partial-trans-opt",
@@ -113,7 +113,7 @@ Parameter::Parameter()
   //AddParam(search_opts, "max-trans-opt-per-coverage",
   //    "maximum number of translation options per input span (after applying mapping steps)");
   AddParam(search_opts, "max-phrase-length",
-      "maximum phrase length (default 20)");
+           "maximum phrase length (default 20)");
   //AddParam(search_opts, "translation-option-threshold", "tot",
   //    "threshold for translation options relative to best for input phrase");
 
@@ -123,14 +123,14 @@ Parameter::Parameter()
   //AddParam(search_opts, "phrase-drop-allowed", "da",
   //    "if present, allow dropping of source words"); //da = drop any (word); see -du for comparison
   AddParam(search_opts, "threads", "th",
-      "number of threads to use in decoding (defaults to single-threaded)");
+           "number of threads to use in decoding (defaults to single-threaded)");
 
   // distortion options
   po::options_description disto_opts("Distortion options");
   AddParam(disto_opts, "distortion-limit", "dl",
-      "distortion (reordering) limit in maximum number of words (0 = monotone, -1 = unlimited)");
+           "distortion (reordering) limit in maximum number of words (0 = monotone, -1 = unlimited)");
   AddParam(disto_opts, "monotone-at-punctuation", "mp",
-      "do not reorder over punctuation");
+           "do not reorder over punctuation");
   //AddParam(disto_opts, "early-distortion-cost", "edc",
   //    "include estimate of distortion cost yet to be incurred in the score [Moore & Quirk 2007]. Default is no");
   //AddParam(disto_opts, "distortion",
@@ -139,18 +139,18 @@ Parameter::Parameter()
   // cube pruning
   po::options_description cube_opts("Cube pruning options.");
   AddParam(cube_opts, "cube-pruning-pop-limit", "cbp",
-      "How many hypotheses should be popped for each stack. (default = 1000)");
+           "How many hypotheses should be popped for each stack. (default = 1000)");
   AddParam(cube_opts, "cube-pruning-diversity", "cbd",
-      "How many hypotheses should be created for each coverage. (default = 0)");
+           "How many hypotheses should be created for each coverage. (default = 0)");
   AddParam(cube_opts, "cube-pruning-lazy-scoring", "cbls",
-      "Don't fully score a hypothesis until it is popped");
+           "Don't fully score a hypothesis until it is popped");
   //AddParam(cube_opts, "cube-pruning-deterministic-search", "cbds",
   //    "Break ties deterministically during search");
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // minimum bayes risk decoding
   po::options_description mbr_opts(
-      "Minimum Bayes Risk (MBR), Lattice MBR, and Consensus decoding");
+    "Minimum Bayes Risk (MBR), Lattice MBR, and Consensus decoding");
 
   //AddParam(mbr_opts, "minimum-bayes-risk", "mbr",
   //    "use miminum Bayes risk to determine best translation");
@@ -179,12 +179,12 @@ Parameter::Parameter()
   // OOV handling options
   po::options_description oov_opts("OOV Handling Options");
   AddParam(oov_opts, "drop-unknown", "du",
-      "drop unknown words instead of copying them");
+           "drop unknown words instead of copying them");
   AddParam(oov_opts, "mark-unknown", "mu", "mark unknown words in output");
   AddParam(oov_opts, "unknown-word-prefix",
-      "prefix to unknwon word when marked (default: 'UNK')");
+           "prefix to unknwon word when marked (default: 'UNK')");
   AddParam(oov_opts, "unknown-word-suffix",
-      "suffix to unknwon word when marked (default: '')");
+           "suffix to unknwon word when marked (default: '')");
   //AddParam(oov_opts, "lmodel-oov-feature",
   //    "add language model oov feature, one per model");
   //AddParam(oov_opts, "output-unknowns",
@@ -197,9 +197,9 @@ Parameter::Parameter()
   po::options_description input_opts("Input Format Options");
   AddParam(input_opts, "input-factors", "list of factors in the input");
   AddParam(input_opts, "inputtype",
-      "text (0), confusion network (1), word lattice (2), tree (3) (default = 0)");
+           "text (0), confusion network (1), word lattice (2), tree (3) (default = 0)");
   AddParam(input_opts, "xml-input", "xi",
-      "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'constraint', 'ignore'");
+           "allows markup of input with desired translations and probabilities. values can be 'pass-through' (default), 'inclusive', 'exclusive', 'constraint', 'ignore'");
   //AddParam(input_opts, "xml-brackets", "xb",
   //    "specify strings to be used as xml tags opening and closing, e.g. \"{{ }}\" (default \"< >\"). Avoid square brackets because of configuration file format. Valid only with text input mode");
   //AddParam(input_opts, "start-translation-id", "Id of 1st input. Default = 0");
@@ -221,10 +221,10 @@ Parameter::Parameter()
   //AddParam(output_opts, "print-all-derivations",
   //    "to print all derivations in search graph");
   AddParam(output_opts, "translation-details", "T",
-      "for each best hypothesis, report translation details to the given file");
+           "for each best hypothesis, report translation details to the given file");
 
   AddParam(output_opts, "output-hypo-score",
-      "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
+           "Output the hypo score to stdout with the output string. For search error analysis. Default is false");
   //AddParam(output_opts, "output-word-graph", "owg",
   //    "Output stack info as word graph. Takes filename, 0=only hypos in stack, 1=stack + nbest hypos");
   //AddParam(output_opts, "tree-translation-details", "Ttree",
@@ -236,9 +236,9 @@ Parameter::Parameter()
   //AddParam(output_opts, "sort-word-alignment",
   //    "Sort word alignments for more consistent display. 0=no sort (default), 1=target order");
   AddParam(output_opts, "report-segmentation", "t",
-      "report phrase segmentation in the output");
+           "report phrase segmentation in the output");
   AddParam(output_opts, "report-segmentation-enriched", "tt",
-      "report phrase segmentation in the output with additional information");
+           "report phrase segmentation in the output with additional information");
 
   // translation-all-details was introduced in the context of DIMwid: Decoder Inspection for Moses (using Widgets)
   // see here: https://ufal.mff.cuni.cz/pbml/100/art-kurtz-seemann-braune-maletti.pdf
@@ -266,7 +266,7 @@ Parameter::Parameter()
   // nbest-options
   po::options_description nbest_opts("N-best Options");
   AddParam(nbest_opts, "n-best-list",
-      "file and size of n-best-list to be generated; specify - as the file in order to write to STDOUT");
+           "file and size of n-best-list to be generated; specify - as the file in order to write to STDOUT");
   // AddParam(nbest_opts,"n-best-list-file", "file of n-best-list to be generated; specify - as the file in order to write to STDOUT");
   // AddParam(nbest_opts,"n-best-list-size", "size of n-best-list to be generated; specify - as the file in order to write to STDOUT");
   //AddParam(nbest_opts, "labeled-n-best-list",
@@ -274,7 +274,7 @@ Parameter::Parameter()
   //AddParam(nbest_opts, "n-best-trees",
   //    "Write n-best target-side trees to n-best-list");
   AddParam(nbest_opts, "n-best-factor",
-      "factor to compute the maximum number of contenders (=factor*nbest-size). value 0 means infinity, i.e. no threshold. default is 0");
+           "factor to compute the maximum number of contenders (=factor*nbest-size). value 0 means infinity, i.e. no threshold. default is 0");
   //AddParam(nbest_opts, "report-all-factors-in-n-best",
   //    "Report all factors in n-best-lists. Default is false");
   //AddParam(nbest_opts, "lattice-samples",
@@ -296,7 +296,7 @@ Parameter::Parameter()
   //    string("Max. number of sessions cached.")
   //        + "Least recently used session is dumped first.");
   AddParam(server_opts, "serial",
-      "Run server in serial mode, processing only one request at a time.");
+           "Run server in serial mode, processing only one request at a time.");
 
   AddParam(server_opts,"server-maxconn",
            "Max. No of simultaneous HTTP transactions allowed by the server.");
@@ -315,9 +315,9 @@ Parameter::Parameter()
 
   po::options_description chart_opts("Chart Decoding Options");
   AddParam(chart_opts, "max-chart-span",
-      "maximum num. of source word chart rules can consume (default 10)");
+           "maximum num. of source word chart rules can consume (default 10)");
   AddParam(chart_opts, "non-terminals",
-      "list of non-term symbols, space separated");
+           "list of non-term symbols, space separated");
   //AddParam(chart_opts, "rule-limit",
   //    "a little like table limit. But for chart decoding rules. Default is DEFAULT_MAX_TRANS_OPT_SIZE");
   //AddParam(chart_opts, "source-label-overlap",
@@ -338,7 +338,7 @@ Parameter::Parameter()
 
   //AddParam(o,"continue-partial-translation", "cpt", "start from nonempty hypothesis");
   AddParam(misc_opts, "decoding-graph-backoff", "dpb",
-      "only use subsequent decoding paths for unknown spans of given length");
+           "only use subsequent decoding paths for unknown spans of given length");
   //AddParam(misc_opts, "references",
   //    "Reference file(s) - used for bleu score feature");
   //AddParam(misc_opts, "recover-input-path", "r",
@@ -357,11 +357,11 @@ Parameter::Parameter()
   //    "Context window (in words) for context-sensitive translation: {+|-|+-}<number>.");
   AddParam(misc_opts, "cpu-affinity-offset", "CPU Affinity. Default = -1 (no affinity)");
   AddParam(misc_opts, "cpu-affinity-increment",
-      "Set to 1 (default) to put each thread on different cores. 0 to run all threads on one core");
+           "Set to 1 (default) to put each thread on different cores. 0 to run all threads on one core");
 
   // Compact phrase table and reordering table.
   po::options_description cpt_opts(
-      "Options when using compact phrase and reordering tables.");
+    "Options when using compact phrase and reordering tables.");
   //AddParam(cpt_opts, "minphr-memory",
   //    "Load phrase table in minphr format into memory");
   //AddParam(cpt_opts, "minlexr-memory",
@@ -376,7 +376,7 @@ Parameter::Parameter()
   // DEPRECATED options
   po::options_description deprec_opts("Deprecated Options");
   AddParam(deprec_opts, "text-type",
-	   "DEPRECATED. DO NOT USE. should be one of dev/devtest/test, used for domain adaptation features");
+           "DEPRECATED. DO NOT USE. should be one of dev/devtest/test, used for domain adaptation features");
 
   /*
   AddParam(deprec_opts, "link-param-count",
@@ -431,11 +431,11 @@ Parameter::Parameter()
       "DEPRECATED. DO NOT USE. location and properties of the language models");
   AddParam(deprec_opts, "lmodel-dub",
       "DEPRECATED. DO NOT USE. dictionary upper bounds of language models");
-#ifdef HAVE_SYNLM
+  #ifdef HAVE_SYNLM
   AddParam(deprec_opts,"slmodel-file", "DEPRECATED. DO NOT USE. location of the syntactic language model file(s)");
   AddParam(deprec_opts,"slmodel-factor", "DEPRECATED. DO NOT USE. factor to use with syntactic language model");
   AddParam(deprec_opts,"slmodel-beam", "DEPRECATED. DO NOT USE. beam width to use with syntactic language model's parser");
-#endif
+  #endif
   AddParam(deprec_opts, "ttable-file",
       "DEPRECATED. DO NOT USE. location and properties of the translation tables");
   AddParam(deprec_opts, "phrase-pair-feature",
@@ -494,8 +494,7 @@ const PARAM_VEC *Parameter::GetParam(const std::string &paramName) const
   PARAM_MAP::const_iterator iter = m_setting.find(paramName);
   if (iter == m_setting.end()) {
     return NULL;
-  }
-  else {
+  } else {
     return &iter->second;
   }
 
@@ -503,7 +502,7 @@ const PARAM_VEC *Parameter::GetParam(const std::string &paramName) const
 
 /** initialize a parameter, sub of constructor */
 void Parameter::AddParam(po::options_description& optgroup,
-    string const& paramName, string const& description)
+                         string const& paramName, string const& description)
 {
   m_valid[paramName] = true;
   m_description[paramName] = description;
@@ -512,8 +511,8 @@ void Parameter::AddParam(po::options_description& optgroup,
 
 /** initialize a parameter (including abbreviation), sub of constructor */
 void Parameter::AddParam(po::options_description& optgroup,
-    string const& paramName, string const& abbrevName,
-    string const& description)
+                         string const& paramName, string const& abbrevName,
+                         string const& description)
 {
   m_valid[paramName] = true;
   m_valid[abbrevName] = true;
@@ -581,7 +580,7 @@ bool Parameter::LoadParam(int argc, char* xargv[])
   // config file (-f) arg mandatory
   string configPath;
   if ((configPath = FindParam("-f", argc, argv)) == "" && (configPath =
-      FindParam("-config", argc, argv)) == "") {
+        FindParam("-config", argc, argv)) == "") {
     PrintCredit();
     Explain();
     FeatureRegistry::Instance().PrintFF();
@@ -590,8 +589,7 @@ bool Parameter::LoadParam(int argc, char* xargv[])
     cerr << "No configuration file was specified.  Use -config or -f";
     cerr << endl;
     return false;
-  }
-  else {
+  } else {
     if (!ReadConfigFile(configPath)) {
       std::cerr << "Could not read " << configPath;
       return false;
@@ -600,14 +598,14 @@ bool Parameter::LoadParam(int argc, char* xargv[])
 
   // overwrite parameters with values from switches
   for (PARAM_STRING::const_iterator iterParam = m_description.begin();
-      iterParam != m_description.end(); iterParam++) {
+       iterParam != m_description.end(); iterParam++) {
     const string paramName = iterParam->first;
     OverwriteParam("-" + paramName, paramName, argc, argv);
   }
 
   // ... also shortcuts
   for (PARAM_STRING::const_iterator iterParam = m_abbreviation.begin();
-      iterParam != m_abbreviation.end(); iterParam++) {
+       iterParam != m_abbreviation.end(); iterParam++) {
     const string paramName = iterParam->first;
     const string paramShortName = iterParam->second;
     OverwriteParam("-" + paramShortName, paramName, argc, argv);
@@ -619,11 +617,11 @@ bool Parameter::LoadParam(int argc, char* xargv[])
   int verbose = 1;
   if (m_setting.find("verbose") != m_setting.end()
       && m_setting["verbose"].size() > 0) verbose = Scan<int>(
-      m_setting["verbose"][0]);
+              m_setting["verbose"][0]);
   if (verbose >= 1) { // only if verbose
     cerr << "Defined parameters (per moses.ini or switch):" << endl;
     for (PARAM_MAP::const_iterator iterParam = m_setting.begin();
-        iterParam != m_setting.end(); iterParam++) {
+         iterParam != m_setting.end(); iterParam++) {
       cerr << "\t" << iterParam->first << ": ";
       for (size_t i = 0; i < iterParam->second.size(); i++)
         cerr << iterParam->second[i] << " ";
@@ -717,7 +715,7 @@ void Parameter::SetWeight(const std::string &name, size_t ind, float weight)
 }
 
 void Parameter::SetWeight(const std::string &name, size_t ind,
-    const vector<float> &weights)
+                          const vector<float> &weights)
 {
   PARAM_VEC &newWeights = m_setting["weight"];
   string line = name + SPrint(ind) + "=";
@@ -729,7 +727,7 @@ void Parameter::SetWeight(const std::string &name, size_t ind,
 }
 
 void Parameter::AddWeight(const std::string &name, size_t ind,
-    const std::vector<float> &weights)
+                          const std::vector<float> &weights)
 {
   PARAM_VEC &newWeights = m_setting["weight"];
 
@@ -777,13 +775,12 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
     PARAM_VEC &numInputScores = m_setting["input-scores"];
     if (inputWeights.size() == 1) {
       UTIL_THROW_IF2(numInputScores.size() != 0,
-          "No [input-scores] section allowed");
+                     "No [input-scores] section allowed");
       numInputScores.push_back("1");
       numInputScores.push_back("0");
-    }
-    else if (inputWeights.size() == 2) {
+    } else if (inputWeights.size() == 2) {
       UTIL_THROW_IF2(numInputScores.size() != 0,
-          "No [input-scores] section allowed");
+                     "No [input-scores] section allowed");
       numInputScores.push_back("1");
       numInputScores.push_back("1");
     }
@@ -821,15 +818,14 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
 
     if (maxTargetPhrase.size() == 1 && translationVector.size() > 1) {
       cerr << "Using uniform ttable-limit of " << maxTargetPhrase[0]
-          << " for all translation tables." << endl;
+           << " for all translation tables." << endl;
       for (size_t i = 1; i < translationVector.size(); i++)
         maxTargetPhrase.push_back(maxTargetPhrase[0]);
-    }
-    else if (maxTargetPhrase.size() != 1
-        && maxTargetPhrase.size() < translationVector.size()) {
+    } else if (maxTargetPhrase.size() != 1
+               && maxTargetPhrase.size() < translationVector.size()) {
       std::cerr << "You specified " << translationVector.size()
-          << " translation tables, but only " << maxTargetPhrase.size()
-          << " ttable-limits.";
+                << " translation tables, but only " << maxTargetPhrase.size()
+                << " ttable-limits.";
       return;
     }
 
@@ -848,7 +844,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
         return;
       }
       UTIL_THROW_IF2(token.size() < 5,
-          "Phrase table must have at least 5 scores");
+                     "Phrase table must have at least 5 scores");
 
       int implementation = Scan<int>(token[0]);
 
@@ -886,8 +882,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       if (ptIndices.find(ptType) == ptIndices.end()) {
         ptIndices[ptType] = 0;
         ptInd = 0;
-      }
-      else {
+      } else {
         ptInd = ++ptIndices[ptType];
       }
 
@@ -898,7 +893,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       vector<float> weights(numFF);
       for (size_t currFF = 0; currFF < numFF; ++currFF) {
         UTIL_THROW_IF2(currOldInd >= oldWeights.size(),
-            "Errors converting old phrase-table weights to new weights");
+                       "Errors converting old phrase-table weights to new weights");
         float weight = Scan<float>(oldWeights[currOldInd]);
         weights[currFF] = weight;
 
@@ -918,7 +913,7 @@ void Parameter::ConvertWeightArgsPhraseModel(const string &oldWeightName)
       //characteristics of the phrase table
 
       vector<FactorType> input = Tokenize<FactorType>(token[1], ","), output =
-          Tokenize<FactorType>(token[2], ",");
+                                   Tokenize<FactorType>(token[2], ",");
       size_t numScoreComponent = Scan<size_t>(token[3]);
       string filePath = token[4];
 
@@ -978,7 +973,7 @@ void Parameter::ConvertWeightArgsDistortion()
     const PARAM_VEC *lextable = GetParam(oldLexReordingName);
 
     for (size_t indTable = 0; lextable && indTable < lextable->size();
-        ++indTable) {
+         ++indTable) {
       const string &line = lextable->at(indTable);
       vector<string> toks = Tokenize(line);
 
@@ -987,7 +982,7 @@ void Parameter::ConvertWeightArgsDistortion()
       vector<float> weights(numFF);
       for (size_t currFF = 0; currFF < numFF; ++currFF) {
         UTIL_THROW_IF2(oldWeights && currOldInd >= oldWeights->size(),
-            "Errors converting old distortion weights to new weights");
+                       "Errors converting old distortion weights to new weights");
         float weight = Scan<float>(oldWeights->at(currOldInd));
         weights[currFF] = weight;
 
@@ -1000,9 +995,9 @@ void Parameter::ConvertWeightArgsDistortion()
 
       vector<FactorType> factors = Tokenize<FactorType>(toks[0], "-");
       UTIL_THROW_IF2(factors.size() != 2,
-          "Error in old factor specification for lexicalized reordering model: " << toks[0]);
+                     "Error in old factor specification for lexicalized reordering model: " << toks[0]);
       strme << "input-factor=" << factors[0] << " output-factor=" << factors[1]
-          << " ";
+            << " ";
 
       strme << "num-features=" << toks[2] << " ";
       strme << "path=" << toks[3];
@@ -1074,7 +1069,7 @@ void Parameter::ConvertWeightArgsLM()
       vector<float> weightsLM(numFF);
       for (size_t currFF = 0; currFF < numFF; ++currFF) {
         UTIL_THROW_IF2(currOldInd >= weights.size(),
-            "Errors converting old LM weights to new weights");
+                       "Errors converting old LM weights to new weights");
         weightsLM[currFF] = Scan<float>(weights[currOldInd]);
         if (isChartDecoding) {
           weightsLM[currFF] = UntransformLMScore(weightsLM[currFF]);
@@ -1086,12 +1081,11 @@ void Parameter::ConvertWeightArgsLM()
       SetWeight(newFeatureName, lmIndex, weightsLM);
 
       string featureLine = newFeatureName + " " + "factor=" + modelToks[1] + " " // factor
-          + "order=" + modelToks[2] + " " // order
-          + "num-features=" + SPrint(numFF) + " ";
+                           + "order=" + modelToks[2] + " " // order
+                           + "num-features=" + SPrint(numFF) + " ";
       if (lmType == 9) {
         featureLine += "lazyken=1 ";
-      }
-      else if (lmType == 8) {
+      } else if (lmType == 8) {
         featureLine += "lazyken=0 ";
       }
 
@@ -1127,7 +1121,7 @@ void Parameter::ConvertWeightArgsGeneration(const std::string &oldWeightName,
       vector<float> weights(numFF);
       for (size_t currFF = 0; currFF < numFF; ++currFF) {
         UTIL_THROW_IF2(currOldInd >= oldWeights.size(),
-            "Errors converting old generation weights to new weights");
+                       "Errors converting old generation weights to new weights");
         float weight = Scan<float>(oldWeights[currOldInd]);
         weights[currFF] = weight;
 
@@ -1137,8 +1131,8 @@ void Parameter::ConvertWeightArgsGeneration(const std::string &oldWeightName,
 
       util::StringStream strme;
       strme << "Generation " << "input-factor=" << modelToks[0] << " "
-          << "output-factor=" << modelToks[1] << " " << "num-features="
-          << modelToks[2] << " " << "path=" << modelToks[3];
+            << "output-factor=" << modelToks[1] << " " << "num-features="
+            << modelToks[2] << " " << "path=" << modelToks[3];
       AddFeature(strme.str());
     }
   }
@@ -1184,7 +1178,7 @@ void Parameter::ConvertPhrasePenalty()
   const PARAM_VEC *params = GetParam(oldWeightName);
   if (params) {
     UTIL_THROW_IF2(params->size() != 1,
-        "There should be only 1 phrase-penalty weight");
+                   "There should be only 1 phrase-penalty weight");
     float weight = Scan<float>(params->at(0));
     AddFeature("PhrasePenalty");
     SetWeight("PhrasePenalty", 0, weight);
@@ -1197,7 +1191,7 @@ void Parameter::ConvertWeightArgs()
 {
   // can't handle discr LM. must do it manually 'cos of bigram/n-gram split
   UTIL_THROW_IF2(m_setting.count("weight-dlm") != 0,
-      "Can't handle discr LM. must do it manually 'cos of bigram/n-gram split");
+                 "Can't handle discr LM. must do it manually 'cos of bigram/n-gram split");
 
   // check that old & new format aren't mixed
   if (m_setting.count("weight")
@@ -1289,23 +1283,20 @@ void Parameter::WeightOverwrite()
 
       name = tok.substr(0, tok.size() - 1);
       std::map<std::string, std::vector<float> >::const_iterator found =
-          m_weights.find(name);
+        m_weights.find(name);
       if (found != m_weights.end()) {
         oldWeights = &(found->second);
-      }
-      else {
+      } else {
         oldWeights = NULL;
       }
       cnt = 0;
-    }
-    else {
+    } else {
       // a weight for curr ff
       if (toks[i] == "x") {
         UTIL_THROW_IF2(!oldWeights || cnt >= oldWeights->size(),
-            "Keeping previous weight failed in weight-overwrite");
+                       "Keeping previous weight failed in weight-overwrite");
         weights.push_back(oldWeights->at(cnt));
-      }
-      else {
+      } else {
         float weight = Scan<float>(toks[i]);
         weights.push_back(weight);
       }
@@ -1326,7 +1317,7 @@ bool Parameter::Validate()
 
   PARAM_MAP::const_iterator iterParams;
   for (iterParams = m_setting.begin(); iterParams != m_setting.end();
-      ++iterParams) {
+       ++iterParams) {
     const std::string &key = iterParams->first;
 
     if (m_valid.find(key) == m_valid.end()) {
@@ -1338,10 +1329,10 @@ bool Parameter::Validate()
   if (m_setting["lmodel-dub"].size() > 0) {
     if (m_setting["lmodel-file"].size() != m_setting["lmodel-dub"].size()) {
       std::cerr << "Config and parameters specify "
-          << static_cast<int>(m_setting["lmodel-file"].size())
-          << " language model files (lmodel-file), but "
-          << static_cast<int>(m_setting["lmodel-dub"].size())
-          << " LM upperbounds (lmodel-dub)" << endl;
+                << static_cast<int>(m_setting["lmodel-file"].size())
+                << " language model files (lmodel-file), but "
+                << static_cast<int>(m_setting["lmodel-dub"].size())
+                << " LM upperbounds (lmodel-dub)" << endl;
       noErrorFlag = false;
     }
   }
@@ -1353,7 +1344,7 @@ bool Parameter::Validate()
     noErrorFlag = FileExists(m_setting["input-file"][0]);
     if (!noErrorFlag) {
       std::cerr << endl << "Input file " << m_setting["input-file"][0]
-          << " does not exist";
+                << " does not exist";
     }
   }
   // generation tables
@@ -1381,7 +1372,7 @@ bool Parameter::Validate()
 
 /** check whether a file exists */
 bool Parameter::FilesExist(const string &paramName, int fieldNo,
-    std::vector<std::string> const& extensions)
+                           std::vector<std::string> const& extensions)
 {
   typedef std::vector<std::string> StringVec;
   StringVec::const_iterator iter;
@@ -1401,8 +1392,8 @@ bool Parameter::FilesExist(const string &paramName, int fieldNo,
 
     if (tokenizeIndex >= vec.size()) {
       std::cerr << "Expected at least " << (tokenizeIndex + 1)
-          << " tokens per entry in '" << paramName << "', but only found "
-          << vec.size();
+                << " tokens per entry in '" << paramName << "', but only found "
+                << vec.size();
       return false;
     }
     const string &pathStr = vec[tokenizeIndex];
@@ -1428,8 +1419,7 @@ string Parameter::FindParam(const string &paramSwitch, int argc, char* argv[])
     if (string(argv[i]) == paramSwitch) {
       if (i + 1 < argc) {
         return argv[i + 1];
-      }
-      else {
+      } else {
         std::cerr << "Option " << paramSwitch << " requires a parameter!";
         // TODO return some sort of error, not the empty string
       }
@@ -1444,7 +1434,7 @@ string Parameter::FindParam(const string &paramSwitch, int argc, char* argv[])
  * \param argc number of arguments on command line
  * \param argv values of paramters on command line */
 void Parameter::OverwriteParam(const string &paramSwitch,
-    const string &paramName, int argc, char* argv[])
+                               const string &paramName, int argc, char* argv[])
 {
   int startPos = -1;
   for (int i = 0; i < argc; i++) {
@@ -1480,8 +1470,7 @@ bool Parameter::ReadConfigFile(const string &filePath)
 
     if (line.size() == 0) {
       // blank line. do nothing.
-    }
-    else if (line[0] == '[') {
+    } else if (line[0] == '[') {
       // new parameter
       for (size_t currPos = 0; currPos < line.size(); currPos++) {
         if (line[currPos] == ']') {
@@ -1489,8 +1478,7 @@ bool Parameter::ReadConfigFile(const string &filePath)
           break;
         }
       }
-    }
-    else {
+    } else {
       // add value to parameter
       m_setting[paramName].push_back(line);
     }
@@ -1498,14 +1486,12 @@ bool Parameter::ReadConfigFile(const string &filePath)
   return true;
 }
 
-struct Credit
-{
+struct Credit {
   string name, contact, currentPursuits, areaResponsibility;
   int sortId;
 
   Credit(string name, string contact, string currentPursuits,
-      string areaResponsibility)
-  {
+         string areaResponsibility) {
     this->name = name;
     this->contact = contact;
     this->currentPursuits = currentPursuits;
@@ -1513,8 +1499,7 @@ struct Credit
     this->sortId = util::rand_excl(1000);
   }
 
-  bool operator<(const Credit &other) const
-  {
+  bool operator<(const Credit &other) const {
     /*
      if (areaResponsibility.size() != 0 && other.areaResponsibility.size() ==0)
      return true;
@@ -1534,7 +1519,7 @@ std::ostream& operator<<(std::ostream &os, const Credit &credit)
   if (credit.contact != "") os << "\t   contact: " << credit.contact;
   if (credit.currentPursuits != "") os << "   " << credit.currentPursuits;
   if (credit.areaResponsibility != "") os << "   I'll answer question on: "
-      << credit.areaResponsibility;
+                                            << credit.areaResponsibility;
   return os;
 }
 
@@ -1544,38 +1529,38 @@ void Parameter::PrintCredit()
   srand(time(NULL));
 
   everyone.push_back(
-      Credit("Nicola Bertoldi", "911", "", "scripts & other stuff"));
+    Credit("Nicola Bertoldi", "911", "", "scripts & other stuff"));
   everyone.push_back(Credit("Ondrej Bojar", "", "czech this out!", ""));
   everyone.push_back(
-      Credit("Chris Callison-Burch", "anytime, anywhere",
-          "international playboy", ""));
+    Credit("Chris Callison-Burch", "anytime, anywhere",
+           "international playboy", ""));
   everyone.push_back(Credit("Alexandra Constantin", "", "eu sunt varza", ""));
   everyone.push_back(
-      Credit("Brooke Cowan", "brooke@csail.mit.edu",
-          "if you're going to san francisco, be sure to wear a flower in your hair",
-          ""));
+    Credit("Brooke Cowan", "brooke@csail.mit.edu",
+           "if you're going to san francisco, be sure to wear a flower in your hair",
+           ""));
   everyone.push_back(
-      Credit("Chris Dyer", "can't. i'll be out driving my mustang",
-          "driving my mustang", ""));
+    Credit("Chris Dyer", "can't. i'll be out driving my mustang",
+           "driving my mustang", ""));
   everyone.push_back(
-      Credit("Marcello Federico", "federico at itc at it",
-          "Researcher at ITC-irst, Trento, Italy", "IRST language model"));
+    Credit("Marcello Federico", "federico at itc at it",
+           "Researcher at ITC-irst, Trento, Italy", "IRST language model"));
   everyone.push_back(
-      Credit("Evan Herbst", "Small college in upstate New York", "", ""));
+    Credit("Evan Herbst", "Small college in upstate New York", "", ""));
   everyone.push_back(
-      Credit("Philipp Koehn", "only between 2 and 4am", "",
-          "Nothing fazes this dude"));
+    Credit("Philipp Koehn", "only between 2 and 4am", "",
+           "Nothing fazes this dude"));
   everyone.push_back(
-      Credit("Christine Moran", "weird building at MIT", "", ""));
+    Credit("Christine Moran", "weird building at MIT", "", ""));
   everyone.push_back(
-      Credit("Wade Shen", "via morse code", "buying another laptop", ""));
+    Credit("Wade Shen", "via morse code", "buying another laptop", ""));
   everyone.push_back(
-      Credit("Richard Zens", "richard at aachen dot de", "",
-          "ambiguous source input, confusion networks, confusing source code"));
+    Credit("Richard Zens", "richard at aachen dot de", "",
+           "ambiguous source input, confusion networks, confusing source code"));
   everyone.push_back(
-      Credit("Hieu Hoang", "http://www.hoang.co.uk/hieu/",
-          "phd student at Edinburgh Uni. Original Moses developer",
-          "general queries/ flames on Moses."));
+    Credit("Hieu Hoang", "http://www.hoang.co.uk/hieu/",
+           "phd student at Edinburgh Uni. Original Moses developer",
+           "general queries/ flames on Moses."));
 
   sort(everyone.begin(), everyone.end());
 
@@ -1622,18 +1607,17 @@ void Parameter::OverwriteParam(const string &paramName, PARAM_VEC values)
   m_setting[paramName]; // defines the parameter, important for boolean switches
   if (m_setting[paramName].size() > 1) {
     cerr << " (the parameter had " << m_setting[paramName].size()
-        << " previous values)";
+         << " previous values)";
     UTIL_THROW_IF2(m_setting[paramName].size() != values.size(),
-        "Number of weight override for " << paramName << " is not the same as the original number of weights");
-  }
-  else {
+                   "Number of weight override for " << paramName << " is not the same as the original number of weights");
+  } else {
     cerr << " (the parameter does not have previous values)";
     m_setting[paramName].resize(values.size());
   }
   cerr << " with the following values:";
   int i = 0;
   for (PARAM_VEC::iterator iter = values.begin(); iter != values.end();
-      iter++, i++) {
+       iter++, i++) {
     m_setting[paramName][i] = *iter;
     cerr << " " << *iter;
   }
@@ -1658,7 +1642,7 @@ void Parameter::Save(const std::string path)
 
   PARAM_MAP::const_iterator iterOuter;
   for (iterOuter = m_setting.begin(); iterOuter != m_setting.end();
-      ++iterOuter) {
+       ++iterOuter) {
     const std::string &sectionName = iterOuter->first;
     file << "[" << sectionName << "]" << endl;
 
@@ -1678,7 +1662,7 @@ void Parameter::Save(const std::string path)
 
 template<>
 void Parameter::SetParameter<bool>(bool &parameter,
-    std::string const& parameterName, bool const& defaultValue) const
+                                   std::string const& parameterName, bool const& defaultValue) const
 {
   const PARAM_VEC *params = GetParam(parameterName);
 

@@ -22,14 +22,15 @@ public:
   SubPhrase<Moses2::Word> subPhrase;
 
   InputPath(MemPool &pool, const SubPhrase<Moses2::Word> &subPhrase, const Range &range,
-      size_t numPt, const InputPath *prefixPath);
+            size_t numPt, const InputPath *prefixPath);
   virtual ~InputPath();
 
   void AddTargetPhrases(const PhraseTable &pt, const TargetPhrases *tps);
   const TargetPhrases *GetTargetPhrases(const PhraseTable &pt) const;
 
-  size_t GetNumRules() const
-  { return m_numRules; }
+  size_t GetNumRules() const {
+    return m_numRules;
+  }
 
   std::string Debug(const System &system) const;
 

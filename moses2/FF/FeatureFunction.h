@@ -39,44 +39,35 @@ public:
 
   FeatureFunction(size_t startInd, const std::string &line);
   virtual ~FeatureFunction();
-  virtual void Load(System &system)
-  {
+  virtual void Load(System &system) {
   }
 
-  size_t GetStartInd() const
-  {
+  size_t GetStartInd() const {
     return m_startInd;
   }
-  size_t GetNumScores() const
-  {
+  size_t GetNumScores() const {
     return m_numScores;
   }
-  const std::string &GetName() const
-  {
+  const std::string &GetName() const {
     return m_name;
   }
-  void SetName(const std::string &val)
-  {
+  void SetName(const std::string &val) {
     m_name = val;
   }
 
-  virtual size_t HasPhraseTableInd() const
-  {
+  virtual size_t HasPhraseTableInd() const {
     return false;
   }
-  void SetPhraseTableInd(size_t ind)
-  {
+  void SetPhraseTableInd(size_t ind) {
     m_PhraseTableInd = ind;
   }
-  size_t GetPhraseTableInd() const
-  {
+  size_t GetPhraseTableInd() const {
     return m_PhraseTableInd;
   }
 
   //! if false, then this feature is not displayed in the n-best list.
   // use with care
-  virtual bool IsTuneable() const
-  {
+  virtual bool IsTuneable() const {
     return m_tuneable;
   }
 
@@ -85,30 +76,27 @@ public:
   // may have more factors than actually need, but not guaranteed.
   virtual void
   EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<Moses2::Word> &source,
-      const TargetPhraseImpl &targetPhrase, Scores &scores,
-      SCORE &estimatedScore) const = 0;
+                      const TargetPhraseImpl &targetPhrase, Scores &scores,
+                      SCORE &estimatedScore) const = 0;
 
   // For SCFG decoding, the source can contain non-terminals, NOT the raw
   // source from the input sentence
   virtual void
   EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
-      const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
-      SCORE &estimatedScore) const = 0;
+                      const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
+                      SCORE &estimatedScore) const = 0;
 
   // used by lexicalised reordering model to add scores to tp data structures
   virtual void EvaluateAfterTablePruning(MemPool &pool,
-      const TargetPhrases &tps, const Phrase<Moses2::Word> &sourcePhrase) const
-  {
+                                         const TargetPhrases &tps, const Phrase<Moses2::Word> &sourcePhrase) const {
   }
 
   virtual void EvaluateAfterTablePruning(MemPool &pool,
-      const SCFG::TargetPhrases &tps, const Phrase<SCFG::Word> &sourcePhrase) const
-  {
+                                         const SCFG::TargetPhrases &tps, const Phrase<SCFG::Word> &sourcePhrase) const {
   }
 
   // clean up temporary memory, called after processing each sentence
-  virtual void CleanUpAfterSentenceProcessing() const
-  {
+  virtual void CleanUpAfterSentenceProcessing() const {
   }
 
 protected:

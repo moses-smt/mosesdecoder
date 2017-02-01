@@ -12,28 +12,23 @@ template<class KeyClass, class ValueClass>
 class Node
 {
 public:
-  Node()
-  {
+  Node() {
   }
   Node(const ValueClass& value) :
-      m_value(value)
-  {
+    m_value(value) {
   }
   ~Node();
   void setKey(const KeyClass& key);
-  void setValue(const ValueClass& value)
-  {
+  void setValue(const ValueClass& value) {
     m_value = value;
   }
   Node* findSub(const KeyClass& key);
   const Node* findSub(const KeyClass& key) const;
-  Node *addSubnode(const KeyClass& cKey)
-  {
+  Node *addSubnode(const KeyClass& cKey) {
     Node *node = findSub(cKey);
     if (node) {
       return node;
-    }
-    else {
+    } else {
       node = new Node();
       subNodes[cKey] = node;
       return node;
@@ -41,8 +36,7 @@ public:
   }
 
   std::vector<Node*> getSubnodes();
-  const ValueClass &getValue() const
-  {
+  const ValueClass &getValue() const {
     return m_value;
   }
 
@@ -64,7 +58,7 @@ Node<KeyClass, ValueClass>::~Node()
 
 template<class KeyClass, class ValueClass>
 const Node<KeyClass, ValueClass>* Node<KeyClass, ValueClass>::findSub(
-    const KeyClass& cKey) const
+  const KeyClass& cKey) const
 {
   typename boost::unordered_map<KeyClass, Node*>::const_iterator iter;
   iter = subNodes.find(cKey);
@@ -77,7 +71,7 @@ const Node<KeyClass, ValueClass>* Node<KeyClass, ValueClass>::findSub(
 
 template<class KeyClass, class ValueClass>
 Node<KeyClass, ValueClass>* Node<KeyClass, ValueClass>::findSub(
-    const KeyClass& cKey)
+  const KeyClass& cKey)
 {
   typename boost::unordered_map<KeyClass, Node*>::iterator iter;
   iter = subNodes.find(cKey);

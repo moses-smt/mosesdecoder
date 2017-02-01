@@ -22,7 +22,7 @@ class System;
 class Manager;
 
 class
-TranslationRequest : public virtual TranslationTask
+  TranslationRequest : public virtual TranslationTask
 {
 protected:
   std::map<std::string, xmlrpc_c::value> m_retData;
@@ -41,7 +41,7 @@ protected:
 
   void
   pack_hypothesis(const Manager& manager, Hypothesis const* h,
-      std::string const& key,
+                  std::string const& key,
                   std::map<std::string, xmlrpc_c::value> & dest) const;
 
 public:
@@ -49,12 +49,12 @@ public:
   static
   boost::shared_ptr<TranslationRequest>
   create(Translator* translator,
-	 xmlrpc_c::paramList const& paramList,
+         xmlrpc_c::paramList const& paramList,
          boost::condition_variable& cond,
          boost::mutex& mut,
          System &system,
-        const std::string &line,
-        long translationId);
+         const std::string &line,
+         long translationId);
 
 
   virtual bool

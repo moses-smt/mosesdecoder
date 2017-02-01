@@ -18,7 +18,7 @@ namespace NSNormal
 {
 
 Stacks::Stacks(const Manager &mgr) :
-    m_mgr(mgr)
+  m_mgr(mgr)
 {
   // TODO Auto-generated constructor stub
 
@@ -46,8 +46,7 @@ std::string Stacks::Debug(const System &system) const
     const Stack *stack = m_stacks[i];
     if (stack) {
       out << stack->GetSize() << " ";
-    }
-    else {
+    } else {
       out << "N ";
     }
   }
@@ -55,7 +54,7 @@ std::string Stacks::Debug(const System &system) const
 }
 
 void Stacks::Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
-    ArcLists &arcLists)
+                 ArcLists &arcLists)
 {
   size_t numWordsCovered = hypo->GetBitmap().GetNumWordsCovered();
   //cerr << "numWordsCovered=" << numWordsCovered << endl;

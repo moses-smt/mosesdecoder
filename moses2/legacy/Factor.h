@@ -49,14 +49,12 @@ class Factor
   size_t m_id;
 
   //! protected constructor. only friend class, FactorCollection, is allowed to create Factor objects
-  Factor()
-  {
+  Factor() {
   }
 
   // Needed for STL containers.  They'll delegate through FactorFriend, which is never exposed publicly.
   Factor(const Factor &factor) :
-      m_string(factor.m_string), m_id(factor.m_id)
-  {
+    m_string(factor.m_string), m_id(factor.m_id) {
   }
 
   // Not implemented.  Shouldn't be called.
@@ -64,13 +62,11 @@ class Factor
 
 public:
   //! original string representation of the factor
-  StringPiece GetString() const
-  {
+  StringPiece GetString() const {
     return m_string;
   }
   //! contiguous ID
-  inline size_t GetId() const
-  {
+  inline size_t GetId() const {
     return m_id;
   }
 
@@ -79,21 +75,18 @@ public:
    *	+1 = more than
    *	0	= same
    */
-  inline int Compare(const Factor &compare) const
-  {
+  inline int Compare(const Factor &compare) const {
     if (this < &compare) return -1;
     if (this > &compare) return 1;
     return 0;
   }
   //! transitive comparison used for adding objects into FactorCollection
-  inline bool operator<(const Factor &compare) const
-  {
+  inline bool operator<(const Factor &compare) const {
     return this < &compare;
   }
 
   // quick equality comparison. Not used
-  inline bool operator==(const Factor &compare) const
-  {
+  inline bool operator==(const Factor &compare) const {
     return this == &compare;
   }
 };

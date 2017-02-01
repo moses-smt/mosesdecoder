@@ -26,16 +26,16 @@ TargetPhraseImpl *TargetPhraseImpl::CreateFromString(MemPool &pool,
   vector<string> toks = Tokenize(str);
   size_t size = toks.size();
   TargetPhraseImpl *ret =
-      new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, pt, system,
-          size);
+    new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, pt, system,
+        size);
   ret->PhraseImplTemplate<Word>::CreateFromString(vocab, system, toks);
 
   return ret;
 }
 
 TargetPhraseImpl::TargetPhraseImpl(MemPool &pool, const PhraseTable &pt,
-    const System &system, size_t size)
-:Moses2::TargetPhrase<Moses2::Word>(pool, pt, system, size)
+                                   const System &system, size_t size)
+  :Moses2::TargetPhrase<Moses2::Word>(pool, pt, system, size)
 {
   m_scores = new (pool.Allocate<Scores>()) Scores(system, pool,
       system.featureFunctions.GetNumScores());

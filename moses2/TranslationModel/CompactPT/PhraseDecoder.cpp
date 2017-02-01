@@ -192,10 +192,10 @@ std::string PhraseDecoder::MakeSourceKey(std::string &source)
 }
 
 TargetPhraseVectorPtr PhraseDecoder::CreateTargetPhraseCollection(
-    const ManagerBase &mgr,
-    const Phrase<Word> &sourcePhrase,
-    bool topLevel,
-    bool eval)
+  const ManagerBase &mgr,
+  const Phrase<Word> &sourcePhrase,
+  bool topLevel,
+  bool eval)
 {
 
   // Not using TargetPhraseCollection avoiding "new" operator
@@ -226,9 +226,9 @@ TargetPhraseVectorPtr PhraseDecoder::CreateTargetPhraseCollection(
   size_t sourcePhraseId = m_phraseDictionary.m_hash[MakeSourceKey(sourcePhraseString)];
   /*
   cerr << "sourcePhraseString=" << sourcePhraseString << " "
-		  << sourcePhraseId
-		  << endl;
-	*/
+  	  << sourcePhraseId
+  	  << endl;
+  */
   if(sourcePhraseId != m_phraseDictionary.m_hash.GetSize()) {
     // Retrieve compressed and encoded target phrase collection
     std::string encodedPhraseCollection;
@@ -251,12 +251,12 @@ TargetPhraseVectorPtr PhraseDecoder::CreateTargetPhraseCollection(
 }
 
 TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
-    const ManagerBase &mgr,
-    TargetPhraseVectorPtr tpv,
-    BitWrapper<> &encodedBitStream,
-    const Phrase<Word> &sourcePhrase,
-    bool topLevel,
-    bool eval)
+  const ManagerBase &mgr,
+  TargetPhraseVectorPtr tpv,
+  BitWrapper<> &encodedBitStream,
+  const Phrase<Word> &sourcePhrase,
+  bool topLevel,
+  bool eval)
 {
   const System &system = mgr.system;
   FactorCollection &vocab = system.GetVocab();

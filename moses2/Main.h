@@ -7,7 +7,8 @@
 #pragma once
 #include <iostream>
 
-namespace Moses2 {
+namespace Moses2
+{
 class Parameter;
 class System;
 class ThreadPool;

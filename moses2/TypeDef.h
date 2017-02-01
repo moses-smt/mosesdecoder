@@ -46,8 +46,7 @@ typedef std::vector<FactorType> FactorList;
 // Note: StaticData uses SearchAlgorithm to determine whether the translation
 // model is phrase-based or syntax-based.  If you add a syntax-based search
 // algorithm here then you should also update StaticData::IsSyntax().
-enum SearchAlgorithm
-{
+enum SearchAlgorithm {
   Normal = 0, CubePruning = 1,
   //,CubeGrowing = 2
   CYKPlus = 3,
@@ -108,12 +107,10 @@ public:
   bool added;
   HypothesisBase *other;
 
-  StackAdd()
-  {
+  StackAdd() {
   }
   StackAdd(bool vadded, HypothesisBase *vOther) :
-      added(vadded), other(vOther)
-  {
+    added(vadded), other(vOther) {
   }
 };
 

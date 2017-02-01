@@ -19,8 +19,7 @@ typedef std::pair<std::string, float> UnknownLHSEntry;
 typedef std::vector<UnknownLHSEntry>  UnknownLHSList;
 
 struct
-SyntaxOptions : public OptionsBaseClass
-{
+    SyntaxOptions : public OptionsBaseClass {
   S2TParsingAlgorithm s2t_parsing_algo;
   SCFG::Word input_default_non_terminal;
   SCFG::Word output_default_non_terminal;

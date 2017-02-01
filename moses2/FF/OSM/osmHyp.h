@@ -22,8 +22,9 @@ public:
   virtual size_t hash() const;
   virtual bool operator==(const FFState& other) const;
 
-  virtual std::string ToString() const
-  { return "osmState"; }
+  virtual std::string ToString() const {
+    return "osmState";
+  }
 
   void saveState(int jVal, int eVal, std::map <int , std::string> & gapVal);
   int getJ()const {

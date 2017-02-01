@@ -43,28 +43,24 @@ class OutputCollector
 {
 public:
   OutputCollector(std::ostream* outStream = &std::cout,
-      std::ostream* debugStream = &std::cerr) :
-      m_nextOutput(0), m_outStream(outStream), m_debugStream(debugStream), m_isHoldingOutputStream(
-          false), m_isHoldingDebugStream(false)
-  {
+                  std::ostream* debugStream = &std::cerr) :
+    m_nextOutput(0), m_outStream(outStream), m_debugStream(debugStream), m_isHoldingOutputStream(
+      false), m_isHoldingDebugStream(false) {
   }
 
   OutputCollector(std::string xout, std::string xerr = "") :
-      m_nextOutput(0)
-  {
+    m_nextOutput(0) {
     // TO DO open magic streams instead of regular ofstreams! [UG]
 
     if (xout == "/dev/stderr") {
       m_outStream = &std::cerr;
       m_isHoldingOutputStream = false;
-    }
-    else if (xout.size() && xout != "/dev/stdout" && xout != "-") {
+    } else if (xout.size() && xout != "/dev/stdout" && xout != "-") {
       m_outStream = new std::ofstream(xout.c_str());
       UTIL_THROW_IF2(!m_outStream->good(),
-          "Failed to open output file" << xout);
+                     "Failed to open output file" << xout);
       m_isHoldingOutputStream = true;
-    }
-    else {
+    } else {
       m_outStream = &std::cout;
       m_isHoldingOutputStream = false;
     }
@@ -72,37 +68,31 @@ public:
     if (xerr == "/dev/stdout") {
       m_debugStream = &std::cout;
       m_isHoldingDebugStream = false;
-    }
-    else if (xerr.size() && xerr != "/dev/stderr") {
+    } else if (xerr.size() && xerr != "/dev/stderr") {
       m_debugStream = new std::ofstream(xerr.c_str());
       UTIL_THROW_IF2(!m_debugStream->good(),
-          "Failed to open debug stream" << xerr);
+                     "Failed to open debug stream" << xerr);
       m_isHoldingDebugStream = true;
-    }
-    else {
+    } else {
       m_debugStream = &std::cerr;
       m_isHoldingDebugStream = false;
     }
   }
 
-  ~OutputCollector()
-  {
+  ~OutputCollector() {
     if (m_isHoldingOutputStream) delete m_outStream;
     if (m_isHoldingDebugStream) delete m_debugStream;
   }
 
-  void HoldOutputStream()
-  {
+  void HoldOutputStream() {
     m_isHoldingOutputStream = true;
   }
 
-  void HoldDebugStream()
-  {
+  void HoldDebugStream() {
     m_isHoldingDebugStream = true;
   }
 
-  bool OutputIsCout() const
-  {
+  bool OutputIsCout() const {
     return (m_outStream == &std::cout);
   }
 
@@ -110,8 +100,7 @@ public:
    * Write or cache the output, as appropriate.
    **/
   void Write(int sourceId, const std::string& output, const std::string& debug =
-      "")
-  {
+               "") {
 #ifdef WITH_THREADS
     boost::mutex::scoped_lock lock(m_mutex);
 #endif
@@ -126,15 +115,14 @@ public:
         *m_outStream << iter->second << std::flush;
         ++m_nextOutput;
         std::map<int, std::string>::iterator debugIter = m_debugs.find(
-            iter->first);
+              iter->first);
         m_outputs.erase(iter);
         if (debugIter != m_debugs.end()) {
           *m_debugStream << debugIter->second << std::flush;
           m_debugs.erase(debugIter);
         }
       }
-    }
-    else {
+    } else {
       //save for later
       m_outputs[sourceId] = output;
       m_debugs[sourceId] = debug;
@@ -154,8 +142,7 @@ private:
 #endif
 
 public:
-  void SetOutputStream(std::ostream* outStream)
-  {
+  void SetOutputStream(std::ostream* outStream) {
     m_outStream = outStream;
   }
 

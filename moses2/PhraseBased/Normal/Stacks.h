@@ -27,29 +27,25 @@ public:
 
   void Init(const Manager &mgr, size_t numStacks);
 
-  size_t GetSize() const
-  {
+  size_t GetSize() const {
     return m_stacks.size();
   }
 
-  const Stack &Back() const
-  {
+  const Stack &Back() const {
     return *m_stacks.back();
   }
 
-  Stack &operator[](size_t ind)
-  {
+  Stack &operator[](size_t ind) {
     return *m_stacks[ind];
   }
 
-  void Delete(size_t ind)
-  {
+  void Delete(size_t ind) {
     delete m_stacks[ind];
     m_stacks[ind] = NULL;
   }
 
   void Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
-      ArcLists &arcLists);
+           ArcLists &arcLists);
 
   std::string Debug(const System &system) const;
 

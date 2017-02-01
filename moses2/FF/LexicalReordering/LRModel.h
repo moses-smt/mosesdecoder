@@ -19,21 +19,17 @@ class LexicalReordering;
 class LRModel
 {
 public:
-  enum ModelType
-  {
+  enum ModelType {
     Monotonic, MSD, MSLR, LeftRight, None
   };
-  enum Direction
-  {
+  enum Direction {
     Forward, Backward, Bidirectional
   };
-  enum Condition
-  {
+  enum Condition {
     F, E, FE
   };
 
-  enum ReorderingType
-  {
+  enum ReorderingType {
     M = 0, // monotonic
     NM = 1, // non-monotonic
     S = 1, // swap
@@ -49,34 +45,28 @@ public:
   LRModel(const std::string &modelType, LexicalReordering &ff);
   virtual ~LRModel();
 
-  ModelType GetModelType() const
-  {
+  ModelType GetModelType() const {
     return m_modelType;
   }
-  Direction GetDirection() const
-  {
+  Direction GetDirection() const {
     return m_direction;
   }
-  Condition GetCondition() const
-  {
+  Condition GetCondition() const {
     return m_condition;
   }
 
-  bool IsPhraseBased() const
-  {
+  bool IsPhraseBased() const {
     return m_phraseBased;
   }
 
-  bool CollapseScores() const
-  {
+  bool CollapseScores() const {
     return m_collapseScores;
   }
 
   size_t GetNumberOfTypes() const;
 
   LexicalReordering*
-  GetScoreProducer() const
-  {
+  GetScoreProducer() const {
     return m_scoreProducer;
   }
 

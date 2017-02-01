@@ -21,23 +21,19 @@ template<typename T>
 class UnorderedComparer
 {
 public:
-  size_t operator()(const T& obj) const
-  {
+  size_t operator()(const T& obj) const {
     return obj.hash();
   }
 
-  bool operator()(const T& a, const T& b) const
-  {
+  bool operator()(const T& a, const T& b) const {
     return a == b;
   }
 
-  size_t operator()(const T* obj) const
-  {
+  size_t operator()(const T* obj) const {
     return obj->hash();
   }
 
-  bool operator()(const T* a, const T* b) const
-  {
+  bool operator()(const T* a, const T* b) const {
     return (*a) == (*b);
   }
 
@@ -53,7 +49,7 @@ void Init(T arr[], size_t size, const T &val)
 
 //! delete white spaces at beginning and end of string
 inline std::string Trim(const std::string& str, const std::string dropChars =
-    " \t\n\r")
+                          " \t\n\r")
 {
   std::string res = str;
   res.erase(str.find_last_not_of(dropChars) + 1);
@@ -107,32 +103,32 @@ inline SearchAlgorithm Scan<SearchAlgorithm>(const std::string &input)
 }
 
 template<>
-  inline XmlInputType Scan<XmlInputType>(const std::string &input)
-  {
-    XmlInputType ret;
-    if (input=="exclusive") ret = XmlExclusive;
-    else if (input=="inclusive") ret = XmlInclusive;
-    else if (input=="constraint") ret = XmlConstraint;
-    else if (input=="ignore") ret = XmlIgnore;
-    else if (input=="pass-through") ret = XmlPassThrough;
-    else {
-      UTIL_THROW2("Unknown XML input type");
-    }
-
-    return ret;
+inline XmlInputType Scan<XmlInputType>(const std::string &input)
+{
+  XmlInputType ret;
+  if (input=="exclusive") ret = XmlExclusive;
+  else if (input=="inclusive") ret = XmlInclusive;
+  else if (input=="constraint") ret = XmlConstraint;
+  else if (input=="ignore") ret = XmlIgnore;
+  else if (input=="pass-through") ret = XmlPassThrough;
+  else {
+    UTIL_THROW2("Unknown XML input type");
   }
 
-template<>
-  inline InputTypeEnum Scan<InputTypeEnum>(const std::string &input)
-  {
-    return (InputTypeEnum) Scan<size_t>(input);
-  }
+  return ret;
+}
 
 template<>
-  inline WordAlignmentSort Scan<WordAlignmentSort>(const std::string &input)
-  {
-    return (WordAlignmentSort) Scan<size_t>(input);
-  }
+inline InputTypeEnum Scan<InputTypeEnum>(const std::string &input)
+{
+  return (InputTypeEnum) Scan<size_t>(input);
+}
+
+template<>
+inline WordAlignmentSort Scan<WordAlignmentSort>(const std::string &input)
+{
+  return (WordAlignmentSort) Scan<size_t>(input);
+}
 
 //! convert vectors of string to vectors of type T variables
 template<typename T>
@@ -182,7 +178,7 @@ inline std::vector<std::string> Tokenize(const std::string& str,
 //! tokenise input string to vector of type T
 template<typename T>
 inline std::vector<T> Tokenize(const std::string &input,
-    const std::string& delimiters = " \t")
+                               const std::string& delimiters = " \t")
 {
   std::vector<std::string> stringVector = Tokenize(input, delimiters);
   return Scan<T>(stringVector);
@@ -201,8 +197,7 @@ inline std::vector<std::string> TokenizeFirstOnly(const std::string& str,
     // Found a token, add it to the vector.
     tokens.push_back(str.substr(0, pos));
     tokens.push_back(str.substr(pos + 1, str.size() - pos - 1));
-  }
-  else {
+  } else {
     tokens.push_back(str);
   }
 
@@ -210,7 +205,7 @@ inline std::vector<std::string> TokenizeFirstOnly(const std::string& str,
 }
 
 inline std::vector<std::string> TokenizeMultiCharSeparator(
-    const std::string& str, const std::string& separator)
+  const std::string& str, const std::string& separator)
 {
   std::vector<std::string> tokens;
 
@@ -233,7 +228,7 @@ inline std::vector<std::string> TokenizeMultiCharSeparator(
 
 // speeded up version of above
 inline void TokenizeMultiCharSeparator(std::vector<std::string> &output,
-    const std::string& str, const std::string& separator)
+                                       const std::string& str, const std::string& separator)
 {
   size_t pos = 0;
   // Find first "non-delimiter".
@@ -296,7 +291,7 @@ template<class COLL>
 void RemoveAllInColl(COLL &coll)
 {
   for (typename COLL::const_iterator iter = coll.begin(); iter != coll.end();
-      ++iter) {
+       ++iter) {
     delete (*iter);
   }
   coll.clear();
@@ -328,10 +323,8 @@ T &GetThreadSpecificObj(boost::thread_specific_ptr<T> &coll)
 template<class T, class S, class C>
 S& Container(std::priority_queue<T, S, C>& q)
 {
-  struct HackedQueue: private std::priority_queue<T, S, C>
-  {
-    static S& Container(std::priority_queue<T, S, C>& q)
-    {
+  struct HackedQueue: private std::priority_queue<T, S, C> {
+    static S& Container(std::priority_queue<T, S, C>& q) {
       return q.*&HackedQueue::c;
     }
   };

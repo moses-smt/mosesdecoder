@@ -20,14 +20,12 @@ namespace Moses2
 
 class MemPool
 {
-  struct Page
-  {
+  struct Page {
     uint8_t *mem;
     uint8_t *end;
     size_t size;
 
-    Page()
-    {
+    Page() {
     }
     Page(std::size_t size);
     ~Page();
@@ -38,8 +36,7 @@ public:
 
   ~MemPool();
 
-  uint8_t *Allocate(std::size_t size)
-  {
+  uint8_t *Allocate(std::size_t size) {
     size = (size + 3) & 0xfffffffc;
 
     uint8_t *ret = current_;
@@ -48,8 +45,7 @@ public:
     Page &page = *m_pages[m_currPage];
     if (current_ <= page.end) {
       // return what we got
-    }
-    else {
+    } else {
       ret = More(size);
     }
     return ret;
@@ -57,15 +53,13 @@ public:
   }
 
   template<typename T>
-  T *Allocate()
-  {
+  T *Allocate() {
     uint8_t *ret = Allocate(sizeof(T));
     return (T*) ret;
   }
 
   template<typename T>
-  T *Allocate(size_t num)
-  {
+  T *Allocate(size_t num) {
     uint8_t *ret = Allocate(sizeof(T) * num);
     return (T*) ret;
   }
@@ -94,18 +88,15 @@ class ObjectPoolContiguous
 
 public:
   ObjectPoolContiguous(std::size_t initSize = 100000) :
-      m_size(0), m_actualSize(initSize)
-  {
+    m_size(0), m_actualSize(initSize) {
     m_vec = (T*) malloc(sizeof(T) * initSize);
   }
 
-  ~ObjectPoolContiguous()
-  {
+  ~ObjectPoolContiguous() {
     free(m_vec);
   }
 
-  void Add(T &obj)
-  {
+  void Add(T &obj) {
     if (m_size >= m_actualSize) {
       //std::cerr << std::endl << "MORE " << m_size << std::endl;
       m_actualSize *= 2;
@@ -116,46 +107,38 @@ public:
     ++m_size;
   }
 
-  bool IsEmpty() const
-  {
+  bool IsEmpty() const {
     return m_size == 0;
   }
 
-  void Reset()
-  {
+  void Reset() {
     m_size = 0;
   }
 
   // vector op
-  size_t GetSize() const
-  {
+  size_t GetSize() const {
     return m_size;
   }
 
-  const T& operator[](size_t ind) const
-  {
+  const T& operator[](size_t ind) const {
     return m_vec[ind];
   }
 
   // stack op
-  const T &Get() const
-  {
+  const T &Get() const {
     return m_vec[m_size - 1];
   }
 
-  void Pop()
-  {
+  void Pop() {
     --m_size;
   }
 
-  T *GetData()
-  {
+  T *GetData() {
     return m_vec;
   }
 
   template<typename ORDERER>
-  void Sort(const ORDERER &orderer)
-  {
+  void Sort(const ORDERER &orderer) {
     std::sort(m_vec, m_vec + m_size, orderer);
   }
 

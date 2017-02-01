@@ -27,77 +27,82 @@ typedef Vector<const Hypothesis*>  Hypotheses;
 class MiniStack
 {
 public:
-	typedef boost::unordered_set<const Hypothesis*,
-			  UnorderedComparer<Hypothesis>,
-			  UnorderedComparer<Hypothesis>
-			   > _HCType;
+  typedef boost::unordered_set<const Hypothesis*,
+          UnorderedComparer<Hypothesis>,
+          UnorderedComparer<Hypothesis>
+          > _HCType;
 
-	MiniStack(const Manager &mgr);
+  MiniStack(const Manager &mgr);
 
-	StackAdd Add(const Hypothesis *hypo);
+  StackAdd Add(const Hypothesis *hypo);
 
-	_HCType &GetColl()
-	{ return m_coll; }
+  _HCType &GetColl() {
+    return m_coll;
+  }
 
-	const _HCType &GetColl() const
-	{ return m_coll; }
+  const _HCType &GetColl() const {
+    return m_coll;
+  }
 
-	void Clear();
+  void Clear();
 
-	Hypotheses &GetSortedAndPruneHypos(const Manager &mgr) const;
+  Hypotheses &GetSortedAndPruneHypos(const Manager &mgr) const;
 
 protected:
-	_HCType m_coll;
-	mutable Hypotheses *m_sortedHypos;
+  _HCType m_coll;
+  mutable Hypotheses *m_sortedHypos;
 
-	void SortAndPruneHypos(const Manager &mgr) const;
+  void SortAndPruneHypos(const Manager &mgr) const;
 
 };
 
 /////////////////////////////////////////////
-class Stack {
+class Stack
+{
 protected:
 
 
 public:
   typedef std::pair<const Bitmap*, size_t> HypoCoverage;
-		  // bitmap and current endPos of hypos
+  // bitmap and current endPos of hypos
   typedef boost::unordered_map<HypoCoverage, Hypotheses*> SortedHypos;
 
   typedef const Bitmap* HypoCoverageInternal;
   typedef boost::unordered_map<HypoCoverageInternal, MiniStack*
-		  ,boost::hash<HypoCoverageInternal>
-		  ,std::equal_to<HypoCoverageInternal>
-  	  	  > Coll;
+  ,boost::hash<HypoCoverageInternal>
+  ,std::equal_to<HypoCoverageInternal>
+  > Coll;
 
 
-	Stack(const Manager &mgr);
-	virtual ~Stack();
+  Stack(const Manager &mgr);
+  virtual ~Stack();
 
-	size_t GetHypoSize() const;
+  size_t GetHypoSize() const;
 
-	Coll &GetColl()
-	{ return m_coll; }
-	const Coll &GetColl() const
-	{ return m_coll; }
+  Coll &GetColl() {
+    return m_coll;
+  }
+  const Coll &GetColl() const {
+    return m_coll;
+  }
 
-	void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
+  void Add(const Hypothesis *hypo, Recycler<Hypothesis*> &hypoRecycle);
 
-	MiniStack &GetMiniStack(const HypoCoverageInternal &key);
+  MiniStack &GetMiniStack(const HypoCoverageInternal &key);
 
-	std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
-	void Clear();
+  std::vector<const Hypothesis*> GetBestHypos(size_t num) const;
+  void Clear();
 
-	SortedHypos GetSortedAndPruneHypos(const Manager &mgr) const;
-	void SortAndPruneHypos(const Manager &mgr, Hypotheses &hypos) const;
+  SortedHypos GetSortedAndPruneHypos(const Manager &mgr) const;
+  void SortAndPruneHypos(const Manager &mgr, Hypotheses &hypos) const;
 
-	void DebugCounts();
+  void DebugCounts();
 
 protected:
-	const Manager &m_mgr;
-	Coll m_coll;
+  const Manager &m_mgr;
+  Coll m_coll;
 
-	std::deque<MiniStack*> m_miniStackRecycler;
+  std::deque<MiniStack*> m_miniStackRecycler;
 
 
 };

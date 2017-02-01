@@ -17,7 +17,7 @@ namespace Moses2
 ////////////////////////////////////////////////////////////////////////////////////////
 
 OpSequenceModel::OpSequenceModel(size_t startInd, const std::string &line) :
-    StatefulFeatureFunction(startInd, line)
+  StatefulFeatureFunction(startInd, line)
 {
   sFactor = 0;
   tFactor = 0;
@@ -96,7 +96,7 @@ void OpSequenceModel::EvaluateInIsolation(MemPool &pool,
   obj.populateScores(scoresVec,numFeatures);
 
   SCORE weightedScore = Scores::CalcWeightedScore(system, *this,
-      scoresVec.data());
+                        scoresVec.data());
   estimatedScore += weightedScore;
 
 }

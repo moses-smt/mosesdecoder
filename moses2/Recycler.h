@@ -18,45 +18,37 @@ class Recycler
 {
 public:
   Recycler() :
-      m_currInd(0)
-  {
+    m_currInd(0) {
   }
-  virtual ~Recycler()
-  {
+  virtual ~Recycler() {
   }
 
-  T Get()
-  {
+  T Get() {
     if (!m_coll.empty()) {
       T &obj = m_coll.back();
       m_coll.pop_back();
       return obj;
-    }
-    else if (m_currInd) {
+    } else if (m_currInd) {
       --m_currInd;
       T &obj = m_all[m_currInd];
       return obj;
-    }
-    else {
+    } else {
       return NULL;
     }
   }
 
-  void Clear()
-  {
+  void Clear() {
     m_coll.clear();
     m_currInd = m_all.size();
   }
 
   // call this for new objects when u 1st create it. It is assumed the object will be used right away
-  void Keep(const T& val)
-  {
+  void Keep(const T& val) {
     m_all.push_back(val);
   }
 
   // call this for existing object to put back into queue for reuse
-  void Recycle(const T& val)
-  {
+  void Recycle(const T& val) {
     m_coll.push_back(val);
   }
 
