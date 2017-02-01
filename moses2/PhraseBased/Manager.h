@@ -37,21 +37,25 @@ class Manager: public ManagerBase
 {
 public:
   Manager(System &sys, const TranslationTask &task, const std::string &inputStr,
-      long translationId);
+          long translationId);
 
   virtual ~Manager();
 
-  Bitmaps &GetBitmaps()
-  {  return *m_bitmaps; }
+  Bitmaps &GetBitmaps() {
+    return *m_bitmaps;
+  }
 
-  const EstimatedScores &GetEstimatedScores() const
-  {  return *m_estimatedScores; }
+  const EstimatedScores &GetEstimatedScores() const {
+    return *m_estimatedScores;
+  }
 
-  const InputPaths &GetInputPaths() const
-  {  return m_inputPaths; }
+  const InputPaths &GetInputPaths() const {
+    return m_inputPaths;
+  }
 
-  const TargetPhraseImpl &GetInitPhrase() const
-  {  return *m_initPhrase; }
+  const TargetPhraseImpl &GetInitPhrase() const {
+    return *m_initPhrase;
+  }
 
   void Decode();
   std::string OutputBest() const;

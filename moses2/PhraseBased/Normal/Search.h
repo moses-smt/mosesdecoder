@@ -41,9 +41,9 @@ protected:
   void Decode(size_t stackInd);
   void Extend(const Hypothesis &hypo, const InputPath &path);
   void Extend(const Hypothesis &hypo, const TargetPhrases &tps,
-      const InputPath &path, const Bitmap &newBitmap, SCORE estimatedScore);
+              const InputPath &path, const Bitmap &newBitmap, SCORE estimatedScore);
   void Extend(const Hypothesis &hypo, const TargetPhraseImpl &tp,
-      const InputPath &path, const Bitmap &newBitmap, SCORE estimatedScore);
+              const InputPath &path, const Bitmap &newBitmap, SCORE estimatedScore);
 
 };
 

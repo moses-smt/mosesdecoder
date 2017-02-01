@@ -13,7 +13,7 @@ namespace Moses2
 
 SkeletonStatelessFF::SkeletonStatelessFF(size_t startInd,
     const std::string &line) :
-    StatelessFeatureFunction(startInd, line)
+  StatelessFeatureFunction(startInd, line)
 {
   ReadParameters();
 }

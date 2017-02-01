@@ -23,16 +23,17 @@ class InputPaths: public InputPathsBase
 public:
   void Init(const InputType &input, const ManagerBase &mgr);
 
-  const InputPath &GetBlank() const
-  {
+  const InputPath &GetBlank() const {
     return *m_blank;
   }
 
-  Matrix<InputPath*> &GetMatrix()
-  { return *m_matrix; }
+  Matrix<InputPath*> &GetMatrix() {
+    return *m_matrix;
+  }
 
-  const Matrix<InputPath*> &GetMatrix() const
-  { return *m_matrix; }
+  const Matrix<InputPath*> &GetMatrix() const {
+    return *m_matrix;
+  }
 
 protected:
   InputPath *m_blank;

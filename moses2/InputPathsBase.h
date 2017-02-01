@@ -22,8 +22,7 @@ class InputPathsBase
 {
   typedef std::vector<InputPathBase*> Coll;
 public:
-  InputPathsBase()
-  {
+  InputPathsBase() {
   }
   virtual ~InputPathsBase();
 
@@ -31,21 +30,17 @@ public:
   typedef Coll::iterator iterator;
   typedef Coll::const_iterator const_iterator;
 
-  const_iterator begin() const
-  {
+  const_iterator begin() const {
     return m_inputPaths.begin();
   }
-  const_iterator end() const
-  {
+  const_iterator end() const {
     return m_inputPaths.end();
   }
 
-  iterator begin()
-  {
+  iterator begin() {
     return m_inputPaths.begin();
   }
-  iterator end()
-  {
+  iterator end() {
     return m_inputPaths.end();
   }
 

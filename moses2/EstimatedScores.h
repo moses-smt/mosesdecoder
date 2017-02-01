@@ -36,8 +36,7 @@ class EstimatedScores: public Matrix<float>
 {
 public:
   EstimatedScores(MemPool &pool, size_t size) :
-      Matrix<float>(pool, size, size)
-  {
+    Matrix<float>(pool, size, size) {
   }
 
   ~EstimatedScores(); // not implemented
@@ -45,8 +44,7 @@ public:
   float CalcEstimatedScore(Bitmap const&) const;
   float CalcEstimatedScore(Bitmap const&, size_t startPos, size_t endPos) const;
 
-  std::ostream &Debug(std::ostream &out, const System &system) const
-  {
+  std::ostream &Debug(std::ostream &out, const System &system) const {
     for (size_t endPos = 0; endPos < GetSize(); endPos++) {
       for (size_t startPos = 0; startPos < GetSize(); startPos++)
         out << GetValue(startPos, endPos) << " ";

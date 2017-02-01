@@ -17,33 +17,34 @@ namespace SCFG
 class NBests
 {
 public:
-	Contenders contenders;
-	boost::unordered_set<size_t> distinctHypos;
+  Contenders contenders;
+  boost::unordered_set<size_t> distinctHypos;
 
-	NBests(const SCFG::Manager &mgr,
-			const ArcList &arcList,
-			NBestColl &nbestColl);
+  NBests(const SCFG::Manager &mgr,
+         const ArcList &arcList,
+         NBestColl &nbestColl);
 
-	virtual ~NBests();
+  virtual ~NBests();
 
-	size_t GetSize() const
-	{ return m_coll.size(); }
+  size_t GetSize() const {
+    return m_coll.size();
+  }
 
-	const NBest &Get(size_t ind) const
-	{ return *m_coll[ind]; }
+  const NBest &Get(size_t ind) const {
+    return *m_coll[ind];
+  }
 
-	bool Extend(const SCFG::Manager &mgr,
-			NBestColl &nbestColl,
-			size_t ind);
+  bool Extend(const SCFG::Manager &mgr,
+              NBestColl &nbestColl,
+              size_t ind);
 
 protected:
-	std::vector<const NBest*> m_coll;
-	size_t indIter;
+  std::vector<const NBest*> m_coll;
+  size_t indIter;
 
-	void Add(const NBest *nbest)
-	{
-		m_coll.push_back(nbest);
-	}
+  void Add(const NBest *nbest) {
+    m_coll.push_back(nbest);
+  }
 
 };
 

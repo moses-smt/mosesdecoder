@@ -19,35 +19,34 @@ namespace SCFG
 Hypothesis *Hypothesis::Create(MemPool &pool, Manager &mgr)
 {
   //  ++g_numHypos;
-    Hypothesis *ret;
-    //ret = new (pool.Allocate<Hypothesis>()) Hypothesis(pool, mgr.system);
+  Hypothesis *ret;
+  //ret = new (pool.Allocate<Hypothesis>()) Hypothesis(pool, mgr.system);
 
-    Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
-    ret = static_cast<Hypothesis*>(recycler.Get());
-    if (ret) {
-      // got new hypo from recycler. Do nothing
-    }
-    else {
-      ret = new (pool.Allocate<Hypothesis>()) Hypothesis(pool, mgr.system);
-      //cerr << "Hypothesis=" << sizeof(Hypothesis) << " " << ret << endl;
-      recycler.Keep(ret);
-    }
-    return ret;
+  Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
+  ret = static_cast<Hypothesis*>(recycler.Get());
+  if (ret) {
+    // got new hypo from recycler. Do nothing
+  } else {
+    ret = new (pool.Allocate<Hypothesis>()) Hypothesis(pool, mgr.system);
+    //cerr << "Hypothesis=" << sizeof(Hypothesis) << " " << ret << endl;
+    recycler.Keep(ret);
+  }
+  return ret;
 }
 
 Hypothesis::Hypothesis(MemPool &pool,
-    const System &system)
-:HypothesisBase(pool, system)
-,m_prevHypos(pool)
+                       const System &system)
+  :HypothesisBase(pool, system)
+  ,m_prevHypos(pool)
 {
 
 }
 
 void Hypothesis::Init(SCFG::Manager &mgr,
-    const SCFG::InputPath &path,
-    const SCFG::SymbolBind &symbolBind,
-    const SCFG::TargetPhraseImpl &tp,
-    const Vector<size_t> &prevHyposIndices)
+                      const SCFG::InputPath &path,
+                      const SCFG::SymbolBind &symbolBind,
+                      const SCFG::TargetPhraseImpl &tp,
+                      const Vector<size_t> &prevHyposIndices)
 {
   m_mgr = &mgr;
   m_targetPhrase = &tp;
@@ -91,8 +90,8 @@ SCORE Hypothesis::GetFutureScore() const
 void Hypothesis::EvaluateWhenApplied()
 {
   const std::vector<const StatefulFeatureFunction*> &sfffs =
-      GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
-  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs){
+    GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
+  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
     EvaluateWhenApplied(*sfff);
   }
 //cerr << *this << endl;
@@ -105,7 +104,7 @@ void Hypothesis::EvaluateWhenApplied(const StatefulFeatureFunction &sfff)
   size_t statefulInd = sfff.GetStatefulInd();
   FFState *thisState = m_ffStates[statefulInd];
   sfff.EvaluateWhenApplied(mgr, *this, statefulInd, GetScores(),
-      *thisState);
+                           *thisState);
 
 }
 
@@ -123,8 +122,7 @@ void Hypothesis::OutputToStream(std::ostream &strm) const
       size_t nonTermInd = tp.GetAlignNonTerm().GetNonTermIndexMap()[targetPos];
       const Hypothesis *prevHypo = m_prevHypos[nonTermInd];
       prevHypo->OutputToStream(strm);
-    }
-    else {
+    } else {
       word.OutputToStream(*m_mgr, targetPos, *this, strm);
       strm << " ";
     }
@@ -166,13 +164,13 @@ std::string Hypothesis::Debug(const System &system) const
 
 void Hypothesis::OutputTransOpt(std::ostream &out) const
 {
-	out << GetInputPath().range << " "
-			<< "score=" << GetScores().GetTotalScore() << " "
-			<< GetTargetPhrase().Debug(m_mgr->system) << endl;
+  out << GetInputPath().range << " "
+      << "score=" << GetScores().GetTotalScore() << " "
+      << GetTargetPhrase().Debug(m_mgr->system) << endl;
 
-	BOOST_FOREACH(const Hypothesis *prevHypo, m_prevHypos) {
-		prevHypo->OutputTransOpt(out);
-	}
+  BOOST_FOREACH(const Hypothesis *prevHypo, m_prevHypos) {
+    prevHypo->OutputTransOpt(out);
+  }
 }
 
 } // namespaces

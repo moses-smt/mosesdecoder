@@ -17,24 +17,19 @@ namespace Moses2
 {
 
 ////////////////////////////////////////////////////////////////////////////////////////
-struct LMScores
-{
-  LMScores()
-  {
+struct LMScores {
+  LMScores() {
   }
 
   LMScores(const LMScores &copy) :
-      prob(copy.prob), backoff(copy.backoff)
-  {
+    prob(copy.prob), backoff(copy.backoff) {
   }
 
   LMScores(float inProb, float inBackoff) :
-      prob(inProb), backoff(inBackoff)
-  {
+    prob(inProb), backoff(inBackoff) {
   }
 
-  void Debug(std::ostream &out, const System &system) const
-  {
+  void Debug(std::ostream &out, const System &system) const {
     out << "(" << prob << "," << backoff << ")" << std::flush;
   }
 
@@ -54,25 +49,25 @@ public:
 
   virtual FFState* BlankState(MemPool &pool, const System &sys) const;
   virtual void EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
-      const InputType &input, const Hypothesis &hypo) const;
+                                    const InputType &input, const Hypothesis &hypo) const;
 
   virtual void
   EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<Moses2::Word> &source,
-      const TargetPhraseImpl &targetPhrase, Scores &scores,
-      SCORE &estimatedScore) const;
+                      const TargetPhraseImpl &targetPhrase, Scores &scores,
+                      SCORE &estimatedScore) const;
 
   virtual void
   EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
-      const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
-      SCORE &estimatedScore) const;
+                      const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
+                      SCORE &estimatedScore) const;
 
   virtual void EvaluateWhenApplied(const ManagerBase &mgr,
-      const Hypothesis &hypo, const FFState &prevState, Scores &scores,
-      FFState &state) const;
+                                   const Hypothesis &hypo, const FFState &prevState, Scores &scores,
+                                   FFState &state) const;
 
   virtual void EvaluateWhenApplied(const SCFG::Manager &mgr,
-      const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
-      FFState &state) const;
+                                   const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
+                                   FFState &state) const;
 
 protected:
   std::string m_path;
@@ -85,9 +80,9 @@ protected:
   const Factor *m_eos;
 
   void ShiftOrPush(std::vector<const Factor*> &context,
-      const Factor *factor) const;
+                   const Factor *factor) const;
   std::pair<SCORE, void*> Score(
-      const std::vector<const Factor*> &context) const;
+    const std::vector<const Factor*> &context) const;
   SCORE BackoffScore(const std::vector<const Factor*> &context) const;
 
   void DebugContext(const std::vector<const Factor*> &context) const;

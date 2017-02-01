@@ -6,13 +6,12 @@ namespace Moses2
 {
 class Parameter;
 
-  struct BookkeepingOptions : public OptionsBaseClass 
-  {
-    bool need_alignment_info;
-    bool init(Parameter const& param);
-    BookkeepingOptions();
-  };
-  
+struct BookkeepingOptions : public OptionsBaseClass {
+  bool need_alignment_info;
+  bool init(Parameter const& param);
+  BookkeepingOptions();
+};
+
 
 
 }

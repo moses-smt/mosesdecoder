@@ -76,8 +76,9 @@ public:
     state.refresh();
   }
 
-  virtual std::string ToString() const
-  { return "DALM state"; }
+  virtual std::string ToString() const {
+    return "DALM state";
+  }
 
 };
 
@@ -89,29 +90,30 @@ inline void read_ini(const char *inifile, string &model, string &words, string &
 
   getline(ifs, line);
   while(ifs) {
-	unsigned int pos = line.find("=");
-	string key = line.substr(0, pos);
-	string value = line.substr(pos+1, line.size()-pos);
-	if(key=="MODEL") {
-	  model = value;
-	} else if(key=="WORDS") {
-	  words = value;
-	} else if(key=="WORDSTXT") {
-	  wordstxt = value;
-	}
-	getline(ifs, line);
+    unsigned int pos = line.find("=");
+    string key = line.substr(0, pos);
+    string value = line.substr(pos+1, line.size()-pos);
+    if(key=="MODEL") {
+      model = value;
+    } else if(key=="WORDS") {
+      words = value;
+    } else if(key=="WORDSTXT") {
+      wordstxt = value;
+    }
+    getline(ifs, line);
   }
 }
 /////////////////////////
 
 LanguageModelDALM::LanguageModelDALM(size_t startInd, const std::string &line)
-:StatefulFeatureFunction(startInd, line)
+  :StatefulFeatureFunction(startInd, line)
 {
-	ReadParameters();
+  ReadParameters();
 }
 
-LanguageModelDALM::~LanguageModelDALM() {
-	// TODO Auto-generated destructor stub
+LanguageModelDALM::~LanguageModelDALM()
+{
+  // TODO Auto-generated destructor stub
 }
 
 void LanguageModelDALM::Load(System &system)
@@ -165,72 +167,72 @@ void LanguageModelDALM::CreateVocabMapping(const std::string &wordstxt, const Sy
   string line;
   std::size_t max_fid = 0;
   while(getline(vocabStrm, line)) {
-	const Factor *factor = system.GetVocab().AddFactor(line, system);
-	std::size_t fid = factor->GetId();
-	DALM::VocabId wid = m_vocab->lookup(line.c_str());
+    const Factor *factor = system.GetVocab().AddFactor(line, system);
+    std::size_t fid = factor->GetId();
+    DALM::VocabId wid = m_vocab->lookup(line.c_str());
 
-	vlist.push_back(std::pair<std::size_t, DALM::VocabId>(fid, wid));
-	if(max_fid < fid) max_fid = fid;
+    vlist.push_back(std::pair<std::size_t, DALM::VocabId>(fid, wid));
+    if(max_fid < fid) max_fid = fid;
   }
 
   for(std::size_t i = 0; i < m_vocabMap.size(); i++) {
-	m_vocabMap[i] = m_vocab->unk();
+    m_vocabMap[i] = m_vocab->unk();
   }
 
   m_vocabMap.resize(max_fid+1, m_vocab->unk());
   std::vector< std::pair<std::size_t, DALM::VocabId> >::iterator it = vlist.begin();
   while(it != vlist.end()) {
-	std::pair<std::size_t, DALM::VocabId> &entry = *it;
-	m_vocabMap[entry.first] = entry.second;
+    std::pair<std::size_t, DALM::VocabId> &entry = *it;
+    m_vocabMap[entry.first] = entry.second;
 
-	++it;
+    ++it;
   }
 }
 
 void LanguageModelDALM::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "factor") {
-	m_factorType = Scan<FactorType>(value);
+    m_factorType = Scan<FactorType>(value);
   } else if (key == "order") {
-	m_nGramOrder = Scan<size_t>(value);
+    m_nGramOrder = Scan<size_t>(value);
   } else if (key == "path") {
-	m_filePath = value;
+    m_filePath = value;
   } else {
-	  StatefulFeatureFunction::SetParameter(key, value);
+    StatefulFeatureFunction::SetParameter(key, value);
   }
   m_ContextSize = m_nGramOrder-1;
 }
 
 FFState* LanguageModelDALM::BlankState(MemPool &pool, const System &sys) const
 {
-	DALMState *state = new DALMState();
-	return state;
+  DALMState *state = new DALMState();
+  return state;
 }
 
 void LanguageModelDALM::EmptyHypothesisState(FFState &state,
-		const ManagerBase &mgr,
-		const InputType &input,
-		const Hypothesis &hypo) const
+    const ManagerBase &mgr,
+    const InputType &input,
+    const Hypothesis &hypo) const
 {
   DALMState &dalmState = static_cast<DALMState&>(state);
   m_lm->init_state(dalmState.get_state());
 }
 
- void LanguageModelDALM::EvaluateInIsolation(MemPool &pool,
-		 const System &system,
-		 const Phrase &source,
-		 const TargetPhraseImpl &targetPhrase,
-         Scores &scores,
-		 SCORE &estimatedScore) const
- {
+void LanguageModelDALM::EvaluateInIsolation(MemPool &pool,
+    const System &system,
+    const Phrase &source,
+    const TargetPhraseImpl &targetPhrase,
+    Scores &scores,
+    SCORE &estimatedScore) const
+{
 
- }
+}
 
 void LanguageModelDALM::EvaluateWhenApplied(const ManagerBase &mgr,
-const Hypothesis &hypo,
-const FFState &prevState,
-Scores &scores,
-FFState &state) const
+    const Hypothesis &hypo,
+    const FFState &prevState,
+    Scores &scores,
+    FFState &state) const
 {
 
 }

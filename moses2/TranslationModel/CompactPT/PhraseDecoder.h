@@ -122,18 +122,18 @@ public:
   size_t Load(std::FILE* in);
 
   TargetPhraseVectorPtr CreateTargetPhraseCollection(
-      const ManagerBase &mgr,
-      const Phrase<Word> &sourcePhrase,
-      bool topLevel = false,
-      bool eval = true);
+    const ManagerBase &mgr,
+    const Phrase<Word> &sourcePhrase,
+    bool topLevel = false,
+    bool eval = true);
 
   TargetPhraseVectorPtr DecodeCollection(
-      const ManagerBase &mgr,
-      TargetPhraseVectorPtr tpv,
-      BitWrapper<> &encodedBitStream,
-      const Phrase<Word> &sourcePhrase,
-      bool topLevel,
-      bool eval);
+    const ManagerBase &mgr,
+    TargetPhraseVectorPtr tpv,
+    BitWrapper<> &encodedBitStream,
+    const Phrase<Word> &sourcePhrase,
+    bool topLevel,
+    bool eval);
 
   void PruneCache();
 };

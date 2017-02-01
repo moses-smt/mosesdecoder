@@ -33,8 +33,7 @@ class VarIntType
 {
 private:
   template<typename IntType, typename OutIt>
-  static void EncodeSymbol(IntType input, OutIt output)
-  {
+  static void EncodeSymbol(IntType input, OutIt output) {
     if (input == 0) {
       *output = 0;
       output++;
@@ -56,8 +55,7 @@ private:
   ;
 
   template<typename InIt, typename IntType>
-  static void DecodeSymbol(InIt &it, InIt end, IntType &output)
-  {
+  static void DecodeSymbol(InIt &it, InIt end, IntType &output) {
     T msb = 1 << (sizeof(T) * 8 - 1);
     IntType shift = (sizeof(T) * 8 - 1);
 
@@ -81,8 +79,7 @@ private:
 public:
 
   template<typename InIt, typename OutIt>
-  static void Encode(InIt it, InIt end, OutIt outIt)
-  {
+  static void Encode(InIt it, InIt end, OutIt outIt) {
     while (it != end) {
       EncodeSymbol(*it, outIt);
       it++;
@@ -90,8 +87,7 @@ public:
   }
 
   template<typename InIt, typename OutIt>
-  static void Decode(InIt &it, InIt end, OutIt outIt)
-  {
+  static void Decode(InIt &it, InIt end, OutIt outIt) {
     while (it != end) {
       size_t output;
       DecodeSymbol(it, end, output);
@@ -101,8 +97,7 @@ public:
   }
 
   template<typename InIt>
-  static size_t DecodeAndSum(InIt &it, InIt end, size_t num)
-  {
+  static size_t DecodeAndSum(InIt &it, InIt end, size_t num) {
     size_t sum = 0;
     size_t curr = 0;
 
@@ -130,8 +125,7 @@ private:
   typedef unsigned int uint;
 
   template<typename InIt>
-  inline static void EncodeSymbol(uint &output, InIt it, InIt end)
-  {
+  inline static void EncodeSymbol(uint &output, InIt it, InIt end) {
     uint length = end - it;
 
     uint type = 0;
@@ -182,8 +176,8 @@ private:
     uint i = 0;
     while (it != end) {
       UTIL_THROW_IF2(*it > 268435455,
-          "You are trying to encode " << *it
-              << " with Simple9. Cannot encode numbers larger than 268435455 (2^28-1)");
+                     "You are trying to encode " << *it
+                     << " with Simple9. Cannot encode numbers larger than 268435455 (2^28-1)");
 
       uint l = bitlength * (length - i - 1);
       output |= *it << l;
@@ -193,8 +187,7 @@ private:
   }
 
   template<typename OutIt>
-  static inline void DecodeSymbol(uint input, OutIt outIt)
-  {
+  static inline void DecodeSymbol(uint input, OutIt outIt) {
     uint type = (input >> 28);
 
     uint bitlen = 0;
@@ -258,8 +251,7 @@ private:
     outIt++;
   }
 
-  static inline size_t DecodeAndSumSymbol(uint input, size_t num, size_t &curr)
-  {
+  static inline size_t DecodeAndSumSymbol(uint input, size_t num, size_t &curr) {
     uint type = (input >> 28);
 
     uint bitlen = 0;
@@ -327,8 +319,7 @@ private:
 
 public:
   template<typename InIt, typename OutIt>
-  static void Encode(InIt it, InIt end, OutIt outIt)
-  {
+  static void Encode(InIt it, InIt end, OutIt outIt) {
     uint parts[] = { 1, 2, 3, 4, 5, 7, 9, 14, 28 };
 
     uint buffer[28];
@@ -367,8 +358,7 @@ public:
   }
 
   template<typename InIt, typename OutIt>
-  static void Decode(InIt &it, InIt end, OutIt outIt)
-  {
+  static void Decode(InIt &it, InIt end, OutIt outIt) {
     while (it != end) {
       DecodeSymbol(*it, outIt);
       it++;
@@ -376,8 +366,7 @@ public:
   }
 
   template<typename InIt>
-  static size_t DecodeAndSum(InIt &it, InIt end, size_t num)
-  {
+  static size_t DecodeAndSum(InIt &it, InIt end, size_t num) {
     size_t sum = 0;
     size_t curr = 0;
     while (it != end && curr < num) {

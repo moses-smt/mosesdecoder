@@ -23,7 +23,7 @@ public:
   virtual ~ArcLists();
 
   void AddArc(bool added, const HypothesisBase *currHypo,
-      const HypothesisBase *otherHypo);
+              const HypothesisBase *otherHypo);
   void Sort();
   void Delete(const HypothesisBase *hypo);
 

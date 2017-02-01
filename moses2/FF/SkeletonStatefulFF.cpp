@@ -19,23 +19,19 @@ class SkeletonState: public FFState
 public:
   int targetLen;
 
-  SkeletonState()
-  {
+  SkeletonState() {
     // uninitialised
   }
 
-  virtual size_t hash() const
-  {
+  virtual size_t hash() const {
     return (size_t) targetLen;
   }
-  virtual bool operator==(const FFState& o) const
-  {
+  virtual bool operator==(const FFState& o) const {
     const SkeletonState& other = static_cast<const SkeletonState&>(o);
     return targetLen == other.targetLen;
   }
 
-  virtual std::string ToString() const
-  {
+  virtual std::string ToString() const {
     stringstream sb;
     sb << targetLen;
     return sb.str();
@@ -45,7 +41,7 @@ public:
 
 ////////////////////////////////////////////////////////////////////////////////////////
 SkeletonStatefulFF::SkeletonStatefulFF(size_t startInd, const std::string &line) :
-    StatefulFeatureFunction(startInd, line)
+  StatefulFeatureFunction(startInd, line)
 {
   ReadParameters();
 }

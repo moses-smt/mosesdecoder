@@ -30,8 +30,8 @@ TargetPhraseImpl *TargetPhraseImpl::CreateFromString(MemPool &pool,
   vector<string> toks = Tokenize(str);
   size_t size = toks.size() - 1;
   TargetPhraseImpl *ret =
-      new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, pt, system,
-          size);
+    new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, pt, system,
+        size);
 
   for (size_t i = 0; i < size; ++i) {
     SCFG::Word &word = (*ret)[i];
@@ -45,11 +45,11 @@ TargetPhraseImpl *TargetPhraseImpl::CreateFromString(MemPool &pool,
 }
 
 TargetPhraseImpl::TargetPhraseImpl(MemPool &pool,
-    const PhraseTable &pt,
-    const System &system,
-    size_t size)
-:Moses2::TargetPhrase<SCFG::Word>(pool, pt, system, size)
-,m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
+                                   const PhraseTable &pt,
+                                   const System &system,
+                                   size_t size)
+  :Moses2::TargetPhrase<SCFG::Word>(pool, pt, system, size)
+  ,m_alignNonTerm(&AlignmentInfoCollection::Instance().GetEmptyAlignmentInfo())
 
 {
   m_scores = new (pool.Allocate<Scores>()) Scores(system, pool,
@@ -111,13 +111,13 @@ void TargetPhraseImpl::SetAlignmentInfo(const std::string &alignString)
 
 size_t TargetPhraseImpl::GetNumNonTerms() const
 {
-	size_t ret = 0;
-	for (size_t i = 0; i < GetSize(); ++i) {
-		if ((*this)[i].isNonTerminal) {
-			++ret;
-		}
-	}
-	return ret;
+  size_t ret = 0;
+  for (size_t i = 0; i < GetSize(); ++i) {
+    if ((*this)[i].isNonTerminal) {
+      ++ret;
+    }
+  }
+  return ret;
 }
 
 

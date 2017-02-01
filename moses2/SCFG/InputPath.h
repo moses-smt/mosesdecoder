@@ -35,20 +35,21 @@ public:
   SubPhrase<SCFG::Word> subPhrase;
 
   InputPath(MemPool &pool, const SubPhrase<SCFG::Word> &subPhrase, const Range &range,
-      size_t numPt, const InputPath *prefixPath);
+            size_t numPt, const InputPath *prefixPath);
   virtual ~InputPath();
 
-  const ActiveChart &GetActiveChart(size_t ptInd) const
-  { return m_activeChart[ptInd]; }
+  const ActiveChart &GetActiveChart(size_t ptInd) const {
+    return m_activeChart[ptInd];
+  }
 
   void AddActiveChartEntry(size_t ptInd, ActiveChartEntry *chartEntry);
 
   void AddTargetPhrasesToPath(
-      MemPool &pool,
-  	  const System &system,
-      const PhraseTable &pt,
-      const SCFG::TargetPhrases &tps,
-      const SCFG::SymbolBind &symbolBind);
+    MemPool &pool,
+    const System &system,
+    const PhraseTable &pt,
+    const SCFG::TargetPhrases &tps,
+    const SCFG::SymbolBind &symbolBind);
 
   size_t GetNumRules() const;
 

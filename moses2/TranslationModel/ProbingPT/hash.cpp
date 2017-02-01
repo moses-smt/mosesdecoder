@@ -21,16 +21,16 @@ std::vector<uint64_t> getVocabIDs(const StringPiece &textin)
   util::TokenIter<util::SingleCharacter> itWord(textin, util::SingleCharacter(' '));
 
   while (itWord) {
-	StringPiece word = *itWord;
-	uint64_t id = 0;
+    StringPiece word = *itWord;
+    uint64_t id = 0;
 
-	util::TokenIter<util::SingleCharacter> itFactor(word, util::SingleCharacter('|'));
+    util::TokenIter<util::SingleCharacter> itFactor(word, util::SingleCharacter('|'));
     while (itFactor) {
-    	StringPiece factor = *itFactor;
-    	//cerr << "factor=" << factor << endl;
+      StringPiece factor = *itFactor;
+      //cerr << "factor=" << factor << endl;
 
-    	id += getHash(factor);
-        itFactor++;
+      id += getHash(factor);
+      itFactor++;
     }
 
     output.push_back(id);

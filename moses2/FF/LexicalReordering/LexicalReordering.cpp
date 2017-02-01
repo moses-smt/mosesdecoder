@@ -30,8 +30,8 @@ namespace Moses2
 ///////////////////////////////////////////////////////////////////////
 
 LexicalReordering::LexicalReordering(size_t startInd, const std::string &line) :
-    StatefulFeatureFunction(startInd, line), m_compactModel(NULL), m_blank(
-        NULL), m_propertyInd(-1), m_coll(NULL), m_configuration(NULL)
+  StatefulFeatureFunction(startInd, line), m_compactModel(NULL), m_blank(
+    NULL), m_propertyInd(-1), m_coll(NULL), m_configuration(NULL)
 {
   ReadParameters();
   assert(m_configuration);
@@ -51,13 +51,11 @@ void LexicalReordering::Load(System &system)
 
   if (m_propertyInd >= 0) {
     // Using integrate Lex RO. No loading needed
-  }
-  else if (FileExists(m_path + ".minlexr")) {
+  } else if (FileExists(m_path + ".minlexr")) {
     m_compactModel = new LexicalReorderingTableCompact(m_path + ".minlexr",
         m_FactorsF, m_FactorsE, m_FactorsC);
     m_blank = new (pool.Allocate<PhraseImpl>()) PhraseImpl(pool, 0);
-  }
-  else {
+  } else {
     m_coll = new Coll();
     InputFileStream file(m_path);
     string line;
@@ -71,12 +69,12 @@ void LexicalReordering::Load(System &system)
       std::vector<std::string> toks = TokenizeMultiCharSeparator(line, "|||");
       assert(toks.size() == 3);
       PhraseImpl *source = PhraseImpl::CreateFromString(pool, system.GetVocab(),
-          system, toks[0]);
+                           system, toks[0]);
       PhraseImpl *target = PhraseImpl::CreateFromString(pool, system.GetVocab(),
-          system, toks[1]);
+                           system, toks[1]);
       std::vector<SCORE> scores = Tokenize<SCORE>(toks[2]);
       std::transform(scores.begin(), scores.end(), scores.begin(),
-          TransformScore);
+                     TransformScore);
       std::transform(scores.begin(), scores.end(), scores.begin(), FloorScore);
 
       Key key(source, target);
@@ -86,24 +84,19 @@ void LexicalReordering::Load(System &system)
 }
 
 void LexicalReordering::SetParameter(const std::string& key,
-    const std::string& value)
+                                     const std::string& value)
 {
   if (key == "path") {
     m_path = value;
-  }
-  else if (key == "type") {
+  } else if (key == "type") {
     m_configuration = new LRModel(value, *this);
-  }
-  else if (key == "input-factor") {
+  } else if (key == "input-factor") {
     m_FactorsF = Tokenize<FactorType>(value);
-  }
-  else if (key == "output-factor") {
+  } else if (key == "output-factor") {
     m_FactorsE = Tokenize<FactorType>(value);
-  }
-  else if (key == "property-index") {
+  } else if (key == "property-index") {
     m_propertyInd = Scan<int>(value);
-  }
-  else {
+  } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
 }
@@ -119,9 +112,9 @@ void LexicalReordering::EmptyHypothesisState(FFState &state,
     const Hypothesis &hypo) const
 {
   BidirectionalReorderingState &stateCast =
-      static_cast<BidirectionalReorderingState&>(state);
+    static_cast<BidirectionalReorderingState&>(state);
   stateCast.Init(NULL, hypo.GetTargetPhrase(), hypo.GetInputPath(), true,
-      &hypo.GetBitmap());
+                 &hypo.GetBitmap());
 }
 
 void LexicalReordering::EvaluateInIsolation(MemPool &pool, const System &system,
@@ -141,9 +134,9 @@ void LexicalReordering::EvaluateInIsolation(MemPool &pool, const System &system,
 void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
     const TargetPhrases &tps, const Phrase<Moses2::Word> &sourcePhrase) const
 {
-  BOOST_FOREACH(const TargetPhraseImpl *tp, tps){
-  EvaluateAfterTablePruning(pool, *tp, sourcePhrase);
-}
+  BOOST_FOREACH(const TargetPhraseImpl *tp, tps) {
+    EvaluateAfterTablePruning(pool, *tp, sourcePhrase);
+  }
 }
 
 void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
@@ -152,11 +145,10 @@ void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
   if (m_propertyInd >= 0) {
     SCORE *scoreArr = targetPhrase.GetScoresProperty(m_propertyInd);
     targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
-  }
-  else if (m_compactModel) {
+  } else if (m_compactModel) {
     // using external compact binary model
     const Values values = m_compactModel->GetScore(sourcePhrase, targetPhrase,
-        *m_blank);
+                          *m_blank);
     if (values.size()) {
       assert(values.size() == m_numScores);
 
@@ -165,12 +157,10 @@ void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
         scoreArr[i] = values[i];
       }
       targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
-    }
-    else {
+    } else {
       targetPhrase.ffData[m_PhraseTableInd] = NULL;
     }
-  }
-  else if (m_coll) {
+  } else if (m_coll) {
     // using external memory model
 
     // cache data in target phrase
@@ -183,8 +173,7 @@ void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
         scoreArr[i] = (*values)[i];
       }
       targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
-    }
-    else {
+    } else {
       targetPhrase.ffData[m_PhraseTableInd] = NULL;
     }
   }
@@ -199,15 +188,14 @@ void LexicalReordering::EvaluateWhenApplied(const ManagerBase &mgr,
 }
 
 const LexicalReordering::Values *LexicalReordering::GetValues(
-    const Phrase<Moses2::Word> &source, const Phrase<Moses2::Word> &target) const
+  const Phrase<Moses2::Word> &source, const Phrase<Moses2::Word> &target) const
 {
   Key key(&source, &target);
   Coll::const_iterator iter;
   iter = m_coll->find(key);
   if (iter == m_coll->end()) {
     return NULL;
-  }
-  else {
+  } else {
     return &iter->second;
   }
 }

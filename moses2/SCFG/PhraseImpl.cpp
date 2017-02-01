@@ -18,7 +18,7 @@ PhraseImpl *PhraseImpl::CreateFromString(MemPool &pool, FactorCollection &vocab,
   std::vector<std::string> toks = Moses2::Tokenize(str);
   size_t size = toks.size();
   if (skipLastWord) {
-	  --size;
+    --size;
   }
   PhraseImpl *ret;
 

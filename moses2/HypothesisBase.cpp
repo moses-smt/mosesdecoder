@@ -29,15 +29,15 @@ HypothesisBase::HypothesisBase(MemPool &pool, const System &system)
 
   // FF states
   const std::vector<const StatefulFeatureFunction*> &sfffs =
-      system.featureFunctions.GetStatefulFeatureFunctions();
+    system.featureFunctions.GetStatefulFeatureFunctions();
   size_t numStatefulFFs = sfffs.size();
   m_ffStates = (FFState **) pool.Allocate(sizeof(FFState*) * numStatefulFFs);
 
-  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs){
-  size_t statefulInd = sfff->GetStatefulInd();
-  FFState *state = sfff->BlankState(pool, system);
-  m_ffStates[statefulInd] = state;
-}
+  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
+    size_t statefulInd = sfff->GetStatefulInd();
+    FFState *state = sfff->BlankState(pool, system);
+    m_ffStates[statefulInd] = state;
+  }
 }
 
 size_t HypothesisBase::hash() const
@@ -48,7 +48,7 @@ size_t HypothesisBase::hash() const
 size_t HypothesisBase::hash(size_t seed) const
 {
   size_t numStatefulFFs =
-      GetManager().system.featureFunctions.GetStatefulFeatureFunctions().size();
+    GetManager().system.featureFunctions.GetStatefulFeatureFunctions().size();
 
   // states
   for (size_t i = 0; i < numStatefulFFs; ++i) {
@@ -63,7 +63,7 @@ size_t HypothesisBase::hash(size_t seed) const
 bool HypothesisBase::operator==(const HypothesisBase &other) const
 {
   size_t numStatefulFFs =
-      GetManager().system.featureFunctions.GetStatefulFeatureFunctions().size();
+    GetManager().system.featureFunctions.GetStatefulFeatureFunctions().size();
 
   // states
   for (size_t i = 0; i < numStatefulFFs; ++i) {

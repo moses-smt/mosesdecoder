@@ -15,7 +15,7 @@ class Bitmaps
 {
   typedef boost::unordered_map<const Range*, const Bitmap*> NextBitmaps;
   typedef boost::unordered_map<const Bitmap*, NextBitmaps,
-      UnorderedComparer<Bitmap>, UnorderedComparer<Bitmap> > Coll;
+          UnorderedComparer<Bitmap>, UnorderedComparer<Bitmap> > Coll;
   //typedef std::set<const Bitmap*, OrderedComparer<Bitmap> > Coll;
   Coll m_coll;
   Bitmap *m_initBitmap;
@@ -29,8 +29,7 @@ public:
   virtual ~Bitmaps();
   void Init(size_t inputSize, const std::vector<bool> &initSourceCompleted);
 
-  const Bitmap &GetInitialBitmap() const
-  {
+  const Bitmap &GetInitialBitmap() const {
     return *m_initBitmap;
   }
   const Bitmap &GetBitmap(const Bitmap &bm, const Range &range);

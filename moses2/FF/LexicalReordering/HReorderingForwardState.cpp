@@ -15,7 +15,7 @@ namespace Moses2
 
 HReorderingForwardState::HReorderingForwardState(const LRModel &config,
     size_t offset) :
-    LRState(config, LRModel::Forward, offset), m_first(true)
+  LRState(config, LRModel::Forward, offset), m_first(true)
 {
   prevPath = NULL;
   m_coverage = NULL;
@@ -27,8 +27,8 @@ HReorderingForwardState::~HReorderingForwardState()
 }
 
 void HReorderingForwardState::Init(const LRState *prev,
-    const TargetPhrase<Moses2::Word> &topt, const InputPathBase &path, bool first,
-    const Bitmap *coverage)
+                                   const TargetPhrase<Moses2::Word> &topt, const InputPathBase &path, bool first,
+                                   const Bitmap *coverage)
 {
   prevTP = &topt;
   prevPath = &path;
@@ -48,12 +48,12 @@ bool HReorderingForwardState::operator==(const FFState& o) const
   if (&o == this) return true;
 
   HReorderingForwardState const& other =
-      static_cast<HReorderingForwardState const&>(o);
+    static_cast<HReorderingForwardState const&>(o);
 
   int compareScores = (
-      (prevPath->range == other.prevPath->range) ?
-          ComparePrevScores(other.prevTP) :
-      (prevPath->range < other.prevPath->range) ? -1 : 1);
+                        (prevPath->range == other.prevPath->range) ?
+                        ComparePrevScores(other.prevTP) :
+                        (prevPath->range < other.prevPath->range) ? -1 : 1);
   return compareScores == 0;
 }
 
@@ -63,8 +63,8 @@ std::string HReorderingForwardState::ToString() const
 }
 
 void HReorderingForwardState::Expand(const ManagerBase &mgr,
-    const LexicalReordering &ff, const Hypothesis &hypo, size_t phraseTableInd,
-    Scores &scores, FFState &state) const
+                                     const LexicalReordering &ff, const Hypothesis &hypo, size_t phraseTableInd,
+                                     Scores &scores, FFState &state) const
 {
   const Range &cur = hypo.GetInputPath().range;
   // keep track of the current coverage ourselves so we don't need the hypothesis
@@ -79,9 +79,9 @@ void HReorderingForwardState::Expand(const ManagerBase &mgr,
   }
 
   HReorderingForwardState &stateCast =
-      static_cast<HReorderingForwardState&>(state);
+    static_cast<HReorderingForwardState&>(state);
   stateCast.Init(this, hypo.GetTargetPhrase(), hypo.GetInputPath(), false,
-      &cov);
+                 &cov);
 }
 
 } /* namespace Moses2 */

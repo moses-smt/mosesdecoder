@@ -81,17 +81,14 @@ private:
   {
   public:
     HashTask(int id, BlockHashIndex& hash, Keys& keys) :
-        m_id(id), m_hash(hash), m_keys(new Keys(keys))
-    {
+      m_id(id), m_hash(hash), m_keys(new Keys(keys)) {
     }
 
-    virtual void Run()
-    {
+    virtual void Run() {
       m_hash.CalcHash(m_id, *m_keys);
     }
 
-    virtual ~HashTask()
-    {
+    virtual ~HashTask() {
       delete m_keys;
     }
 
@@ -108,7 +105,7 @@ private:
 public:
 #ifdef WITH_THREADS
   BlockHashIndex(size_t orderBits, size_t fingerPrintBits,
-      size_t threadsNum = 2);
+                 size_t threadsNum = 2);
 #else
   BlockHashIndex(size_t orderBits, size_t fingerPrintBits);
 #endif
@@ -147,8 +144,7 @@ public:
   void KeepNLastRanges(float ratio = 0.1, float tolerance = 0.1);
 
   template<typename Keys>
-  void AddRange(Keys &keys)
-  {
+  void AddRange(Keys &keys) {
     size_t current = m_landmarks.size();
 
     if (m_landmarks.size() && m_landmarks.back().str() >= keys[0]) {
@@ -171,7 +167,7 @@ public:
 #ifdef WITH_THREADS
 
     boost::shared_ptr<HashTask<Keys> > ht(
-        new HashTask<Keys>(current, *this, keys));
+      new HashTask<Keys>(current, *this, keys));
     m_threadPool.Submit(ht);
 #else
     CalcHash(current, keys);
@@ -179,8 +175,7 @@ public:
   }
 
   template<typename Keys>
-  void CalcHash(size_t current, Keys &keys)
-  {
+  void CalcHash(size_t current, Keys &keys) {
 #ifdef HAVE_CMPH
     void* source = vectorAdapter(keys);
     CalcHash(current, source);

@@ -5,19 +5,19 @@
 namespace Moses2
 {
 
-  NBestOptions::
-  NBestOptions()
-    : nbest_size(0)
-    , factor(20)
-    , enabled(false)
-    , print_trees(false)
-    , only_distinct(false)
-    , include_alignment_info(false)
-    , include_feature_labels(true)
-    , include_segmentation(false)
-    , include_passthrough(false)
-    , include_all_factors(false)
-  {}
+NBestOptions::
+NBestOptions()
+  : nbest_size(0)
+  , factor(20)
+  , enabled(false)
+  , print_trees(false)
+  , only_distinct(false)
+  , include_alignment_info(false)
+  , include_feature_labels(true)
+  , include_segmentation(false)
+  , include_passthrough(false)
+  , include_all_factors(false)
+{}
 
 
 bool
@@ -48,9 +48,9 @@ init(Parameter const& P)
   enabled = output_file_path.size();
   return true;
 }
-  
+
 #ifdef HAVE_XMLRPC_C
-bool 
+bool
 NBestOptions::
 update(std::map<std::string,xmlrpc_c::value>const& param)
 {

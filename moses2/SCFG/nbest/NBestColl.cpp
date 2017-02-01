@@ -21,30 +21,29 @@ namespace SCFG
 /////////////////////////////////////////////////////////////
 NBestColl::~NBestColl()
 {
-	BOOST_FOREACH(const Coll::value_type &valPair, m_candidates) {
-		NBests *nbests = valPair.second;
-		delete nbests;
-	}
+  BOOST_FOREACH(const Coll::value_type &valPair, m_candidates) {
+    NBests *nbests = valPair.second;
+    delete nbests;
+  }
 }
 
 void NBestColl::Add(const SCFG::Manager &mgr, const ArcList &arcList)
 {
-	NBests &nbests = GetOrCreateNBests(mgr, arcList);
-	//cerr << "nbests for " << &nbests << ":";
+  NBests &nbests = GetOrCreateNBests(mgr, arcList);
+  //cerr << "nbests for " << &nbests << ":";
 }
 
 NBests &NBestColl::GetOrCreateNBests(const SCFG::Manager &mgr, const ArcList &arcList)
 {
-	NBests *ret;
-	Coll::iterator iter = m_candidates.find(&arcList);
-	if(iter == m_candidates.end()) {
-		ret = new NBests(mgr, arcList, *this);
-		m_candidates[&arcList] = ret;
-	}
-	else {
-		ret = iter->second;
-	}
-	return *ret;
+  NBests *ret;
+  Coll::iterator iter = m_candidates.find(&arcList);
+  if(iter == m_candidates.end()) {
+    ret = new NBests(mgr, arcList, *this);
+    m_candidates[&arcList] = ret;
+  } else {
+    ret = iter->second;
+  }
+  return *ret;
 }
 
 

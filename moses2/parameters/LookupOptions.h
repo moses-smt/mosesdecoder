@@ -6,12 +6,11 @@
 namespace Moses2
 {
 
-  struct 
-  LookupOptions : public OptionsBaseClass
-  {
-    bool init(Parameter const& param);
-    LookupOptions() {}
-  };
+struct
+    LookupOptions : public OptionsBaseClass {
+  bool init(Parameter const& param);
+  LookupOptions() {}
+};
 
 }
 
