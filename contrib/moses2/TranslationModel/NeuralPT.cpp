@@ -101,8 +101,7 @@ void NeuralPT::EvaluateBeforeExtending(size_t stackInd, const Hypotheses &hypos,
   amunmt::AmunInputs amunInputs;
 
   BOOST_FOREACH(const HypothesisBase *hypo, hypos) {
-    HypothesisBase *h1 = const_cast<HypothesisBase*>(hypo);
-    Hypothesis &hypoPB = *static_cast<Hypothesis*>(h1);
+    const Hypothesis &hypoPB = *static_cast<const Hypothesis*>(hypo);
     const Hypothesis &prevHypo = *hypoPB.GetPrevHypo();
     cerr << "hypoPB=" << &hypoPB << " " << &prevHypo << endl;
 
@@ -123,7 +122,23 @@ void NeuralPT::EvaluateBeforeExtending(size_t stackInd, const Hypotheses &hypos,
     amunInputs.push_back(amunInput);
   }
 
+  // call amun
   amunmt::AmunOutputs amunOutputs = m_plugin->Score(amunInputs);
+
+
+  assert(amunInputs.size() == amunOutputs.size());
+  assert(hypos.size() == amunOutputs.size());
+  // assume its in the same order
+
+  // set moses' hypo score and state
+  for (size_t i = 0; i < hypos.size(); ++i) {
+    const HypothesisBase *hypo = hypos[i];
+    HypothesisBase *h1 = const_cast<HypothesisBase*>(hypo);
+    Hypothesis &hypoPB = *static_cast<Hypothesis*>(h1);
+
+    const amunmt::AmunOutput &amunOutput = amunOutputs[i];
+
+  }
 
   //cerr << "NeuralPT::EvaluateBeforeExtending end" << endl;
 }
