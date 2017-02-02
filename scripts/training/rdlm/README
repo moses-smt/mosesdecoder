@@ -1,0 +1,57 @@
+RDLM: relational dependency language model
+------------------------------------------
+
+This is a language model for the string-to-tree decoder with a dependency
+grammar. It should work with any corpus with projective dependency annotation in
+ConLL format, converted into the Moses format with the script
+mosesdecoder/scripts/training/wrappers/conll2mosesxml.py It depends on NPLM for
+neural network training and querying.
+
+Prerequisites
+-------------
+
+Install NPLM and compile moses with it. See the instructions in the Moses documentation for details:
+
+  http://www.statmt.org/moses/?n=FactoredTraining.BuildingLanguageModel
+
+Training
+--------
+
+RDLM is designed for string-to-tree decoding with dependency annotation on the
+target side. If you have such a system, you can train RDLM on the target side of
+the same parallel corpus that is used for training the translation model.
+
+To train the model on additional monolingual data, or test it on some held-out
+test/dev data, parse and process it in the same way that the parallel corpus has
+been processed. This includes tokenization, parsing, truecasing, compound
+splitting etc.
+
+RDLM is split into two neural network models, which can be trained with
+`train_rdlm.py`. An example command for training follows:
+
+  mkdir working_dir_head
+  mkdir working_dir_label
+  ./train_rdlm.py --nplm-home /path/to/nplm --corpus [your_training_corpus] --working-dir working_dir_head  --output-dir /path/to/output_directory --output-model rdlm_head  --mode head  --output-vocab-size 500000 --noise 100
+  ./train_rdlm.py --nplm-home /path/to/nplm --corpus [your_training_corpus] --working-dir working_dir_label --output-dir /path/to/output_directory --output-model rdlm_label --mode label --output-vocab-size 75 --noise 50
+
+for more options, run `train_rdlm.py --help`. Parameters you may want to adjust
+include the vocabulary size of the label model (depending on the number of
+dependency relations in the grammar), the size of the models, and the number of
+training epochs.
+
+Decoding
+--------
+
+To use RDLM during decoding, add the following line to your moses.ini config:
+
+  [feature]
+  RDLM path_head_lm=/path/to/output_directory/rdlm_head.model.nplm path_label_lm=/path/to/output_directory/rdlm_label.model.nplm context_up=2 context_left=3 context_right=0
+
+  [weight]
+  RDLM 0.1 0.1
+
+Reference
+---------
+
+Sennrich, Rico (2015). Modelling and Optimizing on Syntactic N-Grams for Statistical Machine Translation.
+  Transactions of the Association for Computational Linguistics.

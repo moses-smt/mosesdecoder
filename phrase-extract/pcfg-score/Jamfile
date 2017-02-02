@@ -1,0 +1,1 @@
+exe pcfg-score : [ glob *.cc ] ..//syntax-common ../..//boost_program_options : <include>.. ;

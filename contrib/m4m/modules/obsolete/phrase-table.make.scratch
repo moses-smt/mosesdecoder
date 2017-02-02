@@ -1,0 +1,124 @@
+# .PHONY: $1
+# $1: $1.binphr.idx
+# $1.txt.gz: | L1text = $4
+# $1.txt.gz: | L2text = $5
+# $1.txt.gz: | symal  = $6
+# ${moses.ini}: $1
+# PTABLES += 1;$2;$3;5;$1
+# endef
+
+
+# ${target}.tmp/fwd/scored.gz: | ${target}/phrase-extraction.DONE
+# | ${L1File} ${L2File} ${symal}
+
+
+# # convert phrase table from text file to binary format
+# %.binphr.idx: | %.txt.gz ${MOSES_BIN}/processPhraseTable
+# 	$(lock)
+# 	zcat -f $*.txt.gz | ${MOSES_BIN}/processPhraseTable  \
+# 	-ttable ${L1factors} ${L2factors} - -nscores 5 -out ${@D}/_${@F} \
+# 	&& mv ${@D}/_${@F} $@
+# 	$(unlock)
+
+
+# # directory definitions
+# mo_mdl = model
+# mo_tmp = model/tmp
+# wrdaln = ${fstaln}/out
+# # wrdaln should be set elsewhere!
+
+# # milestone files created during phrase table construction
+# ptable_bin   = ${mo_mdl}/ptable.${L1}-${L2}
+# ptable       = ${mo_mdl}/ptable.${L1}-${L2}.txt.gz
+# lex1given2   = ${mo_mdl}/${L1}-given-${L2}.lex.gz
+# lex2given1   = ${mo_mdl}/${L2}-given-${L1}.lex.gz
+# mosesinifile = ${mo_mdl}/moses.ini.0
+
+# .PHONY: lex ptable
+# lex:    ${lex1given2} ${lex2given1}
+# ptable: ${ptable_bin}
+
+# # steps taken in this module
+
+# # -------------------------------------------------------------------------------
+# # --- STEP 1a: extract raw phrases from word-aligned corpus ---------------------
+# # -------------------------------------------------------------------------------
+# # Note: the script ${moses.extract-phrases} takes care of initial sorting
+# ${mo_tmp}/phrase-extraction.DONE: | ${moses.extract-phrases}
+# ${mo_tmp}/phrase-extraction.DONE: | ${moses.extract}
+# ${mo_tmp}/phrase-extraction.DONE: | ${wrdaln}/${L1}.txt.gz
+# ${mo_tmp}/phrase-extraction.DONE: | ${wrdaln}/${L2}.txt.gz
+# ${mo_tmp}/phrase-extraction.DONE: | ${wrdaln}/${L1}-${L2}.symal.gz
+# ${mo_tmp}/phrase-extraction.DONE: 
+# 	$(lock)
+# 	${moses.extract-phrases} \
+# 	${moses.extract} \
+# 	${wrdaln}/${L1}.txt.gz \
+# 	${wrdaln}/${L2}.txt.gz \
+# 	${wrdaln}/${L1}-${L2}.symal.gz \
+# 	${mo_tmp} ${max_phrase_length} \
+# 	${dmodel.type}-${dmodel.orientation} \
+# 	&& touch $@
+# 	$(unlock)
+
+# # -------------------------------------------------------------------------------
+# # --- STEP 1a: extract word translation lexica from word-aligned corpus ---------
+# # ---          (for lexical phrase scoring)                             ---------
+# # -------------------------------------------------------------------------------
+# $(lex2given1): $(lex1given2)
+# $(lex1given2): | ${wrdaln}/${L1}.txt.gz
+# $(lex1given2): | ${wrdaln}/${L2}.txt.gz
+# $(lex1given2): | ${wrdaln}/${L1}-${L2}.symal.gz
+# 	$(lock)
+# 	$(moses.make-lex) \
+# 	${wrdaln}/${L1}.txt.gz \
+# 	${wrdaln}/${L2}.txt.gz \
+# 	${wrdaln}/${L1}-${L2}.symal.gz \
+# 	$(lex1given2) \
+# 	$(lex2given1)
+# 	$(unlock)
+
+# # -------------------------------------------------------------------------------
+# # --- STEP 2: score extracted phrase pairs --------------------------------------
+# # -------------------------------------------------------------------------------
+# ptfwdhalf    = ${mo_tmp}/fwd/phrases.fwd.scored.gz
+# ptbwdhalf    = ${mo_tmp}/bwd/phrase-scoring.DONE
+
+# # -------------------------------------------------------------------------------
+# # --- STEP 2a: score phrases in the 'forward' direction -------------------------
+# # -------------------------------------------------------------------------------
+# $(ptfwdhalf): | ${mo_tmp}/phrase-extraction.DONE
+# $(ptfwdhalf): | ${lex1given2}
+# 	$(lock)
+# 	$(merge-sorted) ${mo_tmp}/fwd/part.*.gz \
+# 	| ${moses.score-phrases} ${MOSES_BIN}/score - ${lex1given2} ${@:.scored.gz=} \
+# 	$(ptable.smoothing) && mv $@_ $@ 
+# 	$(unlock)
+
+# # -------------------------------------------------------------------------------
+# # --- STEP 2b: score phrases in the 'backward' direction -------------------------
+# # -------------------------------------------------------------------------------
+# # Note: ${moses.score-phrases} re-sorts the scored backward phrases 
+# $(ptbwdhalf): | ${mo_tmp}/phrase-extraction.DONE
+# $(ptbwdhalf): | ${lex2given1}
+# 	$(lock)
+# 	$(merge-sorted) ${mo_tmp}/bwd/part.*.gz \
+# 	| ${moses.score-phrases} ${MOSES_BIN}/score - ${lex2given1} ${@D}/scored \
+# 	"$(ptable.smoothing)" --Inverse && touch $@
+# 	$(unlock)
+
+# # -------------------------------------------------------------------------------
+# # --- STEP 3: put the two phrase table halves together --------------------------
+# # -------------------------------------------------------------------------------
+# # ptfwdhalf is a single .gz file, ptbwdhalf is a collection .gz files 
+# $(ptable): | ${MOSES_BIN}/consolidate
+# $(ptable): | $(ptfwdhalf) $(ptbwdhalf)
+# 	$(lock)
+# 	${MOSES_BIN}/consolidate \
+# 	<(zcat ${ptfwdhalf}) \
+# 	<(${merge-sorted} ${mo_tmp}/bwd/scored.*.gz) /dev/stdout \
+# 	$(if $(ptable.smoothing), \
+# 	$(ptable.smoothing) $(ptfwdhalf:.sorted.gz=.coc)) \
+# 	| gzip > $@_ && mv $@_ $@
+# 	$(unlock)
+

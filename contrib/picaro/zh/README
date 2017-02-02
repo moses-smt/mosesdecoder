@@ -1,0 +1,4 @@
+Chinese-English sample
+sample.f	Chinese text
+sample.e 	English text
+sample.a	Alignment file with links in f-e format

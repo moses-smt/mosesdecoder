@@ -1,0 +1,39 @@
+scorecmd=/Users/nicolabertoldi/workspace/mosesdecoder/trunk/scripts/training/cmert-0.5/score-nbest.py 
+mertcmd=/Users/nicolabertoldi/workspace/mosesdecoder/trunk/scripts/training/cmert-0.5/mert 
+size=15
+
+#cat NBEST | $scorecmd ${casetype} ${normtype} ${reflentype} REF.0 REF.1 REF.2 ./$basename.
+$mertcmd -d $size 
+
+exit
+
+lines=10
+for casetype in '' '-c' ; do
+for normtype in '' '-n' ; do
+for reflentype in '' '-a' '-s' '-e' ; do
+
+basename=OLDMERT${casetype}${normtype}${reflentype}
+cat NBEST | $scorecmd ${casetype} ${normtype} ${reflentype} REF.0 REF.1 REF.2 ./$basename.
+#cat NBEST NBEST | sort -mnk 1,1 | $scorecmd ${casetype} ${normtype} ${reflentype} REF.0 REF.1 REF.2 ./$basename.
+cat ./$basename.feats.opt | cut -d' ' -f 16- > ./$basename.SCORESTAT.out
+cat ./$basename.feats.opt | cut -d' ' -f 1-15 > ./$basename.FEATSTAT.out
+
+echo comparing SCORESTAT.out and $basename.SCORESTAT.out
+cat SCORESTAT.out | perl -pe 's/[ ]+$//' | sort | grep -v "^SCORE"> AAA$$
+cat $basename.SCORESTAT.out | sort >BBB$$
+wc AAA$$ BBB$$
+cmp AAA$$ BBB$$
+
+echo comparing FEATSTAT.out and $basename.FEATSTAT.out
+cat FEATSTAT.out | perl -pe 's/\-/\@\-\@/g; s/(\s)([0-9])/$1\-$2/g; s/\@\-\@//g; s/\-?0\b/0/g; s/[ ]+$//' | sort | grep -v "^FEAT" > AAA$$
+cat $basename.FEATSTAT.out | perl -pe 's/\-?0\.0\b/0/g; s/\.0\b//g' | sort > BBB$$ 
+wc AAA$$ BBB$$
+cmp AAA$$ BBB$$
+#rm AAA$$ BBB$$
+
+echo
+
+done
+done
+done
+

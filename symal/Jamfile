@@ -1,0 +1,2 @@
+exe symal : symal.cpp cmd.c ;
+

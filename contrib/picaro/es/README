@@ -1,0 +1,4 @@
+Spanish-English sample
+sample.f	Spanish text
+sample.e 	English text
+sample.a	Alignment file with links in f-e format

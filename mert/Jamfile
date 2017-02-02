@@ -1,0 +1,96 @@
+import testing ;
+
+lib m ;
+
+lib mert_lib :
+Util.cpp
+GzFileBuf.cpp
+FileStream.cpp
+Timer.cpp
+ScoreStats.cpp
+ScoreArray.cpp
+ScoreData.cpp
+ScoreDataIterator.cpp
+FeatureStats.cpp
+FeatureArray.cpp
+FeatureData.cpp
+FeatureDataIterator.cpp
+ForestRescore.cpp
+HopeFearDecoder.cpp
+Hypergraph.cpp
+MiraFeatureVector.cpp
+MiraWeightVector.cpp
+HypPackEnumerator.cpp
+Data.cpp
+BleuScorer.cpp
+BleuDocScorer.cpp
+SemposScorer.cpp
+SemposOverlapping.cpp
+InterpolatedScorer.cpp
+Point.cpp
+PerScorer.cpp
+HwcmScorer.cpp
+InternalTree.cpp
+M2.cpp
+M2Scorer.cpp
+Scorer.cpp
+ScorerFactory.cpp
+Optimizer.cpp
+OptimizerFactory.cpp
+TER/alignmentStruct.cpp
+TER/hashMap.cpp
+TER/hashMapStringInfos.cpp
+TER/stringHasher.cpp
+TER/terAlignment.cpp
+TER/terShift.cpp
+TER/hashMapInfos.cpp
+TER/infosHasher.cpp
+TER/stringInfosHasher.cpp
+TER/tercalc.cpp
+TER/tools.cpp
+TER/bestShiftStruct.cpp
+TerScorer.cpp
+CderScorer.cpp
+MeteorScorer.cpp
+Vocabulary.cpp
+PreProcessFilter.cpp
+SentenceLevelScorer.cpp
+Permutation.cpp
+PermutationScorer.cpp
+StatisticsBasedScorer.cpp
+../util//kenutil m ..//z ;
+
+exe mert : mert.cpp mert_lib ../moses//ThreadPool ..//boost_filesystem ;
+
+exe extractor : extractor.cpp mert_lib ..//boost_filesystem ;
+
+exe evaluator : evaluator.cpp mert_lib ..//boost_filesystem ;
+
+exe sentence-bleu : sentence-bleu.cpp mert_lib ..//boost_filesystem ;
+
+exe sentence-bleu-nbest : sentence-bleu-nbest.cpp mert_lib ..//boost_filesystem ;
+
+exe pro : pro.cpp mert_lib ..//boost_program_options ..//boost_filesystem ;
+
+exe kbmira : kbmira.cpp mert_lib ..//boost_program_options ..//boost_filesystem ;
+
+exe hgdecode : hgdecode.cpp mert_lib ..//boost_program_options ..//boost_filesystem ;
+
+alias programs : mert extractor evaluator pro kbmira sentence-bleu sentence-bleu-nbest hgdecode ;
+
+unit-test bleu_scorer_test : BleuScorerTest.cpp mert_lib ..//boost_unit_test_framework ..//boost_filesystem ;
+unit-test feature_data_test : FeatureDataTest.cpp mert_lib ..//boost_unit_test_framework ..//boost_filesystem ;
+unit-test data_test : DataTest.cpp mert_lib ..//boost_unit_test_framework ..//boost_filesystem ;
+unit-test forest_rescore_test : ForestRescoreTest.cpp mert_lib ..//boost_unit_test_framework ..//boost_filesystem ;
+unit-test hypergraph_test : HypergraphTest.cpp mert_lib ..//boost_unit_test_framework ..//boost_filesystem ;
+unit-test mira_feature_vector_test : MiraFeatureVectorTest.cpp mert_lib ..//boost_unit_test_framework ..//boost_filesystem ;
+unit-test ngram_test : NgramTest.cpp mert_lib ..//boost_unit_test_framework ..//boost_filesystem ;
+unit-test optimizer_factory_test : OptimizerFactoryTest.cpp mert_lib ..//boost_unit_test_framework ..//boost_filesystem ;
+unit-test point_test : PointTest.cpp mert_lib ..//boost_unit_test_framework ..//boost_filesystem ;
+unit-test reference_test : ReferenceTest.cpp mert_lib ..//boost_unit_test_framework ..//boost_filesystem ;
+unit-test singleton_test : SingletonTest.cpp mert_lib ..//boost_unit_test_framework ..//boost_filesystem ;
+unit-test timer_test : TimerTest.cpp mert_lib ..//boost_unit_test_framework ..//boost_filesystem ;
+unit-test util_test : UtilTest.cpp mert_lib ..//boost_unit_test_framework ..//boost_filesystem ;
+unit-test vocabulary_test : VocabularyTest.cpp mert_lib ..//boost_unit_test_framework ..//boost_filesystem ;
+
+install legacy : programs : <location>. ;

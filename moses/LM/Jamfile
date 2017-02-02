@@ -1,0 +1,150 @@
+#This is somewhat hairy due to the number of optional language models.  
+#Currently, the optional models are IRSTLM, SRILM, and RandLM.  These are
+#activated by --with-irstlm, --with-srilm, and --with-randlm respectively.
+#The value is the path where it's installed e.g. --with-irstlm=/path/to/irst.
+#Each optional model has a section below.  The top level rule is lib LM, which
+#appears after the optional models.  
+
+import option path ;
+
+local dependencies = ;
+local lmmacros = ;
+
+#IRSTLM
+local with-irstlm = [ option.get "with-irstlm" ] ;
+if $(with-irstlm) {
+  lib irstlm : : <search>$(with-irstlm)/lib <search>$(with-irstlm)/lib64 ;
+  obj IRST.o : IRST.cpp ..//headers : <include>$(with-irstlm)/include <include>$(with-irstlm)/include/irstlm ;
+  alias irst : IRST.o irstlm : : : <define>LM_IRST ;
+  dependencies += irst ;
+  lmmacros += LM_IRST ;
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+  echo "!!! You are linking with the IRSTLM library; be sure the release is >= 5.80.07 !!!" ;
+  echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+}
+
+#SRILM
+local with-srilm = [ option.get "with-srilm" ] ;
+local with-maxent-srilm = [ option.get "with-maxent-srilm" ] ;
+if $(with-srilm) {
+  #echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+  #echo "!!! You are linking with the SRILM library; Do NOT use version >= 1.7.1 !!!" ;
+  #echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!" ;
+
+  if [ option.get "with-srilm-dynamic" : no : yes ] = yes {
+    lib srilm ;
+    alias sri-libs : srilm ;
+  } else {
+    sri-arch = [ option.get "with-srilm-arch" ] ;
+    sri-arch ?= [ _shell $(with-srilm)/sbin/machine-type ] ;
+    sri-lib = <search>$(with-srilm)/lib/$(sri-arch) <search>$(with-srilm)/lib <search>$(with-srilm)/lib64 <search>$(with-srilm)/flm/obj/$(sri-arch) ;
+
+    lib flm : : $(sri-lib) ;
+    lib misc : flm : $(sri-lib) ;
+    lib dstruct : misc flm : $(sri-lib) ;
+    lib oolm : dstruct misc flm : $(sri-lib) ;
+
+    alias sri-libs : oolm dstruct misc flm ;
+  }
+
+  obj SRI.o : SRI.cpp ..//headers : <include>$(with-srilm)/include <include>$(with-srilm)/include/srilm <warnings>off ;
+  obj ParallelBackoff.o : ParallelBackoff.cpp ..//headers : <include>$(with-srilm)/include <include>$(with-srilm)/include/srilm <warnings>off ;
+  if $(with-maxent-srilm) {
+  	lib lbfgs : : $(sri-lib) ;
+  	obj MaxEntSRI.o : MaxEntSRI.cpp ..//headers : <include>$(with-srilm)/include <include>$(with-srilm)/lm/src <include>$(with-srilm)/include/srilm <warnings>off ;
+  	alias sri : SRI.o MaxEntSRI.o ParallelBackoff.o lbfgs sri-libs : : : <define>LM_SRI <define>LM_MAXENT_SRI <linkflags>-fopenmp ;
+  	dependencies += sri ;
+  	lmmacros += LM_SRI ;
+  	lmmacros += LM_MAXENT_SRI ;  	
+  } else {
+  	alias sri : SRI.o ParallelBackoff.o sri-libs : : : <define>LM_SRI <linkflags>-fopenmp ;
+  	dependencies += sri ;
+  	lmmacros += LM_SRI ;
+  }
+}
+
+#RandLM
+local with-randlm = [ option.get "with-randlm" ] ;
+if $(with-randlm) {
+  lib RandLM : : <search>$(with-randlm)/lib <search>$(with-randlm)/lib64 ;
+  obj Rand.o : Rand.cpp RandLM ..//headers : <include>$(with-randlm)/include <include>$(with-randlm)/include/RandLM ;
+  alias rand : Rand.o RandLM : : : <define>LM_RAND ;
+  dependencies += rand ;
+  lmmacros += LM_RAND ;
+}
+
+# LDHTLM
+local with-ldhtlm = [ option.get "with-ldhtlm" ] ;
+if $(with-ldhtlm) {
+  lib LDHT : : <search>$(with-ldhtlm)/lib ;
+  lib ticpp : LDHT : <search>$(with-ldhtlm)/lib ;
+  obj LDHT.o : LDHT.cpp LDHT ..//headers : <include>$(with-ldhtlm)/include <include>$(with-ldhtlm)/include/LDHT ;
+  alias ldht : LDHT.o LDHT ticpp : : : <define>LM_LDHT ;
+  dependencies += ldht ;
+  lmmacros += LM_LDHT ;
+}
+
+#NPLM
+local with-nplm = [ option.get "with-nplm" ] ;
+if $(with-nplm) {
+  lib nplm : : <search>$(with-nplm)/lib <search>$(with-nplm)/lib64 ;
+  obj NeuralLMWrapper.o : NeuralLMWrapper.cpp nplm ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen <define>NPLM_DOUBLE_PRECISION=0 ;
+  obj BiLM_NPLM.o : bilingual-lm/BiLM_NPLM.cpp nplm ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen <cxxflags>-fopenmp <define>NPLM_DOUBLE_PRECISION=0 ;
+  obj RDLM.o : RDLM.cpp nplm ..//headers : <include>$(with-nplm)/src <include>$(with-nplm)/3rdparty/eigen <define>NPLM_DOUBLE_PRECISION=0 ;
+  alias neural : NeuralLMWrapper.o nplm : : : <cxxflags>-fopenmp <linkflags>-fopenmp <define>LM_NEURAL ;
+  alias bilinguallm : BiLM_NPLM.o nplm : : : <cxxflags>-fopenmp <linkflags>-fopenmp <define>LM_NEURAL ;
+  alias rdlm : RDLM.o nplm : : : <cxxflags>-fopenmp <linkflags>-fopenmp <define>LM_NEURAL ;
+  dependencies += neural ;
+  dependencies += bilinguallm ;
+  dependencies += rdlm ;
+  lmmacros += LM_NEURAL ;
+}
+
+#OxLM
+local with-oxlm = [ option.get "with-oxlm" ] ;
+if $(with-oxlm) {
+  lib lbl : : <search>$(with-oxlm)/lib <search>$(with-oxlm)/lib64 ;
+  lib murmurhash : : <search>$(with-oxlm)/lib <search>$(with-oxlm)/lib64 ;
+  obj OxLM.o : oxlm/OxLM.cpp lbl ..//headers : <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
+  obj SourceOxLM.o : oxlm/SourceOxLM.cpp lbl ..//headers : <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
+  obj OxLMMapper.o : oxlm/OxLMMapper.cpp lbl ..//headers : <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
+  obj OxLMParallelMapper.o : oxlm/OxLMParallelMapper.cpp lbl ..//headers : <include>$(with-oxlm)/src <include>$(with-oxlm)/third_party/eigen ;
+  alias oxlm : OxLM.o SourceOxLM.o OxLMMapper.o OxLMParallelMapper.o lbl murmurhash /top//boost_filesystem : : : <cxxflags>-std=c++0x <define>LM_OXLM ;
+  dependencies += oxlm ;
+  lmmacros += LM_OXLM ;
+}
+
+
+#DALM
+local with-dalm = [ option.get "with-dalm" ] ;
+if $(with-dalm) {
+  lib dalm : : <search>$(with-dalm)/lib ;
+
+	if [ path.exists $(with-dalm)/lib/libMurmurHash3.a ] {
+  	lib MurmurHash3 : : <search>$(with-dalm)/lib ;
+		alias dalm-libs : dalm MurmurHash3 ;
+	} else {
+		alias dalm-libs : dalm ;
+	}
+
+  obj DALM.o : DALMWrapper.cpp dalm-libs ..//headers : <include>$(with-dalm)/include <include>$(with-dalm)/darts-clone ;
+  alias dalmALIAS : DALM.o dalm-libs : : : <define>LM_DALM ;
+  dependencies += dalmALIAS ;
+  lmmacros += LM_DALM ;
+}
+
+#ORLM is always compiled but needs special headers
+#obj ORLM.o : ORLM.cpp ..//headers ../TranslationModel/DynSAInclude//dynsa : : : <include>../TranslationModel/DynSAInclude ;
+
+#Top-level LM library.  If you've added a file that doesn't depend on external
+#libraries, put it here.  
+alias LM : Backward.cpp BackwardLMState.cpp Base.cpp BilingualLM.cpp Implementation.cpp InMemoryPerSentenceOnDemandLM.cpp Ken.cpp MultiFactor.cpp Remote.cpp SingleFactor.cpp SkeletonLM.cpp
+  ../../lm//kenlm ..//headers $(dependencies) ;
+
+alias macros : : : : <define>$(lmmacros) ;
+
+#Unit test for Backward LM
+import testing ;
+run BackwardTest.cpp ..//moses LM ../../lm//kenlm /top//boost_unit_test_framework : : backward.arpa ;
+
+

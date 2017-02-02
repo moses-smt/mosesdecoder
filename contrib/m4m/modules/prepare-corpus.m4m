@@ -1,0 +1,173 @@
+# -*- Makefile -*-
+# This module deals with corpus preprocessing.
+#
+# Processing order:
+# 1. tokenize (raw -> tok)
+# 2. truecase or lowercase (tok -> cased)
+# 3. clean for alignment, i.e., filter out undesirable sentence pairs (cased -> clean)
+
+max-sentence-length ?= 80
+casing.${L1}        ?= truecase
+casing.${L2}        ?= truecase
+MAX_NUM_REFS        ?= 4
+# tok-mno: monolingual resources
+# tok-pll: parallel resources
+trn.raw-mno   = $(notdir $(wildcard ${WDIR}/crp/trn/mno/raw/*.$1.gz))
+trn.tok-mno   = $(addprefix ${WDIR}/crp/trn/mno/tok/, $(call trn.raw-mno,$1))
+trn.cased-mno = $(addprefix ${WDIR}/crp/trn/mno/cased/, $(call trn.raw-mno,$1))
+
+trn.raw-pll   = $(notdir $(wildcard ${WDIR}/crp/trn/pll/raw/*.$1.gz))
+trn.tok-pll   = $(addprefix ${WDIR}/crp/trn/pll/tok/, $(call trn.raw-pll,$1))
+trn.cased-pll = $(addprefix ${WDIR}/crp/trn/pll/cased/, $(call trn.raw-pll,$1))
+
+
+
+define tokenize
+
+$2/tok/%.$3.gz: | $2/raw/%.$3.gz
+	$$(lock)
+	zcat $$(word 1,$$|) | ${pre-tokenize.$1} \
+	| ${parallel} -j4 --pipe -k ${tokenize.$1} \
+	| gzip > $$@_
+	mv $$@_ $$@
+	$$(unlock)
+
+endef
+
+###########################################################################
+# functions that define dependencies and rules for true- or lowercasing
+###########################################################################
+define truecase
+
+$2/cased/%.$3.gz: caser  = ${run-truecaser} 
+$2/cased/%.$3.gz: caser += -model ${WDIR}/auxiliary/truecasing-model.$1
+$2/cased/%.$3.gz: | $2/tok/%.$3.gz  ${WDIR}/auxiliary/truecasing-model.$1
+	$$(lock)
+	zcat $$(word 1, $$|) | ${parallel} --pipe -k $${caser} | gzip > $$@_
+	mv $$@_ $$@
+	$$(unlock)
+$2/cased/%.$3: | $2/cased/%.$3.gz 
+	$$(lock)
+	gzip -d < $$(word 1, $$|) > $$@_
+	mv $$@_ $$@
+	$$(unlock)
+
+endef 
+
+define lowercase
+
+$2/cased/%.$3.gz: caser  = ${run-lowercaser}
+$2/cased/%.$3.gz: | $2/tok/%.$3.gz
+	$$(lock)
+	zcat $$| | ${parallel} -j4 --pipe -k $${caser} | gzip > $$@_
+	mv $$@_ $$@
+	$$(unlock)
+
+$2/cased/%.$3: | $2/cased/%.$3.gz 
+	$$(lock)
+	gzip -d < $$(word 1, $$|) > $$@_
+	mv $$@_ $$@
+	$$(unlock)
+
+endef
+
+define skipcasing
+$1/cased/%.$2.gz: | $1/tok/%.$2.gz
+	$$(lock)
+	ln -s ../tok/$$*.$2.gz $$(@D)
+	$$(unlock)
+$1/cased/%.$2: | $1/tok/%.$2.gz
+	$$(lock)
+	gzip -d <../tok/$$*.$2.gz > $$@_ && mv $$@_ $$@
+	$$(unlock)
+endef
+
+pllshards := $(notdir $(patsubst %.${L1}.gz,%,\
+	$(wildcard ${WDIR}/crp/trn/pll/raw/*.${L1}.gz)))
+
+.PHONY: pll-ready
+pll-clean = $(addprefix ${WDIR}/crp/trn/pll/clean/, $(pllshards))
+pll-ready: $(foreach l,${L1} ${L2}, $(addsuffix .$l.gz,${pll-clean}))
+	echo MAKEFLAGS = $(filter -n, ${MAKEFLAGS})
+
+define clean_corpus
+
+# .INTERMEDIATE: $1/clean/$2.${L1}.gz 
+# .INTERMEDIATE: $1/clean/$2.${L2}.gz 
+# .INTERMEDIATE: $1/clean/$2.clean.log
+# .SECONDARY: $1/clean/$2.${L1}.gz  
+# .SECONDARY: $1/clean/$2.${L2}.gz 
+# .SECONDARY: $1/clean/$2.clean.log
+$1/clean/$2.${L2}.gz: | $1/clean/$2.clean.log
+	$$(lock)
+	gzip < $$(@D)/_$2.${L2} > $$@_ && rm $$(@D)/_$2.${L2}
+	mv $$@_ $$@
+	$$(unlock)
+
+$1/clean/$2.${L1}.gz: | $1/clean/$2.clean.log
+	$$(lock)
+	gzip < $$(@D)/_$2.${L1} > $$@_ && rm $$(@D)/_$2.${L1} 
+	mv $$@_ $$@
+	$$(unlock)
+
+$1/clean/$2.clean.log: | $1/cased/$2.${L1}.gz $1/cased/$2.${L2}.gz 
+	$$(lock)
+	${MOSES_SCRIPTS}/training/clean-corpus-n.perl \
+	${WDIR}/crp/trn/pll/cased/$2 ${L1} ${L2} $$(@D)/_$2 1 $(max-sentence-length) $$@_
+	mv $$@_ $$@
+	$$(unlock)
+
+endef
+
+############################################################################
+#                         Truecasing models                                #
+############################################################################
+# .INTERMEDIATE: $(call trn.tok-mno,${L1}) $(call trn.tok-pll,${L1})
+# .INTERMEDIATE: $(call trn.tok-mno,${L2}) $(call trn.tok-pll,${L2})
+# .SECONDARY: $(call trn.tok-mno,${L1}) $(call trn.tok-pll,${L1})
+# .SECONDARY: $(call trn.tok-mno,${L2}) $(call trn.tok-pll,${L2})
+
+#${WDIR}/auxiliary/truecasing-model.${L1}: | $(call trn.tok-mno,${L1}) $(call trn.tok-pll,${L1})
+${WDIR}/auxiliary/truecasing-model.${L1}: | $(call trn.tok-mno,${L1}) 
+	$(lock)
+	$(if $|,,$(error Can't find training data for $@!))#'
+	${train-truecaser} -model $@_ -corpus <(echo $| | xargs zcat -f) 
+	test -s $@_ || (echo "Truecasing model $@ is empty!" && exit 1)
+	mv $@_ $@
+	$(unlock)
+
+#${WDIR}/auxiliary/truecasing-model.${L2}: | $(call trn.tok-mno,${L2}) $(call trn.tok-pll,${L2})
+${WDIR}/auxiliary/truecasing-model.${L2}: | $(call trn.tok-mno,${L2}) 
+	$(lock)
+	$(if $|,,$(error Can't find training data for $@!))#'
+	${train-truecaser} -model $@_ -corpus <(echo $| | xargs zcat -f) 
+	test -s $@_ || (echo "Truecasing model $@ is empty!" && exit 1)
+	mv $@_ $@
+	$(unlock)
+
+
+############################################################################
+#                         Generate rules                                   #
+############################################################################
+
+all_data_dirs := $(addprefix ${WDIR}/crp/,trn/mno trn/pll dev tst dev+tst)
+
+# add rules for tokenization and casing
+snippet := $(foreach d,$(all_data_dirs),\
+$(call tokenize,${L1},$d,${L1})$(call ${casing.${L1}},${L1},$d,${L1}))
+
+snippet += $(foreach d,$(all_data_dirs),\
+$(foreach l,${L2} $(addprefix ${L2},$(shell seq 0 ${MAX_NUM_REFS})),\
+$(call tokenize,${L2},$d,$l)$(call ${casing.${L2}},${L2},$d,$l)))
+
+MY_EXPERIMENT += $(snippet)
+#$(info $(snippet))
+$(eval $(snippet))
+
+# add rules for cleaning parallel data prior to word alignment
+snippet := $(foreach s,${pllshards},$(call clean_corpus,${WDIR}/crp/trn/pll,$s))
+
+MY_EXPERIMENT += $(snippet)
+#$(info $(snippet))
+$(eval $(snippet))
+

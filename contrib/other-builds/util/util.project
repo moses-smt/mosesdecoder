@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Project Name="util" InternalType="Library">
+  <Description/>
+  <Dependencies/>
+  <VirtualDirectory Name="src"/>
+  <VirtualDirectory Name="include"/>
+  <VirtualDirectory Name="util">
+    <File Name="../../../util/bit_packing.cc"/>
+    <File Name="../../../util/bit_packing_test.cc" ExcludeProjConfig="Debug"/>
+    <File Name="../../../util/cat_compressed_main.cc"/>
+    <File Name="../../../util/ersatz_progress.cc"/>
+    <File Name="../../../util/exception.cc"/>
+    <File Name="../../../util/file.cc"/>
+    <File Name="../../../util/file_piece.cc"/>
+    <File Name="../../../util/file_piece_test.cc" ExcludeProjConfig="Debug"/>
+    <File Name="../../../util/getopt.c"/>
+    <File Name="../../../util/joint_sort_test.cc" ExcludeProjConfig="Debug"/>
+    <File Name="../../../util/mmap.cc"/>
+    <File Name="../../../util/multi_intersection_test.cc" ExcludeProjConfig="Debug"/>
+    <File Name="../../../util/murmur_hash.cc"/>
+    <File Name="../../../util/parallel_read.cc"/>
+    <File Name="../../../util/pcqueue_test.cc" ExcludeProjConfig="Debug"/>
+    <File Name="../../../util/pool.cc"/>
+    <File Name="../../../util/probing_hash_table_test.cc" ExcludeProjConfig="Debug"/>
+    <File Name="../../../util/read_compressed.cc"/>
+    <File Name="../../../util/read_compressed_test.cc" ExcludeProjConfig="Debug"/>
+    <File Name="../../../util/scoped.cc"/>
+    <File Name="../../../util/sized_iterator_test.cc" ExcludeProjConfig="Debug"/>
+    <File Name="../../../util/sorted_uniform_test.cc" ExcludeProjConfig="Debug"/>
+    <File Name="../../../util/string_piece.cc"/>
+    <File Name="../../../util/tokenize_piece_test.cc" ExcludeProjConfig="Debug"/>
+    <File Name="../../../util/usage.cc"/>
+    <File Name="../../../util/random.cc"/>
+    <File Name="../../../util/random.hh"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="double-conversion">
+    <File Name="../../../util/double-conversion/bignum-dtoa.cc"/>
+    <File Name="../../../util/double-conversion/bignum-dtoa.h"/>
+    <File Name="../../../util/double-conversion/bignum.cc"/>
+    <File Name="../../../util/double-conversion/bignum.h"/>
+    <File Name="../../../util/double-conversion/cached-powers.cc"/>
+    <File Name="../../../util/double-conversion/cached-powers.h"/>
+    <File Name="../../../util/double-conversion/diy-fp.cc"/>
+    <File Name="../../../util/double-conversion/diy-fp.h"/>
+    <File Name="../../../util/double-conversion/double-conversion.cc"/>
+    <File Name="../../../util/double-conversion/double-conversion.h"/>
+    <File Name="../../../util/double-conversion/fast-dtoa.cc"/>
+    <File Name="../../../util/double-conversion/fast-dtoa.h"/>
+    <File Name="../../../util/double-conversion/fixed-dtoa.cc"/>
+    <File Name="../../../util/double-conversion/fixed-dtoa.h"/>
+    <File Name="../../../util/double-conversion/ieee.h"/>
+    <File Name="../../../util/double-conversion/strtod.cc"/>
+    <File Name="../../../util/double-conversion/strtod.h"/>
+    <File Name="../../../util/double-conversion/utils.h"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="stream">
+    <File Name="../../../util/stream/chain.cc"/>
+    <File Name="../../../util/stream/io.cc"/>
+    <File Name="../../../util/stream/io_test.cc" ExcludeProjConfig="Debug"/>
+    <File Name="../../../util/stream/line_input.cc"/>
+    <File Name="../../../util/stream/multi_progress.cc"/>
+    <File Name="../../../util/stream/sort_test.cc" ExcludeProjConfig="Debug"/>
+    <File Name="../../../util/stream/stream_test.cc" ExcludeProjConfig="Debug"/>
+  </VirtualDirectory>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
+  <Settings Type="Static Library">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="" Assembler="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="Debug" CompilerType="GCC" DebuggerType="LLDB Debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g" C_Options="-g" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+        <IncludePath Value="../../.."/>
+        <IncludePath Value="../../../boost/include"/>
+      </Compiler>
+      <Linker Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/lib$(ProjectName).a" IntermediateDirectory="./Debug" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName/>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Release" CompilerType="GCC" DebuggerType="LLDB Debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="" C_Options="" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/lib$(ProjectName).a" IntermediateDirectory="./Release" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="no">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName/>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+</CodeLite_Project>

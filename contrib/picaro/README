@@ -1,0 +1,62 @@
+README - 16 Jan 2011b
+Author: Jason Riesa <jason.riesa@gmail.com>
+
+Picaro [v1.0]: A simple command-line alignment visualization tool.
+Visualize alignments in grid-format. 
+
+This brief README is organized as follows:
+I. REQUIREMENTS
+II. USAGE
+III. INPUT FORMAT
+IV. EXAMPLE USAGE
+V. NOTES 
+
+I. REQUIREMENTS
+===============
+Python v2.5 or higher is required.
+
+II. USAGE
+=========
+Picaro takes as input 3 mandatory arguments and up to 2 optional arguments:
+Mandatory arguments:
+1. -a1 <alignment1>	where alignment1 is a path to an alignment file
+2. -e  <e>		where e is a path to a file of English sentences 
+3. -f  <f>		where f is a path to a file of French sentences 
+Optional arguments:
+1. -a2 <a2>	 	path to alignment2 file in f-e format
+2. -maxlen <len>	for each sentence pair, render only when each 
+			sentence has length in words <= len
+
+For historical reasons we use the labels e, f, English, and French,
+but any language pair will do.
+
+III. INPUT FORMAT
+=================
+- Files e and f must be sentence-aligned
+- Alignment files must be in f-e format
+See included sample files in zh/ and es/.
+
+IV. EXAMPLE USAGE
+=================
+WITH A SINGLE ALIGNMENT:
+$ picaro.py -e zh/sample.e -f zh/sample.f -a1 zh/sample.aln
+
+COMPARING TWO ALIGNMENTS:
+$ picaro.py -e zh/sample.e -f zh/sample.f -a1 zh/alternate.aln -a2 zh/sample.aln
+
+When visualizing two alignments at once, refer to the following color scheme:
+Green blocks: alignments a1 and a2 agree
+Blue blocks:  alignment a1 only
+Gold blocks:  alignment a2 only
+
+V. NOTES
+========
+RIGHT-TO-LEFT TEXT:
+If you are using right-to-left text, e.g. Arabic, transliterate your text first.
+Terminals generally render unexpectedly with mixed left-to-right and right-to-left text.
+For Arabic, in particular, we use the Buckwalter translitation scheme [1] when using this tool.
+The following Perl module implements Buckwalter transliteration:
+http://search.cpan.org/~smrz/Encode-Arabic-1.8/lib/Encode/Arabic.pm
+
+[1] http://www.ldc.upenn.edu/myl/morph/buckwalter.html
+

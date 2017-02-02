@@ -1,0 +1,100 @@
+#!/bin/bash
+
+# $Id: consolidate-training-data.perl 40 2007-03-14 22:48:03Z hieu $
+
+function die() {
+  echo "$@"
+  exit 1
+}
+RUNDIR=`pwd 2> /dev/null`
+if [ -z $RUNDIR ]; then
+  RUNDIR=`pwd`
+fi;
+
+
+[ -d $WORKSPACE ] || die "Missing $WORKSPACE"
+echo "Workspace: $WORKSPACE"
+echo "This test is expected to take an hour."
+
+MOSES=$WORKSPACE/moses-cmd/src/moses
+
+[ -x $MOSES ] || die "Missing $MOSES"
+
+export SCRIPTS_ROOTDIR=$WORKSPACE/scripts
+
+cp -r ../cs-en-sample ./corpus || die "Missing $RUNDIR/../cs-en-sample"
+echo "Copied cs-en-sample files"
+
+mv corpus/test.* ./ || die "Missing corpus/test.*"
+cp corpus/train.cs ./dev.src || die "Missing corpus/train.cs"
+cp corpus/train.en ./dev.ref || die "Missing corpus/train.en"
+
+echo "Test and 'tuning' data ready. Tuning equals training."
+
+bindir=$WORKSPACE/bin
+[ -d $bindir ] || die "Please create $WORKSPACE/bin and put GIZA++ and such there"
+
+echo "Starting training script."
+
+$SCRIPTS_ROOTDIR/training/train-factored-phrase-model.perl \
+  --bin-dir=$bindir \
+  --f cs --e en \
+  --translation-factors 0-0 \
+  --decoding-steps t0 \
+  --first-step 1 \
+  --last-step 9 \
+  --corpus corpus/train \
+  --root   . \
+  --parallel \
+  --lm 0:3:$RUNDIR/corpus/lm.en.gz \
+  || die "Failed to train the model"
+
+echo "Finished moses.ini, merting."
+
+$SCRIPTS_ROOTDIR/training/mert-moses.pl  \
+    --working-dir=mert-tuning \
+    $RUNDIR/dev.src \
+    $RUNDIR/dev.ref \
+    $MOSES \
+    $RUNDIR/model/moses.ini \
+    --decoder-flags="-dl 6 " \
+    || die "Merting failed"
+
+# Typical parallelization flags
+#    --jobs=10 \
+#    --old-sge \
+#    --queue-flags=" " 
+
+echo "Finished merting, filtering phrases for test data."
+
+$SCRIPTS_ROOTDIR/training/filter-model-given-input.pl \
+  filtered-opt \
+  mert-tuning/moses.ini \
+  test.src \
+  || die "Failed to filter phrases for test data."
+
+echo "Finished filtering. Deconding test set."
+
+$MOSES \
+  -dl 6 \
+  -f filtered-opt/moses.ini \
+  -i test.src \
+  > test.opt \
+  || die "Decoding of test set failed."
+
+$SCRIPTS_ROOTDIR/generic/multi-bleu.perl test.ref \
+  < test.opt > test.opt.bleu \
+  || die "Final scoring failed"
+
+# Typical parallel decoding:
+#	$SCRIPTS_ROOTDIR/generic/moses-parallel.pl \
+#	  -decoder $MOSES \
+#	  -jobs 10 \
+#	  -queue-parameters " " \
+#	  -old-sge \
+#	  -inputfile ./test.src \
+#	  -config ./filtered-opt/moses.ini \
+#	  > test.opt.out
+
+echo "Success."
+

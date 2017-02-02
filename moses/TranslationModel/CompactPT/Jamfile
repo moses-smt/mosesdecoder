@@ -1,0 +1,17 @@
+local current = "" ;
+local includes = ;
+local with-cmph = [ option.get "with-cmph" ] ;
+if $(with-cmph) {
+  lib cmph : : <search>$(with-cmph)/lib <search>$(with-cmph)/lib64 ;
+  includes += <include>$(with-cmph)/include ;
+  current = "--with-cmph=$(with-cmph)" ;
+  fakelib CompactPT : [ glob *.cpp ] ../..//headers cmph : $(includes) <dependency>$(PT-LOG) : : $(includes) ;
+}
+else {
+  alias cmph ;
+  fakelib CompactPT ;
+}
+
+path-constant PT-LOG : bin/pt.log ;
+update-if-changed $(PT-LOG) $(current) ;
+

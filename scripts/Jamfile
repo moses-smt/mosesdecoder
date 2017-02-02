@@ -1,0 +1,23 @@
+#See ../Jamroot for options.  
+import option path ;
+
+build-project training ;
+
+prefix = [ option.get "prefix" ] ;
+if $(prefix) {
+  prefix = [ path.root $(prefix) [ path.pwd ] ] ;
+  location = [ option.get "install-scripts" : : $(prefix)$(GITTAG)/scripts ] ;
+} else {
+  location = [ option.get "install-scripts" ] ;
+}
+
+if $(location) {
+  location = [ path.root $(location) [ path.pwd ] ] ;
+  install scripts : 
+    [ glob-tree README *.js *.pl *.perl *.pm *.py *.sh *.php : tests regression-testing other bin ]
+    [ glob share/nonbreaking_prefixes/* ems/example/*.* ems/example/data/* ems/web/* analysis/smtgui/* : ems/web/javascripts ]
+    generic/fsa-sample.fsa
+    ems/experiment.machines
+    ems/experiment.meta
+    : <install-source-root>. <location>$(location) ;
+}

@@ -1,0 +1,127 @@
+external-lib bz2 ;
+
+exe mmlex-build : 
+mmlex-build.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
+exe mmlex-lookup : 
+mmlex-lookup.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
+exe mtt-demo1 : 
+mtt-demo1.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
+exe mtt-count-words : 
+mtt-count-words.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
+exe mtt-build : 
+mtt-build.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
+exe mtt-dump : 
+mtt-dump.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
+exe mam2symal : 
+mam2symal.cc
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
+exe symal2mam : 
+symal2mam.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
+exe mam_verify : 
+mam_verify.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
+# exe custom-pt : 
+# custom-pt.cc 
+# $(TOP)/moses//moses
+# $(TOP)//boost_iostreams 
+# $(TOP)//boost_program_options 
+# $(TOP)/moses/TranslationModel/UG/mm//mm 
+# $(TOP)/moses/TranslationModel/UG/generic//generic 
+# $(TOP)/util//kenutil 
+# ; 
+
+
+exe calc-coverage : 
+calc-coverage.cc 
+$(TOP)/moses//moses
+$(TOP)/moses/TranslationModel/UG/generic//generic 
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/util//kenutil 
+; 
+
+install $(PREFIX)/bin : 
+mtt-build 
+mtt-dump 
+mtt-count-words 
+symal2mam 
+mam2symal 
+mmlex-build 
+mmlex-lookup
+mam_verify 
+calc-coverage
+; 
+
+fakelib mm : [ glob ug_*.cc tpt_*.cc num_read_write.cc ] ;
+

@@ -1,0 +1,6 @@
+alias deps : ../../../moses/src//moses ;
+
+exe calcDivergence : Main.cpp mbr.cpp IOWrapper.cpp TranslationAnalysis.cpp LatticeMBR.cpp RelativeEntropyCalc.cpp deps ;
+
+alias programs : calcDivergence ;
+

@@ -1,0 +1,34 @@
+A simple regular testing of Moses codebase, aka cruise control
+--------------------------------------------------------------
+
+Features:
+
+- Checkout latest commits
+- Test configure, make, make scripts
+- Run regression tests
+- Run a sample EMS pipeline
+- Report results into logfiles
+- A simple web interface in PHP
+
+How to run cruise control:
+
+1) Download and compile SRILM
+
+2) Download, compile and install IRSTLM
+
+3) Edit the configuration file example.config. You can create as many
+   configuration files as you like.
+
+4) Execute ./test_all_new_commits.sh yourfile.config
+
+
+How to set up the web interface:
+
+1) Install Apache and PHP
+
+2) Copy files from cruise-control/web into Apache's www directory
+
+3) Point StaticData::logs_path to correct directory, e.g. /home/cruise/logs/example/
+   Default value is 'data', you might want to just create a symlink.
+
+Written by Ondrej Bojar, Ales Tamchyna, Barry Haddow, Rimas Blazaitis

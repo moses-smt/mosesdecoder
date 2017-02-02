@@ -1,0 +1,5 @@
+#!/usr/bin/perl -w
+use strict;
+my $path = shift @ARGV;
+die "Can't find SALM installation path: $path\nPlease use:\n\n   make SALMDIR=/path/to/SALM\n\n" unless (-d $path);
+exit 0;

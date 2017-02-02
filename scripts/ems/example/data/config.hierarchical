@@ -1,0 +1,227 @@
+################################################
+### CONFIGURATION FILE FOR AN SMT EXPERIMENT ###
+################################################
+
+[GENERAL]
+
+### directory in which experiment is run
+#
+working-dir = /home/hieu/workspace/experiment/data/issues/toy
+
+# specification of the language pair
+input-extension = fr
+output-extension = en
+pair-extension = fr-en
+
+### directories that contain tools and data
+# 
+# moses
+moses-src-dir = /home/hieu/workspace/github/mosesdecoder
+#
+# moses binaries
+moses-bin-dir = $moses-src-dir/bin
+#
+# moses scripts
+moses-script-dir = $moses-src-dir/scripts
+#
+# directory where GIZA++/MGIZA programs resides
+external-bin-dir = /home/hieu/workspace/bin/training-tools
+#
+# srilm
+srilm-dir = $moses-src-dir/srilm/bin/i686-m64
+#
+# irstlm
+irstlm-dir = $moses-src-dir/irstlm/bin
+
+# data
+wmt12-data = $working-dir/data
+
+### basic tools
+#
+# moses decoder
+decoder = $moses-bin-dir/moses_chart
+
+# conversion of phrase table into binary on-disk format
+#ttable-binarizer = $moses-bin-dir/processPhraseTable
+
+# conversion of rule table into binary on-disk format
+ttable-binarizer = "$moses-bin-dir/CreateOnDiskPt 1 1 4 100 2"
+
+# tokenizers - comment out if all your data is already tokenized
+input-tokenizer = "$moses-script-dir/tokenizer/tokenizer.perl -a -l $input-extension"
+output-tokenizer = "$moses-script-dir/tokenizer/tokenizer.perl -a -l $output-extension"
+
+# truecasers - comment out if you do not use the truecaser
+input-truecaser = $moses-script-dir/recaser/truecase.perl
+output-truecaser = $moses-script-dir/recaser/truecase.perl
+detruecaser = $moses-script-dir/recaser/detruecase.perl
+
+
+### multi-core settings
+# when the generic parallelizer is used, the number of cores
+# specified here 
+cores = 8
+
+#################################################################
+# PARALLEL CORPUS PREPARATION: 
+# create a tokenized, sentence-aligned corpus, ready for training
+
+[CORPUS]
+
+### long sentences are filtered out, since they slow down GIZA++ 
+# and are a less reliable source of data. set here the maximum
+# length of a sentence
+#
+max-sentence-length = 80
+
+[CORPUS:nc]
+raw-stem = $wmt12-data/nc-5k
+
+#################################################################
+# LANGUAGE MODEL TRAINING
+
+[LM]
+
+### tool to be used for language model training
+# srilm 
+lm-training = $srilm-dir/ngram-count
+settings = "-interpolate -kndiscount -unk"
+
+# irstlm training
+# msb = modified kneser ney; p=0 no singleton pruning
+#lm-training = "$moses-script-dir/generic/trainlm-irst2.perl -cores $cores -irst-dir $irstlm-dir -temp-dir $working-dir/tmp"
+#settings = "-s msb -p 0"
+
+# order of the language model
+order = 5
+
+# kenlm, also set type to 8
+lm-binarizer = $moses-bin-dir/build_binary
+type = 8
+
+### each language model to be used has its own section here
+
+[LM:nc]
+raw-corpus = $wmt12-data/nc-5k.$output-extension
+
+#################################################################
+# TRANSLATION MODEL TRAINING
+
+[TRAINING]
+
+### training script to be used: either a legacy script or 
+# current moses training script (default) 
+# 
+script = $moses-script-dir/training/train-model.perl
+
+### parallelization of data preparation step
+# the two directions of the data preparation can be run in parallel
+# comment out if not needed
+#
+parallel = yes
+
+### symmetrization method to obtain word alignments from giza output
+# (commonly used: grow-diag-final-and)
+#
+alignment-symmetrization-method = grow-diag-final-and
+
+### hierarchical rule set
+#
+hierarchical-rule-set = true
+
+### settings for rule scoring
+#
+score-settings = "--GoodTuring"
+
+#####################################################
+### TUNING: finding good weights for model components
+
+[TUNING]
+
+### tuning script to be used
+#
+tuning-script = $moses-script-dir/training/mert-moses.pl
+tuning-settings = "-mertdir $moses-bin-dir"
+
+### specify the corpus used for tuning 
+# it should contain 1000s of sentences
+#
+input-sgm = $wmt12-data/test-src.$input-extension.sgm
+#raw-input = 
+#tokenized-input = 
+#factorized-input = 
+#input =
+# 
+reference-sgm = $wmt12-data/test-ref.$output-extension.sgm
+#raw-reference = 
+#tokenized-reference = 
+#factorized-reference = 
+#reference = 
+
+### size of n-best list used (typically 100)
+#
+nbest = 100
+
+#######################################################
+## TRUECASER: train model to truecase corpora and input
+
+[TRUECASER]
+
+### script to train truecaser models
+#
+trainer = $moses-script-dir/recaser/train-truecaser.perl
+
+######################################################################
+## EVALUATION: translating a test set using the tuned system and score it
+
+[EVALUATION]
+
+### prepare system output for scoring 
+# this may include detokenization and wrapping output in sgm 
+# (needed for nist-bleu, ter, meteor)
+#
+detokenizer = "$moses-script-dir/tokenizer/detokenizer.perl -l $output-extension"
+#recaser = $moses-script-dir/recaser/recase.perl
+wrapping-script = "$moses-script-dir/ems/support/wrap-xml.perl $output-extension"
+#output-sgm = 
+
+### BLEU
+#
+nist-bleu = $moses-script-dir/generic/mteval-v13a.pl
+nist-bleu-c = "$moses-script-dir/generic/mteval-v13a.pl -c"
+#multi-bleu = $moses-script-dir/generic/multi-bleu.perl
+#ibm-bleu =
+
+### Analysis: carry out various forms of analysis on the output
+#
+analysis = $moses-script-dir/ems/support/analysis.perl
+#
+# also report on input coverage
+analyze-coverage = yes
+#
+# also report on phrase mappings used
+report-segmentation = yes
+
+[EVALUATION:newstest2011]
+
+### input data
+#
+input-sgm = $wmt12-data/test-src.$input-extension.sgm
+
+### reference data
+#
+reference-sgm = $wmt12-data/test-ref.$output-extension.sgm
+
+### wrapping frame
+# for nist-bleu and other scoring scripts, the output needs to be wrapped 
+# in sgm markup (typically like the input sgm)
+#
+wrapping-frame = $input-sgm
+
+##########################################
+### REPORTING: summarize evaluation scores
+
+[REPORTING]
+
+### currently no parameters for reporting section
+

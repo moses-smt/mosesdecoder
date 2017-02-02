@@ -1,0 +1,59 @@
+div.enclosing {
+	border-collapse:collapse;
+	float: left;
+	border: 0px;
+	margin: 0px;
+	padding: 0px;
+}
+div.leaf {
+	border-collapse:collapse;
+	border:1px solid black;
+	margin:2px;
+	padding:0px;
+	font-weight: normal;
+	background-color: white;	
+}
+div.empty {
+	border-collapse:collapse;
+	border:1px solid transparent;
+	border-left:0px;
+	border-right:0px;
+	margin:2px;
+	margin-left:0px;
+	margin-right:0px;
+	padding:0px;
+	font-weight: normal;	
+}
+div.continued {
+	border-collapse:collapse;
+	border:1px solid black;
+	border-left: 0px;
+	border-right: 0px;
+	margin:2px;
+	margin-left: 0px;
+	margin-right: 0px;
+	padding: 0px;
+	padding-top: 0px;
+	font-weight: normal;
+	background-color: white;		
+}
+div.opening {
+	border-collapse:collapse;
+	border:1px solid black;
+	border-right: 0px;
+	margin:2px;
+	margin-right: 0px;
+	padding: 0px;
+	font-weight: normal;
+	background-color: white;		
+}
+div.closing {
+	border-collapse:collapse;
+	border:1px solid black;
+	border-left: 0px;
+	margin:2px;
+	margin-left: 0px;
+	padding: 0px;
+	font-weight: normal;
+	background-color: white;		
+}

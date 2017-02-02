@@ -1,0 +1,12 @@
+external-lib bzip2 ;
+external-lib zlib ;
+
+exe merge-sorted : 
+merge-sorted.cc 
+$(TOP)/moses/TranslationModel/UG/mm//mm 
+$(TOP)/moses/TranslationModel/UG/generic//generic
+$(TOP)//boost_iostreams 
+$(TOP)//boost_program_options 
+;
+
+

@@ -1,0 +1,903 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CodeLite_Project Name="moses" InternalType="Library">
+  <Plugins>
+    <Plugin Name="qmake">
+      <![CDATA[00010001N0005Debug000000000000]]>
+    </Plugin>
+    <Plugin Name="CMakePlugin">
+      <![CDATA[[{
+  "name": "Debug",
+  "enabled": false,
+  "buildDirectory": "build",
+  "sourceDirectory": "$(ProjectPath)",
+  "generator": "",
+  "buildType": "",
+  "arguments": [],
+  "parentProject": ""
+ }]]]>
+    </Plugin>
+  </Plugins>
+  <VirtualDirectory Name="TranslationModel">
+    <VirtualDirectory Name="UG">
+      <VirtualDirectory Name="mm">
+        <VirtualDirectory Name="obsolete">
+          <File Name="../../../moses/TranslationModel/UG/mm/obsolete/ug_bitext_base.h"/>
+        </VirtualDirectory>
+        <File Name="../../../moses/TranslationModel/UG/mm/calc-coverage.cc" ExcludeProjConfig="Debug"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/custom-pt.cc" ExcludeProjConfig="Debug"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/mam2symal.cc" ExcludeProjConfig="Debug"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/mam_verify.cc" ExcludeProjConfig="Debug"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/mmlex-build.cc" ExcludeProjConfig="Debug"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/mmlex-lookup.cc" ExcludeProjConfig="Debug"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/mtt-build.cc" ExcludeProjConfig="Debug"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/mtt-count-words.cc" ExcludeProjConfig="Debug"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/mtt-demo1.cc" ExcludeProjConfig="Debug"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/mtt-dump.cc" ExcludeProjConfig="Debug"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/mtt.count.cc" ExcludeProjConfig="Debug"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/num_read_write.cc" ExcludeProjConfig="Debug"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/num_read_write.h" ExcludeProjConfig="Debug"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/symal2mam.cc" ExcludeProjConfig="Debug"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/test-dynamic-im-tsa.cc" ExcludeProjConfig="Debug"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/tpt_pickler.cc"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/tpt_pickler.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/tpt_tightindex.cc"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/tpt_tightindex.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/tpt_tokenindex.cc"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/tpt_tokenindex.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/tpt_typedefs.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_bitext.cc"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_bitext.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_conll_bottom_up_token.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_conll_record.cc"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_conll_record.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_corpus_token.cc"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_corpus_token.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_deptree.cc"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_deptree.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_im_tsa.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_im_ttrack.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_lexical_phrase_scorer1.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_lexical_phrase_scorer2.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_lexical_reordering.cc"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_lexical_reordering.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_load_primer.cc"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_load_primer.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_lru_cache.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_mm_2d_table.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_mm_tsa.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_mm_tsa_tree_iterator.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_mm_ttrack.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_mmbitext.cc"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_mmbitext.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_phrasepair.cc"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_phrasepair.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_tsa_array_entry.cc"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_tsa_array_entry.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_tsa_base.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_tsa_bitset_cache.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_tsa_tree_iterator.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_ttrack_base.cc"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_ttrack_base.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_ttrack_position.cc"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_ttrack_position.h"/>
+        <File Name="../../../moses/TranslationModel/UG/mm/ug_typedefs.h"/>
+      </VirtualDirectory>
+      <VirtualDirectory Name="generic">
+        <VirtualDirectory Name="file_io">
+          <File Name="../../../moses/TranslationModel/UG/generic/file_io/ug_stream.cpp"/>
+          <File Name="../../../moses/TranslationModel/UG/generic/file_io/ug_stream.h"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="program_options">
+          <File Name="../../../moses/TranslationModel/UG/generic/program_options/ug_get_options.cpp"/>
+          <File Name="../../../moses/TranslationModel/UG/generic/program_options/ug_get_options.h"/>
+          <File Name="../../../moses/TranslationModel/UG/generic/program_options/ug_splice_arglist.cc"/>
+          <File Name="../../../moses/TranslationModel/UG/generic/program_options/ug_splice_arglist.h"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="sampling">
+          <File Name="../../../moses/TranslationModel/UG/generic/sampling/Sampling.h"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="sorting">
+          <File Name="../../../moses/TranslationModel/UG/generic/sorting/NBestList.h"/>
+          <File Name="../../../moses/TranslationModel/UG/generic/sorting/VectorIndexSorter.h"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="stringdist">
+          <File Name="../../../moses/TranslationModel/UG/generic/stringdist/ug_stringdist.cc" ExcludeProjConfig="Debug"/>
+          <File Name="../../../moses/TranslationModel/UG/generic/stringdist/ug_stringdist.h" ExcludeProjConfig="Debug"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="threading">
+          <File Name="../../../moses/TranslationModel/UG/generic/threading/ug_thread_safe_counter.cc"/>
+          <File Name="../../../moses/TranslationModel/UG/generic/threading/ug_thread_safe_counter.h"/>
+        </VirtualDirectory>
+      </VirtualDirectory>
+      <VirtualDirectory Name="util">
+        <File Name="../../../moses/TranslationModel/UG/util/ibm1-align.cc" ExcludeProjConfig="Debug"/>
+        <File Name="../../../moses/TranslationModel/UG/util/tokenindex.dump.cc" ExcludeProjConfig="Debug"/>
+      </VirtualDirectory>
+      <File Name="../../../moses/TranslationModel/UG/count-ptable-features.cc"/>
+      <File Name="../../../moses/TranslationModel/UG/mmsapt.cpp"/>
+      <File Name="../../../moses/TranslationModel/UG/mmsapt.h"/>
+      <File Name="../../../moses/TranslationModel/UG/mmsapt_align.cc"/>
+      <File Name="../../../moses/TranslationModel/UG/ptable-describe-features.cc"/>
+      <File Name="../../../moses/TranslationModel/UG/ptable-lookup.cc"/>
+      <File Name="../../../moses/TranslationModel/UG/ptable-lookup-corpus.cc"/>
+      <File Name="../../../moses/TranslationModel/UG/sapt_phrase_key.h"/>
+      <File Name="../../../moses/TranslationModel/UG/sapt_phrase_scorers.h"/>
+      <File Name="../../../moses/TranslationModel/UG/sapt_pscore_base.h"/>
+      <File Name="../../../moses/TranslationModel/UG/sapt_pscore_coherence.h"/>
+      <File Name="../../../moses/TranslationModel/UG/sapt_pscore_lex1.h"/>
+      <File Name="../../../moses/TranslationModel/UG/sapt_pscore_logcnt.h"/>
+      <File Name="../../../moses/TranslationModel/UG/sapt_pscore_pbwd.h"/>
+      <File Name="../../../moses/TranslationModel/UG/sapt_pscore_pfwd.h"/>
+      <File Name="../../../moses/TranslationModel/UG/sapt_pscore_phrasecount.h"/>
+      <File Name="../../../moses/TranslationModel/UG/sapt_pscore_provenance.h"/>
+      <File Name="../../../moses/TranslationModel/UG/sapt_pscore_rareness.h"/>
+      <File Name="../../../moses/TranslationModel/UG/sapt_pscore_unaligned.h"/>
+      <File Name="../../../moses/TranslationModel/UG/sapt_pscore_wordcount.h"/>
+      <File Name="../../../moses/TranslationModel/UG/sim-pe.cc" ExcludeProjConfig="Debug"/>
+      <File Name="../../../moses/TranslationModel/UG/spe-check-coverage.cc" ExcludeProjConfig="Debug"/>
+      <File Name="../../../moses/TranslationModel/UG/spe-check-coverage2.cc" ExcludeProjConfig="Debug"/>
+      <File Name="../../../moses/TranslationModel/UG/spe-check-coverage3.cc" ExcludeProjConfig="Debug"/>
+      <File Name="../../../moses/TranslationModel/UG/try-align.cc" ExcludeProjConfig="Debug"/>
+      <File Name="../../../moses/TranslationModel/UG/try-align2.cc" ExcludeProjConfig="Debug"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="CompactPT">
+      <File Name="../../../moses/TranslationModel/CompactPT/BlockHashIndex.cpp"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/BlockHashIndex.h"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/CanonicalHuffman.h"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/CmphStringVectorAdapter.cpp"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/CmphStringVectorAdapter.h"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/ConsistentPhrases.h"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/LexicalReorderingTableCompact.cpp"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/LexicalReorderingTableCompact.h"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/LexicalReorderingTableCreator.cpp"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/LexicalReorderingTableCreator.h"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/ListCoders.h"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/MmapAllocator.h"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/MonotonicVector.h"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/MurmurHash3.cpp"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/MurmurHash3.h"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/PackedArray.h"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/PhraseDecoder.cpp"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/PhraseDecoder.h"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/PhraseDictionaryCompact.cpp"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/PhraseTableCreator.cpp"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/PhraseTableCreator.h"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/StringVector.h"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/StringVectorTemp.h"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/TargetPhraseCollectionCache.h"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/ThrowingFwrite.cpp"/>
+      <File Name="../../../moses/TranslationModel/CompactPT/ThrowingFwrite.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="CYKPlusParser">
+      <File Name="../../../moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerCYKPlus.cpp"/>
+      <File Name="../../../moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerCYKPlus.h"/>
+      <File Name="../../../moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemory.cpp"/>
+      <File Name="../../../moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemory.h"/>
+      <File Name="../../../moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.cpp"/>
+      <File Name="../../../moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemoryPerSentence.h"/>
+      <File Name="../../../moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerOnDisk.cpp"/>
+      <File Name="../../../moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerOnDisk.h"/>
+      <File Name="../../../moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.cpp"/>
+      <File Name="../../../moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"/>
+      <File Name="../../../moses/TranslationModel/CYKPlusParser/CompletedRuleCollection.cpp"/>
+      <File Name="../../../moses/TranslationModel/CYKPlusParser/CompletedRuleCollection.h"/>
+      <File Name="../../../moses/TranslationModel/CYKPlusParser/DotChart.h"/>
+      <File Name="../../../moses/TranslationModel/CYKPlusParser/DotChartInMemory.cpp"/>
+      <File Name="../../../moses/TranslationModel/CYKPlusParser/DotChartInMemory.h"/>
+      <File Name="../../../moses/TranslationModel/CYKPlusParser/DotChartOnDisk.cpp"/>
+      <File Name="../../../moses/TranslationModel/CYKPlusParser/DotChartOnDisk.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="DynSAInclude">
+      <File Name="../../../moses/TranslationModel/DynSAInclude/fdstream.h"/>
+      <File Name="../../../moses/TranslationModel/DynSAInclude/FileHandler.cpp"/>
+      <File Name="../../../moses/TranslationModel/DynSAInclude/FileHandler.h"/>
+      <File Name="../../../moses/TranslationModel/DynSAInclude/hash.h"/>
+      <File Name="../../../moses/TranslationModel/DynSAInclude/onlineRLM.h"/>
+      <File Name="../../../moses/TranslationModel/DynSAInclude/params.cpp"/>
+      <File Name="../../../moses/TranslationModel/DynSAInclude/params.h"/>
+      <File Name="../../../moses/TranslationModel/DynSAInclude/perfectHash.h"/>
+      <File Name="../../../moses/TranslationModel/DynSAInclude/quantizer.h"/>
+      <File Name="../../../moses/TranslationModel/DynSAInclude/RandLMCache.h"/>
+      <File Name="../../../moses/TranslationModel/DynSAInclude/RandLMFilter.h"/>
+      <File Name="../../../moses/TranslationModel/DynSAInclude/types.h"/>
+      <File Name="../../../moses/TranslationModel/DynSAInclude/utils.h"/>
+      <File Name="../../../moses/TranslationModel/DynSAInclude/vocab.cpp"/>
+      <File Name="../../../moses/TranslationModel/DynSAInclude/vocab.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="fuzzy-match">
+      <File Name="../../../moses/TranslationModel/fuzzy-match/Alignments.cpp"/>
+      <File Name="../../../moses/TranslationModel/fuzzy-match/Alignments.h"/>
+      <File Name="../../../moses/TranslationModel/fuzzy-match/create_xml.cpp"/>
+      <File Name="../../../moses/TranslationModel/fuzzy-match/create_xml.h"/>
+      <File Name="../../../moses/TranslationModel/fuzzy-match/FuzzyMatchWrapper.cpp"/>
+      <File Name="../../../moses/TranslationModel/fuzzy-match/FuzzyMatchWrapper.h"/>
+      <File Name="../../../moses/TranslationModel/fuzzy-match/Match.h"/>
+      <File Name="../../../moses/TranslationModel/fuzzy-match/SentenceAlignment.cpp"/>
+      <File Name="../../../moses/TranslationModel/fuzzy-match/SentenceAlignment.h"/>
+      <File Name="../../../moses/TranslationModel/fuzzy-match/SuffixArray.cpp"/>
+      <File Name="../../../moses/TranslationModel/fuzzy-match/SuffixArray.h"/>
+      <File Name="../../../moses/TranslationModel/fuzzy-match/Vocabulary.cpp"/>
+      <File Name="../../../moses/TranslationModel/fuzzy-match/Vocabulary.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="RuleTable">
+      <File Name="../../../moses/TranslationModel/RuleTable/Loader.h"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/LoaderCompact.cpp"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/LoaderCompact.h"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/LoaderFactory.cpp"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/LoaderFactory.h"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/LoaderHiero.cpp"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/LoaderHiero.h"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/LoaderStandard.cpp"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/LoaderStandard.h"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.cpp"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.cpp"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.h"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.cpp"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/Trie.cpp"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/Trie.h"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/UTrie.cpp"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/UTrie.h"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/UTrieNode.cpp"/>
+      <File Name="../../../moses/TranslationModel/RuleTable/UTrieNode.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="Scope3Parser">
+      <File Name="../../../moses/TranslationModel/Scope3Parser/ApplicableRuleTrie.cpp"/>
+      <File Name="../../../moses/TranslationModel/Scope3Parser/ApplicableRuleTrie.h"/>
+      <File Name="../../../moses/TranslationModel/Scope3Parser/IntermediateVarSpanNode.h"/>
+      <File Name="../../../moses/TranslationModel/Scope3Parser/Parser.cpp"/>
+      <File Name="../../../moses/TranslationModel/Scope3Parser/Parser.h"/>
+      <File Name="../../../moses/TranslationModel/Scope3Parser/SentenceMap.h"/>
+      <File Name="../../../moses/TranslationModel/Scope3Parser/StackLattice.h"/>
+      <File Name="../../../moses/TranslationModel/Scope3Parser/StackLatticeBuilder.cpp"/>
+      <File Name="../../../moses/TranslationModel/Scope3Parser/StackLatticeBuilder.h"/>
+      <File Name="../../../moses/TranslationModel/Scope3Parser/StackLatticeSearcher.h"/>
+      <File Name="../../../moses/TranslationModel/Scope3Parser/VarSpanNode.h"/>
+      <File Name="../../../moses/TranslationModel/Scope3Parser/VarSpanTrieBuilder.cpp"/>
+      <File Name="../../../moses/TranslationModel/Scope3Parser/VarSpanTrieBuilder.h"/>
+    </VirtualDirectory>
+    <File Name="../../../moses/TranslationModel/BilingualDynSuffixArray.cpp"/>
+    <File Name="../../../moses/TranslationModel/BilingualDynSuffixArray.h"/>
+    <File Name="../../../moses/TranslationModel/DynSuffixArray.cpp"/>
+    <File Name="../../../moses/TranslationModel/DynSuffixArray.h"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionary.cpp"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionary.h"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryDynamicCacheBased.cpp"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryDynamicCacheBased.h"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryDynSuffixArray.cpp"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryDynSuffixArray.h"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryMemory.cpp"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryMemory.h"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryMultiModel.cpp"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryMultiModel.h"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryMultiModelCounts.cpp"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryMultiModelCounts.h"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryNodeMemory.cpp"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryNodeMemory.h"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryScope3.cpp"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryScope3.h"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryTransliteration.cpp"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryTransliteration.h"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryTree.cpp"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryTree.h"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryTreeAdaptor.cpp"/>
+    <File Name="../../../moses/TranslationModel/PhraseDictionaryTreeAdaptor.h"/>
+    <File Name="../../../moses/TranslationModel/SkeletonPT.cpp"/>
+    <File Name="../../../moses/TranslationModel/SkeletonPT.h"/>
+    <File Name="../../../moses/TranslationModel/WordCoocTable.cpp"/>
+    <File Name="../../../moses/TranslationModel/WordCoocTable.h"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="Syntax">
+    <VirtualDirectory Name="S2T">
+      <VirtualDirectory Name="Parsers">
+        <VirtualDirectory Name="RecursiveCYKPlusParser">
+          <File Name="../../../moses/Syntax/S2T/Parsers/RecursiveCYKPlusParser/RecursiveCYKPlusParser-inl.h"/>
+          <File Name="../../../moses/Syntax/S2T/Parsers/RecursiveCYKPlusParser/RecursiveCYKPlusParser.h"/>
+        </VirtualDirectory>
+        <VirtualDirectory Name="Scope3Parser">
+          <File Name="../../../moses/Syntax/S2T/Parsers/Scope3Parser/Parser-inl.h"/>
+          <File Name="../../../moses/Syntax/S2T/Parsers/Scope3Parser/Parser.h"/>
+          <File Name="../../../moses/Syntax/S2T/Parsers/Scope3Parser/PatternApplicationTrie.cpp"/>
+          <File Name="../../../moses/Syntax/S2T/Parsers/Scope3Parser/PatternApplicationTrie.h"/>
+          <File Name="../../../moses/Syntax/S2T/Parsers/Scope3Parser/SentenceMap.h"/>
+          <File Name="../../../moses/Syntax/S2T/Parsers/Scope3Parser/SymbolRange.h"/>
+          <File Name="../../../moses/Syntax/S2T/Parsers/Scope3Parser/SymbolRangeCalculator.cpp"/>
+          <File Name="../../../moses/Syntax/S2T/Parsers/Scope3Parser/SymbolRangeCalculator.h"/>
+          <File Name="../../../moses/Syntax/S2T/Parsers/Scope3Parser/TailLattice.h"/>
+          <File Name="../../../moses/Syntax/S2T/Parsers/Scope3Parser/TailLatticeBuilder.cpp"/>
+          <File Name="../../../moses/Syntax/S2T/Parsers/Scope3Parser/TailLatticeBuilder.h"/>
+          <File Name="../../../moses/Syntax/S2T/Parsers/Scope3Parser/TailLatticeSearcher.h"/>
+        </VirtualDirectory>
+        <File Name="../../../moses/Syntax/S2T/Parsers/Parser.h"/>
+      </VirtualDirectory>
+      <File Name="../../../moses/Syntax/S2T/DerivationWriter.cpp"/>
+      <File Name="../../../moses/Syntax/S2T/DerivationWriter.h"/>
+      <File Name="../../../moses/Syntax/S2T/Manager-inl.h"/>
+      <File Name="../../../moses/Syntax/S2T/Manager.h"/>
+      <File Name="../../../moses/Syntax/S2T/OovHandler-inl.h"/>
+      <File Name="../../../moses/Syntax/S2T/OovHandler.h"/>
+      <File Name="../../../moses/Syntax/S2T/ParserCallback.h"/>
+      <File Name="../../../moses/Syntax/S2T/PChart.cpp"/>
+      <File Name="../../../moses/Syntax/S2T/PChart.h"/>
+      <File Name="../../../moses/Syntax/S2T/PHyperedgeToSHyperedgeBundle.h"/>
+      <File Name="../../../moses/Syntax/S2T/RuleTrie.h"/>
+      <File Name="../../../moses/Syntax/S2T/RuleTrieCreator.h"/>
+      <File Name="../../../moses/Syntax/S2T/RuleTrieCYKPlus.cpp"/>
+      <File Name="../../../moses/Syntax/S2T/RuleTrieCYKPlus.h"/>
+      <File Name="../../../moses/Syntax/S2T/RuleTrieLoader.cpp"/>
+      <File Name="../../../moses/Syntax/S2T/RuleTrieLoader.h"/>
+      <File Name="../../../moses/Syntax/S2T/RuleTrieScope3.cpp"/>
+      <File Name="../../../moses/Syntax/S2T/RuleTrieScope3.h"/>
+      <File Name="../../../moses/Syntax/S2T/SChart.cpp"/>
+      <File Name="../../../moses/Syntax/S2T/SChart.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="F2S">
+      <File Name="../../../moses/Syntax/F2S/DerivationWriter.cpp"/>
+      <File Name="../../../moses/Syntax/F2S/DerivationWriter.h"/>
+      <File Name="../../../moses/Syntax/F2S/Forest.cpp"/>
+      <File Name="../../../moses/Syntax/F2S/Forest.h"/>
+      <File Name="../../../moses/Syntax/F2S/GlueRuleSynthesizer.cpp"/>
+      <File Name="../../../moses/Syntax/F2S/GlueRuleSynthesizer.h"/>
+      <File Name="../../../moses/Syntax/F2S/HyperPath.cpp"/>
+      <File Name="../../../moses/Syntax/F2S/HyperPath.h"/>
+      <File Name="../../../moses/Syntax/F2S/HyperPathLoader.cpp"/>
+      <File Name="../../../moses/Syntax/F2S/HyperPathLoader.h"/>
+      <File Name="../../../moses/Syntax/F2S/HyperTree.cpp"/>
+      <File Name="../../../moses/Syntax/F2S/HyperTree.h"/>
+      <File Name="../../../moses/Syntax/F2S/HyperTreeCreator.h"/>
+      <File Name="../../../moses/Syntax/F2S/HyperTreeLoader.cpp"/>
+      <File Name="../../../moses/Syntax/F2S/HyperTreeLoader.h"/>
+      <File Name="../../../moses/Syntax/F2S/Manager-inl.h"/>
+      <File Name="../../../moses/Syntax/F2S/Manager.h"/>
+      <File Name="../../../moses/Syntax/F2S/PHyperedgeToSHyperedgeBundle.h"/>
+      <File Name="../../../moses/Syntax/F2S/PVertexToStackMap.h"/>
+      <File Name="../../../moses/Syntax/F2S/RuleMatcher.h"/>
+      <File Name="../../../moses/Syntax/F2S/RuleMatcherCallback.h"/>
+      <File Name="../../../moses/Syntax/F2S/RuleMatcherHyperTree-inl.h"/>
+      <File Name="../../../moses/Syntax/F2S/RuleMatcherHyperTree.h"/>
+      <File Name="../../../moses/Syntax/F2S/TopologicalSorter.cpp"/>
+      <File Name="../../../moses/Syntax/F2S/TopologicalSorter.h"/>
+      <File Name="../../../moses/Syntax/F2S/TreeFragmentTokenizer.cpp"/>
+      <File Name="../../../moses/Syntax/F2S/TreeFragmentTokenizer.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="T2S">
+      <File Name="../../../moses/Syntax/T2S/GlueRuleSynthesizer.cpp"/>
+      <File Name="../../../moses/Syntax/T2S/GlueRuleSynthesizer.h"/>
+      <File Name="../../../moses/Syntax/T2S/HyperTree.h"/>
+      <File Name="../../../moses/Syntax/T2S/InputTree.h"/>
+      <File Name="../../../moses/Syntax/T2S/InputTreeBuilder.cpp"/>
+      <File Name="../../../moses/Syntax/T2S/InputTreeBuilder.h"/>
+      <File Name="../../../moses/Syntax/T2S/InputTreeToForest.cpp"/>
+      <File Name="../../../moses/Syntax/T2S/InputTreeToForest.h"/>
+      <File Name="../../../moses/Syntax/T2S/Manager-inl.h"/>
+      <File Name="../../../moses/Syntax/T2S/Manager.h"/>
+      <File Name="../../../moses/Syntax/T2S/RuleMatcher.h"/>
+      <File Name="../../../moses/Syntax/T2S/RuleMatcherSCFG-inl.h"/>
+      <File Name="../../../moses/Syntax/T2S/RuleMatcherSCFG.h"/>
+      <File Name="../../../moses/Syntax/T2S/RuleTrie.cpp"/>
+      <File Name="../../../moses/Syntax/T2S/RuleTrie.h"/>
+      <File Name="../../../moses/Syntax/T2S/RuleTrieCreator.h"/>
+      <File Name="../../../moses/Syntax/T2S/RuleTrieLoader.cpp"/>
+      <File Name="../../../moses/Syntax/T2S/RuleTrieLoader.h"/>
+    </VirtualDirectory>
+    <File Name="../../../moses/Syntax/BoundedPriorityContainer.h"/>
+    <File Name="../../../moses/Syntax/Cube.cpp"/>
+    <File Name="../../../moses/Syntax/Cube.h"/>
+    <File Name="../../../moses/Syntax/CubeQueue.cpp"/>
+    <File Name="../../../moses/Syntax/CubeQueue.h"/>
+    <File Name="../../../moses/Syntax/InputWeightFF.cpp"/>
+    <File Name="../../../moses/Syntax/InputWeightFF.h"/>
+    <File Name="../../../moses/Syntax/KBestExtractor.cpp"/>
+    <File Name="../../../moses/Syntax/KBestExtractor.h"/>
+    <File Name="../../../moses/Syntax/Manager.cpp"/>
+    <File Name="../../../moses/Syntax/Manager.h"/>
+    <File Name="../../../moses/Syntax/NonTerminalMap.h"/>
+    <File Name="../../../moses/Syntax/PHyperedge.h"/>
+    <File Name="../../../moses/Syntax/PLabel.h"/>
+    <File Name="../../../moses/Syntax/PVertex.h"/>
+    <File Name="../../../moses/Syntax/RuleTable.h"/>
+    <File Name="../../../moses/Syntax/RuleTableFF.cpp"/>
+    <File Name="../../../moses/Syntax/RuleTableFF.h"/>
+    <File Name="../../../moses/Syntax/SHyperedge.cpp"/>
+    <File Name="../../../moses/Syntax/SHyperedge.h"/>
+    <File Name="../../../moses/Syntax/SHyperedgeBundle.h"/>
+    <File Name="../../../moses/Syntax/SHyperedgeBundleScorer.h"/>
+    <File Name="../../../moses/Syntax/SLabel.h"/>
+    <File Name="../../../moses/Syntax/SVertex.cpp"/>
+    <File Name="../../../moses/Syntax/SVertex.h"/>
+    <File Name="../../../moses/Syntax/SVertexRecombinationOrderer.h"/>
+    <File Name="../../../moses/Syntax/SVertexStack.h"/>
+    <File Name="../../../moses/Syntax/SymbolEqualityPred.h"/>
+    <File Name="../../../moses/Syntax/SymbolHasher.h"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="LM">
+    <File Name="../../../moses/LM/Backward.cpp"/>
+    <File Name="../../../moses/LM/Backward.h"/>
+    <File Name="../../../moses/LM/BackwardLMState.cpp"/>
+    <File Name="../../../moses/LM/BackwardLMState.h"/>
+    <File Name="../../../moses/LM/BackwardTest.cpp"/>
+    <File Name="../../../moses/LM/Base.cpp"/>
+    <File Name="../../../moses/LM/Base.h"/>
+    <File Name="../../../moses/LM/BilingualLM.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/BilingualLM.h" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/ChartState.h"/>
+    <File Name="../../../moses/LM/DALMWrapper.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/DALMWrapper.h" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/Implementation.cpp"/>
+    <File Name="../../../moses/LM/Implementation.h"/>
+    <File Name="../../../moses/LM/IRST.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/IRST.h" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/Ken.cpp"/>
+    <File Name="../../../moses/LM/Ken.h"/>
+    <File Name="../../../moses/LM/LDHT.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/LDHT.h" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/MaxEntSRI.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/MaxEntSRI.h" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/MultiFactor.cpp"/>
+    <File Name="../../../moses/LM/MultiFactor.h"/>
+    <File Name="../../../moses/LM/NeuralLMWrapper.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/NeuralLMWrapper.h" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/ORLM.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/ORLM.h" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/ParallelBackoff.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/ParallelBackoff.h" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/PointerState.h"/>
+    <File Name="../../../moses/LM/Rand.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/Rand.h" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/Remote.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/Remote.h" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/SingleFactor.cpp"/>
+    <File Name="../../../moses/LM/SingleFactor.h"/>
+    <File Name="../../../moses/LM/SkeletonLM.cpp"/>
+    <File Name="../../../moses/LM/SkeletonLM.h"/>
+    <File Name="../../../moses/LM/SRI.cpp" ExcludeProjConfig="Debug"/>
+    <File Name="../../../moses/LM/SRI.h" ExcludeProjConfig="Debug"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="FF">
+    <VirtualDirectory Name="LexicalReordering">
+      <File Name="../../../moses/FF/LexicalReordering/LexicalReordering.cpp"/>
+      <File Name="../../../moses/FF/LexicalReordering/LexicalReordering.h"/>
+      <File Name="../../../moses/FF/LexicalReordering/LexicalReorderingState.cpp"/>
+      <File Name="../../../moses/FF/LexicalReordering/LexicalReorderingState.h"/>
+      <File Name="../../../moses/FF/LexicalReordering/LexicalReorderingTable.cpp"/>
+      <File Name="../../../moses/FF/LexicalReordering/LexicalReorderingTable.h"/>
+      <File Name="../../../moses/FF/LexicalReordering/ReorderingStack.cpp"/>
+      <File Name="../../../moses/FF/LexicalReordering/ReorderingStack.h"/>
+      <File Name="../../../moses/FF/LexicalReordering/SparseReordering.cpp"/>
+      <File Name="../../../moses/FF/LexicalReordering/SparseReordering.h"/>
+    </VirtualDirectory>
+    <VirtualDirectory Name="OSM-Feature">
+      <File Name="../../../moses/FF/OSM-Feature/KenOSM.cpp"/>
+      <File Name="../../../moses/FF/OSM-Feature/KenOSM.h"/>
+      <File Name="../../../moses/FF/OSM-Feature/OpSequenceModel.cpp"/>
+      <File Name="../../../moses/FF/OSM-Feature/OpSequenceModel.h"/>
+      <File Name="../../../moses/FF/OSM-Feature/osmHyp.cpp"/>
+      <File Name="../../../moses/FF/OSM-Feature/osmHyp.h"/>
+    </VirtualDirectory>
+    <File Name="../../../moses/FF/BleuScoreFeature.cpp"/>
+    <File Name="../../../moses/FF/BleuScoreFeature.h"/>
+    <File Name="../../../moses/FF/ConstrainedDecoding.cpp"/>
+    <File Name="../../../moses/FF/ConstrainedDecoding.h"/>
+    <File Name="../../../moses/FF/ControlRecombination.cpp"/>
+    <File Name="../../../moses/FF/ControlRecombination.h"/>
+    <File Name="../../../moses/FF/CountNonTerms.cpp"/>
+    <File Name="../../../moses/FF/CountNonTerms.h"/>
+    <File Name="../../../moses/FF/CoveredReferenceFeature.cpp"/>
+    <File Name="../../../moses/FF/CoveredReferenceFeature.h"/>
+    <File Name="../../../moses/FF/DecodeFeature.cpp"/>
+    <File Name="../../../moses/FF/DecodeFeature.h"/>
+    <File Name="../../../moses/FF/DistortionScoreProducer.cpp"/>
+    <File Name="../../../moses/FF/DistortionScoreProducer.h"/>
+    <File Name="../../../moses/FF/DynamicCacheBasedLanguageModel.cpp"/>
+    <File Name="../../../moses/FF/DynamicCacheBasedLanguageModel.h"/>
+    <File Name="../../../moses/FF/Factory.cpp"/>
+    <File Name="../../../moses/FF/Factory.h"/>
+    <File Name="../../../moses/FF/FeatureFunction.cpp"/>
+    <File Name="../../../moses/FF/FeatureFunction.h"/>
+    <File Name="../../../moses/FF/FFState.cpp"/>
+    <File Name="../../../moses/FF/FFState.h"/>
+    <File Name="../../../moses/FF/GlobalLexicalModel.cpp"/>
+    <File Name="../../../moses/FF/GlobalLexicalModel.h"/>
+    <File Name="../../../moses/FF/GlobalLexicalModelUnlimited.cpp"/>
+    <File Name="../../../moses/FF/GlobalLexicalModelUnlimited.h"/>
+    <File Name="../../../moses/FF/HyperParameterAsWeight.cpp"/>
+    <File Name="../../../moses/FF/HyperParameterAsWeight.h"/>
+    <File Name="../../../moses/FF/InputFeature.cpp"/>
+    <File Name="../../../moses/FF/InputFeature.h"/>
+    <File Name="../../../moses/FF/InternalTree.cpp"/>
+    <File Name="../../../moses/FF/InternalTree.h"/>
+    <File Name="../../../moses/FF/MaxSpanFreeNonTermSource.cpp"/>
+    <File Name="../../../moses/FF/MaxSpanFreeNonTermSource.h"/>
+    <File Name="../../../moses/FF/Model1Feature.cpp"/>
+    <File Name="../../../moses/FF/Model1Feature.h"/>
+    <File Name="../../../moses/FF/NieceTerminal.cpp"/>
+    <File Name="../../../moses/FF/NieceTerminal.h"/>
+    <File Name="../../../moses/FF/PhraseBoundaryFeature.cpp"/>
+    <File Name="../../../moses/FF/PhraseBoundaryFeature.h"/>
+    <File Name="../../../moses/FF/PhraseLengthFeature.cpp"/>
+    <File Name="../../../moses/FF/PhraseLengthFeature.h"/>
+    <File Name="../../../moses/FF/PhraseOrientationFeature.cpp"/>
+    <File Name="../../../moses/FF/PhraseOrientationFeature.h"/>
+    <File Name="../../../moses/FF/PhrasePairFeature.cpp"/>
+    <File Name="../../../moses/FF/PhrasePairFeature.h"/>
+    <File Name="../../../moses/FF/PhrasePenalty.cpp"/>
+    <File Name="../../../moses/FF/PhrasePenalty.h"/>
+    <File Name="../../../moses/FF/ReferenceComparison.cpp"/>
+    <File Name="../../../moses/FF/ReferenceComparison.h"/>
+    <File Name="../../../moses/FF/RulePairUnlexicalizedSource.cpp"/>
+    <File Name="../../../moses/FF/RulePairUnlexicalizedSource.h"/>
+    <File Name="../../../moses/FF/RuleScope.cpp"/>
+    <File Name="../../../moses/FF/RuleScope.h"/>
+    <File Name="../../../moses/FF/SetSourcePhrase.cpp"/>
+    <File Name="../../../moses/FF/SetSourcePhrase.h"/>
+    <File Name="../../../moses/FF/SkeletonStatefulFF.cpp"/>
+    <File Name="../../../moses/FF/SkeletonStatefulFF.h"/>
+    <File Name="../../../moses/FF/SkeletonStatelessFF.cpp"/>
+    <File Name="../../../moses/FF/SkeletonStatelessFF.h"/>
+    <File Name="../../../moses/FF/SkeletonTranslationOptionListFeature.h"/>
+    <File Name="../../../moses/FF/SoftMatchingFeature.cpp"/>
+    <File Name="../../../moses/FF/SoftMatchingFeature.h"/>
+    <File Name="../../../moses/FF/SoftSourceSyntacticConstraintsFeature.cpp"/>
+    <File Name="../../../moses/FF/SoftSourceSyntacticConstraintsFeature.h"/>
+    <File Name="../../../moses/FF/SourceGHKMTreeInputMatchFeature.cpp"/>
+    <File Name="../../../moses/FF/SourceGHKMTreeInputMatchFeature.h"/>
+    <File Name="../../../moses/FF/SourceWordDeletionFeature.cpp"/>
+    <File Name="../../../moses/FF/SourceWordDeletionFeature.h"/>
+    <File Name="../../../moses/FF/SpanLength.cpp"/>
+    <File Name="../../../moses/FF/SpanLength.h"/>
+    <File Name="../../../moses/FF/SparseHieroReorderingFeature.cpp"/>
+    <File Name="../../../moses/FF/SparseHieroReorderingFeature.h"/>
+    <File Name="../../../moses/FF/SparseHieroReorderingFeatureTest.cpp"/>
+    <File Name="../../../moses/FF/StatefulFeatureFunction.cpp"/>
+    <File Name="../../../moses/FF/StatefulFeatureFunction.h"/>
+    <File Name="../../../moses/FF/StatelessFeatureFunction.cpp"/>
+    <File Name="../../../moses/FF/StatelessFeatureFunction.h"/>
+    <File Name="../../../moses/FF/SyntaxRHS.cpp"/>
+    <File Name="../../../moses/FF/SyntaxRHS.h"/>
+    <File Name="../../../moses/FF/TargetBigramFeature.cpp"/>
+    <File Name="../../../moses/FF/TargetBigramFeature.h"/>
+    <File Name="../../../moses/FF/TargetNgramFeature.cpp"/>
+    <File Name="../../../moses/FF/TargetNgramFeature.h"/>
+    <File Name="../../../moses/FF/TargetWordInsertionFeature.cpp"/>
+    <File Name="../../../moses/FF/TargetWordInsertionFeature.h"/>
+    <File Name="../../../moses/FF/TreeStructureFeature.cpp"/>
+    <File Name="../../../moses/FF/TreeStructureFeature.h"/>
+    <File Name="../../../moses/FF/UnalignedWordCountFeature.cpp"/>
+    <File Name="../../../moses/FF/UnalignedWordCountFeature.h"/>
+    <File Name="../../../moses/FF/UnknownWordPenaltyProducer.cpp"/>
+    <File Name="../../../moses/FF/UnknownWordPenaltyProducer.h"/>
+    <File Name="../../../moses/FF/WordPenaltyProducer.cpp"/>
+    <File Name="../../../moses/FF/WordPenaltyProducer.h"/>
+    <File Name="../../../moses/FF/WordTranslationFeature.cpp"/>
+    <File Name="../../../moses/FF/WordTranslationFeature.h"/>
+  </VirtualDirectory>
+  <Description/>
+  <Dependencies/>
+  <VirtualDirectory Name="src">
+    <File Name="../../../phrase-extract/extract-ghkm/PhraseOrientation.cpp"/>
+    <File Name="../../../phrase-extract/extract-ghkm/PhraseOrientation.h"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="include"/>
+  <VirtualDirectory Name="moses">
+    <File Name="../../../moses/AlignmentInfo.cpp"/>
+    <File Name="../../../moses/AlignmentInfo.h"/>
+    <File Name="../../../moses/AlignmentInfoCollection.cpp"/>
+    <File Name="../../../moses/AlignmentInfoCollection.h"/>
+    <File Name="../../../moses/AlignmentInfoTest.cpp"/>
+    <File Name="../../../moses/BaseManager.cpp"/>
+    <File Name="../../../moses/BaseManager.h"/>
+    <File Name="../../../moses/BitmapContainer.cpp"/>
+    <File Name="../../../moses/BitmapContainer.h"/>
+    <File Name="../../../moses/ChartCell.cpp"/>
+    <File Name="../../../moses/ChartCell.h"/>
+    <File Name="../../../moses/ChartCellCollection.cpp"/>
+    <File Name="../../../moses/ChartCellCollection.h"/>
+    <File Name="../../../moses/ChartCellLabel.h"/>
+    <File Name="../../../moses/ChartCellLabelSet.h"/>
+    <File Name="../../../moses/ChartHypothesis.cpp"/>
+    <File Name="../../../moses/ChartHypothesis.h"/>
+    <File Name="../../../moses/ChartHypothesisCollection.cpp"/>
+    <File Name="../../../moses/ChartHypothesisCollection.h"/>
+    <File Name="../../../moses/ChartKBestExtractor.cpp"/>
+    <File Name="../../../moses/ChartKBestExtractor.h"/>
+    <File Name="../../../moses/ChartManager.cpp"/>
+    <File Name="../../../moses/ChartManager.h"/>
+    <File Name="../../../moses/ChartParser.cpp"/>
+    <File Name="../../../moses/ChartParser.h"/>
+    <File Name="../../../moses/ChartParserCallback.h"/>
+    <File Name="../../../moses/ChartRuleLookupManager.cpp"/>
+    <File Name="../../../moses/ChartRuleLookupManager.h"/>
+    <File Name="../../../moses/ChartTranslationOption.cpp"/>
+    <File Name="../../../moses/ChartTranslationOption.h"/>
+    <File Name="../../../moses/ChartTranslationOptionList.cpp"/>
+    <File Name="../../../moses/ChartTranslationOptionList.h"/>
+    <File Name="../../../moses/ChartTranslationOptions.cpp"/>
+    <File Name="../../../moses/ChartTranslationOptions.h"/>
+    <File Name="../../../moses/ConfusionNet.cpp"/>
+    <File Name="../../../moses/ConfusionNet.h"/>
+    <File Name="../../../moses/DecodeGraph.cpp"/>
+    <File Name="../../../moses/DecodeGraph.h"/>
+    <File Name="../../../moses/DecodeStep.cpp"/>
+    <File Name="../../../moses/DecodeStep.h"/>
+    <File Name="../../../moses/DecodeStepGeneration.cpp"/>
+    <File Name="../../../moses/DecodeStepGeneration.h"/>
+    <File Name="../../../moses/DecodeStepTranslation.cpp"/>
+    <File Name="../../../moses/DecodeStepTranslation.h"/>
+    <File Name="../../../moses/ExportInterface.cpp"/>
+    <File Name="../../../moses/ExportInterface.h"/>
+    <File Name="../../../moses/Factor.cpp"/>
+    <File Name="../../../moses/Factor.h"/>
+    <File Name="../../../moses/FactorCollection.cpp"/>
+    <File Name="../../../moses/FactorCollection.h"/>
+    <File Name="../../../moses/FactorTypeSet.cpp"/>
+    <File Name="../../../moses/FactorTypeSet.h"/>
+    <File Name="../../../moses/FeatureVector.cpp"/>
+    <File Name="../../../moses/FeatureVector.h"/>
+    <File Name="../../../moses/FeatureVectorTest.cpp"/>
+    <File Name="../../../moses/File.cpp"/>
+    <File Name="../../../moses/File.h"/>
+    <File Name="../../../moses/FilePtr.h"/>
+    <File Name="../../../moses/FloydWarshall.cpp"/>
+    <File Name="../../../moses/FloydWarshall.h"/>
+    <File Name="../../../moses/ForestInput.cpp"/>
+    <File Name="../../../moses/ForestInput.h"/>
+    <File Name="../../../moses/GenerationDictionary.cpp"/>
+    <File Name="../../../moses/GenerationDictionary.h"/>
+    <File Name="../../../moses/gzfilebuf.h"/>
+    <File Name="../../../moses/HypergraphOutput.cpp"/>
+    <File Name="../../../moses/HypergraphOutput.h"/>
+    <File Name="../../../moses/HypoList.h"/>
+    <File Name="../../../moses/Hypothesis.cpp"/>
+    <File Name="../../../moses/Hypothesis.h"/>
+    <File Name="../../../moses/HypothesisStack.cpp"/>
+    <File Name="../../../moses/HypothesisStack.h"/>
+    <File Name="../../../moses/HypothesisStackCubePruning.cpp"/>
+    <File Name="../../../moses/HypothesisStackCubePruning.h"/>
+    <File Name="../../../moses/HypothesisStackNormal.cpp"/>
+    <File Name="../../../moses/HypothesisStackNormal.h"/>
+    <File Name="../../../moses/Incremental.cpp"/>
+    <File Name="../../../moses/Incremental.h"/>
+    <File Name="../../../moses/InputFileStream.cpp"/>
+    <File Name="../../../moses/InputFileStream.h"/>
+    <File Name="../../../moses/InputPath.cpp"/>
+    <File Name="../../../moses/InputPath.h"/>
+    <File Name="../../../moses/InputType.cpp"/>
+    <File Name="../../../moses/InputType.h"/>
+    <File Name="../../../moses/IOWrapper.cpp"/>
+    <File Name="../../../moses/IOWrapper.h"/>
+    <File Name="../../../moses/LatticeMBR.cpp"/>
+    <File Name="../../../moses/LatticeMBR.h"/>
+    <File Name="../../../moses/LVoc.cpp"/>
+    <File Name="../../../moses/LVoc.h"/>
+    <File Name="../../../moses/Manager.cpp"/>
+    <File Name="../../../moses/Manager.h"/>
+    <File Name="../../../moses/mbr.cpp"/>
+    <File Name="../../../moses/mbr.h"/>
+    <File Name="../../../moses/MockHypothesis.cpp"/>
+    <File Name="../../../moses/MockHypothesis.h"/>
+    <File Name="../../../moses/MosesTest.cpp"/>
+    <File Name="../../../moses/NonTerminal.cpp"/>
+    <File Name="../../../moses/NonTerminal.h"/>
+    <File Name="../../../moses/ObjectPool.h"/>
+    <File Name="../../../moses/OutputCollector.h"/>
+    <File Name="../../../moses/Parameter.cpp"/>
+    <File Name="../../../moses/Parameter.h"/>
+    <File Name="../../../moses/PartialTranslOptColl.cpp"/>
+    <File Name="../../../moses/PartialTranslOptColl.h"/>
+    <File Name="../../../moses/PCNTools.cpp"/>
+    <File Name="../../../moses/PCNTools.h"/>
+    <File Name="../../../moses/PDTAimp.cpp"/>
+    <File Name="../../../moses/PDTAimp.h"/>
+    <File Name="../../../moses/Phrase.cpp"/>
+    <File Name="../../../moses/Phrase.h"/>
+    <File Name="../../../moses/PrefixTree.h"/>
+    <File Name="../../../moses/PrefixTreeMap.cpp"/>
+    <File Name="../../../moses/PrefixTreeMap.h"/>
+    <File Name="../../../moses/ReorderingConstraint.cpp"/>
+    <File Name="../../../moses/ReorderingConstraint.h"/>
+    <File Name="../../../moses/RuleCube.cpp"/>
+    <File Name="../../../moses/RuleCube.h"/>
+    <File Name="../../../moses/RuleCubeItem.cpp"/>
+    <File Name="../../../moses/RuleCubeItem.h"/>
+    <File Name="../../../moses/RuleCubeQueue.cpp"/>
+    <File Name="../../../moses/RuleCubeQueue.h"/>
+    <File Name="../../../moses/ScoreComponentCollection.cpp"/>
+    <File Name="../../../moses/ScoreComponentCollection.h"/>
+    <File Name="../../../moses/ScoreComponentCollectionTest.cpp"/>
+    <File Name="../../../moses/Search.cpp"/>
+    <File Name="../../../moses/Search.h"/>
+    <File Name="../../../moses/SearchCubePruning.cpp"/>
+    <File Name="../../../moses/SearchCubePruning.h"/>
+    <File Name="../../../moses/SearchNormal.cpp"/>
+    <File Name="../../../moses/SearchNormal.h"/>
+    <File Name="../../../moses/SearchNormalBatch.cpp"/>
+    <File Name="../../../moses/SearchNormalBatch.h"/>
+    <File Name="../../../moses/Sentence.cpp"/>
+    <File Name="../../../moses/Sentence.h"/>
+    <File Name="../../../moses/SentenceStats.cpp"/>
+    <File Name="../../../moses/SentenceStats.h"/>
+    <File Name="../../../moses/SquareMatrix.cpp"/>
+    <File Name="../../../moses/SquareMatrix.h"/>
+    <File Name="../../../moses/StackVec.h"/>
+    <File Name="../../../moses/StaticData.cpp"/>
+    <File Name="../../../moses/StaticData.h"/>
+    <File Name="../../../moses/SyntacticLanguageModel.cpp"/>
+    <File Name="../../../moses/SyntacticLanguageModel.h"/>
+    <File Name="../../../moses/SyntacticLanguageModelFiles.h"/>
+    <File Name="../../../moses/SyntacticLanguageModelState.h"/>
+    <File Name="../../../moses/TabbedSentence.cpp"/>
+    <File Name="../../../moses/TabbedSentence.h"/>
+    <File Name="../../../moses/TargetPhrase.cpp"/>
+    <File Name="../../../moses/TargetPhrase.h"/>
+    <File Name="../../../moses/TargetPhraseCollection.cpp"/>
+    <File Name="../../../moses/TargetPhraseCollection.h"/>
+    <File Name="../../../moses/Terminal.h"/>
+    <File Name="../../../moses/ThreadPool.cpp"/>
+    <File Name="../../../moses/ThreadPool.h"/>
+    <File Name="../../../moses/Timer.cpp"/>
+    <File Name="../../../moses/Timer.h"/>
+    <File Name="../../../moses/TrainingTask.h"/>
+    <File Name="../../../moses/TranslationAnalysis.cpp"/>
+    <File Name="../../../moses/TranslationAnalysis.h"/>
+    <File Name="../../../moses/TranslationOption.cpp"/>
+    <File Name="../../../moses/TranslationOption.h"/>
+    <File Name="../../../moses/TranslationOptionCollection.cpp"/>
+    <File Name="../../../moses/TranslationOptionCollection.h"/>
+    <File Name="../../../moses/TranslationOptionCollectionConfusionNet.cpp"/>
+    <File Name="../../../moses/TranslationOptionCollectionConfusionNet.h"/>
+    <File Name="../../../moses/TranslationOptionCollectionLattice.cpp"/>
+    <File Name="../../../moses/TranslationOptionCollectionLattice.h"/>
+    <File Name="../../../moses/TranslationOptionCollectionText.cpp"/>
+    <File Name="../../../moses/TranslationOptionCollectionText.h"/>
+    <File Name="../../../moses/TranslationOptionList.cpp"/>
+    <File Name="../../../moses/TranslationOptionList.h"/>
+    <File Name="../../../moses/TranslationTask.cpp"/>
+    <File Name="../../../moses/TranslationTask.h"/>
+    <File Name="../../../moses/TreeInput.cpp"/>
+    <File Name="../../../moses/TreeInput.h"/>
+    <File Name="../../../moses/TrellisPath.cpp"/>
+    <File Name="../../../moses/TrellisPath.h"/>
+    <File Name="../../../moses/TrellisPathCollection.cpp"/>
+    <File Name="../../../moses/TrellisPathCollection.h"/>
+    <File Name="../../../moses/TrellisPathList.h"/>
+    <File Name="../../../moses/TypeDef.h"/>
+    <File Name="../../../moses/UniqueObject.h"/>
+    <File Name="../../../moses/Util.cpp"/>
+    <File Name="../../../moses/Util.h"/>
+    <File Name="../../../moses/Word.cpp"/>
+    <File Name="../../../moses/Word.h"/>
+    <File Name="../../../moses/WordLattice.cpp"/>
+    <File Name="../../../moses/WordLattice.h"/>
+    <File Name="../../../moses/Bitmap.cpp"/>
+    <File Name="../../../moses/Bitmap.h"/>
+    <File Name="../../../moses/Range.cpp"/>
+    <File Name="../../../moses/Range.h"/>
+    <File Name="../../../moses/XmlOption.cpp"/>
+    <File Name="../../../moses/XmlOption.h"/>
+    <File Name="../../../moses/OutputFileStream.cpp"/>
+    <File Name="../../../moses/OutputFileStream.h"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="PP">
+    <File Name="../../../moses/PP/CountsPhraseProperty.cpp"/>
+    <File Name="../../../moses/PP/CountsPhraseProperty.h"/>
+    <File Name="../../../moses/PP/Factory.cpp"/>
+    <File Name="../../../moses/PP/Factory.h"/>
+    <File Name="../../../moses/PP/NonTermContextProperty.cpp"/>
+    <File Name="../../../moses/PP/NonTermContextProperty.h"/>
+    <File Name="../../../moses/PP/OrientationPhraseProperty.cpp"/>
+    <File Name="../../../moses/PP/OrientationPhraseProperty.h"/>
+    <File Name="../../../moses/PP/PhraseProperty.cpp"/>
+    <File Name="../../../moses/PP/PhraseProperty.h"/>
+    <File Name="../../../moses/PP/SourceLabelsPhraseProperty.cpp"/>
+    <File Name="../../../moses/PP/SourceLabelsPhraseProperty.h"/>
+    <File Name="../../../moses/PP/SpanLengthPhraseProperty.cpp"/>
+    <File Name="../../../moses/PP/SpanLengthPhraseProperty.h"/>
+    <File Name="../../../moses/PP/TreeStructurePhraseProperty.h"/>
+  </VirtualDirectory>
+  <VirtualDirectory Name="parameters">
+    <File Name="../../../moses/parameters/ContextParameters.cpp"/>
+    <File Name="../../../moses/parameters/ContextParameters.h"/>
+    <File Name="../../../moses/parameters/BookkeepingOptions.cpp"/>
+    <File Name="../../../moses/parameters/BookkeepingOptions.h"/>
+    <File Name="../../../moses/parameters/NBestOptions.cpp"/>
+    <File Name="../../../moses/parameters/NBestOptions.h"/>
+  </VirtualDirectory>
+  <Settings Type="Static Library">
+    <GlobalSettings>
+      <Compiler Options="" C_Options="" Assembler="">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="">
+        <LibraryPath Value="."/>
+      </Linker>
+      <ResourceCompiler Options=""/>
+    </GlobalSettings>
+    <Configuration Name="Debug" CompilerType="GCC" DebuggerType="LLDB Debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="-g  -std=c++0x" C_Options="-g" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+        <IncludePath Value="../../../"/>
+        <IncludePath Value="../../../phrase-extract"/>
+        <IncludePath Value="../../../boost/include"/>
+        <Preprocessor Value="MAX_NUM_FACTORS=4"/>
+        <Preprocessor Value="KENLM_MAX_ORDER=7"/>
+        <Preprocessor Value="WITH_THREADS"/>
+        <Preprocessor Value="TRACE_ENABLE=1"/>
+      </Compiler>
+      <Linker Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/lib$(ProjectName).a" IntermediateDirectory="./Debug" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="yes">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName/>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+    <Configuration Name="Release" CompilerType="clang( based on LLVM 3.5svn )" DebuggerType="LLDB Debugger" Type="Static Library" BuildCmpWithGlobalSettings="append" BuildLnkWithGlobalSettings="append" BuildResWithGlobalSettings="append">
+      <Compiler Options="" C_Options="" Assembler="" Required="yes" PreCompiledHeader="" PCHInCommandLine="no" PCHFlags="" PCHFlagsPolicy="0">
+        <IncludePath Value="."/>
+      </Compiler>
+      <Linker Options="" Required="yes"/>
+      <ResourceCompiler Options="" Required="no"/>
+      <General OutputFile="$(IntermediateDirectory)/lib$(ProjectName).a" IntermediateDirectory="./Release" Command="" CommandArguments="" UseSeparateDebugArgs="no" DebugArguments="" WorkingDirectory="$(IntermediateDirectory)" PauseExecWhenProcTerminates="yes" IsGUIProgram="no" IsEnabled="yes"/>
+      <Environment EnvVarSetName="&lt;Use Defaults&gt;" DbgSetName="&lt;Use Defaults&gt;">
+        <![CDATA[]]>
+      </Environment>
+      <Debugger IsRemote="no" RemoteHostName="" RemoteHostPort="" DebuggerPath="" IsExtended="yes">
+        <DebuggerSearchPaths/>
+        <PostConnectCommands/>
+        <StartupCommands/>
+      </Debugger>
+      <PreBuild/>
+      <PostBuild/>
+      <CustomBuild Enabled="no">
+        <RebuildCommand/>
+        <CleanCommand/>
+        <BuildCommand/>
+        <PreprocessFileCommand/>
+        <SingleFileCommand/>
+        <MakefileGenerationCommand/>
+        <ThirdPartyToolName/>
+        <WorkingDirectory/>
+      </CustomBuild>
+      <AdditionalRules>
+        <CustomPostBuild/>
+        <CustomPreBuild/>
+      </AdditionalRules>
+      <Completion EnableCpp11="no" EnableCpp14="no">
+        <ClangCmpFlagsC/>
+        <ClangCmpFlags/>
+        <ClangPP/>
+        <SearchPaths/>
+      </Completion>
+    </Configuration>
+  </Settings>
+  <Dependencies Name="Debug"/>
+  <Dependencies Name="Release"/>
+</CodeLite_Project>

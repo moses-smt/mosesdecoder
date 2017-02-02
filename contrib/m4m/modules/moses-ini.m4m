@@ -1,0 +1,62 @@
+# -*- makefile -*-
+# -------------------------------------------------------------------------------
+# --- generate initial moses.ini file -------------------------------------------
+# -------------------------------------------------------------------------------
+# Defaults; can be overwritten in the respective system.make file
+# It is recommended that you use target-specific overrides.
+moses.ini_input-factors          = 0
+moses.ini_search-algorithm       = 1
+moses.ini_stack                  = 5000
+moses.ini_cube-pruning-pop-limit = 5000
+moses.ini_mapping                = 0 T 0
+moses.ini_ttable-limit           = 20
+moses.ini_distortion-limit       = 6
+moses.ini_v                      = 0
+
+weight_vector = perl -ne \
+'m/name=([^; ]+)/;\
+print "$$1=";\
+m/num-features=([0-9]+)/;\
+print " 1.0"x$$1,"\n";'
+
+define create_moses_ini
+
+$(strip $1)/moses.ini.0: ${PTABLES} ${DTABLES} ${LMODELS} ${MOSES_INI_PREREQ}
+	$$(lock)
+	echo '[input-factors]'                                         > $$@_
+	echo '$${moses.ini_input-factors}'                            >> $$@_
+	echo                                                          >> $$@_
+	echo '[search-algorithm]'                                     >> $$@_
+	echo '$${moses.ini_search-algorithm}'                         >> $$@_
+	echo                                                          >> $$@_
+	echo '[stack]'                                                >> $$@_
+	echo '$${moses.ini_stack}'                                    >> $$@_
+	echo                                                          >> $$@_
+	echo '[cube-pruning-pop-limit]'                               >> $$@_
+	echo '$${moses.ini_cube-pruning-pop-limit}'                   >> $$@_
+	echo                                                          >> $$@_
+	echo '[mapping]'                                              >> $$@_
+	echo '$${moses.ini_mapping}'                                  >> $$@_
+	echo                                                          >> $$@_
+	echo '[distortion-limit]'                                     >> $$@_
+	echo '$${moses.ini_distortion-limit}'                         >> $$@_
+	echo                                                          >> $$@_
+	echo '[v]'                                                    >> $$@_
+	echo '$${moses.ini_v}'                                        >> $$@_ 
+	echo                                                          >> $$@_	
+	echo '[feature]'                                              >> $$@_
+	$$(foreach  f,${STANDARD_FEATURES},echo $$f                   >> $$@_;)
+	$$(foreach  i,${INPUT_FEATURES},echo "$$(subst ;, ,$${i})"    >> $$@_;)
+	$$(foreach pt,${PTABLE_ENTRIES},echo "$$(subst ;, ,$${pt})"   >> $$@_;)
+	$$(foreach dt,${DTABLE_ENTRIES},echo "$$(subst ;, ,$${dt})"   >> $$@_;)
+	$$(foreach lm,${LMODEL_ENTRIES},echo "$$(subst ;, ,$${lm})"   >> $$@_;)
+	echo                                                          >> $$@_
+	echo '[weight]'                                               >> $$@_
+	$$(foreach x,$(STANDARD_FEATURES),echo "$$x0= 1.0"            >> $$@_;)
+	$$(foreach i,${INPUT_FEATURES},echo '$$i' | $${weight_vector} >> $$@_;)
+	$$(foreach x,${PTABLE_ENTRIES},echo '$$x' | $${weight_vector} >> $$@_;)
+	$$(foreach x,${DTABLE_ENTRIES},echo '$$x' | $${weight_vector} >> $$@_;)
+	$$(foreach x,${LMODEL_ENTRIES},echo '$$x' | $${weight_vector} >> $$@_;)
+	mv $$@_ $$@
+	$$(unlock)
+endef

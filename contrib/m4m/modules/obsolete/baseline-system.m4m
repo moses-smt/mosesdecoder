@@ -1,0 +1,48 @@
+# -*- Makefile -*-
+
+# This module defines a simple phrase-based baseline system
+# - a single corpus
+# - no factors
+# - single ttable 
+# - single distortion model
+
+# chose a name for the system
+# ${system}/moses.ini.0 then defines the system
+system = baseline
+SYSTEMS += ${system}
+.PHONY: ${system}
+${system}: ${system}/moses.ini.0
+
+#################################################################################
+#
+# Create phrase table(s) and distortion model(s) that you want to use in this 
+# system. If you already have binary or text version of all tables, you don't 
+# need to specify pll.{txt1,txt2,aln}.
+pll.txt1 = ${WDIR}/crp/trn/aln/fast/${L1}.txt.gz
+pll.txt2 = ${WDIR}/crp/trn/aln/fast/${L2}.txt.gz
+pll.aln  = ${WDIR}/crp/trn/aln/fast/${L1}-${L2}.symal.gz
+ptable   = ${WDIR}/model/tm/ptable.${L1}-${L2}
+dtable   = ${WDIR}/model/dm/dtable.${L1}-${L2}
+ptable.max-phrase-length = 7
+# ptable.smoothing         = --GoodTuring
+# dmodels                  = wbe-mslr-bidirectional-fe-allff
+
+LMODEL_ENTRIES = KENLM;name=KENLM0;order=5;factor=0;num-features=1;lazyken=0;path=$(abspath lm/europarl-v7.en.kenlm)
+LMODELS = lm/europarl-v7.en.kenlm
+
+MY_EXPERIMENT += $(call add_binary_phrase_table,0,0,5,${ptable})
+$(eval $(call add_binary_phrase_table,0,0,5,${ptable}))
+
+if 0
+MY_EXPERIMENT += $(call add_binary_reordering_table,0,0,8,\
+              wbe-mslr-bidirectional-fe-allff,${dtable},${ptable})
+$(eval $(call add_binary_reordering_table,0,0,8,\
+              wbe-mslr-bidirectional-fe-allff,${dtable},${ptable}))
+endif
+
+MY_EXPERIMENT += $(call create_moses_ini,${system})
+$(eval $(call create_moses_ini,${system}))
+
+#################################################################################
+
+
