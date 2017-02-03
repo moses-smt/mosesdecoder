@@ -1,5 +1,4 @@
-#ifndef NODE_H_
-#define NODE_H_
+#pragma once
 
 #include <vector>
 #include <boost/unordered_map.hpp>
@@ -84,4 +83,3 @@ Node<KeyClass, ValueClass>* Node<KeyClass, ValueClass>::findSub(
 
 }
 
-#endif /* end of include guard: NODE_H_ */

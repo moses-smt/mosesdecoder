@@ -9,7 +9,7 @@
 
 #include "../FF/StatefulFeatureFunction.h"
 #include "../TypeDef.h"
-#include "../MorphoTrie/MorphTrie.h"
+#include "../InMemoryTrie/InMemoryTrie.h"
 #include "../legacy/Factor.h"
 #include "../legacy/Util2.h"
 
@@ -74,7 +74,7 @@ protected:
   FactorType m_factorType;
   size_t m_order;
 
-  MorphTrie<const Factor*, LMScores> m_root;
+  InMemoryTrie<const Factor*, LMScores> m_root;
   SCORE m_oov;
   const Factor *m_bos;
   const Factor *m_eos;

@@ -1,5 +1,4 @@
-#ifndef MORPHTRIE_H_
-#define MORPHTRIE_H_
+#pragma once
 
 #include <vector>
 #include "Node.h"
@@ -8,26 +7,27 @@ namespace Moses2
 {
 
 template<class KeyClass, class ValueClass>
-class MorphTrie
+class InMemoryTrie
 {
 public:
-  MorphTrie() {
+  InMemoryTrie()
+  {
   }
   Node<KeyClass, ValueClass>* insert(const std::vector<KeyClass>& word,
-                                     const ValueClass& value);
+      const ValueClass& value);
   const Node<KeyClass, ValueClass>* getNode(
-    const std::vector<KeyClass>& words) const;
+      const std::vector<KeyClass>& words) const;
   const Node<KeyClass, ValueClass> &getNode(const std::vector<KeyClass>& words,
       size_t &stoppedAtInd) const;
   std::vector<const Node<KeyClass, ValueClass>*> getNodes(
-    const std::vector<KeyClass>& words, size_t &stoppedAtInd) const;
+      const std::vector<KeyClass>& words, size_t &stoppedAtInd) const;
 private:
   Node<KeyClass, ValueClass> root;
 };
 
 template<class KeyClass, class ValueClass>
-Node<KeyClass, ValueClass>* MorphTrie<KeyClass, ValueClass>::insert(
-  const std::vector<KeyClass>& word, const ValueClass& value)
+Node<KeyClass, ValueClass>* InMemoryTrie<KeyClass, ValueClass>::insert(
+    const std::vector<KeyClass>& word, const ValueClass& value)
 {
   Node<KeyClass, ValueClass>* cNode = &root;
   for (size_t i = 0; i < word.size(); ++i) {
@@ -39,8 +39,8 @@ Node<KeyClass, ValueClass>* MorphTrie<KeyClass, ValueClass>::insert(
 }
 
 template<class KeyClass, class ValueClass>
-const Node<KeyClass, ValueClass>* MorphTrie<KeyClass, ValueClass>::getNode(
-  const std::vector<KeyClass>& words) const
+const Node<KeyClass, ValueClass>* InMemoryTrie<KeyClass, ValueClass>::getNode(
+    const std::vector<KeyClass>& words) const
 {
   size_t stoppedAtInd;
   const Node<KeyClass, ValueClass> &ret = getNode(words, stoppedAtInd);
@@ -51,8 +51,8 @@ const Node<KeyClass, ValueClass>* MorphTrie<KeyClass, ValueClass>::getNode(
 }
 
 template<class KeyClass, class ValueClass>
-const Node<KeyClass, ValueClass> &MorphTrie<KeyClass, ValueClass>::getNode(
-  const std::vector<KeyClass>& words, size_t &stoppedAtInd) const
+const Node<KeyClass, ValueClass> &InMemoryTrie<KeyClass, ValueClass>::getNode(
+    const std::vector<KeyClass>& words, size_t &stoppedAtInd) const
 {
   const Node<KeyClass, ValueClass> *prevNode = &root, *newNode;
   for (size_t i = 0; i < words.size(); ++i) {
@@ -70,8 +70,8 @@ const Node<KeyClass, ValueClass> &MorphTrie<KeyClass, ValueClass>::getNode(
 }
 
 template<class KeyClass, class ValueClass>
-std::vector<const Node<KeyClass, ValueClass>*> MorphTrie<KeyClass, ValueClass>::getNodes(
-  const std::vector<KeyClass>& words, size_t &stoppedAtInd) const
+std::vector<const Node<KeyClass, ValueClass>*> InMemoryTrie<KeyClass, ValueClass>::getNodes(
+    const std::vector<KeyClass>& words, size_t &stoppedAtInd) const
 {
   std::vector<const Node<KeyClass, ValueClass>*> ret;
   const Node<KeyClass, ValueClass> *prevNode = &root, *newNode;
@@ -83,7 +83,8 @@ std::vector<const Node<KeyClass, ValueClass>*> MorphTrie<KeyClass, ValueClass>::
     if (newNode == NULL) {
       stoppedAtInd = i;
       return ret;
-    } else {
+    }
+    else {
       ret.push_back(newNode);
     }
     prevNode = newNode;
@@ -95,4 +96,3 @@ std::vector<const Node<KeyClass, ValueClass>*> MorphTrie<KeyClass, ValueClass>::
 
 }
 
-#endif /* end of include guard: MORPHTRIE_H_ */
