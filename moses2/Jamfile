@@ -48,7 +48,6 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses/Translatio
     FF/OSM/KenOSM.cpp
     FF/OSM/osmHyp.cpp
     
- #   LM/LanguageModelDALM.cpp
     LM/LanguageModel.cpp
     LM/KENLM.cpp
     LM/KENLMBatch.cpp

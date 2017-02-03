@@ -518,16 +518,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses2/LM/LanguageModel.h</locationURI>
 		</link>
 		<link>
-			<name>LM/LanguageModelDALM.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses2/LM/LanguageModelDALM.cpp</locationURI>
-		</link>
-		<link>
-			<name>LM/LanguageModelDALM.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses2/LM/LanguageModelDALM.h</locationURI>
-		</link>
-		<link>
 			<name>MorphoTrie/MorphTrie.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses2/MorphoTrie/MorphTrie.h</locationURI>
@@ -1456,26 +1446,6 @@
 			<name>TranslationModel/CompactPT/PackedArray.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses2/TranslationModel/CompactPT/PackedArray.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/CompactPT/PhraseDecoder.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses2/TranslationModel/CompactPT/PhraseDecoder.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/CompactPT/PhraseDecoder.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses2/TranslationModel/CompactPT/PhraseDecoder.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/CompactPT/PhraseTableCompact.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses2/TranslationModel/CompactPT/PhraseTableCompact.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/CompactPT/PhraseTableCompact.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses2/TranslationModel/CompactPT/PhraseTableCompact.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/CompactPT/StringVector.h</name>
