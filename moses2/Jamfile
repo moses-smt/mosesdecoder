@@ -59,12 +59,10 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses/Translatio
  	TranslationModel/UnknownWordPenalty.cpp 
     TranslationModel/Memory/PhraseTableMemory.cpp 
    	
- 	TranslationModel/CompactPT/PhraseTableCompact.cpp 
     TranslationModel/CompactPT/BlockHashIndex.cpp
     TranslationModel/CompactPT/CmphStringVectorAdapter.cpp
     TranslationModel/CompactPT/LexicalReorderingTableCompact.cpp
     TranslationModel/CompactPT/MurmurHash3.cpp
-    TranslationModel/CompactPT/PhraseDecoder.cpp
     TranslationModel/CompactPT/TargetPhraseCollectionCache.cpp
     TranslationModel/CompactPT/ThrowingFwrite.cpp
 
