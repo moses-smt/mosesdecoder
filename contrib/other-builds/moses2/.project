@@ -98,6 +98,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses2/HypothesisColl.h</locationURI>
 		</link>
 		<link>
+			<name>InMemoryTrie</name>
+			<type>2</type>
+			<locationURI>virtual:/virtual</locationURI>
+		</link>
+		<link>
 			<name>InputPathBase.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses2/InputPathBase.cpp</locationURI>
@@ -166,11 +171,6 @@
 			<name>MemPoolAllocator.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses2/MemPoolAllocator.h</locationURI>
-		</link>
-		<link>
-			<name>MorphoTrie</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
 			<name>Phrase.cpp</name>
@@ -478,6 +478,21 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses2/FF/WordPenalty.h</locationURI>
 		</link>
 		<link>
+			<name>InMemoryTrie/InMemoryTrie.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses2/InMemoryTrie/InMemoryTrie.h</locationURI>
+		</link>
+		<link>
+			<name>InMemoryTrie/Node.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses2/InMemoryTrie/Node.h</locationURI>
+		</link>
+		<link>
+			<name>InMemoryTrie/utils.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses2/InMemoryTrie/utils.h</locationURI>
+		</link>
+		<link>
 			<name>LM/GPULM.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses2/LM/GPULM.cpp</locationURI>
@@ -516,21 +531,6 @@
 			<name>LM/LanguageModel.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses2/LM/LanguageModel.h</locationURI>
-		</link>
-		<link>
-			<name>MorphoTrie/MorphTrie.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses2/MorphoTrie/MorphTrie.h</locationURI>
-		</link>
-		<link>
-			<name>MorphoTrie/Node.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses2/MorphoTrie/Node.h</locationURI>
-		</link>
-		<link>
-			<name>MorphoTrie/utils.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses2/MorphoTrie/utils.h</locationURI>
 		</link>
 		<link>
 			<name>PhraseBased/CubePruningMiniStack</name>
