@@ -1,5 +1,4 @@
-#ifndef MORPHTRIE_H_
-#define MORPHTRIE_H_
+#pragma once
 
 #include <vector>
 #include "Node.h"
@@ -8,10 +7,10 @@ namespace Moses2
 {
 
 template<class KeyClass, class ValueClass>
-class MorphTrie
+class InMemoryTrie
 {
 public:
-  MorphTrie() {
+  InMemoryTrie() {
   }
   Node<KeyClass, ValueClass>* insert(const std::vector<KeyClass>& word,
                                      const ValueClass& value);
@@ -26,7 +25,7 @@ private:
 };
 
 template<class KeyClass, class ValueClass>
-Node<KeyClass, ValueClass>* MorphTrie<KeyClass, ValueClass>::insert(
+Node<KeyClass, ValueClass>* InMemoryTrie<KeyClass, ValueClass>::insert(
   const std::vector<KeyClass>& word, const ValueClass& value)
 {
   Node<KeyClass, ValueClass>* cNode = &root;
@@ -39,7 +38,7 @@ Node<KeyClass, ValueClass>* MorphTrie<KeyClass, ValueClass>::insert(
 }
 
 template<class KeyClass, class ValueClass>
-const Node<KeyClass, ValueClass>* MorphTrie<KeyClass, ValueClass>::getNode(
+const Node<KeyClass, ValueClass>* InMemoryTrie<KeyClass, ValueClass>::getNode(
   const std::vector<KeyClass>& words) const
 {
   size_t stoppedAtInd;
@@ -51,7 +50,7 @@ const Node<KeyClass, ValueClass>* MorphTrie<KeyClass, ValueClass>::getNode(
 }
 
 template<class KeyClass, class ValueClass>
-const Node<KeyClass, ValueClass> &MorphTrie<KeyClass, ValueClass>::getNode(
+const Node<KeyClass, ValueClass> &InMemoryTrie<KeyClass, ValueClass>::getNode(
   const std::vector<KeyClass>& words, size_t &stoppedAtInd) const
 {
   const Node<KeyClass, ValueClass> *prevNode = &root, *newNode;
@@ -70,7 +69,7 @@ const Node<KeyClass, ValueClass> &MorphTrie<KeyClass, ValueClass>::getNode(
 }
 
 template<class KeyClass, class ValueClass>
-std::vector<const Node<KeyClass, ValueClass>*> MorphTrie<KeyClass, ValueClass>::getNodes(
+std::vector<const Node<KeyClass, ValueClass>*> InMemoryTrie<KeyClass, ValueClass>::getNodes(
   const std::vector<KeyClass>& words, size_t &stoppedAtInd) const
 {
   std::vector<const Node<KeyClass, ValueClass>*> ret;
@@ -95,4 +94,3 @@ std::vector<const Node<KeyClass, ValueClass>*> MorphTrie<KeyClass, ValueClass>::
 
 }
 
-#endif /* end of include guard: MORPHTRIE_H_ */

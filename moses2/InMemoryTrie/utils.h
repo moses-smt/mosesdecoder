@@ -1,4 +1,6 @@
-#include "MorphTrie.h"
+#pragma once
+
+#include "InMemoryTrie.h"
 #include <fstream>
 #include <ostream>
 #include <string>
