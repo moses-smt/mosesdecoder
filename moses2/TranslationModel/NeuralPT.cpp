@@ -75,7 +75,7 @@ void NeuralPT::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
   Hypothesis &hypoCast = const_cast<Hypothesis&>(hypo);
 
   Scores &scores = hypoCast.GetScores();
-  scores.PlusEquals(mgr.system, *this, amunOut.score);
+  scores.PlusEquals(mgr.system, *this, amunStates.score);
 
   cerr << "NeuralPT::EmptyHypothesisState end" << endl;
 }
@@ -204,7 +204,7 @@ size_t NeuralPT::Moses2Amun(const Word &word, const VocabMoses2Amun &vocabMappin
   VocabMoses2Amun::const_iterator iter = vocabMapping.find(factor);
   if (iter == vocabMapping.end()) {
     // unk
-    return 1;
+    return amunmt::UNK_ID;
   } else {
     return iter->second;
   }
