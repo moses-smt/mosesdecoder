@@ -43,8 +43,8 @@ void NeuralPT::Load(System &system)
   m_plugin = new amunmt::MosesPlugin();
   m_plugin->initGod(m_modelPath);
 
-  size_t devices = amunmt::MosesPlugin::GetDevices(m_maxDevices);
-  std::cerr << devices << std::endl;
+  //size_t devices = amunmt::MosesPlugin::GetDevices(m_maxDevices);
+  //std::cerr << devices << std::endl;
 
   const amunmt::God &god = m_plugin->GetGod();
 
