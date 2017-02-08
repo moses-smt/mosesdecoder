@@ -8,7 +8,6 @@
 #pragma once
 #include <vector>
 #include <deque>
-#include <boost/thread/tss.hpp>
 #include <boost/pool/object_pool.hpp>
 #include <boost/shared_ptr.hpp>
 #include "FF/FeatureFunctions.h"
@@ -65,8 +64,6 @@ public:
 
 protected:
   mutable FactorCollection m_vocab;
-
-  mutable boost::thread_specific_ptr<Batch> m_batch;
 
   void LoadWeights();
   void LoadMappings();
