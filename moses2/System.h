@@ -65,10 +65,6 @@ public:
 
 protected:
   mutable FactorCollection m_vocab;
-  mutable boost::thread_specific_ptr<MemPool> m_managerPool;
-  mutable boost::thread_specific_ptr<MemPool> m_systemPool;
-
-  mutable boost::thread_specific_ptr<Recycler<HypothesisBase*> > m_hypoRecycler;
 
   mutable boost::thread_specific_ptr<Batch> m_batch;
 
