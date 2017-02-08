@@ -35,35 +35,36 @@ class TargetPhrases;
 class ProbingPT: public Moses2::PhraseTable
 {
   //////////////////////////////////////
-    class ActiveChartEntryProbing : public SCFG::ActiveChartEntry
-    {
-      typedef SCFG::ActiveChartEntry Parent;
-    public:
+  class ActiveChartEntryProbing : public SCFG::ActiveChartEntry
+  {
+    typedef SCFG::ActiveChartEntry Parent;
+  public:
 
-      ActiveChartEntryProbing(MemPool &pool)
+    ActiveChartEntryProbing(MemPool &pool)
       :Parent(pool)
       ,m_key(0)
-      {}
+    {}
 
-      ActiveChartEntryProbing(
-          MemPool &pool,
-          const ActiveChartEntryProbing &prevEntry);
+    ActiveChartEntryProbing(
+      MemPool &pool,
+      const ActiveChartEntryProbing &prevEntry);
 
-      uint64_t GetKey() const
-      { return m_key; }
+    uint64_t GetKey() const {
+      return m_key;
+    }
 
-      std::pair<bool, uint64_t> GetKey(const SCFG::Word &nextWord, const ProbingPT &pt) const;
+    std::pair<bool, uint64_t> GetKey(const SCFG::Word &nextWord, const ProbingPT &pt) const;
 
-      virtual void AddSymbolBindElement(
-          const Range &range,
-          const SCFG::Word &word,
-          const Moses2::Hypotheses *hypos,
-          const Moses2::PhraseTable &pt);
+    virtual void AddSymbolBindElement(
+      const Range &range,
+      const SCFG::Word &word,
+      const Moses2::Hypotheses *hypos,
+      const Moses2::PhraseTable &pt);
 
-    protected:
-      uint64_t m_key;
-    };
-    //////////////////////////////////////
+  protected:
+    uint64_t m_key;
+  };
+  //////////////////////////////////////
 
 public:
   ProbingPT(size_t startInd, const std::string &line);
@@ -73,20 +74,21 @@ public:
   virtual void SetParameter(const std::string& key, const std::string& value);
   void Lookup(const Manager &mgr, InputPathsBase &inputPaths) const;
 
-  uint64_t GetUnk() const
-  { return m_unkId; }
+  uint64_t GetUnk() const {
+    return m_unkId;
+  }
 
   // SCFG
   void InitActiveChart(
-      MemPool &pool,
-      const SCFG::Manager &mgr,
-      SCFG::InputPath &path) const;
+    MemPool &pool,
+    const SCFG::Manager &mgr,
+    SCFG::InputPath &path) const;
 
   virtual void Lookup(MemPool &pool,
-      const SCFG::Manager &mgr,
-      size_t maxChartSpan,
-      const SCFG::Stacks &stacks,
-      SCFG::InputPath &path) const;
+                      const SCFG::Manager &mgr,
+                      size_t maxChartSpan,
+                      const SCFG::Stacks &stacks,
+                      SCFG::InputPath &path) const;
 
 
 protected:
@@ -101,14 +103,13 @@ protected:
   void CreateAlignmentMap(System &system, const std::string path);
 
   TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
-      InputPath &inputPath) const;
+                        InputPath &inputPath) const;
   TargetPhrases *CreateTargetPhrases(MemPool &pool, const System &system,
-      const Phrase<Moses2::Word> &sourcePhrase, uint64_t key) const;
+                                     const Phrase<Moses2::Word> &sourcePhrase, uint64_t key) const;
   TargetPhraseImpl *CreateTargetPhrase(MemPool &pool, const System &system,
-      const char *&offset) const;
+                                       const char *&offset) const;
 
-  inline const std::pair<bool, const Factor*> *GetTargetFactor(uint32_t probingId) const
-  {
+  inline const std::pair<bool, const Factor*> *GetTargetFactor(uint32_t probingId) const {
     if (probingId >= m_targetVocab.size()) {
       return NULL;
     }
@@ -118,7 +119,7 @@ protected:
   std::pair<bool, uint64_t> GetKey(const Phrase<Moses2::Word> &sourcePhrase) const;
 
   void GetSourceProbingIds(const Phrase<Moses2::Word> &sourcePhrase, bool &ok,
-      uint64_t probingSource[]) const;
+                           uint64_t probingSource[]) const;
 
   uint64_t GetSourceProbingId(const Word &word) const;
 
@@ -135,22 +136,22 @@ protected:
 
   // SCFG
   void LookupGivenNode(
-      MemPool &pool,
-      const SCFG::Manager &mgr,
-      const SCFG::ActiveChartEntry &prevEntry,
-      const SCFG::Word &wordSought,
-      const Moses2::Hypotheses *hypos,
-      const Moses2::Range &subPhraseRange,
-      SCFG::InputPath &outPath) const;
+    MemPool &pool,
+    const SCFG::Manager &mgr,
+    const SCFG::ActiveChartEntry &prevEntry,
+    const SCFG::Word &wordSought,
+    const Moses2::Hypotheses *hypos,
+    const Moses2::Range &subPhraseRange,
+    SCFG::InputPath &outPath) const;
 
   std::pair<bool, SCFG::TargetPhrases*> CreateTargetPhrasesSCFG(MemPool &pool, const System &system,
       const Phrase<SCFG::Word> &sourcePhrase, uint64_t key) const;
   // return value: 1st = there are actual rules, not just a empty cell for prefix
 
   SCFG::TargetPhraseImpl *CreateTargetPhraseSCFG(
-      MemPool &pool,
-      const System &system,
-      const char *&offset) const;
+    MemPool &pool,
+    const System &system,
+    const char *&offset) const;
 
 
 };

@@ -14,10 +14,8 @@ namespace Moses2
 {
 
 template<typename T>
-struct CompareTrellisPath
-{
-  bool operator()(const T* pathA, const T* pathB) const
-  {
+struct CompareTrellisPath {
+  bool operator()(const T* pathA, const T* pathB) const {
     return (pathA->GetFutureScore() < pathB->GetFutureScore());
   }
 };
@@ -28,27 +26,23 @@ class TrellisPaths
 public:
   TrellisPaths() {}
 
-  virtual ~TrellisPaths()
-  {
+  virtual ~TrellisPaths() {
     while (!empty()) {
       T *path = Get();
       delete path;
     }
   }
 
-  bool empty() const
-  {
+  bool empty() const {
     return m_coll.empty();
   }
 
   //! add a new entry into collection
-  void Add(T *trellisPath)
-  {
+  void Add(T *trellisPath) {
     m_coll.push(trellisPath);
   }
 
-  T *Get()
-  {
+  T *Get() {
     T *top = m_coll.top();
 
     // Detach
@@ -56,12 +50,13 @@ public:
     return top;
   }
 
-  size_t GetSize() const
-  { return m_coll.size(); }
+  size_t GetSize() const {
+    return m_coll.size();
+  }
 
 protected:
   typedef std::priority_queue<T*, std::vector<T*>,
-      CompareTrellisPath<T> > CollectionType;
+          CompareTrellisPath<T> > CollectionType;
   CollectionType m_coll;
 };
 

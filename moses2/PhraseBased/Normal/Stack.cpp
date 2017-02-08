@@ -20,7 +20,7 @@ namespace NSNormal
 {
 
 Stack::Stack(const Manager &mgr) :
-    HypothesisColl(mgr)
+  HypothesisColl(mgr)
 {
   // TODO Auto-generated constructor stub
 

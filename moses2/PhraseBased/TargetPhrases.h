@@ -25,12 +25,10 @@ public:
   typedef Coll::iterator iterator;
   typedef Coll::const_iterator const_iterator;
   //! iterators
-  const_iterator begin() const
-  {
+  const_iterator begin() const {
     return m_coll.begin();
   }
-  const_iterator end() const
-  {
+  const_iterator end() const {
     return m_coll.end();
   }
 
@@ -38,18 +36,15 @@ public:
   //TargetPhrases(MemPool &pool, const System &system, const TargetPhrases &copy);
   virtual ~TargetPhrases();
 
-  void AddTargetPhrase(const TP &targetPhrase)
-  {
+  void AddTargetPhrase(const TP &targetPhrase) {
     m_coll[m_currInd++] = &targetPhrase;
   }
 
-  size_t GetSize() const
-  {
+  size_t GetSize() const {
     return m_coll.size();
   }
 
-  const TP& operator[](size_t ind) const
-  {
+  const TP& operator[](size_t ind) const {
     return *m_coll[ind];
   }
 

@@ -30,8 +30,7 @@ Hypothesis *Hypothesis::Create(MemPool &pool, Manager &mgr)
   ret = static_cast<Hypothesis*>(recycler.Get());
   if (ret) {
     // got new hypo from recycler. Do nothing
-  }
-  else {
+  } else {
     ret = new (pool.Allocate<Hypothesis>()) Hypothesis(pool, mgr.system);
     //cerr << "Hypothesis=" << sizeof(Hypothesis) << " " << ret << endl;
     recycler.Keep(ret);
@@ -40,7 +39,7 @@ Hypothesis *Hypothesis::Create(MemPool &pool, Manager &mgr)
 }
 
 Hypothesis::Hypothesis(MemPool &pool, const System &system) :
-    HypothesisBase(pool, system), m_currTargetWordsRange()
+  HypothesisBase(pool, system), m_currTargetWordsRange()
 {
 }
 
@@ -50,7 +49,7 @@ Hypothesis::~Hypothesis()
 }
 
 void Hypothesis::Init(Manager &mgr, const InputPathBase &path,
-    const TargetPhraseImpl &tp, const Bitmap &bitmap)
+                      const TargetPhraseImpl &tp, const Bitmap &bitmap)
 {
   m_mgr = &mgr;
   m_targetPhrase = &tp;
@@ -66,8 +65,8 @@ void Hypothesis::Init(Manager &mgr, const InputPathBase &path,
 }
 
 void Hypothesis::Init(Manager &mgr, const Hypothesis &prevHypo,
-    const InputPathBase &path, const TargetPhraseImpl &tp, const Bitmap &bitmap,
-    SCORE estimatedScore)
+                      const InputPathBase &path, const TargetPhraseImpl &tp, const Bitmap &bitmap,
+                      SCORE estimatedScore)
 {
   m_mgr = &mgr;
   m_targetPhrase = &tp;
@@ -76,9 +75,9 @@ void Hypothesis::Init(Manager &mgr, const Hypothesis &prevHypo,
   m_prevHypo = &prevHypo;
 
   m_currTargetWordsRange.SetStartPos(
-      prevHypo.m_currTargetWordsRange.GetEndPos() + 1);
+    prevHypo.m_currTargetWordsRange.GetEndPos() + 1);
   m_currTargetWordsRange.SetEndPos(
-      prevHypo.m_currTargetWordsRange.GetEndPos() + tp.GetSize());
+    prevHypo.m_currTargetWordsRange.GetEndPos() + tp.GetSize());
 
   m_estimatedScore = estimatedScore;
 
@@ -116,7 +115,7 @@ std::string Hypothesis::Debug(const System &system) const
 
   // states
   const std::vector<const StatefulFeatureFunction*> &sfffs =
-      GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
+    GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
   size_t numStatefulFFs = sfffs.size();
   for (size_t i = 0; i < numStatefulFFs; ++i) {
     const FFState &state = *GetState(i);
@@ -152,8 +151,7 @@ void Hypothesis::OutputToStream(std::ostream &out) const
     if (m_mgr->system.options.output.ReportSegmentation == 1) {
       // just report phrase segmentation
       out << "|" << m_path->range.GetStartPos() << "-" << m_path->range.GetEndPos() << "| ";
-    }
-    else if (m_mgr->system.options.output.ReportSegmentation == 2) {
+    } else if (m_mgr->system.options.output.ReportSegmentation == 2) {
       // more detailed info about every segment
       out << "|";
 
@@ -171,19 +169,19 @@ void Hypothesis::OutputToStream(std::ostream &out) const
 void Hypothesis::EmptyHypothesisState(const InputType &input)
 {
   const std::vector<const StatefulFeatureFunction*> &sfffs =
-      GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
-  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs){
-  size_t statefulInd = sfff->GetStatefulInd();
-  FFState *state = m_ffStates[statefulInd];
-  sfff->EmptyHypothesisState(*state, GetManager(), input, *this);
-}
+    GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
+  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
+    size_t statefulInd = sfff->GetStatefulInd();
+    FFState *state = m_ffStates[statefulInd];
+    sfff->EmptyHypothesisState(*state, GetManager(), input, *this);
+  }
 }
 
 void Hypothesis::EvaluateWhenApplied()
 {
   const std::vector<const StatefulFeatureFunction*> &sfffs =
-      GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
-  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs){
+    GetManager().system.featureFunctions.GetStatefulFeatureFunctions();
+  BOOST_FOREACH(const StatefulFeatureFunction *sfff, sfffs) {
     EvaluateWhenApplied(*sfff);
   }
 //cerr << *this << endl;
@@ -196,7 +194,7 @@ void Hypothesis::EvaluateWhenApplied(const StatefulFeatureFunction &sfff)
   FFState *thisState = m_ffStates[statefulInd];
   assert(prevState);
   sfff.EvaluateWhenApplied(GetManager(), *this, *prevState, *m_scores,
-      *thisState);
+                           *thisState);
 
 }
 

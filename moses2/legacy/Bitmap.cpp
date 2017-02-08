@@ -26,7 +26,7 @@ namespace Moses2
 {
 
 Bitmap::Bitmap(MemPool &pool, size_t size) :
-    m_bitmap(pool, size)
+  m_bitmap(pool, size)
 {
 }
 
@@ -47,9 +47,9 @@ void Bitmap::Init(const std::vector<bool>& initializer)
 
   // Find the first gap, and cache it.
   Array<char>::const_iterator first_gap = std::find(m_bitmap.begin(),
-      m_bitmap.end(), false);
+                                          m_bitmap.end(), false);
   m_firstGap = ((first_gap == m_bitmap.end()) ?
-  NOT_FOUND: first_gap - m_bitmap.begin());
+                NOT_FOUND: first_gap - m_bitmap.begin());
 }
 
 void Bitmap::Init(const Bitmap &copy, const Range &range)

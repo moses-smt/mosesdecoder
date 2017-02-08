@@ -36,25 +36,23 @@ public:
   // bitmap and current endPos of hypos
 
   typedef boost::unordered_map<HypoCoverage, Moses2::HypothesisColl*,
-      boost::hash<HypoCoverage>, std::equal_to<HypoCoverage>,
-      MemPoolAllocator<std::pair<HypoCoverage, Moses2::HypothesisColl*> > > Coll;
+          boost::hash<HypoCoverage>, std::equal_to<HypoCoverage>,
+          MemPoolAllocator<std::pair<HypoCoverage, Moses2::HypothesisColl*> > > Coll;
 
   Stack(const Manager &mgr);
   virtual ~Stack();
 
   size_t GetHypoSize() const;
 
-  Coll &GetColl()
-  {
+  Coll &GetColl() {
     return m_coll;
   }
-  const Coll &GetColl() const
-  {
+  const Coll &GetColl() const {
     return m_coll;
   }
 
   void Add(Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
-      ArcLists &arcLists);
+           ArcLists &arcLists);
 
   Moses2::HypothesisColl &GetMiniStack(const HypoCoverage &key);
 

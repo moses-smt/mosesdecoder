@@ -7,14 +7,13 @@ namespace Moses2
 {
 class Parameter;
 
-  struct OptionsBaseClass 
-  {
+struct OptionsBaseClass {
 #ifdef HAVE_XMLRPC_C
-    virtual bool   
-    update(std::map<std::string,xmlrpc_c::value>const& params);
+  virtual bool
+  update(std::map<std::string,xmlrpc_c::value>const& params);
 #endif
-    bool 
-    check(std::map<std::string, xmlrpc_c::value> const& param, 
-          std::string const key, bool dfltval);
-  };
+  bool
+  check(std::map<std::string, xmlrpc_c::value> const& param,
+        std::string const key, bool dfltval);
+};
 }

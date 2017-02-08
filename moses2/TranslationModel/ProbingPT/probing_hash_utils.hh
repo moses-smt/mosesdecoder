@@ -13,18 +13,15 @@ namespace Moses2
 #define API_VERSION 15
 
 //Hash table entry
-struct Entry
-{
+struct Entry {
   typedef uint64_t Key;
   Key key;
 
-  Key GetKey() const
-  {
+  Key GetKey() const {
     return key;
   }
 
-  void SetKey(Key to)
-  {
+  void SetKey(Key to) {
     key = to;
   }
 
@@ -42,8 +39,7 @@ char * readTable(const char * filename, util::LoadMethod load_method, util::scop
 
 uint64_t getKey(const uint64_t source_phrase[], size_t size);
 
-struct TargetPhraseInfo
-{
+struct TargetPhraseInfo {
   uint32_t alignTerm;
   uint32_t alignNonTerm;
   uint16_t numWords;

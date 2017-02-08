@@ -22,8 +22,8 @@ namespace Moses2
 {
 
 bool IsMonotonicStep(Range const& prev, // words range of last source phrase
-    Range const& cur,  // words range of current source phrase
-    Bitmap const& cov)  // coverage bitmap
+                     Range const& cur,  // words range of current source phrase
+                     Bitmap const& cov)  // coverage bitmap
 {
   size_t e = prev.GetEndPos() + 1;
   size_t s = cur.GetStartPos();
@@ -38,19 +38,17 @@ bool IsSwap(Range const& prev, Range const& cur, Bitmap const& cov)
 }
 
 LRModel::LRModel(const std::string &modelType, LexicalReordering &ff) :
-    m_modelType(None), m_phraseBased(true), m_collapseScores(false), m_direction(
-        Backward), m_scoreProducer(&ff)
+  m_modelType(None), m_phraseBased(true), m_collapseScores(false), m_direction(
+    Backward), m_scoreProducer(&ff)
 {
   std::vector<std::string> config = Tokenize(modelType, "-");
 
   for (size_t i = 0; i < config.size(); ++i) {
     if (config[i] == "hier") {
       m_phraseBased = false;
-    }
-    else if (config[i] == "phrase") {
+    } else if (config[i] == "phrase") {
       m_phraseBased = true;
-    }
-    else if (config[i] == "wbe") {
+    } else if (config[i] == "wbe") {
       m_phraseBased = true;
     }
     // no word-based decoding available, fall-back to phrase-based
@@ -58,45 +56,36 @@ LRModel::LRModel(const std::string &modelType, LexicalReordering &ff) :
 
     else if (config[i] == "msd") {
       m_modelType = MSD;
-    }
-    else if (config[i] == "mslr") {
+    } else if (config[i] == "mslr") {
       m_modelType = MSLR;
-    }
-    else if (config[i] == "monotonicity") {
+    } else if (config[i] == "monotonicity") {
       m_modelType = Monotonic;
-    }
-    else if (config[i] == "leftright") {
+    } else if (config[i] == "leftright") {
       m_modelType = LeftRight;
     }
 
     // unidirectional is deprecated, use backward instead
     else if (config[i] == "unidirectional") {
       m_direction = Backward;
-    }
-    else if (config[i] == "backward") {
+    } else if (config[i] == "backward") {
       m_direction = Backward;
-    }
-    else if (config[i] == "forward") {
+    } else if (config[i] == "forward") {
       m_direction = Forward;
-    }
-    else if (config[i] == "bidirectional") {
+    } else if (config[i] == "bidirectional") {
       m_direction = Bidirectional;
     }
 
     else if (config[i] == "f") {
       m_condition = F;
-    }
-    else if (config[i] == "fe") {
+    } else if (config[i] == "fe") {
       m_condition = FE;
     }
 
     else if (config[i] == "collapseff") {
       m_collapseScores = true;
-    }
-    else if (config[i] == "allff") {
+    } else if (config[i] == "allff") {
       m_collapseScores = false;
-    }
-    else {
+    } else {
       std::cerr
           << "Illegal part in the lexical reordering configuration string: "
           << config[i] << std::endl;
@@ -106,7 +95,7 @@ LRModel::LRModel(const std::string &modelType, LexicalReordering &ff) :
 
   if (m_modelType == None) {
     std::cerr << "You need to specify the type of the reordering model "
-        << "(msd, monotonicity,...)" << std::endl;
+              << "(msd, monotonicity,...)" << std::endl;
     exit(1);
   }
 
@@ -135,19 +124,19 @@ LRModel::ReorderingType LRModel::GetOrientation(Range const& prev,
 {
   UTIL_THROW_IF2(m_modelType == None, "No reordering model type specified");
   return (
-      (m_modelType == LeftRight) ? prev.GetEndPos() <= cur.GetStartPos() ? R : L
-      : (cur.GetStartPos() == prev.GetEndPos() + 1) ? M :
-      (m_modelType == Monotonic) ? NM :
-      (prev.GetStartPos() == cur.GetEndPos() + 1) ? S :
-      (m_modelType == MSD) ? D :
-      (cur.GetStartPos() > prev.GetEndPos()) ? DR : DL);
+           (m_modelType == LeftRight) ? prev.GetEndPos() <= cur.GetStartPos() ? R : L
+         : (cur.GetStartPos() == prev.GetEndPos() + 1) ? M :
+           (m_modelType == Monotonic) ? NM :
+           (prev.GetStartPos() == cur.GetEndPos() + 1) ? S :
+           (m_modelType == MSD) ? D :
+           (cur.GetStartPos() > prev.GetEndPos()) ? DR : DL);
 }
 
 LRModel::ReorderingType LRModel::GetOrientation(int const reoDistance) const
 {
   // this one is for HierarchicalReorderingBackwardState
   return ((m_modelType == LeftRight) ? (reoDistance >= 1) ? R : L
-          : (reoDistance == 1) ? M : (m_modelType == Monotonic) ? NM :
+        : (reoDistance == 1) ? M : (m_modelType == Monotonic) ? NM :
           (reoDistance == -1) ? S : (m_modelType == MSD) ? D :
           (reoDistance > 1) ? DR : DL);
 }
@@ -162,28 +151,26 @@ LRState *LRModel::CreateLRState(MemPool &pool) const
   case Bidirectional:
     if (m_phraseBased) {
       bwd =
-          new (pool.Allocate<PhraseBasedReorderingState>()) PhraseBasedReorderingState(
-              *this, Backward, offset);
+        new (pool.Allocate<PhraseBasedReorderingState>()) PhraseBasedReorderingState(
+        *this, Backward, offset);
       //cerr << "bwd=" << bwd << bwd->ToString() << endl;
-    }
-    else {
+    } else {
       bwd =
-          new (pool.Allocate<HReorderingBackwardState>()) HReorderingBackwardState(
-              pool, *this, offset);
+        new (pool.Allocate<HReorderingBackwardState>()) HReorderingBackwardState(
+        pool, *this, offset);
     }
     offset += m_collapseScores ? 1 : GetNumberOfTypes();
     if (m_direction == Backward) return bwd; // else fall through
   case Forward:
     if (m_phraseBased) {
       fwd =
-          new (pool.Allocate<PhraseBasedReorderingState>()) PhraseBasedReorderingState(
-              *this, Forward, offset);
+        new (pool.Allocate<PhraseBasedReorderingState>()) PhraseBasedReorderingState(
+        *this, Forward, offset);
       //cerr << "fwd=" << fwd << fwd->ToString() << endl;
-    }
-    else {
+    } else {
       fwd =
-          new (pool.Allocate<HReorderingForwardState>()) HReorderingForwardState(
-              *this, offset);
+        new (pool.Allocate<HReorderingForwardState>()) HReorderingForwardState(
+        *this, offset);
     }
     offset += m_collapseScores ? 1 : GetNumberOfTypes();
     if (m_direction == Forward) return fwd;
@@ -191,8 +178,8 @@ LRState *LRModel::CreateLRState(MemPool &pool) const
 
   //cerr << "LRStates:" << *bwd << endl << *fwd << endl;
   BidirectionalReorderingState *ret =
-      new (pool.Allocate<BidirectionalReorderingState>()) BidirectionalReorderingState(
-          *this, bwd, fwd, 0);
+    new (pool.Allocate<BidirectionalReorderingState>()) BidirectionalReorderingState(
+    *this, bwd, fwd, 0);
   return ret;
 }
 
@@ -200,10 +187,10 @@ LRModel::ReorderingType LRModel::GetOrientation(Range const& prev,
     Range const& cur, Bitmap const& cov) const
 {
   return (
-      (m_modelType == LeftRight) ? cur.GetStartPos() > prev.GetEndPos() ? R : L
-      : IsMonotonicStep(prev, cur, cov) ? M : (m_modelType == Monotonic) ? NM :
-      IsSwap(prev, cur, cov) ? S : (m_modelType == MSD) ? D :
-      cur.GetStartPos() > prev.GetEndPos() ? DR : DL);
+           (m_modelType == LeftRight) ? cur.GetStartPos() > prev.GetEndPos() ? R : L
+         : IsMonotonicStep(prev, cur, cov) ? M : (m_modelType == Monotonic) ? NM :
+           IsSwap(prev, cur, cov) ? S : (m_modelType == MSD) ? D :
+           cur.GetStartPos() > prev.GetEndPos() ? DR : DL);
 }
 
 } /* namespace Moses2 */

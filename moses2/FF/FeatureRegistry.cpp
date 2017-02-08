@@ -30,8 +30,7 @@ template<class F>
 class DefaultFeatureFactory: public FeatureFactory
 {
 public:
-  FeatureFunction *Create(size_t startInd, const std::string &line) const
-  {
+  FeatureFunction *Create(size_t startInd, const std::string &line) const {
     return new F(startInd, line);
   }
 };
@@ -40,8 +39,7 @@ public:
 class KenFactory: public FeatureFactory
 {
 public:
-  FeatureFunction *Create(size_t startInd, const std::string &line) const
-  {
+  FeatureFunction *Create(size_t startInd, const std::string &line) const {
     ConstructKenLM(startInd, line);
   }
 };

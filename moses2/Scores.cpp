@@ -22,26 +22,24 @@ namespace Moses2
 {
 
 Scores::Scores(const System &system, MemPool &pool, size_t numScores) :
-    m_total(0)
+  m_total(0)
 {
   if (system.options.nbest.nbest_size) {
     m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
     Init<SCORE>(m_scores, numScores, 0);
-  }
-  else {
+  } else {
     m_scores = NULL;
   }
 }
 
 Scores::Scores(const System &system, MemPool &pool, size_t numScores,
-    const Scores &origScores) :
-    m_total(origScores.m_total)
+               const Scores &origScores) :
+  m_total(origScores.m_total)
 {
   if (system.options.nbest.nbest_size) {
     m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
     memcpy(m_scores, origScores.m_scores, sizeof(SCORE) * numScores);
-  }
-  else {
+  } else {
     m_scores = NULL;
   }
 }
@@ -69,7 +67,7 @@ void Scores::Reset(const System &system)
 }
 
 void Scores::PlusEquals(const System &system,
-    const FeatureFunction &featureFunction, const SCORE &score)
+                        const FeatureFunction &featureFunction, const SCORE &score)
 {
   assert(featureFunction.GetNumScores() == 1);
 
@@ -84,7 +82,7 @@ void Scores::PlusEquals(const System &system,
 }
 
 void Scores::PlusEquals(const System &system,
-    const FeatureFunction &featureFunction, const SCORE &score, size_t offset)
+                        const FeatureFunction &featureFunction, const SCORE &score, size_t offset)
 {
   assert(offset < featureFunction.GetNumScores());
 
@@ -99,7 +97,7 @@ void Scores::PlusEquals(const System &system,
 }
 
 void Scores::PlusEquals(const System &system,
-    const FeatureFunction &featureFunction, const std::vector<SCORE> &scores)
+                        const FeatureFunction &featureFunction, const std::vector<SCORE> &scores)
 {
   assert(scores.size() == featureFunction.GetNumScores());
 
@@ -118,7 +116,7 @@ void Scores::PlusEquals(const System &system,
 }
 
 void Scores::PlusEquals(const System &system,
-    const FeatureFunction &featureFunction, SCORE scores[])
+                        const FeatureFunction &featureFunction, SCORE scores[])
 {
   //assert(scores.size() == featureFunction.GetNumScores());
 
@@ -159,7 +157,7 @@ void Scores::MinusEquals(const System &system, const Scores &other)
 }
 
 void Scores::Assign(const System &system,
-    const FeatureFunction &featureFunction, const SCORE &score)
+                    const FeatureFunction &featureFunction, const SCORE &score)
 {
   assert(featureFunction.GetNumScores() == 1);
 
@@ -177,7 +175,7 @@ void Scores::Assign(const System &system,
 }
 
 void Scores::Assign(const System &system,
-    const FeatureFunction &featureFunction, const std::vector<SCORE> &scores)
+                    const FeatureFunction &featureFunction, const std::vector<SCORE> &scores)
 {
   assert(scores.size() == featureFunction.GetNumScores());
 
@@ -198,13 +196,13 @@ void Scores::Assign(const System &system,
 }
 
 void Scores::CreateFromString(const std::string &str,
-    const FeatureFunction &featureFunction, const System &system,
-    bool transformScores)
+                              const FeatureFunction &featureFunction, const System &system,
+                              bool transformScores)
 {
   vector<SCORE> scores = Tokenize<SCORE>(str);
   if (transformScores) {
     std::transform(scores.begin(), scores.end(), scores.begin(),
-        TransformScore);
+                   TransformScore);
     std::transform(scores.begin(), scores.end(), scores.begin(), FloorScore);
   }
 
@@ -223,7 +221,7 @@ std::string Scores::Debug(const System &system) const
 
   if (system.options.nbest.nbest_size) {
     out << ", ";
-    BOOST_FOREACH(const FeatureFunction *ff, system.featureFunctions.GetFeatureFunctions()){
+    BOOST_FOREACH(const FeatureFunction *ff, system.featureFunctions.GetFeatureFunctions()) {
       out << ff->GetName() << "= ";
       for (size_t i = ff->GetStartInd(); i < (ff->GetStartInd() + ff->GetNumScores()); ++i) {
         out << m_scores[i] << " ";
@@ -237,7 +235,7 @@ std::string Scores::Debug(const System &system) const
 void Scores::OutputBreakdown(std::ostream &out, const System &system) const
 {
   if (system.options.nbest.nbest_size) {
-    BOOST_FOREACH(const FeatureFunction *ff, system.featureFunctions.GetFeatureFunctions()){
+    BOOST_FOREACH(const FeatureFunction *ff, system.featureFunctions.GetFeatureFunctions()) {
       if (ff->IsTuneable()) {
         out << ff->GetName() << "= ";
         for (size_t i = ff->GetStartInd(); i < (ff->GetStartInd() + ff->GetNumScores()); ++i) {
@@ -250,7 +248,7 @@ void Scores::OutputBreakdown(std::ostream &out, const System &system) const
 
 // static functions to work out estimated scores
 SCORE Scores::CalcWeightedScore(const System &system,
-    const FeatureFunction &featureFunction, SCORE scores[])
+                                const FeatureFunction &featureFunction, SCORE scores[])
 {
   SCORE ret = 0;
 
@@ -269,7 +267,7 @@ SCORE Scores::CalcWeightedScore(const System &system,
 }
 
 SCORE Scores::CalcWeightedScore(const System &system,
-    const FeatureFunction &featureFunction, SCORE score)
+                                const FeatureFunction &featureFunction, SCORE score)
 {
   const Weights &weights = system.weights;
   assert(featureFunction.GetNumScores() == 1);

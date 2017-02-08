@@ -99,8 +99,8 @@ float EstimatedScores::CalcEstimatedScore(Bitmap const &bitmap, size_t startPos,
     }
     // end of a gap?
     else if (startGap != notInGap
-        && (bitmap.GetValue(currPos) == true
-            || (startPos <= currPos && currPos <= endPos))) {
+             && (bitmap.GetValue(currPos) == true
+                 || (startPos <= currPos && currPos <= endPos))) {
       estimatedScore += GetValue(startGap, currPos - 1);
       startGap = notInGap;
     }

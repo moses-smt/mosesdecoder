@@ -26,16 +26,14 @@ public:
   explicit Word(const SCFG::Word &copy);
 
   void CreateFromString(FactorCollection &vocab,
-      const System &system,
-      const std::string &str);
+                        const System &system,
+                        const std::string &str);
 
-  bool operator==(const SCFG::Word &compare) const
-  {
+  bool operator==(const SCFG::Word &compare) const {
     int cmp = Moses2::Word::Compare(compare);
     if (cmp == 0 && isNonTerminal == compare.isNonTerminal) {
       return true;
-    }
-    else {
+    } else {
       return false;
     }
   }
@@ -45,10 +43,10 @@ public:
 
   virtual void OutputToStream(const System &system, std::ostream &out) const;
   virtual void OutputToStream(
-		  const ManagerBase &mgr,
-		  size_t targetPos,
-		  const SCFG::Hypothesis &hypo,
-		  std::ostream &out) const;
+    const ManagerBase &mgr,
+    size_t targetPos,
+    const SCFG::Hypothesis &hypo,
+    std::ostream &out) const;
 
   virtual std::string Debug(const System &system) const;
 
@@ -56,7 +54,9 @@ protected:
 };
 
 inline size_t hash_value(const SCFG::Word &word)
-{ return word.hash(); }
+{
+  return word.hash();
+}
 
 }
 }

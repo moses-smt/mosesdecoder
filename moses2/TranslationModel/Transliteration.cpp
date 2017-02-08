@@ -28,7 +28,7 @@ namespace Moses2
 {
 
 Transliteration::Transliteration(size_t startInd, const std::string &line) :
-    PhraseTable(startInd, line)
+  PhraseTable(startInd, line)
 {
   ReadParameters();
   UTIL_THROW_IF2(m_mosesDir.empty() ||
@@ -63,23 +63,23 @@ SetParameter(const std::string& key, const std::string& value)
 }
 
 void Transliteration::Lookup(const Manager &mgr,
-    InputPathsBase &inputPaths) const
+                             InputPathsBase &inputPaths) const
 {
-	BOOST_FOREACH(InputPathBase *pathBase, inputPaths){
-	  InputPath *path = static_cast<InputPath*>(pathBase);
+  BOOST_FOREACH(InputPathBase *pathBase, inputPaths) {
+    InputPath *path = static_cast<InputPath*>(pathBase);
 
-	  if (SatisfyBackoff(mgr, *path)) {
-		  const SubPhrase<Moses2::Word> &phrase = path->subPhrase;
+    if (SatisfyBackoff(mgr, *path)) {
+      const SubPhrase<Moses2::Word> &phrase = path->subPhrase;
 
-		  TargetPhrases *tps = Lookup(mgr, mgr.GetPool(), *path);
-		  path->AddTargetPhrases(*this, tps);
-	  }
-	}
+      TargetPhrases *tps = Lookup(mgr, mgr.GetPool(), *path);
+      path->AddTargetPhrases(*this, tps);
+    }
+  }
 
 }
 
 TargetPhrases *Transliteration::Lookup(const Manager &mgr, MemPool &pool,
-    InputPath &inputPath) const
+                                       InputPath &inputPath) const
 {
   const SubPhrase<Moses2::Word> &sourcePhrase = inputPath.subPhrase;
   size_t hash = sourcePhrase.hash();
@@ -121,10 +121,10 @@ TargetPhrases *Transliteration::Lookup(const Manager &mgr, MemPool &pool,
 }
 
 std::vector<TargetPhraseImpl*> Transliteration::CreateTargetPhrases(
-    const Manager &mgr,
-    MemPool &pool,
-    const SubPhrase<Moses2::Word> &sourcePhrase,
-    const std::string &outDir) const
+  const Manager &mgr,
+  MemPool &pool,
+  const SubPhrase<Moses2::Word> &sourcePhrase,
+  const std::string &outDir) const
 {
   std::vector<TargetPhraseImpl*> ret;
 
@@ -137,7 +137,7 @@ std::vector<TargetPhraseImpl*> Transliteration::CreateTargetPhrases(
     UTIL_THROW_IF2(toks.size() != 2, "Error in transliteration output file. Expecting word\tscore");
 
     TargetPhraseImpl *tp =
-        new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, *this, mgr.system, 1);
+      new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, *this, mgr.system, 1);
     Moses2::Word &word = (*tp)[0];
     word.CreateFromString(mgr.system.GetVocab(), mgr.system, toks[0]);
 
@@ -166,61 +166,61 @@ void Transliteration::EvaluateInIsolation(const System &system,
 
 // SCFG ///////////////////////////////////////////////////////////////////////////////////////////
 void Transliteration::InitActiveChart(
-    MemPool &pool,
-    const SCFG::Manager &mgr,
-    SCFG::InputPath &path) const
+  MemPool &pool,
+  const SCFG::Manager &mgr,
+  SCFG::InputPath &path) const
 {
   UTIL_THROW2("Not implemented");
 }
 
 void Transliteration::Lookup(MemPool &pool,
-    const SCFG::Manager &mgr,
-    size_t maxChartSpan,
-    const SCFG::Stacks &stacks,
-    SCFG::InputPath &path) const
+                             const SCFG::Manager &mgr,
+                             size_t maxChartSpan,
+                             const SCFG::Stacks &stacks,
+                             SCFG::InputPath &path) const
 {
   UTIL_THROW2("Not implemented");
 }
 
 void Transliteration::LookupUnary(MemPool &pool,
-    const SCFG::Manager &mgr,
-    const SCFG::Stacks &stacks,
-    SCFG::InputPath &path) const
+                                  const SCFG::Manager &mgr,
+                                  const SCFG::Stacks &stacks,
+                                  SCFG::InputPath &path) const
 {
   UTIL_THROW2("Not implemented");
 }
 
 void Transliteration::LookupNT(
-    MemPool &pool,
-    const SCFG::Manager &mgr,
-    const Moses2::Range &subPhraseRange,
-    const SCFG::InputPath &prevPath,
-    const SCFG::Stacks &stacks,
-    SCFG::InputPath &outPath) const
+  MemPool &pool,
+  const SCFG::Manager &mgr,
+  const Moses2::Range &subPhraseRange,
+  const SCFG::InputPath &prevPath,
+  const SCFG::Stacks &stacks,
+  SCFG::InputPath &outPath) const
 {
   UTIL_THROW2("Not implemented");
 }
 
 void Transliteration::LookupGivenWord(
-    MemPool &pool,
-    const SCFG::Manager &mgr,
-    const SCFG::InputPath &prevPath,
-    const SCFG::Word &wordSought,
-    const Moses2::Hypotheses *hypos,
-    const Moses2::Range &subPhraseRange,
-    SCFG::InputPath &outPath) const
+  MemPool &pool,
+  const SCFG::Manager &mgr,
+  const SCFG::InputPath &prevPath,
+  const SCFG::Word &wordSought,
+  const Moses2::Hypotheses *hypos,
+  const Moses2::Range &subPhraseRange,
+  SCFG::InputPath &outPath) const
 {
   UTIL_THROW2("Not implemented");
 }
 
 void Transliteration::LookupGivenNode(
-    MemPool &pool,
-    const SCFG::Manager &mgr,
-    const SCFG::ActiveChartEntry &prevEntry,
-    const SCFG::Word &wordSought,
-    const Moses2::Hypotheses *hypos,
-    const Moses2::Range &subPhraseRange,
-    SCFG::InputPath &outPath) const
+  MemPool &pool,
+  const SCFG::Manager &mgr,
+  const SCFG::ActiveChartEntry &prevEntry,
+  const SCFG::Word &wordSought,
+  const Moses2::Hypotheses *hypos,
+  const Moses2::Range &subPhraseRange,
+  SCFG::InputPath &outPath) const
 {
   UTIL_THROW2("Not implemented");
 }

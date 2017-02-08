@@ -25,7 +25,7 @@ public:
   virtual ~Translator();
 
   void execute(xmlrpc_c::paramList const& paramList,
-   xmlrpc_c::value *   const  retvalP);
+               xmlrpc_c::value *   const  retvalP);
 
 protected:
   Server& m_server;

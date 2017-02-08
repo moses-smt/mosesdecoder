@@ -38,8 +38,8 @@ class QueueItem
   ~QueueItem(); // NOT IMPLEMENTED. Use MemPool
 public:
   static QueueItem *Create(QueueItem *currItem, Manager &mgr, CubeEdge &edge,
-      size_t hypoIndex, size_t tpIndex,
-      QueueItemRecycler &queueItemRecycler);
+                           size_t hypoIndex, size_t tpIndex,
+                           QueueItemRecycler &queueItemRecycler);
   QueueItem(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex);
 
   void Init(Manager &mgr, CubeEdge &edge, size_t hypoIndex, size_t tpIndex);
@@ -56,8 +56,7 @@ protected:
 class QueueItemOrderer
 {
 public:
-  bool operator()(QueueItem* itemA, QueueItem* itemB) const
-  {
+  bool operator()(QueueItem* itemA, QueueItem* itemB) const {
     HypothesisFutureScoreOrderer orderer;
     return !orderer(itemA->hypo, itemB->hypo);
   }
@@ -68,11 +67,11 @@ class CubeEdge
 {
 public:
   typedef std::priority_queue<QueueItem*,
-      std::vector<QueueItem*, MemPoolAllocator<QueueItem*> >, QueueItemOrderer> Queue;
+          std::vector<QueueItem*, MemPoolAllocator<QueueItem*> >, QueueItemOrderer> Queue;
 
   typedef std::pair<const CubeEdge*, int> SeenPositionItem;
   typedef boost::unordered_set<SeenPositionItem, boost::hash<SeenPositionItem>,
-      std::equal_to<SeenPositionItem>, MemPoolAllocator<SeenPositionItem> > SeenPositions;
+          std::equal_to<SeenPositionItem>, MemPoolAllocator<SeenPositionItem> > SeenPositions;
 
   const Hypotheses &hypos;
   const InputPath &path;
@@ -81,16 +80,16 @@ public:
   SCORE estimatedScore;
 
   CubeEdge(Manager &mgr, const Hypotheses &hypos, const InputPath &path,
-      const TargetPhrases &tps, const Bitmap &newBitmap);
+           const TargetPhrases &tps, const Bitmap &newBitmap);
 
   bool SetSeenPosition(const size_t x, const size_t y,
-      SeenPositions &seenPositions) const;
+                       SeenPositions &seenPositions) const;
 
   void CreateFirst(Manager &mgr, Queue &queue, SeenPositions &seenPositions,
-      QueueItemRecycler &queueItemRecycler);
+                   QueueItemRecycler &queueItemRecycler);
   void CreateNext(Manager &mgr, QueueItem *item, Queue &queue,
-      SeenPositions &seenPositions,
-      QueueItemRecycler &queueItemRecycler);
+                  SeenPositions &seenPositions,
+                  QueueItemRecycler &queueItemRecycler);
 
   std::string Debug(const System &system) const;
 

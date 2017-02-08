@@ -22,15 +22,16 @@ public:
   Stack(const Manager &mgr);
   virtual ~Stack();
 
-  const Coll &GetColl() const
-  {  return m_coll; }
+  const Coll &GetColl() const {
+    return m_coll;
+  }
 
   const Moses2::HypothesisColl *GetColl(const SCFG::Word &nt) const;
 
   size_t GetSize() const;
 
   void Add(SCFG::Hypothesis *hypo, Recycler<HypothesisBase*> &hypoRecycle,
-      ArcLists &arcLists);
+           ArcLists &arcLists);
 
   const Hypothesis *GetBestHypo() const;
 

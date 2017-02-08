@@ -32,32 +32,32 @@ namespace NSCubePruningPerMiniStack
 class Search : public Moses2::Search
 {
 public:
-	Search(Manager &mgr);
-	virtual ~Search();
+  Search(Manager &mgr);
+  virtual ~Search();
 
-	virtual void Decode();
-	const Hypothesis *GetBestHypo() const;
+  virtual void Decode();
+  const Hypothesis *GetBestHypo() const;
 
 protected:
-	Stacks m_stacks;
+  Stacks m_stacks;
 
-	CubeEdge::Queue m_queue;
-	CubeEdge::SeenPositions m_seenPositions;
+  CubeEdge::Queue m_queue;
+  CubeEdge::SeenPositions m_seenPositions;
 
-	// CUBE PRUNING VARIABLES
-	// setup
-	typedef std::vector<CubeEdge*> CubeEdges;
-	boost::unordered_map<NSCubePruningMiniStack::MiniStack*, CubeEdges*> m_cubeEdges;
+  // CUBE PRUNING VARIABLES
+  // setup
+  typedef std::vector<CubeEdge*> CubeEdges;
+  boost::unordered_map<NSCubePruningMiniStack::MiniStack*, CubeEdges*> m_cubeEdges;
 
-	std::deque<QueueItem*> m_queueItemRecycler;
+  std::deque<QueueItem*> m_queueItemRecycler;
 
-	// CUBE PRUNING
-	// decoding
-	void CreateSearchGraph(size_t stackInd);
-	void Decode(size_t stackInd);
-	void Decode(NSCubePruningMiniStack::MiniStack &miniStack);
+  // CUBE PRUNING
+  // decoding
+  void CreateSearchGraph(size_t stackInd);
+  void Decode(size_t stackInd);
+  void Decode(NSCubePruningMiniStack::MiniStack &miniStack);
 
-	void DebugCounts();
+  void DebugCounts();
 };
 
 }

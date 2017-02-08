@@ -28,13 +28,13 @@ public:
   SymbolBindElement();
   SymbolBindElement(const Moses2::Range &range, const SCFG::Word &word, const Moses2::Hypotheses *hypos);
 
-  const Range &GetRange() const
-  { return *m_range; }
+  const Range &GetRange() const {
+    return *m_range;
+  }
 
-  bool operator==(const SymbolBindElement &compare) const
-  {
+  bool operator==(const SymbolBindElement &compare) const {
     bool ret = hypos == compare.hypos
-            && word == compare.word;
+               && word == compare.word;
     return ret;
   }
 
@@ -58,19 +58,21 @@ public:
   SymbolBind(MemPool &pool);
 
   SymbolBind(MemPool &pool, const SymbolBind &copy)
-  :coll(copy.coll)
-  ,numNT(copy.numNT)
+    :coll(copy.coll)
+    ,numNT(copy.numNT)
   {}
 
-  size_t GetSize() const
-  { return coll.size(); }
+  size_t GetSize() const {
+    return coll.size();
+  }
 
   std::vector<const SymbolBindElement*> GetNTElements() const;
 
   void Add(const Range &range, const SCFG::Word &word, const Moses2::Hypotheses *hypos);
 
-  bool operator==(const SymbolBind &compare) const
-  {  return coll == compare.coll; }
+  bool operator==(const SymbolBind &compare) const {
+    return coll == compare.coll;
+  }
 
   std::string Debug(const System &system) const;
 
@@ -88,20 +90,19 @@ public:
   ActiveChartEntry(MemPool &pool);
 
   ActiveChartEntry(MemPool &pool, const ActiveChartEntry &prevEntry)
-  :m_symbolBind(pool, prevEntry.GetSymbolBind())
-  {
+    :m_symbolBind(pool, prevEntry.GetSymbolBind()) {
     //symbolBinds = new (pool.Allocate<SymbolBind>()) SymbolBind(pool, *prevEntry.symbolBinds);
   }
 
-  const SymbolBind &GetSymbolBind() const
-  { return m_symbolBind; }
+  const SymbolBind &GetSymbolBind() const {
+    return m_symbolBind;
+  }
 
   virtual void AddSymbolBindElement(
-      const Range &range,
-      const SCFG::Word &word,
-      const Moses2::Hypotheses *hypos,
-      const PhraseTable &pt)
-  {
+    const Range &range,
+    const SCFG::Word &word,
+    const Moses2::Hypotheses *hypos,
+    const PhraseTable &pt) {
     m_symbolBind.Add(range, word, hypos);
   }
 

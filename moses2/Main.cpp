@@ -20,15 +20,15 @@ using namespace std;
 
 int main(int argc, char** argv)
 {
-	cerr << "Starting..." << endl;
+  cerr << "Starting..." << endl;
 
   Moses2::Timer timer;
   timer.start();
-	//Temp();
+  //Temp();
 
   Moses2::Parameter params;
   if (!params.LoadParam(argc, argv)) {
-	return EXIT_FAILURE;
+    return EXIT_FAILURE;
   }
   Moses2::System system(params);
   timer.check("Loaded");
@@ -45,8 +45,7 @@ int main(int argc, char** argv)
   if (params.GetParam("server")) {
     std::cerr << "RUN SERVER" << std::endl;
     run_as_server(system);
-  }
-  else {
+  } else {
     std::cerr << "RUN BATCH" << std::endl;
     batch_run(params, system, pool);
   }
@@ -71,8 +70,7 @@ istream &GetInputStream(Moses2::Parameter &params)
   if (vec && vec->size()) {
     Moses2::InputFileStream *stream = new Moses2::InputFileStream(vec->at(0));
     return *stream;
-  }
-  else {
+  } else {
     return cin;
   }
 }
@@ -86,7 +84,7 @@ void batch_run(Moses2::Parameter &params, Moses2::System &system, Moses2::Thread
   string line;
   while (getline(inStream, line)) {
     //cerr << "line=" << line << endl;
-      boost::shared_ptr<Moses2::TranslationTask> task(new Moses2::TranslationTask(system, line, translationId));
+    boost::shared_ptr<Moses2::TranslationTask> task(new Moses2::TranslationTask(system, line, translationId));
 
     //cerr << "START pool.Submit()" << endl;
     pool.Submit(task);
@@ -106,23 +104,23 @@ void batch_run(Moses2::Parameter &params, Moses2::System &system, Moses2::Thread
 ////////////////////////////////////////////////////////////////////////////////////////////////
 void Temp()
 {
-	Moses2::MemPool pool;
-	Moses2::MemPoolAllocator<int> a(pool);
+  Moses2::MemPool pool;
+  Moses2::MemPoolAllocator<int> a(pool);
 
-	boost::unordered_set<int, boost::hash<int>, std::equal_to<int>, Moses2::MemPoolAllocator<int> > s(a);
-	s.insert(3);
-	s.insert(4);
-	s.insert(3);
-	s.erase(3);
+  boost::unordered_set<int, boost::hash<int>, std::equal_to<int>, Moses2::MemPoolAllocator<int> > s(a);
+  s.insert(3);
+  s.insert(4);
+  s.insert(3);
+  s.erase(3);
 
-	boost::pool_allocator<int> alloc;
-	std::vector<int, boost::pool_allocator<int> > v(alloc);
-	  for (int i = 0; i < 1000; ++i)
-	    v.push_back(i);
+  boost::pool_allocator<int> alloc;
+  std::vector<int, boost::pool_allocator<int> > v(alloc);
+  for (int i = 0; i < 1000; ++i)
+    v.push_back(i);
 
-	  v.clear();
-	  boost::singleton_pool<boost::pool_allocator_tag, sizeof(int)>::
-	    purge_memory();
+  v.clear();
+  boost::singleton_pool<boost::pool_allocator_tag, sizeof(int)>::
+  purge_memory();
 
-	abort();
+  abort();
 }

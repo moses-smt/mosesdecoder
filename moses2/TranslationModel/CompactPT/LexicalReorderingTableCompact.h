@@ -36,13 +36,11 @@ class LexicalReorderingTable
 {
 public:
   LexicalReorderingTable(const FactorList& f_factors,
-      const FactorList& e_factors, const FactorList& c_factors) :
-      m_FactorsF(f_factors), m_FactorsE(e_factors), m_FactorsC(c_factors)
-  {
+                         const FactorList& e_factors, const FactorList& c_factors) :
+    m_FactorsF(f_factors), m_FactorsE(e_factors), m_FactorsC(c_factors) {
   }
 
-  virtual ~LexicalReorderingTable()
-  {
+  virtual ~LexicalReorderingTable() {
   }
 
 public:
@@ -51,33 +49,27 @@ public:
   GetScore(const Phrase<Moses2::Word>& f, const Phrase<Moses2::Word>& e, const Phrase<Moses2::Word>& c) = 0;
 
   virtual
-  void InitializeForInput()
-  {
+  void InitializeForInput() {
     /* override for on-demand loading */
   }
   ;
 
   virtual
-  void InitializeForInputPhrase(const Phrase<Moses2::Word>&)
-  {
+  void InitializeForInputPhrase(const Phrase<Moses2::Word>&) {
   }
 
-  const FactorList& GetFFactorMask() const
-  {
+  const FactorList& GetFFactorMask() const {
     return m_FactorsF;
   }
-  const FactorList& GetEFactorMask() const
-  {
+  const FactorList& GetEFactorMask() const {
     return m_FactorsE;
   }
-  const FactorList& GetCFactorMask() const
-  {
+  const FactorList& GetCFactorMask() const {
     return m_FactorsC;
   }
 
   virtual
-  void DbgDump(std::ostream* out) const
-  {
+  void DbgDump(std::ostream* out) const {
     *out << "Overwrite in subclass...\n";
   }
   ;
@@ -109,17 +101,17 @@ private:
 
   std::string MakeKey(const Phrase<Moses2::Word>& f, const Phrase<Moses2::Word>& e, const Phrase<Moses2::Word>& c) const;
   std::string MakeKey(const std::string& f, const std::string& e,
-      const std::string& c) const;
+                      const std::string& c) const;
 
 public:
   LexicalReorderingTableCompact(const std::string& filePath,
-      const std::vector<FactorType>& f_factors,
-      const std::vector<FactorType>& e_factors,
-      const std::vector<FactorType>& c_factors);
+                                const std::vector<FactorType>& f_factors,
+                                const std::vector<FactorType>& e_factors,
+                                const std::vector<FactorType>& c_factors);
 
   LexicalReorderingTableCompact(const std::vector<FactorType>& f_factors,
-      const std::vector<FactorType>& e_factors,
-      const std::vector<FactorType>& c_factors);
+                                const std::vector<FactorType>& e_factors,
+                                const std::vector<FactorType>& c_factors);
 
   virtual
   ~LexicalReorderingTableCompact();
@@ -129,9 +121,9 @@ public:
 
   static LexicalReorderingTable*
   CheckAndLoad(const std::string& filePath,
-      const std::vector<FactorType>& f_factors,
-      const std::vector<FactorType>& e_factors,
-      const std::vector<FactorType>& c_factors);
+               const std::vector<FactorType>& f_factors,
+               const std::vector<FactorType>& e_factors,
+               const std::vector<FactorType>& c_factors);
 
   void
   Load(std::string filePath);

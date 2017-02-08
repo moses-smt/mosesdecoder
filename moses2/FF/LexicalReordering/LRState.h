@@ -26,14 +26,14 @@ public:
   LRState(const LRModel &config, LRModel::Direction dir, size_t offset);
 
   virtual void Init(const LRState *prev, const TargetPhrase<Moses2::Word> &topt,
-      const InputPathBase &path, bool first, const Bitmap *coverage) = 0;
+                    const InputPathBase &path, bool first, const Bitmap *coverage) = 0;
 
   virtual void Expand(const ManagerBase &mgr, const LexicalReordering &ff,
-      const Hypothesis &hypo, size_t phraseTableInd, Scores &scores,
-      FFState &state) const = 0;
+                      const Hypothesis &hypo, size_t phraseTableInd, Scores &scores,
+                      FFState &state) const = 0;
 
   void CopyScores(const System &system, Scores &accum, const TargetPhrase<Moses2::Word> &topt,
-      ReorderingType reoType) const;
+                  ReorderingType reoType) const;
 
 protected:
   const LRModel& m_configuration;

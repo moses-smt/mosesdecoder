@@ -32,23 +32,23 @@ namespace Moses2
 bool LexicalReorderingTableCompact::s_inMemoryByDefault = false;
 
 LexicalReorderingTableCompact::LexicalReorderingTableCompact(
-    const std::string& filePath, const std::vector<FactorType>& f_factors,
-    const std::vector<FactorType>& e_factors,
-    const std::vector<FactorType>& c_factors) :
-    LexicalReorderingTable(f_factors, e_factors, c_factors), m_inMemory(
-        s_inMemoryByDefault), m_numScoreComponent(6), m_multipleScoreTrees(
-        true), m_hash(10, 16), m_scoreTrees(1)
+  const std::string& filePath, const std::vector<FactorType>& f_factors,
+  const std::vector<FactorType>& e_factors,
+  const std::vector<FactorType>& c_factors) :
+  LexicalReorderingTable(f_factors, e_factors, c_factors), m_inMemory(
+    s_inMemoryByDefault), m_numScoreComponent(6), m_multipleScoreTrees(
+      true), m_hash(10, 16), m_scoreTrees(1)
 {
   Load(filePath);
 }
 
 LexicalReorderingTableCompact::LexicalReorderingTableCompact(
-    const std::vector<FactorType>& f_factors,
-    const std::vector<FactorType>& e_factors,
-    const std::vector<FactorType>& c_factors) :
-    LexicalReorderingTable(f_factors, e_factors, c_factors), m_inMemory(
-        s_inMemoryByDefault), m_numScoreComponent(6), m_multipleScoreTrees(
-        true), m_hash(10, 16), m_scoreTrees(1)
+  const std::vector<FactorType>& f_factors,
+  const std::vector<FactorType>& e_factors,
+  const std::vector<FactorType>& c_factors) :
+  LexicalReorderingTable(f_factors, e_factors, c_factors), m_inMemory(
+    s_inMemoryByDefault), m_numScoreComponent(6), m_multipleScoreTrees(
+      true), m_hash(10, 16), m_scoreTrees(1)
 {
 }
 
@@ -81,7 +81,7 @@ std::vector<float> LexicalReorderingTableCompact::GetScore(const Phrase<Moses2::
     BitWrapper<> bitStream(scoresString);
     for (size_t i = 0; i < m_numScoreComponent; i++)
       scores.push_back(
-          m_scoreTrees[m_multipleScoreTrees ? i : 0]->Read(bitStream));
+        m_scoreTrees[m_multipleScoreTrees ? i : 0]->Read(bitStream));
 
     return scores;
   }
@@ -93,7 +93,7 @@ std::string LexicalReorderingTableCompact::MakeKey(const Phrase<Moses2::Word>& f
     const Phrase<Moses2::Word>& e, const Phrase<Moses2::Word>& c) const
 {
   return MakeKey(Trim(f.GetString(m_FactorsF)), Trim(e.GetString(m_FactorsE)),
-      Trim(c.GetString(m_FactorsC)));
+                 Trim(c.GetString(m_FactorsC)));
 }
 
 std::string LexicalReorderingTableCompact::MakeKey(const std::string& f,
@@ -126,7 +126,7 @@ LexicalReorderingTableCompact::CheckAndLoad(const std::string& filePath,
     //there exists a compact binary version use that
     std::cerr << "Using compact lexical reordering table" << std::endl;
     return new LexicalReorderingTableCompact(filePath + minlexr, f_factors,
-        e_factors, c_factors);
+           e_factors, c_factors);
   }
   // file name is specified with suffix
   if (filePath.substr(filePath.length() - minlexr.length(), minlexr.length())
@@ -134,7 +134,7 @@ LexicalReorderingTableCompact::CheckAndLoad(const std::string& filePath,
     //there exists a compact binary version use that
     std::cerr << "Using compact lexical reordering table" << std::endl;
     return new LexicalReorderingTableCompact(filePath, f_factors, e_factors,
-        c_factors);
+           c_factors);
   }
 #endif
   return 0;
@@ -152,16 +152,15 @@ void LexicalReorderingTableCompact::Load(std::string filePath)
 
   size_t read = 0;
   read += std::fread(&m_numScoreComponent, sizeof(m_numScoreComponent), 1,
-      pFile);
+                     pFile);
   read += std::fread(&m_multipleScoreTrees, sizeof(m_multipleScoreTrees), 1,
-      pFile);
+                     pFile);
 
   if (m_multipleScoreTrees) {
     m_scoreTrees.resize(m_numScoreComponent);
     for (size_t i = 0; i < m_numScoreComponent; i++)
       m_scoreTrees[i] = new CanonicalHuffman<float>(pFile);
-  }
-  else {
+  } else {
     m_scoreTrees.resize(1);
     m_scoreTrees[0] = new CanonicalHuffman<float>(pFile);
   }

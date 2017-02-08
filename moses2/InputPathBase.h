@@ -24,7 +24,7 @@ public:
   Range range;
 
   InputPathBase(MemPool &pool, const Range &range,
-      size_t numPt, const InputPathBase *prefixPath);
+                size_t numPt, const InputPathBase *prefixPath);
 
 };
 

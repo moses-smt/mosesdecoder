@@ -13,8 +13,7 @@ namespace Moses2
 {
 
 //Struct for holding processed line
-struct line_text
-{
+struct line_text {
   StringPiece source_phrase;
   StringPiece target_phrase;
   StringPiece prob;
@@ -26,8 +25,7 @@ struct line_text
 };
 
 //Struct for holding processed line
-struct target_text
-{
+struct target_text {
   std::vector<unsigned int> target_phrase;
   std::vector<float> prob;
   std::vector<size_t> word_align_term;

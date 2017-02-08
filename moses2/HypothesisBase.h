@@ -20,28 +20,31 @@ class Scores;
 class HypothesisBase
 {
 public:
-  virtual ~HypothesisBase()
-  {
+  virtual ~HypothesisBase() {
   }
 
-  inline ManagerBase &GetManager() const
-  {
+  inline ManagerBase &GetManager() const {
     return *m_mgr;
   }
 
   template<typename T>
-  const T &Cast() const
-  { return static_cast<const T&>(*this); }
+  const T &Cast() const {
+    return static_cast<const T&>(*this);
+  }
 
-  const Scores &GetScores() const
-  { return *m_scores; }
-  Scores &GetScores()
-  { return *m_scores; }
+  const Scores &GetScores() const {
+    return *m_scores;
+  }
+  Scores &GetScores() {
+    return *m_scores;
+  }
 
-  const FFState *GetState(size_t ind) const
-  {  return m_ffStates[ind]; }
-  FFState *GetState(size_t ind)
-  {  return m_ffStates[ind]; }
+  const FFState *GetState(size_t ind) const {
+    return m_ffStates[ind];
+  }
+  FFState *GetState(size_t ind) {
+    return m_ffStates[ind];
+  }
 
   virtual size_t hash() const;
   virtual size_t hash(size_t seed) const;
@@ -64,8 +67,7 @@ protected:
 class HypothesisFutureScoreOrderer
 {
 public:
-  bool operator()(const HypothesisBase* a, const HypothesisBase* b) const
-  {
+  bool operator()(const HypothesisBase* a, const HypothesisBase* b) const {
     return a->GetFutureScore() > b->GetFutureScore();
   }
 };

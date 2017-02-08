@@ -16,36 +16,30 @@ using namespace std;
 namespace Moses2
 {
 
-struct DistortionState_traditional: public FFState
-{
+struct DistortionState_traditional: public FFState {
   Range range;
   int first_gap;
 
   DistortionState_traditional() :
-      range()
-  {
+    range() {
     // uninitialised
   }
 
-  void Set(const Range& wr, int fg)
-  {
+  void Set(const Range& wr, int fg) {
     range = wr;
     first_gap = fg;
   }
 
-  size_t hash() const
-  {
+  size_t hash() const {
     return range.GetEndPos();
   }
-  virtual bool operator==(const FFState& other) const
-  {
+  virtual bool operator==(const FFState& other) const {
     const DistortionState_traditional& o =
-        static_cast<const DistortionState_traditional&>(other);
+      static_cast<const DistortionState_traditional&>(other);
     return range.GetEndPos() == o.range.GetEndPos();
   }
 
-  virtual std::string ToString() const
-  {
+  virtual std::string ToString() const {
     stringstream sb;
     sb << first_gap << " " << range;
     return sb.str();
@@ -55,7 +49,7 @@ struct DistortionState_traditional: public FFState
 
 ///////////////////////////////////////////////////////////////////////
 Distortion::Distortion(size_t startInd, const std::string &line) :
-    StatefulFeatureFunction(startInd, line)
+  StatefulFeatureFunction(startInd, line)
 {
   ReadParameters();
 }
@@ -71,10 +65,10 @@ FFState* Distortion::BlankState(MemPool &pool, const System &sys) const
 }
 
 void Distortion::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
-    const InputType &input, const Hypothesis &hypo) const
+                                      const InputType &input, const Hypothesis &hypo) const
 {
   DistortionState_traditional &stateCast =
-      static_cast<DistortionState_traditional&>(state);
+    static_cast<DistortionState_traditional&>(state);
 
   // fake previous translated phrase start and end
   size_t start = NOT_FOUND;
@@ -92,31 +86,31 @@ void Distortion::EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
 }
 
 void Distortion::EvaluateInIsolation(MemPool &pool, const System &system,
-    const Phrase<Moses2::Word> &source, const TargetPhraseImpl &targetPhrase, Scores &scores,
-    SCORE &estimatedScore) const
+                                     const Phrase<Moses2::Word> &source, const TargetPhraseImpl &targetPhrase, Scores &scores,
+                                     SCORE &estimatedScore) const
 {
 }
 
 void Distortion::EvaluateInIsolation(MemPool &pool, const System &system, const Phrase<SCFG::Word> &source,
-    const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
-    SCORE &estimatedScore) const
+                                     const TargetPhrase<SCFG::Word> &targetPhrase, Scores &scores,
+                                     SCORE &estimatedScore) const
 {
 }
 
 void Distortion::EvaluateWhenApplied(const ManagerBase &mgr,
-    const Hypothesis &hypo, const FFState &prevState, Scores &scores,
-    FFState &state) const
+                                     const Hypothesis &hypo, const FFState &prevState, Scores &scores,
+                                     FFState &state) const
 {
   const DistortionState_traditional &prev =
-      static_cast<const DistortionState_traditional&>(prevState);
+    static_cast<const DistortionState_traditional&>(prevState);
   SCORE distortionScore = CalculateDistortionScore(prev.range,
-      hypo.GetInputPath().range, prev.first_gap);
+                          hypo.GetInputPath().range, prev.first_gap);
   //cerr << "distortionScore=" << distortionScore << endl;
 
   scores.PlusEquals(mgr.system, *this, distortionScore);
 
   DistortionState_traditional &stateCast =
-      static_cast<DistortionState_traditional&>(state);
+    static_cast<DistortionState_traditional&>(state);
   stateCast.Set(hypo.GetInputPath().range, hypo.GetBitmap().GetFirstGapPos());
 
   //cerr << "hypo=" << hypo.Debug(mgr.system) << endl;
@@ -128,8 +122,7 @@ SCORE Distortion::CalculateDistortionScore(const Range &prev, const Range &curr,
   bool useEarlyDistortionCost = false;
   if (!useEarlyDistortionCost) {
     return -(SCORE) ComputeDistortionDistance(prev, curr);
-  }
-  else {
+  } else {
     /* Pay distortion score as soon as possible, from Moore and Quirk MT Summit 2007
      Definitions:
      S   : current source range
@@ -162,7 +155,7 @@ SCORE Distortion::CalculateDistortionScore(const Range &prev, const Range &curr,
     // case4: otherwise => return 2(nbWordBetween(S,S')+length(S))
     //IFVERBOSE(4) std::cerr<< "MQ07disto:case4" << std::endl;
     return (float) -2
-        * ((int) curr.GetNumWordsBetween(prev) + (int) curr.GetNumWordsCovered());
+           * ((int) curr.GetNumWordsBetween(prev) + (int) curr.GetNumWordsCovered());
 
   }
 }
@@ -173,16 +166,15 @@ int Distortion::ComputeDistortionDistance(const Range& prev,
   int dist = 0;
   if (prev.GetNumWordsCovered() == 0) {
     dist = current.GetStartPos();
-  }
-  else {
+  } else {
     dist = (int) prev.GetEndPos() - (int) current.GetStartPos() + 1;
   }
   return abs(dist);
 }
 
 void Distortion::EvaluateWhenApplied(const SCFG::Manager &mgr,
-    const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
-    FFState &state) const
+                                     const SCFG::Hypothesis &hypo, int featureID, Scores &scores,
+                                     FFState &state) const
 {
   UTIL_THROW2("Not implemented");
 }

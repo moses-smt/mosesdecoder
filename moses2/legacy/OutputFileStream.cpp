@@ -31,12 +31,12 @@ using namespace boost::algorithm;
 namespace Moses2
 {
 OutputFileStream::OutputFileStream() :
-    boost::iostreams::filtering_ostream(), m_outFile(NULL), m_open(false)
+  boost::iostreams::filtering_ostream(), m_outFile(NULL), m_open(false)
 {
 }
 
 OutputFileStream::OutputFileStream(const std::string &filePath) :
-    m_outFile(NULL), m_open(false)
+  m_outFile(NULL), m_open(false)
 {
   Open(filePath);
 }
@@ -52,10 +52,9 @@ bool OutputFileStream::Open(const std::string &filePath)
   if (filePath == std::string("-")) {
     // Write to standard output.  Leave m_outFile null.
     this->push(std::cout);
-  }
-  else {
+  } else {
     m_outFile = new ofstream(filePath.c_str(),
-        ios_base::out | ios_base::binary);
+                             ios_base::out | ios_base::binary);
     if (m_outFile->fail()) {
       return false;
     }
