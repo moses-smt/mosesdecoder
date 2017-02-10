@@ -163,14 +163,12 @@ void System::LoadDecodeGraphBackoff()
 
 MemPool &System::GetSystemPool() const
 {
-  thread_local MemPool obj;
-  return obj;
+  return GetThreadSpecificObj(m_systemPool);
 }
 
 MemPool &System::GetManagerPool() const
 {
-  thread_local MemPool obj;
-  return obj;
+  return GetThreadSpecificObj(m_managerPool);
 }
 
 FactorCollection &System::GetVocab() const
@@ -180,8 +178,7 @@ FactorCollection &System::GetVocab() const
 
 Recycler<HypothesisBase*> &System::GetHypoRecycler() const
 {
-  thread_local Recycler<HypothesisBase*> obj;
-  return obj;
+  return GetThreadSpecificObj(m_hypoRecycler);
 }
 
 Batch &System::GetBatch(MemPool &pool) const
