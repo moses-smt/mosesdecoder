@@ -8,6 +8,7 @@
 #include <iostream>
 #include <boost/foreach.hpp>
 #include <boost/thread.hpp>
+#include <boost/thread/mutex.hpp>
 #include "System.h"
 #include "FF/FeatureFunction.h"
 #include "TranslationModel/UnknownWordPenalty.h"
@@ -185,8 +186,14 @@ Recycler<HypothesisBase*> &System::GetHypoRecycler() const
 
 Batch &System::GetBatch(MemPool &pool) const
 {
-  thread_local Batch obj(pool);
-  return obj;
+  Batch *obj;
+  obj = m_batch.get();
+  if (obj == NULL) {
+    obj = new Batch(pool);
+    m_batch.reset(obj);
+  }
+  assert(obj);
+  return *obj;
 }
 
 void System::IsPb()

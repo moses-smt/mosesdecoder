@@ -305,6 +305,20 @@ void Swap(T &a, T &b)
   b = c;
 }
 
+template<typename T>
+T &GetThreadSpecificObj(boost::thread_specific_ptr<T> &coll)
+{
+  T *obj;
+  obj = coll.get();
+  if (obj == NULL) {
+    obj = new T;
+    coll.reset(obj);
+  }
+  assert(obj);
+  return *obj;
+
+}
+
 // grab the underlying contain of priority queue
 template<class T, class S, class C>
 S& Container(std::priority_queue<T, S, C>& q)
