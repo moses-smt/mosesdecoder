@@ -2,8 +2,6 @@
 #include "InputOptions.h"
 #include <vector>
 #include <iostream>
-// #include "moses/StaticData.h"
-#include "moses/TypeDef.h"
 #include "../legacy/Parameter.h"
 
 namespace Moses2

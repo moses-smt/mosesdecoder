@@ -1,6 +1,6 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 #pragma once
-#include "moses/xmlrpc-c.h"
+#include "../legacy/xmlrpc-c.h"
 #include <string>
 #include <map>
 namespace Moses2

@@ -1,5 +1,4 @@
 #include "ContextParameters.h"
-#include "moses/Util.h"
 #include "../legacy/Parameter.h"
 
 namespace Moses2

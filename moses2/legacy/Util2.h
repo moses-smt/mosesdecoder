@@ -17,6 +17,15 @@
 namespace Moses2
 {
 
+#ifdef TRACE_ERR
+#undef TRACE_ERR
+#endif
+#ifdef TRACE_ENABLE
+#define TRACE_ERR(str) do { std::cerr << str; } while (false)
+#else
+#define TRACE_ERR(str) do {} while (false)
+#endif
+
 template<typename T>
 class UnorderedComparer
 {

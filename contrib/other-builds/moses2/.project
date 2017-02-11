@@ -983,6 +983,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses2/legacy/gzfilebuf.h</locationURI>
 		</link>
 		<link>
+			<name>legacy/xmlrpc-c.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses2/legacy/xmlrpc-c.h</locationURI>
+		</link>
+		<link>
 			<name>parameters/AllOptions.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses2/parameters/AllOptions.cpp</locationURI>
