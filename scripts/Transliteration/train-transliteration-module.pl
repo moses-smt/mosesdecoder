@@ -36,15 +36,15 @@ die("ERROR: wrong syntax when invoking train-transliteration-module.perl")
 		       'target-syntax' => \$TARGET_SYNTAX);
 
 # check if the files are in place
-die("ERROR: you need to define --corpus-e, --corpus-f, --alignment, --moses-src-dir --external-bin-dir, --input-extension and --output-extension")
+die("ERROR: you need to define --corpus-e, --corpus-f, --alignment, --srilm-dir, --moses-src-dir --external-bin-dir, --input-extension and --output-extension")
     unless (defined($MOSES_SRC_DIR) &&
             defined($CORPUS_F) &&
             defined($CORPUS_E) &&
             defined($ALIGNMENT)&&
 	     defined($INPUT_EXTENSION)&&	
 	     defined($OUTPUT_EXTENSION)&&	
-	     defined($EXTERNAL_BIN_DIR));#&&
-            #defined($SRILM_DIR));
+	     defined($EXTERNAL_BIN_DIR)&&	
+            defined($SRILM_DIR));
 die("ERROR: could not find input corpus file '$CORPUS_F'")
     unless -e $CORPUS_F;
 die("ERROR: could not find output corpus file '$CORPUS_E'")
@@ -131,15 +131,9 @@ sub learn_transliteration_model{
   `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 6 -last-step 6 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -score-options '--KneserNey' -extract-file $OUT_DIR/model/extract -lexical-file $OUT_DIR/model/lex -phrase-translation-table $OUT_DIR/model/phrase-table`;
 	
   print "Train Language Models\n";
-  
-  if (defined($SRILM_DIR)) {
-  	`$SRILM_DIR/ngram-count -order 5 -interpolate -kndiscount -addsmooth1 0.0 -unk -text $OUT_DIR/lm/target -lm $OUT_DIR/lm/targetLM`;
-  }
-  else {
-    `$MOSES_SRC_DIR/bin/lmplz -o 5 --interpolate_unigrams 0 --discount_fallback --text $OUT_DIR/lm/target --lm $OUT_DIR/lm/targetLM`;
-	
-  }
-  
+
+  `$SRILM_DIR/ngram-count -order 5 -interpolate -kndiscount -addsmooth1 0.0 -unk -text $OUT_DIR/lm/target -lm $OUT_DIR/lm/targetLM`;
+
   `$MOSES_SRC_DIR/bin/build_binary $OUT_DIR/lm/targetLM $OUT_DIR/lm/targetLM.bin`;
 
   print "Create Config File\n";	
@@ -186,7 +180,7 @@ sub train_transliteration_module{
 
     `$MOSES_SRC_DIR/scripts/training/train-model.perl -mgiza -mgiza-cpus 10 -dont-zip -first-step 9 -external-bin-dir $EXTERNAL_BIN_DIR -f $INPUT_EXTENSION -e $OUTPUT_EXTENSION -alignment grow-diag-final-and -parts 5 -score-options '--KneserNey' -phrase-translation-table $OUT_DIR/model/phrase-table -config $OUT_DIR/tuning/moses.table.ini -lm 0:3:$OUT_DIR/tuning/moses.table.ini:8`;
 
-    `$MOSES_SRC_DIR/scripts/training/filter-model-given-input.pl $OUT_DIR/tuning/filtered $OUT_DIR/tuning/moses.table.ini $OUT_DIR/tuning/input  -Binarizer "$MOSES_SRC_DIR/bin/processPhraseTableMin"`;
+    `$MOSES_SRC_DIR/scripts/training/filter-model-given-input.pl $OUT_DIR/tuning/filtered $OUT_DIR/tuning/moses.table.ini $OUT_DIR/tuning/input  -Binarizer "$MOSES_SRC_DIR/bin/processPhraseTable"`;
 
     `rm $OUT_DIR/tuning/moses.table.ini`;
 
