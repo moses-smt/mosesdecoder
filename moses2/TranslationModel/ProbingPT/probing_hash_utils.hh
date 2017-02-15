@@ -2,7 +2,11 @@
 
 #include "util/probing_hash_table.hh"
 
+#if defined(_WIN32) || defined(_WIN64)
+#include <mman.h>
+#else
 #include <sys/mman.h>
+#endif
 #include <boost/functional/hash.hpp>
 #include <fcntl.h>
 #include <fstream>

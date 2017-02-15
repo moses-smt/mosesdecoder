@@ -8,11 +8,13 @@
 #include <sstream>
 #include <vector>
 
+#ifdef _linux
 #include <pthread.h>
+#include <unistd.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <unistd.h>
 
 #include "GPULM.h"
 #include "../Phrase.h"

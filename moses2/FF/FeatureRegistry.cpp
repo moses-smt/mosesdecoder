@@ -40,7 +40,7 @@ class KenFactory: public FeatureFactory
 {
 public:
   FeatureFunction *Create(size_t startInd, const std::string &line) const {
-    ConstructKenLM(startInd, line);
+    return ConstructKenLM(startInd, line);
   }
 };
 

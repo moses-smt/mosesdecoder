@@ -19,12 +19,14 @@
  Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 #include <stdio.h>
+#ifdef __linux
 #include <pthread.h>
-#include <pthread.h>
+#include <unistd.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <unistd.h>
+#include <thread>
 
 #include "ThreadPool.h"
 
@@ -38,9 +40,10 @@ namespace Moses2
 
 ThreadPool::ThreadPool(size_t numThreads, int cpuAffinityOffset,
                        int cpuAffinityIncr) :
-  m_stopped(false), m_stopping(false), m_queueLimit(0)
+  m_stopped(false), m_stopping(false), m_queueLimit(0) 
 {
-  size_t numCPU = sysconf(_SC_NPROCESSORS_ONLN);
+  //size_t numCPU = sysconf(_SC_NPROCESSORS_ONLN);
+  size_t numCPU = std::thread::hardware_concurrency();
   int cpuInd = cpuAffinityOffset % numCPU;
 
   for (size_t i = 0; i < numThreads; ++i) {

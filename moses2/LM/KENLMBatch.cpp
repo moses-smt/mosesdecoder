@@ -8,11 +8,13 @@
 #include <sstream>
 #include <vector>
 
+#ifdef _linux
 #include <pthread.h>
+#include <unistd.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>
-#include <unistd.h>
 
 #include "KENLMBatch.h"
 #include "../Phrase.h"
@@ -187,8 +189,8 @@ void KENLMBatch::EvaluateWhenApplied(const ManagerBase &mgr,
   const std::size_t adjust_end = std::min(end, begin + m_ngram->Order() - 1);
 
   std::size_t position = begin;
-  typename Model::State aux_state;
-  typename Model::State *state0 = &stateCast.state, *state1 = &aux_state;
+  Model::State aux_state;
+  Model::State *state0 = &stateCast.state, *state1 = &aux_state;
 
   float score = m_ngram->Score(in_state, TranslateID(hypo.GetWord(position)),
                                *state0);

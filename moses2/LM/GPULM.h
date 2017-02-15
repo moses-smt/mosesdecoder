@@ -9,7 +9,9 @@
 #include <boost/shared_ptr.hpp>
 #include <boost/bind.hpp>
 #include <boost/thread.hpp>
+#ifdef __linux
 #include <pthread.h>
+#endif
 
 #include "../FF/StatefulFeatureFunction.h"
 #include "lm/model.hh"

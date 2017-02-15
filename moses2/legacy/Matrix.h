@@ -43,7 +43,7 @@ public:
     m_array = pool.Allocate<T>(rows * cols);
   }
 
-  ~Matrix(); // not implemented
+  //~Matrix(); // not implemented
 
   // set upper triangle
   void InitTriangle(const T &val) {

@@ -4,7 +4,9 @@
  *  Created on: 24 Oct 2015
  *      Author: hieu
  */
+#ifdef __linux
 #include <pthread.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <errno.h>

@@ -62,8 +62,7 @@ sanity_check()
 
   // RecoverPath should only be used with confusion net or word lattice input
   if (output.RecoverPath && input.input_type == SentenceInput) {
-    TRACE_ERR("--recover-input-path should only be used with "
-              <<"confusion net or word lattice input!\n");
+    TRACE_ERR("--recover-input-path should only be used with confusion net or word lattice input!\n");
     output.RecoverPath = false;
   }
 

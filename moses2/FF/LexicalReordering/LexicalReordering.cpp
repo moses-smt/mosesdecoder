@@ -12,7 +12,9 @@
 #include "PhraseBasedReorderingState.h"
 #include "BidirectionalReorderingState.h"
 #include "../../TranslationModel/PhraseTable.h"
+#ifndef NO_COMPACT_TABLES
 #include "../../TranslationModel/CompactPT/LexicalReorderingTableCompact.h"
+#endif
 #include "../../System.h"
 #include "../../PhraseBased/PhraseImpl.h"
 #include "../../PhraseBased/Manager.h"
@@ -51,10 +53,12 @@ void LexicalReordering::Load(System &system)
 
   if (m_propertyInd >= 0) {
     // Using integrate Lex RO. No loading needed
+#ifndef NO_COMPACT_TABLES
   } else if (FileExists(m_path + ".minlexr")) {
     m_compactModel = new LexicalReorderingTableCompact(m_path + ".minlexr",
         m_FactorsF, m_FactorsE, m_FactorsC);
     m_blank = new (pool.Allocate<PhraseImpl>()) PhraseImpl(pool, 0);
+#endif
   } else {
     m_coll = new Coll();
     InputFileStream file(m_path);
@@ -145,6 +149,7 @@ void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
   if (m_propertyInd >= 0) {
     SCORE *scoreArr = targetPhrase.GetScoresProperty(m_propertyInd);
     targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
+#ifndef NO_COMPACT_TABLES
   } else if (m_compactModel) {
     // using external compact binary model
     const Values values = m_compactModel->GetScore(sourcePhrase, targetPhrase,
@@ -160,6 +165,7 @@ void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
     } else {
       targetPhrase.ffData[m_PhraseTableInd] = NULL;
     }
+#endif
   } else if (m_coll) {
     // using external memory model
 

@@ -72,6 +72,10 @@ public:
     return false;
   }
 
+  MemPoolAllocator<T>& operator=(const MemPoolAllocator<T>& allocator) {
+	  return *this;
+  }
+
   MemPool &m_pool;
 protected:
 };

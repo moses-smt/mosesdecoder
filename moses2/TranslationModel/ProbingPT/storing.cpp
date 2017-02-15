@@ -67,6 +67,9 @@ void createProbingPT(const std::string &phrasetable_path,
                      const std::string &basepath, int num_scores, int num_lex_scores,
                      bool log_prob, int max_cache_size, bool scfg)
 {
+#if defined(_WIN32) || defined(_WIN64)
+	std::cerr << "Create not implemented for Windows" << std::endl;
+#else
   std::cerr << "Starting..." << std::endl;
 
   //Get basepath and create directory if missing
@@ -231,6 +234,7 @@ void createProbingPT(const std::string &phrasetable_path,
   configfile << "num_lex_scores\t" << num_lex_scores << '\n';
   configfile << "log_prob\t" << log_prob << '\n';
   configfile.close();
+#endif
 }
 
 size_t countUniqueSource(const std::string &path)

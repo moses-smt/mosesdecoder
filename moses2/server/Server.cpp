@@ -45,7 +45,13 @@ void Server::run(System &system)
   pidfilename << "/tmp/moses-server." << m_server_options.port << ".pid";
   m_pidfile = pidfilename.str();
   std::ofstream pidfile(m_pidfile.c_str());
-  pidfile << getpid() << std::endl;
+
+#ifdef _WIN32
+  int thePid = GetCurrentProcessId();
+#else
+  int thePid = getpid();
+#endif
+  pidfile << thePid << std::endl;
   pidfile.close();
   cerr << "Listening on port " << m_server_options.port << std::endl;
   if (m_server_options.is_serial) {

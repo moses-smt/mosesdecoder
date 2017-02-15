@@ -25,13 +25,14 @@
 #include <limits>
 #include <iostream>
 #include <cstdio>
-#include <unistd.h>
 
 #if defined(_WIN32) || defined(_WIN64)
+#define _WINSOCKAPI_
 #include <windows.h>
 #include <io.h>
 #else
 #include <sys/mman.h>
+#include <unistd.h>
 #endif
 
 #include "util/mmap.hh"
@@ -129,7 +130,11 @@ public:
 #endif
     if (!m_fixed) {
       size_t read = 0;
+#ifdef _WIN32
+	  read += _chsize_s(m_file_desc, m_map_size);
+#else
       read += ftruncate(m_file_desc, m_map_size);
+#endif
       m_data_ptr = (char *) util::MapOrThrow(m_map_size, true, map_shared,
                                              false, m_file_desc, 0);
       return (pointer) m_data_ptr;
