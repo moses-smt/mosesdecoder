@@ -12,9 +12,6 @@
 #include "PhraseBasedReorderingState.h"
 #include "BidirectionalReorderingState.h"
 #include "../../TranslationModel/PhraseTable.h"
-#ifndef NO_COMPACT_TABLES
-#include "../../TranslationModel/CompactPT/LexicalReorderingTableCompact.h"
-#endif
 #include "../../System.h"
 #include "../../PhraseBased/PhraseImpl.h"
 #include "../../PhraseBased/Manager.h"
@@ -24,6 +21,11 @@
 #include "../../legacy/InputFileStream.h"
 #include "../../legacy/Util2.h"
 
+#ifdef HAVE_CMPH
+#include "../../TranslationModel/CompactPT/LexicalReorderingTableCompact.h"
+#endif
+
+
 using namespace std;
 
 namespace Moses2
@@ -31,9 +33,15 @@ namespace Moses2
 
 ///////////////////////////////////////////////////////////////////////
 
-LexicalReordering::LexicalReordering(size_t startInd, const std::string &line) :
-  StatefulFeatureFunction(startInd, line), m_compactModel(NULL), m_blank(
-    NULL), m_propertyInd(-1), m_coll(NULL), m_configuration(NULL)
+LexicalReordering::LexicalReordering(size_t startInd, const std::string &line)
+: StatefulFeatureFunction(startInd, line)
+, m_blank(NULL)
+, m_propertyInd(-1)
+, m_coll(NULL)
+, m_configuration(NULL)
+#ifdef HAVE_CMPH
+, m_compactModel(NULL)
+#endif
 {
   ReadParameters();
   assert(m_configuration);
@@ -42,9 +50,11 @@ LexicalReordering::LexicalReordering(size_t startInd, const std::string &line) :
 
 LexicalReordering::~LexicalReordering()
 {
-  delete m_compactModel;
   delete m_coll;
   delete m_configuration;
+#ifdef HAVE_CMPH
+  delete m_compactModel;
+#endif
 }
 
 void LexicalReordering::Load(System &system)
@@ -53,7 +63,7 @@ void LexicalReordering::Load(System &system)
 
   if (m_propertyInd >= 0) {
     // Using integrate Lex RO. No loading needed
-#ifndef NO_COMPACT_TABLES
+#ifdef HAVE_CMPH
   } else if (FileExists(m_path + ".minlexr")) {
     m_compactModel = new LexicalReorderingTableCompact(m_path + ".minlexr",
         m_FactorsF, m_FactorsE, m_FactorsC);
@@ -149,7 +159,7 @@ void LexicalReordering::EvaluateAfterTablePruning(MemPool &pool,
   if (m_propertyInd >= 0) {
     SCORE *scoreArr = targetPhrase.GetScoresProperty(m_propertyInd);
     targetPhrase.ffData[m_PhraseTableInd] = scoreArr;
-#ifndef NO_COMPACT_TABLES
+#ifdef HAVE_CMPH
   } else if (m_compactModel) {
     // using external compact binary model
     const Values values = m_compactModel->GetScore(sourcePhrase, targetPhrase,

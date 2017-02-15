@@ -76,10 +76,8 @@ protected:
   int m_propertyInd;
 
   // COMPACT MODEL
-#ifndef NO_COMPACT_TABLES
+#ifdef HAVE_CMPH
   LexicalReorderingTableCompact *m_compactModel;
-#else
-  void *m_compactModel;
 #endif
 
   Phrase<Moses2::Word> *m_blank;
