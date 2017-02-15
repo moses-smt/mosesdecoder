@@ -1,0 +1,7 @@
+lib probingpt :
+  temp.cpp 
+   ;
+   
+exe ppt : Main.cpp probingpt ;
+
+alias programs : ppt ;
