@@ -11,17 +11,21 @@
 #include <boost/thread/tss.hpp>
 #include <boost/bimap.hpp>
 #include <deque>
-#include "../PhraseTable.h"
-#include "../../Vector.h"
-#include "../../Phrase.h"
-#include "../../SCFG/ActiveChart.h"
+#include "PhraseTable.h"
+#include "../Vector.h"
+#include "../Phrase.h"
+#include "../SCFG/ActiveChart.h"
 #include "util/mmap.hh"
+
+namespace probingpt
+{
+class QueryEngine;
+class target_text;
+}
 
 namespace Moses2
 {
 class AlignmentInfo;
-class QueryEngine;
-class target_text;
 class MemPool;
 class System;
 class RecycleData;
@@ -98,7 +102,7 @@ protected:
   util::LoadMethod load_method;
 
   uint64_t m_unkId;
-  QueryEngine *m_engine;
+  probingpt::QueryEngine *m_engine;
 
   void CreateAlignmentMap(System &system, const std::string path);
 

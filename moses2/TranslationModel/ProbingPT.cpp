@@ -6,24 +6,24 @@
  */
 #include <boost/foreach.hpp>
 #include "ProbingPT.h"
-#include "querying.hh"
-#include "probing_hash_utils.hh"
+#include "probingpt/querying.hh"
+#include "probingpt/probing_hash_utils.hh"
 #include "util/exception.hh"
-#include "../../System.h"
-#include "../../Scores.h"
-#include "../../Phrase.h"
-#include "../../legacy/InputFileStream.h"
-#include "../../legacy/FactorCollection.h"
-#include "../../legacy/Util2.h"
-#include "../../FF/FeatureFunctions.h"
-#include "../../PhraseBased/PhraseImpl.h"
-#include "../../PhraseBased/TargetPhraseImpl.h"
-#include "../../PhraseBased/Manager.h"
-#include "../../PhraseBased/TargetPhrases.h"
-#include "../../SCFG/InputPath.h"
-#include "../../SCFG/Manager.h"
-#include "../../SCFG/TargetPhraseImpl.h"
-#include "../../SCFG/PhraseImpl.h"
+#include "../System.h"
+#include "../Scores.h"
+#include "../Phrase.h"
+#include "../legacy/InputFileStream.h"
+#include "../legacy/FactorCollection.h"
+#include "../legacy/Util2.h"
+#include "../FF/FeatureFunctions.h"
+#include "../PhraseBased/PhraseImpl.h"
+#include "../PhraseBased/TargetPhraseImpl.h"
+#include "../PhraseBased/Manager.h"
+#include "../PhraseBased/TargetPhrases.h"
+#include "../SCFG/InputPath.h"
+#include "../SCFG/Manager.h"
+#include "../SCFG/TargetPhraseImpl.h"
+#include "../SCFG/PhraseImpl.h"
 
 using namespace std;
 
@@ -81,7 +81,7 @@ ProbingPT::~ProbingPT()
 
 void ProbingPT::Load(System &system)
 {
-  m_engine = new QueryEngine(m_path.c_str(), load_method);
+  m_engine = new probingpt::QueryEngine(m_path.c_str(), load_method);
 
   m_unkId = 456456546456;
 
@@ -293,14 +293,14 @@ TargetPhraseImpl *ProbingPT::CreateTargetPhrase(
   const System &system,
   const char *&offset) const
 {
-  TargetPhraseInfo *tpInfo = (TargetPhraseInfo*) offset;
+  probingpt::TargetPhraseInfo *tpInfo = (probingpt::TargetPhraseInfo*) offset;
   size_t numRealWords = tpInfo->numWords / m_output.size();
 
   TargetPhraseImpl *tp =
     new (pool.Allocate<TargetPhraseImpl>()) TargetPhraseImpl(pool, *this,
         system, numRealWords);
 
-  offset += sizeof(TargetPhraseInfo);
+  offset += sizeof(probingpt::TargetPhraseInfo);
 
   // scores
   SCORE *scores = (SCORE*) offset;
@@ -600,12 +600,12 @@ SCFG::TargetPhraseImpl *ProbingPT::CreateTargetPhraseSCFG(
   const System &system,
   const char *&offset) const
 {
-  TargetPhraseInfo *tpInfo = (TargetPhraseInfo*) offset;
+  probingpt::TargetPhraseInfo *tpInfo = (probingpt::TargetPhraseInfo*) offset;
   SCFG::TargetPhraseImpl *tp =
     new (pool.Allocate<SCFG::TargetPhraseImpl>()) SCFG::TargetPhraseImpl(pool, *this,
         system, tpInfo->numWords - 1);
 
-  offset += sizeof(TargetPhraseInfo);
+  offset += sizeof(probingpt::TargetPhraseInfo);
 
   // scores
   SCORE *scores = (SCORE*) offset;

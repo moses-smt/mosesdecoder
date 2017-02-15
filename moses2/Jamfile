@@ -1,4 +1,4 @@
-alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses/TranslationModel/CompactPT//cmph ../moses//moses ;
+alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses/TranslationModel/CompactPT//cmph ;
 
  lib moses2_lib :
    AlignmentInfo.cpp
@@ -53,9 +53,10 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses/Translatio
     LM/KENLMBatch.cpp
     LM/GPULM.cpp
     
- 	TranslationModel/PhraseTable.cpp 
- 	TranslationModel/Transliteration.cpp 
- 	TranslationModel/UnknownWordPenalty.cpp 
+   	TranslationModel/PhraseTable.cpp 
+   	TranslationModel/ProbingPT.cpp 
+ 	  TranslationModel/Transliteration.cpp 
+ 	  TranslationModel/UnknownWordPenalty.cpp 
     TranslationModel/Memory/PhraseTableMemory.cpp 
    	
     TranslationModel/CompactPT/BlockHashIndex.cpp
@@ -64,8 +65,6 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses/Translatio
     TranslationModel/CompactPT/MurmurHash3.cpp
     TranslationModel/CompactPT/TargetPhraseCollectionCache.cpp
     TranslationModel/CompactPT/ThrowingFwrite.cpp
-
-   	TranslationModel/ProbingPT/ProbingPT.cpp 
 
    	parameters/AllOptions.cpp
    	parameters/BookkeepingOptions.cpp
@@ -157,7 +156,7 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses/Translatio
 	
     deps ;
 
-exe moses2 : Main.cpp moses2_lib ;
+exe moses2 : Main.cpp moses2_lib ../probingpt//probingpt ../util//kenutil ../util//rt ../lm//kenlm ;
 
 if [ xmlrpc ] {
   echo "Building Moses2" ;

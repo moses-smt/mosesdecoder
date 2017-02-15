@@ -1,4 +1,4 @@
-alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses/TranslationModel/CompactPT//cmph  ;
+alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem  ;
 
 lib probingpt :
   StoreTarget.cpp
@@ -11,9 +11,21 @@ lib probingpt :
   vocabid.cpp
   OutputFileStream.cpp
   InputFileStream.cpp
+  
+#  ../util/string_piece.cc
+#  ../util/exception.cc
+#  ../util/file.cc
+#  ../util/file_piece.cc
+#  ../util/murmur_hash.cc
+#  ../util/mmap.cc
+#  ../util/read_compressed.cc
+#  ../util/parallel_read.cc
+#  ../util/ersatz_progress.cc
+  
+  
   deps
    ;
    
-exe CreateProbingPT : CreateProbingPT.cpp probingpt ;
+exe CreateProbingPT : CreateProbingPT.cpp probingpt ../util//kenutil ../util//rt ;
 
 alias programs : CreateProbingPT ;

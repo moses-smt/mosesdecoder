@@ -8,7 +8,7 @@
 #include "StoreTarget.h"
 #include "line_splitter.hh"
 #include "probing_hash_utils.hh"
-#include "moses2/legacy/OutputFileStream.h"
+#include "OutputFileStream.h"
 #include "moses2/legacy/Util2.h"
 
 using namespace std;
@@ -89,7 +89,7 @@ void StoreTarget::Save(const target_text &rule)
 void StoreTarget::SaveAlignment()
 {
   std::string path = m_basePath + "/Alignments.dat";
-  Moses2::OutputFileStream file(path);
+  probingpt::OutputFileStream file(path);
 
   BOOST_FOREACH(Alignments::value_type &valPair, m_aligns) {
     file << valPair.second << "\t";

@@ -1,7 +1,7 @@
 #include <string>
 #include <boost/program_options.hpp>
 #include "util/usage.hh"
-#include "moses/TranslationModel/ProbingPT/storing.hh"
+#include "storing.hh"
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
 #include "moses/Util.h"
@@ -66,7 +66,7 @@ int main(int argc, char* argv[])
     inPath = ReformatSCFGFile(inPath);
   }
 
-  Moses::createProbingPT(inPath, outPath, num_scores, num_lex_scores, log_prob, max_cache_size, scfg);
+  probingpt::createProbingPT(inPath, outPath, num_scores, num_lex_scores, log_prob, max_cache_size, scfg);
 
   //util::PrintUsage(std::cout);
   return 0;
