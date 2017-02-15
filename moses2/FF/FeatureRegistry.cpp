@@ -1,7 +1,7 @@
 #include "FeatureRegistry.h"
 
 #include "../TranslationModel/Memory/PhraseTableMemory.h"
-#include "../TranslationModel/ProbingPT/ProbingPT.h"
+#include "../TranslationModel/ProbingPT.h"
 #include "../TranslationModel/UnknownWordPenalty.h"
 #include "../TranslationModel/Transliteration.h"
 

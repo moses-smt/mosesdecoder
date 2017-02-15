@@ -1,4 +1,8 @@
-alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses/TranslationModel/CompactPT//cmph ;
+local with-cmph = [ option.get "with-cmph" ] ;
+lib cmph : : <search>$(with-cmph)/lib <search>$(with-cmph)/lib64 ;
+
+alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem  ;
+
 
  lib moses2_lib :
    AlignmentInfo.cpp
@@ -154,7 +158,12 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses/Translatio
 	server/Translator.cpp
 	server/TranslationRequest.cpp
 	
-    deps ;
+    deps 
+    cmph
+    :
+    <include>$(with-cmph)/include
+    
+    ;
 
 exe moses2 : Main.cpp moses2_lib ../probingpt//probingpt ../util//kenutil ../util//rt ../lm//kenlm ;
 
