@@ -6,6 +6,7 @@
 		<project>lm</project>
 		<project>moses</project>
 		<project>moses2</project>
+		<project>probingpt</project>
 		<project>util</project>
 	</projects>
 	<buildSpec>

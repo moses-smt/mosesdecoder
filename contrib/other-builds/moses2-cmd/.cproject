@@ -56,6 +56,7 @@
 									<listOptionValue builtIn="false" value="xmlrpc++"/>
 									<listOptionValue builtIn="false" value="xmlrpc"/>
 									<listOptionValue builtIn="false" value="cmph"/>
+									<listOptionValue builtIn="false" value="probingpt"/>
 									<listOptionValue builtIn="false" value="search"/>
 									<listOptionValue builtIn="false" value="OnDiskPt"/>
 									<listOptionValue builtIn="false" value="lm"/>
@@ -77,6 +78,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc}/../../xmlrpc-c/lib&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/moses/Debug&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/moses2/Debug&quot;"/>
+									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/probingpt/Debug&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/lm/Debug&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/OnDiskPt/Debug&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/util/Debug&quot;"/>
