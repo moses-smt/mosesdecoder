@@ -44,11 +44,11 @@ ThreadPool::ThreadPool(size_t numThreads, int cpuAffinityOffset,
 {
 #if defined(_WIN32) || defined(_WIN64)
   size_t numCPU = std::thread::hardware_concurrency();
-#else 
+#else
   size_t numCPU = sysconf(_SC_NPROCESSORS_ONLN);
 #endif
   //cerr << "numCPU=" << numCPU << endl;
-  
+
   int cpuInd = cpuAffinityOffset % numCPU;
 
   for (size_t i = 0; i < numThreads; ++i) {
