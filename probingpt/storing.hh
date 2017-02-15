@@ -17,7 +17,7 @@
 #include "util/file.hh"
 #include "vocabid.hh"
 
-namespace Moses2
+namespace probingpt
 {
 typedef std::vector<uint64_t> SourcePhrase;
 

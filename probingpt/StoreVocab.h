@@ -7,10 +7,10 @@
 #pragma once
 #include <string>
 #include <boost/unordered_map.hpp>
-#include "../../legacy/OutputFileStream.h"
-#include "../../legacy/Util2.h"
+#include "OutputFileStream.h"
+#include "moses2/legacy/Util2.h"
 
-namespace Moses2
+namespace probingpt
 {
 
 template<typename VOCABID>

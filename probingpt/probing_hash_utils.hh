@@ -11,7 +11,7 @@
 #include <fcntl.h>
 #include <fstream>
 
-namespace Moses2
+namespace probingpt
 {
 
 #define API_VERSION 15

@@ -6,7 +6,7 @@
 #include "util/tokenize_piece.hh"
 #include <vector>
 
-namespace Moses2
+namespace probingpt
 {
 
 //Gets the MurmurmurHash for give string

@@ -13,7 +13,7 @@
 #include "util/string_piece.hh"  //Tokenization and work with StringPiece
 #include "util/tokenize_piece.hh"
 
-namespace Moses2
+namespace probingpt
 {
 template<typename VOCABID>
 class StoreVocab;

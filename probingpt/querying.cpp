@@ -1,10 +1,10 @@
 #include "querying.hh"
 #include "util/exception.hh"
-#include "../../legacy/Util2.h"
+#include "moses2/legacy/Util2.h"
 
 using namespace std;
 
-namespace Moses2
+namespace probingpt
 {
 
 QueryEngine::QueryEngine(const char * filepath, util::LoadMethod load_method)
@@ -103,7 +103,7 @@ uint64_t QueryEngine::getKey(uint64_t source_phrase[], size_t size) const
 {
   //TOO SLOW
   //uint64_t key = util::MurmurHashNative(&source_phrase[0], source_phrase.size());
-  return Moses2::getKey(source_phrase, size);
+  return probingpt::getKey(source_phrase, size);
 }
 
 std::pair<bool, uint64_t> QueryEngine::query(uint64_t key)
@@ -127,14 +127,14 @@ void QueryEngine::read_alignments(const std::string &alignPath)
     vector<string> toks = Moses2::Tokenize(line, "\t ");
     UTIL_THROW_IF2(toks.size() == 0, "Corrupt alignment file");
 
-    uint32_t alignInd = Scan<uint32_t>(toks[0]);
+    uint32_t alignInd = Moses2::Scan<uint32_t>(toks[0]);
     if (alignInd >= alignColl.size()) {
       alignColl.resize(alignInd + 1);
     }
 
     Alignments &aligns = alignColl[alignInd];
     for (size_t i = 1; i < toks.size(); ++i) {
-      size_t pos = Scan<size_t>(toks[i]);
+      size_t pos = Moses2::Scan<size_t>(toks[i]);
       aligns.push_back(pos);
     }
   }
@@ -142,25 +142,25 @@ void QueryEngine::read_alignments(const std::string &alignPath)
 
 void QueryEngine::file_exits(const std::string &basePath)
 {
-  if (!FileExists(basePath + "/Alignments.dat")) {
+  if (!Moses2::FileExists(basePath + "/Alignments.dat")) {
     UTIL_THROW2("Require file does not exist in: " << basePath << "/Alignments.dat");
   }
-  if (!FileExists(basePath + "/TargetColl.dat")) {
+  if (!Moses2::FileExists(basePath + "/TargetColl.dat")) {
     UTIL_THROW2("Require file does not exist in: " << basePath << "/TargetColl.dat");
   }
-  if (!FileExists(basePath + "/TargetVocab.dat")) {
+  if (!Moses2::FileExists(basePath + "/TargetVocab.dat")) {
     UTIL_THROW2("Require file does not exist in: " << basePath << "/TargetVocab.dat");
   }
-  if (!FileExists(basePath + "/cache")) {
+  if (!Moses2::FileExists(basePath + "/cache")) {
     UTIL_THROW2("Require file does not exist in: " << basePath << "/cache");
   }
-  if (!FileExists(basePath + "/config")) {
+  if (!Moses2::FileExists(basePath + "/config")) {
     UTIL_THROW2("Require file does not exist in: " << basePath << "/config");
   }
-  if (!FileExists(basePath + "/probing_hash.dat")) {
+  if (!Moses2::FileExists(basePath + "/probing_hash.dat")) {
     UTIL_THROW2("Require file does not exist in: " << basePath << "/probing_hash.dat");
   }
-  if (!FileExists(basePath + "/source_vocabids")) {
+  if (!Moses2::FileExists(basePath + "/source_vocabids")) {
     UTIL_THROW2("Require file does not exist in: " << basePath << "/source_vocabids");
   }
 

@@ -65,15 +65,7 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses/Translatio
     TranslationModel/CompactPT/TargetPhraseCollectionCache.cpp
     TranslationModel/CompactPT/ThrowingFwrite.cpp
 
- 	TranslationModel/ProbingPT/ProbingPT.cpp 
-    TranslationModel/ProbingPT/hash.cpp
-    TranslationModel/ProbingPT/line_splitter.cpp
-    TranslationModel/ProbingPT/probing_hash_utils.cpp
-    TranslationModel/ProbingPT/querying.cpp
-    TranslationModel/ProbingPT/storing.cpp
-    TranslationModel/ProbingPT/StoreVocab.cpp
-    TranslationModel/ProbingPT/StoreTarget.cpp
-    TranslationModel/ProbingPT/vocabid.cpp
+   	TranslationModel/ProbingPT/ProbingPT.cpp 
 
    	parameters/AllOptions.cpp
    	parameters/BookkeepingOptions.cpp

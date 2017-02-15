@@ -9,9 +9,9 @@
 #include "probing_hash_utils.hh"
 #include "hash.hh" //Includes line splitter
 #include "line_splitter.hh"
-#include "../../legacy/Util2.h"
+#include "moses2/legacy/Util2.h"
 
-namespace Moses2
+namespace probingpt
 {
 
 class QueryEngine
@@ -68,7 +68,7 @@ public:
     }
 
     const std::string &foundStr = iter->second;
-    found = Scan<T>(foundStr);
+    found = Moses2::Scan<T>(foundStr);
     return true;
   }
 

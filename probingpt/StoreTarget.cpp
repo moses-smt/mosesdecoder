@@ -8,12 +8,12 @@
 #include "StoreTarget.h"
 #include "line_splitter.hh"
 #include "probing_hash_utils.hh"
-#include "../../legacy/OutputFileStream.h"
-#include "../../legacy/Util2.h"
+#include "moses2/legacy/OutputFileStream.h"
+#include "moses2/legacy/Util2.h"
 
 using namespace std;
 
-namespace Moses2
+namespace probingpt
 {
 
 StoreTarget::StoreTarget(const std::string &basepath)
@@ -51,7 +51,7 @@ uint64_t StoreTarget::Save()
   }
 
   // clear coll
-  RemoveAllInColl(m_coll);
+  Moses2::RemoveAllInColl(m_coll);
   m_coll.clear();
 
   // starting position of coll
@@ -149,10 +149,10 @@ void StoreTarget::Append(const line_text &line, bool log_prob, bool scfg)
        util::SingleCharacter(' '));
   while (it) {
     string tok = it->as_string();
-    float prob = Scan<float>(tok);
+    float prob = Moses2::Scan<float>(tok);
 
     if (log_prob) {
-      prob = FloorScore(log(prob));
+      prob = Moses2::FloorScore(log(prob));
       if (prob == 0.0f) prob = 0.0000000001;
     }
 
@@ -172,12 +172,12 @@ void StoreTarget::Append(const line_text &line, bool log_prob, bool scfg)
   it = util::TokenIter<util::SingleCharacter>(line.word_align,
        util::SingleCharacter(' '));
   while (it) {
-    string tokPair = Trim(it->as_string());
+    string tokPair = Moses2::Trim(it->as_string());
     if (tokPair.empty()) {
       break;
     }
 
-    vector<size_t> alignPair = Tokenize<size_t>(tokPair, "-");
+    vector<size_t> alignPair = Moses2::Tokenize<size_t>(tokPair, "-");
     assert(alignPair.size() == 2);
 
     bool nonTerm = false;
@@ -241,11 +241,11 @@ void StoreTarget::AppendLexRO(std::string &prop, std::vector<float> &retvector,
     //cerr << "lexProb=" << lexProb << endl;
 
     // append lex probs to pt probs
-    vector<float> scores = Tokenize<float>(lexProb);
+    vector<float> scores = Moses2::Tokenize<float>(lexProb);
 
     if (log_prob) {
       for (size_t i = 0; i < scores.size(); ++i) {
-        scores[i] = FloorScore(log(scores[i]));
+        scores[i] = Moses2::FloorScore(log(scores[i]));
         if (scores[i] == 0.0f) scores[i] = 0.0000000001;
       }
     }

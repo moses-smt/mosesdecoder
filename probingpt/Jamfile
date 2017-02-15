@@ -1,7 +1,19 @@
+alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses/TranslationModel/CompactPT//cmph  ;
+
 lib probingpt :
-  temp.cpp 
+  StoreTarget.cpp
+  StoreVocab.cpp
+  hash.cpp
+  line_splitter.cpp
+  probing_hash_utils.cpp
+  querying.cpp
+  storing.cpp
+  vocabid.cpp
+  OutputFileStream.cpp
+  InputFileStream.cpp
+  deps
    ;
    
-exe ppt : Main.cpp probingpt ;
+exe CreateProbingPT : CreateProbingPT.cpp probingpt ;
 
-alias programs : ppt ;
+alias programs : CreateProbingPT ;

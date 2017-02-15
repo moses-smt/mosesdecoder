@@ -1,9 +1,9 @@
 #include <boost/foreach.hpp>
 #include "vocabid.hh"
 #include "StoreVocab.h"
-#include "../../legacy/Util2.h"
+#include "moses2/legacy/Util2.h"
 
-namespace Moses2
+namespace probingpt
 {
 
 void add_to_map(StoreVocab<uint64_t> &sourceVocab,
@@ -45,9 +45,9 @@ void read_map(std::map<uint64_t, std::string> &karta, const char* filename)
 
   std::string line;
   while (getline(is, line)) {
-    std::vector<std::string> toks = Tokenize(line, "\t");
+    std::vector<std::string> toks = Moses2::Tokenize(line, "\t");
     assert(toks.size() == 2);
-    uint64_t ind = Scan<uint64_t>(toks[1]);
+    uint64_t ind = Moses2::Scan<uint64_t>(toks[1]);
     karta[ind] = toks[0];
   }
 

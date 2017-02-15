@@ -13,7 +13,7 @@
 #include <boost/unordered_set.hpp>
 #include "StoreVocab.h"
 
-namespace Moses2
+namespace probingpt
 {
 
 class line_text;

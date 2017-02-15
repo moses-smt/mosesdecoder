@@ -2,8 +2,8 @@
 #include <boost/program_options.hpp>
 #include "util/usage.hh"
 #include "moses/TranslationModel/ProbingPT/storing.hh"
-#include "moses/InputFileStream.h"
-#include "moses/OutputFileStream.h"
+#include "InputFileStream.h"
+#include "OutputFileStream.h"
 #include "moses/Util.h"
 
 using namespace std;
@@ -74,9 +74,9 @@ int main(int argc, char* argv[])
 
 std::string ReformatSCFGFile(const std::string &path)
 {
-  Moses::InputFileStream inFile(path);
+  probingpt::InputFileStream inFile(path);
   string reformattedPath = path + ".reformat.gz";
-  Moses::OutputFileStream outFile(reformattedPath);
+  probingpt::OutputFileStream outFile(reformattedPath);
 
   string line;
   while (getline(inFile, line)) {

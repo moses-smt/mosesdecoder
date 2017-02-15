@@ -3,7 +3,7 @@
 
 using namespace std;
 
-namespace Moses2
+namespace probingpt
 {
 
 uint64_t getHash(StringPiece text)

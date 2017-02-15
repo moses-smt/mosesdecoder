@@ -4,12 +4,12 @@
 #include "storing.hh"
 #include "StoreTarget.h"
 #include "StoreVocab.h"
-#include "../../legacy/Util2.h"
-#include "../../legacy/InputFileStream.h"
+#include "moses2/legacy/Util2.h"
+#include "InputFileStream.h"
 
 using namespace std;
 
-namespace Moses2
+namespace probingpt
 {
 
 ///////////////////////////////////////////////////////////////////////
@@ -161,9 +161,9 @@ void createProbingPT(const std::string &phrasetable_path,
         // update cache - CURRENT source phrase, not prev
         if (max_cache_size) {
           std::string countStr = line.counts.as_string();
-          countStr = Trim(countStr);
+          countStr = Moses2::Trim(countStr);
           if (!countStr.empty()) {
-            std::vector<float> toks = Tokenize<float>(countStr);
+            std::vector<float> toks = Moses2::Tokenize<float>(countStr);
             //cerr << "CACHE:" << line.source_phrase << " " << countStr << " " << toks[1] << endl;
 
             if (toks.size() >= 2) {
@@ -174,7 +174,7 @@ void createProbingPT(const std::string &phrasetable_path,
               uint64_t currKey = getKey(currVocabidSource);
 
               CacheItem *item = new CacheItem(
-                Trim(line.source_phrase.as_string()),
+                Moses2::Trim(line.source_phrase.as_string()),
                 currKey,
                 toks[1]);
               cache.push(item);
@@ -244,7 +244,7 @@ size_t countUniqueSource(const std::string &path)
 
   std::string line, prevSource;
   while (std::getline(strme, line)) {
-    std::vector<std::string> toks = TokenizeMultiCharSeparator(line, "|||");
+    std::vector<std::string> toks = Moses2::TokenizeMultiCharSeparator(line, "|||");
     assert(toks.size() != 0);
 
     if (prevSource != toks[0]) {
@@ -284,7 +284,7 @@ void serialize_cache(
 
 uint64_t getKey(const std::vector<uint64_t> &vocabid_source)
 {
-  return Moses2::getKey(vocabid_source.data(), vocabid_source.size());
+  return probingpt::getKey(vocabid_source.data(), vocabid_source.size());
 }
 
 std::vector<uint64_t> CreatePrefix(const std::vector<uint64_t> &vocabid_source, size_t endPos)

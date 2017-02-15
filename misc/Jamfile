@@ -30,11 +30,6 @@ else {
     alias programsMin ;
 }
 
-exe CreateProbingPT : CreateProbingPT.cpp ..//boost_filesystem ../moses//moses ;
-#exe QueryProbingPT : QueryProbingPT.cpp ..//boost_filesystem ../moses//moses ;
-
-alias programsProbing : CreateProbingPT ; #QueryProbingPT
-
 exe merge-sorted : 
 merge-sorted.cc 
 ../moses//moses
@@ -43,6 +38,6 @@ $(TOP)//boost_iostreams
 $(TOP)//boost_program_options 
 ; 
 
-alias programs : 1-1-Extraction TMining generateSequences processLexicalTable queryLexicalTable programsMin programsProbing merge-sorted prunePhraseTable pruneGeneration  ;
+alias programs : 1-1-Extraction TMining generateSequences processLexicalTable queryLexicalTable programsMin merge-sorted prunePhraseTable pruneGeneration  ;
 #processPhraseTable queryPhraseTable
 

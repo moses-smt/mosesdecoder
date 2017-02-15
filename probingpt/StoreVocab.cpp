@@ -7,7 +7,7 @@
 #include <fstream>
 #include "StoreVocab.h"
 
-namespace Moses2
+namespace probingpt
 {
 
 } /* namespace Moses2 */

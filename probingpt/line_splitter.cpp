@@ -1,6 +1,6 @@
 #include "line_splitter.hh"
 
-namespace Moses2
+namespace probingpt
 {
 
 line_text splitLine(const StringPiece &textin, bool scfg)
