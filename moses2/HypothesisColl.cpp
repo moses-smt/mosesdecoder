@@ -178,7 +178,7 @@ void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists)
 
   Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
 
-  const HypothesisBase **sortedHypos = (const HypothesisBase **) new HypothesisBase *[GetSize()];
+  const HypothesisBase **sortedHypos = (const HypothesisBase **) alloca(GetSize() * sizeof(const HypothesisBase *));
   SortHypos(mgr, sortedHypos);
 
   // update worse score

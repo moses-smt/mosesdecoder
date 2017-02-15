@@ -240,7 +240,7 @@ std::pair<bool, uint64_t> ProbingPT::GetKey(const Phrase<Moses2::Word> &sourcePh
   size_t sourceSize = sourcePhrase.GetSize();
   assert(sourceSize);
 
-  uint64_t *probingSource = new uint64_t[sourceSize];
+  uint64_t *probingSource = (uint64_t*) alloca(sourceSize * sizeof(uint64_t));
   GetSourceProbingIds(sourcePhrase, ret.first, probingSource);
   if (!ret.first) {
     // source phrase contains a word unknown in the pt.
@@ -317,7 +317,7 @@ TargetPhraseImpl *ProbingPT::CreateTargetPhrase(
     }
   } else {
     // log score 1st
-	SCORE *logScores = new SCORE[totalNumScores];
+    SCORE *logScores = (SCORE*) alloca(totalNumScores * sizeof(SCORE));
     for (size_t i = 0; i < totalNumScores; ++i) {
       logScores[i] = FloorScore(TransformScore(scores[i]));
     }
@@ -622,7 +622,7 @@ SCFG::TargetPhraseImpl *ProbingPT::CreateTargetPhraseSCFG(
     }
   } else {
     // log score 1st
-	SCORE *logScores = new SCORE[totalNumScores];
+    SCORE *logScores = (SCORE*) alloca(totalNumScores * sizeof(SCORE));
     for (size_t i = 0; i < totalNumScores; ++i) {
       logScores[i] = FloorScore(TransformScore(scores[i]));
     }

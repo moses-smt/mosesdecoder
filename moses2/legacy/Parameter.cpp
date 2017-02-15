@@ -571,7 +571,7 @@ bool Parameter::LoadParam(int argc, char* xargv[])
 {
   // legacy parameter handling: all parameters are expected
   // to start with a single dash
-  char **argv = new char*[argc + 1];
+  char **argv = (char**) alloca(argc * sizeof(char*));
 
   for (int i = 0; i < argc; ++i) {
     argv[i] = xargv[i];
