@@ -34,13 +34,13 @@ namespace Moses2
 ///////////////////////////////////////////////////////////////////////
 
 LexicalReordering::LexicalReordering(size_t startInd, const std::string &line)
-: StatefulFeatureFunction(startInd, line)
-, m_blank(NULL)
-, m_propertyInd(-1)
-, m_coll(NULL)
-, m_configuration(NULL)
+  : StatefulFeatureFunction(startInd, line)
+  , m_blank(NULL)
+  , m_propertyInd(-1)
+  , m_coll(NULL)
+  , m_configuration(NULL)
 #ifdef HAVE_CMPH
-, m_compactModel(NULL)
+  , m_compactModel(NULL)
 #endif
 {
   ReadParameters();

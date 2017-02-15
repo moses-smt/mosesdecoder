@@ -131,7 +131,7 @@ public:
     if (!m_fixed) {
       size_t read = 0;
 #ifdef _WIN32
-	  read += _chsize_s(m_file_desc, m_map_size);
+      read += _chsize_s(m_file_desc, m_map_size);
 #else
       read += ftruncate(m_file_desc, m_map_size);
 #endif

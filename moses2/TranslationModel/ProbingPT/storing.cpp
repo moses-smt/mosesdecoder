@@ -68,7 +68,7 @@ void createProbingPT(const std::string &phrasetable_path,
                      bool log_prob, int max_cache_size, bool scfg)
 {
 #if defined(_WIN32) || defined(_WIN64)
-	std::cerr << "Create not implemented for Windows" << std::endl;
+  std::cerr << "Create not implemented for Windows" << std::endl;
 #else
   std::cerr << "Starting..." << std::endl;
 
