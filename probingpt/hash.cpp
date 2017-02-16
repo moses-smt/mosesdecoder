@@ -1,5 +1,5 @@
 #include <iostream>
-#include "hash.hh"
+#include "hash.h"
 
 using namespace std;
 

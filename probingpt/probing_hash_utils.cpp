@@ -1,5 +1,5 @@
 #include <iostream>
-#include "probing_hash_utils.hh"
+#include "probing_hash_utils.h"
 #include "util/file.hh"
 
 namespace probingpt

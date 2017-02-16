@@ -1,4 +1,4 @@
-#include "util.hh"
+#include "util.h"
 #include "util/exception.hh"
 
 namespace probingpt

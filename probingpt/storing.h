@@ -10,12 +10,12 @@
 #include <queue>
 #include <sys/stat.h> //mkdir
 
-#include "hash.hh" //Includes line_splitter
-#include "probing_hash_utils.hh"
+#include "hash.h" //Includes line_splitter
+#include "probing_hash_utils.h"
+#include "vocabid.h"
 
 #include "util/file_piece.hh"
 #include "util/file.hh"
-#include "vocabid.hh"
 
 namespace probingpt
 {

@@ -1,5 +1,5 @@
 #include <boost/foreach.hpp>
-#include "vocabid.hh"
+#include "vocabid.h"
 #include "StoreVocab.h"
 #include "moses2/legacy/Util2.h"
 

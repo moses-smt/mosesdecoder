@@ -8,7 +8,7 @@
 #include <vector>
 
 #include <map> //Container
-#include "hash.hh" //Hash of elements
+#include "hash.h" //Hash of elements
 
 #include "util/string_piece.hh"  //Tokenization and work with StringPiece
 #include "util/tokenize_piece.hh"

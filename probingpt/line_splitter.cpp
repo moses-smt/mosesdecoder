@@ -1,4 +1,4 @@
-#include "line_splitter.hh"
+#include "line_splitter.h"
 
 namespace probingpt
 {

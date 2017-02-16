@@ -1,7 +1,7 @@
 #include <sys/stat.h>
 #include <boost/foreach.hpp>
-#include "line_splitter.hh"
-#include "storing.hh"
+#include "line_splitter.h"
+#include "storing.h"
 #include "StoreTarget.h"
 #include "StoreVocab.h"
 #include "moses2/legacy/Util2.h"

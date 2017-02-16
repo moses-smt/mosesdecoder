@@ -6,8 +6,8 @@
  */
 #include <boost/foreach.hpp>
 #include "StoreTarget.h"
-#include "line_splitter.hh"
-#include "probing_hash_utils.hh"
+#include "line_splitter.h"
+#include "probing_hash_utils.h"
 #include "OutputFileStream.h"
 #include "moses2/legacy/Util2.h"
 

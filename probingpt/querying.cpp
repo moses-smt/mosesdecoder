@@ -1,4 +1,4 @@
-#include "querying.hh"
+#include "querying.h"
 #include "util/exception.hh"
 #include "moses2/legacy/Util2.h"
 

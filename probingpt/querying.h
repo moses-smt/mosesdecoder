@@ -3,14 +3,14 @@
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/unordered_map.hpp>
 #include <sys/stat.h> //For finding size of file
-#include "vocabid.hh"
 #include <algorithm> //toLower
 #include <deque>
-#include "probing_hash_utils.hh"
-#include "hash.hh" //Includes line splitter
-#include "line_splitter.hh"
+#include "vocabid.h"
+#include "probing_hash_utils.h"
+#include "hash.h" //Includes line splitter
+#include "line_splitter.h"
+#include "util.h"
 #include "moses2/legacy/Util2.h"
-#include "util.hh"
 
 namespace probingpt
 {

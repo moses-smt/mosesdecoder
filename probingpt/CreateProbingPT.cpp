@@ -1,7 +1,7 @@
 #include <string>
 #include <boost/program_options.hpp>
 #include "util/usage.hh"
-#include "storing.hh"
+#include "storing.h"
 #include "InputFileStream.h"
 #include "OutputFileStream.h"
 #include "moses/Util.h"
