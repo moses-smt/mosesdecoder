@@ -6,6 +6,7 @@
 		<project>lm</project>
 		<project>moses</project>
 		<project>OnDiskPt</project>
+		<project>probingpt</project>
 		<project>search</project>
 		<project>util</project>
 	</projects>
