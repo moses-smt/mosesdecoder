@@ -14,7 +14,7 @@
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
-#include "moses/TranslationModel/ProbingPT/ProbingPT.h"
+#include "moses/TranslationModel/ProbingPT.h"
 #include "moses/TranslationModel/PhraseDictionaryMemoryPerSentence.h"
 #include "moses/TranslationModel/PhraseDictionaryMemoryPerSentenceOnDemand.h"
 
