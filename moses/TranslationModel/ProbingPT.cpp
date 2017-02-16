@@ -5,8 +5,8 @@
 #include "moses/TargetPhraseCollection.h"
 #include "moses/InputFileStream.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
-#include "probingpt/querying.hh"
-#include "probingpt/probing_hash_utils.hh"
+#include "probingpt/querying.h"
+#include "probingpt/probing_hash_utils.h"
 
 using namespace std;
 
