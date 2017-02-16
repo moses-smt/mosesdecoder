@@ -10,6 +10,7 @@
 #include "hash.hh" //Includes line splitter
 #include "line_splitter.hh"
 #include "moses2/legacy/Util2.h"
+#include "util.hh"
 
 namespace probingpt
 {
@@ -68,7 +69,7 @@ public:
     }
 
     const std::string &foundStr = iter->second;
-    found = Moses2::Scan<T>(foundStr);
+    found = Scan<T>(foundStr);
     return true;
   }
 

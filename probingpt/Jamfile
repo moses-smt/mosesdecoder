@@ -11,6 +11,7 @@ lib probingpt :
   vocabid.cpp
   OutputFileStream.cpp
   InputFileStream.cpp
+  util.cpp
   
 #  ../util/string_piece.cc
 #  ../util/exception.cc

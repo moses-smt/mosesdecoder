@@ -2271,9 +2271,14 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryTreeAdaptor.h</locationURI>
 		</link>
 		<link>
-			<name>TranslationModel/ProbingPT</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
+			<name>TranslationModel/ProbingPT.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ProbingPT.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/RuleTable</name>
@@ -3356,106 +3361,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>TranslationModel/ProbingPT/Jamfile</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/Jamfile</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/ProbingPT.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/ProbingPT.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/ProbingPT.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/ProbingPT.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/StoreTarget.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/StoreTarget.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/StoreTarget.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/StoreTarget.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/StoreVocab.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/StoreVocab.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/StoreVocab.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/StoreVocab.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/hash.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/hash.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/hash.hh</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/hash.hh</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/line_splitter.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/line_splitter.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/line_splitter.hh</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/line_splitter.hh</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/probing_hash_utils.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/probing_hash_utils.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/probing_hash_utils.hh</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/probing_hash_utils.hh</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/querying.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/querying.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/querying.hh</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/querying.hh</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/storing.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/storing.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/storing.hh</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/storing.hh</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/vocabid.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/vocabid.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/vocabid.hh</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/vocabid.hh</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/RuleTable/Loader.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/RuleTable/Loader.h</locationURI>
@@ -3952,11 +3857,6 @@
 		</link>
 		<link>
 			<name>TranslationModel/CompactPT/bin/darwin-4.2.1</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -4516,11 +4416,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/UG/bin/darwin-4.2.1/release</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -4646,16 +4541,6 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/debug-symbols-on</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/UG/bin/darwin-4.2.1/release/debug-symbols-on</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -4697,16 +4582,6 @@
 		</link>
 		<link>
 			<name>TranslationModel/CompactPT/bin/darwin-4.2.1/release/link-static/threading-multi</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
@@ -5351,66 +5226,6 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CompactPT/bin/darwin-4.2.1/release/link-static/threading-multi/ThrowingFwrite.o</locationURI>
 		</link>
 		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi</name>
-			<type>2</type>
-			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/ProbingPT.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/ProbingPT.o</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/StoreTarget.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/StoreTarget.o</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/StoreVocab.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/StoreVocab.o</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/hash.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/hash.o</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/huffmanish.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/huffmanish.o</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/line_splitter.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/line_splitter.o</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/probing_hash_utils.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/probing_hash_utils.o</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/quering.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/quering.o</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/querying.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/querying.o</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/storing.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/storing.o</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/vocabid.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/bin/darwin-4.2.1/release/link-static/threading-multi/vocabid.o</locationURI>
-		</link>
-		<link>
 			<name>TranslationModel/UG/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
@@ -5974,46 +5789,6 @@
 			<name>TranslationModel/CompactPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ThrowingFwrite.o</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CompactPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ThrowingFwrite.o</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ProbingPT.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/ProbingPT.o</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/hash.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/hash.o</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/huffmanish.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/huffmanish.o</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/line_splitter.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/line_splitter.o</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/probing_hash_utils.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/probing_hash_utils.o</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/quering.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/quering.o</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/storing.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/storing.o</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/ProbingPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/vocabid.o</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ProbingPT/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/vocabid.o</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/UG/bin/darwin-4.2.1/release/debug-symbols-on/link-static/threading-multi/count-ptable-features</name>

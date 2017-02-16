@@ -122,10 +122,10 @@ vwfiles synlm mmlib mserver headers
 FF_Factory.o 
 LM//LM 
 TranslationModel/CompactPT//CompactPT 
-TranslationModel/ProbingPT//ProbingPT 
 ThreadPool
 ..//search 
 ../util/double-conversion//double-conversion 
+../probingpt//probingpt
 ..//z 
 ../OnDiskPt//OnDiskPt 
 $(TOP)//boost_filesystem 
@@ -139,5 +139,5 @@ alias headers-to-install : [ glob-tree *.h ] ;
 
 import testing ;
 
-unit-test moses_test : [ glob *Test.cpp Mock*.cpp FF/*Test.cpp ] ..//boost_filesystem moses headers ..//z ../OnDiskPt//OnDiskPt ..//boost_unit_test_framework ;
+unit-test moses_test : [ glob *Test.cpp Mock*.cpp FF/*Test.cpp ] ..//boost_filesystem moses headers ..//z ../OnDiskPt//OnDiskPt ../probingpt//probingpt ..//boost_unit_test_framework ;
 

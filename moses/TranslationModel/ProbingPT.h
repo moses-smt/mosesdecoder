@@ -3,16 +3,20 @@
 #include <boost/iostreams/device/mapped_file.hpp>
 #include <boost/bimap.hpp>
 #include <boost/unordered_map.hpp>
-#include "../PhraseDictionary.h"
+#include "PhraseDictionary.h"
+#include "util/mmap.hh"
 
+namespace probingpt
+{
+class QueryEngine;
+class target_text;
+}
 
 namespace Moses
 {
 class ChartParser;
 class ChartCellCollectionBase;
 class ChartRuleLookupManager;
-class QueryEngine;
-class target_text;
 
 class ProbingPT : public PhraseDictionary
 {
@@ -39,12 +43,13 @@ public:
 
 
 protected:
-  QueryEngine *m_engine;
+  probingpt::QueryEngine *m_engine;
   uint64_t m_unkId;
 
   std::vector<uint64_t> m_sourceVocab; // factor id -> pt id
   std::vector<const Factor*> m_targetVocab; // pt id -> factor*
   std::vector<const AlignmentInfo*> m_aligns;
+  util::LoadMethod load_method;
 
   boost::iostreams::mapped_file_source file;
   const char *data;

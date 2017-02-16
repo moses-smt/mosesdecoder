@@ -5,7 +5,8 @@
 #include "moses/TargetPhraseCollection.h"
 #include "moses/InputFileStream.h"
 #include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
-#include "querying.hh"
+#include "probingpt/querying.hh"
+#include "probingpt/probing_hash_utils.hh"
 
 using namespace std;
 
@@ -14,6 +15,7 @@ namespace Moses
 ProbingPT::ProbingPT(const std::string &line)
   : PhraseDictionary(line,true)
   ,m_engine(NULL)
+  ,load_method(util::POPULATE_OR_READ)
 {
   ReadParameters();
 
@@ -31,7 +33,7 @@ void ProbingPT::Load(AllOptions::ptr const& opts)
   m_options = opts;
   SetFeaturesToApply();
 
-  m_engine = new QueryEngine(m_filePath.c_str());
+  m_engine = new probingpt::QueryEngine(m_filePath.c_str(), load_method);
 
   m_unkId = 456456546456;
 
@@ -256,12 +258,12 @@ TargetPhraseCollection *ProbingPT::CreateTargetPhrases(
 TargetPhrase *ProbingPT::CreateTargetPhrase(
   const char *&offset) const
 {
-  TargetPhraseInfo *tpInfo = (TargetPhraseInfo*) offset;
+  probingpt::TargetPhraseInfo *tpInfo = (probingpt::TargetPhraseInfo*) offset;
   size_t numRealWords = tpInfo->numWords / m_output.size();
 
   TargetPhrase *tp = new TargetPhrase(this);
 
-  offset += sizeof(TargetPhraseInfo);
+  offset += sizeof(probingpt::TargetPhraseInfo);
 
   // scores
   float *scores = (float*) offset;
