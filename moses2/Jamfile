@@ -1,7 +1,18 @@
 local with-cmph = [ option.get "with-cmph" ] ;
-lib cmph : : <search>$(with-cmph)/lib <search>$(with-cmph)/lib64 ;
+local includes = ;
 
-alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem  ;
+if $(with-cmph) {
+  lib cmph : : <search>$(with-cmph)/lib <search>$(with-cmph)/lib64 ;
+  includes += <include>$(with-cmph)/include ;
+}
+else {
+  alias cmph ;
+}
+
+max-factors = [ option.get "max-factors" : 4 : 4 ] ;
+max-factors = <define>MAX_NUM_FACTORS=$(max-factors) <dependency>$(FACTOR-LOG) ;
+
+alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem : : : $(max-factors) ;
 
 
  lib moses2_lib :
@@ -161,8 +172,7 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem  ;
     deps 
     cmph
     :
-    <include>$(with-cmph)/include
-    
+    $(includes)
     ;
 
 exe moses2 : Main.cpp moses2_lib ../probingpt//probingpt ../util//kenutil ../util//rt ../lm//kenlm ;
