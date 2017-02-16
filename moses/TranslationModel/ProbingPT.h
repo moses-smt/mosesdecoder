@@ -30,6 +30,8 @@ public:
 
   void InitializeForInput(ttasksptr const& ttask);
 
+  void SetParameter(const std::string& key, const std::string& value);
+
   // for phrase-based model
   void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
