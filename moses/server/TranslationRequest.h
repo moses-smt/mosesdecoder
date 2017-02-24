@@ -38,8 +38,8 @@ TranslationRequest : public virtual Moses::TranslationTask
 
   Translator* m_translator;
   std::string m_source_string, m_target_string;
-  // bool m_withAlignInfo;
-  // bool m_withWordAlignInfo;
+  bool m_withAlignInfo;
+  bool m_withWordAlignInfo;
   bool m_withGraphInfo;
   bool m_withTopts;
   bool m_withScoreBreakdown;
