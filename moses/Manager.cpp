@@ -1737,7 +1737,7 @@ OutputSurface(std::ostream &out, Hypothesis const& edge, bool const recursive) c
 
   // trace ("report segmentation") option "-t" / "-tt"
   int reportSegmentation = options()->output.ReportSegmentation;
-  if (reportSegmentation > 0 && phrase.GetSize() > 0) { 
+  if (reportSegmentation > 0 && phrase.GetSize() > 0) {
     const Range &sourceRange = edge.GetCurrSourceWordsRange();
     const int sourceStart = sourceRange.GetStartPos();
     const int sourceEnd = sourceRange.GetEndPos();
