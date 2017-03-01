@@ -62,6 +62,11 @@ update(std::map<std::string,xmlrpc_c::value>const& param)
   enabled = (nbest_size > 0);
   return true;
 }
+#else
+bool 
+NBestOptions::
+update(std::map<std::string,xmlrpc_c::value>const& param)
+{}
 #endif
 
 
