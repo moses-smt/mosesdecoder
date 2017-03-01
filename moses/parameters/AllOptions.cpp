@@ -101,6 +101,11 @@ namespace Moses
     if (!syntax.update(param))     return false;
     return sanity_check();
   }
+#else
+  bool 
+  AllOptions::
+  update(std::map<std::string,xmlrpc_c::value>const& param)
+  {}
 #endif
 
   bool

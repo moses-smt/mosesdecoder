@@ -175,7 +175,7 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem : : : $(max-factors
     $(includes)
     ;
 
-exe moses2 : Main.cpp moses2_lib ../probingpt//probingpt ../util//kenutil ../util//rt ../lm//kenlm ;
+exe moses2 : Main.cpp moses2_lib ../probingpt//probingpt ../util//kenutil ../lm//kenlm ;
 
 if [ xmlrpc ] {
   echo "Building Moses2" ;

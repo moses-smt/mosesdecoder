@@ -6,8 +6,8 @@
  */
 #include <boost/foreach.hpp>
 #include "ProbingPT.h"
-#include "probingpt/querying.hh"
-#include "probingpt/probing_hash_utils.hh"
+#include "probingpt/querying.h"
+#include "probingpt/probing_hash_utils.h"
 #include "util/exception.hh"
 #include "../System.h"
 #include "../Scores.h"
