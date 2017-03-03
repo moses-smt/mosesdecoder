@@ -153,10 +153,5 @@ namespace Moses {
     
     return true;
   }
-#else
-  bool 
-  ReportingOptions::
-  update(std::map<std::string, xmlrpc_c::value>const& param)
-  {}
 #endif
 }
