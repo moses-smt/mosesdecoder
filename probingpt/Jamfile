@@ -27,6 +27,6 @@ lib probingpt :
   deps
    ;
    
-exe CreateProbingPT : CreateProbingPT.cpp probingpt ../util//kenutil ../util//rt ;
+exe CreateProbingPT : CreateProbingPT.cpp probingpt ../util//kenutil ;
 
 alias programs : CreateProbingPT ;

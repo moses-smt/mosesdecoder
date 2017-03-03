@@ -77,6 +77,11 @@ namespace Moses {
     //   xml_policy = Scan<XmlInputType>(xmlrpc_c::value_string(si->second));
     return true;
   }
+#else
+  bool 
+  SyntaxOptions::
+  update(std::map<std::string,xmlrpc_c::value>const& param)
+  {}
 #endif
 
 }

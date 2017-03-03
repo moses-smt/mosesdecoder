@@ -102,6 +102,11 @@ namespace Moses
       
       return true;
     }
+#else
+    bool 
+    SearchOptions::
+    update(std::map<std::string,xmlrpc_c::value>const& params)
+    {}
 #endif
 
 }
