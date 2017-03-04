@@ -36,6 +36,7 @@ import signal
 import subprocess
 import sys
 import threading
+import time
 
 HELP = '''Multiple process decoding with Moses
 
@@ -83,12 +84,21 @@ def gzopen(f):
     return gzip.open(f, 'rb') if f.endswith('.gz') else open(f, 'r')
 
 
-def run_instance(cmd_base, threads, tasks, n_best=False):
+def run_instance(cmd_base, threads, tasks, cpu_affinity, cpu_offset, n_best=False):
     '''Run an instance of moses that processes tasks (input lines) from a
     queue using a specified number of threads'''
     cmd = cmd_base[:]
     cmd.append('--threads')
     cmd.append(str(threads))
+
+    if cpu_affinity:
+       cmd.append('--cpu-affinity-offset')
+       cmd.append(str(cpu_offset))
+
+    #print 'BEFORE'
+    #print cmd
+    #print 'AFTER\n'
+
     try:
         # Queue of tasks instance is currently working on, limited to the number
         # of threads * 2 (minimal buffering).  The queue should be kept full for
@@ -187,6 +197,7 @@ def main(argv):
     n_best_distinct = False
     n_best_out = None
     show_weights = False
+    cpu_affinity = False
 
     # Decoder command
     cmd = argv[1:]
@@ -225,6 +236,9 @@ def main(argv):
             show_weights = True
             # Do not remove from cmd
             i += 1
+        elif cmd[i] in ('-cpu-affinity', '--cpu-affinity'):
+            cpu_affinity = True
+            cmd = cmd[:i] + cmd[i + 1:]
         else:
             i += 1
 
@@ -267,13 +281,18 @@ def main(argv):
             n_best_out = open(n_best_file, 'w')
 
     # Start instances
+    cpu_offset = -threads
     instances = []
     for i in range(procs + (1 if extra else 0)):
-        t = threading.Thread(target=run_instance, args=(cmd, (threads if i < procs else extra), tasks, n_best))
+        if cpu_affinity:
+           cpu_offset += threads
+
+        t = threading.Thread(target=run_instance, args=(cmd, (threads if i < procs else extra), tasks, cpu_affinity, cpu_offset, n_best))
         instances.append(t)
         # Daemon: guaranteed to finish before non-daemons
         t.setDaemon(True)
         t.start()
+        #time.sleep(1)
 
     # Start results writer
     writer = threading.Thread(target=write_results, args=(results, n_best, n_best_out))

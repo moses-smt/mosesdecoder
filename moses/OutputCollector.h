@@ -32,6 +32,7 @@
 #include <iostream>
 #include <map>
 #include <ostream>
+#include <fstream>
 #include <string>
 #include "Util.h"
 #include "util/exception.hh"

@@ -21,8 +21,6 @@
 #include <algorithm>
 #include <iostream>
 #include "moses/Util.h"
-#include "moses/TargetPhraseCollection.h"
-#include "moses/TranslationModel/PhraseDictionary.h"
 #include "TargetPhraseCollection.h"
 #include "Vocab.h"
 #include "OnDiskWrapper.h"
@@ -111,39 +109,6 @@ void TargetPhraseCollection::Save(OnDiskWrapper &onDiskWrapper)
   assert(startPos + memUsed == endPos);
 #endif
   m_filePos = startPos;
-
-}
-
-Moses::TargetPhraseCollection::shared_ptr TargetPhraseCollection::ConvertToMoses(const std::vector<Moses::FactorType> &inputFactors
-    , const std::vector<Moses::FactorType> &outputFactors
-    , const Moses::PhraseDictionary &phraseDict
-    , const std::vector<float> &weightT
-    , Vocab &vocab
-    , bool isSyntax) const
-{
-  Moses::TargetPhraseCollection::shared_ptr ret;
-  ret.reset(new Moses::TargetPhraseCollection);
-
-  CollType::const_iterator iter;
-  for (iter = m_coll.begin(); iter != m_coll.end(); ++iter) {
-    const TargetPhrase &tp = **iter;
-    Moses::TargetPhrase *mosesPhrase
-    = tp.ConvertToMoses(inputFactors, outputFactors, vocab,
-                        phraseDict, weightT, isSyntax);
-
-    /*
-    // debugging output
-    stringstream strme;
-    strme << filePath << " " << *mosesPhrase;
-    mosesPhrase->SetDebugOutput(strme.str());
-    */
-
-    ret->Add(mosesPhrase);
-  }
-
-  ret->Sort(true, phraseDict.GetTableLimit());
-
-  return ret;
 
 }
 

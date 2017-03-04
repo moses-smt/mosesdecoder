@@ -54,16 +54,21 @@ LMResult NeuralLMWrapper::GetValue(const vector<const Word*> &contextFactor, Sta
     //TODO: config option?
     m_neuralLM->set_cache(1000000);
   }
-  size_t hashCode = 0;
 
   vector<int> words(contextFactor.size());
-  for (size_t i=0, n=contextFactor.size(); i<n; i++) {
+  const size_t n = contextFactor.size();
+  for (size_t i=0; i<n; i++) {
     const Word* word = contextFactor[i];
     const Factor* factor = word->GetFactor(m_factorType);
     const std::string string = factor->GetString().as_string();
     int neuralLM_wordID = m_neuralLM->lookup_word(string);
     words[i] = neuralLM_wordID;
-    boost::hash_combine(hashCode, neuralLM_wordID);
+  }
+  // Generate hashCode for only the last n-1 words, that represents the next LM
+  // state
+  size_t hashCode = 0;
+  for (size_t i=1; i<n; ++i) {
+    boost::hash_combine(hashCode, words[i]);
   }
 
   double value = m_neuralLM->lookup_ngram(words);

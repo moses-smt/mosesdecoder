@@ -24,5 +24,10 @@ namespace Moses {
     if (m == param.end()) return dfltval;
     return Scan<bool>(xmlrpc_c::value_string(m->second));
   }
+#else
+  bool 
+  check(std::map<std::string, xmlrpc_c::value> const& param, 
+        std::string const key, bool dfltval)
+  {}
 #endif
 }

@@ -70,6 +70,7 @@ BitextSampler : public Moses::reference_counter
   size_t m_num_occurrences; // estimated number of phrase occurrences in corpus
   boost::taus88 m_rnd;  // every job has its own pseudo random generator
   double m_bias_total;
+  bool m_track_sids; // track sentence ids in stats?
 
   size_t consider_sample(TokenPosition const& p);
   size_t perform_random_sampling();
@@ -86,7 +87,8 @@ public:
                 SPTR<SamplingBias const> const& bias, 
                 size_t const min_samples, 
                 size_t const max_samples,
-                sampling_method const method); 
+                sampling_method const method,
+                bool const track_sids);
   ~BitextSampler();
   SPTR<pstats> stats();
   bool done() const;
@@ -185,7 +187,7 @@ BitextSampler<Token>::
 BitextSampler(SPTR<Bitext<Token> const> const& bitext, 
               typename bitext::iter const& phrase,
               SPTR<SamplingBias const> const& bias, size_t const min_samples, size_t const max_samples,
-              sampling_method const method)
+              sampling_method const method, bool const track_sids)
   : m_bitext(bitext)
   , m_plen(phrase.size())
   , m_fwd(phrase.root == bitext->I1.get())
@@ -201,8 +203,9 @@ BitextSampler(SPTR<Bitext<Token> const> const& bitext,
   , m_finished(false)
   , m_num_occurrences(phrase.ca())
   , m_rnd(0)
+  , m_track_sids(track_sids)
 {
-  m_stats.reset(new pstats);
+  m_stats.reset(new pstats(m_track_sids));
   m_stats->raw_cnt = phrase.ca();
   m_stats->register_worker();
 }
@@ -332,7 +335,8 @@ consider_sample(TokenPosition const& p)
           size_t raw2 = b->approxOccurrenceCount();
           size_t evid = m_stats->add(tpid, sample_weight, 
                                      m_bias ? (*m_bias)[p.sid] : 1, 
-                                     aln, raw2, rec.po_fwd, rec.po_bwd, docid);
+                                     aln, raw2, rec.po_fwd, rec.po_bwd, docid,
+                                     p.sid);
           max_evidence = std::max(max_evidence, evid);
           bool ok = (i == rec.e2) || b->extend(o[i].id());
           UTIL_THROW_IF2(!ok, "Could not extend target phrase.");

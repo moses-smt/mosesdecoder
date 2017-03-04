@@ -1,0 +1,29 @@
+{
+    "manifest_version": 2,
+
+    "name": "Goshen Web Translator",
+    "description": "Translate entire webpages with a casmacat-moses backend",
+    "version": "1.0",
+
+    "browser_action": {
+        "default_icon": "icon.png",
+        "default_popup": "popup/popup.html"
+    },
+    "permissions": [
+        "activeTab",
+        "storage",
+        "https://ajax.googleapis.com/"
+    ],
+    "options_page" : "options/index.html",
+
+    "content_scripts": [{
+        "matches": ["http://*/*", "https://*/*", "file:///*"],
+        "css": ["onpage/onpage.css"],
+        "js": [
+            "onpage/onpage.js",
+            "onpage/goshen.js",
+            "onpage/chromegoshen.js"
+        ],
+        "all_frames": true
+    }]
+}

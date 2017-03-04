@@ -2315,7 +2315,7 @@ sub define_training_build_transliteration_model {
     my $sym_method = &check_and_get("TRAINING:alignment-symmetrization-method");
     my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
     my $external_bin_dir = &check_and_get("GENERAL:external-bin-dir");
-    my $srilm_dir = &check_and_get("TRAINING:srilm-dir");
+    my $srilm_dir = &check_backoff_and_get("TRAINING:srilm-dir");
     my $decoder = &get("TRAINING:transliteration-decoder");
 
     my $cmd = "$moses_script_dir/Transliteration/train-transliteration-module.pl";

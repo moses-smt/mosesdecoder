@@ -33,11 +33,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/TypeDef.h"
 #include "moses/Word.h"
 
+
+
 namespace Moses
 {
 
 //class LanguageModel;
 class FFState;
+class InMemoryPerSentenceOnDemandLM;
 
 LanguageModel *ConstructKenLM(const std::string &line);
 
@@ -67,6 +70,8 @@ public:
 
   virtual bool IsUseable(const FactorMask &mask) const;
 
+  friend class InMemoryPerSentenceOnDemandLM;
+
 protected:
   boost::shared_ptr<Model> m_ngram;
 
@@ -84,6 +89,7 @@ protected:
   std::vector<lm::WordIndex> m_lmIdLookup;
 
 private:
+  LanguageModelKen();
   LanguageModelKen(const LanguageModelKen<Model> &copy_from);
 
   // Convert last words of hypothesis into vocab ids, returning an end pointer.

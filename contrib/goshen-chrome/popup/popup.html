@@ -1,0 +1,44 @@
+<html>
+<head>
+    <script src="../vendor/ustr.min.js"></script>
+    <!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.10.2/jquery.min.js"></script> -->
+    <script src="popup.js"></script>
+    <link rel="stylesheet/less" type="text/css" href="style.less" />
+    <script src="../vendor/less.js"></script>
+</head>
+<body style="width: 400px">
+    <div class="container">
+        <h1>Goshen Translator</h1>
+        <p>
+            Goshen uses <code>python-mt-server</code> and <code>moses</code> to
+            translate webpage text. For more information, see the repository
+            on <a href="https://github.com/j6k4m8/en600.468-final/">GitHub</a>.
+        </p>
+        <hr>
+        <div class="dropdown-container from-container">
+            <h2>Translate from:</h2>
+            <select class="from-select">
+                <!-- <option value="English">English</option> -->
+                <!-- <option value="French">French</option> -->
+                <option value="German">German</option>
+            </select>
+        </div>
+        <div class="dropdown-container to-container">
+            <h2>Translate to:</h2>
+            <select class="to-select">
+                <option value="English">English</option>
+                <!-- <option value="French">French</option> -->
+                <!-- <option value="German">German</option> -->
+            </select>
+        </div>
+        <hr>
+        <p>
+            To translate the webpage, press the <kbd>Alt</kbd>+<kbd>T</kbd>
+            keychord and mouse over the element(s) that you want to queue for
+            translation. Click to begin the translation &mdash; the selected
+            elements will turn blue to indicate that they're queued.
+        </p>
+        <!-- <button type="button" style="float: right;" class="js-translate">Translate</button> -->
+    </div>
+</body>
+</html>

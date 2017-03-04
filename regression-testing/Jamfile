@@ -37,9 +37,11 @@ if $(with-regtest) {
   if $(skip-compact) {
     reg_test phrase : [ glob $(test-dir)/phrase.* : $(test-dir)/*withDALM $(test-dir)/*compactptable ] : ../moses-cmd//moses : @reg_test_decode ;
     reg_test chart  : [ glob $(test-dir)/chart.*  : $(test-dir)/*withDALM $(test-dir)/*compactptable ] : ../moses-cmd//moses : @reg_test_decode ;
+    reg_test moses2  : [ glob $(test-dir)/moses2.*  : $(test-dir)/*withDALM $(test-dir)/*compactptable ] : ../moses-cmd//moses2 : @reg_test_decode ;
   } else {
     reg_test phrase : [ glob $(test-dir)/phrase.* : $(test-dir)/*withDALM ] : ../moses-cmd//moses : @reg_test_decode ;
     reg_test chart  : [ glob $(test-dir)/chart.*  : $(test-dir)/*withDALM ] : ../moses-cmd//moses : @reg_test_decode ;
+    reg_test moses2  : [ glob $(test-dir)/moses2.*  : $(test-dir)/*withDALM ] : ../moses2//moses2 : @reg_test_decode ;
   }
 
   if [ option.get "with-dalm" : : "yes" ] {

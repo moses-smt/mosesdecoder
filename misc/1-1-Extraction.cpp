@@ -216,7 +216,9 @@ int main(int argc, char * argv[])
     getWords(f[i],currF);
     getWords(a[i],currA);
 
-    cerr<<"Processing "<<i<<endl;
+    if (i % 100000 == 0) {
+      cerr<<"Processing "<<i<<endl;
+    }
     constructCepts(ceptsInPhrase, sourceNullWords , targetNullWords, currA , currE.size(), currF.size());
     getOneToOne(ceptsInPhrase , currF , currE, one);
 

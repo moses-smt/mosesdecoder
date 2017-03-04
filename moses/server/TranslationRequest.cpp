@@ -3,7 +3,6 @@
 #include "moses/ContextScope.h"
 #include <boost/foreach.hpp>
 #include "moses/Util.h"
-#include "moses/TreeInput.h"
 #include "moses/Hypothesis.h"
 
 namespace MosesServer
@@ -25,7 +24,9 @@ using Moses::FValue;
 using Moses::PhraseDictionaryMultiModel;
 using Moses::FindPhraseDictionary;
 using Moses::Sentence;
-using Moses::TreeInput;
+using Moses::TokenizeMultiCharSeparator;
+using Moses::FeatureFunction;
+using Moses::Scan;
 
 boost::shared_ptr<TranslationRequest>
 TranslationRequest::
@@ -84,13 +85,14 @@ void
 TranslationRequest::
 add_phrase_aln_info(Hypothesis const& h, vector<xmlrpc_c::value>& aInfo) const
 {
-  // if (!m_withAlignInfo) return;
-  if (!options()->output.ReportSegmentation) return;
+  if (!m_withAlignInfo) return;
+  //  if (!options()->output.ReportSegmentation) return;
   Range const& trg = h.GetCurrTargetWordsRange();
   Range const& src = h.GetCurrSourceWordsRange();
 
   std::map<std::string, xmlrpc_c::value> pAlnInfo;
   pAlnInfo["tgt-start"] = xmlrpc_c::value_int(trg.GetStartPos());
+  pAlnInfo["tgt-end"] = xmlrpc_c::value_int(trg.GetEndPos());
   pAlnInfo["src-start"] = xmlrpc_c::value_int(src.GetStartPos());
   pAlnInfo["src-end"]   = xmlrpc_c::value_int(src.GetEndPos());
   aInfo.push_back(xmlrpc_c::value_struct(pAlnInfo));
@@ -213,6 +215,9 @@ insertTranslationOptions(Moses::Manager& manager,
         for (size_t j = 0; j < scores.size(); ++j)
           scoresXml.push_back(xmlrpc_c::value_double(scores[j]));
         toptXml["scores"] = xmlrpc_c::value_array(scoresXml);
+	ostringstream buf;
+	topt->GetScoreBreakdown().OutputAllFeatureScores(buf, true);
+	toptXml["labelledScores"] = PackScores(topt->GetScoreBreakdown());
         toptsXml.push_back(xmlrpc_c::value_struct(toptXml));
       }
     }
@@ -314,6 +319,106 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
       m_context.reset(new std::vector<std::string>(1,context));
     }
 
+  si = params.find("context-scope");
+  if (si != params.end())
+    {
+
+      string context = xmlrpc_c::value_string(si->second);
+
+      string groupSeparator("Moses::ContextScope::GroupSeparator");
+      string recordSeparator("Moses::ContextScope::RecordSeparator");
+
+      // Here, we assume that any XML-RPC value
+      //       associated with the key "context-scope"
+      //       has the following format:
+      //
+      // FeatureFunctionName followed by recordSeparator
+      //                     followed by the value of interest
+      //                     followed by groupSeparator
+      //
+      // In the following code, the value of interest will be stored
+      //        in contextScope under the key FeatureFunctionName,
+      //        where FeatureFunctionName is the actual name of the feature function
+
+      boost::shared_ptr<Moses::ContextScope> contextScope = GetScope();
+
+      BOOST_FOREACH(string group, TokenizeMultiCharSeparator(context, groupSeparator)) {
+
+	vector<string> record = TokenizeMultiCharSeparator(group, recordSeparator);
+
+	// Use the feature function whose name is record[0] as a key
+	FeatureFunction& ff = Moses::FeatureFunction::FindFeatureFunction(record[0]);
+	void const* key = static_cast<void const*>(&ff);
+
+	// Store (in the context scope) record[1] as the value associated with that key
+	boost::shared_ptr<string> value = contextScope->get<string>(key,true);
+	value->replace(value->begin(), value->end(), record[1]);
+
+      }
+    }
+
+  // Report alignment info if Moses config says to or if XML request says to
+  m_withAlignInfo = options()->output.ReportSegmentation || check(params, "align");
+
+  // Report word alignment info if Moses config says to or if XML request says to
+  m_withWordAlignInfo = options()->output.PrintAlignmentInfo || check(params, "word-align");
+
+  si = params.find("weights");
+  if (si != params.end())
+    {
+
+      boost::unordered_map<string, FeatureFunction*> map;
+      {
+	const vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+	BOOST_FOREACH(FeatureFunction* const& ff, ffs) {
+	  map[ff->GetScoreProducerDescription()] = ff;
+	}
+      }
+
+      string allValues = xmlrpc_c::value_string(si->second);
+
+      BOOST_FOREACH(string values, TokenizeMultiCharSeparator(allValues, "\t")) {
+
+	vector<string> record = TokenizeMultiCharSeparator(values, "=");
+
+	if (record.size() == 2) {
+	  string featureName = record[0];
+	  string featureWeights = record[1];
+
+	  boost::unordered_map<string, FeatureFunction*>::iterator ffi = map.find(featureName);
+
+	  if (ffi != map.end()) {
+	    FeatureFunction* ff = ffi->second;
+
+	    size_t prevNumWeights = ff->GetNumScoreComponents();
+
+	    vector<float> ffWeights;
+	    BOOST_FOREACH(string weight, TokenizeMultiCharSeparator(featureWeights, " ")) {
+	      ffWeights.push_back(Scan<float>(weight));
+	    }
+
+	    if (ffWeights.size() == ff->GetNumScoreComponents()) {
+
+	      // XXX: This is NOT thread-safe
+	      Moses::StaticData::InstanceNonConst().SetWeights(ff, ffWeights);
+	      VERBOSE(1, "WARNING: THIS IS NOT THREAD-SAFE!\tUpdating weights for " << featureName << " to " << featureWeights << "\n");
+
+	    } else {
+	      TRACE_ERR("ERROR: Unable to update weights for " << featureName << " because " << ff->GetNumScoreComponents() << " weights are required but only " << ffWeights.size() << " were provided\n");
+	    }
+
+	  } else {
+	    TRACE_ERR("ERROR: No FeatureFunction with name " << featureName << ", no weight update\n");
+	  }
+
+	} else {
+	  TRACE_ERR("WARNING: XML-RPC weights update was improperly formatted:\t" << values << "\n");
+	}
+
+      }
+
+    }
+
 
   // // biased sampling for suffix-array-based sampling phrase table?
   // if ((si = params.find("bias")) != params.end())
@@ -324,9 +429,7 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
   // 	  m_bias[xmlrpc_c::value_int(tmp[i-1])] = xmlrpc_c::value_double(tmp[i]);
   //   }
   if (is_syntax(m_options->search.algo)) {
-    m_source.reset(new TreeInput(m_options));
-    istringstream in(m_source_string + "\n");
-    m_source->Read(in);
+    m_source.reset(new Sentence(m_options,0,m_source_string));
   } else {
     m_source.reset(new Sentence(m_options,0,m_source_string));
   }
@@ -337,10 +440,6 @@ void
 TranslationRequest::
 run_chart_decoder()
 {
-  Moses::TreeInput tinput(m_options);
-  istringstream buf(m_source_string + "\n");
-  tinput.Read(buf);
-  
   Moses::ChartManager manager(this->self());
   manager.Decode();
 
@@ -373,8 +472,8 @@ pack_hypothesis(const Moses::Manager& manager,
 	   << std::endl);
   dest[key] = xmlrpc_c::value_string(target.str());
 
-  // if (m_withAlignInfo) {
-  if (options()->output.ReportSegmentation) {
+  if (m_withAlignInfo) {
+  //  if (options()->output.ReportSegmentation) {
     // phrase alignment, if requested
 
     vector<xmlrpc_c::value> p_aln;
@@ -383,8 +482,8 @@ pack_hypothesis(const Moses::Manager& manager,
     dest["align"] = xmlrpc_c::value_array(p_aln);
   }
 
-  // if (m_withWordAlignInfo) {
-  if (options()->output.PrintAlignmentInfo) { 
+  if (m_withWordAlignInfo) {
+    //if (options()->output.PrintAlignmentInfo) { 
     // word alignment, if requested
     vector<xmlrpc_c::value> w_aln;
     BOOST_REVERSE_FOREACH(Hypothesis const* e, edges)

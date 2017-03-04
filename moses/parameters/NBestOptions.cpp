@@ -32,7 +32,7 @@ init(Parameter const& P)
       nbest_size = Scan<size_t>( params->at(1) );
       only_distinct = (params->size()>2 && params->at(2)=="distinct");
     } else {
-      std::cerr << "wrong format for switch -n-best-list file size [disinct]";
+      std::cerr << "wrong format for switch -n-best-list file size [distinct]";
       return false;
     }
   } else nbest_size = 0;
@@ -62,6 +62,11 @@ update(std::map<std::string,xmlrpc_c::value>const& param)
   enabled = (nbest_size > 0);
   return true;
 }
+#else
+bool 
+NBestOptions::
+update(std::map<std::string,xmlrpc_c::value>const& param)
+{}
 #endif
 
 

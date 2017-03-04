@@ -61,6 +61,7 @@
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/search/Debug&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/lm/Debug&quot;"/>
 									<listOptionValue builtIn="false" value="&quot;${workspace_loc:}/OnDiskPt/Debug&quot;"/>
+									<listOptionValue builtIn="false" value="/opt/local/lib"/>
 								</option>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.linker.input.1093223502" superClass="cdt.managedbuild.tool.gnu.cpp.linker.input">
 									<additionalInput kind="additionalinputdependency" paths="$(USER_OBJS)"/>

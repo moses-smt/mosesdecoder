@@ -154,7 +154,8 @@ aux_interpret_xml(std::string& line, std::vector<size_t> & xmlWalls,
     bool OK = ProcessAndStripXMLTags(*m_options, line,
                                      m_xmlOptions,
                                      m_reorderingConstraint,
-                                     xmlWalls, placeholders);
+                                     xmlWalls, placeholders,
+                                     *this);
     if (!OK) {
       TRACE_ERR("Unable to parse XML in line: " << line);
     }

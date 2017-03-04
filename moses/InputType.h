@@ -68,6 +68,9 @@ public:
   size_t m_frontSpanCoveredLength;
   // how many words from the beginning are covered
 
+  // Coordinates in user-defined spaces (see "coord" XML tag)
+  SPTR<std::map<size_t const, std::vector<float> > > m_coordMap;
+
   InputType(AllOptions::ptr const& opts, long translationId = 0);
   virtual ~InputType();
 

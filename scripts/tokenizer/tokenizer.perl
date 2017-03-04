@@ -243,9 +243,9 @@ sub tokenize
     my @protected = ();
     foreach my $protected_pattern (@protected_patterns) {
       my $t = $text;
-      while ($t =~ /($protected_pattern)(.*)$/) {
-        push @protected, $1;
-        $t = $2;
+      while ($t =~ /(?<PATTERN>$protected_pattern)(?<TAIL>.*)$/) {
+        push @protected, $+{PATTERN};
+        $t = $+{TAIL};
       }
     }
 
@@ -284,6 +284,9 @@ sub tokenize
     # will also space digit,letter or letter,digit forms (redundant with next section)
     $text =~ s/([^\p{IsN}])[,]/$1 , /g;
     $text =~ s/[,]([^\p{IsN}])/ , $1/g;
+    
+    # separate "," after a number if it's the end of a sentence
+    $text =~ s/([\p{IsN}])[,]$/$1 ,/g;
 
     # separate , pre and post number
     #$text =~ s/([\p{IsN}])[,]([^\p{IsN}])/$1 , $2/g;
