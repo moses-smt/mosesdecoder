@@ -26,8 +26,8 @@ namespace Moses {
   }
 #else
   bool 
-  OptionsBaseClass::
   check(std::map<std::string, xmlrpc_c::value> const& param, 
+        std::string const key, bool dfltval)
   {}
 #endif
 }
