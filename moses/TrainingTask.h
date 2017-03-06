@@ -39,6 +39,18 @@ public:
          boost::shared_ptr<IOWrapper> const& ioWrapper) {
     boost::shared_ptr<TrainingTask> ret(new TrainingTask(source, ioWrapper));
     ret->m_self = ret;
+    ret->m_scope.reset(new ContextScope);
+    return ret;
+  }
+
+  // factory function
+  static boost::shared_ptr<TrainingTask>
+  create(boost::shared_ptr<InputType> const& source,
+         boost::shared_ptr<IOWrapper> const& ioWrapper,
+         boost::shared_ptr<ContextScope> const& scope) {
+    boost::shared_ptr<TrainingTask> ret(new TrainingTask(source, ioWrapper));
+    ret->m_self = ret;
+    ret->m_scope = scope;
     return ret;
   }
 

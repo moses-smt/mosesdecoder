@@ -51,12 +51,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "hypergraph.pb.h"
 #endif
 
-#ifdef PT_UG
-#include <boost/foreach.hpp>
-#include "moses/TranslationModel/UG/mmsapt.h"
-#include "moses/TranslationModel/UG/generic/program_options/ug_splice_arglist.h"
-#endif
-
 using namespace std;
 using namespace Moses;
 
@@ -76,6 +70,9 @@ void OutputFeatureWeightsForHypergraph(std::ostream &outputSearchGraphStream)
 /** main function of the command line version of the decoder **/
 int main(int argc, char const** argv)
 {
+  //setting in the Staticdata a link between the thread id of this process and a NULL tasksptr
+  // StaticData::InstanceNonConst().SetTask();  // => moved into StaticData constructor
+
   try {
 
 #ifdef HAVE_PROTOBUF
@@ -141,11 +138,13 @@ int main(int argc, char const** argv)
     }
 
 #ifdef WITH_THREADS
+#pragma message ("Compiling with Threads.")
     ThreadPool pool(staticData.ThreadCount());
 #endif
 
     // main loop over set of input sentences
 
+    boost::shared_ptr<ContextScope> scope(new ContextScope);
     boost::shared_ptr<InputType> source;
     while ((source = ioWrapper->ReadInput()) != NULL) {
       IFVERBOSE(1) {
@@ -154,7 +153,7 @@ int main(int argc, char const** argv)
 
       // set up task of training one sentence
       boost::shared_ptr<TrainingTask> task;
-      task = TrainingTask::create(source, ioWrapper);
+      task = TrainingTask::create(source, ioWrapper, scope);
 
       // execute task
 #ifdef WITH_THREADS
