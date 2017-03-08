@@ -12,7 +12,10 @@ else {
 max-factors = [ option.get "max-factors" : 4 : 4 ] ;
 max-factors = <define>MAX_NUM_FACTORS=$(max-factors) <dependency>$(FACTOR-LOG) ;
 
-alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem : : : $(max-factors) ;
+max-order = [ option.get "max-kenlm-order" : 6 : 6 ] ;
+max-order = <define>KENLM_MAX_ORDER=$(max-order) ;
+
+alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem : : : $(max-factors) $(max-order) ;
 
 
  lib moses2_lib :
