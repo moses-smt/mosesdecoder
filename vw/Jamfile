@@ -6,11 +6,11 @@ boost 103600 ;
 # VW
 local with-vw = [ option.get "with-vw" ] ;
 if $(with-vw) {
-  lib vw : : <search>$(with-vw)/vowpalwabbit ;
-  lib allreduce : : <search>$(with-vw)/vowpalwabbit ;
+  lib vw : : <search>$(with-vw)/lib ;
+  lib allreduce : : <search>$(with-vw)/lib ;
 
-  obj ClassifierFactory.o : ClassifierFactory.cpp headers : <include>$(with-vw)/vowpalwabbit ;
-  obj VWPredictor.o : VWPredictor.cpp headers : <include>$(with-vw)/vowpalwabbit ;
+  obj ClassifierFactory.o : ClassifierFactory.cpp headers : <include>$(with-vw)/include/vowpalwabbit ;
+  obj VWPredictor.o : VWPredictor.cpp headers : <include>$(with-vw)/include/vowpalwabbit ;
 
   alias vw_objects : VWPredictor.o ClassifierFactory.o vw allreduce : : : <library>boost_program_options ;
   lib classifier : [ glob *.cpp : VWPredictor.cpp ClassifierFactory.cpp ] vw_objects headers ;
