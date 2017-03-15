@@ -32,5 +32,6 @@ addons:
       - libX11-dev
 script:
 - ./bjam -j4
+- find . | grep bin
 - du -sh
 
