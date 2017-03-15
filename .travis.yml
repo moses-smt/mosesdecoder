@@ -1,7 +1,6 @@
 sudo: false
-language: python
-python:
-- '3.5'
+language: c
+compiler: gcc
 env:
   matrix: 
 addons:
@@ -9,9 +8,6 @@ addons:
     sources:
       - ubuntu-toolchain-r-test
     packages:
-      - gcc-4.9
-      - g++-4.9
-      - python3-dev
       - libc6-dev-i386
       - linux-libc-dev
       - gcc-multilib
