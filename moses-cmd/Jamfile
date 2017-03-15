@@ -5,3 +5,4 @@
 # exe lmbrgrid : LatticeMBRGrid.cpp deps ;
 # alias programs : moses lmbrgrid vwtrainer ;
 
+alias programs : ;
