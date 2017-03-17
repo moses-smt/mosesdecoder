@@ -9,12 +9,6 @@ addons:
     sources:
       - ubuntu-toolchain-r-test
     packages:
-      - libc6-dev-i386
-      - linux-libc-dev
-      - gcc-multilib
-      - libx11-dev
-      - libx11-dev:i386
-      - git
       - subversion
       - automake
       - libtool
@@ -26,7 +20,6 @@ addons:
       - libxmlrpc-c++.*-dev
       - cmake
       - csh
-      - libX11-dev
 script:
 - ./bjam -j4
 - find . | grep bin
