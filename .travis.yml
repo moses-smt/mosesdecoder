@@ -22,6 +22,3 @@ addons:
       - csh
 script:
 - ./bjam -j4
-- find . | grep bin
-- du -sh
-
