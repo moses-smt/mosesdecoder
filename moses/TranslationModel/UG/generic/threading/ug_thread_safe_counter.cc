@@ -28,6 +28,7 @@ namespace Moses
   ThreadSafeCounter::
   operator size_t() const
   {
+    boost::lock_guard<boost::mutex> guard(this->lock);
     return ctr;
   }
 
