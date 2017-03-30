@@ -33,6 +33,7 @@ HwcmScorer.cpp
 InternalTree.cpp
 M2.cpp
 M2Scorer.cpp
+QEScorer.cpp
 Scorer.cpp
 ScorerFactory.cpp
 Optimizer.cpp
