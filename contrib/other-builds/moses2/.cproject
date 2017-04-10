@@ -49,6 +49,7 @@
 									<listOptionValue builtIn="false" value="MAX_NUM_FACTORS=4"/>
 									<listOptionValue builtIn="false" value="WITH_THREADS"/>
 								</option>
+								<option id="gnu.cpp.compiler.option.dialect.std.1836172568" superClass="gnu.cpp.compiler.option.dialect.std" useByScannerDiscovery="true" value="gnu.cpp.compiler.dialect.c++11" valueType="enumerated"/>
 								<inputType id="cdt.managedbuild.tool.gnu.cpp.compiler.input.2101942464" superClass="cdt.managedbuild.tool.gnu.cpp.compiler.input"/>
 							</tool>
 							<tool id="cdt.managedbuild.tool.gnu.cross.c.linker.1439481930" name="Cross GCC Linker" superClass="cdt.managedbuild.tool.gnu.cross.c.linker"/>

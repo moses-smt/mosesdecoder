@@ -83,8 +83,10 @@ Sentence *Sentence::CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
   for(size_t i=0; i<xmlOptions.size(); i++) {
     const XMLOption *xmlOption = xmlOptions[i];
     if(strcmp(xmlOption->GetNodeName(), "wall") == 0) {
-      UTIL_THROW_IF2(xmlOption->startPos > ret->GetSize(), "wall is beyond the sentence"); // no buggy walls, please
-      reorderingConstraint.SetWall(xmlOption->startPos - 1, true);
+      if (xmlOption->startPos) {
+        UTIL_THROW_IF2(xmlOption->startPos > ret->GetSize(), "wall is beyond the sentence"); // no buggy walls, please
+        reorderingConstraint.SetWall(xmlOption->startPos - 1, true);
+      }
     } else if (strcmp(xmlOption->GetNodeName(), "zone") == 0) {
       reorderingConstraint.SetZone( xmlOption->startPos, xmlOption->startPos + xmlOption->phraseSize -1 );
     } else if (strcmp(xmlOption->GetNodeName(), "ne") == 0) {
