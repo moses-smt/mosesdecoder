@@ -24,7 +24,7 @@ RUN git clone https://github.com/jonsafari/clustercat.git
 # Install Moses.
 WORKDIR /mosesdecoder
 RUN make -f /mosesdecoder/mosesdecoder/contrib/Makefiles/install-dependencies.gmake
-RUN ./compile.sh  --max-kenlm-order=20 --max-factors=1000
+RUN /mosesdecoder/compile.sh  --max-kenlm-order=20 --max-factors=1000
 WORKDIR /
 
 # Install MGIZA++.
