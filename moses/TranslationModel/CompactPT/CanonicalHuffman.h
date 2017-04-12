@@ -76,8 +76,9 @@ private:
     MinHeapSorter hs(A);
     std::make_heap(A.begin(), A.begin() + n, hs);
 
-    size_t h = n;
-    size_t m1, m2;
+    // marked volatile to prevent the intel compiler from generating bad code
+    volatile size_t h = n;
+    volatile size_t m1, m2;
     while(h > 1) {
       m1 = A[0];
       std::pop_heap(A.begin(), A.begin() + h, hs);

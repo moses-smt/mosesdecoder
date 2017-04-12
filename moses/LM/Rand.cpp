@@ -52,7 +52,7 @@ LanguageModelRandLM::~LanguageModelRandLM()
   delete m_lm;
 }
 
-void LanguageModelRandLM::Load()
+void LanguageModelRandLM::Load(AllOptions::ptr const& opts)
 {
   cerr << "Loading LanguageModelRandLM..." << endl;
   FactorCollection &factorCollection = FactorCollection::Instance();

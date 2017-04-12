@@ -60,7 +60,7 @@ foreach my $system (keys %DOC) {
     }
     open(TXT,">$outfile") || die($outfile);
     foreach my $doc (@ORDER) {
-	die("can't find '$doc' for ref '$system'") unless defined @{$DOC{$system}{$doc}};
+	die("can't find '$doc' for ref '$system'") unless defined $DOC{$system}{$doc};
 	foreach my $line (@{$DOC{$system}{$doc}}) {
 	    print TXT $line."\n";
 	}

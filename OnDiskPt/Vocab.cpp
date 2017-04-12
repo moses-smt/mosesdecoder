@@ -21,6 +21,7 @@
 #include <fstream>
 #include "OnDiskWrapper.h"
 #include "Vocab.h"
+#include "moses/Util.h"
 #include "util/exception.hh"
 
 using namespace std;

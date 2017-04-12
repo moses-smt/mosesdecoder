@@ -17,6 +17,7 @@ OpSequenceModel::OpSequenceModel(const std::string &line)
   tFactor = 0;
   numFeatures = 5;
   ReadParameters();
+  load_method = util::READ;
 }
 
 OpSequenceModel::~OpSequenceModel()
@@ -27,7 +28,7 @@ OpSequenceModel::~OpSequenceModel()
 void OpSequenceModel :: readLanguageModel(const char *lmFile)
 {
   string unkOp = "_TRANS_SLF_";
-  OSM = ConstructOSMLM(m_lmPath);
+  OSM = ConstructOSMLM(m_lmPath.c_str(), load_method);
 
   State startState = OSM->NullContextState();
   State endState;
@@ -35,8 +36,9 @@ void OpSequenceModel :: readLanguageModel(const char *lmFile)
 }
 
 
-void OpSequenceModel::Load()
+void OpSequenceModel::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   readLanguageModel(m_lmPath.c_str());
 }
 
@@ -199,7 +201,7 @@ FFState* OpSequenceModel::EvaluateWhenApplied(
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
-  UTIL_THROW2("Chart decoding not support by UTIL_THROW2");
+  UTIL_THROW2("Chart decoding not support by OpSequenceModel");
 
 }
 
@@ -247,6 +249,20 @@ void OpSequenceModel::SetParameter(const std::string& key, const std::string& va
     sFactor = Scan<int>(value);
   } else if (key == "output-factor") {
     tFactor = Scan<int>(value);
+  } else if (key == "load") {
+    if (value == "lazy") {
+      load_method = util::LAZY;
+    } else if (value == "populate_or_lazy") {
+      load_method = util::POPULATE_OR_LAZY;
+    } else if (value == "populate_or_read" || value == "populate") {
+      load_method = util::POPULATE_OR_READ;
+    } else if (value == "read") {
+      load_method = util::READ;
+    } else if (value == "parallel_read") {
+      load_method = util::PARALLEL_READ;
+    } else {
+      UTIL_THROW2("Unknown KenLM load method " << value);
+    }
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }

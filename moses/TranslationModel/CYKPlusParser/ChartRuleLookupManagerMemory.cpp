@@ -45,8 +45,8 @@ ChartRuleLookupManagerMemory::ChartRuleLookupManagerMemory(
 {
 
   size_t sourceSize = parser.GetSize();
-
-  m_completedRules.resize(sourceSize);
+  size_t ruleLimit  = parser.options()->syntax.rule_limit;
+  m_completedRules.resize(sourceSize, CompletedRuleCollection(ruleLimit));
 
   m_isSoftMatching = !m_softMatchingMap.empty();
 }

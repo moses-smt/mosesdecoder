@@ -21,9 +21,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include "LexicalReorderingTableCompact.h"
+#include "moses/parameters/OOVHandlingOptions.h"
 
 namespace Moses
 {
+bool LexicalReorderingTableCompact::s_inMemoryByDefault = false;
 
 LexicalReorderingTableCompact::
 LexicalReorderingTableCompact(const std::string& filePath,
@@ -31,7 +33,7 @@ LexicalReorderingTableCompact(const std::string& filePath,
                               const std::vector<FactorType>& e_factors,
                               const std::vector<FactorType>& c_factors)
   : LexicalReorderingTable(f_factors, e_factors, c_factors)
-  , m_inMemory(StaticData::Instance().UseMinlexrInMemory())
+  , m_inMemory(s_inMemoryByDefault)
   , m_numScoreComponent(6)
   , m_multipleScoreTrees(true)
   , m_hash(10, 16)
@@ -45,7 +47,7 @@ LexicalReorderingTableCompact(const std::vector<FactorType>& f_factors,
                               const std::vector<FactorType>& e_factors,
                               const std::vector<FactorType>& c_factors)
   : LexicalReorderingTable(f_factors, e_factors, c_factors)
-  , m_inMemory(StaticData::Instance().UseMinlexrInMemory())
+  , m_inMemory(s_inMemoryByDefault)
   , m_numScoreComponent(6)
   , m_multipleScoreTrees(true)
   , m_hash(10, 16)
@@ -181,5 +183,13 @@ Load(std::string filePath)
   else
     m_scoresMapped.load(pFile, true);
 }
+
+void
+LexicalReorderingTableCompact::
+SetStaticDefaultParameters(Parameter const& param)
+{
+  param.SetParameter(s_inMemoryByDefault, "minlexr-memory", false);
+}
+
 
 }

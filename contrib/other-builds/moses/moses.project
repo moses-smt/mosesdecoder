@@ -119,6 +119,7 @@
       <File Name="../../../moses/TranslationModel/UG/mmsapt_align.cc"/>
       <File Name="../../../moses/TranslationModel/UG/ptable-describe-features.cc"/>
       <File Name="../../../moses/TranslationModel/UG/ptable-lookup.cc"/>
+      <File Name="../../../moses/TranslationModel/UG/ptable-lookup-corpus.cc"/>
       <File Name="../../../moses/TranslationModel/UG/sapt_phrase_key.h"/>
       <File Name="../../../moses/TranslationModel/UG/sapt_phrase_scorers.h"/>
       <File Name="../../../moses/TranslationModel/UG/sapt_pscore_base.h"/>

@@ -2,6 +2,7 @@
 
 #include <string>
 #include <limits>
+#include <set>
 #include <boost/unordered_map.hpp>
 #include "StatelessFeatureFunction.h"
 #include "moses/Factor.h"
@@ -98,8 +99,11 @@ private:
   std::string m_fileNameModel1;
   Model1LexicalTable m_model1;
   const Factor* m_emptyWord;
+  bool m_skipTargetPunctuation;
+  std::set<const Factor*> m_punctuation;
+  bool m_is_syntax;
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   // cache
   mutable boost::unordered_map<const InputType*, boost::unordered_map<const Factor*, float> > m_cache;

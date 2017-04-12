@@ -20,12 +20,13 @@ public:
   int sFactor;	// Source Factor ...
   int tFactor;	// Target Factor ...
   int numFeatures;   // Number of features used ...
+  util::LoadMethod load_method; // method to load model
 
   OpSequenceModel(const std::string &line);
   ~OpSequenceModel();
 
   void readLanguageModel(const char *);
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
@@ -36,18 +37,6 @@ public:
     const ChartHypothesis& /* cur_hypo */,
     int /* featureID - used to index the state in the previous hypotheses */,
     ScoreComponentCollection* accumulator) const;
-
-  void EvaluateWithSourceContext(const InputType &input
-                                 , const InputPath &inputPath
-                                 , const TargetPhrase &targetPhrase
-                                 , const StackVec *stackVec
-                                 , ScoreComponentCollection &scoreBreakdown
-                                 , ScoreComponentCollection *estimatedScores = NULL) const {
-  }
-
-  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const {
-  }
 
   void  EvaluateInIsolation(const Phrase &source
                             , const TargetPhrase &targetPhrase

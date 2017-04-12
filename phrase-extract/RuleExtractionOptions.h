@@ -18,8 +18,6 @@
  ***********************************************************************/
 
 #pragma once
-#ifndef RULEEXTRACTIONOPTIONS_H_INCLUDED_
-#define RULEEXTRACTIONOPTIONS_H_INCLUDED_
 
 namespace MosesTraining
 {
@@ -46,6 +44,7 @@ public:
   bool requireAlignedWord;
   bool sourceSyntax;
   bool targetSyntax;
+  bool targetSyntacticPreferences;
   bool duplicateRules;
   bool fractionalCounting;
   bool pcfgScore;
@@ -54,6 +53,7 @@ public:
   bool conditionOnTargetLhs;
   bool boundaryRules;
   bool flexScoreFlag;
+  bool phraseOrientation;
 
   RuleExtractionOptions()
     : maxSpan(10)
@@ -79,6 +79,7 @@ public:
     , requireAlignedWord(true)
     , sourceSyntax(false)
     , targetSyntax(false)
+    , targetSyntacticPreferences(false)
     , duplicateRules(true)
     , fractionalCounting(true)
     , pcfgScore(false)
@@ -86,9 +87,9 @@ public:
     , unpairedExtractFormat(false)
     , conditionOnTargetLhs(false)
     , boundaryRules(false)
-    , flexScoreFlag(false) {}
+    , flexScoreFlag(false)
+    , phraseOrientation(false) {}
 };
 
 }
 
-#endif

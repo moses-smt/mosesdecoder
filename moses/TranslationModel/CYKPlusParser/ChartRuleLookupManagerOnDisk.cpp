@@ -51,6 +51,7 @@ ChartRuleLookupManagerOnDisk::ChartRuleLookupManagerOnDisk(
 
   size_t sourceSize = parser.GetSize();
   m_expandableDottedRuleListVec.resize(sourceSize);
+  m_input_default_nonterminal = parser.options()->syntax.input_default_non_terminal;
 
   for (size_t ind = 0; ind < m_expandableDottedRuleListVec.size(); ++ind) {
     DottedRuleOnDisk *initDottedRule = new DottedRuleOnDisk(m_dbWrapper.GetRootSourceNode());
@@ -81,7 +82,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
   ChartParserCallback &outColl)
 {
   const StaticData &staticData = StaticData::Instance();
-  const Word &defaultSourceNonTerm = staticData.GetInputDefaultNonTerminal();
+  // const Word &defaultSourceNonTerm = staticData.GetInputDefaultNonTerminal();
   const Range &range = inputPath.GetWordsRange();
 
   size_t relEndPos = range.GetEndPos() - range.GetStartPos();
@@ -107,7 +108,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
     // search for terminal symbol
     if (startPos == absEndPos) {
-      OnDiskPt::Word *sourceWordBerkeleyDb = m_dbWrapper.ConvertFromMoses(m_inputFactorsVec, sourceWordLabel.GetLabel());
+      OnDiskPt::Word *sourceWordBerkeleyDb = m_dictionary.ConvertFromMoses(m_dbWrapper, m_inputFactorsVec, sourceWordLabel.GetLabel());
 
       if (sourceWordBerkeleyDb != NULL) {
         const OnDiskPt::PhraseNode *node = prevNode.GetChild(*sourceWordBerkeleyDb, m_dbWrapper);
@@ -153,7 +154,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
     for (iterSourceLHS = sourceLHSSet.begin(); iterSourceLHS != sourceLHSSet.end(); ++iterSourceLHS) {
       const Word &sourceLHS = *iterSourceLHS;
 
-      OnDiskPt::Word *sourceLHSBerkeleyDb = m_dbWrapper.ConvertFromMoses(m_inputFactorsVec, sourceLHS);
+      OnDiskPt::Word *sourceLHSBerkeleyDb = m_dictionary.ConvertFromMoses(m_dbWrapper, m_inputFactorsVec, sourceLHS);
 
       if (sourceLHSBerkeleyDb == NULL) {
         delete sourceLHSBerkeleyDb;
@@ -178,7 +179,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
         if (m_dictionary.m_maxSpanDefault != NOT_FOUND) {
           // for Hieu's source syntax
 
-          bool isSourceSyntaxNonTerm = sourceLHS != defaultSourceNonTerm;
+          bool isSourceSyntaxNonTerm = sourceLHS != m_input_default_nonterminal; // defaultSourceNonTerm;
           size_t nonTermNumWordsCovered = endPos - startPos + 1;
 
           doSearch = isSourceSyntaxNonTerm ?
@@ -189,7 +190,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
         if (doSearch) {
 
-          OnDiskPt::Word *chartNonTermBerkeleyDb = m_dbWrapper.ConvertFromMoses(m_outputFactorsVec, cellLabel.GetLabel());
+          OnDiskPt::Word *chartNonTermBerkeleyDb = m_dictionary.ConvertFromMoses(m_dbWrapper, m_outputFactorsVec, cellLabel.GetLabel());
 
           if (chartNonTermBerkeleyDb == NULL)
             continue;
@@ -233,7 +234,7 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
       for (iterLabelSet = lhsSet.begin(); iterLabelSet != lhsSet.end(); ++iterLabelSet) {
         const Word &sourceLHS = *iterLabelSet;
 
-        OnDiskPt::Word *sourceLHSBerkeleyDb = m_dbWrapper.ConvertFromMoses(m_inputFactorsVec, sourceLHS);
+        OnDiskPt::Word *sourceLHSBerkeleyDb = m_dictionary.ConvertFromMoses(m_dbWrapper, m_inputFactorsVec, sourceLHS);
         if (sourceLHSBerkeleyDb == NULL)
           continue;
 
@@ -250,12 +251,13 @@ void ChartRuleLookupManagerOnDisk::GetChartRuleCollection(
 
             std::vector<float> weightT = staticData.GetWeights(&m_dictionary);
             targetPhraseCollection
-            = tpcollBerkeleyDb->ConvertToMoses(m_inputFactorsVec
-                                               ,m_outputFactorsVec
-                                               ,m_dictionary
-                                               ,weightT
-                                               ,m_dbWrapper.GetVocab()
-                                               ,true);
+            = m_dictionary.ConvertToMoses(tpcollBerkeleyDb
+                                          ,m_inputFactorsVec
+                                          ,m_outputFactorsVec
+                                          ,m_dictionary
+                                          ,weightT
+                                          ,m_dbWrapper.GetVocab()
+                                          ,true);
 
             tpcollBerkeleyDb.reset();
             m_cache[tpCollFilePos] = targetPhraseCollection;

@@ -27,7 +27,7 @@ namespace sapt
       BOOST_FOREACH(char const& x, denom)
 	{
 	  if (x == '+') { --checksum; continue; }
-	  if (x != 'g' && x != 's' && x != 'r') continue;
+	  if (x != 'g' && x != 's' && x != 'r' && x != 'b') continue;
 	  std::string s = (boost::format("pfwd-%c%.3f") % x % c).str();
 	  this->m_feature_names.push_back(s);
 	}
@@ -38,8 +38,9 @@ namespace sapt
     }
 
     void
-    operator()(Bitext<Token> const& bt, PhrasePair<Token> & pp,
-	       std::vector<float> * dest = NULL) const
+    operator()(Bitext<Token> const& bt,
+         PhrasePair<Token>& pp,
+         std::vector<float> * dest = NULL) const
     {
       if (!dest) dest = &pp.fvals;
       if (pp.joint > pp.good1)
@@ -49,12 +50,16 @@ namespace sapt
 	  // cerr<<pp.joint<<"/"<<pp.good1<<"/"<<pp.raw2<<endl;
 	}
       size_t i = this->m_index;
+      float g = log(lbop(pp.good1, pp.joint, conf));; 
       BOOST_FOREACH(char const& c, this->denom)
 	{
 	  switch (c)
 	    {
+	    case 'b':
+	      (*dest)[i++] = g + log(pp.cum_bias) - log(pp.joint);
+	      break;
 	    case 'g':
-	      (*dest)[i++] = log(lbop(pp.good1, pp.joint, conf));
+	      (*dest)[i++] = g;
 	      break;
 	    case 's':
 	      (*dest)[i++] = log(lbop(pp.sample1, pp.joint, conf));

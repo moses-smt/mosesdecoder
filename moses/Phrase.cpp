@@ -114,21 +114,23 @@ Phrase Phrase::GetSubString(const Range &range, FactorType factorType) const
   return retPhrase;
 }
 
-std::string Phrase::GetStringRep(const vector<FactorType> factorsToPrint) const
+std::string
+Phrase::
+GetStringRep(vector<FactorType> const& factorsToPrint,
+             AllOptions const* opts) const
 {
-  bool markUnknown = StaticData::Instance().GetMarkUnknown();
-
+  if (!opts) opts = StaticData::Instance().options().get();
+  bool markUnk = opts->unk.mark;
   util::StringStream strme;
   for (size_t pos = 0 ; pos < GetSize() ; pos++) {
-    if (markUnknown && GetWord(pos).IsOOV()) {
-      strme << StaticData::Instance().GetUnknownWordPrefix();
+    if (markUnk && GetWord(pos).IsOOV()) {
+      strme << opts->unk.prefix;
     }
     strme << GetWord(pos).GetString(factorsToPrint, (pos != GetSize()-1));
-    if (markUnknown && GetWord(pos).IsOOV()) {
-      strme << StaticData::Instance().GetUnknownWordSuffix();
+    if (markUnk && GetWord(pos).IsOOV()) {
+      strme << opts->unk.suffix;
     }
   }
-
   return strme.str();
 }
 
@@ -159,11 +161,10 @@ void Phrase::PrependWord(const Word &newWord)
   m_words[0] = newWord;
 }
 
-void Phrase::CreateFromString(FactorDirection direction
-                              ,const std::vector<FactorType> &factorOrder
-                              ,const StringPiece &phraseString
-                              // ,const StringPiece &factorDelimiter // eliminated [UG]
-                              ,Word **lhs)
+void Phrase::CreateFromString(FactorDirection direction,
+                              const std::vector<FactorType> &factorOrder,
+                              const StringPiece &phraseString,
+                              Word **lhs)
 {
   // parse
   vector<StringPiece> annotatedWordVector;

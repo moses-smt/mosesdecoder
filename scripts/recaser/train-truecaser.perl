@@ -44,6 +44,12 @@ while(<CORPUS>) {
       $firstWordOfSentence = 1;
     }
 
+    if ($currentWord !~ /[\p{Ll}\p{Lu}\p{Lt}]/) {
+      # skip words with nothing to case
+      $firstWordOfSentence = 0;
+      next;
+    }
+
     my $currentWordWeight = 0;
     if (! $firstWordOfSentence) {
       $currentWordWeight = 1;

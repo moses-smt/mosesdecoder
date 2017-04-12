@@ -4,6 +4,14 @@
 namespace Moses 
 {
 
+  CubePruningOptions::
+  CubePruningOptions() 
+    : pop_limit(DEFAULT_CUBE_PRUNING_POP_LIMIT)
+    , diversity(DEFAULT_CUBE_PRUNING_DIVERSITY)
+    , lazy_scoring(false)
+    , deterministic_search(false)
+  {}
+
   bool
   CubePruningOptions::
   init(Parameter const& param)
@@ -64,6 +72,11 @@ namespace Moses
 
       return true;
     }
+#else
+    bool 
+    CubePruningOptions::
+    update(std::map<std::string,xmlrpc_c::value>const& params)
+    {}
 #endif
 
 

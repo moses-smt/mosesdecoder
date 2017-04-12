@@ -62,7 +62,7 @@ public:
   virtual ~GenerationDictionary();
 
   //! load data file
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   /** number of unique input entries in the generation table.
   * NOT the number of lines in the generation table

@@ -48,6 +48,7 @@ class PhraseDictionaryCompact : public PhraseDictionary
 protected:
   friend class PhraseDecoder;
 
+  static bool s_inMemoryByDefault;
   bool m_inMemory;
   bool m_useAlignmentInfo;
 
@@ -61,13 +62,12 @@ protected:
   StringVector<unsigned char, size_t, MmapAllocator>  m_targetPhrasesMapped;
   StringVector<unsigned char, size_t, std::allocator> m_targetPhrasesMemory;
 
-  std::vector<float> m_weight;
 public:
   PhraseDictionaryCompact(const std::string &line);
 
   ~PhraseDictionaryCompact();
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   TargetPhraseCollection::shared_ptr  GetTargetPhraseCollectionNonCacheLEGACY(const Phrase &source) const;
   TargetPhraseVectorPtr GetTargetPhraseCollectionRaw(const Phrase &source) const;
@@ -76,6 +76,7 @@ public:
 
   void CacheForCleanup(TargetPhraseCollection::shared_ptr  tpc);
   void CleanUpAfterSentenceProcessing(const InputType &source);
+  static void SetStaticDefaultParameters(Parameter const& param);
 
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
     const ChartParser &,

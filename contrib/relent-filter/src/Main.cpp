@@ -36,6 +36,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "IOWrapper.h"
 #include "StaticData.h"
 #include "Util.h"
+#include "Timer.h"
 #include "ThreadPool.h"
 #include "TranslationAnalysis.h"
 #include "OutputCollector.h"
@@ -191,6 +192,7 @@ int main(int argc, char** argv)
 
     // initialize all "global" variables, which are stored in StaticData
     // note: this also loads models such as the language model, etc.
+    ResetUserTime();
     if (!StaticData::LoadDataStatic(params, argv[0])) {
       exit(1);
     }

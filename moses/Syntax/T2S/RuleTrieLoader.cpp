@@ -26,6 +26,7 @@
 #include "util/exception.hh"
 
 #include "RuleTrie.h"
+#include "moses/parameters/AllOptions.h"
 
 namespace Moses
 {
@@ -34,16 +35,14 @@ namespace Syntax
 namespace T2S
 {
 
-bool RuleTrieLoader::Load(const std::vector<FactorType> &input,
+bool RuleTrieLoader::Load(Moses::AllOptions const& opts,
+                          const std::vector<FactorType> &input,
                           const std::vector<FactorType> &output,
                           const std::string &inFile,
                           const RuleTableFF &ff,
                           RuleTrie &trie)
 {
   PrintUserTime(std::string("Start loading text phrase table. Moses format"));
-
-  const StaticData &staticData = StaticData::Instance();
-  // const std::string &factorDelimiter = staticData.GetFactorDelimiter();
 
   std::size_t count = 0;
 
@@ -77,12 +76,10 @@ bool RuleTrieLoader::Load(const std::vector<FactorType> &input,
       alignString = temp;
     }
 
-    if (++pipes) {
-      StringPiece str(*pipes); //counts
-    }
+    ++pipes;  // counts
 
     bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == std::string::npos);
-    if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
+    if (isLHSEmpty && !opts.unk.word_deletion_enabled) { // staticData.IsWordDeletionEnabled()) {
       TRACE_ERR( ff.GetFilePath() << ":" << count << ": pt entry contains empty target, skipping\n");
       continue;
     }

@@ -9,6 +9,7 @@
 #include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
 #include "moses/Util.h"
 #include "moses/Phrase.h"
+#include "moses/parameters/AllOptions.h"
 
 void usage();
 
@@ -50,7 +51,8 @@ int main(int argc, char **argv)
   std::stringstream ss;
   ss << nscores;
   PhraseDictionaryCompact pdc("PhraseDictionaryCompact input-factor=0 output-factor=0 num-features=" + ss.str() + " path=" + ttable);
-  pdc.Load();
+  AllOptions::ptr opts(new AllOptions);
+  pdc.Load(opts);
 
   std::string line;
   while(getline(std::cin, line)) {

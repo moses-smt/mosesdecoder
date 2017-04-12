@@ -119,7 +119,7 @@ public:
     return true;
   }
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
   void Load(const std::string filestr);
   void Execute(std::string command);
   void SetParameter(const std::string& key, const std::string& value);

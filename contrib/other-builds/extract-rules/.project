@@ -61,6 +61,21 @@
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/OutputFileStream.h</locationURI>
 		</link>
 		<link>
+			<name>PhraseExtractionOptions.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/PhraseExtractionOptions.h</locationURI>
+		</link>
+		<link>
+			<name>PhraseOrientation.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/PhraseOrientation.cpp</locationURI>
+		</link>
+		<link>
+			<name>PhraseOrientation.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/PhraseOrientation.h</locationURI>
+		</link>
+		<link>
 			<name>SentenceAlignment.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/SentenceAlignment.cpp</locationURI>

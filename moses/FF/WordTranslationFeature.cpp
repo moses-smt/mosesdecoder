@@ -87,8 +87,9 @@ void WordTranslationFeature::SetParameter(const std::string& key, const std::str
   }
 }
 
-void WordTranslationFeature::Load()
+void WordTranslationFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   // load word list for restricted feature set
   if (m_filePathSource.empty()) {
     return;
@@ -110,8 +111,7 @@ void WordTranslationFeature::Load()
     }
 
     inFileSource.close();
-  } else if (!m_filePathSource.empty() || !m_filePathTarget.empty()) {
-    return;
+  } else {
     // restricted source word vocabulary
     ifstream inFileSource(m_filePathSource.c_str());
     UTIL_THROW_IF2(!inFileSource, "could not open file " << m_filePathSource);

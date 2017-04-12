@@ -208,7 +208,7 @@ Manager::Manager(ttasksptr const& ttask)
   : BaseManager(ttask)
   , cells_(m_source, ChartCellBaseFactory(), parser_)
   , parser_(ttask, cells_)
-  , n_best_(search::NBestConfig(StaticData::Instance().options().nbest.nbest_size))
+  , n_best_(search::NBestConfig(StaticData::Instance().options()->nbest.nbest_size))
 { }
 
 Manager::~Manager()
@@ -229,11 +229,12 @@ Manager::
 PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &out)
 {
   const LanguageModel &abstract = LanguageModel::GetFirstLM();
-  const float oov_weight = abstract.OOVFeatureEnabled() ? abstract.GetOOVWeight() : 0.0;
   const StaticData &data = StaticData::Instance();
-  size_t cpl = data.options().cube.pop_limit;
-  size_t nbs = data.options().nbest.nbest_size;
-  search::Config config(abstract.GetWeight() * log_10, cpl, search::NBestConfig(nbs));
+  const float lm_weight = data.GetWeights(&abstract)[0];
+  const float oov_weight = abstract.OOVFeatureEnabled() ? data.GetWeights(&abstract)[1] : 0.0;
+  size_t cpl = data.options()->cube.pop_limit;
+  size_t nbs = data.options()->nbest.nbest_size;
+  search::Config config(lm_weight * log_10, cpl, search::NBestConfig(nbs));
   search::Context<Model> context(config, model);
 
   size_t size = m_source.GetSize();
@@ -260,7 +261,7 @@ PopulateBest(const Model &model, const std::vector<lm::WordIndex> &words, Best &
 
 template <class Model> void Manager::LMCallback(const Model &model, const std::vector<lm::WordIndex> &words)
 {
-  std::size_t nbest = StaticData::Instance().options().nbest.nbest_size;
+  std::size_t nbest = StaticData::Instance().options()->nbest.nbest_size;
   if (nbest <= 1) {
     search::History ret = PopulateBest(model, words, single_best_);
     if (ret) {
@@ -326,9 +327,8 @@ OutputNBestList(OutputCollector *collector,
                 std::vector<search::Applied> const& nbest,
                 long translationId) const
 {
-  const StaticData &staticData = StaticData::Instance();
   const std::vector<Moses::FactorType> &outputFactorOrder
-  = staticData.GetOutputFactorOrder();
+  = options()->output.factor_order;
 
   std::ostringstream out;
   // wtf? copied from the original OutputNBestList
@@ -348,9 +348,9 @@ OutputNBestList(OutputCollector *collector,
     outputPhrase.RemoveWord(0);
     outputPhrase.RemoveWord(outputPhrase.GetSize() - 1);
     out << translationId << " ||| ";
-    OutputSurface(out, outputPhrase, outputFactorOrder, false);
+    OutputSurface(out, outputPhrase); // , outputFactorOrder, false);
     out << " ||| ";
-    bool with_labels = options().nbest.include_feature_labels;
+    bool with_labels = options()->nbest.include_feature_labels;
     features.OutputAllFeatureScores(out, with_labels);
     out << " ||| " << i->GetScore() << '\n';
   }
@@ -508,7 +508,7 @@ void Manager::OutputBestHypo(OutputCollector *collector, search::Applied applied
   if (collector == NULL) return;
   std::ostringstream out;
   FixPrecision(out);
-  if (options().output.ReportHypoScore) {
+  if (options()->output.ReportHypoScore) {
     out << applied.GetScore() << ' ';
   }
   Phrase outPhrase;
@@ -518,7 +518,7 @@ void Manager::OutputBestHypo(OutputCollector *collector, search::Applied applied
                  "Output phrase should have contained at least 2 words (beginning and end-of-sentence)");
   outPhrase.RemoveWord(0);
   outPhrase.RemoveWord(outPhrase.GetSize() - 1);
-  out << outPhrase.GetStringRep(StaticData::Instance().GetOutputFactorOrder());
+  out << outPhrase.GetStringRep(options()->output.factor_order);
   out << '\n';
   collector->Write(translationId, out.str());
 
@@ -530,7 +530,7 @@ Manager::
 OutputBestNone(OutputCollector *collector, long translationId) const
 {
   if (collector == NULL) return;
-  if (options().output.ReportHypoScore) {
+  if (options()->output.ReportHypoScore) {
     collector->Write(translationId, "0 \n");
   } else {
     collector->Write(translationId, "\n");

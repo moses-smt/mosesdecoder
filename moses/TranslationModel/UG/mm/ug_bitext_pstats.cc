@@ -10,7 +10,7 @@ namespace sapt
 #endif
 
   pstats::
-  pstats() : raw_cnt(0), sample_cnt(0), good(0), sum_pairs(0), in_progress(0)
+  pstats(bool const track_sids) : raw_cnt(0), sample_cnt(0), good(0), sum_pairs(0), in_progress(0), track_sids(track_sids)
   {
     for (int i = 0; i <= LRModel::NONE; ++i)
       ofwd[i] = obwd[i] = 0;
@@ -63,23 +63,23 @@ namespace sapt
       }
   }
 
-  bool
+  size_t
   pstats::
   add(uint64_t pid, float const w, float const b,
       std::vector<unsigned char> const& a,
       uint32_t const cnt2,
       uint32_t fwd_o,
-      uint32_t bwd_o, int const docid)
+      uint32_t bwd_o, int const docid, uint32_t const sid)
   {
     boost::lock_guard<boost::mutex> guard(this->lock);
     jstats& entry = this->trg[pid];
-    entry.add(w, b, a, cnt2, fwd_o, bwd_o, docid);
+    size_t ret = entry.add(w, b, a, cnt2, fwd_o, bwd_o, docid, sid, track_sids);
     if (this->good < entry.rcnt())
       {
-	UTIL_THROW(util::Exception, "more joint counts than good counts:"
-		   << entry.rcnt() << "/" << this->good << "!");
+        UTIL_THROW(util::Exception, "more joint counts than good counts:"
+                   << entry.rcnt() << "/" << this->good << "!");
       }
-    return true;
+    return ret;
   }
 
   void 

@@ -4,7 +4,7 @@
 #include "ug_typedefs.h"
 #include "ug_bitext_pstats.h"
 #ifndef NO_MOSES
-#include "moses/FF/LexicalReordering/LexicalReorderingState.h"
+#include "moses/FF/LexicalReordering/LRState.h"
 #endif
 #include "boost/format.hpp"
 #include "tpt_tokenindex.h"
@@ -31,6 +31,8 @@ namespace sapt
     std::vector<unsigned char> aln;
     float score;
     bool inverse;
+    SPTR<std::vector<uint32_t> > sids; // list of sampled sentence ids where
+                                       // this phrase pair was found
     // std::vector<uint32_t> indoc;
     std::map<uint32_t,uint32_t> indoc;
     PhrasePair() { };
@@ -89,9 +91,9 @@ namespace sapt
     p2     = 0;
     if (ps)
       {
-	raw1    = ps->raw_cnt;
-	sample1 = ps->sample_cnt;
-	good1   = ps->good;
+        raw1    = ps->raw_cnt;
+        sample1 = ps->sample_cnt;
+        good1   = ps->good;
       }
     else raw1 = sample1 = good1 = 0;
     joint   = 0;
@@ -127,11 +129,12 @@ namespace sapt
     // should we do that here or leave the raw counts?
     for (int i = 0; i <= LRModel::NONE; i++)
       {
-	PhraseOrientation po = static_cast<PhraseOrientation>(i);
-	dfwd[i] = js.dcnt_fwd(po);
-	dbwd[i] = js.dcnt_bwd(po);
+        PhraseOrientation po = static_cast<PhraseOrientation>(i);
+        dfwd[i] = js.dcnt_fwd(po);
+        dbwd[i] = js.dcnt_bwd(po);
       }
-
+    
+    sids = js.sids;
     indoc = js.indoc;
     return *this;
   }
@@ -182,6 +185,8 @@ namespace sapt
     sample2 += o.sample2;
     cum_bias += o.cum_bias;
     // todo: add distortion counts
+    if (sids && o.sids)
+      sids->insert(sids->end(), o.sids->begin(), o.sids->end());
     return *this;
   }
 
@@ -199,6 +204,7 @@ namespace sapt
     , aln(o.aln)
     , score(o.score)
     , inverse(o.inverse)
+    , sids(o.sids)
     , indoc(o.indoc)
   {
     for (int i = 0; i <= LRModel::NONE; ++i)
@@ -282,8 +288,8 @@ namespace sapt
     size_t offset;
     if (dir == LRModel::Bidirectional)
       {
-	offset = num_scores;
-	num_scores *= 2;
+        offset = num_scores;
+        num_scores *= 2;
       }
     else offset = 0;
 

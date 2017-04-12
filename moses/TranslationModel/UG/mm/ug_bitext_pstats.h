@@ -35,13 +35,14 @@ namespace sapt
 
     indoc_map_t indoc;
     trg_map_t trg;
-    pstats();
+    bool track_sids;
+    pstats(bool const track_sids);
     ~pstats();
     void release();
     void register_worker();
     size_t count_workers() { return in_progress; }
 
-    bool
+    size_t
     add(uint64_t const  pid, // target phrase id
         float const       w, // sample weight (1./(# of phrases extractable))
         float const       b, // sample bias score
@@ -49,7 +50,8 @@ namespace sapt
         uint32_t const cnt2, // raw target phrase count
         uint32_t fwd_o,      // fwd. phrase orientation
         uint32_t bwd_o,      // bwd. phrase orientation
-        int const docid);    // document where sample was found
+        int const docid,     // document where sample was found
+        uint32_t const sid); // index of sentence where sample was found
     
     void
     count_sample(int const docid,        // document where sample was found

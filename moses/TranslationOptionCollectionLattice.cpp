@@ -11,6 +11,7 @@
 #include "FF/InputFeature.h"
 #include "TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "util/exception.hh"
+#include "TranslationTask.h"
 
 using namespace std;
 
@@ -20,18 +21,20 @@ namespace Moses
 /** constructor; just initialize the base class */
 TranslationOptionCollectionLattice
 ::TranslationOptionCollectionLattice
-( ttasksptr const& ttask,   const WordLattice &input,
-  size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
-  : TranslationOptionCollection(ttask, input, maxNoTransOptPerCoverage,
-                                translationOptionThreshold)
+( ttasksptr const& ttask,   const WordLattice &input)
+// , size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
+  : TranslationOptionCollection(ttask, input)//
+  // , maxNoTransOptPerCoverage, translationOptionThreshold)
 {
   UTIL_THROW_IF2(StaticData::Instance().GetUseLegacyPT(),
                  "Not for models using the legqacy binary phrase table");
 
+  size_t maxNoTransOptPerCoverage = ttask->options()->search.max_trans_opt_per_cov;
+  float translationOptionThreshold = ttask->options()->search.trans_opt_threshold;
   const InputFeature *inputFeature = InputFeature::InstancePtr();
   UTIL_THROW_IF2(inputFeature == NULL, "Input feature must be specified");
 
-  size_t maxPhraseLength = StaticData::Instance().GetMaxPhraseLength();
+  size_t maxPhraseLength = ttask->options()->search.max_phrase_length;  //StaticData::Instance().GetMaxPhraseLength();
   size_t size = input.GetSize();
 
   // 1-word phrases
@@ -62,19 +65,22 @@ TranslationOptionCollectionLattice
       ScorePair *inputScore = new ScorePair(scores);
 
       InputPath *path
-      = new InputPath(ttask, subphrase, labels, range, NULL, inputScore);
+      = new InputPath(ttask.get(), subphrase, labels, range, NULL, inputScore);
 
       path->SetNextNode(nextNode);
       m_inputPathQueue.push_back(path);
 
       // recursive
-      Extend(*path, input);
+      Extend(*path, input, ttask->options()->search.max_phrase_length);
 
     }
   }
 }
 
-void TranslationOptionCollectionLattice::Extend(const InputPath &prevPath, const WordLattice &input)
+void
+TranslationOptionCollectionLattice::
+Extend(const InputPath &prevPath, const WordLattice &input,
+       size_t const maxPhraseLength)
 {
   size_t nextPos = prevPath.GetWordsRange().GetEndPos() + 1;
   if (nextPos >= input.GetSize()) {
@@ -100,7 +106,7 @@ void TranslationOptionCollectionLattice::Extend(const InputPath &prevPath, const
 
     Range range(startPos, endPos);
 
-    size_t maxPhraseLength = StaticData::Instance().GetMaxPhraseLength();
+    // size_t maxPhraseLength = StaticData::Instance().GetMaxPhraseLength();
     if (range.GetNumWordsCovered() > maxPhraseLength) {
       continue;
     }
@@ -121,7 +127,7 @@ void TranslationOptionCollectionLattice::Extend(const InputPath &prevPath, const
     m_inputPathQueue.push_back(path);
 
     // recursive
-    Extend(*path, input);
+    Extend(*path, input, maxPhraseLength);
 
   }
 }

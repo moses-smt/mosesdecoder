@@ -22,7 +22,6 @@
 #include <fstream>
 #include "Vocab.h"
 #include "PhraseNode.h"
-#include "moses/Word.h"
 
 namespace OnDiskPt
 {
@@ -106,9 +105,6 @@ public:
   }
 
   uint64_t GetMisc(const std::string &key) const;
-
-  Word *ConvertFromMoses(const std::vector<Moses::FactorType> &factorsVec
-                         , const Moses::Word &origWord) const;
 
 };
 

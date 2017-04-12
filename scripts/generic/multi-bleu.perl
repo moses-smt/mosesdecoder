@@ -31,10 +31,22 @@ while(-e "$stem$ref") {
 &add_to_ref($stem,\@REF) if -e $stem;
 die("ERROR: could not find reference file $stem") unless scalar @REF;
 
+# add additional references explicitly specified on the command line
+shift;
+foreach my $stem (@ARGV) {
+    &add_to_ref($stem,\@REF) if -e $stem;
+}
+
+
+
 sub add_to_ref {
     my ($file,$REF) = @_;
     my $s=0;
-    open(REF,$file) or die "Can't read $file";
+    if ($file =~ /.gz$/) {
+	open(REF,"gzip -dc $file|") or die "Can't read $file";
+    } else { 
+	open(REF,$file) or die "Can't read $file";
+    }
     while(<REF>) {
 	chop;
 	push @{$$REF[$s++]}, $_;

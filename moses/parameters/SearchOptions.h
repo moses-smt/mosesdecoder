@@ -14,9 +14,10 @@ namespace Moses
     SearchAlgorithm algo;
     
     // stack decoding
-    size_t stack_size;      // maxHypoStackSize;
-    size_t stack_diversity; // minHypoStackDiversity;
-
+    size_t stack_size;       // maxHypoStackSize;
+    size_t stack_diversity;  // minHypoStackDiversity;
+    bool disable_discarding; 
+    // Disable discarding of bad hypotheses from HypothesisStackNormal
     size_t max_phrase_length;
     size_t max_trans_opt_per_cov; 
     size_t max_partial_trans_opt;
@@ -24,9 +25,10 @@ namespace Moses
     float beam_width;
 
     int timeout;
+    int segment_timeout;
 
     bool consensus; //! Use Consensus decoding  (DeNero et al 2009)
-
+    
     // reordering options
     // bool  reorderingConstraint; //! use additional reordering constraints
     // bool  useEarlyDistortionCost;
@@ -36,7 +38,7 @@ namespace Moses
 
     bool init(Parameter const& param);
     SearchOptions(Parameter const& param);
-    SearchOptions() {}
+    SearchOptions();
 
     bool 
     UseEarlyDiscarding() const {

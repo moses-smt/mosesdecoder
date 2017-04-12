@@ -23,7 +23,7 @@ private:
   std::vector<std::vector<int> > distances;
 
 public:
-  WordLattice();
+  WordLattice(AllOptions::ptr const& opts);
 
   InputTypeEnum GetType() const {
     return WordLatticeInput;
@@ -40,12 +40,11 @@ public:
   /** Given a lattice represented using the PCN::CN data type (topologically sorted agency list
    * representation), initialize the WordLattice object
    */
-  int InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<FactorType>& factorOrder, const std::string& debug_line = "");
+  int InitializeFromPCNDataType(const PCN::CN& cn, const std::string& debug_line = "");
+
   /** Read from PLF format (1 lattice per line)
    */
-  int Read(std::istream& in,
-           std::vector<FactorType> const& factorOrder,
-           AllOptions const& opts);
+  int Read(std::istream& in);
 
   /** Convert internal representation into an edge matrix
    * @note edges[1][2] means there is an edge from 1 to 2

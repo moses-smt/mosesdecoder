@@ -58,6 +58,10 @@ namespace Moses
     friend class Alignment;
     std::map<std::string,std::string> param;
     std::string m_name;
+#ifndef NO_MOSES
+    // Allows PhraseDictionaryGroup to get &m_lr_func
+    friend class PhraseDictionaryGroup;
+#endif
   public:
     typedef sapt::L2R_Token<sapt::SimpleWordId> Token;
     typedef sapt::mmBitext<Token> mmbitext;
@@ -67,7 +71,7 @@ namespace Moses
     typedef sapt::PhraseScorer<Token> pscorer;
   private:
     // vector<SPTR<bitext> > shards;
-    iptr<mmbitext> btfix;
+    SPTR<mmbitext> btfix;
     SPTR<imbitext> btdyn;
     std::string m_bname, m_extra_data, m_bias_file,m_bias_server;
     std::string L1;
@@ -115,6 +119,12 @@ namespace Moses
     std::vector<SPTR<pscorer > > m_active_ff_common;
     // activated feature functions (dyn)
 
+    bool m_track_coord; // track coordinates?  Track sids when sampling
+                                // from bitext, append coords to target phrases
+    // Space < Sid < sptr sentence coords > >
+    std::vector<std::vector<SPTR<std::vector<float> > > > m_sid_coord_list;
+    std::vector<size_t> m_coord_spaces;
+
     void
     parse_factor_spec(std::vector<FactorType>& flist, std::string const key);
 
@@ -156,7 +166,7 @@ namespace Moses
 
 #if PROVIDES_RANKED_SAMPLING
     void 
-    set_bias_for_ranking(ttasksptr const& ttask, iptr<sapt::Bitext<Token> const> bt);
+    set_bias_for_ranking(ttasksptr const& ttask, SPTR<sapt::Bitext<Token> const> bt);
 #endif
   private:
 
@@ -207,8 +217,8 @@ namespace Moses
     // Mmsapt(std::string const& description, std::string const& line);
     Mmsapt(std::string const& line);
 
-    void Load();
-    void Load(bool with_checks);
+    void Load(AllOptions::ptr const& opts);
+    void Load(AllOptions::ptr const& opts, bool with_checks);
     size_t SetTableLimit(size_t limit); // returns the prior table limit
     std::string const& GetName() const;
 

@@ -466,11 +466,6 @@ inline void ShrinkToFit(T& v)
 
 bool FileExists(const std::string& filePath);
 
-// A couple of utilities to measure decoding time
-void ResetUserTime();
-void PrintUserTime(const std::string &message);
-double GetUserTime();
-
 // dump SGML parser for <dlt> tags
 std::vector< std::map<std::string, std::string> > ProcessAndStripDLT(std::string &line);
 

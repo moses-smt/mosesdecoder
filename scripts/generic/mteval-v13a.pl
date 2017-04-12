@@ -19,6 +19,8 @@ binmode STDERR, ":utf8";
 # version 13a
 #    * modified the scoring functions to prevent division-by-zero errors when a system segment is empty
 #        * affected methods: 'bleu_score' and 'bleu_score_smoothing'
+#    * use \p{Line_Breaks} instead of \p{Hyphen} when stripping end-of-line hyphenation and join lines
+#        * because \p{Hyphen} is deprecated since 2016-06-01, see http://www.unicode.org/reports/tr14/#Hyphen
 #
 # version 13
 #    * Uses a XML parser to read data (only when extension is .xml)
@@ -948,7 +950,7 @@ sub tokenization_international
 	my ($norm_text) = @_;
 
 	$norm_text =~ s/<skipped>//g; # strip "skipped" tags
-	$norm_text =~ s/\p{Hyphen}\p{Zl}//g; # strip end-of-line hyphenation and join lines
+	$norm_text =~ s/\p{Line_Break}\p{Zl}//g; # strip end-of-line hyphenation and join lines
 	$norm_text =~ s/\p{Zl}/ /g; # join lines
 
 	# replace entities

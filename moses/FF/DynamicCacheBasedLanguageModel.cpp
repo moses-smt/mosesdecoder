@@ -323,8 +323,9 @@ void DynamicCacheBasedLanguageModel::Clear()
   m_cache.clear();
 }
 
-void DynamicCacheBasedLanguageModel::Load()
+void DynamicCacheBasedLanguageModel::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
 //  SetPreComputedScores();
   VERBOSE(2,"DynamicCacheBasedLanguageModel::Load()" << std::endl);
   Load(m_initfiles);

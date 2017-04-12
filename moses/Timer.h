@@ -9,6 +9,21 @@
 namespace Moses
 {
 
+// A couple of utilities to measure decoding time
+
+/** Start global timer. */
+void ResetUserTime();
+
+/** Print out an optional message followed by the current global timer timing. */
+void PrintUserTime(const std::string &message);
+
+/**
+ * Total wall time that the global timer has been in the "running"
+ * state since it was first "started".
+ */
+double GetUserTime();
+
+
 /** Wrapper around time_t to time how long things have been running
  *  according to walltime. We avoid CPU time since it is less reliable
  *  in a multi-threaded environment and can spuriously include clock cycles

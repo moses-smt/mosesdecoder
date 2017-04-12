@@ -55,9 +55,6 @@ void ThreadPool::Execute()
     }
     //Execute job
     if (task) {
-      // must read from task before run. otherwise task may be deleted by main thread
-      // race condition
-      task->DeleteAfterExecution();
       task->Run();
     }
     m_threadAvailable.notify_all();

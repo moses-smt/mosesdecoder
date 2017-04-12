@@ -5,6 +5,21 @@
 namespace Moses
 {
 
+  NBestOptions::
+  NBestOptions()
+    : nbest_size(0)
+    , factor(20)
+    , enabled(false)
+    , print_trees(false)
+    , only_distinct(false)
+    , include_alignment_info(false)
+    , include_feature_labels(true)
+    , include_segmentation(false)
+    , include_passthrough(false)
+    , include_all_factors(false)
+  {}
+
+
 bool
 NBestOptions::
 init(Parameter const& P)
@@ -17,7 +32,7 @@ init(Parameter const& P)
       nbest_size = Scan<size_t>( params->at(1) );
       only_distinct = (params->size()>2 && params->at(2)=="distinct");
     } else {
-      std::cerr << "wrong format for switch -n-best-list file size [disinct]";
+      std::cerr << "wrong format for switch -n-best-list file size [distinct]";
       return false;
     }
   } else nbest_size = 0;
@@ -43,10 +58,15 @@ update(std::map<std::string,xmlrpc_c::value>const& param)
   params_t::const_iterator si = param.find("nbest");
   if (si != param.end())
     nbest_size = xmlrpc_c::value_int(si->second);
-  only_distinct = check(param, "nbest-distinct");
+  only_distinct = check(param, "nbest-distinct", only_distinct);
   enabled = (nbest_size > 0);
   return true;
 }
+#else
+bool 
+NBestOptions::
+update(std::map<std::string,xmlrpc_c::value>const& param)
+{}
 #endif
 
 

@@ -33,7 +33,8 @@ using namespace std;
 namespace Moses
 {
 
-ChartTranslationOptionList::ChartTranslationOptionList(size_t ruleLimit, const InputType &input)
+ChartTranslationOptionList::
+ChartTranslationOptionList(size_t ruleLimit, const InputType &input)
   : m_size(0)
   , m_ruleLimit(ruleLimit)
 {
@@ -128,7 +129,7 @@ AddPhraseOOV(TargetPhrase &phrase,
   Add(*tpc, empty, range);
 }
 
-void ChartTranslationOptionList::ApplyThreshold()
+void ChartTranslationOptionList::ApplyThreshold(float const threshold)
 {
   if (m_ruleLimit && m_size > m_ruleLimit) {
     // Something's gone wrong if the list has grown to m_ruleLimit * 2
@@ -154,7 +155,7 @@ void ChartTranslationOptionList::ApplyThreshold()
     scoreThreshold = (score > scoreThreshold) ? score : scoreThreshold;
   }
 
-  scoreThreshold += StaticData::Instance().GetTranslationOptionThreshold();
+  scoreThreshold += threshold; // StaticData::Instance().GetTranslationOptionThreshold();
 
   CollType::iterator bound = std::partition(m_collection.begin(),
                              m_collection.begin()+m_size,

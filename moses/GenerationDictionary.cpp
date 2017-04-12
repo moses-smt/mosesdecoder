@@ -44,8 +44,9 @@ GenerationDictionary::GenerationDictionary(const std::string &line)
   ReadParameters();
 }
 
-void GenerationDictionary::Load()
+void GenerationDictionary::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   FactorCollection &factorCollection = FactorCollection::Instance();
 
   const size_t numFeatureValuesInConfig = this->GetNumScoreComponents();
@@ -119,7 +120,14 @@ const OutputWordCollection *GenerationDictionary::FindWord(const Word &word) con
 {
   const OutputWordCollection *ret;
 
-  Collection::const_iterator iter = m_collection.find(&word);
+  Word wordInput;
+  const std::vector<FactorType> &inputFactors = GetInput();
+  for (size_t i = 0; i < inputFactors.size(); ++i) {
+    FactorType factorType = inputFactors[i];
+    wordInput[factorType] = word[factorType];
+  }
+
+  Collection::const_iterator iter = m_collection.find(&wordInput);
   if (iter == m_collection.end()) {
     // can't find source phrase
     ret = NULL;

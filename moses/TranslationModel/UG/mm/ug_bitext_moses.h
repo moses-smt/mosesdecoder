@@ -30,9 +30,9 @@ lookup(ttasksptr const& ttask, iter const& phrase, int max_sample) const
 template<typename Token>
 void
 Bitext<Token>::
-prep(ttasksptr const& ttask, iter const& phrase) const
+prep(ttasksptr const& ttask, iter const& phrase, bool const track_sids) const
 {
-  prep2(ttask, phrase, m_default_sample_size);
+  prep2(ttask, phrase, track_sids, m_default_sample_size);
 }
 
 
@@ -44,7 +44,8 @@ template<typename Token>
 SPTR<pstats>
 Bitext<Token>
 ::prep2
-( ttasksptr const& ttask, iter const& phrase, int max_sample) const
+( ttasksptr const& ttask, iter const& phrase, bool const track_sids,
+  int max_sample) const
 {
   if (max_sample < 0) max_sample = m_default_sample_size;
   SPTR<SamplingBias> bias;
@@ -74,7 +75,7 @@ Bitext<Token>
       if (m_num_workers > 1)
 	ag->add_workers(m_num_workers);
     }
-  ret = ag->add_job(this, phrase, max_sample, bias);
+  ret = ag->add_job(this, phrase, max_sample, bias, track_sids);
   if (cache) cache->set(phrase.getPid(),ret);
   UTIL_THROW_IF2(ret == NULL, "Couldn't schedule sampling job.");
   return ret;

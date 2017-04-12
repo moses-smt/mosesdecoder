@@ -17,11 +17,11 @@ public:
   }
 
   void operator()(const InputType &input
-                  , const InputPath &inputPath
                   , const TargetPhrase &targetPhrase
-                  , Discriminative::Classifier &classifier) const {
+                  , Discriminative::Classifier &classifier
+                  , Discriminative::FeatureVector &outFeatures) const {
     for (size_t i = 1; i < targetPhrase.GetSize(); i++) {
-      classifier.AddLabelDependentFeature("tbigram^" + GetWord(targetPhrase, i - 1) + "^" + GetWord(targetPhrase, i));
+      outFeatures.push_back(classifier.AddLabelDependentFeature("tbigram^" + GetWord(targetPhrase, i - 1) + "^" + GetWord(targetPhrase, i)));
     }
   }
 

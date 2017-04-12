@@ -4,6 +4,7 @@
 #include <boost/unordered_map.hpp>
 #include <boost/unordered_set.hpp>
 #include "StatelessFeatureFunction.h"
+#include "moses/TargetPhrase.h"
 #include "moses/Factor.h"
 
 namespace Moses
@@ -30,7 +31,7 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   void EvaluateInIsolation(const Phrase &source
                            , const TargetPhrase &targetPhrase

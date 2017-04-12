@@ -42,6 +42,7 @@ namespace Moses
 {
 LanguageModelImplementation::LanguageModelImplementation(const std::string &line)
   :LanguageModel(line)
+  ,m_nGramOrder(NOT_FOUND)
 {
 }
 
@@ -61,7 +62,7 @@ void LanguageModelImplementation::ShiftOrPush(std::vector<const Word*> &contextF
 {
   if (contextFactor.size() < GetNGramOrder()) {
     contextFactor.push_back(&word);
-  } else {
+  } else if (GetNGramOrder() > 0) {
     // shift
     for (size_t currNGramOrder = 0 ; currNGramOrder < GetNGramOrder() - 1 ; currNGramOrder++) {
       contextFactor[currNGramOrder] = contextFactor[currNGramOrder + 1];

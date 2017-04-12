@@ -11,8 +11,8 @@ namespace Syntax
 
 Phrase GetOneBestTargetYield(const SHyperedge &h)
 {
-  FactorType placeholderFactor = StaticData::Instance().options().input.placeholder_factor;
-  
+  FactorType placeholderFactor = StaticData::Instance().options()->input.placeholder_factor;
+
   Phrase ret(ARRAY_SIZE_INCR);
 
   const AlignmentInfo::NonTermIndexMap &targetToSourceMap =

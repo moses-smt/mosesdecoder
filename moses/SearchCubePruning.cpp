@@ -50,10 +50,9 @@ public:
 };
 
 SearchCubePruning::
-SearchCubePruning(Manager& manager, const InputType &source,
-                  const TranslationOptionCollection &transOptColl)
-  : Search(manager, source)
-  , m_hypoStackColl(source.GetSize() + 1)
+SearchCubePruning(Manager& manager, TranslationOptionCollection const& transOptColl)
+  : Search(manager)
+  , m_hypoStackColl(manager.GetSource().GetSize() + 1)
   , m_transOptColl(transOptColl)
 {
   std::vector < HypothesisStackCubePruning >::iterator iterStack;
@@ -79,7 +78,7 @@ void SearchCubePruning::Decode()
 {
   // initial seed hypothesis: nothing translated, no words produced
   const Bitmap &initBitmap = m_bitmaps.GetInitialBitmap();
-  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, initBitmap);
+  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, initBitmap, m_manager.GetNextHypoId());
 
   HypothesisStackCubePruning &firstStack
   = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
@@ -88,17 +87,16 @@ void SearchCubePruning::Decode()
   firstStack.CleanupArcList();
   CreateForwardTodos(firstStack);
 
-  const size_t PopLimit = m_manager.options().cube.pop_limit;
+  const size_t PopLimit = m_manager.options()->cube.pop_limit;
   VERBOSE(2,"Cube Pruning pop limit is " << PopLimit << std::endl);
 
-  const size_t Diversity = m_manager.options().cube.diversity;
+  const size_t Diversity = m_manager.options()->cube.diversity;
   VERBOSE(2,"Cube Pruning diversity is " << Diversity << std::endl);
   VERBOSE(2,"Max Phrase length is "
-          << m_manager.options().search.max_phrase_length << std::endl);
+          << m_manager.options()->search.max_phrase_length << std::endl);
 
   // go through each stack
   size_t stackNo = 1;
-  int timelimit = m_options.search.timeout;
   std::vector < HypothesisStack* >::iterator iterStack;
   for (iterStack = m_hypoStackColl.begin() + 1 ; iterStack != m_hypoStackColl.end() ; ++iterStack) {
     // BOOST_FOREACH(HypothesisStack* hstack, m_hypoStackColl) {
@@ -117,13 +115,17 @@ void SearchCubePruning::Decode()
 
     for(bmIter = accessor.begin(); bmIter != accessor.end(); ++bmIter) {
       // build the first hypotheses
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StartTimeOtherScore();
+      }
       bmIter->second->InitializeEdges();
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StopTimeOtherScore();
+      }
       m_manager.GetSentenceStats().StartTimeManageCubes();
       BCQueue.push(bmIter->second);
       m_manager.GetSentenceStats().StopTimeManageCubes();
 
-      // old algorithm
-      // bmIter->second->EnsureMinStackHyps(PopLimit);
     }
 
     // main search loop, pop k best hyps
@@ -137,7 +139,13 @@ void SearchCubePruning::Decode()
         m_manager.GetSentenceStats().AddPopped();
       }
       // push on stack and create successors
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StartTimeOtherScore();
+      }
       bc->ProcessBestHypothesis();
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StopTimeOtherScore();
+      }
       // if there are any hypothesis left in this specific container, add back to queue
       m_manager.GetSentenceStats().StartTimeManageCubes();
       if (!bc->Empty())
@@ -148,8 +156,14 @@ void SearchCubePruning::Decode()
     // ensure diversity, a minimum number of inserted hyps for each bitmap container;
     //    NOTE: diversity doesn't ensure they aren't pruned at some later point
     if (Diversity > 0) {
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StartTimeOtherScore();
+      }
       for(bmIter = accessor.begin(); bmIter != accessor.end(); ++bmIter) {
         bmIter->second->EnsureMinStackHyps(Diversity);
+      }
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StopTimeOtherScore();
       }
     }
 
@@ -211,7 +225,7 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
       }
 
       size_t maxSize = size - startPos;
-      size_t maxSizePhrase = m_manager.options().search.max_phrase_length;
+      size_t maxSizePhrase = m_manager.options()->search.max_phrase_length;
       maxSize = std::min(maxSize, maxSizePhrase);
       for (endPos = startPos+1; endPos < startPos + maxSize; endPos++) {
         if (bitmap.GetValue(endPos))
@@ -252,7 +266,7 @@ SearchCubePruning::
 CheckDistortion(const Bitmap &hypoBitmap, const Range &range) const
 {
   // since we check for reordering limits, its good to have that limit handy
-  int maxDistortion = m_manager.options().reordering.max_distortion;
+  int maxDistortion = m_manager.options()->reordering.max_distortion;
   if (maxDistortion < 0) return true;
 
   // if there are reordering limits, make sure it is not violated

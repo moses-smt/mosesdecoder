@@ -28,6 +28,8 @@ public:
 
 protected:
 
+  virtual void Print(std::ostream& out) const;
+
   std::string *m_value;
 
 };

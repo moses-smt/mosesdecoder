@@ -58,8 +58,8 @@ protected:
   std::map<std::string, std::vector<float> >  m_weights;
 
   std::string FindParam(const std::string &paramSwitch, int argc, char const* argv[]);
-  void OverwriteParam(const std::string &paramSwitch, const std::string &paramName, 
-		      int argc, char const* argv[]);
+  void OverwriteParam(const std::string &paramSwitch, const std::string &paramName,
+                      int argc, char const* argv[]);
   bool ReadConfigFile(const std::string &filePath );
   bool FilesExist(const std::string &paramName, int fieldNo, std::vector<std::string> const& fileExtension=std::vector<std::string>(1,""));
   bool isOption(const char* token);
@@ -129,7 +129,7 @@ public:
   void OverwriteParam(const std::string &paramName, PARAM_VEC values);
 
   std::vector<float> GetWeights(const std::string &name);
-  std::map<std::string, std::vector<float> > GetAllWeights() const {
+  const std::map<std::string, std::vector<float> > &GetAllWeights() const {
     return m_weights;
   }
   std::set<std::string> GetWeightNames() const;

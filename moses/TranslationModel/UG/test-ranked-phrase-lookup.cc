@@ -76,7 +76,7 @@ int main(int argc, char* argv[])
 {
   typedef vector<PhrasePair<Token> > pplist_t;
   interpret_args(argc, argv);
-  iptr<mmbitext> Bptr(new mmbitext);
+  boost_iptr<mmbitext> Bptr(new mmbitext);
   mmbitext& B = *Bptr;// static_cast<mmbitext*>(Bptr.get());
   B.open(bname, L1, L2);
   B.V1->setDynamic(true);

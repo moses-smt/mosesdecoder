@@ -24,7 +24,7 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   virtual LMResult GetValue(
     const std::vector<const Word*> &contextFactor,

@@ -40,7 +40,7 @@ public:
   void SetParameter(const std::string& key, const std::string& value);
   bool IsUseable(const FactorMask &mask) const;
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   void EvaluateWithSourceContext(const InputType &input
                                  , const InputPath &inputPath

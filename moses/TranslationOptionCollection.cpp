@@ -52,14 +52,14 @@ namespace Moses
  * called by inherited classe */
 TranslationOptionCollection::
 TranslationOptionCollection(ttasksptr const& ttask,
-                            InputType const& src,
-                            size_t maxNoTransOptPerCoverage,
-                            float translationOptionThreshold)
+                            InputType const& src)
   : m_ttask(ttask)
   , m_source(src)
   , m_estimatedScores(src.GetSize())
-  , m_maxNoTransOptPerCoverage(maxNoTransOptPerCoverage)
-  , m_translationOptionThreshold(translationOptionThreshold)
+  , m_maxNoTransOptPerCoverage(ttask->options()->search.max_trans_opt_per_cov)
+  , m_translationOptionThreshold(ttask->options()->search.trans_opt_threshold)
+  , m_max_phrase_length(ttask->options()->search.max_phrase_length)
+  , max_partial_trans_opt(ttask->options()->search.max_partial_trans_opt)
 {
   // create 2-d vector
   size_t size = src.GetSize();
@@ -67,8 +67,7 @@ TranslationOptionCollection(ttasksptr const& ttask,
     m_collection.push_back( vector< TranslationOptionList >() );
 
     size_t maxSize = size - sPos;
-    size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-    maxSize = std::min(maxSize, maxSizePhrase);
+    maxSize = std::min(maxSize, m_max_phrase_length);
 
     for (size_t ePos = 0 ; ePos < maxSize ; ++ePos) {
       m_collection[sPos].push_back( TranslationOptionList() );
@@ -145,12 +144,14 @@ ProcessUnknownWord()
     }
   }
 
-  bool alwaysCreateDirectTranslationOption
-  = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
+  // bool alwaysCreateDirectTranslationOption
+  // = StaticData::Instance().IsAlwaysCreateDirectTranslationOption();
+  bool always = m_ttask.lock()->options()->unk.always_create_direct_transopt;
+
   // create unknown words for 1 word coverage where we don't have any trans options
   for (size_t pos = 0 ; pos < size ; ++pos) {
     TranslationOptionList* fullList = GetTranslationOptionList(pos, pos);
-    if (!fullList || fullList->size() == 0 || alwaysCreateDirectTranslationOption)
+    if (!fullList || fullList->size() == 0 || always)
       ProcessUnknownWord(pos);
   }
 }
@@ -173,7 +174,6 @@ TranslationOptionCollection::
 ProcessOneUnknownWord(const InputPath &inputPath, size_t sourcePos,
                       size_t length, const ScorePair *inputScores)
 {
-  const StaticData &staticData = StaticData::Instance();
   const UnknownWordPenaltyProducer&
   unknownWordPenaltyProducer = UnknownWordPenaltyProducer::Instance();
   float unknownScore = FloorScore(TransformScore(0));
@@ -193,9 +193,8 @@ ProcessOneUnknownWord(const InputPath &inputPath, size_t sourcePos,
   const Factor *f = sourceWord[0]; // TODO hack. shouldn't know which factor is surface
   const StringPiece s = f->GetString();
   bool isEpsilon = (s=="" || s==EPSILON);
-  if (StaticData::Instance().GetDropUnknown()) {
-
-
+  bool dropUnk = GetTranslationTask()->options()->unk.drop;
+  if (dropUnk) {
     isDigit = s.find_first_of("0123456789");
     if (isDigit == string::npos)
       isDigit = 0;
@@ -206,7 +205,7 @@ ProcessOneUnknownWord(const InputPath &inputPath, size_t sourcePos,
 
   TargetPhrase targetPhrase(firstPt);
 
-  if (!(staticData.GetDropUnknown() || isEpsilon) || isDigit) {
+  if (!(dropUnk || isEpsilon) || isDigit) {
     // add to dictionary
 
     Word &targetWord = targetPhrase.AddWord();
@@ -356,8 +355,8 @@ CreateTranslationOptions()
     // iterate over spans
     for (size_t sPos = 0 ; sPos < size; sPos++) {
       size_t maxSize = size - sPos; // don't go over end of sentence
-      size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-      maxSize = std::min(maxSize, maxSizePhrase);
+      // size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+      maxSize = std::min(maxSize, m_max_phrase_length);
 
       for (size_t ePos = sPos ; ePos < sPos + maxSize ; ePos++) {
         if (gidx && backoff &&
@@ -388,12 +387,12 @@ CreateTranslationOptionsForRange
 {
   typedef DecodeStepTranslation Tstep;
   typedef DecodeStepGeneration Gstep;
-  XmlInputType xml_policy = m_ttask.lock()->options().input.xml_policy;
+  XmlInputType xml_policy = m_ttask.lock()->options()->input.xml_policy;
   if ((xml_policy != XmlExclusive)
       || !HasXmlOptionsOverlappingRange(sPos,ePos)) {
 
     // partial trans opt stored in here
-    PartialTranslOptColl* oldPtoc = new PartialTranslOptColl;
+    PartialTranslOptColl* oldPtoc = new PartialTranslOptColl(max_partial_trans_opt);
     size_t totalEarlyPruned = 0;
 
     // initial translation step
@@ -413,7 +412,7 @@ CreateTranslationOptionsForRange
 
     for (++d ; d != dgraph.end() ; ++d) {
       const DecodeStep *dstep = *d;
-      PartialTranslOptColl* newPtoc = new PartialTranslOptColl;
+      PartialTranslOptColl* newPtoc = new PartialTranslOptColl(m_max_phrase_length);
 
       // go thru each intermediate trans opt just created
       const vector<TranslationOption*>& partTransOptList = oldPtoc->GetList();
@@ -448,8 +447,8 @@ CreateTranslationOptionsForRange
     vector<TranslationOption*>::const_iterator c;
     for (c = partTransOptList.begin() ; c != partTransOptList.end() ; ++c) {
       TranslationOption *transOpt = *c;
-      if (xml_policy != XmlConstraint || 
-	  !ViolatesXmlOptionsConstraint(sPos,ePos,transOpt)) {
+      if (xml_policy != XmlConstraint ||
+          !ViolatesXmlOptionsConstraint(sPos,ePos,transOpt)) {
         Add(transOpt);
       }
     }

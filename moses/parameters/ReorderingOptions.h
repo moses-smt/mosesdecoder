@@ -14,7 +14,7 @@ namespace Moses
     bool use_early_distortion_cost;
     bool init(Parameter const& param);
     ReorderingOptions(Parameter const& param);
-    ReorderingOptions() {}
+    ReorderingOptions();
   };
 
 }

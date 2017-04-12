@@ -88,7 +88,7 @@ sub recognize {
           $isRecognized = 0;
         }
 
-        if ($end == length($input) -1 || substr($input, $end, 1) eq " ") {
+        if ($end == length($input) || substr($input, $end, 1) eq " ") {
         # last word, or next char is a space
         }
         else {

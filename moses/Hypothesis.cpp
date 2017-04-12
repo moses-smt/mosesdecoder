@@ -43,8 +43,10 @@ using namespace std;
 
 namespace Moses
 {
+//size_t g_numHypos = 0;
+
 Hypothesis::
-Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const Bitmap &bitmap)
+Hypothesis(Manager& manager, InputType const& source, const TranslationOption &initialTransOpt, const Bitmap &bitmap, int id)
   : m_prevHypo(NULL)
   , m_sourceCompleted(bitmap)
   , m_sourceInput(source)
@@ -59,8 +61,9 @@ Hypothesis(Manager& manager, InputType const& source, const TranslationOption &i
   , m_arcList(NULL)
   , m_transOpt(initialTransOpt)
   , m_manager(manager)
-  , m_id(m_manager.GetNextHypoId())
+  , m_id(id)
 {
+//	++g_numHypos;
   // used for initial seeding of trans process
   // initialize scores
   //_hash_computed = false;
@@ -68,14 +71,13 @@ Hypothesis(Manager& manager, InputType const& source, const TranslationOption &i
   const vector<const StatefulFeatureFunction*>& ffs = StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i)
     m_ffStates[i] = ffs[i]->EmptyHypothesisState(source);
-  m_manager.GetSentenceStats().AddCreated();
 }
 
 /***
  * continue prevHypo by appending the phrases in transOpt
  */
 Hypothesis::
-Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Bitmap &bitmap)
+Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const Bitmap &bitmap, int id)
   : m_prevHypo(&prevHypo)
   , m_sourceCompleted(bitmap)
   , m_sourceInput(prevHypo.m_sourceInput)
@@ -90,11 +92,12 @@ Hypothesis(const Hypothesis &prevHypo, const TranslationOption &transOpt, const 
   , m_arcList(NULL)
   , m_transOpt(transOpt)
   , m_manager(prevHypo.GetManager())
-  , m_id(m_manager.GetNextHypoId())
+  , m_id(id)
 {
+//	++g_numHypos;
+
   m_currScoreBreakdown.PlusEquals(transOpt.GetScoreBreakdown());
   m_wordDeleted = transOpt.IsDeletionOption();
-  m_manager.GetSentenceStats().AddCreated();
 }
 
 Hypothesis::
@@ -141,30 +144,6 @@ AddArc(Hypothesis *loserHypo)
   m_arcList->push_back(loserHypo);
 }
 
-void
-Hypothesis::
-EvaluateWhenApplied(StatefulFeatureFunction const& sfff, int state_idx)
-{
-  const StaticData &staticData = StaticData::Instance();
-  if (! staticData.IsFeatureFunctionIgnored( sfff )) {
-    // Manager& manager = this->GetManager(); //Get the manager and the ttask
-    // ttasksptr const& ttask = manager.GetTtask();
-    FFState const* prev = m_prevHypo ? m_prevHypo->m_ffStates[state_idx] : NULL;
-    m_ffStates[state_idx]
-    = sfff.EvaluateWhenApplied(*this, prev, &m_currScoreBreakdown);
-  }
-}
-
-void
-Hypothesis::
-EvaluateWhenApplied(const StatelessFeatureFunction& slff)
-{
-  const StaticData &staticData = StaticData::Instance();
-  if (! staticData.IsFeatureFunctionIgnored( slff )) {
-    slff.EvaluateWhenApplied(*this, &m_currScoreBreakdown);
-  }
-}
-
 /***
  * calculate the logarithm of our total translation score (sum up components)
  */
@@ -172,9 +151,8 @@ void
 Hypothesis::
 EvaluateWhenApplied(float estimatedScore)
 {
-  IFVERBOSE(2) {
-    m_manager.GetSentenceStats().StartTimeOtherScore();
-  }
+  const StaticData &staticData = StaticData::Instance();
+
   // some stateless score producers cache their values in the translation
   // option: add these here
   // language model scores for n-grams completely contained within a target
@@ -186,23 +164,19 @@ EvaluateWhenApplied(float estimatedScore)
     StatelessFeatureFunction::GetStatelessFeatureFunctions();
   for (unsigned i = 0; i < sfs.size(); ++i) {
     const StatelessFeatureFunction &ff = *sfs[i];
-    EvaluateWhenApplied(ff);
+    if(!staticData.IsFeatureFunctionIgnored(ff)) {
+      ff.EvaluateWhenApplied(*this, &m_currScoreBreakdown);
+    }
   }
 
   const vector<const StatefulFeatureFunction*>& ffs =
     StatefulFeatureFunction::GetStatefulFeatureFunctions();
   for (unsigned i = 0; i < ffs.size(); ++i) {
     const StatefulFeatureFunction &ff = *ffs[i];
-    const StaticData &staticData = StaticData::Instance();
-    if (! staticData.IsFeatureFunctionIgnored(ff)) {
+    if(!staticData.IsFeatureFunctionIgnored(ff)) {
       FFState const* s = m_prevHypo ? m_prevHypo->m_ffStates[i] : NULL;
       m_ffStates[i] = ff.EvaluateWhenApplied(*this, s, &m_currScoreBreakdown);
     }
-  }
-
-  IFVERBOSE(2) {
-    m_manager.GetSentenceStats().StopTimeOtherScore();
-    m_manager.GetSentenceStats().StartTimeEstimateScore();
   }
 
   // FUTURE COST
@@ -211,10 +185,6 @@ EvaluateWhenApplied(float estimatedScore)
   // TOTAL
   m_futureScore = m_currScoreBreakdown.GetWeightedScore() + m_estimatedScore;
   if (m_prevHypo) m_futureScore += m_prevHypo->GetScore();
-
-  IFVERBOSE(2) {
-    m_manager.GetSentenceStats().StopTimeEstimateScore();
-  }
 }
 
 const Hypothesis* Hypothesis::GetPrevHypo()const
@@ -264,7 +234,7 @@ PrintHypothesis() const
 
 void
 Hypothesis::
-CleanupArcList()
+CleanupArcList(size_t nBestSize, bool distinctNBest)
 {
   // point this hypo's main hypo to itself
   SetWinningHypo(this);
@@ -275,11 +245,6 @@ CleanupArcList()
    * However, may not be enough if only unique candidates are needed,
    * so we'll keep all of arc list if nedd distinct n-best list
    */
-
-  const StaticData &staticData = StaticData::Instance();
-  AllOptions const& opts = m_manager.options();
-  size_t nBestSize = opts.nbest.nbest_size;
-  bool distinctNBest = opts.NBestDistinct();
 
   if (!distinctNBest && m_arcList->size() > nBestSize * 5) {
     // prune arc list only if there too many arcs
@@ -347,7 +312,9 @@ std::string
 Hypothesis::
 GetTargetPhraseStringRep(const vector<FactorType> factorsToPrint) const
 {
-  return (m_prevHypo ? GetCurrTargetPhrase().GetStringRep(factorsToPrint) : "");
+  return (m_prevHypo
+          ? GetCurrTargetPhrase().GetStringRep(factorsToPrint)
+          : "");
 }
 
 std::string
@@ -370,57 +337,22 @@ GetTargetPhraseStringRep() const
   return GetTargetPhraseStringRep(allFactors);
 }
 
-void
+size_t
 Hypothesis::
-OutputAlignment(std::ostream &out) const
+OutputAlignment(std::ostream &out, bool recursive=true) const
 {
-  std::vector<const Hypothesis *> edges;
-  const Hypothesis *currentHypo = this;
-  while (currentHypo) {
-    edges.push_back(currentHypo);
-    currentHypo = currentHypo->GetPrevHypo();
-  }
+  WordAlignmentSort const& waso = m_manager.options()->output.WA_SortOrder;
+  TargetPhrase const& tp = GetCurrTargetPhrase();
 
-  OutputAlignment(out, edges, m_manager.options().output.WA_SortOrder);
+  // call with head recursion to output things in the right order
+  size_t trg_off = recursive && m_prevHypo ?  m_prevHypo->OutputAlignment(out) : 0;
+  size_t src_off = GetCurrSourceWordsRange().GetStartPos();
 
-}
-
-void
-Hypothesis::
-OutputAlignment(ostream &out,
-                vector<const Hypothesis *> const& edges,
-                WordAlignmentSort waso)
-{
-  size_t targetOffset = 0;
-
-  for (int currEdge = (int)edges.size() - 1 ; currEdge >= 0 ; currEdge--) {
-    const Hypothesis &edge = *edges[currEdge];
-    const TargetPhrase &tp = edge.GetCurrTargetPhrase();
-    size_t sourceOffset = edge.GetCurrSourceWordsRange().GetStartPos();
-
-    OutputAlignment(out, tp.GetAlignTerm(), sourceOffset, targetOffset, waso);
-
-    targetOffset += tp.GetSize();
-  }
-  // Used by --print-alignment-info, so no endl
-}
-
-void
-Hypothesis::
-OutputAlignment(ostream &out, const AlignmentInfo &ai,
-                size_t sourceOffset, size_t targetOffset,
-                WordAlignmentSort waso)
-{
-  typedef std::vector< const std::pair<size_t,size_t>* > AlignVec;
-  AlignVec alignments = ai.GetSortedAlignments(waso);
-
-  AlignVec::const_iterator it;
-  for (it = alignments.begin(); it != alignments.end(); ++it) {
-    const std::pair<size_t,size_t> &alignment = **it;
-    out << alignment.first  + sourceOffset << "-"
-        << alignment.second + targetOffset << " ";
-  }
-
+  typedef std::pair<size_t,size_t> const* entry;
+  std::vector<entry> alnvec = tp.GetAlignTerm().GetSortedAlignments(waso);
+  BOOST_FOREACH(entry e, alnvec)
+  out << e->first + src_off << "-" << e->second + trg_off << " ";
+  return trg_off + tp.GetSize();
 }
 
 void
@@ -442,102 +374,6 @@ OutputInput(std::ostream& os) const
   OutputInput(inp_phrases, this);
   for (size_t i=0; i<len; ++i)
     if (inp_phrases[i]) os << *inp_phrases[i];
-}
-
-void
-Hypothesis::
-OutputBestSurface(std::ostream &out, const std::vector<FactorType> &outputFactorOrder,
-                  char reportSegmentation, bool reportAllFactors) const
-{
-  if (m_prevHypo) {
-    // recursively retrace this best path through the lattice, starting from the end of the hypothesis sentence
-    m_prevHypo->OutputBestSurface(out, outputFactorOrder, reportSegmentation, reportAllFactors);
-  }
-  OutputSurface(out, *this, outputFactorOrder, reportSegmentation, reportAllFactors);
-}
-
-//////////////////////////////////////////////////////////////////////////
-/***
- * print surface factor only for the given phrase
- */
-void
-Hypothesis::
-OutputSurface(std::ostream &out, const Hypothesis &edge,
-              const std::vector<FactorType> &outputFactorOrder,
-              char reportSegmentation, bool reportAllFactors) const
-{
-  UTIL_THROW_IF2(outputFactorOrder.size() == 0,
-                 "Must specific at least 1 output factor");
-  const TargetPhrase& phrase = edge.GetCurrTargetPhrase();
-  bool markUnknown = StaticData::Instance().GetMarkUnknown();
-  if (reportAllFactors == true) {
-    out << phrase;
-  } else {
-    FactorType placeholderFactor = StaticData::Instance().options().input.placeholder_factor;
-    
-    std::map<size_t, const Factor*> placeholders;
-    if (placeholderFactor != NOT_FOUND) {
-      // creates map of target position -> factor for placeholders
-      placeholders = GetPlaceholders(edge, placeholderFactor);
-    }
-
-    size_t size = phrase.GetSize();
-    for (size_t pos = 0 ; pos < size ; pos++) {
-      const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[0]);
-
-      if (placeholders.size()) {
-        // do placeholders
-        std::map<size_t, const Factor*>::const_iterator iter = placeholders.find(pos);
-        if (iter != placeholders.end()) {
-          factor = iter->second;
-        }
-      }
-
-      UTIL_THROW_IF2(factor == NULL,
-                     "No factor 0 at position " << pos);
-
-      //preface surface form with UNK if marking unknowns
-      const Word &word = phrase.GetWord(pos);
-      if(markUnknown && word.IsOOV()) {
-        out << StaticData::Instance().GetUnknownWordPrefix()
-            << *factor
-            << StaticData::Instance().GetUnknownWordSuffix();
-      } else {
-        out << *factor;
-      }
-
-      for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
-        const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
-        UTIL_THROW_IF2(factor == NULL,
-                       "No factor " << i << " at position " << pos);
-
-        out << "|" << *factor;
-      }
-      out << " ";
-    }
-  }
-
-  // trace ("report segmentation") option "-t" / "-tt"
-  if (reportSegmentation > 0 && phrase.GetSize() > 0) {
-    const Range &sourceRange = edge.GetCurrSourceWordsRange();
-    const int sourceStart = sourceRange.GetStartPos();
-    const int sourceEnd = sourceRange.GetEndPos();
-    out << "|" << sourceStart << "-" << sourceEnd;    // enriched "-tt"
-    if (reportSegmentation == 2) {
-      WordAlignmentSort waso = m_manager.options().output.WA_SortOrder;
-      out << ",wa=";
-      const AlignmentInfo &ai = edge.GetCurrTargetPhrase().GetAlignTerm();
-      Hypothesis::OutputAlignment(out, ai, 0, 0, waso);
-      out << ",total=";
-      out << edge.GetScore() - edge.GetPrevHypo()->GetScore();
-      out << ",";
-      ScoreComponentCollection scoreBreakdown(edge.GetScoreBreakdown());
-      scoreBreakdown.MinusEquals(edge.GetPrevHypo()->GetScoreBreakdown());
-      bool with_labels = m_manager.options().nbest.include_feature_labels;
-      scoreBreakdown.OutputAllFeatureScores(out, with_labels);
-    }
-    out << "| ";
-  }
 }
 
 std::map<size_t, const Factor*>

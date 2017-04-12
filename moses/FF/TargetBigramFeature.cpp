@@ -48,8 +48,9 @@ void TargetBigramFeature::SetParameter(const std::string& key, const std::string
   }
 }
 
-void TargetBigramFeature::Load()
+void TargetBigramFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   if (m_filePath == "*")
     return ; //allow all
   ifstream inFile(m_filePath.c_str());

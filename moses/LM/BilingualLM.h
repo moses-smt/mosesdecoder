@@ -117,24 +117,7 @@ public:
     return new BilingualLMState(0);
   }
 
-  void Load();
-
-  void EvaluateInIsolation(
-    const Phrase &source,
-    const TargetPhrase &targetPhrase,
-    ScoreComponentCollection &scoreBreakdown,
-    ScoreComponentCollection &estimatedScores) const;
-
-  void EvaluateWithSourceContext(
-    const InputType &input,
-    const InputPath &inputPath,
-    const TargetPhrase &targetPhrase,
-    const StackVec *stackVec,
-    ScoreComponentCollection &scoreBreakdown,
-    ScoreComponentCollection *estimatedScores = NULL) const;
-
-  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
-      , const TranslationOptionList &translationOptionList) const {};
+  void Load(AllOptions::ptr const& opts);
 
   FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,

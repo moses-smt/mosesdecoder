@@ -147,11 +147,30 @@ consolidate
 	pass-unless: trainer
 	template: $moses-script-dir/ems/support/consolidate-training-data.perl $input-extension $output-extension OUT IN
 	error: number of lines don't match
+train-input
+        in: tokenized-stem
+        out: truecase-model
+        rerun-on-change: trainer
+        pass-unless: trainer
+        ignore-if: output-truecaser
+        ignore-unless: input-truecaser
+        default-name: truecaser/truecase-model
+        template: $trainer -model OUT.$input-extension -corpus IN.$input-extension
+train-output
+        in: tokenized-stem
+        out: truecase-model
+        rerun-on-change: trainer
+        pass-unless: trainer
+        ignore-if: input-truecaser
+        ignore-unless: output-truecaser
+        default-name: truecaser/truecase-model
+        template: $trainer -model OUT.$output-extension -corpus IN.$output-extension
 train
 	in: tokenized-stem
 	out: truecase-model
 	rerun-on-change: trainer
 	pass-unless: trainer
+        ignore-unless: AND input-truecaser output-truecaser
 	default-name: truecaser/truecase-model
 	template: $trainer -model OUT.$input-extension -corpus IN.$input-extension ; $trainer -model OUT.$output-extension -corpus IN.$output-extension
 
@@ -332,7 +351,7 @@ binarize
 	in: qlm
 	out: binlm
 	pass-unless: lm-binarizer
-	ignore-if: bilingual-lm
+	ignore-if: bilingual-lm nplm
 	rerun-on-change: lm
 	default-name: lm/binlm
 	template: $lm-binarizer IN OUT
@@ -729,19 +748,21 @@ extract-phrases
 	in: corpus-mml-postfilter=OR=word-alignment scored-corpus
 	out: extracted-phrases
 	rerun-on-change: max-phrase-length translation-factors reordering-factors hierarchical-rule-set extract-settings training-options script use-ghkm domain-features baseline-extract lexicalized-reordering
+	pass-if: mmsapt
         only-existence-matters: domain-features
 	default-name: model/extract
 build-reordering
 	in: extracted-phrases
 	out: reordering-table
 	ignore-unless: lexicalized-reordering
+	pass-if: mmsapt
 	rerun-on-change: lexicalized-reordering reordering-factors
 	default-name: model/reordering-table
 	final-model: yes
 build-ttable
 	in: extracted-phrases lexical-translation-table corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains
 	out: phrase-translation-table
-	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script EVALUATION:report-precision-by-coverage include-word-alignment-in-rules domain-features
+	rerun-on-change: translation-factors hierarchical-rule-set score-settings training-options script include-word-alignment-in-rules domain-features
 	default-name: model/phrase-table
 	ignore-if: suffix-array mmsapt
 	final-model: yes
@@ -809,7 +830,8 @@ generation-prune
 	in: generation-table
 	out: generation-table-pruned
 	rerun-on-change: TRAINING:prune-generation
-	ignore-unless: AND TRAINING:prune-generation
+	pass-unless: TRAINING:prune-generation
+	ignore-unless: generation-factors
 	default-name: model/generation-table-pruned
 	final-model: yes
 	template: $TRAINING:prune-generation IN OUT
@@ -824,7 +846,7 @@ create-config
 	in: sigtest-filter-reordering-table sigtest-filter-phrase-translation-table transliteration-table generation-table-pruned sparse corpus-mml-prefilter=OR=corpus-mml-postfilter=OR=domains osm-model INTERPOLATED-LM:binlm LM:binlm
 	out: config
 	ignore-if: use-hiero thot
-	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini mmsapt no-glue-grammar dont-tune-glue-grammar use-syntax-input-weight-feature
+	rerun-on-change: decoding-steps alignment-factors translation-factors reordering-factors generation-factors lexicalized-reordering training-options script decoding-graph-backoff score-settings additional-ini mmsapt no-glue-grammar dont-tune-glue-grammar use-syntax-input-weight-feature operation-sequence-model-load-method
 	default-name: model/moses.ini
 	error: Unknown option
 	error: requires an argument
@@ -1143,7 +1165,7 @@ filter
 	out: filtered-dir
 	default-name: tuning/filtered
 	rerun-on-change: filter-settings ttable-binarizer TRAINING:no-glue-grammar TRAINING:dont-tune-glue-grammar TRAINING:use-syntax-input-weight-feature TRAINING:config
-	ignore-if: TRAINING:binarize-all
+	ignore-if: TRAINING:binarize-all TRAINING:mmsapt
 	error: already exists. Please delete
 filter-devtest
 	in: input-devtest TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table
@@ -1157,7 +1179,7 @@ apply-filter
 	in: TRAINING:bin-config filtered-dir
 	out: filtered-config
 	default-name: tuning/moses.filtered.ini
-	ignore-if: TRAINING:binarize-all
+	ignore-if: TRAINING:binarize-all TRAINING:mmsapt
 	template: $moses-script-dir/ems/support/substitute-filtered-tables.perl IN1/moses.ini < IN > OUT
 apply-filter-devtest
 	in: TRAINING:bin-config filtered-dir-devtest
@@ -1174,7 +1196,7 @@ tune
 	default-name: tuning/moses.ini
 	tmp-name: tuning/tmp
 	final-model: yes
-	rerun-on-change: decoder-settings tuning-settings nbest lambda async
+	rerun-on-change: decoder decoder-settings tuning-settings nbest lambda async
 	not-error: trans: No such file or directory
 thot-tune
 	in: TRAINING:config input reference
@@ -1286,14 +1308,14 @@ filter
 	out: filtered-dir 
 	default-name: evaluation/filtered
 	rerun-on-change: filter-settings report-precision-by-coverage ttable-binarizer TRAINING:no-glue-grammar TRAINING:dont-tune-glue-grammar TRAINING:use-syntax-input-weight-feature TRAINING:config
-	pass-if: TRAINING:binarize-all
+	pass-if: TRAINING:binarize-all TRAINING:mmsapt
 	ignore-if: use-hiero
 	error: already exists. Please delete
 apply-filter
 	in: filtered-dir TRAINING:config TUNING:config-with-reused-weights
 	out: filtered-config
 	default-name: evaluation/filtered.ini
-	ignore-if: TRAINING:binarize-all thot
+	ignore-if: TRAINING:binarize-all TRAINING:mmsapt thot
 	template: $moses-script-dir/ems/support/substitute-filtered-tables-and-weights.perl IN/moses.ini IN1 IN2 OUT
 decode
 	in: TUNING:config-with-reused-weights input filtered-config
@@ -1535,6 +1557,150 @@ analysis-precision
 	default-name: evaluation/analysis
 	ignore-unless: AND analysis analyze-coverage report-precision-by-coverage
 	rerun-on-change: precision-by-coverage-base
+	final-model: yes
+
+[QUALITY-ESTIMATION] single
+tokenize-input
+	in: raw-input
+	out: tokenized-input
+	default-name: quality-estimation/input.tok
+	pass-unless: input-tokenizer
+	template: $input-tokenizer < IN > OUT
+tokenize-input-devtest
+	in: raw-input-devtest
+	out: tokenized-input-devtest
+	default-name: quality-estimation/input.devtest.tok
+	pass-unless: input-tokenizer
+	template: $input-tokenizer < IN > OUT
+lowercase-input
+	in: tokenized-input
+	out: truecased-input
+	default-name: quality-estimation/input.lc
+	pass-unless: input-lowercaser
+	ignore-if: input-truecaser
+	template: $input-lowercaser < IN > OUT
+lowercase-input-devtest
+	in: tokenized-input-devtest
+	out: truecased-input-devtest
+	default-name: quality-estimation/input.devtest.lc
+	pass-unless: input-lowercaser
+	ignore-if: input-truecaser
+	template: $input-lowercaser < IN > OUT
+truecase-input
+	in: tokenized-input TRUECASER:truecase-model
+	out: truecased-input
+	rerun-on-change: input-truecaser
+	default-name: quality-estimation/input.tc
+	ignore-unless: input-truecaser
+        template: $input-truecaser -model IN1.$input-extension < IN > OUT
+truecase-input-devtest
+	in: tokenized-input-devtest TRUECASER:truecase-model
+	out: truecased-input-devtest
+	rerun-on-change: input-truecaser
+	ignore-unless: input-truecaser
+	default-name: quality-estimation/input.devtest.tc
+        template: $input-truecaser -model IN1.$input-extension < IN > OUT
+split-input 
+	in: truecased-input SPLITTER:splitter-model
+	out: split-input
+	rerun-on-change: input-splitter
+	default-name: quality-estimation/input.split
+	pass-unless: input-splitter
+	template: $input-splitter -model IN1.$input-extension < IN > OUT
+split-input-devtest
+	in: truecased-input-devtest SPLITTER:splitter-model
+	out: split-input-devtest
+	rerun-on-change: input-splitter
+	default-name: quality-estimation/input.devtest.split
+	pass-unless: input-splitter
+	template: $input-splitter -model IN1.$input-extension < IN > OUT
+tokenize-reference
+	in: raw-reference
+	out: tokenized-reference
+	default-name: quality-estimation/reference.tok
+	pass-unless: output-tokenizer
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+	template: $output-tokenizer < IN > OUT
+tokenize-reference-devtest
+	in: raw-reference-devtest
+	out: tokenized-reference-devtest
+	default-name: quality-estimation/reference.devtest.tok
+	pass-unless: output-tokenizer
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+	template: $output-tokenizer < IN > OUT
+lowercase-reference
+	in: tokenized-reference
+	out: truecased-reference
+	default-name: quality-estimation/reference.lc
+	pass-unless: output-lowercaser
+	ignore-if: output-truecaser
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+	template: $output-lowercaser < IN > OUT	
+lowercase-reference-devtest
+	in: tokenized-reference-devtest
+	out: truecased-reference-devtest
+	default-name: quality-estimation/reference.devtest.lc
+	pass-unless: output-lowercaser
+	ignore-if: output-truecaser
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+	template: $output-lowercaser < IN > OUT	
+truecase-reference
+	in: tokenized-reference TRUECASER:truecase-model
+	out: truecased-reference
+	rerun-on-change: output-truecaser
+	default-name: quality-estimation/reference.tc
+	ignore-unless: output-truecaser
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+        template: $output-truecaser -model IN1.$output-extension < IN > OUT
+truecase-reference-devtest
+	in: tokenized-reference-devtest TRUECASER:truecase-model
+	out: truecased-reference-devtest
+	rerun-on-change: output-truecaser
+	default-name: quality-estimation/reference.devtest.tc
+	ignore-unless: output-truecaser
+	multiref: $moses-script-dir/ems/support/run-command-on-multiple-refsets.perl
+        template: $output-truecaser -model IN1.$output-extension < IN > OUT
+decode
+	in: TUNING:config-with-reused-weights split-input
+	out: rich-output
+	default-name: quality-estimation/output
+	template: $decoder -v 0 -tt -f IN < IN1 > OUT
+	error: Translation was not performed correctly
+	not-error: trans: No such file or directory
+decode-devtest
+	in: TUNING:config-with-reused-weights split-input-devtest
+	out: rich-output-devtest
+	default-name: quality-estimation/output-devtest
+	template: $decoder -v 0 -tt -f IN < IN1 > OUT
+	error: Translation was not performed correctly
+	not-error: trans: No such file or directory
+remove-markup
+	in: rich-output
+	out: cleaned-output
+	default-name: quality-estimation/tokenized-output
+	template: $moses-script-dir/ems/support/remove-segmentation-markup.perl < IN > OUT
+remove-markup-devtest
+	in: rich-output-devtest
+	out: cleaned-output-devtest
+	default-name: quality-estimation/tokenized-output-devtest
+	template: $moses-script-dir/ems/support/remove-segmentation-markup.perl < IN > OUT
+score-output
+	in: cleaned-output truecased-reference
+	out: scored-output
+	default-name: quality-estimation/output-scored
+	tmp-name: quality-estimation/ter
+	template: mkdir TMP ; $moses-script-dir/ems/support/ter.perl $tercom IN IN1 TMP > OUT
+score-output-devtest
+	in: cleaned-output-devtest truecased-reference-devtest
+	out: scored-output-devtest
+	default-name: quality-estimation/output-scored-devtest
+	tmp-name: quality-estimation/ter-devtest
+	template: mkdir TMP ; $moses-script-dir/ems/support/ter.perl $tercom IN IN1 TMP > OUT
+train
+	in: input rich-output scored-output input-devtest rich-output-devtest scored-output-devtest
+	out: quality-estimation-model
+	default-name: quality-estimation/model
+	template: $trainer --train-rich IN1 --train-ter IN2 --eval-rich IN4 --eval-ter IN5 --model OUT
 	final-model: yes
 
 [REPORTING] single

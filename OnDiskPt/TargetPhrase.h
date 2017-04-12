@@ -102,19 +102,21 @@ public:
     return m_scores[ind];
   }
 
-  Moses::TargetPhrase *ConvertToMoses(const std::vector<Moses::FactorType> &inputFactors
-                                      , const std::vector<Moses::FactorType> &outputFactors
-                                      , const Vocab &vocab
-                                      , const Moses::PhraseDictionary &phraseDict
-                                      , const std::vector<float> &weightT
-                                      , bool isSyntax) const;
   uint64_t ReadOtherInfoFromFile(uint64_t filePos, std::fstream &fileTPColl);
   uint64_t ReadFromFile(std::fstream &fileTP);
 
   virtual void DebugPrint(std::ostream &out, const Vocab &vocab) const;
 
+  const std::string &GetProperty() const {
+    return m_property;
+  }
+
   void SetProperty(const std::string &value) {
     m_property = value;
+  }
+
+  const std::string &GetSparseFeatures() const {
+    return m_sparseFeatures;
   }
 
   void SetSparseFeatures(const std::string &value) {

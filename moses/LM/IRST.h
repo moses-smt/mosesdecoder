@@ -88,7 +88,7 @@ public:
 
   bool IsUseable(const FactorMask &mask) const;
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
   const FFState *EmptyHypothesisState(const InputType &/*input*/) const;
 
   virtual LMResult GetValue(const std::vector<const Word*> &contextFactor, State* finalState = NULL) const;

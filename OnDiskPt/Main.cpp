@@ -25,6 +25,7 @@
 #include <iterator>
 #include <cassert>
 #include "moses/InputFileStream.h"
+#include "moses/Timer.h"
 #include "moses/Util.h"
 #include "OnDiskWrapper.h"
 #include "SourcePhrase.h"

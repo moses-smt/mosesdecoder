@@ -42,7 +42,7 @@ private:
   {
   public:
     bool operator()(const QueueItem &p, const QueueItem &q) const {
-      return p.first->label.score < q.first->label.score;
+      return p.first->label.futureScore < q.first->label.futureScore;
     }
   };
 

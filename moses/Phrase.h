@@ -35,6 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "util/string_piece.hh"
 #include "util/exception.hh"
+#include "parameters/AllOptions.h"
 
 namespace Moses
 {
@@ -53,18 +54,6 @@ protected:
   std::vector<Word>			m_words;
 
 public:
-
-  // /// return shared pointer to ttask
-  // //  only TargetPhrases have non-NULL ttaskptrs!
-  // virtual ttasksptr GetTtask() const {
-  //   return ttasksptr();
-  // }
-
-  // /// check if this phrase belongs to a valid ttask
-  // //  only TargetPhrases have non-NULL ttaskptrs!
-  // virtual bool HasTtaskSPtr() const {
-  //   return false;
-  // }
 
   virtual bool HasScope() const {
     return false;
@@ -96,16 +85,17 @@ public:
   /** destructor */
   virtual ~Phrase();
 
-  /** Fills phrase with words from format string, typically from phrase table or sentence input
-  	* \param factorOrder factor types of each element in 2D string vector
-  	* \param phraseString formatted input string to parse
-  	*	\param factorDelimiter delimiter between factors.
+  /**
+   * Fills phrase with words from format string, typically from phrase table or sentence input
+   *
+   * \param factorOrder  factor types of each element in 2D string vector
+   * \param phraseString formatted input string to parse
+   * \param lhs          returns the non-terminal Word for the left-hand side of an SCFG rule, may be NULL for phrase-based
   */
-  void CreateFromString(FactorDirection direction
-                        , const std::vector<FactorType> &factorOrder
-                        , const StringPiece &phraseString
-                        // , const StringPiece &factorDelimiter // never used [UG]
-                        , Word **lhs);
+  void CreateFromString(FactorDirection direction,
+                        const std::vector<FactorType> &factorOrder,
+                        const StringPiece &phraseString,
+                        Word **lhs);
 
   /**	copy factors from the other phrase to this phrase.
   	IsCompatible() must be run beforehand to ensure incompatible factors aren't overwritten
@@ -200,8 +190,11 @@ public:
   Phrase GetSubString(const Range &range) const;
   Phrase GetSubString(const Range &range, FactorType factorType) const;
 
-  //! return a string rep of the phrase. Each factor is separated by the factor delimiter as specified in StaticData class
-  std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const;
+  //! return a string rep of the phrase;
+  // w/ factors delimited by FactorDelimiter
+  std::string
+  GetStringRep(std::vector<FactorType> const& factorsToPrint,
+               AllOptions const* opts=NULL) const;
 
   TO_STRING();
 

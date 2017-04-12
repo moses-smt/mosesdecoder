@@ -5,6 +5,7 @@
 #include "moses/TranslationAnalysis.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
+#include "moses/Timer.h"
 #include "moses/InputType.h"
 #include "moses/OutputCollector.h"
 #include "moses/Incremental.h"
@@ -29,19 +30,6 @@ GetContextWindow() const
 {
   return m_context;
 }
-
-// SPTR<std::map<std::string, float> const>
-// TranslationTask::GetContextWeights() const
-// {
-//   return m_context_weights;
-// }
-
-// void
-// TranslationTask
-// ::ReSetContextWeights(std::map<std::string, float> const& new_weights)
-// {
-//   m_context_weights.reset(new std::map<string,float>(new_weights));
-// }
 
 void
 TranslationTask::
@@ -89,7 +77,7 @@ TranslationTask
                   boost::shared_ptr<IOWrapper> const& ioWrapper)
   : m_source(source) , m_ioWrapper(ioWrapper)
 {
-  m_options = StaticData::Instance().options();
+  m_options = source->options();
 }
 
 TranslationTask::~TranslationTask()
@@ -101,8 +89,8 @@ TranslationTask
 ::SetupManager(SearchAlgorithm algo)
 {
   boost::shared_ptr<BaseManager> manager;
-  StaticData const& staticData = StaticData::Instance();
-  if (algo == DefaultSearchAlgorithm) algo = staticData.options().search.algo;
+  // StaticData const& staticData = StaticData::Instance();
+  // if (algo == DefaultSearchAlgorithm) algo = staticData.options().search.algo;
 
   if (!is_syntax(algo))
     manager.reset(new Manager(this->self())); // phrase-based
@@ -116,7 +104,7 @@ TranslationTask
 
   else if (algo == SyntaxS2T) {
     // new-style string-to-tree decoding (ask Phil Williams)
-    S2TParsingAlgorithm algorithm = staticData.GetS2TParsingAlgorithm();
+    S2TParsingAlgorithm algorithm = m_options->syntax.s2t_parsing_algo;
     if (algorithm == RecursiveCYKPlus) {
       typedef Syntax::S2T::EagerParserCallback Callback;
       typedef Syntax::S2T::RecursiveCYKPlusParser<Callback> Parser;
@@ -144,7 +132,7 @@ TranslationTask
   return manager;
 }
 
-AllOptions const&
+AllOptions::ptr const&
 TranslationTask::
 options() const
 {
@@ -197,7 +185,7 @@ void TranslationTask::Run()
   Timer initTime;
   initTime.start();
 
-  boost::shared_ptr<BaseManager> manager = SetupManager();
+  boost::shared_ptr<BaseManager> manager = SetupManager(m_options->search.algo);
 
   VERBOSE(1, "Line " << translationId << ": Initialize search took "
           << initTime << " seconds total" << endl);
@@ -230,7 +218,7 @@ void TranslationTask::Run()
 
   // Output search graph in hypergraph format for Kenneth Heafield's
   // lazy hypergraph decoder; writes to stderr
-  if (options().output.SearchGraphHG.size()) {
+  if (m_options->output.SearchGraphHG.size()) {
     size_t transId = manager->GetSource().GetTranslationId();
     string fname = io->GetHypergraphOutputFileName(transId);
     manager->OutputSearchGraphAsHypergraph(fname, PRECISION);

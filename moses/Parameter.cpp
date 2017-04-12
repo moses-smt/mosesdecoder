@@ -35,6 +35,9 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/random.hh"
 #include <boost/program_options.hpp>
 
+#ifdef HAVE_XMLRPC_C
+#include <xmlrpc_server.h>
+#endif
 
 using namespace std;
 using namespace boost::algorithm;
@@ -53,8 +56,10 @@ Parameter::Parameter()
   AddParam(main_opts,"input-file", "i", "location of the input file to be translated");
 
   AddParam(main_opts,"verbose", "v", "verbosity level of the logging");
+  AddParam(main_opts,"version", "show version of Moses and libraries used");
   AddParam(main_opts,"show-weights", "print feature weights and exit");
   AddParam(main_opts,"time-out", "seconds after which is interrupted (-1=no time-out, default is -1)");
+  AddParam(main_opts,"segment-time-out", "seconds for single segment after which is interrupted (-1=no time-out, default is -1)");
 
   ///////////////////////////////////////////////////////////////////////////////////////
   // factorization options
@@ -214,21 +219,21 @@ Parameter::Parameter()
   // server options
   po::options_description server_opts("Moses Server Options");
   AddParam(server_opts,"server", "Run moses as a translation server.");
+  AddParam(server_opts,"daemon", "Run moses as a translation server in the background.");
   AddParam(server_opts,"server-port", "Port for moses server");
   AddParam(server_opts,"server-log", "Log destination for moses server");
   AddParam(server_opts,"serial", "Run server in serial mode, processing only one request at a time.");
 
-  AddParam(server_opts,"server-maxconn", 
-	   "Max. No of simultaneous HTTP transactions allowed by the server.");
+  AddParam(server_opts,"server-maxconn",
+           "Max. No of simultaneous HTTP transactions allowed by the server.");
   AddParam(server_opts,"server-maxconn-backlog",
-	   "Max. No. of requests the OS will queue if the server is busy.");
-  AddParam(server_opts,"server-keepalive-maxconn", 
-	   "Max. No. of requests the server will accept on a single TCP connection.");
-  AddParam(server_opts,"server-keepalive-timeout", 
-	   "Max. number of seconds the server will keep a persistent connection alive.");
-  AddParam(server_opts,"server-timeout", 
-	   "Max. number of seconds the server will wait for a client to submit a request once a connection has been established.");
-
+           "Max. No. of requests the OS will queue if the server is busy.");
+  AddParam(server_opts,"server-keepalive-maxconn",
+           "Max. No. of requests the server will accept on a single TCP connection.");
+  AddParam(server_opts,"server-keepalive-timeout",
+           "Max. number of seconds the server will keep a persistent connection alive.");
+  AddParam(server_opts,"server-timeout",
+           "Max. number of seconds the server will wait for a client to submit a request once a connection has been established.");
   // session timeout and session cache size are for moses translation session handling
   // they have nothing to do with the abyss server (but relate to the moses server)
   AddParam(server_opts,"session-timeout",
@@ -259,7 +264,6 @@ Parameter::Parameter()
   AddParam(misc_opts,"references", "Reference file(s) - used for bleu score feature");
   AddParam(misc_opts,"recover-input-path", "r", "(conf net/word lattice only) - recover input path corresponding to the best translation");
   AddParam(misc_opts,"link-param-count", "Number of parameters on word links when using confusion networks or lattices (default = 1)");
-  AddParam(misc_opts,"description", "Source language, target language, description");
   AddParam(misc_opts,"feature-name-overwrite", "Override feature name (NOT arguments). Eg. SRILM-->KENLM, PhraseDictionaryMemory-->PhraseDictionaryScope3");
 
   AddParam(misc_opts,"feature", "All the feature functions should be here");
@@ -447,6 +451,35 @@ LoadParam(const string &filePath)
   return LoadParam(3, (char const**) argv);
 }
 
+/// Print out version information about the things that went into this
+/// executable.
+void show_version()
+{
+  std::cout << "\nMoses code version (git tag or commit hash):\n   "
+            << MOSES_VERSION_ID << std::endl
+            << "Libraries used:" << std::endl
+            << "      Boost  version "
+            << BOOST_VERSION / 100000     << "."  // major version
+            << BOOST_VERSION / 100 % 1000 << "."  // minor version
+            << BOOST_VERSION % 100                // patch level
+            << std::endl;
+#ifdef HAVE_XMLRPC_C
+  unsigned int major, minor, point;
+  xmlrpc_server_version(&major, &minor, &point);
+  std::cout << "   Xmlrpc-c  version "
+            << major << "." << minor << "." << point << std::endl;
+#endif
+#ifdef HAVE_CMPH
+  // there's no easy way to determine the cmph version at compile time
+  std::cout << "       CMPH (version unknown)" << std::endl;
+#endif
+
+#ifdef MMT_VERSION_ID
+  std::cout << string(20,'-')
+            << "\nMMT extras version: " << MMT_VERSION_ID << std::endl;
+#endif
+}
+
 /** load all parameters from the configuration file and the command line switches */
 bool
 Parameter::
@@ -459,7 +492,13 @@ LoadParam(int argc, char const* xargv[])
     argv[i] = xargv[i];
     if (strlen(argv[i]) > 2 && argv[i][0] == '-' && argv[i][1] == '-')
       ++argv[i];
+    if (!strcmp(argv[i],"-version")) {
+      show_version();
+      exit(0);
+    }
   }
+
+
 
   // config file (-f) arg mandatory
   string configPath;
@@ -976,10 +1015,11 @@ ConvertWeightArgsLM()
                            + "order="  + modelToks[2] + " " // order
                            + "num-features=" + SPrint(numFF) + " ";
       if (lmType == 9) {
-        featureLine += "lazyken=1 ";
-      } else if (lmType == 8) {
-        featureLine += "lazyken=0 ";
+        featureLine += "load=lazy ";
       }
+
+      if(oovWeights.size() > lmIndex)
+        featureLine += "oov-feature=1 ";
 
       featureLine += "path=" + modelToks[3]; // file
 
@@ -1352,8 +1392,8 @@ FindParam(const string &paramSwitch, int argc, char const* argv[])
  * \param argv values of paramters on command line */
 void
 Parameter::
-OverwriteParam(const string &paramSwitch, const string &paramName, 
-	       int argc, char const* argv[])
+OverwriteParam(const string &paramSwitch, const string &paramName,
+               int argc, char const* argv[])
 {
   int startPos = -1;
   for (int i = 0 ; i < argc ; i++) {

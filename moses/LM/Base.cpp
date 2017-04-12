@@ -26,7 +26,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/ChartManager.h"
 #include "moses/FactorCollection.h"
 #include "moses/Phrase.h"
-#include "moses/StaticData.h"
 #include "util/exception.hh"
 
 using namespace std;
@@ -35,29 +34,18 @@ namespace Moses
 {
 
 LanguageModel::LanguageModel(const std::string &line) :
-  StatefulFeatureFunction(StaticData::Instance().GetLMEnableOOVFeature() ? 2 : 1, line )
+  StatefulFeatureFunction(line, /* registerNow = */ false),
+  m_enableOOVFeature(false)
 {
-  m_enableOOVFeature = StaticData::Instance().GetLMEnableOOVFeature();
+  // load m_enableOOVFeature via SetParameter() first
+  // ReadParameters();
+  this->m_numScoreComponents = this->m_numTuneableComponents = m_enableOOVFeature ? 2 : 1;
+  // register with the correct m_numScoreComponents
+  // Register();
 }
 
 
 LanguageModel::~LanguageModel() {}
-
-float LanguageModel::GetWeight() const
-{
-  //return StaticData::Instance().GetAllWeights().GetScoresForProducer(this)[0];
-  return StaticData::Instance().GetWeights(this)[0];
-}
-
-float LanguageModel::GetOOVWeight() const
-{
-  if (m_enableOOVFeature) {
-    //return StaticData::Instance().GetAllWeights().GetScoresForProducer(this)[1];
-    return StaticData::Instance().GetWeights(this)[1];
-  } else {
-    return 0;
-  }
-}
 
 void LanguageModel::IncrementalCallback(Incremental::Manager &manager) const
 {
@@ -69,10 +57,11 @@ void LanguageModel::ReportHistoryOrder(std::ostream &out,const Phrase &phrase) c
   // out << "ReportHistoryOrder not implemented";
 }
 
-void LanguageModel::EvaluateInIsolation(const Phrase &source
-                                        , const TargetPhrase &targetPhrase
-                                        , ScoreComponentCollection &scoreBreakdown
-                                        , ScoreComponentCollection &estimatedScores) const
+void
+LanguageModel::
+EvaluateInIsolation(Phrase const& source, TargetPhrase const& targetPhrase,
+                    ScoreComponentCollection &scoreBreakdown,
+                    ScoreComponentCollection &estimatedScores) const
 {
   // contains factors used by this LM
   float fullScore, nGramScore;
@@ -82,7 +71,7 @@ void LanguageModel::EvaluateInIsolation(const Phrase &source
 
   float estimateScore = fullScore - nGramScore;
 
-  if (StaticData::Instance().GetLMEnableOOVFeature()) {
+  if (m_enableOOVFeature) {
     vector<float> scores(2), estimateScores(2);
     scores[0] = nGramScore;
     scores[1] = oovCount;
@@ -118,6 +107,16 @@ const LanguageModel &LanguageModel::GetFirstLM()
   }
 
   throw std::logic_error("Incremental search only supports one language model.");
+}
+
+void LanguageModel::SetParameter(const std::string& key, const std::string& value)
+{
+  if(key == "oov-feature") {
+    m_enableOOVFeature = Scan<bool>(value);
+    this->m_numScoreComponents = this->m_numTuneableComponents = m_enableOOVFeature ? 2 : 1;
+  } else {
+    StatefulFeatureFunction::SetParameter(key, value);
+  }
 }
 
 } // namespace Moses

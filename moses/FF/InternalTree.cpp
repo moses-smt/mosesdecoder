@@ -7,8 +7,11 @@ namespace Moses
 InternalTree::InternalTree(const std::string & line, size_t start, size_t len, const bool nonterminal)
 {
 
+  std::vector<FactorType> const& oFactors
+  = StaticData::Instance().options()->output.factor_order;
   if (len > 0) {
-    m_value.CreateFromString(Output, StaticData::Instance().GetOutputFactorOrder(), StringPiece(line).substr(start, len), nonterminal);
+    m_value.CreateFromString(Output, oFactors, StringPiece(line).substr(start, len),
+                             nonterminal);
   }
 }
 
@@ -18,7 +21,9 @@ InternalTree::InternalTree(const std::string & line, const bool nonterminal)
   size_t found = line.find_first_of("[] ");
 
   if (found == line.npos) {
-    m_value.CreateFromString(Output, StaticData::Instance().GetOutputFactorOrder(), line, nonterminal);
+    m_value.CreateFromString(Output,
+                             StaticData::Instance().options()->output.factor_order,
+                             line, nonterminal);
   } else {
     AddSubTree(line, 0);
   }
@@ -44,14 +49,18 @@ size_t InternalTree::AddSubTree(const std::string & line, size_t pos)
         pos = m_children.back()->AddSubTree(line, pos+1);
       } else {
         if (len > 0) {
-          m_value.CreateFromString(Output, StaticData::Instance().GetOutputFactorOrder(), StringPiece(line).substr(oldpos, len), false);
+          m_value.CreateFromString(Output,
+                                   StaticData::Instance().options()->output.factor_order,
+                                   StringPiece(line).substr(oldpos, len), false);
           has_value = true;
         }
         pos = AddSubTree(line, pos+1);
       }
     } else if (token == ' ' || token == ']') {
       if (len > 0 && !has_value) {
-        m_value.CreateFromString(Output, StaticData::Instance().GetOutputFactorOrder(), StringPiece(line).substr(oldpos, len), true);
+        m_value.CreateFromString(Output,
+                                 StaticData::Instance().options()->output.factor_order,
+                                 StringPiece(line).substr(oldpos, len), true);
         has_value = true;
       } else if (len > 0) {
         m_children.push_back(boost::make_shared<InternalTree>(line, oldpos, len, false));
@@ -81,7 +90,7 @@ std::string InternalTree::GetString(bool start) const
     ret += "[";
   }
 
-  ret += m_value.GetString(StaticData::Instance().GetOutputFactorOrder(), false);
+  ret += m_value.GetString(StaticData::Instance().options()->output.factor_order, false);
   for (std::vector<TreePointer>::const_iterator it = m_children.begin(); it != m_children.end(); ++it) {
     ret += (*it)->GetString(false);
   }

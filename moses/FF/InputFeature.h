@@ -23,7 +23,7 @@ public:
 
   InputFeature(const std::string &line);
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   void SetParameter(const std::string& key, const std::string& value);
 

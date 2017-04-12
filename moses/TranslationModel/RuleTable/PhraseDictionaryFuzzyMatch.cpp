@@ -93,8 +93,9 @@ PhraseDictionaryFuzzyMatch::~PhraseDictionaryFuzzyMatch()
   delete m_FuzzyMatchWrapper;
 }
 
-void PhraseDictionaryFuzzyMatch::Load()
+void PhraseDictionaryFuzzyMatch::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   SetFeaturesToApply();
 
   m_FuzzyMatchWrapper = new tmmt::FuzzyMatchWrapper(m_config[0], m_config[1], m_config[2]);
@@ -241,7 +242,7 @@ void PhraseDictionaryFuzzyMatch::InitializeForInput(ttasksptr const& ttask)
                                                , &alignString        = tokens[3];
 
     bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
-    if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
+    if (isLHSEmpty && !ttask->options()->unk.word_deletion_enabled) {
       TRACE_ERR( ptFileName << ":" << count << ": pt entry contains empty target, skipping\n");
       continue;
     }

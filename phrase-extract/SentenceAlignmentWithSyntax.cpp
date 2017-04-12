@@ -35,7 +35,7 @@ namespace MosesTraining
 
 bool SentenceAlignmentWithSyntax::processTargetSentence(const char * targetString, int sentenceID, bool boundaryRules)
 {
-  if (!m_options.targetSyntax) {
+  if (!m_targetSyntax) {
     return SentenceAlignment::processTargetSentence(targetString, sentenceID, boundaryRules);
   }
 
@@ -56,7 +56,7 @@ bool SentenceAlignmentWithSyntax::processTargetSentence(const char * targetStrin
 
 bool SentenceAlignmentWithSyntax::processSourceSentence(const char * sourceString, int sentenceID, bool boundaryRules)
 {
-  if (!m_options.sourceSyntax) {
+  if (!m_sourceSyntax) {
     return SentenceAlignment::processSourceSentence(sourceString, sentenceID, boundaryRules);
   }
 

@@ -38,7 +38,7 @@ void SoftMatchingFeature::SetParameter(const std::string& key, const std::string
 bool SoftMatchingFeature::Load(const std::string& filePath)
 {
 
-  StaticData &staticData = StaticData::InstanceNonConst();
+  StaticData &SD = StaticData::InstanceNonConst();
 
   InputFileStream inStream(filePath);
   std::string line;
@@ -52,14 +52,14 @@ bool SoftMatchingFeature::Load(const std::string& filePath)
     }
 
     Word LHS, RHS;
-    LHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), tokens[0], true);
-    RHS.CreateFromString(Output, staticData.GetOutputFactorOrder(), tokens[1], true);
+    LHS.CreateFromString(Output, SD.options()->output.factor_order, tokens[0], true);
+    RHS.CreateFromString(Output, SD.options()->output.factor_order, tokens[1], true);
 
     m_softMatches[RHS[0]->GetId()].push_back(LHS);
     GetOrSetFeatureName(RHS, LHS);
   }
 
-  staticData.SetSoftMatches(m_softMatches);
+  SD.SetSoftMatches(m_softMatches);
 
   return true;
 }
@@ -124,9 +124,10 @@ const std::string& SoftMatchingFeature::GetOrSetFeatureName(const Word& RHS, con
   boost::unique_lock<boost::shared_mutex> lock(m_accessLock);
 #endif
   std::string &name = m_nameCache[RHS[0]->GetId()][LHS[0]->GetId()];
-  const std::vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
-  std::string LHS_string = LHS.GetString(outputFactorOrder, false);
-  std::string RHS_string = RHS.GetString(outputFactorOrder, false);
+  const std::vector<FactorType> & oFactors
+  = StaticData::Instance().options()->output.factor_order;
+  std::string LHS_string = LHS.GetString(oFactors, false);
+  std::string RHS_string = RHS.GetString(oFactors, false);
   name = LHS_string + "->" + RHS_string;
   return name;
 }

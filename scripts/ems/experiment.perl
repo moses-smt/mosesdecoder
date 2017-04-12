@@ -384,11 +384,11 @@ sub read_config {
 	$resolve = 0;
 	foreach my $parameter (keys %CONFIG) {
 	    foreach (@{$CONFIG{$parameter}}) {
-		next unless /\$/;
+		next unless /\$[a-z\{]/i;
 		my $escaped = 0;
 		die ("BAD USE OF \$ IN VALUE used in parameter $parameter")
-		    if ! ( /^(.*)\$([a-z\-\:\d]+)(.*)$/i ||
-			  (/^(.*)\$\{([a-z\-\:\d]+)\}(.*)$/i && ($escaped = 1)));
+		    if ! ( /^(.*)\$([a-z][a-z\-\:\d]*)(.*)$/i ||
+			  (/^(.*)\$\{([a-z][a-z\-\:\d]*)\}(.*)$/i && ($escaped = 1)));
 		my ($pre,$substitution,$post) = ($1,$2,$3);
 		my $pattern = $substitution;
 		if ($substitution !~ /\:/) { # handle local variables
@@ -1800,6 +1800,10 @@ sub define_lm_train_bilingual_lm {
     my $epochs = &get_bilingual_lm_epochs($set);
     $cmd .= " -e $epochs" if defined($epochs);
 
+    my $nnjm_settings = backoff_and_get("LM:$set:nnjm-settings");
+    $cmd .= " ";
+    $cmd .= $nnjm_settings;
+
     my $nplm_settings = backoff_and_get("LM:$set:nplm-settings");
     $cmd .= " --extra-settings \"$nplm_settings\"" if defined($nplm_settings);
 
@@ -2311,7 +2315,7 @@ sub define_training_build_transliteration_model {
     my $sym_method = &check_and_get("TRAINING:alignment-symmetrization-method");
     my $moses_src_dir = &check_and_get("GENERAL:moses-src-dir");
     my $external_bin_dir = &check_and_get("GENERAL:external-bin-dir");
-    my $srilm_dir = &check_and_get("TRAINING:srilm-dir");
+    my $srilm_dir = &check_backoff_and_get("TRAINING:srilm-dir");
     my $decoder = &get("TRAINING:transliteration-decoder");
 
     my $cmd = "$moses_script_dir/Transliteration/train-transliteration-module.pl";
@@ -2364,18 +2368,24 @@ sub define_training_extract_phrases {
           $cmd .= "-unknown-word-soft-matches $unknown_word_soft_matches ";
       }
 
+      if (&get("TRAINING:phrase-orientation")) {
+        $cmd .= "-phrase-orientation ";
+        my $phrase_orientation_priors_file = &versionize(&long_file_name("phrase-orientation-priors","model",""));
+        $cmd .= "-phrase-orientation-priors-file $phrase_orientation_priors_file ";
+      }
+
       if (&get("TRAINING:use-ghkm")) {
         $cmd .= "-ghkm ";
       }
 
-      if (&get("TRAINING:ghkm-tree-fragments")) {
-        $cmd .= "-ghkm-tree-fragments ";
+      if (&get("TRAINING:target-syntactic-preferences")) {
+        $cmd .= "-target-syntactic-preferences ";
+        my $target_syntactic_preferences_labels_file = &versionize(&long_file_name("target-syntactic-preferences-labels","model",""));
+        $cmd .= "-target-syntactic-preferences-labels-file $target_syntactic_preferences_labels_file ";
       }
 
-      if (&get("TRAINING:ghkm-phrase-orientation")) {
-        $cmd .= "-ghkm-phrase-orientation ";
-        my $phrase_orientation_priors_file = &versionize(&long_file_name("phrase-orientation-priors","model",""));
-        $cmd .= "-phrase-orientation-priors-file $phrase_orientation_priors_file ";
+      if (&get("TRAINING:ghkm-tree-fragments")) {
+        $cmd .= "-ghkm-tree-fragments ";
       }
 
       if (&get("TRAINING:ghkm-source-labels")) {
@@ -2396,6 +2406,12 @@ sub define_training_extract_phrases {
 
       if (&get("TRAINING:ghkm-strip-bitpar-nonterminal-labels")) {
         $cmd .= "-ghkm-strip-bitpar-nonterminal-labels ";
+      }
+
+    } else { # !hierarchical-rule-set
+
+      if (&get("TRAINING:target-constituent-boundaries")) {
+        $cmd .= "-target-constituent-boundaries ";
       }
     }
 
@@ -2427,14 +2443,20 @@ sub define_training_build_ttable {
 
     if (&get("TRAINING:hierarchical-rule-set")) {
 
-      if (&get("TRAINING:ghkm-tree-fragments")) {
-        $cmd .= "-ghkm-tree-fragments ";
-      }
-
-      if (&get("TRAINING:ghkm-phrase-orientation")) {
-        $cmd .= "-ghkm-phrase-orientation ";
+      if (&get("TRAINING:phrase-orientation")) {
+        $cmd .= "-phrase-orientation ";
         my $phrase_orientation_priors_file = &versionize(&long_file_name("phrase-orientation-priors","model",""));
         $cmd .= "-phrase-orientation-priors-file $phrase_orientation_priors_file ";
+      }
+
+      if (&get("TRAINING:target-syntactic-preferences")) {
+        $cmd .= "-target-syntactic-preferences ";
+        my $target_syntactic_preferences_labels_file = &versionize(&long_file_name("target-syntactic-preferences-labels","model",""));
+        $cmd .= "-target-syntactic-preferences-labels-file $target_syntactic_preferences_labels_file ";
+      }
+
+      if (&get("TRAINING:ghkm-tree-fragments")) {
+        $cmd .= "-ghkm-tree-fragments ";
       }
 
       if (&get("TRAINING:ghkm-source-labels")) {
@@ -2447,6 +2469,12 @@ sub define_training_build_ttable {
         $cmd .= "-ghkm-parts-of-speech ";
         my $parts_of_speech_labels_file = &versionize(&long_file_name("parts-of-speech","model",""));
         $cmd .= "-ghkm-parts-of-speech-file $parts_of_speech_labels_file ";
+      }
+
+    } else { # !hierarchical-rule-set
+
+      if (&get("TRAINING:target-constituent-boundaries")) {
+        $cmd .= "-target-constituent-boundaries ";
       }
     }
 
@@ -2571,7 +2599,7 @@ sub get_config_tables {
     $cmd .= ":$numFF" if defined($numFF);
     $cmd .= " ";
 
-    $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table) if $reordering_table;
+    $cmd .= &get_table_name_settings("reordering-factors","reordering-table",$reordering_table) if $reordering_table && !defined($mmsapt);
     $cmd .= &get_table_name_settings("generation-factors","generation-table",$generation_table)	if $generation_table;
     $cmd .= "-config $config ";
 
@@ -2632,12 +2660,26 @@ sub define_training_create_config {
 
     if ($osm) {
       my $osm_settings = &get("TRAINING:operation-sequence-model-settings");
-      if ($osm_settings =~ /-factor *(\S+)/){
+      if ($osm_settings =~ /-factor *(\S+)/) {
         $cmd .= "-osm-model $osm/ -osm-setting $1 ";
       }
       else {
         $cmd .= "-osm-model $osm/operationLM.bin ";
       }
+      my $osm_load_method = &get("TRAINING:operation-sequence-model-load-method");
+      if (defined($osm_load_method)) {
+        $cmd .= "-osm-load-method $osm_load_method ";
+      }
+    }
+
+    if (&get("TRAINING:phrase-orientation")) {
+      $cmd .= "-phrase-orientation ";
+    }
+
+    if (&get("TRAINING:target-syntactic-preferences")) {
+      $cmd .= "-target-syntactic-preferences ";
+      my $target_syntactic_preferences_labels_file = &versionize(&long_file_name("target-syntactic-preferences-labels","model",""));
+      $cmd .= "-target-syntactic-preferences-labels-file $target_syntactic_preferences_labels_file ";
     }
 
     if (&get("TRAINING:ghkm-source-labels")) {
@@ -2650,6 +2692,10 @@ sub define_training_create_config {
       $cmd .= "-ghkm-parts-of-speech ";
       my $parts_of_speech_labels_file = &versionize(&long_file_name("parts-of-speech","model",""));
       $cmd .= "-ghkm-parts-of-speech-file $parts_of_speech_labels_file ";
+    }
+
+    if (&get("TRAINING:target-constituent-boundaries")) {
+      $cmd .= "-target-constituent-boundaries ";
     }
 
     # sparse lexical features provide additional content for config file
@@ -3579,8 +3625,8 @@ sub define_template {
     print "\tcmd is $cmd\n" if $VERBOSE;
 
     # replace variables
-    while ($cmd =~ /^([\S\s]*)\$(\??)\{([^\s\/\"\']+)\}([\S\s]*)$/ ||
-           $cmd =~ /^([\S\s]*)\$(\??)([^\s\/\"\']+)([\S\s]*)$/) {
+    while ($cmd =~ /^([\S\s]*)\$(\??)\{([a-z][^\s\/\"\']*)\}([\S\s]*)$/i ||
+           $cmd =~ /^([\S\s]*)\$(\??)([a-z][^\s\/\"\']*)([\S\s]*)$/i) {
 	my ($pre,$optional,$variable,$post) = ($1,$2,$3,$4);
 	my $value;
 	if ($optional eq '?') {
@@ -3594,7 +3640,8 @@ sub define_template {
     }
 
     # deal with pipelined commands
-    $cmd =~ s/\|(.*)(\<\s*\S+) /$2 \| $1 /g;
+    $cmd =~ s/\|(.*[^\\])(\<\s*\S+) /$2 \| $1 /g;
+    $cmd =~ s/\\\</\</g;
 
     # deal with gzipped input
     my $c = "";

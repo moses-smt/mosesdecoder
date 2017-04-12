@@ -1,0 +1,32 @@
+alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem  ;
+
+lib probingpt :
+  StoreTarget.cpp
+  StoreVocab.cpp
+  hash.cpp
+  line_splitter.cpp
+  probing_hash_utils.cpp
+  querying.cpp
+  storing.cpp
+  vocabid.cpp
+  OutputFileStream.cpp
+  InputFileStream.cpp
+  util.cpp
+  
+#  ../util/string_piece.cc
+#  ../util/exception.cc
+#  ../util/file.cc
+#  ../util/file_piece.cc
+#  ../util/murmur_hash.cc
+#  ../util/mmap.cc
+#  ../util/read_compressed.cc
+#  ../util/parallel_read.cc
+#  ../util/ersatz_progress.cc
+  
+  
+  deps
+   ;
+   
+exe CreateProbingPT : CreateProbingPT.cpp probingpt ../util//kenutil ;
+
+alias programs : CreateProbingPT ;

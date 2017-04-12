@@ -3,11 +3,15 @@
 
 #include "FeatureFunction.h"
 
-#include "moses/Syntax/SHyperedge.h"
 
 namespace Moses
 {
 class FFState;
+
+namespace Syntax
+{
+struct SHyperedge;
+}
 
 /** base class for all stateful feature functions.
  * eg. LM, distortion penalty
@@ -65,6 +69,23 @@ public:
   bool IsStateless() const {
     return false;
   }
+
+
+  virtual void
+  EvaluateInIsolation
+  (Phrase const& source, TargetPhrase const& targetPhrase,
+   ScoreComponentCollection &scoreBreakdown,
+   ScoreComponentCollection &estimatedScores) const {}
+
+  virtual void
+  EvaluateWithSourceContext
+  (InputType const&input, InputPath const& inputPath, TargetPhrase const& targetPhrase,
+   StackVec const* stackVec, ScoreComponentCollection &scoreBreakdown,
+   ScoreComponentCollection *estimatedFutureScore = NULL) const {}
+
+  virtual void
+  EvaluateTranslationOptionListWithSourceContext
+  (const InputType &input, const TranslationOptionList &translationOptionList) const {}
 
 };
 

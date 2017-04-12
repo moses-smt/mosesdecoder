@@ -13,18 +13,19 @@ namespace Moses
 size_t BleuScoreState::bleu_order = 4;
 std::vector<BleuScoreFeature*> BleuScoreFeature::s_staticColl;
 
-BleuScoreState::BleuScoreState(): m_words(1),
-  m_source_length(0),
-  m_target_length(0),
-  m_scaled_ref_length(0),
-  m_ngram_counts(bleu_order),
-  m_ngram_matches(bleu_order)
-{
-}
+BleuScoreState::BleuScoreState(bool is_syntax)
+  : m_words(1),
+    m_source_length(0),
+    m_target_length(0),
+    m_is_syntax(false),
+    m_scaled_ref_length(0),
+    m_ngram_counts(bleu_order),
+    m_ngram_matches(bleu_order)
+{ }
 
 size_t BleuScoreState::hash() const
 {
-  if (StaticData::Instance().IsSyntax())
+  if (m_is_syntax)
     return 0;
 
   size_t ret = hash_value(m_words);
@@ -36,7 +37,7 @@ bool BleuScoreState::operator==(const FFState& o) const
   if (&o == this)
     return true;
 
-  if (StaticData::Instance().IsSyntax())
+  if (m_is_syntax)
     return true;
 
   const BleuScoreState& other = static_cast<const BleuScoreState&>(o);
@@ -500,7 +501,7 @@ FFState* BleuScoreFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const
 {
-  if (!m_enabled) return new BleuScoreState();
+  if (!m_enabled) return new BleuScoreState(m_is_syntax);
 
   NGrams::const_iterator reference_ngrams_iter;
   const BleuScoreState& ps = static_cast<const BleuScoreState&>(*prev_state);
@@ -560,7 +561,7 @@ FFState* BleuScoreFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
 FFState* BleuScoreFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureID,
     ScoreComponentCollection* accumulator ) const
 {
-  if (!m_enabled) return new BleuScoreState();
+  if (!m_enabled) return new BleuScoreState(m_is_syntax);
 
   NGrams::const_iterator reference_ngrams_iter;
 
@@ -576,7 +577,7 @@ FFState* BleuScoreFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo, 
   assert(cur_hypo.GetPrevHypos().size() <= 2);
   BleuScoreState* new_state;
   if (cur_hypo.GetPrevHypos().size() == 0)
-    new_state = new BleuScoreState();
+    new_state = new BleuScoreState(m_is_syntax);
   else {
     const FFState* prev_state_zero = cur_hypo.GetPrevHypo(0)->GetFFState(featureID);
     const BleuScoreState& ps_zero = static_cast<const BleuScoreState&>(*prev_state_zero);
@@ -704,7 +705,7 @@ float BleuScoreFeature::CalculateBleu(Phrase translation) const
   }
 
   // get ngram matches for translation
-  BleuScoreState* state = new BleuScoreState();
+  BleuScoreState* state = new BleuScoreState(m_is_syntax);
   GetClippedNgramMatchesAndCounts(normTranslation,
                                   m_cur_ref_ngrams,
                                   state->m_ngram_counts,
@@ -870,7 +871,7 @@ float BleuScoreFeature::CalculateBleu(BleuScoreState* state) const
 
 const FFState* BleuScoreFeature::EmptyHypothesisState(const InputType& input) const
 {
-  return new BleuScoreState();
+  return new BleuScoreState(m_is_syntax);
 }
 
 bool BleuScoreFeature::IsUseable(const FactorMask &mask) const
@@ -878,6 +879,13 @@ bool BleuScoreFeature::IsUseable(const FactorMask &mask) const
   // TODO: Was this meant to return mask[0]!?
   bool ret = mask[0];
   return 0;
+}
+
+void
+BleuScoreFeature::
+Load(AllOptions::ptr const& opts)
+{
+  m_is_syntax = is_syntax(opts->search.algo);
 }
 
 } // namespace.

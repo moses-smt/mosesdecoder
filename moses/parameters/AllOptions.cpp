@@ -4,6 +4,12 @@
 namespace Moses
 {
   AllOptions::
+  AllOptions()
+    : mira(false)
+    , use_legacy_pt(false)
+  { }
+
+  AllOptions::
   AllOptions(Parameter const& param)
   {
     init(param);
@@ -22,6 +28,8 @@ namespace Moses
     if (!mbr.init(param))        return false;
     if (!lmbr.init(param))       return false;
     if (!output.init(param))     return false;
+    if (!unk.init(param))        return false;
+    if (!syntax.init(param))     return false;
 
     param.SetParameter(mira, "mira", false);
 
@@ -64,6 +72,7 @@ namespace Moses
     // set m_nbest_options.enabled = true if necessary:
     nbest.enabled = (nbest.enabled || mira || search.consensus 
                      || nbest.nbest_size > 0
+                     || mbr.enabled || lmbr.enabled
                      || !output.SearchGraph.empty()
                      || !output.SearchGraphExtended.empty()
                      || !output.SearchGraphSLF.empty()
@@ -88,8 +97,15 @@ namespace Moses
     if (!mbr.update(param))        return false;
     if (!lmbr.update(param))       return false;
     if (!output.update(param))     return false;
+    if (!unk.update(param))        return false;
+    if (!syntax.update(param))     return false;
     return sanity_check();
   }
+#else
+  bool 
+  AllOptions::
+  update(std::map<std::string,xmlrpc_c::value>const& param)
+  {}
 #endif
 
   bool
