@@ -969,21 +969,6 @@ parse-input-devtest
 	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
 	ignore-unless: use-mira	
 	template: $input-parser < IN > OUT
-parse-relax-input
-	in: split-input
-	out: input
-	default-name: tuning/input.parse-relaxed
-	pass-unless: input-parse-relaxer
-	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
-    template: $input-parse-relaxer < IN > OUT
-parse-relax-input-devtest
-	in: split-input-devtest
-	out: input-devtest
-	default-name: tuning/input.devtest.parse-relaxed
-	pass-unless: input-parse-relaxer
-	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
-	ignore-unless: use-mira
-    template: $input-parse-relaxer < IN > OUT
 factorize-input
 	in: parsed-input
 	out: factorized-input
@@ -1059,6 +1044,21 @@ split-input-devtest
 	pass-unless: input-splitter
 	ignore-unless: use-mira
 	template: $input-splitter -model IN1.$input-extension < IN > OUT
+parse-relax-input
+	in: split-input
+	out: input
+	default-name: tuning/input.parse-relaxed
+	pass-unless: input-parse-relaxer
+	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
+    template: $input-parse-relaxer < IN > OUT
+parse-relax-input-devtest
+	in: split-input-devtest
+	out: input-devtest
+	default-name: tuning/input.devtest.parse-relaxed
+	pass-unless: input-parse-relaxer
+	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
+	ignore-unless: use-mira
+    template: $input-parse-relaxer < IN > OUT
 reference-from-sgm
 	in: reference-sgm input-sgm
 	out: raw-reference
@@ -1252,20 +1252,6 @@ mock-parse-input
 	default-name: evaluation/input.mock-parsed
 	pass-unless: mock-input-parser-devtesteval
 	template: $mock-input-parser-devtesteval < IN > OUT
-parse-input
-	in: mock-parsed-input
-	out: parsed-input
-	default-name: evaluation/input.parsed
-	pass-unless: input-parser
-	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
-	template: $input-parser < IN > OUT
-parse-relax-input
-	in: split-input
-	out: input
-	default-name: evaluation/input.parse-relaxed
-	pass-unless: input-parse-relaxer
-	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
-    template: $input-parse-relaxer < IN > OUT
 factorize-input
 	in: parsed-input
 	out: factorized-input
@@ -1303,6 +1289,20 @@ split-input
 	default-name: evaluation/input.split
 	pass-unless: input-splitter
 	template: $input-splitter -model IN1.$input-extension < IN > OUT
+parse-input
+	in: mock-parsed-input
+	out: parsed-input
+	default-name: evaluation/input.parsed
+	pass-unless: input-parser
+	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
+	template: $input-parser < IN > OUT
+parse-relax-input
+	in: split-input
+	out: input
+	default-name: evaluation/input.parse-relaxed
+	pass-unless: input-parse-relaxer
+	pass-if: skip-parse-input-devtesteval mock-input-parser-devtesteval
+    template: $input-parse-relaxer < IN > OUT
 filter
 	in: input TRAINING:sigtest-filter-phrase-translation-table TRAINING:sigtest-filter-reordering-table TRAINING:corpus-mml-prefilter=OR=TRAINING:corpus-mml-postfilter=OR=TRAINING:domains TRAINING:transliteration-table
 	out: filtered-dir 
