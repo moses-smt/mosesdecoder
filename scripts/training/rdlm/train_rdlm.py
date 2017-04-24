@@ -105,6 +105,8 @@ parser.add_argument(
 parser.add_argument(
     "--train-host", dest="train_host",
     help="Execute nplm training on this host, via ssh")
+parser.add_argument("--extra-settings", dest="extra_settings",
+  help="Extra settings to be passed to NPLM")
 
 
 parser.set_defaults(
