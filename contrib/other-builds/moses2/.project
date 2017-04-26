@@ -358,6 +358,26 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses2/FF/Distortion.h</locationURI>
 		</link>
 		<link>
+			<name>FF/ExampleStatefulFF.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses2/FF/ExampleStatefulFF.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/ExampleStatefulFF.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses2/FF/ExampleStatefulFF.h</locationURI>
+		</link>
+		<link>
+			<name>FF/ExampleStatelessFF.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses2/FF/ExampleStatelessFF.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/ExampleStatelessFF.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses2/FF/ExampleStatelessFF.h</locationURI>
+		</link>
+		<link>
 			<name>FF/FFState.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses2/FF/FFState.cpp</locationURI>
@@ -426,26 +446,6 @@
 			<name>FF/PointerState.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses2/FF/PointerState.h</locationURI>
-		</link>
-		<link>
-			<name>FF/SkeletonStatefulFF.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses2/FF/SkeletonStatefulFF.cpp</locationURI>
-		</link>
-		<link>
-			<name>FF/SkeletonStatefulFF.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses2/FF/SkeletonStatefulFF.h</locationURI>
-		</link>
-		<link>
-			<name>FF/SkeletonStatelessFF.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses2/FF/SkeletonStatelessFF.cpp</locationURI>
-		</link>
-		<link>
-			<name>FF/SkeletonStatelessFF.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses2/FF/SkeletonStatelessFF.h</locationURI>
 		</link>
 		<link>
 			<name>FF/StatefulFeatureFunction.cpp</name>

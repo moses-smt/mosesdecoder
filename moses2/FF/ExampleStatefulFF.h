@@ -1,23 +1,22 @@
 /*
- * SkeletonStatefulFF.h
+ * ExampleStatefulFF.h
  *
  *  Created on: 27 Oct 2015
  *      Author: hieu
  */
 
-#ifndef SKELETONSTATEFULFF_H_
-#define SKELETONSTATEFULFF_H_
+#pragma once
 
 #include "StatefulFeatureFunction.h"
 
 namespace Moses2
 {
 
-class SkeletonStatefulFF: public StatefulFeatureFunction
+class ExampleStatefulFF: public StatefulFeatureFunction
 {
 public:
-  SkeletonStatefulFF(size_t startInd, const std::string &line);
-  virtual ~SkeletonStatefulFF();
+  ExampleStatefulFF(size_t startInd, const std::string &line);
+  virtual ~ExampleStatefulFF();
 
   virtual FFState* BlankState(MemPool &pool, const System &sys) const;
   virtual void EmptyHypothesisState(FFState &state, const ManagerBase &mgr,
@@ -45,4 +44,3 @@ public:
 
 }
 
-#endif /* SKELETONSTATEFULFF_H_ */
