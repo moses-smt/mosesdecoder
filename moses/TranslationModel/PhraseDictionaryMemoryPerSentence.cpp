@@ -1,6 +1,6 @@
 // vim:tabstop=2
 #include "PhraseDictionaryMemoryPerSentence.h"
-#include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
+#include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerExample.h"
 
 using namespace std;
 

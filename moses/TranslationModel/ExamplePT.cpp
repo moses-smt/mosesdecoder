@@ -1,29 +1,29 @@
 // vim:tabstop=2
-#include "SkeletonPT.h"
-#include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
+#include "ExamplePT.h"
+#include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerExample.h"
 
 using namespace std;
 
 namespace Moses
 {
-SkeletonPT::SkeletonPT(const std::string &line)
+ExamplePT::ExamplePT(const std::string &line)
   : PhraseDictionary(line, true)
 {
   ReadParameters();
 }
 
-void SkeletonPT::Load(AllOptions::ptr const& opts)
+void ExamplePT::Load(AllOptions::ptr const& opts)
 {
   m_options = opts;
   SetFeaturesToApply();
 }
 
-void SkeletonPT::InitializeForInput(ttasksptr const& ttask)
+void ExamplePT::InitializeForInput(ttasksptr const& ttask)
 {
   ReduceCache();
 }
 
-void SkeletonPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
+void ExamplePT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
 {
   CacheColl &cache = GetCache();
 
@@ -46,14 +46,14 @@ void SkeletonPT::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQu
   }
 }
 
-TargetPhrase *SkeletonPT::CreateTargetPhrase(const Phrase &sourcePhrase) const
+TargetPhrase *ExamplePT::CreateTargetPhrase(const Phrase &sourcePhrase) const
 {
-  // create a target phrase from the 1st word of the source, prefix with 'SkeletonPT:'
+  // create a target phrase from the 1st word of the source, prefix with 'ExamplePT:'
   assert(sourcePhrase.GetSize());
   assert(m_output.size() == 1);
 
   string str = sourcePhrase.GetWord(0).GetFactor(0)->GetString().as_string();
-  str = "SkeletonPT:" + str;
+  str = "ExamplePT:" + str;
 
   TargetPhrase *tp = new TargetPhrase(this);
   Word &word = tp->AddWord();
@@ -69,17 +69,17 @@ TargetPhrase *SkeletonPT::CreateTargetPhrase(const Phrase &sourcePhrase) const
   return tp;
 }
 
-ChartRuleLookupManager* SkeletonPT::CreateRuleLookupManager(const ChartParser &parser,
+ChartRuleLookupManager* ExamplePT::CreateRuleLookupManager(const ChartParser &parser,
     const ChartCellCollectionBase &cellCollection,
     std::size_t /*maxChartSpan*/)
 {
-  return new ChartRuleLookupManagerSkeleton(parser, cellCollection, *this);
+  return new ChartRuleLookupManagerExample(parser, cellCollection, *this);
 }
 
-TO_STRING_BODY(SkeletonPT);
+TO_STRING_BODY(ExamplePT);
 
 // friend
-ostream& operator<<(ostream& out, const SkeletonPT& phraseDict)
+ostream& operator<<(ostream& out, const ExamplePT& phraseDict)
 {
   return out;
 }

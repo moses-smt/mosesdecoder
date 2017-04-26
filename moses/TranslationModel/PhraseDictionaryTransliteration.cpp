@@ -2,7 +2,6 @@
 #include <cstdlib>
 
 #include "PhraseDictionaryTransliteration.h"
-#include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
 #include "moses/DecodeGraph.h"
 #include "moses/DecodeStep.h"
 #include "util/tempfile.hh"

@@ -29,16 +29,16 @@ class TargetPhraseCollection;
 class ChartParserCallback;
 class DottedRuleColl;
 class Range;
-class SkeletonPT;
+class ExamplePT;
 
-class ChartRuleLookupManagerSkeleton : public ChartRuleLookupManager
+class ChartRuleLookupManagerExample  : public ChartRuleLookupManager
 {
 public:
-  ChartRuleLookupManagerSkeleton(const ChartParser &parser,
+  ChartRuleLookupManagerExample(const ChartParser &parser,
                                  const ChartCellCollectionBase &cellColl,
-                                 const SkeletonPT &skeletonPt);
+                                 const ExamplePT &skeletonPt);
 
-  ~ChartRuleLookupManagerSkeleton();
+  ~ChartRuleLookupManagerExample();
 
   virtual void GetChartRuleCollection(
     const InputPath &inputPath,
@@ -50,7 +50,7 @@ private:
 
   StackVec m_stackVec;
   std::vector<TargetPhraseCollection::shared_ptr > m_tpColl;
-  const SkeletonPT &m_skeletonPT;
+  const ExamplePT &m_skeletonPT;
 };
 
 }  // namespace Moses

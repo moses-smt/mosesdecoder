@@ -18,7 +18,7 @@
  ***********************************************************************/
 
 #include <iostream>
-#include "ChartRuleLookupManagerSkeleton.h"
+#include "ChartRuleLookupManagerExample.h"
 #include "DotChartInMemory.h"
 
 #include "moses/Util.h"
@@ -29,29 +29,29 @@
 #include "moses/NonTerminal.h"
 #include "moses/ChartCellCollection.h"
 #include "moses/TranslationModel/PhraseDictionaryMemory.h"
-#include "moses/TranslationModel/SkeletonPT.h"
+#include "moses/TranslationModel/ExamplePT.h"
 
 using namespace std;
 
 namespace Moses
 {
 
-ChartRuleLookupManagerSkeleton::ChartRuleLookupManagerSkeleton(
+ChartRuleLookupManagerExample::ChartRuleLookupManagerExample(
   const ChartParser &parser,
   const ChartCellCollectionBase &cellColl,
-  const SkeletonPT &skeletonPt)
+  const ExamplePT &skeletonPt)
   : ChartRuleLookupManager(parser, cellColl)
   , m_skeletonPT(skeletonPt)
 {
-  cerr << "starting ChartRuleLookupManagerSkeleton" << endl;
+  cerr << "starting ChartRuleLookupManagerExample" << endl;
 }
 
-ChartRuleLookupManagerSkeleton::~ChartRuleLookupManagerSkeleton()
+ChartRuleLookupManagerExample::~ChartRuleLookupManagerExample()
 {
   // RemoveAllInColl(m_tpColl);
 }
 
-void ChartRuleLookupManagerSkeleton::GetChartRuleCollection(
+void ChartRuleLookupManagerExample::GetChartRuleCollection(
   const InputPath &inputPath,
   size_t last,
   ChartParserCallback &outColl)
@@ -74,12 +74,12 @@ void ChartRuleLookupManagerSkeleton::GetChartRuleCollection(
 }
 
 TargetPhrase *
-ChartRuleLookupManagerSkeleton::
+ChartRuleLookupManagerExample::
 CreateTargetPhrase(const Word &sourceWord) const
 {
-  // create a target phrase from the 1st word of the source, prefix with 'ChartManagerSkeleton:'
+  // create a target phrase from the 1st word of the source, prefix with 'ChartManagerExample:'
   string str = sourceWord.GetFactor(0)->GetString().as_string();
-  str = "ChartManagerSkeleton:" + str;
+  str = "ChartManagerExample:" + str;
 
   TargetPhrase *tp = new TargetPhrase(&m_skeletonPT);
   Word &word = tp->AddWord();

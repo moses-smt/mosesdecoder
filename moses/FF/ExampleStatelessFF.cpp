@@ -1,5 +1,5 @@
 #include <vector>
-#include "SkeletonStatelessFF.h"
+#include "ExampleStatelessFF.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/TargetPhrase.h"
 
@@ -7,13 +7,13 @@ using namespace std;
 
 namespace Moses
 {
-SkeletonStatelessFF::SkeletonStatelessFF(const std::string &line)
+ExampleStatelessFF::ExampleStatelessFF(const std::string &line)
   :StatelessFeatureFunction(2, line)
 {
   ReadParameters();
 }
 
-void SkeletonStatelessFF::EvaluateInIsolation(const Phrase &source
+void ExampleStatelessFF::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
     , ScoreComponentCollection &estimatedScores) const
@@ -29,7 +29,7 @@ void SkeletonStatelessFF::EvaluateInIsolation(const Phrase &source
 
 }
 
-void SkeletonStatelessFF::EvaluateWithSourceContext(const InputType &input
+void ExampleStatelessFF::EvaluateWithSourceContext(const InputType &input
     , const InputPath &inputPath
     , const TargetPhrase &targetPhrase
     , const StackVec *stackVec
@@ -43,20 +43,20 @@ void SkeletonStatelessFF::EvaluateWithSourceContext(const InputType &input
   }
 }
 
-void SkeletonStatelessFF::EvaluateTranslationOptionListWithSourceContext(const InputType &input
+void ExampleStatelessFF::EvaluateTranslationOptionListWithSourceContext(const InputType &input
 
     , const TranslationOptionList &translationOptionList) const
 {}
 
-void SkeletonStatelessFF::EvaluateWhenApplied(const Hypothesis& hypo,
+void ExampleStatelessFF::EvaluateWhenApplied(const Hypothesis& hypo,
     ScoreComponentCollection* accumulator) const
 {}
 
-void SkeletonStatelessFF::EvaluateWhenApplied(const ChartHypothesis &hypo,
+void ExampleStatelessFF::EvaluateWhenApplied(const ChartHypothesis &hypo,
     ScoreComponentCollection* accumulator) const
 {}
 
-void SkeletonStatelessFF::SetParameter(const std::string& key, const std::string& value)
+void ExampleStatelessFF::SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "arg") {
     // set value here
