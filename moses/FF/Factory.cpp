@@ -68,13 +68,13 @@
 #include "moses/FF/ExampleStatelessFF.h"
 #include "moses/FF/ExampleStatefulFF.h"
 #include "moses/LM/ExampleLM.h"
-#include "moses/LM/InMemoryPerSentenceOnDemandLM.h"
-#include "moses/FF/SkeletonTranslationOptionListFeature.h"
+#include "moses/FF/ExampleTranslationOptionListFeature.h"
 #include "moses/LM/BilingualLM.h"
 #include "moses/TranslationModel/ExamplePT.h"
 #include "moses/Syntax/InputWeightFF.h"
 #include "moses/Syntax/RuleTableFF.h"
 
+#include "moses/LM/InMemoryPerSentenceOnDemandLM.h"
 #include "moses/FF/EditOps.h"
 #include "moses/FF/CorrectionPattern.h"
 
@@ -300,10 +300,10 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(ExampleStatelessFF);
   MOSES_FNAME(ExampleStatefulFF);
   MOSES_FNAME(ExampleLM);
-  MOSES_FNAME(InMemoryPerSentenceOnDemandLM);
-  MOSES_FNAME(SkeletonTranslationOptionListFeature);
+  MOSES_FNAME(ExampleTranslationOptionListFeature);
   MOSES_FNAME(ExamplePT);
 
+  MOSES_FNAME(InMemoryPerSentenceOnDemandLM);
   MOSES_FNAME(EditOps);
   MOSES_FNAME(CorrectionPattern);
 

@@ -6,10 +6,10 @@
 namespace Moses
 {
 
-class SkeletonTranslationOptionListFeature : public StatelessFeatureFunction
+class ExampleTranslationOptionListFeature : public StatelessFeatureFunction
 {
 public:
-  SkeletonTranslationOptionListFeature(const std::string &line)
+  ExampleTranslationOptionListFeature(const std::string &line)
     :StatelessFeatureFunction(1, line) {
     ReadParameters();
   }

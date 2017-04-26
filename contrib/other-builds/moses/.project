@@ -1221,6 +1221,11 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ExampleStatelessFF.h</locationURI>
 		</link>
 		<link>
+			<name>FF/ExampleTranslationOptionListFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ExampleTranslationOptionListFeature.h</locationURI>
+		</link>
+		<link>
 			<name>FF/FFState.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/FFState.cpp</locationURI>
