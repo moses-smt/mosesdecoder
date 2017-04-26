@@ -35,8 +35,8 @@ class ChartRuleLookupManagerExample  : public ChartRuleLookupManager
 {
 public:
   ChartRuleLookupManagerExample(const ChartParser &parser,
-                                 const ChartCellCollectionBase &cellColl,
-                                 const ExamplePT &skeletonPt);
+                                const ChartCellCollectionBase &cellColl,
+                                const ExamplePT &skeletonPt);
 
   ~ChartRuleLookupManagerExample();
 

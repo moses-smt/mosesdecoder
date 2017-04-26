@@ -12,7 +12,7 @@ namespace Moses2
 {
 
 ExampleStatelessFF::ExampleStatelessFF(size_t startInd,
-    const std::string &line) :
+                                       const std::string &line) :
   StatelessFeatureFunction(startInd, line)
 {
   ReadParameters();
