@@ -1201,6 +1201,31 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/EditOps.h</locationURI>
 		</link>
 		<link>
+			<name>FF/ExampleStatefulFF.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ExampleStatefulFF.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/ExampleStatefulFF.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ExampleStatefulFF.h</locationURI>
+		</link>
+		<link>
+			<name>FF/ExampleStatelessFF.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ExampleStatelessFF.cpp</locationURI>
+		</link>
+		<link>
+			<name>FF/ExampleStatelessFF.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ExampleStatelessFF.h</locationURI>
+		</link>
+		<link>
+			<name>FF/ExampleTranslationOptionListFeature.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/ExampleTranslationOptionListFeature.h</locationURI>
+		</link>
+		<link>
 			<name>FF/FFState.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/FFState.cpp</locationURI>
@@ -1419,26 +1444,6 @@
 			<name>FF/SetSourcePhrase.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SetSourcePhrase.h</locationURI>
-		</link>
-		<link>
-			<name>FF/SkeletonStatefulFF.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonStatefulFF.cpp</locationURI>
-		</link>
-		<link>
-			<name>FF/SkeletonStatefulFF.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonStatefulFF.h</locationURI>
-		</link>
-		<link>
-			<name>FF/SkeletonStatelessFF.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonStatelessFF.cpp</locationURI>
-		</link>
-		<link>
-			<name>FF/SkeletonStatelessFF.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/FF/SkeletonStatelessFF.h</locationURI>
 		</link>
 		<link>
 			<name>FF/SoftMatchingFeature.cpp</name>
@@ -1696,6 +1701,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/DALMWrapper.h</locationURI>
 		</link>
 		<link>
+			<name>LM/ExampleLM.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/ExampleLM.cpp</locationURI>
+		</link>
+		<link>
+			<name>LM/ExampleLM.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/ExampleLM.h</locationURI>
+		</link>
+		<link>
 			<name>LM/IRST.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/IRST.cpp</locationURI>
@@ -1844,16 +1859,6 @@
 			<name>LM/SingleFactor.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/SingleFactor.h</locationURI>
-		</link>
-		<link>
-			<name>LM/SkeletonLM.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/SkeletonLM.cpp</locationURI>
-		</link>
-		<link>
-			<name>LM/SkeletonLM.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/LM/SkeletonLM.h</locationURI>
 		</link>
 		<link>
 			<name>LM/backward.arpa</name>
@@ -2141,6 +2146,16 @@
 			<locationURI>virtual:/virtual</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/ExamplePT.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ExamplePT.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/ExamplePT.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/ExamplePT.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/PhraseDictionary.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionary.cpp</locationURI>
@@ -2289,16 +2304,6 @@
 			<name>TranslationModel/Scope3Parser</name>
 			<type>2</type>
 			<locationURI>virtual:/virtual</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/SkeletonPT.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/SkeletonPT.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/SkeletonPT.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/SkeletonPT.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/UG</name>
@@ -3136,6 +3141,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerCYKPlus.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerExample.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerExample.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerExample.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerExample.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemory.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerMemory.cpp</locationURI>
@@ -3164,16 +3179,6 @@
 			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerOnDisk.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerOnDisk.h</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.cpp</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.cpp</locationURI>
-		</link>
-		<link>
-			<name>TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h</locationURI>
 		</link>
 		<link>
 			<name>TranslationModel/CYKPlusParser/CompletedRuleCollection.cpp</name>

@@ -7,11 +7,11 @@
 namespace Moses
 {
 
-class SkeletonState : public FFState
+class ExampleState : public FFState
 {
   int m_targetLen;
 public:
-  SkeletonState(int targetLen)
+  ExampleState(int targetLen)
     :m_targetLen(targetLen) {
   }
 
@@ -19,22 +19,22 @@ public:
     return (size_t) m_targetLen;
   }
   virtual bool operator==(const FFState& o) const {
-    const SkeletonState& other = static_cast<const SkeletonState&>(o);
+    const ExampleState& other = static_cast<const ExampleState&>(o);
     return m_targetLen == other.m_targetLen;
   }
 
 };
 
-class SkeletonStatefulFF : public StatefulFeatureFunction
+class ExampleStatefulFF : public StatefulFeatureFunction
 {
 public:
-  SkeletonStatefulFF(const std::string &line);
+  ExampleStatefulFF(const std::string &line);
 
   bool IsUseable(const FactorMask &mask) const {
     return true;
   }
   virtual const FFState* EmptyHypothesisState(const InputType &input) const {
-    return new SkeletonState(0);
+    return new ExampleState(0);
   }
 
   // An empty implementation of this function is provided by StatefulFeatureFunction.

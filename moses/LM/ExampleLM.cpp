@@ -1,12 +1,12 @@
 
-#include "SkeletonLM.h"
+#include "ExampleLM.h"
 #include "moses/FactorCollection.h"
 
 using namespace std;
 
 namespace Moses
 {
-SkeletonLM::SkeletonLM(const std::string &line)
+ExampleLM::ExampleLM(const std::string &line)
   :LanguageModelSingleFactor(line)
 {
   ReadParameters();
@@ -24,11 +24,11 @@ SkeletonLM::SkeletonLM(const std::string &line)
   m_sentenceEndWord[m_factorType] = m_sentenceEnd;
 }
 
-SkeletonLM::~SkeletonLM()
+ExampleLM::~ExampleLM()
 {
 }
 
-LMResult SkeletonLM::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
+LMResult ExampleLM::GetValue(const vector<const Word*> &contextFactor, State* finalState) const
 {
   LMResult ret;
   ret.score = contextFactor.size();

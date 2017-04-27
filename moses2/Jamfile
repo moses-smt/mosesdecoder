@@ -47,8 +47,8 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem : : : $(max-factors
    FF/FeatureFunctions.cpp 
    FF/FeatureRegistry.cpp
     FF/PhrasePenalty.cpp
-    FF/SkeletonStatefulFF.cpp
-    FF/SkeletonStatelessFF.cpp
+    FF/ExampleStatefulFF.cpp
+    FF/ExampleStatelessFF.cpp
     FF/StatefulFeatureFunction.cpp
     FF/StatelessFeatureFunction.cpp
     FF/WordPenalty.cpp

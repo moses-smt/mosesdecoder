@@ -16,8 +16,8 @@
 #include "WordPenalty.h"
 #include "OSM/OpSequenceModel.h"
 
-#include "SkeletonStatefulFF.h"
-#include "SkeletonStatelessFF.h"
+#include "ExampleStatefulFF.h"
+#include "ExampleStatelessFF.h"
 
 using namespace std;
 
@@ -70,8 +70,8 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(WordPenalty);
   MOSES_FNAME(OpSequenceModel);
 
-  MOSES_FNAME(SkeletonStatefulFF);
-  MOSES_FNAME(SkeletonStatelessFF);
+  MOSES_FNAME(ExampleStatefulFF);
+  MOSES_FNAME(ExampleStatelessFF);
 }
 
 FeatureRegistry::~FeatureRegistry()

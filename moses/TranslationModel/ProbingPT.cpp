@@ -4,7 +4,6 @@
 #include "moses/FactorCollection.h"
 #include "moses/TargetPhraseCollection.h"
 #include "moses/InputFileStream.h"
-#include "moses/TranslationModel/CYKPlusParser/ChartRuleLookupManagerSkeleton.h"
 #include "probingpt/querying.h"
 #include "probingpt/probing_hash_utils.h"
 

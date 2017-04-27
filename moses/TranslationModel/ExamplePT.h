@@ -9,12 +9,12 @@ class ChartParser;
 class ChartCellCollectionBase;
 class ChartRuleLookupManager;
 
-class SkeletonPT : public PhraseDictionary
+class ExamplePT : public PhraseDictionary
 {
-  friend std::ostream& operator<<(std::ostream&, const SkeletonPT&);
+  friend std::ostream& operator<<(std::ostream&, const ExamplePT&);
 
 public:
-  SkeletonPT(const std::string &line);
+  ExamplePT(const std::string &line);
 
   void Load(AllOptions::ptr const& opts);
 
