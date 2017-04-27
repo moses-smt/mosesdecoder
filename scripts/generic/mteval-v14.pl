@@ -5,6 +5,7 @@ use strict;
 use utf8;
 use Encode;
 use XML::Twig;
+use Sort::Naturally;
 
 binmode STDOUT, ":utf8";
 binmode STDERR, ":utf8";
@@ -13,11 +14,16 @@ binmode STDERR, ":utf8";
 #################################
 # History:
 #
+# version 14
+#    (2016-03-29 lukas.diduch@nist.gov)
+#    * Fixed warning message in case seg-id is a string, by sorting in correct order using Sort::Naturally.
+#
+# version 13b
+#    * Fixed die 'bug' in case seg->id = 0 
+#
 # version 13a
 #    * modified the scoring functions to prevent division-by-zero errors when a system segment is empty
 #        * affected methods: 'bleu_score' and 'bleu_score_smoothing'
-#    * use \p{Line_Breaks} instead of \p{Hyphen} when stripping end-of-line hyphenation and join lines
-#        * because \p{Hyphen} is deprecated since 2016-06-01, see http://www.unicode.org/reports/tr14/#Hyphen
 #
 # version 13
 #    * Uses a XML parser to read data (only when extension is .xml)
@@ -125,7 +131,7 @@ binmode STDERR, ":utf8";
 # Intro
 my ($date, $time) = date_time_stamp();
 print "MT evaluation scorer began on $date at $time\n";
-print "command line:  ", $0, " ", join(" ", @ARGV), "\n";
+print "\ncommand line:  ", $0, " ", join(" ", @ARGV), "\n";
 my $usage = "\n\nUsage: $0 -r <ref_file> -s <src_file> -t <tst_file>\n\n".
     "Description:  This Perl script evaluates MT system performance.\n".
     "\n".
@@ -159,7 +165,7 @@ my $usage = "\n\nUsage: $0 -r <ref_file> -s <src_file> -t <tst_file>\n\n".
     "         BLEU-sys.scr and NIST-sys.scr : system-level scores\n" .
     "  --no-smoothing : disable smoothing on BLEU scores\n" .
     "\n";
-
+ 
 use vars qw ($opt_r $opt_s $opt_t $opt_d $opt_h $opt_b $opt_n $opt_c $opt_x $opt_e);
 use Getopt::Long;
 my $ref_file = '';
@@ -222,7 +228,7 @@ my $METHOD = "BOTH";
 if ( $opt_b ) { $METHOD = "BLEU"; }
 if ( $opt_n ) { $METHOD = "NIST"; }
 my $method;
-
+ 
 ######
 # Global variables
 my ($src_lang, $tgt_lang, @tst_sys, @ref_sys); # evaluation parameters
@@ -258,7 +264,7 @@ my %BLEUOverall;
 
 ######
 # Evaluate
-print "  Evaluation of $src_lang-to-$tgt_lang translation using:\n";
+print "\nEvaluation of $src_lang-to-$tgt_lang translation using:\n";
 my $cum_seg = 0;
 foreach my $doc (sort keys %eval_docs)
 {
@@ -267,7 +273,7 @@ foreach my $doc (sort keys %eval_docs)
 print "    src set \"$src_id\" (", scalar keys %eval_docs, " docs, $cum_seg segs)\n";
 print "    ref set \"$ref_id\" (", scalar keys %ref_data, " refs)\n";
 print "    tst set \"$tst_id\" (", scalar keys %tst_data, " systems)\n\n";
-
+ 
 foreach my $sys (sort @tst_sys)
 {
 	for (my $n=1; $n<=$max_Ngram; $n++)
@@ -298,7 +304,7 @@ if ( $metricsMATR_output )
 }
 
 ($date, $time) = date_time_stamp();
-print "MT evaluation scorer ended on $date at $time\n";
+print "\nMT evaluation scorer ended on $date at $time\n";
 
 exit 0;
 
@@ -329,7 +335,9 @@ sub get_source_info
 			my $docID = $currentDoc->{ 'att' }->{ 'docid' } or die "No document 'docid' attribute value in '$file'";
 			foreach my $currentSeg ( $currentDoc->get_xpath( './/seg' ) )
 			{
-				my $segID = $currentSeg->{ 'att' }->{ 'id' } or die "No segment 'id' attribute value in '$file'";
+				
+				my $segID = $currentSeg->{ 'att' }->{ 'id' };
+				die "No segment 'id' attribute value in '$file'" if (! defined $segID);
 				my $segData = $currentSeg->text;
 				($eval_docs{$docID}{SEGS}{$segID}) = &{ $TOKENIZATION }( $segData );
 			}
@@ -420,7 +428,8 @@ sub get_MT_data
 				$docs->{ $sys }{ $docID }{ FILE } = $file;
 				foreach my $currentSeg ( $currentDoc->get_xpath( './/seg' ) )
 				{
-					my $segID = $currentSeg->{ 'att' }->{ 'id' } or die "No segment 'id' attribute value in '$file'";
+					my $segID = $currentSeg->{ 'att' }->{ 'id' };
+					die "No segment 'id' attribute value in '$file'" if (! defined $segID);
 					my $segData = $currentSeg->text;
 					($docs->{$sys}{$docID}{SEGS}{$segID}) = &{ $TOKENIZATION }( $segData );
 				}
@@ -610,7 +619,7 @@ sub score_system
 
 	if ($method eq "BLEU")
 	{
-		$overallScore->{ $sys }{ 'score' } = &{$BLEU_SCORE}($cum_ref_length, \@cum_match, \@cum_tst_cnt, $sys, $SCOREmt, 1);
+		$overallScore->{ $sys }{ 'score' } = &{$BLEU_SCORE}($cum_ref_length, \@cum_match, \@cum_tst_cnt, $sys, $SCOREmt);
 	}
 	if ($method eq "NIST")
 	{
@@ -633,9 +642,10 @@ sub score_document
 		$cum_match[$j] = $cum_tst_cnt[$j] = $cum_ref_cnt[$j] = $cum_tst_info[$j] = $cum_ref_info[$j] = 0;
 	}
 
-#score each segment
-	foreach my $seg ( sort{ $a <=> $b } keys( %{$tst_data{$sys}{$doc}{SEGS}} ) )
+    # score each segment
+	foreach my $seg ( nsort keys( %{$tst_data{$sys}{$doc}{SEGS}} ) )
 	{
+
 		my @ref_segments = ();
 		foreach $ref (@ref_sys)
 		{
@@ -644,9 +654,9 @@ sub score_document
 			{
 				printf "ref '$ref', seg $seg: %s\n", $ref_data{$ref}{$doc}{SEGS}{$seg}
 			}
-
+			
 		}
-
+		
 		printf "sys '$sys', seg $seg: %s\n", $tst_data{$sys}{$doc}{SEGS}{$seg} if ( $detail >= 3 );
 		($ref_length, $match_cnt, $tst_cnt, $ref_cnt, $tst_info, $ref_info) = score_segment ($tst_data{$sys}{$doc}{SEGS}{$seg}, @ref_segments);
 
@@ -656,7 +666,7 @@ sub score_document
 			my $segScore = &{$BLEU_SCORE}($ref_length, $match_cnt, $tst_cnt, $sys, %DOCmt);
 			$overallScore->{ $sys }{ 'documents' }{ $doc }{ 'segments' }{ $seg }{ 'score' } = $segScore;
 			if ( $detail >= 2 )
-			{
+			{ 
 				printf "  $method score using 4-grams = %.4f for system \"$sys\" on segment $seg of document \"$doc\" (%d words)\n", $segScore, $tst_cnt->[1]
 			}
 		}
@@ -666,7 +676,7 @@ sub score_document
 			my $segScore = nist_score (scalar @ref_sys, $match_cnt, $tst_cnt, $ref_cnt, $tst_info, $ref_info, $sys, %DOCmt);
 			$overallScore->{ $sys }{ 'documents' }{ $doc }{ 'segments' }{ $seg }{ 'score' } = $segScore;
 			if ( $detail >= 2 )
-			{
+			{ 
 				printf "  $method score using 5-grams = %.4f for system \"$sys\" on segment $seg of document \"$doc\" (%d words)\n", $segScore, $tst_cnt->[1];
 			}
 		}
@@ -846,12 +856,11 @@ sub bleu_score_nosmoothing
 ###############################################################################################################################
 sub bleu_score
 {
-	my ($ref_length, $matching_ngrams, $tst_ngrams, $sys, $SCOREmt,$report_length) = @_;
+	my ($ref_length, $matching_ngrams, $tst_ngrams, $sys, $SCOREmt) = @_;
 	my $score = 0;
 	my $iscore = 0;
 	my $exp_len_score = 0;
 	$exp_len_score = exp( min (0, 1 - $ref_length / $tst_ngrams->[ 1 ] ) ) if ( $tst_ngrams->[ 1 ] > 0 );
-        print "length ratio: ".($tst_ngrams->[1]/$ref_length)." ($tst_ngrams->[1]/$ref_length), penalty (log): ".log($exp_len_score)."\n" if $report_length;
 	my $smooth = 1;
 	for ( my $j = 1; $j <= $max_Ngram; ++$j )
 	{
@@ -947,7 +956,7 @@ sub tokenization_international
 	my ($norm_text) = @_;
 
 	$norm_text =~ s/<skipped>//g; # strip "skipped" tags
-	$norm_text =~ s/\p{Line_Break}\p{Zl}//g; # strip end-of-line hyphenation and join lines
+	#$norm_text =~ s/\p{Hyphen}\p{Zl}//g; # strip end-of-line hyphenation and join lines
 	$norm_text =~ s/\p{Zl}/ /g; # join lines
 
 	# replace entities
@@ -1011,7 +1020,7 @@ sub extract_sgml_tag_and_span
 sub extract_sgml_tag_attribute
 {
 	my ($name, $data) = @_;
-	($data =~ m|$name\s*=\s*\"?([^\"]*)\"?|si) ? ($1) : ();
+	($data =~ m|$name\s*=\s*\"([^\"]*)\"|si) ? ($1) : ();
 }
 
 #################################
@@ -1081,7 +1090,7 @@ sub printout_report
 			{
 				printf "  %2.4f ",$NISTmt{$i}{$sys}{ind}
 			}
-			printf " \"$sys\"\n";
+			printf "  \"$sys\"\n";
 		}
 		printf "\n";
 	}
@@ -1095,12 +1104,12 @@ sub printout_report
 			{
 				printf "  %2.4f ",$BLEUmt{$i}{$sys}{ind}
 			}
-			printf " \"$sys\"\n";
+			printf "  \"$sys\"\n";
 		}
 	}
 
 	printf "\n# ------------------------------------------------------------------------\n";
-	printf "Cumulative N-gram scoring\n";
+	printf "\nCumulative N-gram scoring\n";
 	printf "        1-gram   2-gram   3-gram   4-gram   5-gram   6-gram   7-gram   8-gram   9-gram\n";
 	printf "        ------   ------   ------   ------   ------   ------   ------   ------   ------\n";
 
@@ -1113,7 +1122,7 @@ sub printout_report
 			{
 				printf "  %2.4f ",$NISTmt{$i}{$sys}{cum}
 			}
-			printf " \"$sys\"\n";
+			printf "  \"$sys\"\n";
 		}
 	}
 	printf "\n";
@@ -1126,7 +1135,7 @@ sub printout_report
 			{
 				printf "  %2.4f ",$BLEUmt{$i}{$sys}{cum}
 			}
-			printf " \"$sys\"\n";
+			printf "  \"$sys\"\n";
 		}
 	}
 }
@@ -1156,7 +1165,7 @@ sub outputMetricsMATR
 		{
 			my $scoreDoc = $overall{ $sys }{ 'documents' }{ $doc }{ 'score' };
 			print FILEOUT_DOC "${tst_id}\t${sys}\t${doc}\t${scoreDoc}\n";
-			foreach my $seg ( sort{ $a <=> $b }( keys( %{$overall{ $sys }{ 'documents' }{ $doc }{ 'segments' }} ) ) )
+			foreach my $seg ( nsort keys( %{$overall{ $sys }{ 'documents' }{ $doc }{ 'segments' }} ) )
 			{
 				my $scoreSeg = $overall{ $sys }{ 'documents' }{ $doc }{ 'segments' }{ $seg }{ 'score' };
 				print FILEOUT_SEG "${tst_id}\t${sys}\t${doc}\t${seg}\t${scoreSeg}\n";
