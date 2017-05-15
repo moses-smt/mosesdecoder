@@ -29,6 +29,7 @@ typedef sapt::L2R_Token<sapt::SimpleWordId> Token;
 typedef mmTtrack<Token> ttrack_t;
 
 size_t ngram_size;
+size_t verbosity;
 string bname;
 vector<string> ifiles;
 
@@ -77,7 +78,7 @@ main(int argc, char* argv[])
               size_t stop = min(snt.size(), i+ngram_size);
               size_t k = i; 
               while (k < stop && m.extend(snt[k])) ++k;
-              // cout << i << " " << k-i << " " << m.str(&V) << endl;
+              if (verbosity) cout << i << " " << k-i << " " << m.str(&V) << endl;
               if (k - i == ngram_size)
                 ++matched_ngrams;
             }
@@ -98,6 +99,8 @@ interpret_args(int ac, char* av[])
     ("help,h",  "print this message")
     ("ngram-size,n", po::value<size_t>(&ngram_size)->default_value(5),
      "sample size")
+    ("verbose,v", po::value<size_t>(&verbosity)->default_value(0),
+     "verbosity")
     ;
 
   po::options_description h("Hidden Options");
