@@ -31,6 +31,9 @@ die("ERROR: please set --phrase-table") unless defined($ptPath);
 #die("ERROR: please set --lex-ro") unless defined($lexRoPath);
 die("ERROR: please set --output-dir") unless defined($outPath);
 #die("ERROR: please set --num-lex-scores") unless defined($numLexScores);
+die("ERROR: compile contrib/sigtest-filter") if (!-X "$mosesDir/contrib/sigtest-filter/filter-pt");
+die("ERROR: compile with bjam --with-cmph") if (!-X "$mosesDir/bin/processLexicalTableMin");
+die("ERROR: compile with bjam --with-xmlrpc-c") if (!-X "$mosesDir/bin/CreateProbingPT2");
 
 my $cmd;
 

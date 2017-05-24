@@ -27,7 +27,7 @@ std::string temp_location()
 {
 #if defined(_WIN32) || defined(_WIN64)
   char dir_buffer[1000];
-  if (GetTempPath(1000, dir_buffer) == 0)
+  if (GetTempPathA(1000, dir_buffer) == 0)
     throw std::runtime_error("Could not read temporary directory.");
   return std::string(dir_buffer);
 #else
@@ -51,7 +51,7 @@ std::string windows_tmpnam()
 {
   const std::string tmp = temp_location();
   char output_buffer[MAX_PATH];
-  if (GetTempFileName(tmp.c_str(), "tmp", 0, output_buffer) == 0)
+  if (GetTempFileNameA(tmp.c_str(), "tmp", 0, output_buffer) == 0)
     throw std::runtime_error("Could not create temporary file name.");
   return output_buffer;
 }

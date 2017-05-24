@@ -85,13 +85,14 @@ void
 TranslationRequest::
 add_phrase_aln_info(Hypothesis const& h, vector<xmlrpc_c::value>& aInfo) const
 {
-  // if (!m_withAlignInfo) return;
-  if (!options()->output.ReportSegmentation) return;
+  if (!m_withAlignInfo) return;
+  //  if (!options()->output.ReportSegmentation) return;
   Range const& trg = h.GetCurrTargetWordsRange();
   Range const& src = h.GetCurrSourceWordsRange();
 
   std::map<std::string, xmlrpc_c::value> pAlnInfo;
   pAlnInfo["tgt-start"] = xmlrpc_c::value_int(trg.GetStartPos());
+  pAlnInfo["tgt-end"] = xmlrpc_c::value_int(trg.GetEndPos());
   pAlnInfo["src-start"] = xmlrpc_c::value_int(src.GetStartPos());
   pAlnInfo["src-end"]   = xmlrpc_c::value_int(src.GetEndPos());
   aInfo.push_back(xmlrpc_c::value_struct(pAlnInfo));
@@ -356,6 +357,12 @@ parse_request(std::map<std::string, xmlrpc_c::value> const& params)
       }
     }
 
+  // Report alignment info if Moses config says to or if XML request says to
+  m_withAlignInfo = options()->output.ReportSegmentation || check(params, "align");
+
+  // Report word alignment info if Moses config says to or if XML request says to
+  m_withWordAlignInfo = options()->output.PrintAlignmentInfo || check(params, "word-align");
+
   si = params.find("weights");
   if (si != params.end())
     {
@@ -465,8 +472,8 @@ pack_hypothesis(const Moses::Manager& manager,
 	   << std::endl);
   dest[key] = xmlrpc_c::value_string(target.str());
 
-  // if (m_withAlignInfo) {
-  if (options()->output.ReportSegmentation) {
+  if (m_withAlignInfo) {
+  //  if (options()->output.ReportSegmentation) {
     // phrase alignment, if requested
 
     vector<xmlrpc_c::value> p_aln;
@@ -475,8 +482,8 @@ pack_hypothesis(const Moses::Manager& manager,
     dest["align"] = xmlrpc_c::value_array(p_aln);
   }
 
-  // if (m_withWordAlignInfo) {
-  if (options()->output.PrintAlignmentInfo) { 
+  if (m_withWordAlignInfo) {
+    //if (options()->output.PrintAlignmentInfo) { 
     // word alignment, if requested
     vector<xmlrpc_c::value> w_aln;
     BOOST_REVERSE_FOREACH(Hypothesis const* e, edges)

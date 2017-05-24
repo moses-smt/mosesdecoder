@@ -1,0 +1,24 @@
+sudo: false
+dist: trusty
+language: c
+compiler: gcc
+env:
+  matrix: 
+addons:
+  apt:
+    sources:
+      - ubuntu-toolchain-r-test
+    packages:
+      - subversion
+      - automake
+      - libtool
+      - zlib1g-dev
+      - libbz2-dev
+      - liblzma-dev
+      - libboost-all-dev
+      - libgoogle-perftools-dev
+      - libxmlrpc-c++.*-dev
+      - cmake
+      - csh
+script:
+- ./bjam -j4
