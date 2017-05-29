@@ -340,6 +340,6 @@ if [ path.exists $(TOP)/dist ] && $(prefix) != dist {
 #local temp = [ _shell "bash source ./s.sh" ] ;
 local temp = [ _shell "mkdir -p $(TOP)/bin" ] ;
 local temp = [ _shell "rm -f $(TOP)/bin/moses_chart" ] ;
-local temp = [ _shell "cd $(TOP)/bin && ln -s moses moses_chart" ] ;
-local temp = [ _shell "cd $(TOP)/bin && ln -s CreateProbingPT CreateProbingPT2" ] ;
+local temp = [ _shell "cd $(TOP)/bin && ln -sf moses moses_chart" ] ;
+local temp = [ _shell "cd $(TOP)/bin && ln -sf CreateProbingPT CreateProbingPT2" ] ;
 
