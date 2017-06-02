@@ -341,33 +341,60 @@ CreateTranslationOptions()
   // there may be multiple decoding graphs (factorizations of decoding)
   const vector <DecodeGraph*> &decodeGraphList
   = StaticData::Instance().GetDecodeGraphs();
+  const vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
+
+  // get the TM (translation models) parameters in the weight-overwrite - a feature
+  // present in a xml translation request.
+  // If these TM parameters are sent as zeros, then the phrases correspondant to
+  // that specific phrase table are not going to be computed.
+  boost::unordered_map<string, FeatureFunction*> map;
+  std::string t("TM");
+  std::vector<int> indexToIgnore;
+  BOOST_FOREACH(FeatureFunction* const& ff, ffs) {
+    if (ff->GetScoreProducerDescription().compare(0, t.length(), t) == 0) {
+        std::vector<float> weight = StaticData::Instance().GetWeights(ff);
+        bool zeros = std::all_of(weight.begin(), weight.end(), [](float i) { return i==0.00000; });
+        if (zeros){
+            std::string index (ff->GetScoreProducerDescription());
+            index.erase(0, 2);
+            VERBOSE(3, "INDEX TO IGNORE " << index << "\n");
+            std::string::size_type sz;
+            int i_idx = std::stoi (index, &sz);
+            indexToIgnore.push_back(i_idx);
+        }
+    }
+  }
 
   // length of the sentence
   const size_t size = m_source.GetSize();
 
   // loop over all decoding graphs, each generates translation options
   for (size_t gidx = 0 ; gidx < decodeGraphList.size() ; gidx++) {
-    if (decodeGraphList.size() > 1)
-      VERBOSE(3,"Creating translation options from decoding graph " << gidx << endl);
 
-    const DecodeGraph& dg = *decodeGraphList[gidx];
-    size_t backoff = dg.GetBackoff();
-    // iterate over spans
-    for (size_t sPos = 0 ; sPos < size; sPos++) {
-      size_t maxSize = size - sPos; // don't go over end of sentence
-      // size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
-      maxSize = std::min(maxSize, m_max_phrase_length);
+      if (std::find(indexToIgnore.begin(), indexToIgnore.end(), gidx) != indexToIgnore.end()) {
+          VERBOSE(3, "GOING TO IGNORE INDEX = " << gidx << endl);
+      } else {
+          if (decodeGraphList.size() > 1) VERBOSE(3, "Creating translation options from decoding graph " << gidx << endl);
 
-      for (size_t ePos = sPos ; ePos < sPos + maxSize ; ePos++) {
-        if (gidx && backoff &&
-            (ePos-sPos+1 <= backoff || // size exceeds backoff limit (HUH? UG) or ...
-             m_collection[sPos][ePos-sPos].size() > 0)) {
-          VERBOSE(3,"No backoff to graph " << gidx << " for span [" << sPos << ";" << ePos << "]" << endl);
-          continue;
-        }
-        CreateTranslationOptionsForRange(dg, sPos, ePos, true, gidx);
+          const DecodeGraph &dg = *decodeGraphList[gidx];
+          size_t backoff = dg.GetBackoff();
+          // iterate over spans
+          for (size_t sPos = 0; sPos < size; sPos++) {
+              size_t maxSize = size - sPos; // don't go over end of sentence
+              // size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+              maxSize = std::min(maxSize, m_max_phrase_length);
+
+              for (size_t ePos = sPos; ePos < sPos + maxSize; ePos++) {
+                  if (gidx && backoff &&
+                      (ePos - sPos + 1 <= backoff || // size exceeds backoff limit (HUH? UG) or ...
+                       m_collection[sPos][ePos - sPos].size() > 0)) {
+                      VERBOSE(3, "No backoff to graph " << gidx << " for span [" << sPos << ";" << ePos << "]" << endl);
+                      continue;
+                  }
+                  CreateTranslationOptionsForRange(dg, sPos, ePos, true, gidx);
+              }
+          }
       }
-    }
   }
   ProcessUnknownWord();
   EvaluateWithSourceContext();
