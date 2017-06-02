@@ -257,13 +257,18 @@ sub tokenize
     $text =~ s/^ //g;
     $text =~ s/ $//g;
 
-    # seperate out all "other" special characters
+    # separate out all "other" special characters
     $text =~ s/([^\p{IsAlnum}\s\.\'\`\,\-])/ $1 /g;
 
     # aggressive hyphen splitting
     if ($AGGRESSIVE)
     {
-        $text =~ s/([\p{IsAlnum}])\-(?=[\p{IsAlnum}])/$1 \@-\@ /g;
+        # $text =~ s/([\p{IsAlnum}])\-(?=[\p{IsAlnum}])/$1 \@-\@ /g;
+        # Does not split hyphen between numbers
+        $text =~ s/([\p{IsAlpha}])\-(?=[\p{IsAlpha}])/$1 \@-\@ /g;
+        $text =~ s/^\-(?=[\p{IsAlpha}])/- /g;
+        $text =~ s/(\s)\-(?=[\p{IsAlnum}])/$1- /g;
+        $text =~ s/(?<=[\p{IsAlnum}])\-(\s)/ -$1/g;
     }
 
     #multi-dots stay together
@@ -315,6 +320,10 @@ sub tokenize
         $text =~ s/([^\p{IsAlpha}])[']([\p{IsAlpha}])/$1 ' $2/g;
         $text =~ s/([\p{IsAlpha}])[']([^\p{IsAlpha}])/$1 ' $2/g;
         $text =~ s/([\p{IsAlpha}])[']([\p{IsAlpha}])/$1' $2/g;
+        # "'" at the beginning of a line
+        $text =~ s/^[']/' /g;
+        # "'" at the end of a line
+        $text =~ s/[']$/ '/g;
     }
     else
     {
