@@ -1724,7 +1724,7 @@ OutputSurface(std::ostream &out, Hypothesis const& edge, bool const recursive) c
     for (size_t i = 1 ; i < outputFactorOrder.size() ; i++) {
       const Factor *factor = phrase.GetFactor(pos, outputFactorOrder[i]);
       if (factor) out << fd << *factor;
-      else        out << fd << UNKNOWN_FACTOR;
+      //else        out << fd << UNKNOWN_FACTOR;
     }
 
     if(markUnknown && word.IsOOV()) {
