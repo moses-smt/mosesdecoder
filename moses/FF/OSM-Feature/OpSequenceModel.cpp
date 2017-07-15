@@ -17,40 +17,42 @@ OpSequenceModel::OpSequenceModel(const std::string &line)
   tFactor = 0;
   numFeatures = 5;
   ReadParameters();
+  load_method = util::READ;
 }
 
 OpSequenceModel::~OpSequenceModel()
 {
-	delete OSM;
+  delete OSM;
 }
 
 void OpSequenceModel :: readLanguageModel(const char *lmFile)
 {
-
   string unkOp = "_TRANS_SLF_";
-  OSM = new Model(m_lmPath.c_str());
+  OSM = ConstructOSMLM(m_lmPath.c_str(), load_method);
+
   State startState = OSM->NullContextState();
   State endState;
-  unkOpProb = OSM->Score(startState,OSM->GetVocabulary().Index(unkOp),endState);
+  unkOpProb = OSM->Score(startState,unkOp,endState);
 }
 
 
-void OpSequenceModel::Load()
+void OpSequenceModel::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   readLanguageModel(m_lmPath.c_str());
 }
 
 
 
-void OpSequenceModel:: Evaluate(const Phrase &source
-                                , const TargetPhrase &targetPhrase
-                                , ScoreComponentCollection &scoreBreakdown
-                                , ScoreComponentCollection &estimatedFutureScore) const
+void OpSequenceModel:: EvaluateInIsolation(const Phrase &source
+    , const TargetPhrase &targetPhrase
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection &estimatedScores) const
 {
 
   osmHypothesis obj;
   obj.setState(OSM->NullContextState());
-  WordsBitmap myBitmap(source.GetSize());
+  Bitmap myBitmap(source.GetSize());
   vector <string> mySourcePhrase;
   vector <string> myTargetPhrase;
   vector<float> scores;
@@ -66,14 +68,14 @@ void OpSequenceModel:: Evaluate(const Phrase &source
     alignments.push_back(iter->second);
   }
 
-  for (int i = 0; i < targetPhrase.GetSize(); i++) {
+  for (size_t i = 0; i < targetPhrase.GetSize(); i++) {
     if (targetPhrase.GetWord(i).IsOOV() && sFactor == 0 && tFactor == 0)
       myTargetPhrase.push_back("_TRANS_SLF_");
     else
       myTargetPhrase.push_back(targetPhrase.GetWord(i).GetFactor(tFactor)->GetString().as_string());
   }
 
-  for (int i = 0; i < source.GetSize(); i++) {
+  for (size_t i = 0; i < source.GetSize(); i++) {
     mySourcePhrase.push_back(source.GetWord(i).GetFactor(sFactor)->GetString().as_string());
   }
 
@@ -82,22 +84,22 @@ void OpSequenceModel:: Evaluate(const Phrase &source
   obj.computeOSMFeature(startIndex,myBitmap);
   obj.calculateOSMProb(*OSM);
   obj.populateScores(scores,numFeatures);
-  estimatedFutureScore.PlusEquals(this, scores);
+  estimatedScores.PlusEquals(this, scores);
 
 }
 
 
-FFState* OpSequenceModel::Evaluate(
+FFState* OpSequenceModel::EvaluateWhenApplied(
   const Hypothesis& cur_hypo,
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const
 {
   const TargetPhrase &target = cur_hypo.GetCurrTargetPhrase();
-  const WordsBitmap &bitmap = cur_hypo.GetWordsBitmap();
-  WordsBitmap myBitmap = bitmap;
+  const Bitmap &bitmap = cur_hypo.GetWordsBitmap();
+  Bitmap myBitmap(bitmap);
   const Manager &manager = cur_hypo.GetManager();
   const InputType &source = manager.GetSource();
-  const Sentence &sourceSentence = static_cast<const Sentence&>(source);
+  // const Sentence &sourceSentence = static_cast<const Sentence&>(source);
   osmHypothesis obj;
   vector <string> mySourcePhrase;
   vector <string> myTargetPhrase;
@@ -120,11 +122,11 @@ FFState* OpSequenceModel::Evaluate(
   //const Sentence &sentence = static_cast<const Sentence&>(curr_hypo.GetManager().GetSource());
 
 
-  const WordsRange & sourceRange = cur_hypo.GetCurrSourceWordsRange();
+  const Range & sourceRange = cur_hypo.GetCurrSourceWordsRange();
   int startIndex  = sourceRange.GetStartPos();
   int endIndex = sourceRange.GetEndPos();
   const AlignmentInfo &align = cur_hypo.GetCurrTargetPhrase().GetAlignTerm();
-  osmState * statePtr;
+  // osmState * statePtr;
 
   vector <int> alignments;
 
@@ -149,7 +151,7 @@ FFState* OpSequenceModel::Evaluate(
     // cerr<<mySourcePhrase[i]<<endl;
   }
 
-  for (int i = 0; i < target.GetSize(); i++) {
+  for (size_t i = 0; i < target.GetSize(); i++) {
 
     if (target.GetWord(i).IsOOV() && sFactor == 0 && tFactor == 0)
       myTargetPhrase.push_back("_TRANS_SLF_");
@@ -194,12 +196,12 @@ FFState* OpSequenceModel::Evaluate(
 // return NULL;
 }
 
-FFState* OpSequenceModel::EvaluateChart(
+FFState* OpSequenceModel::EvaluateWhenApplied(
   const ChartHypothesis& /* cur_hypo */,
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const
 {
-	UTIL_THROW2("Chart decoding not support by UTIL_THROW2");
+  UTIL_THROW2("Chart decoding not support by OpSequenceModel");
 
 }
 
@@ -247,6 +249,20 @@ void OpSequenceModel::SetParameter(const std::string& key, const std::string& va
     sFactor = Scan<int>(value);
   } else if (key == "output-factor") {
     tFactor = Scan<int>(value);
+  } else if (key == "load") {
+    if (value == "lazy") {
+      load_method = util::LAZY;
+    } else if (value == "populate_or_lazy") {
+      load_method = util::POPULATE_OR_LAZY;
+    } else if (value == "populate_or_read" || value == "populate") {
+      load_method = util::POPULATE_OR_READ;
+    } else if (value == "read") {
+      load_method = util::READ;
+    } else if (value == "parallel_read") {
+      load_method = util::PARALLEL_READ;
+    } else {
+      UTIL_THROW2("Unknown KenLM load method " << value);
+    }
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }

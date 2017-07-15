@@ -1,6 +1,10 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
 # $Id$
+use warnings;
 use strict;
 
 my $lowercase = 0;
@@ -27,10 +31,22 @@ while(-e "$stem$ref") {
 &add_to_ref($stem,\@REF) if -e $stem;
 die("ERROR: could not find reference file $stem") unless scalar @REF;
 
+# add additional references explicitly specified on the command line
+shift;
+foreach my $stem (@ARGV) {
+    &add_to_ref($stem,\@REF) if -e $stem;
+}
+
+
+
 sub add_to_ref {
     my ($file,$REF) = @_;
     my $s=0;
-    open(REF,$file) or die "Can't read $file";
+    if ($file =~ /.gz$/) {
+	open(REF,"gzip -dc $file|") or die "Can't read $file";
+    } else { 
+	open(REF,$file) or die "Can't read $file";
+    }
     while(<REF>) {
 	chop;
 	push @{$$REF[$s++]}, $_;
@@ -72,7 +88,7 @@ while(<STDIN>) {
 		$REF_NGRAM_N{$ngram}++;
 	    }
 	    foreach my $ngram (keys %REF_NGRAM_N) {
-		if (!defined($REF_NGRAM{$ngram}) || 
+		if (!defined($REF_NGRAM{$ngram}) ||
 		    $REF_NGRAM{$ngram} < $REF_NGRAM_N{$ngram}) {
 		    $REF_NGRAM{$ngram} = $REF_NGRAM_N{$ngram};
 #	    print "$i: REF_NGRAM{$ngram} = $REF_NGRAM{$ngram}<BR>\n";

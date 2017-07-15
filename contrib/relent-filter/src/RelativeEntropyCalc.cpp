@@ -70,7 +70,7 @@ namespace MosesCmd
       if (neg_log_div > 100){
 	 return 100;
       }
-      return neg_log_div; 
+      return neg_log_div;
   }
 
   void RelativeEntropyCalc::ConcatOutputPhraseRecursive(Phrase& phrase, const Hypothesis *hypo){

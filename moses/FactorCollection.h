@@ -41,6 +41,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "util/pool.hh"
 #include "Factor.h"
 
+class System;
+
 namespace Moses
 {
 
@@ -66,6 +68,7 @@ struct FactorFriend {
 class FactorCollection
 {
   friend std::ostream& operator<<(std::ostream&, const FactorCollection&);
+  friend class ::System;
 
   struct HashFactor : public std::unary_function<const FactorFriend &, std::size_t> {
     std::size_t operator()(const FactorFriend &factor) const {
@@ -110,9 +113,11 @@ public:
   */
   const Factor *AddFactor(const StringPiece &factorString, bool isNonTerminal = false);
 
-  const size_t GetNumNonTerminals() {
+  size_t GetNumNonTerminals() {
     return m_factorIdNonTerminal;
   }
+
+  const Factor *GetFactor(const StringPiece &factorString, bool isNonTerminal = false);
 
   // TODO: remove calls to this function, replacing them with the simpler AddFactor(factorString)
   const Factor *AddFactor(FactorDirection /*direction*/, FactorType /*factorType*/, const StringPiece &factorString, bool isNonTerminal = false) {

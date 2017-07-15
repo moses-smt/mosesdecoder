@@ -84,13 +84,13 @@ class ScoreFeature
 public:
 
   /** Some features might need to store properties in ExtractionPhrasePair,
-   *  e.g. to pass along external information loaded by a feature 
+   *  e.g. to pass along external information loaded by a feature
    *  which may distinguish several phrase occurrences based on sentence ID */
-  virtual void addPropertiesToPhrasePair(ExtractionPhrasePair &phrasePair, 
-                                         float count, 
+  virtual void addPropertiesToPhrasePair(ExtractionPhrasePair &phrasePair,
+                                         float count,
                                          int sentenceId) const {};
 
-  /** Add the values for this feature function. */
+  /** Add the values for this score feature. */
   virtual void add(const ScoreFeatureContext& context,
                    std::vector<float>& denseValues,
                    std::map<std::string,float>& sparseValues) const = 0;
@@ -113,10 +113,10 @@ public:
   void configure(const std::vector<std::string> args);
 
   /** Some features might need to store properties in ExtractionPhrasePair,
-   *  e.g. to pass along external information loaded by a feature 
+   *  e.g. to pass along external information loaded by a feature
    *  which may distinguish several phrase occurrences based on sentence ID */
-  void addPropertiesToPhrasePair(ExtractionPhrasePair &phrasePair, 
-                                 float count, 
+  void addPropertiesToPhrasePair(ExtractionPhrasePair &phrasePair,
+                                 float count,
                                  int sentenceId) const;
 
   /** Add all the features */

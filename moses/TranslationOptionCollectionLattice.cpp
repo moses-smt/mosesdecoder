@@ -11,6 +11,7 @@
 #include "FF/InputFeature.h"
 #include "TranslationModel/PhraseDictionaryTreeAdaptor.h"
 #include "util/exception.hh"
+#include "TranslationTask.h"
 
 using namespace std;
 
@@ -18,18 +19,22 @@ namespace Moses
 {
 
 /** constructor; just initialize the base class */
-TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
-  const WordLattice &input
-  , size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
-  : TranslationOptionCollection(input, maxNoTransOptPerCoverage, translationOptionThreshold)
+TranslationOptionCollectionLattice
+::TranslationOptionCollectionLattice
+( ttasksptr const& ttask,   const WordLattice &input)
+// , size_t maxNoTransOptPerCoverage, float translationOptionThreshold)
+  : TranslationOptionCollection(ttask, input)//
+  // , maxNoTransOptPerCoverage, translationOptionThreshold)
 {
   UTIL_THROW_IF2(StaticData::Instance().GetUseLegacyPT(),
-		  "Not for models using the legqacy binary phrase table");
+                 "Not for models using the legqacy binary phrase table");
 
-  const InputFeature &inputFeature = InputFeature::Instance();
-  UTIL_THROW_IF2(&inputFeature == NULL, "Input feature must be specified");
+  size_t maxNoTransOptPerCoverage = ttask->options()->search.max_trans_opt_per_cov;
+  float translationOptionThreshold = ttask->options()->search.trans_opt_threshold;
+  const InputFeature *inputFeature = InputFeature::InstancePtr();
+  UTIL_THROW_IF2(inputFeature == NULL, "Input feature must be specified");
 
-  size_t maxPhraseLength = StaticData::Instance().GetMaxPhraseLength();
+  size_t maxPhraseLength = ttask->options()->search.max_phrase_length;  //StaticData::Instance().GetMaxPhraseLength();
   size_t size = input.GetSize();
 
   // 1-word phrases
@@ -45,7 +50,12 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
       size_t nextNode = nextNodes[i];
       size_t endPos = startPos + nextNode - 1;
 
-      WordsRange range(startPos, endPos);
+      Range range(startPos, endPos);
+
+      if (range.GetNumWordsCovered() > maxPhraseLength) {
+        continue;
+      }
+
       const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
 
       Phrase subphrase;
@@ -54,67 +64,73 @@ TranslationOptionCollectionLattice::TranslationOptionCollectionLattice(
       const ScorePair &scores = col[i].second;
       ScorePair *inputScore = new ScorePair(scores);
 
-      InputPath *path = new InputPath(subphrase, labels, range, NULL, inputScore);
+      InputPath *path
+      = new InputPath(ttask.get(), subphrase, labels, range, NULL, inputScore);
 
       path->SetNextNode(nextNode);
       m_inputPathQueue.push_back(path);
+
+      // recursive
+      Extend(*path, input, ttask->options()->search.max_phrase_length);
+
     }
   }
-
-  // iteratively extend all paths
-    for (size_t endPos = 1; endPos < size; ++endPos) {
-      const std::vector<size_t> &nextNodes = input.GetNextNodes(endPos);
-
-      // loop thru every previous paths
-      size_t numPrevPaths = m_inputPathQueue.size();
-
-      for (size_t i = 0; i < numPrevPaths; ++i) {
-        //for (size_t pathInd = 0; pathInd < prevPaths.size(); ++pathInd) {
-        const InputPath &prevPath = *m_inputPathQueue[i];
-
-        size_t nextNode = prevPath.GetNextNode();
-        if (prevPath.GetWordsRange().GetEndPos() + nextNode != endPos) {
-        	continue;
-        }
-
-        size_t startPos = prevPath.GetWordsRange().GetStartPos();
-
-        if (endPos - startPos + 1 > maxPhraseLength) {
-        	continue;
-        }
-
-        WordsRange range(startPos, endPos);
-        const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
-
-        const Phrase &prevPhrase = prevPath.GetPhrase();
-        const ScorePair *prevInputScore = prevPath.GetInputScore();
-        UTIL_THROW_IF2(prevInputScore == NULL,
-        		"Null previous score");
-
-        // loop thru every word at this position
-        const ConfusionNet::Column &col = input.GetColumn(endPos);
-
-        for (size_t i = 0; i < col.size(); ++i) {
-          const Word &word = col[i].first;
-          Phrase subphrase(prevPhrase);
-          subphrase.AddWord(word);
-
-          const ScorePair &scores = col[i].second;
-          ScorePair *inputScore = new ScorePair(*prevInputScore);
-          inputScore->PlusEquals(scores);
-
-          InputPath *path = new InputPath(subphrase, labels, range, &prevPath, inputScore);
-
-          size_t nextNode = nextNodes[i];
-          path->SetNextNode(nextNode);
-
-          m_inputPathQueue.push_back(path);
-        } // for (size_t i = 0; i < col.size(); ++i) {
-
-      } // for (size_t i = 0; i < numPrevPaths; ++i) {
-    }
 }
 
+void
+TranslationOptionCollectionLattice::
+Extend(const InputPath &prevPath, const WordLattice &input,
+       size_t const maxPhraseLength)
+{
+  size_t nextPos = prevPath.GetWordsRange().GetEndPos() + 1;
+  if (nextPos >= input.GetSize()) {
+    return;
+  }
+
+  size_t startPos = prevPath.GetWordsRange().GetStartPos();
+  const Phrase &prevPhrase = prevPath.GetPhrase();
+  const ScorePair *prevInputScore = prevPath.GetInputScore();
+  UTIL_THROW_IF2(prevInputScore == NULL,
+                 "Null previous score");
+
+
+  const std::vector<size_t> &nextNodes = input.GetNextNodes(nextPos);
+
+  const ConfusionNet::Column &col = input.GetColumn(nextPos);
+  for (size_t i = 0; i < col.size(); ++i) {
+    const Word &word = col[i].first;
+    UTIL_THROW_IF2(word.IsEpsilon(), "Epsilon not supported");
+
+    size_t nextNode = nextNodes[i];
+    size_t endPos = nextPos + nextNode - 1;
+
+    Range range(startPos, endPos);
+
+    // size_t maxPhraseLength = StaticData::Instance().GetMaxPhraseLength();
+    if (range.GetNumWordsCovered() > maxPhraseLength) {
+      continue;
+    }
+
+    const NonTerminalSet &labels = input.GetLabelSet(startPos, endPos);
+
+    Phrase subphrase(prevPhrase);
+    subphrase.AddWord(word);
+
+    const ScorePair &scores = col[i].second;
+    ScorePair *inputScore = new ScorePair(*prevInputScore);
+    inputScore->PlusEquals(scores);
+
+    InputPath *path = new InputPath(prevPath.ttask, subphrase, labels,
+                                    range, &prevPath, inputScore);
+
+    path->SetNextNode(nextNode);
+    m_inputPathQueue.push_back(path);
+
+    // recursive
+    Extend(*path, input, maxPhraseLength);
+
+  }
+}
 
 void TranslationOptionCollectionLattice::CreateTranslationOptions()
 {
@@ -132,23 +148,23 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
   for (size_t i = 0; i < m_inputPathQueue.size(); ++i) {
     const InputPath &path = *m_inputPathQueue[i];
 
-    const TargetPhraseCollection *tpColl = path.GetTargetPhrases(phraseDictionary);
-    const WordsRange &range = path.GetWordsRange();
+    TargetPhraseCollection::shared_ptr tpColl
+    = path.GetTargetPhrases(phraseDictionary);
+    const Range &range = path.GetWordsRange();
 
     if (tpColl && tpColl->GetSize()) {
-		TargetPhraseCollection::const_iterator iter;
-    	for (iter = tpColl->begin(); iter != tpColl->end(); ++iter) {
-    		const TargetPhrase &tp = **iter;
-    		TranslationOption *transOpt = new TranslationOption(range, tp);
-    		transOpt->SetInputPath(path);
-    		transOpt->Evaluate(m_source);
+      TargetPhraseCollection::const_iterator iter;
+      for (iter = tpColl->begin(); iter != tpColl->end(); ++iter) {
+        const TargetPhrase &tp = **iter;
+        TranslationOption *transOpt = new TranslationOption(range, tp);
+        transOpt->SetInputPath(path);
+        transOpt->EvaluateWithSourceContext(m_source);
 
-    		Add(transOpt);
-    	}
-    }
-    else if (path.GetPhrase().GetSize() == 1) {
-    	// unknown word processing
-    	ProcessOneUnknownWord(path, path.GetWordsRange().GetEndPos(), 1, path.GetInputScore());
+        Add(transOpt);
+      }
+    } else if (path.GetPhrase().GetSize() == 1) {
+      // unknown word processing
+      ProcessOneUnknownWord(path, path.GetWordsRange().GetStartPos(),  path.GetWordsRange().GetNumWordsCovered() , path.GetInputScore());
     }
   }
 
@@ -158,25 +174,29 @@ void TranslationOptionCollectionLattice::CreateTranslationOptions()
   Sort();
 
   // future score matrix
-  CalcFutureScore();
+  CalcEstimatedScore();
 
   // Cached lex reodering costs
   CacheLexReordering();
 
 }
 
-void TranslationOptionCollectionLattice::ProcessUnknownWord(size_t sourcePos)
+void
+TranslationOptionCollectionLattice::
+ProcessUnknownWord(size_t sourcePos)
 {
-	UTIL_THROW(util::Exception, "ProcessUnknownWord() not implemented for lattice");
+  UTIL_THROW(util::Exception, "ProcessUnknownWord() not implemented for lattice");
+  // why??? UG
 }
 
-void TranslationOptionCollectionLattice::CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
-      , size_t startPosition
-      , size_t endPosition
-      , bool adhereTableLimit
-      , size_t graphInd)
+bool
+TranslationOptionCollectionLattice::
+CreateTranslationOptionsForRange
+(const DecodeGraph &decodeStepList, size_t startPosition, size_t endPosition,
+ bool adhereTableLimit, size_t graphInd)
 {
-	UTIL_THROW(util::Exception, "CreateTranslationOptionsForRange() not implemented for lattice");
+  UTIL_THROW(util::Exception,
+             "CreateTranslationOptionsForRange() not implemented for lattice");
 }
 
 } // namespace

@@ -1,10 +1,9 @@
-#ifndef UTIL_SORTED_UNIFORM__
-#define UTIL_SORTED_UNIFORM__
+#ifndef UTIL_SORTED_UNIFORM_H
+#define UTIL_SORTED_UNIFORM_H
 
 #include <algorithm>
 #include <cstddef>
-
-#include <assert.h>
+#include <cassert>
 #include <stdint.h>
 
 namespace util {
@@ -23,7 +22,7 @@ struct Pivot64 {
   }
 };
 
-// Use when off * width is <2^64.  This is guaranteed when each of them is actually a 32-bit value.   
+// Use when off * width is <2^64.  This is guaranteed when each of them is actually a 32-bit value.
 struct Pivot32 {
   static inline std::size_t Calc(uint64_t off, uint64_t range, uint64_t width) {
     return static_cast<std::size_t>((off * width) / (range + 1));
@@ -57,7 +56,7 @@ template <class Iterator, class Accessor> bool BinaryFind(
   return false;
 }
 
-// Search the range [before_it + 1, after_it - 1] for key.  
+// Search the range [before_it + 1, after_it - 1] for key.
 // Preconditions:
 // before_v <= key <= after_v
 // before_v <= all values in the range [before_it + 1, after_it - 1] <= after_v
@@ -91,7 +90,7 @@ template <class Iterator, class Accessor, class Pivot> bool SortedUniformFind(co
     if (key == below) { out = begin; return true; }
     return false;
   }
-  // Make the range [begin, end].  
+  // Make the range [begin, end].
   --end;
   typename Accessor::Key above(accessor(end));
   if (key >= above) {
@@ -101,27 +100,6 @@ template <class Iterator, class Accessor, class Pivot> bool SortedUniformFind(co
   return BoundedSortedUniformFind<Iterator, Accessor, Pivot>(accessor, begin, below, end, above, key, out);
 }
 
-// May return begin - 1.
-template <class Iterator, class Accessor> Iterator BinaryBelow(
-    const Accessor &accessor,
-    Iterator begin,
-    Iterator end,
-    const typename Accessor::Key key) {
-  while (end > begin) {
-    Iterator pivot(begin + (end - begin) / 2);
-    typename Accessor::Key mid(accessor(pivot));
-    if (mid < key) {
-      begin = pivot + 1;
-    } else if (mid > key) {
-      end = pivot;
-    } else {
-      for (++pivot; (pivot < end) && accessor(pivot) == mid; ++pivot) {}
-      return pivot - 1;
-    }
-  }
-  return begin - 1;
-}
-
 } // namespace util
 
-#endif // UTIL_SORTED_UNIFORM__
+#endif // UTIL_SORTED_UNIFORM_H

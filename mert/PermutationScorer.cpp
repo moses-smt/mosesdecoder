@@ -234,7 +234,7 @@ void PermutationScorer::prepareStats(size_t sid, const string& text, ScoreStats&
 }
 
 //Will just be final score
-statscore_t PermutationScorer::calculateScore(const vector<int>& comps) const
+statscore_t PermutationScorer::calculateScore(const vector<ScoreStatsType>& comps) const
 {
   //cerr << "*******PermutationScorer::calculateScore" ;
   //cerr << " " << comps[0]/comps[1] << endl;

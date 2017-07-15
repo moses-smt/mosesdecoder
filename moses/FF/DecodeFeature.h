@@ -31,6 +31,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 class DecodeStep;
+class DecodeGraph;
 
 /**
   * Baseclass for phrase-table or generation table feature function
@@ -39,15 +40,15 @@ class DecodeFeature : public StatelessFeatureFunction
 {
 
 public:
-  DecodeFeature(const std::string &line);
+  DecodeFeature(const std::string &line, bool registerNow);
 
   DecodeFeature(size_t numScoreComponents
-                  , const std::string &line);
+                , const std::string &line);
 
   DecodeFeature(size_t numScoreComponents
-                  , const std::vector<FactorType> &input
-                  , const std::vector<FactorType> &output
-                  , const std::string &line);
+                , const std::vector<FactorType> &input
+                , const std::vector<FactorType> &output
+                , const std::string &line);
 
   //! returns output factor types as specified by the ini file
   const FactorMask& GetOutputFactorMask() const;
@@ -61,26 +62,37 @@ public:
   bool IsUseable(const FactorMask &mask) const;
   void SetParameter(const std::string& key, const std::string& value);
 
-  void Evaluate(const Hypothesis& hypo,
-                ScoreComponentCollection* accumulator) const
-  {}
-  void EvaluateChart(const ChartHypothesis &hypo,
-                     ScoreComponentCollection* accumulator) const
-  {}
-  void Evaluate(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
-  void Evaluate(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {}
+  void EvaluateWhenApplied(const Hypothesis& hypo,
+                           ScoreComponentCollection* accumulator) const {
+  }
+  void EvaluateWhenApplied(const ChartHypothesis &hypo,
+                           ScoreComponentCollection* accumulator) const {
+  }
+  void EvaluateWhenApplied(const Syntax::SHyperedge &hyperedge,
+                           ScoreComponentCollection* accumulator) const {
+  }
+  void EvaluateWithSourceContext(const InputType &input
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedScores = NULL) const {
+  }
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+      , const TranslationOptionList &translationOptionList) const {
+  }
 
-  void SetContainer(const DecodeStep *container)
-  { m_container = container; }
+  void EvaluateInIsolation(const Phrase &source
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedScores) const {
+  }
+
+  void SetContainer(const DecodeStep *container) {
+    m_container = container;
+  }
+
+  const DecodeGraph &GetDecodeGraph() const;
 
 protected:
   std::vector<FactorType> m_input;

@@ -1,4 +1,4 @@
-#!/usr/bin/perl
+#!/usr/bin/env perl
 
 use warnings;
 use strict;
@@ -16,6 +16,8 @@ binmode STDERR, ":utf8";
 # version 13a
 #    * modified the scoring functions to prevent division-by-zero errors when a system segment is empty
 #        * affected methods: 'bleu_score' and 'bleu_score_smoothing'
+#    * use \p{Line_Breaks} instead of \p{Hyphen} when stripping end-of-line hyphenation and join lines
+#        * because \p{Hyphen} is deprecated since 2016-06-01, see http://www.unicode.org/reports/tr14/#Hyphen
 #
 # version 13
 #    * Uses a XML parser to read data (only when extension is .xml)
@@ -157,7 +159,7 @@ my $usage = "\n\nUsage: $0 -r <ref_file> -s <src_file> -t <tst_file>\n\n".
     "         BLEU-sys.scr and NIST-sys.scr : system-level scores\n" .
     "  --no-smoothing : disable smoothing on BLEU scores\n" .
     "\n";
- 
+
 use vars qw ($opt_r $opt_s $opt_t $opt_d $opt_h $opt_b $opt_n $opt_c $opt_x $opt_e);
 use Getopt::Long;
 my $ref_file = '';
@@ -220,7 +222,7 @@ my $METHOD = "BOTH";
 if ( $opt_b ) { $METHOD = "BLEU"; }
 if ( $opt_n ) { $METHOD = "NIST"; }
 my $method;
- 
+
 ######
 # Global variables
 my ($src_lang, $tgt_lang, @tst_sys, @ref_sys); # evaluation parameters
@@ -265,7 +267,7 @@ foreach my $doc (sort keys %eval_docs)
 print "    src set \"$src_id\" (", scalar keys %eval_docs, " docs, $cum_seg segs)\n";
 print "    ref set \"$ref_id\" (", scalar keys %ref_data, " refs)\n";
 print "    tst set \"$tst_id\" (", scalar keys %tst_data, " systems)\n\n";
- 
+
 foreach my $sys (sort @tst_sys)
 {
 	for (my $n=1; $n<=$max_Ngram; $n++)
@@ -642,9 +644,9 @@ sub score_document
 			{
 				printf "ref '$ref', seg $seg: %s\n", $ref_data{$ref}{$doc}{SEGS}{$seg}
 			}
-			
+
 		}
-		
+
 		printf "sys '$sys', seg $seg: %s\n", $tst_data{$sys}{$doc}{SEGS}{$seg} if ( $detail >= 3 );
 		($ref_length, $match_cnt, $tst_cnt, $ref_cnt, $tst_info, $ref_info) = score_segment ($tst_data{$sys}{$doc}{SEGS}{$seg}, @ref_segments);
 
@@ -654,7 +656,7 @@ sub score_document
 			my $segScore = &{$BLEU_SCORE}($ref_length, $match_cnt, $tst_cnt, $sys, %DOCmt);
 			$overallScore->{ $sys }{ 'documents' }{ $doc }{ 'segments' }{ $seg }{ 'score' } = $segScore;
 			if ( $detail >= 2 )
-			{ 
+			{
 				printf "  $method score using 4-grams = %.4f for system \"$sys\" on segment $seg of document \"$doc\" (%d words)\n", $segScore, $tst_cnt->[1]
 			}
 		}
@@ -664,7 +666,7 @@ sub score_document
 			my $segScore = nist_score (scalar @ref_sys, $match_cnt, $tst_cnt, $ref_cnt, $tst_info, $ref_info, $sys, %DOCmt);
 			$overallScore->{ $sys }{ 'documents' }{ $doc }{ 'segments' }{ $seg }{ 'score' } = $segScore;
 			if ( $detail >= 2 )
-			{ 
+			{
 				printf "  $method score using 5-grams = %.4f for system \"$sys\" on segment $seg of document \"$doc\" (%d words)\n", $segScore, $tst_cnt->[1];
 			}
 		}
@@ -945,7 +947,7 @@ sub tokenization_international
 	my ($norm_text) = @_;
 
 	$norm_text =~ s/<skipped>//g; # strip "skipped" tags
-	$norm_text =~ s/\p{Hyphen}\p{Zl}//g; # strip end-of-line hyphenation and join lines
+	$norm_text =~ s/\p{Line_Break}\p{Zl}//g; # strip end-of-line hyphenation and join lines
 	$norm_text =~ s/\p{Zl}/ /g; # join lines
 
 	# replace entities

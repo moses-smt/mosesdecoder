@@ -66,7 +66,7 @@ LanguageModelSRI::~LanguageModelSRI()
   delete m_srilmVocab;
 }
 
-void LanguageModelSRI::Load()
+void LanguageModelSRI::Load(AllOptions::ptr const& opts)
 {
   m_srilmVocab  = new ::Vocab();
   m_srilmModel	= new Ngram(*m_srilmVocab, m_nGramOrder);
@@ -162,7 +162,7 @@ LMResult LanguageModelSRI::GetValue(const vector<const Word*> &contextFactor, St
   ngram[count] = Vocab_None;
 
   UTIL_THROW_IF2((*contextFactor[count-1])[factorType] == NULL,
-		  "No factor " << factorType << " at position " << (count-1));
+                 "No factor " << factorType << " at position " << (count-1));
   // call sri lm fn
   VocabIndex lmId = GetLmID((*contextFactor[count-1])[factorType]);
   ret = GetValue(lmId, ngram+1);

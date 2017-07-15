@@ -1,12 +1,13 @@
-#ifndef UTIL_FILE__
-#define UTIL_FILE__
+#ifndef UTIL_FILE_H
+#define UTIL_FILE_H
 
 #include "util/exception.hh"
+#include "util/scoped.hh"
+#include "util/string_piece.hh"
 
 #include <cstddef>
 #include <cstdio>
 #include <string>
-
 #include <stdint.h>
 
 namespace util {
@@ -41,29 +42,10 @@ class scoped_fd {
     scoped_fd &operator=(const scoped_fd &);
 };
 
-class scoped_FILE {
-  public:
-    explicit scoped_FILE(std::FILE *file = NULL) : file_(file) {}
-
-    ~scoped_FILE();
-
-    std::FILE *get() { return file_; }
-    const std::FILE *get() const { return file_; }
-
-    void reset(std::FILE *to = NULL) {
-      scoped_FILE other(file_);
-      file_ = to;
-    }
-
-    std::FILE *release() {
-      std::FILE *ret = file_;
-      file_ = NULL;
-      return ret;
-    }
-
-  private:
-    std::FILE *file_;
+struct scoped_FILE_closer {
+  static void Close(std::FILE *file);
 };
+typedef scoped<std::FILE, scoped_FILE_closer> scoped_FILE;
 
 /* Thrown for any operation where the fd is known. */
 class FDException : public ErrnoException {
@@ -91,12 +73,34 @@ class EndOfFileException : public Exception {
     ~EndOfFileException() throw();
 };
 
-// Open for read only.  
+// Open for read only.
 int OpenReadOrThrow(const char *name);
-// Create file if it doesn't exist, truncate if it does.  Opened for write.   
+// Create file if it doesn't exist, truncate if it does.  Opened for write.
 int CreateOrThrow(const char *name);
 
-// Return value for SizeFile when it can't size properly.  
+/** Does the given input file path denote standard input?
+ *
+ * Returns true if, and only if, path is either "-" or "/dev/stdin".
+ *
+ * Opening standard input as a file may need some special treatment for
+ * portability.  There's a convention that a dash ("-") in place of an input
+ * file path denotes standard input, but opening "/dev/stdin" may need to be
+ * special as well.
+ */
+bool InputPathIsStdin(StringPiece path);
+
+/** Does the given output file path denote standard output?
+ *
+ * Returns true if, and only if, path is either "-" or "/dev/stdout".
+ *
+ * Opening standard output as a file may need some special treatment for
+ * portability.  There's a convention that a dash ("-") in place of an output
+ * file path denotes standard output, but opening "/dev/stdout" may need to be
+ * special as well.
+ */
+bool OutputPathIsStdout(StringPiece path);
+
+// Return value for SizeFile when it can't size properly.
 const uint64_t kBadSize = (uint64_t)-1;
 uint64_t SizeFile(int fd);
 uint64_t SizeOrThrow(int fd);
@@ -106,11 +110,19 @@ void ResizeOrThrow(int fd, uint64_t to);
 std::size_t PartialRead(int fd, void *to, std::size_t size);
 void ReadOrThrow(int fd, void *to, std::size_t size);
 std::size_t ReadOrEOF(int fd, void *to_void, std::size_t size);
-// Positioned: unix only for now.  
-void PReadOrThrow(int fd, void *to, std::size_t size, uint64_t off);
 
 void WriteOrThrow(int fd, const void *data_void, std::size_t size);
 void WriteOrThrow(FILE *to, const void *data, std::size_t size);
+
+/* These call pread/pwrite in a loop.  However, on Windows they call ReadFile/
+ * WriteFile which changes the file pointer.  So it's safe to call ErsatzPRead
+ * and ErsatzPWrite concurrently (or any combination thereof).  But it changes
+ * the file pointer on windows, so it's not safe to call concurrently with
+ * anything that uses the implicit file pointer e.g. the Read/Write functions
+ * above.
+ */
+void ErsatzPRead(int fd, void *to, std::size_t size, uint64_t off);
+void ErsatzPWrite(int fd, const void *data_void, std::size_t size, uint64_t off);
 
 void FSyncOrThrow(int fd);
 
@@ -125,8 +137,8 @@ std::FILE *FDOpenReadOrThrow(scoped_fd &file);
 // Temporary files
 // Append a / if base is a directory.
 void NormalizeTempPrefix(std::string &base);
-int MakeTemp(const std::string &prefix);
-std::FILE *FMakeTemp(const std::string &prefix);
+int MakeTemp(const StringPiece &prefix);
+std::FILE *FMakeTemp(const StringPiece &prefix);
 
 // dup an fd.
 int DupOrThrow(int fd);
@@ -139,4 +151,4 @@ std::string NameFromFD(int fd);
 
 } // namespace util
 
-#endif // UTIL_FILE__
+#endif // UTIL_FILE_H

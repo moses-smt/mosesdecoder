@@ -37,7 +37,7 @@ void processModelFilePtr ( FILE* pf, bool rF(Array<char*>&) ) {
   int i=0; int numFields=0; int c=' '; int line=1;
   CONSUME_ALL(pf,c,WHITESPACE(c),line);                           // Get to first record
   while ( c!=EOF ) {                                              // For each record
-    if ( c=='#' ) CONSUME_ALL(pf, c, c!='\n' && c!='\0', line ) ; //   If comment, consume 
+    if ( c=='#' ) CONSUME_ALL(pf, c, c!='\n' && c!='\0', line ) ; //   If comment, consume
     else {                                                        //   If no comment,
       Array<char*> aps(100);
       String       psBuff(1000);
@@ -49,7 +49,7 @@ void processModelFilePtr ( FILE* pf, bool rF(Array<char*>&) ) {
         if (!z) break;
         aps[i]=z;
       }
-      
+
       if ( !rF(aps) )                                             //     Try to process fields, else complain
         fprintf( stderr, "\nERROR: %d %d-arg %s in line %d\n\n", numFields, aps.size(), aps[0], line);
     }
@@ -75,7 +75,7 @@ void processModelSocket ( const int tSockfd, int& c, bool rF(Array<char*>&) ) {
   int i=0; int numFields=0; int line=1;
   CONSUME_ALL_SOCKET(tSockfd,c,WHITESPACE(c),line);                                          // Get to first record
   while ( c!='\0' && c!='\5' ) {                                                             // For each record
-    if ( c=='#' ) CONSUME_ALL_SOCKET(tSockfd, c, (c!='\n' && c!='\0' && c!='\5'), line ) ;   //   If comment, consume 
+    if ( c=='#' ) CONSUME_ALL_SOCKET(tSockfd, c, (c!='\n' && c!='\0' && c!='\5'), line ) ;   //   If comment, consume
     else {                                                                                   //   If no comment,
       Array<char*> aps(100);
       String       psBuff(1000);
@@ -88,7 +88,7 @@ void processModelSocket ( const int tSockfd, int& c, bool rF(Array<char*>&) ) {
         if (!z) break;
         aps[i]=z;
       }
-      
+
       if ( !rF(aps) )                                                     //     Try to process fields, else complain
         fprintf( stderr, "\nERROR: %d-arg %s in line %d\n\n", numFields, aps[0], line);
     }
@@ -97,7 +97,7 @@ void processModelSocket ( const int tSockfd, int& c, bool rF(Array<char*>&) ) {
 }
 
 void processModelSocket ( const int tSockfd, bool rF(Array<char*>&) ) {
-  int c=' '; 
+  int c=' ';
   processModelSocket ( tSockfd, c, rF );
 }
 

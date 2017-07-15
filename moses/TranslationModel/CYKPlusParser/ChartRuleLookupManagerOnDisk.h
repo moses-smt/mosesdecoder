@@ -41,12 +41,11 @@ public:
                                const PhraseDictionaryOnDisk &dictionary,
                                OnDiskPt::OnDiskWrapper &dbWrapper,
                                const std::vector<FactorType> &inputFactorsVec,
-                               const std::vector<FactorType> &outputFactorsVec,
-                               const std::string &filePath);
+                               const std::vector<FactorType> &outputFactorsVec);
 
   ~ChartRuleLookupManagerOnDisk();
 
-  virtual void GetChartRuleCollection(const WordsRange &range,
+  virtual void GetChartRuleCollection(const InputPath &inputPath,
                                       size_t last,
                                       ChartParserCallback &outColl);
 
@@ -55,10 +54,10 @@ private:
   OnDiskPt::OnDiskWrapper &m_dbWrapper;
   const std::vector<FactorType> &m_inputFactorsVec;
   const std::vector<FactorType> &m_outputFactorsVec;
-  const std::string &m_filePath;
   std::vector<DottedRuleStackOnDisk*> m_expandableDottedRuleListVec;
-  std::map<UINT64, const TargetPhraseCollection*> m_cache;
+  std::map<uint64_t, TargetPhraseCollection::shared_ptr > m_cache;
   std::list<const OnDiskPt::PhraseNode*> m_sourcePhraseNode;
+  Word m_input_default_nonterminal;
 };
 
 }  // namespace Moses

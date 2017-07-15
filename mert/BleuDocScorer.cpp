@@ -174,7 +174,7 @@ statscore_t BleuDocScorer::calculateScore(const vector<int>& comps) const
   UTIL_THROW_IF(comps.size() != kBleuNgramOrder * 2 + 1, util::Exception, "Error");
 
   float logbleu = 0.0;
-  for (int i = 0; i < kBleuNgramOrder; ++i) {
+  for (size_t i = 0; i < kBleuNgramOrder; ++i) {
     if (comps[2*i] == 0) {
       return 0.0;
     }

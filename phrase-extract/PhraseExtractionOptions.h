@@ -18,7 +18,6 @@
   Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
  ***********************************************************************/
 
-/* Created by Rohit Gupta, CDAC, Mumbai, India on 18 July, 2012*/
 
 #include <string>
 #include <vector>
@@ -51,7 +50,10 @@ private:
   bool onlyOutputSpanInfo;
   bool gzOutput;
   std::string instanceWeightsFile; //weights for each sentence
+  bool targetConstituentConstrainedFlag;
+  bool targetConstituentBoundariesFlag;
   bool flexScoreFlag;
+  bool singleWordHeuristicFlag;
 
 public:
   std::vector<std::string> placeholders;
@@ -73,9 +75,12 @@ public:
     includeSentenceIdFlag(false),
     onlyOutputSpanInfo(false),
     gzOutput(false),
-	flexScoreFlag(false), 
-	debug(false)
-{}
+    targetConstituentConstrainedFlag(false),
+    targetConstituentBoundariesFlag(false),
+    flexScoreFlag(false),
+    singleWordHeuristicFlag(false),
+    debug(false) {
+  }
 
   //functions for initialization of options
   void initAllModelsOutputFlag(const bool initallModelsOutputFlag) {
@@ -117,8 +122,17 @@ public:
   void initInstanceWeightsFile(const char* initInstanceWeightsFile) {
     instanceWeightsFile = std::string(initInstanceWeightsFile);
   }
+  void initTargetConstituentConstrainedFlag(const bool initTargetConstituentConstrainedFlag) {
+    targetConstituentConstrainedFlag = initTargetConstituentConstrainedFlag;
+  }
+  void initTargetConstituentBoundariesFlag(const bool initTargetConstituentBoundariesFlag) {
+    targetConstituentBoundariesFlag = initTargetConstituentBoundariesFlag;
+  }
   void initFlexScoreFlag(const bool initflexScoreFlag) {
     flexScoreFlag=initflexScoreFlag;
+  }
+  void initSingleWordHeuristicFlag(const bool initSingleWordHeuristicFlag) {
+    singleWordHeuristicFlag = initSingleWordHeuristicFlag;
   }
 
   // functions for getting values
@@ -161,8 +175,17 @@ public:
   std::string getInstanceWeightsFile() const {
     return instanceWeightsFile;
   }
+  bool isTargetConstituentConstrainedFlag() const {
+    return targetConstituentConstrainedFlag;
+  }
+  bool isTargetConstituentBoundariesFlag() const {
+    return targetConstituentBoundariesFlag;
+  }
   bool isFlexScoreFlag() const {
     return flexScoreFlag;
+  }
+  bool isSingleWordHeuristicFlag() const {
+    return singleWordHeuristicFlag;
   }
 };
 

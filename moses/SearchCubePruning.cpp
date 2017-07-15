@@ -4,7 +4,7 @@
 #include "StaticData.h"
 #include "InputType.h"
 #include "TranslationOptionCollection.h"
-
+#include <boost/foreach.hpp>
 using namespace std;
 
 namespace Moses
@@ -24,32 +24,42 @@ public:
     }
 
     // Compare the top hypothesis of each bitmap container using the TotalScore, which includes future cost
-    const float scoreA = A->Top()->GetHypothesis()->GetTotalScore();
-    const float scoreB = B->Top()->GetHypothesis()->GetTotalScore();
+    const float scoreA = A->Top()->GetHypothesis()->GetFutureScore();
+    const float scoreB = B->Top()->GetHypothesis()->GetFutureScore();
 
     if (scoreA < scoreB) {
       return true;
     } else if (scoreA > scoreB) {
       return false;
     } else {
-      return A < B;
+      // Equal scores: break ties by comparing target phrases (if they exist)
+      // *Important*: these are pointers to copies of the target phrases from the
+      // hypotheses.  This class is used to keep priority queues ordered in the
+      // background, so comparisons made as those data structures are cleaned up
+      // may occur *after* the target phrases in hypotheses have been cleaned up,
+      // leading to segfaults if relying on hypotheses to provide target phrases.
+      boost::shared_ptr<TargetPhrase> phrA = A->Top()->GetTargetPhrase();
+      boost::shared_ptr<TargetPhrase> phrB = B->Top()->GetTargetPhrase();
+      if (!phrA || !phrB) {
+        // Fallback: compare pointers, non-deterministic sort
+        return A < B;
+      }
+      return (phrA->Compare(*phrB) > 0);
     }
   }
 };
 
-SearchCubePruning::SearchCubePruning(Manager& manager, const InputType &source, const TranslationOptionCollection &transOptColl)
-  :Search(manager)
-  ,m_source(source)
-  ,m_hypoStackColl(source.GetSize() + 1)
-  ,m_transOptColl(transOptColl)
+SearchCubePruning::
+SearchCubePruning(Manager& manager, TranslationOptionCollection const& transOptColl)
+  : Search(manager)
+  , m_hypoStackColl(manager.GetSource().GetSize() + 1)
+  , m_transOptColl(transOptColl)
 {
-  const StaticData &staticData = StaticData::Instance();
-
   std::vector < HypothesisStackCubePruning >::iterator iterStack;
   for (size_t ind = 0 ; ind < m_hypoStackColl.size() ; ++ind) {
     HypothesisStackCubePruning *sourceHypoColl = new HypothesisStackCubePruning(m_manager);
-    sourceHypoColl->SetMaxHypoStackSize(staticData.GetMaxHypoStackSize());
-    sourceHypoColl->SetBeamWidth(staticData.GetBeamWidth());
+    sourceHypoColl->SetMaxHypoStackSize(m_options.search.stack_size);
+    sourceHypoColl->SetBeamWidth(m_options.search.beam_width);
 
     m_hypoStackColl[ind] = sourceHypoColl;
   }
@@ -64,52 +74,58 @@ SearchCubePruning::~SearchCubePruning()
  * Main decoder loop that translates a sentence by expanding
  * hypotheses stack by stack, until the end of the sentence.
  */
-void SearchCubePruning::ProcessSentence()
+void SearchCubePruning::Decode()
 {
-  const StaticData &staticData = StaticData::Instance();
-
   // initial seed hypothesis: nothing translated, no words produced
-  Hypothesis *hypo = Hypothesis::Create(m_manager,m_source, m_initialTransOpt);
+  const Bitmap &initBitmap = m_bitmaps.GetInitialBitmap();
+  Hypothesis *hypo = new Hypothesis(m_manager, m_source, m_initialTransOpt, initBitmap, m_manager.GetNextHypoId());
 
-  HypothesisStackCubePruning &firstStack = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
+  HypothesisStackCubePruning &firstStack
+  = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl.front());
   firstStack.AddInitial(hypo);
   // Call this here because the loop below starts at the second stack.
   firstStack.CleanupArcList();
   CreateForwardTodos(firstStack);
 
-  const size_t PopLimit = StaticData::Instance().GetCubePruningPopLimit();
-  VERBOSE(3,"Cube Pruning pop limit is " << PopLimit << std::endl)
+  const size_t PopLimit = m_manager.options()->cube.pop_limit;
+  VERBOSE(2,"Cube Pruning pop limit is " << PopLimit << std::endl);
 
-  const size_t Diversity = StaticData::Instance().GetCubePruningDiversity();
-  VERBOSE(3,"Cube Pruning diversity is " << Diversity << std::endl)
+  const size_t Diversity = m_manager.options()->cube.diversity;
+  VERBOSE(2,"Cube Pruning diversity is " << Diversity << std::endl);
+  VERBOSE(2,"Max Phrase length is "
+          << m_manager.options()->search.max_phrase_length << std::endl);
 
   // go through each stack
   size_t stackNo = 1;
   std::vector < HypothesisStack* >::iterator iterStack;
-  for (iterStack = ++m_hypoStackColl.begin() ; iterStack != m_hypoStackColl.end() ; ++iterStack) {
-    // check if decoding ran out of time
-    double _elapsed_time = GetUserTime();
-    if (_elapsed_time > staticData.GetTimeoutThreshold()) {
-      VERBOSE(1,"Decoding is out of time (" << _elapsed_time << "," << staticData.GetTimeoutThreshold() << ")" << std::endl);
-      return;
-    }
-    HypothesisStackCubePruning &sourceHypoColl = *static_cast<HypothesisStackCubePruning*>(*iterStack);
+  for (iterStack = m_hypoStackColl.begin() + 1 ; iterStack != m_hypoStackColl.end() ; ++iterStack) {
+    // BOOST_FOREACH(HypothesisStack* hstack, m_hypoStackColl) {
+    if (this->out_of_time()) return;
 
-    // priority queue which has a single entry for each bitmap container, sorted by score of top hyp
-    std::priority_queue< BitmapContainer*, std::vector< BitmapContainer* >, BitmapContainerOrderer> BCQueue;
+    HypothesisStackCubePruning &sourceHypoColl
+    = *static_cast<HypothesisStackCubePruning*>(*iterStack);
+
+    // priority queue which has a single entry for each bitmap
+    // container, sorted by score of top hyp
+    std::priority_queue < BitmapContainer*, std::vector< BitmapContainer* >,
+        BitmapContainerOrderer > BCQueue;
 
     _BMType::const_iterator bmIter;
     const _BMType &accessor = sourceHypoColl.GetBitmapAccessor();
 
     for(bmIter = accessor.begin(); bmIter != accessor.end(); ++bmIter) {
       // build the first hypotheses
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StartTimeOtherScore();
+      }
       bmIter->second->InitializeEdges();
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StopTimeOtherScore();
+      }
       m_manager.GetSentenceStats().StartTimeManageCubes();
       BCQueue.push(bmIter->second);
       m_manager.GetSentenceStats().StopTimeManageCubes();
 
-      // old algorithm
-      // bmIter->second->EnsureMinStackHyps(PopLimit);
     }
 
     // main search loop, pop k best hyps
@@ -123,7 +139,13 @@ void SearchCubePruning::ProcessSentence()
         m_manager.GetSentenceStats().AddPopped();
       }
       // push on stack and create successors
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StartTimeOtherScore();
+      }
       bc->ProcessBestHypothesis();
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StopTimeOtherScore();
+      }
       // if there are any hypothesis left in this specific container, add back to queue
       m_manager.GetSentenceStats().StartTimeManageCubes();
       if (!bc->Empty())
@@ -134,8 +156,14 @@ void SearchCubePruning::ProcessSentence()
     // ensure diversity, a minimum number of inserted hyps for each bitmap container;
     //    NOTE: diversity doesn't ensure they aren't pruned at some later point
     if (Diversity > 0) {
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StartTimeOtherScore();
+      }
       for(bmIter = accessor.begin(); bmIter != accessor.end(); ++bmIter) {
         bmIter->second->EnsureMinStackHyps(Diversity);
+      }
+      IFVERBOSE(2) {
+        m_manager.GetSentenceStats().StopTimeOtherScore();
       }
     }
 
@@ -144,7 +172,7 @@ void SearchCubePruning::ProcessSentence()
     IFVERBOSE(2) {
       m_manager.GetSentenceStats().StartTimeStack();
     }
-    sourceHypoColl.PruneToSize(staticData.GetMaxHypoStackSize());
+    sourceHypoColl.PruneToSize(m_options.search.stack_size);
     VERBOSE(3,std::endl);
     sourceHypoColl.CleanupArcList();
     IFVERBOSE(2) {
@@ -172,7 +200,7 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
   stack.AddHypothesesToBitmapContainers();
 
   for (iterAccessor = bitmapAccessor.begin() ; iterAccessor != bitmapAccessor.end() ; ++iterAccessor) {
-    const WordsBitmap &bitmap = iterAccessor->first;
+    const Bitmap &bitmap = *iterAccessor->first;
     BitmapContainer &bitmapContainer = *iterAccessor->second;
 
     if (bitmapContainer.GetHypothesesSize() == 0) {
@@ -190,21 +218,20 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
         continue;
 
       // not yet covered
-      WordsRange applyRange(startPos, startPos);
+      Range applyRange(startPos, startPos);
       if (CheckDistortion(bitmap, applyRange)) {
         // apply range
         CreateForwardTodos(bitmap, applyRange, bitmapContainer);
       }
 
       size_t maxSize = size - startPos;
-      size_t maxSizePhrase = StaticData::Instance().GetMaxPhraseLength();
+      size_t maxSizePhrase = m_manager.options()->search.max_phrase_length;
       maxSize = std::min(maxSize, maxSizePhrase);
-
       for (endPos = startPos+1; endPos < startPos + maxSize; endPos++) {
         if (bitmap.GetValue(endPos))
           break;
 
-        WordsRange applyRange(startPos, endPos);
+        Range applyRange(startPos, endPos);
         if (CheckDistortion(bitmap, applyRange)) {
           // apply range
           CreateForwardTodos(bitmap, applyRange, bitmapContainer);
@@ -214,52 +241,48 @@ void SearchCubePruning::CreateForwardTodos(HypothesisStackCubePruning &stack)
   }
 }
 
-void SearchCubePruning::CreateForwardTodos(const WordsBitmap &bitmap, const WordsRange &range, BitmapContainer &bitmapContainer)
+void
+SearchCubePruning::
+CreateForwardTodos(Bitmap const& bitmap, Range const& range,
+                   BitmapContainer& bitmapContainer)
 {
-  WordsBitmap newBitmap = bitmap;
-  newBitmap.SetValue(range.GetStartPos(), range.GetEndPos(), true);
+  const Bitmap &newBitmap = m_bitmaps.GetBitmap(bitmap, range);
 
   size_t numCovered = newBitmap.GetNumWordsCovered();
-  const TranslationOptionList &transOptList = m_transOptColl.GetTranslationOptionList(range);
-  const SquareMatrix &futureScore = m_transOptColl.GetFutureScore();
+  const TranslationOptionList* transOptList;
+  transOptList = m_transOptColl.GetTranslationOptionList(range);
+  const SquareMatrix &estimatedScores = m_transOptColl.GetEstimatedScores();
 
-  if (transOptList.size() > 0) {
-    HypothesisStackCubePruning &newStack = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl[numCovered]);
-    newStack.SetBitmapAccessor(newBitmap, newStack, range, bitmapContainer, futureScore, transOptList);
+  if (transOptList && transOptList->size() > 0) {
+    HypothesisStackCubePruning& newStack
+    = *static_cast<HypothesisStackCubePruning*>(m_hypoStackColl[numCovered]);
+    newStack.SetBitmapAccessor(newBitmap, newStack, range, bitmapContainer,
+                               estimatedScores, *transOptList);
   }
 }
 
-bool SearchCubePruning::CheckDistortion(const WordsBitmap &hypoBitmap, const WordsRange &range) const
+bool
+SearchCubePruning::
+CheckDistortion(const Bitmap &hypoBitmap, const Range &range) const
 {
   // since we check for reordering limits, its good to have that limit handy
-  int maxDistortion = StaticData::Instance().GetMaxDistortion();
+  int maxDistortion = m_manager.options()->reordering.max_distortion;
+  if (maxDistortion < 0) return true;
 
   // if there are reordering limits, make sure it is not violated
   // the coverage bitmap is handy here (and the position of the first gap)
-  const size_t	hypoFirstGapPos	= hypoBitmap.GetFirstGapPos()
-                                  , startPos				= range.GetStartPos()
-                                      , endPos					= range.GetEndPos();
+  size_t const startPos = range.GetStartPos();
+  size_t const endPos = range.GetEndPos();
 
-  // if reordering constraints are used (--monotone-at-punctuation or xml), check if passes all
-  if (! m_source.GetReorderingConstraint().Check( hypoBitmap, startPos, endPos ) ) {
+  // if reordering constraints are used (--monotone-at-punctuation or xml),
+  // check if passes all
+  if (!m_source.GetReorderingConstraint().Check(hypoBitmap, startPos, endPos))
     return false;
-  }
 
-  // no limit of reordering: no problem
-  if (maxDistortion < 0) {
-    return true;
-  }
-
-  if (StaticData::Instance().AdjacentOnly() &&
-	  !hypoBitmap.IsAdjacent(range.GetStartPos(), range.GetEndPos())) {
-	return false;
-  }
-
-  bool leftMostEdge = (hypoFirstGapPos == startPos);
+  size_t const hypoFirstGapPos = hypoBitmap.GetFirstGapPos();
   // any length extension is okay if starting at left-most edge
-  if (leftMostEdge) {
-    return true;
-  }
+  if (hypoFirstGapPos == startPos) return true;
+
   // starting somewhere other than left-most edge, use caution
   // the basic idea is this: we would like to translate a phrase starting
   // from a position further right than the left-most open gap. The
@@ -268,21 +291,18 @@ bool SearchCubePruning::CheckDistortion(const WordsBitmap &hypoBitmap, const Wor
   // its maximum value will be (which will always be the value of the
   // hypothesis starting at the left-most edge).  If this vlaue is than
   // the distortion limit, we don't allow this extension to be made.
-  WordsRange bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
-  int required_distortion =
-    m_source.ComputeDistortionDistance(range, bestNextExtension);
-
-  if (required_distortion > maxDistortion) {
-    return false;
-  }
-  return true;
+  Range bestNextExtension(hypoFirstGapPos, hypoFirstGapPos);
+  return (m_source.ComputeDistortionDistance(range, bestNextExtension)
+          <= maxDistortion);
 }
 
 /**
  * Find best hypothesis on the last stack.
  * This is the end point of the best translation, which can be traced back from here
  */
-const Hypothesis *SearchCubePruning::GetBestHypothesis() const
+Hypothesis const*
+SearchCubePruning::
+GetBestHypothesis() const
 {
   //	const HypothesisStackCubePruning &hypoColl = m_hypoStackColl.back();
   const HypothesisStack &hypoColl = *m_hypoStackColl.back();
@@ -292,7 +312,9 @@ const Hypothesis *SearchCubePruning::GetBestHypothesis() const
 /**
  * Logging of hypothesis stack sizes
  */
-void SearchCubePruning::OutputHypoStackSize()
+void
+SearchCubePruning::
+OutputHypoStackSize()
 {
   std::vector < HypothesisStack* >::const_iterator iterStack = m_hypoStackColl.begin();
   TRACE_ERR( "Stack sizes: " << (int)(*iterStack)->size());

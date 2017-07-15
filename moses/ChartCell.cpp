@@ -22,11 +22,11 @@
 #include <algorithm>
 #include "ChartCell.h"
 #include "ChartCellCollection.h"
+#include "HypergraphOutput.h"
 #include "RuleCubeQueue.h"
 #include "RuleCube.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include "Util.h"
-#include "StaticData.h"
 #include "ChartTranslationOptions.h"
 #include "ChartTranslationOptionList.h"
 #include "ChartManager.h"
@@ -36,7 +36,6 @@ using namespace std;
 
 namespace Moses
 {
-extern bool g_mosesDebug;
 
 ChartCellBase::ChartCellBase(size_t startPos, size_t endPos) :
   m_coverage(startPos, endPos),
@@ -51,21 +50,26 @@ ChartCellBase::~ChartCellBase() {}
 ChartCell::ChartCell(size_t startPos, size_t endPos, ChartManager &manager) :
   ChartCellBase(startPos, endPos), m_manager(manager)
 {
-  const StaticData &staticData = StaticData::Instance();
-  m_nBestIsEnabled = staticData.IsNBestEnabled();
+  m_nBestIsEnabled = manager.options()->nbest.enabled;
 }
 
 ChartCell::~ChartCell() {}
 
 /** Add the given hypothesis to the cell.
  *  Returns true if added, false if not. Maybe it already exists in the collection or score falls below threshold etc.
- *  This function just calls the correspondind AddHypothesis() in ChartHypothesisCollection
+ *  This function just calls the corresponding AddHypothesis() in ChartHypothesisCollection
  *  \param hypo Hypothesis to be added
  */
 bool ChartCell::AddHypothesis(ChartHypothesis *hypo)
 {
   const Word &targetLHS = hypo->GetTargetLHS();
-  return m_hypoColl[targetLHS].AddHypothesis(hypo, m_manager);
+  MapType::iterator m = m_hypoColl.find(targetLHS);
+  if (m == m_hypoColl.end()) {
+    std::pair<Word, ChartHypothesisCollection>
+    e(targetLHS, ChartHypothesisCollection(*m_manager.options()));
+    m = m_hypoColl.insert(e).first;
+  }
+  return m->second.AddHypothesis(hypo, m_manager);
 }
 
 /** Prune each collection in this cell to a particular size */
@@ -83,11 +87,9 @@ void ChartCell::PruneToSize()
  * \param transOptList list of applicable rules to create hypotheses for the cell
  * \param allChartCells entire chart - needed to look up underlying hypotheses
  */
-void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
-                                , const ChartCellCollection &allChartCells)
+void ChartCell::Decode(const ChartTranslationOptionList &transOptList
+                       , const ChartCellCollection &allChartCells)
 {
-  const StaticData &staticData = StaticData::Instance();
-
   // priority queue for applicable rules with selected hypotheses
   RuleCubeQueue queue(m_manager);
 
@@ -99,7 +101,7 @@ void ChartCell::ProcessSentence(const ChartTranslationOptionList &transOptList
   }
 
   // pluck things out of queue and add to hypo collection
-  const size_t popLimit = staticData.GetCubePruningPopLimit();
+  const size_t popLimit = m_manager.options()->cube.pop_limit;
   for (size_t numPops = 0; numPops < popLimit && !queue.IsEmpty(); ++numPops) {
     ChartHypothesis *hypo = queue.Pop();
     AddHypothesis(hypo);
@@ -133,8 +135,8 @@ const ChartHypothesis *ChartCell::GetBestHypothesis() const
     const HypoList &sortedList = iter->second.GetSortedHypotheses();
     if (sortedList.size() > 0) {
       const ChartHypothesis *hypo = sortedList[0];
-      if (hypo->GetTotalScore() > bestScore) {
-        bestScore = hypo->GetTotalScore();
+      if (hypo->GetFutureScore() > bestScore) {
+        bestScore = hypo->GetFutureScore();
         ret = hypo;
       }
     }
@@ -195,13 +197,13 @@ const HypoList *ChartCell::GetAllSortedHypotheses() const
   return ret;
 }
 
-//! call GetSearchGraph() for each hypo collection
-void ChartCell::GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<unsigned, bool> &reachable) const
+//! call WriteSearchGraph() for each hypo collection
+void ChartCell::WriteSearchGraph(const ChartSearchGraphWriter& writer, const std::map<unsigned, bool> &reachable) const
 {
   MapType::const_iterator iterOutside;
   for (iterOutside = m_hypoColl.begin(); iterOutside != m_hypoColl.end(); ++iterOutside) {
     const ChartHypothesisCollection &coll = iterOutside->second;
-    coll.GetSearchGraph(translationId, outputSearchGraphStream, reachable);
+    coll.WriteSearchGraph(writer, reachable);
   }
 }
 

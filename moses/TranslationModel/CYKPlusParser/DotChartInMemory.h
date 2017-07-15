@@ -103,8 +103,7 @@ public:
       if (dottedRule->GetLastNode().GetNonTerminalMap().empty() && !dottedRule->IsRoot()) {
         size_t startPos = dottedRule->GetWordsRange().GetEndPos() + 1;
         m_expandableDottedRuleListTerminalsOnly[startPos].push_back(dottedRule);
-      }
-      else {
+      } else {
         m_expandableDottedRuleList.push_back(dottedRule);
       }
     }

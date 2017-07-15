@@ -17,16 +17,13 @@ protected:
   bool m_legacy;
 
 public:
-  static const InputFeature& Instance() {
-    return *s_instance;
-  }
-  static InputFeature& InstanceNonConst() {
-    return *s_instance;
+  static const InputFeature *InstancePtr() {
+    return s_instance;
   }
 
   InputFeature(const std::string &line);
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   void SetParameter(const std::string& key, const std::string& value);
 
@@ -41,23 +38,29 @@ public:
     return m_numRealWordCount;
   }
 
-  void Evaluate(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {}
-  void Evaluate(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const;
+  void EvaluateInIsolation(const Phrase &source
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedScores) const {
+  }
 
-  void Evaluate(const Hypothesis& hypo,
-                ScoreComponentCollection* accumulator) const
-  {}
-  void EvaluateChart(const ChartHypothesis &hypo,
-                     ScoreComponentCollection* accumulator) const
-  {}
+  void EvaluateWithSourceContext(const InputType &input
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedScores = NULL) const;
+
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+      , const TranslationOptionList &translationOptionList) const {
+  }
+
+  void EvaluateWhenApplied(const Hypothesis& hypo,
+                           ScoreComponentCollection* accumulator) const {
+  }
+  void EvaluateWhenApplied(const ChartHypothesis &hypo,
+                           ScoreComponentCollection* accumulator) const {
+  }
 
 
 };

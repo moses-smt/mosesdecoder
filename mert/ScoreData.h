@@ -13,6 +13,7 @@
 #include <vector>
 #include <stdexcept>
 #include <string>
+#include <boost/lexical_cast.hpp>
 #include "ScoreArray.h"
 #include "ScoreStats.h"
 
@@ -108,7 +109,7 @@ public:
   inline int getName(std::size_t idx) const {
     idx2name::const_iterator i = m_index_to_array_name.find(idx);
     if (i != m_index_to_array_name.end())
-      throw std::runtime_error("there is no entry at index " + idx);
+      throw std::runtime_error("there is no entry at index " + boost::lexical_cast<std::string>(idx));
     return i->second;
   }
 };

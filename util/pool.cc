@@ -2,7 +2,9 @@
 
 #include "util/scoped.hh"
 
-#include <stdlib.h>
+#include <cstdlib>
+
+#include <algorithm>
 
 namespace util {
 

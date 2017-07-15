@@ -34,38 +34,43 @@ namespace Moses
 {
 
 class ChartParserCallback;
-class WordsRange;
+class Range;
 
 //! Implementation of ChartRuleLookupManager for in-memory rule tables.
 class ChartRuleLookupManagerMemoryPerSentence : public ChartRuleLookupManagerCYKPlus
 {
 public:
+  typedef std::vector<ChartCellCache> CompressedColumn;
+  typedef std::vector<CompressedColumn> CompressedMatrix;
+
   ChartRuleLookupManagerMemoryPerSentence(const ChartParser &parser,
-                               const ChartCellCollectionBase &cellColl,
-                               const PhraseDictionaryFuzzyMatch &ruleTable);
+                                          const ChartCellCollectionBase &cellColl,
+                                          const PhraseDictionaryFuzzyMatch &ruleTable);
 
   ~ChartRuleLookupManagerMemoryPerSentence() {};
 
   virtual void GetChartRuleCollection(
-    const WordsRange &range,
+    const InputPath &inputPath,
     size_t lastPos, // last position to consider if using lookahead
     ChartParserCallback &outColl);
 
 private:
 
-void GetTerminalExtension(
+  void GetTerminalExtension(
     const PhraseDictionaryNodeMemory *node,
     size_t pos);
 
-void GetNonTerminalExtension(
+  void GetNonTerminalExtension(
     const PhraseDictionaryNodeMemory *node,
-    size_t startPos,
-    size_t endPos);
+    size_t startPos);
 
   void AddAndExtend(
     const PhraseDictionaryNodeMemory *node,
-    size_t endPos,
-    const ChartCellLabel *cellLabel);
+    size_t endPos);
+
+  void UpdateCompressedMatrix(size_t startPos,
+                              size_t endPos,
+                              size_t lastPos);
 
   const PhraseDictionaryFuzzyMatch &m_ruleTable;
 
@@ -80,7 +85,11 @@ void GetNonTerminalExtension(
   size_t m_unaryPos;
 
   StackVec m_stackVec;
+  std::vector<float> m_stackScores;
+  std::vector<const Word*> m_sourceWords;
   ChartParserCallback* m_outColl;
+
+  std::vector<CompressedMatrix> m_compressedMatrixVec;
 
 };
 

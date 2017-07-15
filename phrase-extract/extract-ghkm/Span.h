@@ -24,7 +24,9 @@
 #include <map>
 #include <set>
 
-namespace Moses
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace GHKM
 {
@@ -36,7 +38,8 @@ bool SpansIntersect(const Span &, const ContiguousSpan &);
 
 ContiguousSpan Closure(const Span &);
 
-}  // namespace Moses
+}  // namespace MosesTraining
+}  // namespace Syntax
 }  // namespace GHKM
 
 #endif

@@ -25,10 +25,16 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-int BackwardLMState::Compare(const FFState &o) const
+size_t BackwardLMState::hash() const
+{
+  size_t ret = hash_value(state.left);
+  return ret;
+}
+bool BackwardLMState::operator==(const FFState& o) const
 {
   const BackwardLMState &other = static_cast<const BackwardLMState &>(o);
-  return state.left.Compare(other.state.left);
+  bool ret = state.left == other.state.left;
+  return ret;
 }
 
 }

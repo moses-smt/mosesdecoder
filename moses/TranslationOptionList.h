@@ -1,5 +1,5 @@
-#ifndef moses_TranslationOptionList_h
-#define moses_TranslationOptionList_h
+// -*- c++ -*-
+#pragma once
 
 #include <vector>
 #include "util/exception.hh"
@@ -52,19 +52,21 @@ public:
   const TranslationOption *Get(size_t ind) const {
     return m_coll.at(ind);
   }
+
   void Remove( size_t ind ) {
     UTIL_THROW_IF2(ind >= m_coll.size(),
-    		"Out of bound index " << ind);
+                   "Out of bound index " << ind);
     m_coll.erase( m_coll.begin()+ind );
   }
   void Add(TranslationOption *transOpt) {
+    UTIL_THROW_IF2(!transOpt, "Not a valid translation option!");
     m_coll.push_back(transOpt);
   }
 
   TO_STRING();
 
+  size_t SelectNBest(size_t const N);
+  size_t PruneByThreshold(float const th);
+
 };
-
 }
-
-#endif

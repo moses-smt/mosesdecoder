@@ -80,12 +80,12 @@ class binuint {
   // Input / output methods...
   friend StringInput operator>> ( StringInput si, binuint& i ) {
     if(si==NULL) return si;
-    i.b=0; 
+    i.b=0;
     for ( char c=si[0]; '0'<=c && c<='1'; ++si,c=si[0])
       { i.b=i.b*2+c-'0'; }
     return si; }
-  friend ostream& operator<< ( ostream& os, binuint i ) { for(int e=uint(log2(i.b));e>=0;e--)os <<((i.b>>e)%2); return os;  }  
-  friend String&  operator<< ( String& str, binuint i ) { for(int e=uint(log2(i.b));e>=0;e--)str<<((i.b>>e)%2); return str; }  
+  friend ostream& operator<< ( ostream& os, binuint i ) { for(int e=uint(log2(i.b));e>=0;e--)os <<((i.b>>e)%2); return os;  }
+  friend String&  operator<< ( String& str, binuint i ) { for(int e=uint(log2(i.b));e>=0;e--)str<<((i.b>>e)%2); return str; }
 };
 
 ////////////////////////////////////////////////////////////////////////////////

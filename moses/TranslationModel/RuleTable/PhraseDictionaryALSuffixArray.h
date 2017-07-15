@@ -23,8 +23,8 @@ class PhraseDictionaryALSuffixArray : public PhraseDictionaryMemory
 {
 public:
   PhraseDictionaryALSuffixArray(const std::string &line);
-  void Load();
-  void InitializeForInput(InputType const& source);
+  void Load(AllOptions::ptr const& opts);
+  void InitializeForInput(ttasksptr const& ttask);
   void CleanUpAfterSentenceProcessing(const InputType& source);
 
 protected:

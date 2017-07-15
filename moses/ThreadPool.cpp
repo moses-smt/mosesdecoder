@@ -41,7 +41,7 @@ ThreadPool::ThreadPool( size_t numThreads )
 void ThreadPool::Execute()
 {
   do {
-    Task* task = NULL;
+    boost::shared_ptr<Task> task;
     {
       // Find a job to perform
       boost::mutex::scoped_lock lock(m_mutex);
@@ -56,15 +56,12 @@ void ThreadPool::Execute()
     //Execute job
     if (task) {
       task->Run();
-      if (task->DeleteAfterExecution()) {
-        delete task;
-      }
     }
     m_threadAvailable.notify_all();
   } while (!m_stopped);
 }
 
-void ThreadPool::Submit( Task* task )
+void ThreadPool::Submit(boost::shared_ptr<Task> task)
 {
   boost::mutex::scoped_lock lock(m_mutex);
   if (m_stopping) {

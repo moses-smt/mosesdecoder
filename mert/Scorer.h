@@ -1,5 +1,4 @@
-#ifndef MERT_SCORER_H_
-#define MERT_SCORER_H_
+#pragma once
 
 #include <iostream>
 #include <sstream>
@@ -41,6 +40,19 @@ public:
    * Return the number of statistics needed for the computation of the score.
    */
   virtual std::size_t NumberOfScores() const = 0;
+
+  /**
+   * Calculate score based on a vector of sufficient statistics.
+   */
+  virtual float calculateScore(const std::vector<ScoreStatsType>& totals) const = 0;
+
+  float calculateSentenceLevelBackgroundScore(const std::vector<ScoreStatsType>& totals, const std::vector<ScoreStatsType>& bg) {
+    std::vector<ScoreStatsType> stats(totals.size());
+    for(size_t i=0; i<stats.size(); i++)
+      stats[i] = totals[i]+bg[i];
+    // Get score and scale by reference length (as per Chiang et al 08)
+    return calculateScore(stats) * getReferenceLength(stats);
+  }
 
   /**
    * Set the reference files. This must be called before prepareStats().
@@ -96,6 +108,11 @@ public:
     }
     return 0;
   }
+
+  /**
+   * Based on vector of sufficient statistics, return length of reference.
+   */
+  virtual float getReferenceLength(const std::vector<ScoreStatsType>& totals) const = 0;
 
   /**
    * Set the score data, prior to scoring.
@@ -169,12 +186,12 @@ protected:
    * Tokenise line and encode.
    * Note: We assume that all tokens are separated by whitespaces.
    */
-  void TokenizeAndEncode(const std::string& line, std::vector<int>& encoded);
+  void TokenizeAndEncode(const std::string& line, std::vector<int>& encoded) const;
 
   /*
    * Tokenize functions for testing only.
    */
-  void TokenizeAndEncodeTesting(const std::string& line, std::vector<int>& encoded);
+  void TokenizeAndEncodeTesting(const std::string& line, std::vector<int>& encoded) const;
 
   /**
    * Every inherited scorer should call this function for each sentence
@@ -218,4 +235,3 @@ inline float score_average(const statscores_t& scores, size_t start, size_t end)
 
 }
 
-#endif // MERT_SCORER_H_

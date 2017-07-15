@@ -5,6 +5,7 @@
 #include "Util.h"
 #include "XmlOption.h"
 #include "FactorCollection.h"
+#include "moses/TranslationModel/PhraseDictionary.h"
 
 using namespace std;
 
@@ -21,13 +22,25 @@ namespace Moses
  * \param reorderingConstraint reordering constraint zones specified by xml
  * \param walls reordering constraint walls specified by xml
  */
-bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput> &sourceLabels, std::vector<XmlOption*> &xmlOptions)
+bool
+TreeInput::
+ProcessAndStripXMLTags(AllOptions const& opts, string &line,
+                       std::vector<XMLParseOutput> &sourceLabels,
+                       std::vector<XmlOption const*> &xmlOptions)
 {
   //parse XML markup in translation line
+
+  vector<FactorType> const& oFactors = opts.output.factor_order;
 
   // no xml tag? we're done.
   if (line.find_first_of('<') == string::npos) {
     return true;
+  }
+
+  // hack. What pt should XML trans opt be assigned to?
+  PhraseDictionary *firstPt = NULL;
+  if (PhraseDictionary::GetColl().size() == 0) {
+    firstPt = PhraseDictionary::GetColl()[0];
   }
 
   // break up input into a vector of xml tags and text
@@ -41,10 +54,6 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
 
   string cleanLine; // return string (text without xml)
   size_t wordPos = 0; // position in sentence (in terms of number of words)
-
-  // keep this handy for later
-  const vector<FactorType> &outputFactorOrder = StaticData::Instance().GetOutputFactorOrder();
-  const string &factorDelimiter = StaticData::Instance().GetFactorDelimiter();
 
   // loop through the tokens
   for (size_t xmlTokenPos = 0 ; xmlTokenPos < xmlTokens.size() ; xmlTokenPos++) {
@@ -145,8 +154,11 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
 
         VERBOSE(3,"XML TAG " << tagName << " (" << tagContent << ") spanning " << startPos << " to " << (endPos-1) << " complete, commence processing" << endl);
 
-        if (startPos >= endPos) {
-          TRACE_ERR("ERROR: tag " << tagName << " must span at least one word: " << line << endl);
+        if (startPos == endPos) {
+          TRACE_ERR("WARNING: tag " << tagName << " span is empty. Ignoring: " << line << endl);
+          continue;
+        } else if (startPos > endPos) {
+          TRACE_ERR("ERROR: tag " << tagName << " startPos > endPos: " << line << endl);
           return false;
         }
 
@@ -156,21 +168,21 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
 
         // specified label
         if (translation.length() == 0 && label.length() > 0) {
-          WordsRange range(startPos,endPos-1); // really?
+          Range range(startPos,endPos-1); // really?
           XMLParseOutput item(label, range);
           sourceLabels.push_back(item);
         }
 
         // specified translations -> vector of phrases, separated by "||"
-        if (translation.length() > 0 && StaticData::Instance().GetXmlInputType() != XmlIgnore) {
+        if (translation.length() > 0 && opts.input.xml_policy != XmlIgnore) {
           vector<string> altTexts = TokenizeMultiCharSeparator(translation, "||");
           vector<string> altLabel = TokenizeMultiCharSeparator(label, "||");
           vector<string> altProbs = TokenizeMultiCharSeparator(ParseXmlTagAttribute(tagContent,"prob"), "||");
           //TRACE_ERR("number of translations: " << altTexts.size() << endl);
           for (size_t i=0; i<altTexts.size(); ++i) {
             // set target phrase
-            TargetPhrase targetPhrase;
-            targetPhrase.CreateFromString(Output, outputFactorOrder,altTexts[i],factorDelimiter, NULL);
+            TargetPhrase targetPhrase(firstPt);
+            targetPhrase.CreateFromString(Output, oFactors, altTexts[i], NULL);
 
             // set constituent label
             string targetLHSstr;
@@ -182,13 +194,13 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
               targetLHSstr = iterLHS->first;
             }
             Word *targetLHS = new Word(true);
-            targetLHS->CreateFromString(Output, outputFactorOrder, targetLHSstr, true);
+            targetLHS->CreateFromString(Output, oFactors, targetLHSstr, true);
             UTIL_THROW_IF2(targetLHS->GetFactor(0) == NULL,
-            		"Null factor left-hand-side");
+                           "Null factor left-hand-side");
             targetPhrase.SetTargetLHS(targetLHS);
 
             // not tested
-            Phrase sourcePhrase = this->GetSubString(WordsRange(startPos,endPos-1));
+            Phrase sourcePhrase = this->GetSubString(Range(startPos,endPos-1));
 
             // get probability
             float probValue = 1;
@@ -198,10 +210,10 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
             // convert from prob to log-prob
             float scoreValue = FloorScore(TransformScore(probValue));
             targetPhrase.SetXMLScore(scoreValue);
-            targetPhrase.Evaluate(sourcePhrase);
+            targetPhrase.EvaluateInIsolation(sourcePhrase);
 
             // set span and create XmlOption
-            WordsRange range(startPos+1,endPos);
+            Range range(startPos+1,endPos);
             XmlOption *option = new XmlOption(range,targetPhrase);
             assert(option);
             xmlOptions.push_back(option);
@@ -226,24 +238,21 @@ bool TreeInput::ProcessAndStripXMLTags(string &line, std::vector<XMLParseOutput>
 }
 
 //! populate this InputType with data from in stream
-int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
+int
+TreeInput::
+Read(std::istream& in)
 {
-  const StaticData &staticData = StaticData::Instance();
-
   string line;
   if (getline(in, line, '\n').eof())
     return 0;
-  // remove extra spaces
-  //line = Trim(line);
-
-  std::vector<XMLParseOutput> sourceLabels;
-  ProcessAndStripXMLTags(line, sourceLabels, m_xmlOptions);
+  m_labelledSpans.clear();
+  ProcessAndStripXMLTags(*m_options, line, m_labelledSpans, m_xmlOptions);
 
   // do words 1st - hack
   stringstream strme;
   strme << line << endl;
 
-  Sentence::Read(strme, factorOrder);
+  Sentence::Read(strme);
 
   // size input chart
   size_t sourceSize = GetSize();
@@ -255,17 +264,22 @@ int TreeInput::Read(std::istream& in,const std::vector<FactorType>& factorOrder)
 
   // do source labels
   vector<XMLParseOutput>::const_iterator iterLabel;
-  for (iterLabel = sourceLabels.begin(); iterLabel != sourceLabels.end(); ++iterLabel) {
+  for (iterLabel = m_labelledSpans.begin();
+       iterLabel != m_labelledSpans.end(); ++iterLabel) {
     const XMLParseOutput &labelItem = *iterLabel;
-    const WordsRange &range = labelItem.m_range;
+    const Range &range = labelItem.m_range;
     const string &label = labelItem.m_label;
-    AddChartLabel(range.GetStartPos() + 1, range.GetEndPos() + 1, label, factorOrder);
+    AddChartLabel(range.GetStartPos() + 1, range.GetEndPos() + 1, label);
   }
 
   // default label
+  bool only4empty = m_options->syntax.default_non_term_only_for_empty_range;
   for (size_t startPos = 0; startPos < sourceSize; ++startPos) {
     for (size_t endPos = startPos; endPos < sourceSize; ++endPos) {
-      AddChartLabel(startPos, endPos, staticData.GetInputDefaultNonTerminal(), factorOrder);
+      NonTerminalSet &list = GetLabelSet(startPos, endPos);
+      if (list.size() == 0 || ! only4empty ) {
+        AddChartLabel(startPos, endPos, m_options->syntax.input_default_non_terminal);
+      }
     }
   }
 
@@ -285,13 +299,13 @@ TranslationOptionCollection* TreeInput::CreateTranslationOptionCollection() cons
   return NULL;
 }
 
-void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const Word &label
-                              , const std::vector<FactorType>& /* factorOrder */)
+void
+TreeInput::
+AddChartLabel(size_t startPos, size_t endPos, const Word &label)
 {
   UTIL_THROW_IF2(!label.IsNonTerminal(),
-		  "Label must be a non-terminal");
-
-  SourceLabelOverlap overlapType = StaticData::Instance().GetSourceLabelOverlap();
+                 "Label must be a non-terminal");
+  SourceLabelOverlap overlapType = m_options->syntax.source_label_overlap;
   NonTerminalSet &list = GetLabelSet(startPos, endPos);
   switch (overlapType) {
   case SourceLabelOverlapAdd:
@@ -309,14 +323,17 @@ void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const Word &label
   }
 }
 
-void TreeInput::AddChartLabel(size_t startPos, size_t endPos, const string &label
-                              , const std::vector<FactorType>& factorOrder)
+void
+TreeInput::
+AddChartLabel(size_t startPos, size_t endPos, const string &label)
 {
+  const std::vector<FactorType>& fOrder = m_options->input.factor_order;
   Word word(true);
-  const Factor *factor = FactorCollection::Instance().AddFactor(Input, factorOrder[0], label, true); // TODO - no factors
+  const Factor *factor
+  = FactorCollection::Instance().AddFactor(Input, fOrder[0], label, true);
+  // TODO - no factors
   word.SetFactor(0, factor);
-
-  AddChartLabel(startPos, endPos, word, factorOrder);
+  AddChartLabel(startPos, endPos, word);
 }
 
 std::ostream& operator<<(std::ostream &out, const TreeInput &input)
@@ -331,7 +348,7 @@ std::ostream& operator<<(std::ostream &out, const TreeInput &input)
       for (iter = labelSet.begin(); iter != labelSet.end(); ++iter) {
         const Word &word = *iter;
         UTIL_THROW_IF2(!word.IsNonTerminal(),
-      		  "Word must be a non-terminal");
+                       "Word must be a non-terminal");
         out << "[" << startPos <<"," << endPos << "]="
             << word << "(" << word.IsNonTerminal() << ") ";
       }

@@ -1,4 +1,4 @@
-// $Id$
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // vim:tabstop=2
 
 /***********************************************************************
@@ -35,11 +35,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 
 #include "util/string_piece.hh"
 #include "util/exception.hh"
+#include "parameters/AllOptions.h"
 
 namespace Moses
 {
 class FactorMask;
-class WordsRange;
+class Range;
+class ContextScope;
 
 /** Representation of a phrase, ie. a contiguous number of words.
  *  Wrapper for vector of words
@@ -47,11 +49,21 @@ class WordsRange;
 class Phrase
 {
   friend std::ostream& operator<<(std::ostream&, const Phrase&);
-private:
-
+  // private:
+protected:
   std::vector<Word>			m_words;
 
 public:
+
+  virtual bool HasScope() const {
+    return false;
+  }
+
+  virtual SPTR<ContextScope> GetScope() const {
+    return SPTR<ContextScope>();
+  }
+
+
   /** No longer does anything as not using mem pool for Phrase class anymore */
   static void InitializeMemPool();
   static void FinalizeMemPool();
@@ -73,16 +85,17 @@ public:
   /** destructor */
   virtual ~Phrase();
 
-  /** Fills phrase with words from format string, typically from phrase table or sentence input
-  	* \param factorOrder factor types of each element in 2D string vector
-  	* \param phraseString formatted input string to parse
-  	*	\param factorDelimiter delimiter between factors.
+  /**
+   * Fills phrase with words from format string, typically from phrase table or sentence input
+   *
+   * \param factorOrder  factor types of each element in 2D string vector
+   * \param phraseString formatted input string to parse
+   * \param lhs          returns the non-terminal Word for the left-hand side of an SCFG rule, may be NULL for phrase-based
   */
-  void CreateFromString(FactorDirection direction
-                        , const std::vector<FactorType> &factorOrder
-                        , const StringPiece &phraseString
-                        , const StringPiece &factorDelimiter
-                        , Word **lhs);
+  void CreateFromString(FactorDirection direction,
+                        const std::vector<FactorType> &factorOrder,
+                        const StringPiece &phraseString,
+                        Word **lhs);
 
   /**	copy factors from the other phrase to this phrase.
   	IsCompatible() must be run beforehand to ensure incompatible factors aren't overwritten
@@ -140,6 +153,9 @@ public:
   }
 
   size_t GetNumTerminals() const;
+  size_t GetNumNonTerminals() const {
+    return GetSize() - GetNumTerminals();
+  }
 
   //! whether the 2D vector is a substring of this phrase
   bool Contains(const std::vector< std::vector<std::string> > &subPhraseVector
@@ -163,19 +179,22 @@ public:
   }
 
   void RemoveWord(size_t pos) {
-	UTIL_THROW_IF2(pos >= m_words.size(),
-			"Referencing position " << pos << " out of bound");
+    UTIL_THROW_IF2(pos >= m_words.size(),
+                   "Referencing position " << pos << " out of bound");
     m_words.erase(m_words.begin() + pos);
   }
 
   void InitStartEndWord();
 
   //! create new phrase class that is a substring of this phrase
-  Phrase GetSubString(const WordsRange &wordsRange) const;
-  Phrase GetSubString(const WordsRange &wordsRange, FactorType factorType) const;
+  Phrase GetSubString(const Range &range) const;
+  Phrase GetSubString(const Range &range, FactorType factorType) const;
 
-  //! return a string rep of the phrase. Each factor is separated by the factor delimiter as specified in StaticData class
-  std::string GetStringRep(const std::vector<FactorType> factorsToPrint) const;
+  //! return a string rep of the phrase;
+  // w/ factors delimited by FactorDelimiter
+  std::string
+  GetStringRep(std::vector<FactorType> const& factorsToPrint,
+               AllOptions const* opts=NULL) const;
 
   TO_STRING();
 
@@ -189,8 +208,11 @@ public:
     return Compare(compare) < 0;
   }
 
-  bool operator== (const Phrase &compare) const {
-    return Compare(compare) == 0;
+  size_t hash() const;
+
+  bool operator==(const Phrase &compare) const;
+  bool operator!=(const Phrase &compare) const {
+    return ! (*this == compare);
   }
 
   void OnlyTheseFactors(const FactorMask &factors);
@@ -199,11 +221,7 @@ public:
 
 inline size_t hash_value(const Phrase& phrase)
 {
-  size_t  seed = 0;
-  for (size_t i = 0; i < phrase.GetSize(); ++i) {
-    boost::hash_combine(seed, phrase.GetWord(i));
-  }
-  return seed;
+  return phrase.hash();
 }
 
 struct PhrasePtrComparator {

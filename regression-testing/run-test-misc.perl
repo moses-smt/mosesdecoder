@@ -1,10 +1,11 @@
-#!/usr/bin/perl -w 
+#!/usr/bin/env perl
 
+use warnings;
 use strict;
 
 BEGIN {
-use Cwd qw/ abs_path cwd /; 
-use File::Basename; 
+use Cwd qw/ abs_path cwd /;
+use File::Basename;
 my $script_dir = dirname(abs_path($0));
 print STDERR  "script_dir=$script_dir\n";
 push @INC, $script_dir;
@@ -27,10 +28,10 @@ GetOptions("moses-root=s" => \$mosesRoot,
           ) or exit 1;
 
 # output dir
-unless (defined $results_dir) 
-{ 
+unless (defined $results_dir)
+{
   my $ts = get_timestamp($mosesRoot);
-  $results_dir = "$data_dir/results/$test_name/$ts"; 
+  $results_dir = "$data_dir/results/$test_name/$ts";
 }
 
 `mkdir -p $results_dir`;
@@ -38,6 +39,11 @@ unless (defined $results_dir)
 use File::Basename qw/dirname/;
 my $dir = dirname ($0);
 my $cmdMain = "perl -I $dir $test_dir/$test_name/run.perl -moses-root $mosesRoot -moses-bin $mosesBin -test $test_name -data-dir $data_dir -test-dir $test_dir  -results-dir $results_dir\n";
+
+open CMD, ">$results_dir/cmd_line";
+print CMD $cmdMain;
+close CMD;
+
 `$cmdMain`;
 
 my $outPath = "$results_dir/out";
@@ -47,7 +53,7 @@ print STDERR "outPath=$outPath \n truthPath=$truthPath \n";
 
 if (-e $outPath)
 {
-  my $cmd = "diff $outPath $truthPath | wc -l";
+  my $cmd = "diff --exclude=cmd_line $outPath $truthPath | wc -l";
 
   my $numDiff = `$cmd`;
 

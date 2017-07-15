@@ -1,9 +1,13 @@
 #!/usr/bin/env python
-
-# Usage: extract-target-trees.py [FILE]
 #
-# Reads moses-chart's -T output from FILE or standard input and writes trees to
-# standard output in Moses' XML tree format.
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
+
+"""Usage: extract-target-trees.py [FILE]
+
+Reads moses-chart's -T output from FILE or standard input and writes trees to
+standard output in Moses' XML tree format.
+"""
 
 import re
 import sys
@@ -25,7 +29,7 @@ class Derivation(list):
         for hypothesis in self:
             if hypothesis.span[0] != 0:
                 continue
-            if root == None or hypothesis.span[1] > root.span[1]:
+            if root is None or hypothesis.span[1] > root.span[1]:
                 root = hypothesis
         assert root
         return root
@@ -48,7 +52,8 @@ class Derivation(list):
         non_term_spans = []
         for item in root.source_symbol_info:
             span = item[0]
-            if span != root.span and span in hypo_map: # In hypo_map iff symbol is NT
+            # In hypo_map iff symbol is NT:
+            if span != root.span and span in hypo_map:
                 non_term_spans.append(span)
         non_term_spans.sort()
 
@@ -105,8 +110,15 @@ def read_derivations(input):
         yield derivation, start_line_num
 
 
-# Extract the hypothesis components and return a Hypothesis object.
 def parse_line(s):
+    if s.startswith("Trans Opt"):
+        return parse_line_old_format(s)
+    else:
+        return parse_line_new_format(s)
+
+
+# Extract the hypothesis components and return a Hypothesis object.
+def parse_line_old_format(s):
     pattern = r"Trans Opt (\d+) " + \
               r"\[(\d+)\.\.(\d+)\]:" + \
               r"((?: \[\d+\.\.\d+\]=\S+  )+):" + \
@@ -142,6 +154,48 @@ def parse_line(s):
     return hypothesis
 
 
+# Extract the hypothesis components and return a Hypothesis object.
+def parse_line_new_format(s):
+    pattern = r"(\d+) \|\|\|" + \
+              r" (\[\S+\]) -> ((?:\S+ )+)\|\|\|" + \
+              r" (\[\S+\]) -> ((?:\S+ )+)\|\|\|" + \
+              r" ((?:\d+-\d+ )*)\|\|\|" + \
+              r"((?: \d+\.\.\d+)*)"
+    regexp = re.compile(pattern)
+    match = regexp.match(s)
+    if not match:
+        sys.stderr.write("%s\n" % s)
+    assert match
+    group = match.groups()
+    hypothesis = Hypothesis()
+    hypothesis.sentence_num = int(group[0]) + 1
+    spans = []
+    for pair in group[6].split():
+        match = re.match(r'(\d+)\.\.(\d+)', pair)
+        assert match
+        span = (int(match.group(1)), int(match.group(2)))
+        spans.append(span)
+    hypothesis.span = (spans[0][0], spans[-1][1])
+    hypothesis.source_symbol_info = []
+    for i, symbol in enumerate(group[2].split()):
+        hypothesis.source_symbol_info.append((spans[i], strip_brackets(symbol)))
+    hypothesis.target_lhs = strip_brackets(group[3])
+    hypothesis.target_rhs = group[4].split()
+    hypothesis.nt_alignments = []
+    for pair in group[5].split():
+        match = re.match(r'(\d+)-(\d+)', pair)
+        assert match
+        ai = (int(match.group(1)), int(match.group(2)))
+        hypothesis.nt_alignments.append(ai)
+    return hypothesis
+
+
+def strip_brackets(symbol):
+    if symbol[0] == '[' and symbol[-1] == ']':
+        return symbol[1:-1]
+    return symbol
+
+
 def tree_to_xml(tree):
     if tree.is_leaf():
         return tree.label
@@ -166,7 +220,9 @@ def main():
         try:
             tree = derivation.construct_target_tree()
         except:
-            msg = "error processing derivation starting at line %d\n" % line_num
+            msg = (
+                "error processing derivation starting at line %d\n"
+                % line_num)
             sys.stderr.write(msg)
             raise
         print tree_to_xml(tree)

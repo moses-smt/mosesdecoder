@@ -28,33 +28,15 @@
 namespace Moses
 {
 
+class ChartSearchGraphWriter;
+struct AllOptions;
+
 //! functor to compare (chart) hypotheses by (descending) score
 class ChartHypothesisScoreOrderer
 {
 public:
   bool operator()(const ChartHypothesis* hypoA, const ChartHypothesis* hypoB) const {
-    return hypoA->GetTotalScore() > hypoB->GetTotalScore();
-  }
-};
-
-/** functor to compare (chart) hypotheses by feature function states.
- *  If 2 hypos are equal, according to this functor, then they can be recombined.
- */
-class ChartHypothesisRecombinationOrderer
-{
-public:
-  bool operator()(const ChartHypothesis* hypoA, const ChartHypothesis* hypoB) const {
-    // assert in same cell
-    assert(hypoA->GetCurrSourceRange() == hypoB->GetCurrSourceRange());
-
-    // shouldn't be mixing hypos with different lhs
-    assert(hypoA->GetTargetLHS() == hypoB->GetTargetLHS());
-
-    int ret = hypoA->RecombineCompare(*hypoB);
-    if (ret != 0)
-      return (ret < 0);
-
-    return false;
+    return hypoA->GetFutureScore() > hypoB->GetFutureScore();
   }
 };
 
@@ -66,7 +48,8 @@ class ChartHypothesisCollection
   friend std::ostream& operator<<(std::ostream&, const ChartHypothesisCollection&);
 
 protected:
-  typedef std::set<ChartHypothesis*, ChartHypothesisRecombinationOrderer> HCType;
+  //typedef std::set<ChartHypothesis*, ChartHypothesisRecombinationOrderer> HCType;
+  typedef boost::unordered_set< ChartHypothesis*, UnorderedComparer<ChartHypothesis>, UnorderedComparer<ChartHypothesis> > HCType;
   HCType m_hypos;
   HypoList m_hyposOrdered;
 
@@ -88,7 +71,7 @@ public:
     return m_hypos.end();
   }
 
-  ChartHypothesisCollection();
+  ChartHypothesisCollection(AllOptions const& opts);
   ~ChartHypothesisCollection();
   bool AddHypothesis(ChartHypothesis *hypo, ChartManager &manager);
 
@@ -117,7 +100,7 @@ public:
     return m_bestScore;
   }
 
-  void GetSearchGraph(long translationId, std::ostream &outputSearchGraphStream, const std::map<unsigned,bool> &reachable) const;
+  void WriteSearchGraph(const ChartSearchGraphWriter& writer, const std::map<unsigned,bool> &reachable) const;
 
 };
 

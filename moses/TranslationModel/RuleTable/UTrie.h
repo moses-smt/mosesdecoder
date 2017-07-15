@@ -21,13 +21,13 @@
 
 #include "Trie.h"
 #include "UTrieNode.h"
+#include "moses/TargetPhraseCollection.h"
 
 namespace Moses
 {
 
 class Phrase;
 class TargetPhrase;
-class TargetPhraseCollection;
 class Word;
 class ChartParser;
 
@@ -57,8 +57,10 @@ public:
       const ChartCellCollectionBase &, std::size_t);
 
 private:
-  TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-    const Phrase &source, const TargetPhrase &target, const Word *sourceLHS);
+  TargetPhraseCollection::shared_ptr
+  GetOrCreateTargetPhraseCollection(const Phrase &source,
+                                    const TargetPhrase &target,
+                                    const Word *sourceLHS);
 
   UTrieNode &GetOrCreateNode(const Phrase &source, const TargetPhrase &target,
                              const Word *sourceLHS);

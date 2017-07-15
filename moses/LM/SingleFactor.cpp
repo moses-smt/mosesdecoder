@@ -48,8 +48,8 @@ LanguageModelSingleFactor::LanguageModelSingleFactor(const std::string &line)
 
 LanguageModelSingleFactor::~LanguageModelSingleFactor()
 {
-	delete m_nullContextState;
-	delete m_beginSentenceState;
+  delete m_nullContextState;
+  delete m_beginSentenceState;
 }
 
 const FFState *LanguageModelSingleFactor::GetNullContextState() const
@@ -85,6 +85,17 @@ void LanguageModelSingleFactor::SetParameter(const std::string& key, const std::
   } else {
     LanguageModelImplementation::SetParameter(key, value);
   }
+}
+
+std::string LanguageModelSingleFactor::DebugContextFactor(const std::vector<const Word*> &contextFactor) const
+{
+  std::string ret;
+  for (size_t i = 0; i < contextFactor.size(); ++i) {
+    const Word &word = *contextFactor[i];
+    ret += word.ToString();
+  }
+
+  return ret;
 }
 
 }

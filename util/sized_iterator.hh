@@ -1,5 +1,5 @@
-#ifndef UTIL_SIZED_ITERATOR__
-#define UTIL_SIZED_ITERATOR__
+#ifndef UTIL_SIZED_ITERATOR_H
+#define UTIL_SIZED_ITERATOR_H
 
 #include "util/proxy_iterator.hh"
 
@@ -8,7 +8,7 @@
 #include <string>
 
 #include <stdint.h>
-#include <string.h>
+#include <cstring>
 
 namespace util {
 
@@ -117,4 +117,4 @@ template <class Delegate, class Proxy = SizedProxy> class SizedCompare : public 
 };
 
 } // namespace util
-#endif // UTIL_SIZED_ITERATOR__
+#endif // UTIL_SIZED_ITERATOR_H

@@ -13,13 +13,23 @@
 // returns self (or first argument) if not convertable
 String.prototype.parseColor = function() {
   var color = '#';
+  var i;
   if (this.slice(0,4) == 'rgb(') {
     var cols = this.slice(4,this.length-1).split(',');
-    var i=0; do { color += parseInt(cols[i]).toColorPart() } while (++i<3);
+    i=0;
+    do {
+      color += parseInt(cols[i]).toColorPart();
+    } while (++i<3);
   } else {
     if (this.slice(0,1) == '#') {
-      if (this.length==4) for(var i=1;i<4;i++) color += (this.charAt(i) + this.charAt(i)).toLowerCase();
-      if (this.length==7) color = this.toLowerCase();
+      if (this.length==4) {
+        for(i=1;i<4;i++) {
+          color += (this.charAt(i) + this.charAt(i)).toLowerCase();
+        }
+      }
+      if (this.length==7) {
+        color = this.toLowerCase();
+      }
     }
   }
   return (color.length==7 ? color : (arguments[0] || this));
@@ -45,7 +55,9 @@ Element.collectTextNodesIgnoreClass = function(element, className) {
 Element.setContentZoom = function(element, percent) {
   element = $(element);
   element.setStyle({fontSize: (percent/100) + 'em'});
-  if (Prototype.Browser.WebKit) window.scrollBy(0,0);
+  if (Prototype.Browser.WebKit) {
+    window.scrollBy(0,0);
+  }
   return element;
 };
 
@@ -78,7 +90,7 @@ var Effect = {
       return 1-pos;
     },
     flicker: function(pos) {
-      var pos = ((-Math.cos(pos*Math.PI)/4) + .75) + Math.random()/4;
+      pos = ((-Math.cos(pos*Math.PI)/4) + .75) + Math.random()/4;
       return pos > 1 ? 1 : pos;
     },
     wobble: function(pos) {
@@ -108,7 +120,9 @@ var Effect = {
   },
   tagifyText: function(element) {
     var tagifyStyle = 'position:relative';
-    if (Prototype.Browser.IE) tagifyStyle += ';zoom:1';
+    if (Prototype.Browser.IE) {
+      tagifyStyle += ';zoom:1';
+    }
 
     element = $(element);
     $A(element.childNodes).each( function(child) {
@@ -127,10 +141,11 @@ var Effect = {
     var elements;
     if (((typeof element == 'object') ||
         Object.isFunction(element)) &&
-       (element.length))
+       (element.length)) {
       elements = element;
-    else
+    } else {
       elements = $(element).childNodes;
+    }
 
     var options = Object.extend({
       speed: 0.1,
@@ -150,7 +165,7 @@ var Effect = {
   toggle: function(element, effect, options) {
     element = $(element);
     effect  = (effect || 'appear').toLowerCase();
-    
+
     return Effect[ Effect.PAIRS[ effect ][ element.visible() ? 1 : 0 ] ](element, Object.extend({
       queue: { position:'end', scope:(element.id || 'global'), limit: 1 }
     }, options || {}));
@@ -178,7 +193,7 @@ Effect.ScopedQueue = Class.create(Enumerable, {
     switch(position) {
       case 'front':
         // move unstarted effects after this effect
-        this.effects.findAll(function(e){ return e.state=='idle' }).each( function(e) {
+        this.effects.findAll(function(e){ return e.state=='idle'; }).each( function(e) {
             e.startOn  += effect.finishOn;
             e.finishOn += effect.finishOn;
           });
@@ -195,14 +210,16 @@ Effect.ScopedQueue = Class.create(Enumerable, {
     effect.startOn  += timestamp;
     effect.finishOn += timestamp;
 
-    if (!effect.options.queue.limit || (this.effects.length < effect.options.queue.limit))
+    if (!effect.options.queue.limit || (this.effects.length < effect.options.queue.limit)) {
       this.effects.push(effect);
+    }
 
-    if (!this.interval)
+    if (!this.interval) {
       this.interval = setInterval(this.loop.bind(this), 15);
+    }
   },
   remove: function(effect) {
-    this.effects = this.effects.reject(function(e) { return e==effect });
+    this.effects = this.effects.reject(function(e) { return e==effect; });
     if (this.effects.length == 0) {
       clearInterval(this.interval);
       this.interval = null;
@@ -210,15 +227,19 @@ Effect.ScopedQueue = Class.create(Enumerable, {
   },
   loop: function() {
     var timePos = new Date().getTime();
-    for(var i=0, len=this.effects.length;i<len;i++)
+    var i;
+    for(i=0, len=this.effects.length;i<len;i++) {
       this.effects[i] && this.effects[i].loop(timePos);
+    }
   }
 });
 
 Effect.Queues = {
   instances: $H(),
   get: function(queueName) {
-    if (!Object.isString(queueName)) return queueName;
+    if (!Object.isString(queueName)) {
+      return queueName;
+    }
 
     return this.instances.get(queueName) ||
       this.instances.set(queueName, new Effect.ScopedQueue());
@@ -229,7 +250,9 @@ Effect.Queue = Effect.Queues.get('global');
 Effect.Base = Class.create({
   position: null,
   start: function(options) {
-    if (options && options.transition === false) options.transition = Effect.Transitions.linear;
+    if (options && options.transition === false) {
+      options.transition = Effect.Transitions.linear;
+    }
     this.options      = Object.extend(Object.extend({ },Effect.DefaultOptions), options || { });
     this.currentFrame = 0;
     this.state        = 'idle';
@@ -241,33 +264,40 @@ Effect.Base = Class.create({
 
     this.render = (function() {
       function dispatch(effect, eventName) {
-        if (effect.options[eventName + 'Internal'])
+        if (effect.options[eventName + 'Internal']) {
           effect.options[eventName + 'Internal'](effect);
-        if (effect.options[eventName])
+        }
+        if (effect.options[eventName]) {
           effect.options[eventName](effect);
+        }
       }
 
       return function(pos) {
         if (this.state === "idle") {
           this.state = "running";
           dispatch(this, 'beforeSetup');
-          if (this.setup) this.setup();
+          if (this.setup) {
+            this.setup();
+          }
           dispatch(this, 'afterSetup');
         }
         if (this.state === "running") {
           pos = (this.options.transition(pos) * this.fromToDelta) + this.options.from;
           this.position = pos;
           dispatch(this, 'beforeUpdate');
-          if (this.update) this.update(pos);
+          if (this.update) {
+            this.update(pos);
+          }
           dispatch(this, 'afterUpdate');
         }
       };
     })();
 
     this.event('beforeStart');
-    if (!this.options.sync)
+    if (!this.options.sync) {
       Effect.Queues.get(Object.isString(this.options.queue) ?
         'global' : this.options.queue.scope).add(this);
+    }
   },
   loop: function(timePos) {
     if (timePos >= this.startOn) {
@@ -275,7 +305,9 @@ Effect.Base = Class.create({
         this.render(1.0);
         this.cancel();
         this.event('beforeFinish');
-        if (this.finish) this.finish();
+        if (this.finish) {
+          this.finish();
+        }
         this.event('afterFinish');
         return;
       }
@@ -288,19 +320,27 @@ Effect.Base = Class.create({
     }
   },
   cancel: function() {
-    if (!this.options.sync)
+    if (!this.options.sync) {
       Effect.Queues.get(Object.isString(this.options.queue) ?
         'global' : this.options.queue.scope).remove(this);
+    }
     this.state = 'finished';
   },
   event: function(eventName) {
-    if (this.options[eventName + 'Internal']) this.options[eventName + 'Internal'](this);
-    if (this.options[eventName]) this.options[eventName](this);
+    if (this.options[eventName + 'Internal']) {
+      this.options[eventName + 'Internal'](this);
+    }
+    if (this.options[eventName]) {
+      this.options[eventName](this);
+    }
   },
   inspect: function() {
     var data = $H();
-    for(property in this)
-      if (!Object.isFunction(this[property])) data.set(property, this[property]);
+    for(property in this) {
+      if (!Object.isFunction(this[property])) {
+        data.set(property, this[property]);
+      }
+    }
     return '#<Effect:' + data.inspect() + ',options:' + $H(this.options).inspect() + '>';
   }
 });
@@ -318,7 +358,9 @@ Effect.Parallel = Class.create(Effect.Base, {
       effect.render(1.0);
       effect.cancel();
       effect.event('beforeFinish');
-      if (effect.finish) effect.finish(position);
+      if (effect.finish) {
+        effect.finish(position);
+      }
       effect.event('afterFinish');
     });
   }
@@ -331,7 +373,7 @@ Effect.Tween = Class.create(Effect.Base, {
       options = args.length == 5 ? args[3] : null;
     this.method = Object.isFunction(method) ? method.bind(object) :
       Object.isFunction(object[method]) ? object[method].bind(object) :
-      function(value) { object[method] = value };
+      function(value) { object[method] = value; };
     this.start(Object.extend({ from: from, to: to }, options || { }));
   },
   update: function(position) {
@@ -348,12 +390,16 @@ Effect.Event = Class.create(Effect.Base, {
 
 Effect.Opacity = Class.create(Effect.Base, {
   initialize: function(element) {
+    var options;
     this.element = $(element);
-    if (!this.element) throw(Effect._elementDoesNotExistError);
+    if (!this.element) {
+      throw(Effect._elementDoesNotExistError);
+    }
     // make this work on IE on elements without 'layout'
-    if (Prototype.Browser.IE && (!this.element.currentStyle.hasLayout))
+    if (Prototype.Browser.IE && (!this.element.currentStyle.hasLayout)) {
       this.element.setStyle({zoom: 1});
-    var options = Object.extend({
+    }
+    options = Object.extend({
       from: this.element.getOpacity() || 0.0,
       to:   1.0
     }, arguments[1] || { });
@@ -366,9 +412,12 @@ Effect.Opacity = Class.create(Effect.Base, {
 
 Effect.Move = Class.create(Effect.Base, {
   initialize: function(element) {
+    var options;
     this.element = $(element);
-    if (!this.element) throw(Effect._elementDoesNotExistError);
-    var options = Object.extend({
+    if (!this.element) {
+      throw(Effect._elementDoesNotExistError);
+    }
+    options = Object.extend({
       x:    0,
       y:    0,
       mode: 'relative'
@@ -400,9 +449,12 @@ Effect.MoveBy = function(element, toTop, toLeft) {
 
 Effect.Scale = Class.create(Effect.Base, {
   initialize: function(element, percent) {
+    var options;
     this.element = $(element);
-    if (!this.element) throw(Effect._elementDoesNotExistError);
-    var options = Object.extend({
+    if (!this.element) {
+      throw(Effect._elementDoesNotExistError);
+    }
+    options = Object.extend({
       scaleX: true,
       scaleY: true,
       scaleContent: true,
@@ -436,36 +488,54 @@ Effect.Scale = Class.create(Effect.Base, {
     this.factor = (this.options.scaleTo - this.options.scaleFrom)/100;
 
     this.dims = null;
-    if (this.options.scaleMode=='box')
+    if (this.options.scaleMode=='box') {
       this.dims = [this.element.offsetHeight, this.element.offsetWidth];
-    if (/^content/.test(this.options.scaleMode))
+    }
+    if (/^content/.test(this.options.scaleMode)) {
       this.dims = [this.element.scrollHeight, this.element.scrollWidth];
-    if (!this.dims)
+    }
+    if (!this.dims) {
       this.dims = [this.options.scaleMode.originalHeight,
                    this.options.scaleMode.originalWidth];
+    }
   },
   update: function(position) {
     var currentScale = (this.options.scaleFrom/100.0) + (this.factor * position);
-    if (this.options.scaleContent && this.fontSize)
+    if (this.options.scaleContent && this.fontSize) {
       this.element.setStyle({fontSize: this.fontSize * currentScale + this.fontSizeType });
+    }
     this.setDimensions(this.dims[0] * currentScale, this.dims[1] * currentScale);
   },
   finish: function(position) {
-    if (this.restoreAfterFinish) this.element.setStyle(this.originalStyle);
+    if (this.restoreAfterFinish) {
+      this.element.setStyle(this.originalStyle);
+    }
   },
   setDimensions: function(height, width) {
     var d = { };
-    if (this.options.scaleX) d.width = width.round() + 'px';
-    if (this.options.scaleY) d.height = height.round() + 'px';
+    if (this.options.scaleX) {
+      d.width = width.round() + 'px';
+    }
+    if (this.options.scaleY) {
+      d.height = height.round() + 'px';
+    }
     if (this.options.scaleFromCenter) {
       var topd  = (height - this.dims[0])/2;
       var leftd = (width  - this.dims[1])/2;
       if (this.elementPositioning == 'absolute') {
-        if (this.options.scaleY) d.top = this.originalTop-topd + 'px';
-        if (this.options.scaleX) d.left = this.originalLeft-leftd + 'px';
+        if (this.options.scaleY) {
+          d.top = this.originalTop-topd + 'px';
+        }
+        if (this.options.scaleX) {
+          d.left = this.originalLeft-leftd + 'px';
+        }
       } else {
-        if (this.options.scaleY) d.top = -topd + 'px';
-        if (this.options.scaleX) d.left = -leftd + 'px';
+        if (this.options.scaleY) {
+          d.top = -topd + 'px';
+        }
+        if (this.options.scaleX) {
+          d.left = -leftd + 'px';
+        }
       }
     }
     this.element.setStyle(d);
@@ -474,27 +544,35 @@ Effect.Scale = Class.create(Effect.Base, {
 
 Effect.Highlight = Class.create(Effect.Base, {
   initialize: function(element) {
+    var options;
     this.element = $(element);
-    if (!this.element) throw(Effect._elementDoesNotExistError);
-    var options = Object.extend({ startcolor: '#ffff99' }, arguments[1] || { });
+    if (!this.element) {
+      throw(Effect._elementDoesNotExistError);
+    }
+    options = Object.extend({ startcolor: '#ffff99' }, arguments[1] || { });
     this.start(options);
   },
   setup: function() {
     // Prevent executing on elements not in the layout flow
-    if (this.element.getStyle('display')=='none') { this.cancel(); return; }
+    if (this.element.getStyle('display')=='none') {
+      this.cancel();
+      return;
+    }
     // Disable background image during the effect
     this.oldStyle = { };
     if (!this.options.keepBackgroundImage) {
       this.oldStyle.backgroundImage = this.element.getStyle('background-image');
       this.element.setStyle({backgroundImage: 'none'});
     }
-    if (!this.options.endcolor)
+    if (!this.options.endcolor) {
       this.options.endcolor = this.element.getStyle('background-color').parseColor('#ffffff');
-    if (!this.options.restorecolor)
+    }
+    if (!this.options.restorecolor) {
       this.options.restorecolor = this.element.getStyle('background-color');
+    }
     // init color calculations
-    this._base  = $R(0,2).map(function(i){ return parseInt(this.options.startcolor.slice(i*2+1,i*2+3),16) }.bind(this));
-    this._delta = $R(0,2).map(function(i){ return parseInt(this.options.endcolor.slice(i*2+1,i*2+3),16)-this._base[i] }.bind(this));
+    this._base  = $R(0,2).map(function(i){ return parseInt(this.options.startcolor.slice(i*2+1,i*2+3),16); }.bind(this));
+    this._delta = $R(0,2).map(function(i){ return parseInt(this.options.endcolor.slice(i*2+1,i*2+3),16)-this._base[i]; }.bind(this));
   },
   update: function(position) {
     this.element.setStyle({backgroundColor: $R(0,2).inject('#',function(m,v,i){
@@ -512,7 +590,9 @@ Effect.ScrollTo = function(element) {
   scrollOffsets = document.viewport.getScrollOffsets(),
   elementOffsets = $(element).cumulativeOffset();
 
-  if (options.offset) elementOffsets[1] += options.offset;
+  if (options.offset) {
+    elementOffsets[1] += options.offset;
+  }
 
   return new Effect.Tween(null,
     scrollOffsets.top,
@@ -531,7 +611,9 @@ Effect.Fade = function(element) {
     from: element.getOpacity() || 1.0,
     to:   0.0,
     afterFinishInternal: function(effect) {
-      if (effect.options.to!=0) return;
+      if (effect.options.to!=0) {
+        return;
+      }
       effect.element.hide().setStyle({opacity: oldOpacity});
     }
   }, arguments[1] || { });
@@ -692,7 +774,9 @@ Effect.SlideDown = function(element) {
     afterSetup: function(effect) {
       effect.element.makePositioned();
       effect.element.down().makePositioned();
-      if (window.opera) effect.element.setStyle({top: ''});
+      if (window.opera) {
+        effect.element.setStyle({top: ''});
+      }
       effect.element.makeClipping().setStyle({height: '0px'}).show();
     },
     afterUpdateInternal: function(effect) {
@@ -720,7 +804,9 @@ Effect.SlideUp = function(element) {
     afterSetup: function(effect) {
       effect.element.makePositioned();
       effect.element.down().makePositioned();
-      if (window.opera) effect.element.setStyle({top: ''});
+      if (window.opera) {
+        effect.element.setStyle({top: ''});
+      }
       effect.element.makeClipping().show();
     },
     afterUpdateInternal: function(effect) {
@@ -914,17 +1000,21 @@ Effect.Fold = function(element) {
 
 Effect.Morph = Class.create(Effect.Base, {
   initialize: function(element) {
+    var options;
     this.element = $(element);
-    if (!this.element) throw(Effect._elementDoesNotExistError);
-    var options = Object.extend({
+    if (!this.element) {
+      throw(Effect._elementDoesNotExistError);
+    }
+    options = Object.extend({
       style: { }
     }, arguments[1] || { });
 
-    if (!Object.isString(options.style)) this.style = $H(options.style);
-    else {
-      if (options.style.include(':'))
+    if (!Object.isString(options.style)) {
+      this.style = $H(options.style);
+    } else {
+      if (options.style.include(':')) {
         this.style = options.style.parseStyle();
-      else {
+      } else {
         this.element.addClassName(options.style);
         this.style = $H(this.element.getStyles());
         this.element.removeClassName(options.style);
@@ -945,7 +1035,9 @@ Effect.Morph = Class.create(Effect.Base, {
 
   setup: function(){
     function parseColor(color){
-      if (!color || ['rgba(0, 0, 0, 0)','transparent'].include(color)) color = '#ffffff';
+      if (!color || ['rgba(0, 0, 0, 0)','transparent'].include(color)) {
+        color = '#ffffff';
+      }
       color = color.parseColor();
       return $R(0,2).map(function(i){
         return parseInt( color.slice(i*2+1,i*2+3), 16 );
@@ -959,8 +1051,9 @@ Effect.Morph = Class.create(Effect.Base, {
         unit  = 'color';
       } else if (property == 'opacity') {
         value = parseFloat(value);
-        if (Prototype.Browser.IE && (!this.element.currentStyle.hasLayout))
+        if (Prototype.Browser.IE && (!this.element.currentStyle.hasLayout)) {
           this.element.setStyle({zoom: 1});
+        }
       } else if (Element.CSS_LENGTH.test(value)) {
           var components = value.match(/^([\+\-]?[0-9\.]+)(.*)$/);
           value = parseFloat(components[1]);
@@ -986,7 +1079,7 @@ Effect.Morph = Class.create(Effect.Base, {
   },
   update: function(position) {
     var style = { }, transform, i = this.transforms.length;
-    while(i--)
+    while(i--) {
       style[(transform = this.transforms[i]).style] =
         transform.unit=='color' ? '#'+
           (Math.round(transform.originalValue[0]+
@@ -998,6 +1091,7 @@ Effect.Morph = Class.create(Effect.Base, {
         (transform.originalValue +
           (transform.targetValue - transform.originalValue) * position).toFixed(3) +
             (transform.unit === null ? '' : transform.unit);
+    }
     this.element.setStyle(style, true);
   }
 });

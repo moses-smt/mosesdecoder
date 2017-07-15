@@ -21,8 +21,8 @@
 
 #include "moses/AlignmentInfoCollection.h"
 #include "moses/InputFileStream.h"
-#include "moses/UserMessage.h"
 #include "moses/Util.h"
+#include "moses/Timer.h"
 #include "moses/Word.h"
 #include "Trie.h"
 
@@ -32,7 +32,8 @@
 namespace Moses
 {
 
-bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
+bool RuleTableLoaderCompact::Load(AllOptions const& opts,
+                                  const std::vector<FactorType> &input,
                                   const std::vector<FactorType> &output,
                                   const std::string &inFile,
                                   size_t /* tableLimit */,
@@ -46,9 +47,7 @@ bool RuleTableLoaderCompact::Load(const std::vector<FactorType> &input,
   // Read and check version number.
   reader.ReadLine();
   if (reader.m_line != "1") {
-    std::stringstream msg;
-    msg << "Unexpected compact rule table format: " << reader.m_line;
-    UserMessage::Add(msg.str());
+    std::cerr << "Unexpected compact rule table format: " << reader.m_line;
     return false;
   }
 
@@ -211,27 +210,26 @@ bool RuleTableLoaderCompact::LoadRuleSection(
       scoreVector[j] = FloorScore(TransformScore(score));
     }
     if (reader.m_line[tokenPositions[3+numScoreComponents]] != ':') {
-      std::stringstream msg;
-      msg << "Size of scoreVector != number ("
-          << scoreVector.size() << "!=" << numScoreComponents
-          << ") of score components on line " << reader.m_lineNum;
-      UserMessage::Add(msg.str());
+      std::cerr << "Size of scoreVector != number ("
+                << scoreVector.size() << "!=" << numScoreComponents
+                << ") of score components on line " << reader.m_lineNum;
       return false;
     }
 
     // The remaining columns are currently ignored.
 
     // Create and score target phrase.
-    TargetPhrase *targetPhrase = new TargetPhrase(targetPhrasePhrase);
+    TargetPhrase *targetPhrase = new TargetPhrase(targetPhrasePhrase, &ruleTable);
     targetPhrase->SetAlignNonTerm(alignNonTerm);
     targetPhrase->SetTargetLHS(targetLhs);
 
-    targetPhrase->Evaluate(sourcePhrase, ruleTable.GetFeaturesToApply());
+    targetPhrase->EvaluateInIsolation(sourcePhrase, ruleTable.GetFeaturesToApply());
 
     // Insert rule into table.
-    TargetPhraseCollection &coll = GetOrCreateTargetPhraseCollection(
-                                     ruleTable, sourcePhrase, *targetPhrase, &sourceLHS);
-    coll.Add(targetPhrase);
+    TargetPhraseCollection::shared_ptr coll;
+    coll = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase,
+           *targetPhrase, &sourceLHS);
+    coll->Add(targetPhrase);
   }
 
   return true;

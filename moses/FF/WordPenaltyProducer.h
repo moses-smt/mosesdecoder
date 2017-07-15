@@ -27,23 +27,37 @@ public:
     return true;
   }
 
-  virtual void Evaluate(const Phrase &source
-                        , const TargetPhrase &targetPhrase
-                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const;
-  void Evaluate(const Hypothesis& hypo,
-                ScoreComponentCollection* accumulator) const
-  {}
-  void EvaluateChart(const ChartHypothesis &hypo,
-                     ScoreComponentCollection* accumulator) const
-  {}
-  void Evaluate(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
+  virtual void EvaluateInIsolation(const Phrase &source
+                                   , const TargetPhrase &targetPhrase
+                                   , ScoreComponentCollection &scoreBreakdown
+                                   , ScoreComponentCollection &estimatedScores) const;
+  void EvaluateWhenApplied(const Hypothesis& hypo,
+                           ScoreComponentCollection* accumulator) const {
+  }
+  void EvaluateWhenApplied(const ChartHypothesis &hypo,
+                           ScoreComponentCollection* accumulator) const {
+  }
+  void EvaluateWhenApplied(const Syntax::SHyperedge &hyperedge,
+                           ScoreComponentCollection* accumulator) const {
+  }
+  void EvaluateWithSourceContext(const InputType &input
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedScores = NULL) const {
+  }
 
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+      , const TranslationOptionList &translationOptionList) const {
+  }
+
+
+
+  /*
+    virtual void Evaluate(const InputType &source
+                          , ScoreComponentCollection &scoreBreakdown) const;
+  */
 };
 
 }

@@ -33,15 +33,15 @@ PhraseDecoder::PhraseDecoder(
   PhraseDictionaryCompact &phraseDictionary,
   const std::vector<FactorType>* input,
   const std::vector<FactorType>* output,
-  size_t numScoreComponent,
-  const std::vector<float>* weight
+  size_t numScoreComponent
+  // , const std::vector<float>* weight
 )
   : m_coding(None), m_numScoreComponent(numScoreComponent),
     m_containsAlignmentInfo(true), m_maxRank(0),
     m_symbolTree(0), m_multipleScoreTrees(false),
     m_scoreTrees(1), m_alignTree(0),
     m_phraseDictionary(phraseDictionary), m_input(input), m_output(output),
-    m_weight(weight),
+    // m_weight(weight),
     m_separator(" ||| ")
 { }
 
@@ -219,14 +219,18 @@ TargetPhraseVectorPtr PhraseDecoder::CreateTargetPhraseCollection(const Phrase &
   // Retrieve source phrase identifier
   std::string sourcePhraseString = sourcePhrase.GetStringRep(*m_input);
   size_t sourcePhraseId = m_phraseDictionary.m_hash[MakeSourceKey(sourcePhraseString)];
-
+  /*
+  cerr << "sourcePhraseString=" << sourcePhraseString << " "
+  	  << sourcePhraseId
+  	  << endl;
+  */
   if(sourcePhraseId != m_phraseDictionary.m_hash.GetSize()) {
     // Retrieve compressed and encoded target phrase collection
     std::string encodedPhraseCollection;
     if(m_phraseDictionary.m_inMemory)
-      encodedPhraseCollection = m_phraseDictionary.m_targetPhrasesMemory[sourcePhraseId];
+      encodedPhraseCollection = m_phraseDictionary.m_targetPhrasesMemory[sourcePhraseId].str();
     else
-      encodedPhraseCollection = m_phraseDictionary.m_targetPhrasesMapped[sourcePhraseId];
+      encodedPhraseCollection = m_phraseDictionary.m_targetPhrasesMapped[sourcePhraseId].str();
 
     BitWrapper<> encodedBitStream(encodedPhraseCollection);
     if(m_coding == PREnc && bitsLeft)
@@ -358,7 +362,7 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
 
             // if range smaller than source phrase retrieve subphrase
             if(unsigned(srcEnd - srcStart + 1) != srcSize) {
-              Phrase subPhrase = sourcePhrase.GetSubString(WordsRange(srcStart, srcEnd));
+              Phrase subPhrase = sourcePhrase.GetSubString(Range(srcStart, srcEnd));
               subTpv = CreateTargetPhraseCollection(subPhrase, false);
             } else {
               // false positive consistency check
@@ -414,11 +418,17 @@ TargetPhraseVectorPtr PhraseDecoder::DecodeCollection(
 
     if(state == Add) {
       if(m_phraseDictionary.m_useAlignmentInfo) {
+        size_t sourceSize = sourcePhrase.GetSize();
+        size_t targetSize = targetPhrase->GetSize();
+        for(std::set<AlignPointSizeT>::iterator it = alignment.begin(); it != alignment.end(); it++) {
+          if(it->first >= sourceSize || it->second >= targetSize)
+            return TargetPhraseVectorPtr();
+        }
         targetPhrase->SetAlignTerm(alignment);
       }
 
       if(eval) {
-        targetPhrase->Evaluate(sourcePhrase);
+        targetPhrase->EvaluateInIsolation(sourcePhrase, m_phraseDictionary.GetFeaturesToApply());
       }
 
       if(m_coding == PREnc) {

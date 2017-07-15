@@ -21,8 +21,9 @@
 #pragma once
 
 #include <vector>
+#include <boost/scoped_ptr.hpp>
 #include "Util.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include "ScoreComponentCollection.h"
 #include "Phrase.h"
 #include "ChartTranslationOptions.h"
@@ -45,24 +46,24 @@ typedef std::vector<ChartHypothesis*> ChartArcList;
 class ChartHypothesis
 {
   friend std::ostream& operator<<(std::ostream&, const ChartHypothesis&);
-  friend class ChartKBestExtractor;
+//  friend class ChartKBestExtractor;
 
 protected:
-#ifdef USE_HYPO_POOL
-  static ObjectPool<ChartHypothesis> s_objectPool;
-#endif
 
   boost::shared_ptr<ChartTranslationOption> m_transOpt;
 
-  WordsRange					m_currSourceWordsRange;
+  Range m_currSourceWordsRange;
   std::vector<const FFState*> m_ffStates; /*! stateful feature function states */
-  ScoreComponentCollection m_scoreBreakdown /*! detailed score break-down by components (for instance language model, word penalty, etc) */
+  /*! sum of scores of this hypothesis, and previous hypotheses. Lazily initialised.  */
+  mutable boost::scoped_ptr<ScoreComponentCollection> m_scoreBreakdown;
+  mutable boost::scoped_ptr<ScoreComponentCollection> m_deltaScoreBreakdown;
+  ScoreComponentCollection m_currScoreBreakdown /*! scores for this hypothesis only */
   ,m_lmNGram
   ,m_lmPrefix;
   float m_totalScore;
 
-  ChartArcList 					*m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
-  const ChartHypothesis 	*m_winningHypo;
+  ChartArcList *m_arcList; /*! all arcs that end at the same trellis point as this hypothesis */
+  const ChartHypothesis *m_winningHypo;
 
   std::vector<const ChartHypothesis*> m_prevHypos; // always sorted by source position?
 
@@ -76,29 +77,12 @@ protected:
   //! not implemented
   ChartHypothesis(const ChartHypothesis &copy);
 
-  //! only used by ChartKBestExtractor
-  ChartHypothesis(const ChartHypothesis &, const ChartKBestExtractor &);
-
 public:
-#ifdef USE_HYPO_POOL
-  void *operator new(size_t /* num_bytes */) {
-    void *ptr = s_objectPool.getPtr();
-    return ptr;
-  }
-
-  //! delete \param hypo. Works with object pool too
-  static void Delete(ChartHypothesis *hypo) {
-    s_objectPool.freeObject(hypo);
-  }
-#else
-  //! delete \param hypo. Works with object pool too
-  static void Delete(ChartHypothesis *hypo) {
-    delete hypo;
-  }
-#endif
-
   ChartHypothesis(const ChartTranslationOptions &, const RuleCubeItem &item,
                   ChartManager &manager);
+
+  //! only used by ChartKBestExtractor
+  ChartHypothesis(const ChartHypothesis &, const ChartKBestExtractor &);
 
   ~ChartHypothesis();
 
@@ -106,17 +90,17 @@ public:
     return m_id;
   }
 
-  const ChartTranslationOption &GetTranslationOption()const {
+  const ChartTranslationOption &GetTranslationOption() const {
     return *m_transOpt;
   }
 
   //! Get the rule that created this hypothesis
-  const TargetPhrase &GetCurrTargetPhrase()const {
+  const TargetPhrase &GetCurrTargetPhrase() const {
     return m_transOpt->GetPhrase();
   }
 
   //! the source range that this hypothesis spans
-  const WordsRange &GetCurrSourceRange()const {
+  const Range &GetCurrSourceRange() const {
     return m_currSourceWordsRange;
   }
 
@@ -138,9 +122,11 @@ public:
   void GetOutputPhrase(Phrase &outPhrase) const;
   Phrase GetOutputPhrase() const;
 
-  int RecombineCompare(const ChartHypothesis &compare) const;
+  // get leftmost/rightmost words only
+  // leftRightMost: 1=left, 2=right
+  void GetOutputPhrase(size_t leftRightMost, size_t numWords, Phrase &outPhrase) const;
 
-  void Evaluate();
+  void EvaluateWhenApplied();
 
   void AddArc(ChartHypothesis *loserHypo);
   void CleanupArcList();
@@ -148,11 +134,41 @@ public:
 
   //! get the unweighted score for each feature function
   const ScoreComponentCollection &GetScoreBreakdown() const {
-    return m_scoreBreakdown;
+    // Note: never call this method before m_currScoreBreakdown is fully computed
+    if (!m_scoreBreakdown.get()) {
+      m_scoreBreakdown.reset(new ScoreComponentCollection());
+      // score breakdown from current translation rule
+      if (m_transOpt) {
+        m_scoreBreakdown->PlusEquals(GetTranslationOption().GetScores());
+      }
+      m_scoreBreakdown->PlusEquals(m_currScoreBreakdown);
+      // score breakdowns from prev hypos
+      for (std::vector<const ChartHypothesis*>::const_iterator iter = m_prevHypos.begin(); iter != m_prevHypos.end(); ++iter) {
+        const ChartHypothesis &prevHypo = **iter;
+        m_scoreBreakdown->PlusEquals(prevHypo.GetScoreBreakdown());
+      }
+    }
+    return *(m_scoreBreakdown.get());
+  }
+
+  //! get the unweighted score delta for each feature function
+  const ScoreComponentCollection &GetDeltaScoreBreakdown() const {
+    // Note: never call this method before m_currScoreBreakdown is fully computed
+    if (!m_deltaScoreBreakdown.get()) {
+      m_deltaScoreBreakdown.reset(new ScoreComponentCollection());
+      // score breakdown from current translation rule
+      if (m_transOpt) {
+        m_deltaScoreBreakdown->PlusEquals(GetTranslationOption().GetScores());
+      }
+      m_deltaScoreBreakdown->PlusEquals(m_currScoreBreakdown);
+      // delta: score breakdowns from prev hypos _not_ added
+    }
+    return *(m_deltaScoreBreakdown.get());
   }
 
   //! Get the weighted total score
-  float GetTotalScore() const {
+  float GetFutureScore() const {
+    // scores from current translation rule. eg. translation models & word penalty
     return m_totalScore;
   }
 
@@ -175,6 +191,10 @@ public:
   const ChartHypothesis* GetWinningHypothesis() const {
     return m_winningHypo;
   }
+
+  // for unordered_set in stack
+  size_t hash() const;
+  bool operator==(const ChartHypothesis& other) const;
 
   TO_STRING();
 

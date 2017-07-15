@@ -26,7 +26,10 @@ typedef FeatureStatsType ValType;
 class MiraFeatureVector
 {
 public:
+  MiraFeatureVector() {}
   MiraFeatureVector(const FeatureDataItem& vec);
+  //Assumes that features in sparse with id < num_dense are dense features
+  MiraFeatureVector(const SparseVector& sparse, size_t num_dense);
   MiraFeatureVector(const MiraFeatureVector& other);
   MiraFeatureVector(const std::vector<ValType>& dense,
                     const std::vector<std::size_t>& sparseFeats,
@@ -42,7 +45,12 @@ public:
 
   friend std::ostream& operator<<(std::ostream& o, const MiraFeatureVector& e);
 
+  friend bool operator==(const MiraFeatureVector& a,const MiraFeatureVector& b);
+
 private:
+  //Ignore any sparse features with id < ignoreLimit
+  void InitSparse(const SparseVector& sparse, size_t ignoreLimit = 0);
+
   std::vector<ValType> m_dense;
   std::vector<std::size_t> m_sparseFeats;
   std::vector<ValType> m_sparseVals;

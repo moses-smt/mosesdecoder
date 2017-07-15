@@ -33,7 +33,7 @@ typedef FeatureStatsType* featstats_t;
 typedef std::vector<FeatureStats> featarray_t;
 typedef std::vector<FeatureArray> featdata_t;
 
-typedef int ScoreStatsType;
+typedef float ScoreStatsType;
 typedef ScoreStatsType* scorestats_t;
 //typedef std::vector<ScoreStatsType> scorestats_t;
 typedef std::vector<ScoreStats> scorearray_t;

@@ -21,28 +21,31 @@
 #ifndef PCFG_EXTRACT_RULE_EXTRACTOR_H_
 #define PCFG_EXTRACT_RULE_EXTRACTOR_H_
 
+#include "SyntaxTree.h"
+
+#include "syntax-common/vocabulary.h"
+
 #include "rule_collection.h"
 
-#include "pcfg-common/typedef.h"
-
-namespace Moses
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace PCFG
 {
-
-class PcfgTree;
 
 // Extracts PCFG rules from syntax trees and adds them to a RuleCollection.
 class RuleExtractor
 {
 public:
   RuleExtractor(Vocabulary &);
-  void Extract(const PcfgTree &, RuleCollection &) const;
+  void Extract(const SyntaxTree &, RuleCollection &) const;
 private:
   Vocabulary &non_term_vocab_;
 };
 
 }  // namespace PCFG
-}  // namespace Moses
+}  // namespace Syntax
+}  // namespace MosesTraining
 
 #endif

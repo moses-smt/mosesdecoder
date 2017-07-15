@@ -75,7 +75,7 @@ class ContDTree2DModel : public Generic2DModel<Y,X,P>, public Tree<ContDecisNode
   // Extraction methods...
   const P getProb ( const Y y, const X& x ) const {
     const Tree<ContDecisNode<Y,P> >* ptr = this;
-      while ( !ptr->isTerm() ) { 
+      while ( !ptr->isTerm() ) {
         double sumsqr=0.0;
         for(A a;a<X::getSize();a.setNext()) sumsqr += pow(x.get(a.toInt()),2.0) / X::getSize();
         Wt wtdavg = -Tree<ContDecisNode<Y,P> >::getWt();
@@ -112,7 +112,7 @@ class ContDTree2DModel : public Generic2DModel<Y,X,P>, public Tree<ContDecisNode
 };
 
 ////////////////////
-template <class Y,class X, class P> 
+template <class Y,class X, class P>
 bool ContDTree2DModel<Y,X,P>::readFields ( char* aps[], int numFields ) {
   if ( /*aps[0]==sId &&*/ (3==numFields || 4==numFields) ) {
     //fprintf(stderr,"%s,%d\n",aps[3],numFields);
@@ -171,7 +171,7 @@ class ContDTree3DModel : public Generic3DModel<Y,X1,X2,P> {
 };
 
 ////////////////////
-template <class Y,class X1,class X2, class P> 
+template <class Y,class X1,class X2, class P>
 bool ContDTree3DModel<Y,X1,X2,P>::readFields ( char* aps[], int numFields ) {
   if ( /*aps[0]==sId &&*/ (4==numFields || 5==numFields) ) {
     //fprintf(stderr,"%s,%d\n",aps[3],numFields);
@@ -212,7 +212,7 @@ bool ContDTree3DModel<Y,X1,X2,P>::readFields ( char* aps[], int numFields ) {
 ////////////////////////////////////////////////////////////////////////////////
 
 template<class Y, class X, class P>
-class TrainableContDTree2DModel : public ContDTree2DModel<Y,X,P> { 
+class TrainableContDTree2DModel : public ContDTree2DModel<Y,X,P> {
  private:
   List<Joint2DRV<X,Y> > lxy;
  public:
@@ -225,7 +225,7 @@ class TrainableContDTree2DModel : public ContDTree2DModel<Y,X,P> {
   void train ( List<Joint2DRV<X,Y> >&, const double ) ;
   void train ( const double d )                        { train(lxy,d); }
   ////// Input / output methods...
-  bool readData ( char* vs[], int numFields ) { 
+  bool readData ( char* vs[], int numFields ) {
     if ( 3==numFields ) lxy.add() = Joint2DRV<X,Y> ( X(vs[1]), Y(vs[2]) );
     else return false;
     return true;
@@ -312,7 +312,7 @@ void  TrainableContDTree2DModel<Y,X,P>::train ( List<Joint2DRV<X,Y> >& lxy, cons
 //    if ( double(rand())/double(RAND_MAX) < prRarest/modelY.getProb(pxy->getSub2()) ) {
 
         dCtr++;
-        double gamma = dTot/(dTot+dCtr); // 1.0/(double(epoch)+dCtr/dTot); // 1.0/double(epoch); // 1.0/(double(epoch)+dCtr/(dTot*prRarest*2.0)); // 
+        double gamma = dTot/(dTot+dCtr); // 1.0/(double(epoch)+dCtr/dTot); // 1.0/double(epoch); // 1.0/(double(epoch)+dCtr/(dTot*prRarest*2.0)); //
 
         // Weight deltas for next epoch...
         Wt wDelta = 0.0;
@@ -333,7 +333,7 @@ void  TrainableContDTree2DModel<Y,X,P>::train ( List<Joint2DRV<X,Y> >& lxy, cons
         P prY = 1.0 / ( 1.0 + exp(-wtdavg) );
 
         // Calc deltas for each feature/attribute/dimension...
-        double dEachWt  = 1.0/dTot;  // 1.0/dTot * modelY.getProb ( Y(1-pxy->getSub2().toInt()) );  // 1.0/(dTot*prRarest*2.0); // 
+        double dEachWt  = 1.0/dTot;  // 1.0/dTot * modelY.getProb ( Y(1-pxy->getSub2().toInt()) );  // 1.0/(dTot*prRarest*2.0); //
         wDelta += dEachWt * -1 * ( prY - P(double(pxy->getSub2().toInt())) );
         for ( A a; a<X::getSize(); a.setNext() )
           awDeltas.set(a) += dEachWt * pxy->getSub1().get(a.toInt()) * ( prY - P(double(pxy->getSub2().toInt())) );
@@ -439,7 +439,7 @@ void  TrainableContDTree2DModel<Y,X,P>::train ( List<Joint2DRV<X,Y> >& lxy, cons
 ////////////////////////////////////////////////////////////////////////////////
 
 template<class Y, class X1, class X2, class P>
-class TrainableContDTree3DModel : public ContDTree3DModel<Y,X1,X2,P> { 
+class TrainableContDTree3DModel : public ContDTree3DModel<Y,X1,X2,P> {
 
  private:
 
@@ -455,7 +455,7 @@ class TrainableContDTree3DModel : public ContDTree3DModel<Y,X1,X2,P> {
   TrainableContDTree2DModel<Y,X2,P>& setTree(const X1& x1) { return static_cast<TrainableContDTree2DModel<Y,X2,P>&>(ContDTree3DModel<Y,X1,X2,P>::setTree(x1)); }
 
   ////// Add training data to per-subphone lists...
-  bool readData ( char* vs[], int numFields ) { 
+  bool readData ( char* vs[], int numFields ) {
     if ( 4==numFields ) {
       mqlxy[X1(vs[1])].add() = Joint2DRV<X2,Y> ( X2(vs[2]), Y(vs[3]) );
       ////mqlxy[X1(vs[1])].getLast()->write(stderr); fprintf(stderr,"\n");

@@ -48,6 +48,7 @@ class PhraseDictionaryOnDisk : public PhraseDictionary
 {
   typedef PhraseDictionary MyBase;
   friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryOnDisk&);
+  friend class ChartRuleLookupManagerOnDisk;
 
 protected:
 #ifdef WITH_THREADS
@@ -56,19 +57,30 @@ protected:
   boost::scoped_ptr<OnDiskPt::OnDiskWrapper> m_implementation;
 #endif
 
+  size_t m_maxSpanDefault, m_maxSpanLabelled;
+
   OnDiskPt::OnDiskWrapper &GetImplementation();
   const OnDiskPt::OnDiskWrapper &GetImplementation() const;
 
   void GetTargetPhraseCollectionBatch(InputPath &inputPath) const;
 
+  Moses::TargetPhrase *ConvertToMoses(const OnDiskPt::TargetPhrase &targetPhraseOnDisk
+                                      , const std::vector<Moses::FactorType> &inputFactors
+                                      , const std::vector<Moses::FactorType> &outputFactors
+                                      , const OnDiskPt::Vocab &vocab
+                                      , const Moses::PhraseDictionary &phraseDict
+                                      , const std::vector<float> &weightT
+                                      , bool isSyntax) const;
+
+  void ConvertToMoses(const OnDiskPt::Word &wordOnDisk,
+                      const std::vector<Moses::FactorType> &outputFactorsVec,
+                      const OnDiskPt::Vocab &vocab,
+                      Moses::Word &overwrite) const;
+
 public:
   PhraseDictionaryOnDisk(const std::string &line);
   ~PhraseDictionaryOnDisk();
-  void Load();
-
-  PhraseTableImplementation GetPhraseTableImplementation() const {
-    return OnDisk;
-  }
+  void Load(AllOptions::ptr const& opts);
 
   // PhraseDictionary impl
   virtual ChartRuleLookupManager *CreateRuleLookupManager(
@@ -76,11 +88,29 @@ public:
     const ChartCellCollectionBase &,
     std::size_t);
 
-  virtual void InitializeForInput(InputType const& source);
+  virtual void InitializeForInput(ttasksptr const& ttask);
   void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
-  const TargetPhraseCollection *GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const;
-  const TargetPhraseCollection *GetTargetPhraseCollectionNonCache(const OnDiskPt::PhraseNode *ptNode) const;
+  TargetPhraseCollection::shared_ptr
+  GetTargetPhraseCollection(const OnDiskPt::PhraseNode *ptNode) const;
+
+  TargetPhraseCollection::shared_ptr
+  GetTargetPhraseCollectionNonCache(const OnDiskPt::PhraseNode *ptNode) const;
+
+  Moses::TargetPhraseCollection::shared_ptr
+  ConvertToMoses(
+    const OnDiskPt::TargetPhraseCollection::shared_ptr targetPhrasesOnDisk
+    , const std::vector<Moses::FactorType> &inputFactors
+    , const std::vector<Moses::FactorType> &outputFactors
+    , const Moses::PhraseDictionary &phraseDict
+    , const std::vector<float> &weightT
+    , OnDiskPt::Vocab &vocab
+    , bool isSyntax) const;
+
+  OnDiskPt::Word *ConvertFromMoses(OnDiskPt::OnDiskWrapper &wrapper, const std::vector<Moses::FactorType> &factorsVec
+                                   , const Moses::Word &origWord) const;
+
+  void SetParameter(const std::string& key, const std::string& value);
 
 };
 

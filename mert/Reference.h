@@ -59,6 +59,11 @@ public:
   int CalcClosest(std::size_t length) const;
   int CalcShortest() const;
 
+  void clear() {
+    m_length.clear();
+    m_counts->clear();
+  }
+
 private:
   NgramCounts* m_counts;
 

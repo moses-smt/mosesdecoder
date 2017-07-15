@@ -105,10 +105,12 @@ public:
 
   void RemoveFeature(const FeatureFunction *ff);
 
-  void SetContainer(const DecodeGraph *container)
-  { m_container = container; }
-  const DecodeGraph *GetContainer() const
-  { return m_container; }
+  void SetContainer(const DecodeGraph *container) {
+    m_container = container;
+  }
+  const DecodeGraph *GetContainer() const {
+    return m_container;
+  }
 
 };
 

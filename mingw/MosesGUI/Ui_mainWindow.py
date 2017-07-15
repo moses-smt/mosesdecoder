@@ -9,19 +9,17 @@
 
 from PyQt4 import QtCore, QtGui
 
-try:
-    _fromUtf8 = QtCore.QString.fromUtf8
-except AttributeError:
-    def _fromUtf8(s):
-        return s
 
-try:
-    _encoding = QtGui.QApplication.UnicodeUTF8
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig, _encoding)
-except AttributeError:
-    def _translate(context, text, disambig):
-        return QtGui.QApplication.translate(context, text, disambig)
+_fromUtf8 = getattr(QtCore.QString, 'fromUtf8', lambda s: s)
+
+
+def _translate(context, text, disambig):
+    return QtGui.QApplication.translate(
+        context, text, disambig,
+        getattr(
+            QtGui.QApplication, 'UnicodeUTF8',
+            QtCore.QCoreApplication.Encoding))
+
 
 class Ui_MainWindow(object):
     def setupUi(self, MainWindow):
@@ -83,7 +81,10 @@ class Ui_MainWindow(object):
         self.editModelName.setObjectName(_fromUtf8("editModelName"))
         self.gridLayout.addWidget(self.editModelName, 1, 2, 1, 1)
         self.label_2 = QtGui.QLabel(self.groupBox)
-        self.label_2.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.label_2.setAlignment(
+            QtCore.Qt.AlignRight |
+            QtCore.Qt.AlignTrailing |
+            QtCore.Qt.AlignVCenter)
         self.label_2.setObjectName(_fromUtf8("label_2"))
         self.gridLayout.addWidget(self.label_2, 1, 1, 1, 1)
         self.verticalLayout_2.addWidget(self.groupBox)
@@ -151,7 +152,10 @@ class Ui_MainWindow(object):
         self.verticalLayout_3.addWidget(self.tabWidget)
         self.labelInfo = QtGui.QLabel(self.centralWidget)
         self.labelInfo.setTextFormat(QtCore.Qt.AutoText)
-        self.labelInfo.setAlignment(QtCore.Qt.AlignRight|QtCore.Qt.AlignTrailing|QtCore.Qt.AlignVCenter)
+        self.labelInfo.setAlignment(
+            QtCore.Qt.AlignRight |
+            QtCore.Qt.AlignTrailing |
+            QtCore.Qt.AlignVCenter)
         self.labelInfo.setObjectName(_fromUtf8("labelInfo"))
         self.verticalLayout_3.addWidget(self.labelInfo)
         MainWindow.setCentralWidget(self.centralWidget)
@@ -185,4 +189,3 @@ if __name__ == "__main__":
     ui.setupUi(MainWindow)
     MainWindow.show()
     sys.exit(app.exec_())
-

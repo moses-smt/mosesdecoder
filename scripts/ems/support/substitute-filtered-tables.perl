@@ -1,4 +1,9 @@
-#!/usr/bin/perl -w 
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
+
+use warnings;
 
 # experiment.perl support script
 # get filtered rule and reordering tables and place them into a configuration file
@@ -17,7 +22,7 @@ while(my $line = <FILTERED>) {
     $feature_section = ($1 eq "feature");
   }
   next unless $feature_section;
-  if ($line =~ /PhraseDictionary/) {
+  if ($line =~ /PhraseDictionary/ || $line =~ /RuleTable/ || $line =~ /ProbingPT/ ) {
     print STDERR "pt:$line \n";
     push(@arr, $line);
   }
@@ -36,14 +41,14 @@ while(my $line = <STDIN>) {
   if ($line =~ /^\[(.+)\]/) {
     $feature_section = ($1 eq "feature");
   }
-  if ($feature_section && $line =~ /PhraseDictionary/) {
+  if ($feature_section && ($line =~ /PhraseDictionary/ || $line =~ /RuleTable/ || $line =~ /ProbingPT/ )) {
     print $arr[$ind]."\n";
     ++$ind;
   }
   elsif ($feature_section && $line =~ /LexicalReordering/) {
     print $arr[$ind]."\n";
     ++$ind;
-  }  
+  }
   else {
     print "$line\n";
   }

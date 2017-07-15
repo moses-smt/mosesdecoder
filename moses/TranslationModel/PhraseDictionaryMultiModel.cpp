@@ -17,6 +17,7 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 #include "util/exception.hh"
+#include "util/string_stream.hh"
 
 #include "moses/TranslationModel/PhraseDictionaryMultiModel.h"
 
@@ -25,35 +26,42 @@ using namespace std;
 namespace Moses
 
 {
-PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(const std::string &line)
-  :PhraseDictionary(line)
+
+PhraseDictionaryMultiModel::
+PhraseDictionaryMultiModel(const std::string &line)
+  : PhraseDictionary(line, true)
 {
   ReadParameters();
 
-  if (m_mode != "interpolate") {
-    ostringstream msg;
+  if (m_mode == "interpolate") {
+    size_t numWeights = m_numScoreComponents;
+    UTIL_THROW_IF2(m_pdStr.size() != m_multimodelweights.size() &&
+                   m_pdStr.size()*numWeights != m_multimodelweights.size(),
+                   "Number of scores and weights are not equal");
+  } else if (m_mode == "all" || m_mode == "all-restrict") {
+    UTIL_THROW2("Implementation has moved: use PhraseDictionaryGroup with restrict=true/false");
+  } else {
+    util::StringStream msg;
     msg << "combination mode unknown: " << m_mode;
     throw runtime_error(msg.str());
   }
-
-  size_t numWeights = m_numScoreComponents;
-  UTIL_THROW_IF2(m_pdStr.size() != m_multimodelweights.size() &
-		  m_pdStr.size()*numWeights != m_multimodelweights.size(),
-		  "Number of scores and weights are not equal");
 }
 
-PhraseDictionaryMultiModel::PhraseDictionaryMultiModel(int type, const std::string &line)
-  :PhraseDictionary(line)
+PhraseDictionaryMultiModel::
+PhraseDictionaryMultiModel(int type, const std::string &line)
+  :PhraseDictionary(line, true)
 {
   if (type == 1) {
-	// PhraseDictionaryMultiModelCounts
+    // PhraseDictionaryMultiModelCounts
     UTIL_THROW_IF2(m_pdStr.size() != m_multimodelweights.size() &&
-    		m_pdStr.size()*4 != m_multimodelweights.size(),
-  		  "Number of scores and weights are not equal");
+                   m_pdStr.size()*4 != m_multimodelweights.size(),
+                   "Number of scores and weights are not equal");
   }
 }
 
-void PhraseDictionaryMultiModel::SetParameter(const std::string& key, const std::string& value)
+void
+PhraseDictionaryMultiModel::
+SetParameter(const std::string& key, const std::string& value)
 {
   if (key == "mode") {
     m_mode = value;
@@ -67,12 +75,13 @@ void PhraseDictionaryMultiModel::SetParameter(const std::string& key, const std:
   }
 }
 
-PhraseDictionaryMultiModel::~PhraseDictionaryMultiModel()
-{
-}
+PhraseDictionaryMultiModel::
+~PhraseDictionaryMultiModel()
+{ }
 
-void PhraseDictionaryMultiModel::Load()
+void PhraseDictionaryMultiModel::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   SetFeaturesToApply();
 
   for(size_t i = 0; i < m_numModels; ++i) {
@@ -80,48 +89,46 @@ void PhraseDictionaryMultiModel::Load()
 
     PhraseDictionary *pt = FindPhraseDictionary(ptName);
     UTIL_THROW_IF2(pt == NULL,
-    		"Could not find component phrase table " << ptName);
+                   "Could not find component phrase table " << ptName);
     m_pd.push_back(pt);
   }
 }
 
-
-const TargetPhraseCollection *PhraseDictionaryMultiModel::GetTargetPhraseCollectionLEGACY(const Phrase& src) const
+TargetPhraseCollection::shared_ptr
+PhraseDictionaryMultiModel::
+GetTargetPhraseCollectionLEGACY(const Phrase& src) const
 {
 
   std::vector<std::vector<float> > multimodelweights;
+  multimodelweights = getWeights(m_numScoreComponents, true);
+  TargetPhraseCollection::shared_ptr ret;
 
-  if (m_mode == "interpolate") {
-    multimodelweights = getWeights(m_numScoreComponents, true);
-  }
-
-  std::map<std::string,multiModelStatistics*>* allStats = new(std::map<std::string,multiModelStatistics*>);
-
+  std::map<std::string, multiModelStats*>* allStats;
+  allStats = new(std::map<std::string,multiModelStats*>);
   CollectSufficientStatistics(src, allStats);
-
-  TargetPhraseCollection *ret = NULL;
-  if (m_mode == "interpolate") {
-    ret = CreateTargetPhraseCollectionLinearInterpolation(src, allStats, multimodelweights);
-  }
+  ret = CreateTargetPhraseCollectionLinearInterpolation(src, allStats, multimodelweights);
+  RemoveAllInMap(*allStats);
+  delete allStats; // ??? Why the detour through malloc? UG
 
   ret->NthElement(m_tableLimit); // sort the phrases for pruning later
   const_cast<PhraseDictionaryMultiModel*>(this)->CacheForCleanup(ret);
-  RemoveAllInMap(*allStats);
-  delete allStats;
 
   return ret;
 }
 
-
-void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, std::map<std::string,multiModelStatistics*>* allStats) const
+void
+PhraseDictionaryMultiModel::
+CollectSufficientStatistics
+(const Phrase& src, std::map<std::string, multiModelStats*>* allStats) const
 {
   for(size_t i = 0; i < m_numModels; ++i) {
     const PhraseDictionary &pd = *m_pd[i];
 
-    TargetPhraseCollection *ret_raw = (TargetPhraseCollection*)  pd.GetTargetPhraseCollectionLEGACY( src);
+    TargetPhraseCollection::shared_ptr ret_raw;
+    ret_raw = pd.GetTargetPhraseCollectionLEGACY(src);
     if (ret_raw != NULL) {
 
-      TargetPhraseCollection::iterator iterTargetPhrase, iterLast;
+      TargetPhraseCollection::const_iterator iterTargetPhrase, iterLast;
       if (m_tableLimit != 0 && ret_raw->GetSize() > m_tableLimit) {
         iterLast = ret_raw->begin() + m_tableLimit;
       } else {
@@ -135,7 +142,7 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
         std::string targetString = targetPhrase->GetStringRep(m_output);
         if (allStats->find(targetString) == allStats->end()) {
 
-          multiModelStatistics * statistics = new multiModelStatistics;
+          multiModelStats * statistics = new multiModelStats;
           statistics->targetPhrase = new TargetPhrase(*targetPhrase); //make a copy so that we don't overwrite the original phrase table info
           statistics->p.resize(m_numScoreComponents);
           for(size_t j = 0; j < m_numScoreComponents; ++j) {
@@ -147,14 +154,14 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
           vector<FeatureFunction*> pd_feature;
           pd_feature.push_back(m_pd[i]);
           const vector<FeatureFunction*> pd_feature_const(pd_feature);
-          statistics->targetPhrase->Evaluate(src, pd_feature_const);
+          statistics->targetPhrase->EvaluateInIsolation(src, pd_feature_const);
           // zero out scores from original phrase table
           statistics->targetPhrase->GetScoreBreakdown().ZeroDenseFeatures(&pd);
 
           (*allStats)[targetString] = statistics;
 
         }
-        multiModelStatistics * statistics = (*allStats)[targetString];
+        multiModelStats * statistics = (*allStats)[targetString];
 
         for(size_t j = 0; j < m_numScoreComponents; ++j) {
           statistics->p[j][i] = UntransformScore(raw_scores[j]);
@@ -166,13 +173,17 @@ void PhraseDictionaryMultiModel::CollectSufficientStatistics(const Phrase& src, 
   }
 }
 
-
-TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollectionLinearInterpolation(const Phrase& src, std::map<std::string,multiModelStatistics*>* allStats, std::vector<std::vector<float> > &multimodelweights) const
+TargetPhraseCollection::shared_ptr
+PhraseDictionaryMultiModel::
+CreateTargetPhraseCollectionLinearInterpolation
+( const Phrase& src,
+  std::map<std::string,multiModelStats*>* allStats,
+  std::vector<std::vector<float> > &multimodelweights) const
 {
-  TargetPhraseCollection *ret = new TargetPhraseCollection();
-  for ( std::map< std::string, multiModelStatistics*>::const_iterator iter = allStats->begin(); iter != allStats->end(); ++iter ) {
+  TargetPhraseCollection::shared_ptr ret(new TargetPhraseCollection);
+  for ( std::map< std::string, multiModelStats*>::const_iterator iter = allStats->begin(); iter != allStats->end(); ++iter ) {
 
-    multiModelStatistics * statistics = iter->second;
+    multiModelStats * statistics = iter->second;
 
     Scores scoreVector(m_numScoreComponents);
 
@@ -186,16 +197,17 @@ TargetPhraseCollection* PhraseDictionaryMultiModel::CreateTargetPhraseCollection
     vector<FeatureFunction*> pd_feature;
     pd_feature.push_back(const_cast<PhraseDictionaryMultiModel*>(this));
     const vector<FeatureFunction*> pd_feature_const(pd_feature);
-    statistics->targetPhrase->Evaluate(src, pd_feature_const);
+    statistics->targetPhrase->EvaluateInIsolation(src, pd_feature_const);
 
     ret->Add(new TargetPhrase(*statistics->targetPhrase));
   }
   return ret;
 }
 
-
 //TODO: is it worth caching the results as long as weights don't change?
-std::vector<std::vector<float> > PhraseDictionaryMultiModel::getWeights(size_t numWeights, bool normalize) const
+std::vector<std::vector<float> >
+PhraseDictionaryMultiModel::
+getWeights(size_t numWeights, bool normalize) const
 {
   const std::vector<float>* weights_ptr;
   std::vector<float> raw_weights;
@@ -208,9 +220,7 @@ std::vector<std::vector<float> > PhraseDictionaryMultiModel::getWeights(size_t n
     weights_ptr = &m_multimodelweights; //fall back to weights defined in config
   } else if(weights_ptr->size() != m_numModels && weights_ptr->size() != m_numModels * numWeights) {
     //TODO: can we pass error message to client if weights are malformed?
-    std::stringstream strme;
-    strme << "Must have either one multimodel weight per model (" << m_numModels << "), or one per weighted feature and model (" << numWeights << "*" << m_numModels << "). You have " << weights_ptr->size() << ". Reverting to weights in config";
-    UserMessage::Add(strme.str());
+    std::cerr << "Must have either one multimodel weight per model (" << m_numModels << "), or one per weighted feature and model (" << numWeights << "*" << m_numModels << "). You have " << weights_ptr->size() << ". Reverting to weights in config";
     weights_ptr = &m_multimodelweights; //fall back to weights defined in config
   }
 
@@ -220,7 +230,7 @@ std::vector<std::vector<float> > PhraseDictionaryMultiModel::getWeights(size_t n
       raw_weights.push_back(1.0/m_numModels); //uniform weights created online
     }
   } else if(weights_ptr->size() != m_numModels && weights_ptr->size() != m_numModels * numWeights) {
-    std::stringstream strme;
+    util::StringStream strme;
     strme << "Must have either one multimodel weight per model (" << m_numModels << "), or one per weighted feature and model (" << numWeights << "*" << m_numModels << "). You have " << weights_ptr->size() << ".";
     UTIL_THROW(util::Exception, strme.str());
   } else {
@@ -246,7 +256,9 @@ std::vector<std::vector<float> > PhraseDictionaryMultiModel::getWeights(size_t n
   return multimodelweights;
 }
 
-std::vector<float> PhraseDictionaryMultiModel::normalizeWeights(std::vector<float> &weights) const
+std::vector<float>
+PhraseDictionaryMultiModel::
+normalizeWeights(std::vector<float> &weights) const
 {
   std::vector<float> ret (m_numModels);
   float total = std::accumulate(weights.begin(),weights.end(),0.0);
@@ -257,29 +269,36 @@ std::vector<float> PhraseDictionaryMultiModel::normalizeWeights(std::vector<floa
 }
 
 
-ChartRuleLookupManager *PhraseDictionaryMultiModel::CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&, std::size_t)
+ChartRuleLookupManager *
+PhraseDictionaryMultiModel::
+CreateRuleLookupManager(const ChartParser &, const ChartCellCollectionBase&,
+                        std::size_t)
 {
   UTIL_THROW(util::Exception, "Phrase table used in chart decoder");
 }
 
 
 //copied from PhraseDictionaryCompact; free memory allocated to TargetPhraseCollection (and each TargetPhrase) at end of sentence
-void PhraseDictionaryMultiModel::CacheForCleanup(TargetPhraseCollection* tpc)
+void
+PhraseDictionaryMultiModel::
+CacheForCleanup(TargetPhraseCollection::shared_ptr tpc)
 {
-  PhraseCache &ref = GetPhraseCache();
-  ref.push_back(tpc);
+  GetPhraseCache().push_back(tpc);
 }
 
 
-void PhraseDictionaryMultiModel::CleanUpAfterSentenceProcessing(const InputType &source)
+void
+PhraseDictionaryMultiModel::
+CleanUpAfterSentenceProcessing(const InputType &source)
 {
-  PhraseCache &ref = GetPhraseCache();
-  for(PhraseCache::iterator it = ref.begin(); it != ref.end(); it++) {
-    delete *it;
-  }
+  // PhraseCache &ref = GetPhraseCache();
+  // for(PhraseCache::iterator it = ref.begin(); it != ref.end(); it++) {
+  //   it->reset();
+  // }
 
-  PhraseCache temp;
-  temp.swap(ref);
+  // PhraseCache temp;
+  // temp.swap(ref);
+  GetPhraseCache().clear();
 
   CleanUpComponentModels(source);
 
@@ -288,14 +307,18 @@ void PhraseDictionaryMultiModel::CleanUpAfterSentenceProcessing(const InputType 
 }
 
 
-void  PhraseDictionaryMultiModel::CleanUpComponentModels(const InputType &source)
+void
+PhraseDictionaryMultiModel::
+CleanUpComponentModels(const InputType &source)
 {
   for(size_t i = 0; i < m_numModels; ++i) {
     m_pd[i]->CleanUpAfterSentenceProcessing(source);
   }
 }
 
-const std::vector<float>* PhraseDictionaryMultiModel::GetTemporaryMultiModelWeightsVector() const
+const std::vector<float>*
+PhraseDictionaryMultiModel::
+GetTemporaryMultiModelWeightsVector() const
 {
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> read_lock(m_lock_weights);
@@ -309,7 +332,9 @@ const std::vector<float>* PhraseDictionaryMultiModel::GetTemporaryMultiModelWeig
 #endif
 }
 
-void PhraseDictionaryMultiModel::SetTemporaryMultiModelWeightsVector(std::vector<float> weights)
+void
+PhraseDictionaryMultiModel::
+SetTemporaryMultiModelWeightsVector(std::vector<float> weights)
 {
 #ifdef WITH_THREADS
   boost::unique_lock<boost::shared_mutex> lock(m_lock_weights);
@@ -320,11 +345,10 @@ void PhraseDictionaryMultiModel::SetTemporaryMultiModelWeightsVector(std::vector
 }
 
 #ifdef WITH_DLIB
-vector<float> PhraseDictionaryMultiModel::MinimizePerplexity(vector<pair<string, string> > &phrase_pair_vector)
+vector<float>
+PhraseDictionaryMultiModel::
+MinimizePerplexity(vector<pair<string, string> > &phrase_pair_vector)
 {
-
-  const StaticData &staticData = StaticData::Instance();
-  const string& factorDelimiter = staticData.GetFactorDelimiter();
 
   map<pair<string, string>, size_t> phrase_pair_map;
 
@@ -332,7 +356,7 @@ vector<float> PhraseDictionaryMultiModel::MinimizePerplexity(vector<pair<string,
     phrase_pair_map[*iter] += 1;
   }
 
-  vector<multiModelStatisticsOptimization*> optimizerStats;
+  vector<multiModelStatsOptimization*> optimizerStats;
 
   for ( map<pair<string, string>, size_t>::iterator iter = phrase_pair_map.begin(); iter != phrase_pair_map.end(); ++iter ) {
 
@@ -341,10 +365,10 @@ vector<float> PhraseDictionaryMultiModel::MinimizePerplexity(vector<pair<string,
     string target_string = phrase_pair.second;
 
     vector<float> fs(m_numModels);
-    map<string,multiModelStatistics*>* allStats = new(map<string,multiModelStatistics*>);
+    map<string,multiModelStats*>* allStats = new(map<string,multiModelStats*>);
 
     Phrase sourcePhrase(0);
-    sourcePhrase.CreateFromString(Input, m_input, source_string, factorDelimiter, NULL);
+    sourcePhrase.CreateFromString(Input, m_input, source_string, NULL);
 
     CollectSufficientStatistics(sourcePhrase, allStats); //optimization potential: only call this once per source phrase
 
@@ -355,7 +379,7 @@ vector<float> PhraseDictionaryMultiModel::MinimizePerplexity(vector<pair<string,
       continue;
     }
 
-    multiModelStatisticsOptimization* targetStatistics = new multiModelStatisticsOptimization();
+    multiModelStatsOptimization* targetStatistics = new multiModelStatsOptimization();
     targetStatistics->targetPhrase = new TargetPhrase(*(*allStats)[target_string]->targetPhrase);
     targetStatistics->p = (*allStats)[target_string]->p;
     targetStatistics->f = iter->second;
@@ -395,7 +419,9 @@ vector<float> PhraseDictionaryMultiModel::MinimizePerplexity(vector<pair<string,
 
 }
 
-vector<float> PhraseDictionaryMultiModel::Optimize(OptimizationObjective *ObjectiveFunction, size_t numModels)
+vector<float>
+PhraseDictionaryMultiModel::
+Optimize(OptimizationObjective *ObjectiveFunction, size_t numModels)
 {
 
   dlib::matrix<double,0,1> starting_point;
@@ -440,8 +466,8 @@ double CrossEntropy::operator() ( const dlib::matrix<double,0,1>& arg) const
     weight_vector = m_model->normalizeWeights(weight_vector);
   }
 
-  for ( std::vector<multiModelStatisticsOptimization*>::const_iterator iter = m_optimizerStats.begin(); iter != m_optimizerStats.end(); ++iter ) {
-    multiModelStatisticsOptimization* statistics = *iter;
+  for ( std::vector<multiModelStatsOptimization*>::const_iterator iter = m_optimizerStats.begin(); iter != m_optimizerStats.end(); ++iter ) {
+    multiModelStatsOptimization* statistics = *iter;
     size_t f = statistics->f;
 
     double score;

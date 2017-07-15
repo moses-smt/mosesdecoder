@@ -10,7 +10,7 @@
 #include "Util.h"
 
 using namespace std;
-using namespace TERCpp;
+using namespace TERCPPNS_TERCpp;
 
 namespace MosesTuning
 {
@@ -101,7 +101,7 @@ void TerScorer::prepareStats ( size_t sid, const string& text, ScoreStats& entry
   entry.set ( stats_str );
 }
 
-float TerScorer::calculateScore(const vector<int>& comps) const
+float TerScorer::calculateScore(const vector<ScoreStatsType>& comps) const
 {
   float denom = 1.0 * comps[1];
   float num =  -1.0 * comps[0];

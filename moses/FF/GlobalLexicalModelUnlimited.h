@@ -12,11 +12,9 @@
 #include "moses/Phrase.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 #include "moses/FactorTypeSet.h"
 #include "moses/Sentence.h"
-
-#include "moses/FF/FFState.h"
 
 #ifdef WITH_THREADS
 #include <boost/thread/tss.hpp>
@@ -42,6 +40,7 @@ class GlobalLexicalModelUnlimited : public StatelessFeatureFunction
   typedef std::map< std::string, short > StringHash;
 
   struct ThreadLocalStorage {
+    // const Sentence *input;
     const Sentence *input;
   };
 
@@ -73,34 +72,36 @@ public:
 
   bool Load(const std::string &filePathSource, const std::string &filePathTarget);
 
-  void InitializeForInput( Sentence const& in );
-
-  const FFState* EmptyHypothesisState(const InputType &) const {
-    return new DummyState();
-  }
+  void InitializeForInput(ttasksptr const& ttask);
 
   //TODO: This implements the old interface, but cannot be updated because
   //it appears to be stateful
-  void Evaluate(const Hypothesis& cur_hypo,
-                ScoreComponentCollection* accumulator) const;
+  void EvaluateWhenApplied(const Hypothesis& cur_hypo,
+                           ScoreComponentCollection* accumulator) const;
 
-  void EvaluateChart(const ChartHypothesis& /* cur_hypo */,
-                     int /* featureID */,
-                     ScoreComponentCollection* ) const {
+  void EvaluateWhenApplied(const ChartHypothesis& /* cur_hypo */,
+                           int /* featureID */,
+                           ScoreComponentCollection* ) const {
     throw std::logic_error("GlobalLexicalModelUnlimited not supported in chart decoder, yet");
   }
 
-  void Evaluate(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
-  void Evaluate(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {}
+  void EvaluateWithSourceContext(const InputType &input
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedScores = NULL) const {
+  }
+
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+      , const TranslationOptionList &translationOptionList) const {
+  }
+
+  void EvaluateInIsolation(const Phrase &source
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedScores) const {
+  }
 
   void AddFeature(ScoreComponentCollection* accumulator,
                   StringPiece sourceTrigger, StringPiece sourceWord, StringPiece targetTrigger,

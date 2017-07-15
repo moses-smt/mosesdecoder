@@ -6,7 +6,6 @@
 #include "moses/ChartHypothesis.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/TranslationOption.h"
-#include "moses/UserMessage.h"
 #include "moses/Util.h"
 
 #include "util/string_piece_hash.hh"
@@ -21,8 +20,9 @@ SourceWordDeletionFeature::SourceWordDeletionFeature(const std::string &line)
   :StatelessFeatureFunction(0, line),
    m_unrestricted(true)
 {
-  std::cerr << "Initializing source word deletion feature.." << std::endl;
+  VERBOSE(1, "Initializing feature " << GetScoreProducerDescription() << " ...");
   ReadParameters();
+  VERBOSE(1, " Done." << std::endl);
 }
 
 void SourceWordDeletionFeature::SetParameter(const std::string& key, const std::string& value)
@@ -36,14 +36,13 @@ void SourceWordDeletionFeature::SetParameter(const std::string& key, const std::
   }
 }
 
-void SourceWordDeletionFeature::Load()
+void SourceWordDeletionFeature::Load(AllOptions::ptr const& opts)
 {
-  if (m_filename == "") {
+  m_options = opts;
+  if (m_filename.empty())
     return;
-  }
 
-  cerr << "loading source word deletion word list from " << m_filename << endl;
-
+  FEATUREVERBOSE(1, "Loading source word deletion word list from " << m_filename << std::endl);
   ifstream inFile(m_filename.c_str());
   UTIL_THROW_IF2(!inFile, "Can't open file " << m_filename);
 
@@ -63,10 +62,10 @@ bool SourceWordDeletionFeature::IsUseable(const FactorMask &mask) const
   return ret;
 }
 
-void SourceWordDeletionFeature::Evaluate(const Phrase &source
+void SourceWordDeletionFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScores) const
 {
   const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
   ComputeFeatures(source, targetPhrase, &scoreBreakdown, alignmentInfo);
@@ -83,10 +82,7 @@ void SourceWordDeletionFeature::ComputeFeatures(const Phrase &source,
   if (targetLength == 1 && sourceLength == 1 && !alignmentInfo.GetSize()) return;
 
   // flag aligned words
-  bool aligned[16];
-  UTIL_THROW_IF2(sourceLength >= 16, "Source length must be less than 16 words");
-  for(size_t i=0; i<sourceLength; i++)
-    aligned[i] = false;
+  std::vector<bool> aligned(sourceLength, false);
   for (AlignmentInfo::const_iterator alignmentPoint = alignmentInfo.begin(); alignmentPoint != alignmentInfo.end(); alignmentPoint++)
     aligned[ alignmentPoint->first ] = true;
 

@@ -1,6 +1,7 @@
-alias deps : IOWrapper.cpp mbr.cpp LatticeMBR.cpp TranslationAnalysis.cpp ..//z ..//boost_iostreams ..//boost_filesystem ../moses//moses ;
+alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem ../moses//moses ;
 
 exe moses : Main.cpp deps ;
+exe vwtrainer : MainVW.cpp deps ;
 exe lmbrgrid : LatticeMBRGrid.cpp deps ;
+alias programs : moses lmbrgrid vwtrainer ;
 
-alias programs : moses lmbrgrid ;

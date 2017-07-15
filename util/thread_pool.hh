@@ -1,5 +1,5 @@
-#ifndef UTIL_THREAD_POOL__
-#define UTIL_THREAD_POOL__
+#ifndef UTIL_THREAD_POOL_H
+#define UTIL_THREAD_POOL_H
 
 #include "util/pcqueue.hh"
 
@@ -8,8 +8,7 @@
 #include <boost/thread.hpp>
 
 #include <iostream>
-
-#include <stdlib.h>
+#include <cstdlib>
 
 namespace util {
 
@@ -18,8 +17,8 @@ template <class HandlerT> class Worker : boost::noncopyable {
     typedef HandlerT Handler;
     typedef typename Handler::Request Request;
 
-    template <class Construct> Worker(PCQueue<Request> &in, Construct &construct, Request &poison)
-      : in_(in), handler_(construct), thread_(boost::ref(*this)), poison_(poison) {}
+    template <class Construct> Worker(PCQueue<Request> &in, Construct &construct, const Request &poison)
+      : in_(in), handler_(construct), poison_(poison), thread_(boost::ref(*this)) {}
 
     // Only call from thread.
     void operator()() {
@@ -30,7 +29,7 @@ template <class HandlerT> class Worker : boost::noncopyable {
         try {
           (*handler_)(request);
         }
-        catch(std::exception &e) {
+        catch(const std::exception &e) {
           std::cerr << "Handler threw " << e.what() << std::endl;
           abort();
         }
@@ -50,9 +49,9 @@ template <class HandlerT> class Worker : boost::noncopyable {
 
     boost::optional<Handler> handler_;
 
-    boost::thread thread_;
+    const Request poison_;
 
-    Request poison_;
+    boost::thread thread_;
 };
 
 template <class HandlerT> class ThreadPool : boost::noncopyable {
@@ -92,4 +91,4 @@ template <class HandlerT> class ThreadPool : boost::noncopyable {
 
 } // namespace util
 
-#endif // UTIL_THREAD_POOL__
+#endif // UTIL_THREAD_POOL_H

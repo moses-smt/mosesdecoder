@@ -1,9 +1,10 @@
-#ifndef LM_FILTER_ARPA_IO__
-#define LM_FILTER_ARPA_IO__
+#ifndef LM_FILTER_ARPA_IO_H
+#define LM_FILTER_ARPA_IO_H
 /* Input and output for ARPA format language model files.
  */
 #include "lm/read_arpa.hh"
 #include "util/exception.hh"
+#include "util/file_stream.hh"
 #include "util/string_piece.hh"
 #include "util/tokenize_piece.hh"
 
@@ -14,7 +15,7 @@
 #include <string>
 #include <vector>
 
-#include <string.h>
+#include <cstring>
 #include <stdint.h>
 
 namespace util { class FilePiece; }
@@ -26,17 +27,6 @@ class ARPAInputException : public util::Exception {
     explicit ARPAInputException(const StringPiece &message) throw();
     explicit ARPAInputException(const StringPiece &message, const StringPiece &line) throw();
     virtual ~ARPAInputException() throw();
-};
-
-class ARPAOutputException : public util::ErrnoException {
-  public:
-    ARPAOutputException(const char *prefix, const std::string &file_name) throw();
-    virtual ~ARPAOutputException() throw();
-
-    const std::string &File() const throw() { return file_name_; }
-
-  private:
-    const std::string file_name_;
 };
 
 // Handling for the counts of n-grams at the beginning of ARPA files.
@@ -55,11 +45,7 @@ class ARPAOutput : boost::noncopyable {
     void BeginLength(unsigned int length);
 
     void AddNGram(const StringPiece &line) {
-      try {
-        file_ << line << '\n';
-      } catch (const std::ios_base::failure &f) {
-        throw ARPAOutputException("Writing an n-gram", file_name_);
-      }
+      file_ << line << '\n';
       ++fast_counter_;
     }
 
@@ -76,9 +62,8 @@ class ARPAOutput : boost::noncopyable {
     void Finish();
 
   private:
-    const std::string file_name_;
-    boost::scoped_array<char> buffer_;
-    std::fstream file_;
+    util::scoped_fd file_backing_;
+    util::FileStream file_;
     size_t fast_counter_;
     std::vector<uint64_t> counts_;
 };
@@ -111,4 +96,4 @@ template <class Output> void ReadARPA(util::FilePiece &in_lm, Output &out) {
 
 } // namespace lm
 
-#endif // LM_FILTER_ARPA_IO__
+#endif // LM_FILTER_ARPA_IO_H

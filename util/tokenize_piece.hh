@@ -1,5 +1,5 @@
-#ifndef UTIL_TOKENIZE_PIECE__
-#define UTIL_TOKENIZE_PIECE__
+#ifndef UTIL_TOKENIZE_PIECE_H
+#define UTIL_TOKENIZE_PIECE_H
 
 #include "util/exception.hh"
 #include "util/string_piece.hh"
@@ -7,7 +7,7 @@
 #include <boost/iterator/iterator_facade.hpp>
 
 #include <algorithm>
-#include <iostream>
+#include <cstring>
 
 namespace util {
 
@@ -71,6 +71,13 @@ class BoolCharacter {
       return StringPiece(in.data() + in.size(), 0);
     }
 
+    template <unsigned Length> static void Build(const char (&characters)[Length], bool (&out)[256]) {
+      memset(out, 0, sizeof(out));
+      for (const char *i = characters; i != characters + Length; ++i) {
+        out[static_cast<unsigned char>(*i)] = true;
+      }
+    }
+
   private:
     const bool *delimiter_;
 };
@@ -120,7 +127,7 @@ template <class Find, bool SkipEmpty = false> class TokenIter : public boost::it
         } else {
           after_ = StringPiece(found.data() + found.size(), after_.data() - found.data() + after_.size() - found.size());
         }
-      } while (SkipEmpty && current_.data() && current_.empty()); // Compiler should optimize this away if SkipEmpty is false.  
+      } while (SkipEmpty && current_.data() && current_.empty()); // Compiler should optimize this away if SkipEmpty is false.
     }
 
     bool equal(const TokenIter<Find, SkipEmpty> &other) const {
@@ -140,4 +147,4 @@ template <class Find, bool SkipEmpty = false> class TokenIter : public boost::it
 
 } // namespace util
 
-#endif // UTIL_TOKENIZE_PIECE__
+#endif // UTIL_TOKENIZE_PIECE_H

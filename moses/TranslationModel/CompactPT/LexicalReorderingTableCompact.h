@@ -36,9 +36,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 namespace Moses
 {
 
-class LexicalReorderingTableCompact: public LexicalReorderingTable
+class LexicalReorderingTableCompact:
+  public LexicalReorderingTable
 {
 private:
+  static bool s_inMemoryByDefault;
   bool m_inMemory;
 
   size_t m_numScoreComponent;
@@ -56,28 +58,35 @@ private:
   std::string MakeKey(const std::string& f, const std::string& e, const std::string& c) const;
 
 public:
-  LexicalReorderingTableCompact(
-    const std::string& filePath,
-    const std::vector<FactorType>& f_factors,
-    const std::vector<FactorType>& e_factors,
-    const std::vector<FactorType>& c_factors);
+  LexicalReorderingTableCompact(const std::string& filePath,
+                                const std::vector<FactorType>& f_factors,
+                                const std::vector<FactorType>& e_factors,
+                                const std::vector<FactorType>& c_factors);
 
-  LexicalReorderingTableCompact(
-    const std::vector<FactorType>& f_factors,
-    const std::vector<FactorType>& e_factors,
-    const std::vector<FactorType>& c_factors);
+  LexicalReorderingTableCompact(const std::vector<FactorType>& f_factors,
+                                const std::vector<FactorType>& e_factors,
+                                const std::vector<FactorType>& c_factors);
 
-  virtual ~LexicalReorderingTableCompact();
+  virtual
+  ~LexicalReorderingTableCompact();
 
-  virtual std::vector<float> GetScore(const Phrase& f, const Phrase& e, const Phrase& c);
+  virtual
+  std::vector<float>
+  GetScore(const Phrase& f, const Phrase& e, const Phrase& c);
 
-  static LexicalReorderingTable* CheckAndLoad(
-    const std::string& filePath,
-    const std::vector<FactorType>& f_factors,
-    const std::vector<FactorType>& e_factors,
-    const std::vector<FactorType>& c_factors);
+  static
+  LexicalReorderingTable*
+  CheckAndLoad(const std::string& filePath,
+               const std::vector<FactorType>& f_factors,
+               const std::vector<FactorType>& e_factors,
+               const std::vector<FactorType>& c_factors);
 
-  void Load(std::string filePath);
+  void
+  Load(std::string filePath);
+
+  static void
+  SetStaticDefaultParameters(Parameter const& param);
+
 };
 
 }

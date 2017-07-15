@@ -29,7 +29,7 @@ namespace Moses
 
 class DottedRule;
 class TargetPhraseCollection;
-class WordsRange;
+class Range;
 
 /** @todo what is this?
  */
@@ -44,10 +44,22 @@ protected:
   void AddCompletedRule(
     const DottedRule &dottedRule,
     const TargetPhraseCollection &tpc,
-    const WordsRange &range,
+    const Range &range,
     ChartParserCallback &outColl);
 
   StackVec m_stackVec;
+};
+
+// struct that caches cellLabel, its end position and score for quicker lookup
+struct ChartCellCache {
+  ChartCellCache(size_t endPos, const ChartCellLabel* cellLabel, float score)
+    : endPos(endPos)
+    , cellLabel(cellLabel)
+    , score(score) {}
+
+  size_t endPos;
+  const ChartCellLabel* cellLabel;
+  float score;
 };
 
 }  // namespace Moses

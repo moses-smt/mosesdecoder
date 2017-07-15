@@ -153,6 +153,41 @@ void InterpolatedScorer::score(const candidates_t& candidates, const diffs_t& di
 
 }
 
+/** Interpolated scorer gets a vector of sufficient statistics, calls all scorers with corresponding statistics,
+    and combines them with weights **/
+float InterpolatedScorer::calculateScore(const std::vector<ScoreStatsType>& totals) const
+{
+  size_t scorerNum = 0;
+  size_t last = 0;
+  float score = 0;
+  for (ScopedVector<Scorer>::const_iterator itsc = m_scorers.begin();
+       itsc != m_scorers.end(); ++itsc) {
+    int numScoresScorer = (*itsc)->NumberOfScores();
+    std::vector<ScoreStatsType> totals_scorer(totals.begin()+last, totals.begin()+last+numScoresScorer);
+    score += (*itsc)->calculateScore(totals_scorer) * m_scorer_weights[scorerNum];
+    last += numScoresScorer;
+    scorerNum++;
+  }
+  return score;
+}
+
+
+float InterpolatedScorer::getReferenceLength(const std::vector<ScoreStatsType>& totals) const
+{
+  size_t scorerNum = 0;
+  size_t last = 0;
+  float refLen = 0;
+  for (ScopedVector<Scorer>::const_iterator itsc = m_scorers.begin();
+       itsc != m_scorers.end(); ++itsc) {
+    int numScoresScorer = (*itsc)->NumberOfScores();
+    std::vector<ScoreStatsType> totals_scorer(totals.begin()+last, totals.begin()+last+numScoresScorer);
+    refLen += (*itsc)->getReferenceLength(totals_scorer) * m_scorer_weights[scorerNum];
+    last += numScoresScorer;
+    scorerNum++;
+  }
+  return refLen;
+}
+
 void InterpolatedScorer::setReferenceFiles(const vector<string>& referenceFiles)
 {
   for (ScopedVector<Scorer>::iterator itsc = m_scorers.begin();

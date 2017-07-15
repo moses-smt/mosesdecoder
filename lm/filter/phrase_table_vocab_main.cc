@@ -1,4 +1,4 @@
-#include "util/fake_ofstream.hh"
+#include "util/file_stream.hh"
 #include "util/file_piece.hh"
 #include "util/murmur_hash.hh"
 #include "util/pool.hh"
@@ -68,7 +68,7 @@ class TargetWords {
     }
 
     void Print() const {
-      util::FakeOFStream out(1);
+      util::FileStream out(1);
       for (std::vector<boost::unordered_set<const char *> >::const_iterator i = vocab_.begin(); i != vocab_.end(); ++i) {
         for (boost::unordered_set<const char *>::const_iterator j = i->begin(); j != i->end(); ++j) {
           out << *j << ' ';
@@ -88,7 +88,7 @@ class TargetWords {
 
 class Input {
   public:
-    explicit Input(std::size_t max_length) 
+    explicit Input(std::size_t max_length)
       : max_length_(max_length), sentence_id_(0), empty_() {}
 
     void AddSentence(StringPiece sentence, TargetWords &targets) {
@@ -125,7 +125,7 @@ class Input {
     Map map_;
 
     std::size_t sentence_id_;
-    
+
     // Temporaries in AddSentence.
     std::string canonical_;
     std::vector<std::size_t> starts_;

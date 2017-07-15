@@ -22,7 +22,7 @@ void HypothesisStack::Remove(const HypothesisStack::iterator &iter)
 {
   Hypothesis *h = *iter;
   Detach(iter);
-  FREEHYPO(h);
+  delete h;
 }
 
 

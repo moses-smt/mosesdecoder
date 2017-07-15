@@ -35,7 +35,7 @@ public:
   virtual std::size_t NumberOfScores() const {
     return m_ovr->NumberOfScores();
   }
-  virtual float calculateScore(const std::vector<int>& comps) const {
+  virtual float calculateScore(const std::vector<ScoreStatsType>& comps) const {
     return m_ovr->calculateScore(comps);
   }
 

@@ -6,6 +6,7 @@
 #include "moses/Timer.h"
 #include "moses/InputFileStream.h"
 #include "moses/FF/LexicalReordering/LexicalReorderingTable.h"
+#include "moses/parameters/OOVHandlingOptions.h"
 
 using namespace Moses;
 
@@ -87,9 +88,15 @@ int main(int argc, char** argv)
     c_mask.push_back(0);
   }
   Phrase e( 0),f(0),c(0);
-  e.CreateFromString(Output, e_mask, query_e, "|", NULL);
-  f.CreateFromString(Input, f_mask, query_f, "|", NULL);
-  c.CreateFromString(Input, c_mask,  query_c,"|", NULL);
+  // e.CreateFromString(Output, e_mask, query_e, "|", NULL);
+  // f.CreateFromString(Input, f_mask, query_f, "|", NULL);
+  // c.CreateFromString(Input, c_mask,  query_c,"|", NULL);
+  // Phrase.CreateFromString() calls Word.CreateFromSting(), which gets
+  // the factor delimiter from StaticData, so it should not be hardcoded
+  // here. [UG], thus:
+  e.CreateFromString(Output, e_mask, query_e, NULL);
+  f.CreateFromString(Input, f_mask, query_f, NULL);
+  c.CreateFromString(Input, c_mask,  query_c, NULL);
   LexicalReorderingTable* table;
   if(FileExists(inFilePath+".binlexr.idx")) {
     std::cerr << "Loading binary table...\n";
@@ -103,7 +110,11 @@ int main(int argc, char** argv)
     std::cerr << "Caching for f\n";
     table->InitializeForInputPhrase(f);
   }
-  std::cerr << "Querying: f='" << f.GetStringRep(f_mask) << "' e='" << e.GetStringRep(e_mask) << "' c='" << c.GetStringRep(c_mask) << "'\n";
+
+  std::cerr << "Querying: "
+            << "f='" << f.GetStringRep(f_mask) <<"' "
+            << "e='" << e.GetStringRep(e_mask) << "' "
+            << "c='" << c.GetStringRep(c_mask) << "'\n";
   std::cerr << table->GetScore(f,e,c) << "\n";
   //table->DbgDump(&std::cerr);
   delete table;

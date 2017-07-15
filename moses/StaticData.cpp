@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 // $Id$
 // vim:tabstop=2
 
@@ -21,11 +22,15 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
 #include <string>
+#include <boost/algorithm/string/predicate.hpp>
 
+#include "moses/FF/Factory.h"
 #include "TypeDef.h"
 #include "moses/FF/WordPenaltyProducer.h"
 #include "moses/FF/UnknownWordPenaltyProducer.h"
 #include "moses/FF/InputFeature.h"
+#include "moses/FF/DynamicCacheBasedLanguageModel.h"
+#include "moses/TranslationModel/PhraseDictionaryDynamicCacheBased.h"
 
 #include "DecodeStepTranslation.h"
 #include "DecodeStepGeneration.h"
@@ -34,7 +39,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "FactorCollection.h"
 #include "Timer.h"
-#include "UserMessage.h"
 #include "TranslationOption.h"
 #include "DecodeGraph.h"
 #include "InputFileStream.h"
@@ -46,48 +50,33 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #ifdef WITH_THREADS
 #include <boost/thread.hpp>
 #endif
+#ifdef HAVE_CMPH
+#include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
+#endif
+#if defined HAVE_CMPH
+#include "moses/TranslationModel/CompactPT/LexicalReorderingTableCompact.h"
+#endif
 
 using namespace std;
+using namespace boost::algorithm;
 
 namespace Moses
 {
-bool g_mosesDebug = false;
-
 StaticData StaticData::s_instance;
 
 StaticData::StaticData()
-  :m_sourceStartPosMattersForRecombination(false)
-  ,m_inputType(SentenceInput)
-  ,m_detailedTranslationReportingFilePath()
-  ,m_detailedTreeFragmentsTranslationReportingFilePath()
-  ,m_onlyDistinctNBest(false)
-  ,m_needAlignmentInfo(false)
-  ,m_factorDelimiter("|") // default delimiter between factors
-  ,m_lmEnableOOVFeature(false)
-  ,m_isAlwaysCreateDirectTranslationOption(false)
-  ,m_currentWeightSetting("default")
-  ,m_treeStructure(NULL)
+  : m_options(new AllOptions)
+  , m_requireSortingAfterSourceContext(false)
+  , m_currentWeightSetting("default")
+  , m_treeStructure(NULL)
+  , m_coordSpaceNextID(1)
 {
-  m_xmlBrackets.first="<";
-  m_xmlBrackets.second=">";
-
-  // memory pools
   Phrase::InitializeMemPool();
 }
 
 StaticData::~StaticData()
 {
   RemoveAllInColl(m_decodeGraphs);
-
-  /*
-  const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
-  for(size_t i=0;i<producers.size();++i) {
-  FeatureFunction *ff = producers[i];
-    delete ff;
-  }
-  */
-
-  // memory pools
   Phrase::FinalizeMemPool();
 }
 
@@ -97,463 +86,143 @@ bool StaticData::LoadDataStatic(Parameter *parameter, const std::string &execPat
   return s_instance.LoadData(parameter);
 }
 
-bool StaticData::LoadData(Parameter *parameter)
+void
+StaticData
+::initialize_features()
 {
-  ResetUserTime();
-  m_parameter = parameter;
-
-  // verbose level
-  m_verboseLevel = 1;
-  if (m_parameter->GetParam("verbose").size() == 1) {
-    m_verboseLevel = Scan<size_t>( m_parameter->GetParam("verbose")[0]);
-  }
-
-  // to cube or not to cube
-  m_searchAlgorithm = (m_parameter->GetParam("search-algorithm").size() > 0) ?
-                      (SearchAlgorithm) Scan<size_t>(m_parameter->GetParam("search-algorithm")[0]) : Normal;
-
-  if (IsChart())
-    LoadChartDecodingParameters();
-
-  // input type has to be specified BEFORE loading the phrase tables!
-  if(m_parameter->GetParam("inputtype").size())
-    m_inputType= (InputTypeEnum) Scan<int>(m_parameter->GetParam("inputtype")[0]);
-  std::string s_it = "text input";
-  if (m_inputType == 1) {
-    s_it = "confusion net";
-  }
-  if (m_inputType == 2) {
-    s_it = "word lattice";
-  }
-  VERBOSE(2,"input type is: "<<s_it<<"\n");
-
-  if(m_parameter->GetParam("recover-input-path").size()) {
-    m_recoverPath = Scan<bool>(m_parameter->GetParam("recover-input-path")[0]);
-    if (m_recoverPath && m_inputType == SentenceInput) {
-      TRACE_ERR("--recover-input-path should only be used with confusion net or word lattice input!\n");
-      m_recoverPath = false;
-    }
-  }
-
-  // factor delimiter
-  if (m_parameter->GetParam("factor-delimiter").size() > 0) {
-    m_factorDelimiter = m_parameter->GetParam("factor-delimiter")[0];
-  }
-
-  SetBooleanParameter( &m_continuePartialTranslation, "continue-partial-translation", false );
-  SetBooleanParameter( &m_outputHypoScore, "output-hypo-score", false );
-
-  //word-to-word alignment
-  // alignments
-  SetBooleanParameter( &m_PrintAlignmentInfo, "print-alignment-info", false );
-  if (m_PrintAlignmentInfo) {
-    m_needAlignmentInfo = true;
-  }
-
-  if(m_parameter->GetParam("sort-word-alignment").size()) {
-    m_wordAlignmentSort = (WordAlignmentSort) Scan<size_t>(m_parameter->GetParam("sort-word-alignment")[0]);
-  }
-
-  SetBooleanParameter( &m_PrintAlignmentInfoNbest, "print-alignment-info-in-n-best", false );
-  if (m_PrintAlignmentInfoNbest) {
-    m_needAlignmentInfo = true;
-  }
-
-  if (m_parameter->GetParam("alignment-output-file").size() > 0) {
-    m_alignmentOutputFile = Scan<std::string>(m_parameter->GetParam("alignment-output-file")[0]);
-    m_needAlignmentInfo = true;
-  }
-
-  // n-best
-  if (m_parameter->GetParam("n-best-list").size() >= 2) {
-    m_nBestFilePath = m_parameter->GetParam("n-best-list")[0];
-    m_nBestSize = Scan<size_t>( m_parameter->GetParam("n-best-list")[1] );
-    m_onlyDistinctNBest=(m_parameter->GetParam("n-best-list").size()>2
-                         && m_parameter->GetParam("n-best-list")[2]=="distinct");
-  } else if (m_parameter->GetParam("n-best-list").size() == 1) {
-    UserMessage::Add(string("wrong format for switch -n-best-list file size"));
-    return false;
-  } else {
-    m_nBestSize = 0;
-  }
-  if (m_parameter->GetParam("n-best-factor").size() > 0) {
-    m_nBestFactor = Scan<size_t>( m_parameter->GetParam("n-best-factor")[0]);
-  } else {
-    m_nBestFactor = 20;
-  }
-
-  //lattice samples
-  if (m_parameter->GetParam("lattice-samples").size() ==2 ) {
-    m_latticeSamplesFilePath = m_parameter->GetParam("lattice-samples")[0];
-    m_latticeSamplesSize = Scan<size_t>(m_parameter->GetParam("lattice-samples")[1]);
-  } else if (m_parameter->GetParam("lattice-samples").size() != 0 ) {
-    UserMessage::Add(string("wrong format for switch -lattice-samples file size"));
-    return false;
-  } else {
-    m_latticeSamplesSize = 0;
-  }
-
-  // word graph
-  if (m_parameter->GetParam("output-word-graph").size() == 2)
-    m_outputWordGraph = true;
-  else
-    m_outputWordGraph = false;
-
-  // search graph
-  if (m_parameter->GetParam("output-search-graph").size() > 0) {
-    if (m_parameter->GetParam("output-search-graph").size() != 1) {
-      UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph file"));
-      return false;
-    }
-    m_outputSearchGraph = true;
-  }
-  // ... in extended format
-  else if (m_parameter->GetParam("output-search-graph-extended").size() > 0) {
-    if (m_parameter->GetParam("output-search-graph-extended").size() != 1) {
-      UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph-extended file"));
-      return false;
-    }
-    m_outputSearchGraph = true;
-    m_outputSearchGraphExtended = true;
-  } else {
-    m_outputSearchGraph = false;
-  }
-  if (m_parameter->GetParam("output-search-graph-slf").size() > 0) {
-    m_outputSearchGraphSLF = true;
-  } else {
-    m_outputSearchGraphSLF = false;
-  }
-  if (m_parameter->GetParam("output-search-graph-hypergraph").size() > 0) {
-    m_outputSearchGraphHypergraph = true;
-  } else {
-    m_outputSearchGraphHypergraph = false;
-  }
-#ifdef HAVE_PROTOBUF
-  if (m_parameter->GetParam("output-search-graph-pb").size() > 0) {
-    if (m_parameter->GetParam("output-search-graph-pb").size() != 1) {
-      UserMessage::Add(string("ERROR: wrong format for switch -output-search-graph-pb path"));
-      return false;
-    }
-    m_outputSearchGraphPB = true;
-  } else
-    m_outputSearchGraphPB = false;
-#endif
-  SetBooleanParameter( &m_unprunedSearchGraph, "unpruned-search-graph", false );
-  SetBooleanParameter( &m_includeLHSInSearchGraph, "include-lhs-in-search-graph", false );
-
-  if (m_parameter->isParamSpecified("output-unknowns")) {
-
-    if (m_parameter->GetParam("output-unknowns").size() == 1) {
-      m_outputUnknownsFile =Scan<string>(m_parameter->GetParam("output-unknowns")[0]);
-    } else {
-      UserMessage::Add(string("need to specify exactly one file name for unknowns"));
-      return false;
-    }
-  }
-
-  // include feature names in the n-best list
-  SetBooleanParameter( &m_labeledNBestList, "labeled-n-best-list", true );
-
-  // include word alignment in the n-best list
-  SetBooleanParameter( &m_nBestIncludesSegmentation, "include-segmentation-in-n-best", false );
-
-  // printing source phrase spans
-  SetBooleanParameter( &m_reportSegmentation, "report-segmentation", false );
-  SetBooleanParameter( &m_reportSegmentationEnriched, "report-segmentation-enriched", false );
-
-  // print all factors of output translations
-  SetBooleanParameter( &m_reportAllFactors, "report-all-factors", false );
-
-  // print all factors of output translations
-  SetBooleanParameter( &m_reportAllFactorsNBest, "report-all-factors-in-n-best", false );
-
-  //input factors
-  const vector<string> &inputFactorVector = m_parameter->GetParam("input-factors");
-  for(size_t i=0; i<inputFactorVector.size(); i++) {
-    m_inputFactorOrder.push_back(Scan<FactorType>(inputFactorVector[i]));
-  }
-  if(m_inputFactorOrder.empty()) {
-    UserMessage::Add(string("no input factor specified in config file"));
-    return false;
-  }
-
-  //output factors
-  const vector<string> &outputFactorVector = m_parameter->GetParam("output-factors");
-  for(size_t i=0; i<outputFactorVector.size(); i++) {
-    m_outputFactorOrder.push_back(Scan<FactorType>(outputFactorVector[i]));
-  }
-  if(m_outputFactorOrder.empty()) {
-    // default. output factor 0
-    m_outputFactorOrder.push_back(0);
-  }
-
-  //source word deletion
-  SetBooleanParameter( &m_wordDeletionEnabled, "phrase-drop-allowed", false );
-
-  //Disable discarding
-  SetBooleanParameter(&m_disableDiscarding, "disable-discarding", false);
-
-  //Print All Derivations
-  SetBooleanParameter( &m_printAllDerivations , "print-all-derivations", false );
-
-  // additional output
-  if (m_parameter->isParamSpecified("translation-details")) {
-    const vector<string> &args = m_parameter->GetParam("translation-details");
-    if (args.size() == 1) {
-      m_detailedTranslationReportingFilePath = args[0];
-    } else {
-      UserMessage::Add(string("the translation-details option requires exactly one filename argument"));
-      return false;
-    }
-  }
-  if (m_parameter->isParamSpecified("tree-translation-details")) {
-    const vector<string> &args = m_parameter->GetParam("tree-translation-details");
-    if (args.size() == 1) {
-      m_detailedTreeFragmentsTranslationReportingFilePath = args[0];
-    } else {
-      UserMessage::Add(string("the tree-translation-details option requires exactly one filename argument"));
-      return false;
-    }
-  }
-
-  //DIMw
-  if (m_parameter->isParamSpecified("translation-all-details")) {
-    const vector<string> &args = m_parameter->GetParam("translation-all-details");
-    if (args.size() == 1) {
-      m_detailedAllTranslationReportingFilePath = args[0];
-    } else {
-      UserMessage::Add(string("the translation-all-details option requires exactly one filename argument"));
-      return false;
-    }
-  }
-
-  // reordering constraints
-  m_maxDistortion = (m_parameter->GetParam("distortion-limit").size() > 0) ?
-                    Scan<int>(m_parameter->GetParam("distortion-limit")[0])
-                    : -1;
-  SetBooleanParameter( &m_reorderingConstraint, "monotone-at-punctuation", false );
-
-  // settings for pruning
-  m_maxHypoStackSize = (m_parameter->GetParam("stack").size() > 0)
-                       ? Scan<size_t>(m_parameter->GetParam("stack")[0]) : DEFAULT_MAX_HYPOSTACK_SIZE;
-
-  m_minHypoStackDiversity = 0;
-  if (m_parameter->GetParam("stack-diversity").size() > 0) {
-    if (m_maxDistortion > 15) {
-      UserMessage::Add("stack diversity > 0 is not allowed for distortion limits larger than 15");
-      return false;
-    }
-    if (m_inputType == WordLatticeInput) {
-      UserMessage::Add("stack diversity > 0 is not allowed for lattice input");
-      return false;
-    }
-    m_minHypoStackDiversity = Scan<size_t>(m_parameter->GetParam("stack-diversity")[0]);
-  }
-
-  m_beamWidth = (m_parameter->GetParam("beam-threshold").size() > 0) ?
-                TransformScore(Scan<float>(m_parameter->GetParam("beam-threshold")[0]))
-                : TransformScore(DEFAULT_BEAM_WIDTH);
-  m_earlyDiscardingThreshold = (m_parameter->GetParam("early-discarding-threshold").size() > 0) ?
-                               TransformScore(Scan<float>(m_parameter->GetParam("early-discarding-threshold")[0]))
-                               : TransformScore(DEFAULT_EARLY_DISCARDING_THRESHOLD);
-  m_translationOptionThreshold = (m_parameter->GetParam("translation-option-threshold").size() > 0) ?
-                                 TransformScore(Scan<float>(m_parameter->GetParam("translation-option-threshold")[0]))
-                                 : TransformScore(DEFAULT_TRANSLATION_OPTION_THRESHOLD);
-
-  m_maxNoTransOptPerCoverage = (m_parameter->GetParam("max-trans-opt-per-coverage").size() > 0)
-                               ? Scan<size_t>(m_parameter->GetParam("max-trans-opt-per-coverage")[0]) : DEFAULT_MAX_TRANS_OPT_SIZE;
-
-  m_maxNoPartTransOpt = (m_parameter->GetParam("max-partial-trans-opt").size() > 0)
-                        ? Scan<size_t>(m_parameter->GetParam("max-partial-trans-opt")[0]) : DEFAULT_MAX_PART_TRANS_OPT_SIZE;
-
-  m_maxPhraseLength = (m_parameter->GetParam("max-phrase-length").size() > 0)
-                      ? Scan<size_t>(m_parameter->GetParam("max-phrase-length")[0]) : DEFAULT_MAX_PHRASE_LENGTH;
-
-  m_cubePruningPopLimit = (m_parameter->GetParam("cube-pruning-pop-limit").size() > 0)
-                          ? Scan<size_t>(m_parameter->GetParam("cube-pruning-pop-limit")[0]) : DEFAULT_CUBE_PRUNING_POP_LIMIT;
-
-  m_cubePruningDiversity = (m_parameter->GetParam("cube-pruning-diversity").size() > 0)
-                           ? Scan<size_t>(m_parameter->GetParam("cube-pruning-diversity")[0]) : DEFAULT_CUBE_PRUNING_DIVERSITY;
-
-  SetBooleanParameter(&m_cubePruningLazyScoring, "cube-pruning-lazy-scoring", false);
-
-  // early distortion cost
-  SetBooleanParameter( &m_useEarlyDistortionCost, "early-distortion-cost", false );
-
-  // unknown word processing
-  SetBooleanParameter( &m_dropUnknown, "drop-unknown", false );
-  SetBooleanParameter( &m_markUnknown, "mark-unknown", false );
-
-  SetBooleanParameter( &m_lmEnableOOVFeature, "lmodel-oov-feature", false);
-
-  SetBooleanParameter( &m_adjacentOnly, "adjacent-only", false);
-
-  // minimum Bayes risk decoding
-  SetBooleanParameter( &m_mbr, "minimum-bayes-risk", false );
-  m_mbrSize = (m_parameter->GetParam("mbr-size").size() > 0) ?
-              Scan<size_t>(m_parameter->GetParam("mbr-size")[0]) : 200;
-  m_mbrScale = (m_parameter->GetParam("mbr-scale").size() > 0) ?
-               Scan<float>(m_parameter->GetParam("mbr-scale")[0]) : 1.0f;
-
-  //lattice mbr
-  SetBooleanParameter( &m_useLatticeMBR, "lminimum-bayes-risk", false );
-  if (m_useLatticeMBR && m_mbr) {
-    cerr << "Errror: Cannot use both n-best mbr and lattice mbr together" << endl;
-    exit(1);
-  }
-
-  //mira training
-  SetBooleanParameter( &m_mira, "mira", false );
-
-  // lattice MBR
-  if (m_useLatticeMBR) m_mbr = true;
-
-  m_lmbrPruning = (m_parameter->GetParam("lmbr-pruning-factor").size() > 0) ?
-                  Scan<size_t>(m_parameter->GetParam("lmbr-pruning-factor")[0]) : 30;
-  m_lmbrThetas = Scan<float>(m_parameter->GetParam("lmbr-thetas"));
-  SetBooleanParameter( &m_useLatticeHypSetForLatticeMBR, "lattice-hypo-set", false );
-  m_lmbrPrecision = (m_parameter->GetParam("lmbr-p").size() > 0) ?
-                    Scan<float>(m_parameter->GetParam("lmbr-p")[0]) : 0.8f;
-  m_lmbrPRatio = (m_parameter->GetParam("lmbr-r").size() > 0) ?
-                 Scan<float>(m_parameter->GetParam("lmbr-r")[0]) : 0.6f;
-  m_lmbrMapWeight = (m_parameter->GetParam("lmbr-map-weight").size() >0) ?
-                    Scan<float>(m_parameter->GetParam("lmbr-map-weight")[0]) : 0.0f;
-
-  //consensus decoding
-  SetBooleanParameter( &m_useConsensusDecoding, "consensus-decoding", false );
-  if (m_useConsensusDecoding && m_mbr) {
-    cerr<< "Error: Cannot use consensus decoding together with mbr" << endl;
-    exit(1);
-  }
-  if (m_useConsensusDecoding) m_mbr=true;
-
-  // Compact phrase table and reordering model
-  SetBooleanParameter( &m_minphrMemory, "minphr-memory", false );
-  SetBooleanParameter( &m_minlexrMemory, "minlexr-memory", false );
-
-  m_timeout_threshold = (m_parameter->GetParam("time-out").size() > 0) ?
-                        Scan<size_t>(m_parameter->GetParam("time-out")[0]) : -1;
-  m_timeout = (GetTimeoutThreshold() == (size_t)-1) ? false : true;
-
-
-  m_lmcache_cleanup_threshold = (m_parameter->GetParam("clean-lm-cache").size() > 0) ?
-                                Scan<size_t>(m_parameter->GetParam("clean-lm-cache")[0]) : 1;
-
-  m_threadCount = 1;
-  const std::vector<std::string> &threadInfo = m_parameter->GetParam("threads");
-  if (!threadInfo.empty()) {
-    if (threadInfo[0] == "all") {
-#ifdef WITH_THREADS
-      m_threadCount = boost::thread::hardware_concurrency();
-      if (!m_threadCount) {
-        UserMessage::Add("-threads all specified but Boost doesn't know how many cores there are");
-        return false;
-      }
-#else
-      UserMessage::Add("-threads all specified but moses not built with thread support");
-      return false;
-#endif
-    } else {
-      m_threadCount = Scan<int>(threadInfo[0]);
-      if (m_threadCount < 1) {
-        UserMessage::Add("Specify at least one thread.");
-        return false;
-      }
-#ifndef WITH_THREADS
-      if (m_threadCount > 1) {
-        UserMessage::Add(std::string("Error: Thread count of ") + threadInfo[0] + " but moses not built with thread support");
-        return false;
-      }
-#endif
-    }
-  }
-
-  m_startTranslationId = (m_parameter->GetParam("start-translation-id").size() > 0) ?
-                         Scan<long>(m_parameter->GetParam("start-translation-id")[0]) : 0;
-
-  // use of xml in input
-  if (m_parameter->GetParam("xml-input").size() == 0) m_xmlInputType = XmlPassThrough;
-  else if (m_parameter->GetParam("xml-input")[0]=="exclusive") m_xmlInputType = XmlExclusive;
-  else if (m_parameter->GetParam("xml-input")[0]=="inclusive") m_xmlInputType = XmlInclusive;
-  else if (m_parameter->GetParam("xml-input")[0]=="constraint") m_xmlInputType = XmlConstraint;
-  else if (m_parameter->GetParam("xml-input")[0]=="ignore") m_xmlInputType = XmlIgnore;
-  else if (m_parameter->GetParam("xml-input")[0]=="pass-through") m_xmlInputType = XmlPassThrough;
-  else {
-    UserMessage::Add("invalid xml-input value, must be pass-through, exclusive, inclusive, constraint, or ignore");
-    return false;
-  }
-
-  // specify XML tags opening and closing brackets for XML option
-  if (m_parameter->GetParam("xml-brackets").size() > 0) {
-    std::vector<std::string> brackets = Tokenize(m_parameter->GetParam("xml-brackets")[0]);
-    if(brackets.size()!=2) {
-      cerr << "invalid xml-brackets value, must specify exactly 2 blank-delimited strings for XML tags opening and closing brackets" << endl;
-      exit(1);
-    }
-    m_xmlBrackets.first= brackets[0];
-    m_xmlBrackets.second=brackets[1];
-    cerr << "XML tags opening and closing brackets for XML input are: " << m_xmlBrackets.first << " and " << m_xmlBrackets.second << endl;
-  }
-
-  if (m_parameter->GetParam("placeholder-factor").size() > 0) {
-    m_placeHolderFactor = Scan<FactorType>(m_parameter->GetParam("placeholder-factor")[0]);
-  } else {
-    m_placeHolderFactor = NOT_FOUND;
-  }
-
   std::map<std::string, std::string> featureNameOverride = OverrideFeatureNames();
-
   // all features
   map<string, int> featureIndexMap;
 
-  const vector<string> &features = m_parameter->GetParam("feature");
-  for (size_t i = 0; i < features.size(); ++i) {
-    const string &line = Trim(features[i]);
-    cerr << "line=" << line << endl;
+  const PARAM_VEC* params = m_parameter->GetParam("feature");
+  for (size_t i = 0; params && i < params->size(); ++i) {
+    const string &line = Trim(params->at(i));
+    VERBOSE(1,"line=" << line << endl);
     if (line.empty())
       continue;
 
     vector<string> toks = Tokenize(line);
 
     string &feature = toks[0];
-    std::map<std::string, std::string>::const_iterator iter = featureNameOverride.find(feature);
+    std::map<std::string, std::string>::const_iterator iter
+    = featureNameOverride.find(feature);
     if (iter == featureNameOverride.end()) {
-    	// feature name not override
-    	m_registry.Construct(feature, line);
-    }
-    else {
-    	// replace feature name with new name
-    	string newName = iter->second;
-    	feature = newName;
-    	string newLine = Join(" ", toks);
-    	m_registry.Construct(newName, newLine);
+      // feature name not override
+      m_registry.Construct(feature, line);
+    } else {
+      // replace feature name with new name
+      string newName = iter->second;
+      feature = newName;
+      string newLine = Join(" ", toks);
+      m_registry.Construct(newName, newLine);
     }
   }
 
   NoCache();
   OverrideFeatures();
 
-  LoadFeatureFunctions();
+}
 
-  if (!LoadDecodeGraphs()) return false;
+bool
+StaticData
+::ini_output_options()
+{
+  // verbose level
+  m_parameter->SetParameter(m_verboseLevel, "verbose", (size_t) 1);
+  m_parameter->SetParameter<string>(m_outputUnknownsFile,
+                                    "output-unknowns", "");
+  return true;
+}
 
+// threads, timeouts, etc.
+bool
+StaticData
+::ini_performance_options()
+{
+  const PARAM_VEC *params;
 
-  if (!CheckWeights()) {
-    return false;
+  m_threadCount = 1;
+  params = m_parameter->GetParam("threads");
+  if (params && params->size()) {
+    if (params->at(0) == "all") {
+#ifdef WITH_THREADS
+      m_threadCount = boost::thread::hardware_concurrency();
+      if (!m_threadCount) {
+        std::cerr << "-threads all specified but Boost doesn't know how many cores there are";
+        return false;
+      }
+#else
+      std::cerr << "-threads all specified but moses not built with thread support";
+      return false;
+#endif
+    } else {
+      m_threadCount = Scan<int>(params->at(0));
+      if (m_threadCount < 1) {
+        std::cerr << "Specify at least one thread.";
+        return false;
+      }
+#ifndef WITH_THREADS
+      if (m_threadCount > 1) {
+        std::cerr << "Error: Thread count of " << params->at(0)
+                  << " but moses not built with thread support";
+        return false;
+      }
+#endif
+    }
   }
+  return true;
+}
 
-  //Add any other features here.
+bool StaticData::LoadData(Parameter *parameter)
+{
+  m_parameter = parameter;
+
+  const PARAM_VEC *params;
+
+  m_options->init(*parameter);
+  if (is_syntax(m_options->search.algo))
+    m_options->syntax.LoadNonTerminals(*parameter, FactorCollection::Instance());
+
+  if (is_syntax(m_options->search.algo))
+    LoadChartDecodingParameters();
+
+  // ORDER HERE MATTERS, SO DON'T CHANGE IT UNLESS YOU KNOW WHAT YOU ARE DOING!
+  // input, output
+
+  m_parameter->SetParameter<string>(m_factorDelimiter, "factor-delimiter", "|");
+  m_parameter->SetParameter<size_t>(m_lmcache_cleanup_threshold, "clean-lm-cache", 1);
+
+  m_bookkeeping_options.init(*parameter);
+  if (!ini_output_options()) return false;
+
+  // threading etc.
+  if (!ini_performance_options()) return false;
+
+  // FEATURE FUNCTION INITIALIZATION HAPPENS HERE ===============================
+
+  // set class-specific default parameters
+#if defined HAVE_CMPH
+  LexicalReorderingTableCompact::SetStaticDefaultParameters(*parameter);
+  PhraseDictionaryCompact::SetStaticDefaultParameters(*parameter);
+#endif
+
+  initialize_features();
+
+  if (m_parameter->GetParam("show-weights") == NULL)
+    LoadFeatureFunctions();
+
+  LoadDecodeGraphs();
+
+  // sanity check that there are no weights without an associated FF
+  if (!CheckWeights()) return false;
 
   //Load extra feature weights
-  vector<string> extraWeightConfig = m_parameter->GetParam("weight-file");
-  if (extraWeightConfig.size()) {
-    if (extraWeightConfig.size() != 1) {
-      UserMessage::Add("One argument should be supplied for weight-file");
-      return false;
-    }
+  string weightFile;
+  m_parameter->SetParameter<string>(weightFile, "weight-file", "");
+  if (!weightFile.empty()) {
     ScoreComponentCollection extraWeights;
-    if (!extraWeights.Load(extraWeightConfig[0])) {
-      UserMessage::Add("Unable to load weights from " + extraWeightConfig[0]);
+    if (!extraWeights.Load(weightFile)) {
+      std::cerr << "Unable to load weights from " << weightFile;
       return false;
     }
     m_allWeights.PlusEquals(extraWeights);
@@ -562,32 +231,22 @@ bool StaticData::LoadData(Parameter *parameter)
   //Load sparse features from config (overrules weight file)
   LoadSparseWeightsFromConfig();
 
-  // alternate weight settings
-  if (m_parameter->GetParam("alternate-weight-setting").size() > 0) {
-    if (!LoadAlternateWeightSettings()) {
-      return false;
-    }
-  }
+  // load alternate weight settings
+  //
+  // When and where are these used??? [UG]
+  //
+  // Update: Just checked the manual. The config file is NOT the right
+  // place to do this. [UG]
+  //
+  // <TODO>
+  // * Eliminate alternate-weight-setting. Alternate weight settings should
+  //   be provided with the input, not in the config file.
+  // </TODO>
+  params = m_parameter->GetParam("alternate-weight-setting");
+  if (params && params->size() && !LoadAlternateWeightSettings())
+    return false;
+
   return true;
-}
-
-void StaticData::SetBooleanParameter( bool *parameter, string parameterName, bool defaultValue )
-{
-  // default value if nothing is specified
-  *parameter = defaultValue;
-  if (! m_parameter->isParamSpecified( parameterName ) ) {
-    return;
-  }
-
-  // if parameter is just specified as, e.g. "-parameter" set it true
-  if (m_parameter->GetParam( parameterName ).size() == 0) {
-    *parameter = true;
-  }
-
-  // if paramter is specified "-parameter true" or "-parameter false"
-  else if (m_parameter->GetParam( parameterName ).size() == 1) {
-    *parameter = Scan<bool>( m_parameter->GetParam( parameterName )[0]);
-  }
 }
 
 void StaticData::SetWeight(const FeatureFunction* sp, float weight)
@@ -596,7 +255,8 @@ void StaticData::SetWeight(const FeatureFunction* sp, float weight)
   m_allWeights.Assign(sp,weight);
 }
 
-void StaticData::SetWeights(const FeatureFunction* sp, const std::vector<float>& weights)
+void StaticData::SetWeights(const FeatureFunction* sp,
+                            const std::vector<float>& weights)
 {
   m_allWeights.Resize();
   m_allWeights.Assign(sp,weights);
@@ -605,13 +265,7 @@ void StaticData::SetWeights(const FeatureFunction* sp, const std::vector<float>&
 void StaticData::LoadNonTerminals()
 {
   string defaultNonTerminals;
-
-  if (m_parameter->GetParam("non-terminals").size() == 0) {
-    defaultNonTerminals = "X";
-  } else {
-    vector<std::string> tokens = Tokenize(m_parameter->GetParam("non-terminals")[0]);
-    defaultNonTerminals = tokens[0];
-  }
+  m_parameter->SetParameter<string>(defaultNonTerminals, "non-terminals", "X");
 
   FactorCollection &factorCollection = FactorCollection::Instance();
 
@@ -623,22 +277,24 @@ void StaticData::LoadNonTerminals()
   const Factor *targetFactor = factorCollection.AddFactor(Output, 0, defaultNonTerminals, true);
   m_outputDefaultNonTerminal.SetFactor(0, targetFactor);
 
-  // for unknwon words
-  if (m_parameter->GetParam("unknown-lhs").size() == 0) {
+  // for unknown words
+  const PARAM_VEC *params = m_parameter->GetParam("unknown-lhs");
+  if (params == NULL || params->size() == 0) {
     UnknownLHSEntry entry(defaultNonTerminals, 0.0f);
     m_unknownLHS.push_back(entry);
   } else {
-    const string &filePath = m_parameter->GetParam("unknown-lhs")[0];
+    const string &filePath = params->at(0);
 
     InputFileStream inStream(filePath);
     string line;
     while(getline(inStream, line)) {
       vector<string> tokens = Tokenize(line);
       UTIL_THROW_IF2(tokens.size() != 2,
-    		  "Incorrect unknown LHS format: " << line);
+                     "Incorrect unknown LHS format: " << line);
       UnknownLHSEntry entry(tokens[0], Scan<float>(tokens[1]));
       m_unknownLHS.push_back(entry);
-      const Factor *targetFactor = factorCollection.AddFactor(Output, 0, tokens[0], true);
+      // const Factor *targetFactor =
+      factorCollection.AddFactor(Output, 0, tokens[0], true);
     }
 
   }
@@ -650,24 +306,57 @@ void StaticData::LoadChartDecodingParameters()
   LoadNonTerminals();
 
   // source label overlap
-  if (m_parameter->GetParam("source-label-overlap").size() > 0) {
-    m_sourceLabelOverlap = (SourceLabelOverlap) Scan<int>(m_parameter->GetParam("source-label-overlap")[0]);
-  } else {
-    m_sourceLabelOverlap = SourceLabelOverlapAdd;
-  }
+  m_parameter->SetParameter(m_sourceLabelOverlap, "source-label-overlap",
+                            SourceLabelOverlapAdd);
 
-  m_ruleLimit = (m_parameter->GetParam("rule-limit").size() > 0)
-                ? Scan<size_t>(m_parameter->GetParam("rule-limit")[0]) : DEFAULT_MAX_TRANS_OPT_SIZE;
 }
 
-bool StaticData::LoadDecodeGraphs()
+void StaticData::LoadDecodeGraphs()
 {
-  const vector<string> &mappingVector = m_parameter->GetParam("mapping");
-  const vector<size_t> &maxChartSpans = Scan<size_t>(m_parameter->GetParam("max-chart-span"));
+  vector<string> mappingVector;
+  vector<size_t> maxChartSpans;
+
+  const PARAM_VEC *params;
+
+  params = m_parameter->GetParam("mapping");
+  if (params && params->size()) {
+    mappingVector = *params;
+  } else {
+    mappingVector.assign(1,"0 T 0");
+  }
+
+  params = m_parameter->GetParam("max-chart-span");
+  if (params && params->size()) {
+    maxChartSpans = Scan<size_t>(*params);
+  }
+
+  vector<string> toks = Tokenize(mappingVector[0]);
+  if (toks.size() == 3) {
+    // eg 0 T 0
+    LoadDecodeGraphsOld(mappingVector, maxChartSpans);
+  } else if (toks.size() == 2) {
+    if (toks[0] == "T" || toks[0] == "G") {
+      // eg. T 0
+      LoadDecodeGraphsOld(mappingVector, maxChartSpans);
+    } else {
+      // eg. 0 TM1
+      LoadDecodeGraphsNew(mappingVector, maxChartSpans);
+    }
+  } else {
+    UTIL_THROW(util::Exception, "Malformed mapping");
+  }
+}
+
+void
+StaticData::
+LoadDecodeGraphsOld(const vector<string> &mappingVector,
+                    const vector<size_t> &maxChartSpans)
+{
   const vector<PhraseDictionary*>& pts = PhraseDictionary::GetColl();
   const vector<GenerationDictionary*>& gens = GenerationDictionary::GetColl();
 
-  const std::vector<FeatureFunction*> *featuresRemaining = &FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> *featuresRemaining
+  = &FeatureFunction::GetFeatureFunctions();
   DecodeStep *prev = 0;
   size_t prevDecodeGraphInd = 0;
 
@@ -677,15 +366,18 @@ bool StaticData::LoadDecodeGraphs()
     DecodeType decodeType;
     size_t index;
     if (token.size() == 2) {
+      // eg. T 0
       decodeGraphInd = 0;
       decodeType = token[0] == "T" ? Translate : Generate;
       index = Scan<size_t>(token[1]);
     } else if (token.size() == 3) {
+      // eg. 0 T 0
       // For specifying multiple translation model
       decodeGraphInd = Scan<size_t>(token[0]);
       //the vectorList index can only increment by one
-      UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd && decodeGraphInd != prevDecodeGraphInd + 1,
-    		  "Malformed mapping");
+      UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd
+                     && decodeGraphInd != prevDecodeGraphInd + 1,
+                     "Malformed mapping");
       if (decodeGraphInd > prevDecodeGraphInd) {
         prev = NULL;
       }
@@ -704,7 +396,7 @@ bool StaticData::LoadDecodeGraphs()
     switch (decodeType) {
     case Translate:
       if(index>=pts.size()) {
-        stringstream strme;
+        util::StringStream strme;
         strme << "No phrase dictionary with index "
               << index << " available!";
         UTIL_THROW(util::Exception, strme.str());
@@ -713,15 +405,15 @@ bool StaticData::LoadDecodeGraphs()
       break;
     case Generate:
       if(index>=gens.size()) {
-        stringstream strme;
+        util::StringStream strme;
         strme << "No generation dictionary with index "
               << index << " available!";
         UTIL_THROW(util::Exception, strme.str());
       }
       decodeStep = new DecodeStepGeneration(gens[index], prev, *featuresRemaining);
       break;
-    case InsertNullFertilityWord:
-      UTIL_THROW(util::Exception, "Please implement NullFertilityInsertion.");
+    default:
+      UTIL_THROW(util::Exception, "Unknown decode step");
       break;
     }
 
@@ -730,9 +422,14 @@ bool StaticData::LoadDecodeGraphs()
     UTIL_THROW_IF2(decodeStep == NULL, "Null decode step");
     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
       DecodeGraph *decodeGraph;
-      if (IsChart()) {
-        size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
-        cerr << "max-chart-span: " << maxChartSpans[decodeGraphInd] << endl;
+      if (is_syntax(m_options->search.algo)) {
+        size_t maxChartSpan;
+        if (decodeGraphInd < maxChartSpans.size()) {
+          maxChartSpan = maxChartSpans[decodeGraphInd];
+          VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
+        } else {
+          maxChartSpan = DEFAULT_MAX_CHART_SPAN;
+        }
         decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
       } else {
         decodeGraph = new DecodeGraph(m_decodeGraphs.size());
@@ -749,98 +446,98 @@ bool StaticData::LoadDecodeGraphs()
   // set maximum n-gram size for backoff approach to decoding paths
   // default is always use subsequent paths (value = 0)
   // if specified, record maxmimum unseen n-gram size
-  const vector<string> &backoffVector = m_parameter->GetParam("decoding-graph-backoff");
-  for(size_t i=0; i<m_decodeGraphs.size() && i<backoffVector.size(); i++) {
-	DecodeGraph &decodeGraph = *m_decodeGraphs[i];
+  const vector<string> *backoffVector = m_parameter->GetParam("decoding-graph-backoff");
+  for(size_t i=0; i<m_decodeGraphs.size() && backoffVector && i<backoffVector->size(); i++) {
+    DecodeGraph &decodeGraph = *m_decodeGraphs[i];
 
-	if (i < backoffVector.size()) {
-		decodeGraph.SetBackoff(Scan<size_t>(backoffVector[i]));
-	}
+    if (i < backoffVector->size()) {
+      decodeGraph.SetBackoff(Scan<size_t>(backoffVector->at(i)));
+    }
   }
-
-  return true;
 }
 
-void StaticData::ReLoadParameter()
+void StaticData::LoadDecodeGraphsNew(const std::vector<std::string> &mappingVector, const std::vector<size_t> &maxChartSpans)
 {
-  UTIL_THROW(util::Exception, "completely redo. Too many hardcoded ff"); // TODO completely redo. Too many hardcoded ff
-  /*
-  m_verboseLevel = 1;
-  if (m_parameter->GetParam("verbose").size() == 1) {
-    m_verboseLevel = Scan<size_t>( m_parameter->GetParam("verbose")[0]);
-  }
+  const std::vector<FeatureFunction*> *featuresRemaining = &FeatureFunction::GetFeatureFunctions();
+  DecodeStep *prev = 0;
+  size_t prevDecodeGraphInd = 0;
 
-  // check whether "weight-u" is already set
-  if (m_parameter->isParamShortNameSpecified("u")) {
-    if (m_parameter->GetParamShortName("u").size() < 1 ) {
-      PARAM_VEC w(1,"1.0");
-      m_parameter->OverwriteParamShortName("u", w);
+  for(size_t i=0; i<mappingVector.size(); i++) {
+    vector<string>	token		= Tokenize(mappingVector[i]);
+    size_t decodeGraphInd;
+
+    decodeGraphInd = Scan<size_t>(token[0]);
+    //the vectorList index can only increment by one
+    UTIL_THROW_IF2(decodeGraphInd != prevDecodeGraphInd
+                   && decodeGraphInd != prevDecodeGraphInd + 1,
+                   "Malformed mapping");
+    if (decodeGraphInd > prevDecodeGraphInd) {
+      prev = NULL;
     }
-  }
 
-  //loop over all ScoreProducer to update weights
+    if (prevDecodeGraphInd < decodeGraphInd) {
+      featuresRemaining = &FeatureFunction::GetFeatureFunctions();
+    }
 
-  std::vector<const ScoreProducer*>::const_iterator iterSP;
-  for (iterSP = transSystem.GetFeatureFunctions().begin() ; iterSP != transSystem.GetFeatureFunctions().end() ; ++iterSP) {
-    std::string paramShortName = (*iterSP)->GetScoreProducerWeightShortName();
-    vector<float> Weights = Scan<float>(m_parameter->GetParamShortName(paramShortName));
+    FeatureFunction &ff = FeatureFunction::FindFeatureFunction(token[1]);
 
-    if (paramShortName == "d") { //basic distortion model takes the first weight
-      if ((*iterSP)->GetScoreProducerDescription() == "Distortion") {
-        Weights.resize(1); //take only the first element
-      } else { //lexicalized reordering model takes the other
-        Weights.erase(Weights.begin()); //remove the first element
+    DecodeStep* decodeStep = NULL;
+    if (typeid(ff) == typeid(PhraseDictionary)) {
+      decodeStep = new DecodeStepTranslation(&static_cast<PhraseDictionary&>(ff), prev, *featuresRemaining);
+    } else if (typeid(ff) == typeid(GenerationDictionary)) {
+      decodeStep = new DecodeStepGeneration(&static_cast<GenerationDictionary&>(ff), prev, *featuresRemaining);
+    } else {
+      UTIL_THROW(util::Exception, "Unknown decode step");
+    }
+
+    featuresRemaining = &decodeStep->GetFeaturesRemaining();
+
+    UTIL_THROW_IF2(decodeStep == NULL, "Null decode step");
+    if (m_decodeGraphs.size() < decodeGraphInd + 1) {
+      DecodeGraph *decodeGraph;
+      if (is_syntax(m_options->search.algo)) {
+        size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
+        VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
+        decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
+      } else {
+        decodeGraph = new DecodeGraph(m_decodeGraphs.size());
       }
-      //			std::cerr << "this is the Distortion Score Producer -> " << (*iterSP)->GetScoreProducerDescription() << std::cerr;
-      //			std::cerr << "this is the Distortion Score Producer; it has " << (*iterSP)->GetNumScoreComponents() << " weights"<< std::cerr;
-      //  	std::cerr << Weights << std::endl;
-    } else if (paramShortName == "tm") {
-      continue;
+
+      m_decodeGraphs.push_back(decodeGraph); // TODO max chart span
     }
-    SetWeights(*iterSP, Weights);
+
+    m_decodeGraphs[decodeGraphInd]->Add(decodeStep);
+    prev = decodeStep;
+    prevDecodeGraphInd = decodeGraphInd;
   }
 
-  //	std::cerr << "There are " << m_phraseDictionary.size() << " m_phraseDictionaryfeatures" << std::endl;
+  // set maximum n-gram size for backoff approach to decoding paths
+  // default is always use subsequent paths (value = 0)
+  // if specified, record maxmimum unseen n-gram size
+  const vector<string> *backoffVector = m_parameter->GetParam("decoding-graph-backoff");
+  for(size_t i=0; i<m_decodeGraphs.size() && backoffVector && i<backoffVector->size(); i++) {
+    DecodeGraph &decodeGraph = *m_decodeGraphs[i];
 
-  const vector<float> WeightsTM = Scan<float>(m_parameter->GetParamShortName("tm"));
-  //  std::cerr << "WeightsTM: " << WeightsTM << std::endl;
-
-  const vector<float> WeightsLM = Scan<float>(m_parameter->GetParamShortName("lm"));
-  //  std::cerr << "WeightsLM: " << WeightsLM << std::endl;
-
-  size_t index_WeightTM = 0;
-  for(size_t i=0; i<transSystem.GetPhraseDictionaries().size(); ++i) {
-    PhraseDictionaryFeature &phraseDictionaryFeature = *m_phraseDictionary[i];
-
-    //		std::cerr << "phraseDictionaryFeature.GetNumScoreComponents():" << phraseDictionaryFeature.GetNumScoreComponents() << std::endl;
-    //		std::cerr << "phraseDictionaryFeature.GetNumInputScores():" << phraseDictionaryFeature.GetNumInputScores() << std::endl;
-
-    vector<float> tmp_weights;
-    for(size_t j=0; j<phraseDictionaryFeature.GetNumScoreComponents(); ++j)
-      tmp_weights.push_back(WeightsTM[index_WeightTM++]);
-
-    //  std::cerr << tmp_weights << std::endl;
-
-    SetWeights(&phraseDictionaryFeature, tmp_weights);
+    if (i < backoffVector->size()) {
+      decodeGraph.SetBackoff(Scan<size_t>(backoffVector->at(i)));
+    }
   }
-  */
+
 }
 
 void StaticData::ReLoadBleuScoreFeatureParameter(float weight)
 {
-  assert(false);
-  /*
   //loop over ScoreProducers to update weights of BleuScoreFeature
+  const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
+  for(size_t i=0; i<producers.size(); ++i) {
+    FeatureFunction *ff = producers[i];
+    std::string ffName = ff->GetScoreProducerDescription();
 
-  std::vector<const ScoreProducer*>::const_iterator iterSP;
-  for (iterSP = transSystem.GetFeatureFunctions().begin() ; iterSP != transSystem.GetFeatureFunctions().end() ; ++iterSP) {
-    std::string paramShortName = (*iterSP)->GetScoreProducerWeightShortName();
-    if (paramShortName == "bl") {
-      SetWeight(*iterSP, weight);
+    if (ffName == "BleuScoreFeature") {
+      SetWeight(ff, weight);
       break;
     }
   }
-  */
 }
 
 // ScoreComponentCollection StaticData::GetAllWeightsScoreComponentCollection() const {}
@@ -848,23 +545,12 @@ void StaticData::ReLoadBleuScoreFeatureParameter(float weight)
 
 void StaticData::SetExecPath(const std::string &path)
 {
-  /*
-   namespace fs = boost::filesystem;
-
-   fs::path full_path( fs::initial_path<fs::path>() );
-
-   full_path = fs::system_complete( fs::path( path ) );
-
-   //Without file name
-   m_binPath = full_path.parent_path().string();
-   */
-
   // NOT TESTED
   size_t pos = path.rfind("/");
   if (pos !=  string::npos) {
     m_binPath = path.substr(0, pos);
   }
-  cerr << m_binPath << endl;
+  VERBOSE(1,m_binPath << endl);
 }
 
 const string &StaticData::GetBinDirectory() const
@@ -875,56 +561,60 @@ const string &StaticData::GetBinDirectory() const
 float StaticData::GetWeightWordPenalty() const
 {
   float weightWP = GetWeight(&WordPenaltyProducer::Instance());
-  //VERBOSE(1, "Read weightWP from translation sytem: " << weightWP << std::endl);
   return weightWP;
 }
 
-float StaticData::GetWeightUnknownWordPenalty() const
+void
+StaticData::
+InitializeForInput(ttasksptr const& ttask) const
 {
-  return GetWeight(&UnknownWordPenaltyProducer::Instance());
-}
-
-void StaticData::InitializeForInput(const InputType& source) const
-{
-  const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> &producers
+  = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0; i<producers.size(); ++i) {
     FeatureFunction &ff = *producers[i];
     if (! IsFeatureFunctionIgnored(ff)) {
       Timer iTime;
       iTime.start();
-      ff.InitializeForInput(source);
-      VERBOSE(3,"InitializeForInput( " << ff.GetScoreProducerDescription() << " ) = " << iTime << endl);
+      ff.InitializeForInput(ttask);
+      VERBOSE(3,"InitializeForInput( " << ff.GetScoreProducerDescription()
+              << " )" << "= " << iTime << endl);
     }
   }
 }
 
-void StaticData::CleanUpAfterSentenceProcessing(const InputType& source) const
+void
+StaticData::
+CleanUpAfterSentenceProcessing(ttasksptr const& ttask) const
 {
-  const std::vector<FeatureFunction*> &producers = FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> &producers
+  = FeatureFunction::GetFeatureFunctions();
   for(size_t i=0; i<producers.size(); ++i) {
     FeatureFunction &ff = *producers[i];
     if (! IsFeatureFunctionIgnored(ff)) {
-      ff.CleanUpAfterSentenceProcessing(source);
+      ff.CleanUpAfterSentenceProcessing(ttask);
     }
   }
 }
 
 void StaticData::LoadFeatureFunctions()
 {
-  const std::vector<FeatureFunction*> &ffs
-  = FeatureFunction::GetFeatureFunctions();
+  const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
   std::vector<FeatureFunction*>::const_iterator iter;
   for (iter = ffs.begin(); iter != ffs.end(); ++iter) {
     FeatureFunction *ff = *iter;
     bool doLoad = true;
 
-    if (PhraseDictionary *ffCast = dynamic_cast<PhraseDictionary*>(ff)) {
+    if (ff->RequireSortingAfterSourceContext()) {
+      m_requireSortingAfterSourceContext = true;
+    }
+
+    if (dynamic_cast<PhraseDictionary*>(ff)) {
       doLoad = false;
     }
 
     if (doLoad) {
       VERBOSE(1, "Loading " << ff->GetScoreProducerDescription() << endl);
-      ff->Load();
+      ff->Load(options());
     }
   }
 
@@ -932,7 +622,7 @@ void StaticData::LoadFeatureFunctions()
   for (size_t i = 0; i < pts.size(); ++i) {
     PhraseDictionary *pt = pts[i];
     VERBOSE(1, "Loading " << pt->GetScoreProducerDescription() << endl);
-    pt->Load();
+    pt->Load(options());
   }
 
   CheckLEGACYPT();
@@ -962,18 +652,18 @@ bool StaticData::CheckWeights() const
     set<string>::iterator iter;
     for (iter = weightNames.begin(); iter != weightNames.end(); ) {
       string fname = (*iter).substr(0, (*iter).find("_"));
-      cerr << fname << "\n";
+      VERBOSE(1,fname << "\n");
       if (featureNames.find(fname) != featureNames.end()) {
         weightNames.erase(iter++);
-      }
-      else {
+      } else {
         ++iter;
       }
     }
   }
 
   if (!weightNames.empty()) {
-    cerr << "The following weights have no feature function. Maybe incorrectly spelt weights: ";
+    cerr << "The following weights have no feature function. "
+         << "Maybe incorrectly spelt weights: ";
     set<string>::iterator iter;
     for (iter = weightNames.begin(); iter != weightNames.end(); ++iter) {
       cerr << *iter << ",";
@@ -985,7 +675,8 @@ bool StaticData::CheckWeights() const
 }
 
 
-void StaticData::LoadSparseWeightsFromConfig() {
+void StaticData::LoadSparseWeightsFromConfig()
+{
   set<string> featureNames;
   const std::vector<FeatureFunction*> &ffs = FeatureFunction::GetFeatureFunctions();
   for (size_t i = 0; i < ffs.size(); ++i) {
@@ -994,13 +685,13 @@ void StaticData::LoadSparseWeightsFromConfig() {
     featureNames.insert(descr);
   }
 
-  std::map<std::string, std::vector<float> > weights = m_parameter->GetAllWeights();
-  std::map<std::string, std::vector<float> >::iterator iter;
+  const std::map<std::string, std::vector<float> > &weights = m_parameter->GetAllWeights();
+  std::map<std::string, std::vector<float> >::const_iterator iter;
   for (iter = weights.begin(); iter != weights.end(); ++iter) {
     // this indicates that it is sparse feature
     if (featureNames.find(iter->first) == featureNames.end()) {
       UTIL_THROW_IF2(iter->second.size() != 1, "ERROR: only one weight per sparse feature allowed: " << iter->first);
-        m_allWeights.Assign(iter->first, iter->second[0]);
+      m_allWeights.Assign(iter->first, iter->second[0]);
     }
   }
 
@@ -1015,7 +706,11 @@ bool StaticData::LoadAlternateWeightSettings()
     return false;
   }
 
-  const vector<string> &weightSpecification = m_parameter->GetParam("alternate-weight-setting");
+  vector<string> weightSpecification;
+  const PARAM_VEC *params = m_parameter->GetParam("alternate-weight-setting");
+  if (params && params->size()) {
+    weightSpecification = *params;
+  }
 
   // get mapping from feature names to feature functions
   map<string,FeatureFunction*> nameToFF;
@@ -1037,9 +732,9 @@ bool StaticData::LoadAlternateWeightSettings()
       vector<string> tokens = Tokenize(weightSpecification[i]);
       vector<string> args = Tokenize(tokens[0], "=");
       currentId = args[1];
-      cerr << "alternate weight setting " << currentId << endl;
+      VERBOSE(1,"alternate weight setting " << currentId << endl);
       UTIL_THROW_IF2(m_weightSetting.find(currentId) != m_weightSetting.end(),
-    		  "Duplicate alternate weight id: " << currentId);
+                     "Duplicate alternate weight id: " << currentId);
       m_weightSetting[ currentId ] = new ScoreComponentCollection;
 
       // other specifications
@@ -1048,12 +743,12 @@ bool StaticData::LoadAlternateWeightSettings()
         // sparse weights
         if (args[0] == "weight-file") {
           if (args.size() != 2) {
-            UserMessage::Add("One argument should be supplied for weight-file");
+            std::cerr << "One argument should be supplied for weight-file";
             return false;
           }
           ScoreComponentCollection extraWeights;
           if (!extraWeights.Load(args[1])) {
-            UserMessage::Add("Unable to load weights from " + args[1]);
+            std::cerr << "Unable to load weights from " << args[1];
             return false;
           }
           m_weightSetting[ currentId ]->PlusEquals(extraWeights);
@@ -1065,8 +760,7 @@ bool StaticData::LoadAlternateWeightSettings()
           vector<string> featureFunctionName = Tokenize(args[1], ",");
           for(size_t k=0; k<featureFunctionName.size(); k++) {
             // check if a valid nane
-            map<string,FeatureFunction*>::iterator ffLookUp
-            = nameToFF.find(featureFunctionName[k]);
+            map<string,FeatureFunction*>::iterator ffLookUp = nameToFF.find(featureFunctionName[k]);
             if (ffLookUp == nameToFF.end()) {
               cerr << "ERROR: alternate weight setting " << currentId
                    << " specifies to ignore feature function " << featureFunctionName[k]
@@ -1085,7 +779,7 @@ bool StaticData::LoadAlternateWeightSettings()
       UTIL_THROW_IF2(currentId.empty(), "No alternative weights specified");
       vector<string> tokens = Tokenize(weightSpecification[i]);
       UTIL_THROW_IF2(tokens.size() < 2
-    		  , "Incorrect format for alternate weights: " << weightSpecification[i]);
+                     , "Incorrect format for alternate weights: " << weightSpecification[i]);
 
       // get name and weight values
       string name = tokens[0];
@@ -1114,43 +808,58 @@ bool StaticData::LoadAlternateWeightSettings()
 
 void StaticData::NoCache()
 {
-	bool noCache;
-	SetBooleanParameter( &noCache, "no-cache", false );
+  bool noCache;
+  m_parameter->SetParameter(noCache, "no-cache", false );
 
-	if (noCache) {
-		const std::vector<PhraseDictionary*> &pts = PhraseDictionary::GetColl();
-		for (size_t i = 0; i < pts.size(); ++i) {
-			PhraseDictionary &pt = *pts[i];
-			pt.SetParameter("cache-size", "0");
-		}
-	}
+  if (noCache) {
+    const std::vector<PhraseDictionary*> &pts = PhraseDictionary::GetColl();
+    for (size_t i = 0; i < pts.size(); ++i) {
+      PhraseDictionary &pt = *pts[i];
+      pt.SetParameter("cache-size", "0");
+    }
+  }
 }
 
-std::map<std::string, std::string> StaticData::OverrideFeatureNames()
+std::map<std::string, std::string>
+StaticData
+::OverrideFeatureNames()
 {
-	std::map<std::string, std::string> ret;
+  std::map<std::string, std::string> ret;
 
-	const PARAM_VEC &params = m_parameter->GetParam("feature-name-overwrite");
-	if (params.size()) {
-		UTIL_THROW_IF2(params.size() != 1, "Only provide 1 line in the section [feature-name-overwrite]");
-		vector<string> toks = Tokenize(params[0]);
-		UTIL_THROW_IF2(toks.size() % 2 != 0, "Format of -feature-name-overwrite must be [old-name new-name]*");
+  const PARAM_VEC *params = m_parameter->GetParam("feature-name-overwrite");
+  if (params && params->size()) {
+    UTIL_THROW_IF2(params->size() != 1, "Only provide 1 line in the section [feature-name-overwrite]");
+    vector<string> toks = Tokenize(params->at(0));
+    UTIL_THROW_IF2(toks.size() % 2 != 0, "Format of -feature-name-overwrite must be [old-name new-name]*");
 
-		for (size_t i = 0; i < toks.size(); i += 2) {
-			const string &oldName = toks[i];
-			const string &newName = toks[i+1];
-			ret[oldName] = newName;
-		}
-	}
+    for (size_t i = 0; i < toks.size(); i += 2) {
+      const string &oldName = toks[i];
+      const string &newName = toks[i+1];
+      ret[oldName] = newName;
+    }
+  }
 
-	return ret;
+  // FIXME Does this make sense for F2S?  Perhaps it should be changed once
+  // FIXME the pipeline uses RuleTable consistently.
+  SearchAlgorithm algo = m_options->search.algo;
+  if (algo == SyntaxS2T || algo == SyntaxT2S ||
+      algo == SyntaxT2S_SCFG || algo == SyntaxF2S) {
+    // Automatically override PhraseDictionary{Memory,Scope3}.  This will
+    // have to change if the FF parameters diverge too much in the future,
+    // but for now it makes switching between the old and new decoders much
+    // more convenient.
+    ret["PhraseDictionaryMemory"] = "RuleTable";
+    ret["PhraseDictionaryScope3"] = "RuleTable";
+  }
+
+  return ret;
 }
 
 void StaticData::OverrideFeatures()
 {
-  const PARAM_VEC &params = m_parameter->GetParam("feature-overwrite");
-  for (size_t i = 0; i < params.size(); ++i) {
-    const string &str = params[i];
+  const PARAM_VEC *params = m_parameter->GetParam("feature-overwrite");
+  for (size_t i = 0; params && i < params->size(); ++i) {
+    const string &str = params->at(i);
     vector<string> toks = Tokenize(str);
     UTIL_THROW_IF2(toks.size() <= 1, "Incorrect format for feature override: " << str);
 
@@ -1195,24 +904,24 @@ void StaticData::ResetWeights(const std::string &denseWeights, const std::string
   vector<float> weights;
   vector<string> toks = Tokenize(denseWeights);
   for (size_t i = 0; i < toks.size(); ++i) {
-	const string &tok = toks[i];
+    const string &tok = toks[i];
 
-	if (tok.substr(tok.size() - 1, 1) == "=") {
-	  // start of new feature
+    if (ends_with(tok, "=")) {
+      // start of new feature
 
-	  if (name != "") {
-		// save previous ff
-		const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(name);
-		m_allWeights.Assign(&ff, weights);
-		weights.clear();
-	  }
+      if (name != "") {
+        // save previous ff
+        const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(name);
+        m_allWeights.Assign(&ff, weights);
+        weights.clear();
+      }
 
-	  name = tok.substr(0, tok.size() - 1);
-	} else {
-	  // a weight for curr ff
-	  float weight = Scan<float>(toks[i]);
-	  weights.push_back(weight);
-	}
+      name = tok.substr(0, tok.size() - 1);
+    } else {
+      // a weight for curr ff
+      float weight = Scan<float>(toks[i]);
+      weights.push_back(weight);
+    }
   }
 
   const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(name);
@@ -1222,16 +931,36 @@ void StaticData::ResetWeights(const std::string &denseWeights, const std::string
   InputFileStream sparseStrme(sparseFile);
   string line;
   while (getline(sparseStrme, line)) {
-	  vector<string> toks = Tokenize(line);
-	  UTIL_THROW_IF2(toks.size() != 2, "Incorrect sparse weight format. Should be FFName_spareseName weight");
+    vector<string> toks = Tokenize(line);
+    UTIL_THROW_IF2(toks.size() != 2, "Incorrect sparse weight format. Should be FFName_spareseName weight");
 
-	  vector<string> names = Tokenize(toks[0], "_");
-	  UTIL_THROW_IF2(names.size() != 2, "Incorrect sparse weight name. Should be FFName_spareseName");
+    vector<string> names = Tokenize(toks[0], "_");
+    UTIL_THROW_IF2(names.size() != 2, "Incorrect sparse weight name. Should be FFName_spareseName");
 
-      const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(names[0]);
-	  m_allWeights.Assign(&ff, names[1], Scan<float>(toks[1]));
+    const FeatureFunction &ff = FeatureFunction::FindFeatureFunction(names[0]);
+    m_allWeights.Assign(&ff, names[1], Scan<float>(toks[1]));
   }
 }
 
-} // namespace
+size_t StaticData::GetCoordSpace(string space) const
+{
+  map<string const, size_t>::const_iterator m = m_coordSpaceMap.find(space);
+  if(m == m_coordSpaceMap.end()) {
+    return 0;
+  }
+  return m->second;
+}
 
+size_t StaticData::MapCoordSpace(string space)
+{
+  map<string const, size_t>::const_iterator m = m_coordSpaceMap.find(space);
+  if (m != m_coordSpaceMap.end()) {
+    return m->second;
+  }
+  size_t id = m_coordSpaceNextID;
+  m_coordSpaceNextID += 1;
+  m_coordSpaceMap[space] = id;
+  return id;
+}
+
+} // namespace

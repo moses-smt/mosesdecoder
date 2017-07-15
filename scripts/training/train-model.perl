@@ -1,5 +1,9 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 use Getopt::Long "GetOptions";
 use FindBin qw($RealBin);
@@ -21,27 +25,126 @@ if ($SCRIPTS_ROOTDIR eq '') {
 $SCRIPTS_ROOTDIR =~ s/\/training$//;
 #$SCRIPTS_ROOTDIR = $ENV{"SCRIPTS_ROOTDIR"} if defined($ENV{"SCRIPTS_ROOTDIR"});
 
-my($_EXTERNAL_BINDIR, $_ROOT_DIR, $_CORPUS_DIR, $_GIZA_E2F, $_GIZA_F2E, $_MODEL_DIR, $_TEMP_DIR, $_SORT_BUFFER_SIZE, $_SORT_BATCH_SIZE,  $_SORT_COMPRESS, $_SORT_PARALLEL, $_CORPUS,
-   $_CORPUS_COMPRESSION, $_FIRST_STEP, $_LAST_STEP, $_F, $_E, $_MAX_PHRASE_LENGTH,
-   $_LEXICAL_FILE, $_NO_LEXICAL_WEIGHTING, $_LEXICAL_COUNTS, $_VERBOSE, $_ALIGNMENT,
-   $_ALIGNMENT_FILE, $_ALIGNMENT_STEM, @_LM, $_EXTRACT_FILE, $_GIZA_OPTION, $_HELP, $_PARTS,
-   $_DIRECTION, $_ONLY_PRINT_GIZA, $_GIZA_EXTENSION, $_REORDERING,
-   $_REORDERING_SMOOTH, $_INPUT_FACTOR_MAX, $_ALIGNMENT_FACTORS,
-   $_TRANSLATION_FACTORS, $_REORDERING_FACTORS, $_GENERATION_FACTORS,
-   $_DECODING_GRAPH_BACKOFF,
-   $_DECODING_STEPS, $_PARALLEL, $_FACTOR_DELIMITER, @_PHRASE_TABLE,
-   @_REORDERING_TABLE, @_GENERATION_TABLE, @_GENERATION_TYPE, $_GENERATION_CORPUS,
-   $_DONT_ZIP,  $_MGIZA, $_MGIZA_CPUS, $_SNT2COOC, $_HMM_ALIGN, $_CONFIG, $_OSM, $_OSM_FACTORS, $_POST_DECODING_TRANSLIT, $_TRANSLITERATION_PHRASE_TABLE,
-   $_HIERARCHICAL,$_XML,$_SOURCE_SYNTAX,$_TARGET_SYNTAX,$_GLUE_GRAMMAR,$_GLUE_GRAMMAR_FILE,$_UNKNOWN_WORD_LABEL_FILE,$_GHKM,$_GHKM_TREE_FRAGMENTS,$_PCFG,@_EXTRACT_OPTIONS,@_SCORE_OPTIONS,
-   $_ALT_DIRECT_RULE_SCORE_1, $_ALT_DIRECT_RULE_SCORE_2, $_UNKNOWN_WORD_SOFT_MATCHES_FILE,
-   $_OMIT_WORD_ALIGNMENT,$_FORCE_FACTORED_FILENAMES,
-   $_MEMSCORE, $_FINAL_ALIGNMENT_MODEL,
-   $_CONTINUE,$_MAX_LEXICAL_REORDERING,$_DO_STEPS,
-   @_ADDITIONAL_INI,$_ADDITIONAL_INI_FILE,
-   @_BASELINE_ALIGNMENT_MODEL, $_BASELINE_EXTRACT, $_BASELINE_ALIGNMENT,
-   $_DICTIONARY, $_SPARSE_PHRASE_FEATURES, $_EPPEX, $_INSTANCE_WEIGHTS_FILE, $_LMODEL_OOV_FEATURE, $_NUM_LATTICE_FEATURES, $IGNORE, $_FLEXIBILITY_SCORE, $_EXTRACT_COMMAND);
+my($_EXTERNAL_BINDIR,
+	$_ROOT_DIR,
+	$_CORPUS_DIR,
+	$_GIZA_E2F,
+	$_GIZA_F2E,
+	$_MODEL_DIR,
+	$_TEMP_DIR,
+	$_SORT_BUFFER_SIZE,
+	$_SORT_BATCH_SIZE,
+	$_SORT_COMPRESS,
+	$_SORT_PARALLEL,
+	$_CORPUS,
+   	$_CORPUS_COMPRESSION,
+   	$_FIRST_STEP,
+   	$_LAST_STEP,
+   	$_F,
+   	$_E,
+   	$_MAX_PHRASE_LENGTH,
+   	$_DISTORTION_LIMIT,
+   	$_LEXICAL_FILE,
+   	$_NO_LEXICAL_WEIGHTING,
+   	$_LEXICAL_COUNTS,
+   	$_VERBOSE,
+   	$_ALIGNMENT,
+   	$_ALIGNMENT_FILE,
+   	$_ALIGNMENT_STEM,
+   	@_LM,
+   	$_EXTRACT_FILE,
+   	$_GIZA_OPTION,
+   	$_HELP,
+   	$_PARTS,
+   	$_DIRECTION,
+   	$_ONLY_PRINT_GIZA,
+   	$_GIZA_EXTENSION,
+   	$_REORDERING,
+   	$_REORDERING_SMOOTH,
+   	$_INPUT_FACTOR_MAX,
+   	$_ALIGNMENT_FACTORS,
+   	$_TRANSLATION_FACTORS,
+   	$_REORDERING_FACTORS,
+   	$_GENERATION_FACTORS,
+   	$_DECODING_GRAPH_BACKOFF,
+   	$_DECODING_STEPS,
+   	$_PARALLEL,
+   	$_FACTOR_DELIMITER,
+   	@_PHRASE_TABLE,
+   	@_REORDERING_TABLE,
+   	@_GENERATION_TABLE,
+   	@_GENERATION_TYPE,
+   	$_GENERATION_CORPUS,
+   	$_DONT_ZIP,
+   	$_MGIZA,
+   	$_MGIZA_CPUS,
+   	$_SNT2COOC,
+   	$_HMM_ALIGN,
+   	$_CONFIG,
+   	$_OSM,
+   	$_OSM_FACTORS,
+   	$_OSM_LOAD_METHOD,
+   	$_POST_DECODING_TRANSLIT,
+   	$_TRANSLITERATION_PHRASE_TABLE,
+   	$_HIERARCHICAL,
+   	$_XML,
+   	$_SOURCE_SYNTAX,
+   	$_TARGET_SYNTAX,
+    $_TARGET_SYNTACTIC_PREFERENCES,
+    $_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE,
+   	$_GLUE_GRAMMAR,
+   	$_GLUE_GRAMMAR_FILE,
+   	$_DONT_TUNE_GLUE_GRAMMAR,
+   	$_UNKNOWN_WORD_LABEL_FILE,
+   	$_PHRASE_ORIENTATION,
+   	$_PHRASE_ORIENTATION_PRIORS_FILE,
+   	$_GHKM,
+   	$_GHKM_TREE_FRAGMENTS,
+   	$_GHKM_SOURCE_LABELS,
+   	$_GHKM_SOURCE_LABELS_FILE,
+   	$_GHKM_PARTS_OF_SPEECH,
+   	$_GHKM_PARTS_OF_SPEECH_FILE,
+   	$_GHKM_PARTS_OF_SPEECH_FACTOR,
+    $_GHKM_STRIP_BITPAR_NONTERMINAL_LABELS,
+   	$_PCFG,
+   	@_EXTRACT_OPTIONS,
+   	@_SCORE_OPTIONS,
+   	$_S2T,
+   	$_ALT_DIRECT_RULE_SCORE_1,
+   	$_ALT_DIRECT_RULE_SCORE_2,
+   	$_UNKNOWN_WORD_SOFT_MATCHES_FILE,
+   	$_USE_SYNTAX_INPUT_WEIGHT_FEATURE,
+   	$_OMIT_WORD_ALIGNMENT,
+   	$_FORCE_FACTORED_FILENAMES,
+   	$_MEMSCORE,
+   	$_FINAL_ALIGNMENT_MODEL,
+   	$_CONTINUE,
+   	$_MAX_LEXICAL_REORDERING,
+   	$_LEXICAL_REORDERING_DEFAULT_SCORES,
+   	$_DO_STEPS,
+   	@_ADDITIONAL_INI,
+   	$_ADDITIONAL_INI_FILE,
+   	$_MMSAPT,
+   	@_BASELINE_ALIGNMENT_MODEL,
+   	$_BASELINE_EXTRACT,
+   	$_BASELINE_ALIGNMENT,
+   	$_DICTIONARY,
+   	$_SPARSE_PHRASE_FEATURES,
+   	$_EPPEX,
+   	$_INSTANCE_WEIGHTS_FILE,
+   	$_LMODEL_OOV_FEATURE,
+   	$_NUM_LATTICE_FEATURES,
+   	$IGNORE,
+    $_TARGET_CONSTITUENT_BOUNDARIES,
+   	$_FLEXIBILITY_SCORE,
+   	$_FEATURE_LINES,
+   	$_WEIGHT_LINES,
+   	$_EXTRACT_COMMAND,
+   	$_SCORE_COMMAND);
 my $_BASELINE_CORPUS = "";
-my $_CORES = 1;
+my $_CORES = `getconf _NPROCESSORS_ONLN`;
+chomp($_CORES);
+
 my $debug = 0; # debug this script, do not delete any files in debug mode
 
 $_HELP = 1
@@ -54,6 +157,7 @@ $_HELP = 1
 		       'giza-e2f=s' => \$_GIZA_E2F,
 		       'giza-f2e=s' => \$_GIZA_F2E,
 		       'max-phrase-length=s' => \$_MAX_PHRASE_LENGTH,
+		       'distortion-limit=s' => \$_DISTORTION_LIMIT,
 		       'lexical-file=s' => \$_LEXICAL_FILE,
 		       'no-lexical-weighting' => \$_NO_LEXICAL_WEIGHTING,
 		       'write-lexical-counts' => \$_LEXICAL_COUNTS,
@@ -75,8 +179,8 @@ $_HELP = 1
 		       'parallel' => \$_PARALLEL,
 		       'lm=s' => \@_LM,
 		       'help' => \$_HELP,
-		       'mgiza' => \$_MGIZA, # multi-thread 
-		       'mgiza-cpus=i' => \$_MGIZA_CPUS, # multi-thread 
+		       'mgiza' => \$_MGIZA, # multi-thread
+		       'mgiza-cpus=i' => \$_MGIZA_CPUS, # multi-thread
 		       'snt2cooc=s' => \$_SNT2COOC, # override snt2cooc exe. For when you want to run reduced memory snt2cooc.perl from mgiza
 		       'hmm-align' => \$_HMM_ALIGN,
 		       'final-alignment-model=s' => \$_FINAL_ALIGNMENT_MODEL, # use word alignment model 1/2/hmm/3/4/5 as final (default is 4); value 'hmm' equivalent to the --hmm-align switch
@@ -104,12 +208,22 @@ $_HELP = 1
 		       'generation-type=s' => \@_GENERATION_TYPE,
 		       'continue' => \$_CONTINUE,
 		       'hierarchical' => \$_HIERARCHICAL,
+		       's2t' => \$_S2T,
 		       'glue-grammar' => \$_GLUE_GRAMMAR,
 		       'glue-grammar-file=s' => \$_GLUE_GRAMMAR_FILE,
+		       'dont-tune-glue-grammar' => \$_DONT_TUNE_GLUE_GRAMMAR,
 		       'unknown-word-label-file=s' => \$_UNKNOWN_WORD_LABEL_FILE,
 		       'unknown-word-soft-matches-file=s' => \$_UNKNOWN_WORD_SOFT_MATCHES_FILE, # give dummy label to unknown word, and allow soft matches to all other labels (with cost determined by sparse features)
+		       'phrase-orientation' => \$_PHRASE_ORIENTATION,
+		       'phrase-orientation-priors-file=s' => \$_PHRASE_ORIENTATION_PRIORS_FILE, # currently relevant for Hiero and GHKM extraction only; phrase orientation for PBT has different implementation
 		       'ghkm' => \$_GHKM,
 		       'ghkm-tree-fragments' => \$_GHKM_TREE_FRAGMENTS,
+               'ghkm-source-labels' => \$_GHKM_SOURCE_LABELS,
+               'ghkm-source-labels-file=s' => \$_GHKM_SOURCE_LABELS_FILE,
+               'ghkm-parts-of-speech' => \$_GHKM_PARTS_OF_SPEECH,
+               'ghkm-parts-of-speech-file=s' => \$_GHKM_PARTS_OF_SPEECH_FILE,
+               'ghkm-parts-of-speech-factor' => \$_GHKM_PARTS_OF_SPEECH_FACTOR,
+               'ghkm-strip-bitpar-nonterminal-labels' => \$_GHKM_STRIP_BITPAR_NONTERMINAL_LABELS,
 		       'pcfg' => \$_PCFG,
 		       'alt-direct-rule-score-1' => \$_ALT_DIRECT_RULE_SCORE_1,
 		       'alt-direct-rule-score-2' => \$_ALT_DIRECT_RULE_SCORE_2,
@@ -117,22 +231,28 @@ $_HELP = 1
 		       'score-options=s' => \@_SCORE_OPTIONS,
 		       'source-syntax' => \$_SOURCE_SYNTAX,
 		       'target-syntax' => \$_TARGET_SYNTAX,
+		       'target-syntactic-preferences' => \$_TARGET_SYNTACTIC_PREFERENCES,
+               'target-syntactic-preferences-labels-file=s' => \$_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE,
+		       'use-syntax-input-weight-feature' => \$_USE_SYNTAX_INPUT_WEIGHT_FEATURE,
 		       'xml' => \$_XML,
 		       'no-word-alignment' => \$_OMIT_WORD_ALIGNMENT,
 		       'config=s' => \$_CONFIG,
 		       'osm-model=s' => \$_OSM,
-			'osm-setting=s' => \$_OSM_FACTORS,
-			'post-decoding-translit=s' => \$_POST_DECODING_TRANSLIT,
-			'transliteration-phrase-table=s' => \$_TRANSLITERATION_PHRASE_TABLE,		
+		       'osm-setting=s' => \$_OSM_FACTORS,
+		       'osm-load-method=s' => \$_OSM_LOAD_METHOD,
+		       'post-decoding-translit=s' => \$_POST_DECODING_TRANSLIT,
+		       'transliteration-phrase-table=s' => \$_TRANSLITERATION_PHRASE_TABLE,
+		       'mmsapt' => \$_MMSAPT,
 		       'max-lexical-reordering' => \$_MAX_LEXICAL_REORDERING,
+		       'lexical-reordering-default-scores=s' => \$_LEXICAL_REORDERING_DEFAULT_SCORES,
 		       'do-steps=s' => \$_DO_STEPS,
 		       'memscore:s' => \$_MEMSCORE,
 		       'force-factored-filenames' => \$_FORCE_FACTORED_FILENAMES,
 		       'dictionary=s' => \$_DICTIONARY,
 		       'sparse-phrase-features' => \$_SPARSE_PHRASE_FEATURES,
 		       'eppex:s' => \$_EPPEX,
-		       'additional-ini=s' => \@_ADDITIONAL_INI, 
-		       'additional-ini-file=s' => \$_ADDITIONAL_INI_FILE, 
+		       'additional-ini=s' => \@_ADDITIONAL_INI,
+		       'additional-ini-file=s' => \$_ADDITIONAL_INI_FILE,
 		       'baseline-alignment-model=s{8}' => \@_BASELINE_ALIGNMENT_MODEL,
 		       'baseline-extract=s' => \$_BASELINE_EXTRACT,
 		       'baseline-corpus=s' => \$_BASELINE_CORPUS,
@@ -141,8 +261,12 @@ $_HELP = 1
 		       'instance-weights-file=s' => \$_INSTANCE_WEIGHTS_FILE,
 		       'lmodel-oov-feature' => \$_LMODEL_OOV_FEATURE,
 		       'num-lattice-features=i' => \$_NUM_LATTICE_FEATURES,
+               'target-constituent-boundaries' => \$_TARGET_CONSTITUENT_BOUNDARIES,
 		       'flexibility-score' => \$_FLEXIBILITY_SCORE,
+		       'config-add-feature-lines=s' => \$_FEATURE_LINES,
+		       'config-add-weight-lines=s' => \$_WEIGHT_LINES,
 		       'extract-command=s' => \$_EXTRACT_COMMAND,
+		       'score-command=s' => \$_SCORE_COMMAND,
                );
 
 if ($_HELP) {
@@ -167,6 +291,10 @@ if (defined($IGNORE)) {
   print STDERR "WARNING: Do not specify -bin-dir or -scripts-root-dir anymore. These variable are ignored and will be deleted soon";
 }
 
+if (defined($_HIERARCHICAL) && defined($_REORDERING)) {
+  die("ERROR: You cannot specify a lexicalized reordering model (-reordering) when building an hierarchical model (-hierarchical)");
+}
+
 # convert all paths to absolute paths
 $_ROOT_DIR = File::Spec->rel2abs($_ROOT_DIR) if defined($_ROOT_DIR);
 $_EXTERNAL_BINDIR = File::Spec->rel2abs($_EXTERNAL_BINDIR) if defined($_EXTERNAL_BINDIR);
@@ -189,6 +317,7 @@ $_GIZA_F2E = File::Spec->rel2abs($_GIZA_F2E) if defined($_GIZA_F2E);
 my $_SCORE_OPTIONS; # allow multiple switches
 foreach (@_SCORE_OPTIONS) { $_SCORE_OPTIONS .= $_." "; }
 chop($_SCORE_OPTIONS) if $_SCORE_OPTIONS;
+
 my $_EXTRACT_OPTIONS; # allow multiple switches
 foreach (@_EXTRACT_OPTIONS) { $_EXTRACT_OPTIONS .= $_." "; }
 chop($_EXTRACT_OPTIONS) if $_EXTRACT_OPTIONS;
@@ -196,7 +325,6 @@ my $_ADDITIONAL_INI; # allow multiple switches
 foreach (@_ADDITIONAL_INI) { $_ADDITIONAL_INI .= $_." "; }
 chop($_ADDITIONAL_INI) if $_ADDITIONAL_INI;
 
-$_HIERARCHICAL = 1 if $_SOURCE_SYNTAX || $_TARGET_SYNTAX;
 $_XML = 1 if $_SOURCE_SYNTAX || $_TARGET_SYNTAX;
 my $___FACTOR_DELIMITER = $_FACTOR_DELIMITER;
 $___FACTOR_DELIMITER = '|' unless ($_FACTOR_DELIMITER);
@@ -230,7 +358,7 @@ foreach my $step (@step_conf) {
   }
   die("Only steps between 1 and 9 can be used") if ($f < 1 || $l > 9);
   die("The first step must be smaller than the last step") if ($f > $l);
-	
+
   for (my $i=$f; $i<=$l; $i++) {
     $STEPS[$i] = 1;
   }
@@ -244,12 +372,12 @@ my $GIZA;
 my $SNT2COOC;
 
 if ($STEPS[1] || $STEPS[2])
-{	
+{
 	if(!defined $_MGIZA ){
 		$GIZA = "$_EXTERNAL_BINDIR/GIZA++";
 		if (-x "$_EXTERNAL_BINDIR/snt2cooc.out") {
 			$SNT2COOC = "$_EXTERNAL_BINDIR/snt2cooc.out";
-		} elsif (-x "$_EXTERNAL_BINDIR/snt2cooc") { # Since "snt2cooc.out" and "snt2cooc" work the same   
+		} elsif (-x "$_EXTERNAL_BINDIR/snt2cooc") { # Since "snt2cooc.out" and "snt2cooc" work the same
 			$SNT2COOC = "$_EXTERNAL_BINDIR/snt2cooc";
 		}
 		print STDERR "Using single-thread GIZA\n";
@@ -265,19 +393,19 @@ if ($STEPS[1] || $STEPS[2])
 		} elsif (-x "$_EXTERNAL_BINDIR/snt2cooc.out") { # Important for users that use MGIZA and copy only the "mgiza" file to $_EXTERNAL_BINDIR
 			$SNT2COOC = "$_EXTERNAL_BINDIR/snt2cooc.out";
 		}
-		print STDERR "Using multi-thread GIZA\n";	
+		print STDERR "Using multi-thread GIZA\n";
 		if (!defined($_MGIZA_CPUS)) {
 			$_MGIZA_CPUS=4;
 		}
 		die("ERROR: Cannot find $MGIZA_MERGE_ALIGN") unless (-x $MGIZA_MERGE_ALIGN);
 	}
-	
+
 	# override
-	$SNT2COOC = "$_EXTERNAL_BINDIR/$_SNT2COOC" if defined($_SNT2COOC);	
+	$SNT2COOC = "$_EXTERNAL_BINDIR/$_SNT2COOC" if defined($_SNT2COOC);
 }
 
 # parallel extract
-my $SPLIT_EXEC = `gsplit --help 2>/dev/null`; 
+my $SPLIT_EXEC = `gsplit --help 2>/dev/null`;
 if($SPLIT_EXEC) {
   $SPLIT_EXEC = 'gsplit';
 }
@@ -285,13 +413,22 @@ else {
   $SPLIT_EXEC = 'split';
 }
 
-my $SORT_EXEC = `gsort --help 2>/dev/null`; 
+my $SORT_EXEC = `gsort --help 2>/dev/null`;
 if($SORT_EXEC) {
   $SORT_EXEC = 'gsort';
 }
 else {
   $SORT_EXEC = 'sort';
 }
+
+my $GZIP_EXEC;
+if(`which pigz 2> /dev/null`) {
+  $GZIP_EXEC = 'pigz';
+}
+else {
+  $GZIP_EXEC = 'gzip';
+}
+print STDERR "using $GZIP_EXEC \n";
 
 my $__SORT_BUFFER_SIZE = "";
 $__SORT_BUFFER_SIZE = "-S $_SORT_BUFFER_SIZE" if $_SORT_BUFFER_SIZE;
@@ -333,14 +470,19 @@ my $EPPEX = "$SCRIPTS_ROOTDIR/../bin/eppex";
 my $SYMAL = "$SCRIPTS_ROOTDIR/../bin/symal";
 my $GIZA2BAL = "$SCRIPTS_ROOTDIR/training/giza2bal.pl";
 
-my $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/../bin/score";
+my $PHRASE_SCORE;
+if (defined($_SCORE_COMMAND)) {
+  $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/../bin/$_SCORE_COMMAND";
+} else {
+  $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/../bin/score";
+}
 $PHRASE_SCORE = "$SCRIPTS_ROOTDIR/generic/score-parallel.perl $_CORES \"$SORT_EXEC $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE $__SORT_COMPRESS $__SORT_PARALLEL\" $PHRASE_SCORE";
 
 my $PHRASE_CONSOLIDATE = "$SCRIPTS_ROOTDIR/../bin/consolidate";
 my $FLEX_SCORER = "$SCRIPTS_ROOTDIR/training/flexibility_score.py";
 
 # utilities
-my $ZCAT = "gzip -cd";
+my $ZCAT = "$GZIP_EXEC -cd";
 my $BZCAT = "bzcat";
 
 # do a sanity check to make sure we can find the necessary binaries since
@@ -423,22 +565,25 @@ $___GLUE_GRAMMAR_FILE = $_GLUE_GRAMMAR_FILE if $_GLUE_GRAMMAR_FILE;
 my $___CONFIG = $___MODEL_DIR."/moses.ini";
 $___CONFIG = $_CONFIG if $_CONFIG;
 
-my $___DONT_ZIP = 0; 
+my $___DONT_ZIP = 0;
 $_DONT_ZIP = $___DONT_ZIP unless $___DONT_ZIP;
 
 my $___TEMP_DIR = $___MODEL_DIR;
 $___TEMP_DIR = $_TEMP_DIR if $_TEMP_DIR;
 
-my $___CONTINUE = 0; 
+my $___CONTINUE = 0;
 $___CONTINUE = $_CONTINUE if $_CONTINUE;
 
 my $___MAX_PHRASE_LENGTH = "7";
 $___MAX_PHRASE_LENGTH = "10" if $_HIERARCHICAL;
+$___MAX_PHRASE_LENGTH = $_MAX_PHRASE_LENGTH if $_MAX_PHRASE_LENGTH;
+
+my $___DISTORTION_LIMIT = 6;
+$___DISTORTION_LIMIT = $_DISTORTION_LIMIT if $_DISTORTION_LIMIT;
 
 my $___LEXICAL_WEIGHTING = 1;
 my $___LEXICAL_COUNTS = 0;
 my $___LEXICAL_FILE = $___MODEL_DIR."/lex";
-$___MAX_PHRASE_LENGTH = $_MAX_PHRASE_LENGTH if $_MAX_PHRASE_LENGTH;
 $___LEXICAL_WEIGHTING = 0 if $_NO_LEXICAL_WEIGHTING;
 $___LEXICAL_COUNTS = 1 if $_LEXICAL_COUNTS;
 $___LEXICAL_FILE = $_LEXICAL_FILE if $_LEXICAL_FILE;
@@ -503,13 +648,13 @@ foreach my $r (split(/\,/,$___REORDERING)) {
    $r =~ s/unidirectional/backward/;
    #set default values
    push @REORDERING_MODELS, {};
-   $REORDERING_MODELS[$model_num]{"dir"} = "backward";   
+   $REORDERING_MODELS[$model_num]{"dir"} = "backward";
    $REORDERING_MODELS[$model_num]{"type"} = "wbe";
    $REORDERING_MODELS[$model_num]{"collapse"} = "allff";
 
    #handle the options set in the config string
    foreach my $reoconf (split(/\-/,$r)) {
-      if ($reoconf =~ /^((msd)|(mslr)|(monotonicity)|(leftright))/) { 
+      if ($reoconf =~ /^((msd)|(mslr)|(monotonicity)|(leftright))/) {
         $REORDERING_MODELS[$model_num]{"orient"} = $reoconf;
         $REORDERING_LEXICAL = 1;
       }
@@ -566,7 +711,7 @@ foreach my $r (split(/\,/,$___REORDERING)) {
   # fix the overall model selection
   if (defined $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}}) {
      $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}} .=
-        $REORDERING_MODELS[$model_num]{"orient"}."-"; 
+        $REORDERING_MODELS[$model_num]{"orient"}."-";
   }
   else  {
      $REORDERING_MODEL_TYPES{$REORDERING_MODELS[$model_num]{"type"}} =
@@ -599,26 +744,26 @@ $___NOT_FACTORED = 0 unless $___ALIGNMENT_FACTORS eq "0-0";
 my $___TRANSLATION_FACTORS = undef;
 $___TRANSLATION_FACTORS = "0-0" unless defined($_DECODING_STEPS); # single factor default
 $___TRANSLATION_FACTORS = $_TRANSLATION_FACTORS if defined($_TRANSLATION_FACTORS);
-die("ERROR: format for translation factors is \"0-0\" or \"0-0+1-1\" or \"0-0+0,1-0,1\", you provided $___TRANSLATION_FACTORS\n") 
+die("ERROR: format for translation factors is \"0-0\" or \"0-0+1-1\" or \"0-0+0,1-0,1\", you provided $___TRANSLATION_FACTORS\n")
   if defined $___TRANSLATION_FACTORS && $___TRANSLATION_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*(\+\d+(\,\d+)*\-\d+(\,\d+)*)*$/;
 $___NOT_FACTORED = 0 unless $___TRANSLATION_FACTORS eq "0-0";
 
 my $___REORDERING_FACTORS = undef;
 $___REORDERING_FACTORS = "0-0" if defined($_REORDERING) && ! defined($_DECODING_STEPS); # single factor default
 $___REORDERING_FACTORS = $_REORDERING_FACTORS if defined($_REORDERING_FACTORS);
-die("ERROR: format for reordering factors is \"0-0\" or \"0-0+1-1\" or \"0-0+0,1-0,1\", you provided $___REORDERING_FACTORS\n") 
+die("ERROR: format for reordering factors is \"0-0\" or \"0-0+1-1\" or \"0-0+0,1-0,1\", you provided $___REORDERING_FACTORS\n")
   if defined $___REORDERING_FACTORS && $___REORDERING_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*(\+\d+(\,\d+)*\-\d+(\,\d+)*)*$/;
 $___NOT_FACTORED = 0 if defined($_REORDERING) && $___REORDERING_FACTORS ne "0-0";
 
 my $___GENERATION_FACTORS = undef;
 $___GENERATION_FACTORS = $_GENERATION_FACTORS if defined($_GENERATION_FACTORS);
-die("ERROR: format for generation factors is \"0-1\" or \"0-1+0-2\" or \"0-1+0,1-1,2\", you provided $___GENERATION_FACTORS\n") 
+die("ERROR: format for generation factors is \"0-1\" or \"0-1+0-2\" or \"0-1+0,1-1,2\", you provided $___GENERATION_FACTORS\n")
   if defined $___GENERATION_FACTORS && $___GENERATION_FACTORS !~ /^\d+(\,\d+)*\-\d+(\,\d+)*(\+\d+(\,\d+)*\-\d+(\,\d+)*)*$/;
 $___NOT_FACTORED = 0 if defined($___GENERATION_FACTORS);
 
 my $___DECODING_STEPS = "t0";
 $___DECODING_STEPS = $_DECODING_STEPS if defined($_DECODING_STEPS);
-die("ERROR: format for decoding steps is \"t0,g0,t1,g1:t2\", you provided $___DECODING_STEPS\n") 
+die("ERROR: format for decoding steps is \"t0,g0,t1,g1:t2\", you provided $___DECODING_STEPS\n")
   if defined $_DECODING_STEPS && $_DECODING_STEPS !~ /^[tg]\d+([,:][tg]\d+)*$/;
 
 ### MAIN
@@ -638,7 +783,7 @@ die("ERROR: format for decoding steps is \"t0,g0,t1,g1:t2\", you provided $___DE
 sub prepare {
     print STDERR "(1) preparing corpus @ ".`date`;
     safesystem("mkdir -p $___CORPUS_DIR") or die("ERROR: could not create corpus dir $___CORPUS_DIR");
-    
+
     print STDERR "(1.0) selecting factors @ ".`date`;
     my ($factor_f,$factor_e) = split(/\-/,$___ALIGNMENT_FACTORS);
     my $corpus = ($___NOT_FACTORED && !$_XML) ? $___CORPUS : $___CORPUS.".".$___ALIGNMENT_FACTORS;
@@ -650,21 +795,21 @@ sub prepare {
 	    &reduce_factors($___CORPUS.".".$___F,$corpus.".".$___F,$factor_f);
 	    &reduce_factors($___CORPUS.".".$___E,$corpus.".".$___E,$factor_e);
 	}
-	
+
 	&make_classes($corpus.".".$___F,$___VCB_F.".classes");
 	&make_classes($corpus.".".$___E,$___VCB_E.".classes");
-	
+
 	$VCB_F = &get_vocabulary($corpus.".".$___F,$___VCB_F,0);
 	$VCB_E = &get_vocabulary($corpus.".".$___E,$___VCB_E,1);
-	
+
 	&numberize_txt_file($VCB_F,$corpus.".".$___F,
 			    $VCB_E,$corpus.".".$___E,
 			    $___CORPUS_DIR."/$___F-$___E-int-train.snt");
-	
+
 	&numberize_txt_file($VCB_E,$corpus.".".$___E,
 			    $VCB_F,$corpus.".".$___F,
 			    $___CORPUS_DIR."/$___E-$___F-int-train.snt");
-    } 
+    }
     else {
 	print "Forking...\n";
 	if (! $___NOT_FACTORED || $_XML) {
@@ -673,7 +818,7 @@ sub prepare {
 	    if (!$pid) {
 		&reduce_factors($___CORPUS.".".$___F,$corpus.".".$___F,$factor_f);
 		exit 0;
-	    } 
+	    }
 	    else {
 		&reduce_factors($___CORPUS.".".$___E,$corpus.".".$___E,$factor_e);
 	    }
@@ -692,14 +837,14 @@ sub prepare {
 	    &make_classes($corpus.".".$___E,$___VCB_E.".classes");
 	    exit 0;
 	}
-	
+
 	$VCB_F = &get_vocabulary($corpus.".".$___F,$___VCB_F,0);
 	$VCB_E = &get_vocabulary($corpus.".".$___E,$___VCB_E,1);
-	
+
 	&numberize_txt_file($VCB_F,$corpus.".".$___F,
 			    $VCB_E,$corpus.".".$___E,
 			    $___CORPUS_DIR."/$___F-$___E-int-train.snt");
-	
+
 	&numberize_txt_file($VCB_E,$corpus.".".$___E,
 			    $VCB_F,$corpus.".".$___F,
 			    $___CORPUS_DIR."/$___E-$___F-int-train.snt");
@@ -754,7 +899,9 @@ sub reduce_factors {
         $firstline =~ s/^\s*//;
         $firstline =~ s/\s.*//;
         # count factors
-        my $maxfactorindex = $firstline =~ tr/$___FACTOR_DELIMITER/$___FACTOR_DELIMITER/;
+        my @WORD = split(/ /,$firstline);
+        my @FACTOR = split(/$___FACTOR_DELIMITER/,$WORD[0]);
+        my $maxfactorindex = scalar(@FACTOR)-1;
         if (join(",", @INCLUDE) eq join(",", 0..$maxfactorindex)) {
           # create just symlink; preserving compression
           my $realfull = $full;
@@ -799,7 +946,7 @@ sub reduce_factors {
 		# $first_factor = 0;
 		# print OUT $FACTOR[$factor];
 	    # }
-	} 
+	}
 	print OUT "\n";
     }
     print STDERR "\n";
@@ -823,7 +970,7 @@ sub get_vocabulary {
 #    return unless $___LEXICAL_WEIGHTING;
     my($corpus,$vcb,$is_target) = @_;
     print STDERR "(1.2) creating vcb file $vcb @ ".`date`;
-    
+
     my %WORD;
     open(TXT,$corpus) or die "ERROR: Can't read $corpus";
     while(<TXT>) {
@@ -869,7 +1016,7 @@ sub get_vocabulary {
 	$id++;
     }
     close(VCB);
-    
+
     return \%VCB;
 }
 
@@ -897,7 +1044,7 @@ sub make_dicts_files {
 	}
     close(DICT);
 	my @items = sort {$a <=> $b} keys %numberized_dict;
-	if (scalar(@items) == 0) { return 0; } 
+	if (scalar(@items) == 0) { return 0; }
 	foreach my $key (@items)
 	{
 		print OUT1 "$key $numberized_dict{$key}\n";
@@ -935,7 +1082,7 @@ sub numberize_line {
     chomp($txt);
     my $out = "";
     my $not_first = 0;
-    foreach (split(/ /,$txt)) { 
+    foreach (split(/ /,$txt)) {
 	next if $_ eq '';
 	$out .= " " if $not_first++;
 	print STDERR "Unknown word '$_'\n" unless defined($$VCB{$_});
@@ -984,13 +1131,13 @@ sub run_giza_on_parts {
     my $size = `cat $___CORPUS_DIR/$___F-$___E-int-train.snt | wc -l`;
     die "ERROR: Failed to get number of lines in $___CORPUS_DIR/$___F-$___E-int-train.snt"
       if $size == 0;
-    
+
     if ($___DIRECTION == 1 || $___DIRECTION == 2 || $___NOFORK) {
 	&run_single_giza_on_parts($___GIZA_F2E,$___E,$___F,
 			      $___VCB_E,$___VCB_F,
 			      $___CORPUS_DIR."/$___F-$___E-int-train.snt",$size)
    	    unless $___DIRECTION == 2;
- 
+
 	&run_single_giza_on_parts($___GIZA_E2F,$___F,$___E,
 			      $___VCB_F,$___VCB_E,
 			      $___CORPUS_DIR."/$___E-$___F-int-train.snt",$size)
@@ -1017,12 +1164,12 @@ sub run_giza_on_parts {
 
 sub run_single_giza_on_parts {
     my($dir,$e,$f,$vcb_e,$vcb_f,$train,$size) = @_;
-    
+
     my $part = 0;
 
     # break up training data into parts
     open(SNT,$train) or die "ERROR: Can't read $train";
-    { 
+    {
 	my $i=0;
 	while(<SNT>) {
 	    $i++;
@@ -1089,7 +1236,7 @@ sub merge_cooc_files {
 		$CURRENT[$i] = <$pf>;
 		chop($CURRENT[$i]) if $CURRENT[$i];
 	    }
-	}	
+	}
     }
     for(my $i=0;$i<scalar(@COOC_PART_FILE_NAME);$i++) {
 	close($PF[$i]);
@@ -1100,16 +1247,16 @@ sub merge_cooc_files {
 sub run_single_giza {
     my($dir,$e,$f,$vcb_e,$vcb_f,$train) = @_;
 
-    my %GizaDefaultOptions = 
+    my %GizaDefaultOptions =
 	(p0 => .999 ,
-	 m1 => 5 , 
-	 m2 => 0 , 
-	 m3 => 3 , 
-	 m4 => 3 , 
+	 m1 => 5 ,
+	 m2 => 0 ,
+	 m3 => 3 ,
+	 m4 => 3 ,
 	 o => "giza" ,
 	 nodumps => 1 ,
 	 onlyaldumps => 1 ,
-	 nsmooth => 4 , 
+	 nsmooth => 4 ,
          model1dumpfrequency => 1,
 	 model4smoothfactor => 0.4 ,
 	 t => $vcb_f,
@@ -1117,10 +1264,10 @@ sub run_single_giza {
 	 c => $train,
 	 CoocurrenceFile => "$dir/$f-$e.cooc",
 	 o => "$dir/$f-$e");
-	
+
 	if (defined $_DICTIONARY)
 	{ $GizaDefaultOptions{d} = $___CORPUS_DIR."/gizadict.$f-$e"; }
-	
+
 	# 5 Giza threads
 	if (defined $_MGIZA){ $GizaDefaultOptions{"ncpus"} = $_MGIZA_CPUS; }
 
@@ -1135,15 +1282,15 @@ sub run_single_giza {
     if ($___FINAL_ALIGNMENT_MODEL) {
         $GizaDefaultOptions{nodumps} =               ($___FINAL_ALIGNMENT_MODEL =~ /^[345]$/)? 1: 0;
         $GizaDefaultOptions{model345dumpfrequency} = 0;
-        
+
         $GizaDefaultOptions{model1dumpfrequency} =   ($___FINAL_ALIGNMENT_MODEL eq '1')? 5: 0;
-        
+
         $GizaDefaultOptions{m2} =                    ($___FINAL_ALIGNMENT_MODEL eq '2')? 5: 0;
         $GizaDefaultOptions{model2dumpfrequency} =   ($___FINAL_ALIGNMENT_MODEL eq '2')? 5: 0;
-        
+
         $GizaDefaultOptions{hmmiterations} =         ($___FINAL_ALIGNMENT_MODEL =~ /^(hmm|[345])$/)? 5: 0;
         $GizaDefaultOptions{hmmdumpfrequency} =      ($___FINAL_ALIGNMENT_MODEL eq 'hmm')? 5: 0;
-        
+
         $GizaDefaultOptions{m3} =                    ($___FINAL_ALIGNMENT_MODEL =~ /^[345]$/)? 3: 0;
         $GizaDefaultOptions{m4} =                    ($___FINAL_ALIGNMENT_MODEL =~ /^[45]$/)? 3: 0;
         $GizaDefaultOptions{m5} =                    ($___FINAL_ALIGNMENT_MODEL eq '5')? 3: 0;
@@ -1167,7 +1314,7 @@ sub run_single_giza {
 	my $value = $GizaDefaultOptions{$option} ;
 	$GizaOptions .= " -$option $value" ;
     }
-    
+
     &run_single_snt2cooc($dir,$e,$f,$vcb_e,$vcb_f,$train) if $___PARTS == 1;
 
     print STDERR "(2.1b) running giza $f-$e @ ".`date`."$GIZA $GizaOptions\n";
@@ -1180,7 +1327,7 @@ sub run_single_giza {
     print "$GIZA $GizaOptions\n";
     return if  $___ONLY_PRINT_GIZA;
     safesystem("$GIZA $GizaOptions");
- 
+
 	if (defined $_MGIZA and (!defined $___FINAL_ALIGNMENT_MODEL or $___FINAL_ALIGNMENT_MODEL ne '2')){
 		print STDERR "Merging $___GIZA_EXTENSION.part\* tables\n";
 		safesystem("$MGIZA_MERGE_ALIGN  $dir/$f-$e.$___GIZA_EXTENSION.part*>$dir/$f-$e.$___GIZA_EXTENSION");
@@ -1191,7 +1338,7 @@ sub run_single_giza {
     die "ERROR: Giza did not produce the output file $dir/$f-$e.$___GIZA_EXTENSION. Is your corpus clean (reasonably-sized sentences)?"
       if ! -e "$dir/$f-$e.$___GIZA_EXTENSION";
     safesystem("rm -f $dir/$f-$e.$___GIZA_EXTENSION.gz") or die;
-    safesystem("gzip $dir/$f-$e.$___GIZA_EXTENSION") or die;
+    safesystem("$GZIP_EXEC $dir/$f-$e.$___GIZA_EXTENSION") or die;
 }
 
 sub run_single_snt2cooc {
@@ -1222,7 +1369,7 @@ sub word_align {
 
     ### build arguments for giza2bal.pl
     my($__ALIGNMENT_CMD,$__ALIGNMENT_INV_CMD);
-    
+
     if (-e "$___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.bz2"){
       $__ALIGNMENT_CMD="\"$BZCAT $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.bz2\"";
     } elsif (-e "$___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.gz") {
@@ -1230,7 +1377,7 @@ sub word_align {
     } else {
       die "ERROR: Can't read $___GIZA_F2E/$___F-$___E.$___GIZA_EXTENSION.{bz2,gz}\n";
     }
-  
+
     if ( -e "$___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.bz2"){
       $__ALIGNMENT_INV_CMD="\"$BZCAT $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.bz2\"";
     }elsif (-e "$___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.gz"){
@@ -1238,32 +1385,32 @@ sub word_align {
     }else{
       die "ERROR: Can't read $___GIZA_E2F/$___E-$___F.$___GIZA_EXTENSION.{bz2,gz}\n\n";
     }
-    
+
    safesystem("mkdir -p $___MODEL_DIR") or die("ERROR: could not create dir $___MODEL_DIR");
-   
+
    #build arguments for symal
     my($__symal_a)="";
-    $__symal_a="union" if $___ALIGNMENT eq 'union';
+    $__symal_a="union" if $___ALIGNMENT=~ /union/;
     $__symal_a="intersect" if $___ALIGNMENT=~ /intersect/;
     $__symal_a="grow" if $___ALIGNMENT=~ /grow/;
     $__symal_a="srctotgt" if $___ALIGNMENT=~ /srctotgt/;
     $__symal_a="tgttosrc" if $___ALIGNMENT=~ /tgttosrc/;
- 
-    
+
+
     my($__symal_d,$__symal_f,$__symal_b);
     ($__symal_d,$__symal_f,$__symal_b)=("no","no","no");
 
     $__symal_d="yes" if $___ALIGNMENT=~ /diag/;
     $__symal_f="yes" if $___ALIGNMENT=~ /final/;
     $__symal_b="yes" if $___ALIGNMENT=~ /final-and/;
-    
+
     safesystem("$GIZA2BAL -d $__ALIGNMENT_INV_CMD -i $__ALIGNMENT_CMD |".
 	  "$SYMAL -alignment=\"$__symal_a\" -diagonal=\"$__symal_d\" ".
 	  "-final=\"$__symal_f\" -both=\"$__symal_b\" > ".
-	  "$___ALIGNMENT_FILE.$___ALIGNMENT") 
+	  "$___ALIGNMENT_FILE.$___ALIGNMENT")
       ||
        die "ERROR: Can't generate symmetrized alignment file\n"
-	
+
 }
 
 ### (4) BUILDING LEXICAL TRANSLATION TABLE
@@ -1274,7 +1421,7 @@ sub get_lexical_factored {
 	&get_lexical($___CORPUS.".".$___F,
 		     $___CORPUS.".".$___E,
 		     $___ALIGNMENT_FILE.".".$___ALIGNMENT,
-		     $___LEXICAL_FILE, 
+		     $___LEXICAL_FILE,
 		     $___LEXICAL_COUNTS,
                      $_BASELINE_CORPUS.".".$___F,
                      $_BASELINE_CORPUS.".".$___E,
@@ -1296,7 +1443,7 @@ sub get_lexical_factored {
 	    &get_lexical($___ALIGNMENT_STEM.".".$factor_f.".".$___F,
 			 $___ALIGNMENT_STEM.".".$factor_e.".".$___E,
 			 $___ALIGNMENT_FILE.".".$___ALIGNMENT,
-			 $lexical_file, 
+			 $lexical_file,
 			 $___LEXICAL_COUNTS,
                          $_BASELINE_CORPUS.".".$factor_f.".".$___F,
                          $_BASELINE_CORPUS.".".$factor_e.".".$___E,
@@ -1330,7 +1477,7 @@ sub extract_phrase_factored {
 	    foreach my $factor (split(/\+/,"$___REORDERING_FACTORS")) {
 		my $factor_key = $factor.":".&get_max_phrase_length(-1); # max
 		if (!defined($EXTRACT_FOR_FACTOR{$factor_key}{"translation"})) {
-		    push @FACTOR_LIST, $factor_key;	    
+		    push @FACTOR_LIST, $factor_key;
 		}
 		$EXTRACT_FOR_FACTOR{$factor_key}{"reordering"}++;
 	    }
@@ -1340,14 +1487,14 @@ sub extract_phrase_factored {
 	    my ($factor,$max_length) = split(/:/,$factor_key);
 	    print STDERR "(5) [$factor] extract phrases (max length $max_length)@ ".`date`;
 	    my ($factor_f,$factor_e) = split(/\-/,$factor);
-	    
+
 	    &reduce_factors($___CORPUS.".".$___F,
 			    $___ALIGNMENT_STEM.".".$factor_f.".".$___F,
 			    $factor_f);
 	    &reduce_factors($___CORPUS.".".$___E,
 			    $___ALIGNMENT_STEM.".".$factor_e.".".$___E,
 			    $factor_e);
-	    
+
 	    &extract_phrase($___ALIGNMENT_STEM.".".$factor_f.".".$___F,
 			    $___ALIGNMENT_STEM.".".$factor_e.".".$___E,
 			    $___EXTRACT_FILE.".".$factor,
@@ -1360,7 +1507,7 @@ sub extract_phrase_factored {
 
 sub get_max_phrase_length {
     my ($table_number) = @_;
-    
+
     # single length? that's it then
     if ($___MAX_PHRASE_LENGTH =~ /^\d+$/) {
 	return $___MAX_PHRASE_LENGTH;
@@ -1377,7 +1524,7 @@ sub get_max_phrase_length {
 	return $max_length;
     }
 
-    # look up length for table 
+    # look up length for table
     $max_length = $max[0]; # fallback: first specified length
     if ($#max >= $table_number) {
 	$max_length = $max[$table_number];
@@ -1389,7 +1536,7 @@ sub get_extract_reordering_flags {
     if ($___MAX_LEXICAL_REORDERING) {
 	return " --model wbe-mslr --model phrase-mslr --model hier-mslr";
     }
-    return "" unless @REORDERING_MODELS; 
+    return "" unless @REORDERING_MODELS;
     my $config_string = "";
     for my $type ( keys %REORDERING_MODEL_TYPES) {
 	$config_string .= " --model $type-".$REORDERING_MODEL_TYPES{$type};
@@ -1421,10 +1568,21 @@ sub extract_phrase {
         $cmd .= " --PCFG" if $_PCFG;
         $cmd .= " --UnpairedExtractFormat" if $_ALT_DIRECT_RULE_SCORE_1 || $_ALT_DIRECT_RULE_SCORE_2;
         $cmd .= " --ConditionOnTargetLHS" if $_ALT_DIRECT_RULE_SCORE_1;
-        $cmd .= " --TreeFragments" if $_GHKM_TREE_FRAGMENTS;
-        if (!defined($_GHKM)) {
+        $cmd .= " --PhraseOrientation" if $_PHRASE_ORIENTATION;
+        $cmd .= " --PhraseOrientationPriors $_PHRASE_ORIENTATION_PRIORS_FILE" if defined($_PHRASE_ORIENTATION_PRIORS_FILE);
+        if (defined($_GHKM))
+        {
+          $cmd .= " --TreeFragments" if $_GHKM_TREE_FRAGMENTS;
+          $cmd .= " --SourceLabels" if $_GHKM_SOURCE_LABELS;
+          $cmd .= " --PartsOfSpeech" if $_GHKM_PARTS_OF_SPEECH;
+          $cmd .= " --PartsOfSpeechFactor" if $_GHKM_PARTS_OF_SPEECH_FACTOR;
+          $cmd .= " --StripBitParLabels" if $_GHKM_STRIP_BITPAR_NONTERMINAL_LABELS;
+        }
+        else
+        {
           $cmd .= " --SourceSyntax" if $_SOURCE_SYNTAX;
           $cmd .= " --TargetSyntax" if $_TARGET_SYNTAX;
+          $cmd .= " --TargetSyntacticPreferences" if $_TARGET_SYNTACTIC_PREFERENCES;
           $cmd .= " --MaxSpan $max_length";
         }
         $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
@@ -1449,25 +1607,31 @@ sub extract_phrase {
       }
       $cmd .= " ".$_EXTRACT_OPTIONS if defined($_EXTRACT_OPTIONS);
     }
-    
+
     $cmd .= " --GZOutput ";
     $cmd .= " --InstanceWeights $_INSTANCE_WEIGHTS_FILE " if defined $_INSTANCE_WEIGHTS_FILE;
     $cmd .= " --BaselineExtract $_BASELINE_EXTRACT" if defined($_BASELINE_EXTRACT) && $PHRASE_EXTRACT =~ /extract-parallel.perl/;
+    $cmd .= " --TargetConstituentBoundaries" if $_TARGET_CONSTITUENT_BOUNDARIES;
     $cmd .= " --FlexibilityScore" if $_FLEXIBILITY_SCORE;
-    
+    $cmd .= " --NoTTable" if $_MMSAPT;
+
     map { die "File not found: $_" if ! -e $_ } ($alignment_file_e, $alignment_file_f, $alignment_file_a);
     print STDERR "$cmd\n";
     safesystem("$cmd") or die "ERROR: Phrase extraction failed (missing input files?)";
 
     if (defined($_BASELINE_EXTRACT) && $PHRASE_EXTRACT !~ /extract-parallel.perl/) {
       print STDERR "merging with baseline extract from $_BASELINE_EXTRACT\n";
-      safesystem("$ZCAT $_BASELINE_EXTRACT.gz $extract_file$suffix.gz | gzip > $extract_file.gz");
-      safesystem("$ZCAT $_BASELINE_EXTRACT.inv.gz $extract_file$suffix.inv.gz | gzip > $extract_file.inv.gz");
-      safesystem("$ZCAT $_BASELINE_EXTRACT.o.gz $extract_file$suffix.o.gz | gzip > $extract_file.o.gz")
+      safesystem("$ZCAT $_BASELINE_EXTRACT.gz $extract_file$suffix.gz | $GZIP_EXEC > $extract_file.gz")
+        if -e "$extract_file$suffix.gz";
+      safesystem("$ZCAT $_BASELINE_EXTRACT.inv.gz $extract_file$suffix.inv.gz | $GZIP_EXEC > $extract_file.inv.gz")
+        if -e "$extract_file$suffix.inv.gz";
+      safesystem("$ZCAT $_BASELINE_EXTRACT.o.gz $extract_file$suffix.o.gz | $GZIP_EXEC > $extract_file.o.gz")
 	if -e "$extract_file$suffix.o.gz";
-      safesystem("rm $extract_file$suffix.gz");
-      safesystem("rm $extract_file$suffix.inv.gz");
-      safesystem("rm $extract_file$suffix.o.gz") 
+      safesystem("rm $extract_file$suffix.gz")
+        if -e "$extract_file$suffix.gz";
+      safesystem("rm $extract_file$suffix.inv.gz")
+        if -e "$extract_file$suffix.inv.gz";
+      safesystem("rm $extract_file$suffix.o.gz")
         if -e "$extract_file$suffix.o.gz";
     }
 
@@ -1516,7 +1680,7 @@ sub score_phrase_phrase_extract {
 
     # distinguish between score and consolidation options
     my $ONLY_DIRECT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /OnlyDirect/);
-    my $PHRASE_COUNT = (!defined($_SCORE_OPTIONS) || $_SCORE_OPTIONS !~ /NoPhraseCount/);
+    my $PHRASE_COUNT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /PhraseCount/);
     my $LOW_COUNT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /LowCountFeature/);
     my ($SPARSE_COUNT_BIN,$COUNT_BIN,$DOMAIN) = ("","","");
     $SPARSE_COUNT_BIN = $1 if defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /SparseCountBinFeature ([\s\d]*\d)/;
@@ -1540,18 +1704,25 @@ sub score_phrase_phrase_extract {
       $UNALIGNED_FW_F = $1;
       $UNALIGNED_FW_E = $2;
     }
+    my $MIN_SCORE = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /MinScore *(\S+)/) ? $1 : undef;
     my $GOOD_TURING = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /GoodTuring/);
     my $KNESER_NEY = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /KneserNey/);
     my $LOG_PROB = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /LogProb/);
     my $NEG_LOG_PROB = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /NegLogProb/);
     my $NO_LEX = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /NoLex/);
+    my $MIN_COUNT = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /MinCount ([\d\.]+)/) ? $1 : undef;
     my $MIN_COUNT_HIERARCHICAL = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /MinCountHierarchical ([\d\.]+)/) ? $1 : undef;
+    my $SOURCE_LABELS = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /SourceLabels/);
+    my $SOURCE_LABEL_COUNTS_LHS = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /SourceLabelCountsLHS/);
+    my $SPAN_LENGTH = (defined($_SCORE_OPTIONS) && $_SCORE_OPTIONS =~ /SpanLength/);
     my $CORE_SCORE_OPTIONS = "";
     $CORE_SCORE_OPTIONS .= " --LogProb" if $LOG_PROB;
     $CORE_SCORE_OPTIONS .= " --NegLogProb" if $NEG_LOG_PROB;
     $CORE_SCORE_OPTIONS .= " --NoLex" if $NO_LEX;
 	$CORE_SCORE_OPTIONS .= " --Singleton" if $SINGLETON;
 	$CORE_SCORE_OPTIONS .= " --CrossedNonTerm" if $CROSSEDNONTERM;
+	$CORE_SCORE_OPTIONS .= " --SourceLabels" if $SOURCE_LABELS;
+	$CORE_SCORE_OPTIONS .= " --SourceLabelCountsLHS " if $SOURCE_LABEL_COUNTS_LHS;
 
     my $substep = 1;
     my $isParent = 1;
@@ -1563,7 +1734,7 @@ sub score_phrase_phrase_extract {
 		  $substep+=2;
       }
       my $pid = fork();
-    
+
       if ($pid == 0)
       {
 	      next if $___CONTINUE && -e "$ttable_file.half.$direction";
@@ -1574,7 +1745,7 @@ sub score_phrase_phrase_extract {
 	          $inverse = "--Inverse";
                   $extract_filename = $extract_file.".inv";
               }
-              
+
 	      my $extract = "$extract_filename.sorted.gz";
 
 	      print STDERR "(6.".($substep++).")  creating table half $ttable_file.half.$direction @ ".`date`;
@@ -1584,16 +1755,24 @@ sub score_phrase_phrase_extract {
         $cmd .= " --NoWordAlignment" if $_OMIT_WORD_ALIGNMENT;
         $cmd .= " --KneserNey" if $KNESER_NEY;
         $cmd .= " --GoodTuring" if $GOOD_TURING && $inverse eq "";
+        $cmd .= " --SpanLength" if $SPAN_LENGTH && $inverse eq "";
         $cmd .= " --UnalignedPenalty" if $UNALIGNED_COUNT;
         $cmd .= " --UnalignedFunctionWordPenalty ".($inverse ? $UNALIGNED_FW_F : $UNALIGNED_FW_E) if $UNALIGNED_FW_COUNT;
+        $cmd .= " --MinCount $MIN_COUNT" if $MIN_COUNT;
         $cmd .= " --MinCountHierarchical $MIN_COUNT_HIERARCHICAL" if $MIN_COUNT_HIERARCHICAL;
         $cmd .= " --PCFG" if $_PCFG;
         $cmd .= " --UnpairedExtractFormat" if $_ALT_DIRECT_RULE_SCORE_1 || $_ALT_DIRECT_RULE_SCORE_2;
         $cmd .= " --ConditionOnTargetLHS" if $_ALT_DIRECT_RULE_SCORE_1;
         $cmd .= " --TreeFragments" if $_GHKM_TREE_FRAGMENTS;
+        $cmd .= " --PhraseOrientation" if $_PHRASE_ORIENTATION;
+        $cmd .= " --PhraseOrientationPriors $_PHRASE_ORIENTATION_PRIORS_FILE" if $_PHRASE_ORIENTATION && defined($_PHRASE_ORIENTATION_PRIORS_FILE);
+        $cmd .= " --SourceLabels $_GHKM_SOURCE_LABELS_FILE" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
+        $cmd .= " --TargetSyntacticPreferences $_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE" if $_TARGET_SYNTACTIC_PREFERENCES && defined($_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE);
+        $cmd .= " --PartsOfSpeech $_GHKM_PARTS_OF_SPEECH_FILE" if $_GHKM_PARTS_OF_SPEECH && defined($_GHKM_PARTS_OF_SPEECH_FILE);
+        $cmd .= " --TargetConstituentBoundaries" if $_TARGET_CONSTITUENT_BOUNDARIES;
+        $cmd .= " --FlexibilityScore=$FLEX_SCORER" if $_FLEXIBILITY_SCORE;
         $cmd .= " $DOMAIN" if $DOMAIN;
         $cmd .= " $CORE_SCORE_OPTIONS" if defined($_SCORE_OPTIONS);
-        $cmd .= " --FlexibilityScore=$FLEX_SCORER" if $_FLEXIBILITY_SCORE;
 
 				# sorting
 				if ($direction eq "e2f" || $_ALT_DIRECT_RULE_SCORE_1 || $_ALT_DIRECT_RULE_SCORE_2) {
@@ -1604,8 +1783,8 @@ sub score_phrase_phrase_extract {
 				}
 
         print STDERR $cmd."\n";
-        safesystem($cmd) or die "ERROR: Scoring of phrases failed";	    
-  
+        safesystem($cmd) or die "ERROR: Scoring of phrases failed";
+
         exit();
       }
       else
@@ -1635,15 +1814,19 @@ sub score_phrase_phrase_extract {
     $cmd .= " --LogProb" if $LOG_PROB;
     $cmd .= " --NegLogProb" if $NEG_LOG_PROB;
     $cmd .= " --OnlyDirect" if $ONLY_DIRECT;
-    $cmd .= " --NoPhraseCount" unless $PHRASE_COUNT;
+    $cmd .= " --PhraseCount" if $PHRASE_COUNT;
     $cmd .= " --LowCountFeature" if $LOW_COUNT;
     $cmd .= " --CountBinFeature $COUNT_BIN" if $COUNT_BIN;
     $cmd .= " --SparseCountBinFeature $SPARSE_COUNT_BIN" if $SPARSE_COUNT_BIN;
+    $cmd .= " --MinScore $MIN_SCORE" if $MIN_SCORE;
     $cmd .= " --GoodTuring $ttable_file.half.f2e.gz.coc" if $GOOD_TURING;
     $cmd .= " --KneserNey $ttable_file.half.f2e.gz.coc" if $KNESER_NEY;
-    
-    $cmd .= " | gzip -c > $ttable_file.gz";
-    
+    $cmd .= " --SourceLabels $_GHKM_SOURCE_LABELS_FILE" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
+    $cmd .= " --TargetSyntacticPreferences $_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE" if $_TARGET_SYNTACTIC_PREFERENCES && defined($_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE);
+    $cmd .= " --PartsOfSpeech $_GHKM_PARTS_OF_SPEECH_FILE" if $_GHKM_PARTS_OF_SPEECH && defined($_GHKM_PARTS_OF_SPEECH_FILE);
+
+    $cmd .= " | $GZIP_EXEC -c > $ttable_file.gz";
+
     safesystem($cmd) or die "ERROR: Consolidating the two phrase table halves failed";
     if (! $debug) { safesystem("rm -f $ttable_file.half.*") or die("ERROR"); }
 }
@@ -1659,7 +1842,7 @@ sub score_phrase_memscore {
 
     # The output is sorted to avoid breaking scripts that rely on the
     # sorting behaviour of the previous scoring algorithm.
-    my $cmd = "$MEMSCORE $options | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR | gzip >$ttable_file.gz";
+    my $cmd = "$MEMSCORE $options | LC_ALL=C sort $__SORT_BUFFER_SIZE $__SORT_BATCH_SIZE -T $___TEMP_DIR | $GZIP_EXEC >$ttable_file.gz";
     if (-e "$extract_file.gz") {
         $cmd = "$ZCAT $extract_file.gz | ".$cmd;
     } else {
@@ -1694,7 +1877,7 @@ sub get_reordering_factored {
 	    foreach my $factor (split(/\+/,$___REORDERING_FACTORS)) {
 		print STDERR "(7.1) [$factor] learn reordering model @ ".`date`;
 		my ($factor_f,$factor_e) = split(/\-/,$factor);
-		# foreach my $model (@REORDERING_MODELS) { 
+		# foreach my $model (@REORDERING_MODELS) {
 		#     my $file = "$___MODEL_DIR/reordering-table.$factor";
 		#     $file .= $model->{"all"};
 		#     $file = shift @SPECIFIED_TABLE if scalar(@SPECIFIED_TABLE);
@@ -1705,7 +1888,7 @@ sub get_reordering_factored {
         $file .= ".";
 		&get_reordering("$___EXTRACT_FILE.$factor",$file);
 	    }
-	} 
+	}
     }
     else {
 	print STDERR "  ... skipping this step, reordering is not lexicalized ...\n";
@@ -1715,9 +1898,9 @@ sub get_reordering_factored {
 sub get_reordering {
 	my ($extract_file,$reo_model_path) = @_;
 	my $smooth = $___REORDERING_SMOOTH;
-	
+
 	print STDERR "(7.2) building tables @ ".`date`;
-	
+
 	#create cmd string for lexical reordering scoring
 	my $cmd = "$LEXICAL_REO_SCORER $extract_file.o.sorted.gz $smooth $reo_model_path";
 	$cmd .= " --SmoothWithCounts" if ($smooth =~ /(.+)u$/);
@@ -1726,7 +1909,7 @@ sub get_reordering {
                 # * the value stored in $REORDERING_MODEL_TYPES{$mtype} is a concatenation of the "orient"
                 #   attributes such as "msd"
                 # * the "filename" attribute is appended to the filename, but actually serves as the main configuration specification
-                #   for reordering scoring. it holds a string such as "wbe-msd-didirectional-fe"
+                #   for reordering scoring. it holds a string such as "wbe-msd-bidirectional-fe"
                 #   which has the more general format type-orient-dir-lang
 		$cmd .= " --model \"$mtype $REORDERING_MODEL_TYPES{$mtype}";
 		foreach my $model (@REORDERING_MODELS) {
@@ -1736,10 +1919,10 @@ sub get_reordering {
 		}
 		$cmd .= "\"";
 	}
-	
+
 	#Call the lexical reordering scorer
 	safesystem("$cmd") or die "ERROR: Lexical reordering scoring failed";
-	
+
 }
 
 
@@ -1762,7 +1945,7 @@ sub get_generation_factored {
 	    $type = shift @TYPE if scalar @TYPE;
 	    &get_generation($file,$type,$factor,$factor_e_source,$factor_e,$corpus);
 	}
-    } 
+    }
     else {
 	print STDERR "  no generation model requested, skipping step\n";
     }
@@ -1775,7 +1958,7 @@ sub get_generation {
     my (%WORD_TRANSLATION,%TOTAL_FOREIGN,%TOTAL_ENGLISH);
 
     my %INCLUDE_SOURCE;
-    foreach my $factor (split(/,/,$factor_e_source)) {	
+    foreach my $factor (split(/,/,$factor_e_source)) {
 	$INCLUDE_SOURCE{$factor} = 1;
     }
     my %INCLUDE;
@@ -1803,14 +1986,14 @@ sub get_generation {
 		$target .= $___FACTOR_DELIMITER unless $first_factor;
 		$first_factor = 0;
 		$target .= $FACTOR[$factor];
-	    }	    
+	    }
 	    $GENERATION{$source}{$target}++;
 	    $GENERATION_TOTAL_SOURCE{$source}++;
 	    $GENERATION_TOTAL_TARGET{$target}++;
 	}
-    } 
+    }
     close(E);
-    
+
     open(GEN,">$file") or die "ERROR: Can't write $file";
     foreach my $source (keys %GENERATION) {
 	foreach my $target (keys %{$GENERATION{$source}}) {
@@ -1824,14 +2007,14 @@ sub get_generation {
     }
     close(GEN);
     safesystem("rm -f $file.gz") or die("ERROR");
-    safesystem("gzip $file") or die("ERROR");
+    safesystem("$GZIP_EXEC $file") or die("ERROR");
 }
 
 ### (9) CREATE CONFIGURATION FILE
 
 sub create_ini {
     print STDERR "(9) create moses.ini @ ".`date`;
-    
+
     &full_path(\$___MODEL_DIR);
     &full_path(\$___VCB_E);
     &full_path(\$___VCB_F);
@@ -1841,7 +2024,7 @@ sub create_ini {
 ### MOSES CONFIG FILE ###
 #########################
 \n";
-    
+
     if (defined $___TRANSLATION_FACTORS) {
 	print INI "# input factors\n";
 	print INI "[input-factors]\n";
@@ -1850,7 +2033,7 @@ sub create_ini {
 	    my ($factor_list, $output) = split /-+/, $table;
 	    foreach (split(/,/,$factor_list)) {
 		$INPUT_FACTOR_MAX = $_ if $_>$INPUT_FACTOR_MAX;
-	    }  
+	    }
 	}
 	$INPUT_FACTOR_MAX = $_INPUT_FACTOR_MAX if $_INPUT_FACTOR_MAX; # use specified, if exists
 	for (my $c = 0; $c <= $INPUT_FACTOR_MAX; $c++) { print INI "$c\n"; }
@@ -1867,7 +2050,7 @@ sub create_ini {
     foreach (split(/:/,$___DECODING_STEPS)) {
       my $first_ttable_flag = 1;
       foreach (split(/,/,$_)) {
-       s/t/T /g; 
+       s/t/T /g;
        s/g/G /g;
        my ($type, $num) = split /\s+/;
        if ($first_ttable_flag && $type eq "T") {
@@ -1880,8 +2063,8 @@ sub create_ini {
      $path++;
    }
    print INI "1 T 1\n" if $_GLUE_GRAMMAR;
-  
-   print INI "1 T 1\n" if $_TRANSLITERATION_PHRASE_TABLE;	
+
+   print INI "1 T 1\n" if $_TRANSLITERATION_PHRASE_TABLE;
 
    if (defined($_DECODING_GRAPH_BACKOFF)) {
      $_DECODING_GRAPH_BACKOFF =~ s/\s+/ /g;
@@ -1897,6 +2080,18 @@ sub create_ini {
    # translation tables
    my $i=0;
    my @SPECIFIED_TABLE = @_PHRASE_TABLE;
+
+   if (defined($_FEATURE_LINES)) {
+     foreach my $f (split(/;/,$_FEATURE_LINES)) {
+       $feature_spec .= $f . "\n";
+     }
+   }
+   if (defined($_WEIGHT_LINES)) {
+     foreach my $f (split(/;/,$_WEIGHT_LINES)) {
+       $weight_spec .= $f . "\n";
+     }
+   }
+
 
    # number of weights
    my $basic_weight_count = 4; # both directions, lex and phrase
@@ -1914,7 +2109,7 @@ sub create_ini {
      my $count = `cut -d\\  -f 2 $file | sort | uniq | wc -l`;
      $basic_weight_count += $count if $method eq "Indicator" || $method eq "Ratio";
      $basic_weight_count += 2**$count-1 if $method eq "Subset";
-   }     
+   }
    $basic_weight_count++ if $_PCFG;
    $basic_weight_count+=4 if $_FLEXIBILITY_SCORE;
    $basic_weight_count+=2 if $_FLEXIBILITY_SCORE && $_HIERARCHICAL;
@@ -1945,17 +2140,29 @@ sub create_ini {
      $phrase_table_impl_name = "PhraseDictionaryOnDisk" if $phrase_table_impl==2;
      $phrase_table_impl_name = "PhraseDictionaryMemory" if $phrase_table_impl==6;
      $phrase_table_impl_name = "PhraseDictionaryALSuffixArray" if $phrase_table_impl==10;
+     $phrase_table_impl_name = "PhraseDictionaryBitextSampling" if $phrase_table_impl==11;
+     $file .= "/" if $phrase_table_impl==11 && $file !~ /\/$/;
 
-     #table limit
+     if ($_S2T) {
+       $phrase_table_impl_name = "RuleTable";
+     }
+
+     # table limit (maximum number of translation options per input phrase)
      my $table_limit = 0;
      if ($i == 0) {
        $table_limit = 20;
      }
+
      # sum up...
-     $feature_spec .= "$phrase_table_impl_name name=TranslationModel$i table-limit=$table_limit num-features=$basic_weight_count path=$file input-factor=$input_factor output-factor=$output_factor\n";
-     $weight_spec .= "TranslationModel$i=";
-     for(my $j=0;$j<$basic_weight_count;$j++) { $weight_spec .= " 0.2"; }
-     $weight_spec .= "\n";
+     $feature_spec .= "$phrase_table_impl_name name=TranslationModel$i num-features=$basic_weight_count path=$file input-factor=$input_factor output-factor=$output_factor";
+     $feature_spec .= " L1=$___F L2=$___E" if defined($_MMSAPT); # extra settings for memory mapped suffix array phrase table
+     $feature_spec .= " lr-func=LexicalReordering0" if defined($_MMSAPT) && $i==0 && $REORDERING_LEXICAL;
+     $feature_spec .= "\n";
+     unless ($phrase_table_impl==11) { # suffix array provides its weights at first iteration
+       $weight_spec .= "TranslationModel$i=";
+       for(my $j=0;$j<$basic_weight_count;$j++) { $weight_spec .= " 0.2"; }
+       $weight_spec .= "\n";
+    }
 
      $i++;
    }
@@ -1965,18 +2172,33 @@ sub create_ini {
      exit 1 if $i < $stepsused{"T"}; # fatal to define less
    }
 
-   if ($_TRANSLITERATION_PHRASE_TABLE){
-		
+   if ($_TRANSLITERATION_PHRASE_TABLE) {
      $feature_spec .= "PhraseDictionaryMemory name=TranslationModel$i table-limit=100 num-features=4 path=$_TRANSLITERATION_PHRASE_TABLE input-factor=0 output-factor=0\n";
      $weight_spec .= "TranslationModel$i= 0.2 0.2 0.2 0.2\n";
-     $i++;	
-   }  	
+     $i++;
+   }
 
    # glue grammar
    if ($_GLUE_GRAMMAR) {
      &full_path(\$___GLUE_GRAMMAR_FILE);
-     $feature_spec .= "PhraseDictionaryMemory name=TranslationModel$i num-features=1 path=$___GLUE_GRAMMAR_FILE input-factor=0 output-factor=0\n";
-     $weight_spec .= "TranslationModel$i= 1.0\n";
+     my $tuneable = defined($_DONT_TUNE_GLUE_GRAMMAR) ? "false" : "true";
+     my $feature_name = "PhraseDictionaryMemory";
+     if ($_S2T) {
+       $feature_name = "RuleTable";
+     }
+     my $glue_weight = 1.0;
+     if ($_SOURCE_SYNTAX || $_TARGET_SYNTAX) {
+       $glue_weight = -100.0;
+     }
+
+     $feature_spec .= "$feature_name name=TranslationModel$i num-features=1 path=$___GLUE_GRAMMAR_FILE input-factor=0 output-factor=0 tuneable=$tuneable\n";
+     $weight_spec .= "TranslationModel$i= $glue_weight\n";
+   }
+
+   # SyntaxInputWeight FF
+   if ($_USE_SYNTAX_INPUT_WEIGHT_FEATURE) {
+     $feature_spec .= "SyntaxInputWeight name=SyntaxInputWeight0\n";
+     $weight_spec .= "SyntaxInputWeight0= 0.1\n";
    }
 
    # generation model
@@ -2004,7 +2226,7 @@ sub create_ini {
   # lexicalized reordering model
   if ($___REORDERING ne "distance") {
     my $i = 0;
- 
+
     my @SPECIFIED_TABLE = @_REORDERING_TABLE;
     foreach my $factor (split(/\+/,$___REORDERING_FACTORS)) {
         my ($input_factor,$output_factor) = split(/\-/,$factor);
@@ -2015,7 +2237,7 @@ sub create_ini {
 	    $table_file .= ".";
 	    $table_file .= $model->{"filename"};
 	    $table_file .= ".gz";
-            $feature_spec .= "LexicalReordering name=LexicalReordering$i num-features=".$model->{"numfeatures"}." type=".$model->{"config"}." input-factor=$input_factor output-factor=$output_factor path=$table_file\n"; 
+            $feature_spec .= "LexicalReordering name=LexicalReordering$i num-features=".$model->{"numfeatures"}." type=".$model->{"config"}." input-factor=$input_factor output-factor=$output_factor".((defined($_MMSAPT)&&$i==0)?"":" path=$table_file").(defined($_LEXICAL_REORDERING_DEFAULT_SCORES)?" default-scores=$_LEXICAL_REORDERING_DEFAULT_SCORES":"")."\n";
             $weight_spec .= "LexicalReordering$i=";
             for(my $j=0;$j<$model->{"numfeatures"};$j++) { $weight_spec .= " 0.3"; }
             $weight_spec .= "\n";
@@ -2029,6 +2251,8 @@ sub create_ini {
 
   if($_OSM)
   {
+    my $load_method = "";
+    $load_method = " load=$_OSM_LOAD_METHOD" if defined($_OSM_LOAD_METHOD);
     if (defined($_OSM_FACTORS))
     {
 	my $count = 0;
@@ -2038,12 +2262,12 @@ sub create_ini {
 		my ($factor_f,$factor_e) = split(/\-/,$factor_val);
 
 		if($count == 0){
-		$feature_spec .= "OpSequenceModel name=OpSequenceModel$count num-features=5 path=". $_OSM . $factor_val . "/operationLM.bin" . " input-factor=". $factor_f . " output-factor=". $factor_e . " support-features=yes \n";
-	       $weight_spec  .= "OpSequenceModel$count= 0.08 -0.02 0.02 -0.001 0.03\n";		
+		$feature_spec .= "OpSequenceModel$load_method name=OpSequenceModel$count num-features=5 path=". $_OSM . $factor_val . "/operationLM.bin" . " input-factor=". $factor_f . " output-factor=". $factor_e . " support-features=yes \n";
+	       $weight_spec  .= "OpSequenceModel$count= 0.08 -0.02 0.02 -0.001 0.03\n";
 		}
 		else{
-			$feature_spec .= "OpSequenceModel name=OpSequenceModel$count num-features=1 path=". $_OSM . $factor_val . "/operationLM.bin" . " input-factor=". $factor_f . " output-factor=". $factor_e . " support-features=no \n";
-	       	$weight_spec  .= "OpSequenceModel$count= 0.08 \n";	
+			$feature_spec .= "OpSequenceModel$load_method name=OpSequenceModel$count num-features=1 path=". $_OSM . $factor_val . "/operationLM.bin" . " input-factor=". $factor_f . " output-factor=". $factor_e . " support-features=no \n";
+	       	$weight_spec  .= "OpSequenceModel$count= 0.08 \n";
 
 		}
 		$count++;
@@ -2051,10 +2275,10 @@ sub create_ini {
     }
     else
     {
-      $feature_spec .= "OpSequenceModel name=OpSequenceModel0 num-features=5 path=". $_OSM . " \n";
+      $feature_spec .= "OpSequenceModel$load_method name=OpSequenceModel0 num-features=5 path=". $_OSM . " \n";
       $weight_spec  .= "OpSequenceModel0= 0.08 -0.02 0.02 -0.001 0.03\n";
     }
-  }	
+  }
 
   # distance-based reordering
   if (!$_HIERARCHICAL) {
@@ -2070,32 +2294,47 @@ sub create_ini {
       my $path = `pwd`; chop($path);
       $fn = $path."/".$fn;
     }
-    $type = 0 unless $type;
-    my $type_name = "UnknownLM";
-    $type_name = "SRILM" if $type == 0;
-    $type_name = "IRSTLM" if $type == 1;
-    $type_name = "KENLM lazyken=0" if $type == 8;
-    $type_name = "KENLM lazyken=1" if $type == 9;
-	
+    $type = "KENLM" unless defined $type; # default to KENLM if no type given
+
+    if ($type =~ /^8-(.+)/) {
+      $type = "KENLM load=$1";
+    } elsif ($type =~ /^\d+$/) {
+      # backwards compatibility if the type is given not as string but as a number
+      if ($type == 0) {
+        $type = "SRILM";
+      } elsif ($type == 1) {
+        $type = "IRSTLM";
+      } elsif ($type == 8) {
+        $type = "KENLM";
+      } elsif ($type == 9) {
+        $type = "KENLM load=lazy";
+      } else {
+        die "Unknown numeric LM type given: $type";
+      }
+    }
+
     my $lm_oov_prob = 0.1;
-	
+    my $lm_extra_options = "";
+    
     if ($_POST_DECODING_TRANSLIT || $_TRANSLITERATION_PHRASE_TABLE){
 	$lm_oov_prob = -100.0;
 	$_LMODEL_OOV_FEATURE = "yes";
-    } 	   
- 
-    $feature_spec .= "$type_name name=LM$i factor=$f path=$fn order=$o\n";
+    }
+    
+    if ($_LMODEL_OOV_FEATURE) {
+        # enable language model OOV feature
+        $lm_extra_options = " oov-feature=1";
+    }
+
+    $feature_spec .= "$type name=LM$i factor=$f path=$fn order=$o$lm_extra_options\n";
     $weight_spec .= "LM$i= 0.5".($_LMODEL_OOV_FEATURE?" $lm_oov_prob":"")."\n";
     $i++;
-  }
-  if ($_LMODEL_OOV_FEATURE) {
-    print INI "\n# language model OOV feature enabled\n[lmodel-oov-feature]\n1\n\n";
   }
 
   # hierarchical model settings
   print INI "\n";
   if ($_HIERARCHICAL) {
-    print INI "[unknown-lhs]\n$_UNKNOWN_WORD_LABEL_FILE\n\n" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_LABEL_FILE);
+    print INI "[unknown-lhs]\n$_UNKNOWN_WORD_LABEL_FILE\n\n" if $_TARGET_SYNTAX && !$_TARGET_SYNTACTIC_PREFERENCES && defined($_UNKNOWN_WORD_LABEL_FILE);
     print INI "[cube-pruning-pop-limit]\n1000\n\n";
     print INI "[non-terminals]\nX\n\n";
     print INI "[search-algorithm]\n3\n\n";
@@ -2106,7 +2345,7 @@ sub create_ini {
   }
   # phrase-based model settings
   else {
-    print INI "[distortion-limit]\n6\n";
+    print INI "[distortion-limit]\n$___DISTORTION_LIMIT\n";
   }
 
   # only set the factor delimiter if it is non-standard
@@ -2131,7 +2370,9 @@ sub create_ini {
   }
   if ($_ADDITIONAL_INI_FILE) {
     print INI "\n# additional settings\n\n";
-    print INI `cat $_ADDITIONAL_INI_FILE`;
+    for my $AIF (split (/:/, $_ADDITIONAL_INI_FILE)) {
+      print INI `cat $AIF`;
+    }
   }
 
   # feature functions and weights
@@ -2141,13 +2382,34 @@ sub create_ini {
   print INI "WordPenalty\n";
   print INI "PhrasePenalty\n";
   print INI "SoftMatchingFeature name=SM0 path=$_UNKNOWN_WORD_SOFT_MATCHES_FILE\n" if $_TARGET_SYNTAX && defined($_UNKNOWN_WORD_SOFT_MATCHES_FILE);
+  print INI "SoftSourceSyntacticConstraintsFeature sourceLabelSetFile=$_GHKM_SOURCE_LABELS_FILE\n" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
+  if ($_PHRASE_ORIENTATION) {
+    print INI "PhraseOrientationFeature";
+    # find the label of the left-hand side non-terminal in glue rules (target non-terminal set)
+    my $TOPLABEL = `head -n 1 $___GLUE_GRAMMAR_FILE`;
+    $TOPLABEL =~ s/.* \|\|\| .* \[(.*)\] \|\|\| .*/$1/;
+    chomp($TOPLABEL);
+    print INI " glue-label=$TOPLABEL\n";
+  }
+  if ($_HIERARCHICAL && $_TARGET_SYNTAX && $_TARGET_SYNTACTIC_PREFERENCES && defined($_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE)) {
+    print INI "TargetPreferencesFeature label-set-file=$_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE";
+    print INI " unknown-word-labels-file=$_UNKNOWN_WORD_LABEL_FILE" if defined($_UNKNOWN_WORD_LABEL_FILE);
+    print INI "\n";
+  }
+  print INI "TargetConstituentAdjacencyFeature\n" if $_TARGET_CONSTITUENT_BOUNDARIES;
   print INI $feature_spec;
 
   print INI "\n# dense weights for feature functions\n";
   print INI "[weight]\n";
+  print INI "# The default weights are NOT optimized for translation quality. You MUST tune the weights.\n";
+  print INI "# Documentation for tuning is here: http://www.statmt.org/moses/?n=FactoredTraining.Tuning \n";
   print INI "UnknownWordPenalty0= 1\n";
   print INI "WordPenalty0= -1\n";
   print INI "PhrasePenalty0= 0.2\n";
+  print INI "SoftSourceSyntacticConstraintsFeature0= -0.2 -0.2 -0.2 0.1 0.1 0.1\n" if $_GHKM_SOURCE_LABELS && defined($_GHKM_SOURCE_LABELS_FILE);
+  print INI "PhraseOrientationFeature0= 0.05 0.05 0.05 0.05 0.05 0.05\n" if $_PHRASE_ORIENTATION;
+  print INI "TargetPreferencesFeature0= 0.2 -0.2\n" if $_HIERARCHICAL && $_TARGET_SYNTAX && $_TARGET_SYNTACTIC_PREFERENCES && defined($_TARGET_SYNTACTIC_PREFERENCES_LABELS_FILE);
+  print INI "TargetConstituentAdjacencyFeature0= 0.05 -0.1\n" if $_TARGET_CONSTITUENT_BOUNDARIES;
   print INI $weight_spec;
   close(INI);
 }
@@ -2201,5 +2463,3 @@ sub open_or_zcat {
   open($hdl,$read) or die "Can't read $fn ($read)";
   return $hdl;
 }
-
-

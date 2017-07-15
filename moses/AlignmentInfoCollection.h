@@ -46,13 +46,22 @@ public:
     * contains such an object then returns a pointer to it; otherwise a new
     * one is inserted.
    */
-  const AlignmentInfo *Add(const std::set<std::pair<size_t,size_t> > &);
+private:
+  const AlignmentInfo* Add(AlignmentInfo const& ainfo);
+
+public:
+  template<typename ALNREP>
+  AlignmentInfo const *
+  Add(ALNREP const & aln) {
+    return this->Add(AlignmentInfo(aln));
+  }
 
   //! Returns a pointer to an empty AlignmentInfo object.
   const AlignmentInfo &GetEmptyAlignmentInfo() const;
 
 private:
   typedef std::set<AlignmentInfo, AlignmentInfoOrderer> AlignmentInfoSet;
+
 
   //! Only a single static variable should be created.
   AlignmentInfoCollection();

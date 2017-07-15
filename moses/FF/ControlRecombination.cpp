@@ -33,30 +33,41 @@ ControlRecombinationState::ControlRecombinationState(const ChartHypothesis &hypo
   }
 }
 
-int ControlRecombinationState::Compare(const FFState& other) const
+size_t ControlRecombinationState::hash() const
+{
+  size_t ret;
+  if (m_ff.GetType() == SameOutput) {
+    ret = hash_value(m_outputPhrase);
+  } else {
+    // compare hypo address. Won't be equal unless they're actually the same hypo
+    ret = (size_t) m_hypo;
+  }
+  return ret;
+}
+
+bool ControlRecombinationState::operator==(const FFState& other) const
 {
   const ControlRecombinationState &otherFF = static_cast<const ControlRecombinationState&>(other);
 
   if (m_ff.GetType() == SameOutput) {
-    int ret = 	m_outputPhrase.Compare(otherFF.m_outputPhrase);
-    return ret;
+    return m_outputPhrase == otherFF.m_outputPhrase;
   } else {
     // compare hypo address. Won't be equal unless they're actually the same hypo
     if (m_hypo == otherFF.m_hypo)
-      return 0;
-    return (m_hypo < otherFF.m_hypo) ? -1 : +1;
+      return true;
+    return (m_hypo == otherFF.m_hypo);
   }
 }
 
 std::vector<float> ControlRecombination::DefaultWeights() const
 {
   UTIL_THROW_IF2(m_numScoreComponents,
-		  "ControlRecombination should not have any scores");
+                 "ControlRecombination should not have any scores");
   vector<float> ret(0);
   return ret;
 }
 
-FFState* ControlRecombination::Evaluate(
+FFState* ControlRecombination::EvaluateWhenApplied(
   const Hypothesis& hypo,
   const FFState* prev_state,
   ScoreComponentCollection* accumulator) const
@@ -64,7 +75,7 @@ FFState* ControlRecombination::Evaluate(
   return new ControlRecombinationState(hypo, *this);
 }
 
-FFState* ControlRecombination::EvaluateChart(
+FFState* ControlRecombination::EvaluateWhenApplied(
   const ChartHypothesis &hypo,
   int /* featureID - used to index the state in the previous hypotheses */,
   ScoreComponentCollection* accumulator) const

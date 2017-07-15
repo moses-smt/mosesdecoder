@@ -24,15 +24,17 @@ public:
   friend class BleuScoreFeature;
   static size_t bleu_order;
 
-  BleuScoreState();
-  virtual int Compare(const FFState& other) const;
+  BleuScoreState(bool is_syntax);
+  size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
+
   void print(std::ostream& out) const;
 
 private:
   Phrase m_words;
   size_t m_source_length;
   size_t m_target_length;
-
+  bool m_is_syntax;
   // scaled reference length is needed for scoring incomplete hypotheses against reference translation
   float m_scaled_ref_length;
 
@@ -62,7 +64,7 @@ class BleuScoreFeature : public StatefulFeatureFunction
 {
 public:
   static const std::vector<BleuScoreFeature*>& GetColl() {
-	return s_staticColl;
+    return s_staticColl;
   }
 
   typedef boost::unordered_map<size_t, RefValue > RefCounts;
@@ -115,23 +117,12 @@ public:
                                        std::vector< size_t >&,
                                        size_t skip = 0) const;
 
-  FFState* Evaluate( const Hypothesis& cur_hypo,
-                     const FFState* prev_state,
-                     ScoreComponentCollection* accumulator) const;
-  FFState* EvaluateChart(const ChartHypothesis& cur_hypo,
-                         int featureID,
-                         ScoreComponentCollection* accumulator) const;
-  void Evaluate(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
-  void Evaluate(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {}
+  FFState* EvaluateWhenApplied( const Hypothesis& cur_hypo,
+                                const FFState* prev_state,
+                                ScoreComponentCollection* accumulator) const;
+  FFState* EvaluateWhenApplied(const ChartHypothesis& cur_hypo,
+                               int featureID,
+                               ScoreComponentCollection* accumulator) const;
 
   bool Enabled() const {
     return m_enabled;
@@ -153,13 +144,15 @@ public:
     return m_avg_input_length;
   }
 
+  void Load(AllOptions::ptr const& opts);
+
 private:
   static std::vector<BleuScoreFeature*> s_staticColl;
 
   bool m_enabled;
   bool m_sentence_bleu;
   bool m_simple_history_bleu;
-
+  bool m_is_syntax;
   // counts for pseudo-document
   std::vector< float > m_count_history;
   std::vector< float > m_match_history;

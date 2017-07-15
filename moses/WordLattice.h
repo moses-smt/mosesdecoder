@@ -1,3 +1,4 @@
+// -*- c++ -*-
 #ifndef moses_WordLattice_h
 #define moses_WordLattice_h
 
@@ -8,6 +9,8 @@
 
 namespace Moses
 {
+
+class TranslationTask;
 
 /** An input to the decoder that represent a word lattice.
  *  @todo why is this inherited from confusion net?
@@ -20,22 +23,28 @@ private:
   std::vector<std::vector<int> > distances;
 
 public:
-  WordLattice();
+  WordLattice(AllOptions::ptr const& opts);
+
+  InputTypeEnum GetType() const {
+    return WordLatticeInput;
+  }
+
   size_t GetColumnIncrement(size_t ic, size_t j) const;
   void Print(std::ostream&) const;
   /** Get shortest path between two nodes
    */
-  virtual int ComputeDistortionDistance(const WordsRange& prev, const WordsRange& current) const;
+  virtual int ComputeDistortionDistance(const Range& prev, const Range& current) const;
   // is it possible to get from the edge of the previous word range to the current word range
   virtual bool CanIGetFromAToB(size_t start, size_t end) const;
 
   /** Given a lattice represented using the PCN::CN data type (topologically sorted agency list
    * representation), initialize the WordLattice object
    */
-  int InitializeFromPCNDataType(const PCN::CN& cn, const std::vector<FactorType>& factorOrder, const std::string& debug_line = "");
+  int InitializeFromPCNDataType(const PCN::CN& cn, const std::string& debug_line = "");
+
   /** Read from PLF format (1 lattice per line)
    */
-  int Read(std::istream& in,const std::vector<FactorType>& factorOrder);
+  int Read(std::istream& in);
 
   /** Convert internal representation into an edge matrix
    * @note edges[1][2] means there is an edge from 1 to 2
@@ -46,7 +55,8 @@ public:
     return next_nodes[pos];
   }
 
-  TranslationOptionCollection *CreateTranslationOptionCollection() const;
+  TranslationOptionCollection*
+  CreateTranslationOptionCollection(ttasksptr const& ttask) const;
 };
 
 }

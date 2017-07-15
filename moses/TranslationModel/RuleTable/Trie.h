@@ -41,19 +41,20 @@ class RuleTableTrie : public PhraseDictionary
 {
 public:
   RuleTableTrie(const std::string &line)
-    : PhraseDictionary(line) {
+    : PhraseDictionary(line, true) {
   }
 
   virtual ~RuleTableTrie();
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
 private:
   friend class RuleTableLoader;
 
-  virtual TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-    const Phrase &source, const TargetPhrase &target,
-    const Word *sourceLHS) = 0;
+  virtual TargetPhraseCollection::shared_ptr
+  GetOrCreateTargetPhraseCollection(const Phrase &source,
+                                    const TargetPhrase &target,
+                                    const Word *sourceLHS) = 0;
 
   virtual void SortAndPrune() = 0;
 

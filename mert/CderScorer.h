@@ -23,13 +23,13 @@ public:
 
   virtual void prepareStats(std::size_t sid, const std::string& text, ScoreStats& entry);
 
-  virtual void prepareStatsVector(std::size_t sid, const std::string& text, std::vector<int>& stats);
+  virtual void prepareStatsVector(std::size_t sid, const std::string& text, std::vector<ScoreStatsType>& stats);
 
   virtual std::size_t NumberOfScores() const {
     return 2;
   }
 
-  virtual float calculateScore(const std::vector<int>& comps) const;
+  virtual float calculateScore(const std::vector<ScoreStatsType>& comps) const;
 
 private:
   bool m_allowed_long_jumps;
@@ -38,7 +38,7 @@ private:
   std::vector<std::vector<sent_t> > m_ref_sentences;
 
   void computeCD(const sent_t& cand, const sent_t& ref,
-                 std::vector<int>& stats) const;
+                 std::vector<ScoreStatsType>& stats) const;
 
   // no copying allowed
   CderScorer(const CderScorer&);

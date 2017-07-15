@@ -1,5 +1,4 @@
-#ifndef MERT_BLEU_DOC_SCORER_H_
-#define MERT_BLEU_DOC_SCORER_H_
+#pragma once
 
 #include <ostream>
 #include <string>
@@ -64,4 +63,3 @@ private:
 
 }
 
-#endif  // MERT_BLEU_DOC_SCORER_H_

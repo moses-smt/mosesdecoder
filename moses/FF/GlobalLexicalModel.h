@@ -10,7 +10,7 @@
 #include "moses/Phrase.h"
 #include "moses/TypeDef.h"
 #include "moses/Util.h"
-#include "moses/WordsRange.h"
+#include "moses/Range.h"
 #include "moses/FactorTypeSet.h"
 #include "moses/Sentence.h"
 
@@ -33,8 +33,10 @@ class InputType;
  */
 class GlobalLexicalModel : public StatelessFeatureFunction
 {
-  typedef std::map< const Word*, std::map< const Word*, float, WordComparer >, WordComparer > DoubleHash;
-  typedef std::map< const Word*, float, WordComparer > SingleHash;
+  typedef boost::unordered_map< const Word*,
+          boost::unordered_map< const Word*, float, UnorderedComparer<Word> , UnorderedComparer<Word> >,
+          UnorderedComparer<Word>, UnorderedComparer<Word> > DoubleHash;
+  typedef boost::unordered_map< const Word*, float, UnorderedComparer<Word>, UnorderedComparer<Word> > SingleHash;
   typedef std::map< const TargetPhrase*, float > LexiconCache;
 
   struct ThreadLocalStorage {
@@ -55,7 +57,7 @@ private:
   std::vector<FactorType> m_inputFactorsVec, m_outputFactorsVec;
   std::string m_filePath;
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   float ScorePhrase( const TargetPhrase& targetPhrase ) const;
   float GetFromCacheOrScorePhrase( const TargetPhrase& targetPhrase ) const;
@@ -66,32 +68,33 @@ public:
 
   void SetParameter(const std::string& key, const std::string& value);
 
-  void InitializeForInput( Sentence const& in );
+  void InitializeForInput(ttasksptr const& ttask);
 
   bool IsUseable(const FactorMask &mask) const;
 
-  void Evaluate(const Hypothesis& hypo,
-                ScoreComponentCollection* accumulator) const;
-
-
-  void EvaluateChart(
-    const ChartHypothesis& hypo,
-    ScoreComponentCollection* accumulator) const {
-    throw std::logic_error("GlobalLexicalModel not supported in chart decoder, yet");
+  void EvaluateInIsolation(const Phrase &source
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedScores) const {
   }
 
-  void Evaluate(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
-  void Evaluate(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {}
+  void EvaluateWhenApplied(const Hypothesis& hypo,
+                           ScoreComponentCollection* accumulator) const {
+  }
+  void EvaluateWhenApplied(const ChartHypothesis &hypo,
+                           ScoreComponentCollection* accumulator) const {
+  }
 
+  void EvaluateWithSourceContext(const InputType &input
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedScores = NULL) const;
+
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+      , const TranslationOptionList &translationOptionList) const {
+  }
 
 };
 

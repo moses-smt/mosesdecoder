@@ -86,7 +86,8 @@ protected:
   virtual const ValueT* value_ptr(PosT i) const;
 
 public:
-  typedef ValueIteratorRange<typename std::vector<ValueT, Allocator<ValueT> >::const_iterator> range;
+  //typedef ValueIteratorRange<typename std::vector<ValueT, Allocator<ValueT> >::const_iterator> range;
+  typedef ValueIteratorRange<const ValueT *> range;
 
   // ********** RangeIterator **********
 
@@ -146,8 +147,8 @@ public:
   typedef RangeIterator iterator;
   typedef StringIterator string_iterator;
 
-  StringVector();
-  StringVector(Allocator<ValueT> alloc);
+  StringVector(bool allocate = false);
+  StringVector(Allocator<ValueT>& alloc);
 
   virtual ~StringVector() {
     delete m_charArray;
@@ -174,8 +175,10 @@ public:
   iterator end() const;
 
   PosT length(PosT i) const;
-  typename std::vector<ValueT, Allocator<ValueT> >::const_iterator begin(PosT i) const;
-  typename std::vector<ValueT, Allocator<ValueT> >::const_iterator end(PosT i) const;
+  //typename std::vector<ValueT, Allocator<ValueT> >::const_iterator begin(PosT i) const;
+  //typename std::vector<ValueT, Allocator<ValueT> >::const_iterator end(PosT i) const;
+  const ValueT* begin(PosT i) const;
+  const ValueT* end(PosT i) const;
 
   void clear() {
     m_charArray->clear();
@@ -200,13 +203,13 @@ public:
     m_memoryMapped = memoryMapped;
 
     size += std::fread(&m_sorted, sizeof(bool), 1, in) * sizeof(bool);
-    size += m_positions.load(in, m_memoryMapped);
+    size += m_positions.load(in, false);
 
-    size += loadCharArray(*m_charArray, in, m_memoryMapped);
+    size += loadCharArray(m_charArray, in, m_memoryMapped);
     return size;
   }
 
-  size_t loadCharArray(std::vector<ValueT, std::allocator<ValueT> >& c,
+  size_t loadCharArray(std::vector<ValueT, std::allocator<ValueT> >*& c,
                        std::FILE* in, bool map = false) {
     // Can only be read into memory. Mapping not possible with std:allocator.
     assert(map == false);
@@ -216,13 +219,13 @@ public:
     size_t valSize;
     byteSize += std::fread(&valSize, sizeof(size_t), 1, in) * sizeof(size_t);
 
-    c.resize(valSize, 0);
-    byteSize += std::fread(&c[0], sizeof(ValueT), valSize, in) * sizeof(ValueT);
+    c = new std::vector<ValueT, std::allocator<ValueT> >(valSize, 0);
+    byteSize += std::fread(&(*c)[0], sizeof(ValueT), valSize, in) * sizeof(ValueT);
 
     return byteSize;
   }
 
-  size_t loadCharArray(std::vector<ValueT, MmapAllocator<ValueT> >& c,
+  size_t loadCharArray(std::vector<ValueT, MmapAllocator<ValueT> >*& c,
                        std::FILE* in, bool map = false) {
     size_t byteSize = 0;
 
@@ -232,18 +235,16 @@ public:
     if(map == false) {
       // Read data into temporary file (default constructor of MmapAllocator)
       // and map memory onto temporary file. Can be resized.
-
-      c.resize(valSize, 0);
-      byteSize += std::fread(&c[0], sizeof(ValueT), valSize, in) * sizeof(ValueT);
+      c = new std::vector<ValueT, MmapAllocator<ValueT> >(valSize, 0);
+      byteSize += std::fread(&(*c)[0], sizeof(ValueT), valSize, in) * sizeof(ValueT);
     } else {
       // Map it directly on specified region of file "in" starting at valPos
       // with length valSize * sizeof(ValueT). Mapped region cannot be resized.
 
       size_t valPos = std::ftell(in);
       Allocator<ValueT> alloc(in, valPos);
-      std::vector<ValueT, Allocator<ValueT> > charArrayTemp(alloc);
-      charArrayTemp.resize(valSize, 0);
-      c.swap(charArrayTemp);
+      c = new std::vector<ValueT, Allocator<ValueT> >(alloc);
+      c->resize(valSize, 0);
 
       byteSize += valSize * sizeof(ValueT);
     }
@@ -366,11 +367,12 @@ OStream& operator<<(OStream &os, ValueIteratorRange<ValueIteratorT> cr)
 // StringVector
 
 template<typename ValueT, typename PosT, template <typename> class Allocator>
-StringVector<ValueT, PosT, Allocator>::StringVector()
-  : m_sorted(true), m_memoryMapped(false), m_charArray(new std::vector<ValueT, Allocator<ValueT> >()) { }
+StringVector<ValueT, PosT, Allocator>::StringVector(bool allocate)
+  : m_sorted(true), m_memoryMapped(false),
+    m_charArray(allocate ? new std::vector<ValueT, Allocator<ValueT> >() : 0) { }
 
 template<typename ValueT, typename PosT, template <typename> class Allocator>
-StringVector<ValueT, PosT, Allocator>::StringVector(Allocator<ValueT> alloc)
+StringVector<ValueT, PosT, Allocator>::StringVector(Allocator<ValueT> &alloc)
   : m_sorted(true), m_memoryMapped(false), m_charArray(new std::vector<ValueT, Allocator<ValueT> >(alloc)) { }
 
 template<typename ValueT, typename PosT, template <typename> class Allocator>
@@ -469,15 +471,19 @@ const ValueT* StringVector<ValueT, PosT, Allocator>::value_ptr(PosT i) const
 }
 
 template<typename ValueT, typename PosT, template <typename> class Allocator>
-typename std::vector<ValueT, Allocator<ValueT> >::const_iterator StringVector<ValueT, PosT, Allocator>::begin(PosT i) const
+//typename std::vector<ValueT, Allocator<ValueT> >::const_iterator StringVector<ValueT, PosT, Allocator>::begin(PosT i) const
+const ValueT* StringVector<ValueT, PosT, Allocator>::begin(PosT i) const
 {
-  return typename std::vector<ValueT, Allocator<ValueT> >::const_iterator(value_ptr(i));
+  //return typename std::vector<ValueT, Allocator<ValueT> >::const_iterator(value_ptr(i));
+  return value_ptr(i);
 }
 
 template<typename ValueT, typename PosT, template <typename> class Allocator>
-typename std::vector<ValueT, Allocator<ValueT> >::const_iterator StringVector<ValueT, PosT, Allocator>::end(PosT i) const
+//typename std::vector<ValueT, Allocator<ValueT> >::const_iterator StringVector<ValueT, PosT, Allocator>::end(PosT i) const
+const ValueT* StringVector<ValueT, PosT, Allocator>::end(PosT i) const
 {
-  return typename std::vector<ValueT, Allocator<ValueT> >::const_iterator(value_ptr(i) + length(i));
+  //return typename std::vector<ValueT, Allocator<ValueT> >::const_iterator(value_ptr(i) + length(i));
+  return value_ptr(i) + length(i);
 }
 
 template<typename ValueT, typename PosT, template <typename> class Allocator>

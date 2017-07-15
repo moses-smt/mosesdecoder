@@ -33,9 +33,9 @@ void SemposOverlappingFactory::SetOverlapping(SemposOverlapping* ovr)
   g_overlapping = ovr;
 }
 
-vector<int> CapMicroOverlapping::prepareStats(const sentence_t& cand, const sentence_t& ref)
+vector<ScoreStatsType> CapMicroOverlapping::prepareStats(const sentence_t& cand, const sentence_t& ref)
 {
-  vector<int> stats(2);
+  vector<ScoreStatsType> stats(2);
   sentence_t intersection;
 
   set_intersection(cand.begin(), cand.end(), ref.begin(), ref.end(),
@@ -53,12 +53,12 @@ vector<int> CapMicroOverlapping::prepareStats(const sentence_t& cand, const sent
     refSum += semposScorer->weight(it->first);
   }
 
-  stats[0] = (int)(multCoeff * interSum);
-  stats[1] = (int)(multCoeff * refSum);
+  stats[0] = (ScoreStatsType)(multCoeff * interSum);
+  stats[1] = (ScoreStatsType)(multCoeff * refSum);
   return stats;
 }
 
-float CapMicroOverlapping::calculateScore(const vector<int>& stats) const
+float CapMicroOverlapping::calculateScore(const vector<ScoreStatsType>& stats) const
 {
   if (stats.size() != 2) {
     throw std::runtime_error("Size of stats vector has to be 2");
@@ -67,9 +67,9 @@ float CapMicroOverlapping::calculateScore(const vector<int>& stats) const
   return stats[0] / static_cast<float>(stats[1]);
 }
 
-vector<int> CapMacroOverlapping::prepareStats(const sentence_t& cand, const sentence_t& ref)
+vector<ScoreStatsType> CapMacroOverlapping::prepareStats(const sentence_t& cand, const sentence_t& ref)
 {
-  vector<int> stats(2 * kMaxNOC);
+  vector<ScoreStatsType> stats(2 * kMaxNOC);
   sentence_t intersection;
 
   set_intersection(cand.begin(), cand.end(), ref.begin(), ref.end(),
@@ -92,7 +92,7 @@ vector<int> CapMacroOverlapping::prepareStats(const sentence_t& cand, const sent
   return stats;
 }
 
-float CapMacroOverlapping::calculateScore(const vector<int>& stats) const
+float CapMacroOverlapping::calculateScore(const vector<ScoreStatsType>& stats) const
 {
   if (stats.size() != 2 * kMaxNOC) {
     // TODO: Add some comments. The number "38" looks like a magic number.

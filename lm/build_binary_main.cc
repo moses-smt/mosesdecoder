@@ -9,9 +9,8 @@
 #include <iostream>
 #include <iomanip>
 #include <limits>
-
-#include <math.h>
-#include <stdlib.h>
+#include <cmath>
+#include <cstdlib>
 
 #ifdef WIN32
 #include "util/getopt.hh"
@@ -57,7 +56,7 @@ void Usage(const char *name, const char *default_mem) {
   exit(1);
 }
 
-// I could really use boost::lexical_cast right about now.  
+// I could really use boost::lexical_cast right about now.
 float ParseFloat(const char *from) {
   char *end;
   float ret = strtod(from, &end);
@@ -137,6 +136,7 @@ int main(int argc, char *argv[]) {
         case 't': // legacy
         case 'T':
           config.temporary_directory_prefix = optarg;
+          util::NormalizeTempPrefix(config.temporary_directory_prefix);
           break;
         case 'm': // legacy
           config.building_memory = ParseUInt(optarg) * 1048576;

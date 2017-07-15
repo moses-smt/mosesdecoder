@@ -6,7 +6,6 @@
 #include "moses/ChartHypothesis.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/TranslationOption.h"
-#include "moses/UserMessage.h"
 #include "util/string_piece_hash.hh"
 #include "util/exception.hh"
 
@@ -19,8 +18,9 @@ TargetWordInsertionFeature::TargetWordInsertionFeature(const std::string &line)
   :StatelessFeatureFunction(0, line),
    m_unrestricted(true)
 {
-  std::cerr << "Initializing target word insertion feature.." << std::endl;
+  VERBOSE(1, "Initializing feature " << GetScoreProducerDescription() << " ...");
   ReadParameters();
+  VERBOSE(1, " Done." << std::endl);
 }
 
 void TargetWordInsertionFeature::SetParameter(const std::string& key, const std::string& value)
@@ -34,12 +34,13 @@ void TargetWordInsertionFeature::SetParameter(const std::string& key, const std:
   }
 }
 
-void TargetWordInsertionFeature::Load()
+void TargetWordInsertionFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   if (m_filename.empty())
     return;
 
-  cerr << "loading target word insertion word list from " << m_filename << endl;
+  FEATUREVERBOSE(1, "Loading target word insertion word list from " << m_filename << std::endl);
   ifstream inFile(m_filename.c_str());
   UTIL_THROW_IF2(!inFile, "could not open file " << m_filename);
 
@@ -53,10 +54,10 @@ void TargetWordInsertionFeature::Load()
   m_unrestricted = false;
 }
 
-void TargetWordInsertionFeature::Evaluate(const Phrase &source
+void TargetWordInsertionFeature::EvaluateInIsolation(const Phrase &source
     , const TargetPhrase &targetPhrase
     , ScoreComponentCollection &scoreBreakdown
-    , ScoreComponentCollection &estimatedFutureScore) const
+    , ScoreComponentCollection &estimatedScores) const
 {
   const AlignmentInfo &alignmentInfo = targetPhrase.GetAlignTerm();
   ComputeFeatures(source, targetPhrase, &scoreBreakdown, alignmentInfo);
@@ -73,11 +74,7 @@ void TargetWordInsertionFeature::ComputeFeatures(const Phrase &source,
   if (targetLength == 1 && sourceLength == 1 && !alignmentInfo.GetSize()) return;
 
   // flag aligned words
-  bool aligned[16];
-  UTIL_THROW_IF2(targetLength >= 16, "Target length must be less than 16 words");
-  for(size_t i=0; i<targetLength; i++) {
-    aligned[i] = false;
-  }
+  std::vector<bool> aligned(targetLength, false);
   for (AlignmentInfo::const_iterator alignmentPoint = alignmentInfo.begin(); alignmentPoint != alignmentInfo.end(); alignmentPoint++) {
     aligned[ alignmentPoint->second ] = true;
   }

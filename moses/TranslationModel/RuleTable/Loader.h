@@ -21,6 +21,7 @@
 
 #include "Trie.h"
 #include "moses/TypeDef.h"
+#include "moses/parameters/AllOptions.h"
 
 #include <istream>
 #include <vector>
@@ -35,7 +36,8 @@ class RuleTableLoader
 public:
   virtual ~RuleTableLoader() {}
 
-  virtual bool Load(const std::vector<FactorType> &input,
+  virtual bool Load(AllOptions const& opts,
+                    const std::vector<FactorType> &input,
                     const std::vector<FactorType> &output,
                     const std::string &inFile,
                     size_t tableLimit,
@@ -49,12 +51,13 @@ protected:
 
   // Provide access to RuleTableTrie's private
   // GetOrCreateTargetPhraseCollection function.
-  TargetPhraseCollection &GetOrCreateTargetPhraseCollection(
-    RuleTableTrie &ruleTable
-    , const Phrase &source
-    , const TargetPhrase &target
-    , const Word *sourceLHS) {
-    return ruleTable.GetOrCreateTargetPhraseCollection(source, target, sourceLHS);
+  TargetPhraseCollection::shared_ptr
+  GetOrCreateTargetPhraseCollection(RuleTableTrie &ruleTable,
+                                    const Phrase &source,
+                                    const TargetPhrase &target,
+                                    const Word *sourceLHS) {
+    return ruleTable.GetOrCreateTargetPhraseCollection(source, target,
+           sourceLHS);
   }
 };
 

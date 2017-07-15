@@ -179,7 +179,7 @@ cdef class QueryResult(list):
     def __init__(self, source, targets = []):
         super(QueryResult, self).__init__(targets)
         self.source = source
-    
+
 
 cdef class DictionaryTree(object):
 
@@ -222,10 +222,10 @@ cdef class PhraseDictionaryTree(DictionaryTree):
             raise ValueError, "'%s' doesn't seem a valid binary table." % path
         self.path = path
         self.tableLimit = tableLimit
-        self.nscores = nscores
+        self.nscores = nscores #used to be passed to PhraseDictionaryTree, not used now
         self.wa = wa
         self.delimiters = delimiters
-        self.tree = new cdictree.PhraseDictionaryTree(nscores)
+        self.tree = new cdictree.PhraseDictionaryTree()
         self.tree.NeedAlignmentInfo(wa)
         self.tree.Read(path)
 
@@ -248,7 +248,7 @@ cdef class PhraseDictionaryTree(DictionaryTree):
                 and os.path.isfile(stem + ".binphr.srcvoc") \
                 and os.path.isfile(stem + ".binphr.tgtdata") \
                 and os.path.isfile(stem + ".binphr.tgtvoc")
-    
+
     cdef TargetProduction getTargetProduction(self, cdictree.StringTgtCand& cand, wa = None, converter = None):
         """Converts a StringTgtCandidate (c++ object) and possibly a word-alignment info (string) to a TargetProduction (python object)."""
         cdef list words = [cand.tokens[i].c_str() for i in xrange(cand.tokens.size())]
@@ -284,9 +284,9 @@ cdef class PhraseDictionaryTree(DictionaryTree):
             results.sort(cmp=cmp, key=key)
         if self.tableLimit > 0:
             return QueryResult(source, results[0:self.tableLimit])
-        else:  
+        else:
             return results
-    
+
 cdef class OnDiskWrapper(DictionaryTree):
 
     cdef condiskpt.OnDiskWrapper *wrapper
@@ -300,7 +300,7 @@ cdef class OnDiskWrapper(DictionaryTree):
         self.wrapper = new condiskpt.OnDiskWrapper()
         self.wrapper.BeginLoad(string(path))
         self.finder = new condiskpt.OnDiskQuery(self.wrapper[0])
-    
+
     @classmethod
     def canLoad(cls, stem, bint wa = False):
         return os.path.isfile(stem + "/Misc.dat") \
@@ -345,7 +345,7 @@ cdef class OnDiskWrapper(DictionaryTree):
         if cmp:
             results.sort(cmp=cmp, key=key)
         return results
-    
+
 def load(path, nscores, limit):
     """Finds out the correct implementation depending on the content of 'path' and returns the appropriate dictionary tree."""
     if PhraseDictionaryTree.canLoad(path, False):

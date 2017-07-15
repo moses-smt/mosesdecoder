@@ -1,5 +1,4 @@
-// $Id$
-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -28,8 +27,13 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Phrase.h"
 #include "ScoreComponentCollection.h"
 #include "AlignmentInfo.h"
-
+#include "AlignmentInfoCollection.h"
+#include "moses/PP/PhraseProperty.h"
 #include "util/string_piece.hh"
+//#include "moses/TranslationTask.h"
+
+#include <boost/shared_ptr.hpp>
+#include <boost/unordered_map.hpp>
 
 #ifdef HAVE_PROTOBUF
 #include "rule.pb.h"
@@ -39,39 +43,76 @@ namespace Moses
 {
 class FeatureFunction;
 class InputPath;
+class InputPath;
+class PhraseDictionary;
 
 /** represents an entry on the target side of a phrase table (scores, translation, alignment)
  */
 class TargetPhrase: public Phrase
 {
+public:
+  typedef std::map<FeatureFunction const*, boost::shared_ptr<Scores> > ScoreCache_t;
+  ScoreCache_t const& GetExtraScores() const;
+  Scores const* GetExtraScores(FeatureFunction const* ff) const;
+  void SetExtraScores(FeatureFunction const* ff,boost::shared_ptr<Scores> const& scores);
+
+  typedef std::map<size_t const, std::vector<SPTR<std::vector<float> > > > CoordCache_t;
+  std::vector<SPTR<std::vector<float> > > const* GetCoordList(size_t const spaceID) const;
+  void PushCoord(size_t const spaceID, SPTR<std::vector<float> > const coord);
+
+private:
+  ScoreCache_t m_cached_scores;
+  SPTR<CoordCache_t> m_cached_coord;
+  WPTR<ContextScope> m_scope;
+
 private:
   friend std::ostream& operator<<(std::ostream&, const TargetPhrase&);
   friend void swap(TargetPhrase &first, TargetPhrase &second);
 
-  float m_fullScore, m_futureScore;
+  float m_futureScore, m_estimatedScore;
   ScoreComponentCollection m_scoreBreakdown;
 
   const AlignmentInfo* m_alignTerm, *m_alignNonTerm;
   const Word *m_lhsTarget;
   mutable Phrase *m_ruleSource; // to be set by the feature function that needs it.
 
-  std::map<std::string, std::string> m_properties;
+  typedef std::map<std::string, boost::shared_ptr<PhraseProperty> > Properties;
+  Properties m_properties;
+
+  const PhraseDictionary *m_container;
+
+  mutable boost::unordered_map<const std::string, boost::shared_ptr<void> > m_data;
+
 public:
-  TargetPhrase();
+  TargetPhrase(const PhraseDictionary *pt = NULL);
+  TargetPhrase(std::string out_string, const PhraseDictionary *pt = NULL);
   TargetPhrase(const TargetPhrase &copy);
-  explicit TargetPhrase(std::string out_string);
-  explicit TargetPhrase(const Phrase &targetPhrase);
+  explicit TargetPhrase(const Phrase &targetPhrase, const PhraseDictionary *pt);
+
+  /*ttasksptr version*/
+  TargetPhrase(ttasksptr &ttask, const PhraseDictionary *pt = NULL);
+  TargetPhrase(ttasksptr &ttask, std::string out_string, const PhraseDictionary *pt = NULL);
+  explicit TargetPhrase(ttasksptr &ttask, const Phrase &targetPhrase, const PhraseDictionary *pt);
+
+  // ttasksptr GetTtask() const;
+  // bool HasTtaskSPtr() const;
+
+  bool HasScope() const;
+  SPTR<ContextScope> GetScope() const;
+
   ~TargetPhrase();
 
   // 1st evaluate method. Called during loading of phrase table.
-  void Evaluate(const Phrase &source, const std::vector<FeatureFunction*> &ffs);
+  void EvaluateInIsolation(const Phrase &source, const std::vector<FeatureFunction*> &ffs);
 
   // as above, score with ALL FFs
   // Used only for OOV processing. Doesn't have a phrase table connect with it
-  void Evaluate(const Phrase &source);
+  void EvaluateInIsolation(const Phrase &source);
 
   // 'inputPath' is guaranteed to be the raw substring from the input. No factors were added or taken away
-  void Evaluate(const InputType &input, const InputPath &inputPath);
+  void EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath);
+
+  void UpdateScore(ScoreComponentCollection *futureScoreBreakdown = NULL);
 
   void SetSparseScore(const FeatureFunction* translationScoreProducer, const StringPiece &sparseString);
 
@@ -89,7 +130,7 @@ public:
    *
    */
   inline float GetFutureScore() const {
-    return m_fullScore;
+    return m_futureScore;
   }
 
   inline const ScoreComponentCollection &GetScoreBreakdown() const {
@@ -99,6 +140,15 @@ public:
     return m_scoreBreakdown;
   }
 
+  /*
+    //TODO: Probably shouldn't copy this, but otherwise ownership is unclear
+    void SetSourcePhrase(const Phrase&  p) {
+      m_sourcePhrase=p;
+    }
+    const Phrase& GetSourcePhrase() const {
+      return m_sourcePhrase;
+    }
+  */
   void SetTargetLHS(const Word *lhs) {
     m_lhsTarget = lhs;
   }
@@ -114,8 +164,22 @@ public:
     m_alignNonTerm = alignNonTerm;
   }
 
-  void SetAlignTerm(const AlignmentInfo::CollType &coll);
-  void SetAlignNonTerm(const AlignmentInfo::CollType &coll);
+  // ALNREP = alignment representation,
+  // see AlignmentInfo constructors for supported representations
+  template<typename ALNREP>
+  void
+  SetAlignTerm(const ALNREP &coll) {
+    m_alignTerm = AlignmentInfoCollection::Instance().Add(coll);
+  }
+
+  // ALNREP = alignment representation,
+  // see AlignmentInfo constructors for supported representations
+  template<typename ALNREP>
+  void
+  SetAlignNonTerm(const ALNREP &coll) {
+    m_alignNonTerm = AlignmentInfoCollection::Instance().Add(coll);
+  }
+
 
   const AlignmentInfo &GetAlignTerm() const {
     return *m_alignTerm;
@@ -128,15 +192,36 @@ public:
     return m_ruleSource;
   }
 
+  const PhraseDictionary *GetContainer() const {
+    return m_container;
+  }
+
+  bool SetData(const std::string& key, boost::shared_ptr<void> value) const {
+    std::pair< boost::unordered_map<const std::string, boost::shared_ptr<void> >::iterator, bool > inserted =
+      m_data.insert( std::pair<const std::string, boost::shared_ptr<void> >(key,value) );
+    if (!inserted.second) {
+      return false;
+    }
+    return true;
+  }
+
+  boost::shared_ptr<void> GetData(const std::string& key) const {
+    boost::unordered_map<const std::string, boost::shared_ptr<void> >::const_iterator found = m_data.find(key);
+    if (found == m_data.end()) {
+      return boost::shared_ptr<void>();
+    }
+    return found->second;
+  }
+
+
+
   // To be set by the FF that needs it, by default the rule source = NULL
   // make a copy of the source side of the rule
   void SetRuleSource(const Phrase &ruleSource) const;
 
   void SetProperties(const StringPiece &str);
-  void SetProperty(const std::string &key, const std::string &value) {
-    m_properties[key] = value;
-  }
-  void GetProperty(const std::string &key, std::string &value, bool &found) const;
+  void SetProperty(const std::string &key, const std::string &value);
+  const PhraseProperty *GetProperty(const std::string &key) const;
 
   void Merge(const TargetPhrase &copy, const std::vector<FactorType>& factorVec);
 
@@ -149,29 +234,6 @@ public:
 void swap(TargetPhrase &first, TargetPhrase &second);
 
 std::ostream& operator<<(std::ostream&, const TargetPhrase&);
-
-/**
- * Hasher that looks at source and target phrase.
- **/
-struct TargetPhraseHasher {
-  inline size_t operator()(const TargetPhrase& targetPhrase) const {
-    size_t seed = 0;
-    boost::hash_combine(seed, targetPhrase);
-    boost::hash_combine(seed, targetPhrase.GetAlignTerm());
-    boost::hash_combine(seed, targetPhrase.GetAlignNonTerm());
-
-    return seed;
-  }
-};
-
-struct TargetPhraseComparator {
-  inline bool operator()(const TargetPhrase& lhs, const TargetPhrase& rhs) const {
-    return lhs.Compare(rhs) == 0 &&
-           lhs.GetAlignTerm() == rhs.GetAlignTerm() &&
-           lhs.GetAlignNonTerm() == rhs.GetAlignNonTerm();
-  }
-
-};
 
 }
 

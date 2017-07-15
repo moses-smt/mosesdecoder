@@ -6,7 +6,11 @@
 #include "moses/Hypothesis.h"
 #include "moses/Manager.h"
 #include "moses/TranslationOption.h"
+#include "moses/TranslationTask.h"
 #include "moses/Util.h"
+#include "moses/FF/DistortionScoreProducer.h"
+
+#include <boost/foreach.hpp>
 
 using namespace std;
 
@@ -34,31 +38,45 @@ void FeatureFunction::Destroy()
   RemoveAllInColl(s_staticColl);
 }
 
-FeatureFunction::
-FeatureFunction(const std::string& line)
-  : m_tuneable(true)
-  , m_numScoreComponents(1)
+void FeatureFunction::SetupAll(TranslationTask const& ttask)
 {
-  Initialize(line);
+  BOOST_FOREACH(FeatureFunction* ff, s_staticColl)
+  ff->Setup(ttask);
 }
 
 FeatureFunction::
-FeatureFunction(size_t numScoreComponents,
-                const std::string& line)
+FeatureFunction(const std::string& line, bool registerNow)
   : m_tuneable(true)
-  , m_numScoreComponents(numScoreComponents)
+  , m_requireSortingAfterSourceContext(false)
+  , m_verbosity(std::numeric_limits<std::size_t>::max())
+  , m_numScoreComponents(1)
+  , m_index(0)
 {
-  Initialize(line);
+  m_numTuneableComponents = m_numScoreComponents;
+  ParseLine(line);
+  // if (registerNow) Register(); // now done in FeatureFactory::DefaultSetup()
+  // TO DO: eliminate the registerNow parameter
+}
+
+FeatureFunction::FeatureFunction(size_t numScoreComponents, const std::string& line, bool registerNow)
+  : m_tuneable(true)
+  , m_requireSortingAfterSourceContext(false)
+  , m_verbosity(std::numeric_limits<std::size_t>::max())
+  , m_numScoreComponents(numScoreComponents)
+  , m_index(0)
+{
+  m_numTuneableComponents = m_numScoreComponents;
+  ParseLine(line);
+  // if (registerNow) Register(); // now done in FeatureFactory::DefaultSetup()
+  // TO DO: eliminate the registerNow parameter
 }
 
 void
 FeatureFunction::
-Initialize(const std::string &line)
+Register(FeatureFunction* ff)
 {
-  ParseLine(line);
-
-  ScoreComponentCollection::RegisterScoreProducer(this);
-  s_staticColl.push_back(this);
+  ScoreComponentCollection::RegisterScoreProducer(ff);
+  s_staticColl.push_back(ff);
 }
 
 FeatureFunction::~FeatureFunction() {}
@@ -75,13 +93,14 @@ void FeatureFunction::ParseLine(const std::string &line)
   for (size_t i = 1; i < toks.size(); ++i) {
     vector<string> args = TokenizeFirstOnly(toks[i], "=");
     UTIL_THROW_IF2(args.size() != 2,
-    		"Incorrect format for feature function arg: " << toks[i]);
+                   "Incorrect format for feature function arg: " << toks[i]);
 
     pair<set<string>::iterator,bool> ret = keys.insert(args[0]);
     UTIL_THROW_IF2(!ret.second, "Duplicate key in line " << line);
 
     if (args[0] == "num-features") {
       m_numScoreComponents = Scan<size_t>(args[1]);
+      m_numTuneableComponents = m_numScoreComponents;
     } else if (args[0] == "name") {
       m_description = args[1];
     } else {
@@ -93,12 +112,10 @@ void FeatureFunction::ParseLine(const std::string &line)
   if (m_description == "") {
     size_t index = description_counts.count(nameStub);
 
-    ostringstream dstream;
-    dstream << nameStub;
-    dstream << index;
+    string descr = SPrint(nameStub) + SPrint(index);
 
     description_counts.insert(nameStub);
-    m_description = dstream.str();
+    m_description = descr;
   }
 
 }
@@ -107,9 +124,17 @@ void FeatureFunction::SetParameter(const std::string& key, const std::string& va
 {
   if (key == "tuneable") {
     m_tuneable = Scan<bool>(value);
+  } else if (key == "tuneable-components") {
+    UTIL_THROW_IF2(!m_tuneable, GetScoreProducerDescription()
+                   << ": tuneable-components cannot be set if tuneable=false");
+    SetTuneableComponents(value);
+  } else if (key == "require-sorting-after-source-context") {
+    m_requireSortingAfterSourceContext = Scan<bool>(value);
+  } else if (key == "verbosity") {
+    m_verbosity = Scan<size_t>(value);
   } else if (key == "filterable") { //ignore
   } else {
-    UTIL_THROW(util::Exception, "Unknown argument " << key << "=" << value);
+    UTIL_THROW2(GetScoreProducerDescription() << ": Unknown argument " << key << "=" << value);
   }
 }
 
@@ -125,7 +150,60 @@ void FeatureFunction::ReadParameters()
 
 std::vector<float> FeatureFunction::DefaultWeights() const
 {
-  UTIL_THROW(util::Exception, "No default weights");
+  return std::vector<float>(this->m_numScoreComponents,1.0);
+  // UTIL_THROW2(GetScoreProducerDescription() << ": No default weights");
+}
+
+void FeatureFunction::SetTuneableComponents(const std::string& value)
+{
+  std::vector<std::string> toks = Tokenize(value,",");
+  UTIL_THROW_IF2(toks.empty(), GetScoreProducerDescription()
+                 << ": Empty tuneable-components");
+  UTIL_THROW_IF2(toks.size()!=m_numScoreComponents, GetScoreProducerDescription()
+                 << ": tuneable-components value has to be a comma-separated list of "
+                 << m_numScoreComponents << " boolean values");
+
+  m_tuneableComponents.resize(m_numScoreComponents);
+  m_numTuneableComponents = m_numScoreComponents;
+
+  for (size_t i = 0; i < toks.size(); ++i) {
+    m_tuneableComponents[i] = Scan<bool>(toks[i]);
+    if (!m_tuneableComponents[i]) {
+      --m_numTuneableComponents;
+    }
+  }
+}
+
+// void
+// FeatureFunction
+// ::InitializeForInput(ttasksptr const& ttask)
+// {
+//   InitializeForInput(*(ttask->GetSource().get()));
+// }
+
+void
+FeatureFunction
+::CleanUpAfterSentenceProcessing(ttasksptr const& ttask)
+{
+  CleanUpAfterSentenceProcessing(*(ttask->GetSource().get()));
+}
+
+size_t
+FeatureFunction
+::GetIndex() const
+{
+  return m_index;
+}
+
+
+/// set index
+//  @return index of the next FF
+size_t
+FeatureFunction
+::SetIndex(size_t const idx)
+{
+  m_index = idx;
+  return this->GetNumScoreComponents() + idx;
 }
 
 }

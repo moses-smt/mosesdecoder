@@ -14,32 +14,38 @@ class HyperParameterAsWeight : public StatelessFeatureFunction
 public:
   HyperParameterAsWeight(const std::string &line);
 
-  virtual bool IsUseable(const FactorMask &mask) const
-  { return true; }
+  virtual bool IsUseable(const FactorMask &mask) const {
+    return true;
+  }
 
-  virtual void Evaluate(const Phrase &source
-                        , const TargetPhrase &targetPhrase
-                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection &estimatedFutureScore) const
-  {}
+  virtual void EvaluateInIsolation(const Phrase &source
+                                   , const TargetPhrase &targetPhrase
+                                   , ScoreComponentCollection &scoreBreakdown
+                                   , ScoreComponentCollection &estimatedScores) const {
+  }
 
-  virtual void Evaluate(const InputType &input
-                        , const InputPath &inputPath
-                        , const TargetPhrase &targetPhrase
-                        , ScoreComponentCollection &scoreBreakdown
-                        , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
+  virtual void EvaluateWithSourceContext(const InputType &input
+                                         , const InputPath &inputPath
+                                         , const TargetPhrase &targetPhrase
+                                         , const StackVec *stackVec
+                                         , ScoreComponentCollection &scoreBreakdown
+                                         , ScoreComponentCollection *estimatedScores = NULL) const {
+  }
 
-  virtual void Evaluate(const Hypothesis& hypo,
-                        ScoreComponentCollection* accumulator) const
-  {}
+  virtual void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+      , const TranslationOptionList &translationOptionList) const {
+  }
+
+  virtual void EvaluateWhenApplied(const Hypothesis& hypo,
+                                   ScoreComponentCollection* accumulator) const {
+  }
 
   /**
     * Same for chart-based features.
     **/
-  virtual void EvaluateChart(const ChartHypothesis &hypo,
-                             ScoreComponentCollection* accumulator) const
-  {}
+  virtual void EvaluateWhenApplied(const ChartHypothesis &hypo,
+                                   ScoreComponentCollection* accumulator) const {
+  }
 
 };
 

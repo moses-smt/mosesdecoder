@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // $Id$
 
 /***********************************************************************
@@ -28,7 +29,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TranslationOption.h"
 #include "TranslationOptionList.h"
 #include "SquareMatrix.h"
-#include "WordsBitmap.h"
+#include "Bitmap.h"
 #include "PartialTranslOptColl.h"
 #include "DecodeStep.h"
 #include "InputPath.h"
@@ -64,18 +65,20 @@ class TranslationOptionCollection
   friend std::ostream& operator<<(std::ostream& out, const TranslationOptionCollection& coll);
   TranslationOptionCollection(const TranslationOptionCollection&); /*< no copy constructor */
 protected:
+  ttaskwptr m_ttask; // that is and must be a weak pointer!
   std::vector< std::vector< TranslationOptionList > >	m_collection; /*< contains translation options */
-  InputType const			&m_source; /*< reference to the input */
-  SquareMatrix				m_futureScore; /*< matrix of future costs for contiguous parts (span) of the input */
-  const size_t				m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span */
-  const float				m_translationOptionThreshold; /*< threshold for translation options with regard to best option for input span */
+  InputType const &m_source; /*< reference to the input */
+  SquareMatrix m_estimatedScores; /*< matrix of future costs for contiguous parts (span) of the input */
+  const size_t m_maxNoTransOptPerCoverage; /*< maximum number of translation options per input span */
+  const float m_translationOptionThreshold; /*< threshold for translation options with regard to best option for input span */
+  size_t m_max_phrase_length;
+  size_t max_partial_trans_opt;
   std::vector<const Phrase*> m_unksrcs;
   InputPathList m_inputPathQueue;
 
-  TranslationOptionCollection(InputType const& src, size_t maxNoTransOptPerCoverage,
-                              float translationOptionThreshold);
+  TranslationOptionCollection(ttasksptr const& ttask, InputType const& src);
 
-  void CalcFutureScore();
+  void CalcEstimatedScore();
 
   //! Force a creation of a translation option where there are none for a particular source position.
   void ProcessUnknownWord();
@@ -88,21 +91,31 @@ protected:
   //! sort all trans opt in each list for cube pruning */
   void Sort();
 
+public:
+  // is there any good reason not to make these public? UG
+
   //! list of trans opt for a particular span
-  TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos);
-  const TranslationOptionList &GetTranslationOptionList(size_t startPos, size_t endPos) const;
+  TranslationOptionList*
+  GetTranslationOptionList(size_t startPos, size_t endPos);
+
+  TranslationOptionList const*
+  GetTranslationOptionList(size_t startPos, size_t endPos) const;
+
+protected:
   void Add(TranslationOption *translationOption);
 
   //! implemented by inherited class, called by this class
   virtual void ProcessUnknownWord(size_t sourcePos)=0;
 
-  void EvaluateWithSource();
+  void EvaluateWithSourceContext();
+
+  void EvaluateTranslationOptionListWithSourceContext(TranslationOptionList&);
 
   void CacheLexReordering();
 
   void GetTargetPhraseCollectionBatch();
 
-  void CreateTranslationOptionsForRange(
+  bool CreateTranslationOptionsForRange(
     const DecodeGraph &decodeGraph
     , size_t startPos
     , size_t endPos
@@ -127,15 +140,20 @@ public:
 
   //! Create all possible translations from the phrase tables
   virtual void CreateTranslationOptions();
+
   //! Create translation options that exactly cover a specific input span.
-  virtual void CreateTranslationOptionsForRange(const DecodeGraph &decodeStepList
-      , size_t startPosition
-      , size_t endPosition
-      , bool adhereTableLimit
-      , size_t graphInd) = 0;
+  virtual
+  bool
+  CreateTranslationOptionsForRange
+  (const DecodeGraph &decodeStepList,
+   size_t startPosition, size_t endPosition,
+   bool adhereTableLimit, size_t graphInd) = 0;
 
   //!Check if this range has XML options
-  virtual bool HasXmlOptionsOverlappingRange(size_t startPosition, size_t endPosition) const;
+  virtual
+  bool
+  HasXmlOptionsOverlappingRange(size_t startPosition,
+                                size_t endPosition) const;
 
   //! Check if a subsumed XML option constraint is satisfied
   virtual bool ViolatesXmlOptionsConstraint(size_t startPosition, size_t endPosition, TranslationOption *transOpt) const;
@@ -145,15 +163,23 @@ public:
 
 
   //! returns future cost matrix for sentence
-  inline virtual const SquareMatrix &GetFutureScore() const {
-    return m_futureScore;
+  inline virtual const SquareMatrix &GetEstimatedScores() const {
+    return m_estimatedScores;
   }
 
   //! list of trans opt for a particular span
-  const TranslationOptionList &GetTranslationOptionList(const WordsRange &coverage) const {
+  TranslationOptionList const*
+  GetTranslationOptionList(const Range &coverage) const {
     return GetTranslationOptionList(coverage.GetStartPos(), coverage.GetEndPos());
   }
 
+  const InputPathList &GetInputPaths() const {
+    return m_inputPathQueue;
+  }
+
+  ttasksptr GetTranslationTask() const {
+    return m_ttask.lock();
+  }
   TO_STRING();
 };
 

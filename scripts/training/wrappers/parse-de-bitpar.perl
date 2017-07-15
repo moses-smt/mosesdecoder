@@ -1,5 +1,9 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 use Getopt::Long "GetOptions";
 use FindBin qw($RealBin);
@@ -15,6 +19,7 @@ my $DEESCAPE = "$SCRIPTS_ROOT_DIR/tokenizer/deescape-special-chars.perl";
 my $DEBUG = 0;
 my $BASIC = 0;
 my $OLD_BITPAR = 0;
+my $UNPARSEABLE = 0;
 
 my $RAW = "";
 
@@ -22,7 +27,8 @@ GetOptions(
     "basic" => \$BASIC,
     "bitpar=s" => \$BITPAR,
     "old-bitpar" => \$OLD_BITPAR,
-    "raw=s" => \$RAW
+    "raw=s" => \$RAW,
+    "unparseable" => \$UNPARSEABLE
     ) or die("ERROR: unknown options");
 
 `mkdir -p $TMPDIR`;
@@ -48,13 +54,13 @@ while(<INPUT>)
         }
         print $TMP $_."\n";
 
-				$hasWords = 1;        
+				$hasWords = 1;
     }
 
     if ($hasWords == 0) {
     	print $TMP " \n";
     }
-        
+
     print $TMP "\n";
 }
 close($TMP);
@@ -71,6 +77,12 @@ if ($OLD_BITPAR)
 open(PARSER,$pipeline);
 while(my $line = <PARSER>) {
     if ($line =~ /^No parse for/) {
+        if ($UNPARSEABLE) {
+          my $len = length($line);
+          $line = substr($line, 15, $len - 17);
+          $line = escape($line);
+          print $line;
+        }
         print "\n";
         next;
     }
@@ -81,7 +93,7 @@ while(my $line = <PARSER>) {
     for(my $i=0;$i<length($line);$i++) {
         # print STDERR substr($line,$i)."\n";
 	if (substr($line,$i,4) eq "(*T*") {
-	   my ($trace,$rest) = split(/\)/,substr($line,$i+1)); 
+	   my ($trace,$rest) = split(/\)/,substr($line,$i+1));
 	   $i+=length($trace)+2;
 	   $i++ if substr($line,$i+1,1) eq " ";
 	   die("ERROR: NO LABEL FOR TRACE") unless @LABEL;

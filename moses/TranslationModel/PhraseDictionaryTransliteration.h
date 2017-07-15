@@ -18,7 +18,7 @@ class PhraseDictionaryTransliteration : public PhraseDictionary
 public:
   PhraseDictionaryTransliteration(const std::string &line);
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   virtual void CleanUpAfterSentenceProcessing(const InputType& source);
 
@@ -36,7 +36,6 @@ protected:
   std::string m_mosesDir, m_scriptDir, m_externalDir, m_inputLang, m_outputLang;
 
   std::vector<TargetPhrase*> CreateTargetPhrases(const Phrase &sourcePhrase, const std::string &outDir) const;
-  bool SatisfyBackoff(const InputPath &inputPath) const;
 
   void GetTargetPhraseCollection(InputPath &inputPath) const;
 

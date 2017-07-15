@@ -1,5 +1,4 @@
-// $Id$
-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -43,6 +42,7 @@ namespace Moses
 {
 LanguageModelImplementation::LanguageModelImplementation(const std::string &line)
   :LanguageModel(line)
+  ,m_nGramOrder(NOT_FOUND)
 {
 }
 
@@ -62,7 +62,7 @@ void LanguageModelImplementation::ShiftOrPush(std::vector<const Word*> &contextF
 {
   if (contextFactor.size() < GetNGramOrder()) {
     contextFactor.push_back(&word);
-  } else {
+  } else if (GetNGramOrder() > 0) {
     // shift
     for (size_t currNGramOrder = 0 ; currNGramOrder < GetNGramOrder() - 1 ; currNGramOrder++) {
       contextFactor[currNGramOrder] = contextFactor[currNGramOrder + 1];
@@ -114,7 +114,7 @@ void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullSco
     } else {
       ShiftOrPush(contextFactor, word);
       UTIL_THROW_IF2(contextFactor.size() > GetNGramOrder(),
-    		  "Can only calculate LM score of phrases up to the n-gram order");
+                     "Can only calculate LM score of phrases up to the n-gram order");
 
       if (word == GetSentenceStartWord()) {
         // do nothing, don't include prob for <s> unigram
@@ -134,7 +134,7 @@ void LanguageModelImplementation::CalcScore(const Phrase &phrase, float &fullSco
   }
 }
 
-FFState *LanguageModelImplementation::Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
+FFState *LanguageModelImplementation::EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
 {
   // In this function, we only compute the LM scores of n-grams that overlap a
   // phrase boundary. Phrase-internal scores are taken directly from the
@@ -222,7 +222,7 @@ FFState *LanguageModelImplementation::Evaluate(const Hypothesis &hypo, const FFS
   return res;
 }
 
-FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection* out) const
+FFState* LanguageModelImplementation::EvaluateWhenApplied(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection* out) const
 {
   LanguageModelChartState *ret = new LanguageModelChartState(hypo, featureID, GetNGramOrder());
   // data structure for factored context phrase (history and predicted word)
@@ -253,8 +253,8 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
 
       // beginning of sentence symbol <s>? -> just update state
       if (word == GetSentenceStartWord()) {
-    	UTIL_THROW_IF2(phrasePos != 0,
-    			"Sentence start symbol must be at the beginning of sentence");
+        UTIL_THROW_IF2(phrasePos != 0,
+                       "Sentence start symbol must be at the beginning of sentence");
         delete lmState;
         lmState = NewState( GetBeginSentenceState() );
       }
@@ -280,7 +280,7 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
 
         // get prefixScore and finalizedScore
         prefixScore = prevState->GetPrefixScore();
-        finalizedScore = prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0] - prefixScore;
+        finalizedScore = -prefixScore;
 
         // get language model state
         delete lmState;
@@ -308,13 +308,10 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
           updateChartScore( &prefixScore, &finalizedScore, GetValueGivenState(contextFactor, *lmState).score, ++wordPos );
         }
 
+        finalizedScore -= prevState->GetPrefixScore();
+
         // check if we are dealing with a large sub-phrase
         if (subPhraseLength > GetNGramOrder() - 1) {
-          // add its finalized language model score
-          finalizedScore +=
-            prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0] // full score
-            - prevState->GetPrefixScore();                              // - prefix score
-
           // copy language model state
           delete lmState;
           lmState = NewState( prevState->GetRightContext() );
@@ -337,8 +334,16 @@ FFState* LanguageModelImplementation::EvaluateChart(const ChartHypothesis& hypo,
     }
   }
 
-  // assign combined score to score breakdown
-  out->Assign(this, prefixScore + finalizedScore);
+  // add combined score to score breakdown
+  if (OOVFeatureEnabled()) {
+    vector<float> scores(2);
+    scores[0] = prefixScore + finalizedScore - hypo.GetTranslationOption().GetScores().GetScoresForProducer(this)[0];
+    // scores[1] = out->GetScoresForProducer(this)[1];
+    scores[1] = 0;
+    out->PlusEquals(this, scores);
+  } else {
+    out->PlusEquals(this, prefixScore + finalizedScore - hypo.GetTranslationOption().GetScores().GetScoresForProducer(this)[0]);
+  }
 
   ret->Set(prefixScore, lmState);
   return ret;

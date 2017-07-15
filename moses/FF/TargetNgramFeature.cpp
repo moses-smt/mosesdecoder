@@ -12,31 +12,38 @@ namespace Moses
 
 using namespace std;
 
-int TargetNgramState::Compare(const FFState& other) const
+size_t TargetNgramState::hash() const
 {
-  const TargetNgramState& rhs = dynamic_cast<const TargetNgramState&>(other);
-  int result;
+  std::size_t ret = boost::hash_range(m_words.begin(), m_words.end());
+  return ret;
+}
+
+bool TargetNgramState::operator==(const FFState& other) const
+{
+  const TargetNgramState& rhs = static_cast<const TargetNgramState&>(other);
+  bool result;
   if (m_words.size() == rhs.m_words.size()) {
     for (size_t i = 0; i < m_words.size(); ++i) {
-      result = Word::Compare(m_words[i],rhs.m_words[i]);
-      if (result != 0) return result;
+      result = m_words[i] == rhs.m_words[i];
+      if (!result) return false;
     }
-    return 0;
+    return true;
   } else if (m_words.size() < rhs.m_words.size()) {
     for (size_t i = 0; i < m_words.size(); ++i) {
-      result = Word::Compare(m_words[i],rhs.m_words[i]);
-      if (result != 0) return result;
+      result = m_words[i] == rhs.m_words[i];
+      if (!result) return false;
     }
-    return -1;
+    return true;
   } else {
     for (size_t i = 0; i < rhs.m_words.size(); ++i) {
-      result = Word::Compare(m_words[i],rhs.m_words[i]);
-      if (result != 0) return result;
+      result = m_words[i] == rhs.m_words[i];
+      if (!result) return false;
     }
-    return 1;
+    return true;
   }
 }
 
+////////////////////////////////////////////////////////////////////////////
 TargetNgramFeature::TargetNgramFeature(const std::string &line)
   :StatefulFeatureFunction(0, line)
 {
@@ -61,20 +68,21 @@ void TargetNgramFeature::SetParameter(const std::string& key, const std::string&
   } else if (key == "lower-ngrams") {
     m_lower_ngrams = Scan<bool>(value);
   } else if (key == "file") {
-      m_file = value;
+    m_file = value;
   } else {
     StatefulFeatureFunction::SetParameter(key, value);
   }
 }
 
-void TargetNgramFeature::Load()
+void TargetNgramFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   if (m_file == "") return; //allow all, for now
 
   if (m_file == "*") return; //allow all
   ifstream inFile(m_file.c_str());
   if (!inFile) {
-      UTIL_THROW(util::Exception, "Couldn't open file" << m_file);
+    UTIL_THROW(util::Exception, "Couldn't open file" << m_file);
   }
 
   std::string line;
@@ -82,6 +90,7 @@ void TargetNgramFeature::Load()
   m_vocab.insert(EOS_);
   while (getline(inFile, line)) {
     m_vocab.insert(line);
+    cerr << "ADD TO VOCAB: '" << line << "'" << endl;
   }
 
   inFile.close();
@@ -94,9 +103,9 @@ const FFState* TargetNgramFeature::EmptyHypothesisState(const InputType &/*input
   return new TargetNgramState(bos);
 }
 
-FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
-                                      const FFState* prev_state,
-                                      ScoreComponentCollection* accumulator) const
+FFState* TargetNgramFeature::EvaluateWhenApplied(const Hypothesis& cur_hypo,
+    const FFState* prev_state,
+    ScoreComponentCollection* accumulator) const
 {
   const TargetNgramState* tnState = static_cast<const TargetNgramState*>(prev_state);
   assert(tnState);
@@ -107,7 +116,7 @@ FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
 
   // extract all ngrams from current hypothesis
   vector<Word> prev_words(tnState->GetWords());
-  stringstream curr_ngram;
+  util::StringStream curr_ngram;
   bool skip = false;
 
   // include lower order ngrams?
@@ -119,7 +128,9 @@ FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
 //  		const string& curr_w = targetPhrase.GetWord(i).GetFactor(m_factorType)->GetString();
       const StringPiece curr_w = targetPhrase.GetWord(i).GetString(m_factorType);
 
+      //cerr << "CHECK WORD '" << curr_w << "'" << endl;
       if (m_vocab.size() && (FindStringPiece(m_vocab, curr_w) == m_vocab.end())) continue; // skip ngrams
+      //cerr << "ALLOWED WORD '" << curr_w << "'" << endl;
 
       if (n > 1) {
         // can we build an ngram at this position? ("<s> this" --> cannot build 3gram at this position)
@@ -154,6 +165,7 @@ FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
 
       if (!skip) {
         curr_ngram << curr_w;
+        //cerr << "SCORE '" << curr_ngram.str() << "'" << endl;
         accumulator->PlusEquals(this,curr_ngram.str(),1);
       }
       curr_ngram.str("");
@@ -162,7 +174,7 @@ FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
 
   if (cur_hypo.GetWordsBitmap().IsComplete()) {
     for (size_t n = m_n; n >= smallest_n; --n) {
-      stringstream last_ngram;
+      util::StringStream last_ngram;
       skip = false;
       for (size_t i = cur_hypo.GetSize() - n + 1; i <  cur_hypo.GetSize() && !skip; ++i)
         appendNgram(cur_hypo.GetWord(i), skip, last_ngram);
@@ -172,7 +184,7 @@ FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
         accumulator->PlusEquals(this, last_ngram.str(), 1);
       }
     }
-    return NULL;
+    return new TargetNgramState();
   }
 
   // prepare new state
@@ -192,7 +204,7 @@ FFState* TargetNgramFeature::Evaluate(const Hypothesis& cur_hypo,
   return new TargetNgramState(new_prev_words);
 }
 
-void TargetNgramFeature::appendNgram(const Word& word, bool& skip, stringstream &ngram) const
+void TargetNgramFeature::appendNgram(const Word& word, bool& skip, util::StringStream &ngram) const
 {
 //	const string& w = word.GetFactor(m_factorType)->GetString();
   const StringPiece w = word.GetString(m_factorType);
@@ -203,7 +215,7 @@ void TargetNgramFeature::appendNgram(const Word& word, bool& skip, stringstream 
   }
 }
 
-FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int featureId, ScoreComponentCollection* accumulator) const
+FFState* TargetNgramFeature::EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureId, ScoreComponentCollection* accumulator) const
 {
   vector<const Word*> contextFactor;
   contextFactor.reserve(m_n);
@@ -245,7 +257,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
         suffixTerminals++;
       // everything else
       else {
-        stringstream ngram;
+        util::StringStream ngram;
         ngram << m_baseName;
         if (m_factorType == 0)
           ngram << factorZero;
@@ -356,7 +368,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
             suffixTerminals = 0;
 
             // remove duplicates
-            stringstream curr_ngram;
+            util::StringStream curr_ngram;
             curr_ngram << m_baseName;
             curr_ngram << (*contextFactor[m_n-2]).GetString(m_factorType);
             curr_ngram << ":";
@@ -382,7 +394,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
       // remove duplicates
       size_t size = contextFactor.size();
       if (makePrefix && makeSuffix && (size <= m_n)) {
-        stringstream curr_ngram;
+        util::StringStream curr_ngram;
         curr_ngram << m_baseName;
         for (size_t i = 0; i < size; ++i) {
           curr_ngram << (*contextFactor[i]).GetString(m_factorType);
@@ -400,7 +412,7 @@ FFState* TargetNgramFeature::EvaluateChart(const ChartHypothesis& cur_hypo, int 
 
 void TargetNgramFeature::MakePrefixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator, size_t numberOfStartPos, size_t offset) const
 {
-  stringstream ngram;
+  util::StringStream ngram;
   size_t size = contextFactor.size();
   for (size_t k = 0; k < numberOfStartPos; ++k) {
     size_t max_end = (size < m_n+k+offset)? size: m_n+k+offset;
@@ -425,7 +437,7 @@ void TargetNgramFeature::MakePrefixNgrams(std::vector<const Word*> &contextFacto
 
 void TargetNgramFeature::MakeSuffixNgrams(std::vector<const Word*> &contextFactor, ScoreComponentCollection* accumulator, size_t numberOfEndPos, size_t offset) const
 {
-  stringstream ngram;
+  util::StringStream ngram;
   for (size_t k = 0; k < numberOfEndPos; ++k) {
     size_t end_pos = contextFactor.size()-1-k-offset;
     for (int start_pos=end_pos-1; (start_pos >= 0) && (end_pos-start_pos < m_n); --start_pos) {

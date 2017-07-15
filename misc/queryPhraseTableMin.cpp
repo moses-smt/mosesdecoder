@@ -9,6 +9,7 @@
 #include "moses/TranslationModel/CompactPT/PhraseDictionaryCompact.h"
 #include "moses/Util.h"
 #include "moses/Phrase.h"
+#include "moses/parameters/AllOptions.h"
 
 void usage();
 
@@ -18,7 +19,7 @@ using namespace Moses;
 
 int main(int argc, char **argv)
 {
-  int nscores = 5;
+  int nscores = 4;
   std::string ttable = "";
   bool useAlignments = false;
   bool reportCounts = false;
@@ -47,24 +48,17 @@ int main(int argc, char **argv)
   std::vector<FactorType> output(1, 0);
   std::vector<float> weight(nscores, 0);
 
-  Parameter *parameter = new Parameter();
-  const_cast<std::vector<std::string>&>(parameter->GetParam("factor-delimiter")).resize(1, "||dummy_string||");
-  const_cast<std::vector<std::string>&>(parameter->GetParam("input-factors")).resize(1, "0");
-  const_cast<std::vector<std::string>&>(parameter->GetParam("verbose")).resize(1, "0");
-  //const_cast<std::vector<std::string>&>(parameter->GetParam("weight-w")).resize(1, "0");
-  //const_cast<std::vector<std::string>&>(parameter->GetParam("weight-d")).resize(1, "0");
-
-  StaticData::InstanceNonConst().LoadData(parameter);
-
   std::stringstream ss;
   ss << nscores;
   PhraseDictionaryCompact pdc("PhraseDictionaryCompact input-factor=0 output-factor=0 num-features=" + ss.str() + " path=" + ttable);
-  pdc.Load();
+  AllOptions::ptr opts(new AllOptions);
+  pdc.Load(opts);
 
   std::string line;
   while(getline(std::cin, line)) {
     Phrase sourcePhrase;
-    sourcePhrase.CreateFromString(Input, input, line, "||dummy_string||", NULL);
+    // sourcePhrase.CreateFromString(Input, input, line, "||dummy_string||", NULL);
+    sourcePhrase.CreateFromString(Input, input, line, NULL);
 
     TargetPhraseVectorPtr decodedPhraseColl
     = pdc.GetTargetPhraseCollectionRaw(sourcePhrase);

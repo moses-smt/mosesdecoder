@@ -76,8 +76,9 @@ private:
     MinHeapSorter hs(A);
     std::make_heap(A.begin(), A.begin() + n, hs);
 
-    size_t h = n;
-    size_t m1, m2;
+    // marked volatile to prevent the intel compiler from generating bad code
+    volatile size_t h = n;
+    volatile size_t m1, m2;
     while(h > 1) {
       m1 = A[0];
       std::pop_heap(A.begin(), A.begin() + h, hs);
@@ -157,12 +158,14 @@ private:
     }
   }
 
-  boost::dynamic_bitset<>& Encode(Data data) {
-    return m_encodeMap[data];
+  const boost::dynamic_bitset<>& Encode(Data data) const {
+    typename EncodeMap::const_iterator it = m_encodeMap.find(data);
+    UTIL_THROW_IF2(it == m_encodeMap.end(), "Cannot find symbol in encoding map");
+    return it->second;
   }
 
   template <class BitWrapper>
-  void PutCode(BitWrapper& bitWrapper, boost::dynamic_bitset<>& code) {
+  void PutCode(BitWrapper& bitWrapper, const boost::dynamic_bitset<>& code) {
     for(int j = code.size()-1; j >= 0; j--)
       bitWrapper.Put(code[j]);
   }

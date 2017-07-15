@@ -1,5 +1,4 @@
-#ifndef MERT_NGRAM_H_
-#define MERT_NGRAM_H_
+#pragma once
 
 #include <vector>
 #include <string>
@@ -121,4 +120,3 @@ private:
 
 }
 
-#endif  // MERT_NGRAM_H_

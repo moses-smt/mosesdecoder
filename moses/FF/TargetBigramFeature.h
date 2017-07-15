@@ -20,7 +20,8 @@ public:
   const Word& GetWord() const {
     return m_word;
   }
-  virtual int Compare(const FFState& other) const;
+  size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
 private:
   Word m_word;
@@ -33,31 +34,20 @@ class TargetBigramFeature : public StatefulFeatureFunction
 public:
   TargetBigramFeature(const std::string &line);
 
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   bool IsUseable(const FactorMask &mask) const;
 
   virtual const FFState* EmptyHypothesisState(const InputType &input) const;
 
-  virtual FFState* Evaluate(const Hypothesis& cur_hypo, const FFState* prev_state,
-                            ScoreComponentCollection* accumulator) const;
+  virtual FFState* EvaluateWhenApplied(const Hypothesis& cur_hypo, const FFState* prev_state,
+                                       ScoreComponentCollection* accumulator) const;
 
-  virtual FFState* EvaluateChart( const ChartHypothesis& /* cur_hypo */,
-                                  int /* featureID */,
-                                  ScoreComponentCollection* ) const {
+  virtual FFState* EvaluateWhenApplied( const ChartHypothesis& /* cur_hypo */,
+                                        int /* featureID */,
+                                        ScoreComponentCollection* ) const {
     throw std::logic_error("TargetBigramFeature not valid in chart decoder");
   }
-  void Evaluate(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
-  void Evaluate(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {}
 
   void SetParameter(const std::string& key, const std::string& value);
 

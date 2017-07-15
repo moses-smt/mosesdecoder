@@ -18,10 +18,13 @@
 ***********************************************************************/
 
 #include <iostream>
-#include "Subgraph.h"
-#include "Node.h"
 
-namespace Moses
+#include "Node.h"
+#include "Subgraph.h"
+
+namespace MosesTraining
+{
+namespace Syntax
 {
 namespace GHKM
 {
@@ -119,12 +122,12 @@ float Subgraph::CalcPcfgScore() const
   return score;
 }
 
-void Subgraph::PrintTree(std::ostream &out) const 
+void Subgraph::PrintTree(std::ostream &out) const
 {
   RecursivelyPrintTree(m_root,out);
 }
 
-void Subgraph::RecursivelyPrintTree(const Node *n, std::ostream &out) const 
+void Subgraph::RecursivelyPrintTree(const Node *n, std::ostream &out) const
 {
   NodeType nodeType = n->GetType();
   if (nodeType == TREE) {
@@ -134,6 +137,11 @@ void Subgraph::RecursivelyPrintTree(const Node *n, std::ostream &out) const
       for (std::vector<Node *>::const_iterator p(children.begin());
            p != children.end(); ++p) {
         Node *child = *p;
+        if (child->GetType() == SOURCE) {
+          // This is possible due to the heuristic for attaching unaligned
+          // source words.
+          continue;
+        }
         out << " ";
         RecursivelyPrintTree(child,out);
       }
@@ -144,5 +152,55 @@ void Subgraph::RecursivelyPrintTree(const Node *n, std::ostream &out) const
   }
 }
 
-}  // namespace Moses
+void Subgraph::PrintPartsOfSpeech(std::ostream &out) const
+{
+  RecursivelyPrintPartsOfSpeech(m_root,out);
+}
+
+void Subgraph::RecursivelyPrintPartsOfSpeech(const Node *n, std::ostream &out) const
+{
+  NodeType nodeType = n->GetType();
+  if (nodeType == TREE) {
+    if (m_leaves.find(n) == m_leaves.end()) {
+      const std::vector<Node *> &children = n->GetChildren();
+      for (std::vector<Node *>::const_iterator p(children.begin());
+           p != children.end(); ++p) {
+        Node *child = *p;
+        if (child->GetType() == TARGET) {
+          out << " " << n->GetLabel();
+        } else {
+          RecursivelyPrintPartsOfSpeech(child,out);
+        }
+      }
+    }
+  }
+}
+
+void Subgraph::GetPartsOfSpeech(std::vector<std::string> &out) const
+{
+  out.clear();
+  RecursivelyGetPartsOfSpeech(m_root,out);
+}
+
+void Subgraph::RecursivelyGetPartsOfSpeech(const Node *n, std::vector<std::string> &out) const
+{
+  NodeType nodeType = n->GetType();
+  if (nodeType == TREE) {
+    if (m_leaves.find(n) == m_leaves.end()) {
+      const std::vector<Node *> &children = n->GetChildren();
+      for (std::vector<Node *>::const_iterator p(children.begin());
+           p != children.end(); ++p) {
+        Node *child = *p;
+        if (child->GetType() == TARGET) {
+          out.push_back(n->GetLabel());
+        } else {
+          RecursivelyGetPartsOfSpeech(child,out);
+        }
+      }
+    }
+  }
+}
+
+}  // namespace MosesTraining
+}  // namespace Syntax
 }  // namespace GHKM

@@ -1,0 +1,21 @@
+table,th,td
+{
+border:1px solid black;
+ border-collapse:collapse
+}
+
+tr:nth-child(odd) {
+    background-color: Gainsboro;
+}
+
+.better {
+	color: Green;
+}
+
+.worse {
+	color: Red;
+}
+
+.unchanged {
+	color: SkyBlue;
+}

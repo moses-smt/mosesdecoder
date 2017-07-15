@@ -1,5 +1,9 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 use File::Temp qw/tempfile/;
 use Getopt::Long "GetOptions";
@@ -19,7 +23,7 @@ my ($dummy, $tmpfile) = tempfile("mada-in-XXXX", DIR=>$TMPDIR, UNLINK=>!$KEEP_TM
 
 print STDERR $tmpfile."\n";
 open(TMP,">$tmpfile");
-while(<STDIN>) { 
+while(<STDIN>) {
   print TMP $_;
 }
 close(TMP);

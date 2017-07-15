@@ -1,5 +1,5 @@
-#ifndef LM_FILTER_WRAPPER_H__
-#define LM_FILTER_WRAPPER_H__
+#ifndef LM_FILTER_WRAPPER_H
+#define LM_FILTER_WRAPPER_H
 
 #include "util/string_piece.hh"
 
@@ -13,7 +13,7 @@ namespace lm {
 // multiple-output filter so clients code against one interface.
 template <class Binary> class BinaryFilter {
   public:
-    // Binary modes are just references (and a set) and it makes the API cleaner to copy them.  
+    // Binary modes are just references (and a set) and it makes the API cleaner to copy them.
     explicit BinaryFilter(Binary binary) : binary_(binary) {}
 
     template <class Iterator, class Output> void AddNGram(const Iterator &begin, const Iterator &end, const StringPiece &line, Output &output) {
@@ -53,4 +53,4 @@ template <class FilterT> class ContextFilter {
 
 } // namespace lm
 
-#endif // LM_FILTER_WRAPPER_H__
+#endif // LM_FILTER_WRAPPER_H

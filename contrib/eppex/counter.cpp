@@ -13,7 +13,7 @@
 #include <string>
 #include <iostream>
 #include <fstream>
-#include <stdlib.h>
+#include <cstdlib>
 #include <iomanip>
 
 #include "phrase-extract.h"

@@ -1,5 +1,5 @@
-#ifndef LM_FILTER_FORMAT_H__
-#define LM_FILTER_FORMAT_H__
+#ifndef LM_FILTER_FORMAT_H
+#define LM_FILTER_FORMAT_H
 
 #include "lm/filter/arpa_io.hh"
 #include "lm/filter/count_io.hh"
@@ -134,12 +134,12 @@ struct CountFormat {
 
 /* For multithreading, the buffer classes hold batches of filter inputs and
  * outputs in memory.  The strings get reused a lot, so keep them around
- * instead of clearing each time.  
+ * instead of clearing each time.
  */
 class InputBuffer {
   public:
     InputBuffer() : actual_(0) {}
-    
+
     void Reserve(size_t size) { lines_.reserve(size); }
 
     template <class Output> void AddNGram(const StringPiece &ngram, const StringPiece &line, Output &output) {
@@ -179,18 +179,18 @@ class BinaryOutputBuffer {
     void Reserve(size_t size) {
       lines_.reserve(size);
     }
-    
+
     void AddNGram(const StringPiece &line) {
       lines_.push_back(line);
     }
-    
+
     template <class Output> void Flush(Output &output) {
       for (std::vector<StringPiece>::const_iterator i = lines_.begin(); i != lines_.end(); ++i) {
         output.AddNGram(*i);
       }
       lines_.clear();
     }
-    
+
   private:
     std::vector<StringPiece> lines_;
 };
@@ -234,7 +234,7 @@ class MultipleOutputBuffer {
 
   private:
     struct Annotated {
-      // If this is empty, send to all systems. 
+      // If this is empty, send to all systems.
       // A filter should never send to all systems and send to a single one.
       std::vector<size_t> systems;
       StringPiece line;
@@ -247,4 +247,4 @@ class MultipleOutputBuffer {
 
 } // namespace lm
 
-#endif // LM_FILTER_FORMAT_H__
+#endif // LM_FILTER_FORMAT_H

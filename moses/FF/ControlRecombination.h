@@ -20,13 +20,14 @@ class ControlRecombinationState : public FFState
 {
 public:
   ControlRecombinationState(const ControlRecombination &ff)
-    :m_ff(ff)
-  {}
+    :m_ff(ff) {
+  }
 
   ControlRecombinationState(const Hypothesis &hypo, const ControlRecombination &ff);
   ControlRecombinationState(const ChartHypothesis &hypo, const ControlRecombination &ff);
 
-  int Compare(const FFState& other) const;
+  virtual size_t hash() const;
+  virtual bool operator==(const FFState& other) const;
 
   const Phrase &GetPhrase() const {
     return m_outputPhrase;
@@ -57,23 +58,12 @@ public:
     return true;
   }
 
-  void Evaluate(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const
-  {}
-  void Evaluate(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const
-  {}
-  FFState* Evaluate(
+  FFState* EvaluateWhenApplied(
     const Hypothesis& cur_hypo,
     const FFState* prev_state,
     ScoreComponentCollection* accumulator) const;
 
-  FFState* EvaluateChart(
+  FFState* EvaluateWhenApplied(
     const ChartHypothesis& /* cur_hypo */,
     int /* featureID - used to index the state in the previous hypotheses */,
     ScoreComponentCollection* accumulator) const;

@@ -44,10 +44,10 @@ public:
   typedef MapType::const_iterator const_iterator;
   typedef MapType::iterator iterator;
 
-  ChartCellLabelSet(const WordsRange &coverage)
-  : m_coverage(coverage)
-  , m_map(FactorCollection::Instance().GetNumNonTerminals(), NULL)
-  , m_size(0) { }
+  ChartCellLabelSet(const Range &coverage)
+    : m_coverage(coverage)
+    , m_map(FactorCollection::Instance().GetNumNonTerminals(), NULL)
+    , m_size(0) { }
 
   ~ChartCellLabelSet() {
     RemoveAllInColl(m_map);
@@ -72,6 +72,8 @@ public:
     size_t idx = w[0]->GetId();
     if (! ChartCellExists(idx)) {
       m_size++;
+
+
       m_map[idx] = new ChartCellLabel(m_coverage, w);
     }
   }
@@ -82,8 +84,7 @@ public:
     if (ChartCellExists(idx)) {
       ChartCellLabel::Stack & s = m_map[idx]->MutableStack();
       s.cube = stack;
-    }
-    else {
+    } else {
       ChartCellLabel::Stack s;
       s.cube = stack;
       m_size++;
@@ -97,8 +98,7 @@ public:
       if (m_map.at(idx) != NULL) {
         return true;
       }
-    }
-    catch (const std::out_of_range& oor) {
+    } catch (const std::out_of_range& oor) {
       m_map.resize(FactorCollection::Instance().GetNumNonTerminals(), NULL);
     }
     return false;
@@ -116,8 +116,15 @@ public:
     size_t idx = w[0]->GetId();
     try {
       return m_map.at(idx);
+    } catch (const std::out_of_range& oor) {
+      return NULL;
     }
-    catch (const std::out_of_range& oor) {
+  }
+
+  const ChartCellLabel *Find(size_t idx) const {
+    try {
+      return m_map.at(idx);
+    } catch (const std::out_of_range& oor) {
       return NULL;
     }
   }
@@ -132,7 +139,7 @@ public:
   }
 
 private:
-  const WordsRange &m_coverage;
+  const Range &m_coverage;
   MapType m_map;
   size_t m_size;
 };

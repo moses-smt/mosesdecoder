@@ -11,8 +11,8 @@
 #include "moses/InputType.h"
 #include "moses/InputFileStream.h"
 #include "moses/TypeDef.h"
+#include "moses/TranslationTask.h"
 #include "moses/StaticData.h"
-#include "moses/UserMessage.h"
 #include "Loader.h"
 #include "LoaderFactory.h"
 #include "util/exception.hh"
@@ -32,13 +32,15 @@ PhraseDictionaryALSuffixArray::PhraseDictionaryALSuffixArray(const std::string &
   ReadParameters();
 }
 
-void PhraseDictionaryALSuffixArray::Load()
+void PhraseDictionaryALSuffixArray::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   SetFeaturesToApply();
 }
 
-void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)
+void PhraseDictionaryALSuffixArray::InitializeForInput(ttasksptr const& ttask)
 {
+  InputType const& source = *ttask->GetSource();
   // populate with rules for this sentence
   long translationId = source.GetTranslationId();
 
@@ -46,11 +48,11 @@ void PhraseDictionaryALSuffixArray::InitializeForInput(InputType const& source)
 
   std::auto_ptr<RuleTableLoader> loader =
     RuleTableLoaderFactory::Create(grammarFile);
-  bool ret = loader->Load(m_input, m_output, grammarFile, m_tableLimit,
-                          *this);
+  AllOptions::ptr const& opts = ttask->options();
+  bool ret = loader->Load(*opts, m_input, m_output, grammarFile, m_tableLimit, *this);
 
-  UTIL_THROW_IF2(ret == NULL,
-		  "Rules not successfully loaded for sentence id " << translationId);
+  UTIL_THROW_IF2(!ret, "Rules not successfully loaded for sentence id "
+                 << translationId);
 }
 
 void PhraseDictionaryALSuffixArray::CleanUpAfterSentenceProcessing(const InputType &source)

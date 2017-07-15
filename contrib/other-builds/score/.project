@@ -3,6 +3,8 @@
 	<name>score</name>
 	<comment></comment>
 	<projects>
+		<project>moses</project>
+		<project>util</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -84,16 +86,6 @@
 			<name>ScoreFeature.h</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/phrase-extract/ScoreFeature.h</locationURI>
-		</link>
-		<link>
-			<name>exception.cc</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/util/exception.cc</locationURI>
-		</link>
-		<link>
-			<name>exception.hh</name>
-			<type>1</type>
-			<locationURI>PARENT-3-PROJECT_LOC/util/exception.hh</locationURI>
 		</link>
 		<link>
 			<name>score-main.cpp</name>

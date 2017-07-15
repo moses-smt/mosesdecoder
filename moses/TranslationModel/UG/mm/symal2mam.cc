@@ -1,10 +1,10 @@
-// -*- c++ -*-
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 // program to convert GIZA-style alignments into memory-mapped format
 // (c) 2010 Ulrich Germann
 
-// Reads from stdin a file with alternating lines: sentence lengths and symal output. 
-// We need the sentence lenghts for sanity checks, because GIZA alignment might skip 
-// sentences. If --skip, we skip such sentence pairs, otherwise, we leave the word 
+// Reads from stdin a file with alternating lines: sentence lengths and symal output.
+// We need the sentence lenghts for sanity checks, because GIZA alignment might skip
+// sentences. If --skip, we skip such sentence pairs, otherwise, we leave the word
 // alignment matrix blank.
 
 #include "ug_mm_ttrack.h"
@@ -24,13 +24,14 @@
 #include "util/exception.hh"
 // #include "headers-base/util/check.hh"
 
-// NOTE TO SELF: 
+// NOTE TO SELF:
 /* Program to filter out sentences that GIZA will skip or truncate,
  * i.e. sentences longer than 100 words or sentence pairs with a length
  */
 
 using namespace std;
 using namespace ugdiss;
+using namespace sapt;
 
 ofstream t1out,t2out,mam;
 int len1=0,len2=0;
@@ -42,7 +43,7 @@ TokenIndex V1;
 
 string mtt1name,mtt2name,o1name,o2name,mamname,cfgFile;
 string dataFormat,A3filename;
-void 
+void
 interpret_args(int ac, char* av[])
 {
   namespace po=boost::program_options;
@@ -63,7 +64,7 @@ interpret_args(int ac, char* av[])
     ("t2",    po::value<string>(&mtt2name), "file name of L2 mapped token track")
     ("format,F", po::value<string>(&dataFormat)->default_value("plain"), "data format (plain or conll)")
     ;
-  
+
   h.add_options()
     ("mamname", po::value<string>(&mamname), "name of output file for mam")
     ;
@@ -76,8 +77,8 @@ interpret_args(int ac, char* av[])
   if (vm.count("help") || mamname.empty())
     {
       cout << "usage:\n"
-           << "\t\n" 
-           << "\t ... | " << av[0] 
+           << "\t\n"
+           << "\t ... | " << av[0]
 	   << " <.mam file> \n" << endl;
       cout << o << endl;
       cout << "If an A3 file is given (as produced by (m)giza), symal2mam performs\n"
@@ -117,10 +118,10 @@ procSymalLine(string const& line, ostream& out)
         {
           cerr << a << "-" << b << " " << len1 << "/" << len2 << endl;
         }
-      assert(len1 == 0 || a<len1); 
-      assert(len2 == 0 || b<len2); 
-      binwrite(out,a);
-      binwrite(out,b);
+      assert(len1 == 0 || a<len1);
+      assert(len2 == 0 || b<len2);
+      tpt::binwrite(out,a);
+      tpt::binwrite(out,b);
     }
   return out.tellp();
 }
@@ -130,25 +131,25 @@ void finiMAM(ofstream& out, vector<id_type>& idx, id_type numTok)
   id_type offset = sizeof(filepos_type)+2*sizeof(id_type);
   filepos_type idxStart = out.tellp();
   for (vector<id_type>::iterator i = idx.begin(); i != idx.end(); ++i)
-    numwrite(out,*i-offset);
+    tpt::numwrite(out,*i-offset);
   out.seekp(0);
-  numwrite(out,idxStart);
-  numwrite(out,id_type(idx.size()-1));
-  numwrite(out,numTok);
+  tpt::numwrite(out,idxStart);
+  tpt::numwrite(out,id_type(idx.size()-1));
+  tpt::numwrite(out,numTok);
   out.close();
 }
 
-void 
+void
 finalize(ofstream& out, vector<id_type> const& idx, id_type tokenCount)
 {
   id_type       idxSize = idx.size();
   filepos_type idxStart = out.tellp();
   for (size_t i = 0; i < idx.size(); ++i)
-    numwrite(out,idx[i]);
+    tpt::numwrite(out,idx[i]);
   out.seekp(0);
-  numwrite(out,idxStart);
-  numwrite(out,idxSize-1);
-  numwrite(out,tokenCount);
+  tpt::numwrite(out,idxStart);
+  tpt::numwrite(out,idxSize-1);
+  tpt::numwrite(out,tokenCount);
   out.close();
 }
 
@@ -184,7 +185,7 @@ go()
   while(getline(cin,line))
     {
       idxm.push_back(procSymalLine(line,mam));
-      if (debug && ++ctr%100000==0) 
+      if (debug && ++ctr%100000==0)
 	cerr << ctr/1000 << "K lines processed" << endl;
     }
   finiMAM(mam,idxm,0);
@@ -197,31 +198,32 @@ go(string t1name, string t2name, string A3filename)
 {
   typedef mmTtrack<TKN> track_t;
   track_t T1(t1name),T2(t2name);
-  filtering_istream A3file; open_input_stream(A3filename,A3file);
+  boost::iostreams::filtering_istream A3file; 
+  open_input_stream(A3filename, A3file);
 
   string line; int check1=-1,check2=-1;
-  vector<id_type> idx1(1,0),idx2(1,0),idxm(1,mam.tellp());
+  vector<id_type> idx1(1,0),idx2(1,0),idxm(1, mam.tellp());
   size_t tokenCount1=0,tokenCount2=0;
   size_t skipCtr=0,lineCtr=0;
-  if (!getCheckValues(A3file,check1,check2))
+  if (!getCheckValues(A3file, check1, check2))
     UTIL_THROW(util::Exception, "Mismatch in input files!");
 
   for (sid = 0; sid < T1.size(); ++sid)
     {
-      len1 = T1.sntLen(sid); 
+      len1 = T1.sntLen(sid);
       len2 = T2.sntLen(sid);
-      if (debug) 
-        cerr << "[" << lineCtr << "] " 
-             << len1 << " (" << check1 << ") / " 
+      if (debug)
+        cerr << "[" << lineCtr << "] "
+             << len1 << " (" << check1 << ") / "
              << len2 << " (" << check2 << ")" << endl;
-      if ((check1 >=0 && check1!=len1) || 
+      if ((check1 >=0 && check1!=len1) ||
 	  (check2 >=0 && check2!=len2))
         {
           if (skip)
             {
-              cerr << "[" << ++skipCtr << "] skipping " 
-                   << check1 << "/" << check2 << " vs. " 
-                   << len1 << "/" << len2 
+              cerr << "[" << ++skipCtr << "] skipping "
+                   << check1 << "/" << check2 << " vs. "
+                   << len1 << "/" << len2
                    << " at line " << lineCtr << endl;
             }
           else
@@ -238,9 +240,9 @@ go(string t1name, string t2name, string A3filename)
         }
       if (skip)
         {
-          idx1.push_back(tokenCount1 += len1); 
+          idx1.push_back(tokenCount1 += len1);
           copySentence(T1,sid,t1out);
-          idx2.push_back(tokenCount2 += len2); 
+          idx2.push_back(tokenCount2 += len2);
           copySentence(T2,sid,t2out);
         }
 
@@ -250,7 +252,7 @@ go(string t1name, string t2name, string A3filename)
       lineCtr++;
       idxm.push_back(procSymalLine(line,mam));
       if (debug) cerr << "[" << lineCtr << "] "
-                      << check1 << " (" << len1 <<") " 
+                      << check1 << " (" << len1 <<") "
                       << check2 << " (" << len2 <<") "
                       << line << endl;
       getCheckValues(A3file,check1,check2);
@@ -264,13 +266,13 @@ go(string t1name, string t2name, string A3filename)
   cout << idxm.size() << endl;
 }
 
-void 
+void
 initialize(ofstream& out, string const& fname)
 {
   out.open(fname.c_str());
-  numwrite(out,filepos_type(0)); // place holder for index start
-  numwrite(out,id_type(0));      // place holder for index size
-  numwrite(out,id_type(0));      // place holder for token count
+  tpt::numwrite(out,filepos_type(0)); // place holder for index start
+  tpt::numwrite(out,id_type(0));      // place holder for index size
+  tpt::numwrite(out,id_type(0));      // place holder for token count
 }
 
 int main(int argc, char* argv[])

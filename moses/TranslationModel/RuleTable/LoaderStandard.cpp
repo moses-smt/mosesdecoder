@@ -25,15 +25,15 @@
 #include <algorithm>
 #include <iostream>
 #include <sys/stat.h>
-#include <stdlib.h>
+#include <cstdlib>
+#include <boost/algorithm/string/predicate.hpp>
 #include "Trie.h"
 #include "moses/FactorCollection.h"
 #include "moses/Word.h"
 #include "moses/Util.h"
 #include "moses/InputFileStream.h"
 #include "moses/StaticData.h"
-#include "moses/WordsRange.h"
-#include "moses/UserMessage.h"
+#include "moses/Range.h"
 #include "moses/ChartTranslationOptionList.h"
 #include "moses/FactorCollection.h"
 #include "util/file_piece.hh"
@@ -43,22 +43,21 @@
 #include "util/exception.hh"
 
 using namespace std;
+using namespace boost::algorithm;
 
 namespace Moses
 {
-bool RuleTableLoaderStandard::Load(const std::vector<FactorType> &input
-                                   , const std::vector<FactorType> &output
-                                   , const std::string &inFile
-                                   , size_t tableLimit
-                                   , RuleTableTrie &ruleTable)
-{
-  bool ret = Load(MosesFormat
-                  ,input, output
-                  ,inFile
-                  ,tableLimit
-                  ,ruleTable);
-  return ret;
 
+bool
+RuleTableLoaderStandard::
+Load(AllOptions const& opts
+     , const std::vector<FactorType> &input
+     , const std::vector<FactorType> &output
+     , const std::string &inFile
+     , size_t tableLimit
+     , RuleTableTrie &ruleTable)
+{
+  return Load(opts, MosesFormat,input, output ,inFile ,tableLimit ,ruleTable);
 }
 
 void ReformatHieroRule(int sourceTarget, string &phrase, map<size_t, pair<size_t, size_t> > &ntAlign)
@@ -68,12 +67,11 @@ void ReformatHieroRule(int sourceTarget, string &phrase, map<size_t, pair<size_t
 
   for (size_t i = 0; i < toks.size(); ++i) {
     string &tok = toks[i];
-    size_t tokLen = tok.size();
-    if (tok.substr(0, 1) == "[" && tok.substr(tokLen - 1, 1) == "]") {
+    if (starts_with(tok, "[") && ends_with(tok, "]")) {
       // no-term
       vector<string> split = Tokenize(tok, ",");
       UTIL_THROW_IF2(split.size() != 2,
-    		  "Incorrectly formmatted non-terminal: " << tok);
+                     "Incorrectly formmatted non-terminal: " << tok);
 
       tok = "[X]" + split[0] + "]";
       size_t coIndex = Scan<size_t>(split[1]);
@@ -100,7 +98,7 @@ void ReformateHieroScore(string &scoreString)
     string &tok = toks[i];
     vector<string> nameValue = Tokenize(tok, "=");
     UTIL_THROW_IF2(nameValue.size() != 2,
-    		"Incorrectly formatted score: " << tok);
+                   "Incorrectly formatted score: " << tok);
 
     float score = Scan<float>(nameValue[1]);
     score = exp(-score);
@@ -126,14 +124,14 @@ void ReformatHieroRule(const string &lineOrig, string &out)
   ReformatHieroRule(1, targetPhraseString, ntAlign);
   ReformateHieroScore(scoreString);
 
-  stringstream align;
+  util::StringStream align;
   map<size_t, pair<size_t, size_t> >::const_iterator iterAlign;
   for (iterAlign = ntAlign.begin(); iterAlign != ntAlign.end(); ++iterAlign) {
     const pair<size_t, size_t> &alignPoint = iterAlign->second;
     align << alignPoint.first << "-" << alignPoint.second << " ";
   }
 
-  stringstream ret;
+  util::StringStream ret;
   ret << sourcePhraseString << " ||| "
       << targetPhraseString << " ||| "
       << scoreString << " ||| "
@@ -142,17 +140,16 @@ void ReformatHieroRule(const string &lineOrig, string &out)
   out = ret.str();
 }
 
-bool RuleTableLoaderStandard::Load(FormatType format
+bool RuleTableLoaderStandard::Load(AllOptions const& opts, FormatType format
                                    , const std::vector<FactorType> &input
                                    , const std::vector<FactorType> &output
                                    , const std::string &inFile
                                    , size_t /* tableLimit */
                                    , RuleTableTrie &ruleTable)
 {
-  PrintUserTime(string("Start loading text SCFG phrase table. ") + (format==MosesFormat?"Moses ":"Hiero ") + " format");
+  PrintUserTime(string("Start loading text phrase table. ") + (format==MosesFormat?"Moses":"Hiero") + " format");
 
-  const StaticData &staticData = StaticData::Instance();
-  const std::string& factorDelimiter = staticData.GetFactorDelimiter();
+  // const StaticData &staticData = StaticData::Instance();
 
   string lineOrig;
   size_t count = 0;
@@ -192,12 +189,8 @@ bool RuleTableLoaderStandard::Load(FormatType format
       alignString = temp;
     }
 
-    if (++pipes) {
-      StringPiece str(*pipes); //counts
-    }
-
     bool isLHSEmpty = (sourcePhraseString.find_first_not_of(" \t", 0) == string::npos);
-    if (isLHSEmpty && !staticData.IsWordDeletionEnabled()) {
+    if (isLHSEmpty && !opts.unk.word_deletion_enabled) {
       TRACE_ERR( ruleTable.GetFilePath() << ":" << count << ": pt entry contains empty target, skipping\n");
       continue;
     }
@@ -212,7 +205,7 @@ bool RuleTableLoaderStandard::Load(FormatType format
     const size_t numScoreComponents = ruleTable.GetNumScoreComponents();
     if (scoreVector.size() != numScoreComponents) {
       UTIL_THROW2("Size of scoreVector != number (" << scoreVector.size() << "!="
-    		  	  << numScoreComponents << ") of score components on line " << count);
+                  << numScoreComponents << ") of score components on line " << count);
     }
 
     // parse source & find pt node
@@ -222,18 +215,17 @@ bool RuleTableLoaderStandard::Load(FormatType format
     Word *targetLHS;
 
     // create target phrase obj
-    TargetPhrase *targetPhrase = new TargetPhrase();
-    targetPhrase->CreateFromString(Output, output, targetPhraseString, factorDelimiter, &targetLHS);
-
+    TargetPhrase *targetPhrase = new TargetPhrase(&ruleTable);
+    targetPhrase->CreateFromString(Output, output, targetPhraseString, &targetLHS);
     // source
     Phrase sourcePhrase;
-    sourcePhrase.CreateFromString(Input, input, sourcePhraseString, factorDelimiter, &sourceLHS);
+    sourcePhrase.CreateFromString(Input, input, sourcePhraseString, &sourceLHS);
 
     // rest of target phrase
     targetPhrase->SetAlignmentInfo(alignString);
     targetPhrase->SetTargetLHS(targetLHS);
 
-    //targetPhrase->SetDebugOutput(string("New Format pt ") + line);
+    ++pipes;  // skip over counts field
 
     if (++pipes) {
       StringPiece sparseString(*pipes);
@@ -246,10 +238,12 @@ bool RuleTableLoaderStandard::Load(FormatType format
     }
 
     targetPhrase->GetScoreBreakdown().Assign(&ruleTable, scoreVector);
-    targetPhrase->Evaluate(sourcePhrase, ruleTable.GetFeaturesToApply());
+    targetPhrase->EvaluateInIsolation(sourcePhrase, ruleTable.GetFeaturesToApply());
 
-    TargetPhraseCollection &phraseColl = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase, *targetPhrase, sourceLHS);
-    phraseColl.Add(targetPhrase);
+    TargetPhraseCollection::shared_ptr phraseColl
+    = GetOrCreateTargetPhraseCollection(ruleTable, sourcePhrase,
+                                        *targetPhrase, sourceLHS);
+    phraseColl->Add(targetPhrase);
 
     // not implemented correctly in memory pt. just delete it for now
     delete sourceLHS;

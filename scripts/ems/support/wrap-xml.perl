@@ -1,5 +1,9 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 
 my ($language,$src,$system) = @ARGV;
@@ -10,6 +14,7 @@ open(SRC,$src) or die "Cannot open: $!";
 my @OUT = <STDIN>;
 chomp(@OUT);
 #my @OUT = `cat $decoder_output`;
+my $missing_end_seg = 0;
 while(<SRC>) {
     chomp;
     if (/^<srcset/) {
@@ -27,10 +32,20 @@ while(<SRC>) {
         $line = "" if $line =~ /NO BEST TRANSLATION/;
         if (/<\/seg>/) {
 	  s/(<seg[^>]+> *).*(<\/seg>)/$1$line$2/i;
+          $missing_end_seg = 0;
         }
         else {
-	  s/(<seg[^>]+> *)[^<]*/$1$line/i;
+	  s/(<seg[^>]+> *)[^<]*/$1$line<\/seg>/i;
+          $missing_end_seg = 1;
         }
+    }
+    elsif ($missing_end_seg) {
+      if (/<\/doc>/) {
+        $missing_end_seg = 0;
+      }
+      else {
+        next;
+      }
     }
     print $_."\n";
 }

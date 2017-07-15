@@ -13,19 +13,19 @@ namespace Moses
 InputFeature *InputFeature::s_instance = NULL;
 
 InputFeature::InputFeature(const std::string &line)
-  : StatelessFeatureFunction(line)
+  : StatelessFeatureFunction(line,true)
   , m_numRealWordCount(0)
 {
   m_numInputScores = this->m_numScoreComponents;
   ReadParameters();
-  
+
   UTIL_THROW_IF2(s_instance, "Can only have 1 input feature");
   s_instance = this;
 }
 
-void InputFeature::Load()
+void InputFeature::Load(AllOptions::ptr const& opts)
 {
-  
+  m_options = opts;
   const PhraseDictionary *pt = PhraseDictionary::GetColl()[0];
   const PhraseDictionaryTreeAdaptor *ptBin = dynamic_cast<const PhraseDictionaryTreeAdaptor*>(pt);
 
@@ -44,22 +44,22 @@ void InputFeature::SetParameter(const std::string& key, const std::string& value
 
 }
 
-void InputFeature::Evaluate(const InputType &input
-                            , const InputPath &inputPath
-                            , const TargetPhrase &targetPhrase
-                            , ScoreComponentCollection &scoreBreakdown
-                            , ScoreComponentCollection *estimatedFutureScore) const
+void InputFeature::EvaluateWithSourceContext(const InputType &input
+    , const InputPath &inputPath
+    , const TargetPhrase &targetPhrase
+    , const StackVec *stackVec
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection *estimatedScores) const
 {
   if (m_legacy) {
     //binary phrase-table does input feature itself
     return;
+  } else if (input.GetType() == WordLatticeInput) {
+    const ScorePair *scores = inputPath.GetInputScore();
+    if (scores) {
+      scoreBreakdown.PlusEquals(this, *scores);
+    }
   }
-  /*
-  const ScorePair *scores = inputPath.GetInputScore();
-  if (scores) {
-  	  scoreBreakdown.PlusEquals(this, *scores);
-  }
-  */
 }
 
 } // namespace

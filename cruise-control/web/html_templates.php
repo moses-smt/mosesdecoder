@@ -8,7 +8,7 @@ function show_header($title)
     <META HTTP-EQUIV=\"Content-Type\" CONTENT=\"text/html;charset=utf-8\">
     <title>$title</title>
   </head><body>";
-} 
+}
 
 function show_heading($text, $size = 1)
 {

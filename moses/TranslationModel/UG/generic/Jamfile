@@ -1,1 +1,2 @@
-fakelib generic : [ glob */*.cc */*.cpp ] ; 
+fakelib generic : [ glob */*.cc */*.cpp : stringdist/* ] ; 
+fakelib stringdist : [ glob stringdist/*.cc ] ;

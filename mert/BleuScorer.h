@@ -1,22 +1,22 @@
-#ifndef MERT_BLEU_SCORER_H_
-#define MERT_BLEU_SCORER_H_
+#pragma once
 
-#include <ostream>
+#include <fstream>
 #include <string>
 #include <vector>
 
-#include "Types.h"
+#include <boost/shared_ptr.hpp>
+
+#include "Ngram.h"
+#include "Reference.h"
+#include "ScopedVector.h"
 #include "ScoreData.h"
 #include "StatisticsBasedScorer.h"
-#include "ScopedVector.h"
+#include "Types.h"
 
 namespace MosesTuning
 {
 
-const int kBleuNgramOrder = 4;
-
-class NgramCounts;
-class Reference;
+const size_t kBleuNgramOrder = 4;
 
 /**
  * Bleu scoring
@@ -37,16 +37,19 @@ public:
 
   virtual void setReferenceFiles(const std::vector<std::string>& referenceFiles);
   virtual void prepareStats(std::size_t sid, const std::string& text, ScoreStats& entry);
-  virtual statscore_t calculateScore(const std::vector<int>& comps) const;
+  virtual statscore_t calculateScore(const std::vector<ScoreStatsType>& comps) const;
   virtual std::size_t NumberOfScores() const {
     return 2 * kBleuNgramOrder + 1;
   }
 
-  int CalcReferenceLength(std::size_t sentence_id, std::size_t length);
+  void CalcBleuStats(const Reference& ref, const std::string& text, ScoreStats& entry) const;
+
+  int CalcReferenceLength(const Reference& ref, std::size_t length) const;
 
   ReferenceLengthType GetReferenceLengthType() const {
     return m_ref_length_type;
   }
+
   void SetReferenceLengthType(ReferenceLengthType type) {
     m_ref_length_type = type;
   }
@@ -55,17 +58,23 @@ public:
     return m_references.get();
   }
 
+  virtual float getReferenceLength(const std::vector<ScoreStatsType>& totals) const {
+    return totals[kBleuNgramOrder*2];
+  }
+
   /**
    * Count the ngrams of each type, up to the given length in the input line.
    */
-  std::size_t CountNgrams(const std::string& line, NgramCounts& counts, unsigned int n, bool is_testing=false);
+  size_t CountNgrams(const std::string& line, NgramCounts& counts, unsigned int n, bool is_testing=false) const;
 
   void DumpCounts(std::ostream* os, const NgramCounts& counts) const;
 
-  bool OpenReference(const char* filename, std::size_t file_id);
-
   // NOTE: this function is used for unit testing.
-  virtual bool OpenReferenceStream(std::istream* is, std::size_t file_id);
+  bool OpenReferenceStream(std::istream* is, std::size_t file_id);
+
+  void ProcessReferenceLine(const std::string& line, Reference* ref) const;
+
+  bool GetNextReferenceFromStreams(std::vector<boost::shared_ptr<std::ifstream> >& referenceStreams, Reference& ref) const;
 
   //private:
 protected:
@@ -93,11 +102,5 @@ float smoothedSentenceBleu
  */
 float sentenceLevelBackgroundBleu(const std::vector<float>& sent, const std::vector<float>& bg);
 
-/**
- * Computes plain old BLEU from a vector of stats
- */
-float unsmoothedBleu(const std::vector<float>& stats);
-
 }
 
-#endif  // MERT_BLEU_SCORER_H_

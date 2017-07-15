@@ -1,5 +1,5 @@
-#ifndef UTIL_PCQUEUE__
-#define UTIL_PCQUEUE__
+#ifndef UTIL_PCQUEUE_H
+#define UTIL_PCQUEUE_H
 
 #include "util/exception.hh"
 
@@ -8,7 +8,7 @@
 #include <boost/thread/mutex.hpp>
 #include <boost/utility.hpp>
 
-#include <errno.h>
+#include <cerrno>
 
 #ifdef __APPLE__
 #include <mach/semaphore.h>
@@ -72,11 +72,12 @@ inline void WaitSemaphore (Semaphore &on) {
 
 #endif // __APPLE__
 
-/* Producer consumer queue safe for multiple producers and multiple consumers.
- * T must be default constructable and have operator=.  
+/**
+ * Producer consumer queue safe for multiple producers and multiple consumers.
+ * T must be default constructable and have operator=.
  * The value is copied twice for Consume(T &out) or three times for Consume(),
  * so larger objects should be passed via pointer.
- * Strong exception guarantee if operator= throws.  Undefined if semaphores throw.  
+ * Strong exception guarantee if operator= throws.  Undefined if semaphores throw.
  */
 template <class T> class PCQueue : boost::noncopyable {
  public:
@@ -129,7 +130,7 @@ template <class T> class PCQueue : boost::noncopyable {
     Consume(ret);
     return ret;
   }
-   
+
  private:
   // Number of empty spaces in storage_.
   Semaphore empty_;
@@ -152,4 +153,4 @@ template <class T> class PCQueue : boost::noncopyable {
 
 } // namespace util
 
-#endif // UTIL_PCQUEUE__
+#endif // UTIL_PCQUEUE_H

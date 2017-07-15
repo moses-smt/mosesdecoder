@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 // $Id$
 // vim:tabstop=2
 
@@ -37,26 +38,31 @@ namespace Moses
 {
 
 class InputType;
-class WordsBitmap;
+class Bitmap;
 
 #define NOT_A_ZONE 999999999
 /** A list of zones and walls to limit which reordering can occur
  */
 class ReorderingConstraint
 {
-  friend std::ostream& operator<<(std::ostream& out, const ReorderingConstraint& reorderingConstraint);
+  friend std::ostream& operator<<(std::ostream& out, const ReorderingConstraint &obj);
 protected:
   // const size_t m_size; /**< number of words in sentence */
   size_t m_size; /**< number of words in sentence */
   bool *m_wall;	/**< flag for each word if it is a wall */
   size_t *m_localWall;	/**< flag for each word if it is a local wall */
-  std::vector< std::vector< size_t > > m_zone; /** zones that limit reordering */
+  std::vector< std::pair<size_t,size_t> > m_zone; /** zones that limit reordering */
   bool   m_active; /**< flag indicating, if there are any active constraints */
-
+  int m_max_distortion;
 public:
 
   //! create ReorderingConstraint of length size and initialise to zero
-  ReorderingConstraint() :m_wall(NULL),m_localWall(NULL),m_active(false) {}
+  ReorderingConstraint(int max_distortion)
+    : m_wall(NULL)
+    , m_localWall(NULL)
+    , m_active(false)
+    , m_max_distortion(max_distortion)
+  {}
 
   //! destructer
   ~ReorderingConstraint() {
@@ -87,7 +93,7 @@ public:
   void SetZone( size_t startPos, size_t endPos );
 
   //! returns the vector of zones
-  std::vector< std::vector< size_t > > & GetZones() {
+  std::vector< std::pair<size_t,size_t> > & GetZones() {
     return m_zone;
   }
 
@@ -95,7 +101,7 @@ public:
   void SetMonotoneAtPunctuation( const Phrase & sentence );
 
   //! check if all constraints are fulfilled -> all find
-  bool Check( const WordsBitmap &bitmap, size_t start, size_t end ) const;
+  bool Check( const Bitmap &bitmap, size_t start, size_t end ) const;
 
   //! checks if reordering constraints will be enforced
   bool IsActive() const {

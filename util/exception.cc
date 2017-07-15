@@ -4,53 +4,51 @@
 #include <typeinfo>
 #endif
 
-#include <errno.h>
-#include <string.h>
+#include <cerrno>
+#include <cstring>
+
+#if defined(_WIN32) || defined(_WIN64)
+#include <windows.h>
+#include <io.h>
+#endif
 
 namespace util {
 
 Exception::Exception() throw() {}
 Exception::~Exception() throw() {}
 
-Exception::Exception(const Exception &from) : std::exception() {
-  stream_ << from.stream_.str();
-}
-
-Exception &Exception::operator=(const Exception &from) {
-  stream_ << from.stream_.str();
-  return *this;
-}
-
-const char *Exception::what() const throw() {
-  text_ = stream_.str();
-  return text_.c_str();
-}
-
 void Exception::SetLocation(const char *file, unsigned int line, const char *func, const char *child_name, const char *condition) {
   /* The child class might have set some text, but we want this to come first.
    * Another option would be passing this information to the constructor, but
    * then child classes would have to accept constructor arguments and pass
-   * them down.  
+   * them down.
    */
-  text_ = stream_.str();
-  stream_.str("");
-  stream_ << file << ':' << line;
-  if (func) stream_ << " in " << func << " threw ";
+  std::string old_text;
+  what_.swap(old_text);
+  what_ << file << ':' << line;
+  if (func) what_ << " in " << func << " threw ";
   if (child_name) {
-    stream_ << child_name;
+    what_ << child_name;
   } else {
 #ifdef __GXX_RTTI
-    stream_ << typeid(this).name();
+    what_ << typeid(this).name();
 #else
-    stream_ << "an exception";
+    what_ << "an exception";
 #endif
   }
-  if (condition) stream_ << " because `" << condition;
-  stream_ << "'.\n";
-  stream_ << text_;
+  if (condition) {
+    what_ << " because `" << condition << '\'';
+  }
+  what_ << ".\n";
+  what_ << old_text;
 }
 
 namespace {
+
+#ifdef __GNUC__
+const char *HandleStrerror(int ret, const char *buf) __attribute__ ((unused));
+const char *HandleStrerror(const char *ret, const char * /*buf*/) __attribute__ ((unused));
+#endif
 // At least one of these functions will not be called.
 #ifdef __clang__
 #pragma clang diagnostic push
@@ -89,5 +87,18 @@ ErrnoException::~ErrnoException() throw() {}
 
 OverflowException::OverflowException() throw() {}
 OverflowException::~OverflowException() throw() {}
+
+#if defined(_WIN32) || defined(_WIN64)
+WindowsException::WindowsException() throw() {
+  unsigned int last_error = GetLastError();
+  char error_msg[256] = "";
+  if (!FormatMessageA(FORMAT_MESSAGE_FROM_SYSTEM | FORMAT_MESSAGE_IGNORE_INSERTS, NULL, last_error, LANG_NEUTRAL, error_msg, sizeof(error_msg), NULL)) {
+    *this << "Windows error " << GetLastError() << " while formatting Windows error " << last_error << ". ";
+  } else {
+    *this << "Windows error " << last_error << ": " << error_msg;
+  }
+}
+WindowsException::~WindowsException() throw() {}
+#endif
 
 } // namespace util

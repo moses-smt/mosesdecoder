@@ -20,13 +20,13 @@ class ifdstream;
 class ScoreStats;
 
 /**
- * Meteor scoring 
+ * Meteor scoring
  *
  * https://github.com/mjdenkowski/meteor
- * http://statmt.org/wmt11/pdf/WMT07.pdf
+ * http://statmt.org/wmt14/pdf/W14-3348.pdf
  *
  * Config:
- * jar - location of meteor-*.jar (meteor-1.4.jar at time of writing)
+ * jar - location of meteor-*.jar (meteor-1.5.jar at time of writing)
  * lang - optional language code (default: en)
  * task - optional task (default: tune)
  * m - optional quoted, space delimited module string "exact stem synonym paraphrase" (default varies by language)
@@ -34,7 +34,10 @@ class ScoreStats;
  * w - optional quoted, space delimited weight string "w_exact w_stem w_synonym w_paraphrase" (default for tune: "1.0 0.5 0.5 0.5")
  *
  * Usage with mert-moses.pl:
- * --mertargs="--sctype METEOR --scconfig jar:/path/to/meteor-1.4.jar"
+ * --mertargs="--sctype METEOR --scconfig jar:/path/to/meteor-1.5.jar"
+ *
+ * Usage with mert-moses.pl when using --batch-mira:
+ * --batch-mira-args="--sctype METEOR --scconfig jar:/path/to/meteor-1.5.jar"
  */
 class MeteorScorer: public StatisticsBasedScorer
 {
@@ -54,7 +57,12 @@ public:
     return 23;
   }
 
-  virtual float calculateScore(const std::vector<int>& comps) const;
+  virtual float getReferenceLength(const std::vector<ScoreStatsType>& totals) const {
+    // refLen is index 1 (see above stats comment)
+    return totals[1];
+  }
+
+  virtual float calculateScore(const std::vector<ScoreStatsType>& comps) const;
 
 private:
   // Meteor and process IO

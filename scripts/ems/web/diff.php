@@ -1,5 +1,10 @@
 <?php
 
+/*
+This file is part of moses.  Its use is licensed under the GNU Lesser General
+Public License version 2.1 or, at your option, any later version.
+*/
+
 function diff() {
   global $experiment;
   $display = $_GET["run"];
@@ -37,7 +42,7 @@ function compute_diff($base,$change) {
   foreach ($all_parameters as $parameter) {
     if (!array_key_exists($parameter,$parameter_base)) {
       $parameter_base[$parameter] = "";
-    } 
+    }
     if (!array_key_exists($parameter,$parameter_change)) {
       $parameter_change[$parameter] = "";
     }

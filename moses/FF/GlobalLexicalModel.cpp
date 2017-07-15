@@ -3,7 +3,7 @@
 #include "moses/StaticData.h"
 #include "moses/InputFileStream.h"
 #include "moses/TranslationOption.h"
-#include "moses/UserMessage.h"
+#include "moses/TranslationTask.h"
 #include "moses/FactorCollection.h"
 #include "util/exception.hh"
 
@@ -43,7 +43,7 @@ GlobalLexicalModel::~GlobalLexicalModel()
   // delete words in the hash data structure
   DoubleHash::const_iterator iter;
   for(iter = m_hash.begin(); iter != m_hash.end(); iter++ ) {
-    map< const Word*, float, WordComparer >::const_iterator iter2;
+    boost::unordered_map< const Word*, float, UnorderedComparer<Word>, UnorderedComparer<Word> >::const_iterator iter2;
     for(iter2 = iter->second.begin(); iter2 != iter->second.end(); iter2++ ) {
       delete iter2->first; // delete input word
     }
@@ -51,10 +51,13 @@ GlobalLexicalModel::~GlobalLexicalModel()
   }
 }
 
-void GlobalLexicalModel::Load()
+void GlobalLexicalModel::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   FactorCollection &factorCollection = FactorCollection::Instance();
-  const std::string& factorDelimiter = StaticData::Instance().GetFactorDelimiter();
+  const std::string& oFactorDelimiter = opts->output.factor_delimiter;
+  const std::string& iFactorDelimiter = opts->input.factor_delimiter;
+
 
   VERBOSE(2, "Loading global lexical model from file " << m_filePath << endl);
 
@@ -75,21 +78,23 @@ void GlobalLexicalModel::Load()
 
     // create the output word
     Word *outWord = new Word();
-    vector<string> factorString = Tokenize( token[0], factorDelimiter );
+    vector<string> factorString = Tokenize( token[0], oFactorDelimiter );
     for (size_t i=0 ; i < m_outputFactorsVec.size() ; i++) {
       const FactorDirection& direction = Output;
       const FactorType& factorType = m_outputFactorsVec[i];
-      const Factor* factor = factorCollection.AddFactor( direction, factorType, factorString[i] );
+      const Factor* factor
+      = factorCollection.AddFactor( direction, factorType, factorString[i] );
       outWord->SetFactor( factorType, factor );
     }
 
     // create the input word
     Word *inWord = new Word();
-    factorString = Tokenize( token[1], factorDelimiter );
+    factorString = Tokenize( token[1], iFactorDelimiter );
     for (size_t i=0 ; i < m_inputFactorsVec.size() ; i++) {
       const FactorDirection& direction = Input;
       const FactorType& factorType = m_inputFactorsVec[i];
-      const Factor* factor = factorCollection.AddFactor( direction, factorType, factorString[i] );
+      const Factor* factor
+      = factorCollection.AddFactor( direction, factorType, factorString[i] );
       inWord->SetFactor( factorType, factor );
     }
 
@@ -109,10 +114,13 @@ void GlobalLexicalModel::Load()
   }
 }
 
-void GlobalLexicalModel::InitializeForInput( Sentence const& in )
+void GlobalLexicalModel::InitializeForInput(ttasksptr const& ttask)
 {
+  UTIL_THROW_IF2(ttask->GetSource()->GetType() != SentenceInput,
+                 "GlobalLexicalModel works only with sentence input.");
+  Sentence const* s = reinterpret_cast<Sentence const*>(ttask->GetSource().get());
   m_local.reset(new ThreadLocalStorage);
-  m_local->input = &in;
+  m_local->input = s;
 }
 
 float GlobalLexicalModel::ScorePhrase( const TargetPhrase& targetPhrase ) const
@@ -131,7 +139,7 @@ float GlobalLexicalModel::ScorePhrase( const TargetPhrase& targetPhrase ) const
         sum += inputWordHash->second;
       }
 
-      set< const Word*, WordComparer > alreadyScored; // do not score a word twice
+      boost::unordered_set< const Word*, UnorderedComparer<Word>, UnorderedComparer<Word> > alreadyScored; // do not score a word twice
       for(size_t inputIndex = 0; inputIndex < input.GetSize(); inputIndex++ ) {
         const Word& inputWord = input.GetWord( inputIndex );
         if ( alreadyScored.find( &inputWord ) == alreadyScored.end() ) {
@@ -165,12 +173,14 @@ float GlobalLexicalModel::GetFromCacheOrScorePhrase( const TargetPhrase& targetP
   return score;
 }
 
-void GlobalLexicalModel::Evaluate
-(const Hypothesis& hypo,
- ScoreComponentCollection* accumulator) const
+void GlobalLexicalModel::EvaluateWithSourceContext(const InputType &input
+    , const InputPath &inputPath
+    , const TargetPhrase &targetPhrase
+    , const StackVec *stackVec
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection *estimatedScores) const
 {
-  accumulator->PlusEquals( this,
-                           GetFromCacheOrScorePhrase(hypo.GetCurrTargetPhrase()) );
+  scoreBreakdown.PlusEquals( this, GetFromCacheOrScorePhrase(targetPhrase) );
 }
 
 bool GlobalLexicalModel::IsUseable(const FactorMask &mask) const

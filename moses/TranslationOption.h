@@ -1,3 +1,4 @@
+// -*- c++ -*-
 // $Id$
 
 /***********************************************************************
@@ -25,8 +26,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <map>
 #include <vector>
 #include <boost/functional/hash.hpp>
-#include "WordsBitmap.h"
-#include "WordsRange.h"
+#include "Bitmap.h"
+#include "Range.h"
 #include "Phrase.h"
 #include "TargetPhrase.h"
 #include "Hypothesis.h"
@@ -34,7 +35,6 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "TypeDef.h"
 #include "ScoreComponentCollection.h"
 #include "StaticData.h"
-
 namespace Moses
 {
 
@@ -67,17 +67,31 @@ protected:
 
   TargetPhrase 		m_targetPhrase; /*< output phrase when using this translation option */
   const InputPath		*m_inputPath;
-  const WordsRange	m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
+  const Range	m_sourceWordsRange; /*< word position in the input that are covered by this translation option */
   float             m_futureScore; /*< estimate of total cost when using this translation option, includes language model probabilities */
 
-  typedef std::map<const LexicalReordering*, Scores> _ScoreCacheMap;
-  _ScoreCacheMap m_lexReorderingScores;
+  // typedef std::map<const LexicalReordering*, Scores> _ScoreCacheMap;
+  // _ScoreCacheMap m_lexReorderingScores;
+  // m_lexReorderingScores was moved to TargetPhrase.h so that phrase tables
+  // can add information (such as lexical reordering scores) to target phrases
+  // during lookup.
 
 public:
+  struct Better {
+    bool operator()(TranslationOption const& a, TranslationOption const& b) const {
+      return a.GetFutureScore() > b.GetFutureScore();
+    }
+
+    bool operator()(TranslationOption const* a, TranslationOption const* b) const {
+      return a->GetFutureScore() > b->GetFutureScore();
+    }
+  };
+
+
   explicit TranslationOption(); // For initial hypo that does translate nothing
 
   /** constructor. Used by initial translation step */
-  TranslationOption(const WordsRange &wordsRange
+  TranslationOption(const Range &range
                     , const TargetPhrase &targetPhrase);
 
   /** returns true if all feature types in featuresToCheck are compatible between the two phrases */
@@ -89,7 +103,7 @@ public:
   }
 
   /** returns source word range */
-  inline const WordsRange &GetSourceWordsRange() const {
+  inline const Range &GetSourceWordsRange() const {
     return m_sourceWordsRange;
   }
 
@@ -135,18 +149,22 @@ public:
     return m_targetPhrase.GetScoreBreakdown();
   }
 
-  void Evaluate(const InputType &input);
+  void EvaluateWithSourceContext(const InputType &input);
 
-  /** returns cached scores */
-  inline const Scores *GetLexReorderingScores(const LexicalReordering *scoreProducer) const {
-    _ScoreCacheMap::const_iterator it = m_lexReorderingScores.find(scoreProducer);
-    if(it == m_lexReorderingScores.end())
-      return NULL;
-    else
-      return &(it->second);
+  void UpdateScore(ScoreComponentCollection *futureScoreBreakdown = NULL) {
+    m_targetPhrase.UpdateScore(futureScoreBreakdown);
   }
 
-  void CacheLexReorderingScores(const LexicalReordering &scoreProducer, const Scores &score);
+  /** returns cached scores */
+  // inline
+  const Scores*
+  GetLexReorderingScores(const LexicalReordering *scoreProducer) const;
+  // {
+  //   return m_targetPhrase.GetExtraScores(scoreProducer);
+  // }
+
+  void CacheLexReorderingScores(const LexicalReordering &scoreProducer,
+                                const Scores &score);
 
   TO_STRING();
 

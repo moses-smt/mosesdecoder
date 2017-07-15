@@ -1,0 +1,191 @@
+local with-cmph = [ option.get "with-cmph" ] ;
+local includes = ;
+
+if $(with-cmph) {
+  lib cmph : : <search>$(with-cmph)/lib <search>$(with-cmph)/lib64 ;
+  includes += <include>$(with-cmph)/include ;
+}
+else {
+  alias cmph ;
+}
+
+max-factors = [ option.get "max-factors" : 4 : 4 ] ;
+max-factors = <define>MAX_NUM_FACTORS=$(max-factors) <dependency>$(FACTOR-LOG) ;
+
+max-order = [ option.get "max-kenlm-order" : 6 : 6 ] ;
+max-order = <define>KENLM_MAX_ORDER=$(max-order) ;
+
+alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem : : : $(max-factors) $(max-order) ;
+
+
+ lib moses2_lib :
+   AlignmentInfo.cpp
+   AlignmentInfoCollection.cpp
+   ArcLists.cpp
+   EstimatedScores.cpp
+   HypothesisBase.cpp
+   HypothesisColl.cpp
+   InputPathBase.cpp 
+   InputPathsBase.cpp
+   InputType.cpp
+   ManagerBase.cpp
+   MemPool.cpp
+   Phrase.cpp 
+   pugixml.cpp
+   Scores.cpp 
+   SubPhrase.cpp
+   System.cpp 
+   TargetPhrase.cpp
+   TranslationTask.cpp
+   TrellisPaths.cpp
+   TypeDef.cpp
+   Vector.cpp
+   Weights.cpp 
+   Word.cpp 
+   FF/Distortion.cpp
+   FF/FeatureFunction.cpp 
+   FF/FeatureFunctions.cpp 
+   FF/FeatureRegistry.cpp
+    FF/PhrasePenalty.cpp
+    FF/ExampleStatefulFF.cpp
+    FF/ExampleStatelessFF.cpp
+    FF/StatefulFeatureFunction.cpp
+    FF/StatelessFeatureFunction.cpp
+    FF/WordPenalty.cpp
+    
+    FF/LexicalReordering/BidirectionalReorderingState.cpp
+    FF/LexicalReordering/HReorderingBackwardState.cpp
+    FF/LexicalReordering/HReorderingForwardState.cpp
+    FF/LexicalReordering/LexicalReordering.cpp
+    FF/LexicalReordering/LRModel.cpp
+    FF/LexicalReordering/LRState.cpp
+    FF/LexicalReordering/PhraseBasedReorderingState.cpp
+    FF/LexicalReordering/ReorderingStack.cpp
+
+    FF/OSM/OpSequenceModel.cpp
+    FF/OSM/KenOSM.cpp
+    FF/OSM/osmHyp.cpp
+    
+    LM/LanguageModel.cpp
+    LM/KENLM.cpp
+    LM/KENLMBatch.cpp
+    LM/GPULM.cpp
+    
+   	TranslationModel/PhraseTable.cpp 
+   	TranslationModel/ProbingPT.cpp 
+ 	  TranslationModel/Transliteration.cpp 
+ 	  TranslationModel/UnknownWordPenalty.cpp 
+    TranslationModel/Memory/PhraseTableMemory.cpp 
+   	
+    TranslationModel/CompactPT/BlockHashIndex.cpp
+    TranslationModel/CompactPT/CmphStringVectorAdapter.cpp
+    TranslationModel/CompactPT/LexicalReorderingTableCompact.cpp
+    TranslationModel/CompactPT/MurmurHash3.cpp
+    TranslationModel/CompactPT/TargetPhraseCollectionCache.cpp
+    TranslationModel/CompactPT/ThrowingFwrite.cpp
+
+   	parameters/AllOptions.cpp
+   	parameters/BookkeepingOptions.cpp
+   	parameters/ContextParameters.cpp
+   	parameters/CubePruningOptions.cpp
+   	parameters/InputOptions.cpp
+   	parameters/LMBR_Options.cpp
+   	parameters/MBR_Options.cpp
+   	parameters/NBestOptions.cpp
+   	parameters/OOVHandlingOptions.cpp
+   	parameters/OptionsBaseClass.cpp
+   	parameters/ReorderingOptions.cpp
+   	parameters/ReportingOptions.cpp
+   	parameters/SearchOptions.cpp
+   	parameters/ServerOptions.cpp
+   	parameters/SyntaxOptions.cpp
+   	
+		PhraseBased/Hypothesis.cpp 
+ 	 	PhraseBased/InputPath.cpp
+ 	 	PhraseBased/InputPaths.cpp
+		PhraseBased/Manager.cpp 
+    	PhraseBased/PhraseImpl.cpp
+		PhraseBased/ReorderingConstraint.cpp 
+		PhraseBased/TargetPhrases.cpp
+ 	 	PhraseBased/Search.cpp
+	    PhraseBased/Sentence.cpp
+		PhraseBased/TargetPhraseImpl.cpp 
+ 	 	PhraseBased/TrellisPath.cpp
+
+		PhraseBased/Normal/Search.cpp
+ 	 	PhraseBased/Normal/Stack.cpp 
+ 	 	PhraseBased/Normal/Stacks.cpp 
+
+		PhraseBased/CubePruningMiniStack/Misc.cpp
+ 	 	PhraseBased/CubePruningMiniStack/Search.cpp
+ 	 	PhraseBased/CubePruningMiniStack/Stack.cpp 
+
+#	 	PhraseBased/CubePruningCardinalStack/Misc.cpp
+# 	 	PhraseBased/CubePruningCardinalStack/Search.cpp
+# 	 	PhraseBased/CubePruningCardinalStack/Stack.cpp
+
+# 	 	PhraseBased/CubePruningBitmapStack/Misc.cpp
+# 	 	PhraseBased/CubePruningBitmapStack/Search.cpp
+# 	 	PhraseBased/CubePruningBitmapStack/Stack.cpp
+
+# 	 	PhraseBased/CubePruningPerBitmap/Misc.cpp
+# 	 	PhraseBased/CubePruningPerBitmap/Search.cpp
+# 	 	PhraseBased/CubePruningPerBitmap/Stacks.cpp
+
+# 	 	PhraseBased/CubePruningPerMiniStack/Misc.cpp
+# 	 	PhraseBased/CubePruningPerMiniStack/Search.cpp
+# 	 	PhraseBased/CubePruningPerMiniStack/Stacks.cpp
+
+		legacy/Bitmap.cpp
+		legacy/Bitmaps.cpp
+		legacy/Factor.cpp
+		legacy/FactorCollection.cpp
+		legacy/InputFileStream.cpp
+		legacy/Matrix.cpp
+		legacy/OutputFileStream.cpp
+		legacy/Parameter.cpp
+		legacy/Range.cpp
+		legacy/Range.cpp
+		legacy/ThreadPool.cpp
+		legacy/Timer.cpp
+		legacy/Util2.cpp
+
+    SCFG/ActiveChart.cpp
+    SCFG/Hypothesis.cpp
+    SCFG/InputPath.cpp
+    SCFG/InputPaths.cpp
+    SCFG/Manager.cpp
+    SCFG/Misc.cpp
+    SCFG/PhraseImpl.cpp
+    SCFG/Sentence.cpp
+    SCFG/Stack.cpp
+    SCFG/Stacks.cpp
+    SCFG/TargetPhraseImpl.cpp
+    SCFG/TargetPhrases.cpp
+    SCFG/Word.cpp
+    SCFG/nbest/KBestExtractor.cpp
+    SCFG/nbest/NBest.cpp
+    SCFG/nbest/NBests.cpp
+    SCFG/nbest/NBestColl.cpp
+
+	server/Server.cpp
+	server/Translator.cpp
+	server/TranslationRequest.cpp
+	
+    deps 
+    cmph
+    :
+    $(includes)
+    ;
+
+exe moses2 : Main.cpp moses2_lib ../probingpt//probingpt ../util//kenutil ../lm//kenlm ;
+
+if [ xmlrpc ] {
+  echo "Building Moses2" ;
+  alias programs : moses2 ;
+}
+else {
+  echo "Not building Moses2" ;
+  alias programs : ;
+}
+

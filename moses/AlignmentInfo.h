@@ -26,7 +26,7 @@
 #include <cstdlib>
 
 #include <boost/functional/hash.hpp>
-
+#include "TypeDef.h"
 namespace Moses
 {
 
@@ -41,6 +41,7 @@ class AlignmentInfo
   friend struct AlignmentInfoOrderer;
   friend struct AlignmentInfoHasher;
   friend class AlignmentInfoCollection;
+  friend class VW;
 
 public:
   typedef std::set<std::pair<size_t,size_t> > CollType;
@@ -65,6 +66,12 @@ public:
     return m_nonTermIndexMap;
   }
 
+  /** Like GetNonTermIndexMap but the return value is the symbol index (i.e.
+    * the index counting both terminals and non-terminals) */
+  const NonTermIndexMap &GetNonTermIndexMap2() const {
+    return m_nonTermIndexMap2;
+  }
+
   const CollType &GetAlignments() const {
     return m_collection;
   }
@@ -76,7 +83,8 @@ public:
     return m_collection.size();
   }
 
-  std::vector< const std::pair<size_t,size_t>* > GetSortedAlignments() const;
+  std::vector< const std::pair<size_t,size_t>* >
+  GetSortedAlignments(WordAlignmentSort SortOrder) const;
 
   std::vector<size_t> GetSourceIndex2PosMap() const;
 
@@ -88,11 +96,16 @@ public:
 private:
   //! AlignmentInfo objects should only be created by an AlignmentInfoCollection
   explicit AlignmentInfo(const std::set<std::pair<size_t,size_t> > &pairs);
+  explicit AlignmentInfo(const std::vector<unsigned char> &aln);
 
-  void BuildNonTermIndexMap();
+  // used only by VW to load word alignment between sentences
+  explicit AlignmentInfo(const std::string &str);
+
+  void BuildNonTermIndexMaps();
 
   CollType m_collection;
   NonTermIndexMap m_nonTermIndexMap;
+  NonTermIndexMap m_nonTermIndexMap2;
 };
 
 /** Define an arbitrary strict weak ordering between AlignmentInfo objects

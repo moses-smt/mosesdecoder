@@ -67,7 +67,7 @@ void  StatisticsBasedScorer::score(const candidates_t& candidates, const diffs_t
     throw runtime_error("No candidates supplied");
   }
   int numCounts = m_score_data->get(0,candidates[0]).size();
-  vector<int> totals(numCounts);
+  vector<ScoreStatsType> totals(numCounts);
   for (size_t i = 0; i < candidates.size(); ++i) {
     ScoreStats stats = m_score_data->get(i,candidates[i]);
     if (stats.size() != totals.size()) {

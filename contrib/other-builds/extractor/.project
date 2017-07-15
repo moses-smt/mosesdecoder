@@ -4,6 +4,7 @@
 	<comment></comment>
 	<projects>
 		<project>mert_lib</project>
+		<project>util</project>
 	</projects>
 	<buildSpec>
 		<buildCommand>
@@ -82,6 +83,16 @@
 		<nature>org.eclipse.cdt.managedbuilder.core.ScannerConfigNature</nature>
 	</natures>
 	<linkedResources>
+		<link>
+			<name>InternalTree.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/InternalTree.cpp</locationURI>
+		</link>
+		<link>
+			<name>InternalTree.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/mert/InternalTree.h</locationURI>
+		</link>
 		<link>
 			<name>bin</name>
 			<type>2</type>

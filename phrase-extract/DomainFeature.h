@@ -5,16 +5,14 @@
 
 #include <iostream>
 #include <fstream>
-#include <assert.h>
-#include <stdlib.h>
+#include <cassert>
+#include <cstdlib>
 #include <string>
 #include <queue>
 #include <map>
 #include <cmath>
 
 #include "ScoreFeature.h"
-
-extern std::vector<std::string> tokenize( const char*);
 
 namespace MosesTraining
 {
@@ -35,8 +33,8 @@ public:
 
   DomainFeature(const std::string& domainFile);
 
-  void addPropertiesToPhrasePair(ExtractionPhrasePair &phrasePair, 
-                                 float count, 
+  void addPropertiesToPhrasePair(ExtractionPhrasePair &phrasePair,
+                                 float count,
                                  int sentenceId) const;
 
   void add(const ScoreFeatureContext& context,

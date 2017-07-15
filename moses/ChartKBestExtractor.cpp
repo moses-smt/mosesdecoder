@@ -27,13 +27,15 @@
 
 #include <vector>
 
+using namespace std;
+
 namespace Moses
 {
 
 // Extract the k-best list from the search graph.
 void ChartKBestExtractor::Extract(
-    const std::vector<const ChartHypothesis*> &topLevelHypos, std::size_t k,
-    KBestVec &kBestList)
+  const std::vector<const ChartHypothesis*> &topLevelHypos, std::size_t k,
+  KBestVec &kBestList)
 {
   kBestList.clear();
   if (topLevelHypos.empty()) {
@@ -45,14 +47,14 @@ void ChartKBestExtractor::Extract(
   std::vector<const ChartHypothesis*>::const_iterator p = topLevelHypos.begin();
   const ChartHypothesis &bestTopLevelHypo = **p;
   boost::scoped_ptr<ChartHypothesis> supremeHypo(
-      new ChartHypothesis(bestTopLevelHypo, *this));
+    new ChartHypothesis(bestTopLevelHypo, *this));
 
   // Do the same for each alternative top-level hypothesis, but add the new
   // ChartHypothesis objects as arcs from supremeHypo, as if they had been
   // recombined.
   for (++p; p != topLevelHypos.end(); ++p) {
     // Check that the first item in topLevelHypos really was the best.
-    UTIL_THROW_IF2((*p)->GetTotalScore() <= bestTopLevelHypo.GetTotalScore(),
+    UTIL_THROW_IF2((*p)->GetFutureScore() > bestTopLevelHypo.GetFutureScore(),
                    "top-level hypotheses are not correctly sorted");
     // Note: there's no need for a smart pointer here: supremeHypo will take
     // ownership of altHypo.
@@ -68,8 +70,8 @@ void ChartKBestExtractor::Extract(
   // each derivation.
   kBestList.reserve(targetVertex->kBestList.size());
   for (std::vector<boost::weak_ptr<Derivation> >::const_iterator
-        q = targetVertex->kBestList.begin();
-        q != targetVertex->kBestList.end(); ++q) {
+       q = targetVertex->kBestList.begin();
+       q != targetVertex->kBestList.end(); ++q) {
     const boost::shared_ptr<Derivation> d(*q);
     assert(d);
     assert(d->subderivations.size() == 1);
@@ -80,7 +82,7 @@ void ChartKBestExtractor::Extract(
 // Generate the target-side yield of the derivation d.
 Phrase ChartKBestExtractor::GetOutputPhrase(const Derivation &d)
 {
-  FactorType placeholderFactor = StaticData::Instance().GetPlaceholderFactor();
+  FactorType placeholderFactor = StaticData::Instance().options()->input.placeholder_factor;
 
   Phrase ret(ARRAY_SIZE_INCR);
 
@@ -122,9 +124,60 @@ Phrase ChartKBestExtractor::GetOutputPhrase(const Derivation &d)
   return ret;
 }
 
+// Generate the score breakdown of the derivation d.
+boost::shared_ptr<ScoreComponentCollection>
+ChartKBestExtractor::GetOutputScoreBreakdown(const Derivation &d)
+{
+  const ChartHypothesis &hypo = d.edge.head->hypothesis;
+  boost::shared_ptr<ScoreComponentCollection> scoreBreakdown(new ScoreComponentCollection());
+  scoreBreakdown->PlusEquals(hypo.GetDeltaScoreBreakdown());
+  const TargetPhrase &phrase = hypo.GetCurrTargetPhrase();
+  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+    phrase.GetAlignNonTerm().GetNonTermIndexMap();
+  for (std::size_t pos = 0; pos < phrase.GetSize(); ++pos) {
+    const Word &word = phrase.GetWord(pos);
+    if (word.IsNonTerminal()) {
+      std::size_t nonTermInd = nonTermIndexMap[pos];
+      const Derivation &subderivation = *d.subderivations[nonTermInd];
+      scoreBreakdown->PlusEquals(*GetOutputScoreBreakdown(subderivation));
+    }
+  }
+
+  return scoreBreakdown;
+}
+
+// Generate the target tree of the derivation d.
+TreePointer ChartKBestExtractor::GetOutputTree(const Derivation &d)
+{
+  const ChartHypothesis &hypo = d.edge.head->hypothesis;
+  const TargetPhrase &phrase = hypo.GetCurrTargetPhrase();
+  if (const PhraseProperty *property = phrase.GetProperty("Tree")) {
+    const std::string *tree = property->GetValueString();
+    TreePointer mytree (boost::make_shared<InternalTree>(*tree));
+
+    //get subtrees (in target order)
+    std::vector<TreePointer> previous_trees;
+    for (size_t pos = 0; pos < phrase.GetSize(); ++pos) {
+      const Word &word = phrase.GetWord(pos);
+      if (word.IsNonTerminal()) {
+        size_t nonTermInd = phrase.GetAlignNonTerm().GetNonTermIndexMap()[pos];
+        const Derivation &subderivation = *d.subderivations[nonTermInd];
+        const TreePointer prev_tree = GetOutputTree(subderivation);
+        previous_trees.push_back(prev_tree);
+      }
+    }
+
+    mytree->Combine(previous_trees);
+    mytree->Unbinarize();
+    return mytree;
+  } else {
+    UTIL_THROW2("Error: k-best tree output active, but no internal tree structure found");
+  }
+}
+
 // Create an unweighted hyperarc corresponding to the given ChartHypothesis.
 ChartKBestExtractor::UnweightedHyperarc ChartKBestExtractor::CreateEdge(
-    const ChartHypothesis &h)
+  const ChartHypothesis &h)
 {
   UnweightedHyperarc edge;
   edge.head = FindOrCreateVertex(h);
@@ -159,7 +212,9 @@ ChartKBestExtractor::FindOrCreateVertex(const ChartHypothesis &h)
     bestEdge.tail[i] = FindOrCreateVertex(*prevHypo);
   }
   boost::shared_ptr<Derivation> bestDerivation(new Derivation(bestEdge));
+#ifndef NDEBUG
   std::pair<DerivationSet::iterator, bool> q =
+#endif
     m_derivations.insert(bestDerivation);
   assert(q.second);
   sp->kBestList.push_back(bestDerivation);
@@ -253,8 +308,7 @@ ChartKBestExtractor::Derivation::Derivation(const UnweightedHyperarc &e)
     boost::shared_ptr<Derivation> sub(pred.kBestList[0]);
     subderivations.push_back(sub);
   }
-  scoreBreakdown = edge.head->hypothesis.GetScoreBreakdown();
-  score = edge.head->hypothesis.GetTotalScore();
+  score = edge.head->hypothesis.GetFutureScore();
 }
 
 // Construct a Derivation that neighbours an existing Derivation.
@@ -265,15 +319,14 @@ ChartKBestExtractor::Derivation::Derivation(const Derivation &d, std::size_t i)
   backPointers = d.backPointers;
   subderivations = d.subderivations;
   std::size_t j = ++backPointers[i];
-  scoreBreakdown = d.scoreBreakdown;
+  score = d.score;
   // Deduct the score of the old subderivation.
-  scoreBreakdown.MinusEquals(subderivations[i]->scoreBreakdown);
+  score -= subderivations[i]->score;
   // Update the subderivation pointer.
   boost::shared_ptr<Derivation> newSub(edge.tail[i]->kBestList[j]);
   subderivations[i] = newSub;
   // Add the score of the new subderivation.
-  scoreBreakdown.PlusEquals(subderivations[i]->scoreBreakdown);
-  score = scoreBreakdown.GetWeightedScore();
+  score += subderivations[i]->score;
 }
 
 }  // namespace Moses

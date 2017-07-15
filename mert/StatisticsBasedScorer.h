@@ -11,6 +11,8 @@
 
 #include "Scorer.h"
 
+#include "util/exception.hh"
+
 namespace MosesTuning
 {
 
@@ -21,6 +23,8 @@ namespace MosesTuning
  */
 class StatisticsBasedScorer : public Scorer
 {
+  friend class HopeFearDecoder;
+
 public:
   StatisticsBasedScorer(const std::string& name, const std::string& config);
   virtual ~StatisticsBasedScorer() {}
@@ -38,7 +42,12 @@ protected:
   /**
    * Calculate the actual score.
    */
-  virtual statscore_t calculateScore(const std::vector<int>& totals) const = 0;
+  virtual statscore_t calculateScore(const std::vector<ScoreStatsType>& totals) const = 0;
+
+  virtual float getReferenceLength(const std::vector<ScoreStatsType>& totals) const {
+    UTIL_THROW(util::Exception, "getReferenceLength not implemented for this scorer type.");
+    return 0;
+  }
 
   // regularisation
   RegularisationType m_regularization_type;

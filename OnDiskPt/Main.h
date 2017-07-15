@@ -29,7 +29,7 @@ OnDiskPt::WordPtr Tokenize(OnDiskPt::Phrase &phrase
                            , const std::string &token, bool addSourceNonTerm, bool addTargetNonTerm
                            , OnDiskPt::OnDiskWrapper &onDiskWrapper, int retSourceTarget);
 OnDiskPt::PhrasePtr Tokenize(OnDiskPt::SourcePhrase &sourcePhrase, OnDiskPt::TargetPhrase &targetPhrase
-                             , char *line, OnDiskPt::OnDiskWrapper &onDiskWrapper
+                             , const std::string &lineStr, OnDiskPt::OnDiskWrapper &onDiskWrapper
                              , int numScores
                              , std::vector<float> &misc);
 

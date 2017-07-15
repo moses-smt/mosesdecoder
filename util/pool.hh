@@ -1,11 +1,10 @@
 // Very simple pool.  It can only allocate memory.  And all of the memory it
-// allocates must be freed at the same time.  
+// allocates must be freed at the same time.
 
-#ifndef UTIL_POOL__
-#define UTIL_POOL__
+#ifndef UTIL_POOL_H
+#define UTIL_POOL_H
 
 #include <vector>
-
 #include <stdint.h>
 
 namespace util {
@@ -38,8 +37,8 @@ class Pool {
     // no copying
     Pool(const Pool &);
     Pool &operator=(const Pool &);
-}; 
+};
 
 } // namespace util
 
-#endif // UTIL_POOL__
+#endif // UTIL_POOL_H

@@ -27,8 +27,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "Util.h"
 #include "InputFileStream.h"
 #include "StaticData.h"
-#include "UserMessage.h"
 #include "util/exception.hh"
+#include "util/string_stream.hh"
 
 using namespace std;
 
@@ -37,15 +37,16 @@ namespace Moses
 std::vector<GenerationDictionary*> GenerationDictionary::s_staticColl;
 
 GenerationDictionary::GenerationDictionary(const std::string &line)
-  : DecodeFeature(line)
+  : DecodeFeature(line, true)
 {
   s_staticColl.push_back(this);
 
   ReadParameters();
 }
 
-void GenerationDictionary::Load()
+void GenerationDictionary::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   FactorCollection &factorCollection = FactorCollection::Instance();
 
   const size_t numFeatureValuesInConfig = this->GetNumScoreComponents();
@@ -85,9 +86,9 @@ void GenerationDictionary::Load()
 
     size_t numFeaturesInFile = token.size() - 2;
     if (numFeaturesInFile < numFeatureValuesInConfig) {
-      stringstream strme;
+      util::StringStream strme;
       strme << m_filePath << ":" << lineNum << ": expected " << numFeatureValuesInConfig
-            << " feature values, but found " << numFeaturesInFile << std::endl;
+            << " feature values, but found " << numFeaturesInFile << "\n";
       throw strme.str();
     }
     std::vector<float> scores(numFeatureValuesInConfig, 0.0f);
@@ -119,7 +120,14 @@ const OutputWordCollection *GenerationDictionary::FindWord(const Word &word) con
 {
   const OutputWordCollection *ret;
 
-  Collection::const_iterator iter = m_collection.find(&word);
+  Word wordInput;
+  const std::vector<FactorType> &inputFactors = GetInput();
+  for (size_t i = 0; i < inputFactors.size(); ++i) {
+    FactorType factorType = inputFactors[i];
+    wordInput[factorType] = word[factorType];
+  }
+
+  Collection::const_iterator iter = m_collection.find(&wordInput);
   if (iter == m_collection.end()) {
     // can't find source phrase
     ret = NULL;

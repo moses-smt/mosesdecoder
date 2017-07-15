@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 /***********************************************************************
  Moses - statistical machine translation system
  Copyright (C) 2006-2011 University of Edinburgh
@@ -43,7 +44,7 @@ class PhraseDictionaryFuzzyMatch : public PhraseDictionary
 public:
   PhraseDictionaryFuzzyMatch(const std::string &line);
   ~PhraseDictionaryFuzzyMatch();
-  void Load();
+  void Load(AllOptions::ptr const& opts);
 
   const PhraseDictionaryNodeMemory &GetRootNode(long translationId) const;
 
@@ -51,7 +52,7 @@ public:
     const ChartParser &parser,
     const ChartCellCollectionBase &,
     std::size_t);
-  void InitializeForInput(InputType const& inputSentence);
+  void InitializeForInput(ttasksptr const& ttask);
   void CleanUpAfterSentenceProcessing(const InputType& source);
 
   void SetParameter(const std::string& key, const std::string& value);
@@ -59,10 +60,11 @@ public:
   TO_STRING();
 
 protected:
-  TargetPhraseCollection &GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeMemory &rootNode
-      , const Phrase &source
-      , const TargetPhrase &target
-      , const Word *sourceLHS);
+  TargetPhraseCollection::shared_ptr
+  GetOrCreateTargetPhraseCollection(PhraseDictionaryNodeMemory &rootNode
+                                    , const Phrase &source
+                                    , const TargetPhrase &target
+                                    , const Word *sourceLHS);
 
   PhraseDictionaryNodeMemory &GetOrCreateNode(PhraseDictionaryNodeMemory &rootNode
       , const Phrase &source

@@ -28,11 +28,11 @@ using namespace std;
 namespace Moses
 {
 /** constructor, intializes counters and thresholds */
-PartialTranslOptColl::PartialTranslOptColl()
+PartialTranslOptColl::PartialTranslOptColl(size_t const maxSize)
 {
   m_bestScore = -std::numeric_limits<float>::infinity();
   m_worstScore = -std::numeric_limits<float>::infinity();
-  m_maxSize = StaticData::Instance().GetMaxNoPartTransOpt();
+  m_maxSize = maxSize; // StaticData::Instance().GetMaxNoPartTransOpt();
   m_totalPruned = 0;
 }
 
@@ -83,9 +83,9 @@ void PartialTranslOptColl::Prune()
 
   // find nth element
   NTH_ELEMENT4(m_list.begin(),
-              m_list.begin() + m_maxSize,
-              m_list.end(),
-              ComparePartialTranslationOption);
+               m_list.begin() + m_maxSize,
+               m_list.end(),
+               ComparePartialTranslationOption);
 
   m_worstScore = m_list[ m_maxSize-1 ]->GetFutureScore();
   // delete the rest

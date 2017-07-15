@@ -1,5 +1,6 @@
 #!/usr/bin/env perl
 # downloads the regression data
+use warnings;
 use strict;
 use MosesRegressionTesting;
 

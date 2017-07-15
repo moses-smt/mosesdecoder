@@ -1,10 +1,17 @@
-// $Id$
+// -*- mode: c++; indent-tabs-mode: nil; tab-width:2  -*-
 #include <vector>
+#include <boost/algorithm/string/predicate.hpp>
+#include <boost/foreach.hpp>
+#include <boost/format.hpp>
 #include "util/exception.hh"
+#include "util/string_stream.hh"
 #include "ScoreComponentCollection.h"
 #include "StaticData.h"
+#include "moses/FF/StatelessFeatureFunction.h"
+#include "moses/FF/StatefulFeatureFunction.h"
 
 using namespace std;
+using namespace boost::algorithm;
 
 namespace Moses
 {
@@ -43,7 +50,7 @@ std::ostream& operator<<(std::ostream& os, const ScorePair& rhs)
   return os;
 }
 
-ScoreComponentCollection::ScoreIndexMap ScoreComponentCollection::s_scoreIndexes;
+//ScoreComponentCollection::ScoreIndexMap ScoreComponentCollection::s_scoreIndexes;
 size_t ScoreComponentCollection::s_denseVectorSize = 0;
 
 ScoreComponentCollection::
@@ -54,15 +61,14 @@ ScoreComponentCollection()
 
 void
 ScoreComponentCollection::
-RegisterScoreProducer(const FeatureFunction* scoreProducer)
+RegisterScoreProducer(FeatureFunction* scoreProducer)
 {
   size_t start = s_denseVectorSize;
-  size_t end = start + scoreProducer->GetNumScoreComponents();
+  s_denseVectorSize = scoreProducer->SetIndex(s_denseVectorSize);
   VERBOSE(1, "FeatureFunction: "
           << scoreProducer->GetScoreProducerDescription()
-          << " start: " << start << " end: " << (end-1) << endl);
-  s_scoreIndexes[scoreProducer] = pair<size_t,size_t>(start,end);
-  s_denseVectorSize = end;
+          << " start: " << start
+          << " end: "   << (s_denseVectorSize-1) << endl);
 }
 
 
@@ -83,9 +89,8 @@ void ScoreComponentCollection::MultiplyEquals(const FeatureFunction* sp, float s
 {
   std::string prefix = sp->GetScoreProducerDescription() + FName::SEP;
   for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {
-    std::stringstream name;
-    name << i->first;
-    if (name.str().substr( 0, prefix.length() ).compare( prefix ) == 0)
+    const std::string &name = i->first.name();
+    if (starts_with(name, prefix))
       m_scores[i->first] = i->second * scalar;
   }
 }
@@ -96,9 +101,8 @@ size_t ScoreComponentCollection::GetNumberWeights(const FeatureFunction* sp)
   std::string prefix = sp->GetScoreProducerDescription() + FName::SEP;
   size_t weights = 0;
   for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {
-    std::stringstream name;
-    name << i->first;
-    if (name.str().substr( 0, prefix.length() ).compare( prefix ) == 0)
+    const std::string &name = i->first.name();
+    if (starts_with(name, prefix))
       weights++;
   }
   return weights;
@@ -179,32 +183,38 @@ void ScoreComponentCollection::SparseL2Regularize(float lambda)
   m_scores.sparseL2regularize(lambda);
 }
 
-void ScoreComponentCollection::Save(ostream& out) const
+void ScoreComponentCollection::Save(ostream& out, bool multiline) const
 {
-  ScoreIndexMap::const_iterator iter = s_scoreIndexes.begin();
-  for (; iter != s_scoreIndexes.end(); ++iter ) {
-    string name = iter->first->GetScoreProducerDescription();
-    IndexPair ip = iter->second; // feature indices
-    if (ip.second-ip.first == 1) {
-      out << name << " " << m_scores[ip.first] << endl;
-    } else {
-      for (size_t i=ip.first; i < ip.second; ++i) {
-        ostringstream fullname;
-        fullname << name << "_" << (i + 1 - ip.first);
-        out << fullname.str() << " " << m_scores[i] << endl;
-      }
-    }
+  string sep = " ";
+  string linesep = "\n";
+  if (!multiline) {
+    sep = "=";
+    linesep = " ";
   }
 
+  std::vector<FeatureFunction*> const& all_ff
+  = FeatureFunction::GetFeatureFunctions();
+  BOOST_FOREACH(FeatureFunction const* ff, all_ff) {
+    string name = ff->GetScoreProducerDescription();
+    size_t i = ff->GetIndex();
+    if (ff->GetNumScoreComponents() == 1)
+      out << name << sep << m_scores[i] << linesep;
+    else {
+      size_t stop = i + ff->GetNumScoreComponents();
+      boost::format fmt("%s_%d");
+      for (size_t k = 1; i < stop; ++i, ++k)
+        out << fmt % name % k << sep << m_scores[i] << linesep;
+    }
+  }
   // write sparse features
-  m_scores.write(out);
+  m_scores.write(out,sep,linesep);
 }
 
 void ScoreComponentCollection::Save(const string& filename) const
 {
   ofstream out(filename.c_str());
   if (!out) {
-    ostringstream msg;
+    util::StringStream msg;
     msg << "Unable to open " << filename;
     throw runtime_error(msg.str());
   }
@@ -214,7 +224,7 @@ void ScoreComponentCollection::Save(const string& filename) const
 
 void
 ScoreComponentCollection::
-Assign(const FeatureFunction* sp, const string line)
+Assign(const FeatureFunction* sp, const string &line)
 {
   istringstream istr(line);
   while(istr) {
@@ -232,8 +242,8 @@ void
 ScoreComponentCollection::
 Assign(const FeatureFunction* sp, const std::vector<float>& scores)
 {
-  IndexPair indexes = GetIndexes(sp);
-  size_t numScores = indexes.second - indexes.first;
+  size_t numScores = sp->GetNumScoreComponents();
+  size_t offset = sp->GetIndex();
 
   if (scores.size() != numScores) {
     UTIL_THROW(util::Exception, "Feature function "
@@ -243,7 +253,7 @@ Assign(const FeatureFunction* sp, const std::vector<float>& scores)
   }
 
   for (size_t i = 0; i < scores.size(); ++i) {
-    m_scores[i + indexes.first] = scores[i];
+    m_scores[i + offset] = scores[i];
   }
 }
 
@@ -270,14 +280,16 @@ void ScoreComponentCollection::ZeroDenseFeatures(const FeatureFunction* sp)
 }
 
 //! get subset of scores that belong to a certain sparse ScoreProducer
-FVector ScoreComponentCollection::GetVectorForProducer(const FeatureFunction* sp) const
+FVector
+ScoreComponentCollection::
+GetVectorForProducer(const FeatureFunction* sp) const
 {
   FVector fv(s_denseVectorSize);
   std::string prefix = sp->GetScoreProducerDescription() + FName::SEP;
   for(FVector::FNVmap::const_iterator i = m_scores.cbegin(); i != m_scores.cend(); i++) {
     std::stringstream name;
     name << i->first;
-    if (name.str().substr( 0, prefix.length() ).compare( prefix ) == 0)
+    if (starts_with(name.str(), prefix))
       fv[i->first] = i->second;
   }
   return fv;
@@ -292,6 +304,58 @@ void ScoreComponentCollection::PlusEquals(const FeatureFunction* sp, const Score
     const StringPiece &key = iter->first;
     float value = iter->second;
     PlusEquals(sp, key, value);
+  }
+}
+
+void
+ScoreComponentCollection::
+OutputAllFeatureScores(std::ostream &out, bool with_labels) const
+{
+  std::string lastName = "";
+  const vector<const StatefulFeatureFunction*>& sff
+  = StatefulFeatureFunction::GetStatefulFeatureFunctions();
+  for( size_t i=0; i<sff.size(); i++ ) {
+    const StatefulFeatureFunction *ff = sff[i];
+    if (ff->IsTuneable()) {
+      OutputFeatureScores(out, ff, lastName, with_labels);
+    }
+  }
+  const vector<const StatelessFeatureFunction*>& slf
+  = StatelessFeatureFunction::GetStatelessFeatureFunctions();
+  for( size_t i=0; i<slf.size(); i++ ) {
+    const StatelessFeatureFunction *ff = slf[i];
+    if (ff->IsTuneable()) {
+      OutputFeatureScores(out, ff, lastName, with_labels);
+    }
+  }
+}
+
+void
+ScoreComponentCollection::
+OutputFeatureScores(std::ostream& out, FeatureFunction const* ff,
+                    std::string &lastName, bool with_labels) const
+{
+  // const StaticData &staticData = StaticData::Instance();
+  // bool labeledOutput = staticData.options().nbest.include_feature_labels;
+
+  // regular features (not sparse)
+  if (ff->HasTuneableComponents()) {
+    if( with_labels && lastName != ff->GetScoreProducerDescription() ) {
+      lastName = ff->GetScoreProducerDescription();
+      out << " " << lastName << "=";
+    }
+    vector<float> scores = GetScoresForProducer( ff );
+    for (size_t j = 0; j<scores.size(); ++j) {
+      if (ff->IsTuneableComponent(j)) {
+        out << " " << scores[j];
+      }
+    }
+  }
+
+  // sparse features
+  const FVector scores = GetVectorForProducer( ff );
+  for(FVector::FNVmap::const_iterator i = scores.cbegin(); i != scores.cend(); i++) {
+    out << " " << i->first << "= " << i->second;
   }
 }
 

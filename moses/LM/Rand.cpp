@@ -52,7 +52,7 @@ LanguageModelRandLM::~LanguageModelRandLM()
   delete m_lm;
 }
 
-void LanguageModelRandLM::Load()
+void LanguageModelRandLM::Load(AllOptions::ptr const& opts)
 {
   cerr << "Loading LanguageModelRandLM..." << endl;
   FactorCollection &factorCollection = FactorCollection::Instance();
@@ -134,7 +134,7 @@ LMResult LanguageModelRandLM::GetValue(const vector<const Word*> &contextFactor,
   return ret;
 }
 
-void LanguageModelRandLM::InitializeForInput(InputType const& source)
+void LanguageModelRandLM::InitializeForInput(ttasksptr const& ttask)
 {
   m_lm->initThreadSpecificData(); // Creates thread specific data iff                                    // compiled with multithreading.
 }

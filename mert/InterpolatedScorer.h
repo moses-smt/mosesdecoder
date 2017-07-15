@@ -39,6 +39,10 @@ public:
 
   virtual void setScoreData(ScoreData* data);
 
+  virtual float calculateScore(const std::vector<ScoreStatsType>& totals) const;
+
+  virtual float getReferenceLength(const std::vector<ScoreStatsType>& totals) const;
+
   /**
    * Set the factors, which should be used for this metric
    */

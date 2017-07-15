@@ -1,3 +1,4 @@
+// -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -17,23 +18,19 @@ License along with this library; if not, write to the Free Software
 Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 ***********************************************************************/
 
-#ifndef moses_TypeDef_h
-#define moses_TypeDef_h
+#pragma once
 
 #include <list>
 #include <limits>
 #include <vector>
 #include <string>
+#include <stdint.h>
+
+#include <boost/shared_ptr.hpp>
+#include <boost/weak_ptr.hpp>
 
 //! all the typedefs and enums goes here
 
-#ifdef WIN32
-#include <BaseTsd.h>
-#else
-#include <stdint.h>
-typedef uint32_t UINT32;
-typedef uint64_t UINT64;
-#endif
 
 namespace Moses
 {
@@ -59,14 +56,25 @@ const size_t DEFAULT_MAX_HYPOSTACK_SIZE = 200;
 const size_t DEFAULT_MAX_TRANS_OPT_CACHE_SIZE = 10000;
 const size_t DEFAULT_MAX_TRANS_OPT_SIZE	= 5000;
 const size_t DEFAULT_MAX_PART_TRANS_OPT_SIZE = 10000;
+//#ifdef PT_UG
+// setting to std::numeric_limits<size_t>::max() makes the regression test for (deprecated) PhraseDictionaryDynamicSuffixArray fail.
+// const size_t DEFAULT_MAX_PHRASE_LENGTH = 100000;
+//#else
 const size_t DEFAULT_MAX_PHRASE_LENGTH = 20;
-const size_t DEFAULT_MAX_CHART_SPAN			= 10;
+//#endif
+const size_t DEFAULT_MAX_CHART_SPAN			= 20;
 const size_t ARRAY_SIZE_INCR					= 10; //amount by which a phrase gets resized when necessary
 const float LOWEST_SCORE							= -100.0f;
 const float DEFAULT_BEAM_WIDTH				= 0.00001f;
 const float DEFAULT_EARLY_DISCARDING_THRESHOLD		= 0.0f;
 const float DEFAULT_TRANSLATION_OPTION_THRESHOLD	= 0.0f;
 const size_t DEFAULT_VERBOSE_LEVEL = 1;
+
+// output floats with five significant digits
+static const size_t PRECISION = 3;
+
+// tolerance for equality in floating point comparisons
+const float FLOAT_EPSILON = 0.0001;
 
 // enums.
 // must be 0, 1, 2, ..., unless otherwise stated
@@ -82,19 +90,18 @@ enum FactorDirection {
 };
 
 enum DecodeType {
-  Translate
-  ,Generate
-  ,InsertNullFertilityWord //! an optional step that attempts to insert a few closed-class words to improve LM scores
+  Translate,
+  Generate
 };
 
 namespace LexReorderType
 {
 enum LexReorderType { // explain values
-  Backward
-  ,Forward
-  ,Bidirectional
-  ,Fe
-  ,F
+  Backward,
+  Forward,
+  Bidirectional,
+  Fe,
+  F
 };
 }
 
@@ -106,32 +113,14 @@ enum DistortionOrientationOptions {
 };
 }
 
-enum PhraseTableImplementation {
-  Memory				= 0
-  ,Binary				= 1
-  ,OnDisk				= 2
-  //,GlueRule		= 3
-  //,Joshua			= 4
-  //,MemorySourceLabel	= 5
-  ,SCFG					= 6
-  //,BerkeleyDb	= 7
-  ,SuffixArray	= 8
-  ,Hiero        = 9
-  ,ALSuffixArray = 10
-  ,FuzzyMatch    = 11
-  ,Compact      = 12
-  ,Interpolated = 13
-  ,DSuffixArray = 14
-  ,MemMappedSA = 15
-};
-
 enum InputTypeEnum {
-  SentenceInput						= 0
-  ,ConfusionNetworkInput	= 1
-  ,WordLatticeInput				= 2
-  ,TreeInputType					= 3
-  ,WordLatticeInput2			= 4
-
+  SentenceInput         = 0,
+  ConfusionNetworkInput	= 1,
+  WordLatticeInput      = 2,
+  TreeInputType         = 3,
+  //,WordLatticeInput2 = 4,
+  TabbedSentenceInput    = 5,
+  ForestInputType        = 6
 };
 
 enum XmlInputType {
@@ -143,33 +132,46 @@ enum XmlInputType {
 };
 
 enum DictionaryFind {
-  Best		= 0
-  ,All		= 1
+  Best		= 0,
+  All		= 1
 };
 
+// Note: StaticData uses SearchAlgorithm to determine whether the translation
+// model is phrase-based or syntax-based.  If you add a syntax-based search
+// algorithm here then you should also update StaticData::IsSyntax().
 enum SearchAlgorithm {
-  Normal				= 0
-  ,CubePruning	= 1
-  ,CubeGrowing	= 2
-  ,ChartDecoding= 3
-  ,NormalBatch  = 4
-  ,ChartIncremental = 5
+  Normal = 0,
+  CubePruning	= 1,
+  //,CubeGrowing = 2
+  CYKPlus = 3,
+  //NormalBatch  = 4,
+  ChartIncremental = 5,
+  SyntaxS2T = 6,
+  SyntaxT2S = 7,
+  SyntaxT2S_SCFG = 8,
+  SyntaxF2S = 9,
+  DefaultSearchAlgorithm = 777 // means: use StaticData.m_searchAlgorithm
 };
 
 enum SourceLabelOverlap {
-  SourceLabelOverlapAdd = 0
-  ,SourceLabelOverlapReplace = 1
-  ,SourceLabelOverlapDiscard = 2
+  SourceLabelOverlapAdd = 0,
+  SourceLabelOverlapReplace = 1,
+  SourceLabelOverlapDiscard = 2
 };
 
 enum WordAlignmentSort {
-  NoSort = 0
-  ,TargetOrder = 1
+  NoSort = 0,
+  TargetOrder = 1
 };
 
 enum FormatType {
-  MosesFormat
-  ,HieroFormat
+  MosesFormat,
+  HieroFormat
+};
+
+enum S2TParsingAlgorithm {
+  RecursiveCYKPlus,
+  Scope3
 };
 
 // typedef
@@ -182,5 +184,10 @@ typedef std::vector<FactorType> FactorList;
 
 typedef std::pair<std::vector<std::string const*>,WordAlignments > StringWordAlignmentCand;
 
+class TranslationTask;
+typedef boost::shared_ptr<TranslationTask> ttasksptr;
+typedef boost::weak_ptr<TranslationTask> ttaskwptr;
 }
-#endif
+
+#define SPTR boost::shared_ptr
+#define WPTR boost::weak_ptr

@@ -1,7 +1,28 @@
+/*********************************
+tercpp: an open-source Translation Edit Rate (TER) scorer tool for Machine Translation.
+
+Copyright 2010-2013, Christophe Servan, LIUM, University of Le Mans, France
+Contact: christophe.servan@lium.univ-lemans.fr
+
+The tercpp tool and library are free software: you can redistribute it and/or modify it
+under the terms of the GNU Lesser General Public License as published by
+the Free Software Foundation, either version 2.1 of the licence, or
+(at your option) any later version.
+
+This program and library are distributed in the hope that it will be useful, but WITHOUT
+ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License
+for more details.
+
+You should have received a copy of the GNU Lesser General Public License
+along with this library; if not, write to the Free Software Foundation,
+Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+**********************************/
 #include "tools.h"
 
 using namespace std;
-namespace Tools
+using namespace boost::xpressive;
+namespace TERCPPNS_Tools
 {
 
 string vectorToString ( vector<string> vec )
@@ -15,6 +36,45 @@ string vectorToString ( vector<string> vec )
     }
   }
   return retour;
+}
+string vectorToString ( vector<char> vec )
+{
+  stringstream retour;
+  retour.str("");
+  for ( vector<char>::iterator vecIter = vec.begin(); vecIter != vec.end(); vecIter++ ) {
+    if ( vecIter == vec.begin() ) {
+      retour << ( *vecIter );
+    } else {
+      retour << "\t" << ( *vecIter );
+    }
+  }
+  return retour.str();
+}
+string vectorToString ( vector<int> vec )
+{
+  stringstream retour;
+  retour.str("");
+  for ( vector<int>::iterator vecIter = vec.begin(); vecIter != vec.end(); vecIter++ ) {
+    if ( vecIter == vec.begin() ) {
+      retour << ( *vecIter );
+    } else {
+      retour << "\t" << ( *vecIter );
+    }
+  }
+  return retour.str();
+}
+string vectorToString ( vector<int> * vec )
+{
+  stringstream retour;
+  retour.str("");
+  for ( vector<int>::iterator vecIter = vec->begin(); vecIter != vec->end(); vecIter++ ) {
+    if ( vecIter == vec->begin() ) {
+      retour << ( *vecIter );
+    } else {
+      retour << "\t" << ( *vecIter );
+    }
+  }
+  return retour.str();
 }
 
 string vectorToString ( vector< string > vec, string s )
@@ -30,6 +90,132 @@ string vectorToString ( vector< string > vec, string s )
   return retour;
 
 }
+
+string vectorToString ( vector< char > vec, string s )
+{
+  stringstream retour;
+  retour.str("");
+  for ( vector<char>::iterator vecIter = vec.begin(); vecIter != vec.end(); vecIter++ ) {
+    if ( vecIter == vec.begin() ) {
+      retour << ( *vecIter );
+    } else {
+      retour << s << ( *vecIter );
+    }
+  }
+  return retour.str();
+
+}
+
+string vectorToString ( vector< int > vec, string s )
+{
+  stringstream retour;
+  retour.str("");
+  for ( vector<int>::iterator vecIter = vec.begin(); vecIter != vec.end(); vecIter++ ) {
+    if ( vecIter == vec.begin() ) {
+      retour << ( *vecIter );
+    } else {
+      retour <<  s << ( *vecIter );
+    }
+  }
+  return retour.str();
+
+}
+
+string vectorToString ( vector< bool > vec, string s )
+{
+  stringstream retour;
+  retour.str("");
+  for ( vector<bool>::iterator vecIter = vec.begin(); vecIter != vec.end(); vecIter++ ) {
+    if ( vecIter == vec.begin() ) {
+      retour << ( *vecIter );
+    } else {
+      retour <<  s << ( *vecIter );
+    }
+  }
+  return retour.str();
+
+}
+string vectorToString ( char* vec, string s , int taille)
+{
+  stringstream retour;
+  retour.str("");
+  int l_i;
+  for ( l_i=0; l_i < taille ; l_i++) {
+    if ( l_i == 0 ) {
+      retour << vec[l_i];
+    } else {
+      retour << s << vec[l_i];
+    }
+  }
+  return retour.str();
+
+}
+
+string vectorToString ( int* vec, string s , int taille)
+{
+  stringstream retour;
+  retour.str("");
+  int l_i;
+  for ( l_i=0; l_i < taille ; l_i++) {
+    if ( l_i == 0 ) {
+      retour << vec[l_i];
+    } else {
+      retour << s << vec[l_i];
+    }
+  }
+  return retour.str();
+
+}
+
+string vectorToString ( bool* vec, string s , int taille)
+{
+  stringstream retour;
+  retour.str("");
+  int l_i;
+  for ( l_i=0; l_i < taille ; l_i++) {
+    if ( l_i == 0 ) {
+      retour << vec[l_i];
+    } else {
+      retour << s << vec[l_i];
+    }
+  }
+  return retour.str();
+
+}
+
+string vectorToString ( vector<bool>* vec, string s , int taille)
+{
+  stringstream retour;
+  retour.str("");
+  int l_i;
+  for ( l_i=0; l_i < taille ; l_i++) {
+    if ( l_i == 0 ) {
+      retour << vec->at(l_i);
+    } else {
+      retour << s << vec->at(l_i);
+    }
+  }
+  return retour.str();
+
+}
+
+string vectorToString ( vector<int>* vec, string s , int taille)
+{
+  stringstream retour;
+  retour.str("");
+  int l_i;
+  for ( l_i=0; l_i < taille ; l_i++) {
+    if ( l_i == 0 ) {
+      retour << vec->at(l_i);
+    } else {
+      retour << s << vec->at(l_i);
+    }
+  }
+  return retour.str();
+
+}
+
+
 
 vector<string> subVector ( vector<string> vec, int start, int end )
 {
@@ -178,8 +364,6 @@ string lowerCase ( string str )
   }
   return str;
 }
-
-/*
 string removePunctTercom ( string str )
 {
   string str_mod = str;
@@ -505,7 +689,6 @@ string normalizeStd ( string str )
 
   return str_mod;
 }
-*/
 
 param copyParam ( param p )
 {
@@ -513,14 +696,19 @@ param copyParam ( param p )
   to_return.caseOn = p.caseOn;
   to_return.noPunct = p.noPunct;
   to_return.debugMode = p.debugMode;
+  to_return.debugLevel = p.debugLevel;
   to_return.hypothesisFile = p.hypothesisFile;
   to_return.referenceFile = p.referenceFile;
   to_return.normalize = p.normalize;
   to_return.noTxtIds = p.noTxtIds;
+  to_return.verbose = p.verbose;
+  to_return.count_verbose = p.count_verbose;
   to_return.outputFileExtension = p.outputFileExtension;
   to_return.outputFileName = p.outputFileName;
   to_return.sgmlInputs = p.sgmlInputs;
   to_return.tercomLike = p.tercomLike;
+  to_return.printAlignments = p.printAlignments;
+  to_return.WER=p.WER;
   return to_return;
 }
 string printParams ( param p )
@@ -529,6 +717,7 @@ string printParams ( param p )
   s << "caseOn = " << p.caseOn << endl;
   s << "noPunct = " << p.noPunct << endl;
   s << "debugMode = " << p.debugMode << endl;
+  s << "debugLevel = " << p.debugLevel << endl;
   s << "hypothesisFile = " << p.hypothesisFile << endl;
   s << "referenceFile = " << p.referenceFile << endl;
   s << "normalize = " << p.normalize << endl;
@@ -537,9 +726,27 @@ string printParams ( param p )
   s << "outputFileName = " << p.outputFileName << endl;
   s << "sgmlInputs = " << p.sgmlInputs << endl;
   s << "tercomLike = " << p.tercomLike << endl;
+  s << "verbose = " << p.verbose << endl;
+  s << "count_verbose = " << p.count_verbose << endl;
   return s.str();
 
 }
-
+string join ( string delim, vector<string> arr )
+{
+  if ( ( int ) arr.size() == 0 ) return "";
+// 		if ((int)delim.compare("") == 0) delim = new String("");
+// 		String s = new String("");
+  stringstream s;
+  s.str ( "" );
+  for ( int i = 0; i < ( int ) arr.size(); i++ ) {
+    if ( i == 0 ) {
+      s << arr.at ( i );
+    } else {
+      s << delim << arr.at ( i );
+    }
+  }
+  return s.str();
+// 		return "";
+}
 
 }

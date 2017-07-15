@@ -22,7 +22,7 @@ int main(int argc, char **argv)
 {
   int tableLimit = 20;
   std::string ttable = "";
-  bool useAlignments = false;
+  // bool useAlignments = false;
 
   for(int i = 1; i < argc; i++) {
     if(!strcmp(argv[i], "-tlimit")) {
@@ -56,7 +56,7 @@ int main(int argc, char **argv)
 
     if (node) {
       // source phrase points to a bunch of rules
-      const TargetPhraseCollection *coll = node->GetTargetPhraseCollection(tableLimit, onDiskWrapper);
+      TargetPhraseCollection::shared_ptr coll = node->GetTargetPhraseCollection(tableLimit, onDiskWrapper);
       string str = coll->GetDebugStr();
       cout << "Found " << coll->GetSize() << endl;
 

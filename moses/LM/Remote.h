@@ -4,9 +4,15 @@
 #include "SingleFactor.h"
 #include "moses/TypeDef.h"
 #include "moses/Factor.h"
-#include <sys/socket.h>
 #include <sys/types.h>
+
+#if defined(_WIN32) || defined(_WIN64)
+#include <winsock2.h>
+#else
+#include <sys/socket.h>
 #include <netinet/in.h>
+#include <netdb.h>
+#endif
 
 namespace Moses
 {

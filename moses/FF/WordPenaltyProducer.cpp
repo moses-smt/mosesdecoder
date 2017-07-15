@@ -17,10 +17,10 @@ WordPenaltyProducer::WordPenaltyProducer(const std::string &line)
   s_instance = this;
 }
 
-void WordPenaltyProducer::Evaluate(const Phrase &source
-                                   , const TargetPhrase &targetPhrase
-                                   , ScoreComponentCollection &scoreBreakdown
-                                   , ScoreComponentCollection &estimatedFutureScore) const
+void WordPenaltyProducer::EvaluateInIsolation(const Phrase &source
+    , const TargetPhrase &targetPhrase
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection &estimatedScores) const
 {
   float score = - (float) targetPhrase.GetNumTerminals();
   scoreBreakdown.Assign(this, score);

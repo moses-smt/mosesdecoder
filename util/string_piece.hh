@@ -45,8 +45,8 @@
 // conversions from "const char*" to "string" and back again.
 //
 
-#ifndef BASE_STRING_PIECE_H__
-#define BASE_STRING_PIECE_H__
+#ifndef UTIL_STRING_PIECE_H
+#define UTIL_STRING_PIECE_H
 
 #include "util/have.hh"
 
@@ -85,7 +85,7 @@ inline bool starts_with(const StringPiece& longer, const StringPiece& prefix) {
 #include <algorithm>
 #include <cstddef>
 #include <string>
-#include <string.h>
+#include <cstring>
 
 #ifdef WIN32
 #undef max
@@ -257,6 +257,14 @@ inline bool operator>=(const StringPiece& x, const StringPiece& y) {
   return !(x < y);
 }
 
+inline StringPiece Trim(const StringPiece& str, const std::string dropChars = " \t\n\r")
+{
+  StringPiece::size_type startPos = str.find_first_not_of(dropChars);
+  StringPiece::size_type endPos = str.find_last_not_of(dropChars);
+  StringPiece ret = str.substr(startPos, endPos - startPos + 1);
+  return ret;
+}
+
 // allow StringPiece to be logged (needed for unit testing).
 inline std::ostream& operator<<(std::ostream& o, const StringPiece& piece) {
   return o.write(piece.data(), static_cast<std::streamsize>(piece.size()));
@@ -267,4 +275,4 @@ U_NAMESPACE_END
 using U_NAMESPACE_QUALIFIER StringPiece;
 #endif
 
-#endif  // BASE_STRING_PIECE_H__
+#endif  // UTIL_STRING_PIECE_H

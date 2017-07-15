@@ -1,5 +1,3 @@
-// $Id$
-
 /***********************************************************************
 Moses - factored phrase-based language decoder
 Copyright (C) 2006 University of Edinburgh
@@ -22,14 +20,17 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include <cstring>
 #include <iostream>
 #include <memory>
-#include <stdlib.h>
+#include <cstdlib>
 #include <boost/shared_ptr.hpp>
+#include <boost/lexical_cast.hpp>
 
 #include "lm/binary_format.hh"
 #include "lm/enumerate_vocab.hh"
 #include "lm/left.hh"
 #include "lm/model.hh"
 #include "util/exception.hh"
+#include "util/tokenize_piece.hh"
+#include "util/string_stream.hh"
 
 #include "Ken.h"
 #include "Base.h"
@@ -42,7 +43,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301  USA
 #include "moses/StaticData.h"
 #include "moses/ChartHypothesis.h"
 #include "moses/Incremental.h"
-#include "moses/UserMessage.h"
+#include "moses/Syntax/SHyperedge.h"
+#include "moses/Syntax/SVertex.h"
 
 using namespace std;
 
@@ -53,70 +55,17 @@ namespace
 
 struct KenLMState : public FFState {
   lm::ngram::State state;
-  int Compare(const FFState &o) const {
-    const KenLMState &other = static_cast<const KenLMState &>(o);
-    if (state.length < other.state.length) return -1;
-    if (state.length > other.state.length) return 1;
-    return std::memcmp(state.words, other.state.words, sizeof(lm::WordIndex) * state.length);
+  virtual size_t hash() const {
+    size_t ret = hash_value(state);
+    return ret;
   }
-};
+  virtual bool operator==(const FFState& o) const {
+    const KenLMState &other = static_cast<const KenLMState &>(o);
+    bool ret = state == other.state;
+    return ret;
+  }
 
-///*
-// * An implementation of single factor LM using Ken's code.
-// */
-//template <class Model> class LanguageModelKen : public LanguageModel
-//{
-//public:
-//  LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, bool lazy);
-//
-//  const FFState *EmptyHypothesisState(const InputType &/*input*/) const {
-//    KenLMState *ret = new KenLMState();
-//    ret->state = m_ngram->BeginSentenceState();
-//    return ret;
-//  }
-//
-//  void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const;
-//
-//  FFState *Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const;
-//
-//  FFState *EvaluateChart(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const;
-//
-//  void IncrementalCallback(Incremental::Manager &manager) const {
-//    manager.LMCallback(*m_ngram, m_lmIdLookup);
-//  }
-//
-//  bool IsUseable(const FactorMask &mask) const;
-//private:
-//  LanguageModelKen(const LanguageModelKen<Model> &copy_from);
-//
-//  lm::WordIndex TranslateID(const Word &word) const {
-//    std::size_t factor = word.GetFactor(m_factorType)->GetId();
-//    return (factor >= m_lmIdLookup.size() ? 0 : m_lmIdLookup[factor]);
-//  }
-//
-//  // Convert last words of hypothesis into vocab ids, returning an end pointer.
-//  lm::WordIndex *LastIDs(const Hypothesis &hypo, lm::WordIndex *indices) const {
-//    lm::WordIndex *index = indices;
-//    lm::WordIndex *end = indices + m_ngram->Order() - 1;
-//    int position = hypo.GetCurrTargetWordsRange().GetEndPos();
-//    for (; ; ++index, --position) {
-//      if (index == end) return index;
-//      if (position == -1) {
-//        *index = m_ngram->GetVocabulary().BeginSentence();
-//        return index + 1;
-//      }
-//      *index = TranslateID(hypo.GetWord(position));
-//    }
-//  }
-//
-//  boost::shared_ptr<Model> m_ngram;
-//
-//  std::vector<lm::WordIndex> m_lmIdLookup;
-//
-//  FactorType m_factorType;
-//
-//  const Factor *m_beginSentenceFactor;
-//};
+};
 
 class MappingBuilder : public lm::EnumerateVocab
 {
@@ -140,34 +89,50 @@ private:
 
 } // namespace
 
-template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
-  :LanguageModel(line)
-  ,m_factorType(factorType)
+template <class Model> void LanguageModelKen<Model>::LoadModel(const std::string &file, util::LoadMethod load_method)
 {
+  m_lmIdLookup.clear();
+
   lm::ngram::Config config;
-  IFVERBOSE(1) {
+  if(this->m_verbosity >= 1) {
     config.messages = &std::cerr;
-  }
-  else {
+  } else {
     config.messages = NULL;
   }
   FactorCollection &collection = FactorCollection::Instance();
   MappingBuilder builder(collection, m_lmIdLookup);
   config.enumerate_vocab = &builder;
-  config.load_method = lazy ? util::LAZY : util::POPULATE_OR_READ;
+  config.load_method = load_method;
 
   m_ngram.reset(new Model(file.c_str(), config));
-
-  m_beginSentenceFactor = collection.AddFactor(BOS_);
+  VERBOSE(2, "LanguageModelKen " << m_description << " reset to " << file << "\n");
 }
+
+template <class Model> LanguageModelKen<Model>::LanguageModelKen(const std::string &line, const std::string &file, FactorType factorType, util::LoadMethod load_method)
+  :LanguageModel(line)
+  ,m_beginSentenceFactor(FactorCollection::Instance().AddFactor(BOS_))
+  ,m_factorType(factorType)
+{
+  ReadParameters();
+  LoadModel(file, load_method);
+}
+
+template <class Model> LanguageModelKen<Model>::LanguageModelKen()
+  :LanguageModel("KENLM")
+  ,m_beginSentenceFactor(FactorCollection::Instance().AddFactor(BOS_))
+  ,m_factorType(0)
+{
+  ReadParameters();
+}
+
 
 template <class Model> LanguageModelKen<Model>::LanguageModelKen(const LanguageModelKen<Model> &copy_from)
   :LanguageModel(copy_from.GetArgLine()),
    m_ngram(copy_from.m_ngram),
 // TODO: don't copy this.
-   m_lmIdLookup(copy_from.m_lmIdLookup),
+   m_beginSentenceFactor(copy_from.m_beginSentenceFactor),
    m_factorType(copy_from.m_factorType),
-   m_beginSentenceFactor(copy_from.m_beginSentenceFactor)
+   m_lmIdLookup(copy_from.m_lmIdLookup)
 {
 }
 
@@ -229,7 +194,7 @@ template <class Model> void LanguageModelKen<Model>::CalcScore(const Phrase &phr
   fullScore = TransformLMScore(fullScore);
 }
 
-template <class Model> FFState *LanguageModelKen<Model>::Evaluate(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
+template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const
 {
   const lm::ngram::State &in_state = static_cast<const KenLMState&>(*ps).state;
 
@@ -297,9 +262,13 @@ public:
     return m_state;
   }
 
-  int Compare(const FFState& o) const {
-    const LanguageModelChartStateKenLM &other = static_cast<const LanguageModelChartStateKenLM&>(o);
-    int ret = m_state.Compare(other.m_state);
+  size_t hash() const {
+    size_t ret = hash_value(m_state);
+    return ret;
+  }
+  virtual bool operator==(const FFState& o) const {
+    const LanguageModelChartStateKenLM &other = static_cast<const LanguageModelChartStateKenLM &>(o);
+    bool ret = m_state == other.m_state;
     return ret;
   }
 
@@ -307,7 +276,7 @@ private:
   lm::ngram::ChartState m_state;
 };
 
-template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *accumulator) const
+template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(const ChartHypothesis& hypo, int featureID, ScoreComponentCollection *accumulator) const
 {
   LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM();
   lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
@@ -328,8 +297,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
       // Non-terminal is first so we can copy instead of rescoring.
       const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
-      float prob = UntransformLMScore(prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
-      ruleScore.BeginNonTerminal(prevState, prob);
+      ruleScore.BeginNonTerminal(prevState);
       phrasePos++;
     }
   }
@@ -339,8 +307,7 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
     if (word.IsNonTerminal()) {
       const ChartHypothesis *prevHypo = hypo.GetPrevHypo(nonTermIndexMap[phrasePos]);
       const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(prevHypo->GetFFState(featureID))->GetChartState();
-      float prob = UntransformLMScore(prevHypo->GetScoreBreakdown().GetScoresForProducer(this)[0]);
-      ruleScore.NonTerminal(prevState, prob);
+      ruleScore.NonTerminal(prevState);
     } else {
       ruleScore.Terminal(TranslateID(word));
     }
@@ -348,7 +315,68 @@ template <class Model> FFState *LanguageModelKen<Model>::EvaluateChart(const Cha
 
   float score = ruleScore.Finish();
   score = TransformLMScore(score);
-  accumulator->Assign(this, score);
+  score -= hypo.GetTranslationOption().GetScores().GetScoresForProducer(this)[0];
+
+  if (OOVFeatureEnabled()) {
+    std::vector<float> scores(2);
+    scores[0] = score;
+    scores[1] = 0.0;
+    accumulator->PlusEquals(this, scores);
+  } else {
+    accumulator->PlusEquals(this, score);
+  }
+  return newState;
+}
+
+template <class Model> FFState *LanguageModelKen<Model>::EvaluateWhenApplied(const Syntax::SHyperedge& hyperedge, int featureID, ScoreComponentCollection *accumulator) const
+{
+  LanguageModelChartStateKenLM *newState = new LanguageModelChartStateKenLM();
+  lm::ngram::RuleScore<Model> ruleScore(*m_ngram, newState->GetChartState());
+  const TargetPhrase &target = *hyperedge.label.translation;
+  const AlignmentInfo::NonTermIndexMap &nonTermIndexMap =
+    target.GetAlignNonTerm().GetNonTermIndexMap2();
+
+  const size_t size = target.GetSize();
+  size_t phrasePos = 0;
+  // Special cases for first word.
+  if (size) {
+    const Word &word = target.GetWord(0);
+    if (word.GetFactor(m_factorType) == m_beginSentenceFactor) {
+      // Begin of sentence
+      ruleScore.BeginSentence();
+      phrasePos++;
+    } else if (word.IsNonTerminal()) {
+      // Non-terminal is first so we can copy instead of rescoring.
+      const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
+      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->states[featureID])->GetChartState();
+      ruleScore.BeginNonTerminal(prevState);
+      phrasePos++;
+    }
+  }
+
+  for (; phrasePos < size; phrasePos++) {
+    const Word &word = target.GetWord(phrasePos);
+    if (word.IsNonTerminal()) {
+      const Syntax::SVertex *pred = hyperedge.tail[nonTermIndexMap[phrasePos]];
+      const lm::ngram::ChartState &prevState = static_cast<const LanguageModelChartStateKenLM*>(pred->states[featureID])->GetChartState();
+      ruleScore.NonTerminal(prevState);
+    } else {
+      ruleScore.Terminal(TranslateID(word));
+    }
+  }
+
+  float score = ruleScore.Finish();
+  score = TransformLMScore(score);
+  score -= target.GetScoreBreakdown().GetScoresForProducer(this)[0];
+
+  if (OOVFeatureEnabled()) {
+    std::vector<float> scores(2);
+    scores[0] = score;
+    scores[1] = 0.0;
+    accumulator->PlusEquals(this, scores);
+  } else {
+    accumulator->PlusEquals(this, score);
+  }
   return newState;
 }
 
@@ -386,59 +414,98 @@ bool LanguageModelKen<Model>::IsUseable(const FactorMask &mask) const
 }
 
 
-LanguageModel *ConstructKenLM(const std::string &line)
+/* Instantiate LanguageModelKen here.  Tells the compiler to generate code
+ * for the instantiations' non-inline member functions in this file.
+ * Otherwise, depending on the compiler, those functions may not be present
+ * at link time.
+ */
+template class LanguageModelKen<lm::ngram::ProbingModel>;
+template class LanguageModelKen<lm::ngram::RestProbingModel>;
+template class LanguageModelKen<lm::ngram::TrieModel>;
+template class LanguageModelKen<lm::ngram::ArrayTrieModel>;
+template class LanguageModelKen<lm::ngram::QuantTrieModel>;
+template class LanguageModelKen<lm::ngram::QuantArrayTrieModel>;
+
+
+LanguageModel *ConstructKenLM(const std::string &lineOrig)
 {
   FactorType factorType = 0;
   string filePath;
-  bool lazy = false;
+  util::LoadMethod load_method = util::POPULATE_OR_READ;
 
-  vector<string> toks = Tokenize(line);
-  for (size_t i = 1; i < toks.size(); ++i) {
-    vector<string> args = Tokenize(toks[i], "=");
-    UTIL_THROW_IF2(args.size() != 2,
-    		"Incorrect format of KenLM property: " << toks[i]);
+  util::TokenIter<util::SingleCharacter, true> argument(lineOrig, ' ');
+  ++argument; // KENLM
 
-    if (args[0] == "factor") {
-      factorType = Scan<FactorType>(args[1]);
-    } else if (args[0] == "order") {
-      //nGramOrder = Scan<size_t>(args[1]);
-    } else if (args[0] == "path") {
-      filePath = args[1];
-    } else if (args[0] == "lazyken") {
-      lazy = Scan<bool>(args[1]);
-    } else if (args[0] == "name") {
-      // that's ok. do nothing, passes onto LM constructor
+  util::StringStream line;
+  line << "KENLM";
+
+  for (; argument; ++argument) {
+    const char *equals = std::find(argument->data(), argument->data() + argument->size(), '=');
+    UTIL_THROW_IF2(equals == argument->data() + argument->size(),
+                   "Expected = in KenLM argument " << *argument);
+    StringPiece name(argument->data(), equals - argument->data());
+    StringPiece value(equals + 1, argument->data() + argument->size() - equals - 1);
+    if (name == "factor") {
+      factorType = boost::lexical_cast<FactorType>(value);
+    } else if (name == "order") {
+      // Ignored
+    } else if (name == "path") {
+      filePath.assign(value.data(), value.size());
+    } else if (name == "lazyken") {
+      // deprecated: use load instead.
+      if (value == "0" || value == "false") {
+        load_method = util::POPULATE_OR_READ;
+      } else if (value == "1" || value == "true") {
+        load_method = util::LAZY;
+      } else {
+        UTIL_THROW2("Can't parse lazyken argument " << value << ".  Also, lazyken is deprecated.  Use load with one of the arguments lazy, populate_or_lazy, populate_or_read, read, or parallel_read.");
+      }
+    } else if (name == "load") {
+      if (value == "lazy") {
+        load_method = util::LAZY;
+      } else if (value == "populate_or_lazy") {
+        load_method = util::POPULATE_OR_LAZY;
+      } else if (value == "populate_or_read" || value == "populate") {
+        load_method = util::POPULATE_OR_READ;
+      } else if (value == "read") {
+        load_method = util::READ;
+      } else if (value == "parallel_read") {
+        load_method = util::PARALLEL_READ;
+      } else {
+        UTIL_THROW2("Unknown KenLM load method " << value);
+      }
+    } else {
+      // pass to base class to interpret
+      line << " " << name << "=" << value;
     }
   }
 
-  return ConstructKenLM(line, filePath, factorType, lazy);
+  return ConstructKenLM(line.str(), filePath, factorType, load_method);
 }
 
-LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy)
+LanguageModel *ConstructKenLM(const std::string &line, const std::string &file, FactorType factorType, util::LoadMethod load_method)
 {
-    lm::ngram::ModelType model_type;
-    if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
-
-      switch(model_type) {
-      case lm::ngram::PROBING:
-        return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, lazy);
-      case lm::ngram::REST_PROBING:
-        return new LanguageModelKen<lm::ngram::RestProbingModel>(line, file, factorType, lazy);
-      case lm::ngram::TRIE:
-        return new LanguageModelKen<lm::ngram::TrieModel>(line, file, factorType, lazy);
-      case lm::ngram::QUANT_TRIE:
-        return new LanguageModelKen<lm::ngram::QuantTrieModel>(line, file, factorType, lazy);
-      case lm::ngram::ARRAY_TRIE:
-        return new LanguageModelKen<lm::ngram::ArrayTrieModel>(line, file, factorType, lazy);
-      case lm::ngram::QUANT_ARRAY_TRIE:
-        return new LanguageModelKen<lm::ngram::QuantArrayTrieModel>(line, file, factorType, lazy);
-      default:
-    	UTIL_THROW2("Unrecognized kenlm model type " << model_type);
-      }
-    } else {
-      return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, lazy);
+  lm::ngram::ModelType model_type;
+  if (lm::ngram::RecognizeBinary(file.c_str(), model_type)) {
+    switch(model_type) {
+    case lm::ngram::PROBING:
+      return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, load_method);
+    case lm::ngram::REST_PROBING:
+      return new LanguageModelKen<lm::ngram::RestProbingModel>(line, file, factorType, load_method);
+    case lm::ngram::TRIE:
+      return new LanguageModelKen<lm::ngram::TrieModel>(line, file, factorType, load_method);
+    case lm::ngram::QUANT_TRIE:
+      return new LanguageModelKen<lm::ngram::QuantTrieModel>(line, file, factorType, load_method);
+    case lm::ngram::ARRAY_TRIE:
+      return new LanguageModelKen<lm::ngram::ArrayTrieModel>(line, file, factorType, load_method);
+    case lm::ngram::QUANT_ARRAY_TRIE:
+      return new LanguageModelKen<lm::ngram::QuantArrayTrieModel>(line, file, factorType, load_method);
+    default:
+      UTIL_THROW2("Unrecognized kenlm model type " << model_type);
     }
+  } else {
+    return new LanguageModelKen<lm::ngram::ProbingModel>(line, file, factorType, load_method);
+  }
 }
 
 }
-

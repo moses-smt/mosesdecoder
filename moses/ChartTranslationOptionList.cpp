@@ -24,7 +24,7 @@
 #include "ChartTranslationOptionList.h"
 #include "ChartTranslationOptions.h"
 #include "ChartCellCollection.h"
-#include "WordsRange.h"
+#include "Range.h"
 #include "InputType.h"
 #include "InputPath.h"
 
@@ -33,7 +33,8 @@ using namespace std;
 namespace Moses
 {
 
-ChartTranslationOptionList::ChartTranslationOptionList(size_t ruleLimit, const InputType &input)
+ChartTranslationOptionList::
+ChartTranslationOptionList(size_t ruleLimit, const InputType &input)
   : m_size(0)
   , m_ruleLimit(ruleLimit)
 {
@@ -61,7 +62,7 @@ public:
 
 void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
                                      const StackVec &stackVec,
-                                     const WordsRange &range)
+                                     const Range &range)
 {
   if (tpc.IsEmpty()) {
     return;
@@ -83,7 +84,7 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
 
   // If the rule limit has already been reached then don't add the option
   // unless it is better than at least one existing option.
-  if (m_size > m_ruleLimit && score < m_scoreThreshold) {
+  if (m_ruleLimit && m_size > m_ruleLimit && score < m_scoreThreshold) {
     return;
   }
 
@@ -100,42 +101,46 @@ void ChartTranslationOptionList::Add(const TargetPhraseCollection &tpc,
   ++m_size;
 
   // If the rule limit hasn't been exceeded then update the threshold.
-  if (m_size <= m_ruleLimit) {
+  if (!m_ruleLimit || m_size <= m_ruleLimit) {
     m_scoreThreshold = (score < m_scoreThreshold) ? score : m_scoreThreshold;
   }
 
   // Prune if bursting
-  if (m_size == m_ruleLimit * 2) {
-	NTH_ELEMENT4(m_collection.begin(),
-                     m_collection.begin() + m_ruleLimit - 1,
-                     m_collection.begin() + m_size,
-                     ChartTranslationOptionOrderer());
+  if (m_ruleLimit && m_size == m_ruleLimit * 2) {
+    NTH_ELEMENT4(m_collection.begin(),
+                 m_collection.begin() + m_ruleLimit - 1,
+                 m_collection.begin() + m_size,
+                 ChartTranslationOptionOrderer());
     m_scoreThreshold = m_collection[m_ruleLimit-1]->GetEstimateOfBestScore();
     m_size = m_ruleLimit;
   }
 }
 
-void ChartTranslationOptionList::AddPhraseOOV(TargetPhrase &phrase, std::list<TargetPhraseCollection*> &waste_memory, const WordsRange &range)
+void
+ChartTranslationOptionList::
+AddPhraseOOV(TargetPhrase &phrase,
+             std::list<TargetPhraseCollection::shared_ptr > &waste_memory,
+             const Range &range)
 {
-  TargetPhraseCollection *tpc = new TargetPhraseCollection();
+  TargetPhraseCollection::shared_ptr tpc(new TargetPhraseCollection);
   tpc->Add(&phrase);
   waste_memory.push_back(tpc);
   StackVec empty;
   Add(*tpc, empty, range);
 }
 
-void ChartTranslationOptionList::ApplyThreshold()
+void ChartTranslationOptionList::ApplyThreshold(float const threshold)
 {
-  if (m_size > m_ruleLimit) {
+  if (m_ruleLimit && m_size > m_ruleLimit) {
     // Something's gone wrong if the list has grown to m_ruleLimit * 2
     // without being pruned.
     assert(m_size < m_ruleLimit * 2);
     // Reduce the list to the best m_ruleLimit options.  The remaining
     // options can be overwritten on subsequent calls to Add().
     NTH_ELEMENT4(m_collection.begin(),
-                     m_collection.begin()+m_ruleLimit,
-                     m_collection.begin()+m_size,
-                     ChartTranslationOptionOrderer());
+                 m_collection.begin()+m_ruleLimit,
+                 m_collection.begin()+m_size,
+                 ChartTranslationOptionOrderer());
     m_size = m_ruleLimit;
   }
 
@@ -150,7 +155,7 @@ void ChartTranslationOptionList::ApplyThreshold()
     scoreThreshold = (score > scoreThreshold) ? score : scoreThreshold;
   }
 
-  scoreThreshold += StaticData::Instance().GetTranslationOptionThreshold();
+  scoreThreshold += threshold; // StaticData::Instance().GetTranslationOptionThreshold();
 
   CollType::iterator bound = std::partition(m_collection.begin(),
                              m_collection.begin()+m_size,
@@ -161,30 +166,54 @@ void ChartTranslationOptionList::ApplyThreshold()
 
 float ChartTranslationOptionList::GetBestScore(const ChartCellLabel *chartCell) const
 {
-    const HypoList *stack = chartCell->GetStack().cube;
-    assert(stack);
-    assert(!stack->empty());
-	const ChartHypothesis &bestHypo = **(stack->begin());
-	return bestHypo.GetTotalScore();
+  const HypoList *stack = chartCell->GetStack().cube;
+  assert(stack);
+  assert(!stack->empty());
+  const ChartHypothesis &bestHypo = **(stack->begin());
+  return bestHypo.GetFutureScore();
 }
 
-void ChartTranslationOptionList::Evaluate(const InputType &input, const InputPath &inputPath)
+void ChartTranslationOptionList::EvaluateWithSourceContext(const InputType &input, const InputPath &inputPath)
 {
   // NEVER iterate over ALL of the collection. Just over the first m_size
   CollType::iterator iter;
   for (iter = m_collection.begin(); iter != m_collection.begin() + m_size; ++iter) {
     ChartTranslationOptions &transOpts = **iter;
-    transOpts.Evaluate(input, inputPath);
+    transOpts.EvaluateWithSourceContext(input, inputPath);
   }
+
+  // get rid of empty trans opts
+  size_t numDiscard = 0;
+  for (size_t i = 0; i < m_size; ++i) {
+    ChartTranslationOptions *transOpts = m_collection[i];
+    if (transOpts->GetSize() == 0) {
+      //delete transOpts;
+      ++numDiscard;
+    } else if (numDiscard) {
+      SwapTranslationOptions(i - numDiscard, i);
+      //m_collection[] = transOpts;
+    }
+  }
+
+  size_t newSize = m_size - numDiscard;
+  m_size = newSize;
+}
+
+void ChartTranslationOptionList::SwapTranslationOptions(size_t a, size_t b)
+{
+  ChartTranslationOptions *transOptsA = m_collection[a];
+  ChartTranslationOptions *transOptsB = m_collection[b];
+  m_collection[a] = transOptsB;
+  m_collection[b] = transOptsA;
 }
 
 std::ostream& operator<<(std::ostream &out, const ChartTranslationOptionList &obj)
 {
-	for (size_t i = 0; i < obj.m_collection.size(); ++i) {
-		const ChartTranslationOptions &transOpts = *obj.m_collection[i];
-		out << transOpts << endl;
-	}
-	return out;
+  for (size_t i = 0; i < obj.m_collection.size(); ++i) {
+    const ChartTranslationOptions &transOpts = *obj.m_collection[i];
+    out << transOpts << endl;
+  }
+  return out;
 }
 
 }

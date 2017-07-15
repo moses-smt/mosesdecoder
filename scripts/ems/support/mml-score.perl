@@ -1,5 +1,9 @@
-#!/usr/bin/perl -w
+#!/usr/bin/env perl
+#
+# This file is part of moses.  Its use is licensed under the GNU Lesser General
+# Public License version 2.1 or, at your option, any later version.
 
+use warnings;
 use strict;
 
 #
@@ -54,7 +58,7 @@ sub score {
   my $fd = shift;
   my $line = <$fd>;
   #print "$line";
-  return 1 if !defined($line);
+  return 1 if !defined($line) || $line =~ /^Perplexity /;
   $line =~ /Total: ([\.\-0-9]+) /;
   return $1;
 }

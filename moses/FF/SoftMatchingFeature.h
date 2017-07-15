@@ -19,20 +19,26 @@ public:
     return true;
   }
 
-  virtual void EvaluateChart(const ChartHypothesis& hypo,
-                             ScoreComponentCollection* accumulator) const;
+  virtual void EvaluateWhenApplied(const ChartHypothesis& hypo,
+                                   ScoreComponentCollection* accumulator) const;
 
-  void Evaluate(const Phrase &source
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection &estimatedFutureScore) const {};
-  void Evaluate(const InputType &input
-                , const InputPath &inputPath
-                , const TargetPhrase &targetPhrase
-                , ScoreComponentCollection &scoreBreakdown
-                , ScoreComponentCollection *estimatedFutureScore = NULL) const {};
-  void Evaluate(const Hypothesis& hypo,
-                ScoreComponentCollection* accumulator) const {};
+  void EvaluateInIsolation(const Phrase &source
+                           , const TargetPhrase &targetPhrase
+                           , ScoreComponentCollection &scoreBreakdown
+                           , ScoreComponentCollection &estimatedScores) const {};
+  void EvaluateWithSourceContext(const InputType &input
+                                 , const InputPath &inputPath
+                                 , const TargetPhrase &targetPhrase
+                                 , const StackVec *stackVec
+                                 , ScoreComponentCollection &scoreBreakdown
+                                 , ScoreComponentCollection *estimatedScores = NULL) const {};
+
+  void EvaluateTranslationOptionListWithSourceContext(const InputType &input
+      , const TranslationOptionList &translationOptionList) const {
+  }
+
+  void EvaluateWhenApplied(const Hypothesis& hypo,
+                           ScoreComponentCollection* accumulator) const {};
 
   bool Load(const std::string &filePath);
 
@@ -49,6 +55,7 @@ public:
 private:
   mutable std::vector<std::vector<Word> > m_softMatches; // map RHS of new rule to list of possible LHS of old rule (subtree)
   mutable std::vector<std::vector<std::string> > m_nameCache;
+  bool m_scoreIdentical;
 
 #ifdef WITH_THREADS
   //reader-writer lock

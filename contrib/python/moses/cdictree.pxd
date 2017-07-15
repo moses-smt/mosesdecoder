@@ -16,14 +16,14 @@ cdef extern from 'PhraseDictionaryTree.h' namespace 'Moses':
         Scores fvalues
 
     cdef cppclass PhraseDictionaryTree:
-        PhraseDictionaryTree(unsigned nscores)
+        PhraseDictionaryTree()
         void NeedAlignmentInfo(bint value)
         void PrintWordAlignment(bint value)
         bint PrintWordAlignment()
         int Read(string& path)
-        void GetTargetCandidates(vector[string]& fs, 
+        void GetTargetCandidates(vector[string]& fs,
                 vector[StringTgtCand]& rv)
-        void GetTargetCandidates(vector[string]& fs, 
+        void GetTargetCandidates(vector[string]& fs,
                 vector[StringTgtCand]& rv,
                 vector[string]& wa)
 

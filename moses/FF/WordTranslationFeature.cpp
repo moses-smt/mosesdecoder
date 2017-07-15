@@ -7,7 +7,6 @@
 #include "moses/ChartHypothesis.h"
 #include "moses/ScoreComponentCollection.h"
 #include "moses/TranslationOption.h"
-#include "moses/UserMessage.h"
 #include "moses/InputPath.h"
 #include "util/string_piece_hash.hh"
 #include "util/exception.hh"
@@ -23,33 +22,33 @@ WordTranslationFeature::WordTranslationFeature(const std::string &line)
   ,m_simple(true)
   ,m_sourceContext(false)
   ,m_targetContext(false)
-  ,m_ignorePunctuation(false)
   ,m_domainTrigger(false)
+  ,m_ignorePunctuation(false)
 {
-  std::cerr << "Initializing word translation feature.. " << endl;
+  VERBOSE(1, "Initializing feature " << GetScoreProducerDescription() << " ...");
   ReadParameters();
 
-  if (m_simple == 1) std::cerr << "using simple word translations.. ";
-  if (m_sourceContext == 1) std::cerr << "using source context.. ";
-  if (m_targetContext == 1) std::cerr << "using target context.. ";
-  if (m_domainTrigger == 1) std::cerr << "using domain triggers.. ";
+  if (m_simple == 1) VERBOSE(1, " Using simple word translations.");
+  if (m_sourceContext == 1) VERBOSE(1, " Using source context.");
+  if (m_targetContext == 1) VERBOSE(1, " Using target context.");
+  if (m_domainTrigger == 1) VERBOSE(1, " Using domain triggers.");
 
   // compile a list of punctuation characters
   if (m_ignorePunctuation) {
-    std::cerr << "ignoring punctuation for triggers.. ";
+    VERBOSE(1, " Ignoring punctuation for triggers.");
     char punctuation[] = "\"'!?¿·()#_,.:;•&@‑/\\0123456789~=";
     for (size_t i=0; i < sizeof(punctuation)-1; ++i) {
       m_punctuationHash[punctuation[i]] = 1;
     }
   }
 
-  std::cerr << "done." << std::endl;
+  VERBOSE(1, " Done." << std::endl);
 
   // TODO not sure about this
   /*
   if (weight[0] != 1) {
     AddSparseProducer(wordTranslationFeature);
-    cerr << "wt sparse producer weight: " << weight[0] << endl;
+    VERBOSE(1, "wt sparse producer weight: " << weight[0] << std::endl);
     if (m_mira)
       m_metaFeatureProducer = new MetaFeatureProducer("wt");
   }
@@ -88,14 +87,15 @@ void WordTranslationFeature::SetParameter(const std::string& key, const std::str
   }
 }
 
-void WordTranslationFeature::Load()
+void WordTranslationFeature::Load(AllOptions::ptr const& opts)
 {
+  m_options = opts;
   // load word list for restricted feature set
   if (m_filePathSource.empty()) {
     return;
   } //else if (tokens.size() == 8) {
 
-  cerr << "loading word translation word lists from " << m_filePathSource << " and " << m_filePathTarget << endl;
+  FEATUREVERBOSE(1, "Loading word translation word lists from " << m_filePathSource << " and " << m_filePathTarget << std::endl);
   if (m_domainTrigger) {
     // domain trigger terms for each input document
     ifstream inFileSource(m_filePathSource.c_str());
@@ -137,18 +137,19 @@ void WordTranslationFeature::Load()
   }
 }
 
-void WordTranslationFeature::Evaluate
-(const Hypothesis& hypo,
- ScoreComponentCollection* accumulator) const
+void WordTranslationFeature::EvaluateWithSourceContext(const InputType &input
+    , const InputPath &inputPath
+    , const TargetPhrase &targetPhrase
+    , const StackVec *stackVec
+    , ScoreComponentCollection &scoreBreakdown
+    , ScoreComponentCollection *estimatedScores) const
 {
-  const Sentence& input = static_cast<const Sentence&>(hypo.GetInput());
-  const TranslationOption& transOpt = hypo.GetTranslationOption();
-  const TargetPhrase& targetPhrase = hypo.GetCurrTargetPhrase();
+  const Sentence& sentence = static_cast<const Sentence&>(input);
   const AlignmentInfo &alignment = targetPhrase.GetAlignTerm();
 
   // process aligned words
   for (AlignmentInfo::const_iterator alignmentPoint = alignment.begin(); alignmentPoint != alignment.end(); alignmentPoint++) {
-    const Phrase& sourcePhrase = transOpt.GetInputPath().GetPhrase();
+    const Phrase& sourcePhrase = inputPath.GetPhrase();
     int sourceIndex = alignmentPoint->first;
     int targetIndex = alignmentPoint->second;
     Word ws = sourcePhrase.GetWord(sourceIndex);
@@ -178,21 +179,21 @@ void WordTranslationFeature::Evaluate
 
     if (m_simple) {
       // construct feature name
-      stringstream featureName;
+      util::StringStream featureName;
       featureName << m_description << "_";
       featureName << sourceWord;
       featureName << "~";
       featureName << targetWord;
-      accumulator->SparsePlusEquals(featureName.str(), 1);
+      scoreBreakdown.SparsePlusEquals(featureName.str(), 1);
     }
     if (m_domainTrigger && !m_sourceContext) {
-      const bool use_topicid = input.GetUseTopicId();
-      const bool use_topicid_prob = input.GetUseTopicIdAndProb();
+      const bool use_topicid = sentence.GetUseTopicId();
+      const bool use_topicid_prob = sentence.GetUseTopicIdAndProb();
       if (use_topicid || use_topicid_prob) {
         if(use_topicid) {
           // use topicid as trigger
-          const long topicid = input.GetTopicId();
-          stringstream feature;
+          const long topicid = sentence.GetTopicId();
+          util::StringStream feature;
           feature << m_description << "_";
           if (topicid == -1)
             feature << "unk";
@@ -203,27 +204,27 @@ void WordTranslationFeature::Evaluate
           feature << sourceWord;
           feature << "~";
           feature << targetWord;
-          accumulator->SparsePlusEquals(feature.str(), 1);
+          scoreBreakdown.SparsePlusEquals(feature.str(), 1);
         } else {
           // use topic probabilities
           const vector<string> &topicid_prob = *(input.GetTopicIdAndProb());
           if (atol(topicid_prob[0].c_str()) == -1) {
-            stringstream feature;
+            util::StringStream feature;
             feature << m_description << "_unk_";
             feature << sourceWord;
             feature << "~";
             feature << targetWord;
-            accumulator->SparsePlusEquals(feature.str(), 1);
+            scoreBreakdown.SparsePlusEquals(feature.str(), 1);
           } else {
             for (size_t i=0; i+1 < topicid_prob.size(); i+=2) {
-              stringstream feature;
+              util::StringStream feature;
               feature << m_description << "_";
               feature << topicid_prob[i];
               feature << "_";
               feature << sourceWord;
               feature << "~";
               feature << targetWord;
-              accumulator->SparsePlusEquals(feature.str(), atof((topicid_prob[i+1]).c_str()));
+              scoreBreakdown.SparsePlusEquals(feature.str(), atof((topicid_prob[i+1]).c_str()));
             }
           }
         }
@@ -232,28 +233,28 @@ void WordTranslationFeature::Evaluate
         const long docid = input.GetDocumentId();
         for (boost::unordered_set<std::string>::const_iterator p = m_vocabDomain[docid].begin(); p != m_vocabDomain[docid].end(); ++p) {
           string sourceTrigger = *p;
-          stringstream feature;
+          util::StringStream feature;
           feature << m_description << "_";
           feature << sourceTrigger;
           feature << "_";
           feature << sourceWord;
           feature << "~";
           feature << targetWord;
-          accumulator->SparsePlusEquals(feature.str(), 1);
+          scoreBreakdown.SparsePlusEquals(feature.str(), 1);
         }
       }
     }
     if (m_sourceContext) {
-      size_t globalSourceIndex = hypo.GetTranslationOption().GetStartPos() + sourceIndex;
+      size_t globalSourceIndex = inputPath.GetWordsRange().GetStartPos() + sourceIndex;
       if (!m_domainTrigger && globalSourceIndex == 0) {
         // add <s> trigger feature for source
-        stringstream feature;
+        util::StringStream feature;
         feature << m_description << "_";
         feature << "<s>,";
         feature << sourceWord;
         feature << "~";
         feature << targetWord;
-        accumulator->SparsePlusEquals(feature.str(), 1);
+        scoreBreakdown.SparsePlusEquals(feature.str(), 1);
       }
 
       // range over source words to get context
@@ -277,17 +278,17 @@ void WordTranslationFeature::Evaluate
 
         if (m_domainTrigger) {
           if (sourceTriggerExists) {
-            stringstream feature;
+            util::StringStream feature;
             feature << m_description << "_";
             feature << sourceTrigger;
             feature << "_";
             feature << sourceWord;
             feature << "~";
             feature << targetWord;
-            accumulator->SparsePlusEquals(feature.str(), 1);
+            scoreBreakdown.SparsePlusEquals(feature.str(), 1);
           }
         } else if (m_unrestricted || sourceTriggerExists) {
-          stringstream feature;
+          util::StringStream feature;
           feature << m_description << "_";
           if (contextIndex < globalSourceIndex) {
             feature << sourceTrigger;
@@ -300,7 +301,7 @@ void WordTranslationFeature::Evaluate
           }
           feature << "~";
           feature << targetWord;
-          accumulator->SparsePlusEquals(feature.str(), 1);
+          scoreBreakdown.SparsePlusEquals(feature.str(), 1);
         }
       }
     }
@@ -347,13 +348,6 @@ void WordTranslationFeature::Evaluate
       }*/
     }
   }
-}
-
-void WordTranslationFeature::EvaluateChart(
-  const ChartHypothesis &hypo,
-  ScoreComponentCollection* accumulator) const
-{
-  UTIL_THROW(util::Exception, "Need source phrase. Can't be arsed at the moment");
 }
 
 bool WordTranslationFeature::IsUseable(const FactorMask &mask) const
