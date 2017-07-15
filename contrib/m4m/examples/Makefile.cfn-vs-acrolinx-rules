@@ -1,0 +1,185 @@
+# -*- Makefile -*-
+
+L1    = fr
+L2    = en
+wa    = giza
+itype = cased
+
+# specific to the local environment
+MAKECMDGOALS ?= 
+WDIR          = $(CURDIR)
+MOSES_ROOT    = ${HOME}/moses
+MOSES_SCRIPTS = ${MOSES_ROOT}/scripts
+FACTORSEP = \n
+
+.SECONDARY: 
+include m4m/modules/m4m.m4m
+
+# specification of the language model:
+lm.order  = 5
+lm.factor = 0
+lm.lazy   = 1 
+lm.file   = ${WDIR}/lm/${L2}.5-grams.kenlm
+$(eval $(call add_kenlm,${lm.file},${lm.order},${lm.factor},${lm.lazy}))
+
+# aligner := giza
+# myptable = model/tm/${aligner}.${L1}-${L2}
+# mydtable = model/dm/${aligner}.${L1}-${L2}
+# mysystem = systems/${itype}
+
+# SYSTEMS := systems/${itype}
+
+$(eval $(clear-ptables))
+$(eval $(clear-dtables))
+$(eval $(call add_mmsapt,0,0,5,${WDIR}/crp/trn/mm/giza,${WDIR}/crp/trn/aln/giza/))
+INPUT_FEATURES := 
+$(eval $(call create_moses_ini,systems/cased))
+INPUT_FEATURES := InputFeature;name=InputFeature0;num-features=4;num-input-features=4
+$(eval $(call create_moses_ini,systems/cfn))
+$(eval $(call create_moses_ini,systems/cfn+f))
+$(eval $(call create_moses_ini,systems/cfn+f+e))
+$(eval $(call create_moses_ini,systems/cfn+f+e+c))
+
+# cfn: simple cfn; LM and homophones only
+# cfn+f: plus faroo, simple edit-distance-based model
+# cfn+f+e: simple edit-distance-based model replaced by 
+#          explicit error model trained on French Wikipedia error corpus
+# cfn+f+e+c: added list of hand-crafted confusions
+ 
+
+# mm: ${WDIR}/crp/trn/mm/giza/${L1}.mct
+# mm: ${WDIR}/crp/trn/mm/giza/${L2}.mct
+# mm: ${WDIR}/crp/trn/mm/giza/${L1}-${L2}.mam
+
+# aln: ${WDIR}/crp/trn/aln/giza/${L1}-${L2}.symal.gz
+
+# info:
+# dtable: ${DTABLES}
+# ptable: ${PTABLES}
+# system: $(addsuffix /moses.ini.0,${SYSTEMS})
+# eval:   ${EVALUATIONS}
+
+mkcfn  = bin/mkcfn 
+mkcfn += -L lm/fr.5-grams.kenlm 
+mkcfn += -p aux/fr_forum_alternates.txt
+# mkcfn += -F models/mkcfn/faroo.fr
+# mkcfn += -E models/mkcfn/errormodel.fr
+
+define make_cfn
+
+$(if $(findstring cfn+f,$2),${WDIR}/crp/$1/$2/%.${L1}:\
+mkcfn += -F aux/mkcfn/faroo.fr)
+$(if $(findstring cfn+f+e,$2),${WDIR}/crp/$1/$2/%.${L1}:\
+mkcfn += -E aux/mkcfn/errormodel.fr)
+$(if $(findstring cfn+f+e+c,$2),${WDIR}/crp/$1/$2/%.${L1}:\
+mkcfn += -a aux/mkcfn/confusions.fr)
+${WDIR}/crp/$1/$2/%.${L1}: ${WDIR}/crp/$1/cased/%.${L1}
+	$$(lock)
+	$${mkcfn} < $$< > $$@_ 
+	mv $$@_ $$@
+	$$(unlock)
+
+endef
+
+$(foreach set,tst dev,\
+$(foreach variant,cfn cfn+f cfn+f+e cfn+f+e+c,\
+$(eval $(call make_cfn,${set},${variant}))))
+
+${WDIR}/crp/tst/cfn/%.${L1}: ${WDIR}/crp/tst/cased/%.${L1}
+	$(lock)
+	${mkcfn} < $< > $@_ 
+	mv $@_ $@
+	$(unlock)
+
+${WDIR}/crp/dev/cfn/%.${L1}: ${WDIR}/crp/tst/cased/%.${L1}
+	$(lock)
+	${mkcfn} < $< > $@_ 
+	mv $@_ $@
+	$(unlock)
+
+
+
+
+${WDIR}/crp/dev/cfn/%.${L1}: ${WDIR}/crp/dev/cased/%.${L1}
+	$(lock)
+	${mkcfn} < $< > $@_ 
+	mv $@_ $@
+	$(unlock)
+
+#tune.sets =  $(filter tune%,$(call get_set,${WDIR}/crp/dev/cfn))
+#tune.sets =  $(call get_set,${WDIR}/crp/dev/${itype}/tune)
+#eval.sets = $(call get_set,${WDIR}/crp/tst/${itype}/tune)
+#$(info TUNE SETS ${tune.sets})
+
+# evalprep: $(addsuffix .${L1},${eval.sets}) 
+# evalprep: $(foreach x,$(addsuffix .${L1},${eval.sets}),$(call reffiles,$x,${WDIR}/crp/tst))
+# tuneprep: $(addsuffix .${L1},${tune.sets}) 
+# tuneprep: $(foreach x,$(addsuffix .${L1},${tune.sets}),$(call reffiles,$x,${WDIR}/crp/dev))
+
+ifdef tune.runs
+
+TUNED_SYSTEMS  :=
+EVALUATIONS    :=
+itypes := cased cfn
+itypes := cased 
+
+$(foreach run,$(shell seq ${tune.runs}),\
+$(foreach itype,${itypes},$(eval system=systems/${itype});$(info SYSTEM=${system})\
+$(eval tune.sets=${WDIR}/crp/dev/${itype}/casmaccept-dev);\
+$(eval eval.sets=$(addprefix ${WDIR}/crp/tst/${itype}/casmaccept-,tst man aut man-raw aut-raw));\
+$(foreach tuneset, ${tune.sets},$(info TUNING ${system} ON ${tuneset})\
+$(eval $(call tune_system,${system}/moses.ini.0,\
+${system}/tuned/$(notdir ${tuneset})/${run}/moses.ini,${tuneset}.${L1}));\
+$(foreach evalset, ${eval.sets},\
+$(eval $(call bleu_eval,\
+${system}/eval/$(notdir ${tuneset})/${run}/$(notdir ${evalset}),\
+${system}/tuned/$(notdir ${tuneset})/${run}/moses.ini,${evalset}.${L1}))))))
+
+$(info EVALUATIONS=${EVALUATIONS})
+
+#$(eval $(tune_all_systems))
+#$(eval $(bleu_score_all_systems))
+tune: ${TUNED_SYSTEMS}
+	echo TUNED ${TUNED_SYSTEMS}
+all: ${EVALUATIONS} 
+
+else
+
+tune: all
+# The recursive calls below make sure that tuning runs happen sequentially 
+# (moses runs multi-threaded anyway). The reason is that we may want to have
+# first results as soon as possible.
+tune.runs := 1 1
+$(info TUNE RUNS ${tune.runs})
+all: 
+	$(foreach n,$(shell seq ${tune.runs}),\
+	${MAKE} -f $(word 1, ${MAKEFILE_LIST}) \
+	tune.runs="$n $n" ${MAKECMDGOALS} -${MAKEFLAGS})
+
+endif
+
+#data: ${L1mno} ${L2mno}
+#data: $(addsuffix .${L1}.gz, $(pll-clean))
+#data: $(addsuffix .${L2}.gz, $(pll-clean))
+# .PHONY: $(addprefix reset-,lm tm dm all aln tune eval systems)
+# reset-aln: reset-mm
+# 	-rm -rf $(foreach a,${wa},crp/trn/aln/${a})
+# reset-mm: reset-dm reset-tm
+# 	-rm -rf $(foreach a,${wa},crp/trn/mm/${a})
+# reset-dm: reset-systems
+# 	-rm -rf $(foreach a,${wa},model/dm/${a}.*)
+# reset-tm: reset-systems
+# 	-rm -rf $(foreach a,${wa},model/tm/${a}.*)
+# reset-systems: 
+# 	-rm -rf ${SYSTEMS}
+# reset-tune: 
+# 	-rm -rf $(foreach s,${SYSTEMS}/$s/tune)
+# reset-eval: 
+# 	-rm -rf $(foreach s,${SYSTEMS},$s/eval)
+# reset-lm: 
+# 	-rm -rf lm
+# reset-all: reset-lm reset-aln
+# 	-rm -rf $(wildcard crp/trn/*/[ct]* crp/dev/[ct]* crp/tst/[ct]*) 
+# 	-rm -rf aux
+
+.SECONDARY:

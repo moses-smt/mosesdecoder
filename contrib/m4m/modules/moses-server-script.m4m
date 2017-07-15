@@ -1,0 +1,5 @@
+# -*- Makefile -*-
+# This m4m module creates the script that runs the moses backend 
+# for CASMACAT/MATECAT
+
+bin/moses-server.sh: 

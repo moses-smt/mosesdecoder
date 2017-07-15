@@ -1,0 +1,119 @@
+# -*- Makefile -*-
+
+# Makefile for building a system with suffix-array phrase tables.
+# Uses Makefiles for Moses (m4m), written by Ulrich Germann.
+#
+# This Makefile assumes that you have already word-aligned 
+# your training corpus. 
+# 
+# PREPARATION: 
+# - put the text and symal files in crp/trn/aln/giza as 
+#   ${L1}.txt.gz ${L2}.txt.gz and ${L1}-${L2}.symal.gz
+#   All files should be gzipped. 
+# - put the language model into lm/ as
+#   ${L2}.${lm.order}-grams.kenlm (assuming it's a 5-gram model)
+#
+
+# some variables need to be set before m4m modules are included
+# Experiment-specific
+# L1: source language; L2: target language
+L1   = en
+L2   = it
+word-alignment = giza
+
+# specific to the local environment
+MAKECMDGOALS ?= 
+WDIR          = $(CURDIR)
+MOSES_ROOT    = ${WDIR}/moses
+MOSES_SCRIPTS = ${MOSES_ROOT}/scripts
+#MGIZA_ROOT    = ${MOSES_ROOT}
+#fast_align    = ${HOME}/bin/fast_align 
+
+.SECONDARY: 
+include m4m/modules/m4m.m4m
+
+# specification of the language model:
+lm.order  = 5
+lm.factor = 0
+lm.lazy   = 1 
+lm.file   = ${WDIR}/lm/${L2}.5-grams.kenlm
+${lm.file}: | $(L2mno)
+$(eval $(call add_kenlm,${lm.file},${lm.order},${lm.factor},${lm.lazy}))
+
+#dmodels  = wbe-mslr-bidirectional-fe-allff
+mysystem = systems/${word-alignment}-aligned
+myptable = model/tm/${aligner}.${L1}-${L2}
+mydtable = model/dm/${aligner}.${L1}-${L2}
+
+SYSTEMS := systems/giza-aligned
+aligner := giza
+$(eval $(clear-ptables))
+$(eval $(clear-dtables))
+$(eval $(call add_mmsapt,0,0,5,${WDIR}/crp/trn/mm/giza,${WDIR}/crp/trn/aln/giza/))
+$(eval $(call create_moses_ini,$${mysystem}))
+
+
+mm: ${WDIR}/crp/trn/mm/giza/${L1}.mct
+mm: ${WDIR}/crp/trn/mm/giza/${L2}.mct
+mm: ${WDIR}/crp/trn/mm/giza/${L1}-${L2}.mam
+
+aln: ${WDIR}/crp/trn/aln/giza/${L1}-${L2}.symal.gz
+	$(info $^)
+info:
+dtable: ${DTABLES}
+ptable: ${PTABLES}
+system: $(addsuffix /moses.ini.0,${SYSTEMS})
+eval:    ${EVALUATIONS}
+
+ifdef tune.runs
+
+TUNED_SYSTEMS :=
+EVALUATIONS   :=
+$(eval $(tune_all_systems))
+$(eval $(bleu_score_all_systems))
+tune: ${TUNED_SYSTEMS}
+	echo TUNED ${TUNED_SYSTEMS}
+all: ${EVALUATIONS} 
+
+else
+
+tune: all
+
+# The recursive calls below make sure that tuning runs happen sequentially 
+# (moses runs multi-threaded anyway). The reason is that we may want to have
+# first results as soon as possible.
+tune.runs := 2 2
+$(info TUNE RUNS ${tune.runs})
+all: 
+	$(foreach n,$(shell seq ${tune.runs}),\
+	${MAKE} -f $(word 1, ${MAKEFILE_LIST}) \
+	tune.runs="$n $n" ${MAKECMDGOALS} -${MAKEFLAGS})
+
+endif
+
+data: ${L1mno} ${L2mno}
+data: $(addsuffix .${L1}.gz, $(pll-clean))
+data: $(addsuffix .${L2}.gz, $(pll-clean))
+
+.PHONY: $(addprefix reset-,lm tm dm all aln tune eval systems)
+reset-aln: reset-mm
+	-rm -rf $(foreach a,${wa},crp/trn/aln/${a})
+reset-mm: reset-dm reset-tm
+	-rm -rf $(foreach a,${wa},crp/trn/mm/${a})
+reset-dm: reset-systems
+	-rm -rf $(foreach a,${wa},model/dm/${a}.*)
+reset-tm: reset-systems
+	-rm -rf $(foreach a,${wa},model/tm/${a}.*)
+reset-systems: 
+	-rm -rf ${SYSTEMS}
+reset-tune: 
+	-rm -rf $(foreach s,${SYSTEMS}/$s/tune)
+reset-eval: 
+	-rm -rf $(foreach s,${SYSTEMS},$s/eval)
+reset-lm: 
+	-rm -rf lm
+reset-all: reset-lm reset-aln
+	-rm -rf $(wildcard crp/trn/*/[ct]* crp/dev/[ct]* crp/tst/[ct]*) 
+	-rm -rf aux
+
+.SECONDARY:
