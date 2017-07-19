@@ -1,0 +1,574 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <Filter Include="Source Files">
+      <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
+      <Extensions>cpp;c;cc;cxx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
+    </Filter>
+    <Filter Include="Header Files">
+      <UniqueIdentifier>{93995380-89BD-4b04-88EB-625FBE52EBFB}</UniqueIdentifier>
+      <Extensions>h;hh;hpp;hxx;hm;inl;inc;xsd</Extensions>
+    </Filter>
+    <Filter Include="Resource Files">
+      <UniqueIdentifier>{67DA6AB6-F800-4c08-8B7A-83BB121AAD01}</UniqueIdentifier>
+      <Extensions>rc;ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe;resx;tiff;tif;png;wav;mfcribbon-ms</Extensions>
+    </Filter>
+    <Filter Include="Source Files\server">
+      <UniqueIdentifier>{214e915b-eafb-4e76-b9a2-1fbfe99424b7}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\util">
+      <UniqueIdentifier>{d6922dd8-d86c-4c79-8587-a3a412a2e9f6}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\util\double-conversion">
+      <UniqueIdentifier>{4e9f8bc8-ef01-463e-a309-df80bb1e63b5}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\parameters">
+      <UniqueIdentifier>{58e84bec-0301-41b2-a4c2-dc00162c550a}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\legacy">
+      <UniqueIdentifier>{ccdac19b-8883-4c3d-8006-365d4846688f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\FF">
+      <UniqueIdentifier>{929b6fab-e56b-4218-bfb6-da1c50a6c48e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SCFG">
+      <UniqueIdentifier>{797f4634-c680-45fc-b30e-b5e90ee5d224}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\TranslationModel">
+      <UniqueIdentifier>{5a603a90-587d-4fef-ab01-ba6e5173869e}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\TranslationModel\Memory">
+      <UniqueIdentifier>{85931b40-138d-48c4-a288-c4ee96039879}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\FF\LexicalReordering">
+      <UniqueIdentifier>{a044c0cd-45cc-4a91-bd83-0e04d11f2afa}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\FF\OSM">
+      <UniqueIdentifier>{fe76b14f-0997-4f14-b3d6-c6f1b725bf72}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\PhraseBased">
+      <UniqueIdentifier>{dea1c12e-1a75-4313-9c03-28689a06a1ee}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\lm">
+      <UniqueIdentifier>{b895cea0-249f-4b4a-9b47-872d810fd4f2}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\PhraseBased\Normal">
+      <UniqueIdentifier>{12cccf90-d56a-4aca-8780-41777bb2f291}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\PhraseBased\CubePruningMiniStack">
+      <UniqueIdentifier>{e8564ac2-1055-4b10-9da0-4ae82e713881}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Moses2LM">
+      <UniqueIdentifier>{cad8906a-d5b9-447d-952c-68bd6fa93bef}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\SCFG\nbest">
+      <UniqueIdentifier>{806d58ef-f545-4428-a8f0-f870e211d15f}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\ProbingPT">
+      <UniqueIdentifier>{8f10d9c1-66d4-4490-b310-d3f4973bad29}</UniqueIdentifier>
+    </Filter>
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\util\exception.cc">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\float_to_string.cc">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\integer_to_string.cc">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\double-conversion\bignum.cc">
+      <Filter>Source Files\util\double-conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\double-conversion\bignum-dtoa.cc">
+      <Filter>Source Files\util\double-conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\double-conversion\cached-powers.cc">
+      <Filter>Source Files\util\double-conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\double-conversion\diy-fp.cc">
+      <Filter>Source Files\util\double-conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\double-conversion\double-conversion.cc">
+      <Filter>Source Files\util\double-conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\double-conversion\fast-dtoa.cc">
+      <Filter>Source Files\util\double-conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\double-conversion\fixed-dtoa.cc">
+      <Filter>Source Files\util\double-conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\double-conversion\strtod.cc">
+      <Filter>Source Files\util\double-conversion</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\murmur_hash.cc">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\pool.cc">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\random.cc">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\usage.cc">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\Distortion.cpp">
+      <Filter>Source Files\FF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\FeatureFunction.cpp">
+      <Filter>Source Files\FF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\FeatureFunctions.cpp">
+      <Filter>Source Files\FF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\FeatureRegistry.cpp">
+      <Filter>Source Files\FF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\FFState.cpp">
+      <Filter>Source Files\FF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\PhrasePenalty.cpp">
+      <Filter>Source Files\FF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\PointerState.cpp">
+      <Filter>Source Files\FF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\StatefulFeatureFunction.cpp">
+      <Filter>Source Files\FF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\StatelessFeatureFunction.cpp">
+      <Filter>Source Files\FF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\WordPenalty.cpp">
+      <Filter>Source Files\FF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\legacy\Bitmap.cpp">
+      <Filter>Source Files\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\legacy\Bitmaps.cpp">
+      <Filter>Source Files\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\legacy\Factor.cpp">
+      <Filter>Source Files\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\legacy\FactorCollection.cpp">
+      <Filter>Source Files\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\legacy\InputFileStream.cpp">
+      <Filter>Source Files\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\legacy\Matrix.cpp">
+      <Filter>Source Files\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\legacy\OutputFileStream.cpp">
+      <Filter>Source Files\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\legacy\Parameter.cpp">
+      <Filter>Source Files\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\legacy\Range.cpp">
+      <Filter>Source Files\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\legacy\ThreadPool.cpp">
+      <Filter>Source Files\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\legacy\Timer.cpp">
+      <Filter>Source Files\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\legacy\Util2.cpp">
+      <Filter>Source Files\legacy</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\parameters\AllOptions.cpp">
+      <Filter>Source Files\parameters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\parameters\BookkeepingOptions.cpp">
+      <Filter>Source Files\parameters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\parameters\ContextParameters.cpp">
+      <Filter>Source Files\parameters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\parameters\CubePruningOptions.cpp">
+      <Filter>Source Files\parameters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\parameters\InputOptions.cpp">
+      <Filter>Source Files\parameters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\parameters\LMBR_Options.cpp">
+      <Filter>Source Files\parameters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\parameters\MBR_Options.cpp">
+      <Filter>Source Files\parameters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\parameters\NBestOptions.cpp">
+      <Filter>Source Files\parameters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\parameters\OOVHandlingOptions.cpp">
+      <Filter>Source Files\parameters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\parameters\OptionsBaseClass.cpp">
+      <Filter>Source Files\parameters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\parameters\ReorderingOptions.cpp">
+      <Filter>Source Files\parameters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\parameters\ReportingOptions.cpp">
+      <Filter>Source Files\parameters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\parameters\SearchOptions.cpp">
+      <Filter>Source Files\parameters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\parameters\ServerOptions.cpp">
+      <Filter>Source Files\parameters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\parameters\SyntaxOptions.cpp">
+      <Filter>Source Files\parameters</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\SCFG\ActiveChart.cpp">
+      <Filter>Source Files\SCFG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\SCFG\Hypothesis.cpp">
+      <Filter>Source Files\SCFG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\SCFG\InputPath.cpp">
+      <Filter>Source Files\SCFG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\SCFG\InputPaths.cpp">
+      <Filter>Source Files\SCFG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\SCFG\Manager.cpp">
+      <Filter>Source Files\SCFG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\SCFG\Misc.cpp">
+      <Filter>Source Files\SCFG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\SCFG\PhraseImpl.cpp">
+      <Filter>Source Files\SCFG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\SCFG\Sentence.cpp">
+      <Filter>Source Files\SCFG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\SCFG\Stack.cpp">
+      <Filter>Source Files\SCFG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\SCFG\Stacks.cpp">
+      <Filter>Source Files\SCFG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\SCFG\TargetPhraseImpl.cpp">
+      <Filter>Source Files\SCFG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\SCFG\TargetPhrases.cpp">
+      <Filter>Source Files\SCFG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\SCFG\Word.cpp">
+      <Filter>Source Files\SCFG</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\server\Server.cpp">
+      <Filter>Source Files\server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\server\TranslationRequest.cpp">
+      <Filter>Source Files\server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\server\Translator.cpp">
+      <Filter>Source Files\server</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\AlignmentInfo.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\AlignmentInfoCollection.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\ArcLists.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\EstimatedScores.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\HypothesisBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\HypothesisColl.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\InputPathBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\InputPathsBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\InputType.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\Main.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\ManagerBase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\MemPool.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\Phrase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\pugixml.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\Recycler.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\Scores.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\SubPhrase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\System.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\TargetPhrase.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\TranslationTask.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\TrellisPaths.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\TypeDef.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\Vector.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\Weights.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\Word.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\scoped.cc">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\TranslationModel\Memory\PhraseTableMemory.cpp">
+      <Filter>Source Files\TranslationModel\Memory</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\TranslationModel\PhraseTable.cpp">
+      <Filter>Source Files\TranslationModel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\TranslationModel\Transliteration.cpp">
+      <Filter>Source Files\TranslationModel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\TranslationModel\UnknownWordPenalty.cpp">
+      <Filter>Source Files\TranslationModel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\LexicalReordering\BidirectionalReorderingState.cpp">
+      <Filter>Source Files\FF\LexicalReordering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\LexicalReordering\HReorderingBackwardState.cpp">
+      <Filter>Source Files\FF\LexicalReordering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\LexicalReordering\HReorderingForwardState.cpp">
+      <Filter>Source Files\FF\LexicalReordering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\LexicalReordering\LexicalReordering.cpp">
+      <Filter>Source Files\FF\LexicalReordering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\LexicalReordering\LRModel.cpp">
+      <Filter>Source Files\FF\LexicalReordering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\LexicalReordering\LRState.cpp">
+      <Filter>Source Files\FF\LexicalReordering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\LexicalReordering\PhraseBasedReorderingState.cpp">
+      <Filter>Source Files\FF\LexicalReordering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\LexicalReordering\ReorderingStack.cpp">
+      <Filter>Source Files\FF\LexicalReordering</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\OSM\KenOSM.cpp">
+      <Filter>Source Files\FF\OSM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\OSM\OpSequenceModel.cpp">
+      <Filter>Source Files\FF\OSM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\OSM\osmHyp.cpp">
+      <Filter>Source Files\FF\OSM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\file.cc">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\file_piece.cc">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\mmap.cc">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\parallel_read.cc">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\read_compressed.cc">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\string_piece.cc">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\Hypothesis.cpp">
+      <Filter>Source Files\PhraseBased</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\InputPath.cpp">
+      <Filter>Source Files\PhraseBased</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\InputPaths.cpp">
+      <Filter>Source Files\PhraseBased</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\Manager.cpp">
+      <Filter>Source Files\PhraseBased</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\PhraseImpl.cpp">
+      <Filter>Source Files\PhraseBased</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\ReorderingConstraint.cpp">
+      <Filter>Source Files\PhraseBased</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\Search.cpp">
+      <Filter>Source Files\PhraseBased</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\Sentence.cpp">
+      <Filter>Source Files\PhraseBased</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\TargetPhraseImpl.cpp">
+      <Filter>Source Files\PhraseBased</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\TargetPhrases.cpp">
+      <Filter>Source Files\PhraseBased</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\TrellisPath.cpp">
+      <Filter>Source Files\PhraseBased</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\lm\bhiksha.cc">
+      <Filter>Source Files\lm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\lm\binary_format.cc">
+      <Filter>Source Files\lm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\lm\config.cc">
+      <Filter>Source Files\lm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\lm\lm_exception.cc">
+      <Filter>Source Files\lm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\lm\model.cc">
+      <Filter>Source Files\lm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\lm\quantize.cc">
+      <Filter>Source Files\lm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\lm\read_arpa.cc">
+      <Filter>Source Files\lm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\lm\search_hashed.cc">
+      <Filter>Source Files\lm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\lm\search_trie.cc">
+      <Filter>Source Files\lm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\lm\sizes.cc">
+      <Filter>Source Files\lm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\lm\trie.cc">
+      <Filter>Source Files\lm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\lm\trie_sort.cc">
+      <Filter>Source Files\lm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\lm\value_build.cc">
+      <Filter>Source Files\lm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\lm\virtual_interface.cc">
+      <Filter>Source Files\lm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\lm\vocab.cc">
+      <Filter>Source Files\lm</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\ersatz_progress.cc">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\util\bit_packing.cc">
+      <Filter>Source Files\util</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\Normal\Search.cpp">
+      <Filter>Source Files\PhraseBased\Normal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\Normal\Stack.cpp">
+      <Filter>Source Files\PhraseBased\Normal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\Normal\Stacks.cpp">
+      <Filter>Source Files\PhraseBased\Normal</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\CubePruningMiniStack\Misc.cpp">
+      <Filter>Source Files\PhraseBased\CubePruningMiniStack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\CubePruningMiniStack\Search.cpp">
+      <Filter>Source Files\PhraseBased\CubePruningMiniStack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\CubePruningMiniStack\Stack.cpp">
+      <Filter>Source Files\PhraseBased\CubePruningMiniStack</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\LM\GPULM.cpp">
+      <Filter>Source Files\Moses2LM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\LM\KENLM.cpp">
+      <Filter>Source Files\Moses2LM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\LM\KENLMBatch.cpp">
+      <Filter>Source Files\Moses2LM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\LM\LanguageModel.cpp">
+      <Filter>Source Files\Moses2LM</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\SCFG\nbest\KBestExtractor.cpp">
+      <Filter>Source Files\SCFG\nbest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\SCFG\nbest\NBest.cpp">
+      <Filter>Source Files\SCFG\nbest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\SCFG\nbest\NBestColl.cpp">
+      <Filter>Source Files\SCFG\nbest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\SCFG\nbest\NBests.cpp">
+      <Filter>Source Files\SCFG\nbest</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\TranslationModel\ProbingPT.cpp">
+      <Filter>Source Files\TranslationModel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\probingpt\querying.cpp">
+      <Filter>Source Files\ProbingPT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\probingpt\storing.cpp">
+      <Filter>Source Files\ProbingPT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\probingpt\vocabid.cpp">
+      <Filter>Source Files\ProbingPT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\probingpt\util.cpp">
+      <Filter>Source Files\ProbingPT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\probingpt\probing_hash_utils.cpp">
+      <Filter>Source Files\ProbingPT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\probingpt\InputFileStream.cpp">
+      <Filter>Source Files\ProbingPT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\probingpt\hash.cpp">
+      <Filter>Source Files\ProbingPT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\ExampleStatefulFF.cpp">
+      <Filter>Source Files\FF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\..\moses2\FF\ExampleStatelessFF.cpp">
+      <Filter>Source Files\FF</Filter>
+    </ClCompile>
+  </ItemGroup>
+</Project>

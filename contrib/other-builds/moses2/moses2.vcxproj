@@ -1,0 +1,327 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" ToolsVersion="14.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <ProjectGuid>{B4304E97-D37F-4022-BD03-841A4FAEE398}</ProjectGuid>
+    <Keyword>Win32Proj</Keyword>
+    <RootNamespace>moses2</RootNamespace>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v140</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v120</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="PropertySheets">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <LinkIncremental>true</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LinkIncremental>false</LinkIncremental>
+  </PropertyGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\;$(SolutionDir)\..\..\..\..\xmlrpc-c\include\;$(SolutionDir)\..\..\..\..\boost_1_55_0\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <WarningLevel>Level3</WarningLevel>
+      <Optimization>Disabled</Optimization>
+      <PreprocessorDefinitions>NO_COMPACT_TABLES;HAVE_CMPHXXX;MAX_NUM_FACTORS=4;KENLM_MAX_ORDER=6;_USE_MATH_DEFINES;NOMINMAX;WITH_THREADS;NO_PIPES;_WIN32;WIN32;_DEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\..\cmph-2.0\src;$(SolutionDir)\..\..\..\..\zlib-1.2.8;$(SolutionDir)\..\..\..\..\xmlrpc-c\include\;$(SolutionDir)\..\..\..\..\mman-win32\;$(SolutionDir)\..\..\..\..\boost_1_56_0\;$(SolutionDir)\..\..\..\moses2\;$(SolutionDir)\..\..\..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <ObjectFileName>$(IntDir)\%(RelativeDir)\%(Filename).obj</ObjectFileName>
+      <SuppressStartupBanner>false</SuppressStartupBanner>
+      <ShowIncludes>false</ShowIncludes>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\..\..\..\xmlrpc-c\bin\Release-Static-x64;$(SolutionDir)\..\..\..\..\zlib-1.2.8\contrib\vstudio\vc11\x64\ZlibDllRelease;$(SolutionDir)\..\..\..\..\mman-win32\x64\Release;$(SolutionDir)\..\..\..\..\cmph-2.0\visualstudio2013\x64\Release;$(SolutionDir)\..\..\..\..\boost_1_56_0\lib64-msvc-12.0\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libxmlrpc.lib;libxmlrpc_server_abyss.lib;libxmlrpc_server.lib;libxmlrpc_abyss.lib;libxmlrpc_util.lib;libxmlrpc_xmlparse.lib;libxmlrpc_xmltok.lib;libxmlrpc++.lib;zlibwapi.lib;mman.lib;cmph.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <PrecompiledHeader>
+      </PrecompiledHeader>
+      <Optimization>MaxSpeed</Optimization>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <PreprocessorDefinitions>NO_COMPACT_TABLES;HAVE_CMPHXXX;MAX_NUM_FACTORS=4;KENLM_MAX_ORDER=6;_USE_MATH_DEFINES;NOMINMAX;WITH_THREADS;NO_PIPES;_WIN32;WIN32;NDEBUG;_CONSOLE;_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <AdditionalIncludeDirectories>$(SolutionDir)\..\..\..\..\cmph-2.0\src;$(SolutionDir)\..\..\..\..\zlib-1.2.8;$(SolutionDir)\..\..\..\..\xmlrpc-c\include\;$(SolutionDir)\..\..\..\..\mman-win32\;$(SolutionDir)\..\..\..\..\boost_1_56_0\;$(SolutionDir)\..\..\..\moses2\;$(SolutionDir)\..\..\..\;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
+      <ObjectFileName>$(IntDir)\%(RelativeDir)\%(Filename).obj</ObjectFileName>
+      <ShowIncludes>false</ShowIncludes>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <AdditionalLibraryDirectories>$(SolutionDir)\..\..\..\..\xmlrpc-c\bin\Release-Static-x64;$(SolutionDir)\..\..\..\..\zlib-1.2.8\contrib\vstudio\vc11\x64\ZlibDllRelease;$(SolutionDir)\..\..\..\..\mman-win32\x64\Release;$(SolutionDir)\..\..\..\..\cmph-2.0\visualstudio2013\x64\Release;$(SolutionDir)\..\..\..\..\boost_1_56_0\lib64-msvc-12.0\</AdditionalLibraryDirectories>
+      <AdditionalDependencies>libxmlrpc.lib;libxmlrpc_server_abyss.lib;libxmlrpc_server.lib;libxmlrpc_abyss.lib;libxmlrpc_util.lib;libxmlrpc_xmlparse.lib;libxmlrpc_xmltok.lib;libxmlrpc++.lib;zlibwapi.lib;mman.lib;cmph.lib;%(AdditionalDependencies)</AdditionalDependencies>
+    </Link>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClCompile Include="..\..\..\..\lm\bhiksha.cc" />
+    <ClCompile Include="..\..\..\..\lm\binary_format.cc" />
+    <ClCompile Include="..\..\..\..\lm\config.cc" />
+    <ClCompile Include="..\..\..\..\lm\lm_exception.cc" />
+    <ClCompile Include="..\..\..\..\lm\model.cc" />
+    <ClCompile Include="..\..\..\..\lm\quantize.cc" />
+    <ClCompile Include="..\..\..\..\lm\read_arpa.cc" />
+    <ClCompile Include="..\..\..\..\lm\search_hashed.cc" />
+    <ClCompile Include="..\..\..\..\lm\search_trie.cc" />
+    <ClCompile Include="..\..\..\..\lm\sizes.cc" />
+    <ClCompile Include="..\..\..\..\lm\trie.cc" />
+    <ClCompile Include="..\..\..\..\lm\trie_sort.cc" />
+    <ClCompile Include="..\..\..\..\lm\value_build.cc" />
+    <ClCompile Include="..\..\..\..\lm\virtual_interface.cc" />
+    <ClCompile Include="..\..\..\..\lm\vocab.cc" />
+    <ClCompile Include="..\..\..\..\moses2\FF\ExampleStatefulFF.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\ExampleStatelessFF.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\LexicalReordering\BidirectionalReorderingState.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\LexicalReordering\HReorderingBackwardState.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\LexicalReordering\HReorderingForwardState.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\LexicalReordering\LexicalReordering.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\LexicalReordering\LRModel.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\LexicalReordering\LRState.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\LexicalReordering\PhraseBasedReorderingState.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\LexicalReordering\ReorderingStack.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\OSM\KenOSM.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\OSM\OpSequenceModel.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\OSM\osmHyp.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\LM\GPULM.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\LM\KENLM.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\LM\KENLMBatch.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\LM\LanguageModel.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\CubePruningMiniStack\Misc.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\CubePruningMiniStack\Search.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\CubePruningMiniStack\Stack.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\Hypothesis.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\InputPath.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\InputPaths.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\Manager.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\Normal\Search.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\Normal\Stack.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\Normal\Stacks.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\PhraseImpl.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\ReorderingConstraint.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\Search.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\Sentence.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\TargetPhraseImpl.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\TargetPhrases.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\PhraseBased\TrellisPath.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\SCFG\nbest\KBestExtractor.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\SCFG\nbest\NBest.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\SCFG\nbest\NBestColl.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\SCFG\nbest\NBests.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\TranslationModel\Memory\PhraseTableMemory.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\TranslationModel\PhraseTable.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\TranslationModel\ProbingPT.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\TranslationModel\Transliteration.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\TranslationModel\UnknownWordPenalty.cpp" />
+    <ClCompile Include="..\..\..\..\probingpt\hash.cpp" />
+    <ClCompile Include="..\..\..\..\probingpt\InputFileStream.cpp" />
+    <ClCompile Include="..\..\..\..\probingpt\probing_hash_utils.cpp" />
+    <ClCompile Include="..\..\..\..\probingpt\querying.cpp" />
+    <ClCompile Include="..\..\..\..\probingpt\storing.cpp" />
+    <ClCompile Include="..\..\..\..\probingpt\util.cpp" />
+    <ClCompile Include="..\..\..\..\probingpt\vocabid.cpp" />
+    <ClCompile Include="..\..\..\..\util\bit_packing.cc" />
+    <ClCompile Include="..\..\..\..\util\double-conversion\bignum-dtoa.cc" />
+    <ClCompile Include="..\..\..\..\util\double-conversion\bignum.cc" />
+    <ClCompile Include="..\..\..\..\util\double-conversion\cached-powers.cc" />
+    <ClCompile Include="..\..\..\..\util\double-conversion\diy-fp.cc" />
+    <ClCompile Include="..\..\..\..\util\double-conversion\double-conversion.cc" />
+    <ClCompile Include="..\..\..\..\util\double-conversion\fast-dtoa.cc" />
+    <ClCompile Include="..\..\..\..\util\double-conversion\fixed-dtoa.cc" />
+    <ClCompile Include="..\..\..\..\util\double-conversion\strtod.cc" />
+    <ClCompile Include="..\..\..\..\util\ersatz_progress.cc" />
+    <ClCompile Include="..\..\..\..\util\exception.cc" />
+    <ClCompile Include="..\..\..\..\util\file.cc" />
+    <ClCompile Include="..\..\..\..\util\file_piece.cc" />
+    <ClCompile Include="..\..\..\..\util\float_to_string.cc" />
+    <ClCompile Include="..\..\..\..\util\integer_to_string.cc" />
+    <ClCompile Include="..\..\..\..\util\mmap.cc" />
+    <ClCompile Include="..\..\..\..\util\murmur_hash.cc" />
+    <ClCompile Include="..\..\..\..\util\parallel_read.cc" />
+    <ClCompile Include="..\..\..\..\util\pool.cc" />
+    <ClCompile Include="..\..\..\..\util\random.cc" />
+    <ClCompile Include="..\..\..\..\util\read_compressed.cc" />
+    <ClCompile Include="..\..\..\..\util\scoped.cc" />
+    <ClCompile Include="..\..\..\..\util\string_piece.cc" />
+    <ClCompile Include="..\..\..\..\util\usage.cc" />
+    <ClCompile Include="..\..\..\..\moses2\AlignmentInfo.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\AlignmentInfoCollection.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\ArcLists.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\EstimatedScores.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\Distortion.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\FeatureFunction.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\FeatureFunctions.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\FeatureRegistry.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\FFState.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\PhrasePenalty.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\PointerState.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\StatefulFeatureFunction.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\StatelessFeatureFunction.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\FF\WordPenalty.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\HypothesisBase.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\HypothesisColl.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\InputPathBase.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\InputPathsBase.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\InputType.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\legacy\Bitmap.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\legacy\Bitmaps.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\legacy\Factor.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\legacy\FactorCollection.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\legacy\InputFileStream.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\legacy\Matrix.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\legacy\OutputFileStream.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\legacy\Parameter.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\legacy\Range.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\legacy\ThreadPool.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\legacy\Timer.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\legacy\Util2.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\Main.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\ManagerBase.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\MemPool.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\parameters\AllOptions.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\parameters\BookkeepingOptions.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\parameters\ContextParameters.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\parameters\CubePruningOptions.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\parameters\InputOptions.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\parameters\LMBR_Options.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\parameters\MBR_Options.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\parameters\NBestOptions.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\parameters\OOVHandlingOptions.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\parameters\OptionsBaseClass.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\parameters\ReorderingOptions.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\parameters\ReportingOptions.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\parameters\SearchOptions.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\parameters\ServerOptions.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\parameters\SyntaxOptions.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\Phrase.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\pugixml.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\Recycler.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\SCFG\ActiveChart.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\SCFG\Hypothesis.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\SCFG\InputPath.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\SCFG\InputPaths.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\SCFG\Manager.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\SCFG\Misc.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\SCFG\PhraseImpl.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\SCFG\Sentence.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\SCFG\Stack.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\SCFG\Stacks.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\SCFG\TargetPhraseImpl.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\SCFG\TargetPhrases.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\SCFG\Word.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\Scores.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\server\Server.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\server\TranslationRequest.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\server\Translator.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\SubPhrase.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\System.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\TargetPhrase.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\TranslationTask.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\TrellisPaths.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\TypeDef.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\Vector.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\Weights.cpp" />
+    <ClCompile Include="..\..\..\..\moses2\Word.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

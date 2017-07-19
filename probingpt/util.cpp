@@ -1,3 +1,4 @@
+#include <cctype>
 #include "util.h"
 #include "util/exception.hh"
 
