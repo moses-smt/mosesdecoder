@@ -423,8 +423,13 @@ LoadDecodeGraphsOld(const vector<string> &mappingVector,
     if (m_decodeGraphs.size() < decodeGraphInd + 1) {
       DecodeGraph *decodeGraph;
       if (is_syntax(m_options->search.algo)) {
-        size_t maxChartSpan = (decodeGraphInd < maxChartSpans.size()) ? maxChartSpans[decodeGraphInd] : DEFAULT_MAX_CHART_SPAN;
-        VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
+        size_t maxChartSpan;
+        if (decodeGraphInd < maxChartSpans.size()) {
+          maxChartSpan = maxChartSpans[decodeGraphInd];
+          VERBOSE(1,"max-chart-span: " << maxChartSpans[decodeGraphInd] << endl);
+        } else {
+          maxChartSpan = DEFAULT_MAX_CHART_SPAN;
+        }
         decodeGraph = new DecodeGraph(m_decodeGraphs.size(), maxChartSpan);
       } else {
         decodeGraph = new DecodeGraph(m_decodeGraphs.size());

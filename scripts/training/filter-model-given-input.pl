@@ -228,7 +228,7 @@ while ( my $line = <INI> ) {
                 $phrase_table_impl = "PhraseDictionaryOnDisk";
                 @toks = set_value( \@toks, "path", "$new_name.bin$table_flag" );
             }
-            elsif ( $binarizer =~ /CreateProbingPT2/ ) {
+            elsif ( $binarizer =~ /CreateProbingPT/ ) {
                 $phrase_table_impl = "ProbingPT";
                 @toks = set_value( \@toks, "path", "$new_name.probing$table_flag" );
             }
@@ -488,7 +488,7 @@ for ( my $i = 0 ; $i <= $#TABLE ; $i++ ) {
                 my $cmd = "$binarizer $mid_file $new_file.bin";
                 safesystem($cmd) or die "Can't binarize";
             }
-            elsif ( $binarizer =~ /CreateProbingPT2/ ) {
+            elsif ( $binarizer =~ /CreateProbingPT/ ) {
                 my $cmd = "$binarizer --input-pt $mid_file --output-dir $new_file.probing";
                 if ($opt_hierarchical) {
 		    $cmd .= " --scfg";
@@ -509,8 +509,8 @@ for ( my $i = 0 ; $i <= $#TABLE ; $i++ ) {
             if ( $binarizer =~ /CreateOnDiskPt/ ) {
                 $lexbin =~ s/CreateOnDiskPt/processLexicalTable/;
             }
-            elsif ( $binarizer =~ /CreateProbingPT2/ ) {
-                $lexbin =~ s/CreateProbingPT2/processLexicalTableMin/;
+            elsif ( $binarizer =~ /CreateProbingPT/ ) {
+                $lexbin =~ s/CreateProbingPT/processLexicalTableMin/;
             }
 
             $lexbin =~ s/PhraseTable/LexicalTable/;

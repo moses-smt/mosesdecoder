@@ -64,22 +64,29 @@ class BleuScore:
         self.lower = None
         self.upper = None
         self.median = None
-        self.bootstrap = [
-            self.score([randint(0, len(hyp.snt) - 1) for s in hyp.snt])
-            for i in xrange(1000)]
-        self.bootstrap.sort()
         self.actual = self.score([i for i in xrange(len(hyp.snt))])
+        if bootstrap:
+            self.bootstrap = [self.score([randint(0, len(hyp.snt) - 1)
+                                          for s in hyp.snt])
+                              for i in xrange(bootstrap)]
+            self.bootstrap.sort()
+        else:
+            self.bootstrap = [self.actual]
+            pass
 
     def score(self, sample):
         hits = [0 for i in xrange(self.max_n)]
         self.hyplen = 0
         self.reflen = 0
+        self.total = [0 for i in hits]
         for i in sample:
             self.hyplen += len(self.hyp.snt[i])
             self.reflen += len(self.ref.snt[i])
             for n in xrange(self.max_n):
                 hits[n] += self.hits[i][n]
-        self.prec = [float(hits[n]) / (self.hyplen - n * len(sample))
+                self.total[n] += max(len(self.hyp.snt[i]) - n, 0)
+                pass
+        self.prec = [float(hits[n]) / self.total[n]
                      for n in xrange(self.max_n)]
         ret = sum([math.log(x) for x in self.prec]) / self.max_n
         self.BP = min(

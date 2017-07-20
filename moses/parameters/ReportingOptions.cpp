@@ -128,11 +128,17 @@ namespace Moses {
       for (size_t i = 0; i < MAX_NUM_FACTORS; ++i)
         factor_order.push_back(i);
     }
+
+    m = param.find("no-ReportSegmentation");
+    if (m == param.end() || !Scan<bool>(xmlrpc_c::value_string(m->second))) {
+
+      // If we are reporting alignment info, turn on ReportSegmentation, unless XML request explicitly says not to
+      m = param.find("align");
+      if (m != param.end() && Scan<bool>(xmlrpc_c::value_string(m->second)))
+        ReportSegmentation = 1;
     
-    m = param.find("align");
-    if (m != param.end() && Scan<bool>(xmlrpc_c::value_string(m->second)))
-      ReportSegmentation = 1;
-    
+    }
+
     PrintAlignmentInfo = check(param,"word-align",PrintAlignmentInfo);
 
     m = param.find("factor-delimiter");

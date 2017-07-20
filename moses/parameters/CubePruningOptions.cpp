@@ -72,6 +72,11 @@ namespace Moses
 
       return true;
     }
+#else
+    bool 
+    CubePruningOptions::
+    update(std::map<std::string,xmlrpc_c::value>const& params)
+    {}
 #endif
 
 

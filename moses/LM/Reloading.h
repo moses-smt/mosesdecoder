@@ -35,113 +35,48 @@ namespace Moses
 {
 
 class FFState;
-
-//LanguageModel *ConstructReloadingLM(const std::string &line);
-//LanguageModel *ConstructReloadingLM(const std::string &line, const std::string &file, FactorType factorType, bool lazy);
-/*
- namespace {
-class MappingBuilder : public lm::EnumerateVocab
-{
-public:
-  MappingBuilder(FactorCollection &factorCollection, std::vector<lm::WordIndex> &mapping)
-    : m_factorCollection(factorCollection), m_mapping(mapping) {}
-
-  void Add(lm::WordIndex index, const StringPiece &str) {
-    std::size_t factorId = m_factorCollection.AddFactor(str)->GetId();
-    if (m_mapping.size() <= factorId) {
-      // 0 is <unk> :-)
-      m_mapping.resize(factorId + 1);
-    }
-    m_mapping[factorId] = index;
-  }
-
-private:
-  FactorCollection &m_factorCollection;
-  std::vector<lm::WordIndex> &m_mapping;
-};
- }
-*/
 template <class Model> class ReloadingLanguageModel : public LanguageModelKen<Model>
 {
 public:
-  // TODO(Lane) copy less code, update to load_method
+
   ReloadingLanguageModel(const std::string &line, const std::string &file, FactorType factorType, bool lazy) : LanguageModelKen<Model>(line, file, factorType, lazy ? util::LAZY : util::POPULATE_OR_READ), m_file(file), m_lazy(lazy) {
 
-    std::cerr << "ReloadingLM constructor: " << m_file << std::endl;
-    //    std::cerr << std::string(line).replace(0,11,"KENLM") << std::endl;
+    VERBOSE(1, "ReloadingLM constructor: " << m_file << std::endl);
 
   }
 
   virtual void InitializeForInput(ttasksptr const& ttask) {
-    std::cerr << "ReloadingLM InitializeForInput" << std::endl;
-    // TODO(lane): load_method
-    LanguageModelKen<Model>::LoadModel(m_file, m_lazy ? util::LAZY : util::POPULATE_OR_READ);
-    /*
-    lm::ngram::Config config;
-    if(this->m_verbosity >= 1) {
-      config.messages = &std::cerr;
-    } else {
-      config.messages = NULL;
+    VERBOSE(1, "ReloadingLM InitializeForInput" << std::endl);
+
+    // The context scope object for this translation task
+    //     contains a map of translation task-specific data
+    boost::shared_ptr<Moses::ContextScope> contextScope = ttask->GetScope();
+
+    // The key to the map is this object
+    void const* key = static_cast<void const*>(this);
+
+    // The value stored in the map is a string representing a phrase table
+    boost::shared_ptr<string> value = contextScope->get<string>(key);
+
+    // Create a stream to read the phrase table data
+    stringstream strme(*(value.get()));
+
+    ofstream tmp;
+    tmp.open(m_file.c_str());
+
+    // Read the phrase table data, one line at a time
+    string line;
+    while (getline(strme, line)) {
+
+      tmp << line << "\n";
+
     }
-    FactorCollection &collection = FactorCollection::Instance();
-    MappingBuilder builder(collection, m_lmIdLookup);
-    config.enumerate_vocab = &builder;
-    config.load_method = m_lazy ? util::LAZY : util::POPULATE_OR_READ;
 
-    m_ngram.reset(new Model(m_file.c_str(), config));
+    tmp.close();
 
-    m_beginSentenceFactor = collection.AddFactor(BOS_);
-    */
+    LanguageModelKen<Model>::LoadModel(m_file, m_lazy ? util::LAZY : util::POPULATE_OR_READ);
   };
 
-  /*
-  ReloadingLanguageModel(const std::string &line) : LanguageModelKen<Model>(ConstructKenLM(std::string(line).replace(0,11,"KENLM"))) {
-    std::cerr << "ReloadingLM constructor" << std::endl;
-    std::cerr << std::string(line).replace(0,11,"KENLM") << std::endl;
-  }
-  */
-  /*
-  ~ReloadingLanguageModel() {
-    delete m_lm;
-  }
-
-  virtual const FFState *EmptyHypothesisState(const InputType &input) const {
-    return m_lm->EmptyHypothesisState(input);
-  }
-
-  virtual void CalcScore(const Phrase &phrase, float &fullScore, float &ngramScore, size_t &oovCount) const {
-    m_lm->CalcScore(phrase, fullScore, ngramScore, oovCount);
-  }
-
-  virtual FFState *EvaluateWhenApplied(const Hypothesis &hypo, const FFState *ps, ScoreComponentCollection *out) const {
-    return m_lm->EvaluateWhenApplied(hypo, ps, out);
-  }
-
-  virtual FFState *EvaluateWhenApplied(const ChartHypothesis& cur_hypo, int featureID, ScoreComponentCollection *accumulator) const {
-    return m_lm->EvaluateWhenApplied(cur_hypo, featureID, accumulator);
-  }
-
-  virtual FFState *EvaluateWhenApplied(const Syntax::SHyperedge& hyperedge, int featureID, ScoreComponentCollection *accumulator) const {
-    return m_lm->EvaluateWhenApplied(hyperedge, featureID, accumulator);
-  }
-
-  virtual void IncrementalCallback(Incremental::Manager &manager) const {
-    m_lm->IncrementalCallback(manager);
-  }
-
-  virtual void ReportHistoryOrder(std::ostream &out,const Phrase &phrase) const {
-    m_lm->ReportHistoryOrder(out, phrase);
-  }
-
-  virtual bool IsUseable(const FactorMask &mask) const {
-    return m_lm->IsUseable(mask);
-  }
-
-
-  private:
-
-  LanguageModel *m_lm;
-  */
 
 protected:
 

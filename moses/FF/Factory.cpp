@@ -15,8 +15,9 @@
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryOnDisk.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryFuzzyMatch.h"
 #include "moses/TranslationModel/RuleTable/PhraseDictionaryALSuffixArray.h"
-#include "moses/TranslationModel/ProbingPT/ProbingPT.h"
+#include "moses/TranslationModel/ProbingPT.h"
 #include "moses/TranslationModel/PhraseDictionaryMemoryPerSentence.h"
+#include "moses/TranslationModel/PhraseDictionaryMemoryPerSentenceOnDemand.h"
 
 #include "moses/FF/LexicalReordering/LexicalReordering.h"
 
@@ -65,15 +66,16 @@
 #include "SyntaxRHS.h"
 #include "DeleteRules.h"
 
-#include "moses/FF/SkeletonStatelessFF.h"
-#include "moses/FF/SkeletonStatefulFF.h"
-#include "moses/LM/SkeletonLM.h"
-#include "moses/FF/SkeletonTranslationOptionListFeature.h"
+#include "moses/FF/ExampleStatelessFF.h"
+#include "moses/FF/ExampleStatefulFF.h"
+#include "moses/LM/ExampleLM.h"
+#include "moses/FF/ExampleTranslationOptionListFeature.h"
 #include "moses/LM/BilingualLM.h"
-#include "moses/TranslationModel/SkeletonPT.h"
+#include "moses/TranslationModel/ExamplePT.h"
 #include "moses/Syntax/InputWeightFF.h"
 #include "moses/Syntax/RuleTableFF.h"
 
+#include "moses/LM/InMemoryPerSentenceOnDemandLM.h"
 #include "moses/FF/EditOps.h"
 #include "moses/FF/CorrectionPattern.h"
 
@@ -246,6 +248,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(PhraseDictionaryFuzzyMatch);
   MOSES_FNAME(ProbingPT);
   MOSES_FNAME(PhraseDictionaryMemoryPerSentence);
+  MOSES_FNAME(PhraseDictionaryMemoryPerSentenceOnDemand);
   MOSES_FNAME2("RuleTable", Syntax::RuleTableFF);
   MOSES_FNAME2("SyntaxInputWeight", Syntax::InputWeightFF);
 
@@ -296,12 +299,13 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(UnalignedWordCountFeature);
   MOSES_FNAME(DeleteRules);
 
-  MOSES_FNAME(SkeletonStatelessFF);
-  MOSES_FNAME(SkeletonStatefulFF);
-  MOSES_FNAME(SkeletonLM);
-  MOSES_FNAME(SkeletonTranslationOptionListFeature);
-  MOSES_FNAME(SkeletonPT);
+  MOSES_FNAME(ExampleStatelessFF);
+  MOSES_FNAME(ExampleStatefulFF);
+  MOSES_FNAME(ExampleLM);
+  MOSES_FNAME(ExampleTranslationOptionListFeature);
+  MOSES_FNAME(ExamplePT);
 
+  MOSES_FNAME(InMemoryPerSentenceOnDemandLM);
   MOSES_FNAME(EditOps);
   MOSES_FNAME(CorrectionPattern);
 

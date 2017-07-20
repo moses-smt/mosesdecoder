@@ -346,7 +346,7 @@ static void GetBestHypothesis(size_t vertexId, const Graph& graph, const vector<
 
 void Viterbi(const Graph& graph, const SparseVector& weights, float bleuWeight, const ReferenceSet& references , size_t sentenceId, const std::vector<FeatureStatsType>& backgroundBleu,  HgHypothesis* bestHypo)
 {
-  BackPointer init(NULL,kMinScore);
+  BackPointer init((const Edge*) NULL,kMinScore);
   vector<BackPointer> backPointers(graph.VertexSize(),init);
   HgBleuScorer bleuScorer(references, graph, sentenceId, backgroundBleu);
   vector<FeatureStatsType> winnerStats(kBleuNgramOrder*2+1);
