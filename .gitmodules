@@ -4,6 +4,3 @@
 [submodule "contrib/omtc/omtc"]
 	path = contrib/omtc/omtc
 	url = https://github.com/ianj-als/omtc.git
-[submodule "regtest"]
-        path = regtest
-   	url = https://github.com/moses-smt/moses-regression-tests
