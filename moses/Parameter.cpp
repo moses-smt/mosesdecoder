@@ -793,6 +793,9 @@ ConvertWeightArgsPhraseModel(const string &oldWeightName)
       case 15: // DCacheBased:
         ptType = "PhraseDictionaryDynamicCacheBased";
         break;
+      case 16: // CachePT:
+        ptType = "PhraseDictionaryCache";
+        break;
       default:
         break;
       }

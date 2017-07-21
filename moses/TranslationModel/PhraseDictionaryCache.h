@@ -19,11 +19,12 @@
 
 #pragma once
 
-#ifndef moses_PhraseDictionaryDynamicCacheBased_H
-#define moses_PhraseDictionaryDynamicCacheBased_H
+#ifndef moses_PhraseDictionaryCache_H
+#define moses_PhraseDictionaryCache_H
 
 #include "moses/TypeDef.h"
 #include "moses/TranslationModel/PhraseDictionary.h"
+#include "moses/TranslationTask.h"
 
 #include <boost/tuple/tuple.hpp>
 #include <boost/tuple/tuple_io.hpp>
@@ -49,24 +50,24 @@ namespace Moses
 class ChartParser;
 class ChartCellCollectionBase;
 class ChartRuleLookupManager;
+class TranslationTask;
+class PhraseDictionary;
 
 /** Implementation of a Cache-based phrase table.
  */
-class PhraseDictionaryDynamicCacheBased : public PhraseDictionary
+class PhraseDictionaryCache : public PhraseDictionary
 {
 
-//  typedef std::vector<unsigned int> AgeCollection;
-  typedef std::vector<unsigned int> AgeCollection;
-  typedef boost::tuple<TargetPhraseCollection::shared_ptr , AgeCollection*, Scores*> TargetCollectionPair;
-  typedef std::map<Phrase, TargetCollectionPair> cacheMap;
+  typedef std::pair<TargetPhraseCollection::shared_ptr, Scores*> TargetCollectionPair;
+  typedef boost::unordered_map<Phrase, TargetCollectionPair> cacheMap;
+  typedef std::map<long, cacheMap> sentCacheMap;
 
   // factored translation
   std::vector<FactorType> m_inputFactorsVec, m_outputFactorsVec;
 
   // data structure for the cache
-  cacheMap m_cacheTM;
-  std::vector<Scores> precomputedScores;
-  unsigned int m_maxAge;
+  sentCacheMap m_cacheTM;
+  long m_sentences;
   unsigned int m_numscorecomponent;
   size_t m_score_type; //scoring type of the match
   size_t m_entries; //total number of entries in the cache
@@ -80,11 +81,11 @@ class PhraseDictionaryDynamicCacheBased : public PhraseDictionary
   mutable boost::shared_mutex m_cacheLock;
 #endif
 
-  friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryDynamicCacheBased&);
+  friend std::ostream& operator<<(std::ostream&, const PhraseDictionaryCache&);
 
 public:
-  PhraseDictionaryDynamicCacheBased(const std::string &line);
-  ~PhraseDictionaryDynamicCacheBased();
+  PhraseDictionaryCache(const std::string &line);
+  ~PhraseDictionaryCache();
 
   inline const std::string GetName() {
     return m_name;
@@ -93,14 +94,14 @@ public:
     m_name = name;
   }
 
-  static const PhraseDictionaryDynamicCacheBased* Instance(const std::string& name) {
+  static const PhraseDictionaryCache* Instance(const std::string& name) {
     if (s_instance_map.find(name) == s_instance_map.end()) {
       return NULL;
     }
     return s_instance_map[name];
   }
 
-  static PhraseDictionaryDynamicCacheBased* InstanceNonConst(const std::string& name) {
+  static PhraseDictionaryCache* InstanceNonConst(const std::string& name) {
     if (s_instance_map.find(name) == s_instance_map.end()) {
       return NULL;
     }
@@ -108,28 +109,30 @@ public:
   }
 
 
-  static const PhraseDictionaryDynamicCacheBased& Instance() {
+  static const PhraseDictionaryCache& Instance() {
     return *s_instance;
   }
 
-  static PhraseDictionaryDynamicCacheBased& InstanceNonConst() {
+  static PhraseDictionaryCache& InstanceNonConst() {
     return *s_instance;
   }
 
-  void Load(AllOptions::ptr const& opts);
-  void Load(const std::string files);
-
   TargetPhraseCollection::shared_ptr
-  GetTargetPhraseCollection(const Phrase &src) const;
+    GetTargetPhraseCollectionLEGACY(ttasksptr const& ttask,
+                                    Phrase const& src) const{
+	  GetTargetPhraseCollection(src, ttask->GetSource()->GetTranslationId());
+  }
 
-  TargetPhraseCollection::shared_ptr
-  GetTargetPhraseCollectionLEGACY(Phrase const &src) const;
-
-  TargetPhraseCollection::shared_ptr
-  GetTargetPhraseCollectionNonCacheLEGACY(Phrase const &src) const;
 
   // for phrase-based model
-  //  void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
+  void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
+
+  TargetPhraseCollection::shared_ptr
+  GetTargetPhraseCollection(const Phrase &src, long tID) const;
+
+  void CleanUpAfterSentenceProcessing(const InputType& source);
+  // for phrase-based model
+//  virtual void GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const;
 
   // for syntax/hiero model (CKY+ decoding)
   ChartRuleLookupManager* CreateRuleLookupManager(const ChartParser&, const ChartCellCollectionBase&, std::size_t);
@@ -138,56 +141,36 @@ public:
 
   void InitializeForInput(ttasksptr const& ttask);
 
-  //  virtual void InitializeForInput(InputType const&) {
-  //    /* Don't do anything source specific here as this object is shared between threads.*/
-  //  }
-
   void Print() const;             // prints the cache
   void Clear();           // clears the cache
+  void Clear(long tID);		// clears cache of a sentence
 
-  void ClearEntries(std::string &entries);
-  void ClearSource(std::string &entries);
-  void Insert(std::string &entries);
-  void Execute(std::string command);
-  void ExecuteDlt(std::map<std::string, std::string> dlt_meta);
-
-  void SetScoreType(size_t type);
-  void SetMaxAge(unsigned int age);
+  void Insert(std::string &entries, long tID);
+  void Execute(std::string command, long tID);
+  void ExecuteDlt(std::map<std::string, std::string> dlt_meta, long tID);
 
 protected:
-  static PhraseDictionaryDynamicCacheBased *s_instance;
-  static std::map< const std::string, PhraseDictionaryDynamicCacheBased * > s_instance_map;
 
-  float decaying_score(const int age);  // calculates the decay score given the age
+  static PhraseDictionaryCache *s_instance;
+  static std::map< const std::string, PhraseDictionaryCache * > s_instance_map;
+
   Scores Conv2VecFloats(std::string&);
-  void Insert(std::vector<std::string> entries);
+  void Insert(std::vector<std::string> entries, long tID);
 
-  void Decay();   // traverse through the cache and decay each entry
-  void Decay(Phrase p);   // traverse through the cache and decay each entry for a given Phrase
-  void Update(std::vector<std::string> entries, std::string ageString);
-  void Update(std::string sourceString, std::string targetString, std::string ageString, std::string ScoreString="", std::string waString="");
-  void Update(Phrase p, TargetPhrase tp, int age, Scores scores, std::string waString="");
+  void Update(long tID, std::vector<std::string> entries);
+  void Update(long tID, std::string sourceString, std::string targetString, std::string ScoreString="", std::string waString="");
+  void Update(long tID, Phrase p, TargetPhrase tp, Scores scores, std::string waString="");
 
-  void ClearEntries(std::vector<std::string> entries);
-  void ClearEntries(std::string sourceString, std::string targetString);
-  void ClearEntries(Phrase p, Phrase tp);
-
-  void ClearSource(std::vector<std::string> entries);
-  void ClearSource(Phrase sp);
-
-  void Execute(std::vector<std::string> commands);
+  void Execute(std::vector<std::string> commands, long tID);
   void Execute_Single_Command(std::string command);
 
 
   void SetPreComputedScores(const unsigned int numScoreComponent);
   Scores GetPreComputedScores(const unsigned int age);
 
-  void Load_Multiple_Files(std::vector<std::string> files);
-  void Load_Single_File(const std::string file);
-
   TargetPhrase *CreateTargetPhrase(const Phrase &sourcePhrase) const;
 };
 
 }  // namespace Moses
 
-#endif /* moses_PhraseDictionaryDynamicCacheBased_H_ */
+#endif /* moses_PhraseDictionaryCache_H_ */
