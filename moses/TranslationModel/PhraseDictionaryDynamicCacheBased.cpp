@@ -147,9 +147,9 @@ void PhraseDictionaryDynamicCacheBased::SetParameter(const std::string& key, con
   } else if (key == "cbtm-constant") {
     m_constant = Scan<bool>(value);
   } else if (key == "input-factor") {
-	  m_inputFactorsVec = Tokenize<FactorType>(value,",");
+    m_inputFactorsVec = Tokenize<FactorType>(value,",");
   } else if (key == "output-factor") {
-	  m_outputFactorsVec = Tokenize<FactorType>(value,",");
+    m_outputFactorsVec = Tokenize<FactorType>(value,",");
   } else {
     PhraseDictionary::SetParameter(key, value);
   }
@@ -523,7 +523,7 @@ void PhraseDictionaryDynamicCacheBased::Update(std::vector<std::string> entries,
       VERBOSE(3,"pp[2]:|" << pp[2] << "|" << std::endl);
       VERBOSE(3,"pp[3]:|" << pp[3] << "|" << std::endl);
       Update(pp[0], pp[1], ageString, pp[2], pp[3]);
-    } else if (pp.size() > 2){
+    } else if (pp.size() > 2) {
       VERBOSE(3,"pp[2]:|" << pp[2] << "|" << std::endl);
       Update(pp[0], pp[1], ageString, pp[2]);
     } else {
@@ -532,15 +532,16 @@ void PhraseDictionaryDynamicCacheBased::Update(std::vector<std::string> entries,
   }
 }
 
-Scores PhraseDictionaryDynamicCacheBased::Conv2VecFloats(std::string& s){
-	std::vector<float> n;
-	if (s.empty())
-		return n;
-	std::istringstream iss(s);
-	std::copy(std::istream_iterator<float>(iss),
-	        std::istream_iterator<float>(),
-	        std::back_inserter(n));
-	return n;
+Scores PhraseDictionaryDynamicCacheBased::Conv2VecFloats(std::string& s)
+{
+  std::vector<float> n;
+  if (s.empty())
+    return n;
+  std::istringstream iss(s);
+  std::copy(std::istream_iterator<float>(iss),
+            std::istream_iterator<float>(),
+            std::back_inserter(n));
+  return n;
 }
 
 void PhraseDictionaryDynamicCacheBased::Update(std::string sourcePhraseString, std::string targetPhraseString, std::string ageString, std::string scoreString, std::string waString)
@@ -615,13 +616,13 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, TargetPhrase tp, int a
       std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(tp));
       Scores scoreVec;
       scoreVec.push_back(GetPreComputedScores(age)[0]);
-      for (unsigned int i=0; i<scores.size(); i++){
-    	  scoreVec.push_back(scores[i]);
+      for (unsigned int i=0; i<scores.size(); i++) {
+        scoreVec.push_back(scores[i]);
       }
-      if(scoreVec.size() != m_numScoreComponents){
-    	  VERBOSE(1, "Scores does not match number of score components for phrase : "<< sp.ToString() <<" ||| " << tp.ToString() <<endl);
-    	  VERBOSE(1, "Debugging: Press Enter to continue..." <<endl);
-    	  std::cin.ignore();
+      if(scoreVec.size() != m_numScoreComponents) {
+        VERBOSE(1, "Scores does not match number of score components for phrase : "<< sp.ToString() <<" ||| " << tp.ToString() <<endl);
+        VERBOSE(1, "Debugging: Press Enter to continue..." <<endl);
+        std::cin.ignore();
       }
       targetPhrase->GetScoreBreakdown().Assign(this, scoreVec);
 //      targetPhrase->GetScoreBreakdown().Assign(this, GetPreComputedScores(age));
@@ -635,17 +636,17 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, TargetPhrase tp, int a
       m_entries++;
       VERBOSE(3,"sp:|" << sp << "tp:|" << tp << "| INSERTED" << std::endl);
     } else {
-	  Scores scoreVec;
-	  scoreVec.push_back(GetPreComputedScores(age)[0]);
-	  for (unsigned int i=0; i<scores.size(); i++){
-	 	scoreVec.push_back(scores[i]);
-	  }
-	  if(scoreVec.size() != m_numScoreComponents){
-	 	VERBOSE(1, "Scores does not match number of score components for phrase : "<< sp.ToString() <<" ||| " << tp.ToString() <<endl);
-		VERBOSE(1, "Debugging: Press Enter to continue..." <<endl);
-		std::cin.ignore();
-	  }
-	  tp_ptr->GetScoreBreakdown().Assign(this, scoreVec);
+      Scores scoreVec;
+      scoreVec.push_back(GetPreComputedScores(age)[0]);
+      for (unsigned int i=0; i<scores.size(); i++) {
+        scoreVec.push_back(scores[i]);
+      }
+      if(scoreVec.size() != m_numScoreComponents) {
+        VERBOSE(1, "Scores does not match number of score components for phrase : "<< sp.ToString() <<" ||| " << tp.ToString() <<endl);
+        VERBOSE(1, "Debugging: Press Enter to continue..." <<endl);
+        std::cin.ignore();
+      }
+      tp_ptr->GetScoreBreakdown().Assign(this, scoreVec);
 //      tp_ptr->GetScoreBreakdown().Assign(this, GetPreComputedScores(age));
       if (!waString.empty()) tp_ptr->SetAlignmentInfo(waString);
       ac->at(tp_pos) = age;
@@ -667,13 +668,13 @@ void PhraseDictionaryDynamicCacheBased::Update(Phrase sp, TargetPhrase tp, int a
     // scoreVec is a composition of decay_score and the feature scores
     Scores scoreVec;
     scoreVec.push_back(GetPreComputedScores(age)[0]);
-    for (unsigned int i=0; i<scores.size(); i++){
-    	scoreVec.push_back(scores[i]);
+    for (unsigned int i=0; i<scores.size(); i++) {
+      scoreVec.push_back(scores[i]);
     }
-    if(scoreVec.size() != m_numScoreComponents){
-    	VERBOSE(1, "Scores do not match number of score components for phrase : "<< sp <<" ||| " << tp <<endl);
-    	VERBOSE(1, "Debugging: Press Enter to continue..." <<endl);
-    	std::cin.ignore();
+    if(scoreVec.size() != m_numScoreComponents) {
+      VERBOSE(1, "Scores do not match number of score components for phrase : "<< sp <<" ||| " << tp <<endl);
+      VERBOSE(1, "Debugging: Press Enter to continue..." <<endl);
+      std::cin.ignore();
     }
     targetPhrase->GetScoreBreakdown().Assign(this, scoreVec);
     if (!waString.empty()) targetPhrase->SetAlignmentInfo(waString);
@@ -788,16 +789,16 @@ void PhraseDictionaryDynamicCacheBased::Clear()
 #endif
   cacheMap::iterator it;
   for(it = m_cacheTM.begin(); it!=m_cacheTM.end(); it++) {
-	  // clear age collection
-	  (boost::get<1>((*it).second))->clear();
-	  // clear score collection
-	  (boost::get<2>((*it).second))->clear();
-	  // delete age collection
-	  delete boost::get<1>((*it).second);
-	  // delete score collection
-	  delete boost::get<2>((*it).second);
-	  // reset the target phrase collection
-	  (boost::get<0>(it->second)).reset();
+    // clear age collection
+    (boost::get<1>((*it).second))->clear();
+    // clear score collection
+    (boost::get<2>((*it).second))->clear();
+    // delete age collection
+    delete boost::get<1>((*it).second);
+    // delete score collection
+    delete boost::get<2>((*it).second);
+    // reset the target phrase collection
+    (boost::get<0>(it->second)).reset();
   }
   m_cacheTM.clear();
   m_entries = 0;

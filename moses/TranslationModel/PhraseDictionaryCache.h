@@ -118,9 +118,9 @@ public:
   }
 
   TargetPhraseCollection::shared_ptr
-    GetTargetPhraseCollectionLEGACY(ttasksptr const& ttask,
-                                    Phrase const& src) const{
-	  GetTargetPhraseCollection(src, ttask->GetSource()->GetTranslationId());
+  GetTargetPhraseCollectionLEGACY(ttasksptr const& ttask,
+                                  Phrase const& src) const {
+    GetTargetPhraseCollection(src, ttask->GetSource()->GetTranslationId());
   }
 
 

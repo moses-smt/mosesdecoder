@@ -70,16 +70,17 @@ void PhraseDictionaryCache::SetParameter(const std::string& key, const std::stri
   if (key == "cache-name") {
     m_name = Scan<std::string>(value);
   } else if (key == "input-factor") {
-	  m_inputFactorsVec = Tokenize<FactorType>(value,",");
+    m_inputFactorsVec = Tokenize<FactorType>(value,",");
   } else if (key == "output-factor") {
-	  m_outputFactorsVec = Tokenize<FactorType>(value,",");
+    m_outputFactorsVec = Tokenize<FactorType>(value,",");
   } else {
     PhraseDictionary::SetParameter(key, value);
   }
 }
 
-void PhraseDictionaryCache::CleanUpAfterSentenceProcessing(const InputType& source) {
-	Clear(source.GetTranslationId());
+void PhraseDictionaryCache::CleanUpAfterSentenceProcessing(const InputType& source)
+{
+  Clear(source.GetTranslationId());
 }
 
 void PhraseDictionaryCache::InitializeForInput(ttasksptr const& ttask)
@@ -87,21 +88,21 @@ void PhraseDictionaryCache::InitializeForInput(ttasksptr const& ttask)
 #ifdef WITH_THREADS
   boost::unique_lock<boost::shared_mutex> lock(m_cacheLock);
 #endif
-	long tID = ttask->GetSource()->GetTranslationId();
-	TargetPhraseCollection::shared_ptr tpc;
-	if (m_cacheTM.find(tID) == m_cacheTM.end()) return;
-	for(cacheMap::const_iterator it=m_cacheTM.at(tID).begin();  it != m_cacheTM.at(tID).end(); it++) {
-		tpc.reset(new TargetPhraseCollection(*(it->second).first));
-		std::vector<const TargetPhrase*>::const_iterator it2 = tpc->begin();
+  long tID = ttask->GetSource()->GetTranslationId();
+  TargetPhraseCollection::shared_ptr tpc;
+  if (m_cacheTM.find(tID) == m_cacheTM.end()) return;
+  for(cacheMap::const_iterator it=m_cacheTM.at(tID).begin();  it != m_cacheTM.at(tID).end(); it++) {
+    tpc.reset(new TargetPhraseCollection(*(it->second).first));
+    std::vector<const TargetPhrase*>::const_iterator it2 = tpc->begin();
 
-		while (it2 != tpc->end()) {
-			((TargetPhrase*) *it2)->EvaluateInIsolation(it->first, GetFeaturesToApply());
-			it2++;
-		}
-	}
-	if (tpc)  {
-		tpc->NthElement(m_tableLimit); // sort the phrases for the decoder
-	}
+    while (it2 != tpc->end()) {
+      ((TargetPhrase*) *it2)->EvaluateInIsolation(it->first, GetFeaturesToApply());
+      it2++;
+    }
+  }
+  if (tpc)  {
+    tpc->NthElement(m_tableLimit); // sort the phrases for the decoder
+  }
 }
 
 void PhraseDictionaryCache::GetTargetPhraseCollectionBatch(const InputPathList &inputPathQueue) const
@@ -109,19 +110,19 @@ void PhraseDictionaryCache::GetTargetPhraseCollectionBatch(const InputPathList &
 #ifdef WITH_THREADS
   boost::shared_lock<boost::shared_mutex> read_lock(m_cacheLock);
 #endif
-	InputPathList::const_iterator iter;
-	for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
-		InputPath &inputPath = **iter;
-		long tID = inputPath.ttask->GetSource()->GetTranslationId();
-		if (m_cacheTM.find(tID) == m_cacheTM.end()) continue;
-		const Phrase &source = inputPath.GetPhrase();
-		TargetPhraseCollection::shared_ptr tpc;
-		for(cacheMap::const_iterator it=m_cacheTM.at(tID).begin();  it != m_cacheTM.at(tID).end(); it++) {
-			if (source.Compare(it->first)!=0) continue;
-			tpc.reset(new TargetPhraseCollection(*(it->second).first));
-			inputPath.SetTargetPhrases(*this, tpc, NULL);
-		}
-	}
+  InputPathList::const_iterator iter;
+  for (iter = inputPathQueue.begin(); iter != inputPathQueue.end(); ++iter) {
+    InputPath &inputPath = **iter;
+    long tID = inputPath.ttask->GetSource()->GetTranslationId();
+    if (m_cacheTM.find(tID) == m_cacheTM.end()) continue;
+    const Phrase &source = inputPath.GetPhrase();
+    TargetPhraseCollection::shared_ptr tpc;
+    for(cacheMap::const_iterator it=m_cacheTM.at(tID).begin();  it != m_cacheTM.at(tID).end(); it++) {
+      if (source.Compare(it->first)!=0) continue;
+      tpc.reset(new TargetPhraseCollection(*(it->second).first));
+      inputPath.SetTargetPhrases(*this, tpc, NULL);
+    }
+  }
 }
 
 TargetPhraseCollection::shared_ptr PhraseDictionaryCache::GetTargetPhraseCollection(const Phrase &source, long tID) const
@@ -195,7 +196,7 @@ void PhraseDictionaryCache::Update(long tID, std::vector<std::string> entries)
       VERBOSE(3,"pp[2]:|" << pp[2] << "|" << std::endl);
       VERBOSE(3,"pp[3]:|" << pp[3] << "|" << std::endl);
       Update(tID,pp[0], pp[1], pp[2], pp[3]);
-    } else if (pp.size() > 2){
+    } else if (pp.size() > 2) {
       VERBOSE(3,"pp[2]:|" << pp[2] << "|" << std::endl);
       Update(tID,pp[0], pp[1], pp[2]);
     } else {
@@ -204,15 +205,16 @@ void PhraseDictionaryCache::Update(long tID, std::vector<std::string> entries)
   }
 }
 
-Scores PhraseDictionaryCache::Conv2VecFloats(std::string& s){
-	std::vector<float> n;
-	if (s.empty())
-		return n;
-	std::istringstream iss(s);
-	std::copy(std::istream_iterator<float>(iss),
-	        std::istream_iterator<float>(),
-	        std::back_inserter(n));
-	return n;
+Scores PhraseDictionaryCache::Conv2VecFloats(std::string& s)
+{
+  std::vector<float> n;
+  if (s.empty())
+    return n;
+  std::istringstream iss(s);
+  std::copy(std::istream_iterator<float>(iss),
+            std::istream_iterator<float>(),
+            std::back_inserter(n));
+  return n;
 }
 
 void PhraseDictionaryCache::Update(long tID, std::string sourcePhraseString, std::string targetPhraseString, std::string scoreString, std::string waString)
@@ -277,12 +279,12 @@ void PhraseDictionaryCache::Update(long tID, Phrase sp, TargetPhrase tp, Scores 
       VERBOSE(3,"tp:|" << tp << "| NOT FOUND" << std::endl);
       std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(tp));
       Scores scoreVec;
-      for (unsigned int i=0; i<scores.size(); i++){
-    	  scoreVec.push_back(scores[i]);
+      for (unsigned int i=0; i<scores.size(); i++) {
+        scoreVec.push_back(scores[i]);
       }
-      if(scoreVec.size() != m_numScoreComponents){
-    	  VERBOSE(1, "Scores does not match number of score components for phrase : "<< sp.ToString() <<" ||| " << tp.ToString() <<endl);
-    	  VERBOSE(1, "I am ignoring this..." <<endl);
+      if(scoreVec.size() != m_numScoreComponents) {
+        VERBOSE(1, "Scores does not match number of score components for phrase : "<< sp.ToString() <<" ||| " << tp.ToString() <<endl);
+        VERBOSE(1, "I am ignoring this..." <<endl);
 //    	  std::cin.ignore();
       }
       targetPhrase->GetScoreBreakdown().Assign(this, scoreVec);
@@ -295,16 +297,16 @@ void PhraseDictionaryCache::Update(long tID, Phrase sp, TargetPhrase tp, Scores 
       m_entries++;
       VERBOSE(3,"sp:|" << sp << "tp:|" << tp << "| INSERTED" << std::endl);
     } else {
-	  Scores scoreVec;
-	  for (unsigned int i=0; i<scores.size(); i++){
-	 	scoreVec.push_back(scores[i]);
-	  }
-	  if(scoreVec.size() != m_numScoreComponents){
-	 	VERBOSE(1, "Scores does not match number of score components for phrase : "<< sp.ToString() <<" ||| " << tp.ToString() <<endl);
-	 	VERBOSE(1, "I am ignoring this..." <<endl);
+      Scores scoreVec;
+      for (unsigned int i=0; i<scores.size(); i++) {
+        scoreVec.push_back(scores[i]);
+      }
+      if(scoreVec.size() != m_numScoreComponents) {
+        VERBOSE(1, "Scores does not match number of score components for phrase : "<< sp.ToString() <<" ||| " << tp.ToString() <<endl);
+        VERBOSE(1, "I am ignoring this..." <<endl);
 //		std::cin.ignore();
-	  }
-	  tp_ptr->GetScoreBreakdown().Assign(this, scoreVec);
+      }
+      tp_ptr->GetScoreBreakdown().Assign(this, scoreVec);
       if (!waString.empty()) tp_ptr->SetAlignmentInfo(waString);
       VERBOSE(3,"sp:|" << sp << "tp:|" << tp << "| UPDATED" << std::endl);
     }
@@ -321,12 +323,12 @@ void PhraseDictionaryCache::Update(long tID, Phrase sp, TargetPhrase tp, Scores 
     std::auto_ptr<TargetPhrase> targetPhrase(new TargetPhrase(tp));
     // scoreVec is a composition of decay_score and the feature scores
     Scores scoreVec;
-    for (unsigned int i=0; i<scores.size(); i++){
-    	scoreVec.push_back(scores[i]);
+    for (unsigned int i=0; i<scores.size(); i++) {
+      scoreVec.push_back(scores[i]);
     }
-    if(scoreVec.size() != m_numScoreComponents){
-    	VERBOSE(1, "Scores do not match number of score components for phrase : "<< sp <<" ||| " << tp <<endl);
-    	VERBOSE(1, "I am ignoring this..." <<endl);
+    if(scoreVec.size() != m_numScoreComponents) {
+      VERBOSE(1, "Scores do not match number of score components for phrase : "<< sp <<" ||| " << tp <<endl);
+      VERBOSE(1, "I am ignoring this..." <<endl);
 //    	std::cin.ignore();
     }
     targetPhrase->GetScoreBreakdown().Assign(this, scoreVec);
@@ -364,8 +366,9 @@ void PhraseDictionaryCache::Execute_Single_Command(std::string command)
   }
 }
 
-void PhraseDictionaryCache::Clear(){
-  for(sentCacheMap::iterator it=m_cacheTM.begin(); it!=m_cacheTM.end(); it++){
+void PhraseDictionaryCache::Clear()
+{
+  for(sentCacheMap::iterator it=m_cacheTM.begin(); it!=m_cacheTM.end(); it++) {
     Clear(it->first);
   }
 }
@@ -378,9 +381,9 @@ void PhraseDictionaryCache::Clear(long tID)
   if (m_cacheTM.find(tID) == m_cacheTM.end()) return;
   cacheMap::iterator it;
   for(it = m_cacheTM.at(tID).begin(); it!=m_cacheTM.at(tID).end(); it++) {
-	  (((*it).second).second)->clear();
-	  delete ((*it).second).second;
-	  ((*it).second).first.reset();
+    (((*it).second).second)->clear();
+    delete ((*it).second).second;
+    ((*it).second).first.reset();
   }
   m_cacheTM.at(tID).clear();
   m_entries = 0;
@@ -407,17 +410,17 @@ void PhraseDictionaryCache::Print() const
   boost::shared_lock<boost::shared_mutex> read_lock(m_cacheLock);
 #endif
   for(sentCacheMap::const_iterator itr = m_cacheTM.begin(); itr!=m_cacheTM.end(); itr++) {
-	  cacheMap::const_iterator it;
-	  for(it = (itr->second).begin(); it!=(itr->second).end(); it++) {
-		  std::string source = (it->first).ToString();
-		  TargetPhraseCollection::shared_ptr  tpc = (it->second).first;
-		  TargetPhraseCollection::iterator itr;
-		  for(itr = tpc->begin(); itr != tpc->end(); itr++) {
-			  std::string target = (*itr)->ToString();
-			  std::cout << source << " ||| " << target << std::endl;
-		  }
-		  source.clear();
-	  }
+    cacheMap::const_iterator it;
+    for(it = (itr->second).begin(); it!=(itr->second).end(); it++) {
+      std::string source = (it->first).ToString();
+      TargetPhraseCollection::shared_ptr  tpc = (it->second).first;
+      TargetPhraseCollection::iterator itr;
+      for(itr = tpc->begin(); itr != tpc->end(); itr++) {
+        std::string target = (*itr)->ToString();
+        std::cout << source << " ||| " << target << std::endl;
+      }
+      source.clear();
+    }
   }
 }
 
