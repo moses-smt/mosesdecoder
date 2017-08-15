@@ -14,6 +14,7 @@
 
 # Excerpts from revision history
 
+# 15 Aug 2017 option added: --transform-decoded-file (Joerg Tiedemann)
 # Sept 2011   multi-threaded mert (Barry Haddow)
 # 3 Aug 2011  Added random directions, historic best, pairwise ranked (PK)
 # Jul 2011    simplifications (Ondrej Bojar)
@@ -57,6 +58,7 @@ use FindBin qw($RealBin);
 use File::Basename;
 use File::Path;
 use File::Spec;
+use File::Copy qw(move);
 use Cwd;
 
 my $SCRIPTS_ROOTDIR = $RealBin;
@@ -86,6 +88,7 @@ my $___DECODER_FLAGS = ""; # additional parametrs to pass to the decoder
 my $continue = 0; # should we try to continue from the last saved step?
 my $skip_decoder = 0; # and should we skip the first decoder run (assuming we got interrupted during mert)
 my $___FILTER_PHRASE_TABLE = 1; # filter phrase table
+my $___TRANSFORM_DECODED_FILE = 0; # transform decoded file before scoring (script or command)
 my $___PREDICTABLE_SEEDS = 0;
 my $___START_WITH_HISTORIC_BESTS = 0; # use best settings from all previous iterations as starting points [Foster&Kuhn,2009]
 my $___RANDOM_DIRECTIONS = 0; # search in random directions only
@@ -211,6 +214,7 @@ GetOptions(
   "mosesparallelcmd=s" => \$moses_parallel_cmd, # allow to override the default location
   "old-sge" => \$old_sge, #passed to moses-parallel
   "filter-phrase-table!" => \$___FILTER_PHRASE_TABLE, # (dis)allow of phrase tables
+  "transform-decoded-file=s" => \$___TRANSFORM_DECODED_FILE, # transform decoded file to convert to standard word level format (script or command line)
   "predictable-seeds" => \$___PREDICTABLE_SEEDS, # make random restarts deterministic
   "historic-bests" => \$___START_WITH_HISTORIC_BESTS, # use best settings from all previous iterations as starting points
   "random-directions" => \$___RANDOM_DIRECTIONS, # search only in random directions
@@ -333,6 +337,8 @@ Options:
   --multi-moses          ... Use multiple instances of moses instead of threads for decoding
                              (Use with --decoder-flags='-threads N' to get N instances, each of
                               which uses a single thread (overrides threads in moses.ini))
+  --transform-decoded-file=STRING    ... transform n-best list before scoring, 
+                                         STRING='bpe', script or command for transforming
 ";
   exit 1;
 }
@@ -820,6 +826,27 @@ while (1) {
       $lsamp_file      = "$lsamp_file.gz";
       $nbest_file      = "$combined_file";
     }
+    ## tranforming decoded file (n-best list)
+    if ($___TRANSFORM_DECODED_FILE) {
+        my $trans_file=$nbest_file.".transformed";
+	## original code by Anoop Kunchukuttan
+        ##Command to run: cat $nbest_file | sed 's, ||| ,""""",g' | awk -F '"""""' 'BEGIN{OFS=" ||| "}{gsub (" ", "", $2);gsub ("\\^"," ",$2);print}' > $trans_file 
+        ## my $trans_cmd="cat $nbest_file | sed 's, ||| ,!!!!!,g' | awk -F '!!!!!' 'BEGIN{OFS=\" ||| \"}{gsub (\" \", \"\", \$2);gsub (\"\\\\^\",\" \",\$2);print}' > $trans_file";
+	my $trans_cmd;
+	## check if the argument is a file or includes space
+	## if there are spaces then assume that it specifies the command to be run 
+	if ((-e $___TRANSFORM_DECODED_FILE) || ($___TRANSFORM_DECODED_FILE=~/ /)){
+	    $trans_cmd="cat $nbest_file | $___TRANSFORM_DECODED_FILE > $trans_file";
+	}
+	## otherwise assume BPE markup with @@
+	else{
+	    $trans_cmd="cat $nbest_file | sed 's/\@\@ //g'  > $trans_file";
+	}
+        print STDERR "Executing data transformation command: $trans_cmd \n";
+        safesystem($trans_cmd) or die "The data transformation failed \n";
+        move $trans_file, $nbest_file ;
+    }
+
     safesystem("gzip -f $nbest_file") or die "Failed to gzip run*out" unless $___HG_MIRA;
     $nbest_file = $nbest_file.".gz";
   } else {
