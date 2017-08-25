@@ -35,7 +35,7 @@ IRSTLM_PREFIX ?= ${PREFIX}/irstlm-5.80.08
 BOOST_PREFIX  ?= ${PREFIX}
 
 # currently, the full enchilada means xmlrpc-c, cmph, irstlm, boost
-all: xmlrpc cmph irstlm boost
+all: xmlrpc cmph boost
 
 # we use bash and fail when pipelines fail
 SHELL = /bin/bash -e -o pipefail
