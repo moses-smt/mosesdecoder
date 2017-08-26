@@ -579,10 +579,10 @@ void PhraseTableCreator::EncodeTargetPhraseREnc(std::vector<std::string>& s,
         if(r < bestRank) {
           bestRank = r;
           bestSrcPos = *it;
-          bestDiff = abs(*it-i);
-        } else if(r == bestRank && unsigned(abs(*it-i)) < bestDiff) {
+          bestDiff = abs((long)*it-(long)i);
+        } else if(r == bestRank && unsigned(abs((long)*it-(long)i)) < bestDiff) {
           bestSrcPos = *it;
-          bestDiff = abs(*it-i);
+          bestDiff = abs((long)*it-(long)i);
         }
       }
     }
