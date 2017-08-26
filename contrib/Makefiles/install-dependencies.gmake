@@ -97,5 +97,5 @@ boost: override PREFIX=${BOOST_PREFIX}
 boost: | $(call safepath,${BOOST_PREFIX}/include/boost)
 $(call safepath,${BOOST_PREFIX}/include/boost):
 	$(sfget)
-	cd '${TMP}/boost_1_63_0' && ./bootstrap.sh && ./b2 --prefix=${PREFIX} -j${nproc} install
+	cd '${TMP}/boost_1_63_0' && ./bootstrap.sh && ./b2 --prefix=${PREFIX} -j${nproc} --layout=system link=static install
 	rm -rf ${TMP}
