@@ -68,16 +68,18 @@ while(<STDIN>) {
   $reference = lc($reference) if $lowercase;
 	my @WORD = split(' ',$reference);
 	my $length = scalar(@WORD);
-        my $diff = abs($length_translation_this_sentence-$length);
-	if ($diff < $closest_diff) {
-	    $closest_diff = $diff;
-	    $closest_length = $length;
-	    # print STDERR "$s: closest diff ".abs($length_translation_this_sentence-$length)." = abs($length_translation_this_sentence-$length), setting len: $closest_length\n";
-	} elsif ($diff == $closest_diff) {
-            $closest_length = $length if $length < $closest_length;
-            # from two references with the same closeness to me
-            # take the *shorter* into account, not the "first" one.
-        }
+  if ($length > 0) { # Prevent empty refs that might be closest to translation
+    my $diff = abs($length_translation_this_sentence-$length);
+    if ($diff < $closest_diff) {
+      $closest_diff = $diff;
+      $closest_length = $length;
+      # print STDERR "$s: closest diff ".abs($length_translation_this_sentence-$length)." = abs($length_translation_this_sentence-$length), setting len: $closest_length\n";
+    } elsif ($diff == $closest_diff) {
+      $closest_length = $length if $length < $closest_length;
+      # from two references with the same closeness to me
+      # take the *shorter* into account, not the "first" one.
+    }
+  }
 	for(my $n=1;$n<=4;$n++) {
 	    my %REF_NGRAM_N = ();
 	    for(my $start=0;$start<=$#WORD-($n-1);$start++) {
