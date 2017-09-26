@@ -254,8 +254,6 @@ void HypothesisColl::Delete(const HypothesisBase *hypo)
   //cerr << "hypo=" << hypo << " " << m_coll.size() << endl;
 
   size_t erased = m_coll.erase(hypo);
-  //cerr << "erased=" << erased << " " << m_coll.size() << endl;
-
   UTIL_THROW_IF2(erased != 1, "couldn't erase hypo " << hypo);
 }
 
