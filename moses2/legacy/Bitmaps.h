@@ -1,6 +1,5 @@
 #pragma once
 
-#include <boost/unordered_set.hpp>
 #include <boost/unordered_map.hpp>
 #include <set>
 #include <stack>

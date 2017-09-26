@@ -7,7 +7,7 @@
 #pragma once
 #include <boost/pool/pool_alloc.hpp>
 #include <boost/unordered_map.hpp>
-#include <boost/unordered_set.hpp>
+#include <unordered_set>
 #include <vector>
 #include <queue>
 #include "../../legacy/Range.h"
@@ -70,7 +70,7 @@ public:
           std::vector<QueueItem*, MemPoolAllocator<QueueItem*> >, QueueItemOrderer> Queue;
 
   typedef std::pair<const CubeEdge*, int> SeenPositionItem;
-  typedef boost::unordered_set<SeenPositionItem, boost::hash<SeenPositionItem>,
+  typedef std::unordered_set<SeenPositionItem, boost::hash<SeenPositionItem>,
           std::equal_to<SeenPositionItem>, MemPoolAllocator<SeenPositionItem> > SeenPositions;
 
   const Hypotheses &hypos;

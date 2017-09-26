@@ -107,7 +107,7 @@ void Temp()
   Moses2::MemPool pool;
   Moses2::MemPoolAllocator<int> a(pool);
 
-  boost::unordered_set<int, boost::hash<int>, std::equal_to<int>, Moses2::MemPoolAllocator<int> > s(a);
+  std::unordered_set<int, boost::hash<int>, std::equal_to<int>, Moses2::MemPoolAllocator<int> > s(a);
   s.insert(3);
   s.insert(4);
   s.insert(3);

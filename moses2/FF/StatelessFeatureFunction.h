@@ -5,8 +5,7 @@
  *      Author: hieu
  */
 
-#ifndef STATELESSFEATUREFUNCTION_H_
-#define STATELESSFEATUREFUNCTION_H_
+#pragma once
 
 #include "FeatureFunction.h"
 
@@ -22,4 +21,3 @@ public:
 
 }
 
-#endif /* STATELESSFEATUREFUNCTION_H_ */

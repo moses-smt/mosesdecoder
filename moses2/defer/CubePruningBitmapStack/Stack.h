@@ -6,7 +6,6 @@
  */
 #pragma once
 #include <boost/unordered_map.hpp>
-#include <boost/unordered_set.hpp>
 #include <deque>
 #include "../Hypothesis.h"
 #include "../../TypeDef.h"
@@ -27,7 +26,7 @@ typedef Vector<const Hypothesis*>  Hypotheses;
 class MiniStack
 {
 public:
-  typedef boost::unordered_set<const Hypothesis*,
+  typedef std::unordered_set<const Hypothesis*,
           UnorderedComparer<Hypothesis>,
           UnorderedComparer<Hypothesis>
           > _HCType;

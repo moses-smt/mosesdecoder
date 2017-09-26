@@ -7,7 +7,6 @@
 #pragma once
 #include <boost/pool/pool_alloc.hpp>
 #include <boost/unordered_map.hpp>
-#include <boost/unordered_set.hpp>
 #include <vector>
 #include <queue>
 #include "../../legacy/Range.h"
@@ -72,7 +71,7 @@ public:
           QueueItemOrderer> Queue;
 
   typedef std::pair<const CubeEdge*, int> SeenPositionItem;
-  typedef boost::unordered_set<SeenPositionItem,
+  typedef std::unordered_set<SeenPositionItem,
           boost::hash<SeenPositionItem>,
           std::equal_to<SeenPositionItem> > SeenPositions;
 
