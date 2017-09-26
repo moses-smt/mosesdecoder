@@ -6,7 +6,7 @@
  */
 
 #pragma once
-#include <unordered_set>
+#include <boost/unordered_set.hpp>
 #include "NBest.h"
 
 namespace Moses2
@@ -18,7 +18,7 @@ class NBests
 {
 public:
   Contenders contenders;
-  std::unordered_set<size_t> distinctHypos;
+  boost::unordered_set<size_t> distinctHypos;
 
   NBests(const SCFG::Manager &mgr,
          const ArcList &arcList,

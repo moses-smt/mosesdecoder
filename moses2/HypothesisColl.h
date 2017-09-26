@@ -6,6 +6,7 @@
  */
 #pragma once
 #include <unordered_set>
+#include <boost/unordered_set.hpp>
 #include "HypothesisBase.h"
 #include "MemPoolAllocator.h"
 #include "Recycler.h"

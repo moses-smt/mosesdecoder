@@ -6,6 +6,7 @@
  */
 #pragma once
 #include <boost/unordered_map.hpp>
+#include <boost/unordered_set.hpp>
 #include <deque>
 #include "../Hypothesis.h"
 #include "../../TypeDef.h"

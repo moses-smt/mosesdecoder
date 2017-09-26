@@ -6,7 +6,7 @@
  */
 #include <boost/foreach.hpp>
 #include <boost/functional/hash.hpp>
-#include <unordered_set>
+#include <boost/unordered_set.hpp>
 #include <vector>
 #include <sstream>
 #include "Manager.h"
@@ -218,7 +218,7 @@ std::string Manager::OutputNBest()
 {
   arcLists.Sort();
 
-  std::unordered_set<size_t> distinctHypos;
+  boost::unordered_set<size_t> distinctHypos;
 
   TrellisPaths<TrellisPath> contenders;
   m_search->AddInitialTrellisPaths(contenders);

@@ -31,7 +31,7 @@
 #endif
 
 #include "util/murmur_hash.hh"
-#include <unordered_set>
+#include <boost/unordered_set.hpp>
 
 #include <functional>
 #include <string>
@@ -82,7 +82,7 @@ class FactorCollection
       return left.in.GetString() == right.in.GetString();
     }
   };
-  typedef std::unordered_set<FactorFriend, HashFactor, EqualsFactor> Set;
+  typedef boost::unordered_set<FactorFriend, HashFactor, EqualsFactor> Set;
   Set m_set;
   Set m_setNonTerminal;
 

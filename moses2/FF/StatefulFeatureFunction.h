@@ -5,7 +5,8 @@
  *      Author: hieu
  */
 
-#pragma once
+#ifndef STATEFULFEATUREFUNCTION_H_
+#define STATEFULFEATUREFUNCTION_H_
 
 #include "FeatureFunction.h"
 #include "FFState.h"
@@ -62,3 +63,4 @@ protected:
 
 }
 
+#endif /* STATEFULFEATUREFUNCTION_H_ */

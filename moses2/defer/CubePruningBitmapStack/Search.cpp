@@ -96,7 +96,7 @@ void Search::Decode(size_t stackInd)
 
   /*
   cerr << "edges: ";
-  std::unordered_set<const Bitmap*> uniqueBM;
+  boost::unordered_set<const Bitmap*> uniqueBM;
   BOOST_FOREACH(CubeEdge *edge, edges) {
   	uniqueBM.insert(&edge->newBitmap);
   	//cerr << *edge << " ";
