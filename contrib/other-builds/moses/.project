@@ -2166,6 +2166,16 @@
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionary.h</locationURI>
 		</link>
 		<link>
+			<name>TranslationModel/PhraseDictionaryCache.cpp</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryCache.cpp</locationURI>
+		</link>
+		<link>
+			<name>TranslationModel/PhraseDictionaryCache.h</name>
+			<type>1</type>
+			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryCache.h</locationURI>
+		</link>
+		<link>
 			<name>TranslationModel/PhraseDictionaryDynamicCacheBased.cpp</name>
 			<type>1</type>
 			<locationURI>PARENT-3-PROJECT_LOC/moses/TranslationModel/PhraseDictionaryDynamicCacheBased.cpp</locationURI>
