@@ -386,7 +386,7 @@ for ( my $i = 0 ; $i <= $#TABLE ; $i++ ) {
     $mid_file .= ".gz"
       if $mid_file !~ /\.gz/
       && $binarizer
-      && $binarizer =~ /processPhraseTable/;
+      && $binarizer =~ /processPhraseTable|CreateOnDiskPt|CreateProbingPT/;
 
     my $openstring = mk_open_string($file);
 
