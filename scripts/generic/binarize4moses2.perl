@@ -14,7 +14,7 @@ my $lexRoPath;
 my $outPath;
 my $numScores = 4;
 my $numLexScores;
-my $pruneNum = 0;
+my $pruneNum = 100;
 my $scfg = 0;
 
 GetOptions("phrase-table=s"  => \$ptPath,
