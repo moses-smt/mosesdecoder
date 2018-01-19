@@ -106,7 +106,7 @@ sub detokenize {
 	my $prependSpace = " ";
 	for ($i=0;$i<(scalar(@words));$i++) {		
 		if (&startsWithCJKChar($words[$i])) {
-		    if ($i > 0 && &endsWithCJKChar($words[$i-1])) {
+		    if (($i > 0 && &endsWithCJKChar($words[$i-1])) && ($language ne "ko")) {
 			# perform left shift if this is a second consecutive CJK (Chinese/Japanese/Korean) word
 			$text=$text.$words[$i];
 		    } else {
