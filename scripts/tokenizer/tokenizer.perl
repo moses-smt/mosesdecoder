@@ -257,8 +257,17 @@ sub tokenize
     $text =~ s/^ //g;
     $text =~ s/ $//g;
 
-    # seperate out all "other" special characters
-    $text =~ s/([^\p{IsAlnum}\s\.\'\`\,\-])/ $1 /g;
+    # separate out all "other" special characters
+    if (($language eq "fi") or ($language eq "sv")) {
+        # in Finnish and Swedish, the colon can be used inside words as an apostrophe-like character:
+        # USA:n, 20:een, EU:ssa, USA:s, S:t
+        $text =~ s/([^\p{IsAlnum}\s\.\:\'\`\,\-])/ $1 /g;
+        # if a colon is not immediately followed by lower-case characters, separate it out anyway
+        $text =~ s/(:)(?=$|[^\p{Ll}])/ $1 /g;
+    }
+    else {
+        $text =~ s/([^\p{IsAlnum}\s\.\'\`\,\-])/ $1 /g;
+    }
 
     # aggressive hyphen splitting
     if ($AGGRESSIVE)
