@@ -112,7 +112,7 @@ sub cache_file {
   else {
     # okay, go for it
     `touch $cached_path$suffix.lock`;
-    `cp $path$suffix $cached_path$suffix`;
+    `cp -r $path$suffix $cached_path$suffix`;
     `rm $cached_path$suffix.lock`;
   }
 
