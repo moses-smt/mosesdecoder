@@ -74,7 +74,7 @@ if (-e "$prefixfile") {
 ## Loop over text, add lines together until we get a blank line or a <p>
 my $text = "";
 while (<STDIN>) {
-	chop;
+	chomp;
 	if (/^<.+>$/ || /^\s*$/) {
 		# Time to process this block; we've hit a blank or <p>
 		&do_it_for($text, $_);
