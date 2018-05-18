@@ -2,7 +2,7 @@
  * CHRFScorer.cpp
  *
  *  Created on: Dec 28, 2016
- *      Author: pramathur
+ *      Author: pramathur@ebay.com
  */
 
 #include "CHRFScorer.h"
