@@ -47,11 +47,16 @@ public:
   virtual float calculateScore(const std::vector<ScoreStatsType>& totals) const = 0;
 
   float calculateSentenceLevelBackgroundScore(const std::vector<ScoreStatsType>& totals, const std::vector<ScoreStatsType>& bg) {
-    std::vector<ScoreStatsType> stats(totals.size());
-    for(size_t i=0; i<stats.size(); i++)
-      stats[i] = totals[i]+bg[i];
-    // Get score and scale by reference length (as per Chiang et al 08)
-    return calculateScore(stats) * getReferenceLength(stats);
+	if (m_name.compare("CHRF")!=0){
+		std::vector<ScoreStatsType> stats(totals.size());
+   for(size_t i=0; i<stats.size(); i++)
+       stats[i] = totals[i]+bg[i];
+   // Get score and scale by reference length (as per Chiang et al 08)
+   return calculateScore(stats) * getReferenceLength(stats);
+	}
+	else{
+		return calculateScore(totals);
+	}
   }
 
   /**
