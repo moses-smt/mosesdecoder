@@ -1184,6 +1184,9 @@ sub define_step {
 	elsif ($DO_STEP[$i] eq 'TRAINING:build-generation') {
             &define_training_build_generation($i);
         }
+    elsif ($DO_STEP[$i] eq 'TRAINING:build-generation-custom') {
+            &define_training_build_custom_generation($i);
+        }
 	elsif ($DO_STEP[$i] eq 'TRAINING:sigtest-filter-ttable' ||
 	       $DO_STEP[$i] eq 'TRAINING:sigtest-filter-reordering') {
             &define_training_sigtest_filter($i);
@@ -2525,7 +2528,7 @@ sub define_training_build_custom_generation {
 
     my ($generation_table, $generation_corpus) = &get_output_and_input($step_id);
     my $cmd = &get_training_setting(8);
-    $cmd .= "-generation-corpus $generation_corpus ";
+    $cmd .= "-corpus $generation_corpus ";
     $cmd .= &get_table_name_settings("generation-factors","generation-table",$generation_table);
 
     &create_step($step_id,$cmd);
