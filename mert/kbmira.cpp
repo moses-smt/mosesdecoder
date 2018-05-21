@@ -43,6 +43,7 @@ de recherches du Canada
 #include "util/random.hh"
 
 #include "BleuScorer.h"
+#include "CHRFScorer.h"
 #include "HopeFearDecoder.h"
 #include "MiraFeatureVector.h"
 #include "MiraWeightVector.h"

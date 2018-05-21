@@ -23,6 +23,7 @@ MiraWeightVector.cpp
 HypPackEnumerator.cpp
 Data.cpp
 BleuScorer.cpp
+CHRFScorer.cpp
 BleuDocScorer.cpp
 SemposScorer.cpp
 SemposOverlapping.cpp
