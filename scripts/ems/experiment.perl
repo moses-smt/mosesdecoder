@@ -623,7 +623,7 @@ sub find_steps_for_module {
 		print "\t\tneeds input $in: " if $VERBOSE;
 		if(defined($CONFIG{$in}) && $CONFIG{$in}[0] =~ /^\[(.+)\]$/) {
 		    # multiple input, explicitly defined (example: LM:{europarl,nc}:lm )
-		    if ($CONFIG{$in}[0] =~ /^\[([^:]+):{(\S+)}:(\S+)\]$/) {
+		    if ($CONFIG{$in}[0] =~ /^\[([^:]+):[{](\S+)[}]:(\S+)\]$/) {
 			my @SETS = split(',', $2);
 			foreach my $set (@SETS) {
 			    $in = &construct_name($1,$set,$3);
