@@ -947,7 +947,7 @@ sub tokenization_international
 	my ($norm_text) = @_;
 
 	$norm_text =~ s/<skipped>//g; # strip "skipped" tags
-	$norm_text =~ s/\p{Line_Break}\p{Zl}//g; # strip end-of-line hyphenation and join lines
+	$norm_text =~ s/\p{Line_Break: Hyphen}\p{Zl}//g; # strip end-of-line hyphenation and join lines
 	$norm_text =~ s/\p{Zl}/ /g; # join lines
 
 	# replace entities
