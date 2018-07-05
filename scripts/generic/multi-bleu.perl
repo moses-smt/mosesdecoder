@@ -48,7 +48,7 @@ sub add_to_ref {
 	open(REF,$file) or die "Can't read $file";
     }
     while(<REF>) {
-	chop;
+	chomp;
 	push @{$$REF[$s++]}, $_;
     }
     close(REF);
@@ -57,7 +57,7 @@ sub add_to_ref {
 my(@CORRECT,@TOTAL,$length_translation,$length_reference);
 my $s=0;
 while(<STDIN>) {
-    chop;
+    chomp;
     $_ = lc if $lowercase;
     my @WORD = split;
     my %REF_NGRAM = ();
