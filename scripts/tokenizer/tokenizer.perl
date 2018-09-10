@@ -325,6 +325,13 @@ sub tokenize
         $text =~ s/([\p{IsAlpha}])[']([^\p{IsAlpha}])/$1 ' $2/g;
         $text =~ s/([\p{IsAlpha}])[']([\p{IsAlpha}])/$1' $2/g;
     }
+    elsif ($language eq "so") 
+    {
+        # Don't split glottals
+        $text =~ s/([^\p{IsAlpha}])[']([^\p{IsAlpha}])/$1 ' $2/g;
+        $text =~ s/([^\p{IsAlpha}])[']([\p{IsAlpha}])/$1 ' $2/g;
+        $text =~ s/([\p{IsAlpha}])[']([^\p{IsAlpha}])/$1 ' $2/g;
+    }
     else
     {
         $text =~ s/\'/ \' /g;
