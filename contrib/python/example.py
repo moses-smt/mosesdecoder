@@ -2,7 +2,7 @@ from moses.dictree import load
 import sys
 
 if len(sys.argv) != 4:
-    print "Usage: %s table nscores tlimit < query > result" % (sys.argv[0])
+    print("Usage: %s table nscores tlimit < query > result" % (sys.argv[0]))
     sys.exit(0)
 
 path = sys.argv[1]
@@ -20,13 +20,17 @@ for line in sys.stdin:
     print result.source
     for e in result:
         if e.lhs:
-            print '\t%s -> %s ||| %s ||| %s' % (e.lhs, 
+            print('\t%s -> %s ||| %s ||| %s' % (
+                    e.lhs, 
                     ' '.join(e.rhs), 
                     e.scores, 
-                    e.alignment)
+                    e.alignment
+                )
+            )
         else:
-            print '\t%s ||| %s ||| %s' % (' '.join(e.rhs), 
+            print('\t%s ||| %s ||| %s' % (
+                    ' '.join(e.rhs), 
                     e.scores, 
-                    e.alignment)
-     
-
+                    e.alignment
+                )
+            )

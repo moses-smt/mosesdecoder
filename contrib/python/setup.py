@@ -1,5 +1,7 @@
+from __future__ import print_function
 from distutils.core import setup
 from distutils.extension import Extension
+
 import sys
 import os
 
@@ -21,19 +23,19 @@ while sys.argv[-1].split('=')[0] in available_switches:
     if param[0] == '--moses-lib':
         libdir = param[1]
     if param[0] == '--cython':
-        print >> sys.stderr, 'I will be cythoning your pyx files...'
+        print('I will be cythoning your pyx files...', file=sys.stderr)
         try:
             from Cython.Distutils import build_ext
             suffix = '.pyx'
             cmdcls['build_ext'] = build_ext
         except ImportError:
-            print 'You do not seem to have Cython installed'
+            print('You do not seem to have Cython installed')
     if param[0] == '--max-factors':
         defines['MAX_NUM_FACTORS'] = param[1]
     if param[0] == '--max-kenlm-order':
         defines['KENLM_MAX_ORDER'] = param[1]
 
-print >> sys.stderr, 'mosesdir=%s\nincludes=%s\nlibdir=%s\ncmph=%s' % (mosesdir, includes, libdir, with_cmph)
+print('mosesdir=%s\nincludes=%s\nlibdir=%s\ncmph=%s' % (mosesdir, includes, libdir, with_cmph), file=sys.stderr)
 
 #basic=['z', 'stdc++', 'pthread', 'm', 'gcc_s', 'c', 'boost_system', 'boost_filesystem']
 basic=[]
