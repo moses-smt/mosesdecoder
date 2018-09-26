@@ -1498,7 +1498,7 @@ multi-bleu-c
 	final-model: yes
 
 multi-bleu-detok
-        in: detokenized-output tokenized-reference
+        in: detokenized-output raw-reference
         out: multi-bleu-detok-score
         default-name: evaluation/multi-bleu-detok
         ignore-unless: multi-bleu-detok
@@ -1506,7 +1506,7 @@ multi-bleu-detok
         template: $multi-bleu-detok IN1 < IN > OUT
         final-model: yes
 multi-bleu-c-detok
-        in: detokenized-output tokenized-reference
+        in: detokenized-output raw-reference
         out: multi-bleu-c-detok-score
         default-name: evaluation/multi-bleu-c-detok
         ignore-unless: multi-bleu-c-detok
