@@ -2,15 +2,15 @@
 # Makefile for installing 3rd-party software required to build Moses.
 # author: Ulrich Germann
 #
-# run as 
-#    make -f /path/to/this/file 
+# run as
+#    make -f /path/to/this/file
 #
 # By default, everything will be installed in ./opt.
 # If you want an alternative destination specify PREFIX=... with the make call
 #
 #    make -f /path/to/this/file PREFIX=/where/to/install/things
 #
-# The name of the current directory must not contain spaces! The build scripts for 
+# The name of the current directory must not contain spaces! The build scripts for
 # at least some of the external software can't handle them.
 
 space :=
@@ -54,8 +54,8 @@ sourceforge = http://downloads.sourceforge.net/project
 
 # functions for building software from sourceforge
 nproc := $(shell getconf _NPROCESSORS_ONLN)
-sfget  = mkdir -p '${TMP}' && cd '${TMP}' && wget -qO- ${URL} | tar xz 
-configure-make-install  = cd '$1' && ./configure --prefix='${PREFIX}' 
+sfget  = mkdir -p '${TMP}' && cd '${TMP}' && wget -qO- ${URL} | tar xz
+configure-make-install  = cd '$1' && ./configure --prefix='${PREFIX}'
 configure-make-install += && make -j${nproc} && make install
 
 # XMLRPC-C for moses server
@@ -90,12 +90,14 @@ $(call safepath,$(IRSTLM_PREFIX)/bin/build-lm.sh):
 	&& ./configure --prefix='${PREFIX}' && make -j${nproc} && make install -j${nproc}
 	rm -rf ${TMP}
 
-# boost 
-boost: URL=http://sourceforge.net/projects/boost/files/boost/1.63.0/boost_1_63_0.tar.gz/download
+# boost
+boost: VERSION=1.68.0
+boost: UNDERSCORED=$(subst .,_,$(VERSION))
+boost: URL=http://sourceforge.net/projects/boost/files/boost/${VERSION}/boost_${UNDERSCORED}.tar.gz/download
 boost: TMP=$(CWD)/build/boost
 boost: override PREFIX=${BOOST_PREFIX}
 boost: | $(call safepath,${BOOST_PREFIX}/include/boost)
 $(call safepath,${BOOST_PREFIX}/include/boost):
 	$(sfget)
-	cd '${TMP}/boost_1_63_0' && ./bootstrap.sh && ./b2 --prefix=${PREFIX} -j${nproc} --layout=system link=static install
+	cd '${TMP}/boost_${UNDERSCORED}' && ./bootstrap.sh && ./b2 --prefix=${PREFIX} -j${nproc} --layout=system link=static install
 	rm -rf ${TMP}
