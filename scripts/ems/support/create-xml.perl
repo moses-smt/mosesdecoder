@@ -12,11 +12,11 @@ if ($type =~ /^s/i) {
 	print "<doc docid=\"doc\">\n";
 }
 elsif ($type =~ /^t/i) {
-	print "<tstset setid=\"test\" tgtlang=\"any\" srclang=\"any\">\n";
+	print "<tstset setid=\"test\" trglang=\"any\" srclang=\"any\">\n";
 	print "<doc sysid=\"moses\" docid=\"doc\">\n";
 }
 elsif ($type =~ /^r/i) {
-	print "<refset setid=\"test\" tgtlang=\"any\" srclang=\"any\">\n";
+	print "<refset setid=\"test\" trglang=\"any\" srclang=\"any\">\n";
 	print "<doc sysid=\"ref\" docid=\"doc\">\n";
 }
 else {

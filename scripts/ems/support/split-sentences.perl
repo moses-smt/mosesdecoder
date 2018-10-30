@@ -151,6 +151,20 @@ sub preprocess {
 		$text =~ s/ +/ /g;
 	}
 
+  # Hindi and Gujarati do not capitalise beginning of sentence characters.
+  # Also Hindi traditionally uses a danda as a sentence separator (U+0964)
+  if ($language eq 'hi' || $language eq 'gu') {
+    $text =~ s{
+            ( (?: [\.\?!\x{0964}\x{0965}] | \.\.+ )
+              [\'\"\x{201e}\x{bb}\(\[\¿\¡\p{IsPf}]*
+              )
+            \s+
+            ( [\'\"\x{201e}\x{bb}\(\[\¿\¡\p{IsPi}]*
+              [\x{0900}-\x{097F}\x{0a80}-\x{0aff}]
+              )
+        }{$1\n$2}gx;
+  }
+
 	# Special punctuation cases are covered. Check all remaining periods.
 	my $word;
 	my $i;
