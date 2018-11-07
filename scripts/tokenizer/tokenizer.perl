@@ -346,10 +346,14 @@ sub tokenize
         if ( $word =~ /^(\S+)\.$/)
         {
             my $pre = $1;
-            if (($pre =~ /\./ && $pre =~ /\p{IsAlpha}/) || ($NONBREAKING_PREFIX{$pre} && $NONBREAKING_PREFIX{$pre}==1) || ($i<scalar(@words)-1 && ($words[$i+1] =~ /^[\p{IsLower}]/)))
+            if ($i == scalar(@words)-1) {
+                # split last words independently as they are unlikely to be non-breaking prefixes
+                $word = $pre." .";
+            }
+            elsif (($pre =~ /\./ && $pre =~ /\p{IsAlpha}/) || ($NONBREAKING_PREFIX{$pre} && $NONBREAKING_PREFIX{$pre}==1) || ($i<scalar(@words)-1 && ($words[$i+1] =~ /^[\p{IsLower}]/)))
             {
                 #no change
-			}
+            }
             elsif (($NONBREAKING_PREFIX{$pre} && $NONBREAKING_PREFIX{$pre}==2) && ($i<scalar(@words)-1 && ($words[$i+1] =~ /^[0-9]+/)))
             {
                 #no change
