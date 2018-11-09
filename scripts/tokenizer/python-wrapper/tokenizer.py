@@ -41,17 +41,17 @@ class MosesTokenizer(ToolWrapper):
     ['Hello', 'World', '!']
     """
 
-    def __init__(self, lang="en", old_version=False):
+    def __init__(self, lang="en"):
         self.lang = lang
         program = path.join(
             path.dirname(__file__),
-            "tokenizer-" + ("v1.0" if old_version else "v1.1") + ".perl"
+            "../tokenizer.perl"
         )
         argv = ["perl", program, "-q", "-l", self.lang]
-        if not old_version:
-            # -b = disable output buffering
-            # -a = aggressive hyphen splitting
-            argv.extend(["-b", "-a"])
+
+        # -b = disable output buffering
+        # -a = aggressive hyphen splitting
+        argv.extend(["-b", "-a"])
         super().__init__(argv)
 
     def __str__(self):
@@ -80,8 +80,7 @@ def main():
         if not args["<lang>"]:
             sys.exit(0)
     tokenize = MosesTokenizer(
-        args["<lang>"],
-        old_version=args["--old"],
+        args["<lang>"]
     )
     inputfile = openfile(args["<inputfile>"])
     outputfile = openfile(args["<outputfile>"], "wt")
