@@ -6,6 +6,11 @@
 use warnings;
 use strict;
 
+while (@ARGV) {
+    $_ = shift;
+    /^-b$/ && ($| = 1, next); # not buffered (flush each line)
+}
+
 while(<STDIN>) {
   s/\&bar;/\|/g;   # factor separator (legacy)
   s/\&#124;/\|/g;  # factor separator

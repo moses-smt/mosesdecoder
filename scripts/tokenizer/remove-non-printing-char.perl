@@ -6,6 +6,11 @@
 use warnings;
 use utf8;
 
+while (@ARGV) {
+    $_ = shift;
+    /^-b$/ && ($| = 1, next); # not buffered (flush each line)
+}
+
 binmode(STDIN, ":utf8");
 binmode(STDOUT, ":utf8");
 binmode(STDERR, ":utf8");
