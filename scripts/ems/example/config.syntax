@@ -625,6 +625,8 @@ nist-bleu-c = "$moses-script-dir/generic/mteval-v13a.pl -c"
 #multi-bleu = "$moses-script-dir/generic/multi-bleu.perl -lc"
 #multi-bleu-c = $moses-script-dir/generic/multi-bleu.perl
 #ibm-bleu =
+#sacre-bleu = "sacrebleu -lc"
+#sacre-bleu-c = "sacrebleu"
 
 ### TER: translation error rate (BBN metric) based on edit distance
 # not yet integrated
