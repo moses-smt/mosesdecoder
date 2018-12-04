@@ -1514,6 +1514,23 @@ multi-bleu-c-detok
         template: $multi-bleu-c-detok IN1 < IN > OUT
         final-model: yes
 
+sacre-bleu
+        in: detokenized-output raw-reference
+        out: sacre-bleu-score
+        default-name: evaluation/sacre-bleu
+        ignore-unless: sacre-bleu
+        rerun-on-change: sacre-bleu
+        template: $sacre-bleu IN1 < IN > OUT
+        final-model: yes
+sacre-bleu-c
+        in: detokenized-output raw-reference
+        out: sacre-bleu-c-score
+        default-name: evaluation/sacre-bleu-c
+        ignore-unless: sacre-bleu-c
+        rerun-on-change: sacre-bleu-c
+        template: $sacre-bleu-c IN1 < IN > OUT
+        final-model: yes
+
 ter
 	in: wrapped-output reference-sgm
 	out: ter-score
@@ -1705,6 +1722,6 @@ train
 
 [REPORTING] single
 report
-	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:bolt-bleu-score EVALUATION:bolt-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:multi-bleu-detok-score EVALUATION:multi-bleu-c-detok-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage EVALUATION:analysis-prec TRAINING:biconcor-model EVALUATION:wade-analysis
+	in: EVALUATION:nist-bleu-score EVALUATION:nist-bleu-c-score EVALUATION:bolt-bleu-score EVALUATION:bolt-bleu-c-score EVALUATION:multi-bleu-score EVALUATION:multi-bleu-c-score EVALUATION:multi-bleu-detok-score EVALUATION:multi-bleu-c-detok-score EVALUATION:sacre-bleu-score EVALUATION:sacre-bleu-c-score EVALUATION:meteor-score EVALUATION:ter-score EVALUATION:wer-score EVALUATION:ibm-bleu-score EVALUATION:ibm-bleu-c-score EVALUATION:analysis EVALUATION:analysis-coverage EVALUATION:analysis-prec TRAINING:biconcor-model EVALUATION:wade-analysis
 	out: report
 	default-name: evaluation/report

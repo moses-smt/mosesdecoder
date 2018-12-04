@@ -22,9 +22,11 @@ $TYPE{"bolt-bleu"}     = "BLEU";
 $TYPE{"bolt-bleu-c"}   = "BLEU-c";
 $TYPE{"bolt-ter"}      = "TER";
 $TYPE{"bolt-ter-c"}    = "TER-c";
-
 $TYPE{"multi-bleu-detok"}  = "BLEU";
 $TYPE{"multi-bleu-c-detok"}= "BLEU-c";
+
+$TYPE{"sacre-bleu"}  = "BLEU";
+$TYPE{"sacre-bleu-c"}= "BLEU-c";
 
 my %SCORE;
 my %AVERAGE;
@@ -57,24 +59,47 @@ sub process {
     my ($set,$type,$file) = @_;
     $SCORE{$set} .= "; " if defined($SCORE{$set});
     if (! -e $file) {
-	print STDERR "ERROR (score $type for set $set): file '$file' does not exist!\n";
+	    print STDERR "ERROR (score $type for set $set): file '$file' does not exist!\n";
     }
     elsif ($type eq 'nist-bleu' || $type eq 'nist-bleu-c') {
-	$SCORE{$set} .= &extract_nist_bleu($file,$type)." ";
+	    $SCORE{$set} .= &extract_nist_bleu($file,$type)." ";
     }
     elsif ($type eq 'ibm-bleu' || $type eq 'ibm-bleu-c') {
-	$SCORE{$set} .= &extract_ibm_bleu($file,$type)." ";
+	    $SCORE{$set} .= &extract_ibm_bleu($file,$type)." ";
     }
     elsif ($type eq 'multi-bleu' || $type eq 'multi-bleu-c'
 	|| $type eq 'multi-bleu-detok' || $type eq 'multi-bleu-c-detok') {
-	$SCORE{$set} .= &extract_multi_bleu($file,$type)." ";
+        $SCORE{$set} .= &extract_multi_bleu($file,$type)." ";
+    }
+    elsif ($type eq 'sacre-bleu' || $type eq 'sacre-bleu-c') {
+        $SCORE{$set} .= &extract_sacre_bleu($file,$type)." ";
     }
     elsif ($type eq 'meteor') {
-	$SCORE{$set} .= &extract_meteor($file,$type)." ";
+	    $SCORE{$set} .= &extract_meteor($file,$type)." ";
     }
     elsif ($type =~ /^bolt-(.+)$/) {
       $SCORE{$set} .= &extract_bolt($file,$1)." ";
     }
+}
+
+sub extract_sacre_bleu {
+    my ($file,$type) = @_;
+    my ($bleu,$ratio);
+    #print STDERR "type=$type, file=$file \n";
+
+    foreach (my $line = `cat $file`) {
+        chomp($line);
+        #print STDERR "line=$line \n";
+        my @toks = split(" ", $line);
+        $bleu = $toks[2];
+        $ratio = $toks[9];
+    }
+    my $output = sprintf("%.02f ",$bleu);
+    $output .= sprintf("(%.03f) ",$ratio) if $ratio;
+
+    $AVERAGE{"sacre-bleu"} += $bleu;
+
+    return $output.$TYPE{$type};
 }
 
 sub extract_nist_bleu {
