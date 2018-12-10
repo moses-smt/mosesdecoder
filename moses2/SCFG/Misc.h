@@ -61,7 +61,7 @@ public:
 
 protected:
   typedef boost::unordered_set<const SeenPosition*,
-          UnorderedComparer<SeenPosition>, UnorderedComparer<SeenPosition> > Coll;
+		  UnorderedComparer<SeenPosition>, UnorderedComparer<SeenPosition> > Coll;
   Coll m_coll;
 };
 

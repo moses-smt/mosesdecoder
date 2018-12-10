@@ -20,25 +20,6 @@ class ArcLists;
 
 typedef Array<const HypothesisBase*> Hypotheses;
 
-class HypoHash
-{
-public:
-  size_t operator()(const HypothesisBase* obj) const {
-    return obj->hash();
-  }
-
-};
-
-class HypoEqualTo
-{
-public:
-  bool operator()(const HypothesisBase* a, const HypothesisBase* b) const {
-    return a->hash() == b->hash();
-  }
-
-};
-
-
 ////////////////////////////////////////////////////
 class HypothesisColl
 {
@@ -74,7 +55,7 @@ public:
 
 protected:
   typedef boost::unordered_set<const HypothesisBase*,
-		  HypoHash, HypoEqualTo,
+		  UnorderedComparer<HypothesisBase>, UnorderedComparer<HypothesisBase>,
           MemPoolAllocator<const HypothesisBase*> > _HCType;
 
   _HCType m_coll;

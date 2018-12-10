@@ -26,27 +26,24 @@ namespace Moses2
 #define TRACE_ERR(str) do {} while (false)
 #endif
 
+////////////////////////////////////////////////////
+
 template<typename T>
 class UnorderedComparer
 {
 public:
-  size_t operator()(const T& obj) const {
-    return obj.hash();
-  }
-
-  bool operator()(const T& a, const T& b) const {
-    return a == b;
-  }
-
   size_t operator()(const T* obj) const {
     return obj->hash();
   }
 
   bool operator()(const T* a, const T* b) const {
-    return (*a) == (*b);
+    return a->hash() == b->hash();
   }
 
 };
+
+////////////////////////////////////////////////////
+
 
 template<typename T>
 void Init(T arr[], size_t size, const T &val)
