@@ -121,21 +121,40 @@ StackAdd HypothesisColl::Add(const HypothesisBase *hypo)
 
     if (hypo->GetFutureScore() > hypoExisting->GetFutureScore()) {
       // incoming hypo is better than the one we have
+  	  //cerr << "Add " << hypo << "(" << hypo->hash() << ")"
+	  //	  << " discard existing " << hypoExisting << "(" << hypoExisting->hash() << ")"
+	  //	  << endl;
+
       const HypothesisBase * const &hypoExisting1 = *addRet.first;
       const HypothesisBase *&hypoExisting2 =
         const_cast<const HypothesisBase *&>(hypoExisting1);
       hypoExisting2 = hypo;
 
-      cerr << "Added " << hypo << "(" << hypo->hash() << ")"
-    		  << " discard existing " << hypoExisting << "(" << hypoExisting->hash() << ")"
-			  << endl;
+      /*
+      Delete(hypoExisting);
+      addRet = m_coll.insert(hypo);
+      UTIL_THROW_IF2(!addRet.second, "couldn't insert hypo "
+      		  	  	  << hypo << "(" << hypo->hash() << ")");
+      */
+      /*
+      if (!addRet.second) {
+    	  cerr << "couldn't insert hypo " << hypo << "(" << hypo->hash() << ")" << endl;
+    	  cerr << "m_coll=";
+    	  for (_HCType::const_iterator iter = m_coll.begin(); iter != m_coll.end(); ++iter) {
+    		  const HypothesisBase *h = *iter;
+    		  cerr << h << "(" << h->hash() << ") ";
+    	  }
+    	  cerr << endl;
+    	  abort();
+      }
+	  */
 
       return StackAdd(true, hypoExisting);
     } else {
       // already storing the best hypo. discard incoming hypo
-      cerr << "Keep existing " << hypoExisting << "(" << hypoExisting->hash() << ")"
-    		  << " discard new " << hypo << "(" << hypo->hash() << ")"
-			  << endl;
+      //cerr << "Keep existing " << hypoExisting << "(" << hypoExisting->hash() << ")"
+      //		  << " discard new " << hypo << "(" << hypo->hash() << ")"
+	  //		  << endl;
       return StackAdd(false, hypoExisting);
     }
   }
@@ -256,8 +275,8 @@ void HypothesisColl::SortHypos(const ManagerBase &mgr, const HypothesisBase **so
 
 void HypothesisColl::Delete(const HypothesisBase *hypo)
 {
-  cerr << " Delete hypo=" << hypo << "(" << hypo->hash() << ")"
-		<< " m_coll=" << m_coll.size() << endl;
+  //cerr << " Delete hypo=" << hypo << "(" << hypo->hash() << ")"
+  //		<< " m_coll=" << m_coll.size() << endl;
 
   size_t erased = m_coll.erase(hypo);
   UTIL_THROW_IF2(erased != 1, "couldn't erase hypo " << hypo);
