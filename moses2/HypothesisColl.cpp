@@ -126,11 +126,16 @@ StackAdd HypothesisColl::Add(const HypothesisBase *hypo)
         const_cast<const HypothesisBase *&>(hypoExisting1);
       hypoExisting2 = hypo;
 
-      //cerr << "Added " << hypo << " dicard existing " << hypoExisting2 << endl;
+      cerr << "Added " << hypo << "(" << hypo->hash() << ")"
+    		  << " discard existing " << hypoExisting << "(" << hypoExisting->hash() << ")"
+			  << endl;
+
       return StackAdd(true, hypoExisting);
     } else {
       // already storing the best hypo. discard incoming hypo
-      //cerr << "Keep existing " << hypoExisting << " dicard new " << hypo << endl;
+      cerr << "Keep existing " << hypoExisting << "(" << hypoExisting->hash() << ")"
+    		  << " discard new " << hypo << "(" << hypo->hash() << ")"
+			  << endl;
       return StackAdd(false, hypoExisting);
     }
   }
@@ -251,7 +256,8 @@ void HypothesisColl::SortHypos(const ManagerBase &mgr, const HypothesisBase **so
 
 void HypothesisColl::Delete(const HypothesisBase *hypo)
 {
-  //cerr << "hypo=" << hypo << " " << m_coll.size() << endl;
+  cerr << " Delete hypo=" << hypo << "(" << hypo->hash() << ")"
+		<< " m_coll=" << m_coll.size() << endl;
 
   size_t erased = m_coll.erase(hypo);
   UTIL_THROW_IF2(erased != 1, "couldn't erase hypo " << hypo);
