@@ -92,7 +92,7 @@ detruecaser = $moses-script-dir/recaser/detruecase.perl
 ### multi-core settings
 # when the generic parallelizer is used, the number of cores
 # specified here 
-cores = 4
+cores = 16
 
 #################################################################
 # PARALLEL CORPUS PREPARATION: 
