@@ -40,7 +40,7 @@ foreach (@ARGV) {
 	&process($1,$2,$3);
     }
 }
-foreach my $set (keys %SCORE) {
+foreach my $set (sort keys %SCORE) {
     my $score = $SCORE{$set};
     chop($score);
     print "$set: $score\n";
