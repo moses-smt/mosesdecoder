@@ -103,20 +103,8 @@ sub split_xml {
   while($line =~ /\S/) {
     # XML tag
     if ($line =~ /^\s*(<\S[^>]*>)(.*)$/) {
-      my $potential_xml = $1;
-      my $line_next = $2;
-      # exception for factor that is an XML tag
-      if ($line =~ /^\S/ && scalar(@WORD)>0 && $WORD[$i-1] =~ /\|$/) {
-	$WORD[$i-1] .= $potential_xml;
-	if ($line_next =~ /^(\|+)(.*)$/) {
-	  $WORD[$i-1] .= $1;
-	  $line_next = $2;
-	}
-      }
-      else {
-        $MARKUP[$i] .= $potential_xml." ";
-      }
-      $line = $line_next;
+      $MARKUP[$i] .= $1." ";
+      $line = $2;
     }
     # non-XML text
     elsif ($line =~ /^\s*([^\s<>]+)(.*)$/) {
