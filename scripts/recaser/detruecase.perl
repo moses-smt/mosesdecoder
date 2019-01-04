@@ -63,7 +63,7 @@ sub process {
     # uppercase first char of word at sentence start
     my $sentence_start = 1;
     for(my $i=0;$i<scalar(@WORD);$i++) {
-      ucfirst(\$WORD[$i]) if $sentence_start;
+      &ucfirst(\$WORD[$i]) if $sentence_start;
       if (defined($SENTENCE_END{ $WORD[$i] })) { $sentence_start = 1; }
       elsif (!defined($DELAYED_SENTENCE_START{$WORD[$i] })) { $sentence_start = 0; }
     }
@@ -71,7 +71,7 @@ sub process {
     # uppercase first char of each word in headlines {
     if (defined($SRC) && $HEADLINE[$sentence]) {
 	foreach (@WORD) {
-	    ucfirst(\$_) unless $ALWAYS_LOWER{$_};
+	    &ucfirst(\$_) unless $ALWAYS_LOWER{$_};
 	}
     }
 
