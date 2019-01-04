@@ -60,19 +60,19 @@ sub process {
     $line =~ s/\s+$//;
     my @WORD  = split(/\s+/,$line);
 
-    # uppercase first char of word at sentence start
+    # uppercase at sentence start
     my $sentence_start = 1;
     for(my $i=0;$i<scalar(@WORD);$i++) {
-      ucfirst(\$WORD[$i]) if $sentence_start;
+      &uppercase(\$WORD[$i]) if $sentence_start;
       if (defined($SENTENCE_END{ $WORD[$i] })) { $sentence_start = 1; }
       elsif (!defined($DELAYED_SENTENCE_START{$WORD[$i] })) { $sentence_start = 0; }
     }
 
-    # uppercase first char of each word in headlines {
+    # uppercase headlines {
     if (defined($SRC) && $HEADLINE[$sentence]) {
 	foreach (@WORD) {
-	    ucfirst(\$_) unless $ALWAYS_LOWER{$_};
-	}
+	    &uppercase(\$_) unless $ALWAYS_LOWER{$_};
+	}	
     }
 
     # output
@@ -84,4 +84,9 @@ sub process {
     }
     print "\n";
     $sentence++;
+}
+
+sub uppercase {
+    my ($W) = @_;
+    $$W = uc(substr($$W,0,1)).substr($$W,1);
 }
