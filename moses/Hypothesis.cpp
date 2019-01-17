@@ -415,8 +415,11 @@ size_t Hypothesis::hash() const
   // states
   for (size_t i = 0; i < m_ffStates.size(); ++i) {
     const FFState *state = m_ffStates[i];
-    size_t hash = state->hash();
-    boost::hash_combine(seed, hash);
+
+    if (state) {
+		size_t hash = state->hash();
+		boost::hash_combine(seed, hash);
+    }
   }
   return seed;
 }
@@ -430,10 +433,15 @@ bool Hypothesis::operator==(const Hypothesis& other) const
 
   // states
   for (size_t i = 0; i < m_ffStates.size(); ++i) {
-    const FFState &thisState = *m_ffStates[i];
-    const FFState &otherState = *other.m_ffStates[i];
-    if (thisState != otherState) {
-      return false;
+    const FFState *thisState = m_ffStates[i];
+
+    if (thisState) {
+		const FFState *otherState = other.m_ffStates[i];
+		assert(otherState);
+
+		if ((*thisState) != (*otherState)) {
+		  return false;
+		}
     }
   }
   return true;
