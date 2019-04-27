@@ -30,6 +30,8 @@ while(<SRC>) {
     elsif (/<seg/) {
 	my $line = shift(@OUT);
         $line = "" if $line =~ /NO BEST TRANSLATION/;
+	$line =~ s/</&lt;/g;
+	$line =~ s/>/&gt;/g;
         if (/<\/seg>/) {
 	  s/(<seg[^>]+> *).*(<\/seg>)/$1$line$2/i;
           $missing_end_seg = 0;
