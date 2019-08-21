@@ -165,6 +165,20 @@ sub preprocess {
         }{$1\n$2}gx;
   }
 
+  # Urdu support
+  # https://en.wikipedia.org/wiki/Urdu_alphabet#Encoding_Urdu_in_Unicode
+  if ($language eq 'ur') {
+    $text =~ s{
+            ( (?: [\.\?!\x{06d4}] | \.\.+ )
+              [\'\"\x{201e}\x{bb}\(\[\¿\¡\p{IsPf}]*
+              )
+            \s+
+            ( [\'\"\x{201e}\x{bb}\(\[\¿\¡\p{IsPi}]*
+              [\x{0600}-\x{06ff}]
+              )
+        }{$1\n$2}gx;
+  }
+
 	# Special punctuation cases are covered. Check all remaining periods.
 	my $word;
 	my $i;
