@@ -18,6 +18,7 @@ my $mydir = "$RealBin/../../share/nonbreaking_prefixes";
 
 my %NONBREAKING_PREFIX = ();
 my $language = "en";
+my $prefixfile = "";
 my $is_cjk = 0;
 my $QUIET = 0;
 my $HELP = 0;
@@ -25,15 +26,17 @@ my $HELP = 0;
 while (@ARGV) {
 	$_ = shift;
 	/^-l$/ && ($language = shift, next);
+  /^-p$/ && ($prefixfile = shift, next);
 	/^-q$/ && ($QUIET = 1, next);
 	/^-h$/ && ($HELP = 1, next);
 	/^-b$/ && ($|++, next); # no output buffering
 }
 
 if ($HELP) {
-	print "Usage ./split-sentences.perl (-l [en|de|...]) [-q] [-b] < textfile > splitfile\n";
+	print "Usage ./split-sentences.perl (-l [en|de|...]) [-p prefix-file] [-q] [-b] < textfile > splitfile\n";
 	print "-q: quiet mode\n";
 	print "-b: no output buffering (for use in bidirectional pipes)\n";
+	print "-p: use a custom prefix file, overriding the installed one\n";
 	exit;
 }
 if (!$QUIET) {
@@ -46,13 +49,18 @@ if ($language eq "yue" || $language eq "zh") {
 	$is_cjk = 1;
 }
 
-my $prefixfile = "$mydir/nonbreaking_prefix.$language";
+if ($prefixfile ne "") {
+  print STDERR "Loading non-breaking prefixes from $prefixfile\n";
+} else {
+
+  my $prefixfile = "$mydir/nonbreaking_prefix.$language";
 
 # Default to English, if we don't have a language-specific prefix file.
-if (!(-e $prefixfile)) {
-	$prefixfile = "$mydir/nonbreaking_prefix.en";
-	print STDERR "WARNING: No known abbreviations for language '$language', attempting fall-back to English version...\n";
-	die ("ERROR: No abbreviations files found in $mydir\n") unless (-e $prefixfile);
+  if (!(-e $prefixfile)) {
+    $prefixfile = "$mydir/nonbreaking_prefix.en";
+    print STDERR "WARNING: No known abbreviations for language '$language', attempting fall-back to English version...\n";
+    die ("ERROR: No abbreviations files found in $mydir\n") unless (-e $prefixfile);
+  }
 }
 
 if (-e "$prefixfile") {
@@ -65,6 +73,7 @@ if (-e "$prefixfile") {
 				$NONBREAKING_PREFIX{$1} = 2;
 			} else {
 				$NONBREAKING_PREFIX{$item} = 1;
+        print STDERR "nbp: $item\n";
 			}
 		}
 	}
