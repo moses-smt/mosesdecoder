@@ -73,7 +73,6 @@ if (-e "$prefixfile") {
 				$NONBREAKING_PREFIX{$1} = 2;
 			} else {
 				$NONBREAKING_PREFIX{$item} = 1;
-        print STDERR "nbp: $item\n";
 			}
 		}
 	}
