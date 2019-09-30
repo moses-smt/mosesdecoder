@@ -193,7 +193,7 @@ sub preprocess {
 			my $starting_punct = $2;
 			if ($prefix && $NONBREAKING_PREFIX{$prefix} && $NONBREAKING_PREFIX{$prefix} == 1 && !$starting_punct) {
 				# Not breaking;
-			} elsif ($words[$i] =~ /(\.?)[\p{IsUpper}\-]+(\.+)$/) {
+			} elsif ($words[$i] =~ /(\.)[\p{IsUpper}\-]+(\.+)$/) {
 				# Not breaking - upper case acronym
 			} elsif($words[$i+1] =~ /^([ ]*[\'\"\(\[\¿\¡\p{IsPi}]*[ ]*[\p{IsUpper}0-9])/) {
 				# The next word has a bunch of initial quotes, maybe a
