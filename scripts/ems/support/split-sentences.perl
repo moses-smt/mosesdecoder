@@ -167,6 +167,20 @@ sub preprocess {
         }{$1\n$2}gx;
   }
 
+  # Urdu support
+  # https://en.wikipedia.org/wiki/Urdu_alphabet#Encoding_Urdu_in_Unicode
+  if ($language eq 'ur') {
+    $text =~ s{
+            ( (?: [\.\?!\x{06d4}] | \.\.+ )
+              [\'\"\x{201e}\x{bb}\(\[\¿\¡\p{IsPf}]*
+              )
+            \s+
+            ( [\'\"\x{201e}\x{bb}\(\[\¿\¡\p{IsPi}]*
+              [\x{0600}-\x{06ff}]
+              )
+        }{$1\n$2}gx;
+  }
+
 	# Special punctuation cases are covered. Check all remaining periods.
 	my $word;
 	my $i;
@@ -179,7 +193,7 @@ sub preprocess {
 			my $starting_punct = $2;
 			if ($prefix && $NONBREAKING_PREFIX{$prefix} && $NONBREAKING_PREFIX{$prefix} == 1 && !$starting_punct) {
 				# Not breaking;
-			} elsif ($words[$i] =~ /(\.)[\p{IsUpper}\-]+(\.+)$/) {
+			} elsif ($words[$i] =~ /(\.?)[\p{IsUpper}\-]+(\.+)$/) {
 				# Not breaking - upper case acronym
 			} elsif($words[$i+1] =~ /^([ ]*[\'\"\(\[\¿\¡\p{IsPi}]*[ ]*[\p{IsUpper}0-9])/) {
 				# The next word has a bunch of initial quotes, maybe a

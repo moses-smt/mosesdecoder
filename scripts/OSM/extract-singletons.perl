@@ -3,9 +3,13 @@
 # This file is part of moses.  Its use is licensed under the GNU Lesser General
 # Public License version 2.1 or, at your option, any later version.
 
-#use strict;
+use strict;
 use warnings;
 use Getopt::Std;
+
+our ($opt_q, %count);
+our $M = 0;
+
 getopts('q');
 
 my $target = shift;
@@ -22,19 +26,19 @@ while (<TARGET>) {
     unless (defined $opt_q) {
 	print STDERR "\r$M" if ++$M%1000 == 0;
     }
-    @T = split;
+    my @T = split;
     $_ = <SOURCE>;
-    @S = split;
+    my @S = split;
     $_ = <ALIGN>;
-    @A = split;
+    my @A = split;
 
     my(@source_links,@target_links);
-    for( $i=0; $i<=$#A; $i+=2 ) {
+    for(my $i=0; $i<=$#A; $i+=2 ) {
 	$target_links[$A[$i]]++;
 	$source_links[$A[$i+1]]++;
     }
 
-    for( $i=0; $i<=$#A; $i+=2 ) {
+    for(my $i=0; $i<=$#A; $i+=2 ) {
 	if ($target_links[$A[$i]] == 1 && $source_links[$A[$i+1]] == 1 &&
 	    $T[$A[$i]] eq $S[$A[$i+1]])
 	{
@@ -46,6 +50,6 @@ while (<TARGET>) {
     }
 }
 
-foreach $w (sort keys %count) {
+foreach my $w (sort keys %count) {
     print "$w\n" if $count{$w}==1;
 }
