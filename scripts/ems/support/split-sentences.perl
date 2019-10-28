@@ -45,7 +45,7 @@ if (!$QUIET) {
 }
 
 # Is it Chinese, Japanese, Korean?
-if ($language eq "yue" || $language eq "zh") {
+if ($language eq "yue" || $language eq "zh" || $language eq "ja" || $language eq "ko" ) {
 	$is_cjk = 1;
 }
 
