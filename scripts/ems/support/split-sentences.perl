@@ -121,7 +121,7 @@ sub preprocess {
 
   # Sentences can start with upper-case, numnbers,  or Indic characters
   my $sentence_start = "\\p{IsUpper}0-9";
-  $sentence_start .= "\\p{Block: Devanagari_Extended}" if $language eq "hi";
+  $sentence_start .= "\\p{Block: Devanagari}\\p{Block: Devanagari_Extended}" if $language eq "hi";
   $sentence_start .= "\\p{Block: Gujarati}" if $language eq "gu";
 
   # we include danda and double danda (U+0964 and U+0965) as sentence split characters
