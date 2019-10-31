@@ -170,7 +170,7 @@ sub preprocess {
               )
             \s+
             ( [\'\"\x{201e}\x{bb}\(\[\¿\¡\p{IsPi}]*
-              [\x{0900}-\x{097F}\x{0a80}-\x{0aff}]
+              [\p{Block: Devanagari_Extended}\p{Block: Gujarati}]
               )
         }{$1\n$2}gx;
   }
