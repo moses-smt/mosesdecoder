@@ -53,7 +53,7 @@ if ($prefixfile ne "") {
   print STDERR "Loading non-breaking prefixes from $prefixfile\n";
 } else {
 
-  my $prefixfile = "$mydir/nonbreaking_prefix.$language";
+  $prefixfile = "$mydir/nonbreaking_prefix.$language";
 
 # Default to English, if we don't have a language-specific prefix file.
   if (!(-e $prefixfile)) {
