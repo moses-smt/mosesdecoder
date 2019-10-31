@@ -119,20 +119,27 @@ sub preprocess {
 
 	##### Add sentence breaks as needed #####
 
+  # Sentences can start with upper-case, numnbers,  or Indic characters
+  my $sentence_start = "\\p{IsUpper}0-9";
+  $sentence_start .= "\\p{Block: Devanagari_Extended}" if $language eq "hi";
+  $sentence_start .= "\\p{Block: Gujarati}" if $language eq "gu";
+
+  # we include danda and double danda (U+0964 and U+0965) as sentence split characters
+
 	# Non-period end of sentence markers (?!) followed by sentence starters.
-	$text =~ s/([?!]) +([\'\"\(\[\¿\¡\p{IsPi}]*[\p{IsUpper}])/$1\n$2/g;
+	$text =~ s/([?!\x{0964}\x{0965}]) +([\'\"\(\[\¿\¡\p{IsPi}]*[$sentence_start])/$1\n$2/g;
 
 	# Multi-dots followed by sentence starters.
-	$text =~ s/(\.[\.]+) +([\'\"\(\[\¿\¡\p{IsPi}]*[\p{IsUpper}])/$1\n$2/g;
+	$text =~ s/(\.[\.]+) +([\'\"\(\[\¿\¡\p{IsPi}]*[$sentence_start])/$1\n$2/g;
 
 	# Add breaks for sentences that end with some sort of punctuation
 	# inside a quote or parenthetical and are followed by a possible
 	# sentence starter punctuation and upper case.
-	$text =~ s/([?!\.][\ ]*[\'\"\)\]\p{IsPf}]+) +([\'\"\(\[\¿\¡\p{IsPi}]*[\ ]*[\p{IsUpper}])/$1\n$2/g;
+	$text =~ s/([?!\.\x{0964}\x{0965}][\ ]*[\'\"\)\]\p{IsPf}]+) +([\'\"\(\[\¿\¡\p{IsPi}]*[\ ]*[$sentence_start])/$1\n$2/g;
 
 	# Add breaks for sentences that end with some sort of punctuation,
 	# and are followed by a sentence starter punctuation and upper case.
-	$text =~ s/([?!\.]) +([\'\"\(\[\¿\¡\p{IsPi}]+[\ ]*[\p{IsUpper}])/$1\n$2/g;
+	$text =~ s/([?!\.\x{0964}\x{0965}]) +([\'\"\(\[\¿\¡\p{IsPi}]+[\ ]*[$sentence_start])/$1\n$2/g;
 
 	if ($is_cjk == 1) {
 		# Chinese uses unusual end-of-sentence markers. These are NOT
@@ -161,19 +168,20 @@ sub preprocess {
 		#$text =~ s/ +/ /g;
 	}
 
+  # Indic languages dealt with using regular rules above
   # Hindi and Gujarati do not capitalise beginning of sentence characters.
   # Also Hindi traditionally uses a danda as a sentence separator (U+0964)
-  if ($language eq 'hi' || $language eq 'gu') {
-    $text =~ s{
-            ( (?: [\.\?!\x{0964}\x{0965}] | \.\.+ )
-              [\'\"\x{201e}\x{bb}\(\[\¿\¡\p{IsPf}]*
-              )
-            \s+
-            ( [\'\"\x{201e}\x{bb}\(\[\¿\¡\p{IsPi}]*
-              [\p{Block: Devanagari_Extended}\p{Block: Gujarati}]
-              )
-        }{$1\n$2}gx;
-  }
+  #if ($language eq 'hi' || $language eq 'gu') {
+  #  $text =~ s{
+  #          ( (?: [\.\?!\x{0964}\x{0965}] | \.\.+ )
+  #            [\'\"\x{201e}\x{bb}\(\[\¿\¡\p{IsPf}]*
+  #            )
+  #          \s+
+  #          ( [\'\"\x{201e}\x{bb}\(\[\¿\¡\p{IsPi}]*
+  #            [\p{Block: Devanagari_Extended}\p{Block: Gujarati}]
+  #            )
+  #      }{$1\n$2}gx;
+  #}
 
   # Urdu support
   # https://en.wikipedia.org/wiki/Urdu_alphabet#Encoding_Urdu_in_Unicode
@@ -201,9 +209,9 @@ sub preprocess {
 			my $starting_punct = $2;
 			if ($prefix && $NONBREAKING_PREFIX{$prefix} && $NONBREAKING_PREFIX{$prefix} == 1 && !$starting_punct) {
 				# Not breaking;
-			} elsif ($words[$i] =~ /(\.)[\p{IsUpper}\-]+(\.+)$/) {
+			} elsif ($words[$i] =~ /(\.)[$sentence_start\-]+(\.+)$/) {
 				# Not breaking - upper case acronym
-			} elsif($words[$i+1] =~ /^([ ]*[\'\"\(\[\¿\¡\p{IsPi}]*[ ]*[\p{IsUpper}0-9])/) {
+			} elsif($words[$i+1] =~ /^([ ]*[\'\"\(\[\¿\¡\p{IsPi}]*[ ]*[0-9$sentence_start])/) {
 				# The next word has a bunch of initial quotes, maybe a
 				# space, then either upper case or a number
 				$words[$i] = $words[$i]."\n" unless ($prefix && $NONBREAKING_PREFIX{$prefix} && $NONBREAKING_PREFIX{$prefix} == 2 && !$starting_punct && ($words[$i+1] =~ /^[0-9]+/));
