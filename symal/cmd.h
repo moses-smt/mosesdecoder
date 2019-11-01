@@ -22,14 +22,7 @@ typedef struct {
   int	Idx;
 } Enum_T;
 
-#ifdef  __cplusplus
-extern "C" {
-#endif
-
   int DeclareParams(const char *, ...);
   int GetParams(int *n, char ***a, const char *CmdFileName);
 
-#ifdef  __cplusplus
-}
-#endif
 #endif
