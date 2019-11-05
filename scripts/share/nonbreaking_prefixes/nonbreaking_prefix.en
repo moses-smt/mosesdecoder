@@ -95,6 +95,8 @@ vs
 i.e
 rev
 e.g
+# rupees
+Rs
 
 #Numbers only. These should only induce breaks when followed by a numeric sequence
 # add NUMERIC_ONLY after the word for this function
