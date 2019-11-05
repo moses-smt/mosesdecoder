@@ -22,6 +22,7 @@ my $prefixfile = "";
 my $is_cjk = 0;
 my $QUIET = 0;
 my $HELP = 0;
+my $LIST_ITEM = 0;
 
 while (@ARGV) {
 	$_ = shift;
@@ -29,6 +30,7 @@ while (@ARGV) {
   /^-p$/ && ($prefixfile = shift, next);
 	/^-q$/ && ($QUIET = 1, next);
 	/^-h$/ && ($HELP = 1, next);
+  /^-i$/ && ($LIST_ITEM = 1, next);
 	/^-b$/ && ($|++, next); # no output buffering
 }
 
@@ -37,6 +39,7 @@ if ($HELP) {
 	print "-q: quiet mode\n";
 	print "-b: no output buffering (for use in bidirectional pipes)\n";
 	print "-p: use a custom prefix file, overriding the installed one\n";
+  print "-i: avoid splitting on list items (e.g. 1. This is the first)\n";
 	exit;
 }
 if (!$QUIET) {
@@ -213,6 +216,11 @@ sub preprocess {
 			} elsif ($words[$i] =~ /(\.)[\p{IsUpper}\-]+(\.+)$/) {
 				# Not breaking - upper case acronym
         #print "NBP2 $words[$i] $words[$i+1]\n";
+      } elsif ($LIST_ITEM
+             && ($i == 0 || substr($words[$i-1], -1) eq "\n")
+             && $words[$i] =~ /^\(?(([0-9]+)|([ivx]+)|([A-Za-z]))\)?\.$/) {
+        #Maybe list item - non breaking
+        #print "NBP3 $words[$i] $words[$i+1]\n";
 			} elsif($words[$i+1] =~ /^([ ]*[\'\"\(\[\¿\¡\p{IsPi}]*[ ]*[0-9$sentence_start])/) {
 				# The next word has a bunch of initial quotes, maybe a
 				# space, then either upper case or a number
