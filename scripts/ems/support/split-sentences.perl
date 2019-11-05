@@ -209,11 +209,14 @@ sub preprocess {
 			my $starting_punct = $2;
 			if ($prefix && $NONBREAKING_PREFIX{$prefix} && $NONBREAKING_PREFIX{$prefix} == 1 && !$starting_punct) {
 				# Not breaking;
-			} elsif ($words[$i] =~ /(\.)[$sentence_start\-]+(\.+)$/) {
+        #print "NBP1 $words[$i] $words[$i+1]\n";
+			} elsif ($words[$i] =~ /(\.)[\p{IsUpper}\-]+(\.+)$/) {
 				# Not breaking - upper case acronym
+        #print "NBP2 $words[$i] $words[$i+1]\n";
 			} elsif($words[$i+1] =~ /^([ ]*[\'\"\(\[\¿\¡\p{IsPi}]*[ ]*[0-9$sentence_start])/) {
 				# The next word has a bunch of initial quotes, maybe a
 				# space, then either upper case or a number
+        #print "MAYBE $words[$i] $words[$i+1]\n";
 				$words[$i] = $words[$i]."\n" unless ($prefix && $NONBREAKING_PREFIX{$prefix} && $NONBREAKING_PREFIX{$prefix} == 2 && !$starting_punct && ($words[$i+1] =~ /^[0-9]+/));
 				# We always add a return for these, unless we have a
 				# numeric non-breaker and a number start.
