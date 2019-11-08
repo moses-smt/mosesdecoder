@@ -126,10 +126,10 @@ sub preprocess {
   my $sentence_start = "\\p{IsUpper}0-9";
   $sentence_start .= "\\p{Block: Devanagari}\\p{Block: Devanagari_Extended}" if ($language eq "hi" || $language eq "mr");
   $sentence_start .= "\\p{Block: Gujarati}" if $language eq "gu";
-  $sentence_start .= "\\p{Block: Bengali}" if ($language eq "asm" || $language eq  "bn" || $language eq "mni"); 
+  $sentence_start .= "\\p{Block: Bengali}" if ($language eq "as" || $language eq  "bn" || $language eq "mni"); 
   $sentence_start .= "\\p{Block: Kannada}" if $language eq "kn"; 
   $sentence_start .= "\\p{Block: Malayalam}" if $language eq "ml"; 
-  $sentence_start .= "\\p{Block: Oriya}" if $language eq "ory"; 
+  $sentence_start .= "\\p{Block: Oriya}" if $language eq "or"; 
   $sentence_start .= "\\p{Block: Gurmukhi}" if $language eq "pa"; 
   $sentence_start .= "\\p{Block: Tamil}" if $language eq "ta"; 
   $sentence_start .= "\\p{Block: Telugu}" if $language eq "te"; 
