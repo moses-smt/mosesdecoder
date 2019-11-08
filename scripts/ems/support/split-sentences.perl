@@ -124,8 +124,15 @@ sub preprocess {
 
   # Sentences can start with upper-case, numnbers,  or Indic characters
   my $sentence_start = "\\p{IsUpper}0-9";
-  $sentence_start .= "\\p{Block: Devanagari}\\p{Block: Devanagari_Extended}" if $language eq "hi";
+  $sentence_start .= "\\p{Block: Devanagari}\\p{Block: Devanagari_Extended}" if ($language eq "hi" || $language eq "mr");
   $sentence_start .= "\\p{Block: Gujarati}" if $language eq "gu";
+  $sentence_start .= "\\p{Block: Bengali}" if ($language eq "asm" || $language eq  "bn" || $language eq "mni"); 
+  $sentence_start .= "\\p{Block: Kannada}" if $language eq "kn"; 
+  $sentence_start .= "\\p{Block: Malayalam}" if $language eq "ml"; 
+  $sentence_start .= "\\p{Block: Oriya}" if $language eq "ory"; 
+  $sentence_start .= "\\p{Block: Gurmukhi}" if $language eq "pa"; 
+  $sentence_start .= "\\p{Block: Tamil}" if $language eq "ta"; 
+  $sentence_start .= "\\p{Block: Telugu}" if $language eq "te"; 
 
   # we include danda and double danda (U+0964 and U+0965) as sentence split characters
 
@@ -170,21 +177,6 @@ sub preprocess {
 		#$text =~ s/([\p{CJK}\p{CJKSymbols}])/ $1 /g;
 		#$text =~ s/ +/ /g;
 	}
-
-  # Indic languages dealt with using regular rules above
-  # Hindi and Gujarati do not capitalise beginning of sentence characters.
-  # Also Hindi traditionally uses a danda as a sentence separator (U+0964)
-  #if ($language eq 'hi' || $language eq 'gu') {
-  #  $text =~ s{
-  #          ( (?: [\.\?!\x{0964}\x{0965}] | \.\.+ )
-  #            [\'\"\x{201e}\x{bb}\(\[\¿\¡\p{IsPf}]*
-  #            )
-  #          \s+
-  #          ( [\'\"\x{201e}\x{bb}\(\[\¿\¡\p{IsPi}]*
-  #            [\p{Block: Devanagari_Extended}\p{Block: Gujarati}]
-  #            )
-  #      }{$1\n$2}gx;
-  #}
 
   # Urdu support
   # https://en.wikipedia.org/wiki/Urdu_alphabet#Encoding_Urdu_in_Unicode
