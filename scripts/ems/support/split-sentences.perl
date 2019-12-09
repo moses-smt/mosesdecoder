@@ -195,28 +195,29 @@ sub preprocess {
 	# Special punctuation cases are covered. Check all remaining periods.
 	my $word;
 	my $i;
-	my @words = split(/ /,$text);
+	my @words = split(/\s/,$text);
 	$text = "";
 	for ($i=0;$i<(scalar(@words)-1);$i++) {
+    #print "Checking $words[$i] $words[$i+1]\n";
 		if ($words[$i] =~ /([\p{IsAlnum}\.\-]*)([\'\"\)\]\%\p{IsPf}]*)(\.+)$/) {
 			# Check if $1 is a known honorific and $2 is empty, never break.
 			my $prefix = $1;
 			my $starting_punct = $2;
 			if ($prefix && $NONBREAKING_PREFIX{$prefix} && $NONBREAKING_PREFIX{$prefix} == 1 && !$starting_punct) {
 				# Not breaking;
-        #print "NBP1 $words[$i] $words[$i+1]\n";
+   #     print "NBP1 $words[$i] $words[$i+1]\n";
 			} elsif ($words[$i] =~ /(\.)[\p{IsUpper}\-]+(\.+)$/) {
 				# Not breaking - upper case acronym
-        #print "NBP2 $words[$i] $words[$i+1]\n";
+  #      print "NBP2 $words[$i] $words[$i+1]\n";
       } elsif ($LIST_ITEM
              && ($i == 0 || substr($words[$i-1], -1) eq "\n")
              && $words[$i] =~ /^\(?(([0-9]+)|([ivx]+)|([A-Za-z]))\)?\.$/) {
         #Maybe list item - non breaking
-        #print "NBP3 $words[$i] $words[$i+1]\n";
+ #       print "NBP3 $words[$i] $words[$i+1]\n";
 			} elsif($words[$i+1] =~ /^([ ]*[\'\"\(\[\¿\¡\p{IsPi}]*[ ]*[0-9$sentence_start])/) {
 				# The next word has a bunch of initial quotes, maybe a
 				# space, then either upper case or a number
-        #print "MAYBE $words[$i] $words[$i+1]\n";
+#        print "MAYBE $words[$i] $words[$i+1]\n";
 				$words[$i] = $words[$i]."\n" unless ($prefix && $NONBREAKING_PREFIX{$prefix} && $NONBREAKING_PREFIX{$prefix} == 2 && !$starting_punct && ($words[$i+1] =~ /^[0-9]+/));
 				# We always add a return for these, unless we have a
 				# numeric non-breaker and a number start.
