@@ -48,7 +48,7 @@ if (!$QUIET) {
 }
 
 # Is it Chinese, Japanese, Korean?
-if ($language eq "yue" || $language eq "zh" || $language eq "ja" || $language eq "ko" ) {
+if ($language eq "yue" || $language eq "zh" || $language eq "ja") {
 	$is_cjk = 1;
 }
 
@@ -133,6 +133,8 @@ sub preprocess {
   $sentence_start .= "\\p{Block: Gurmukhi}" if $language eq "pa"; 
   $sentence_start .= "\\p{Block: Tamil}" if $language eq "ta"; 
   $sentence_start .= "\\p{Block: Telugu}" if $language eq "te"; 
+  $sentence_start .= "\\p{Block: Hangul}\\p{Block: Hangul_Compatibility_Jamo}\\p{Block: Hangul_Jamo}\\p{Block: Hangul_Jamo_Extended_A}\\p{Block: Hangul_Jamo_Extended_B}" if $language eq "ko";
+
 
   # we include danda and double danda (U+0964 and U+0965) as sentence split characters
 
@@ -145,18 +147,21 @@ sub preprocess {
 	# Add breaks for sentences that end with some sort of punctuation
 	# inside a quote or parenthetical and are followed by a possible
 	# sentence starter punctuation and upper case.
-	$text =~ s/([?!\.\x{0964}\x{0965}][\ ]*[\'\"\)\]\p{IsPf}]+) +([\'\"\(\[\¿\¡\p{IsPi}]*[\ ]*[$sentence_start])/$1\n$2/g;
+	$text =~ s/([?!\.\x{0964}\x{0965}][\ ]*[\x{300d}\x{300f}\'\"\)\]\p{IsPf}]+) +([\'\"\(\[\¿\¡\p{IsPi}]*[\ ]*[$sentence_start])/$1\n$2/g;
 
 	# Add breaks for sentences that end with some sort of punctuation,
 	# and are followed by a sentence starter punctuation and upper case.
-	$text =~ s/([?!\.\x{0964}\x{0965}]) +([\'\"\(\[\¿\¡\p{IsPi}]+[\ ]*[$sentence_start])/$1\n$2/g;
+	$text =~ s/([?!\.\x{0964}\x{0965}]) +([\x{300d}\x{300f}\'\"\(\[\¿\¡\p{IsPi}]+[\ ]*[$sentence_start])/$1\n$2/g;
 
+  
+#NOTE: Korean no longer handled here.
 	if ($is_cjk == 1) {
 		# Chinese uses unusual end-of-sentence markers. These are NOT
 		# followed by whitespace.  Nor is there any idea of capitalization.
 		# There does not appear to be any unicode category for full-stops
 		# in general, so list them here.  U+3002 U+FF0E U+FF1F U+FF01
-		$text =~ s/([。．？！♪])/$1\n/g;
+		#$text =~ s/([。．？！♪])/$1\n/g;
+    $text =~ s/([\x{3002}\x{ff0e}\x{FF1F}\x{FF01}]+\s*["\x{201d}\x{201e}\x{300d}\x{300f}]?\s*)/$1\n/g;
 
 		# A normal full-stop or other Western sentence enders followed
 		# by an ideograph is an end-of-sentence, always.
@@ -176,7 +181,7 @@ sub preprocess {
 		#$text =~ s/(\p{CJK}) *(\p{Punctuation})/$1 $2 /g;
 		#$text =~ s/([\p{CJK}\p{CJKSymbols}])/ $1 /g;
 		#$text =~ s/ +/ /g;
-	}
+	} 
 
   # Urdu support
   # https://en.wikipedia.org/wiki/Urdu_alphabet#Encoding_Urdu_in_Unicode
@@ -195,7 +200,8 @@ sub preprocess {
 	# Special punctuation cases are covered. Check all remaining periods.
 	my $word;
 	my $i;
-	my @words = split(/\s/,$text);
+	my @words = split(/\h/,$text);
+  #print "NOW $text\n";
 	$text = "";
 	for ($i=0;$i<(scalar(@words)-1);$i++) {
     #print "Checking $words[$i] $words[$i+1]\n";
