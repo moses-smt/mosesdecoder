@@ -20,6 +20,9 @@ using namespace std;
 namespace Moses2
 {
 
+thread_local MemPool System::m_managerPool;
+thread_local MemPool System::m_systemPool;
+
 System::System(const Parameter &paramsArg) :
   params(paramsArg), featureFunctions(*this)
 {
@@ -163,12 +166,12 @@ void System::LoadDecodeGraphBackoff()
 
 MemPool &System::GetSystemPool() const
 {
-  return GetThreadSpecificObj(m_systemPool);
+  return m_systemPool;
 }
 
 MemPool &System::GetManagerPool() const
 {
-  return GetThreadSpecificObj(m_managerPool);
+  return m_managerPool;
 }
 
 FactorCollection &System::GetVocab() const
