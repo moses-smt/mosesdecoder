@@ -69,8 +69,7 @@ protected:
   //mutable boost::thread_specific_ptr<MemPool> m_systemPool;
   thread_local static MemPool m_managerPool;
   thread_local static MemPool m_systemPool;
-
-  mutable boost::thread_specific_ptr<Recycler<HypothesisBase*> > m_hypoRecycler;
+  thread_local static Recycler<HypothesisBase*> m_hypoRecycler;
 
   //thread_local static MemPool d;
 

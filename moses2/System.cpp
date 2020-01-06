@@ -22,6 +22,7 @@ namespace Moses2
 
 thread_local MemPool System::m_managerPool;
 thread_local MemPool System::m_systemPool;
+thread_local Recycler<HypothesisBase*> System::m_hypoRecycler;
 
 System::System(const Parameter &paramsArg) :
   params(paramsArg), featureFunctions(*this)
@@ -181,7 +182,7 @@ FactorCollection &System::GetVocab() const
 
 Recycler<HypothesisBase*> &System::GetHypoRecycler() const
 {
-  return GetThreadSpecificObj(m_hypoRecycler);
+  return m_hypoRecycler;
 }
 
 Batch &System::GetBatch(MemPool &pool) const
