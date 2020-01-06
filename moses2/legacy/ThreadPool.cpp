@@ -40,7 +40,7 @@ namespace Moses2
 
 ThreadPool::ThreadPool(size_t numThreads, int cpuAffinityOffset,
                        int cpuAffinityIncr) :
-  m_stopped(false), m_stopping(false), m_queueLimit(0)
+  m_stopped(false), m_stopping(false), m_queueLimit(numThreads*2)
 {
 #if defined(_WIN32) || defined(_WIN64)
   size_t numCPU = std::thread::hardware_concurrency();
