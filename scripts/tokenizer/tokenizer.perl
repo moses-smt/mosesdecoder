@@ -186,6 +186,7 @@ else
         {
             print &tokenize($_);
         }
+        STDOUT->flush
     }
 }
 

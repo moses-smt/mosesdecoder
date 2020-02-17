@@ -83,6 +83,7 @@ sub process {
 	print $_;
     }
     print "\n";
+    STDOUT->flush;
     $sentence++;
 }
 
