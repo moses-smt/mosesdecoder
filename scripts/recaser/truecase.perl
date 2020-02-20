@@ -82,7 +82,6 @@ while(<STDIN>) {
   }
   print $$MARKUP[$#$MARKUP];
   print "\n";
-  STDOUT->flush
 }
 
 # store away xml markup

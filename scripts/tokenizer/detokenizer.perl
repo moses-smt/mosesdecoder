@@ -64,7 +64,6 @@ while(<STDIN>) {
   } else {
 		print &detokenize($_);
 	}
-	STDOUT->flush
 }
 
 
