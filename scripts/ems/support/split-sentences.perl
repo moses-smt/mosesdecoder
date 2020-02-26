@@ -23,6 +23,7 @@ my $is_cjk = 0;
 my $QUIET = 0;
 my $HELP = 0;
 my $LIST_ITEM = 0;
+my $NOP = 0;
 
 while (@ARGV) {
 	$_ = shift;
@@ -31,6 +32,7 @@ while (@ARGV) {
 	/^-q$/ && ($QUIET = 1, next);
 	/^-h$/ && ($HELP = 1, next);
 	/^-i$/ && ($LIST_ITEM = 1, next);
+	/^-n$/ && ($NOP = 1, next);
 	/^-b$/ && ($|++, next); # no output buffering
 }
 
@@ -40,6 +42,7 @@ if ($HELP) {
 	print "-b: no output buffering (for use in bidirectional pipes)\n";
 	print "-p: use a custom prefix file, overriding the installed one\n";
 	print "-i: avoid splitting on list items (e.g. 1. This is the first)\n";
+	print "-n: do not emit <P> after paragraphs\n";
 	exit;
 }
 if (!$QUIET) {
@@ -89,7 +92,7 @@ while (<STDIN>) {
 	if (/^<.+>$/ || /^\s*$/) {
 		# Time to process this block; we've hit a blank or <p>
 		&do_it_for($text, $_);
-		print "<P>\n" if (/^\s*$/ && $text); ## If we have text followed by <P>
+		print "<P>\n" if $NOP == 0 && (/^\s*$/ && $text); ## If we have text followed by <P>
 		$text = "";
 	}
 	else {
