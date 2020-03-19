@@ -141,7 +141,7 @@ sub preprocess {
 	# we include danda and double danda (U+0964 and U+0965) as sentence split characters
 
 	# Non-period end of sentence markers (?!) followed by sentence starters.
-	$text =~ s/([?!\x{0964}\x{0965}]) +([\'\"\(\[\¿\¡\p{IsPi}]*[$sentence_start])/$1\n$2/g;
+	$text =~ s/([?!؟\x{0964}\x{0965}]) +([\'\"\(\[\¿\¡\p{IsPi}]*[$sentence_start])/$1\n$2/g;
 
 	# Multi-dots followed by sentence starters.
 	$text =~ s/(\.[\.]+) +([\'\"\(\[\¿\¡\p{IsPi}]*[$sentence_start])/$1\n$2/g;
@@ -149,11 +149,11 @@ sub preprocess {
 	# Add breaks for sentences that end with some sort of punctuation
 	# inside a quote or parenthetical and are followed by a possible
 	# sentence starter punctuation and upper case.
-	$text =~ s/([?!\.\x{0964}\x{0965}][\ ]*[\x{300d}\x{300f}\'\"\)\]\p{IsPf}]+) +([\'\"\(\[\¿\¡\p{IsPi}]*[\ ]*[$sentence_start])/$1\n$2/g;
+	$text =~ s/([?!؟\.\x{0964}\x{0965}][\ ]*[\x{300d}\x{300f}\'\"\)\]\p{IsPf}]+) +([\'\"\(\[\¿\¡\p{IsPi}]*[\ ]*[$sentence_start])/$1\n$2/g;
 
 	# Add breaks for sentences that end with some sort of punctuation,
 	# and are followed by a sentence starter punctuation and upper case.
-	$text =~ s/([?!\.\x{0964}\x{0965}]) +([\x{300d}\x{300f}\'\"\(\[\¿\¡\p{IsPi}]+[\ ]*[$sentence_start])/$1\n$2/g;
+	$text =~ s/([?!؟\.\x{0964}\x{0965}]) +([\x{300d}\x{300f}\'\"\(\[\¿\¡\p{IsPi}]+[\ ]*[$sentence_start])/$1\n$2/g;
 
 
 	#NOTE: Korean no longer handled here, cos Korean has spaces.
@@ -167,7 +167,7 @@ sub preprocess {
 
 		# A normal full-stop or other Western sentence enders followed
 		# by an ideograph is an end-of-sentence, always.
-		$text =~ s/([\.?!]) *(\p{CJK})/$1\n$2/g;
+		$text =~ s/([\.?!؟]) *(\p{CJK})/$1\n$2/g;
 
 		# Split close-paren-then-comma into two.
 		$text =~ s/(\p{Punctuation}) *(\p{Punctuation})/ $1 $2 /g;
