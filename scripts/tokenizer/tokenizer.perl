@@ -265,6 +265,13 @@ sub tokenize
         # if a colon is not immediately followed by lower-case characters, separate it out anyway
         $text =~ s/(:)(?=$|[^\p{Ll}])/ $1 /g;
     }
+    elsif (($language eq "ca")) {
+        # in Catalan, the middle dot can be used inside words:
+        # il�lusio
+        $text =~ s/([^\p{IsAlnum}\s\.\·\'\`\,\-])/ $1 /g;
+        # if a middot is not immediately followed by lower-case characters, separate it out anyway
+        $text =~ s/(·)(?=$|[^\p{Ll}])/ $1 /g;
+    }   
     else {
         $text =~ s/([^\p{IsAlnum}\s\.\'\`\,\-])/ $1 /g;
     }
@@ -317,7 +324,7 @@ sub tokenize
         #special case for "1990's"
         $text =~ s/([\p{IsN}])[']([s])/$1 '$2/g;
     }
-    elsif (($language eq "fr") or ($language eq "it") or ($language eq "ga"))
+    elsif (($language eq "fr") or ($language eq "it") or ($language eq "ga") or ($language eq "ca"))
     {
         #split contractions left
         $text =~ s/([^\p{IsAlpha}])[']([^\p{IsAlpha}])/$1 ' $2/g;
