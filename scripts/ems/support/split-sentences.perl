@@ -141,6 +141,7 @@ sub preprocess {
 	$sentence_start .= "\\p{Block: Tamil}" if $language eq "ta";
 	$sentence_start .= "\\p{Block: Telugu}" if $language eq "te";
 	$sentence_start .= "\\p{Block: Hangul}\\p{Block: Hangul_Compatibility_Jamo}\\p{Block: Hangul_Jamo}\\p{Block: Hangul_Jamo_Extended_A}\\p{Block: Hangul_Jamo_Extended_B}" if $language eq "ko";
+	$sentence_start .= "\\p{Arabic}" if $language eq "fa";
 
 	# we include danda and double danda (U+0964 and U+0965) as sentence split characters
 
