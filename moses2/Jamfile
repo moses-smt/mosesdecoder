@@ -84,6 +84,8 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem : : : $(max-factors
     TranslationModel/CompactPT/TargetPhraseCollectionCache.cpp
     TranslationModel/CompactPT/ThrowingFwrite.cpp
 
+    TranslationModel/MSPT/MSPT.cpp 
+
    	parameters/AllOptions.cpp
    	parameters/BookkeepingOptions.cpp
    	parameters/ContextParameters.cpp
