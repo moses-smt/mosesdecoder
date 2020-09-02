@@ -1,5 +1,5 @@
 # Starter pipeline
-- task: ComponentGovernanceComponentDetection@0
+task: ComponentGovernanceComponentDetection@0
   inputs:
     scanType: 'Register'
     verbosity: 'Verbose'
