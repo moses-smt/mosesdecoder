@@ -24,7 +24,7 @@
                 "Other": {
                     "Name": "xml-rpc-c",
                     "Version": "1.51.06",
-                    "DownloadUrl": "https://sourceforge.net/projects/xmlrpc-c/files/Xmlrpc-c%20Super%20Stable/1.51.06/xmlrpc-c-1.51.06.tgz/download"
+                    "DownloadUrl": "https://sourceforge.net/projects/xmlrpc-c/files/Xmlrpc-c%20Super%20Stable/1.51.06/xmlrpc-c-1.51.06.tgz"
                 }
             }
         },        
