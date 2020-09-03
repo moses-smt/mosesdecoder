@@ -69,7 +69,7 @@ steps:
   displayName: 'Build and Install cmph'    
 
 - script: |   
-    wget https://sourceforge.net/projects/xmlrpc-c/files/Xmlrpc-c%20Super%20Stable/1.51.06/xmlrpc-c-1.51.06.tgz/download
+    wget "https://sourceforge.net/projects/xmlrpc-c/files/Xmlrpc-c%20Super%20Stable/1.51.06/xmlrpc-c-1.51.06.tgz/download"
     mv download  xmlrpc-c-1.51.06.tgz
     tar xvzf xmlrpc-c-1.51.06.tgz
     cd xmlrpc-c-1.51.06
