@@ -76,7 +76,7 @@ steps:
     ./configure --prefix=$PWD
     make
     make install
-    ldconfig
+    sudo ldconfig
     cd ..
   displayName: 'Build and Install xmlrpc-c'    
 
