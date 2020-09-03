@@ -8,7 +8,7 @@ trigger:
 
 pool:
   #vmImage: 'ubuntu-latest'
-  vmImage: ubuntu-16.04
+  vmImage: 'ubuntu-16.04'
 
 steps:
 
@@ -52,7 +52,7 @@ steps:
       imagemagick \
       make \
       cmake \
-      libgoogle-perftools-dev (for tcmalloc) \
+      libgoogle-perftools-dev \
       autoconf \
       doxygen 
   displayName: 'Install Ubuntu packages'
@@ -82,7 +82,7 @@ steps:
     ./bjam \
       --with-cmph=$PWD/cmph-2.0.2 \
       --with-xmlrpc-c=$PWD/xmlrpc-c-1.51.06 \
-      -j3
+      -j2
   displayName: 'Build Moses'    
 
 - task: ComponentGovernanceComponentDetection@0
