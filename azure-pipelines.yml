@@ -58,9 +58,10 @@ steps:
   displayName: 'Install Ubuntu packages'
 
 - script: |   
-    wget https://sourceforge.net/projects/cmph/files/v2.0.2/cmph-2.0.2.tar.gz/download   
+    wget "https://sourceforge.net/projects/cmph/files/v2.0.2/cmph-2.0.2.tar.gz/download"
+    mv download  cmph-2.0.2.tar.gz  
     tar xvzf cmph-2.0.2.tar.gz
-    cd cmph-2.0.2.tar.gz
+    cd cmph-2.0.2
     ./configure --prefix=$PWD
     make
     make install
@@ -69,8 +70,9 @@ steps:
 
 - script: |   
     wget https://sourceforge.net/projects/xmlrpc-c/files/Xmlrpc-c%20Super%20Stable/1.51.06/xmlrpc-c-1.51.06.tgz/download
+    mv download  xmlrpc-c-1.51.06.tgz
     tar xvzf xmlrpc-c-1.51.06.tgz
-    cd xmlrpc-c-1.51.06.tgz
+    cd xmlrpc-c-1.51.06
     ./configure --prefix=$PWD
     make
     make install
