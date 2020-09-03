@@ -45,6 +45,7 @@ steps:
       zlib1g-dev \
       libicu-dev \
       libboost-all-dev \
+      libssl-dev \
       libbz2-dev \
       liblzma-dev \
       python-dev \
