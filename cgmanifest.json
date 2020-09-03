@@ -9,16 +9,15 @@
                }
              }
           },
-        {
-            "Component": {
-                "Type": "other",
-                "Other": {
-                    "Name": "cmph",
-                    "Version": "2.0.2",
-                    "DownloadUrl": "https://sourceforge.net/projects/cmph/files/v2.0.2/cmph-2.0.2.tar.gz/download"
-                }
-            }
-        },
+          {
+            "component": { 
+             "type": "git", 
+             "git": { 
+               "repositoryUrl": "https://git.code.sf.net/p/cmph/git", 
+               "commitHash": "a250982ade093f4eed0552bbdd22dd7b0432007f" 
+               }
+             }
+          },          
         {
             "Component": {
                 "Type": "other",
@@ -31,3 +30,4 @@
         },        
     ]
 }
+
