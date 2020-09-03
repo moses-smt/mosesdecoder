@@ -58,35 +58,40 @@ steps:
       doxygen 
   displayName: 'Install Ubuntu packages'
 
-- script: |   
-    wget "https://sourceforge.net/projects/cmph/files/v2.0.2/cmph-2.0.2.tar.gz/download"
-    mv download  cmph-2.0.2.tar.gz  
-    tar xvzf cmph-2.0.2.tar.gz
-    cd cmph-2.0.2
-    ./configure --prefix=$PWD
-    make
-    make install
-    cd ..
-  displayName: 'Build and Install cmph'    
+# - script: |   
+#     wget "https://sourceforge.net/projects/cmph/files/v2.0.2/cmph-2.0.2.tar.gz/download"
+#     mv download  cmph-2.0.2.tar.gz  
+#     tar xvzf cmph-2.0.2.tar.gz
+#     cd cmph-2.0.2
+#     ./configure --prefix=$PWD
+#     make
+#     make install
+#     cd ..
+#   displayName: 'Build and Install cmph'    
 
-- script: |   
-    wget "https://sourceforge.net/projects/xmlrpc-c/files/Xmlrpc-c%20Super%20Stable/1.51.06/xmlrpc-c-1.51.06.tgz/download"
-    mv download  xmlrpc-c-1.51.06.tgz
-    tar xvzf xmlrpc-c-1.51.06.tgz
-    cd xmlrpc-c-1.51.06
-    ./configure --prefix=$PWD
-    make
-    make install
-    sudo ldconfig
-    cd ..
-  displayName: 'Build and Install xmlrpc-c'    
+# - script: |   
+#     wget "https://sourceforge.net/projects/xmlrpc-c/files/Xmlrpc-c%20Super%20Stable/1.51.06/xmlrpc-c-1.51.06.tgz/download"
+#     mv download  xmlrpc-c-1.51.06.tgz
+#     tar xvzf xmlrpc-c-1.51.06.tgz
+#     cd xmlrpc-c-1.51.06
+#     ./configure --prefix=$PWD
+#     make
+#     make install
+#     sudo ldconfig
+#     cd ..
+#   displayName: 'Build and Install xmlrpc-c'    
+
+# - script: |   
+#     ./bjam \
+#       --with-cmph=$PWD/cmph-2.0.2 \
+#       --with-xmlrpc-c=$PWD/xmlrpc-c-1.51.06 \
+#       -j2
+#   displayName: 'Build Moses'    
 
 - script: |   
     ./bjam \
-      --with-cmph=$PWD/cmph-2.0.2 \
-      --with-xmlrpc-c=$PWD/xmlrpc-c-1.51.06 \
       -j2
-  displayName: 'Build Moses'    
+  displayName: 'Build Moses'  
 
 - task: ComponentGovernanceComponentDetection@0
   inputs:
