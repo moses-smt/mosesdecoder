@@ -37,14 +37,6 @@ protected:
   static SentenceWithCandidates *CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
                                        const System &system, const std::string &str);
 
-  static void XMLParse(
-    MemPool &pool,
-    const System &system,
-    size_t depth,
-    const pugi::xml_node &parentNode,
-    std::vector<std::string> &toks,
-    std::vector<XMLOption*> &xmlOptions);
-
 };
 
 } /* namespace Moses2 */
