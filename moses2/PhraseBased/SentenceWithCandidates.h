@@ -9,7 +9,7 @@
 #include <boost/property_tree/ptree.hpp>
 #include <string>
 #include "PhraseImpl.h"
-#include "../InputType.h"
+#include "Sentence.h"
 #include "../MemPool.h"
 #include "../pugixml.hpp"
 #include "../legacy/Util2.h"
@@ -19,7 +19,7 @@ namespace Moses2
 class FactorCollection;
 class System;
 
-class SentenceWithCandidates: public InputType, public PhraseImpl
+class SentenceWithCandidates: public Sentence
 {
 public:
 
@@ -27,8 +27,7 @@ public:
                                     const System &system, const std::string &str);
 
   SentenceWithCandidates(MemPool &pool, size_t size)
-    :InputType(pool)
-    ,PhraseImpl(pool, size)
+    :Sentence(pool, size)
   {}
 
   virtual ~SentenceWithCandidates()

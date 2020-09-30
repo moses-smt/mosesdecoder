@@ -31,7 +31,7 @@ SentenceWithCandidates *SentenceWithCandidates::CreateFromString(MemPool &pool, 
     exit(1);
   }
 
-  const string partstr = result[0]
+  const string partstr = result[0];
   
   if (system.options.input.xml_policy) {
     // xml

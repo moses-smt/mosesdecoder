@@ -108,7 +108,8 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem : : : $(max-factors
 		PhraseBased/ReorderingConstraint.cpp 
 		PhraseBased/TargetPhrases.cpp
  	 	PhraseBased/Search.cpp
-	    PhraseBased/Sentence.cpp
+    PhraseBased/Sentence.cpp
+    PhraseBased/SentenceWithCandidates.cpp
 		PhraseBased/TargetPhraseImpl.cpp 
  	 	PhraseBased/TrellisPath.cpp
 
