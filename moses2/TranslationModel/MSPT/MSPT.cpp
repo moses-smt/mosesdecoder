@@ -52,7 +52,7 @@ MSPT::~MSPT()
 
 void MSPT::InitializeForInput(const InputType &input)
 {
-  cerr << "InitializeForInput" << endl;
+  cerr << "InitializeForInput MSPT" << endl;
 }
 
 TargetPhrases* MSPT::Lookup(const Manager &mgr, MemPool &pool,
