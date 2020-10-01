@@ -66,6 +66,8 @@ public:
               const SCFG::Stacks &stacks,
               SCFG::InputPath &path) const;
 
+  virtual void InitializeForInput(const InputType &input);
+
 protected:
   PBNODE    *m_rootPb;
   SCFGNODE  *m_rootSCFG;

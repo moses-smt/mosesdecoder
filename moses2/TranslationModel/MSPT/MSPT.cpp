@@ -150,6 +150,11 @@ void MSPT::Load(System &system)
   */
 }
 
+void MSPT::InitializeForInput(const InputType &input)
+{
+  cerr << "InitializeForInput" << endl;
+}
+
 TargetPhrases* MSPT::Lookup(const Manager &mgr, MemPool &pool,
     InputPath &inputPath) const
 {
