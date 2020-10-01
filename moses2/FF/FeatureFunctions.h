@@ -88,7 +88,7 @@ public:
   void EvaluateWhenAppliedBatch(const Batch &batch) const;
 
   void InitializeForInput(const InputType &input);
-  void CleanUpAfterSentenceProcessing() const;
+  void CleanUpAfterSentenceProcessing(const InputType &input) const;
 
   void ShowWeights(const Weights &allWeights);
 
