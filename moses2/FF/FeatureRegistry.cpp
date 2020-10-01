@@ -4,6 +4,7 @@
 #include "../TranslationModel/ProbingPT.h"
 #include "../TranslationModel/UnknownWordPenalty.h"
 #include "../TranslationModel/Transliteration.h"
+#include "../TranslationModel/MSPT/MSPT.h"
 
 #include "../LM/KENLM.h"
 #include "../LM/KENLMBatch.h"
@@ -56,6 +57,7 @@ FeatureRegistry::FeatureRegistry()
   MOSES_FNAME(ProbingPT);
   MOSES_FNAME2("PhraseDictionaryTransliteration", Transliteration);
   MOSES_FNAME(UnknownWordPenalty);
+  MOSES_FNAME(MSPT);
 
   Add("KENLM", new KenFactory());
 
