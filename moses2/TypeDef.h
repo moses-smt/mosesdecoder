@@ -71,7 +71,8 @@ enum InputTypeEnum {
   TreeInputType         = 3,
   //,WordLatticeInput2 = 4,
   TabbedSentenceInput    = 5,
-  ForestInputType        = 6
+  ForestInputType        = 6,
+  SentenceInputWithCandidates = 7,
 };
 
 enum XmlInputType {

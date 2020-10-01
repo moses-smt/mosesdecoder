@@ -13,6 +13,7 @@
 #include "TargetPhraseImpl.h"
 #include "InputPath.h"
 #include "Sentence.h"
+#include "SentenceWithCandidates.h"
 
 #include "Normal/Search.h"
 #include "CubePruningMiniStack/Search.h"
@@ -59,7 +60,8 @@ void Manager::Init()
   InitPools();
 
   FactorCollection &vocab = system.GetVocab();
-  m_input = Moses2::Sentence::CreateFromString(GetPool(), vocab, system, m_inputStr);
+  //TODO: need option to choose Sentence vs SentenceWithCandidates
+  m_input = Moses2::SentenceWithCandidates::CreateFromString(GetPool(), vocab, system, m_inputStr);
 
   m_bitmaps = new Bitmaps(GetPool());
 
