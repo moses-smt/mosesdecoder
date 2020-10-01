@@ -51,7 +51,6 @@ public:
   MSPT(size_t startInd, const std::string &line);
   virtual ~MSPT();
 
-  virtual void Load(System &system);
   virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
                                 InputPath &inputPath) const;
 
