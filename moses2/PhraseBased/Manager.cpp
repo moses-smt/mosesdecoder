@@ -13,6 +13,7 @@
 #include "TargetPhraseImpl.h"
 #include "InputPath.h"
 #include "Sentence.h"
+#include "SentenceWithCandidates.h"
 
 #include "Normal/Search.h"
 #include "CubePruningMiniStack/Search.h"
