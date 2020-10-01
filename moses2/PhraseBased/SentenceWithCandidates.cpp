@@ -12,7 +12,7 @@
 #include "../System.h"
 #include "../parameters/AllOptions.h"
 #include "../legacy/Util2.h"
-
+#include <unordered_map>
 
 using namespace std;
 
@@ -23,15 +23,30 @@ SentenceWithCandidates *SentenceWithCandidates::CreateFromString(MemPool &pool, 
                                      const System &system, const std::string &str)
 {
   SentenceWithCandidates *ret;
+  
+  // unordered_map<string,unordered_map<string, float>> ;
 
-  vector<string> result; 
-  boost::split(result, str, boost::is_any_of("|||")); 
+  // unordered_map<string, float> s;
+  // s["abc"]=0.2;
+  // s["awc"]=0.4;
+  // s["abe"]=0.3;
+  // translation_candidates["src_1"]=s; 
 
-  if (result.size()!=2){
+  // s.clear();
+  // s["pqr"]=0.2;
+  // s["yen"]=0.4;
+  // s["dkg"]=0.5;
+  // translation_candidates["src_2"]=s;  
+
+  vector<string> input_parts; 
+  boost::split(input_parts, str, boost::is_any_of("|||")); 
+
+  if (input_parts.size()!=2){
     exit(1);
   }
 
-  const string partstr = result[0]
+  const string partstr = input_parts[0]
+  parseCandidates(input_parts[1])
   
   if (system.options.input.xml_policy) {
     // xml
