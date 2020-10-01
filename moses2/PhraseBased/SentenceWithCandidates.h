@@ -23,6 +23,9 @@ class SentenceWithCandidates: public Sentence
 {
 public:
 
+  static const std::string INPUT_PART_DELIM;
+  static const std::string PT_LINE_DELIM;
+
   static SentenceWithCandidates *CreateFromString(MemPool &pool, FactorCollection &vocab,
                                     const System &system, const std::string &str);
 
@@ -33,9 +36,8 @@ public:
   virtual ~SentenceWithCandidates()
   {}
 
-protected:
-  static SentenceWithCandidates *CreateFromStringXML(MemPool &pool, FactorCollection &vocab,
-                                       const System &system, const std::string &str);
+private:
+  std::string m_phraseTableString;
 
 };
 
