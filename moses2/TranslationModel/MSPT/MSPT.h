@@ -51,7 +51,6 @@ public:
   MSPT(size_t startInd, const std::string &line);
   virtual ~MSPT();
 
-  virtual void Load(System &system);
   virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
                                 InputPath &inputPath) const;
 
@@ -65,6 +64,8 @@ public:
               size_t maxChartSpan,
               const SCFG::Stacks &stacks,
               SCFG::InputPath &path) const;
+
+  virtual void InitializeForInput(const InputType &input);
 
 protected:
   PBNODE    *m_rootPb;

@@ -33,7 +33,7 @@ class HypothesisBase;
 class ManagerBase
 {
 public:
-  const System &system;
+  System &system;
   const TranslationTask &task;
   mutable ArcLists arcLists;
 

@@ -229,6 +229,13 @@ void FeatureFunctions::EvaluateWhenAppliedBatch(const Batch &batch) const
   }
 }
 
+void FeatureFunctions::InitializeForInput(const InputType &input) 
+{
+  BOOST_FOREACH(FeatureFunction *ff, m_featureFunctions) {
+    ff->InitializeForInput(input);
+  }
+}
+
 void FeatureFunctions::CleanUpAfterSentenceProcessing() const
 {
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {

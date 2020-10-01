@@ -31,6 +31,7 @@ class Scores;
 class Hypothesis;
 class UnknownWordPenalty;
 class Weights;
+class InputType;
 
 namespace SCFG
 {
@@ -47,7 +48,7 @@ public:
   FeatureFunctions(System &system);
   virtual ~FeatureFunctions();
 
-  const std::vector<const FeatureFunction*> &GetFeatureFunctions() const {
+  const std::vector<FeatureFunction*> &GetFeatureFunctions() const {
     return m_featureFunctions;
   }
 
@@ -86,12 +87,13 @@ public:
 
   void EvaluateWhenAppliedBatch(const Batch &batch) const;
 
+  void InitializeForInput(const InputType &input);
   void CleanUpAfterSentenceProcessing() const;
 
   void ShowWeights(const Weights &allWeights);
 
 protected:
-  std::vector<const FeatureFunction*> m_featureFunctions;
+  std::vector<FeatureFunction*> m_featureFunctions;
   std::vector<const StatefulFeatureFunction*> m_statefulFeatureFunctions;
   std::vector<const FeatureFunction*> m_withPhraseTableInd;
   const UnknownWordPenalty *m_unkWP;

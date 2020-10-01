@@ -25,6 +25,7 @@ class TargetPhraseImpl;
 class Scores;
 class ManagerBase;
 class MemPool;
+class InputType;
 
 namespace SCFG
 {
@@ -94,6 +95,8 @@ public:
   virtual void EvaluateAfterTablePruning(MemPool &pool,
                                          const SCFG::TargetPhrases &tps, const Phrase<SCFG::Word> &sourcePhrase) const {
   }
+
+  virtual void InitializeForInput(const InputType &input) { };
 
   // clean up temporary memory, called after processing each sentence
   virtual void CleanUpAfterSentenceProcessing() const {

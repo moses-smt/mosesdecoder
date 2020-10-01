@@ -30,6 +30,7 @@ ManagerBase::ManagerBase(System &sys, const TranslationTask &task,
   ,m_systemPool(NULL)
   ,m_hypoRecycle(NULL)
 {
+  system.featureFunctions.InitializeForInput(*m_input);
 }
 
 ManagerBase::~ManagerBase()
