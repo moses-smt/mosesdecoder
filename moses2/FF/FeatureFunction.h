@@ -99,7 +99,7 @@ public:
   virtual void InitializeForInput(const InputType &input) { };
 
   // clean up temporary memory, called after processing each sentence
-  virtual void CleanUpAfterSentenceProcessing() const {
+  virtual void CleanUpAfterSentenceProcessing(const InputType &input) const {
   }
 
 protected:
