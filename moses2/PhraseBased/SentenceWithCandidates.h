@@ -29,12 +29,8 @@ public:
   static SentenceWithCandidates *CreateFromString(MemPool &pool, FactorCollection &vocab,
                                     const System &system, const std::string &str);
 
-  SentenceWithCandidates(MemPool &pool, size_t size)
-    :Sentence(pool, size)
-  {}
-
-  virtual ~SentenceWithCandidates()
-  {}
+  SentenceWithCandidates(MemPool &pool, size_t size);
+  virtual ~SentenceWithCandidates();
 
   virtual std::string Debug(const System &system) const;
   std::string virtual getPhraseTableString() const{

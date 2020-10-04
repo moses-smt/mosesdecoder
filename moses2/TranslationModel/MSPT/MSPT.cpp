@@ -157,13 +157,13 @@ void MSPT::InitializeForInput(const System &system, const InputType &input)
 {
   cerr << "InitializeForInput MSPT" << endl;
   cerr << input.Debug(system) << endl << flush;
-  cerr << "HH1" << endl;
+  cerr << "HH1" << endl << flush;
   
   // downcast to SentenceWithCandidates
-  //const SentenceWithCandidates *inputObj = static_cast<const SentenceWithCandidates*>(&input);
-  const SentenceWithCandidates* inputObj = dynamic_cast<const SentenceWithCandidates*>(&input);
+  //const SentenceWithCandidates &inputObj = static_cast<const SentenceWithCandidates&>(input);
+  const SentenceWithCandidates &inputObj = dynamic_cast<const SentenceWithCandidates&>(input);
   cerr << "Casting done." << endl << flush;
-  cerr << "PhraseTableString member: " << inputObj->getPhraseTableString() << endl;
+  cerr << "PhraseTableString member: " << inputObj.getPhraseTableString() << endl;
 
 }
 

@@ -77,6 +77,17 @@ SentenceWithCandidates *SentenceWithCandidates::CreateFromString(MemPool &pool, 
   return ret;
 }
 
+SentenceWithCandidates::SentenceWithCandidates(MemPool &pool, size_t size)
+:Sentence(pool, size)
+{
+    cerr << "SentenceWithCandidates::SentenceWithCandidates" << endl;
+}
+
+SentenceWithCandidates::~SentenceWithCandidates()
+{
+    cerr << "SentenceWithCandidates::~SentenceWithCandidates" << endl;
+}
+
 std::string SentenceWithCandidates::Debug(const System &system) const
 {
   cerr << "SentenceWithCandidates::Debug" << endl;
