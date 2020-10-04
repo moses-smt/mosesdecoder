@@ -73,6 +73,8 @@ public:
   //! Returns true if there were any XML tags parsed that at least partially covered the range passed
   bool XmlOverlap(size_t startPos, size_t endPos) const;
 
+  virtual std::string Debug(const System &system) const;
+
 protected:
   ReorderingConstraint m_reorderingConstraint; /**< limits on reordering specified either by "-mp" switch or xml tags */
   Vector<const XMLOption*> m_xmlOptions;

@@ -29,7 +29,9 @@ ManagerBase::ManagerBase(System &sys, const TranslationTask &task,
   ,m_pool(NULL)
   ,m_systemPool(NULL)
   ,m_hypoRecycle(NULL)
+  ,m_input(NULL)
 {
+  //cerr << "ManagerBase::ManagerBase " << m_input->Debug(sys) << endl << flush;
   system.featureFunctions.InitializeForInput(*m_input);
 }
 

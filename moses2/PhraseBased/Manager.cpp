@@ -62,6 +62,7 @@ void Manager::Init()
   FactorCollection &vocab = system.GetVocab();
   //TODO: need option to choose Sentence vs SentenceWithCandidates
   m_input = Moses2::SentenceWithCandidates::CreateFromString(GetPool(), vocab, system, m_inputStr);
+  cerr << "Manager::Init: " << m_input->Debug(sys) << endl << flush;
 
   m_bitmaps = new Bitmaps(GetPool());
 

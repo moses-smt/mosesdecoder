@@ -77,5 +77,10 @@ SentenceWithCandidates *SentenceWithCandidates::CreateFromString(MemPool &pool, 
   return ret;
 }
 
+std::string SentenceWithCandidates::Debug(const System &system) const
+{
+  cerr << "SentenceWithCandidates::Debug" << endl;
+}
+
 } /* namespace Moses2 */
 
