@@ -236,10 +236,10 @@ void FeatureFunctions::InitializeForInput(const InputType &input)
   }
 }
 
-void FeatureFunctions::CleanUpAfterSentenceProcessing() const
+void FeatureFunctions::CleanUpAfterSentenceProcessing(const InputType &input) const
 {
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
-    ff->CleanUpAfterSentenceProcessing();
+    ff->CleanUpAfterSentenceProcessing(input);
   }
 }
 

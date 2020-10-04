@@ -154,7 +154,7 @@ MSPT::~MSPT()
 
 void MSPT::InitializeForInput(const InputType &input)
 {
-  cerr << "InitializeForInput" << endl;
+  cerr << "InitializeForInput MSPT" << endl;
 
   // downcast to SentenceWithCandidates
   const SentenceWithCandidates& inputObj = dynamic_cast<const SentenceWithCandidates&>(input);
