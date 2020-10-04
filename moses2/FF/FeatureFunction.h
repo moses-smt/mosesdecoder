@@ -96,10 +96,10 @@ public:
                                          const SCFG::TargetPhrases &tps, const Phrase<SCFG::Word> &sourcePhrase) const {
   }
 
-  virtual void InitializeForInput(const InputType &input) { };
+  virtual void InitializeForInput(const System &system, const InputType &input) { };
 
   // clean up temporary memory, called after processing each sentence
-  virtual void CleanUpAfterSentenceProcessing(const InputType &input) const {
+  virtual void CleanUpAfterSentenceProcessing(const System &system, const InputType &input) const {
   }
 
 protected:

@@ -232,14 +232,14 @@ void FeatureFunctions::EvaluateWhenAppliedBatch(const Batch &batch) const
 void FeatureFunctions::InitializeForInput(const InputType &input) 
 {
   BOOST_FOREACH(FeatureFunction *ff, m_featureFunctions) {
-    ff->InitializeForInput(input);
+    ff->InitializeForInput(m_system, input);
   }
 }
 
 void FeatureFunctions::CleanUpAfterSentenceProcessing(const InputType &input) const
 {
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
-    ff->CleanUpAfterSentenceProcessing(input);
+    ff->CleanUpAfterSentenceProcessing(m_system, input);
   }
 }
 

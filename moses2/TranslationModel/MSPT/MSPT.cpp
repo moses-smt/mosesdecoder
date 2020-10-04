@@ -28,6 +28,7 @@
 #include "../../SCFG/Stacks.h"
 #include "../../SCFG/Manager.h"
 
+#include "../../PhraseBased/SentenceWithCandidates.h"
 
 using namespace std;
 
@@ -152,14 +153,16 @@ MSPT::~MSPT()
 
 // }
 
-void MSPT::InitializeForInput(const InputType &input)
+void MSPT::InitializeForInput(const System &system, const InputType &input)
 {
   cerr << "InitializeForInput MSPT" << endl;
+  cerr << &input << endl;
 
   // downcast to SentenceWithCandidates
-  const SentenceWithCandidates& inputObj = dynamic_cast<const SentenceWithCandidates&>(input);
-  cerr << "Casting done." << endl;
-  // cerr << "PhraseTableString member: " << inputObj.getPhraseTableString() << endl;
+  //const SentenceWithCandidates *inputObj = static_cast<const SentenceWithCandidates*>(&input);
+  const SentenceWithCandidates* inputObj = dynamic_cast<const SentenceWithCandidates*>(&input);
+  cerr << "Casting done." << endl << flush;
+  cerr << "PhraseTableString member: " << inputObj->getPhraseTableString() << endl;
 
 }
 
