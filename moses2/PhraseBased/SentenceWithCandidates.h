@@ -36,6 +36,10 @@ public:
   virtual ~SentenceWithCandidates()
   {}
 
+  std::string virtual getPhraseTableString() const{
+    return m_phraseTableString; 
+  }
+
 private:
   std::string m_phraseTableString;
 

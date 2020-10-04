@@ -70,8 +70,9 @@ SentenceWithCandidates *SentenceWithCandidates::CreateFromString(MemPool &pool, 
 
   //// Parse the phrase table of the input 
   ret->m_phraseTableString = replace_all_copy(input_parts[1],PT_LINE_DELIM,"\n");
-  cerr << "Extracted Phrase Table String" << endl; 
-  cerr << ret->m_phraseTableString << endl; 
+    // ret->m_phraseTableString="constant phrase table";
+//   cerr << "Extracted Phrase Table String: " << ret->m_phraseTableString << endl; 
+   cerr << "Extracted Phrase Table String: " << ret->getPhraseTableString() << endl;
 
   return ret;
 }
