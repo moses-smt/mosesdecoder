@@ -43,7 +43,6 @@ namespace Moses2
 MSPT::MSPT(size_t startInd, const std::string &line)
   :PhraseTable(startInd, line)
   ,m_rootPb(NULL)
-  ,m_rootSCFG(NULL)
 {
   ReadParameters();
 }
@@ -51,7 +50,6 @@ MSPT::MSPT(size_t startInd, const std::string &line)
 MSPT::~MSPT()
 {
   delete m_rootPb;
-  delete m_rootSCFG;
 }
 
 void MSPT::CreatePTForInput(const System &system, string phraseTableString)
@@ -65,7 +63,7 @@ void MSPT::CreatePTForInput(const System &system, string phraseTableString)
   if (system.isPb) {
     m_rootPb = new PBNODE();
   } else {
-    m_rootSCFG = new SCFGNODE();
+    abort();
     //cerr << "m_rootSCFG=" << m_rootSCFG << endl;
   }
 
@@ -111,32 +109,7 @@ void MSPT::CreatePTForInput(const System &system, string phraseTableString)
 
       //cerr << "target=" << target->Debug(system) << endl;
     } else {
-      SCFG::PhraseImpl *source = SCFG::PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
-                                 toks[0]);
-      //cerr << "created source:" << *source << endl;
-      SCFG::TargetPhraseImpl *target = SCFG::TargetPhraseImpl::CreateFromString(systemPool, *this,
-                                       system, toks[1]);
-
-      //cerr << "created target " << *target << " source=" << *source << endl;
-
-      target->GetScores().CreateFromString(toks[2], *this, system, true);
-      //cerr << "created scores:" << *target << endl;
-
-      //vector<SCORE> scores = Tokenize<SCORE>(toks[2]);
-      //target->sortScore = (scores.size() >= 3) ? TransformScore(scores[2]) : 0;
-
-      target->SetAlignmentInfo(toks[3]);
-
-      // properties
-      if (toks.size() == 7) {
-        //target->properties = (char*) system.systemPool.Allocate(toks[6].size() + 1);
-        //strcpy(target->properties, toks[6].c_str());
-      }
-
-      system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
-          *target);
-      //cerr << "EvaluateInIsolation:" << *target << endl;
-      m_rootSCFG->AddRule(m_input, *source, target);
+      abort();
     }
   }
 
@@ -144,8 +117,7 @@ void MSPT::CreatePTForInput(const System &system, string phraseTableString)
     m_rootPb->SortAndPrune(m_tableLimit, systemPool, system);
     //cerr << "root=" << &m_rootPb << endl;
   } else {
-    m_rootSCFG->SortAndPrune(m_tableLimit, systemPool, system);
-    //cerr << "root=" << &m_rootPb << endl;
+      abort();
   }
   /*
   BOOST_FOREACH(const PtMem::Node<Word>::Children::value_type &valPair, m_rootPb.GetChildren()) {

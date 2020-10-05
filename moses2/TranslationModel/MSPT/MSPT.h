@@ -69,7 +69,6 @@ public:
 
 protected:
   PBNODE    *m_rootPb;
-  SCFGNODE  *m_rootSCFG;
 
   void LookupGivenNode(
     MemPool &pool,
