@@ -67,7 +67,7 @@ public:
     return m_targetPhrases;
   }
 
-  void SortAndPrune(size_t tableLimit, MemPool &pool, System &system) {
+  void SortAndPrune(size_t tableLimit, MemPool &pool, const System &system) {
     BOOST_FOREACH(typename Children::value_type &val, m_children) {
       Node &child = val.second;
       child.SortAndPrune(tableLimit, pool, system);

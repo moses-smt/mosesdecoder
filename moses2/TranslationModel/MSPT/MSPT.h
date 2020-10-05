@@ -80,6 +80,8 @@ protected:
     const Moses2::Range &subPhraseRange,
     SCFG::InputPath &outPath) const;
 
+  void CreatePTForInput(const System &system, std::string phraseTableString);
+
 };
 
 }
