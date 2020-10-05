@@ -229,10 +229,10 @@ void FeatureFunctions::EvaluateWhenAppliedBatch(const Batch &batch) const
   }
 }
 
-void FeatureFunctions::InitializeForInput(const InputType &input) 
+void FeatureFunctions::InitializeForInput(const ManagerBase &mgr, const InputType &input) 
 {
   BOOST_FOREACH(FeatureFunction *ff, m_featureFunctions) {
-    ff->InitializeForInput(m_system, input);
+    ff->InitializeForInput(mgr, input);
   }
 }
 

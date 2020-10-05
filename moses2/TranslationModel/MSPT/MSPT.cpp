@@ -52,12 +52,13 @@ MSPT::~MSPT()
   delete m_rootPb;
 }
 
-void MSPT::CreatePTForInput(const System &system, string phraseTableString)
+void MSPT::CreatePTForInput(const ManagerBase &mgr, string phraseTableString)
 {
   //cerr << "In CreatePTForInput" << endl << flush;
-
+  const System &system = mgr.system;
   FactorCollection &vocab = system.GetVocab();
   MemPool &systemPool = system.GetSystemPool();
+  MemPool &pool = mgr.GetPool();
   MemPool tmpSourcePool;
 
   if (system.isPb) {
@@ -85,7 +86,7 @@ void MSPT::CreatePTForInput(const System &system, string phraseTableString)
       PhraseImpl *source = PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
                            toks[0]);
       //cerr << "created soure" << endl;
-      TargetPhraseImpl *target = TargetPhraseImpl::CreateFromString(systemPool, *this, system,
+      TargetPhraseImpl *target = TargetPhraseImpl::CreateFromString(pool, *this, system,
                                  toks[1]);
       //cerr << "created target" << endl;
       target->GetScores().CreateFromString(toks[2], *this, system, true);
@@ -102,7 +103,7 @@ void MSPT::CreatePTForInput(const System &system, string phraseTableString)
         //strcpy(target->properties, toks[6].c_str());
       }
 
-      system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
+      system.featureFunctions.EvaluateInIsolation(pool, system, *source,
           *target);
       //cerr << "EvaluateInIsolation:" << target->Debug(system) << endl;
       m_rootPb->AddRule(m_input, *source, target);
@@ -114,7 +115,7 @@ void MSPT::CreatePTForInput(const System &system, string phraseTableString)
   }
 
   if (system.isPb) {
-    m_rootPb->SortAndPrune(m_tableLimit, systemPool, system);
+    m_rootPb->SortAndPrune(m_tableLimit, pool, system);
     //cerr << "root=" << &m_rootPb << endl;
   } else {
       abort();
@@ -129,21 +130,11 @@ void MSPT::CreatePTForInput(const System &system, string phraseTableString)
 
 }
 
-void MSPT::InitializeForInput(const System &system, const InputType &input)
+void MSPT::InitializeForInput(const ManagerBase &mgr, const InputType &input)
 {
-  //cerr << "InitializeForInput MSPT" << endl;
-  //cerr << input.Debug(system) << endl;
-  //cerr << "HH1" << endl << flush;
-  
   // downcast to SentenceWithCandidates
   const SentenceWithCandidates &inputObj = static_cast<const SentenceWithCandidates&>(input);
-  //const SentenceWithCandidates &inputObj = dynamic_cast<const SentenceWithCandidates&>(input);
-  //cerr << "Casting done." << endl << flush;
-  //cerr << "PhraseTableString member: " << inputObj.getPhraseTableString() << endl << flush;
-  //cerr << "HH2" << endl << flush;
-  CreatePTForInput(system, inputObj.getPhraseTableString());
-  //cerr << "HH3" << endl << flush;
-
+  CreatePTForInput(mgr, inputObj.getPhraseTableString());
 }
 
 TargetPhrases* MSPT::Lookup(const Manager &mgr, MemPool &pool,

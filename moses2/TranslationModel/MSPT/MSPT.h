@@ -65,7 +65,7 @@ public:
               const SCFG::Stacks &stacks,
               SCFG::InputPath &path) const;
 
-  virtual void InitializeForInput(const System &system, const InputType &input);
+  virtual void InitializeForInput(const ManagerBase &mgr, const InputType &input);
 
 protected:
   PBNODE    *m_rootPb;
@@ -79,7 +79,7 @@ protected:
     const Moses2::Range &subPhraseRange,
     SCFG::InputPath &outPath) const;
 
-  void CreatePTForInput(const System &system, std::string phraseTableString);
+  void CreatePTForInput(const ManagerBase &mgr, std::string phraseTableString);
 
 };
 
