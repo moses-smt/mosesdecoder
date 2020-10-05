@@ -30,6 +30,7 @@
 #include "../../SCFG/Manager.h"
 
 #include "../../PhraseBased/SentenceWithCandidates.h"
+#include "../../PhraseBased/Manager.h"
 
 using namespace std;
 
@@ -55,7 +56,7 @@ MSPT::~MSPT()
 
 void MSPT::CreatePTForInput(const System &system, string phraseTableString)
 {
-  cerr << "In CreatePTForInput" << endl << flush;
+  //cerr << "In CreatePTForInput" << endl << flush;
 
   FactorCollection &vocab = system.GetVocab();
   MemPool &systemPool = system.GetSystemPool();
@@ -105,7 +106,7 @@ void MSPT::CreatePTForInput(const System &system, string phraseTableString)
 
       system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
           *target);
-      //cerr << "EvaluateInIsolation:" << *target << endl;
+      //cerr << "EvaluateInIsolation:" << target->Debug(system) << endl;
       m_rootPb->AddRule(m_input, *source, target);
 
       //cerr << "target=" << target->Debug(system) << endl;
@@ -158,27 +159,29 @@ void MSPT::CreatePTForInput(const System &system, string phraseTableString)
 
 void MSPT::InitializeForInput(const System &system, const InputType &input)
 {
-  cerr << "InitializeForInput MSPT" << endl;
-  cerr << input.Debug(system) << endl << flush;
-  cerr << "HH1" << endl << flush;
+  //cerr << "InitializeForInput MSPT" << endl;
+  //cerr << input.Debug(system) << endl;
+  //cerr << "HH1" << endl << flush;
   
   // downcast to SentenceWithCandidates
-  //const SentenceWithCandidates &inputObj = static_cast<const SentenceWithCandidates&>(input);
-  const SentenceWithCandidates &inputObj = dynamic_cast<const SentenceWithCandidates&>(input);
-  cerr << "Casting done." << endl << flush;
-  cerr << "PhraseTableString member: " << inputObj.getPhraseTableString() << endl;
-
-  cerr << "Hardcoding sample PhraseTableString" << endl << flush; 
-  string phraseTableString="a ||| x ||| 0.4 $$$ a ||| y ||| 0.6 $$$ b ||| y ||| 0.1 $$$ b ||| z ||| 0.9";
-  CreatePTForInput(system,phraseTableString);
+  const SentenceWithCandidates &inputObj = static_cast<const SentenceWithCandidates&>(input);
+  //const SentenceWithCandidates &inputObj = dynamic_cast<const SentenceWithCandidates&>(input);
+  //cerr << "Casting done." << endl << flush;
+  //cerr << "PhraseTableString member: " << inputObj.getPhraseTableString() << endl << flush;
+  //cerr << "HH2" << endl << flush;
+  CreatePTForInput(system, inputObj.getPhraseTableString());
+  //cerr << "HH3" << endl << flush;
 
 }
 
 TargetPhrases* MSPT::Lookup(const Manager &mgr, MemPool &pool,
     InputPath &inputPath) const
 {
+  //cerr << "MSPT::Lookup inputPath:" << inputPath.Debug(mgr.system) << endl;
   const SubPhrase<Moses2::Word> &phrase = inputPath.subPhrase;
   TargetPhrases *tps = m_rootPb->Find(m_input, phrase);
+  //cerr << "MSPT::Lookup tps:" << tps->Debug(mgr.system) << endl;
+  //cerr << "MSPT::Lookup done" << endl;
   return tps;
 }
 

@@ -38,10 +38,10 @@ SentenceWithCandidates *SentenceWithCandidates::CreateFromString(MemPool &pool, 
       input_parts.push_back(copy_range<std::string>(*It));
   }
 
-  cerr << "Number of subparts: " << input_parts.size() << endl;
+  //cerr << "Number of subparts: " << input_parts.size() << endl;
 
   if (input_parts.size() ==2 ) {
-      cerr << "correct number of parts" << endl ;
+      //cerr << "correct number of parts" << endl ;
   } else {
       // TODO: how to handle wrong input format 
       cerr << "INCORRECT number of parts" << endl ;
@@ -50,8 +50,8 @@ SentenceWithCandidates *SentenceWithCandidates::CreateFromString(MemPool &pool, 
 
   trim(input_parts[0]);
   trim(input_parts[1]);
-  cerr << "Input String: " << input_parts[0] << endl ;
-  cerr << "Phrase Table: " << input_parts[1] << endl ;
+  //cerr << "Input String: " << input_parts[0] << endl ;
+  //cerr << "Phrase Table: " << input_parts[1] << endl ;
 
   ///// Process the text part of the input 
   const string partstr = input_parts[0];
@@ -72,7 +72,7 @@ SentenceWithCandidates *SentenceWithCandidates::CreateFromString(MemPool &pool, 
   ret->m_phraseTableString = replace_all_copy(input_parts[1],PT_LINE_DELIM,"\n");
     // ret->m_phraseTableString="constant phrase table";
 //   cerr << "Extracted Phrase Table String: " << ret->m_phraseTableString << endl; 
-   cerr << "Extracted Phrase Table String: " << ret->getPhraseTableString() << endl;
+   //cerr << "Extracted Phrase Table String: " << ret->getPhraseTableString() << endl;
 
   return ret;
 }
@@ -80,17 +80,17 @@ SentenceWithCandidates *SentenceWithCandidates::CreateFromString(MemPool &pool, 
 SentenceWithCandidates::SentenceWithCandidates(MemPool &pool, size_t size)
 :Sentence(pool, size)
 {
-    cerr << "SentenceWithCandidates::SentenceWithCandidates" << endl;
+    //cerr << "SentenceWithCandidates::SentenceWithCandidates" << endl;
 }
 
 SentenceWithCandidates::~SentenceWithCandidates()
 {
-    cerr << "SentenceWithCandidates::~SentenceWithCandidates" << endl;
+    //cerr << "SentenceWithCandidates::~SentenceWithCandidates" << endl;
 }
 
 std::string SentenceWithCandidates::Debug(const System &system) const
 {
-  cerr << "SentenceWithCandidates::Debug" << endl;
+  return "SentenceWithCandidates::Debug";
 }
 
 } /* namespace Moses2 */
