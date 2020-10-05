@@ -6,6 +6,7 @@
  */
 
 #include <cassert>
+#include <sstream>
 #include <boost/foreach.hpp>
 #include "MSPT.h"
 #include "../../PhraseBased/PhraseImpl.h"
@@ -66,7 +67,7 @@ MSPT::~MSPT()
 
 //   vector<string> toks;
 //   size_t lineNum = 0;
-//   InputFileStream strme(m_path);
+//   istringstream  strme(phraseTableString);
 //   string line;
 //   while (getline(strme, line)) {
 //     if (++lineNum % 1000000 == 0) {
@@ -159,7 +160,7 @@ void MSPT::InitializeForInput(const InputType &input)
   // downcast to SentenceWithCandidates
   const SentenceWithCandidates& inputObj = dynamic_cast<const SentenceWithCandidates&>(input);
   cerr << "Casting done." << endl;
-  // cerr << "PhraseTableString member: " << inputObj.getPhraseTableString() << endl;
+  cerr << "PhraseTableString member: " << inputObj.getPhraseTableString() << endl;
 
 }
 
