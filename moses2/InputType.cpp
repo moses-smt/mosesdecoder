@@ -7,6 +7,9 @@
 
 #include "InputType.h"
 #include "System.h"
+#include <iostream>
+
+using namespace std;
 
 namespace Moses2
 {
@@ -87,6 +90,11 @@ bool InputType::XmlOverlap(size_t startPos, size_t endPos) const
     }
   }
   return false;
+}
+
+std::string InputType::Debug(const System &system) const
+{
+  cerr << "InputType::Debug" << endl;
 }
 
 } /* namespace Moses2 */
