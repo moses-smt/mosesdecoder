@@ -36,13 +36,12 @@ using namespace std;
 
 namespace Moses2
 {
-
+thread_local MSPT::PBNODE *MSPT::m_rootPb;
 
 ////////////////////////////////////////////////////////////////////////
 
 MSPT::MSPT(size_t startInd, const std::string &line)
   :PhraseTable(startInd, line)
-  ,m_rootPb(NULL)
 {
   ReadParameters();
 }
@@ -57,7 +56,6 @@ void MSPT::CreatePTForInput(const ManagerBase &mgr, string phraseTableString)
   //cerr << "In CreatePTForInput" << endl << flush;
   const System &system = mgr.system;
   FactorCollection &vocab = system.GetVocab();
-  MemPool &systemPool = system.GetSystemPool();
   MemPool &pool = mgr.GetPool();
   MemPool tmpSourcePool;
 
@@ -146,6 +144,10 @@ TargetPhrases* MSPT::Lookup(const Manager &mgr, MemPool &pool,
   //cerr << "MSPT::Lookup tps:" << tps->Debug(mgr.system) << endl;
   //cerr << "MSPT::Lookup done" << endl;
   return tps;
+}
+
+void MSPT::CleanUpAfterSentenceProcessing(const System &system, const InputType &input) const {
+  delete m_rootPb;
 }
 
 void MSPT::InitActiveChart(
