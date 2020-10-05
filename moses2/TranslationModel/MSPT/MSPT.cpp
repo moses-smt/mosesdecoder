@@ -53,106 +53,108 @@ MSPT::~MSPT()
   delete m_rootSCFG;
 }
 
-// void MSPT::CreatePTForInput(string phraseTableString)
-// {
-//   FactorCollection &vocab = system.GetVocab();
-//   MemPool &systemPool = system.GetSystemPool();
-//   MemPool tmpSourcePool;
+void MSPT::CreatePTForInput(const System &system, string phraseTableString)
+{
+  cerr << "In CreatePTForInput" << endl << flush;
 
-//   if (system.isPb) {
-//     m_rootPb = new PBNODE();
-//   } else {
-//     m_rootSCFG = new SCFGNODE();
-//     //cerr << "m_rootSCFG=" << m_rootSCFG << endl;
-//   }
+  FactorCollection &vocab = system.GetVocab();
+  MemPool &systemPool = system.GetSystemPool();
+  MemPool tmpSourcePool;
 
-//   vector<string> toks;
-//   size_t lineNum = 0;
-//   istringstream  strme(phraseTableString);
-//   string line;
-//   while (getline(strme, line)) {
-//     if (++lineNum % 1000000 == 0) {
-//       cerr << lineNum << " ";
-//     }
-//     toks.clear();
-//     TokenizeMultiCharSeparator(toks, line, "|||");
-//     UTIL_THROW_IF2(toks.size() < 3, "Wrong format");
-//     //cerr << "line=" << line << endl;
-//     //cerr << "system.isPb=" << system.isPb << endl;
+  if (system.isPb) {
+    m_rootPb = new PBNODE();
+  } else {
+    m_rootSCFG = new SCFGNODE();
+    //cerr << "m_rootSCFG=" << m_rootSCFG << endl;
+  }
 
-//     if (system.isPb) {
-//       PhraseImpl *source = PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
-//                            toks[0]);
-//       //cerr << "created soure" << endl;
-//       TargetPhraseImpl *target = TargetPhraseImpl::CreateFromString(systemPool, *this, system,
-//                                  toks[1]);
-//       //cerr << "created target" << endl;
-//       target->GetScores().CreateFromString(toks[2], *this, system, true);
-//       //cerr << "created scores:" << *target << endl;
+  vector<string> toks;
+  size_t lineNum = 0;
+  istringstream  strme(phraseTableString);
+  string line;
+  while (getline(strme, line)) {
+    if (++lineNum % 1000000 == 0) {
+      cerr << lineNum << " ";
+    }
+    toks.clear();
+    TokenizeMultiCharSeparator(toks, line, "|||");
+    UTIL_THROW_IF2(toks.size() < 3, "Wrong format");
+    //cerr << "line=" << line << endl;
+    //cerr << "system.isPb=" << system.isPb << endl;
 
-//       if (toks.size() >= 4) {
-//         //cerr << "alignstr=" << toks[3] << endl;
-//         target->SetAlignmentInfo(toks[3]);
-//       }
+    if (system.isPb) {
+      PhraseImpl *source = PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
+                           toks[0]);
+      //cerr << "created soure" << endl;
+      TargetPhraseImpl *target = TargetPhraseImpl::CreateFromString(systemPool, *this, system,
+                                 toks[1]);
+      //cerr << "created target" << endl;
+      target->GetScores().CreateFromString(toks[2], *this, system, true);
+      //cerr << "created scores:" << *target << endl;
 
-//       // properties
-//       if (toks.size() == 7) {
-//         //target->properties = (char*) system.systemPool.Allocate(toks[6].size() + 1);
-//         //strcpy(target->properties, toks[6].c_str());
-//       }
+      if (toks.size() >= 4) {
+        //cerr << "alignstr=" << toks[3] << endl;
+        target->SetAlignmentInfo(toks[3]);
+      }
 
-//       system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
-//           *target);
-//       //cerr << "EvaluateInIsolation:" << *target << endl;
-//       m_rootPb->AddRule(m_input, *source, target);
+      // properties
+      if (toks.size() == 7) {
+        //target->properties = (char*) system.systemPool.Allocate(toks[6].size() + 1);
+        //strcpy(target->properties, toks[6].c_str());
+      }
 
-//       //cerr << "target=" << target->Debug(system) << endl;
-//     } else {
-//       SCFG::PhraseImpl *source = SCFG::PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
-//                                  toks[0]);
-//       //cerr << "created source:" << *source << endl;
-//       SCFG::TargetPhraseImpl *target = SCFG::TargetPhraseImpl::CreateFromString(systemPool, *this,
-//                                        system, toks[1]);
+      system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
+          *target);
+      //cerr << "EvaluateInIsolation:" << *target << endl;
+      m_rootPb->AddRule(m_input, *source, target);
 
-//       //cerr << "created target " << *target << " source=" << *source << endl;
+      //cerr << "target=" << target->Debug(system) << endl;
+    } else {
+      SCFG::PhraseImpl *source = SCFG::PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
+                                 toks[0]);
+      //cerr << "created source:" << *source << endl;
+      SCFG::TargetPhraseImpl *target = SCFG::TargetPhraseImpl::CreateFromString(systemPool, *this,
+                                       system, toks[1]);
 
-//       target->GetScores().CreateFromString(toks[2], *this, system, true);
-//       //cerr << "created scores:" << *target << endl;
+      //cerr << "created target " << *target << " source=" << *source << endl;
 
-//       //vector<SCORE> scores = Tokenize<SCORE>(toks[2]);
-//       //target->sortScore = (scores.size() >= 3) ? TransformScore(scores[2]) : 0;
+      target->GetScores().CreateFromString(toks[2], *this, system, true);
+      //cerr << "created scores:" << *target << endl;
 
-//       target->SetAlignmentInfo(toks[3]);
+      //vector<SCORE> scores = Tokenize<SCORE>(toks[2]);
+      //target->sortScore = (scores.size() >= 3) ? TransformScore(scores[2]) : 0;
 
-//       // properties
-//       if (toks.size() == 7) {
-//         //target->properties = (char*) system.systemPool.Allocate(toks[6].size() + 1);
-//         //strcpy(target->properties, toks[6].c_str());
-//       }
+      target->SetAlignmentInfo(toks[3]);
 
-//       system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
-//           *target);
-//       //cerr << "EvaluateInIsolation:" << *target << endl;
-//       m_rootSCFG->AddRule(m_input, *source, target);
-//     }
-//   }
+      // properties
+      if (toks.size() == 7) {
+        //target->properties = (char*) system.systemPool.Allocate(toks[6].size() + 1);
+        //strcpy(target->properties, toks[6].c_str());
+      }
 
-//   if (system.isPb) {
-//     m_rootPb->SortAndPrune(m_tableLimit, systemPool, system);
-//     //cerr << "root=" << &m_rootPb << endl;
-//   } else {
-//     m_rootSCFG->SortAndPrune(m_tableLimit, systemPool, system);
-//     //cerr << "root=" << &m_rootPb << endl;
-//   }
-//   /*
-//   BOOST_FOREACH(const PtMem::Node<Word>::Children::value_type &valPair, m_rootPb.GetChildren()) {
-//     const Word &word = valPair.first;
-//     cerr << word << " ";
-//   }
-//   cerr << endl;
-//   */
+      system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
+          *target);
+      //cerr << "EvaluateInIsolation:" << *target << endl;
+      m_rootSCFG->AddRule(m_input, *source, target);
+    }
+  }
 
-// }
+  if (system.isPb) {
+    m_rootPb->SortAndPrune(m_tableLimit, systemPool, system);
+    //cerr << "root=" << &m_rootPb << endl;
+  } else {
+    m_rootSCFG->SortAndPrune(m_tableLimit, systemPool, system);
+    //cerr << "root=" << &m_rootPb << endl;
+  }
+  /*
+  BOOST_FOREACH(const PtMem::Node<Word>::Children::value_type &valPair, m_rootPb.GetChildren()) {
+    const Word &word = valPair.first;
+    cerr << word << " ";
+  }
+  cerr << endl;
+  */
+
+}
 
 void MSPT::InitializeForInput(const System &system, const InputType &input)
 {
@@ -165,6 +167,10 @@ void MSPT::InitializeForInput(const System &system, const InputType &input)
   const SentenceWithCandidates &inputObj = dynamic_cast<const SentenceWithCandidates&>(input);
   cerr << "Casting done." << endl << flush;
   cerr << "PhraseTableString member: " << inputObj.getPhraseTableString() << endl;
+
+  cerr << "Hardcoding sample PhraseTableString" << endl << flush; 
+  string phraseTableString="a ||| x ||| 0.4 $$$ a ||| y ||| 0.6 $$$ b ||| y ||| 0.1 $$$ b ||| z ||| 0.9";
+  CreatePTForInput(system,phraseTableString);
 
 }
 
