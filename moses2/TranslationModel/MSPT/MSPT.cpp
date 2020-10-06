@@ -30,19 +30,18 @@
 #include "../../SCFG/Manager.h"
 
 #include "../../PhraseBased/SentenceWithCandidates.h"
+#include "../../PhraseBased/Manager.h"
 
 using namespace std;
 
 namespace Moses2
 {
-
+thread_local MSPT::PBNODE *MSPT::m_rootPb;
 
 ////////////////////////////////////////////////////////////////////////
 
 MSPT::MSPT(size_t startInd, const std::string &line)
   :PhraseTable(startInd, line)
-  ,m_rootPb(NULL)
-  ,m_rootSCFG(NULL)
 {
   ReadParameters();
 }
@@ -50,21 +49,20 @@ MSPT::MSPT(size_t startInd, const std::string &line)
 MSPT::~MSPT()
 {
   delete m_rootPb;
-  delete m_rootSCFG;
 }
 
-void MSPT::CreatePTForInput(const System &system, string phraseTableString)
+void MSPT::CreatePTForInput(const ManagerBase &mgr, string phraseTableString)
 {
-  cerr << "In CreatePTForInput" << endl << flush;
-
+  //cerr << "In CreatePTForInput" << endl << flush;
+  const System &system = mgr.system;
   FactorCollection &vocab = system.GetVocab();
-  MemPool &systemPool = system.GetSystemPool();
+  MemPool &pool = mgr.GetPool();
   MemPool tmpSourcePool;
 
   if (system.isPb) {
     m_rootPb = new PBNODE();
   } else {
-    m_rootSCFG = new SCFGNODE();
+    abort();
     //cerr << "m_rootSCFG=" << m_rootSCFG << endl;
   }
 
@@ -86,7 +84,7 @@ void MSPT::CreatePTForInput(const System &system, string phraseTableString)
       PhraseImpl *source = PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
                            toks[0]);
       //cerr << "created soure" << endl;
-      TargetPhraseImpl *target = TargetPhraseImpl::CreateFromString(systemPool, *this, system,
+      TargetPhraseImpl *target = TargetPhraseImpl::CreateFromString(pool, *this, system,
                                  toks[1]);
       //cerr << "created target" << endl;
       target->GetScores().CreateFromString(toks[2], *this, system, true);
@@ -103,48 +101,22 @@ void MSPT::CreatePTForInput(const System &system, string phraseTableString)
         //strcpy(target->properties, toks[6].c_str());
       }
 
-      system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
+      system.featureFunctions.EvaluateInIsolation(pool, system, *source,
           *target);
-      //cerr << "EvaluateInIsolation:" << *target << endl;
+      //cerr << "EvaluateInIsolation:" << target->Debug(system) << endl;
       m_rootPb->AddRule(m_input, *source, target);
 
       //cerr << "target=" << target->Debug(system) << endl;
     } else {
-      SCFG::PhraseImpl *source = SCFG::PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
-                                 toks[0]);
-      //cerr << "created source:" << *source << endl;
-      SCFG::TargetPhraseImpl *target = SCFG::TargetPhraseImpl::CreateFromString(systemPool, *this,
-                                       system, toks[1]);
-
-      //cerr << "created target " << *target << " source=" << *source << endl;
-
-      target->GetScores().CreateFromString(toks[2], *this, system, true);
-      //cerr << "created scores:" << *target << endl;
-
-      //vector<SCORE> scores = Tokenize<SCORE>(toks[2]);
-      //target->sortScore = (scores.size() >= 3) ? TransformScore(scores[2]) : 0;
-
-      target->SetAlignmentInfo(toks[3]);
-
-      // properties
-      if (toks.size() == 7) {
-        //target->properties = (char*) system.systemPool.Allocate(toks[6].size() + 1);
-        //strcpy(target->properties, toks[6].c_str());
-      }
-
-      system.featureFunctions.EvaluateInIsolation(systemPool, system, *source,
-          *target);
-      //cerr << "EvaluateInIsolation:" << *target << endl;
-      m_rootSCFG->AddRule(m_input, *source, target);
+      abort();
     }
   }
 
   if (system.isPb) {
-    m_rootPb->SortAndPrune(m_tableLimit, systemPool, system);
+    m_rootPb->SortAndPrune(m_tableLimit, pool, system);
     //cerr << "root=" << &m_rootPb << endl;
   } else {
-    m_rootSCFG->SortAndPrune(m_tableLimit, systemPool, system);
-    //cerr << "root=" << &m_rootPb << endl;
+      abort();
   }
   /*
   BOOST_FOREACH(const PtMem::Node<Word>::Children::value_type &valPair, m_rootPb.GetChildren()) {
@@ -156,30 +128,26 @@ void MSPT::CreatePTForInput(const System &system, string phraseTableString)
 
 }
 
-void MSPT::InitializeForInput(const System &system, const InputType &input)
+void MSPT::InitializeForInput(const ManagerBase &mgr, const InputType &input)
 {
-  cerr << "InitializeForInput MSPT" << endl;
-  cerr << input.Debug(system) << endl << flush;
-  cerr << "HH1" << endl << flush;
-  
   // downcast to SentenceWithCandidates
-  //const SentenceWithCandidates &inputObj = static_cast<const SentenceWithCandidates&>(input);
-  const SentenceWithCandidates &inputObj = dynamic_cast<const SentenceWithCandidates&>(input);
-  cerr << "Casting done." << endl << flush;
-  cerr << "PhraseTableString member: " << inputObj.getPhraseTableString() << endl;
-
-  cerr << "Hardcoding sample PhraseTableString" << endl << flush; 
-  string phraseTableString="a ||| x ||| 0.4 $$$ a ||| y ||| 0.6 $$$ b ||| y ||| 0.1 $$$ b ||| z ||| 0.9";
-  CreatePTForInput(system,phraseTableString);
-
+  const SentenceWithCandidates &inputObj = static_cast<const SentenceWithCandidates&>(input);
+  CreatePTForInput(mgr, inputObj.getPhraseTableString());
 }
 
 TargetPhrases* MSPT::Lookup(const Manager &mgr, MemPool &pool,
     InputPath &inputPath) const
 {
+  //cerr << "MSPT::Lookup inputPath:" << inputPath.Debug(mgr.system) << endl;
   const SubPhrase<Moses2::Word> &phrase = inputPath.subPhrase;
   TargetPhrases *tps = m_rootPb->Find(m_input, phrase);
+  //cerr << "MSPT::Lookup tps:" << tps->Debug(mgr.system) << endl;
+  //cerr << "MSPT::Lookup done" << endl;
   return tps;
+}
+
+void MSPT::CleanUpAfterSentenceProcessing(const System &system, const InputType &input) const {
+  delete m_rootPb;
 }
 
 void MSPT::InitActiveChart(

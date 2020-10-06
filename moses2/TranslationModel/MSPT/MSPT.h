@@ -65,11 +65,11 @@ public:
               const SCFG::Stacks &stacks,
               SCFG::InputPath &path) const;
 
-  virtual void InitializeForInput(const System &system, const InputType &input);
+  virtual void InitializeForInput(const ManagerBase &mgr, const InputType &input);
+  virtual void CleanUpAfterSentenceProcessing(const System &system, const InputType &input) const;
 
 protected:
-  PBNODE    *m_rootPb;
-  SCFGNODE  *m_rootSCFG;
+  thread_local static PBNODE    *m_rootPb;
 
   void LookupGivenNode(
     MemPool &pool,
@@ -80,7 +80,7 @@ protected:
     const Moses2::Range &subPhraseRange,
     SCFG::InputPath &outPath) const;
 
-  void CreatePTForInput(const System &system, std::string phraseTableString);
+  void CreatePTForInput(const ManagerBase &mgr, std::string phraseTableString);
 
 };
 
