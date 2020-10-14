@@ -6,7 +6,7 @@
 #include "Phrase.h"
 #include "TranslationTask.h"
 #include "MemPoolAllocator.h"
-#include "server/Server.h"
+//#include "server/Server.h"
 #include "legacy/InputFileStream.h"
 #include "legacy/Parameter.h"
 #include "legacy/ThreadPool.h"
@@ -59,8 +59,8 @@ int main(int argc, char** argv)
 ////////////////////////////////////////////////////////////////////////////////////////////////
 void run_as_server(Moses2::System &system)
 {
-  Moses2::Server server(system.options.server, system);
-  server.run(system); // actually: don't return. see Server::run()
+  //Moses2::Server server(system.options.server, system);
+  //server.run(system); // actually: don't return. see Server::run()
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////

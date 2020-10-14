@@ -23,7 +23,18 @@ TranslationTask::TranslationTask(System &system,
 TranslationTask::~TranslationTask()
 {
 }
+std::string TranslationTask::RunTranslation() 
+{
+    m_mgr->Decode();
 
+    string out;
+
+    out = m_mgr->OutputBest() + "\n";
+    
+
+    delete m_mgr;
+    return out;
+}
 void TranslationTask::Run()
 {
 
