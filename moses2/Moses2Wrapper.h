@@ -10,7 +10,7 @@ namespace Moses2 {
 
 	public:
 		Moses2Wrapper(const std::string &filePath);
-		std::string Translate(const std::string &input);
+		std::string Translate(const std::string &input, long id);
 	};
 
 }

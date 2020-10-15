@@ -95,6 +95,7 @@ bool InputType::XmlOverlap(size_t startPos, size_t endPos) const
 std::string InputType::Debug(const System &system) const
 {
   cerr << "InputType::Debug" << endl;
+  return "";
 }
 
 } /* namespace Moses2 */

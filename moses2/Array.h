@@ -72,7 +72,7 @@ public:
   }
 
   void resize(size_t newSize) {
-    assert(m_size < m_maxSize);
+    assert(m_size <= m_maxSize);
     m_size = newSize;
   }
 protected:

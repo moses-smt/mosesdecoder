@@ -9,11 +9,9 @@ namespace Moses2 {
 		m_param->LoadParam(filePath);
 		m_system = new System(*m_param);
 	}
-	std::string Moses2Wrapper::Translate(const std::string &input) {
-		//create id
-		long a = 11234567;
-		TranslationTask task(*m_system, input, a);
-		std::string  translation = task.RunTranslation();
+	std::string Moses2Wrapper::Translate(const std::string &input , long id) {
+		TranslationTask task(*m_system, input, id);
+		std::string  translation = task.ReturnTranslation();
 		//delete translation;
 		return translation;
 	}
