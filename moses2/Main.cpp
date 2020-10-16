@@ -54,7 +54,9 @@ int main(int argc, char** argv)
       batch_run(params, system, pool);
   }
 #endif // 
+//TODO : WIN32
 #ifndef HAVE_SERVER
+  // TODO :  remove hardcoding for num of threads
   Moses2::ThreadPool pool(15, system.cpuAffinityOffset, system.cpuAffinityOffsetIncr);
   //cerr << "CREATED POOL" << endl;
 
