@@ -1,5 +1,5 @@
 /*
- * MSPT.cpp
+ * DynamicPhraseTable.cpp
  *
  *  Created on: 28 Oct 2015
  *      Author: hieu
@@ -8,7 +8,7 @@
 #include <cassert>
 #include <sstream>
 #include <boost/foreach.hpp>
-#include "MSPT.h"
+#include "DynamicPhraseTable.h"
 #include "../../PhraseBased/PhraseImpl.h"
 #include "../../Phrase.h"
 #include "../../System.h"
@@ -36,22 +36,22 @@ using namespace std;
 
 namespace Moses2
 {
-thread_local MSPT::PBNODE *MSPT::m_rootPb;
+thread_local DynamicPhraseTable::PBNODE * DynamicPhraseTable::m_rootPb;
 
 ////////////////////////////////////////////////////////////////////////
 
-MSPT::MSPT(size_t startInd, const std::string &line)
+DynamicPhraseTable::DynamicPhraseTable(size_t startInd, const std::string &line)
   :PhraseTable(startInd, line)
 {
   ReadParameters();
 }
 
-MSPT::~MSPT()
+DynamicPhraseTable::~DynamicPhraseTable()
 {
   delete m_rootPb;
 }
 
-void MSPT::CreatePTForInput(const ManagerBase &mgr, string phraseTableString)
+void DynamicPhraseTable::CreatePTForInput(const ManagerBase &mgr, string phraseTableString)
 {
   //cerr << "In CreatePTForInput" << endl << flush;
   const System &system = mgr.system;
@@ -128,29 +128,26 @@ void MSPT::CreatePTForInput(const ManagerBase &mgr, string phraseTableString)
 
 }
 
-void MSPT::InitializeForInput(const ManagerBase &mgr, const InputType &input)
+void DynamicPhraseTable::InitializeForInput(const ManagerBase &mgr, const InputType &input)
 {
   // downcast to SentenceWithCandidates
   const SentenceWithCandidates &inputObj = static_cast<const SentenceWithCandidates&>(input);
   CreatePTForInput(mgr, inputObj.getPhraseTableString());
 }
 
-TargetPhrases* MSPT::Lookup(const Manager &mgr, MemPool &pool,
+TargetPhrases* DynamicPhraseTable::Lookup(const Manager &mgr, MemPool &pool,
     InputPath &inputPath) const
 {
-  //cerr << "MSPT::Lookup inputPath:" << inputPath.Debug(mgr.system) << endl;
   const SubPhrase<Moses2::Word> &phrase = inputPath.subPhrase;
   TargetPhrases *tps = m_rootPb->Find(m_input, phrase);
-  //cerr << "MSPT::Lookup tps:" << tps->Debug(mgr.system) << endl;
-  //cerr << "MSPT::Lookup done" << endl;
   return tps;
 }
 
-void MSPT::CleanUpAfterSentenceProcessing(const System &system, const InputType &input) const {
+void DynamicPhraseTable::CleanUpAfterSentenceProcessing(const System &system, const InputType &input) const {
   delete m_rootPb;
 }
 
-void MSPT::InitActiveChart(
+void DynamicPhraseTable::InitActiveChart(
   MemPool &pool,
   const SCFG::Manager &mgr,
   SCFG::InputPath &path) const
@@ -158,7 +155,7 @@ void MSPT::InitActiveChart(
   abort();
 }
 
-void MSPT::Lookup(MemPool &pool,
+void DynamicPhraseTable::Lookup(MemPool &pool,
                                const SCFG::Manager &mgr,
                                size_t maxChartSpan,
                                const SCFG::Stacks &stacks,
@@ -167,7 +164,7 @@ void MSPT::Lookup(MemPool &pool,
   abort();
 }
 
-void MSPT::LookupGivenNode(
+void DynamicPhraseTable::LookupGivenNode(
   MemPool &pool,
   const SCFG::Manager &mgr,
   const SCFG::ActiveChartEntry &prevEntry,

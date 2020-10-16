@@ -1,5 +1,9 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 #pragma once
+#ifdef HAVE_SERVER
+
+
+
 #include <string>
 #include <map>
 #include <stdint.h>
@@ -39,3 +43,4 @@ struct
 };
 
 }
+#endif // HAVE_SERVER

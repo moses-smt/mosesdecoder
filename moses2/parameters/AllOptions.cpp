@@ -31,7 +31,9 @@ init(Parameter const& param)
   if (!lmbr.init(param))       return false;
   if (!output.init(param))     return false;
   if (!unk.init(param))        return false;
+#if HAVE_SERVER
   if (!server.init(param))     return false;
+#endif // HAVE_SERVER
   if (!syntax.init(param))     return false;
 
   param.SetParameter(mira, "mira", false);
@@ -95,7 +97,7 @@ update(std::map<std::string,xmlrpc_c::value>const& param)
   if (!lmbr.update(param))       return false;
   if (!output.update(param))     return false;
   if (!unk.update(param))        return false;
-  if (!server.update(param))     return false;
+  //if (!server.update(param))     return false;
   //if (!syntax.update(param))     return false;
   return sanity_check();
 }

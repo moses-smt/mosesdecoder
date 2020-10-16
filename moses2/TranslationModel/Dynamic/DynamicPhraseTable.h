@@ -9,7 +9,7 @@
 #include "../PhraseTable.h"
 #include "../../legacy/Util2.h"
 #include "../../SCFG/InputPath.h"
-#include "MSNode.h"
+#include "DynamicPhraseTableNode.h"
 #include "../../PhraseBased/PhraseImpl.h"
 #include "../../PhraseBased/TargetPhraseImpl.h"
 #include "../../PhraseBased/TargetPhrases.h"
@@ -20,26 +20,26 @@
 namespace Moses2
 {
 
-class MSPT: public PhraseTable
+class DynamicPhraseTable: public PhraseTable
 {
-  typedef MSPTNS::Node<Word, Phrase<Word>, TargetPhraseImpl, TargetPhrases> PBNODE;
-  typedef MSPTNS::Node<SCFG::Word, Phrase<SCFG::Word>, SCFG::TargetPhraseImpl, SCFG::TargetPhrases> SCFGNODE;
+  typedef DynamicPhraseTableNS::Node<Word, Phrase<Word>, TargetPhraseImpl, TargetPhrases> PBNODE;
+  typedef DynamicPhraseTableNS::Node<SCFG::Word, Phrase<SCFG::Word>, SCFG::TargetPhraseImpl, SCFG::TargetPhrases> SCFGNODE;
 
 //////////////////////////////////////
   class ActiveChartEntryMem : public SCFG::ActiveChartEntry
   {
     typedef SCFG::ActiveChartEntry Parent;
   public:
-    const MSPT::SCFGNODE &node;
+    const DynamicPhraseTable::SCFGNODE &node;
 
-    ActiveChartEntryMem(MemPool &pool, const MSPT::SCFGNODE &vnode)
+    ActiveChartEntryMem(MemPool &pool, const DynamicPhraseTable::SCFGNODE &vnode)
       :Parent(pool)
       ,node(vnode)
     {}
 
     ActiveChartEntryMem(
       MemPool &pool,
-      const MSPT::SCFGNODE &vnode,
+      const DynamicPhraseTable::SCFGNODE &vnode,
       const ActiveChartEntry &prevEntry)
       :Parent(prevEntry)
       ,node(vnode)
@@ -48,8 +48,8 @@ class MSPT: public PhraseTable
 
   //////////////////////////////////////
 public:
-  MSPT(size_t startInd, const std::string &line);
-  virtual ~MSPT();
+  DynamicPhraseTable(size_t startInd, const std::string &line);
+  virtual ~DynamicPhraseTable();
 
   virtual TargetPhrases *Lookup(const Manager &mgr, MemPool &pool,
                                 InputPath &inputPath) const;

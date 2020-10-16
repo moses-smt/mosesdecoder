@@ -15,7 +15,7 @@ namespace Moses2
 {
 class System;
 
-namespace MSPTNS
+namespace DynamicPhraseTableNS
 {
 
 template<class WORD, class SP, class TP, class TPS>

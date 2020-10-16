@@ -6,7 +6,10 @@
 #include "Phrase.h"
 #include "TranslationTask.h"
 #include "MemPoolAllocator.h"
-//#include "server/Server.h"
+#ifdef HAVE_SERVER
+    #include "server/Server.h"
+#endif // HAVE_SERVER
+
 #include "legacy/InputFileStream.h"
 #include "legacy/Parameter.h"
 #include "legacy/ThreadPool.h"
@@ -38,17 +41,26 @@ int main(int argc, char** argv)
   }
 
   //cerr << "system.numThreads=" << system.options.server.numThreads << endl;
-
+#ifdef HAVE_SERVER
   Moses2::ThreadPool pool(system.options.server.numThreads, system.cpuAffinityOffset, system.cpuAffinityOffsetIncr);
   //cerr << "CREATED POOL" << endl;
 
   if (params.GetParam("server")) {
     std::cerr << "RUN SERVER" << std::endl;
     run_as_server(system);
-  } else {
-    std::cerr << "RUN BATCH" << std::endl;
-    batch_run(params, system, pool);
   }
+  else {
+      std::cerr << "RUN BATCH" << std::endl;
+      batch_run(params, system, pool);
+  }
+#endif // 
+#ifndef HAVE_SERVER
+  Moses2::ThreadPool pool(15, system.cpuAffinityOffset, system.cpuAffinityOffsetIncr);
+  //cerr << "CREATED POOL" << endl;
+
+  std::cerr << "RUN BATCH" << std::endl;
+  batch_run(params, system, pool);
+#endif // !HAVE_SERVER
 
   cerr << "Decoding took " << timer.get_elapsed_time() << endl;
   //	cerr << "g_numHypos=" << g_numHypos << endl;
@@ -57,12 +69,14 @@ int main(int argc, char** argv)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-void run_as_server(Moses2::System &system)
-{
-  //Moses2::Server server(system.options.server, system);
-  //server.run(system); // actually: don't return. see Server::run()
-}
+#ifdef HAVE_SERVER
+    void run_as_server(Moses2::System& system)
+    {
+        Moses2::Server server(system.options.server, system);
+        server.run(system); // actually: don't return. see Server::run()
+    }
 
+#endif // HAVE_SERVER
 ////////////////////////////////////////////////////////////////////////////////////////////////
 istream &GetInputStream(Moses2::Parameter &params)
 {
@@ -76,31 +90,33 @@ istream &GetInputStream(Moses2::Parameter &params)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-void batch_run(Moses2::Parameter &params, Moses2::System &system, Moses2::ThreadPool &pool)
+
+void batch_run(Moses2::Parameter& params, Moses2::System& system, Moses2::ThreadPool& pool)
 {
-  istream &inStream = GetInputStream(params);
+    istream& inStream = GetInputStream(params);
 
-  long translationId = 0;
-  string line;
-  while (getline(inStream, line)) {
-    //cerr << "line=" << line << endl;
-    boost::shared_ptr<Moses2::TranslationTask> task(new Moses2::TranslationTask(system, line, translationId));
+    long translationId = 0;
+    string line;
+    while (getline(inStream, line)) {
+        //cerr << "line=" << line << endl;
+        boost::shared_ptr<Moses2::TranslationTask> task(new Moses2::TranslationTask(system, line, translationId));
 
-    //cerr << "START pool.Submit()" << endl;
-    pool.Submit(task);
-    //task->Run();
-    ++translationId;
-  }
+        //cerr << "START pool.Submit()" << endl;
+        pool.Submit(task);
+        //task->Run();
+        ++translationId;
+    }
 
-  pool.Stop(true);
+    pool.Stop(true);
 
-  if (&inStream != &cin) {
-    delete &inStream;
-  }
+    if (&inStream != &cin) {
+        delete& inStream;
+    }
 
-  //util::PrintUsage(std::cerr);
+    //util::PrintUsage(std::cerr);
 
 }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 void Temp()
 {
