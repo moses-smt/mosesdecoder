@@ -2,8 +2,6 @@
 #pragma once
 #ifdef HAVE_SERVER
 
-
-
 #include <string>
 #include <map>
 #include <stdint.h>
