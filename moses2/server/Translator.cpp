@@ -4,7 +4,6 @@
  *  Created on: 1 Apr 2016
  *      Author: hieu
  */
-#ifdef HAVE_SERVER
 #include <boost/shared_ptr.hpp>
 #include "Translator.h"
 #include "TranslationRequest.h"
@@ -67,4 +66,3 @@ void Translator::execute(xmlrpc_c::paramList const& paramList,
 }
 
 } /* namespace Moses2 */
-#endif // HAVE_SERVER

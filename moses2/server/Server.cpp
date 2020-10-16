@@ -4,7 +4,6 @@
  *  Created on: 1 Apr 2016
  *      Author: hieu
  */
-#ifdef HAVE_SERVER
 #include <iostream>
 #include "../System.h"
 #include "Server.h"
@@ -71,4 +70,3 @@ ServerOptions const&Server::options() const
 
 
 } /* namespace Moses2 */
-#endif // HAVE_SERVER

@@ -1,13 +1,10 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
 #pragma once
-#ifdef HAVE_SERVER
 
+#include "../legacy/xmlrpc-c.h"
 #include <string>
 #include <map>
 #include <stdint.h>
-#include <xmlrpc-c/base.hpp>
-#include <xmlrpc-c/registry.hpp>
-#include <xmlrpc-c/server_abyss.hpp>
 
 namespace Moses2
 {
@@ -41,4 +38,3 @@ struct
 };
 
 }
-#endif // HAVE_SERVER

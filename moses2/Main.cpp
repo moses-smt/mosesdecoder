@@ -6,9 +6,9 @@
 #include "Phrase.h"
 #include "TranslationTask.h"
 #include "MemPoolAllocator.h"
-#ifdef HAVE_SERVER
+#ifdef HAVE_XMLRPC_C
     #include "server/Server.h"
-#endif // HAVE_SERVER
+#endif // HAVE_XMLRPC_C
 
 #include "legacy/InputFileStream.h"
 #include "legacy/Parameter.h"
@@ -41,7 +41,6 @@ int main(int argc, char** argv)
   }
 
   //cerr << "system.numThreads=" << system.options.server.numThreads << endl;
-#ifdef HAVE_SERVER
   Moses2::ThreadPool pool(system.options.server.numThreads, system.cpuAffinityOffset, system.cpuAffinityOffsetIncr);
   //cerr << "CREATED POOL" << endl;
 
@@ -53,16 +52,6 @@ int main(int argc, char** argv)
       std::cerr << "RUN BATCH" << std::endl;
       batch_run(params, system, pool);
   }
-#endif // 
-//TODO : WIN32
-#ifndef HAVE_SERVER
-  // TODO :  remove hardcoding for num of threads
-  Moses2::ThreadPool pool(15, system.cpuAffinityOffset, system.cpuAffinityOffsetIncr);
-  //cerr << "CREATED POOL" << endl;
-
-  std::cerr << "RUN BATCH" << std::endl;
-  batch_run(params, system, pool);
-#endif // !HAVE_SERVER
 
   cerr << "Decoding took " << timer.get_elapsed_time() << endl;
   //	cerr << "g_numHypos=" << g_numHypos << endl;
@@ -71,14 +60,17 @@ int main(int argc, char** argv)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-#ifdef HAVE_SERVER
-    void run_as_server(Moses2::System& system)
-    {
-        Moses2::Server server(system.options.server, system);
-        server.run(system); // actually: don't return. see Server::run()
-    }
+void run_as_server(Moses2::System& system)
+{
+#ifdef HAVE_XMLRPC_C
+	Moses2::Server server(system.options.server, system);
+	server.run(system); // actually: don't return. see Server::run()
+#else
+  UTIL_THROW2("Moses2 was compiled without xmlrpc-c. "
+              << "No server functionality available.");
+#endif
+}
 
-#endif // HAVE_SERVER
 ////////////////////////////////////////////////////////////////////////////////////////////////
 istream &GetInputStream(Moses2::Parameter &params)
 {

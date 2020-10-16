@@ -31,9 +31,7 @@ init(Parameter const& param)
   if (!lmbr.init(param))       return false;
   if (!output.init(param))     return false;
   if (!unk.init(param))        return false;
-#if HAVE_SERVER
   if (!server.init(param))     return false;
-#endif // HAVE_SERVER
   if (!syntax.init(param))     return false;
 
   param.SetParameter(mira, "mira", false);

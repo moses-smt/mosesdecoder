@@ -13,9 +13,7 @@
 #include "LMBR_Options.h"
 #include "ReportingOptions.h"
 #include "OOVHandlingOptions.h"
-#ifdef HAVE_SERVER
-    #include "ServerOptions.h"
-#endif // HAVE_SERVER
+#include "ServerOptions.h"
 #include "SyntaxOptions.h"
 
 namespace Moses2
@@ -33,9 +31,7 @@ struct
   LMBR_Options            lmbr;
   ReportingOptions      output;
   OOVHandlingOptions       unk;
-#ifdef HAVE_SERVER
   ServerOptions       server;
-#endif // HAVE_SERVER
   SyntaxOptions         syntax;
   bool mira;
   bool use_legacy_pt;

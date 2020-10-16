@@ -1,5 +1,4 @@
 // -*- mode: c++; indent-tabs-mode: nil; tab-width: 2 -*-
-#ifdef HAVE_SERVER
 #include <boost/foreach.hpp>
 #include <string>
 #include "../legacy/Parameter.h"
@@ -82,4 +81,3 @@ init(Parameter const& P)
   return true;
 }
 } // namespace Moses
-#endif

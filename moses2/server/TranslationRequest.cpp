@@ -1,4 +1,3 @@
-#ifdef HAVE_SERVER
 #include <boost/foreach.hpp>
 #include "TranslationRequest.h"
 #include "../ManagerBase.h"
@@ -67,4 +66,3 @@ void TranslationRequest::pack_hypothesis(const Manager& manager, Hypothesis cons
 }
 
 }
-#endif // HAVE_SERVER
