@@ -1,4 +1,4 @@
-﻿#include "Moses2Wrapper.h"
+#include "Moses2Wrapper.h"
 using namespace std;
 using namespace Moses2;
 

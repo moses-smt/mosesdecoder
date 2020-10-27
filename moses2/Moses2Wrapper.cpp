@@ -1,4 +1,4 @@
-﻿#include "Moses2Wrapper.h"
+#include "Moses2Wrapper.h"
 #include "System.h"
 #include "legacy/Parameter.h"
 #include "TranslationTask.h"
