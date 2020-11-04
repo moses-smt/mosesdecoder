@@ -69,7 +69,7 @@ public:
   virtual void CleanUpAfterSentenceProcessing(const System &system, const InputType &input) const;
 
 protected:
-  thread_local static PBNODE    *m_rootPb;
+  thread_local static PBNODE m_rootPb;
 
   void LookupGivenNode(
     MemPool &pool,

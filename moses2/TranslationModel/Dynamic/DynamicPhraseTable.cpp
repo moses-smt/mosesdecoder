@@ -36,7 +36,7 @@ using namespace std;
 
 namespace Moses2
 {
-thread_local DynamicPhraseTable::PBNODE * DynamicPhraseTable::m_rootPb;
+thread_local DynamicPhraseTable::PBNODE DynamicPhraseTable::m_rootPb;
 
 ////////////////////////////////////////////////////////////////////////
 
@@ -48,7 +48,7 @@ DynamicPhraseTable::DynamicPhraseTable(size_t startInd, const std::string &line)
 
 DynamicPhraseTable::~DynamicPhraseTable()
 {
-  delete m_rootPb;
+  //delete m_rootPb;
 }
 
 void DynamicPhraseTable::CreatePTForInput(const ManagerBase &mgr, string phraseTableString)
@@ -60,7 +60,7 @@ void DynamicPhraseTable::CreatePTForInput(const ManagerBase &mgr, string phraseT
   MemPool tmpSourcePool;
 
   if (system.isPb) {
-    m_rootPb = new PBNODE();
+    //m_rootPb = new PBNODE();
   } else {
     abort();
     //cerr << "m_rootSCFG=" << m_rootSCFG << endl;
@@ -104,7 +104,7 @@ void DynamicPhraseTable::CreatePTForInput(const ManagerBase &mgr, string phraseT
       system.featureFunctions.EvaluateInIsolation(pool, system, *source,
           *target);
       //cerr << "EvaluateInIsolation:" << target->Debug(system) << endl;
-      m_rootPb->AddRule(m_input, *source, target);
+      m_rootPb.AddRule(m_input, *source, target);
 
       //cerr << "target=" << target->Debug(system) << endl;
     } else {
@@ -113,7 +113,7 @@ void DynamicPhraseTable::CreatePTForInput(const ManagerBase &mgr, string phraseT
   }
 
   if (system.isPb) {
-    m_rootPb->SortAndPrune(m_tableLimit, pool, system);
+    m_rootPb.SortAndPrune(m_tableLimit, pool, system);
     //cerr << "root=" << &m_rootPb << endl;
   } else {
       abort();
@@ -139,12 +139,12 @@ TargetPhrases* DynamicPhraseTable::Lookup(const Manager &mgr, MemPool &pool,
     InputPath &inputPath) const
 {
   const SubPhrase<Moses2::Word> &phrase = inputPath.subPhrase;
-  TargetPhrases *tps = m_rootPb->Find(m_input, phrase);
+  TargetPhrases *tps = m_rootPb.Find(m_input, phrase);
   return tps;
 }
 
 void DynamicPhraseTable::CleanUpAfterSentenceProcessing(const System &system, const InputType &input) const {
-  delete m_rootPb;
+   m_rootPb.CleanNode(); //TODO  : clean this
 }
 
 void DynamicPhraseTable::InitActiveChart(

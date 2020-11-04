@@ -88,7 +88,9 @@ public:
       delete m_unsortedTPS;
     }
   }
-
+  void CleanNode() {
+      m_children.clear();
+  }
   const Children &GetChildren() const {
     return m_children;
   }
