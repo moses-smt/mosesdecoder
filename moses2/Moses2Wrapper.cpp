@@ -11,8 +11,7 @@ namespace Moses2 {
 	}
 	std::string Moses2Wrapper::Translate(const std::string &input , long id) {
 		TranslationTask task(*m_system, input, id);
-		std::string  translation = task.ReturnTranslation();
-		return translation;
+		return task.ReturnTranslation();
 	}
 	Moses2Wrapper::~Moses2Wrapper() {
 		delete m_param;

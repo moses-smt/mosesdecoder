@@ -48,7 +48,7 @@ DynamicPhraseTable::DynamicPhraseTable(size_t startInd, const std::string &line)
 
 DynamicPhraseTable::~DynamicPhraseTable()
 {
-  //delete m_rootPb;
+  m_rootPb.CleanNode();
 }
 
 void DynamicPhraseTable::CreatePTForInput(const ManagerBase &mgr, string phraseTableString)
