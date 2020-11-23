@@ -12,7 +12,7 @@ namespace Moses2 {
 		Moses2Wrapper(const std::string &filePath);
 		~Moses2Wrapper();
 		std::string Translate(const std::string &input, long id);
-		Moses2Wrapper* getInstance(const std::string& filePath);
+		void UpdateLMPath(const std::string &filePath);
 		int getEngineVersion();
 
 	};
