@@ -11,27 +11,25 @@ namespace dllImpCheck
 {
     class Program
     {
-        
-        [DllImport("D:/moses-mstranslator/contrib/other-builds/moses2/x64/Debug/moses2.dll", EntryPoint = "getEngineVersion1")]
-        private static extern int getEngineVersion1();
-        [DllImport("D:/moses-mstranslator/contrib/other-builds/moses2/x64/Debug/moses2.dll", EntryPoint = "CreateMosesSystem")]
-        private static extern IntPtr CreateMosesSystem(string s);
-        [DllImport("D:/moses-mstranslator/contrib/other-builds/moses2/x64/Debug/moses2.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "GetMosesSystem")]
-        private static extern int GetMosesSystem(string s,ref IntPtr system);
-        [DllImport("D:/moses-mstranslator/contrib/other-builds/moses2/x64/Debug/moses2.dll", EntryPoint = "MosesTranslate")]
-        private static extern int MosesTranslate(IntPtr model,int id,string input,StringBuilder output,int output_len);
-        [DllImport("D:/moses-mstranslator/contrib/other-builds/moses2/x64/Debug/moses2.dll", EntryPoint = "ReleaseSystem")]
-        private static extern void ReleaseSystem(IntPtr model);
+
+        [DllImport("../../../moses2/x64/Debug/moses2.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "GetMosesSystem")]
+        private static extern int GetMosesSystem(string s, ref IntPtr system);
+        [DllImport("../../../moses2/x64/Debug/moses2.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "MosesTranslate")]
+        private static extern int MosesTranslate(IntPtr model, int id, string input, StringBuilder output, int output_len);
+        [DllImport("../../../moses2/x64/Debug/moses2.dll", CallingConvention = CallingConvention.StdCall, EntryPoint = "ReleaseSystem")]
+        private static extern int ReleaseSystem(ref IntPtr model);
+
         static void Main(string[] args)
         {
-            string a = "D:/moses-mstranslator/test_sentence_with_candidates/moses_mspt.ini";
-            string cand = "फ ो ट ो ं @@@ ट ||| a ||| 0.5338410658500136 $$$ ट ||| c ||| 0.10587171128910133 $$$ ट ||| m ||| 0.7056508746775306 $$$ ं ||| l ||| 0.29237797398236876 $$$ ं ||| o ||| 0.4026301817948226 $$$ ं ||| r ||| 0.20594041196734436 $$$ फ ||| c ||| 0.46792456587433573 $$$ फ ||| g ||| 0.43855815762641204 $$$ फ ||| x ||| 0.7077570324853759 $$$ ो ||| h ||| 0.9869239425073358 $$$ ो ||| i ||| 0.6660016809625412 $$$ ो ||| h ||| 0.8425506301302961";
-            IntPtr system =  new IntPtr(0);
-            int v = GetMosesSystem(a,ref system);
+            string config = "D:\\src\\moses-mstranslator\\test_sentence_with_candidates\\moses_mspt.ini";
+            string cand = "aaj din main chaand nikla @@@ aaj ||| आज ||| 0.23034750595193718 $$$ aaj ||| अाज ||| 0.2036812076840512 $$$ aaj ||| एएजे ||| 0.1806033272478164 $$$ aaj ||| आज़ ||| 0.1550204531642581 $$$ din ||| दिन ||| 0.23292194982342979 $$$ din ||| दीन ||| 0.20844420805170855 $$$ din ||| दिं ||| 0.16399885041729953 $$$ din ||| डिन ||| 0.16171304188413235 $$$ chaand ||| चांद ||| 0.2374591084461087 $$$ chaand ||| चाँद ||| 0.217932729237165 $$$ chaand ||| चंद ||| 0.15435859487004985 $$$ chaand ||| चांड ||| 0.15279045900056767 $$$ nikla ||| निकला ||| 0.2727953350543125 $$$ nikla ||| निक्ला ||| 0.15350986400512082 $$$ nikla ||| नीकला ||| 0.1533410959941387 $$$ nikla ||| निकल़ा ||| 0.1475583698921154 $$$ main ||| मैं ||| 0.20812875019912347 $$$ main ||| में ||| 0.2042153102272697 $$$ main ||| मैन ||| 0.1933505532706236 $$$ main ||| मेन ||| 0.18617663610385968";
+            IntPtr system = IntPtr.Zero;
+            int v = GetMosesSystem(config, ref system);
             StringBuilder output = new StringBuilder();
-            int error_code = MosesTranslate(system,1234678,cand,output,50);
+            var ret = MosesTranslate(system, 1234678, cand, output, 50);
             Console.WriteLine(output);
-
+            ReleaseSystem(ref system);
+            Console.ReadLine();
         }
     }
 }
