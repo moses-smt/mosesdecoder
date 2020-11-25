@@ -6,8 +6,14 @@ using namespace std;
 namespace Moses2 {
 	//summary ::  need to update the LM path at runtime with complete artifact path.
 	void Moses2Wrapper::UpdateLMPath(const std::string& filePath) {
-		auto file = filePath.substr(filePath.find_last_of("\\") + 1);
-		auto path = filePath.substr(0, filePath.find_last_of("\\"));
+
+		char sep = '/';
+
+		#ifdef _WIN32
+				sep = '\\';
+		#endif
+		auto file = filePath.substr(filePath.find_last_of(sep) + 1);
+		auto path = filePath.substr(0, filePath.find_last_of(sep));
 		auto a = m_param->GetParam("feature");
 		std::vector<std::string> feature;
 		for (int i = 0; i < a->size(); i++) {
@@ -17,7 +23,7 @@ namespace Moses2 {
 				for (int k = 0; k < abc.size(); k++) {
 					if (abc.at(k).find("path=") != string::npos) {
 						auto lm = abc.at(k).substr(abc.at(k).find_last_of("=") + 1);
-						s = s + "path=" + path + "\\" + lm + " ";
+						s = s + "path=" + path + sep + lm + " ";
 					}
 					else {
 						s = s + abc.at(k) + " ";
