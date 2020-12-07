@@ -1,0 +1,3805 @@
+" Bulgarien " genannt , ||| as " Bulgaria " ; ||| 3-0 0-1 2-1 1-2 2-3 3-3 4-4
+" Bulgarien " genannt ||| as " Bulgaria " ||| 3-0 0-1 2-1 1-2 2-3 3-3
+" Gemeinschaft " genannt ||| as " the Community " ||| 3-0 0-1 2-1 1-2 1-3 2-4 3-4
+" Studierende " alle ||| " students " means all ||| 0-0 1-1 2-2 2-3 3-4
+" Studierende " alle ||| " students " means all ||| 0-0 1-1 2-2 2-3 3-4
+" Studierende " ||| " students " means ||| 0-0 1-1 2-2 2-3
+" Studierende " ||| " students " means ||| 0-0 1-1 2-2 2-3
+" Studierende ||| " students ||| 0-0 1-1
+" Studierende ||| " students ||| 0-0 1-1
+" alle ||| " means all ||| 0-0 0-1 1-2
+" alle ||| " means all ||| 0-0 0-1 1-2
+" alle ||| institution " means any ||| 0-0 0-1 0-2 1-3
+" ||| " means ||| 0-0 0-1
+" ||| " means ||| 0-0 0-1
+" ||| " means ||| 0-0 0-1
+" ||| " means ||| 0-0 0-1
+" ||| " ||| 0-0
+" ||| " ||| 0-0
+" ||| " ||| 0-0
+" ||| " ||| 0-0
+" ||| " ||| 0-0
+" ||| " ||| 0-0
+" ||| . " ||| 0-1
+" ||| . " ||| 0-1
+" ||| . " ||| 0-1
+" ||| institution " means ||| 0-0 0-1 0-2
+( 1 ) ||| ( 1 ) ||| 0-0 1-1 2-2
+( 1 ) ||| ( 1 ) ||| 0-0 1-1 2-2
+( 1 ) ||| ( 1 ) ||| 0-0 1-1 2-2
+( 1 ||| ( 1 ||| 0-0 1-1
+( 1 ||| ( 1 ||| 0-0 1-1
+( 1 ||| ( 1 ||| 0-0 1-1
+( 2 ) ||| ( 2 ) ||| 0-0 1-1 2-2
+( 2 ) ||| ( 2 ) ||| 0-0 1-1 2-2
+( 2 ) ||| ( 2 ) ||| 0-0 1-1 2-2
+( 2 ) ||| ( 2 ) ||| 0-0 1-1 2-2
+( 2 ||| ( 2 ||| 0-0 1-1
+( 2 ||| ( 2 ||| 0-0 1-1
+( 2 ||| ( 2 ||| 0-0 1-1
+( 2 ||| ( 2 ||| 0-0 1-1
+( 3 ) ||| ( 3 ) ||| 0-0 1-1 2-2
+( 3 ||| ( 3 ||| 0-0 1-1
+( 4 ) ||| ( 4 ) ||| 0-0 1-1 2-2
+( 4 ) ||| ( 4 ) ||| 0-0 1-1 2-2
+( 4 ||| ( 4 ||| 0-0 1-1
+( 4 ||| ( 4 ||| 0-0 1-1
+( ||| ( ||| 0-0
+( ||| ( ||| 0-0
+( ||| ( ||| 0-0
+( ||| ( ||| 0-0
+( ||| ( ||| 0-0
+( ||| ( ||| 0-0
+( ||| ( ||| 0-0
+( ||| ( ||| 0-0
+( ||| ( ||| 0-0
+( ||| ( ||| 0-0
+( ||| ( ||| 0-0
+) Ausgaben ||| ) Ausgaben ||| 0-0 1-1
+) Ausgaben ||| ) Ausgaben ||| 0-0 1-1
+) Die ||| ) Die ||| 0-0 1-1
+) Die ||| ) Die ||| 0-0 1-1
+) ||| ) , ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+) ||| ) ||| 0-0
+, Behörden , Unternehmen ||| , public authorities , private ||| 0-0 1-1 1-2 2-3 3-4
+, Behörden , Unternehmen ||| , public authorities , private ||| 0-0 2-0 1-1 1-2 2-3 3-4
+, Behörden , ||| , public authorities , ||| 0-0 1-1 1-2 2-3
+, Behörden , ||| , public authorities , ||| 0-0 2-0 1-1 1-2 2-3
+, Behörden ||| , public authorities ||| 0-0 1-1 1-2
+, Kulturen und Institutionen ; ||| , cultures and institutions ; ||| 0-0 1-1 2-2 3-3 4-4
+, Kulturen und Institutionen ; ||| , cultures and institutions ; ||| 0-0 1-1 2-2 3-3 4-4
+, Kulturen und Institutionen ||| , cultures and institutions ||| 0-0 1-1 2-2 3-3
+, Kulturen und Institutionen ||| , cultures and institutions ||| 0-0 1-1 2-2 3-3
+, Kulturen und ||| , cultures and ||| 0-0 1-1 2-2
+, Kulturen und ||| , cultures and ||| 0-0 1-1 2-2
+, Kulturen ||| , cultures ||| 0-0 1-1
+, Kulturen ||| , cultures ||| 0-0 1-1
+, UNESCO und ||| , Unesco and the ||| 0-0 1-1 2-2
+, UNESCO und ||| , Unesco and ||| 0-0 1-1 2-2
+, UNESCO ||| , Unesco ||| 0-0 1-1
+, Unternehmen ||| , private ||| 0-0 1-1
+, dass Bulgarien ||| that Bulgaria ||| 0-0 1-0 2-1
+, dass ihre Anforderungen an ||| that their requirements for ||| 0-0 1-0 2-1 3-2 4-2
+, dass ihre Anforderungen an ||| that their requirements ||| 0-0 1-0 2-1 3-2 4-2
+, dass ihre rechtlichen Anforderungen ||| that their legal requirements for ||| 0-0 1-0 2-1 3-2 4-3
+, dass ihre rechtlichen Anforderungen ||| that their legal requirements ||| 0-0 1-0 2-1 3-2 4-3
+, dass ihre rechtlichen ||| that their legal ||| 0-0 1-0 2-1 3-2
+, dass ihre ||| that their ||| 0-0 1-0 2-1
+, dass ihre ||| that their ||| 0-0 1-0 2-1
+, dass ||| , to ensure that ||| 0-0 1-2 1-3
+, dass ||| that the ||| 0-0 1-0
+, dass ||| that the ||| 0-0 1-0
+, dass ||| that ||| 0-0 1-0
+, dass ||| that ||| 0-0 1-0
+, dass ||| that ||| 0-0 1-0
+, dass ||| that ||| 0-0 1-0
+, dass ||| that ||| 0-0 1-0
+, dass ||| that ||| 0-0 1-0
+, dass ||| that ||| 0-0 1-0
+, dass ||| that ||| 0-0 1-0
+, der Anhänger , der ||| trailer , semi-trailer , ||| 2-0 0-1 2-2 3-3
+, der Anhänger , ||| trailer , semi-trailer , ||| 2-0 0-1 2-2 3-3
+, der Anhänger ||| trailer , semi-trailer ||| 2-0 0-1 2-2
+, der ||| , ||| 0-0
+, der ||| , ||| 0-0
+, der ||| , ||| 0-0
+, der ||| of ||| 1-0
+, die Studenten und Lehrern ||| students and teachers ||| 2-0 3-1
+, die Studenten und Lehrern ||| students and ||| 2-0 3-1
+, die Studenten und Lehrern ||| to students and teachers ||| 2-1 3-2
+, die Studenten und Lehrern ||| to students and ||| 2-1 3-2
+, die Studenten und ||| students and teachers ||| 2-0 3-1
+, die Studenten und ||| students and ||| 2-0 3-1
+, die Studenten und ||| to students and teachers ||| 2-1 3-2
+, die Studenten und ||| to students and ||| 2-1 3-2
+, die Studenten ||| students ||| 2-0
+, die Studenten ||| to students ||| 2-1
+, die bestehenden beiderseitigen Rechte ||| the Community existing mutual rights ||| 1-0 2-2 3-3 4-4
+, die bestehenden beiderseitigen ||| the Community existing mutual ||| 1-0 2-2 3-3
+, die bestehenden ||| the Community existing ||| 1-0 2-2
+, die engere Beziehungen ||| , ||| 0-0
+, die engere Beziehungen ||| classrooms , ||| 0-1
+, die engere ||| , ||| 0-0
+, die engere ||| classrooms , ||| 0-1
+, die im Bereich der ||| the field of ||| 1-0 2-1 3-1 4-2
+, die im Bereich ||| the field ||| 1-0 2-1 3-1
+, die zu ||| , further ||| 0-0 2-1
+, die ||| , which , irrespective of ||| 0-0 1-1 0-3
+, die ||| , which , irrespective of ||| 0-0 1-1 0-3
+, die ||| , which , irrespective ||| 0-0 1-1 0-3
+, die ||| , which , irrespective ||| 0-0 1-1 0-3
+, die ||| , ||| 0-0
+, die ||| , ||| 0-0
+, die ||| , ||| 0-0
+, die ||| , ||| 0-0
+, die ||| , ||| 0-0
+, die ||| classrooms , ||| 0-1
+, die ||| the Community ||| 1-0
+, die ||| the ||| 1-0
+, die ||| the ||| 1-0
+, die ||| those ||| 0-0 1-0
+, die ||| which ||| 0-0 1-0
+, die ||| which ||| 0-0 1-0
+, die ||| which ||| 0-0 1-0
+, einschließlich des ||| , including the ||| 0-0 1-1 2-2
+, einschließlich umfassenderer Kenntnisse in ||| , including broader knowledge of ||| 0-0 1-1 2-2 3-3 4-4
+, einschließlich umfassenderer Kenntnisse ||| , including broader knowledge ||| 0-0 1-1 2-2 3-3
+, einschließlich umfassenderer ||| , including broader ||| 0-0 1-1 2-2
+, einschließlich ||| , including ||| 0-0 1-1
+, einschließlich ||| , including ||| 0-0 1-1
+, einschließlich ||| , including ||| 0-0 1-1
+, gesellschaftlichen und wirtschaftlichen Vielfalt ||| , social and economic diversity ||| 0-0 1-1 2-2 3-3 4-4
+, gesellschaftlichen und wirtschaftlichen ||| , social , and economic ||| 0-0 1-1 0-2 2-3 3-4
+, gesellschaftlichen und wirtschaftlichen ||| , social and economic ||| 0-0 1-1 2-2 3-3
+, gesellschaftlichen und ||| , social , and ||| 0-0 1-1 0-2 2-3
+, gesellschaftlichen und ||| , social and ||| 0-0 1-1 2-2
+, gesellschaftlichen ||| , social , ||| 0-0 1-1 0-2
+, gesellschaftlichen ||| , social ||| 0-0 1-1
+, in ||| to ||| 0-0 1-0
+, indem insbesondere ||| in particular : ||| 0-0 2-0 1-1 2-1 2-2
+, nachstehend ||| , hereinafter referred to ||| 0-0 1-1 1-2 1-3
+, nachstehend ||| , hereinafter referred to ||| 0-0 1-1 1-2 1-3
+, oder ||| or the ||| 1-0 0-1
+, primär auf ||| range of student-centred ||| 1-0 0-1 2-1 1-2
+, umweltfreundliche ||| environmentally friendly ||| 1-0 1-1
+, umweltfreundliche ||| of environmentally friendly ||| 1-1 1-2
+, ungeachtet ihrer ||| level , whatever such ||| 2-0 0-1 1-2
+, ungeachtet ihrer ||| level , whatever such ||| 2-0 0-1 1-2
+, ungeachtet ihrer ||| level , whatever ||| 2-0 0-1 1-2
+, ungeachtet ihrer ||| level , whatever ||| 2-0 0-1 1-2
+, ungeachtet ||| , whatever such ||| 0-0 1-1
+, ungeachtet ||| , whatever such ||| 0-0 1-1
+, ungeachtet ||| , whatever ||| 0-0 1-1
+, ungeachtet ||| , whatever ||| 0-0 1-1
+, ||| , in ||| 0-0
+, ||| , in ||| 0-0
+, ||| , that ||| 0-0
+, ||| , the ||| 0-0
+, ||| , to ||| 0-0
+, ||| , to ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| , ||| 0-0
+, ||| ; ||| 0-0
+, ||| ; ||| 0-0
+, ||| ; ||| 0-0
+, ||| ; ||| 0-0
+, ||| ; ||| 0-0
+, ||| catalyst ||| 0-0
+, ||| classrooms , ||| 0-1
+, ||| it , in ||| 0-1
+, ||| it , in ||| 0-1
+, ||| it , ||| 0-1
+, ||| it , ||| 0-1
+, ||| potential catalyst ||| 0-1
+, ||| subject to the ||| 0-1
+, ||| subject to ||| 0-1
+, ||| that , ||| 0-1
+, ||| the ||| 0-0
+, ||| the ||| 0-0
+, ||| to it , in ||| 0-2
+, ||| to it , in ||| 0-2
+, ||| to it , ||| 0-2
+, ||| to it , ||| 0-2
+, ||| to the ||| 0-0
+, ||| to ||| 0-0
+, ||| to ||| 0-0
+, ||| to ||| 0-0
+, ||| which ||| 0-0
+, ||| which ||| 0-0
+- die Verbesserung ||| - improving ||| 0-0 1-1 2-1
+- die Zusammenarbeit beim Aufbau ||| - cooperation in developing ||| 0-0 1-1 2-1 3-3 4-3
+- die Zusammenarbeit ||| - cooperation in ||| 0-0 1-1 2-1
+- die Zusammenarbeit ||| - cooperation ||| 0-0 1-1 2-1
+- einen Umkreis ||| - within a radius ||| 0-0 2-1 1-2 1-3 2-3
+- flankierende ||| - legal ||| 0-0 1-1
+- wobei ||| of ||| 0-0 1-0
+- ||| , ||| 0-0
+- ||| , ||| 0-0
+- ||| - ||| 0-0
+- ||| - ||| 0-0
+- ||| - ||| 0-0
+- ||| - ||| 0-0
+- ||| - ||| 0-0
+- ||| - ||| 0-0
+- ||| - ||| 0-0
+- ||| - ||| 0-0
+- ||| - ||| 0-0
+- ||| - ||| 0-0
+- ||| - ||| 0-0
+- ||| - ||| 0-0
+- ||| Agreement ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| . ||| 0-0
+. ||| Party . ||| 0-1
+1 ) Die ||| 1 ) Die ||| 0-0 1-1 2-2
+1 ) Die ||| 1 ) Die ||| 0-0 1-1 2-2
+1 ) ||| 1 ) ||| 0-0 1-1
+1 ) ||| 1 ) ||| 0-0 1-1
+1 ) ||| 1 ) ||| 0-0 1-1
+1 ) ||| 1 ) ||| 0-0 1-1
+1 ) ||| 1 ) ||| 0-0 1-1
+1 ) ||| 1 ) ||| 0-0 1-1
+1 ) ||| 1 ) ||| 0-0 1-1
+1 ||| 1 ||| 0-0
+1 ||| 1 ||| 0-0
+1 ||| 1 ||| 0-0
+1 ||| 1 ||| 0-0
+1 ||| 1 ||| 0-0
+1 ||| 1 ||| 0-0
+1 ||| 1 ||| 0-0
+1. " ||| 1 . " ||| 0-0 1-2
+1. " ||| 1 . " ||| 0-0 1-2
+1. Förderung eines ||| 1. promote ||| 0-0 1-1
+1. Förderung ||| 1. promote ||| 0-0 1-1
+1. Förderung ||| 1. promote ||| 0-0 1-1
+1. uneingeschränkte Achtung der ||| 1. full respect for the ||| 0-0 1-1 2-2 2-3 3-4
+1. uneingeschränkte Achtung der ||| 1. full respect for the ||| 0-0 1-1 2-2 2-3 3-4
+1. uneingeschränkte Achtung ||| 1. full respect for ||| 0-0 1-1 2-2 2-3
+1. uneingeschränkte Achtung ||| 1. full respect for ||| 0-0 1-1 2-2 2-3
+1. uneingeschränkte ||| 1. full ||| 0-0 1-1
+1. uneingeschränkte ||| 1. full ||| 0-0 1-1
+1. ||| 1 . ||| 0-0
+1. ||| 1 . ||| 0-0
+1. ||| 1 ||| 0-0
+1. ||| 1 ||| 0-0
+1. ||| 1. ||| 0-0
+1. ||| 1. ||| 0-0
+1. ||| 1. ||| 0-0
+1. ||| 1. ||| 0-0
+1. ||| 1. ||| 0-0
+100 ||| 100 ||| 0-0
+17. Dezember 1996 ||| 17 December 1996 ||| 0-0 1-1 2-2
+17. Dezember ||| 17 December ||| 0-0 1-1
+17. ||| 17 ||| 0-0
+1990 ||| 1990 ||| 0-0
+1990 ||| 1990 ||| 0-0
+1993 ||| 1993 ||| 0-0
+1995 ||| 1995 in ||| 0-0
+1995 ||| 1995 ||| 0-0
+1995 ||| 1995 ||| 0-0
+1996 ||| 1996 ||| 0-0
+1997 ||| 1997 ||| 0-0
+2 ) Ausgaben ||| 2 ) Ausgaben ||| 0-0 1-1 2-2
+2 ) ||| 2 ) ||| 0-0 1-1
+2 ) ||| 2 ) ||| 0-0 1-1
+2 ) ||| 2 ) ||| 0-0 1-1
+2 ) ||| 2 ) ||| 0-0 1-1
+2 ) ||| 2 ) ||| 0-0 1-1
+2 ) ||| 2 ) ||| 0-0 1-1
+2 ) ||| 2 ) ||| 0-0 1-1
+2 ) ||| 2 ) ||| 0-0 1-1
+2 ||| 2 ||| 0-0
+2 ||| 2 ||| 0-0
+2 ||| 2 ||| 0-0
+2 ||| 2 ||| 0-0
+2 ||| 2 ||| 0-0
+2 ||| 2 ||| 0-0
+2 ||| 2 ||| 0-0
+2 ||| 2 ||| 0-0
+2. " ||| 2 . " ||| 0-0 1-2
+2. ausgewogener ||| 2. overall balance of ||| 0-0 1-1 1-2
+2. ausgewogener ||| 2. overall balance ||| 0-0 1-1 1-2
+2. gegenseitiger Nutzen ||| 2. mutual benefit ||| 0-0 1-1 2-2
+2. gegenseitiger ||| 2. mutual ||| 0-0 1-1
+2. ||| 2 . ||| 0-0
+2. ||| 2 . ||| 0-0
+2. ||| 2 ||| 0-0
+2. ||| 2 ||| 0-0
+2. ||| 2. ||| 0-0
+2. ||| 2. ||| 0-0
+2. ||| 2. ||| 0-0
+2. ||| 2. ||| 0-0
+20 ||| 20 ||| 0-0
+22. November 1990 ||| 22 November 1990 ||| 0-0 1-1 2-2
+22. November ||| 22 November ||| 0-0 1-1
+22. ||| 22 ||| 0-0
+3 ) Ausgaben ||| 3 ) Ausgaben ||| 0-0 1-1 2-2
+3 ) ||| 3 ) ||| 0-0 1-1
+3 ) ||| 3 ) ||| 0-0 1-1
+3 ) ||| 3 ) ||| 0-0 1-1
+3 ) ||| 3 ) ||| 0-0 1-1
+3 ) ||| 3 ) ||| 0-0 1-1
+3 ||| 3 of ||| 0-0
+3 ||| 3 ||| 0-0
+3 ||| 3 ||| 0-0
+3 ||| 3 ||| 0-0
+3 ||| 3 ||| 0-0
+3 ||| 3 ||| 0-0
+3 ||| 3 ||| 0-0
+3. Förderung ||| 3. encourage ||| 0-0 1-1
+3. wirksame ||| 3. effective provision of ||| 0-0 1-1
+3. wirksame ||| 3. effective provision of ||| 0-0 1-1
+3. wirksame ||| 3. effective provision ||| 0-0 1-1
+3. wirksame ||| 3. effective provision ||| 0-0 1-1
+3. wirksame ||| 3. effective ||| 0-0 1-1
+3. wirksame ||| 3. effective ||| 0-0 1-1
+3. ||| 3 ||| 0-0
+3. ||| 3 ||| 0-0
+3. ||| 3. ||| 0-0
+3. ||| 3. ||| 0-0
+3. ||| 3. ||| 0-0
+3. ||| 3. ||| 0-0
+4 ) ||| 4 ) ||| 0-0 1-1
+4 ) ||| 4 ) ||| 0-0 1-1
+4 ) ||| 4 ) ||| 0-0 1-1
+4 ||| 4 ||| 0-0
+4 ||| 4 ||| 0-0
+4 ||| 4 ||| 0-0
+4. umfassende Einbeziehung der ||| 4. broad participation across the ||| 0-0 1-1 2-2 2-3 3-4
+4. umfassende Einbeziehung der ||| 4. broad participation across the ||| 0-0 1-1 2-2 2-3 3-4
+4. umfassende Einbeziehung ||| 4. broad participation across ||| 0-0 1-1 2-2 2-3
+4. umfassende Einbeziehung ||| 4. broad participation across ||| 0-0 1-1 2-2 2-3
+4. umfassende ||| 4. broad ||| 0-0 1-1
+4. umfassende ||| 4. broad ||| 0-0 1-1
+4. ||| 4. ||| 0-0
+4. ||| 4. ||| 0-0
+4. ||| 4. ||| 0-0
+4. ||| 4. ||| 0-0
+5. Förderung des ||| 5. encourage the ||| 0-0 1-1 2-2
+5. Förderung des ||| 5. encourage the ||| 0-0 1-1 2-2
+5. Förderung ||| 5. encourage ||| 0-0 1-1
+5. Förderung ||| 5. encourage ||| 0-0 1-1
+5. uneingeschränkte Anerkennung der ||| 5. recognition of the full ||| 0-0 2-1 3-2 3-3 1-4 3-4
+5. uneingeschränkte Anerkennung der ||| 5. recognition of the full ||| 0-0 2-1 3-2 3-3 1-4 3-4
+5. ||| 5. ||| 0-0
+5. ||| 5. ||| 0-0
+5. ||| 5. ||| 0-0
+5. ||| 5. ||| 0-0
+57 ||| 57 ||| 0-0
+6. Förderung oder Ausbau von ||| 6. promote or enhance ||| 0-0 1-1 2-2 3-3
+6. Förderung oder Ausbau ||| 6. promote or enhance ||| 0-0 1-1 2-2 3-3
+6. Förderung oder ||| 6. promote or ||| 0-0 1-1 2-2
+6. Förderung ||| 6. promote ||| 0-0 1-1
+6. ||| 6. form ||| 0-0
+6. ||| 6. ||| 0-0
+6. ||| 6. ||| 0-0
+6. ||| 6. ||| 0-0
+6. ||| 6. ||| 0-0
+7. Verstärkte Einbringung einer ||| 7. reinforce a ||| 0-0 1-1 2-1 3-2
+7. Verstärkte Einbringung ||| 7. reinforce ||| 0-0 1-1 2-1
+7. verstärkte Einbringung einer ||| 7. reinforce a ||| 0-0 1-1 2-1 3-2
+7. verstärkte Einbringung ||| 7. reinforce ||| 0-0 1-1 2-1
+7. ||| 7. ||| 0-0
+7. ||| 7. ||| 0-0
+8. Ergänzung bilateraler Programme ||| 8. complement bilateral programmes ||| 0-0 1-1 2-2 3-3
+8. Ergänzung bilateraler Programme ||| 8. complement relevant bilateral programmes ||| 0-0 1-1 3-2 2-3 3-4
+8. Ergänzung bilateraler ||| 8. complement bilateral ||| 0-0 1-1 2-2
+8. Ergänzung ||| 8. complement ||| 0-0 1-1
+8. Ergänzung ||| 8. complement ||| 0-0 1-1
+8. ||| 8. ||| 0-0
+8. ||| 8. ||| 0-0
+: ||| : ||| 0-0
+: ||| : ||| 0-0
+: ||| : ||| 0-0
+; ||| , ||| 0-0
+; ||| , ||| 0-0
+; ||| ; and ||| 0-0 0-1
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+; ||| ; ||| 0-0
+Abkommen ersetzt das ||| Agreement replaces the ||| 0-0 1-1 2-2
+Abkommen ersetzt ||| Agreement replaces ||| 0-0 1-1
+Abkommen ist ||| Agreement is ||| 0-0 1-1
+Abkommen ist ||| Agreement is ||| 0-0 1-1
+Abkommen zwischen der Europäischen Gemeinschaft ||| Agreement Between the European Community ||| 0-0 1-1 2-2 1-3 3-3 4-4
+Abkommen zwischen der Europäischen ||| Agreement Between the European ||| 0-0 1-1 2-2 1-3 3-3
+Abkommen ||| Abkommen ||| 0-0
+Abkommen ||| Agreement ||| 0-0
+Abkommen ||| Agreement ||| 0-0
+Abkommen ||| Agreement ||| 0-0
+Abkommen ||| Agreement ||| 0-0
+Abkommen ||| Agreement ||| 0-0
+Abkommen ||| Agreement ||| 0-0
+Abkommen ||| Agreement ||| 0-0
+Abkommen ||| Agreement ||| 0-0
+Abkommen ||| Agreement ||| 0-0
+Abkommen ||| Agreement ||| 0-0
+Abkommen ||| Agreement ||| 0-0
+Abkommen ||| Agreement ||| 0-0
+Abkommen ||| Agreement ||| 0-0
+Abkommen ||| Agreement ||| 0-0
+Abkommen ||| Agreement ||| 0-0
+Abkommens hat ||| Agreement shall ||| 0-0 1-1
+Abkommens hat ||| Agreement shall ||| 0-0 1-1
+Abkommens ||| Agreement , ||| 0-0
+Abkommens ||| Agreement ||| 0-0
+Abkommens ||| Agreement ||| 0-0
+Abkommens ||| Agreement ||| 0-0
+Abkommens ||| Agreement ||| 0-0
+Abkommens ||| Agreement ||| 0-0
+Abkommens ||| Agreement ||| 0-0
+Abkommens ||| Agreement ||| 0-0
+Abkommens ||| Agreement ||| 0-0
+Abkommens ||| Agreement ||| 0-0
+Abkommens ||| Agreement ||| 0-0
+Abkommens ||| Agreement ||| 0-0
+Abkommens ||| Agreement ||| 0-0
+Abkommens ||| US Agreement ||| 0-1
+Ablauf oder die Kündigung dieses ||| expiration or termination of this ||| 0-0 1-1 3-2 2-3 4-4
+Ablauf oder die Kündigung dieses ||| expiration or termination of this ||| 0-0 1-1 3-2 2-3 4-4
+Ablauf oder die Kündigung ||| expiration or termination of ||| 0-0 1-1 3-2 2-3
+Ablauf oder die Kündigung ||| expiration or termination of ||| 0-0 1-1 3-2 2-3
+Ablauf oder ||| expiration or ||| 0-0 1-1
+Ablauf oder ||| expiration or ||| 0-0 1-1
+Ablauf ||| expiration ||| 0-0
+Ablauf ||| expiration ||| 0-0
+Ablaufstrecke ||| final ||| 0-0
+Achtung der Zuständigkeiten ||| respect for the responsibilities of ||| 0-0 0-1 1-2 2-3
+Achtung der Zuständigkeiten ||| respect for the responsibilities of ||| 0-0 0-1 1-2 2-3
+Achtung der Zuständigkeiten ||| respect for the responsibilities ||| 0-0 0-1 1-2 2-3
+Achtung der Zuständigkeiten ||| respect for the responsibilities ||| 0-0 0-1 1-2 2-3
+Achtung der ||| respect for the ||| 0-0 0-1 1-2
+Achtung der ||| respect for the ||| 0-0 0-1 1-2
+Achtung ||| respect for ||| 0-0 0-1
+Achtung ||| respect for ||| 0-0 0-1
+Agenda ||| Agenda ||| 0-0
+Akademiker- und ||| academic and youth ||| 0-0 1-1 0-2
+Akademiker- und ||| academic and youth ||| 0-0 1-1 0-2
+Aktivitäten bilden könnte , die ||| cooperative activities of ||| 0-0 0-1
+Aktivitäten bilden könnte , die ||| cooperative activities ||| 0-0 0-1
+Aktivitäten bilden könnte , ||| cooperative activities of ||| 0-0 0-1
+Aktivitäten bilden könnte , ||| cooperative activities ||| 0-0 0-1
+Aktivitäten bilden könnte ||| cooperative activities of ||| 0-0 0-1
+Aktivitäten bilden könnte ||| cooperative activities ||| 0-0 0-1
+Aktivitäten bilden ||| cooperative activities of ||| 0-0 0-1
+Aktivitäten bilden ||| cooperative activities ||| 0-0 0-1
+Aktivitäten im Rahmen dieses Abkommens ||| cooperative activities under this Agreement ||| 0-0 1-0 2-0 0-1 2-2 3-3 4-4
+Aktivitäten im Rahmen dieses ||| cooperative activities under this ||| 0-0 1-0 2-0 0-1 2-2 3-3
+Aktivitäten im Rahmen dieses ||| cooperative activities under this ||| 0-0 1-0 2-0 0-1 2-2 3-3
+Aktivitäten im Rahmen ||| cooperative activities under ||| 0-0 1-0 2-0 0-1 2-2
+Aktivitäten im Rahmen ||| cooperative activities under ||| 0-0 1-0 2-0 0-1 2-2
+Aktivitäten im ||| cooperative activities ||| 0-0 1-0 0-1
+Aktivitäten ||| activities ||| 0-0
+Aktivitäten ||| activities ||| 0-0
+Aktivitäten ||| activities ||| 0-0
+Aktivitäten ||| activities ||| 0-0
+Aktivitäten ||| cooperative activities of ||| 0-0 0-1
+Aktivitäten ||| cooperative activities ||| 0-0 0-1
+Aktivitäten ||| of activities ||| 0-1
+Amerika ||| America ||| 0-0
+Amtsträgern der ||| Minister-level officials of ||| 0-0 0-1 1-2
+Amtsträgern ||| Minister-level officials ||| 0-0 0-1
+Anerkennung ||| recognition ||| 0-0
+Anerkennung ||| recognition ||| 0-0
+Anerkennung ||| recognition ||| 0-0
+Anerkennung ||| recognition ||| 0-0
+Anerkennung ||| recognition ||| 0-0
+Anerkennung ||| recognition ||| 0-0
+Anforderungen an ||| requirements for ||| 0-0 1-0
+Anforderungen an ||| requirements ||| 0-0 1-0
+Anforderungen ||| requirements for the ||| 0-0
+Anforderungen ||| requirements for ||| 0-0
+Anforderungen ||| requirements ||| 0-0
+Anhang dieses Abkommens ||| Annex to this Agreement ||| 0-0 1-2 2-3
+Anhang dieses ||| Annex to this ||| 0-0 1-2
+Anhang ||| Annex to ||| 0-0
+Anhang ||| Annex ||| 0-0
+Anstoß für ||| for ||| 1-0
+Arten von ||| of ||| 0-0 1-0
+Arten ||| of ||| 0-0
+Artikel 57 Nummer 3 ||| point 3 of Article 57 ||| 2-0 3-1 0-3 1-4
+Artikel 57 ||| Article 57 ||| 0-0 1-1
+Artikel 57 ||| of Article 57 ||| 0-1 1-2
+Artikel ||| Article ||| 0-0
+Artikel ||| of Article ||| 0-1
+Artikels ||| Article , ||| 0-0
+Artikels ||| Article ||| 0-0
+Artikels ||| Article ||| 0-0
+Assoziation zwischen ||| an association between ||| 0-0 0-1 1-2
+Assoziation ||| an association ||| 0-0 0-1
+Ausbau von Partnerschaften zwischen ||| enhance partnerships among ||| 0-0 2-1 2-2 3-2
+Ausbau von ||| enhance ||| 0-0
+Ausbau ||| enhance ||| 0-0
+Ausbau ||| enhance ||| 0-0
+Ausbildungskursen oder Programmen teilnehmen ||| courses or programmes ||| 0-0 1-1 3-1 2-2
+Ausbildungskursen oder Programmen teilnehmen ||| courses or programmes ||| 0-0 1-1 3-1 2-2
+Ausbildungskursen ||| courses ||| 0-0
+Ausbildungskursen ||| courses ||| 0-0
+Ausgaben ||| Ausgaben ||| 0-0
+Ausgaben ||| Ausgaben ||| 0-0
+Ausrüstung ||| equipment ||| 0-0
+Ausrüstung ||| equipment ||| 0-0
+Ausschusses ||| Committee ||| 0-0
+Ausschusses ||| Committee ||| 0-0
+Autonomie ||| autonomy ||| 0-0
+Autonomie ||| the autonomy ||| 0-1
+BULGARIEN , nachstehend ||| BULGARIA , hereinafter referred to ||| 0-0 1-1 2-2 2-3 2-4
+BULGARIEN , ||| BULGARIA , ||| 0-0 1-1
+BULGARIEN ||| BULGARIA ||| 0-0
+Bedingungen ||| conditions ||| 0-0
+Behörden , Unternehmen ||| public authorities , private ||| 0-0 0-1 1-2 2-3
+Behörden , ||| public authorities , ||| 0-0 0-1 1-2
+Behörden ||| authorities ||| 0-0
+Behörden ||| authorities ||| 0-0
+Behörden ||| public authorities ||| 0-0 0-1
+Behörden ||| public authorities ||| 0-0 0-1
+Beispiele für ||| examples of ||| 0-0 0-1 1-1
+Beitrags ||| contribution ||| 0-0
+Beitrags ||| contribution ||| 0-0
+Bereich der Hochschul- und Berufsbildung ||| in higher education and training ||| 0-0 0-1 1-1 2-1 2-2 3-3 4-4
+Bereich der Hochschul- und ||| in higher education and ||| 0-0 0-1 1-1 2-1 2-2 3-3
+Bereich der Hochschul- ||| in higher education ||| 0-0 0-1 1-1 2-1 2-2
+Bereich ||| fields ||| 0-0
+Bereiche ||| Bereiche ||| 0-0
+Bereichen ||| fields ||| 0-0
+Bereichen ||| fields ||| 0-0
+Berichts an die Parteien ||| report annually to the Parties ||| 0-0 1-2 2-3 3-4
+Berichts an die ||| report annually to the ||| 0-0 1-2 2-3
+Berichts an ||| report annually to ||| 0-0 1-2
+Berichts ||| report annually ||| 0-0
+Berichts ||| report ||| 0-0
+Berufsbildung , ||| training ; ||| 0-0 0-1 1-1
+Berufsbildung , ||| training ; ||| 0-0 0-1 1-1
+Berufsbildung ; ||| training ; ||| 0-0 1-1
+Berufsbildung ; ||| training ; ||| 0-0 1-1
+Berufsbildung von ||| training ||| 0-0 1-0
+Berufsbildung zwischen ||| training between ||| 0-0 1-1
+Berufsbildung ||| training ||| 0-0
+Berufsbildung ||| training ||| 0-0
+Berufsbildung ||| training ||| 0-0
+Berufsbildung ||| training ||| 0-0
+Berufsbildung ||| training ||| 0-0
+Berufsbildung ||| training ||| 0-0
+Berufsbildung ||| training ||| 0-0
+Berufsbildung ||| training ||| 0-0
+Berufsbildung ||| training ||| 0-0
+Berufsbildungssektor , zu erweitern , ||| and training sector ; and ||| 3-0 0-1 0-2 2-2 3-2 1-3 4-3 3-4
+Berufsbildungssektor , zu erweitern , ||| the training sector ; ||| 1-0 0-1 0-2 2-2 3-2 4-3
+Berufsbildungssektor , zu erweitern ||| the training sector ||| 1-0 0-1 0-2 2-2 3-2
+Betrag , ||| amount for ||| 0-0
+Betrag , ||| amount ||| 0-0
+Betrag ||| amount for ||| 0-0
+Betrag ||| amount ||| 0-0
+Betrag ||| amount ||| 0-0
+Beträge ||| payment ||| 0-0
+Bezeichnung ; ||| called ; ||| 0-0 1-1
+Bezeichnung ; ||| called ; ||| 0-0 1-1
+Bezeichnung ||| called ||| 0-0
+Bezeichnung ||| called ||| 0-0
+Beziehungen von ||| links ||| 0-0
+Beziehungen ||| links ||| 0-0
+Beziehungen ||| links ||| 0-0
+Beziehungen ||| links ||| 0-0
+Bildung ||| education ||| 0-0
+Brückenschlag ||| Atlantic : ||| 0-0
+Brückenschlag ||| Atlantic ||| 0-0
+Brückenschlag ||| Atlantic ||| 0-0
+Bulgarien zur Regelung ||| Bulgaria establishing certain conditions for ||| 0-0 1-1 2-1 1-2 1-4
+Bulgarien ||| Bulgaria , ||| 0-0
+Bulgarien ||| Bulgaria ||| 0-0
+Bulgarien ||| Bulgaria ||| 0-0
+Bulgarien ||| Bulgaria ||| 0-0
+Bulgarien ||| Bulgaria ||| 0-0
+Bulgarien ||| Bulgaria ||| 0-0
+Bulgarien ||| of Bulgaria ||| 0-1
+Bulgariens , ||| Bulgaria , ||| 0-0 1-1
+Bulgariens , ||| of Bulgaria , ||| 0-1 1-2
+Bulgariens ; ||| Bulgaria , ||| 0-0 1-1
+Bulgariens ||| Bulgaria ||| 0-0
+Bulgariens ||| Bulgaria ||| 0-0
+Bulgariens ||| of Bulgaria ||| 0-1
+Bürger ||| citizens ||| 0-0
+Bürger ||| citizens ||| 0-0
+DIE EUROPÄISCHE GEMEINSCHAFT , ||| THE EUROPEAN COMMUNITY , ||| 0-0 0-1 1-1 2-2 3-3
+DIE EUROPÄISCHE GEMEINSCHAFT ||| THE EUROPEAN COMMUNITY ||| 0-0 0-1 1-1 2-2
+DIE EUROPÄISCHE ||| THE EUROPEAN ||| 0-0 0-1 1-1
+DIE REPUBLIK BULGARIEN , ||| THE REPUBLIC OF BULGARIA , ||| 0-0 0-1 1-1 1-2 2-3 3-4
+DIE REPUBLIK BULGARIEN ||| THE REPUBLIC OF BULGARIA ||| 0-0 0-1 1-1 1-2 2-3
+DIE REPUBLIK ||| THE REPUBLIC OF ||| 0-0 0-1 1-1 1-2
+Das Abkommen ||| The Agreement shall ||| 0-0 1-1 0-2
+Das Kooperationsprogramm wird in ||| The Cooperation Programme shall be ||| 0-0 1-1 1-2 2-3 3-3 2-4
+Das Kooperationsprogramm ||| The Cooperation Programme ||| 0-0 1-1 1-2
+Das Kooperationsprogramm ||| The Cooperation Programme ||| 0-0 1-1 1-2
+Das Programm wird in ||| The Programme shall be ||| 0-0 1-1 2-2 2-3 3-3
+Das Programm wird ||| The Programme shall be ||| 0-0 1-1 2-2 2-3
+Das Programm ||| The Programme ||| 0-0 1-1
+Das Programm ||| The Programme ||| 0-0 1-1
+Das ||| The ||| 0-0
+Das ||| The ||| 0-0
+Das ||| The ||| 0-0
+Das ||| The ||| 0-0
+Dauer von ||| duration of ||| 0-0 1-1
+Dauer von ||| duration of ||| 0-0 1-1
+Dauer ||| duration ||| 0-0
+Dauer ||| duration ||| 0-0
+Der Ablauf oder die Kündigung ||| The expiration or termination of ||| 0-0 1-1 2-2 4-3 3-4
+Der Ablauf oder die Kündigung ||| The expiration or termination of ||| 0-0 1-1 2-2 4-3 3-4
+Der Ablauf oder ||| The expiration or ||| 0-0 1-1 2-2
+Der Ablauf oder ||| The expiration or ||| 0-0 1-1 2-2
+Der Ablauf ||| The expiration ||| 0-0 1-1
+Der Ablauf ||| The expiration ||| 0-0 1-1
+Der ||| The ||| 0-0
+Der ||| The ||| 0-0
+Dezember 1995 ||| December 1995 in ||| 0-0 1-1
+Dezember 1995 ||| December 1995 ||| 0-0 1-1
+Dezember 1996 ||| December 1996 ||| 0-0 1-1
+Dezember ||| December ||| 0-0
+Dezember ||| December ||| 0-0
+Die Finanzierung erfolgt ||| Financing will be , ||| 0-0 1-0 2-0 2-1 2-2
+Die Finanzierung erfolgt ||| Financing will be ||| 0-0 1-0 2-0 2-1 2-2
+Die Finanzierung erfolgt ||| Financing will be ||| 0-0 1-0 2-0 2-1 2-2
+Die Parteien bemühen sich darum ||| The Parties shall attempt ||| 0-0 1-1 3-2 2-3 4-3
+Die Parteien ||| The Parties ||| 0-0 1-1
+Die Vertragsparteien treffen ||| The Contracting Parties shall take ||| 0-0 1-1 1-2 0-3 2-4
+Die Vertragsparteien ||| The Contracting Parties shall ||| 0-0 1-1 1-2 0-3
+Die Vertragsparteien ||| The Contracting Parties ||| 0-0 1-1 1-2
+Die Zusammenarbeit nach diesem Abkommen ||| Cooperation under this Agreement shall ||| 0-0 1-0 2-1 3-2 4-3 0-4
+Die Zusammenarbeit nach diesem Abkommen ||| Cooperation under this Agreement shall ||| 0-0 1-0 2-1 3-2 4-3 0-4
+Die ||| Die ||| 0-0
+Die ||| Die ||| 0-0
+Die ||| The ||| 0-0
+Die ||| The ||| 0-0
+Dies ermöglicht ||| This shall permit ||| 0-0 0-1 1-2
+Dies ermöglicht ||| This shall permit ||| 0-0 0-1 1-2
+Dies ||| This shall ||| 0-0 0-1
+Dies ||| This shall ||| 0-0 0-1
+Dieses Abkommen ersetzt das ||| This Agreement replaces the ||| 0-0 1-1 2-2 3-3
+Dieses Abkommen ersetzt ||| This Agreement replaces ||| 0-0 1-1 2-2
+Dieses Abkommen ist ||| This Agreement is ||| 0-0 1-1 2-2
+Dieses Abkommen ist ||| This Agreement is ||| 0-0 1-1 2-2
+Dieses Abkommen ||| This Agreement ||| 0-0 1-1
+Dieses Abkommen ||| This Agreement ||| 0-0 1-1
+Dieses Abkommen ||| This Agreement ||| 0-0 1-1
+Dieses Abkommen ||| This Agreement ||| 0-0 1-1
+Dieses Abkommen ||| This Agreement ||| 0-0 1-1
+Dieses ||| This ||| 0-0
+Dieses ||| This ||| 0-0
+Dieses ||| This ||| 0-0
+Dieses ||| This ||| 0-0
+Dieses ||| This ||| 0-0
+Dimension ||| dimension ||| 0-0
+Diskriminierung ||| discrimination ||| 0-0
+Durchführung gemeinsamer ||| conduct ||| 0-0
+Durchführung ||| conduct ||| 0-0
+Durchführung ||| implementation of ||| 0-0
+Durchführung ||| implementation ||| 0-0
+EG ||| EC / US ||| 0-0 0-1
+EG ||| EC / ||| 0-0 0-1
+Einbeziehung der verschiedenen Mitgliedstaaten ||| participation across the different Member ||| 0-0 0-1 1-2 2-3 3-4
+Einbeziehung der verschiedenen ||| participation across the different ||| 0-0 0-1 1-2 2-3
+Einbeziehung der verschiedenen ||| participation across the different ||| 0-0 0-1 1-2 2-3
+Einbeziehung der ||| participation across the ||| 0-0 0-1 1-2
+Einbeziehung der ||| participation across the ||| 0-0 0-1 1-2
+Einbeziehung ||| participation across ||| 0-0 0-1
+Einbeziehung ||| participation across ||| 0-0 0-1
+Einführung ||| introduction of ||| 0-0
+Einführung ||| introduction ||| 0-0
+Einrichtungen ||| institutions ||| 0-0
+Entwicklung und Förderung des ||| the development and promotion of ||| 3-0 0-1 1-2 2-3
+Entwicklung und Förderung des ||| the development and promotion ||| 3-0 0-1 1-2 2-3
+Entwicklung und Förderung ||| development and promotion of ||| 0-0 1-1 2-2
+Entwicklung und Förderung ||| development and promotion ||| 0-0 1-1 2-2
+Entwicklung und ||| development and ||| 0-0 1-1
+Entwicklung ||| development ||| 0-0
+Entwicklung ||| development ||| 0-0
+Entwicklung ||| development ||| 0-0
+Entwicklung ||| development ||| 0-0
+Ergebnisse ||| results ||| 0-0
+Ergebnisse ||| results ||| 0-0
+Ergänzung bilateraler Programme zwischen den ||| complement bilateral programmes between ||| 0-0 1-1 2-2 3-3 4-3
+Ergänzung bilateraler Programme zwischen den ||| complement relevant bilateral programmes between ||| 0-0 2-1 1-2 2-3 3-4 4-4
+Ergänzung bilateraler Programme ||| complement bilateral programmes ||| 0-0 1-1 2-2
+Ergänzung bilateraler Programme ||| complement relevant bilateral programmes ||| 0-0 2-1 1-2 2-3
+Ergänzung bilateraler ||| complement bilateral ||| 0-0 1-1
+Ergänzung ||| complement ||| 0-0
+Ergänzung ||| complement ||| 0-0
+Erklärung umgesetzt werden und ||| Declaration and ||| 0-0 1-1 3-1
+Erklärung umgesetzt werden und ||| Declaration and ||| 0-0 3-1
+Erklärung umgesetzt werden ||| Declaration ||| 0-0
+Erklärung umgesetzt ||| Declaration ||| 0-0
+Erklärung ||| Declaration ||| 0-0
+Erklärung ||| Declaration ||| 0-0
+Erklärung ||| Declaration ||| 0-0
+Erklärung ||| Declaration ||| 0-0
+Erklärung ||| Declaration ||| 0-0
+Erneuerung ||| renewing a ||| 0-0
+Erneuerung ||| renewing a ||| 0-0
+Erneuerung ||| renewing ||| 0-0
+Erneuerung ||| renewing ||| 0-0
+Erwerbs der angesichts ||| acquisition of skills ||| 0-0 1-1 0-2 2-2
+Erwägung ||| considering to ||| 0-0
+Erwägung ||| considering ||| 0-0
+Europarat sicherzustellen ||| Council of Europe ||| 0-0 1-1 0-2
+Europarat sicherzustellen ||| the Council of Europe ||| 0-1 1-2 0-3
+Europäischen Gemeinschaft und Kanada ergänzen ||| European Community and Canada ||| 0-0 1-1 2-2 4-2 3-3
+Europäischen Gemeinschaft und Kanada ||| European Community and Canada ||| 0-0 1-1 2-2 3-3
+Europäischen Gemeinschaft und Kanadas , ||| European Community and Canada , ||| 0-0 1-1 2-2 3-3 4-4
+Europäischen Gemeinschaft und Kanadas ||| European Community and Canada ||| 0-0 1-1 2-2 3-3
+Europäischen Gemeinschaft und den Vereinigten ||| European Community and the United ||| 0-0 1-1 2-2 3-3 4-4
+Europäischen Gemeinschaft und den Vereinigten ||| European Community and the United ||| 0-0 1-1 2-2 3-3 4-4
+Europäischen Gemeinschaft und den Vereinigten ||| European Community and the United ||| 0-0 1-1 2-2 3-3 4-4
+Europäischen Gemeinschaft und den ||| European Community and the ||| 0-0 1-1 2-2 3-3
+Europäischen Gemeinschaft und den ||| European Community and the ||| 0-0 1-1 2-2 3-3
+Europäischen Gemeinschaft und den ||| European Community and the ||| 0-0 1-1 2-2 3-3
+Europäischen Gemeinschaft und den ||| the European Community and the ||| 0-1 1-2 2-3 3-4
+Europäischen Gemeinschaft und der Provinzen ||| European Community and the Provinces ||| 0-0 1-1 2-2 3-3 4-4
+Europäischen Gemeinschaft und der Vereinigten ||| European Community and the United ||| 0-0 1-1 2-2 3-3 4-4
+Europäischen Gemeinschaft und der Vereinigten ||| European Community and the United ||| 0-0 1-1 2-2 3-3 4-4
+Europäischen Gemeinschaft und der ||| European Community and the ||| 0-0 1-1 2-2 3-3
+Europäischen Gemeinschaft und der ||| European Community and the ||| 0-0 1-1 2-2 3-3
+Europäischen Gemeinschaft und der ||| European Community and the ||| 0-0 1-1 2-2 3-3
+Europäischen Gemeinschaft und der ||| the European Community and the ||| 0-1 1-2 2-3 3-4
+Europäischen Gemeinschaft und ||| European Community and ||| 0-0 1-1 2-2
+Europäischen Gemeinschaft und ||| European Community and ||| 0-0 1-1 2-2
+Europäischen Gemeinschaft und ||| European Community and ||| 0-0 1-1 2-2
+Europäischen Gemeinschaft und ||| European Community and ||| 0-0 1-1 2-2
+Europäischen Gemeinschaft und ||| European Community and ||| 0-0 1-1 2-2
+Europäischen Gemeinschaft und ||| European Community and ||| 0-0 1-1 2-2
+Europäischen Gemeinschaft und ||| European Community and ||| 0-0 1-1 2-2
+Europäischen Gemeinschaft und ||| European Community and ||| 0-0 1-1 2-2
+Europäischen Gemeinschaft und ||| European Community and ||| 0-0 1-1 2-2
+Europäischen Gemeinschaft und ||| European Community and ||| 0-0 1-1 2-2
+Europäischen Gemeinschaft und ||| European Community and ||| 0-0 1-1 2-2
+Europäischen Gemeinschaft und ||| European Community and ||| 0-0 1-1 2-2
+Europäischen Gemeinschaft und ||| European Community and ||| 0-0 1-1 2-2
+Europäischen Gemeinschaft und ||| European Community and ||| 0-0 1-1 2-2
+Europäischen Gemeinschaft und ||| European Community and ||| 0-0 1-1 2-2
+Europäischen Gemeinschaft und ||| both the European Community and ||| 2-0 0-2 1-3 2-4
+Europäischen Gemeinschaft und ||| both the European Community and ||| 2-0 0-2 1-3 2-4
+Europäischen Gemeinschaft und ||| the European Community and ||| 0-1 1-2 2-3
+Europäischen Gemeinschaft und ||| the European Community and ||| 0-1 1-2 2-3
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| European Community ||| 0-0 1-1
+Europäischen Gemeinschaft ||| the European Community ||| 0-1 1-2
+Europäischen Gemeinschaft ||| the European Community ||| 0-1 1-2
+Europäischen Gemeinschaft ||| the European Community ||| 0-1 1-2
+Europäischen Gemeinschaft ||| the European Community ||| 0-1 1-2
+Europäischen Gemeinschaft ||| the European Community ||| 0-1 1-2
+Europäischen Gemeinschaft ||| the European Community ||| 0-1 1-2
+Europäischen Gemeinschaft ||| the European Community ||| 0-1 1-2
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| European ||| 0-0
+Europäischen ||| the European ||| 0-1
+Europäischen ||| the European ||| 0-1
+Europäischen ||| the European ||| 0-1
+Europäischen ||| the European ||| 0-1
+Europäischen ||| the European ||| 0-1
+Europäischen ||| the European ||| 0-1
+Europäischen ||| the European ||| 0-1
+Fachwissen im Bereich ||| expertise in ||| 0-0 1-1 2-1
+Fachwissen im Bereich ||| of expertise in ||| 0-1 1-2 2-2
+Fachwissen ||| expertise ||| 0-0
+Fachwissen ||| expertise ||| 0-0
+Fachwissen ||| of expertise ||| 0-1
+Fachwissen ||| of expertise ||| 0-1
+Fahrt ||| journey ||| 0-0
+Folgenden ||| hereinafter referred ||| 0-0 0-1
+Form ||| Form ||| 0-0
+Frist ||| Frist ||| 0-0
+Frist ||| Frist ||| 0-0
+Förderung des ||| encourage the ||| 0-0 1-1
+Förderung des ||| encourage the ||| 0-0 1-1
+Förderung eines ||| promote ||| 0-0
+Förderung oder Ausbau von ||| promote or enhance ||| 0-0 1-1 2-2
+Förderung oder Ausbau ||| promote or enhance ||| 0-0 1-1 2-2
+Förderung oder ||| promote or ||| 0-0 1-1
+Förderung ||| encourage ||| 0-0
+Förderung ||| encourage ||| 0-0
+Förderung ||| encourage ||| 0-0
+Förderung ||| promote ||| 0-0
+Förderung ||| promote ||| 0-0
+Förderung ||| promote ||| 0-0
+Förderung ||| promoting ||| 0-0
+Förderung ||| promoting ||| 0-0
+Förderung ||| promotion of ||| 0-0
+Förderung ||| promotion ||| 0-0
+Förderung ||| promotion ||| 0-0
+Für ||| For ||| 0-0
+GEMEINSCHAFT , nachstehend ||| COMMUNITY , hereinafter referred to ||| 0-0 1-1 2-2 2-3 2-4
+GEMEINSCHAFT , ||| COMMUNITY , ||| 0-0 1-1
+GEMEINSCHAFT ||| COMMUNITY ||| 0-0
+GESTÜTZT auf das Europa-Abkommen ||| CONSIDERING the Europe Agreement ||| 0-0 1-1 3-2 2-3 3-3
+GESTÜTZT auf ||| CONSIDERING the ||| 0-0 1-1
+GESTÜTZT ||| CONSIDERING ||| 0-0
+Gebiet ||| territory ||| 0-0
+Gebiet ||| territory ||| 0-0
+Gebieten , die ||| fields which ||| 0-0 1-1 2-1
+Gebieten , die ||| fields which ||| 0-0 1-1 2-1
+Gebieten der Vertragsparteien ||| territories of the Contracting Parties ||| 0-0 1-1 2-3 2-4
+Gebieten der ||| territories of the ||| 0-0 1-1
+Gebieten der ||| territories of ||| 0-0 1-1
+Gebieten ||| fields ||| 0-0
+Gebieten ||| fields ||| 0-0
+Gebieten ||| territories of ||| 0-0
+Gebieten ||| territories ||| 0-0
+Gebieten ||| territories ||| 0-0
+Gebieten ||| territories ||| 0-0
+Gebieten ||| the territories of ||| 0-1
+Gebieten ||| the territories ||| 0-1
+Gemeinsamen Ausschusses ||| Joint Committee ||| 0-0 1-1
+Gemeinsamen Ausschusses ||| Joint Committee ||| 0-0 1-1
+Gemeinsamen ||| Joint ||| 0-0
+Gemeinsamen ||| Joint ||| 0-0
+Gemeinschaft oder Bulgariens ; ||| Community or Bulgaria , ||| 0-0 1-1 2-2 3-3
+Gemeinschaft oder Bulgariens ||| Community or Bulgaria ||| 0-0 1-1 2-2
+Gemeinschaft oder ||| Community or ||| 0-0 1-1
+Gemeinschaft und Kanada ergänzen ||| Community and Canada ||| 0-0 1-1 3-1 2-2
+Gemeinschaft und Kanada ||| Community and Canada ||| 0-0 1-1 2-2
+Gemeinschaft und Kanadas , einschließlich ||| Community and Canada , including ||| 0-0 1-1 2-2 3-3 4-4
+Gemeinschaft und Kanadas , ||| Community and Canada , ||| 0-0 1-1 2-2 3-3
+Gemeinschaft und Kanadas ; ||| Community and Canada ; and ||| 0-0 1-1 2-2 3-3 1-4
+Gemeinschaft und Kanadas ||| Community and Canada ||| 0-0 1-1 2-2
+Gemeinschaft und den Vereinigten Staaten ||| Community and the United States ||| 0-0 1-1 2-2 3-3 4-4
+Gemeinschaft und den Vereinigten Staaten ||| Community and the United States ||| 0-0 1-1 2-2 3-3 4-4
+Gemeinschaft und den Vereinigten Staaten ||| Community and the United States ||| 0-0 1-1 2-2 3-3 4-4
+Gemeinschaft und den Vereinigten Staaten ||| Community and the United States ||| 0-0 1-1 2-2 3-3 4-4
+Gemeinschaft und den Vereinigten ||| Community and the United ||| 0-0 1-1 2-2 3-3
+Gemeinschaft und den Vereinigten ||| Community and the United ||| 0-0 1-1 2-2 3-3
+Gemeinschaft und den Vereinigten ||| Community and the United ||| 0-0 1-1 2-2 3-3
+Gemeinschaft und den Vereinigten ||| Community and the United ||| 0-0 1-1 2-2 3-3
+Gemeinschaft und den Vereinigten ||| Community and the United ||| 0-0 1-1 2-2 3-3
+Gemeinschaft und den ||| Community and the ||| 0-0 1-1 2-2
+Gemeinschaft und den ||| Community and the ||| 0-0 1-1 2-2
+Gemeinschaft und den ||| Community and the ||| 0-0 1-1 2-2
+Gemeinschaft und den ||| Community and the ||| 0-0 1-1 2-2
+Gemeinschaft und den ||| Community and the ||| 0-0 1-1 2-2
+Gemeinschaft und der Provinzen ||| Community and the Provinces ||| 0-0 1-1 2-2 3-3
+Gemeinschaft und der Vereinigten Staaten ||| Community and the United States ||| 0-0 1-1 2-2 3-3 4-4
+Gemeinschaft und der Vereinigten ||| Community and the United ||| 0-0 1-1 2-2 3-3
+Gemeinschaft und der Vereinigten ||| Community and the United ||| 0-0 1-1 2-2 3-3
+Gemeinschaft und der ||| Community and the ||| 0-0 1-1 2-2
+Gemeinschaft und der ||| Community and the ||| 0-0 1-1 2-2
+Gemeinschaft und der ||| Community and the ||| 0-0 1-1 2-2
+Gemeinschaft und ||| Community and ||| 0-0 1-1
+Gemeinschaft und ||| Community and ||| 0-0 1-1
+Gemeinschaft und ||| Community and ||| 0-0 1-1
+Gemeinschaft und ||| Community and ||| 0-0 1-1
+Gemeinschaft und ||| Community and ||| 0-0 1-1
+Gemeinschaft und ||| Community and ||| 0-0 1-1
+Gemeinschaft und ||| Community and ||| 0-0 1-1
+Gemeinschaft und ||| Community and ||| 0-0 1-1
+Gemeinschaft und ||| Community and ||| 0-0 1-1
+Gemeinschaft und ||| Community and ||| 0-0 1-1
+Gemeinschaft und ||| Community and ||| 0-0 1-1
+Gemeinschaft und ||| Community and ||| 0-0 1-1
+Gemeinschaft und ||| Community and ||| 0-0 1-1
+Gemeinschaft und ||| Community and ||| 0-0 1-1
+Gemeinschaft und ||| Community and ||| 0-0 1-1
+Gemeinschaft und ||| Community and ||| 0-0 1-1
+Gemeinschaft und ||| Community and ||| 0-0 1-1
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| Community ||| 0-0
+Gemeinschaft ||| of the Community ||| 0-2
+Gemeinschaft ||| the Community ||| 0-0 0-1
+Gemeinschaft ||| the Community ||| 0-1
+Gemeinschaften ||| Communities ||| 0-0
+Gepflogenheiten ||| practices ||| 0-0
+Gepflogenheiten ||| practices ||| 0-0
+Geschichte und ||| history and ||| 1-0 0-1 1-1
+Grundlage für die weitere Zusammenarbeit ||| basis for continued cooperation ||| 0-0 1-1 2-1 3-1 2-2 4-3
+Grundlage für die weitere ||| basis for continued ||| 0-0 1-1 2-1 3-1 2-2
+Grundlage ||| basis ||| 0-0
+Grundlage ||| basis ||| 0-0
+Grundsätze . ||| principles . ||| 0-0 1-1
+Grundsätze . ||| principles . ||| 0-0 1-1
+Grundsätze ||| principles ||| 0-0
+Grundsätze ||| principles ||| 0-0
+Güter abgeladen werden ||| goods are unloaded ||| 0-0 2-1 1-2
+Güter ||| goods ||| 0-0
+Güterbeförderung zwischen den ||| goods between ||| 0-0 1-1 2-1
+Güterbeförderung zwischen den ||| of goods between ||| 0-1 1-2 2-2
+Güterbeförderung ||| goods ||| 0-0
+Güterbeförderung ||| of goods ||| 0-1
+Güterverkehr ||| carriage of goods ||| 0-0 0-2
+Hemmnisse ||| efficiently ||| 0-0
+Herausforderungen der ||| meet the challenges ||| 0-0 1-1 0-2
+Herausforderungen der ||| to meet the challenges ||| 0-1 1-2 0-3
+Hierbei umfasst die ||| of the ||| 0-1 2-1
+Hierbei umfasst die ||| the ||| 0-0 2-0
+Hochschul- und ||| higher education and ||| 0-0 0-1 1-2
+Hochschul- und ||| higher education and ||| 0-0 0-1 1-2
+Hochschul- und ||| higher education and ||| 0-0 0-1 1-2
+Hochschul- ||| higher education ||| 0-0 0-1
+Hochschul- ||| higher education ||| 0-0 0-1
+Hochschul- ||| higher education ||| 0-0 0-1
+Hochschul- ||| higher education ||| 0-0 0-1
+Hochschulen und Berufsbildungseinrichtungen ||| higher education and training institutions ||| 2-0 0-1 2-1 1-2 2-3 2-4
+Hochschulqualifikationen ||| offers qualifications ||| 0-0 0-1
+Hochschulqualifikationen ||| offers qualifications ||| 0-0 0-1
+Humanressourcen , ||| human resources capable ||| 0-0 0-1 0-2 1-2
+Humanressourcen , ||| human resources capable ||| 0-0 0-1 0-2 1-2
+IN DER ERKENNTNIS , dass ||| RECOGNISING that ||| 0-0 1-0 2-0 3-1 4-1
+IN DER ERKENNTNIS , dass ||| RECOGNISING that ||| 0-0 1-0 2-0 3-1 4-1
+IN DER ERKENNTNIS ||| RECOGNISING ||| 0-0 1-0 2-0
+IN DER ERKENNTNIS ||| RECOGNISING ||| 0-0 1-0 2-0
+IN DER ERKENNTNIS ||| RECOGNISING ||| 0-0 1-0 2-0
+IN DER ERWAEGUNG , dass ||| CONSIDERING that the ||| 0-0 1-0 2-0 3-1 4-1
+IN DER ERWAEGUNG , dass ||| CONSIDERING that ||| 0-0 1-0 2-0 3-1 4-1
+IN DER ERWAEGUNG , ||| CONSIDERING , furthermore , ||| 0-0 1-0 2-0 2-2 3-3
+IN DER ERWAEGUNG ||| CONSIDERING , furthermore ||| 0-0 1-0 2-0 2-2
+IN DER ERWAEGUNG ||| CONSIDERING ||| 0-0 1-0 2-0
+IN DER ERWAEGUNG ||| CONSIDERING ||| 0-0 1-0 2-0
+IN DER ERWARTUNG eines gegenseitigen ||| EXPECTING to obtain mutual ||| 0-0 1-0 2-0 0-1 2-2 3-2 4-3
+IN DER ERWARTUNG eines gegenseitigen ||| EXPECTING to obtain mutual ||| 0-0 1-0 2-0 0-1 2-2 3-2 4-3
+IN DER ERWARTUNG eines ||| EXPECTING to obtain ||| 0-0 1-0 2-0 0-1 2-2 3-2
+IN DER ERWARTUNG eines ||| EXPECTING to obtain ||| 0-0 1-0 2-0 0-1 2-2 3-2
+IV - ||| Action IV - ||| 0-1 1-2
+IV - ||| IV - ||| 0-0 1-1
+IV ||| Action IV ||| 0-1
+IV ||| IV ||| 0-0
+Infrastruktur ||| infrastructure ||| 0-0
+Initiativen der Zusammenarbeit zwischen der ||| cooperation initiatives between the ||| 1-0 2-0 0-1 3-2 4-3
+Initiativen der Zusammenarbeit zwischen der ||| cooperation initiatives between the ||| 2-0 0-1 3-2 1-3 4-3
+Initiativen der Zusammenarbeit zwischen der ||| relevant cooperation initiatives between the ||| 1-1 2-1 0-2 3-3 4-4
+Initiativen der Zusammenarbeit zwischen der ||| relevant cooperation initiatives between the ||| 2-1 0-2 3-3 1-4 4-4
+Initiativen der Zusammenarbeit zwischen ||| cooperation initiatives between ||| 1-0 2-0 0-1 3-2
+Initiativen der Zusammenarbeit zwischen ||| relevant cooperation initiatives between ||| 1-1 2-1 0-2 3-3
+Initiativen der Zusammenarbeit ||| cooperation initiatives ||| 1-0 2-0 0-1
+Initiativen der Zusammenarbeit ||| relevant cooperation initiatives ||| 1-1 2-1 0-2
+Initiativen ||| initiatives ||| 0-0
+Initiativen ||| initiatives ||| 0-0
+Initiativen ||| initiatives ||| 0-0
+Initiativen ||| initiatives ||| 0-0
+Initiativen ||| initiatives ||| 0-0
+Institutionen ; ||| institutions ; ||| 0-0 1-1
+Institutionen ; ||| institutions ; ||| 0-0 1-1
+Institutionen ||| institutions ||| 0-0
+Institutionen ||| institutions ||| 0-0
+Interesse daran ||| interest in ||| 0-0 1-1
+Interesse ||| interest ||| 0-0
+Interesse ||| interest ||| 0-0
+Interesse ||| interest ||| 0-0
+Jede Partei ||| Each Party ||| 0-0 1-1
+Jede Partei ||| Each Party ||| 0-0 1-1
+Jede ||| Each ||| 0-0
+Jede ||| Each ||| 0-0
+KV-Projekte ||| projects ||| 0-0
+Kanada , einschließlich ||| Canada , including ||| 0-0 1-1 2-2
+Kanada , ||| Canada , ||| 0-0 1-1
+Kanada ; ||| Canada ; ||| 0-0 1-1
+Kanada ||| Canada , established ||| 0-0
+Kanada ||| Canada , ||| 0-0
+Kanada ||| Canada ||| 0-0
+Kanada ||| Canada ||| 0-0
+Kanada ||| Canada ||| 0-0
+Kanada ||| Canada ||| 0-0
+Kanada ||| Canada ||| 0-0
+Kanadas , einschließlich umfassenderer Kenntnisse ||| Canada , including broader knowledge ||| 0-0 1-1 2-2 3-3 4-4
+Kanadas , einschließlich umfassenderer ||| Canada , including broader ||| 0-0 1-1 2-2 3-3
+Kanadas , einschließlich ||| Canada , including ||| 0-0 1-1 2-2
+Kanadas , ||| Canada , ||| 0-0 1-1
+Kanadas ; ||| Canada ; ||| 0-0 1-1
+Kanadas ; ||| Canada ; ||| 0-0 1-1
+Kanadas am 22. November 1990 ||| Canada on 22 November 1990 ||| 0-0 1-1 2-2 3-3 4-4
+Kanadas am 22. November ||| Canada on 22 November ||| 0-0 1-1 2-2 3-3
+Kanadas am 22. November ||| of Canada on 22 November ||| 0-1 1-2 2-3 3-4
+Kanadas am 22. ||| Canada on 22 ||| 0-0 1-1 2-2
+Kanadas am 22. ||| of Canada on 22 ||| 0-1 1-2 2-3
+Kanadas am ||| Canada on ||| 0-0 1-1
+Kanadas am ||| of Canada on ||| 0-1 1-2
+Kanadas den ||| ; for Canada , ||| 0-2
+Kanadas den ||| ; for Canada ||| 0-2
+Kanadas den ||| Canada , ||| 0-0
+Kanadas den ||| Canada ||| 0-0
+Kanadas den ||| for Canada , ||| 0-1
+Kanadas den ||| for Canada ||| 0-1
+Kanadas gemeinsam ||| Canada that ||| 0-0
+Kanadas gemeinsam ||| Canada ||| 0-0
+Kanadas ||| ; for Canada , ||| 0-2
+Kanadas ||| ; for Canada ||| 0-2
+Kanadas ||| Canada , ||| 0-0
+Kanadas ||| Canada that ||| 0-0
+Kanadas ||| Canada ||| 0-0
+Kanadas ||| Canada ||| 0-0
+Kanadas ||| Canada ||| 0-0
+Kanadas ||| Canada ||| 0-0
+Kanadas ||| Canada ||| 0-0
+Kanadas ||| Canada ||| 0-0
+Kanadas ||| Canada ||| 0-0
+Kanadas ||| Canada ||| 0-0
+Kanadas ||| Canada ||| 0-0
+Kanadas ||| Canada ||| 0-0
+Kanadas ||| for Canada , ||| 0-1
+Kanadas ||| for Canada ||| 0-1
+Kanadas ||| of Canada ||| 0-1
+Kanadas ||| of Canada ||| 0-1
+Kanadas ||| of Canada ||| 0-1
+Kenntnisse in ihren Sprachen , ||| knowledge of their languages , ||| 0-0 1-1 2-2 3-3 4-4
+Kenntnisse in ihren Sprachen , ||| knowledge of their languages , ||| 0-0 1-1 2-2 3-3 4-4
+Kenntnisse in ihren Sprachen ||| knowledge of their languages ||| 0-0 1-1 2-2 3-3
+Kenntnisse in ihren Sprachen ||| knowledge of their languages ||| 0-0 1-1 2-2 3-3
+Kenntnisse in ihren ||| knowledge of their ||| 0-0 1-1 2-2
+Kenntnisse in ihren ||| knowledge of their ||| 0-0 1-1 2-2
+Kenntnisse in ||| knowledge of ||| 0-0 1-1
+Kenntnisse in ||| knowledge of ||| 0-0 1-1
+Kenntnisse ||| knowledge ||| 0-0
+Kenntnisse ||| knowledge ||| 0-0
+Konferenz ||| Conference ||| 0-0
+Kontakte ||| contacts ||| 0-0
+Kooperationsprogramm wird in ||| Cooperation Programme shall be ||| 0-0 0-1 1-2 2-2 1-3
+Kooperationsprogramm ||| Cooperation Programme ||| 0-0 0-1
+Kooperationsprogramm ||| Cooperation Programme ||| 0-0 0-1
+Kooperationsprogramms ||| Cooperation Programme ||| 0-0 0-1
+Kooperationsprogramms ||| Cooperation Programme ||| 0-0 0-1
+Kraftfahrzeugkombination ||| coupled ||| 0-0
+Kultur , ||| culture , ||| 0-0 1-1
+Kultur ||| culture ||| 0-0
+Kultur ||| culture ||| 0-0
+Kulturen und Institutionen ; ||| cultures and institutions ; ||| 0-0 1-1 2-2 3-3
+Kulturen und Institutionen ; ||| cultures and institutions ; ||| 0-0 1-1 2-2 3-3
+Kulturen und Institutionen ||| cultures and institutions ||| 0-0 1-1 2-2
+Kulturen und Institutionen ||| cultures and institutions ||| 0-0 1-1 2-2
+Kulturen und ||| cultures and ||| 0-0 1-1
+Kulturen und ||| cultures and ||| 0-0 1-1
+Kulturen ||| cultures ||| 0-0
+Kulturen ||| cultures ||| 0-0
+Kulturen ||| cultures ||| 0-0
+Kulturen ||| shared cultures ||| 0-1
+Kündigung ||| termination ||| 0-0
+Kündigung ||| termination ||| 0-0
+Landverkehrsabkommen ||| inland ||| 0-0
+Lastkraftwagen ||| lorry ||| 0-0
+Lehr- oder ||| learning or ||| 0-0 1-1
+Lehr- oder ||| learning or ||| 0-0 1-1
+Lehr- ||| learning ||| 0-0
+Lehr- ||| learning ||| 0-0
+Lizenzsystemen für die ||| initial ||| 0-0 1-0
+Lizenzsystemen für die ||| the initial ||| 0-1 1-1
+Lizenzsystemen für ||| initial ||| 0-0 1-0
+Lizenzsystemen für ||| the initial ||| 0-1 1-1
+Madrid ||| Madrid refers ||| 0-0
+Madrid ||| Madrid ||| 0-0
+Madrid ||| in Madrid refers ||| 0-1
+Madrid ||| in Madrid ||| 0-1
+Marktzugangs ||| access to ||| 0-0
+Marktzugangs ||| access ||| 0-0
+Maut ||| tolls : payment ||| 0-0 0-2
+Maßgabe ||| Maßgabe ||| 0-0
+Maßgabe ||| Maßgabe ||| 0-0
+Maßnahmen ||| given to it ||| 0-0
+Maßnahmen ||| given to it ||| 0-0
+Maßnahmen ||| given to ||| 0-0
+Maßnahmen ||| given to ||| 0-0
+Maßnahmen ||| given ||| 0-0
+Maßnahmen ||| given ||| 0-0
+Maßnahmen ||| measures ||| 0-0
+Maßnahmen ||| steps ||| 0-0
+Ministerebene zuständigen Amtsträgern der ||| appropriate Minister-level officials of ||| 1-0 2-1 2-2 3-3
+Ministerebene zuständigen Amtsträgern ||| appropriate Minister-level officials ||| 1-0 2-1 2-2
+Ministerebene zuständigen ||| appropriate ||| 1-0
+Ministern der ||| Ministers of ||| 0-0 1-1
+Ministern ||| Ministers ||| 0-0
+Mit diesem Abkommen wird ||| This Agreement renews the ||| 2-0 3-0 1-1 2-1 0-2
+Mit diesem Abkommen wird ||| This Agreement renews ||| 2-0 3-0 1-1 2-1 0-2
+Mit ||| renews the ||| 0-0
+Mit ||| renews the ||| 0-0
+Mit ||| renews ||| 0-0
+Mit ||| renews ||| 0-0
+Mitgliedstaaten der Europäischen ||| Member States of the European ||| 0-0 0-1 1-2 1-3 2-4
+Mitgliedstaaten der Europäischen ||| Member States of the European ||| 0-0 0-1 1-2 2-4
+Mitgliedstaaten der ||| Member States of the ||| 0-0 0-1 1-2
+Mitgliedstaaten der ||| Member States of the ||| 0-0 0-1 1-2 1-3
+Mitgliedstaaten der ||| Member States of ||| 0-0 0-1 1-2
+Mitgliedstaaten der ||| the Member States of the ||| 1-0 0-1 0-2 1-3 1-4
+Mitgliedstaaten und der Regierung ||| Member States and the Government ||| 0-0 0-1 1-2 2-3 3-4
+Mitgliedstaaten und der ||| Member States and the ||| 0-0 0-1 1-2 2-3
+Mitgliedstaaten und ||| Member States and ||| 0-0 0-1 1-2
+Mitgliedstaaten ||| Member State ||| 0-0 0-1
+Mitgliedstaaten ||| Member States , of ||| 0-0 0-1
+Mitgliedstaaten ||| Member States , ||| 0-0 0-1
+Mitgliedstaaten ||| Member States ||| 0-0 0-1
+Mitgliedstaaten ||| Member States ||| 0-0 0-1
+Mitgliedstaaten ||| Member States ||| 0-0 0-1
+Mitgliedstaaten ||| Member States ||| 0-0 0-1
+Mitgliedstaaten ||| Member States ||| 0-0 0-1
+Mitgliedstaaten ||| Member ||| 0-0
+Mitgliedstaaten ||| Member ||| 0-0
+Mitgliedstaaten ||| Member ||| 0-0
+Mitgliedstaaten ||| Member ||| 0-0
+Mitgliedstaaten ||| the Member ||| 0-1
+Mittel zwischen den ||| funds between ||| 0-0 1-1 2-1
+Mittel zwischen den ||| funds between ||| 0-0 1-1 2-1
+Mittel ||| funds ||| 0-0
+Mittel ||| funds ||| 0-0
+Mobilität von Studierenden durch Förderung ||| student mobility by promoting ||| 2-0 0-1 1-2 3-2 4-3
+Mobilität von Studierenden durch Förderung ||| student mobility by promoting ||| 2-0 0-1 1-2 3-2 4-3
+Mobilität von Studierenden durch ||| student mobility by ||| 2-0 0-1 1-2 3-2
+Mobilität von Studierenden durch ||| student mobility by ||| 2-0 0-1 1-2 3-2
+Mobilität ||| mobility ||| 0-0
+Mobilität ||| mobility ||| 0-0
+Multiplikatoreffekt ||| that ||| 0-0
+Multiplikatoreffekt ||| that ||| 0-0
+Möglichkeiten der Zusammenarbeit zwischen der ||| cooperation between the ||| 2-0 3-1 0-2 1-2 4-2
+Möglichkeiten ||| opportunities ||| 0-0
+Möglichkeiten ||| opportunities ||| 0-0
+Möglichkeiten ||| or opportunities ||| 0-1
+Möglichkeiten ||| or opportunities ||| 0-1
+November 1990 ||| November 1990 ||| 0-0 1-1
+November 1990 ||| November 1990 ||| 0-0 1-1
+November ||| November ||| 0-0
+November ||| November ||| 0-0
+Nummer 3 ||| point 3 of ||| 0-0 1-1
+Nummer 3 ||| point 3 ||| 0-0 1-1
+Nummer ||| point ||| 0-0
+Nutzen aus den nach ||| benefit from ||| 0-0 1-1 2-1 3-1
+Nutzen aus den nach ||| benefits from ||| 0-0 1-0 1-1 2-1 3-1
+Nutzen aus den nach ||| of benefits from ||| 0-1 1-1 1-2 2-2 3-2
+Nutzen ||| benefit ||| 0-0
+Nutzens der Zusammenarbeit ||| benefit from cooperative ||| 0-0 0-1 1-1 0-2 2-2
+OECD , UNESCO und ||| OECD , Unesco and the ||| 0-0 1-1 2-2 3-3
+OECD , UNESCO und ||| OECD , Unesco and ||| 0-0 1-1 2-2 3-3
+OECD , UNESCO ||| OECD , Unesco ||| 0-0 1-1 2-2
+OECD , ||| OECD , ||| 0-0 1-1
+OECD , ||| OECD , ||| 0-0 1-1
+OECD ||| OECD ||| 0-0
+OECD ||| OECD ||| 0-0
+Organisationen ||| organisations ||| 0-0
+Organisationen ||| organisations ||| 0-0
+Partei ||| Party ||| 0-0
+Partei ||| Party ||| 0-0
+Partei ||| Party ||| 0-0
+Partei ||| Party ||| 0-0
+Partei ||| Party ||| 0-0
+Parteien . ||| Parties . ||| 0-0 1-1
+Parteien . ||| Parties . ||| 0-0 1-1
+Parteien bemühen sich darum , ||| Parties shall attempt to ||| 0-0 2-1 1-2 3-2 4-3
+Parteien bemühen sich darum ||| Parties shall attempt ||| 0-0 2-1 1-2 3-2
+Parteien mit ||| Parties ||| 0-0
+Parteien unter ||| Parteien unter ||| 0-0 1-1
+Parteien unter ||| Parteien unter ||| 0-0 1-1
+Parteien ||| Parteien ||| 0-0
+Parteien ||| Parteien ||| 0-0
+Parteien ||| Parties ||| 0-0
+Parteien ||| Parties ||| 0-0
+Parteien ||| Parties ||| 0-0
+Parteien ||| Parties ||| 0-0
+Parteien ||| Parties ||| 0-0
+Parteien ||| Parties ||| 0-0
+Parteien ||| Parties ||| 0-0
+Parteien ||| Parties ||| 0-0
+Parteien ||| Parties ||| 0-0
+Parteien ||| Parties ||| 0-0
+Parteien ||| each ||| 0-0
+Parteien ||| the Parties ||| 0-1
+Parteien über ||| Parties on the ||| 0-0 1-1
+Parteien über ||| Parties on ||| 0-0 1-1
+Partnerschaften zwischen ||| partnerships among ||| 0-0 0-1 1-1
+Partnerschaften zwischen ||| partnerships among ||| 0-0 0-1 1-1
+Personal ||| personnel , ||| 0-0
+Personal ||| personnel , ||| 0-0
+Personal ||| personnel ||| 0-0
+Personal ||| personnel ||| 0-0
+Personen , die ||| persons recognised by ||| 0-0
+Personen , die ||| persons recognised ||| 0-0
+Personen , die ||| persons ||| 0-0
+Personen , ||| persons recognised by ||| 0-0
+Personen , ||| persons recognised ||| 0-0
+Personen , ||| persons ||| 0-0
+Personen ||| persons recognised by ||| 0-0
+Personen ||| persons recognised ||| 0-0
+Personen ||| persons ||| 0-0
+Personen ||| persons ||| 0-0
+Pflichten ||| obligations ||| 0-0
+Programm aufrechterhalten ||| Cooperation Programme ||| 0-1
+Programm aufrechterhalten ||| Programme ||| 0-0
+Programm aufrechterhalten ||| Programme ||| 0-0
+Programm wird in ||| Programme shall be ||| 0-0 1-1 1-2 2-2
+Programm wird ||| Programme shall be ||| 0-0 1-1 1-2
+Programm ||| Cooperation Programme ||| 0-1
+Programm ||| Programme ||| 0-0
+Programm ||| Programme ||| 0-0
+Programm ||| Programme ||| 0-0
+Programm ||| Programme ||| 0-0
+Programmaktivitäten von vergleichbarer Wirkung ||| offer Programme activities of comparable ||| 0-0 0-1 3-1 1-2 1-3 2-4
+Programme zwischen den ||| programmes between ||| 0-0 1-1 2-1
+Programme ||| programmes ||| 0-0
+Programme ||| programmes ||| 0-0
+Programme ||| programmes ||| 0-0
+Programmen ||| programmes ||| 0-0
+Programmen ||| programmes ||| 0-0
+Programms ||| Programme ||| 0-0
+Projekte ||| projects ||| 0-0
+Projekte ||| projects ||| 0-0
+Projektzusammenschlüsse ||| consortia ||| 0-0
+Projektzusammenschlüsse ||| project consortia ||| 0-1
+Provinzen und Territorien ||| Provinces and Territories ||| 0-0 1-1 2-2
+Provinzen und ||| Provinces and ||| 0-0 1-1
+Provinzen ||| Provinces ||| 0-0
+Provinzen ||| Provinces ||| 0-0
+Qualität ||| quality of ||| 0-0
+Qualität ||| quality of ||| 0-0
+Qualität ||| quality ||| 0-0
+Qualität ||| quality ||| 0-0
+Rahmen ||| under ||| 0-0
+Rahmenabkommen ||| Framework Agreement ||| 0-0
+Rahmenabkommen ||| Framework ||| 0-0
+Rechnung desselben ||| Rechnung desselben ||| 0-0 1-1
+Rechnung desselben ||| Rechnung desselben ||| 0-0 1-1
+Rechnung ||| Rechnung ||| 0-0
+Rechnung ||| Rechnung ||| 0-0
+Rechte ||| rights ||| 0-0
+Rechtsvorschriften ||| laws ||| 0-0
+Rechtsvorschriften ||| laws ||| 0-0
+Rechtsvorschriften ||| laws ||| 0-0
+Rechtsvorschriften ||| laws ||| 0-0
+Regierung Kanadas am 22. ||| Government of Canada on 22 ||| 0-0 1-2 2-3 3-4
+Regierung Kanadas am ||| Government of Canada on ||| 0-0 1-2 2-3
+Regierung Kanadas ||| Government of Canada ||| 0-0 1-2
+Regierung der Vereinigten ||| Government of the United ||| 0-0 1-1 2-3
+Regierung der ||| Government of the ||| 0-0 1-1
+Regierung der ||| Government of ||| 0-0 1-1
+Regierung ||| Government of ||| 0-0
+Regierung ||| Government ||| 0-0
+Regierung ||| Government ||| 0-0
+Regierung ||| Government ||| 0-0
+Regionen ||| regions ||| 0-0
+Regionen ||| regions ||| 0-0
+Republik Bulgarien ||| Republic of Bulgaria ||| 0-0 1-2
+Republik Bulgarien ||| the Republic of Bulgaria ||| 0-1 1-3
+Republik ||| Republic of ||| 0-0
+Republik ||| Republic ||| 0-0
+Republik ||| Republic ||| 0-0
+Republik ||| the Republic of ||| 0-1
+Republik ||| the Republic ||| 0-1
+Sattelanhängern ; ||| semi-trailers ||| 0-0 1-0
+Schritt zu ||| step in achieving ||| 0-0 1-2
+Schritt ||| step in ||| 0-0
+Schritt ||| step ||| 0-0
+Schritte unternehmen und ||| steps and ||| 0-0 1-0 2-1
+Schritte unternehmen ||| steps ||| 0-0 1-0
+Sinne dieses Artikels durchgeführt ||| as defined in this Article ||| 3-0 0-1 1-3 2-4
+Sinne dieses Artikels ||| defined in this Article , ||| 0-0 1-2 2-3
+Sinne dieses Artikels ||| defined in this Article ||| 0-0 1-2 2-3
+Sinne dieses ||| defined in this ||| 0-0 1-2
+Sinne ||| defined in ||| 0-0
+Sinne ||| defined ||| 0-0
+Sinne ||| defined ||| 0-0
+Spektrum innovativer kooperativer Aktivitäten bilden ||| innovative cooperative activities of ||| 1-0 3-1 3-2
+Spektrum innovativer kooperativer Aktivitäten bilden ||| innovative cooperative activities ||| 1-0 3-1 3-2
+Spektrum innovativer kooperativer Aktivitäten bilden ||| of innovative cooperative activities of ||| 1-1 3-2 3-3
+Spektrum innovativer kooperativer Aktivitäten bilden ||| of innovative cooperative activities ||| 1-1 3-2 3-3
+Spektrum innovativer kooperativer Aktivitäten bilden ||| spectrum of innovative cooperative activities ||| 1-2 3-3 3-4
+Spektrum innovativer kooperativer Aktivitäten ||| innovative cooperative activities of ||| 1-0 3-1 3-2
+Spektrum innovativer kooperativer Aktivitäten ||| innovative cooperative activities ||| 1-0 3-1 3-2
+Spektrum innovativer kooperativer Aktivitäten ||| of innovative cooperative activities of ||| 1-1 3-2 3-3
+Spektrum innovativer kooperativer Aktivitäten ||| of innovative cooperative activities ||| 1-1 3-2 3-3
+Spektrum innovativer kooperativer Aktivitäten ||| spectrum of innovative cooperative activities ||| 1-2 3-3 3-4
+Spektrum innovativer kooperativer ||| broad spectrum of innovative ||| 1-3
+Spektrum innovativer kooperativer ||| innovative ||| 1-0
+Spektrum innovativer kooperativer ||| of innovative ||| 1-1
+Spektrum innovativer kooperativer ||| spectrum of innovative ||| 1-2
+Spektrum innovativer ||| broad spectrum of innovative ||| 1-3
+Spektrum innovativer ||| innovative ||| 1-0
+Spektrum innovativer ||| of innovative ||| 1-1
+Spektrum innovativer ||| spectrum of innovative ||| 1-2
+Sprachen , Kulturen und Institutionen ||| languages , cultures and institutions ||| 0-0 1-1 2-2 3-3 4-4
+Sprachen , Kulturen und Institutionen ||| languages , cultures and institutions ||| 0-0 1-1 2-2 3-3 4-4
+Sprachen , Kulturen und ||| languages , cultures and ||| 0-0 1-1 2-2 3-3
+Sprachen , Kulturen und ||| languages , cultures and ||| 0-0 1-1 2-2 3-3
+Sprachen , Kulturen ||| languages , cultures ||| 0-0 1-1 2-2
+Sprachen , Kulturen ||| languages , cultures ||| 0-0 1-1 2-2
+Sprachen , ||| languages , ||| 0-0 1-1
+Sprachen , ||| languages , ||| 0-0 1-1
+Sprachen ||| languages ||| 0-0
+Sprachen ||| languages ||| 0-0
+Staaten von Amerika , einschließlich ||| States of America , including ||| 0-0 1-2 2-2 3-3 4-4
+Staaten von Amerika , ||| States of America , ||| 0-0 1-2 2-2 3-3
+Staaten von Amerika ; ||| States of America ; ||| 0-0 1-1 1-2 2-2 3-3
+Staaten von Amerika ; ||| States of America ; ||| 0-0 1-2 2-2 3-3
+Staaten von Amerika einschließlich umfassenderer ||| States of America including broader ||| 0-0 1-2 2-2 3-3 4-4
+Staaten von Amerika einschließlich ||| States of America including ||| 0-0 1-2 2-2 3-3
+Staaten von Amerika gemeinsam ||| States of America that ||| 0-0 1-2 2-2
+Staaten von Amerika gemeinsam ||| States of America ||| 0-0 1-2 2-2
+Staaten von Amerika ||| States of America that ||| 0-0 1-2 2-2
+Staaten von Amerika ||| States of America ||| 0-0 1-1 1-2 2-2
+Staaten von Amerika ||| States of America ||| 0-0 1-2 2-2
+Staaten von Amerika ||| States of America ||| 0-0 1-2 2-2
+Staaten von Amerika ||| States of America ||| 0-0 1-2 2-2
+Staaten von Amerika ||| States of America ||| 0-0 1-2 2-2
+Staaten von Amerika ||| States of America ||| 0-0 1-2 2-2
+Staaten von Amerika ||| States of America ||| 0-0 1-2 2-2
+Staaten von Amerika ||| States of America ||| 0-0 1-2 2-2
+Staaten von Amerika ||| States of America ||| 0-0 1-2 2-2
+Staaten von Amerika ||| States of America ||| 0-0 1-2 2-2
+Staaten von Amerika ||| States of America ||| 0-0 1-2 2-2
+Staaten von ||| States ||| 0-0
+Staaten ||| States of ||| 0-0
+Staaten ||| States of ||| 0-0
+Staaten ||| States of ||| 0-0
+Staaten ||| States of ||| 0-0
+Staaten ||| States of ||| 0-0
+Staaten ||| States of ||| 0-0
+Staaten ||| States of ||| 0-0
+Staaten ||| States of ||| 0-0
+Staaten ||| States of ||| 0-0
+Staaten ||| States of ||| 0-0
+Staaten ||| States ||| 0-0
+Staaten ||| States ||| 0-0
+Staaten ||| States ||| 0-0
+Staaten ||| States ||| 0-0
+Staaten ||| States ||| 0-0
+Staaten ||| States ||| 0-0
+Staaten ||| States ||| 0-0
+Staaten ||| States ||| 0-0
+Staaten ||| States ||| 0-0
+Staaten ||| States ||| 0-0
+Staaten ||| States ||| 0-0
+Staaten ||| States ||| 0-0
+Staaten ||| States ||| 0-0
+Staaten ||| States ||| 0-0
+Straße und ||| by road and ||| 0-0 0-1 1-2
+Straße ||| by road ||| 0-0 0-1
+Straße ||| road ||| 0-0
+Strukturen und Beziehungen ||| structures and links ||| 0-0 1-1 2-2
+Strukturen und ||| structures and ||| 0-0 1-1
+Strukturen ||| structures ||| 0-0
+Strukturen ||| structures ||| 0-0
+Studenten und Lehrern ||| students and teachers ||| 0-0 1-1
+Studenten und Lehrern ||| students and ||| 0-0 1-1
+Studenten und Lehrern ||| to students and teachers ||| 0-1 1-2
+Studenten und Lehrern ||| to students and ||| 0-1 1-2
+Studenten und ||| students and teachers ||| 0-0 1-1
+Studenten und ||| students and ||| 0-0 1-1
+Studenten und ||| to students and teachers ||| 0-1 1-2
+Studenten und ||| to students and ||| 0-1 1-2
+Studenten ||| students ||| 0-0
+Studenten ||| to students ||| 0-1
+Studierende " alle ||| students " means all ||| 0-0 1-1 1-2 2-3
+Studierende " alle ||| students " means all ||| 0-0 1-1 1-2 2-3
+Studierende " ||| students " means ||| 0-0 1-1 1-2
+Studierende " ||| students " means ||| 0-0 1-1 1-2
+Studierende ||| students ||| 0-0
+Studierende ||| students ||| 0-0
+Studierenden ||| student ||| 0-0
+Studierenden ||| student ||| 0-0
+Stärkung der beiderseitigen Zusammenarbeit ||| strengthening mutual cooperation ||| 0-0 1-0 2-1 3-2
+Stärkung der beiderseitigen ||| strengthening mutual ||| 0-0 1-0 2-1
+Stärkung der gegenseitigen Zusammenarbeit ||| strengthening mutual cooperation ||| 0-0 1-0 2-1 3-2
+Stärkung der gegenseitigen ||| strengthening mutual ||| 0-0 1-0 2-1
+Stärkung der ||| strengthening ||| 0-0 1-0
+Stärkung der ||| strengthening ||| 0-0 1-0
+Technologien in den ||| technologies into classrooms ||| 0-0 1-1
+Technologien in den ||| technologies into ||| 0-0 1-1
+Technologien in ||| technologies into classrooms ||| 0-0 1-1
+Technologien in ||| technologies into ||| 0-0 1-1
+Technologien ||| technologies ||| 0-0
+Teil des grenzüberschreitenden Verkehrs ||| of their international transport ||| 0-0 2-2 1-3 2-3 3-3
+Teil ||| of their ||| 0-0
+Teil ||| of ||| 0-0
+Teil ||| part ||| 0-0
+Territorien Kanadas ||| Territories of Canada ||| 0-0 1-2
+Territorien ||| Territories of ||| 0-0
+Territorien ||| Territories ||| 0-0
+Territorien ||| Territories ||| 0-0
+Transparenz ||| transparency ||| 0-0
+Transparenz ||| transparency ||| 0-0
+UNESCO und ||| Unesco and the ||| 0-0 1-1
+UNESCO und ||| Unesco and ||| 0-0 1-1
+UNESCO und ||| Unesco and ||| 0-0 1-1
+UNESCO ||| Unesco ||| 0-0
+UNESCO ||| Unesco ||| 0-0
+US-amerikanischen ||| transatlantic ||| 0-0
+Umschlags . ||| unloading ; ||| 0-0 0-1 1-1
+Umweltschutzes ||| environmental ||| 0-0
+Union ermöglichen ||| Union ||| 0-0
+Union ||| Union ||| 0-0
+Unternehmen ||| private ||| 0-0
+Unternehmen ||| private ||| 0-0
+Unterricht ||| teaching ||| 0-0
+Unterstützung neuer ||| assistance to new ||| 0-0 1-2
+Unterstützung ||| assistance to ||| 0-0
+Unterstützung ||| assistance ||| 0-0
+Verbesserung ||| improve ||| 0-0
+Verbreitung der Ergebnisse ||| dissemination of results ||| 0-0 1-1 2-2
+Verbreitung der Ergebnisse ||| dissemination of results ||| 0-0 1-1 2-2
+Verbreitung der ||| dissemination of ||| 0-0 1-1
+Verbreitung der ||| dissemination of ||| 0-0 1-1
+Verbreitung ||| dissemination ||| 0-0
+Verbreitung ||| dissemination ||| 0-0
+Vereinbarung ||| Vereinbarung ||| 0-0
+Vereinbarung ||| Vereinbarung ||| 0-0
+Vereinbarung ||| agreement ||| 0-0
+Vereinbarungen ||| arrangements ||| 0-0
+Vereinigten Staaten von Amerika , ||| United States of America , ||| 0-0 1-1 2-3 3-3 4-4
+Vereinigten Staaten von Amerika ; ||| United States of America ; ||| 0-0 1-1 2-2 2-3 3-3 4-4
+Vereinigten Staaten von Amerika ; ||| United States of America ; ||| 0-0 1-1 2-3 3-3 4-4
+Vereinigten Staaten von Amerika einschließlich ||| United States of America including ||| 0-0 1-1 2-3 3-3 4-4
+Vereinigten Staaten von Amerika gemeinsam ||| United States of America that ||| 0-0 1-1 2-3 3-3
+Vereinigten Staaten von Amerika gemeinsam ||| United States of America ||| 0-0 1-1 2-3 3-3
+Vereinigten Staaten von Amerika ||| United States of America that ||| 0-0 1-1 2-3 3-3
+Vereinigten Staaten von Amerika ||| United States of America ||| 0-0 1-1 2-2 2-3 3-3
+Vereinigten Staaten von Amerika ||| United States of America ||| 0-0 1-1 2-3 3-3
+Vereinigten Staaten von Amerika ||| United States of America ||| 0-0 1-1 2-3 3-3
+Vereinigten Staaten von Amerika ||| United States of America ||| 0-0 1-1 2-3 3-3
+Vereinigten Staaten von Amerika ||| United States of America ||| 0-0 1-1 2-3 3-3
+Vereinigten Staaten von Amerika ||| United States of America ||| 0-0 1-1 2-3 3-3
+Vereinigten Staaten von Amerika ||| United States of America ||| 0-0 1-1 2-3 3-3
+Vereinigten Staaten von Amerika ||| United States of America ||| 0-0 1-1 2-3 3-3
+Vereinigten Staaten von Amerika ||| United States of America ||| 0-0 1-1 2-3 3-3
+Vereinigten Staaten von Amerika ||| United States of America ||| 0-0 1-1 2-3 3-3
+Vereinigten Staaten von Amerika ||| United States of America ||| 0-0 1-1 2-3 3-3
+Vereinigten Staaten von Amerika ||| the United States of America ||| 0-1 1-2 2-4 3-4
+Vereinigten Staaten von ||| United States ||| 0-0 1-1
+Vereinigten Staaten von ||| the United States ||| 0-1 1-2
+Vereinigten Staaten ||| United States of ||| 0-0 1-1
+Vereinigten Staaten ||| United States of ||| 0-0 1-1
+Vereinigten Staaten ||| United States of ||| 0-0 1-1
+Vereinigten Staaten ||| United States of ||| 0-0 1-1
+Vereinigten Staaten ||| United States of ||| 0-0 1-1
+Vereinigten Staaten ||| United States of ||| 0-0 1-1
+Vereinigten Staaten ||| United States of ||| 0-0 1-1
+Vereinigten Staaten ||| United States of ||| 0-0 1-1
+Vereinigten Staaten ||| United States of ||| 0-0 1-1
+Vereinigten Staaten ||| United States of ||| 0-0 1-1
+Vereinigten Staaten ||| United States ||| 0-0 1-1
+Vereinigten Staaten ||| United States ||| 0-0 1-1
+Vereinigten Staaten ||| United States ||| 0-0 1-1
+Vereinigten Staaten ||| United States ||| 0-0 1-1
+Vereinigten Staaten ||| United States ||| 0-0 1-1
+Vereinigten Staaten ||| United States ||| 0-0 1-1
+Vereinigten Staaten ||| United States ||| 0-0 1-1
+Vereinigten Staaten ||| United States ||| 0-0 1-1
+Vereinigten Staaten ||| United States ||| 0-0 1-1
+Vereinigten Staaten ||| United States ||| 0-0 1-1
+Vereinigten Staaten ||| United States ||| 0-0 1-1
+Vereinigten Staaten ||| United States ||| 0-0 1-1
+Vereinigten Staaten ||| United States ||| 0-0 1-1
+Vereinigten Staaten ||| of the United States of ||| 0-2 1-3
+Vereinigten Staaten ||| of the United States ||| 0-2 1-3
+Vereinigten Staaten ||| the United States of ||| 0-1 1-2
+Vereinigten Staaten ||| the United States ||| 0-1 1-2
+Vereinigten Staaten ||| the United States ||| 0-1 1-2
+Vereinigten ||| United ||| 0-0
+Vereinigten ||| United ||| 0-0
+Vereinigten ||| United ||| 0-0
+Vereinigten ||| United ||| 0-0
+Vereinigten ||| United ||| 0-0
+Vereinigten ||| United ||| 0-0
+Vereinigten ||| United ||| 0-0
+Vereinigten ||| United ||| 0-0
+Vereinigten ||| United ||| 0-0
+Vereinigten ||| United ||| 0-0
+Vereinigten ||| United ||| 0-0
+Vereinigten ||| United ||| 0-0
+Vereinigten ||| United ||| 0-0
+Vereinigten ||| United ||| 0-0
+Vereinigten ||| United ||| 0-0
+Vereinigten ||| United ||| 0-0
+Vereinigten ||| United ||| 0-0
+Vereinigten ||| United ||| 0-0
+Vereinigten ||| of the United ||| 0-2
+Vereinigten ||| the United ||| 0-1
+Vereinigten ||| the United ||| 0-1
+Vereinigten ||| the United ||| 0-1
+Verkehrs ; ||| transport ||| 0-0 1-0
+Verkehrs durch ||| transport by : ||| 0-0 1-1 0-2
+Verkehrs ||| transport ||| 0-0
+Verkehrspolitik der ||| transport policies of the ||| 0-0 0-1 1-2 1-3
+Verkehrspolitik ||| transport policies ||| 0-0 0-1
+Verlauf , Stand und Wirksamkeit ||| level , status and effectiveness ||| 2-0 1-1 0-2 2-2 3-3 4-4
+Verlauf , Stand und Wirksamkeit ||| level , status and effectiveness ||| 2-0 1-1 0-2 2-2 3-3 4-4
+Verlauf , Stand und ||| level , status and ||| 2-0 1-1 0-2 2-2 3-3
+Verlauf , Stand und ||| level , status and ||| 2-0 1-1 0-2 2-2 3-3
+Verlauf , Stand und ||| the level , status and ||| 2-1 1-2 0-3 2-3 3-4
+Verlauf , Stand und ||| the level , status and ||| 2-1 1-2 0-3 2-3 3-4
+Verlauf , Stand ||| level , status ||| 2-0 1-1 0-2 2-2
+Verlauf , Stand ||| level , status ||| 2-0 1-1 0-2 2-2
+Verlauf , Stand ||| the level , status ||| 2-1 1-2 0-3 2-3
+Verlauf , Stand ||| the level , status ||| 2-1 1-2 0-3 2-3
+Verlängerung ||| extension ||| 0-0
+Verlängerung ||| extension ||| 0-0
+Verlängerungen ||| the ||| 0-0
+Verpflichtungen der ||| the commitments of the ||| 1-0 0-1
+Verpflichtungen der ||| the commitments of ||| 1-0 0-1
+Verpflichtungen der ||| the commitments ||| 1-0 0-1
+Verpflichtungen der ||| to the commitments of the ||| 1-1 0-2
+Verpflichtungen der ||| to the commitments of ||| 1-1 0-2
+Verpflichtungen der ||| to the commitments ||| 1-1 0-2
+Verpflichtungen ||| commitments of the ||| 0-0
+Verpflichtungen ||| commitments of ||| 0-0
+Verpflichtungen ||| commitments ||| 0-0
+Verstärkte Einbringung einer ||| reinforce a ||| 0-0 1-0 2-1
+Verstärkte Einbringung ||| reinforce ||| 0-0 1-0
+Vertragspartei ||| Contracting Party and ||| 0-0 0-1
+Vertragspartei ||| Contracting Party ||| 0-0 0-1
+Vertragspartei ||| Contracting Party ||| 0-0 0-1
+Vertragsparteien . ||| Contracting Parties . ||| 0-0 0-1 1-2
+Vertragsparteien oder durch ihre ||| or through the Contracting Parties ||| 1-0 2-1 0-3 0-4
+Vertragsparteien oder durch ||| or through the Contracting Parties ||| 1-0 2-1 0-3 0-4
+Vertragsparteien ||| Contracting Parties ||| 0-0 0-1
+Vertragsparteien ||| Contracting Parties ||| 0-0 0-1
+Vertragsparteien ||| Contracting Parties ||| 0-0 0-1
+Vertragsparteien ||| Contracting Parties ||| 0-0 0-1
+Vertragsparteien ||| Contracting Parties ||| 0-0 0-1
+Vertragsparteien ||| Contracting Parties ||| 0-0 0-1
+Vertragsparteien ||| Contracting Parties ||| 0-0 0-1
+Vertragsparteien ||| Contracting Parties ||| 0-0 0-1
+Vertragsparteien ||| the Contracting Parties ||| 0-1 0-2
+Vertragsparteien ||| the Contracting Parties ||| 0-1 0-2
+Vertragsparteien ||| the Contracting Parties ||| 0-1 0-2
+Vertreter beider ||| representatives ||| 0-0 1-0
+Vielfalt der Europäischen Gemeinschaft ||| diversity of the European Community ||| 0-0 1-1 1-2 2-3 3-4
+Vielfalt der Europäischen Gemeinschaft ||| diversity of the European Community ||| 0-0 1-1 1-2 2-3 3-4
+Vielfalt der Europäischen ||| diversity of the European ||| 0-0 1-1 1-2 2-3
+Vielfalt der Europäischen ||| diversity of the European ||| 0-0 1-1 1-2 2-3
+Vielfalt der ||| diversity of the ||| 0-0 1-1 1-2
+Vielfalt der ||| diversity of the ||| 0-0 1-1 1-2
+Vielfalt ||| diversity ||| 0-0
+Vielfalt ||| diversity ||| 0-0
+Vollendung des ||| of the completion of ||| 1-0 0-2
+Vollendung des ||| of the completion ||| 1-0 0-2
+Vollendung ||| completion of ||| 0-0
+Vollendung ||| completion ||| 0-0
+Vollendung ||| the completion of ||| 0-1
+Vollendung ||| the completion ||| 0-1
+Vorlage eines jährlichen Berichts an ||| a report annually to ||| 0-0 1-0 3-1 4-3
+Vorlage eines jährlichen Berichts ||| a report annually ||| 0-0 1-0 3-1
+Vorlage eines jährlichen Berichts ||| a report ||| 0-0 1-0 3-1
+Vorlage eines jährlichen ||| a ||| 0-0 1-0
+Vorlage eines ||| a ||| 0-0 1-0
+Vorlage eines ||| a ||| 0-0 1-0
+Vorsitz ||| Vorsitz ||| 0-0
+Weitere Zusammenkünfte können ||| Other meetings may ||| 0-0 1-1 2-2
+Weitere Zusammenkünfte können ||| Other meetings may ||| 0-0 1-1 2-2
+Weitere Zusammenkünfte ||| Other meetings ||| 0-0 1-1
+Weitere Zusammenkünfte ||| Other meetings ||| 0-0 1-1
+Weitere ||| Other ||| 0-0
+Weitere ||| Other ||| 0-0
+Wettbewerb unter Berücksichtigung der ||| , taking account of the ||| 0-0 1-1 2-1 2-2 3-3 3-4
+Wettbewerb unter Berücksichtigung ||| , taking account ||| 0-0 1-1 2-1 2-2
+Wettbewerb ||| , ||| 0-0
+Wettbewerbsbasis unter Berücksichtigung ||| competitive basis , taking account ||| 0-0 0-1 1-2 1-3 2-3 2-4
+Wettbewerbsbasis ||| competitive basis ||| 0-0 0-1
+Wettbewerbsfähigkeit ||| competitiveness ||| 0-0
+Wettbewerbsfähigkeit ||| competitiveness ||| 0-0
+Wirksamkeit der ||| effectiveness of ||| 0-0 1-1
+Wirksamkeit der ||| effectiveness of ||| 0-0 1-1
+Wirksamkeit ||| effectiveness ||| 0-0
+Wirksamkeit ||| effectiveness ||| 0-0
+Wohlergehen ||| well-being of ||| 0-0
+Wohlergehen ||| well-being ||| 0-0
+Wortlaut ||| texts ||| 0-0
+Wortlaut ||| texts ||| 0-0
+Zeitraum von ||| Zeitraum von ||| 0-0 1-1
+Zeitraum ||| Zeitraum ||| 0-0
+Ziele ||| objectives ||| 0-0
+Ziele ||| objectives ||| 0-0
+Zu- oder ||| initial or ||| 0-0 1-1
+Zu- oder ||| make the initial or ||| 0-2 1-3
+Zu- oder ||| the initial or ||| 0-1 1-2
+Zu- ||| initial ||| 0-0
+Zu- ||| initial ||| 0-0
+Zu- ||| make the initial ||| 0-2
+Zu- ||| road haulage legs ||| 0-0 0-1 0-2
+Zu- ||| the initial ||| 0-1
+Zugang ||| access ||| 0-0
+Zusammenarbeit mittels ||| cooperation ||| 0-0
+Zusammenarbeit zwischen ||| cooperation between ||| 0-0 1-1
+Zusammenarbeit ||| cooperation ||| 0-0
+Zusammenarbeit ||| cooperation ||| 0-0
+Zusammenarbeit ||| cooperation ||| 0-0
+Zusammenarbeit ||| cooperation ||| 0-0
+Zusammenarbeit ||| cooperation ||| 0-0
+Zusammenarbeit ||| cooperation ||| 0-0
+Zusammenarbeit ||| cooperation ||| 0-0
+Zusammenarbeit ||| cooperation ||| 0-0
+Zusammenarbeit ||| cooperation ||| 0-0
+Zusammenarbeit ||| cooperation ||| 0-0
+Zusammenarbeit ||| cooperation ||| 0-0
+Zusammenarbeit ||| relevant cooperation ||| 0-1
+Zusammenkünfte können ||| meetings may ||| 0-0 1-1
+Zusammenkünfte können ||| meetings may ||| 0-0 1-1
+Zusammenkünfte ||| meetings ||| 0-0
+Zusammenkünfte ||| meetings ||| 0-0
+Zusammenkünften des Gemeinsamen Ausschusses ||| meetings of the Joint Committee ||| 0-0 1-1 1-2 2-3 3-4
+Zusammenkünften des Gemeinsamen Ausschusses ||| meetings of the Joint Committee ||| 0-0 1-1 1-2 2-3 3-4
+Zusammenkünften des Gemeinsamen ||| meetings of the Joint ||| 0-0 1-1 1-2 2-3
+Zusammenkünften des Gemeinsamen ||| meetings of the Joint ||| 0-0 1-1 1-2 2-3
+Zusammenkünften des ||| meetings of the ||| 0-0 1-1 1-2
+Zusammenkünften des ||| meetings of the ||| 0-0 1-1 1-2
+Zusammenkünften ||| meetings ||| 0-0
+Zusammenkünften ||| meetings ||| 0-0
+Zusammenstellung ||| principal points ||| 0-0 0-1
+Zuständigkeiten der Mitgliedstaaten ||| responsibilities of the Member States ||| 0-0 1-2 2-3 2-4
+Zuständigkeiten der Mitgliedstaaten ||| responsibilities of the Member ||| 0-0 1-2 2-3
+Zuständigkeiten der ||| responsibilities of the ||| 0-0 1-2
+Zuständigkeiten der ||| responsibilities of the ||| 0-0 1-2
+Zuständigkeiten ||| responsibilities of ||| 0-0
+Zuständigkeiten ||| responsibilities of ||| 0-0
+Zuständigkeiten ||| responsibilities ||| 0-0
+Zuständigkeiten ||| responsibilities ||| 0-0
+Zweck ||| purpose ||| 0-0
+a ) bewegen ||| ( a ) taking ||| 1-0 0-1 1-2 2-3
+a ) ||| ( a ) ||| 0-0 1-0 0-1 1-2
+a ) ||| ( a ) ||| 1-0 0-1 1-2
+a ) ||| ( a ) ||| 1-0 0-1 1-2
+a ) Überprüfung der ||| ( a ) review the ||| 0-0 1-0 0-1 1-2 2-3 3-4
+a ) Überprüfung der ||| ( a ) review the ||| 1-0 0-1 1-2 2-3 3-4
+a ) Überprüfung ||| ( a ) review ||| 0-0 1-0 0-1 1-2 2-3
+a ) Überprüfung ||| ( a ) review ||| 1-0 0-1 1-2 2-3
+a ||| a ||| 0-0
+a ||| a ||| 0-0
+abgedeckten ||| covered ||| 0-0
+abgeladen werden ||| are unloaded ||| 1-0 0-1
+abgeladen ||| unloaded ||| 0-0
+abgewickelt ||| hindrance ||| 0-0
+aktiven internationalen Organisationen ||| international organisations active ||| 1-0 2-1 0-2
+aktiven ||| active ||| 0-0
+aktiven ||| active ||| 0-0
+alle angemessenen Schritte unternehmen und ||| all reasonable steps and ||| 0-0 1-1 2-2 3-2 4-3
+alle angemessenen Schritte unternehmen ||| all reasonable steps ||| 0-0 1-1 2-2 3-2
+alle angemessenen ||| all reasonable ||| 0-0 1-1
+alle zwei ||| alle zwei ||| 0-0 1-1
+alle zwei ||| alle zwei ||| 0-0 1-1
+alle ||| all ||| 0-0
+alle ||| all ||| 0-0
+alle ||| all ||| 0-0
+alle ||| all ||| 0-0
+alle ||| alle ||| 0-0
+alle ||| alle ||| 0-0
+alle ||| any ||| 0-0
+alle ||| any ||| 0-0
+alle ||| provide ||| 0-0
+allgemeinen und beruflichen Bildung zur ||| education and training to ||| 0-0 3-0 1-1 2-2 4-3
+allgemeinen und beruflichen Bildung ||| education and training ||| 0-0 3-0 1-1 2-2
+als Teil ||| , as part ||| 0-1 1-2
+als Teil ||| as part ||| 0-0 1-1
+als ||| , as ||| 0-1
+als ||| as ||| 0-0
+am 22. November 1990 ||| on 22 November 1990 ||| 0-0 1-1 2-2 3-3
+am 22. November ||| on 22 November ||| 0-0 1-1 2-2
+am 22. ||| on 22 ||| 0-0 1-1
+am ||| on ||| 0-0
+an Lehr- oder ||| following learning or ||| 0-0 1-1 2-2
+an Lehr- ||| following learning ||| 0-0 1-1
+an die Parteien ||| annually to the Parties ||| 0-1 1-2 2-3
+an die Parteien ||| to the Parties ||| 0-0 1-1 2-2
+an die Parteien ||| to the Parties ||| 0-0 1-1 2-2
+an die Parteien über ||| to the Parties on the ||| 0-0 1-1 2-2 3-3
+an die Parteien über ||| to the Parties on ||| 0-0 1-1 2-2 3-3
+an die ||| annually to the ||| 0-1 1-2
+an die ||| to the ||| 0-0 1-1
+an die ||| to the ||| 0-0 1-1
+an ||| annually to ||| 0-1
+an ||| following ||| 0-0
+an ||| the ||| 0-0
+an ||| to ||| 0-0
+an ||| to ||| 0-0
+andere ||| other relevant ||| 0-0
+andere ||| other relevant ||| 0-0
+andere ||| other ||| 0-0
+andere ||| other ||| 0-0
+anderen Partei ||| other Party ||| 0-0 1-1
+anderen ||| other ||| 0-0
+anderen ||| other ||| 0-0
+anderen ||| other ||| 0-0
+anderen ||| other ||| 0-0
+anderen ||| the other ||| 0-1
+anderer ||| other ||| 0-0
+anderer ||| other ||| 0-0
+anerkannt ||| recognised ||| 0-0
+anerkannten ||| recognised ||| 0-0
+angemessenen Schritte unternehmen und ||| reasonable steps and ||| 0-0 1-1 2-1 3-2
+angemessenen Schritte unternehmen ||| reasonable steps ||| 0-0 1-1 2-1
+angemessenen ||| reasonable ||| 0-0
+angenommenen ||| adopted ||| 0-0
+angenommenen ||| adopted ||| 0-0
+auf Wettbewerbsbasis ||| on a competitive basis ||| 0-0 0-1 1-2 1-3
+auf das Europa-Abkommen ||| the Europe Agreement ||| 0-0 2-1 1-2 2-2
+auf den ||| auf den ||| 0-0 1-1
+auf den ||| auf den ||| 0-0 1-1
+auf der Grundlage ||| on the basis of ||| 0-0 2-0 1-1 2-2 1-3
+auf der ||| the ||| 0-0 1-0
+auf die gemäß dem Anhang ||| established pursuant to the Annex ||| 2-1 0-2 1-2 3-3 4-4
+auf die gemäß dem Anhang ||| pursuant to the Annex to ||| 2-0 0-1 1-1 3-2 4-3
+auf die gemäß dem Anhang ||| pursuant to the Annex ||| 2-0 0-1 1-1 3-2 4-3
+auf die gemäß dem ||| established pursuant to the ||| 2-1 0-2 1-2 3-3
+auf die gemäß dem ||| pursuant to the ||| 2-0 0-1 1-1 3-2
+auf die gemäß ||| established pursuant to ||| 2-1 0-2 1-2
+auf die gemäß ||| pursuant to ||| 2-0 0-1 1-1
+auf die ||| to ||| 0-0 1-0
+auf jeder Ebene ||| at every level ||| 0-0 2-0 2-2
+auf jeder Ebene ||| citizens at every level ||| 0-1 2-1 2-3
+auf ||| at ||| 0-0
+auf ||| auf ||| 0-0
+auf ||| auf ||| 0-0
+auf ||| on a ||| 0-0 0-1
+auf ||| the ||| 0-0
+aufgebaut ||| build ||| 0-0
+aufgebaut ||| build ||| 0-0
+aufgebaut ||| that build ||| 0-1
+aufgebaut ||| that build ||| 0-1
+aus den nach ||| from ||| 0-0 1-0 2-0
+ausgewogener Nutzen aus den nach ||| overall balance of benefits from ||| 0-0 0-1 1-3 2-3 2-4 3-4 4-4
+ausgewogener ||| overall balance of ||| 0-0 0-1
+ausgewogener ||| overall balance ||| 0-0 0-1
+ausgewählt ||| selected ||| 0-0
+ausschließlich für den ||| exclusively for the ||| 0-0 1-1 2-2
+ausschließlich für ||| exclusively for ||| 0-0 1-1
+ausschließlich ||| exclusively ||| 0-0
+auszubauen , ||| ; ||| 0-0 1-0
+b ) ||| ( b ) ||| 1-0 0-1 1-2
+b ) ||| ( b ) ||| 1-0 0-1 1-2
+b ) ||| ( b ) ||| 1-0 0-1 1-2
+b ||| b ||| 0-0
+b ||| b ||| 0-0
+b ||| b ||| 0-0
+beide Parteien mit ||| both Parties ||| 0-0 1-1
+beide Parteien ||| both Parties ||| 0-0 1-1
+beide ||| both ||| 0-0
+beiderseitigen Rechte ||| mutual rights ||| 0-0 1-1
+beiderseitigen Zusammenarbeit ||| mutual cooperation ||| 0-0 1-1
+beiderseitigen ||| mutual ||| 0-0
+beiderseitigen ||| mutual ||| 0-0
+beigefügte ||| attached to ||| 0-0
+beigefügte ||| attached ||| 0-0
+beim Aufbau eines ||| developing a ||| 0-0 1-0 2-1
+beim Aufbau eines ||| in developing a ||| 0-1 1-1 2-2
+beim Aufbau ||| developing ||| 0-0 1-0
+beim Aufbau ||| in developing ||| 0-1 1-1
+beitragen , ||| to ||| 0-0 1-0
+bemühen sich darum , ||| shall attempt to ||| 1-0 0-1 2-1 3-2
+bemühen sich darum ||| shall attempt ||| 1-0 0-1 2-1
+beruflichen ||| training ||| 0-0
+berührt ||| affect ||| 0-0
+besondere ||| special ||| 0-0
+bestehenden beiderseitigen Rechte ||| Community existing mutual rights ||| 0-1 1-2 2-3
+bestehenden beiderseitigen Rechte ||| existing mutual rights ||| 0-0 1-1 2-2
+bestehenden beiderseitigen ||| Community existing mutual ||| 0-1 1-2
+bestehenden beiderseitigen ||| existing mutual ||| 0-0 1-1
+bestehenden ||| Community existing ||| 0-1
+bestehenden ||| existing ||| 0-0
+bestimmter Betrag , ||| specified amount for ||| 0-0 1-1
+bestimmter Betrag , ||| specified amount ||| 0-0 1-1
+bestimmter Betrag ||| specified amount for ||| 0-0 1-1
+bestimmter Betrag ||| specified amount ||| 0-0 1-1
+bestimmter ||| specified ||| 0-0
+betreffen , ||| , ||| 1-0
+betreffen , ||| , ||| 1-0
+betreffende ||| question ||| 0-0
+betreffende ||| question ||| 0-0
+bewegen ||| taking ||| 0-0
+bewertet . ||| basis . ||| 0-0 1-1
+bewertet . ||| basis . ||| 0-0 1-1
+bewertet ||| basis ||| 0-0
+bewertet ||| basis ||| 0-0
+bilateraler Programme zwischen den ||| bilateral programmes between ||| 0-0 1-1 2-2 3-2
+bilateraler Programme zwischen den ||| relevant bilateral programmes between the ||| 1-0 0-1 1-2 2-3 3-3
+bilateraler Programme zwischen den ||| relevant bilateral programmes between ||| 1-0 0-1 1-2 2-3 3-3
+bilateraler Programme ||| bilateral programmes ||| 0-0 1-1
+bilateraler Programme ||| relevant bilateral programmes ||| 1-0 0-1 1-2
+bilateraler ||| bilateral ||| 0-0
+bilateraler ||| bilateral ||| 0-0
+bilden könnte , die Studenten ||| students ||| 4-0
+bilden könnte , die Studenten ||| to students ||| 4-1
+bislang ||| the ||| 0-0
+breites Spektrum innovativer kooperativer Aktivitäten ||| innovative cooperative activities of ||| 2-0 4-1 4-2
+breites Spektrum innovativer kooperativer Aktivitäten ||| innovative cooperative activities ||| 2-0 4-1 4-2
+breites Spektrum innovativer kooperativer Aktivitäten ||| of innovative cooperative activities of ||| 2-1 4-2 4-3
+breites Spektrum innovativer kooperativer Aktivitäten ||| of innovative cooperative activities ||| 2-1 4-2 4-3
+breites Spektrum innovativer kooperativer Aktivitäten ||| spectrum of innovative cooperative activities ||| 2-2 4-3 4-4
+breites Spektrum innovativer kooperativer ||| broad spectrum of innovative ||| 2-3
+breites Spektrum innovativer kooperativer ||| innovative ||| 2-0
+breites Spektrum innovativer kooperativer ||| of innovative ||| 2-1
+breites Spektrum innovativer kooperativer ||| spectrum of innovative ||| 2-2
+breites Spektrum innovativer ||| broad spectrum of innovative ||| 2-3
+breites Spektrum innovativer ||| innovative ||| 2-0
+breites Spektrum innovativer ||| of innovative ||| 2-1
+breites Spektrum innovativer ||| spectrum of innovative ||| 2-2
+c ) ||| ( c ) ||| 1-0 0-1 1-2
+c ||| c ||| 0-0
+d ) ||| ( d ) ||| 1-0 0-1 1-2
+d ||| d ||| 0-0
+danach ||| danach ||| 0-0
+daran ||| in ||| 0-0
+das Europa-Abkommen ||| Europe Agreement ||| 1-0 0-1 1-1
+das Gebiet Kanadas ||| territory of Canada ||| 0-0 1-0 2-2
+das Gebiet Kanadas ||| the territory of Canada ||| 0-1 1-1 2-3
+das Gebiet der Vereinigten ||| the territory of the United ||| 2-0 0-1 1-1 3-4
+das Gebiet der ||| , to the territory of ||| 2-2 0-3 1-3
+das Gebiet der ||| , to the territory ||| 2-2 0-3 1-3
+das Gebiet der ||| the territory of the ||| 2-0 0-1 1-1
+das Gebiet der ||| the territory of ||| 2-0 0-1 1-1
+das Gebiet der ||| the territory ||| 2-0 0-1 1-1
+das Gebiet der ||| to the territory of the ||| 2-1 0-2 1-2
+das Gebiet der ||| to the territory of ||| 2-1 0-2 1-2
+das Gebiet der ||| to the territory ||| 2-1 0-2 1-2
+das Gebiet ||| territory of the ||| 0-0 1-0
+das Gebiet ||| territory of ||| 0-0 1-0
+das Gebiet ||| territory of ||| 0-0 1-0
+das Gebiet ||| territory ||| 0-0 1-0
+das Gebiet ||| territory ||| 0-0 1-0
+das Gebiet ||| the territory of ||| 0-1 1-1
+das Gebiet ||| the territory ||| 0-1 1-1
+das im ||| programme ||| 0-0 1-0
+das ||| the longer ||| 0-0
+das ||| the longer ||| 0-0
+das ||| the ||| 0-0
+das ||| the ||| 0-0
+das ||| the ||| 0-0
+das ||| the ||| 0-0
+dass die ||| that ||| 0-0
+dass es ||| that it ||| 0-0 1-1
+dass es ||| the ||| 0-0 1-0
+dass sich ||| that ||| 0-0 1-0
+dass ||| ensure that ||| 0-0 0-1
+dass ||| that ||| 0-0
+dass ||| that ||| 0-0
+dass ||| that ||| 0-0
+dass ||| to ensure that ||| 0-1 0-2
+dauerhafte Wirkungen ||| durable impact ||| 0-0 1-0 1-1
+dauerhafte Wirkungen ||| durable impact ||| 0-0 1-0 1-1
+dem Anhang dieses Abkommens ||| the Annex to this Agreement ||| 0-0 1-1 2-3 3-4
+dem Anhang dieses ||| the Annex to this ||| 0-0 1-1 2-3
+dem Anhang ||| the Annex to ||| 0-0 1-1
+dem Anhang ||| the Annex ||| 0-0 1-1
+dem Jahresbericht ||| annual report , ||| 0-1 1-1
+dem Jahresbericht ||| annual report ||| 0-1 1-1
+dem Jahresbericht ||| report , ||| 0-0 1-0
+dem Jahresbericht ||| report ||| 0-0 1-0
+dem Jahresbericht ||| the annual report , ||| 0-2 1-2
+dem Jahresbericht ||| the annual report ||| 0-2 1-2
+dem die ||| dem die ||| 0-0 1-1
+dem ||| dem ||| 0-0
+dem ||| the ||| 0-0
+dem ||| the ||| 0-0
+den Anstoß für ||| for ||| 2-0
+den Güterverkehr ||| the carriage of goods ||| 0-0 1-1 1-3
+den Schulen in ||| educational establishments in the ||| 2-2 0-3 1-3
+den Schulen in ||| establishments in the ||| 2-1 0-2 1-2
+den Schulen in ||| in the ||| 2-0 0-1 1-1
+den Schulen ||| the ||| 0-0 1-0
+den Vereinigten Staaten von Amerika ||| United States of America ||| 1-0 0-1 2-1 3-3 4-3
+den Vereinigten Staaten von Amerika ||| the United States of America ||| 0-0 1-1 2-2 3-4 4-4
+den Vereinigten Staaten von Amerika ||| the United States of America ||| 0-0 1-1 2-2 3-4 4-4
+den Vereinigten Staaten von Amerika ||| the United States of America ||| 0-0 1-1 2-2 3-4 4-4
+den Vereinigten Staaten von Amerika ||| the United States of America ||| 0-0 1-1 2-2 3-4 4-4
+den Vereinigten Staaten von Amerika ||| the United States of America ||| 0-0 1-1 2-2 3-4 4-4
+den Vereinigten Staaten von Amerika ||| the United States of America ||| 0-0 1-1 2-2 3-4 4-4
+den Vereinigten Staaten ||| United States of ||| 1-0 0-1 2-1
+den Vereinigten Staaten ||| United States ||| 1-0 0-1 2-1
+den Vereinigten Staaten ||| the United States of ||| 0-0 1-1 2-2
+den Vereinigten Staaten ||| the United States of ||| 0-0 1-1 2-2
+den Vereinigten Staaten ||| the United States of ||| 0-0 1-1 2-2
+den Vereinigten Staaten ||| the United States of ||| 0-0 1-1 2-2
+den Vereinigten Staaten ||| the United States of ||| 0-0 1-1 2-2
+den Vereinigten Staaten ||| the United States of ||| 0-0 1-1 2-2
+den Vereinigten Staaten ||| the United States ||| 0-0 1-1 2-2
+den Vereinigten Staaten ||| the United States ||| 0-0 1-1 2-2
+den Vereinigten Staaten ||| the United States ||| 0-0 1-1 2-2
+den Vereinigten Staaten ||| the United States ||| 0-0 1-1 2-2
+den Vereinigten Staaten ||| the United States ||| 0-0 1-1 2-2
+den Vereinigten Staaten ||| the United States ||| 0-0 1-1 2-2
+den Vereinigten ||| the United ||| 0-0 1-1
+den Vereinigten ||| the United ||| 0-0 1-1
+den Vereinigten ||| the United ||| 0-0 1-1
+den Vereinigten ||| the United ||| 0-0 1-1
+den Vereinigten ||| the United ||| 0-0 1-1
+den Vereinigten ||| the United ||| 0-0 1-1
+den Vereinigten ||| the United ||| 0-0 1-1
+den Zugang ||| access ||| 0-0 1-0
+den nach diesem Abkommen geförderten ||| supported under this Agreement ||| 4-0 0-1 1-1 2-2 3-3
+den nach diesem Abkommen ||| under this Agreement ||| 0-0 1-0 2-1 3-2
+den nach diesem ||| under this ||| 0-0 1-0 2-1
+den nach ||| under ||| 0-0 1-0
+den nach ||| under ||| 0-0 1-0
+den zuständigen Behörden ||| competent authorities ||| 1-0 2-1
+den zuständigen ||| competent ||| 1-0
+den ||| , of the ||| 0-2
+den ||| den ||| 0-0
+den ||| den ||| 0-0
+den ||| of the ||| 0-1
+den ||| of the ||| 0-1
+den ||| of the ||| 0-1
+den ||| the ||| 0-0
+den ||| the ||| 0-0
+den ||| the ||| 0-0
+den ||| the ||| 0-0
+den ||| the ||| 0-0
+den ||| the ||| 0-0
+den ||| the ||| 0-0
+den ||| the ||| 0-0
+den ||| the ||| 0-0
+den ||| the ||| 0-0
+den ||| the ||| 0-0
+den ||| the ||| 0-0
+den ||| the ||| 0-0
+den ||| the ||| 0-0
+den ||| the ||| 0-0
+denen in der ||| those in the ||| 0-0 1-1 2-2
+denen in ||| those in ||| 0-0 1-1
+denen ||| those ||| 0-0
+der Autonomie der ||| autonomy of the ||| 0-0 1-0 2-2
+der Autonomie der ||| autonomy of ||| 1-0 0-1 2-1
+der Autonomie der ||| the autonomy of the ||| 0-1 1-1 2-3
+der Autonomie der ||| the autonomy of ||| 1-1 0-2 2-2
+der Autonomie ||| autonomy of ||| 0-0 1-0
+der Autonomie ||| autonomy ||| 0-0 1-0
+der Autonomie ||| the autonomy of ||| 0-1 1-1
+der Autonomie ||| the autonomy ||| 0-1 1-1
+der Ergebnisse ||| of results ||| 0-0 1-1
+der Ergebnisse ||| of results ||| 0-0 1-1
+der Europäischen Gemeinschaft und Kanada ||| the European Community and Canada ||| 0-0 1-1 2-2 3-3 4-4
+der Europäischen Gemeinschaft und Kanadas ||| the European Community and Canada ||| 0-0 1-1 2-2 3-3 4-4
+der Europäischen Gemeinschaft und der ||| the European Community and the ||| 0-0 1-1 2-2 3-3 4-4
+der Europäischen Gemeinschaft und ||| European Community and United States ||| 1-0 0-1 2-1 3-2 0-3 2-4
+der Europäischen Gemeinschaft und ||| both the European Community and ||| 3-0 0-1 1-2 2-3 3-4
+der Europäischen Gemeinschaft und ||| both the European Community and ||| 3-0 0-1 1-2 2-3 3-4
+der Europäischen Gemeinschaft und ||| of the European Community and ||| 0-0 0-1 1-2 2-3 3-4
+der Europäischen Gemeinschaft und ||| of the European Community and ||| 0-0 0-1 1-2 2-3 3-4
+der Europäischen Gemeinschaft und ||| of the European Community and ||| 0-0 1-2 2-3 3-4
+der Europäischen Gemeinschaft und ||| of the European Community and ||| 0-0 1-2 2-3 3-4
+der Europäischen Gemeinschaft und ||| of the European Community and ||| 0-1 1-2 2-3 3-4
+der Europäischen Gemeinschaft und ||| of the European Community and ||| 0-1 1-2 2-3 3-4
+der Europäischen Gemeinschaft und ||| the European Community and ||| 0-0 1-1 2-2 3-3
+der Europäischen Gemeinschaft und ||| the European Community and ||| 0-0 1-1 2-2 3-3
+der Europäischen Gemeinschaft und ||| the European Community and ||| 0-0 1-1 2-2 3-3
+der Europäischen Gemeinschaft und ||| the European Community and ||| 0-0 1-1 2-2 3-3
+der Europäischen Gemeinschaft ||| European Community ||| 0-0 1-0 2-1
+der Europäischen Gemeinschaft ||| European Community ||| 1-0 0-1 2-1
+der Europäischen Gemeinschaft ||| European Community ||| 1-0 0-1 2-1
+der Europäischen Gemeinschaft ||| European Community ||| 1-0 2-1
+der Europäischen Gemeinschaft ||| of the European Community ||| 0-0 0-1 1-2 2-3
+der Europäischen Gemeinschaft ||| of the European Community ||| 0-0 0-1 1-2 2-3
+der Europäischen Gemeinschaft ||| of the European Community ||| 0-0 0-1 1-2 2-3
+der Europäischen Gemeinschaft ||| of the European Community ||| 0-0 0-1 1-2 2-3
+der Europäischen Gemeinschaft ||| of the European Community ||| 0-0 1-2 2-3
+der Europäischen Gemeinschaft ||| of the European Community ||| 0-0 1-2 2-3
+der Europäischen Gemeinschaft ||| of the European Community ||| 0-0 1-2 2-3
+der Europäischen Gemeinschaft ||| of the European Community ||| 0-1 1-2 2-3
+der Europäischen Gemeinschaft ||| of the European Community ||| 0-1 1-2 2-3
+der Europäischen Gemeinschaft ||| the European Community ||| 0-0 1-1 2-2
+der Europäischen Gemeinschaft ||| the European Community ||| 0-0 1-1 2-2
+der Europäischen Gemeinschaft ||| the European Community ||| 0-0 1-1 2-2
+der Europäischen Gemeinschaft ||| the European Community ||| 0-0 1-1 2-2
+der Europäischen Gemeinschaft ||| the European Community ||| 0-0 1-1 2-2
+der Europäischen Gemeinschaft ||| the European Community ||| 0-0 1-1 2-2
+der Europäischen Gemeinschaft ||| the European Community ||| 0-0 1-1 2-2
+der Europäischen Gemeinschaft ||| the European Community ||| 0-0 1-1 2-2
+der Europäischen Gemeinschaft ||| the European Community ||| 0-0 1-1 2-2
+der Europäischen Gemeinschaft ||| the European Community ||| 1-1 2-2
+der Europäischen ||| European ||| 0-0 1-0
+der Europäischen ||| European ||| 1-0
+der Europäischen ||| of the European ||| 0-0 0-1 1-2
+der Europäischen ||| of the European ||| 0-0 0-1 1-2
+der Europäischen ||| of the European ||| 0-0 0-1 1-2
+der Europäischen ||| of the European ||| 0-0 0-1 1-2
+der Europäischen ||| of the European ||| 0-0 1-2
+der Europäischen ||| of the European ||| 0-0 1-2
+der Europäischen ||| of the European ||| 0-0 1-2
+der Europäischen ||| of the European ||| 0-1 1-2
+der Europäischen ||| of the European ||| 0-1 1-2
+der Europäischen ||| the European ||| 0-0 1-1
+der Europäischen ||| the European ||| 0-0 1-1
+der Europäischen ||| the European ||| 0-0 1-1
+der Europäischen ||| the European ||| 0-0 1-1
+der Europäischen ||| the European ||| 0-0 1-1
+der Europäischen ||| the European ||| 0-0 1-1
+der Europäischen ||| the European ||| 0-0 1-1
+der Europäischen ||| the European ||| 0-0 1-1
+der Europäischen ||| the European ||| 0-0 1-1
+der Europäischen ||| the European ||| 1-1
+der Herausforderungen der ||| meet the challenges of the ||| 1-0 0-1 2-1 1-2
+der Herausforderungen der ||| meet the challenges of ||| 1-0 0-1 2-1 1-2
+der Herausforderungen der ||| meet the challenges ||| 1-0 0-1 2-1 1-2
+der Herausforderungen der ||| to meet the challenges of ||| 1-1 0-2 2-2 1-3
+der Herausforderungen der ||| to meet the challenges ||| 1-1 0-2 2-2 1-3
+der Hochschul- und ||| of higher education and ||| 0-0 1-1 1-2 2-3
+der Hochschul- ||| of higher education ||| 0-0 1-1 1-2
+der Lastkraftwagen ||| the lorry ||| 0-0 1-1
+der Mitgliedstaaten der ||| of the Member States of ||| 0-1 1-2 1-3 2-4
+der Mitgliedstaaten der ||| the Member States of the ||| 0-0 1-1 1-2 2-3
+der Mitgliedstaaten der ||| the Member States of ||| 0-0 1-1 1-2 2-3
+der Mitgliedstaaten ||| of the Member States ||| 0-1 1-2 1-3
+der Mitgliedstaaten ||| of the Member ||| 0-1 1-2
+der Mitgliedstaaten ||| the Member States ||| 0-0 1-1 1-2
+der Mitgliedstaaten ||| the Member ||| 0-0 1-1
+der Mittel zwischen den Parteien ||| of funds between the Parties ||| 0-0 1-1 2-2 3-2 0-3 4-4
+der Mittel zwischen den ||| of funds between the ||| 0-0 1-1 2-2 3-2 0-3
+der OECD , der UNESCO ||| the OECD , Unesco ||| 0-0 3-0 1-1 2-2 4-3
+der OECD , der ||| the OECD , ||| 0-0 3-0 1-1 2-2
+der Provinzen und Territorien ||| the Provinces and Territories of ||| 0-0 1-1 2-2 3-3 0-4
+der Provinzen ||| the Provinces ||| 0-0 1-1
+der Qualität ||| the quality of ||| 0-0 1-1
+der Qualität ||| the quality of ||| 0-0 1-1
+der Qualität ||| the quality ||| 0-0 1-1
+der Qualität ||| the quality ||| 0-0 1-1
+der Regierung Kanadas am ||| the Government of Canada on ||| 0-0 1-1 2-3 3-4
+der Regierung Kanadas ||| the Government of Canada ||| 0-0 1-1 2-3
+der Regierung der Vereinigten ||| the Government of the United ||| 0-0 1-1 2-2 3-4
+der Regierung der ||| the Government of the ||| 0-0 1-1 2-2
+der Regierung der ||| the Government of ||| 0-0 1-1 2-2
+der Regierung ||| the Government of ||| 0-0 1-1
+der Regierung ||| the Government ||| 0-0 1-1
+der Regierung ||| the Government ||| 0-0 1-1
+der Straße ||| road ||| 1-0
+der Vereinbarung ||| of the agreement ||| 0-1 1-2
+der Vereinbarung ||| the agreement ||| 0-0 1-1
+der Vereinigten Staaten von Amerika ||| the United States of America ||| 0-0 1-1 2-2 3-3 3-4 4-4
+der Vereinigten Staaten von Amerika ||| the United States of America ||| 0-0 1-1 2-2 3-4 4-4
+der Vereinigten Staaten von Amerika ||| the United States of America ||| 0-0 1-1 2-2 3-4 4-4
+der Vereinigten Staaten von Amerika ||| the United States of America ||| 0-0 1-1 2-2 3-4 4-4
+der Vereinigten Staaten ||| United States ||| 0-0 1-0 2-1
+der Vereinigten Staaten ||| the United States of ||| 0-0 1-1 2-2
+der Vereinigten Staaten ||| the United States of ||| 0-0 1-1 2-2
+der Vereinigten Staaten ||| the United States of ||| 0-0 1-1 2-2
+der Vereinigten Staaten ||| the United States ||| 0-0 1-1 2-2
+der Vereinigten Staaten ||| the United States ||| 0-0 1-1 2-2
+der Vereinigten Staaten ||| the United States ||| 0-0 1-1 2-2
+der Vereinigten Staaten ||| the United States ||| 0-0 1-1 2-2
+der Vereinigten ||| United ||| 0-0 1-0
+der Vereinigten ||| of the United ||| 0-0 1-2
+der Vereinigten ||| the United ||| 0-0 1-1
+der Vereinigten ||| the United ||| 0-0 1-1
+der Vereinigten ||| the United ||| 0-0 1-1
+der Vereinigten ||| the United ||| 0-0 1-1
+der Vereinigten ||| the United ||| 0-0 1-1
+der Vertragsparteien . ||| of the Contracting Parties . ||| 0-0 0-1 1-2 1-3 2-4
+der Vertragsparteien ||| of the Contracting Parties ||| 0-0 0-1 1-2 1-3
+der Vertragsparteien ||| of the Contracting Parties ||| 0-0 1-2 1-3
+der Zusammenarbeit ||| cooperation ||| 0-0 1-0
+der Zusammenarbeit ||| relevant cooperation ||| 0-1 1-1
+der Zusammenkünfte ||| the ||| 0-0
+der Zuständigkeiten der Mitgliedstaaten ||| the responsibilities of the Member ||| 0-0 1-1 2-3 3-4
+der Zuständigkeiten der ||| the responsibilities of the ||| 0-0 1-1 2-3
+der Zuständigkeiten der ||| the responsibilities of the ||| 0-0 1-1 2-3
+der Zuständigkeiten ||| the responsibilities of ||| 0-0 1-1
+der Zuständigkeiten ||| the responsibilities of ||| 0-0 1-1
+der Zuständigkeiten ||| the responsibilities ||| 0-0 1-1
+der Zuständigkeiten ||| the responsibilities ||| 0-0 1-1
+der auf dem EU-US-Gipfel ||| at the EU-US Summit ||| 1-0 0-1 2-1 3-1
+der auf dem EU-US-Gipfel ||| at the EU-US ||| 1-0 0-1 2-1 3-1
+der auf dem EU-US-Gipfel ||| at the ||| 1-0 0-1 2-1 3-1
+der auf den ||| auf den ||| 1-0 2-1
+der auf den ||| auf den ||| 1-0 2-1
+der auf ||| auf ||| 1-0
+der auf ||| auf ||| 1-0
+der bestehenden ||| the wider ||| 0-0
+der bestehenden ||| the ||| 0-0
+der die ||| the ||| 0-0 1-0
+der die ||| the ||| 0-0 1-0
+der nach den geltenden Rechtsvorschriften ||| according to the applicable laws ||| 1-0 0-2 2-2 3-3 4-4
+der nach den geltenden ||| according to the applicable ||| 1-0 0-2 2-2 3-3
+der nach den ||| according to the ||| 1-0 0-2 2-2
+der verschiedenen Mitgliedstaaten ||| the different Member States ||| 0-0 1-1 2-2 2-3
+der verschiedenen Mitgliedstaaten ||| the different Member ||| 0-0 1-1 2-2
+der verschiedenen ||| the different ||| 0-0 1-1
+der verschiedenen ||| the different ||| 0-0 1-1
+der von der Europäischen Gemeinschaft ||| by the European Community ||| 1-0 0-1 2-1 3-2 4-3
+der von der Europäischen Gemeinschaft ||| by the European Community ||| 1-0 0-1 2-1 3-2 4-3
+der von der Europäischen ||| by the European ||| 1-0 0-1 2-1 3-2
+der von der Europäischen ||| by the European ||| 1-0 0-1 2-1 3-2
+der von der ||| by the ||| 1-0 0-1 2-1
+der von der ||| by the ||| 1-0 0-1 2-1
+der vorgenannten Grundsätze . ||| of the foregoing principles . ||| 0-0 0-1 1-2 2-3 3-4
+der vorgenannten Grundsätze ||| of the foregoing principles ||| 0-0 0-1 1-2 2-3
+der vorgenannten ||| of the foregoing ||| 0-0 0-1 1-2
+der ||| , to the ||| 0-2
+der ||| Act . ||| 0-0
+der ||| Act ||| 0-0
+der ||| Kanadas ||| 0-0
+der ||| available to the ||| 0-2
+der ||| by ||| 0-0
+der ||| of the ||| 0-0
+der ||| of the ||| 0-0
+der ||| of the ||| 0-0
+der ||| of the ||| 0-0
+der ||| of the ||| 0-0
+der ||| of the ||| 0-0
+der ||| of the ||| 0-0
+der ||| of the ||| 0-0
+der ||| of the ||| 0-0
+der ||| of the ||| 0-0 0-1
+der ||| of the ||| 0-0 0-1
+der ||| of the ||| 0-0 0-1
+der ||| of the ||| 0-0 0-1
+der ||| of the ||| 0-0 0-1
+der ||| of the ||| 0-0 0-1
+der ||| of the ||| 0-0 0-1
+der ||| of the ||| 0-1
+der ||| of the ||| 0-1
+der ||| of the ||| 0-1
+der ||| of the ||| 0-1
+der ||| of the ||| 0-1
+der ||| of the ||| 0-1
+der ||| of the ||| 0-1
+der ||| of the ||| 0-1
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| of ||| 0-0
+der ||| on ||| 0-0
+der ||| the wider ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| the ||| 0-0
+der ||| to the ||| 0-1
+der ||| to the ||| 0-1
+der ||| to the ||| 0-1
+der ||| to the ||| 0-1
+der ||| to the ||| 0-1
+des Akademiker- und ||| academic and youth ||| 1-0 2-1 1-2
+des Akademiker- und ||| academic and youth ||| 1-0 2-1 1-2
+des Erwerbs der angesichts ||| the acquisition of skills ||| 0-0 1-1 2-2 1-3 3-3
+des Gemeinsamen Ausschusses ||| of the Joint Committee ||| 0-0 0-1 1-2 2-3
+des Gemeinsamen Ausschusses ||| of the Joint Committee ||| 0-0 0-1 1-2 2-3
+des Gemeinsamen ||| of the Joint ||| 0-0 0-1 1-2
+des Gemeinsamen ||| of the Joint ||| 0-0 0-1 1-2
+des Marktzugangs ||| access to the ||| 1-0 0-2
+des computergestützten Lernens und des ||| e-learning and open ||| 0-0 1-0 2-0 4-0 3-1 2-2
+des computergestützten Lernens und des ||| e-learning and open ||| 0-0 1-0 2-0 4-0 3-1 2-2
+des grenzüberschreitenden Verkehrs ||| international transport ||| 1-0 0-1 1-1 2-1
+des grenzüberschreitenden Verkehrs ||| their international transport ||| 1-1 0-2 1-2 2-2
+des kombinierten Verkehrs durch ||| combined transport by : ||| 0-0 1-0 2-1 3-2 2-3
+des kombinierten ||| combined ||| 0-0 1-0
+des ||| 's ||| 0-0
+des ||| des ||| 0-0
+des ||| des ||| 0-0
+des ||| of the ||| 0-0
+des ||| of the ||| 0-0 0-1
+des ||| of the ||| 0-0 0-1
+des ||| of ||| 0-0
+des ||| of ||| 0-0
+des ||| other 's ||| 0-1
+des ||| the ||| 0-0
+des ||| the ||| 0-0
+des ||| the ||| 0-0
+des ||| the ||| 0-0
+des ||| the ||| 0-0
+des ||| the ||| 0-0
+des ||| to the ||| 0-1
+desselben ||| desselben ||| 0-0
+desselben ||| desselben ||| 0-0
+die , ||| , ||| 1-0
+die , ||| , ||| 1-0
+die , ||| that , ||| 1-1
+die Güter abgeladen werden ||| the goods are unloaded ||| 0-0 1-1 3-2 2-3
+die Güter ||| the goods ||| 0-0 1-1
+die Kündigung dieses Abkommens hat ||| termination of this Agreement shall ||| 1-0 0-1 2-2 3-3 4-4
+die Kündigung dieses Abkommens hat ||| termination of this Agreement shall ||| 1-0 0-1 2-2 3-3 4-4
+die Kündigung dieses Abkommens ||| termination of this Agreement ||| 1-0 0-1 2-2 3-3
+die Kündigung dieses Abkommens ||| termination of this Agreement ||| 1-0 0-1 2-2 3-3
+die Kündigung dieses ||| termination of this ||| 1-0 0-1 2-2
+die Kündigung dieses ||| termination of this ||| 1-0 0-1 2-2
+die Kündigung ||| termination of ||| 1-0 0-1
+die Kündigung ||| termination of ||| 1-0 0-1
+die Parteien auffordert , ||| encourages the Parties to ||| 3-0 0-1 2-1 1-2 3-3
+die Parteien auffordert ||| the Parties ||| 0-0 2-0 1-1
+die Parteien ||| Parties ||| 1-0
+die Parteien ||| the Parties ||| 0-0 1-1
+die Parteien ||| the Parties ||| 0-0 1-1
+die Parteien ||| the Parties ||| 1-1
+die Parteien über ||| the Parties on the ||| 0-0 1-1 2-2
+die Parteien über ||| the Parties on ||| 0-0 1-1 2-2
+die Studenten und Lehrern ||| students and teachers ||| 1-0 2-1
+die Studenten und Lehrern ||| students and ||| 1-0 2-1
+die Studenten und Lehrern ||| to students and teachers ||| 1-1 2-2
+die Studenten und Lehrern ||| to students and ||| 1-1 2-2
+die Studenten und ||| students and teachers ||| 1-0 2-1
+die Studenten und ||| students and ||| 1-0 2-1
+die Studenten und ||| to students and teachers ||| 1-1 2-2
+die Studenten und ||| to students and ||| 1-1 2-2
+die Studenten ||| students ||| 1-0
+die Studenten ||| to students ||| 1-1
+die Verbesserung ||| improving ||| 0-0 1-0
+die Zu- ||| road haulage legs ||| 1-0 1-1 1-2
+die Zu- ||| the initial ||| 0-0 1-1
+die Zusammenarbeit beim Aufbau eines ||| cooperation in developing a ||| 0-0 1-0 2-2 3-2 4-3
+die Zusammenarbeit beim Aufbau ||| cooperation in developing ||| 0-0 1-0 2-2 3-2
+die Zusammenarbeit ||| cooperation in ||| 0-0 1-0
+die Zusammenarbeit ||| cooperation ||| 0-0 1-0
+die bestehenden beiderseitigen Rechte ||| the Community existing mutual rights ||| 0-0 1-2 2-3 3-4
+die bestehenden beiderseitigen ||| the Community existing mutual ||| 0-0 1-2 2-3
+die bestehenden ||| the Community existing ||| 0-0 1-2
+die gegenseitige Anerkennung ||| mutual recognition ||| 1-0 2-1
+die gegenseitige ||| mutual ||| 1-0
+die im Bereich der Hochschul- ||| the field of higher education ||| 0-0 1-1 2-1 3-2 4-3 4-4
+die im Bereich der ||| the field of ||| 0-0 1-1 2-1 3-2
+die im Bereich ||| the field ||| 0-0 1-1 2-1
+die zu ||| further ||| 1-0
+die ||| , die ||| 0-1
+die ||| : the ||| 0-1
+die ||| die ||| 0-0
+die ||| die ||| 0-0
+die ||| give ||| 0-0
+die ||| of the ||| 0-1
+die ||| of ||| 0-0
+die ||| of ||| 0-0
+die ||| of ||| 0-0
+die ||| of ||| 0-0
+die ||| of ||| 0-0
+die ||| over ||| 0-0
+die ||| over ||| 0-0
+die ||| providing for ||| 0-0
+die ||| providing for ||| 0-0
+die ||| providing ||| 0-0
+die ||| providing ||| 0-0
+die ||| range of ||| 0-1
+die ||| range of ||| 0-1
+die ||| the Community ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| the ||| 0-0
+die ||| to ||| 0-0
+die ||| to ||| 0-0
+die ||| which , ||| 0-0
+die ||| which , ||| 0-0
+die ||| which ||| 0-0
+die ||| which ||| 0-0
+die ||| which ||| 0-0
+diese ||| effect to ||| 0-0
+diese ||| effect ||| 0-0
+diesem Abkommen durchgeführten Aktivitäten ||| activities undertaken through this Agreement ||| 3-0 2-1 3-1 2-2 0-3 1-4
+diesem Abkommen durchgeführten Aktivitäten ||| activities undertaken through this Agreement ||| 3-0 2-1 3-1 2-2 0-3 1-4
+diesem Abkommen wird ||| This Agreement ||| 1-0 2-0 0-1 1-1
+diesem Abkommen ||| diesem Abkommen ||| 0-0 1-1
+diesem Abkommen ||| this Agreement ||| 0-0 1-1
+diesem Abkommen ||| this Agreement ||| 0-0 1-1
+diesem Abkommen ||| this Agreement ||| 0-0 1-1
+diesem Abkommen ||| this Agreement ||| 0-0 1-1
+diesem Abkommen ||| this Agreement ||| 0-0 1-1
+diesem Abkommen ||| this Agreement ||| 0-0 1-1
+diesem Abkommen ||| this Agreement ||| 0-0 1-1
+diesem ||| diesem ||| 0-0
+diesem ||| diesem ||| 0-0
+diesem ||| this ||| 0-0
+diesem ||| this ||| 0-0
+diesem ||| this ||| 0-0
+diesem ||| this ||| 0-0
+diesem ||| this ||| 0-0
+diesem ||| this ||| 0-0
+diesem ||| this ||| 0-0
+diesen Bereichen ||| these fields such ||| 0-0 1-1 0-2
+diesen Bereichen ||| these fields such ||| 0-0 1-1 0-2
+diesen Gebieten ||| these territories ||| 0-0 1-1
+diesen ||| these ||| 0-0
+dieser ||| of its ||| 0-0
+dieser ||| of ||| 0-0
+dieser ||| of ||| 0-0
+dieser ||| this section ||| 0-0
+dieser ||| this ||| 0-0
+dieses Abkommens hat ||| this Agreement shall ||| 0-0 1-1 2-2
+dieses Abkommens hat ||| this Agreement shall ||| 0-0 1-1 2-2
+dieses Abkommens ||| this Agreement , ||| 0-0 1-1
+dieses Abkommens ||| this Agreement ||| 0-0 1-1
+dieses Abkommens ||| this Agreement ||| 0-0 1-1
+dieses Abkommens ||| this Agreement ||| 0-0 1-1
+dieses Abkommens ||| this Agreement ||| 0-0 1-1
+dieses Abkommens ||| this Agreement ||| 0-0 1-1
+dieses Abkommens ||| this Agreement ||| 0-0 1-1
+dieses Abkommens ||| this Agreement ||| 0-0 1-1
+dieses Abkommens ||| to this Agreement ||| 0-1 1-2
+dieses Artikels ||| in this Article , ||| 0-1 1-2
+dieses Artikels ||| in this Article ||| 0-1 1-2
+dieses Artikels ||| this Article , ||| 0-0 1-1
+dieses Artikels ||| this Article ||| 0-0 1-1
+dieses Artikels ||| this Article ||| 0-0 1-1
+dieses ||| in this ||| 0-1
+dieses ||| this ||| 0-0
+dieses ||| this ||| 0-0
+dieses ||| this ||| 0-0
+dieses ||| this ||| 0-0
+dieses ||| this ||| 0-0
+dieses ||| this ||| 0-0
+dieses ||| this ||| 0-0
+dieses ||| this ||| 0-0
+dieses ||| this ||| 0-0
+dieses ||| this ||| 0-0
+dieses ||| to this ||| 0-1
+direkt ||| directly ||| 0-0
+direkt ||| directly ||| 0-0
+durch Bulgarien ||| through Bulgaria , ||| 0-0 1-1
+durch Bulgarien ||| through Bulgaria ||| 0-0 1-1
+durch Projektzusammenschlüsse ||| by project consortia ||| 0-0 1-2
+durch den Abschluss und ||| and the ||| 3-0 0-1 1-1 2-1
+durch den Abschluss ||| the ||| 0-0 1-0 2-0
+durch den ||| the ||| 0-0 1-0
+durch ihre ||| through the ||| 0-0
+durch ihre ||| through ||| 0-0
+durch ||| by project ||| 0-0
+durch ||| by ||| 0-0
+durch ||| by ||| 0-0
+durch ||| through the ||| 0-0
+durch ||| through ||| 0-0
+durch ||| through ||| 0-0
+durchgeführt ||| as ||| 0-0
+durchgeführt ||| as ||| 0-0
+durchgeführt ||| durchgeführt ||| 0-0
+durchgeführt ||| durchgeführt ||| 0-0
+durchgeführten Aktivitäten ||| activities undertaken through ||| 1-0 0-1 1-1 0-2
+durchgeführten Aktivitäten ||| activities undertaken through ||| 1-0 0-1 1-1 0-2
+e ) ||| ( e ) ||| 1-0 0-1 1-2
+e ||| e ||| 0-0
+effizient ||| flow ||| 0-0
+ein Kraftfahrzeug ||| vehicle ||| 0-0 1-0
+ein ||| a ||| 0-0
+ein ||| for a ||| 0-1
+ein ||| record ||| 0-0
+eine formelle Grundlage ||| a formal basis ||| 0-0 1-1 2-2
+eine formelle ||| a formal ||| 0-0 1-1
+eine ||| a ||| 0-0
+eine ||| an ||| 0-0
+einen Umkreis von höchstens ||| within a radius not exceeding ||| 1-0 0-1 0-2 1-2 3-3 2-4 3-4
+einen Umkreis ||| within a radius ||| 1-0 0-1 0-2 1-2
+einen Zeitraum von ||| einen Zeitraum von ||| 0-0 1-1 2-2
+einen Zeitraum ||| einen Zeitraum ||| 0-0 1-1
+einen ||| einen ||| 0-0
+einer Frist ||| einer Frist ||| 0-0 1-1
+einer Gesamtabgleichung ||| an overall matching ||| 0-0 1-0 1-1 1-2
+einer Gesamtabgleichung ||| an overall matching ||| 0-0 1-0 1-1 1-2
+einer US-amerikanischen ||| to transatlantic ||| 0-0 1-1
+einer ||| a ||| 0-0
+einer ||| a ||| 0-0
+einer ||| einer ||| 0-0
+einer ||| to ||| 0-0
+eines ||| a ||| 0-0
+eines ||| a ||| 0-0
+eines ||| a ||| 0-0
+eines ||| a ||| 0-0
+eingegangenen Verpflichtungen ||| obligations established ||| 0-0 1-0
+eingegangenen Verpflichtungen ||| obligations ||| 0-0 1-0
+einschließlich des Erwerbs der angesichts ||| including the acquisition of skills ||| 0-0 1-1 2-2 3-3 2-4 4-4
+einschließlich des ||| including the ||| 0-0 1-1
+einschließlich umfassenderer Kenntnisse in ihren ||| including broader knowledge of their ||| 0-0 1-1 2-2 3-3 4-4
+einschließlich umfassenderer Kenntnisse in ihren ||| including broader knowledge of their ||| 0-0 1-1 2-2 3-3 4-4
+einschließlich umfassenderer Kenntnisse in ||| including broader knowledge of ||| 0-0 1-1 2-2 3-3
+einschließlich umfassenderer Kenntnisse in ||| including broader knowledge of ||| 0-0 1-1 2-2 3-3
+einschließlich umfassenderer Kenntnisse ||| including broader knowledge ||| 0-0 1-1 2-2
+einschließlich umfassenderer Kenntnisse ||| including broader knowledge ||| 0-0 1-1 2-2
+einschließlich umfassenderer ||| including broader ||| 0-0 1-1
+einschließlich umfassenderer ||| including broader ||| 0-0 1-1
+einschließlich ||| including ||| 0-0
+einschließlich ||| including ||| 0-0
+einschließlich ||| including ||| 0-0
+einschließlich ||| including ||| 0-0
+einschließlich ||| including ||| 0-0
+einzelnen ||| of ||| 0-0
+entwickelt ||| developed ||| 0-0
+erfolgreiche und kostenwirksame ||| successful and cost-effective ||| 0-0 1-1 2-2
+erfolgreiche und ||| successful and ||| 0-0 1-1
+erfolgreiche ||| successful ||| 0-0
+erforderlichen Maßnahmen zur Verbesserung ||| steps necessary to improve ||| 1-0 0-1 2-1 2-2 3-3
+erforderlichen Maßnahmen zur ||| steps necessary to ||| 1-0 0-1 2-1 2-2
+erforderlichen Maßnahmen ||| measures necessary ||| 1-0 0-1
+erforderlichen ||| necessary ||| 0-0
+erforderlichen ||| required to ||| 0-0
+erforderlichen ||| required to ||| 0-0
+erforderlichen ||| required ||| 0-0
+erforderlichen ||| required ||| 0-0
+erfuellt sind . ||| been fulfilled . ||| 0-0 0-1 1-1 2-2
+erfuellt sind ||| been fulfilled ||| 0-0 0-1 1-1
+erlassen ||| adopt ||| 0-0
+erleichtern ||| facilitate ||| 0-0
+erleichtern ||| facilitate ||| 0-0
+ermöglicht ||| permit ||| 0-0
+ermöglicht ||| permit ||| 0-0
+erneuert ||| renewed ||| 0-0
+ersetzt das ||| replaces the ||| 0-0 1-1
+ersetzt ||| replace ||| 0-0
+ersetzt ||| replaces ||| 0-0
+ersten Schritt zu ||| first step in achieving ||| 0-0 1-1 2-3
+ersten Schritt ||| first step in ||| 0-0 1-1
+ersten Schritt ||| first step ||| 0-0 1-1
+ersten ||| first ||| 0-0
+erstreckt ||| erstreckt ||| 0-0
+es den Anstoß ||| as ||| 0-0
+es den ||| as ||| 0-0
+es wichtig ist ||| importance ||| 1-0
+es wichtig ist ||| the importance ||| 1-1
+es wichtig ||| importance ||| 1-0
+es wichtig ||| the importance ||| 1-1
+es ||| as ||| 0-0
+es ||| it ||| 0-0
+festgestellt wird ||| in ||| 0-0
+festgestellt ||| in ||| 0-0
+finanziell ||| financially supported ||| 0-0
+finanziell ||| financially ||| 0-0
+finanzielle Unterstützung neuer ||| financial assistance to new ||| 0-0 1-1 2-3
+finanzielle Unterstützung ||| financial assistance to ||| 0-0 1-1
+finanzielle Unterstützung ||| financial assistance ||| 0-0 1-1
+finanzielle ||| financial ||| 0-0
+flankierende ||| legal ||| 0-0
+folgenden ||| folgenden ||| 0-0
+formalen Bildung ||| non-formal education ||| 0-0 1-1
+formalen Bildung ||| of non-formal education ||| 0-1 1-2
+formalen ||| non-formal ||| 0-0
+formalen ||| of non-formal ||| 0-1
+formelle Grundlage für die weitere ||| formal basis for continued ||| 0-0 1-1 2-2 3-2 4-2 3-3
+formelle Grundlage ||| formal basis ||| 0-0 1-1
+formelle ||| formal ||| 0-0
+fördern werden ||| encourage ||| 0-0
+fördern ||| encourage ||| 0-0
+für den Güterverkehr ||| for the carriage of goods ||| 0-0 1-1 2-2 2-4
+für den ||| for the ||| 0-0 1-1
+für die weitere Zusammenarbeit ||| for continued cooperation ||| 0-0 1-0 2-0 1-1 3-2
+für die weitere ||| for continued ||| 0-0 1-0 2-0 1-1
+für die ||| for the ||| 0-0 1-1
+für die ||| for ||| 0-0 1-0
+für ||| for ||| 0-0
+für ||| for ||| 0-0
+für ||| for ||| 0-0
+für ||| for ||| 0-0
+für ||| for ||| 0-0
+für ||| for ||| 0-0
+für ||| to ||| 0-0
+geförderten ||| supported ||| 0-0
+geförderten ||| supported ||| 0-0
+gegebenenfalls ||| appropriate , ||| 0-0
+gegebenenfalls ||| appropriate , ||| 0-0
+gegebenenfalls ||| appropriate ||| 0-0
+gegebenenfalls ||| appropriate ||| 0-0
+gegebenenfalls ||| appropriate ||| 0-0
+gegebenenfalls ||| appropriate ||| 0-0
+gegebenenfalls ||| as appropriate ||| 0-0 0-1
+gegebenenfalls ||| as appropriate ||| 0-0 0-1
+gegenseitige Anerkennung ||| mutual recognition ||| 0-0 1-1
+gegenseitige Anerkennung ||| mutual recognition ||| 0-0 1-1
+gegenseitige ||| mutual ||| 0-0
+gegenseitige ||| mutual ||| 0-0
+gegenseitigem Einvernehmen die ||| the mutually ||| 2-0 0-1 1-1
+gegenseitigem Einvernehmen ||| mutually ||| 0-0 1-0
+gegenseitigen Anerkennung ||| mutual recognition ||| 0-0 1-1
+gegenseitigen Anerkennung ||| mutual recognition ||| 0-0 1-1
+gegenseitigen Nutzens der Zusammenarbeit ||| mutual benefit from cooperative ||| 0-0 1-1 1-2 2-2 1-3 3-3
+gegenseitigen Zusammenarbeit ||| mutual cooperation ||| 0-0 1-1
+gegenseitigen ||| mutual ||| 0-0
+gegenseitigen ||| mutual ||| 0-0
+gegenseitigen ||| mutual ||| 0-0
+gegenseitigen ||| mutual ||| 0-0
+gegenseitigen ||| mutual ||| 0-0
+gegenseitigen ||| mutual ||| 0-0
+gegenseitiger Nutzen aus den nach ||| mutual benefit from ||| 0-0 1-1 2-2 3-2 4-2
+gegenseitiger Nutzen ||| mutual benefit ||| 0-0 1-1
+gegenseitiger ||| mutual ||| 0-0
+gelten folgende Begriffsbestimmungen : ||| following definitions shall apply : ||| 1-0 0-1 1-1 2-1 1-2 0-3 3-4
+gelten folgende Begriffsbestimmungen ||| following definitions shall apply ||| 1-0 0-1 1-1 2-1 1-2 0-3
+geltenden Rechts- und Verwaltungsvorschriften ||| laws and regulations ||| 0-0 1-0 3-0 2-1 3-2
+geltenden Rechtsvorschriften ||| applicable laws ||| 0-0 1-1
+geltenden Rechtsvorschriften ||| applicable laws ||| 0-0 1-1
+geltenden Rechtsvorschriften ||| applicable laws ||| 0-0 1-1
+geltenden Rechtsvorschriften ||| applicable laws ||| 0-0 1-1
+geltenden ||| applicable ||| 0-0
+geltenden ||| applicable ||| 0-0
+geltenden ||| applicable ||| 0-0
+geltenden ||| applicable ||| 0-0
+gemacht ||| to ||| 0-0
+gemeinsame Projekte ||| joint projects ||| 0-0 1-1
+gemeinsame Projekte ||| joint projects ||| 0-0 1-1
+gemeinsame ||| common ||| 0-0
+gemeinsame ||| joint ||| 0-0
+gemeinsame ||| joint ||| 0-0
+gemeinsame ||| the common ||| 0-1
+gemeinsamer Aktivitäten im ||| cooperative activities ||| 1-0 2-0 1-1
+gemeinschaftlichen und ||| Community and ||| 0-0 1-1
+gemeinschaftlichen ||| Community ||| 0-0
+gemäß ||| accordance with ||| 0-0 0-1
+gemäß ||| accordance with ||| 0-0 0-1
+gemäß ||| according ||| 0-0
+gemäß ||| established pursuant ||| 0-1
+gemäß ||| in accordance with ||| 0-1 0-2
+gemäß ||| in accordance with ||| 0-1 0-2
+gemäß ||| pursuant ||| 0-0
+genehmigt ||| genehmigt , ||| 0-0
+genehmigt ||| genehmigt ||| 0-0
+geschlossenen Abkommens ||| Agreement ||| 1-0
+geschlossenen Abkommens ||| US Agreement ||| 1-1
+gesellschaftlichen und wirtschaftlichen Vielfalt ||| social and economic diversity ||| 0-0 1-1 2-2 3-3
+gesellschaftlichen und wirtschaftlichen ||| social and economic ||| 0-0 1-1 2-2
+gesellschaftlichen und ||| social and ||| 0-0 1-1
+gesellschaftlichen ||| social ||| 0-0
+gesellschaftlichen ||| social ||| 0-0
+getroffen werden ||| made ||| 0-0 1-0
+gilt für ||| apply , ||| 0-0 1-0
+gilt für ||| apply ||| 0-0 1-0
+gilt für ||| apply ||| 0-0 1-0
+gleich viele Vertreter beider ||| equal number of representatives of ||| 0-0 1-1 0-2 2-3 3-3 0-4
+globalen ||| global ||| 0-0
+globalen ||| global ||| 0-0
+globalen ||| global ||| 0-0
+globalen ||| global ||| 0-0
+globalen ||| of the global ||| 0-2
+globalen ||| the global ||| 0-1
+globalen ||| the global ||| 0-1
+globalen ||| the global ||| 0-1
+großer Teil ||| large proportion of their ||| 0-0 0-1 1-2
+großer Teil ||| large proportion of ||| 0-0 0-1 1-2
+großer ||| large proportion ||| 0-0 0-1
+größeren Verständnisses zwischen den Völkern ||| closer understanding between the peoples ||| 0-0 0-1 1-1 2-2 3-2 1-4 4-4
+hat , ||| has ||| 0-0
+hat ||| has ||| 0-0
+hat ||| shall ||| 0-0
+hat ||| shall ||| 0-0
+hindurch koordiniert ||| a coordinated manner ||| 0-1 1-1 1-2
+hindurch koordiniert ||| coordinated manner ||| 0-0 1-0 1-1
+höchst erfolgreiche und kostenwirksame ||| highly successful and cost-effective ||| 0-0 1-1 2-2 3-3
+höchst erfolgreiche und ||| highly successful and ||| 0-0 1-1 2-2
+höchst erfolgreiche ||| highly successful ||| 0-0 1-1
+höchst positive ||| highly positive ||| 0-0 1-1
+höchst ||| highly ||| 0-0
+höchst ||| highly ||| 0-0
+ihre Anforderungen an ||| their requirements for ||| 0-0 1-1 2-1
+ihre Anforderungen an ||| their requirements ||| 0-0 1-1 2-1
+ihre rechtlichen Anforderungen ||| their legal requirements for the ||| 0-0 1-1 2-2
+ihre rechtlichen Anforderungen ||| their legal requirements for ||| 0-0 1-1 2-2
+ihre rechtlichen Anforderungen ||| their legal requirements ||| 0-0 1-1 2-2
+ihre rechtlichen ||| their legal ||| 0-0 1-1
+ihre ||| their ||| 0-0
+ihre ||| their ||| 0-0
+ihren Mitgliedstaaten ||| their Member States , of ||| 0-0 1-1 1-2
+ihren Mitgliedstaaten ||| their Member States , ||| 0-0 1-1 1-2
+ihren Mitgliedstaaten ||| their Member States ||| 0-0 1-1 1-2
+ihren Sprachen , Kulturen und ||| their languages , cultures and ||| 0-0 1-1 2-2 3-3 4-4
+ihren Sprachen , Kulturen und ||| their languages , cultures and ||| 0-0 1-1 2-2 3-3 4-4
+ihren Sprachen , Kulturen ||| their languages , cultures ||| 0-0 1-1 2-2 3-3
+ihren Sprachen , Kulturen ||| their languages , cultures ||| 0-0 1-1 2-2 3-3
+ihren Sprachen , ||| their languages , ||| 0-0 1-1 2-2
+ihren Sprachen , ||| their languages , ||| 0-0 1-1 2-2
+ihren Sprachen ||| their languages ||| 0-0 1-1
+ihren Sprachen ||| their languages ||| 0-0 1-1
+ihren ||| their ||| 0-0
+ihren ||| their ||| 0-0
+ihren ||| their ||| 0-0
+ihrer jeweiligen ||| the ||| 0-0 1-0
+ihrer ||| level ||| 0-0
+ihrer ||| level ||| 0-0
+ihres wirksamen ||| their effective ||| 0-0 1-1
+ihres wirksamen ||| their effective ||| 0-0 1-1
+ihres ||| their ||| 0-0
+ihres ||| their ||| 0-0
+im Anhang , der ||| described in the Annex , ||| 1-0 0-1 3-2 1-3 2-4
+im Anhang , der ||| described in the Annex , ||| 1-0 0-1 3-2 1-3 2-4
+im Bereich der Bildung und ||| education and ||| 0-0 1-0 3-0 4-1
+im Bereich der Bildung und ||| education and ||| 0-0 1-0 3-0 4-1
+im Bereich der Bildung ||| education ||| 0-0 1-0 3-0
+im Bereich der Bildung ||| education ||| 0-0 1-0 3-0
+im Bereich der Hochschul- und ||| activities in higher education and ||| 1-0 1-1 0-2 1-2 2-2 3-2 3-3 4-4
+im Bereich der Hochschul- und ||| field of higher education and ||| 0-0 1-0 2-1 3-2 3-3 4-4
+im Bereich der Hochschul- und ||| higher education and ||| 0-0 1-0 3-0 2-1 3-1 4-2
+im Bereich der Hochschul- ||| activities in higher education ||| 1-0 1-1 0-2 1-2 2-2 3-2 3-3
+im Bereich der Hochschul- ||| field of higher education ||| 0-0 1-0 2-1 3-2 3-3
+im Bereich der Hochschul- ||| higher education ||| 0-0 1-0 3-0 2-1 3-1
+im Bereich der nicht formalen ||| in the field of non-formal ||| 1-0 3-0 2-1 0-2 1-2 4-4
+im Bereich der nicht ||| in the field of ||| 1-0 3-0 2-1 0-2 1-2
+im Bereich der nicht ||| in the field ||| 1-0 3-0 2-1 0-2 1-2
+im Bereich der ||| field of ||| 0-0 1-0 2-1
+im Bereich ||| field ||| 0-0 1-0
+im Bereich ||| in ||| 0-0 1-0
+im Hinblick auf die ||| in the context ||| 0-0 1-0 2-0 3-1 0-2
+im Unterricht ||| teaching ||| 1-0
+im Wege der ||| evaluated as ||| 0-0 1-0 0-1 2-1
+im Wege ||| evaluated as ||| 0-0 1-0 0-1
+im kombinierten Verkehr ||| in combined transport ||| 0-0 1-1 2-1 1-2
+im ||| in ||| 0-0
+im ||| in ||| 0-0
+im ||| in ||| 0-0
+im ||| in ||| 0-0
+im ||| the ||| 0-0
+in Verbindung mit Zusammenkünften des ||| with meetings of the ||| 0-0 1-0 2-0 3-1 4-2 4-3
+in Verbindung mit Zusammenkünften des ||| with meetings of the ||| 0-0 1-0 2-0 3-1 4-2 4-3
+in Verbindung mit Zusammenkünften ||| with meetings ||| 0-0 1-0 2-0 3-1
+in Verbindung mit Zusammenkünften ||| with meetings ||| 0-0 1-0 2-0 3-1
+in Verbindung mit ||| with ||| 0-0 1-0 2-0
+in Verbindung mit ||| with ||| 0-0 1-0 2-0
+in den ||| into classrooms ||| 0-0
+in den ||| into ||| 0-0
+in der ||| in the ||| 0-0 1-1
+in die ||| in ||| 0-0 1-0
+in gegenseitigem Einvernehmen vereinbart werden ||| be held as mutually determined ||| 0-0 4-0 1-1 3-2 1-3 2-3 3-3 3-4 4-4
+in gegenseitigem Einvernehmen vereinbart werden ||| be held as mutually determined ||| 0-0 4-0 1-1 3-2 1-3 2-3 3-3 3-4 4-4
+in ihren Sprachen , Kulturen ||| of their languages , cultures ||| 0-0 1-1 2-2 3-3 4-4
+in ihren Sprachen , Kulturen ||| of their languages , cultures ||| 0-0 1-1 2-2 3-3 4-4
+in ihren Sprachen , ||| of their languages , ||| 0-0 1-1 2-2 3-3
+in ihren Sprachen , ||| of their languages , ||| 0-0 1-1 2-2 3-3
+in ihren Sprachen ||| of their languages ||| 0-0 1-1 2-2
+in ihren Sprachen ||| of their languages ||| 0-0 1-1 2-2
+in ihren ||| of their ||| 0-0 1-1
+in ihren ||| of their ||| 0-0 1-1
+in seinem Rahmen getroffen werden ||| made under it ||| 1-0 3-0 4-0 2-1 1-2
+in seinem Rahmen getroffen werden ||| made under it ||| 3-0 4-0 0-1 2-1 1-2
+in seinem Rahmen ||| under it ||| 0-0 2-0 1-1
+in zwei Urschriften in ||| drawn up in duplicate in ||| 0-0 2-0 2-1 3-2 1-3 2-3 3-4
+in zwei Urschriften in ||| drawn up in duplicate in ||| 0-0 2-0 2-1 3-2 1-3 2-3 3-4
+in ||| educational establishments in ||| 0-2
+in ||| establishments in ||| 0-1
+in ||| in the ||| 0-0
+in ||| in ||| 0-0
+in ||| in ||| 0-0
+in ||| in ||| 0-0
+in ||| in ||| 0-0
+in ||| in ||| 0-0
+in ||| in ||| 0-0
+in ||| in ||| 0-0
+in ||| in ||| 0-0
+in ||| in ||| 0-0
+in ||| in ||| 0-0
+in ||| into classrooms ||| 0-0
+in ||| into ||| 0-0
+in ||| of ||| 0-0
+in ||| of ||| 0-0
+in ||| the ||| 0-0
+innovativer kooperativer Aktivitäten bilden könnte ||| innovative cooperative activities of ||| 0-0 2-1 2-2
+innovativer kooperativer Aktivitäten bilden könnte ||| innovative cooperative activities ||| 0-0 2-1 2-2
+innovativer kooperativer Aktivitäten bilden könnte ||| of innovative cooperative activities of ||| 0-1 2-2 2-3
+innovativer kooperativer Aktivitäten bilden könnte ||| of innovative cooperative activities ||| 0-1 2-2 2-3
+innovativer kooperativer Aktivitäten bilden könnte ||| spectrum of innovative cooperative activities ||| 0-2 2-3 2-4
+innovativer kooperativer Aktivitäten bilden ||| innovative cooperative activities of ||| 0-0 2-1 2-2
+innovativer kooperativer Aktivitäten bilden ||| innovative cooperative activities ||| 0-0 2-1 2-2
+innovativer kooperativer Aktivitäten bilden ||| of innovative cooperative activities of ||| 0-1 2-2 2-3
+innovativer kooperativer Aktivitäten bilden ||| of innovative cooperative activities ||| 0-1 2-2 2-3
+innovativer kooperativer Aktivitäten bilden ||| spectrum of innovative cooperative activities ||| 0-2 2-3 2-4
+innovativer kooperativer Aktivitäten ||| innovative cooperative activities of ||| 0-0 2-1 2-2
+innovativer kooperativer Aktivitäten ||| innovative cooperative activities ||| 0-0 2-1 2-2
+innovativer kooperativer Aktivitäten ||| of innovative cooperative activities of ||| 0-1 2-2 2-3
+innovativer kooperativer Aktivitäten ||| of innovative cooperative activities ||| 0-1 2-2 2-3
+innovativer kooperativer Aktivitäten ||| spectrum of innovative cooperative activities ||| 0-2 2-3 2-4
+innovativer kooperativer ||| broad spectrum of innovative ||| 0-3
+innovativer kooperativer ||| innovative ||| 0-0
+innovativer kooperativer ||| of innovative ||| 0-1
+innovativer kooperativer ||| spectrum of innovative ||| 0-2
+innovativer ||| broad spectrum of innovative ||| 0-3
+innovativer ||| innovative ||| 0-0
+innovativer ||| innovative ||| 0-0
+innovativer ||| innovative ||| 0-0
+innovativer ||| of innovative ||| 0-1
+innovativer ||| spectrum of innovative ||| 0-2
+insbesondere ||| especially ||| 0-0
+insbesondere ||| in particular ||| 0-0 0-1
+insbesondere ||| particularly ||| 0-0
+insgesamt . ||| entirety . ||| 0-0 1-1
+insgesamt . ||| its entirety . ||| 0-1 1-2
+insgesamt ||| entirety ||| 0-0
+insgesamt ||| its entirety ||| 0-1
+internationalen Organisationen ||| international organisations ||| 0-0 1-1
+internationalen ||| international ||| 0-0
+ist ein bestimmter Betrag , ||| a specified amount for ||| 0-0 1-0 2-1 3-2
+ist ein bestimmter Betrag , ||| a specified amount ||| 0-0 1-0 2-1 3-2
+ist ein bestimmter Betrag ||| a specified amount for ||| 0-0 1-0 2-1 3-2
+ist ein bestimmter Betrag ||| a specified amount ||| 0-0 1-0 2-1 3-2
+ist ein bestimmter ||| a specified ||| 0-0 1-0 2-1
+ist ein ||| a ||| 0-0 1-0
+ist ||| be ||| 0-0
+ist ||| be ||| 0-0
+ist ||| is ||| 0-0
+ist ||| is ||| 0-0
+jede ||| , ||| 0-0
+jeder ||| each of ||| 0-0
+jeder ||| each of ||| 0-0
+jeder ||| each ||| 0-0
+jeder ||| each ||| 0-0
+jährlichen Berichts an die Parteien ||| report annually to the Parties ||| 1-0 2-2 3-3 4-4
+jährlichen Berichts an die ||| report annually to the ||| 1-0 2-2 3-3
+jährlichen Berichts an ||| report annually to ||| 1-0 2-2
+jährlichen Berichts ||| report annually ||| 1-0
+jährlichen Berichts ||| report ||| 1-0
+kanadischen ||| Canadian ||| 0-0
+keiner ||| any ||| 0-0
+kombinierten Verkehr ||| combined transport ||| 0-0 1-0 0-1
+kombinierten Verkehrs ; insbesondere ||| combined transport especially by : ||| 0-0 1-1 2-1 3-2 0-3 3-4
+kombinierten Verkehrs und ||| combined transport and to ||| 0-0 1-0 1-1 2-2
+kombinierten Verkehrs und ||| combined transport and ||| 0-0 1-0 1-1 2-2
+kombinierten Verkehrs ||| combined transport ||| 0-0 1-0 1-1
+kombinierten Verkehrs ||| combined transport ||| 0-0 1-0 1-1
+kommen ||| kommen ||| 0-0
+konkret ||| makes specific ||| 0-0
+konkret ||| makes specific ||| 0-0
+konkret ||| makes ||| 0-0
+konkret ||| makes ||| 0-0
+kooperativen Aktivitäten im ||| cooperative activities ||| 0-0 1-0 2-0 1-1
+kooperativen Aktivitäten ||| cooperative activities ||| 0-0 1-1
+kooperativen ||| cooperative ||| 0-0
+kooperativer Aktivitäten bilden könnte , ||| cooperative activities of ||| 1-0 1-1
+kooperativer Aktivitäten bilden könnte , ||| cooperative activities ||| 1-0 1-1
+kooperativer Aktivitäten bilden könnte ||| cooperative activities of ||| 1-0 1-1
+kooperativer Aktivitäten bilden könnte ||| cooperative activities ||| 1-0 1-1
+kooperativer Aktivitäten bilden ||| cooperative activities of ||| 1-0 1-1
+kooperativer Aktivitäten bilden ||| cooperative activities ||| 1-0 1-1
+kooperativer Aktivitäten ||| cooperative activities of ||| 1-0 1-1
+kooperativer Aktivitäten ||| cooperative activities ||| 1-0 1-1
+kostenwirksame ||| cost-effective ||| 0-0
+kulturellen , gesellschaftlichen und wirtschaftlichen ||| cultural , social and economic ||| 0-0 1-1 2-2 3-3 4-4
+kulturellen , gesellschaftlichen und ||| cultural , social , and ||| 0-0 1-1 2-2 1-3 3-4
+kulturellen , gesellschaftlichen und ||| cultural , social and ||| 0-0 1-1 2-2 3-3
+kulturellen , gesellschaftlichen ||| cultural , social , ||| 0-0 1-1 2-2 1-3
+kulturellen , gesellschaftlichen ||| cultural , social ||| 0-0 1-1 2-2
+kulturellen , ||| cultural , ||| 0-0 1-1
+kulturellen ||| cultural ||| 0-0
+kulturellen ||| cultural ||| 0-0
+können ||| may ||| 0-0
+können ||| may ||| 0-0
+können ||| may ||| 0-0
+können ||| may ||| 0-0
+könnte , die Studenten und ||| students and teachers ||| 3-0 4-1
+könnte , die Studenten und ||| students and ||| 3-0 4-1
+könnte , die Studenten und ||| to students and teachers ||| 3-1 4-2
+könnte , die Studenten und ||| to students and ||| 3-1 4-2
+könnte , die Studenten ||| students ||| 3-0
+könnte , die Studenten ||| to students ||| 3-1
+künftige Wohlergehen ||| future well-being of ||| 0-0 1-1
+künftige Wohlergehen ||| future well-being ||| 0-0 1-1
+künftige ||| future wellbeing of ||| 0-0
+künftige ||| future wellbeing ||| 0-0
+künftige ||| future ||| 0-0
+künftige ||| future ||| 0-0
+lässt ||| lässt ||| 0-0
+lässt ||| lässt ||| 0-0
+mindestens 20 ||| 20 ||| 1-0
+mit dem Jahresbericht ||| with the annual report , ||| 0-0 1-3 2-3
+mit dem Jahresbericht ||| with the annual report ||| 0-0 1-3 2-3
+mit dieser ||| of its ||| 1-0
+mit dieser ||| of ||| 1-0
+mit ||| with the annual ||| 0-0
+mit ||| with the ||| 0-0
+mit ||| with ||| 0-0
+mit ||| with ||| 0-0
+mit ||| with ||| 0-0
+mit ||| with ||| 0-0
+nach diesem Abkommen ||| under this Agreement ||| 0-0 1-1 2-2
+nach diesem Abkommen ||| under this Agreement ||| 0-0 1-1 2-2
+nach diesem ||| under this ||| 0-0 1-1
+nach diesem ||| under this ||| 0-0 1-1
+nach folgenden Grundsätzen auszurichten ||| guided by the following principles ||| 1-0 0-1 1-1 1-2 1-3 3-3 2-4 3-4
+nach ||| according to ||| 0-0
+nach ||| according ||| 0-0
+nach ||| under ||| 0-0
+nach ||| under ||| 0-0
+nachdem ||| nachdem ||| 0-0
+nachhaltigen , primär auf ||| sustainable range of student-centred ||| 0-0 2-1 1-2 3-2 2-3
+nachhaltigen ||| sustainable ||| 0-0
+nachhaltigen ||| sustainable ||| 0-0
+nachstehend ||| hereinafter referred to ||| 0-0 0-1 0-2
+nachstehend ||| hereinafter referred to ||| 0-0 0-1 0-2
+nachstehend ||| hereinafter referred to ||| 0-0 0-1 0-2
+neue Strukturen und Beziehungen aufgebaut ||| build new structures and links ||| 4-0 0-1 1-2 2-3 3-4
+neue Strukturen und Beziehungen ||| new structures and links ||| 0-0 1-1 2-2 3-3
+neue Strukturen und ||| new structures and ||| 0-0 1-1 2-2
+neue Strukturen ||| new structures ||| 0-0 1-1
+neue Strukturen ||| new structures ||| 0-0 1-1
+neue ||| new ||| 0-0
+neue ||| new ||| 0-0
+neuer ||| new ||| 0-0
+neuer ||| to new ||| 0-1
+niederländischer , ||| Italian ||| 0-0 1-0
+niederländischer , ||| Italian ||| 0-0 1-0
+oben ||| aforementioned ||| 0-0
+oder Ablaufstrecke ||| or final ||| 0-0 1-1
+oder Ausbau von Partnerschaften zwischen ||| or enhance partnerships among ||| 0-0 1-1 3-2 3-3 4-3
+oder Ausbau von ||| or enhance ||| 0-0 1-1
+oder Ausbau ||| form or enhance ||| 0-1 1-2
+oder Ausbau ||| or enhance ||| 0-0 1-1
+oder Ausbau ||| or enhance ||| 0-0 1-1
+oder Bulgariens ; ||| or Bulgaria , ||| 0-0 1-1 2-2
+oder Bulgariens ||| or Bulgaria ||| 0-0 1-1
+oder Diskriminierung abgewickelt ||| hindrance or discrimination ||| 2-0 0-1 1-2
+oder Diskriminierung ||| or discrimination ||| 0-0 1-1
+oder Programmen teilnehmen , die ||| or programmes which ||| 0-0 2-0 1-1 3-2 4-2
+oder Programmen teilnehmen ||| or programmes ||| 0-0 2-0 1-1
+oder Programmen teilnehmen ||| or programmes ||| 0-0 2-0 1-1
+oder Verlängerung ||| or extension ||| 0-0 1-1
+oder Verlängerung ||| or extension ||| 0-0 1-1
+oder Verlängerung ||| or ||| 0-0
+oder die Kündigung dieses Abkommens ||| or termination of this Agreement ||| 0-0 2-1 1-2 3-3 4-4
+oder die Kündigung dieses Abkommens ||| or termination of this Agreement ||| 0-0 2-1 1-2 3-3 4-4
+oder die Kündigung dieses ||| or termination of this ||| 0-0 2-1 1-2 3-3
+oder die Kündigung dieses ||| or termination of this ||| 0-0 2-1 1-2 3-3
+oder die Kündigung ||| or termination of ||| 0-0 2-1 1-2
+oder die Kündigung ||| or termination of ||| 0-0 2-1 1-2
+oder durch ihre ||| or through the ||| 0-0 1-1
+oder durch ihre ||| or through ||| 0-0 1-1
+oder durch ||| or through the ||| 0-0 1-1
+oder durch ||| or through ||| 0-0 1-1
+oder ||| form or ||| 0-1
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+oder ||| or ||| 0-0
+offenen und Fernunterrichts und ihres ||| and distance learning and their ||| 1-0 0-1 2-1 2-2 3-3 4-4
+offenen und Fernunterrichts und ||| and distance learning and ||| 1-0 0-1 2-1 2-2 3-3
+offenen und Fernunterrichts ||| and distance learning ||| 1-0 0-1 2-1 2-2
+offenen und Fernunterrichts ||| and distance ||| 1-0 0-1 2-1
+offiziellen ||| , ||| 0-0
+ohne fortlaufende ||| without ||| 0-0
+ohne fortlaufende ||| without ||| 0-0
+ohne ||| without ||| 0-0
+ohne ||| without ||| 0-0
+ohne ||| without ||| 0-0
+ohne ||| without ||| 0-0
+positive ||| positive ||| 0-0
+qualitative Verbesserung der transatlantischen ||| improve the quality of transatlantic ||| 0-0 1-0 0-2 2-3 0-4 3-4
+qualitative Verbesserung der transatlantischen ||| improve the quality of transatlantic ||| 0-0 1-0 0-2 2-3 0-4 3-4
+rechtlichen Anforderungen ||| legal requirements for the ||| 0-0 1-1
+rechtlichen Anforderungen ||| legal requirements for ||| 0-0 1-1
+rechtlichen Anforderungen ||| legal requirements ||| 0-0 1-1
+rechtlichen ||| legal ||| 0-0
+rechtlichen ||| legal ||| 0-0
+rechtlichen ||| legal ||| 0-0
+regelmäßigen ||| a regular ||| 0-0 0-1
+schriftlich ||| writing ||| 0-0
+schriftlicher ||| written ||| 0-0
+schwedischer und spanischer ||| Spanish and Swedish ||| 2-0 1-1 0-2
+schwedischer und spanischer ||| Spanish and Swedish ||| 2-0 1-1 0-2
+schwedischer und ||| and Swedish ||| 1-0 0-1
+schwedischer und ||| and Swedish ||| 1-0 0-1
+schwedischer ||| Swedish ||| 0-0
+schwedischer ||| Swedish ||| 0-0
+seinem Rahmen getroffen werden . ||| made under it . ||| 0-0 2-0 3-0 1-1 0-2 4-3
+seinem Rahmen getroffen werden ||| made under it ||| 0-0 2-0 3-0 1-1 0-2
+seinem ||| it ||| 0-0
+sich ||| shall ||| 0-0
+sichergestellt ||| of the ||| 0-1
+sichergestellt ||| the ||| 0-0
+sicherzustellen ||| ensure for ||| 0-0
+sicherzustellen ||| ensure ||| 0-0
+sicherzustellen ||| of ||| 0-0
+sie ||| is ||| 0-0
+sie ||| is ||| 0-0
+sie ||| it ||| 0-0
+sind , ||| sind ||| 0-0
+sind besondere ||| special ||| 1-0
+sind ||| sind ||| 0-0
+sollte ||| should ||| 0-0
+sollte ||| should ||| 0-0
+sonst in ||| the ||| 1-0
+sonstige ||| other ||| 0-0
+soweit wie möglich ||| extent possible , ||| 0-0 1-1 2-1
+soweit wie möglich ||| extent possible ||| 0-0 1-1 2-1
+soweit ||| extent ||| 0-0
+sowie anderer ||| as well as other ||| 0-0 0-1 0-2 1-3
+sowie anderer ||| as well as other ||| 0-0 0-1 0-2 1-3
+sowie ||| as well as ||| 0-0 0-1 0-2
+sowie ||| as well as ||| 0-0 0-1 0-2
+sozialer und technischer Vorschriften ||| social and technical ||| 0-0 1-1 2-2 3-2
+sozialer und ||| social and ||| 0-0 1-1
+sozialer ||| social ||| 0-0
+spanischer ||| Spanish ||| 0-0
+spanischer ||| Spanish ||| 0-0
+spätere ||| later ||| 0-0
+staatlichen ||| body ||| 0-0
+staatlichen ||| body ||| 0-0
+stetige ||| that have ||| 0-0
+stetige ||| that have ||| 0-0
+stetige ||| that ||| 0-0
+stetige ||| that ||| 0-0
+sämtlicher Arten ||| all types ||| 0-0 0-1 1-1
+technischer Vorschriften ||| technical ||| 0-0 1-0
+transatlantischen Zusammenarbeit ||| Transatlantic cooperation ||| 0-0 1-1
+transatlantischen ||| Transatlantic ||| 0-0
+treffen alle ||| take all ||| 0-0 1-1
+treffen ||| take ||| 0-0
+umfassende Einbeziehung der verschiedenen ||| broad participation across the different ||| 0-0 1-1 1-2 2-3 3-4
+umfassende Einbeziehung der verschiedenen ||| broad participation across the different ||| 0-0 1-1 1-2 2-3 3-4
+umfassende Einbeziehung der ||| broad participation across the ||| 0-0 1-1 1-2 2-3
+umfassende Einbeziehung der ||| broad participation across the ||| 0-0 1-1 1-2 2-3
+umfassende Einbeziehung ||| broad participation across ||| 0-0 1-1 1-2
+umfassende Einbeziehung ||| broad participation across ||| 0-0 1-1 1-2
+umfassende ||| broad ||| 0-0
+umfassende ||| broad ||| 0-0
+umfassenderer Kenntnisse in ihren Sprachen ||| broader knowledge of their languages ||| 0-0 1-1 2-2 3-3 4-4
+umfassenderer Kenntnisse in ihren Sprachen ||| broader knowledge of their languages ||| 0-0 1-1 2-2 3-3 4-4
+umfassenderer Kenntnisse in ihren ||| broader knowledge of their ||| 0-0 1-1 2-2 3-3
+umfassenderer Kenntnisse in ihren ||| broader knowledge of their ||| 0-0 1-1 2-2 3-3
+umfassenderer Kenntnisse in ||| broader knowledge of ||| 0-0 1-1 2-2
+umfassenderer Kenntnisse in ||| broader knowledge of ||| 0-0 1-1 2-2
+umfassenderer Kenntnisse ||| broader knowledge ||| 0-0 1-1
+umfassenderer Kenntnisse ||| broader knowledge ||| 0-0 1-1
+umfassenderer ||| broader ||| 0-0
+umfassenderer ||| broader ||| 0-0
+umgesetzt werden und ||| and ||| 0-0 2-0
+umgesetzt werden und ||| and ||| 2-0
+umweltfreundliche ||| environmentally friendly ||| 0-0 0-1
+umweltfreundliche ||| of environmentally friendly ||| 0-1 0-2
+unbegleiteten kombinierten Verkehrs und ||| unaccompanied combined transport and to ||| 0-0 1-1 2-1 2-2 3-3
+unbegleiteten kombinierten Verkehrs und ||| unaccompanied combined transport and ||| 0-0 1-1 2-1 2-2 3-3
+unbegleiteten kombinierten Verkehrs ||| unaccompanied combined transport ||| 0-0 1-1 2-1 2-2
+unbegleiteten ||| unaccompanied ||| 0-0
+und Berufsbildung , ||| and training ; ||| 0-0 1-1 1-2 2-2
+und Berufsbildung ; ||| and training ; ||| 0-0 1-1 2-2
+und Berufsbildung zu erneuern ||| and training ||| 0-0 2-0 1-1 3-1
+und Berufsbildung ||| and training ||| 0-0 1-1
+und Berufsbildung ||| and training ||| 0-0 1-1
+und Berufsbildung ||| and training ||| 0-0 1-1
+und Beziehungen ||| and links ||| 0-0 1-1
+und Einwohnern ||| and ||| 0-0
+und Europarat sicherzustellen ||| and the Council of Europe ||| 0-0 1-2 2-3 1-4
+und Förderung ||| and promotion of ||| 0-0 1-1
+und Förderung ||| and promotion ||| 0-0 1-1
+und Gepflogenheiten ||| practices ||| 0-0 1-0
+und Gepflogenheiten ||| practices ||| 0-0 1-0
+und Institutionen ; ||| and institutions ; ||| 0-0 1-1 2-2
+und Institutionen ; ||| and institutions ; ||| 0-0 1-1 2-2
+und Institutionen ||| and institutions ||| 0-0 1-1
+und Institutionen ||| and institutions ||| 0-0 1-1
+und Kanada ergänzen ||| and Canada ||| 0-0 2-0 1-1
+und Kanada ||| and Canada ||| 0-0 1-1
+und Kanadas , einschließlich umfassenderer ||| and Canada , including broader ||| 0-0 1-1 2-2 3-3 4-4
+und Kanadas , einschließlich ||| and Canada , including ||| 0-0 1-1 2-2 3-3
+und Kanadas , ||| and Canada , ||| 0-0 1-1 2-2
+und Kanadas ; ||| and Canada ; and ||| 0-0 1-1 2-2 0-3
+und Kanadas ||| and Canada ||| 0-0 1-1
+und Kultur , ||| and culture , ||| 0-0 1-1 2-2
+und Kultur ||| and culture ||| 0-0 1-1
+und Kultur ||| and culture ||| 0-0 1-1
+und Lehrern ||| and teachers ||| 0-0
+und Lehrern ||| and ||| 0-0
+und Sattelanhängern ; ||| and semi-trailers ||| 0-0 1-1 2-1
+und Territorien Kanadas sowie ||| and Territories of Canada and ||| 0-0 1-1 2-3 0-4 3-4
+und Territorien ||| and Territories ||| 0-0 1-1
+und Tragweite anzubieten . ||| benefit and scope . ||| 1-0 0-1 1-2 2-2 3-3
+und Tragweite anzubieten ||| benefit and scope ||| 1-0 0-1 1-2 2-2
+und Wirksamkeit der ||| and effectiveness of ||| 0-0 1-1 2-2
+und Wirksamkeit der ||| and effectiveness of ||| 0-0 1-1 2-2
+und Wirksamkeit ||| and effectiveness ||| 0-0 1-1
+und Wirksamkeit ||| and effectiveness ||| 0-0 1-1
+und auch sonst in ||| and the ||| 0-0 1-0 3-1
+und auch sonst ||| and ||| 0-0 1-0
+und auch ||| and ||| 0-0 1-0
+und beruflichen ||| and training ||| 0-0 1-1
+und den Vereinigten Staaten ||| and the United States of ||| 0-0 1-1 2-2 3-3
+und den Vereinigten Staaten ||| and the United States of ||| 0-0 1-1 2-2 3-3
+und den Vereinigten Staaten ||| and the United States of ||| 0-0 1-1 2-2 3-3
+und den Vereinigten Staaten ||| and the United States of ||| 0-0 1-1 2-2 3-3
+und den Vereinigten Staaten ||| and the United States ||| 0-0 1-1 2-2 3-3
+und den Vereinigten Staaten ||| and the United States ||| 0-0 1-1 2-2 3-3
+und den Vereinigten Staaten ||| and the United States ||| 0-0 1-1 2-2 3-3
+und den Vereinigten Staaten ||| and the United States ||| 0-0 1-1 2-2 3-3
+und den Vereinigten ||| and the United ||| 0-0 1-1 2-2
+und den Vereinigten ||| and the United ||| 0-0 1-1 2-2
+und den Vereinigten ||| and the United ||| 0-0 1-1 2-2
+und den Vereinigten ||| and the United ||| 0-0 1-1 2-2
+und den Vereinigten ||| and the United ||| 0-0 1-1 2-2
+und den ||| and the ||| 0-0 1-1
+und den ||| and the ||| 0-0 1-1
+und den ||| and the ||| 0-0 1-1
+und den ||| and the ||| 0-0 1-1
+und den ||| and the ||| 0-0 1-1
+und der Provinzen ||| and the Provinces ||| 0-0 1-1 2-2
+und der Regierung Kanadas ||| and the Government of Canada ||| 0-0 1-1 2-2 3-4
+und der Regierung der ||| and the Government of the ||| 0-0 1-1 2-2 3-3
+und der Regierung der ||| and the Government of ||| 0-0 1-1 2-2 3-3
+und der Regierung ||| and the Government of ||| 0-0 1-1 2-2
+und der Regierung ||| and the Government ||| 0-0 1-1 2-2
+und der Regierung ||| and the Government ||| 0-0 1-1 2-2
+und der Vereinigten Staaten ||| and the United States of ||| 0-0 1-1 2-2 3-3
+und der Vereinigten Staaten ||| and the United States ||| 0-0 1-1 2-2 3-3
+und der Vereinigten ||| and the United ||| 0-0 1-1 2-2
+und der Vereinigten ||| and the United ||| 0-0 1-1 2-2
+und der ||| and the ||| 0-0 1-1
+und der ||| and the ||| 0-0 1-1
+und der ||| and the ||| 0-0 1-1
+und der ||| and the ||| 0-0 1-1
+und der ||| and the ||| 0-0 1-1
+und ihres wirksamen ||| and their effective ||| 0-0 1-1 2-2
+und ihres wirksamen ||| and their effective ||| 0-0 1-1 2-2
+und ihres ||| and their ||| 0-0 1-1
+und ihres ||| and their ||| 0-0 1-1
+und kostenwirksame ||| and cost-effective ||| 0-0 1-1
+und nachhaltigen , primär auf ||| and sustainable range of student-centred ||| 0-0 1-1 3-2 2-3 4-3 3-4
+und nachhaltigen ||| and sustainable ||| 0-0 1-1
+und nachhaltigen ||| and sustainable ||| 0-0 1-1
+und spanischer ||| Spanish and ||| 1-0 0-1
+und spanischer ||| Spanish and ||| 1-0 0-1
+und technischer Vorschriften ||| and technical ||| 0-0 1-1 2-1
+und wichtigsten ||| and ||| 0-0
+und wirtschaftlichen Vielfalt der ||| and economic diversity of the ||| 0-0 1-1 2-2 3-3 3-4
+und wirtschaftlichen Vielfalt der ||| and economic diversity of the ||| 0-0 1-1 2-2 3-3 3-4
+und wirtschaftlichen Vielfalt ||| and economic diversity ||| 0-0 1-1 2-2
+und wirtschaftlichen Vielfalt ||| and economic diversity ||| 0-0 1-1 2-2
+und wirtschaftlichen ||| and economic ||| 0-0 1-1
+und wirtschaftlichen ||| and economic ||| 0-0 1-1
+und ||| , and , ||| 0-1
+und ||| , and make the ||| 0-1
+und ||| , and make ||| 0-1
+und ||| , and ||| 0-1
+und ||| , and ||| 0-1
+und ||| , and ||| 0-1
+und ||| and , ||| 0-0
+und ||| and in ||| 0-0
+und ||| and make the ||| 0-0
+und ||| and make ||| 0-0
+und ||| and teachers ||| 0-0
+und ||| and the ||| 0-0
+und ||| and to ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| and ||| 0-0
+und ||| of ||| 0-0
+und ||| und ||| 0-0
+und/ oder Ablaufstrecke ||| / or final ||| 0-0 1-1 2-2
+und/ oder ||| / or ||| 0-0 1-1
+und/ ||| / ||| 0-0
+uneingeschränkte Achtung der Zuständigkeiten ||| full respect for the responsibilities ||| 0-0 1-1 1-2 2-3 3-4
+uneingeschränkte Achtung der Zuständigkeiten ||| full respect for the responsibilities ||| 0-0 1-1 1-2 2-3 3-4
+uneingeschränkte Achtung der ||| full respect for the ||| 0-0 1-1 1-2 2-3
+uneingeschränkte Achtung der ||| full respect for the ||| 0-0 1-1 1-2 2-3
+uneingeschränkte Achtung ||| full respect for ||| 0-0 1-1 1-2
+uneingeschränkte Achtung ||| full respect for ||| 0-0 1-1 1-2
+uneingeschränkte Anerkennung der kulturellen ||| recognition of the full cultural ||| 1-0 2-1 2-2 0-3 2-3 3-4
+uneingeschränkte Anerkennung der kulturellen ||| recognition of the full cultural ||| 1-0 2-1 2-2 0-3 2-3 3-4
+uneingeschränkte Anerkennung der ||| recognition of the full ||| 1-0 2-1 2-2 0-3 2-3
+uneingeschränkte Anerkennung der ||| recognition of the full ||| 1-0 2-1 2-2 0-3 2-3
+uneingeschränkte ||| full ||| 0-0
+uneingeschränkte ||| full ||| 0-0
+ungeachtet ||| whatever such ||| 0-0
+ungeachtet ||| whatever such ||| 0-0
+ungeachtet ||| whatever ||| 0-0
+ungeachtet ||| whatever ||| 0-0
+unmittelbar betreffen ||| directly ||| 0-0
+unmittelbar betreffen ||| directly ||| 0-0
+unmittelbar ||| directly ||| 0-0
+unmittelbar ||| directly ||| 0-0
+unter Berücksichtigung der vorgenannten ||| taking account of the foregoing ||| 0-0 1-0 1-1 2-2 2-3 3-4
+unter Berücksichtigung der ||| taking account of the ||| 0-0 1-0 1-1 2-2 2-3
+unter Berücksichtigung ||| , taking account ||| 0-0 0-1 1-1 1-2
+unter Berücksichtigung ||| taking account ||| 0-0 1-0 1-1
+unter umweltfreundlicheren Bedingungen abgewickelt ||| performed under more environment-friendly conditions ||| 1-0 0-1 1-2 1-3 3-3 2-4
+unter ||| refers under Action ||| 0-1
+unter ||| refers under ||| 0-1
+unter ||| under Action ||| 0-0
+unter ||| under ||| 0-0
+unter ||| under ||| 0-0
+unter ||| unter ||| 0-0
+unter ||| unter ||| 0-0
+unterstrichen ||| underlined the potential ||| 0-0
+unterstrichen ||| underlined the ||| 0-0
+unterstrichen ||| underlined ||| 0-0
+ursprünglich durch ||| , originally established ||| 0-1
+ursprünglich durch ||| , originally ||| 0-1
+ursprünglich durch ||| originally established ||| 0-0
+ursprünglich durch ||| originally ||| 0-0
+ursprünglich ||| , originally established ||| 0-1
+ursprünglich ||| , originally ||| 0-1
+ursprünglich ||| originally established ||| 0-0
+ursprünglich ||| originally ||| 0-0
+verabschiedeten ||| adopted ||| 0-0
+verbindlich ist . ||| authentic . ||| 0-0 1-0 2-1
+verbindlich ist . ||| authentic . ||| 0-0 1-0 2-1
+verbindlich ist ||| authentic ||| 0-0 1-0
+verbindlich ist ||| authentic ||| 0-0 1-0
+verfügbaren ||| verfügbaren ||| 0-0
+verfügbaren ||| verfügbaren ||| 0-0
+vergleichbarer ||| comparable ||| 0-0
+verschiedenen Gebieten , die ||| various fields which ||| 0-0 1-1 2-2 3-2
+verschiedenen Gebieten , die ||| various fields which ||| 0-0 1-1 2-2 3-2
+verschiedenen Gebieten ||| various fields ||| 0-0 1-1
+verschiedenen Gebieten ||| various fields ||| 0-0 1-1
+verschiedenen Mitgliedstaaten der ||| different Member States of the ||| 0-0 1-1 1-2 2-3 2-4
+verschiedenen Mitgliedstaaten ||| different Member States ||| 0-0 1-1 1-2
+verschiedenen Mitgliedstaaten ||| different Member ||| 0-0 1-1
+verschiedenen Regionen ||| different regions ||| 0-0 1-1
+verschiedenen Regionen ||| different regions ||| 0-0 1-1
+verschiedenen ||| different ||| 0-0
+verschiedenen ||| different ||| 0-0
+verschiedenen ||| different ||| 0-0
+verschiedenen ||| different ||| 0-0
+verschiedenen ||| various ||| 0-0
+verschiedenen ||| various ||| 0-0
+verstärken und ||| and ||| 0-0 1-0
+verstärkte Einbringung einer ||| reinforce a ||| 0-0 1-0 2-1
+verstärkte Einbringung ||| reinforce ||| 0-0 1-0
+verwendet ||| are used ||| 0-1
+verwendet ||| used ||| 0-0
+viele ||| number ||| 0-0
+vom ||| the ||| 0-0
+von Amerika , einschließlich des ||| America , including the ||| 0-0 1-0 2-1 3-2 4-3
+von Amerika , einschließlich des ||| of America , including the ||| 0-1 1-1 2-2 3-3 4-4
+von Amerika , einschließlich ||| America , including ||| 0-0 1-0 2-1 3-2
+von Amerika , einschließlich ||| of America , including ||| 0-1 1-1 2-2 3-3
+von Amerika , ||| America , ||| 0-0 1-0 2-1
+von Amerika , ||| of America , ||| 0-1 1-1 2-2
+von Amerika ; ||| America ; ||| 0-0 1-0 2-1
+von Amerika ; ||| of America ; ||| 0-0 0-1 1-1 2-2
+von Amerika ; ||| of America ; ||| 0-0 0-1 1-1 2-2
+von Amerika ; ||| of America ; ||| 0-1 1-1 2-2
+von Amerika einschließlich umfassenderer Kenntnisse ||| America including broader knowledge ||| 0-0 1-0 2-1 3-2 4-3
+von Amerika einschließlich umfassenderer Kenntnisse ||| of America including broader knowledge ||| 0-1 1-1 2-2 3-3 4-4
+von Amerika einschließlich umfassenderer ||| America including broader ||| 0-0 1-0 2-1 3-2
+von Amerika einschließlich umfassenderer ||| of America including broader ||| 0-1 1-1 2-2 3-3
+von Amerika einschließlich ||| America including ||| 0-0 1-0 2-1
+von Amerika einschließlich ||| of America including ||| 0-1 1-1 2-2
+von Amerika gemeinsam ||| America that ||| 0-0 1-0
+von Amerika gemeinsam ||| America ||| 0-0 1-0
+von Amerika gemeinsam ||| of America that ||| 0-1 1-1
+von Amerika gemeinsam ||| of America ||| 0-1 1-1
+von Amerika sowie anderer ||| America as well as other ||| 0-0 1-0 2-1 2-2 2-3 3-4
+von Amerika sowie ||| America as well as ||| 0-0 1-0 2-1 2-2 2-3
+von Amerika sowie ||| of America as well as ||| 0-1 1-1 2-2 2-3 2-4
+von Amerika ||| America that ||| 0-0 1-0
+von Amerika ||| America ||| 0-0 1-0
+von Amerika ||| America ||| 0-0 1-0
+von Amerika ||| America ||| 0-0 1-0
+von Amerika ||| America ||| 0-0 1-0
+von Amerika ||| America ||| 0-0 1-0
+von Amerika ||| America ||| 0-0 1-0
+von Amerika ||| America ||| 0-0 1-0
+von Amerika ||| America ||| 0-0 1-0
+von Amerika ||| America ||| 0-0 1-0
+von Amerika ||| America ||| 0-0 1-0
+von Amerika ||| America ||| 0-0 1-0
+von Amerika ||| America ||| 0-0 1-0
+von Amerika ||| America ||| 0-0 1-0
+von Amerika ||| America ||| 0-0 1-0
+von Amerika ||| of America that ||| 0-1 1-1
+von Amerika ||| of America ||| 0-0 0-1 1-1
+von Amerika ||| of America ||| 0-0 0-1 1-1
+von Amerika ||| of America ||| 0-1 1-1
+von Amerika ||| of America ||| 0-1 1-1
+von Amerika ||| of America ||| 0-1 1-1
+von Amerika ||| of America ||| 0-1 1-1
+von Amerika ||| of America ||| 0-1 1-1
+von Amerika ||| of America ||| 0-1 1-1
+von Amerika ||| of America ||| 0-1 1-1
+von Amerika ||| of America ||| 0-1 1-1
+von Amerika ||| of America ||| 0-1 1-1
+von Amerika ||| of America ||| 0-1 1-1
+von Amerika ||| of America ||| 0-1 1-1
+von Amerika ||| of America ||| 0-1 1-1
+von Amerika ||| of America ||| 0-1 1-1
+von Material ||| , material ||| 0-1 1-1
+von Material ||| material ||| 0-0 1-0
+von Partnerschaften zwischen ||| partnerships among ||| 1-0 1-1 2-1
+von dem ||| the ||| 1-0
+von den ||| by ||| 0-0 1-0
+von höchstens ||| not exceeding ||| 1-0 0-1 1-1
+von mindestens ||| use the ||| 0-0
+von mindestens ||| use ||| 0-0
+von vergleichbarer ||| activities of comparable ||| 0-0 0-1 1-2
+von ||| activities of ||| 0-0 0-1
+von ||| by the ||| 0-0
+von ||| by ||| 0-0
+von ||| by ||| 0-0
+von ||| by ||| 0-0
+von ||| by ||| 0-0
+von ||| by ||| 0-0
+von ||| from ||| 0-0
+von ||| from ||| 0-0
+von ||| from ||| 0-0
+von ||| from ||| 0-0
+von ||| of the ||| 0-0
+von ||| of the ||| 0-0
+von ||| of ||| 0-0
+von ||| of ||| 0-0
+von ||| of ||| 0-0
+von ||| of ||| 0-0
+von ||| of ||| 0-0
+von ||| of ||| 0-0
+von ||| of ||| 0-0
+von ||| of ||| 0-0
+von ||| of ||| 0-0
+von ||| supported by the ||| 0-1
+von ||| supported by ||| 0-1
+von ||| use the ||| 0-0
+von ||| use ||| 0-0
+von ||| von ||| 0-0
+von ||| von ||| 0-0
+von ||| von ||| 0-0
+vorgenannten Grundsätze . ||| foregoing principles . ||| 0-0 1-1 2-2
+vorgenannten Grundsätze . ||| foregoing principles . ||| 0-0 1-1 2-2
+vorgenannten Grundsätze ||| foregoing principles ||| 0-0 1-1
+vorgenannten Grundsätze ||| foregoing principles ||| 0-0 1-1
+vorgenannten ||| foregoing ||| 0-0
+vorgenannten ||| foregoing ||| 0-0
+weiter ||| the ||| 0-0
+welcher ||| welcher ||| 0-0
+werden kann ||| , can ||| 0-1 1-1
+werden kann ||| can ||| 0-0 1-0
+werden muss , indem insbesondere ||| , particularly by introducing ||| 2-0 4-1 0-2 3-2 2-3
+werden und ||| and ||| 1-0
+werden ||| are ||| 0-0
+werden ||| shall ||| 0-0
+wesentlicher ||| essential ||| 0-0
+wichtig ist ||| importance ||| 0-0
+wichtig ist ||| the importance ||| 0-1
+wichtig ||| importance ||| 0-0
+wichtig ||| importance ||| 0-0
+wichtig ||| the importance ||| 0-1
+wichtig ||| the importance ||| 0-1
+wie OECD , UNESCO und ||| as OECD , Unesco and ||| 0-0 1-1 2-2 3-3 4-4
+wie OECD , UNESCO ||| as OECD , Unesco ||| 0-0 1-1 2-2 3-3
+wie OECD , ||| as OECD , ||| 0-0 1-1 2-2
+wie OECD ||| as OECD ||| 0-0 1-1
+wie der OECD , der ||| as the OECD , ||| 0-0 1-1 4-1 2-2 3-3
+wie möglich ||| possible , ||| 0-0 1-0
+wie möglich ||| possible ||| 0-0 1-0
+wie ||| as ||| 0-0
+wie ||| as ||| 0-0
+wird , die engere Beziehungen ||| , ||| 1-0
+wird , die engere Beziehungen ||| classrooms , ||| 1-1
+wird , die engere ||| , ||| 1-0
+wird , die engere ||| classrooms , ||| 1-1
+wird , die ||| , ||| 1-0
+wird , die ||| classrooms , ||| 1-1
+wird , ||| , ||| 1-0
+wird , ||| catalyst ||| 1-0
+wird , ||| classrooms , ||| 1-1
+wird , ||| potential catalyst ||| 1-1
+wird . ||| ; ||| 0-0 1-0
+wird . ||| ; ||| 0-0 1-0
+wird in ||| shall be ||| 0-0 0-1 1-1
+wird in ||| shall be ||| 0-0 1-0 0-1
+wird ||| shall be ||| 0-0 0-1
+wird ||| will ||| 0-0
+wirksame Verbreitung der Ergebnisse ||| effective dissemination of results ||| 0-0 1-1 2-2 3-3
+wirksame Verbreitung der Ergebnisse ||| effective dissemination of results ||| 0-0 1-1 2-2 3-3
+wirksame Verbreitung der ||| effective dissemination of ||| 0-0 1-1 2-2
+wirksame Verbreitung der ||| effective dissemination of ||| 0-0 1-1 2-2
+wirksame Verbreitung ||| effective dissemination ||| 0-0 1-1
+wirksame Verbreitung ||| effective dissemination ||| 0-0 1-1
+wirksame ||| effective provision of ||| 0-0
+wirksame ||| effective provision of ||| 0-0
+wirksame ||| effective provision ||| 0-0
+wirksame ||| effective provision ||| 0-0
+wirksame ||| effective ||| 0-0
+wirksame ||| effective ||| 0-0
+wirksame ||| effective ||| 0-0
+wirksame ||| effective ||| 0-0
+wirksamen ||| effective ||| 0-0
+wirksamen ||| effective ||| 0-0
+wirtschaftlichen Vielfalt der Europäischen ||| economic diversity of the European ||| 0-0 1-1 2-2 2-3 3-4
+wirtschaftlichen Vielfalt der Europäischen ||| economic diversity of the European ||| 0-0 1-1 2-2 2-3 3-4
+wirtschaftlichen Vielfalt der ||| economic diversity of the ||| 0-0 1-1 2-2 2-3
+wirtschaftlichen Vielfalt der ||| economic diversity of the ||| 0-0 1-1 2-2 2-3
+wirtschaftlichen Vielfalt ||| economic diversity ||| 0-0 1-1
+wirtschaftlichen Vielfalt ||| economic diversity ||| 0-0 1-1
+wirtschaftlichen ||| economic ||| 0-0
+wirtschaftlichen ||| economic ||| 0-0
+worden sind , ||| worden sind ||| 0-0 1-1
+worden sind ||| worden sind ||| 0-0 1-1
+worden ||| worden ||| 0-0
+wurden , ||| ; ||| 0-0 1-0
+wurden ||| wurden ||| 0-0
+wurden ||| wurden ||| 0-0
+zu verstärken und sicherzustellen , ||| , and to ensure for ||| 4-0 1-1 2-1 0-2 3-3
+zu verstärken und sicherzustellen , ||| , and to ensure ||| 4-0 1-1 2-1 0-2 3-3
+zu verstärken und sicherzustellen ||| and to ensure for ||| 1-0 2-0 0-1 3-2
+zu verstärken und sicherzustellen ||| and to ensure ||| 1-0 2-0 0-1 3-2
+zu verstärken und ||| and to ||| 1-0 2-0 0-1
+zu ||| achieving ||| 0-0
+zu ||| further ||| 0-0
+zu ||| in achieving ||| 0-1
+zu ||| of ||| 0-0
+zu ||| renew ||| 0-0
+zu ||| to ||| 0-0
+zugute kommen , ||| benefit to ||| 0-0
+zugute kommen , ||| benefit ||| 0-0
+zugute kommen ||| benefit to ||| 0-0
+zugute kommen ||| benefit ||| 0-0
+zugute ||| benefit of ||| 0-0
+zugute ||| benefit to ||| 0-0
+zugute ||| benefit ||| 0-0
+zugute ||| benefit ||| 0-0
+zukunftsfähige ||| respecting the principle of ||| 0-0 0-2
+zukunftsfähige ||| respecting the principle ||| 0-0 0-2
+zur Gründung der Europäischen Gemeinschaft ||| establishing the European Community ||| 0-0 1-0 2-1 3-2 4-3
+zur Gründung der Europäischen ||| establishing the European ||| 0-0 1-0 2-1 3-2
+zur Gründung der ||| establishing the ||| 0-0 1-0 2-1
+zur Gründung ||| establishing ||| 0-0 1-0
+zur Gründung ||| establishing ||| 0-0 1-0
+zur Regelung ||| establishing certain conditions for ||| 0-0 1-0 0-1 0-3
+zur ||| to ||| 0-0
+zur ||| to ||| 0-0
+zurücklegt ||| the ||| 0-0
+zuständigen Amtsträgern der ||| appropriate Minister-level officials of ||| 0-0 1-1 1-2 2-3
+zuständigen Amtsträgern ||| appropriate Minister-level officials ||| 0-0 1-1 1-2
+zuständigen Behörden ||| competent authorities ||| 0-0 1-1
+zuständigen Behörden ||| competent authorities ||| 0-0 1-1
+zuständigen Behörden ||| the competent authorities ||| 0-1 1-2
+zuständigen ||| appropriate ||| 0-0
+zuständigen ||| competent ||| 0-0
+zuständigen ||| competent ||| 0-0
+zuständigen ||| the competent ||| 0-1
+zuvor in ||| pre-existing ||| 0-0
+zuvor ||| pre-existing ||| 0-0
+zwei ||| two ||| 0-0
+zwei ||| zwei ||| 0-0
+zwei ||| zwei ||| 0-0
+zwischen den Mitgliedstaaten ||| between the Member ||| 0-0 1-0 2-2
+zwischen den Vertragsparteien ||| between the Contracting Parties ||| 0-0 1-0 2-2 2-3
+zwischen den ||| between the ||| 0-0 1-0
+zwischen den ||| between the ||| 0-0 1-0
+zwischen den ||| between the ||| 0-0 1-0
+zwischen den ||| between ||| 0-0 1-0
+zwischen den ||| between ||| 0-0 1-0
+zwischen den ||| between ||| 0-0 1-0
+zwischen den ||| between ||| 0-0 1-0
+zwischen den ||| between ||| 0-0 1-0
+zwischen den ||| between ||| 0-0 1-0
+zwischen den ||| between ||| 0-0 1-0
+zwischen den ||| between ||| 0-0 1-0
+zwischen den ||| between ||| 0-0 1-0
+zwischen den ||| between ||| 0-0 1-0
+zwischen der Europäischen Gemeinschaft und ||| Between the European Community and ||| 0-0 1-1 0-2 2-2 3-3 4-4
+zwischen der Europäischen Gemeinschaft und ||| between the European Community and ||| 0-0 1-1 2-2 3-3 4-4
+zwischen der Europäischen Gemeinschaft und ||| between the European Community and ||| 0-0 1-1 2-2 3-3 4-4
+zwischen der Europäischen Gemeinschaft ||| Between the European Community ||| 0-0 1-1 0-2 2-2 3-3
+zwischen der Europäischen Gemeinschaft ||| between the European Community ||| 0-0 1-1 2-2 3-3
+zwischen der Europäischen Gemeinschaft ||| between the European Community ||| 0-0 1-1 2-2 3-3
+zwischen der Europäischen Gemeinschaft ||| between the European Community ||| 0-0 1-1 2-2 3-3
+zwischen der Europäischen ||| Between the European ||| 0-0 1-1 0-2 2-2
+zwischen der Europäischen ||| between the European ||| 0-0 1-1 2-2
+zwischen der Europäischen ||| between the European ||| 0-0 1-1 2-2
+zwischen der Europäischen ||| between the European ||| 0-0 1-1 2-2
+zwischen der ||| between the ||| 0-0 1-1
+zwischen der ||| between the ||| 0-0 1-1
+zwischen der ||| between the ||| 0-0 1-1
+zwischen zwei ||| between two ||| 0-0 1-1
+zwischen ||| between ||| 0-0
+zwischen ||| between ||| 0-0
+zwischen ||| between ||| 0-0
+zwischen ||| between ||| 0-0
+zwischen ||| between ||| 0-0
+zwischen ||| between ||| 0-0
+zwischen ||| between ||| 0-0
+zwischen ||| between ||| 0-0
+zwischen ||| between ||| 0-0
+zwischen ||| between ||| 0-0
+Änderung oder Verlängerung ||| amendment or extension ||| 0-0 1-1 2-2
+Änderung oder Verlängerung ||| amendment or extension ||| 0-0 1-1 2-2
+Änderung oder ||| amendment or ||| 0-0 1-1
+Änderung oder ||| amendment or ||| 0-0 1-1
+Änderung ||| amendment ||| 0-0
+Änderung ||| amendment ||| 0-0
+Über jede ||| Minutes , comprising ||| 0-0 1-1 0-2
+Übereinstimmung mit den ||| accordance with ||| 0-0 2-0 1-1
+Überprüfung der ||| review the ||| 0-0 1-1
+Überprüfung der ||| review the ||| 0-0 1-1
+Überprüfung ||| review ||| 0-0
+Überprüfung ||| review ||| 0-0
+über Verlauf , Stand ||| on the level , status ||| 0-0 3-2 2-3 1-4 3-4
+über ||| across ||| 0-0
+über ||| on the ||| 0-0
+über ||| on ||| 0-0
+über ||| on ||| 0-0
+über ||| on ||| 0-0
+übrigen ||| other ||| 0-0
