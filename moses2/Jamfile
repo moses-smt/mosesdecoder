@@ -52,7 +52,7 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem : : : $(max-factors
    TypeDef.cpp
    Vector.cpp
    Weights.cpp 
-   Word.cpp 
+   Word.cpp
    FF/Distortion.cpp
    FF/FeatureFunction.cpp 
    FF/FeatureFunctions.cpp 
@@ -188,9 +188,15 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem : : : $(max-factors
     :
     $(includes)
     ;
-
+lib moses2so : 
+  Moses2Wrapper.cpp
+  DLLEntryApi.cpp
+  moses2_lib
+   : <link>shared
+    $(includes)
+    ; 
 exe moses2 : Main.cpp moses2_lib ../probingpt//probingpt ../util//kenutil ../lm//kenlm ;
 
 echo "Building Moses2" ;
-alias programs : moses2 ;
+alias programs : moses2 moses2so ;
 
