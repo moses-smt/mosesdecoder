@@ -188,15 +188,8 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem : : : $(max-factors
     :
     $(includes)
     ;
-lib moses2so : 
-  Moses2Wrapper.cpp
-  DLLEntryApi.cpp
-  moses2_lib
-   : <link>shared
-    $(includes)
-    ; 
-exe moses2 : Main.cpp moses2_lib ../probingpt//probingpt ../util//kenutil ../lm//kenlm ;
-
+#need to figure out this 
+lib moses2 : Main.cpp moses2_lib ../probingpt//probingpt ../util//kenutil ../lm//kenlm : <link>shared ;
+#exe moses2 : moses2 ;
 echo "Building Moses2" ;
-alias programs : moses2 moses2so ;
-
+alias programs : moses2 ;
