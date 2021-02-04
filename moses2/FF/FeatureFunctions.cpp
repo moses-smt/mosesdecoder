@@ -67,7 +67,6 @@ void FeatureFunctions::Create()
   UTIL_THROW_IF2(ffParams == NULL, "Must have [feature] section");
 
   BOOST_FOREACH(const std::string &line, *ffParams) {
-    //cerr << "line=" << line << endl;
     FeatureFunction *ff = Create(line);
 
     m_featureFunctions.push_back(ff);
