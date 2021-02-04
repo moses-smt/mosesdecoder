@@ -97,7 +97,7 @@ void System::LoadWeights()
   const WeightMap &allWeights = params.GetAllWeights();
 
   // check all weights are there for all FF
-  const std::vector<const FeatureFunction*> &ffs = featureFunctions.GetFeatureFunctions();
+  const std::vector<FeatureFunction*> &ffs = featureFunctions.GetFeatureFunctions();
   BOOST_FOREACH(const FeatureFunction *ff, ffs) {
     if (ff->IsTuneable()) {
       const std::string &ffName = ff->GetName();

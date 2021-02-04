@@ -1,0 +1,33 @@
+{
+    "Registrations":[
+        {
+            "component": { 
+             "type": "git", 
+             "git": { 
+               "repositoryUrl": "https://github.com/moses-smt/mosesdecoder", 
+               "commitHash": "78ca5f3cc5aa671a8a5d36c56452e217e6f00828" 
+               }
+             }
+          },
+          {
+            "component": { 
+             "type": "git", 
+             "git": { 
+               "repositoryUrl": "https://git.code.sf.net/p/cmph/git", 
+               "commitHash": "a250982ade093f4eed0552bbdd22dd7b0432007f" 
+               }
+             }
+          },          
+        {
+            "Component": {
+                "Type": "other",
+                "Other": {
+                    "Name": "xml-rpc-c",
+                    "Version": "1.51.06",
+                    "DownloadUrl": "https://sourceforge.net/projects/xmlrpc-c/files/Xmlrpc-c%20Super%20Stable/1.51.06/xmlrpc-c-1.51.06.tgz"
+                }
+            }
+        },        
+    ]
+}
+

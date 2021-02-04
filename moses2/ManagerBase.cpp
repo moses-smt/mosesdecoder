@@ -29,12 +29,13 @@ ManagerBase::ManagerBase(System &sys, const TranslationTask &task,
   ,m_pool(NULL)
   ,m_systemPool(NULL)
   ,m_hypoRecycle(NULL)
+  ,m_input(NULL)
 {
 }
 
 ManagerBase::~ManagerBase()
 {
-  system.featureFunctions.CleanUpAfterSentenceProcessing();
+  system.featureFunctions.CleanUpAfterSentenceProcessing(*m_input);
 
   if (m_pool) {
     GetPool().Reset();

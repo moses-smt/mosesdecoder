@@ -1,0 +1,34 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  #vmImage: 'ubuntu-latest'
+  vmImage: 'ubuntu-16.04'
+
+steps:
+
+- script: |
+    echo Printing some environment information
+    echo HOME: $HOME
+    echo
+    echo UBUNTU VERSION: 
+    cat /etc/lsb-release
+    echo
+    echo CPU INFO
+    cat /proc/cpuinfo
+    echo 
+    echo MEM INFO
+    cat /proc/meminfo
+    echo
+    echo DISK INFO
+    df -h
+    echo 
+    echo PWD: $PWD
+    echo
+    ls
+  displayName: 'Printing some environment information'

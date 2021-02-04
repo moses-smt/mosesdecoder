@@ -25,6 +25,7 @@ class TargetPhraseImpl;
 class Scores;
 class ManagerBase;
 class MemPool;
+class InputType;
 
 namespace SCFG
 {
@@ -95,8 +96,10 @@ public:
                                          const SCFG::TargetPhrases &tps, const Phrase<SCFG::Word> &sourcePhrase) const {
   }
 
+  virtual void InitializeForInput(const ManagerBase &mgr, const InputType &input) { };
+
   // clean up temporary memory, called after processing each sentence
-  virtual void CleanUpAfterSentenceProcessing() const {
+  virtual void CleanUpAfterSentenceProcessing(const System &system, const InputType &input) const {
   }
 
 protected:

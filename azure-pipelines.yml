@@ -1,0 +1,100 @@
+# Starter pipeline
+# Start with a minimal pipeline that you can customize to build and deploy your code.
+# Add steps that build, run tests, deploy, and more:
+# https://aka.ms/yaml
+
+trigger:
+- master
+
+pool:
+  #vmImage: 'ubuntu-latest'
+  vmImage: 'ubuntu-16.04'
+
+steps:
+
+- script: |
+    echo Printing some environment information
+    echo HOME: $HOME
+    echo
+    echo UBUNTU VERSION: 
+    cat /etc/lsb-release
+    echo
+    echo CPU INFO
+    cat /proc/cpuinfo
+    echo 
+    echo MEM INFO
+    cat /proc/meminfo
+    echo
+    echo DISK INFO
+    df -h
+    echo 
+    echo PWD: $PWD
+    echo
+    ls
+  displayName: 'Printing some environment information'
+
+
+## Installation commands for Ubuntu 
+- script: |
+    sudo apt-get install  \
+      g++  \
+      git  \
+      subversion \
+      automake \
+      libtool \
+      zlib1g-dev \
+      libicu-dev \
+      libboost-all-dev \
+      libssl-dev \
+      libbz2-dev \
+      liblzma-dev \
+      python-dev \
+      graphviz \
+      imagemagick \
+      make \
+      cmake \
+      libgoogle-perftools-dev \
+      autoconf \
+      doxygen 
+  displayName: 'Install Ubuntu packages'
+
+- script: |   
+    wget "https://sourceforge.net/projects/cmph/files/v2.0.2/cmph-2.0.2.tar.gz/download"
+    mv download  cmph-2.0.2.tar.gz  
+    tar xvzf cmph-2.0.2.tar.gz
+    cd cmph-2.0.2
+    ./configure --prefix=$PWD
+    make
+    make install
+    cd ..
+  displayName: 'Build and Install cmph'    
+
+- script: |   
+    wget "https://sourceforge.net/projects/xmlrpc-c/files/Xmlrpc-c%20Super%20Stable/1.51.06/xmlrpc-c-1.51.06.tgz/download"
+    mv download  xmlrpc-c-1.51.06.tgz
+    tar xvzf xmlrpc-c-1.51.06.tgz
+    cd xmlrpc-c-1.51.06
+    ./configure --prefix=$PWD
+    make
+    make install
+    sudo ldconfig
+    cd ..
+  displayName: 'Build and Install xmlrpc-c'    
+
+- script: |   
+    ./bjam \
+      --with-cmph=$PWD/cmph-2.0.2 \
+      --with-xmlrpc-c=$PWD/xmlrpc-c-1.51.06 \
+      -j2
+  displayName: 'Build Moses'    
+
+# - script: |   
+#     ./bjam \
+#       -j2
+#   displayName: 'Build Moses'  
+
+# - task: ComponentGovernanceComponentDetection@0
+#   inputs:
+#     scanType: 'Register'
+#     verbosity: 'Verbose'
+#     alertWarningLevel: 'High' 

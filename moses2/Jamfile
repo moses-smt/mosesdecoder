@@ -9,6 +9,17 @@ else {
   alias cmph ;
 }
 
+if [ xmlrpc ] 
+{
+  echo "BUILDING MOSES2 SERVER!" ;
+  alias mserver2 : [ glob server/*.cpp ] ;
+}
+else 
+{
+  echo "NOT BUILDING MOSES2 SERVER!" ;
+  alias mserver2 ;
+}
+
 max-factors = [ option.get "max-factors" : 4 : 4 ] ;
 max-factors = <define>MAX_NUM_FACTORS=$(max-factors) <dependency>$(FACTOR-LOG) ;
 
@@ -41,7 +52,7 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem : : : $(max-factors
    TypeDef.cpp
    Vector.cpp
    Weights.cpp 
-   Word.cpp 
+   Word.cpp
    FF/Distortion.cpp
    FF/FeatureFunction.cpp 
    FF/FeatureFunctions.cpp 
@@ -83,8 +94,7 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem : : : $(max-factors
     TranslationModel/CompactPT/MurmurHash3.cpp
     TranslationModel/CompactPT/TargetPhraseCollectionCache.cpp
     TranslationModel/CompactPT/ThrowingFwrite.cpp
-
-    TranslationModel/MSPT/MSPT.cpp 
+    TranslationModel/Dynamic/DynamicPhraseTable.cpp 
 
    	parameters/AllOptions.cpp
    	parameters/BookkeepingOptions.cpp
@@ -110,7 +120,8 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem : : : $(max-factors
 		PhraseBased/ReorderingConstraint.cpp 
 		PhraseBased/TargetPhrases.cpp
  	 	PhraseBased/Search.cpp
-	    PhraseBased/Sentence.cpp
+    PhraseBased/Sentence.cpp
+    PhraseBased/SentenceWithCandidates.cpp
 		PhraseBased/TargetPhraseImpl.cpp 
  	 	PhraseBased/TrellisPath.cpp
 
@@ -169,25 +180,16 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem : : : $(max-factors
     SCFG/nbest/NBest.cpp
     SCFG/nbest/NBests.cpp
     SCFG/nbest/NBestColl.cpp
-
-	server/Server.cpp
-	server/Translator.cpp
-	server/TranslationRequest.cpp
-	
+	Moses2Wrapper.cpp
+    DLLEntryApi.cpp
     deps 
     cmph
+	mserver2
     :
     $(includes)
     ;
-
-exe moses2 : Main.cpp moses2_lib ../probingpt//probingpt ../util//kenutil ../lm//kenlm ;
-
-if [ xmlrpc ] {
-  echo "Building Moses2" ;
-  alias programs : moses2 ;
-}
-else {
-  echo "Not building Moses2" ;
-  alias programs : ;
-}
-
+#need to figure out this 
+lib moses2decoder : Main.cpp moses2_lib ../probingpt//probingpt ../util//kenutil ../lm//kenlm ;
+exe moses2 : moses2decoder ;
+echo "Building Moses2" ;
+alias programs : moses2 moses2decoder ;

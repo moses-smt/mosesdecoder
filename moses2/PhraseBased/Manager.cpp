@@ -13,6 +13,7 @@
 #include "TargetPhraseImpl.h"
 #include "InputPath.h"
 #include "Sentence.h"
+#include "SentenceWithCandidates.h"
 
 #include "Normal/Search.h"
 #include "CubePruningMiniStack/Search.h"
@@ -59,7 +60,13 @@ void Manager::Init()
   InitPools();
 
   FactorCollection &vocab = system.GetVocab();
-  m_input = Moses2::Sentence::CreateFromString(GetPool(), vocab, system, m_inputStr);
+  if (system.options.input.input_type == SentenceInputWithCandidates) {
+      m_input = Moses2::SentenceWithCandidates::CreateFromString(GetPool(), vocab, system, m_inputStr);
+  }
+  else {
+      m_input = Moses2::Sentence::CreateFromString(GetPool(), vocab, system, m_inputStr);
+  }
+  system.featureFunctions.InitializeForInput(*this, *m_input);
 
   m_bitmaps = new Bitmaps(GetPool());
 
@@ -88,7 +95,7 @@ void Manager::Init()
   CalcFutureScore();
 
   m_bitmaps->Init(sentence.GetSize(), vector<bool>(0));
-
+  
   switch (system.options.search.algo) {
   case Normal:
     m_search = new NSNormal::Search(*this);

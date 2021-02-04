@@ -19,12 +19,12 @@ Server::Server(ServerOptions &server_options, System &system)
   :m_server_options(server_options)
   ,m_translator(new Translator(*this, system))
 {
-  m_registry.addMethod("translate", m_translator);
+    m_registry.addMethod("translate", m_translator);
 }
 
 Server::~Server()
 {
-  unlink(m_pidfile.c_str());
+    unlink(m_pidfile.c_str());
 }
 
 void Server::run(System &system)

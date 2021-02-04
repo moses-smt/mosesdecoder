@@ -6,7 +6,10 @@
 #include "Phrase.h"
 #include "TranslationTask.h"
 #include "MemPoolAllocator.h"
-#include "server/Server.h"
+#ifdef HAVE_XMLRPC_C
+    #include "server/Server.h"
+#endif // HAVE_XMLRPC_C
+
 #include "legacy/InputFileStream.h"
 #include "legacy/Parameter.h"
 #include "legacy/ThreadPool.h"
@@ -38,16 +41,16 @@ int main(int argc, char** argv)
   }
 
   //cerr << "system.numThreads=" << system.options.server.numThreads << endl;
-
   Moses2::ThreadPool pool(system.options.server.numThreads, system.cpuAffinityOffset, system.cpuAffinityOffsetIncr);
   //cerr << "CREATED POOL" << endl;
 
   if (params.GetParam("server")) {
     std::cerr << "RUN SERVER" << std::endl;
     run_as_server(system);
-  } else {
-    std::cerr << "RUN BATCH" << std::endl;
-    batch_run(params, system, pool);
+  }
+  else {
+      std::cerr << "RUN BATCH" << std::endl;
+      batch_run(params, system, pool);
   }
 
   cerr << "Decoding took " << timer.get_elapsed_time() << endl;
@@ -57,10 +60,15 @@ int main(int argc, char** argv)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-void run_as_server(Moses2::System &system)
+void run_as_server(Moses2::System& system)
 {
-  Moses2::Server server(system.options.server, system);
-  server.run(system); // actually: don't return. see Server::run()
+#ifdef HAVE_XMLRPC_C
+	Moses2::Server server(system.options.server, system);
+	server.run(system); // actually: don't return. see Server::run()
+#else
+  UTIL_THROW2("Moses2 was compiled without xmlrpc-c. "
+              << "No server functionality available.");
+#endif
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
@@ -76,31 +84,33 @@ istream &GetInputStream(Moses2::Parameter &params)
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-void batch_run(Moses2::Parameter &params, Moses2::System &system, Moses2::ThreadPool &pool)
+
+void batch_run(Moses2::Parameter& params, Moses2::System& system, Moses2::ThreadPool& pool)
 {
-  istream &inStream = GetInputStream(params);
+    istream& inStream = GetInputStream(params);
 
-  long translationId = 0;
-  string line;
-  while (getline(inStream, line)) {
-    //cerr << "line=" << line << endl;
-    boost::shared_ptr<Moses2::TranslationTask> task(new Moses2::TranslationTask(system, line, translationId));
+    long translationId = 0;
+    string line;
+    while (getline(inStream, line)) {
+        //cerr << "line=" << line << endl;
+        boost::shared_ptr<Moses2::TranslationTask> task(new Moses2::TranslationTask(system, line, translationId));
 
-    //cerr << "START pool.Submit()" << endl;
-    pool.Submit(task);
-    //task->Run();
-    ++translationId;
-  }
+        //cerr << "START pool.Submit()" << endl;
+        pool.Submit(task);
+        //task->Run();
+        ++translationId;
+    }
 
-  pool.Stop(true);
+    pool.Stop(true);
 
-  if (&inStream != &cin) {
-    delete &inStream;
-  }
+    if (&inStream != &cin) {
+        delete& inStream;
+    }
 
-  //util::PrintUsage(std::cerr);
+    //util::PrintUsage(std::cerr);
 
 }
+
 ////////////////////////////////////////////////////////////////////////////////////////////////
 void Temp()
 {

@@ -67,7 +67,6 @@ void FeatureFunctions::Create()
   UTIL_THROW_IF2(ffParams == NULL, "Must have [feature] section");
 
   BOOST_FOREACH(const std::string &line, *ffParams) {
-    //cerr << "line=" << line << endl;
     FeatureFunction *ff = Create(line);
 
     m_featureFunctions.push_back(ff);
@@ -229,10 +228,17 @@ void FeatureFunctions::EvaluateWhenAppliedBatch(const Batch &batch) const
   }
 }
 
-void FeatureFunctions::CleanUpAfterSentenceProcessing() const
+void FeatureFunctions::InitializeForInput(const ManagerBase &mgr, const InputType &input) 
+{
+  BOOST_FOREACH(FeatureFunction *ff, m_featureFunctions) {
+    ff->InitializeForInput(mgr, input);
+  }
+}
+
+void FeatureFunctions::CleanUpAfterSentenceProcessing(const InputType &input) const
 {
   BOOST_FOREACH(const FeatureFunction *ff, m_featureFunctions) {
-    ff->CleanUpAfterSentenceProcessing();
+    ff->CleanUpAfterSentenceProcessing(m_system, input);
   }
 }
 
