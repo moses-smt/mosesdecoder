@@ -55,7 +55,7 @@ extern "C" EXPORT MosesApiErrorCode __stdcall FreeMemory(char* output) {
 	}
 }
 
-extern "C" EXPORT MosesApiErrorCode __stdcall ReleaseSystem(Moses2::Moses2Wrapper * *pObject) {
+extern "C" EXPORT MosesApiErrorCode __stdcall ReleaseSystem(Moses2::Moses2Wrapper **pObject) {
 	if (*pObject != NULL)
 	{
 		delete* pObject;

@@ -181,7 +181,8 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem : : : $(max-factors
     SCFG/nbest/NBest.cpp
     SCFG/nbest/NBests.cpp
     SCFG/nbest/NBestColl.cpp
-	
+	Moses2Wrapper.cpp
+    DLLEntryApi.cpp
     deps 
     cmph
 	mserver2
@@ -189,7 +190,7 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem : : : $(max-factors
     $(includes)
     ;
 #need to figure out this 
-lib moses2 : Main.cpp moses2_lib ../probingpt//probingpt ../util//kenutil ../lm//kenlm : <link>shared ;
-#exe moses2 : moses2 ;
+lib moses2decoder : Main.cpp moses2_lib ../probingpt//probingpt ../util//kenutil ../lm//kenlm ;
+exe moses2 : moses2decoder ;
 echo "Building Moses2" ;
-alias programs : moses2 ;
+alias programs : moses2 moses2decoder ;
