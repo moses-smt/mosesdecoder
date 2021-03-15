@@ -265,6 +265,12 @@ sub tokenize
         # if a colon is not immediately followed by lower-case characters, separate it out anyway
         $text =~ s/(:)(?=$|[^\p{Ll}])/ $1 /g;
     }
+    elsif ($language eq "tdt") {
+        # in Tetun, the apostrophe can be used inside words as an apostrophe-like character:
+        $text =~ s/([^\p{IsAlnum}\s\.\'\`\,\-])/ $1 /g;
+        # if an apostrophe is not immediately followed by lower-case characters, separate it out anyway
+        $text =~ s/(\')(?=$|[^\p{Ll}])/ $1 /g;
+    }
     elsif (($language eq "ca")) {
         # in Catalan, the middle dot can be used inside words:
         # il�lusio
@@ -332,7 +338,7 @@ sub tokenize
         $text =~ s/([\p{IsAlpha}])[']([^\p{IsAlpha}])/$1 ' $2/g;
         $text =~ s/([\p{IsAlpha}])[']([\p{IsAlpha}])/$1' $2/g;
     }
-    elsif ($language eq "so") 
+    elsif (($language eq "so")  or ($language eq "tdt"))
     {
         # Don't split glottals
         $text =~ s/([^\p{IsAlpha}])[']([^\p{IsAlpha}])/$1 ' $2/g;
