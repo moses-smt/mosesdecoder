@@ -9,7 +9,6 @@
 #include "../lists.h"
 #include "../native.h"
 #include "../timestamp.h"
-#include "../filesys.h"
 
 
 LIST * path_exists( FRAME * frame, int flags )

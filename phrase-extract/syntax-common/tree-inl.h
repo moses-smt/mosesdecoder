@@ -73,7 +73,7 @@ Tree<T>::PreOrderIter<V>::PreOrderIter(V &t)
 
 template<typename T>
 template<typename V>
-typename Tree<T>::template PreOrderIter<V> &Tree<T>::PreOrderIter<V>::operator++() {
+Tree<T>::PreOrderIter<V> &Tree<T>::PreOrderIter<V>::operator++() {
   // If the current node has children then visit the left-most child next.
   if (!node_->children().empty()) {
     index_stack_.push(0);
@@ -100,7 +100,7 @@ typename Tree<T>::template PreOrderIter<V> &Tree<T>::PreOrderIter<V>::operator++
 
 template<typename T>
 template<typename V>
-typename Tree<T>::template PreOrderIter<V> Tree<T>::PreOrderIter<V>::operator++(int) {
+Tree<T>::PreOrderIter<V> Tree<T>::PreOrderIter<V>::operator++(int) {
   PreOrderIter tmp(*this);
   ++*this;
   return tmp;
@@ -162,7 +162,7 @@ Tree<T>::LeafIter<V>::LeafIter(V &t)
 
 template<typename T>
 template<typename V>
-typename Tree<T>::template LeafIter<V> &Tree<T>::LeafIter<V>::operator++() {
+Tree<T>::LeafIter<V> &Tree<T>::LeafIter<V>::operator++() {
   // Try node's ancestors until either a node is found with a sibling to the
   // right or we reach the root (in which case the traversal is complete).
   V *ancestor = node_->parent_;
@@ -187,7 +187,7 @@ typename Tree<T>::template LeafIter<V> &Tree<T>::LeafIter<V>::operator++() {
 
 template<typename T>
 template<typename V>
-typename Tree<T>::template LeafIter<V> Tree<T>::LeafIter<V>::operator++(int) {
+Tree<T>::LeafIter<V> Tree<T>::LeafIter<V>::operator++(int) {
   LeafIter tmp(*this);
   ++*this;
   return tmp;

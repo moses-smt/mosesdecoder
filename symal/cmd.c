@@ -144,7 +144,7 @@ int DeclareParams(const char *ParName, ...)
       cmds[j].p = va_arg(args, void *);
       break;
     case CMDSUBRANGETYPE: {	/* get the two extremes		     */
-      int *subrange = (int*) calloc(2, sizeof(int));
+      int *subrange = calloc(2, sizeof(int));
       cmds[j].p = subrange;
       subrange[0] = va_arg(args, int);
       subrange[1] = va_arg(args, int);
@@ -152,7 +152,7 @@ int DeclareParams(const char *ParName, ...)
     break;
     case CMDGTETYPE:	/* get lower or upper bound	     */
     case CMDLTETYPE: {
-      int *value = (int*) calloc(1, sizeof(int));
+      int *value = calloc(1, sizeof(int));
       cmds[j].p = value;
       value[0] = va_arg(args, int);
     }
@@ -320,12 +320,12 @@ static char **str2array(const char *s, const char *sep)
     p += strspn(p, sep);
     ++n;
   }
-  a = (char **) calloc(n+1, sizeof(char *));
+  a = calloc(n+1, sizeof(char *));
   p = s;
   n = 0;
   while(*p) {
     l = strcspn(p, sep);
-    a[n] = (char *) malloc(l+1);
+    a[n] = malloc(l+1);
     memcpy(a[n], p, l);
     a[n][l] = 0;
     ++n;
@@ -479,7 +479,7 @@ static void PrintStrArray(const Cmd_T *cmd, int ValFlag, FILE *fp)
   int	l = 4+strlen(cmd->Name);
 
   fprintf(fp, "%s", cmd->Name);
-  indent = (char *) malloc(l+2);
+  indent = malloc(l+2);
   memset(indent, ' ', l+1);
   indent[l+1] = 0;
   if(ValFlag) {
@@ -578,7 +578,7 @@ int GetParams(int *n, char ***a, const char *CmdFileName)
 #define	PATHSEP '/'
 #endif
 
-  if(!(Line=(char *) malloc(LINSIZ))) {
+  if(!(Line=malloc(LINSIZ))) {
     fprintf(stderr, "GetParams(): Unable to alloc %d bytes\n",
             LINSIZ);
     exit(1);
