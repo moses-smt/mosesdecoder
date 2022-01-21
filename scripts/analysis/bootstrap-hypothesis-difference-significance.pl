@@ -8,7 +8,7 @@ use utf8;
 # An implementation of paired bootstrap resampling for testing the statistical
 # significance of the difference between two systems from (Koehn 2004 @ EMNLP)
 #
-# Usage: ./compare-hypotheses-with-significance.pl hypothesis_1 hypothesis_2 reference_1 [ reference_2 ... ]
+# Usage: ./bootstrap-hypothesis-difference-significance.pl hypothesis_1 hypothesis_2 reference_1 [ reference_2 ... ]
 #
 # Author: Mark Fishel, fishel@ut.ee
 #
