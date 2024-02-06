@@ -34,11 +34,11 @@ public:
 
   virtual std::string Debug(const System &system) const;
   std::string virtual getPhraseTableString() const{
-    return m_phraseTableString; 
+    return std::string(m_phraseTableString); 
   }
 
 private:
-  std::string m_phraseTableString;
+  char *m_phraseTableString;
 
 };
 

@@ -69,7 +69,13 @@ SentenceWithCandidates *SentenceWithCandidates::CreateFromString(MemPool &pool, 
 
 
   //// Parse the phrase table of the input 
-  ret->m_phraseTableString = replace_all_copy(input_parts[1],PT_LINE_DELIM,"\n");
+  input_parts[1] = replace_all_copy(input_parts[1],PT_LINE_DELIM,"\n");
+  size_t lenPt = input_parts[1].size();
+  char *strPt = (char *) pool.Allocate(lenPt + 1);
+  strcpy(strPt, input_parts[1].c_str());
+
+  ret->m_phraseTableString = strPt;
+
     // ret->m_phraseTableString="constant phrase table";
 //   cerr << "Extracted Phrase Table String: " << ret->m_phraseTableString << endl; 
    //cerr << "Extracted Phrase Table String: " << ret->getPhraseTableString() << endl;
