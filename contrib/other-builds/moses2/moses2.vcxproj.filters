@@ -291,15 +291,6 @@
     <ClCompile Include="..\..\..\probingpt\InputFileStream.cpp">
       <Filter>Source Files\ProbingPT</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\probingpt\probing_hash_utils.cpp">
-      <Filter>Source Files\ProbingPT</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\probingpt\querying.cpp">
-      <Filter>Source Files\ProbingPT</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\probingpt\storing.cpp">
-      <Filter>Source Files\ProbingPT</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\probingpt\util.cpp">
       <Filter>Source Files\ProbingPT</Filter>
     </ClCompile>
@@ -358,9 +349,6 @@
       <Filter>Source Files\SCFG\nbest</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\moses2\TranslationModel\PhraseTable.cpp">
-      <Filter>Source Files\TranslationModel</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\..\moses2\TranslationModel\ProbingPT.cpp">
       <Filter>Source Files\TranslationModel</Filter>
     </ClCompile>
     <ClCompile Include="..\..\..\moses2\TranslationModel\UnknownWordPenalty.cpp">
@@ -573,10 +561,11 @@
     <ClCompile Include="..\..\..\moses2\TranslationModel\Dynamic\DynamicPhraseTable.cpp">
       <Filter>Source Files\TranslationModel\Dynamic</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\moses2\DLLEntryApi.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="..\..\..\moses2\Moses2Wrapper.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
+    <None Include="packages.config" />
   </ItemGroup>
 </Project>
