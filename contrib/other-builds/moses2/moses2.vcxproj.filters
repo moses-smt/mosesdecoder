@@ -564,8 +564,28 @@
     <ClCompile Include="..\..\..\moses2\DLLEntryApi.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\moses2\TranslationModel\ProbingPT.cpp">
+      <Filter>Source Files\TranslationModel</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\probingpt\querying.cpp">
+      <Filter>Source Files\ProbingPT</Filter>
+    </ClCompile>
+    <ClCompile Include="..\..\..\probingpt\probing_hash_utils.cpp">
+      <Filter>Source Files\ProbingPT</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\..\moses2\TranslationModel\ProbingPT.h">
+      <Filter>Source Files\TranslationModel</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\probingpt\querying.h">
+      <Filter>Source Files\ProbingPT</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\probingpt\probing_hash_utils.h">
+      <Filter>Source Files\ProbingPT</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

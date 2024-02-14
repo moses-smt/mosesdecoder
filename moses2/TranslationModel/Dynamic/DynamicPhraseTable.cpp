@@ -57,7 +57,7 @@ void DynamicPhraseTable::CreatePTForInput(const ManagerBase &mgr, string phraseT
   const System &system = mgr.system;
   FactorCollection &vocab = system.GetVocab();
   MemPool &pool = mgr.GetPool();
-  MemPool tmpSourcePool;
+  //MemPool tmpSourcePool;
 
   if (system.isPb) {
     //m_rootPb = new PBNODE();
@@ -81,7 +81,7 @@ void DynamicPhraseTable::CreatePTForInput(const ManagerBase &mgr, string phraseT
     //cerr << "system.isPb=" << system.isPb << endl;
 
     if (system.isPb) {
-      PhraseImpl *source = PhraseImpl::CreateFromString(tmpSourcePool, vocab, system,
+      PhraseImpl *source = PhraseImpl::CreateFromString(pool, vocab, system,
                            toks[0]);
       //cerr << "created soure" << endl;
       TargetPhraseImpl *target = TargetPhraseImpl::CreateFromString(pool, *this, system,

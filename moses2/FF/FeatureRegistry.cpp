@@ -54,7 +54,7 @@ FeatureRegistry::FeatureRegistry()
 #define MOSES_FNAME2(name, type) Add(name, new DefaultFeatureFactory< type >());
 
   MOSES_FNAME2("PhraseDictionaryMemory", PhraseTableMemory);
-  MOSES_FNAME(ProbingPT);
+  MOSES_FNAME(ProbingPT); 
   MOSES_FNAME2("PhraseDictionaryTransliteration", Transliteration);
   MOSES_FNAME(UnknownWordPenalty);
   MOSES_FNAME(DynamicPhraseTable);

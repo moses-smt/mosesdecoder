@@ -17,6 +17,8 @@
 #include "legacy/Util2.h"
 #include "util/usage.hh"
 
+//#include <vld.h>
+
 using namespace std;
 
 //extern size_t g_numHypos;

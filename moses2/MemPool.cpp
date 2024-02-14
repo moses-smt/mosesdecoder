@@ -34,12 +34,12 @@ MemPool::MemPool(size_t initSize) :
   m_pages.push_back(page);
 
   current_ = page->mem;
-  //cerr << "new memory pool";
+  cerr << "new memory pool";
 }
 
 MemPool::~MemPool()
 {
-  //cerr << "delete memory pool" << endl;
+  //cerr << "delete memory pool " << m_currSize << endl;
   RemoveAllInColl(m_pages);
 }
 
@@ -52,6 +52,7 @@ uint8_t *MemPool::More(std::size_t size)
     std::size_t amount = std::max(m_currSize, size);
 
     Page *page = new Page(amount);
+    cerr << "NEW PAGE " << amount << endl;
     m_pages.push_back(page);
 
     uint8_t *ret = page->mem;
