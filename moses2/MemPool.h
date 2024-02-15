@@ -25,8 +25,7 @@ class MemPool
     uint8_t *end;
     size_t size;
 
-    Page() {
-    }
+    Page() = delete;
     Page(std::size_t size);
     ~Page();
   };
@@ -36,21 +35,7 @@ public:
 
   ~MemPool();
 
-  uint8_t *Allocate(std::size_t size) {
-    size = (size + 3) & 0xfffffffc;
-
-    uint8_t *ret = current_;
-    current_ += size;
-
-    Page &page = *m_pages[m_currPage];
-    if (current_ <= page.end) {
-      // return what we got
-    } else {
-      ret = More(size);
-    }
-    return ret;
-
-  }
+  uint8_t* Allocate(std::size_t size);
 
   template<typename T>
   T *Allocate() {

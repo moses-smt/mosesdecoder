@@ -43,6 +43,29 @@ MemPool::~MemPool()
   RemoveAllInColl(m_pages);
 }
 
+uint8_t* MemPool::Allocate(std::size_t size) {
+  if (size == 0) {
+    return nullptr;
+  }
+  //size = (size + 3) & 0xfffffffc;
+  //size = (size + 7) & 0xfffffff8;
+  size = (size + 15) & 0xfffffff0;
+  //size = (size + 31) & 0xffffffe0;
+
+  uint8_t* ret = current_;
+  current_ += size;
+
+  Page& page = *m_pages[m_currPage];
+  if (current_ <= page.end) {
+    // return what we got
+  }
+  else {
+    ret = More(size);
+  }
+  return ret;
+
+}
+
 uint8_t *MemPool::More(std::size_t size)
 {
   ++m_currPage;
