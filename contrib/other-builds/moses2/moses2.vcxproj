@@ -16,7 +16,6 @@
     <RootNamespace>moses2</RootNamespace>
     <WindowsTargetPlatformVersion>10.0.18362.0</WindowsTargetPlatformVersion>
     <PlatformToolset>v140</PlatformToolset>
-    <MosesDir>C:\Users\hihoan\Documents\mosesdecoder\moses2</MosesDir>
     <BoostDir>c:\depot\translator\packages\boost.library\1.66.0</BoostDir>
     <ZlibDir>c:\depot\translator\private\mt\zlib\src</ZlibDir>
   </PropertyGroup>
