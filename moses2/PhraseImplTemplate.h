@@ -43,10 +43,12 @@ public:
   }
 
   WORD& operator[](size_t pos) {
+    assert(pos < GetSize());
     return m_words[pos];
   }
 
   const WORD& operator[](size_t pos) const {
+    assert(pos < GetSize());
     return m_words[pos];
   }
 

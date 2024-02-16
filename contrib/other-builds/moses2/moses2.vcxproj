@@ -284,7 +284,37 @@
     <None Include="packages.config" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\..\..\moses2\AlignmentInfo.h" />
+    <ClInclude Include="..\..\..\moses2\AlignmentInfoCollection.h" />
+    <ClInclude Include="..\..\..\moses2\ArcLists.h" />
+    <ClInclude Include="..\..\..\moses2\Array.h" />
+    <ClInclude Include="..\..\..\moses2\EstimatedScores.h" />
+    <ClInclude Include="..\..\..\moses2\HypothesisBase.h" />
+    <ClInclude Include="..\..\..\moses2\HypothesisColl.h" />
+    <ClInclude Include="..\..\..\moses2\InputPathBase.h" />
+    <ClInclude Include="..\..\..\moses2\InputPathsBase.h" />
+    <ClInclude Include="..\..\..\moses2\InputType.h" />
+    <ClInclude Include="..\..\..\moses2\Main.h" />
+    <ClInclude Include="..\..\..\moses2\ManagerBase.h" />
+    <ClInclude Include="..\..\..\moses2\MemPool.h" />
+    <ClInclude Include="..\..\..\moses2\MemPoolAllocator.h" />
+    <ClInclude Include="..\..\..\moses2\Moses2Wrapper.h" />
+    <ClInclude Include="..\..\..\moses2\Phrase.h" />
+    <ClInclude Include="..\..\..\moses2\PhraseImplTemplate.h" />
+    <ClInclude Include="..\..\..\moses2\pugiconfig.hpp" />
+    <ClInclude Include="..\..\..\moses2\pugixml.hpp" />
+    <ClInclude Include="..\..\..\moses2\Recycler.h" />
+    <ClInclude Include="..\..\..\moses2\Scores.h" />
+    <ClInclude Include="..\..\..\moses2\SubPhrase.h" />
+    <ClInclude Include="..\..\..\moses2\System.h" />
+    <ClInclude Include="..\..\..\moses2\TargetPhrase.h" />
     <ClInclude Include="..\..\..\moses2\TranslationModel\ProbingPT.h" />
+    <ClInclude Include="..\..\..\moses2\TranslationTask.h" />
+    <ClInclude Include="..\..\..\moses2\TrellisPaths.h" />
+    <ClInclude Include="..\..\..\moses2\TypeDef.h" />
+    <ClInclude Include="..\..\..\moses2\Vector.h" />
+    <ClInclude Include="..\..\..\moses2\Weights.h" />
+    <ClInclude Include="..\..\..\moses2\Word.h" />
     <ClInclude Include="..\..\..\probingpt\probing_hash_utils.h" />
     <ClInclude Include="..\..\..\probingpt\querying.h" />
   </ItemGroup>

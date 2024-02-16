@@ -38,6 +38,7 @@ public:
   virtual size_t GetSize() const = 0;
 
   virtual const WORD& Back() const {
+    assert(GetSize());
     return (*this)[GetSize() - 1];
   }
 

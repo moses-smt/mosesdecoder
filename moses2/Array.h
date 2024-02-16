@@ -41,10 +41,12 @@ public:
   }
 
   const T& operator[](size_t ind) const {
+    assert(ind < m_size);
     return m_arr[ind];
   }
 
   T& operator[](size_t ind) {
+    assert(ind < m_size);
     return m_arr[ind];
   }
 
