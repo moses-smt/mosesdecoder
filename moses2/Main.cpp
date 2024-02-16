@@ -98,8 +98,8 @@ void batch_run(Moses2::Parameter& params, Moses2::System& system, Moses2::Thread
         boost::shared_ptr<Moses2::TranslationTask> task(new Moses2::TranslationTask(system, line, translationId));
 
         //cerr << "START pool.Submit()" << endl;
-        //pool.Submit(task);
-        task->Run();
+        pool.Submit(task);
+        //task->Run();
         ++translationId;
     }
 
