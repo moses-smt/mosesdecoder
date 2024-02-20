@@ -45,7 +45,11 @@ public:
 
   template<typename T>
   T *Allocate(size_t num) {
-    uint8_t *ret = Allocate(sizeof(T) * num);
+    size_t size = sizeof(T);
+    size_t m = size % 16;
+    size += m;
+
+    uint8_t *ret = Allocate(size * num);
     return (T*) ret;
   }
 
