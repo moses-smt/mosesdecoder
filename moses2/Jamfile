@@ -155,6 +155,7 @@ alias deps :  ..//z ..//boost_iostreams ..//boost_filesystem : : : $(max-factors
 		legacy/FactorCollection.cpp
 		legacy/InputFileStream.cpp
 		legacy/Matrix.cpp
+    legacy/OutputCollector.cpp
 		legacy/OutputFileStream.cpp
 		legacy/Parameter.cpp
 		legacy/Range.cpp
