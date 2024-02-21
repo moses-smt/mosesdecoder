@@ -70,6 +70,9 @@
     <Filter Include="Source Files\TranslationModel\Dynamic">
       <UniqueIdentifier>{8f2f68ba-2b5e-4d2c-92a7-6ece71df74ba}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\legacy">
+      <UniqueIdentifier>{742ab76a-e9db-4098-b7dd-38a4aeac845e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\moses2\FF\Distortion.cpp">
@@ -573,6 +576,9 @@
     <ClCompile Include="..\..\..\probingpt\probing_hash_utils.cpp">
       <Filter>Source Files\ProbingPT</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\..\moses2\legacy\OutputCollector.cpp">
+      <Filter>Source Files\legacy</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
@@ -676,6 +682,51 @@
     </ClInclude>
     <ClInclude Include="..\..\..\moses2\Word.h">
       <Filter>Header Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\legacy\Bitmap.h">
+      <Filter>Header Files\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\legacy\Bitmaps.h">
+      <Filter>Header Files\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\legacy\Factor.h">
+      <Filter>Header Files\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\legacy\FactorCollection.h">
+      <Filter>Header Files\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\legacy\gzfilebuf.h">
+      <Filter>Header Files\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\legacy\InputFileStream.h">
+      <Filter>Header Files\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\legacy\Matrix.h">
+      <Filter>Header Files\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\legacy\OutputCollector.h">
+      <Filter>Header Files\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\legacy\OutputFileStream.h">
+      <Filter>Header Files\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\legacy\Parameter.h">
+      <Filter>Header Files\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\legacy\Range.h">
+      <Filter>Header Files\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\legacy\ThreadPool.h">
+      <Filter>Header Files\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\legacy\Timer.h">
+      <Filter>Header Files\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\legacy\Util2.h">
+      <Filter>Header Files\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\legacy\xmlrpc-c.h">
+      <Filter>Header Files\legacy</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>
