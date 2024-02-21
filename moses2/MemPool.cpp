@@ -97,6 +97,16 @@ uint8_t *MemPool::More(std::size_t size)
 
 void MemPool::Reset()
 {
+  if (m_pages.size() > 1) {
+    size_t total = 0;
+    for (size_t i = 0; i < m_pages.size(); ++i) {
+      total += m_pages[i]->size;
+    }
+    RemoveAllInColl(m_pages);
+    Page* page = new Page(total);
+    m_pages.push_back(page);
+  }
+
   m_currPage = 0;
   current_ = m_pages[0]->mem;
 }
