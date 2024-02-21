@@ -31,7 +31,7 @@ class MemPool
   };
 
 public:
-  MemPool(std::size_t initSize = 10000);
+  MemPool(std::size_t initSize = 10240);
 
   ~MemPool();
 
