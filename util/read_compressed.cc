@@ -169,8 +169,7 @@ class GZip {
 
     ~GZip() {
       if (Z_OK != inflateEnd(&stream_)) {
-        std::cerr << "zlib could not close properly." << std::endl;
-        abort();
+        throw std::runtime_error("zlib could not close properly.");
       }
     }
 
@@ -219,8 +218,7 @@ class BZip {
       try {
         HandleError(BZ2_bzDecompressEnd(&stream_));
       } catch (const std::exception &e) {
-        std::cerr << e.what() << std::endl;
-        abort();
+        throw std::runtime_error(e.what());
       }
     }
 

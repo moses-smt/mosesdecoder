@@ -214,7 +214,7 @@ void System::IsPb()
     isPb = false;
     break;
   default:
-    abort();
+    throw std::runtime_error("Unknown search algorithm " + options.search.algo);
     break;
   }
 }

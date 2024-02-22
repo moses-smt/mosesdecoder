@@ -36,15 +36,13 @@ namespace util {
 
 scoped_fd::~scoped_fd() {
   if (fd_ != -1 && close(fd_)) {
-    std::cerr << "Could not close file " << fd_ << std::endl;
-    std::abort();
+    throw std::runtime_error("Could not close file " + fd_);
   }
 }
 
 void scoped_FILE_closer::Close(std::FILE *file) {
   if (file && std::fclose(file)) {
-    std::cerr << "Could not close file " << file << std::endl;
-    std::abort();
+    throw std::runtime_error("Could not close file ");
   }
 }
 

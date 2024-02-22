@@ -88,8 +88,7 @@ void FeatureRegistry::Add(const std::string &name, FeatureFactory *factory)
   std::pair<std::string, boost::shared_ptr<FeatureFactory> > to_ins(name,
       boost::shared_ptr<FeatureFactory>(factory));
   if (!registry_.insert(to_ins).second) {
-    cerr << "Duplicate feature name " << name << endl;
-    abort();
+    throw std::runtime_error("Duplicate feature name " + name);
   }
 }
 
@@ -98,8 +97,7 @@ FeatureFunction *FeatureRegistry::Construct(size_t startInd,
 {
   Map::const_iterator i = registry_.find(name);
   if (i == registry_.end()) {
-    cerr << "Feature name " << name << " is not registered.";
-    abort();
+    throw std::runtime_error("Feature name " + name + " is not registered");
   }
   FeatureFactory *fact = i->second.get();
   FeatureFunction *ff = fact->Create(startInd, line);

@@ -62,7 +62,7 @@ void DynamicPhraseTable::CreatePTForInput(const ManagerBase &mgr, string phraseT
   if (system.isPb) {
     //m_rootPb = new PBNODE();
   } else {
-    abort();
+    throw std::runtime_error("Must be a phrase-based model");
     //cerr << "m_rootSCFG=" << m_rootSCFG << endl;
   }
 
@@ -108,7 +108,7 @@ void DynamicPhraseTable::CreatePTForInput(const ManagerBase &mgr, string phraseT
 
       //cerr << "target=" << target->Debug(system) << endl;
     } else {
-      abort();
+      throw std::runtime_error("Must be a phrase-based model");
     }
   }
 
@@ -116,7 +116,7 @@ void DynamicPhraseTable::CreatePTForInput(const ManagerBase &mgr, string phraseT
     m_rootPb.SortAndPrune(m_tableLimit, pool, system);
     //cerr << "root=" << &m_rootPb << endl;
   } else {
-      abort();
+    throw std::runtime_error("Must be a phrase-based model");
   }
   /*
   BOOST_FOREACH(const PtMem::Node<Word>::Children::value_type &valPair, m_rootPb.GetChildren()) {
@@ -152,7 +152,7 @@ void DynamicPhraseTable::InitActiveChart(
   const SCFG::Manager &mgr,
   SCFG::InputPath &path) const
 {
-  abort();
+  throw std::runtime_error("Must be a phrase-based model");
 }
 
 void DynamicPhraseTable::Lookup(MemPool &pool,
@@ -161,7 +161,7 @@ void DynamicPhraseTable::Lookup(MemPool &pool,
                                const SCFG::Stacks &stacks,
                                SCFG::InputPath &path) const
 {
-  abort();
+  throw std::runtime_error("Must be a phrase-based model");
 }
 
 void DynamicPhraseTable::LookupGivenNode(
@@ -173,7 +173,7 @@ void DynamicPhraseTable::LookupGivenNode(
   const Moses2::Range &subPhraseRange,
   SCFG::InputPath &outPath) const
 {
-  abort();
+  throw std::runtime_error("Must be a phrase-based model");
 }
 
 }

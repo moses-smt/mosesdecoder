@@ -44,8 +44,7 @@ scoped_mmap::~scoped_mmap() {
       SyncOrThrow(data_, size_);
       UnmapOrThrow(data_, size_);
     } catch (const util::ErrnoException &e) {
-      std::cerr << e.what();
-      abort();
+      throw std::runtime_error(e.what());
     }
   }
 }

@@ -130,25 +130,6 @@ StackAdd HypothesisColl::Add(const HypothesisBase *hypo)
         const_cast<const HypothesisBase *&>(hypoExisting1);
       hypoExisting2 = hypo;
 
-      /*
-      Delete(hypoExisting);
-      addRet = m_coll.insert(hypo);
-      UTIL_THROW_IF2(!addRet.second, "couldn't insert hypo "
-      		  	  	  << hypo << "(" << hypo->hash() << ")");
-      */
-      /*
-      if (!addRet.second) {
-    	  cerr << "couldn't insert hypo " << hypo << "(" << hypo->hash() << ")" << endl;
-    	  cerr << "m_coll=";
-    	  for (_HCType::const_iterator iter = m_coll.begin(); iter != m_coll.end(); ++iter) {
-    		  const HypothesisBase *h = *iter;
-    		  cerr << h << "(" << h->hash() << ") ";
-    	  }
-    	  cerr << endl;
-    	  abort();
-      }
-	  */
-
       return StackAdd(true, hypoExisting);
     } else {
       // already storing the best hypo. discard incoming hypo
