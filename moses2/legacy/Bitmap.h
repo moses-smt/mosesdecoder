@@ -56,7 +56,8 @@ private:
   size_t m_firstGap; //! Cached position of first gap, or NOT_FOUND.
   size_t m_numWordsCovered;
 
-  Bitmap(); // not implemented
+  Bitmap() = delete;
+
   Bitmap& operator=(const Bitmap& other);
 
   /** Update the first gap, when bits are flipped */

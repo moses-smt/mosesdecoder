@@ -34,8 +34,8 @@ protected:
   size_t m_rows, m_cols; /**< length of the square (sentence length) */
   T *m_array; /**< two-dimensional array to store floats */
 
-  Matrix(); // not implemented
-  Matrix(const Matrix &copy); // not implemented
+  Matrix() = delete;
+  Matrix(const Matrix &copy) = delete;
 
 public:
   Matrix(MemPool &pool, size_t rows, size_t cols) :

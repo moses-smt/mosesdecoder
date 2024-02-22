@@ -66,8 +66,8 @@ private:
   uint8_t *current_;
 
   // no copying
-  MemPool(const MemPool &);
-  MemPool &operator=(const MemPool &);
+  MemPool(const MemPool &) = delete;
+  MemPool &operator=(const MemPool &) = delete;
 };
 
 
