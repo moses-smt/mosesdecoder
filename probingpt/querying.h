@@ -1,7 +1,7 @@
 #pragma once
 
 #include <boost/iostreams/device/mapped_file.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <sys/stat.h> //For finding size of file
 #include <algorithm> //toLower
 #include <deque>
@@ -62,8 +62,8 @@ public:
   uint64_t getKey(uint64_t source_phrase[], size_t size) const;
 
   template<typename T>
-  inline bool Get(const boost::unordered_map<std::string, std::string> &keyValue, const std::string &sought, T &found) const {
-    boost::unordered_map<std::string, std::string>::const_iterator iter = keyValue.find(sought);
+  inline bool Get(const std::unordered_map<std::string, std::string> &keyValue, const std::string &sought, T &found) const {
+    std::unordered_map<std::string, std::string>::const_iterator iter = keyValue.find(sought);
     if (iter == keyValue.end()) {
       return false;
     }

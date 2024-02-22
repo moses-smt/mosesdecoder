@@ -126,7 +126,7 @@ FeatureFunction *FeatureFunctions::Create(const std::string &line)
 std::string FeatureFunctions::GetDefaultName(const std::string &stub)
 {
   size_t ind;
-  boost::unordered_map<std::string, size_t>::iterator iter =
+  std::unordered_map<std::string, size_t>::iterator iter =
     m_defaultNames.find(stub);
   if (iter == m_defaultNames.end()) {
     m_defaultNames[stub] = 0;

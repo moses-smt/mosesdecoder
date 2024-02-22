@@ -11,6 +11,7 @@
 #include <boost/thread/tss.hpp>
 #include <boost/bimap.hpp>
 #include <deque>
+#include <unordered_map>
 #include "PhraseTable.h"
 #include "../Vector.h"
 #include "../Phrase.h"
@@ -128,10 +129,10 @@ protected:
   uint64_t GetSourceProbingId(const Word &word) const;
 
   // caching
-  typedef boost::unordered_map<uint64_t, TargetPhrases*> CachePb;
+  typedef std::unordered_map<uint64_t, TargetPhrases*> CachePb;
   CachePb m_cachePb;
 
-  typedef boost::unordered_map<uint64_t, SCFG::TargetPhrases*> CacheSCFG;
+  typedef std::unordered_map<uint64_t, SCFG::TargetPhrases*> CacheSCFG;
   CacheSCFG m_cacheSCFG;
 
   void CreateCache(System &system);

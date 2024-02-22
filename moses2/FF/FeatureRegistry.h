@@ -1,5 +1,5 @@
 #pragma once
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <boost/shared_ptr.hpp>
 
 namespace Moses2
@@ -37,7 +37,7 @@ public:
 private:
   static FeatureRegistry s_instance;
 
-  typedef boost::unordered_map<std::string, boost::shared_ptr<FeatureFactory> > Map;
+  typedef std::unordered_map<std::string, boost::shared_ptr<FeatureFactory> > Map;
   Map registry_;
 
   FeatureRegistry();

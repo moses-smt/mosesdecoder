@@ -108,17 +108,6 @@ void Search::Decode(size_t stackInd)
     edge->CreateFirst(mgr, m_queue, m_seenPositions, m_queueItemRecycler);
   }
 
-  /*
-  cerr << "edges: ";
-  boost::unordered_set<const Bitmap*> uniqueBM;
-  BOOST_FOREACH(CubeEdge *edge, edges) {
-  uniqueBM.insert(&edge->newBitmap);
-  //cerr << *edge << " ";
-  }
-  cerr << edges.size() << " " << uniqueBM.size();
-  cerr << endl;
-   */
-
   size_t pops = 0;
   while (!m_queue.empty() && pops < mgr.system.options.cube.pop_limit) {
     // get best hypo from queue, add to stack

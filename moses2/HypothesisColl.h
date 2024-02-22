@@ -5,7 +5,7 @@
  *      Author: hieu
  */
 #pragma once
-#include <boost/unordered_set.hpp>
+#include <unordered_set>
 #include "HypothesisBase.h"
 #include "MemPoolAllocator.h"
 #include "Recycler.h"
@@ -54,7 +54,7 @@ public:
   std::string Debug(const System &system) const;
 
 protected:
-  typedef boost::unordered_set<const HypothesisBase*,
+  typedef std::unordered_set<const HypothesisBase*,
 		  UnorderedComparer<HypothesisBase>, UnorderedComparer<HypothesisBase>,
           MemPoolAllocator<const HypothesisBase*> > _HCType;
 

@@ -232,28 +232,6 @@ void Manager::CreateQueue(
 ///////////////////////////////////////////////////////////////
 // NON CUBE-PRUNING
 ///////////////////////////////////////////////////////////////
-/*
-void Manager::Decode(SCFG::InputPath &path, Stack &stack)
-{
-  //cerr << "path=" << path << endl;
-
-  boost::unordered_map<SCFG::SymbolBind, SCFG::TargetPhrases*>::const_iterator iterOuter;
-  for (iterOuter = path.targetPhrases->begin(); iterOuter != path.targetPhrases->end(); ++iterOuter) {
-    const SCFG::SymbolBind &symbolBind = iterOuter->first;
-
-    const SCFG::TargetPhrases &tps = *iterOuter->second;
-    //cerr << "symbolBind=" << symbolBind << " tps=" << tps.GetSize() << endl;
-
-    SCFG::TargetPhrases::const_iterator iter;
-    for (iter = tps.begin(); iter != tps.end(); ++iter) {
-      const SCFG::TargetPhraseImpl &tp = **iter;
-      //cerr << "tp=" << tp << endl;
-      ExpandHypo(path, symbolBind, tp, stack);
-    }
-  }
-}
-*/
-
 void Manager::ExpandHypo(
   const SCFG::InputPath &path,
   const SCFG::SymbolBind &symbolBind,

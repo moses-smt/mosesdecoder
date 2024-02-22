@@ -7,7 +7,7 @@
 
 #pragma once
 
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <vector>
 #include <string>
 #include "../legacy/Parameter.h"
@@ -98,7 +98,7 @@ protected:
   std::vector<const FeatureFunction*> m_withPhraseTableInd;
   const UnknownWordPenalty *m_unkWP;
 
-  boost::unordered_map<std::string, size_t> m_defaultNames;
+  std::unordered_map<std::string, size_t> m_defaultNames;
   System &m_system;
   size_t m_ffStartInd;
 

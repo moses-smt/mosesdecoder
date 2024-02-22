@@ -114,25 +114,3 @@ void batch_run(Moses2::Parameter& params, Moses2::System& system, Moses2::Thread
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////
-void Temp()
-{
-  Moses2::MemPool pool;
-  Moses2::MemPoolAllocator<int> a(pool);
-
-  boost::unordered_set<int, boost::hash<int>, std::equal_to<int>, Moses2::MemPoolAllocator<int> > s(a);
-  s.insert(3);
-  s.insert(4);
-  s.insert(3);
-  s.erase(3);
-
-  boost::pool_allocator<int> alloc;
-  std::vector<int, boost::pool_allocator<int> > v(alloc);
-  for (int i = 0; i < 1000; ++i)
-    v.push_back(i);
-
-  v.clear();
-  boost::singleton_pool<boost::pool_allocator_tag, sizeof(int)>::
-  purge_memory();
-
-  abort();
-}

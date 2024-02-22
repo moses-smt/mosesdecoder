@@ -73,6 +73,9 @@
     <Filter Include="Header Files\legacy">
       <UniqueIdentifier>{742ab76a-e9db-4098-b7dd-38a4aeac845e}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Files\FF">
+      <UniqueIdentifier>{4bcc6bd2-7220-4a5a-95e1-fd08b03a0d34}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="..\..\..\moses2\FF\Distortion.cpp">
@@ -727,6 +730,42 @@
     </ClInclude>
     <ClInclude Include="..\..\..\moses2\legacy\xmlrpc-c.h">
       <Filter>Header Files\legacy</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\FF\Distortion.h">
+      <Filter>Header Files\FF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\FF\ExampleStatefulFF.h">
+      <Filter>Header Files\FF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\FF\ExampleStatelessFF.h">
+      <Filter>Header Files\FF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\FF\FeatureFunction.h">
+      <Filter>Header Files\FF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\FF\FeatureFunctions.h">
+      <Filter>Header Files\FF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\FF\FeatureRegistry.h">
+      <Filter>Header Files\FF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\FF\FFState.h">
+      <Filter>Header Files\FF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\FF\PhrasePenalty.h">
+      <Filter>Header Files\FF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\FF\PointerState.h">
+      <Filter>Header Files\FF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\FF\StatefulFeatureFunction.h">
+      <Filter>Header Files\FF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\FF\StatelessFeatureFunction.h">
+      <Filter>Header Files\FF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\..\moses2\FF\WordPenalty.h">
+      <Filter>Header Files\FF</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -1,12 +1,10 @@
 #pragma once
 
-#include <boost/unordered_set.hpp>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
 #include <set>
 #include <stack>
 #include "Bitmap.h"
 #include "Util2.h"
-#include <unordered_set>
 
 namespace Moses2
 {
@@ -14,8 +12,8 @@ class MemPool;
 
 class Bitmaps
 {
-  typedef boost::unordered_map<const Range*, const Bitmap*> NextBitmaps;
-  typedef boost::unordered_map<const Bitmap*, NextBitmaps,
+  typedef std::unordered_map<const Range*, const Bitmap*> NextBitmaps;
+  typedef std::unordered_map<const Bitmap*, NextBitmaps,
 		  UnorderedComparer<Bitmap>, UnorderedComparer<Bitmap> > Coll;
   //typedef std::set<const Bitmap*, OrderedComparer<Bitmap> > Coll;
   Coll m_coll;

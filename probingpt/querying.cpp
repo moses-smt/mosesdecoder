@@ -1,6 +1,7 @@
 #include "querying.h"
 #include "util/exception.hh"
 #include "moses2/legacy/Util2.h"
+#include <unordered_map>
 
 using namespace std;
 
@@ -30,7 +31,7 @@ QueryEngine::QueryEngine(const char * filepath, util::LoadMethod load_method)
   memTPS = readTable(targetCollPath.c_str(), load_method, fileTPS_, memoryTPS_);
 
   //Read config file
-  boost::unordered_map<std::string, std::string> keyValue;
+  std::unordered_map<std::string, std::string> keyValue;
 
   std::ifstream config(path_to_config.c_str());
   std::string line;
