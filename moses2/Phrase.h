@@ -16,6 +16,7 @@
 #include "TypeDef.h"
 #include "legacy/FactorCollection.h"
 #include "SCFG/Word.h"
+#include <boost/functional/hash.hpp>
 
 namespace Moses2
 {

@@ -6,6 +6,7 @@
 #include <stack>
 #include "Bitmap.h"
 #include "Util2.h"
+#include <unordered_set>
 
 namespace Moses2
 {

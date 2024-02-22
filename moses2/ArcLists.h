@@ -6,7 +6,8 @@
  */
 #pragma once
 #include <vector>
-#include <boost/unordered_map.hpp>
+#include <unordered_map>
+#include <unordered_set>
 
 namespace Moses2
 {
@@ -31,7 +32,7 @@ public:
 
   std::string Debug(const System &system) const;
 protected:
-  typedef boost::unordered_map<const HypothesisBase*, ArcList*> Coll;
+  typedef std::unordered_map<const HypothesisBase*, ArcList*> Coll;
   Coll m_coll;
 
   ArcList &GetArcList(const HypothesisBase *hypo);

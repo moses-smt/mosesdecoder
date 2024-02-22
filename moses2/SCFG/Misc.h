@@ -7,7 +7,7 @@
 #pragma once
 #include <vector>
 #include <queue>
-#include <boost/unordered_set.hpp>
+#include <unordered_set>
 #include "../HypothesisColl.h"
 #include "../Vector.h"
 #include "Hypothesis.h"
@@ -60,7 +60,7 @@ public:
 
 
 protected:
-  typedef boost::unordered_set<const SeenPosition*,
+  typedef std::unordered_set<const SeenPosition*,
 		  UnorderedComparer<SeenPosition>, UnorderedComparer<SeenPosition> > Coll;
   Coll m_coll;
 };

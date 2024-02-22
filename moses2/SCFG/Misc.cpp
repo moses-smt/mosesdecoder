@@ -83,7 +83,12 @@ size_t SeenPosition::hash() const
   size_t ret = (size_t) &symbolBind;
   boost::hash_combine(ret, &tps);
   boost::hash_combine(ret, tpInd);
-  boost::hash_combine(ret, hypoIndColl);
+
+  for (size_t i = 0; i < hypoIndColl.size(); ++i) {
+    size_t val = hypoIndColl[i];
+    boost::hash_combine(ret, val);
+  }
+
   return ret;
 }
 
