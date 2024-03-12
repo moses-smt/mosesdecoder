@@ -9,6 +9,8 @@ Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
 		Debug|x64 = Debug|x64
+		Debug-DLL|Win32 = Debug-DLL|Win32
+		Debug-DLL|x64 = Debug-DLL|x64
 		Release|Win32 = Release|Win32
 		Release|x64 = Release|x64
 		Release-DLL|Win32 = Release-DLL|Win32
@@ -19,6 +21,10 @@ Global
 		{B4304E97-D37F-4022-BD03-841A4FAEE398}.Debug|Win32.Build.0 = Debug|Win32
 		{B4304E97-D37F-4022-BD03-841A4FAEE398}.Debug|x64.ActiveCfg = Debug|x64
 		{B4304E97-D37F-4022-BD03-841A4FAEE398}.Debug|x64.Build.0 = Debug|x64
+		{B4304E97-D37F-4022-BD03-841A4FAEE398}.Debug-DLL|Win32.ActiveCfg = Debug-DLL|x64
+		{B4304E97-D37F-4022-BD03-841A4FAEE398}.Debug-DLL|Win32.Build.0 = Debug-DLL|x64
+		{B4304E97-D37F-4022-BD03-841A4FAEE398}.Debug-DLL|x64.ActiveCfg = Debug-DLL|x64
+		{B4304E97-D37F-4022-BD03-841A4FAEE398}.Debug-DLL|x64.Build.0 = Debug-DLL|x64
 		{B4304E97-D37F-4022-BD03-841A4FAEE398}.Release|Win32.ActiveCfg = Release|Win32
 		{B4304E97-D37F-4022-BD03-841A4FAEE398}.Release|Win32.Build.0 = Release|Win32
 		{B4304E97-D37F-4022-BD03-841A4FAEE398}.Release|x64.ActiveCfg = Release|x64
@@ -30,5 +36,8 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8B10AABC-E114-4EB7-BE1E-9432E208DDEA}
 	EndGlobalSection
 EndGlobal
