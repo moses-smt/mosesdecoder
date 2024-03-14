@@ -19,10 +19,11 @@ using namespace std;
 
 namespace Moses2
 {
-
-thread_local MemPool System::m_managerPool;
-thread_local MemPool System::m_systemPool;
-thread_local Recycler<HypothesisBase*> System::m_hypoRecycler;
+#ifndef WIN32
+  thread_local MemPool System::m_managerPool;
+  thread_local MemPool System::m_systemPool;
+  thread_local Recycler<HypothesisBase*> System::m_hypoRecycler;
+#endif // WIN32
 
 System::System(const Parameter &paramsArg) :
   params(paramsArg), featureFunctions(*this)
@@ -165,38 +166,6 @@ void System::LoadDecodeGraphBackoff()
   }
 }
 
-MemPool &System::GetSystemPool() const
-{
-  return m_systemPool;
-}
-
-MemPool &System::GetManagerPool() const
-{
-  return m_managerPool;
-}
-
-FactorCollection &System::GetVocab() const
-{
-  return m_vocab;
-}
-
-Recycler<HypothesisBase*> &System::GetHypoRecycler() const
-{
-  return m_hypoRecycler;
-}
-
-Batch &System::GetBatch(MemPool &pool) const
-{
-  Batch *obj;
-  obj = m_batch.get();
-  if (obj == NULL) {
-    obj = new Batch(pool);
-    m_batch.reset(obj);
-  }
-  assert(obj);
-  return *obj;
-}
-
 void System::IsPb()
 {
   switch (options.search.algo) {
@@ -218,6 +187,75 @@ void System::IsPb()
     break;
   }
 }
+
+FactorCollection& System::GetVocab() const
+{
+  return m_vocab;
+}
+
+//////////////////////////////////////////////////////
+// thread local stuff
+Batch& System::GetBatch(MemPool& pool) const
+{
+  Batch* obj;
+  obj = m_batch.get();
+  if (obj == NULL) {
+    obj = new Batch(pool);
+    m_batch.reset(obj);
+  }
+  assert(obj);
+  return *obj;
+}
+
+#ifdef WIN32
+template<class C>
+C& GetThreadSpecificObj(boost::thread_specific_ptr<C> &threadSpecificPtr)
+{
+  C* obj;
+  obj = threadSpecificPtr.get();
+  if (obj == NULL) {
+    obj = new C();
+    threadSpecificPtr.reset(obj);
+  }
+  assert(obj);
+  return *obj;
+}
+
+MemPool& System::GetManagerPool() const
+{
+  MemPool &obj = GetThreadSpecificObj<MemPool>(m_managerPool);
+  return obj;
+}
+
+MemPool& System::GetSystemPool() const
+{
+  MemPool& obj = GetThreadSpecificObj<MemPool>(m_systemPool);
+  return obj;
+}
+
+Recycler<HypothesisBase*>& System::GetHypoRecycler() const
+{
+  Recycler<HypothesisBase*>& obj = GetThreadSpecificObj<Recycler<HypothesisBase*> >(m_hypoRecycler);
+  return obj;
+}
+
+#else
+MemPool& System::GetManagerPool() const
+{
+  return m_managerPool;
+}
+
+MemPool& System::GetSystemPool() const
+{
+  return m_systemPool;
+}
+
+Recycler<HypothesisBase*>& System::GetHypoRecycler() const
+{
+  return m_hypoRecycler;
+}
+
+#endif
 
 
 }

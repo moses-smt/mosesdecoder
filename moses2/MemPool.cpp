@@ -55,6 +55,7 @@ uint8_t* MemPool::Allocate(std::size_t size) {
   uint8_t* ret = current_;
   current_ += size;
 
+  assert(m_currPage < m_pages.size());
   Page& page = *m_pages[m_currPage];
   if (current_ <= page.end) {
     // return what we got
