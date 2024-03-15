@@ -2,6 +2,8 @@
 #include "System.h"
 #include "legacy/Parameter.h"
 #include "TranslationTask.h"
+#include <string.h>
+
 using namespace std;
 namespace Moses2 {
 	//summary ::  need to update the LM path at runtime with complete artifact path.
@@ -52,4 +54,16 @@ namespace Moses2 {
 		delete m_param;
 		delete  m_system;
 	}
+
+	char* Moses2Wrapper::CopyString(const char* str) {
+		int32_t size = (int32_t)strlen(str);
+		char* obj = (char*)malloc(size + 1);
+		memcpy(obj, str, size);
+		obj[size] = '\0';
+		return obj;
+	}
+	void Moses2Wrapper::Free(void* ptr) {
+		free(ptr);
+	}
+
 }

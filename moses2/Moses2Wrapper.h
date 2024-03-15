@@ -1,6 +1,6 @@
 #pragma once
 #include <string>
-#include <string.h>
+
 namespace Moses2 {
 	class Parameter;
 	class System;
@@ -22,18 +22,9 @@ namespace Moses2 {
 		~Moses2Wrapper();
 		std::string Translate(const std::string& input, long id);
 		void UpdateLMPath(const std::string& filePath);
-		int getEngineVersion();
 
-		static char* CopyString(const char* str) {
-			int32_t size = (int32_t)strlen(str);
-			char* obj = (char*)malloc(size + 1);
-			memcpy(obj, str, size);
-			obj[size] = '\0';
-			return obj;
-		}
-		static void Free(void* ptr) {
-			free(ptr);
-		}
+		static char* CopyString(const char* str);
+		static void Free(void* ptr);
 	};
 
 }

@@ -1,6 +1,5 @@
 ﻿#include "Moses2Wrapper.h"
 #include <iostream>
-#include <fstream>
 #include <string.h>
 
 
@@ -34,19 +33,10 @@ extern "C" EXPORT MosesApiErrorCode __stdcall GetMosesSystem(const char* filePat
 }
 
 extern "C" EXPORT MosesApiErrorCode __stdcall Translate(Moses2::Moses2Wrapper * pObject, long id, const char* input, char** output) {
-	ofstream tmpfile;
-	tmpfile.open("C:\\moses.log", ios::app);
-	tmpfile << "Start Translate: " << endl;
-	tmpfile << pObject << " " << endl;
-	tmpfile << id << " " << endl;
-	tmpfile << string(input) << endl;
-
 	if (pObject != NULL)
 	{
 		std::string tr = pObject->Translate(input, id);
-		tmpfile << "tr=" << tr << endl;
 		*output = Moses2Wrapper::CopyString(tr.c_str());
-		tmpfile << "output=" << string(*output) << endl;
 		return MS_API_OK;
 	}
 	else {
