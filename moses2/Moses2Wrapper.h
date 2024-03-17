@@ -20,7 +20,7 @@ namespace Moses2 {
 	public:
 		Moses2Wrapper(const std::string& filePath);
 		~Moses2Wrapper();
-		std::string Translate(const std::string& input, long id);
+		std::string Translate(const std::string& input, long id, bool nbest);
 		void UpdateLMPath(const std::string& filePath);
 
 		static char* CopyString(const char* str);

@@ -16,7 +16,7 @@ public:
   TranslationTask(System &system, const std::string &line, long translationId);
   virtual ~TranslationTask();
   virtual void Run();
-  virtual std::string ReturnTranslation() const;
+  virtual std::string ReturnTranslation(bool nbest) const;
 
 protected:
   ManagerBase *m_mgr;

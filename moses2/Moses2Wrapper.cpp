@@ -46,9 +46,10 @@ namespace Moses2 {
 		UpdateLMPath(filePath);
 		m_system = new System(*m_param);
 	}
-	std::string Moses2Wrapper::Translate(const std::string &input , long id) {
+
+	std::string Moses2Wrapper::Translate(const std::string &input , long id, bool nbest) {
 		TranslationTask task(*m_system, input, id);
-		return task.ReturnTranslation();
+		return task.ReturnTranslation(nbest);
 	}
 	Moses2Wrapper::~Moses2Wrapper() {
 		delete m_param;

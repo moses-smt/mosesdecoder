@@ -23,14 +23,21 @@ TranslationTask::TranslationTask(System &system,
 TranslationTask::~TranslationTask()
 {
 }
-std::string TranslationTask::ReturnTranslation() const
+
+std::string TranslationTask::ReturnTranslation(bool nbest) const
 {
     m_mgr->Decode();
     string out;
-    out = m_mgr->OutputBest() + "\n";
+    if (nbest) {
+      out = m_mgr->OutputNBest() + "\n";
+    }
+    else {
+      out = m_mgr->OutputBest() + "\n";
+    }
     delete m_mgr;
     return out;
 }
+
 void TranslationTask::Run()
 {
 

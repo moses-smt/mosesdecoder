@@ -34,10 +34,10 @@ extern "C" EXPORT MosesApiErrorCode __stdcall GetMosesSystem(const char* filePat
 	}
 }
 
-extern "C" EXPORT MosesApiErrorCode __stdcall Translate(Moses2::Moses2Wrapper * pObject, long id, const char* input, char** output) {
+extern "C" EXPORT MosesApiErrorCode __stdcall Translate(Moses2::Moses2Wrapper * pObject, long id, bool nbest, const char* input, char** output) {
 	if (pObject != NULL)
 	{
-		std::string tr = pObject->Translate(input, id);
+		std::string tr = pObject->Translate(input, id, nbest);
 		*output = Moses2Wrapper::CopyString(tr.c_str());
 		return MS_API_OK;
 	}
@@ -91,7 +91,7 @@ int main(int argc, char** argv)
 	while (std::getline(inFile, input))
 	{
 		char* output;
-		ret = Translate(pObject, id, input.c_str(), &output);
+		ret = Translate(pObject, id, true, input.c_str(), &output);
 		assert(ret == MS_API_OK);
 		cerr << output << flush;
 
