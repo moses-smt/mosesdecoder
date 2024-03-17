@@ -465,9 +465,6 @@
     <ClCompile Include="..\..\..\moses2\InputType.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\..\moses2\Main.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\..\moses2\ManagerBase.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>

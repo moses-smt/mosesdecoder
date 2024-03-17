@@ -1,5 +1,7 @@
 ﻿#include "Moses2Wrapper.h"
 #include <iostream>
+#include <fstream>
+#include <cassert>
 #include <string.h>
 
 
@@ -70,4 +72,37 @@ extern "C" EXPORT MosesApiErrorCode __stdcall EngineVersion() {
 	//std::cout << "windows build on v1142/ msvc 14.27.29110"<< std::endl;
 	std::cout << "0.0.1" << std::endl;
 	return MS_API_OK;
+}
+
+int main(int argc, char** argv)
+{
+	assert(argc >= 2);
+	cerr << "Starting" << endl;
+	string filePath(argv[1]); // = ".\\enu.rus.generalnn_contextual_translit.mosesconfig.ini";
+	Moses2::Moses2Wrapper *pObject = nullptr;
+	MosesApiErrorCode ret = GetMosesSystem(filePath.c_str(), &pObject);
+	assert(ret == MS_API_OK);
+
+	ifstream inFile;
+	inFile.open(argv[2]);
+
+	long id = 44;
+	string input;
+	while (std::getline(inFile, input))
+	{
+		char* output;
+		ret = Translate(pObject, id, input.c_str(), &output);
+		assert(ret == MS_API_OK);
+		cerr << output << flush;
+
+		ret = FreeMemory(output);
+		assert(ret == MS_API_OK);
+
+		++id;
+	}
+
+	ret = ReleaseSystem(&pObject);
+	assert(ret == MS_API_OK);
+
+	cerr << "Finished" << endl;
 }
