@@ -3,7 +3,7 @@
 #include <fstream>
 #include <cassert>
 #include <string.h>
-
+#include <thread>
 
 // Generic helper definitions for shared library support
 #if defined _WIN32
@@ -37,11 +37,20 @@ extern "C" EXPORT MosesApiErrorCode __stdcall GetMosesSystem(const char* filePat
 extern "C" EXPORT MosesApiErrorCode __stdcall Translate(Moses2::Moses2Wrapper * pObject, long id, bool nbest, const char* input, char** output) {
 	if (pObject != NULL)
 	{
+		std::thread::id threadId = std::this_thread::get_id();
+    std::cerr << "Translate: " << threadId << " " << input << std::endl;
+
 		std::string tr = pObject->Translate(input, id, nbest);
+
+    std::cerr << "CopyString: " << threadId << " " << tr << std::endl;
 		*output = Moses2Wrapper::CopyString(tr.c_str());
+
+    std::cerr << "Translate Finished: " << threadId << " " << tr << std::endl;
 		return MS_API_OK;
 	}
 	else {
+		std::thread::id threadId = std::this_thread::get_id();
+    std::cerr << "Translate Failure: " << threadId << " " << input << std::endl;
 		return MS_API_E_FAILURE;
 	}
 }
