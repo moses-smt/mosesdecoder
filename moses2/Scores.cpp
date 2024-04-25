@@ -61,17 +61,17 @@ const SCORE *Scores::GetScores(const FeatureFunction &featureFunction) const
 void Scores::Reset(const System &system)
 {
   std::thread::id threadId = std::this_thread::get_id();
-  std::cerr << "Reset1: " << threadId << this << " " << &system << std::endl;
+  std::cerr << "Reset1: " << threadId << " " << this << " " << &system << std::endl;
   if (system.options.nbest.nbest_size) {
-    std::cerr << "Reset2: " << threadId << this << " " << &system << " " << system.options.nbest.nbest_size << std::endl;
+    std::cerr << "Reset2: " << threadId << " " << this << " " << &system << " " << system.options.nbest.nbest_size << std::endl;
     size_t numScores = system.featureFunctions.GetNumScores();
-    std::cerr << "Reset3: " << threadId << this << " " << &system << " " << system.options.nbest.nbest_size << " " << numScores << " " << m_scores[0] << std::endl;
+    std::cerr << "Reset3: " << threadId << " " << this << " " << &system << " " << system.options.nbest.nbest_size << " " << numScores << " " << m_scores[0] << std::endl;
     Init<SCORE>(m_scores, numScores, 0);
-    std::cerr << "Reset4: " << threadId << this << " " << &system << " " << system.options.nbest.nbest_size << " " << numScores << " " << m_scores[0] << std::endl;
+    std::cerr << "Reset4: " << threadId << " " << this << " " << &system << " " << system.options.nbest.nbest_size << " " << numScores << " " << m_scores[0] << std::endl;
   }
-  std::cerr << "Reset5: " << threadId << this << " " << &system << " " << m_total << std::endl;
+  std::cerr << "Reset5: " << threadId << " " << this << " " << &system << " " << m_total << std::endl;
   m_total = 0;
-  std::cerr << "Reset6: " << threadId << this << " " << &system << " " << m_total << std::endl;
+  std::cerr << "Reset6: " << threadId << " " << this << " " << &system << " " << m_total << std::endl;
 }
 
 void Scores::PlusEquals(const System &system,
