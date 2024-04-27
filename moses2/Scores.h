@@ -10,6 +10,7 @@
 #include <string>
 #include "TypeDef.h"
 #include "MemPool.h"
+#include "Array.h"
 
 namespace Moses2
 {
@@ -73,7 +74,7 @@ public:
                                  const FeatureFunction &featureFunction, SCORE score);
 
 protected:
-  SCORE *m_scores;
+  Array<SCORE> *m_scores;
   SCORE m_total;
 };
 

@@ -26,8 +26,7 @@ Scores::Scores(const System &system, MemPool &pool, size_t numScores) :
   m_total(0)
 {
   if (system.options.nbest.nbest_size) {
-    m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
-    Init<SCORE>(m_scores, numScores, 0);
+    m_scores = new (pool.Allocate<Array<SCORE> >()) Array<SCORE>(pool, numScores, 0);
   } else {
     m_scores = NULL;
   }
@@ -38,8 +37,7 @@ Scores::Scores(const System &system, MemPool &pool, size_t numScores,
   m_total(origScores.m_total)
 {
   if (system.options.nbest.nbest_size) {
-    m_scores = new (pool.Allocate<SCORE>(numScores)) SCORE[numScores];
-    memcpy(m_scores, origScores.m_scores, sizeof(SCORE) * numScores);
+    m_scores = new (pool.Allocate<Array<SCORE> >()) Array<SCORE>(pool, *origScores.m_scores);
   } else {
     m_scores = NULL;
   }
@@ -54,24 +52,23 @@ const SCORE *Scores::GetScores(const FeatureFunction &featureFunction) const
 {
   assert(m_scores);
   size_t ffStartInd = featureFunction.GetStartInd();
-  const SCORE &scores = m_scores[ffStartInd];
+  const SCORE &scores = (*m_scores)[ffStartInd];
   return &scores;
 }
 
 void Scores::Reset(const System &system)
 {
-  std::thread::id threadId = std::this_thread::get_id();
-  std::cerr << "Reset1: " << threadId << " " << this << " " << &system << std::endl;
+  //std::thread::id threadId = std::this_thread::get_id();
+  //std::cerr << "Reset1: " << threadId << " " << this << " " << &system << std::endl;
   if (system.options.nbest.nbest_size) {
-    std::cerr << "Reset2: " << threadId << " " << this << " " << &system << " " << system.options.nbest.nbest_size << std::endl;
-    size_t numScores = system.featureFunctions.GetNumScores();
-    std::cerr << "Reset3: " << threadId << " " << this << " " << &system << " " << system.options.nbest.nbest_size << " " << numScores << " " << m_scores[0] << std::endl;
-    Init<SCORE>(m_scores, numScores, 0);
-    std::cerr << "Reset4: " << threadId << " " << this << " " << &system << " " << system.options.nbest.nbest_size << " " << numScores << " " << m_scores[0] << std::endl;
+    //std::cerr << "Reset2: " << threadId << " " << this << " " << &system << " " << system.options.nbest.nbest_size << std::endl;
+    //std::cerr << "Reset3: " << threadId << " " << this << " " << &system << " " << system.options.nbest.nbest_size << " " << numScores << " " << m_scores[0] << std::endl;
+    m_scores->Init(0);
+    //std::cerr << "Reset4: " << threadId << " " << this << " " << &system << " " << system.options.nbest.nbest_size << " " << numScores << " " << m_scores[0] << std::endl;
   }
-  std::cerr << "Reset5: " << threadId << " " << this << " " << &system << " " << m_total << std::endl;
+  //std::cerr << "Reset5: " << threadId << " " << this << " " << &system << " " << m_total << std::endl;
   m_total = 0;
-  std::cerr << "Reset6: " << threadId << " " << this << " " << &system << " " << m_total << std::endl;
+  //std::cerr << "Reset6: " << threadId << " " << this << " " << &system << " " << m_total << std::endl;
 }
 
 void Scores::PlusEquals(const System &system,
@@ -83,7 +80,7 @@ void Scores::PlusEquals(const System &system,
 
   size_t ffStartInd = featureFunction.GetStartInd();
   if (system.options.nbest.nbest_size) {
-    m_scores[ffStartInd] += score;
+    (*m_scores)[ffStartInd] += score;
   }
   SCORE weight = weights[ffStartInd];
   m_total += score * weight;
@@ -98,7 +95,7 @@ void Scores::PlusEquals(const System &system,
 
   size_t ffStartInd = featureFunction.GetStartInd();
   if (system.options.nbest.nbest_size) {
-    m_scores[ffStartInd + offset] += score;
+    (*m_scores)[ffStartInd + offset] += score;
   }
   SCORE weight = weights[ffStartInd + offset];
   m_total += score * weight;
@@ -115,7 +112,7 @@ void Scores::PlusEquals(const System &system,
   for (size_t i = 0; i < scores.size(); ++i) {
     SCORE incrScore = scores[i];
     if (system.options.nbest.nbest_size) {
-      m_scores[ffStartInd + i] += incrScore;
+      (*m_scores)[ffStartInd + i] += incrScore;
     }
     //cerr << "ffStartInd=" << ffStartInd << " " << i << endl;
     SCORE weight = weights[ffStartInd + i];
@@ -134,7 +131,7 @@ void Scores::PlusEquals(const System &system,
   for (size_t i = 0; i < featureFunction.GetNumScores(); ++i) {
     SCORE incrScore = scores[i];
     if (system.options.nbest.nbest_size) {
-      m_scores[ffStartInd + i] += incrScore;
+      (*m_scores)[ffStartInd + i] += incrScore;
     }
     //cerr << "ffStartInd=" << ffStartInd << " " << i << endl;
     SCORE weight = weights[ffStartInd + i];
@@ -147,7 +144,7 @@ void Scores::PlusEquals(const System &system, const Scores &other)
   size_t numScores = system.featureFunctions.GetNumScores();
   if (system.options.nbest.nbest_size) {
     for (size_t i = 0; i < numScores; ++i) {
-      m_scores[i] += other.m_scores[i];
+      (*m_scores)[i] += (*other.m_scores)[i];
     }
   }
   m_total += other.m_total;
@@ -158,7 +155,7 @@ void Scores::MinusEquals(const System &system, const Scores &other)
   size_t numScores = system.featureFunctions.GetNumScores();
   if (system.options.nbest.nbest_size) {
     for (size_t i = 0; i < numScores; ++i) {
-      m_scores[i] -= other.m_scores[i];
+      (*m_scores)[i] -= (*other.m_scores)[i];
     }
   }
   m_total -= other.m_total;
@@ -175,7 +172,7 @@ void Scores::Assign(const System &system,
 
   if (system.options.nbest.nbest_size) {
     assert(m_scores[ffStartInd] == 0);
-    m_scores[ffStartInd] = score;
+    (*m_scores)[ffStartInd] = score;
   }
   SCORE weight = weights[ffStartInd];
   m_total += score * weight;
@@ -195,7 +192,7 @@ void Scores::Assign(const System &system,
 
     if (system.options.nbest.nbest_size) {
       assert(m_scores[ffStartInd + i] == 0);
-      m_scores[ffStartInd + i] = incrScore;
+      (*m_scores)[ffStartInd + i] = incrScore;
     }
     //cerr << "ffStartInd=" << ffStartInd << " " << i << endl;
     SCORE weight = weights[ffStartInd + i];
@@ -232,7 +229,7 @@ std::string Scores::Debug(const System &system) const
     BOOST_FOREACH(const FeatureFunction *ff, system.featureFunctions.GetFeatureFunctions()) {
       out << ff->GetName() << "= ";
       for (size_t i = ff->GetStartInd(); i < (ff->GetStartInd() + ff->GetNumScores()); ++i) {
-        out << m_scores[i] << " ";
+        out << (*m_scores)[i] << " ";
       }
     }
   }
@@ -247,7 +244,7 @@ void Scores::OutputBreakdown(std::ostream &out, const System &system) const
       if (ff->IsTuneable()) {
         out << ff->GetName() << "= ";
         for (size_t i = ff->GetStartInd(); i < (ff->GetStartInd() + ff->GetNumScores()); ++i) {
-          out << m_scores[i] << " ";
+          out << (*m_scores)[i] << " ";
         }
       }
     }

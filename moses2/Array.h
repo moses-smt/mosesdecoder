@@ -27,11 +27,30 @@ public:
     return m_arr + m_size;
   }
 
-  Array(MemPool &pool, size_t size = 0, const T &val = T()) {
+  Array(MemPool &pool, size_t size = 0) {
     m_size = size;
     m_maxSize = size;
     m_arr = pool.Allocate<T>(size);
-    for (size_t i = 0; i < size; ++i) {
+  }
+
+  Array(MemPool &pool, size_t size, const T &val) {
+    m_size = size;
+    m_maxSize = size;
+    m_arr = pool.Allocate<T>(size);
+    Init(val);
+  }
+
+  Array(MemPool &pool, const Array<T> &orig) {
+    m_size = orig.size();
+    m_maxSize = orig.size();
+    m_arr = pool.Allocate<T>(m_size);
+    for (size_t i = 0; i < m_size; ++i) {
+      m_arr[i] = orig[i];
+    }
+  }
+
+  void Init(const T &val) {
+    for (size_t i = 0; i < m_size; ++i) {
       m_arr[i] = val;
     }
   }
