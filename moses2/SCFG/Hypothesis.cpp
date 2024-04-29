@@ -29,7 +29,6 @@ Hypothesis *Hypothesis::Create(Manager &mgr)
   } else {
     ret = new (pool.Allocate<Hypothesis>()) Hypothesis(pool, mgr.system);
     //cerr << "Hypothesis=" << sizeof(Hypothesis) << " " << ret << endl;
-    recycler.Keep(ret);
   }
   return ret;
 }

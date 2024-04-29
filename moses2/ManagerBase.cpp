@@ -28,6 +28,7 @@ ManagerBase::ManagerBase(System &sys, const TranslationTask &task,
   ,m_translationId(translationId)
   ,m_pool(NULL)
   ,m_systemPool(NULL)
+  ,m_hypoRecycler(NULL)
   ,m_input(NULL)
 {
 }
