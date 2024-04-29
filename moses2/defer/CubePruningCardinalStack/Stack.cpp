@@ -153,7 +153,7 @@ Stack::SortedHypos Stack::GetSortedAndPruneHypos(const Manager &mgr) const
 void Stack::SortAndPruneHypos(const Manager &mgr, Hypotheses &hypos) const
 {
   size_t stackSize = mgr.system.stackSize;
-  Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycle();
+  Recycler<Hypothesis*> &recycler = mgr.GetHypoRecycler();
 
   /*
   cerr << "UNSORTED hypos:" << endl;

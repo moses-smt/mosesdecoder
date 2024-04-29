@@ -21,12 +21,13 @@ using namespace std;
 
 namespace Moses2
 {
-Hypothesis *Hypothesis::Create(MemPool &pool, Manager &mgr)
+Hypothesis *Hypothesis::Create(Manager &mgr)
 {
 //	++g_numHypos;
   Hypothesis *ret;
+  MemPool &pool = mgr.GetPool();
 
-  Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
+  Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycler();
   ret = static_cast<Hypothesis*>(recycler.Get());
   if (ret) {
     // got new hypo from recycler. Do nothing

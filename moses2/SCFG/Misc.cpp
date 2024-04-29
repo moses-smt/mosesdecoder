@@ -166,7 +166,7 @@ void QueueItem::CreateHypo(
 {
   const SCFG::TargetPhraseImpl &tp = (*tps)[tpInd];
 
-  hypo = SCFG::Hypothesis::Create(systemPool, mgr);
+  hypo = SCFG::Hypothesis::Create(mgr);
   hypo->Init(mgr, path, symbolBind, tp, *m_hypoIndColl);
   hypo->EvaluateWhenApplied();
 }

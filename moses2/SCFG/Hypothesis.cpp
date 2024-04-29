@@ -16,13 +16,13 @@ namespace Moses2
 {
 namespace SCFG
 {
-Hypothesis *Hypothesis::Create(MemPool &pool, Manager &mgr)
+Hypothesis *Hypothesis::Create(Manager &mgr)
 {
   //  ++g_numHypos;
   Hypothesis *ret;
-  //ret = new (pool.Allocate<Hypothesis>()) Hypothesis(pool, mgr.system);
+  MemPool &pool = mgr.GetPool();
 
-  Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
+  Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycler();
   ret = static_cast<Hypothesis*>(recycler.Get());
   if (ret) {
     // got new hypo from recycler. Do nothing

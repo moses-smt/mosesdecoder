@@ -28,7 +28,6 @@ ManagerBase::ManagerBase(System &sys, const TranslationTask &task,
   ,m_translationId(translationId)
   ,m_pool(NULL)
   ,m_systemPool(NULL)
-  ,m_hypoRecycle(NULL)
   ,m_input(NULL)
 {
 }
@@ -40,16 +39,12 @@ ManagerBase::~ManagerBase()
   if (m_pool) {
     GetPool().Reset();
   }
-  if (m_hypoRecycle) {
-    GetHypoRecycle().Clear();
-  }
 }
 
 void ManagerBase::InitPools()
 {
   m_pool = &system.GetManagerPool();
   m_systemPool = &system.GetSystemPool();
-  m_hypoRecycle = &system.GetHypoRecycler();
 }
 
 }

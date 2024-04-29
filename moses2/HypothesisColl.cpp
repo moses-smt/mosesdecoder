@@ -156,7 +156,7 @@ const Hypotheses &HypothesisColl::GetSortedAndPrunedHypos(
     SortHypos(mgr, m_sortedHypos->GetArray());
 
     // prune
-    Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
+    Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycler();
 
     size_t maxStackSize = mgr.system.options.search.stack_size;
     if (maxStackSize && m_sortedHypos->size() > maxStackSize) {
@@ -181,7 +181,7 @@ void HypothesisColl::PruneHypos(const ManagerBase &mgr, ArcLists &arcLists)
 {
   size_t maxStackSize = mgr.system.options.search.stack_size;
 
-  Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycle();
+  Recycler<HypothesisBase*> &recycler = mgr.GetHypoRecycler();
 
   const HypothesisBase **sortedHypos = (const HypothesisBase **) alloca(GetSize() * sizeof(const HypothesisBase *));
   SortHypos(mgr, sortedHypos);

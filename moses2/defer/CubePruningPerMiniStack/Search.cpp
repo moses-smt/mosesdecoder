@@ -49,7 +49,7 @@ void Search::Decode()
   initHypo->Init(mgr, mgr.GetInputPaths().GetBlank(), mgr.GetInitPhrase(), initBitmap);
   initHypo->EmptyHypothesisState(mgr.GetInput());
 
-  m_stacks.Add(initHypo, mgr.GetHypoRecycle());
+  m_stacks.Add(initHypo, mgr.GetHypoRecycler());
 
   for (size_t stackInd = 0; stackInd < m_stacks.GetSize() - 1; ++stackInd) {
     CreateSearchGraph(stackInd);
@@ -77,7 +77,7 @@ void Search::Decode(size_t stackInd)
 
 void Search::Decode(NSCubePruningMiniStack::MiniStack &miniStack)
 {
-  Recycler<Hypothesis*> &hypoRecycler  = mgr.GetHypoRecycle();
+  Recycler<Hypothesis*> &hypoRecycler  = mgr.GetHypoRecycler();
 
   // reuse queue from previous stack. Clear it first
   std::vector<QueueItem*> &container = Container(m_queue);
@@ -120,23 +120,6 @@ void Search::Decode(NSCubePruningMiniStack::MiniStack &miniStack)
 
     ++pops;
   }
-
-  /*
-  // create hypo from every edge. Increase diversity
-  while (!m_queue.empty()) {
-  	QueueItem *item = m_queue.top();
-  	m_queue.pop();
-
-  	if (item->hypoIndex == 0 && item->tpIndex == 0) {
-  		CubeEdge &edge = item->edge;
-
-  		// add hypo to stack
-  		Hypothesis *hypo = item->hypo;
-  		//cerr << "hypo=" << *hypo << " " << hypo->GetBitmap() << endl;
-  		m_stacks.Add(hypo, mgr.GetHypoRecycle());
-  	}
-  }
-  */
 }
 
 

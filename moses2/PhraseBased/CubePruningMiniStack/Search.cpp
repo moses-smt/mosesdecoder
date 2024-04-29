@@ -59,13 +59,13 @@ void Search::Decode()
   }
 
   const Bitmap &initBitmap = mgr.GetBitmaps().GetInitialBitmap();
-  Hypothesis *initHypo = Hypothesis::Create(mgr.GetSystemPool(), mgr);
+  Hypothesis *initHypo = Hypothesis::Create(mgr);
   initHypo->Init(mgr, mgr.GetInputPaths().GetBlank(), mgr.GetInitPhrase(),
                  initBitmap);
   initHypo->EmptyHypothesisState(mgr.GetInput());
   //cerr << "initHypo=" << *initHypo << endl;
 
-  m_stack.Add(initHypo, mgr.GetHypoRecycle(), mgr.arcLists);
+  m_stack.Add(initHypo, mgr.GetHypoRecycler(), mgr.arcLists);
   PostDecode(0);
 
   for (size_t stackInd = 1; stackInd < sentence.GetSize() + 1;
@@ -82,7 +82,7 @@ void Search::Decode()
 
 void Search::Decode(size_t stackInd)
 {
-  Recycler<HypothesisBase*> &hypoRecycler = mgr.GetHypoRecycle();
+  Recycler<HypothesisBase*> &hypoRecycler = mgr.GetHypoRecycler();
 
   // reuse queue from previous stack. Clear it first
   std::vector<QueueItem*, MemPoolAllocator<QueueItem*> > &container = Container(

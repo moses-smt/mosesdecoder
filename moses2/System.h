@@ -76,7 +76,6 @@ protected:
 #else
   thread_local static MemPool m_managerPool;
   thread_local static MemPool m_systemPool;
-  thread_local static Recycler<HypothesisBase*> m_hypoRecycler;
 
 #endif
 
