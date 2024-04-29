@@ -22,6 +22,7 @@ namespace Moses2
 #ifndef WIN32
   thread_local MemPool System::m_managerPool;
   thread_local MemPool System::m_systemPool;
+  thread_local Recycler<HypothesisBase*> System::m_hypoRecycler;
 #endif // WIN32
 
 System::System(const Parameter &paramsArg) :
@@ -232,6 +233,12 @@ MemPool& System::GetSystemPool() const
   return obj;
 }
 
+Recycler<HypothesisBase*>& System::GetHypoRecycler() const
+{
+  Recycler<HypothesisBase*>& obj = GetThreadSpecificObj<Recycler<HypothesisBase*> >(m_hypoRecycler);
+  return obj;
+}
+
 #else
 MemPool& System::GetManagerPool() const
 {
@@ -241,6 +248,11 @@ MemPool& System::GetManagerPool() const
 MemPool& System::GetSystemPool() const
 {
   return m_systemPool;
+}
+
+Recycler<HypothesisBase*>& System::GetHypoRecycler() const
+{
+  return m_hypoRecycler;
 }
 
 #endif

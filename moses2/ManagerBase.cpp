@@ -45,6 +45,7 @@ void ManagerBase::InitPools()
 {
   m_pool = &system.GetManagerPool();
   m_systemPool = &system.GetSystemPool();
+  m_hypoRecycler = &system.GetHypoRecycler();
   //cerr << "pool size " << m_pool->Size() << " " << m_systemPool->Size() << endl;
 }
 

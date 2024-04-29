@@ -39,7 +39,8 @@ public:
 
   void Clear() {
     m_coll.clear();
-    m_currInd = m_all.size();
+    m_all.clear();
+    m_currInd = 0;
   }
 
   // call this for new objects when u 1st create it. It is assumed the object will be used right away
