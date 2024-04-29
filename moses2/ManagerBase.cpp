@@ -37,9 +37,8 @@ ManagerBase::~ManagerBase()
 {
   system.featureFunctions.CleanUpAfterSentenceProcessing(*m_input);
 
-  if (m_pool) {
-    GetPool().Reset();
-  }
+  GetPool().Reset();
+  GetHypoRecycler().Clear();
 }
 
 void ManagerBase::InitPools()

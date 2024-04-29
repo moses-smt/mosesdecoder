@@ -7,7 +7,7 @@
 #pragma once
 
 #include <cstddef>
-#include <stack>
+#include <deque>
 #include <vector>
 
 namespace Moses2
@@ -25,8 +25,8 @@ public:
 
   T Get() {
     if (!m_coll.empty()) {
-      T &obj = m_coll.top();
-      m_coll.pop();
+      T &obj = m_coll.back();
+      m_coll.pop_back();
       return obj;
     } else {
       return NULL;
@@ -39,12 +39,12 @@ public:
 
   // call this for existing object to put back into queue for reuse
   void Recycle(const T& val) {
-    m_coll.push(val);
+    m_coll.push_back(val);
   }
 
 protected:
   // objects that have been give back to us
-  std::stack<T> m_coll;
+  std::deque<T> m_coll;
 };
 
 } /* namespace Moses2 */
