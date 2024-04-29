@@ -112,5 +112,14 @@ void MemPool::Reset()
   current_ = m_pages[0]->mem;
 }
 
+size_t MemPool::Size()
+{
+  size_t ret = 0;
+  for (const Page *page: m_pages) {
+    ret += page->size;
+  }
+  return ret;
+}
+
 }
 
