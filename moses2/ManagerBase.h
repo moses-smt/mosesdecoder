@@ -53,8 +53,8 @@ public:
     return *m_systemPool;
   }
 
-  Recycler<HypothesisBase*> &GetHypoRecycle() const {
-    return *m_hypoRecycle;
+  Recycler<HypothesisBase*> &GetHypoRecycler() const {
+    return *m_hypoRecycler;
   }
 
   const InputType &GetInput() const {
@@ -71,7 +71,7 @@ protected:
   InputType *m_input;
 
   mutable MemPool *m_pool, *m_systemPool;
-  mutable Recycler<HypothesisBase*> *m_hypoRecycle;
+  mutable Recycler<HypothesisBase*> *m_hypoRecycler;
 
   void InitPools();
 

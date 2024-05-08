@@ -156,7 +156,7 @@ void Manager::Decode(SCFG::InputPath &path, Stack &stack)
   // clear cube pruning data
   //std::vector<QueueItem*> &container = Container(m_queue);
   //container.clear();
-  Recycler<HypothesisBase*> &hypoRecycler = GetHypoRecycle();
+  Recycler<HypothesisBase*> &hypoRecycler = GetHypoRecycler();
   while (!m_queue.empty()) {
     QueueItem *item = m_queue.top();
     m_queue.pop();
@@ -189,7 +189,7 @@ void Manager::Decode(SCFG::InputPath &path, Stack &stack)
     Hypothesis *hypo = item->hypo;
 
     //cerr << "hypo=" << *hypo << " " << endl;
-    stack.Add(hypo, GetHypoRecycle(), arcLists);
+    stack.Add(hypo, GetHypoRecycler(), arcLists);
     //cerr << "Added " << *hypo << " " << endl;
 
     item->CreateNext(GetSystemPool(), GetPool(), *this, m_queue, m_seenPositions, path);
@@ -238,7 +238,7 @@ void Manager::ExpandHypo(
   const SCFG::TargetPhraseImpl &tp,
   Stack &stack)
 {
-  Recycler<HypothesisBase*> &hypoRecycler = GetHypoRecycle();
+  Recycler<HypothesisBase*> &hypoRecycler = GetHypoRecycler();
 
   std::vector<const SymbolBindElement*> ntEles = symbolBind.GetNTElements();
   Vector<size_t> prevHyposIndices(GetPool(), symbolBind.numNT);
@@ -247,7 +247,7 @@ void Manager::ExpandHypo(
 
   size_t ind = 0;
   while (IncrPrevHypoIndices(prevHyposIndices, ind, ntEles)) {
-    SCFG::Hypothesis *hypo = SCFG::Hypothesis::Create(GetSystemPool(), *this);
+    SCFG::Hypothesis *hypo = SCFG::Hypothesis::Create(*this);
     hypo->Init(*this, path, symbolBind, tp, prevHyposIndices);
     hypo->EvaluateWhenApplied();
 

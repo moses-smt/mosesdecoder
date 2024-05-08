@@ -30,7 +30,7 @@ class Hypothesis: public HypothesisBase
 
 public:
 
-  static Hypothesis *Create(MemPool &pool, Manager &mgr);
+  static Hypothesis *Create(Manager &mgr);
   virtual ~Hypothesis();
 
   // initial, empty hypo

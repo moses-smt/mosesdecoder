@@ -28,7 +28,7 @@ ManagerBase::ManagerBase(System &sys, const TranslationTask &task,
   ,m_translationId(translationId)
   ,m_pool(NULL)
   ,m_systemPool(NULL)
-  ,m_hypoRecycle(NULL)
+  ,m_hypoRecycler(NULL)
   ,m_input(NULL)
 {
 }
@@ -37,19 +37,16 @@ ManagerBase::~ManagerBase()
 {
   system.featureFunctions.CleanUpAfterSentenceProcessing(*m_input);
 
-  if (m_pool) {
-    GetPool().Reset();
-  }
-  if (m_hypoRecycle) {
-    GetHypoRecycle().Clear();
-  }
+  GetPool().Reset();
+  GetHypoRecycler().Clear();
 }
 
 void ManagerBase::InitPools()
 {
   m_pool = &system.GetManagerPool();
   m_systemPool = &system.GetSystemPool();
-  m_hypoRecycle = &system.GetHypoRecycler();
+  m_hypoRecycler = &system.GetHypoRecycler();
+  //cerr << "pool size " << m_pool->Size() << " " << m_systemPool->Size() << endl;
 }
 
 }

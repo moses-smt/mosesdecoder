@@ -56,6 +56,8 @@ public:
   // re-use pool
   void Reset();
 
+  size_t Size();
+
 private:
   uint8_t *More(std::size_t size);
 
