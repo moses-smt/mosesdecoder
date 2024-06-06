@@ -680,7 +680,7 @@ process-berkeley
 symmetrize-giza
 	in: giza-alignment giza-alignment-inverse
 	out: word-alignment
-	ignore-if: use-berkeley fast-align-settings
+	ignore-if: use-berkeley fast-align-settings eflomal-settings
 	rerun-on-change: alignment-symmetrization-method training-options script
 	default-name: model/aligned
 	error: skip=<[1-9]
