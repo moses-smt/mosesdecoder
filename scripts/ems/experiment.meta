@@ -626,6 +626,19 @@ symmetrize-fast-align
 	rerun-on-change: alignment-symmetrization-method
 	template: $moses-script-dir/ems/support/symmetrize-fast-align.perl IN IN1 IN2.$input-extension IN2.$output-extension OUT $alignment-symmetrization-method $moses-src-dir/bin/symal
         default-name: model/aligned
+eflomal
+        in: prepared-data-fast-align
+        out: eflomal-alignment
+        rerun-on-change: eflomal-settings
+        template: eflomal-align -i IN $eflomal-settings -f OUT.forward -r OUT.backward 2> OUT.log
+        default-name: eflomal-align
+symmetrize-eflomal
+        in: eflomal-alignment corpus-mml-prefilter=OR=corpus
+        out: word-alignment
+        ignore-unless: eflomal-settings
+        rerun-on-change: alignment-symmetrization-method
+        template: $moses-script-dir/ems/support/symmetrize-fast-align.perl IN.forward IN.backward IN1.$input-extension IN1.$output-extension OUT $alignment-symmetrization-method $moses-src-dir/bin/symal
+        default-name: model/aligned
 prepare-data
 	in: corpus-mml-prefilter=OR=corpus
 	out: prepared-data
