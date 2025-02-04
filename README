@@ -13,4 +13,7 @@ into the source tree from elsewhere:
  * "bjam-files" is taken from Boost.
  * "util" and "lm" are taken from KenLM: https://github.com/kpu/kenlm
 
-
+=====================================================
+Running on Ubuntu 22.04 (March 2025)
+sudo apt install libcmph-dev libxmlrpc-c++8-dev
+./bjam -j11 --with-cmph=/usr --with-xmlrpc-c=/usr -a
